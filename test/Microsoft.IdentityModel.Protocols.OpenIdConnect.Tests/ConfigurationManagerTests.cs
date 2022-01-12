@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
@@ -116,8 +117,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), new FileDocumentRetriever());
             Type type = typeof(ConfigurationManager<OpenIdConnectConfiguration>);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 7)
-                Assert.True(false, "Number of properties has changed from 7 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 8)
+                Assert.True(false, "Number of properties has changed from 8 to: " + properties.Length + ", adjust tests");
 
             var defaultAutomaticRefreshInterval = ConfigurationManager<OpenIdConnectConfiguration>.DefaultAutomaticRefreshInterval;
             var defaultRefreshInterval = ConfigurationManager<OpenIdConnectConfiguration>.DefaultRefreshInterval;
@@ -336,6 +337,67 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 context.AddDiff("Last known good first use time was not reset when a new LKG configuration was set.");
 
             TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Theory, MemberData(nameof(ValidateOpenIdConnectConfigurationTestCases), DisableDiscoveryEnumeration = true)]
+        public void ValidateOpenIdConnectConfigurationTests(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.ValidateOpenIdConnectConfigurationTests");
+            var context = new CompareContext();
+
+            try
+            {
+                var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(theoryData.MetadataAddress, theoryData.ConfigurationRetreiver, theoryData.DocumentRetriever);
+                var openIdConnectConfigurationValidateExecutor = new ConfigurationValidationExecutor<OpenIdConnectConfiguration>(new OpenIdConnectConfigurationValidator());
+                openIdConnectConfigurationValidateExecutor.ShouldValidateConfiguration = true;
+                configurationManager.ValidationExecutor = openIdConnectConfigurationValidateExecutor;
+                var configuration = configurationManager.GetConfigurationAsync().Result;
+
+                theoryData.ExpectedException.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<ConfigurationManagerTheoryData<OpenIdConnectConfiguration>> ValidateOpenIdConnectConfigurationTestCases
+        {
+            get
+            {
+                var theoryData = new TheoryData<ConfigurationManagerTheoryData<OpenIdConnectConfiguration>>();
+
+                theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
+                {
+                    ConfigurationRetreiver = new OpenIdConnectConfigurationRetriever(),
+                    DocumentRetriever = new FileDocumentRetriever(),
+                    First = true,
+                    MetadataAddress = "OpenIdConnectMetadata.json",
+                    TestId = "Valid_Configuration"
+                });
+
+                theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
+                {
+                    ConfigurationRetreiver = new OpenIdConnectConfigurationRetriever(),
+                    DocumentRetriever = new FileDocumentRetriever(),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "Invalid configuraiton:"),
+                    MetadataAddress = "OpenIdConnectMetadataBadX509DataBadBase64Data.json",
+                    TestId = "InvalidConfiguration_BadX509Data"
+                });
+
+                theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
+                {
+                    ConfigurationRetreiver = new OpenIdConnectConfigurationRetriever(),
+                    DocumentRetriever = new FileDocumentRetriever(),
+                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "Invalid configuraiton:"),
+                    MetadataAddress = "OpenIdConnectMetadata.json",
+                    TestId = "InvalidConfiguration_BadBase64Data"
+                });
+
+                return theoryData;
+            }
         }
 
         public class ConfigurationManagerTheoryData<T> : TheoryDataBase

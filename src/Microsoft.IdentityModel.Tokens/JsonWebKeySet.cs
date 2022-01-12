@@ -183,7 +183,7 @@ namespace Microsoft.IdentityModel.Tokens
                         signingKeys.Add(webKey);
                 }
             }
-
+            AdditionalData.Add(ConvertKeyError, errorList);
             return signingKeys;
         }
     }
