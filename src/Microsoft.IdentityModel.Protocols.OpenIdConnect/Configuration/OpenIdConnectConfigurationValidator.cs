@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Linq;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
@@ -57,18 +58,19 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
             {
                 return new ConfigurationValidationResult
                 {
-                    Exception = new ConfigurationValidationException("The OpenIdConnectConfiguration has no key in JsonWebKeySet."),
+                    Exception = new ConfigurationValidationException("The OpenIdConnectConfiguration did not contain any JsonWebKeys."),
                     Succeeded = false
                 };
             }
 
             if (openIdConnectConfiguration.SigningKeys.Count < MinimumNumberOfKeys)
             {
-                if (openIdConnectConfiguration.JsonWebKeySet.AdditionalData.ContainsKey(JsonWebKeySet.ConvertKeyError))
+                if (openIdConnectConfiguration.JsonWebKeySet.KeyConvertError.Any())
                 {
                     return new ConfigurationValidationResult
                     {
-                        Exception = new ConfigurationValidationException("The OpenIdConnectConfiguration's valid signing keys are less than the minimum requirment: {MinimumNumberOfKeys}. Invalid keys:" + openIdConnectConfiguration.JsonWebKeySet.AdditionalData[JsonWebKeySet.ConvertKeyError]),
+                        Exception = new ConfigurationValidationException("The OpenIdConnectConfiguration's valid signing keys are less than the minimum requirment: {MinimumNumberOfKeys}. " +
+                        "Invalid keys:" + string.Join("; ", openIdConnectConfiguration.JsonWebKeySet.KeyConvertError.Select(x => x.Key.ToString() + ": " + x.Value))),
                         Succeeded = false
                     };
                 }
