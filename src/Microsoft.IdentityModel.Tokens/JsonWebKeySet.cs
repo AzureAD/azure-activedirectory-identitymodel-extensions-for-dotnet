@@ -43,11 +43,6 @@ namespace Microsoft.IdentityModel.Tokens
         private const string _className = "Microsoft.IdentityModel.Tokens.JsonWebKeySet";
 
         /// <summary>
-        /// The key is used to add convert key error message into <see cref="AdditionalData"/>.
-        /// </summary>
-        public const string ConvertKeyError = "convert_key_error";
-
-        /// <summary>
         /// Returns a new instance of <see cref="JsonWebKeySet"/>.
         /// </summary>
         /// <param name="json">a string that contains JSON Web Key parameters in JSON format.</param>
@@ -114,6 +109,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         [DefaultValue(true)]
         public bool SkipUnresolvedJsonWebKeys { get; set; } = DefaultSkipUnresolvedJsonWebKeys;
+
+        /// <summary>
+        /// Gets a <see cref="IDictionary{JsonWebKey, String}"/> that contains convert key error message.
+        /// </summary>
+        public virtual IDictionary<JsonWebKey, string> KeyConvertError { get; } = new Dictionary<JsonWebKey, string>();
 
         /// <summary>
         /// Returns the JsonWebKeys as a <see cref="IList{SecurityKey}"/>.
@@ -183,7 +183,7 @@ namespace Microsoft.IdentityModel.Tokens
                         signingKeys.Add(webKey);
                 }
             }
-            AdditionalData.Add(ConvertKeyError, errorList);
+
             return signingKeys;
         }
     }
