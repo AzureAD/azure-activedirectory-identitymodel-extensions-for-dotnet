@@ -1021,21 +1021,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 if (tokenValidationResult.IsValid)
                 {
-                    // Set current configuration as LKG if it exists and is not the same as the LKG.
-                    if (currentConfiguration != null && currentConfiguration != validationParameters.ConfigurationManager.LastKnownGoodConfiguration)
+                    // Set current configuration as LKG if it exists and has not already been set as the LKG.
+                    if (currentConfiguration != null && !ReferenceEquals(currentConfiguration, validationParameters.ConfigurationManager.LastKnownGoodConfiguration))
                         validationParameters.ConfigurationManager.LastKnownGoodConfiguration = currentConfiguration;
 
                     return tokenValidationResult;
                 }
                 // using 'GetType()' instead of 'is' as SecurityTokenUnableToValidException (and others) extend SecurityTokenInvalidSignatureException
                 // we want to make sure that the clause for SecurityTokenUnableToValidateException is hit so that the ValidationFailure is checked
-                else if (tokenValidationResult.Exception.GetType().Equals(typeof(SecurityTokenInvalidSignatureException))
-                   || tokenValidationResult.Exception is SecurityTokenInvalidSigningKeyException
-                   || tokenValidationResult.Exception is SecurityTokenInvalidIssuerException
-                   || (tokenValidationResult.Exception is SecurityTokenUnableToValidateException
-                   // we should not try to revalidate with the LKG or request a refresh if the token has an invalid lifetime
-                   && (tokenValidationResult.Exception as SecurityTokenUnableToValidateException).ValidationFailure != ValidationFailure.InvalidLifetime)
-                   || tokenValidationResult.Exception is SecurityTokenSignatureKeyNotFoundException)
+                else if (TokenUtilities.IsRecoverableException(tokenValidationResult.Exception))
                 {
                     if (validationParameters.ConfigurationManager.UseLastKnownGoodConfiguration
                         && validationParameters.ConfigurationManager.LastKnownGoodConfiguration != null

@@ -26,7 +26,9 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -789,28 +791,22 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
             }
 
-            Exception exceptionThrown;
+            ExceptionDispatchInfo exceptionThrown;
             ClaimsPrincipal claimsPrincipal = outerToken != null ? ValidateJWE(token, outerToken, validationParameters, currentConfiguration, out signatureValidatedToken, out exceptionThrown) :
                 ValidateJWS(token, validationParameters, currentConfiguration, out signatureValidatedToken, out exceptionThrown);
             if (validationParameters.ConfigurationManager != null)
             {
                 if (claimsPrincipal != null)
                 {
-                    // Set current configuration as LKG if it exists and is not the same as the LKG.
-                    if (currentConfiguration != null && currentConfiguration != validationParameters.ConfigurationManager.LastKnownGoodConfiguration)
+                    // Set current configuration as LKG if it exists and has not already been set as the LKG.
+                    if (currentConfiguration != null && !ReferenceEquals(currentConfiguration, validationParameters.ConfigurationManager.LastKnownGoodConfiguration))
                         validationParameters.ConfigurationManager.LastKnownGoodConfiguration = currentConfiguration;
 
                     return claimsPrincipal;
                 }
                 // using 'GetType()' instead of 'is' as SecurityTokenUnableToValidException (and others) extend SecurityTokenInvalidSignatureException
                 // we want to make sure that the clause for SecurityTokenUnableToValidateException is hit so that the ValidationFailure is checked
-                else if (exceptionThrown.GetType().Equals(typeof(SecurityTokenInvalidSignatureException))
-                   || exceptionThrown is SecurityTokenInvalidSigningKeyException
-                   || exceptionThrown is SecurityTokenInvalidIssuerException
-                   || (exceptionThrown is SecurityTokenUnableToValidateException
-                   // we should not try to revalidate with the LKG or request a refresh if the token has an invalid lifetime
-                   && (exceptionThrown as SecurityTokenUnableToValidateException).ValidationFailure != ValidationFailure.InvalidLifetime)
-                   || exceptionThrown is SecurityTokenSignatureKeyNotFoundException)
+                else if (TokenUtilities.IsRecoverableException(exceptionThrown.SourceException))
                 {
                     if (validationParameters.ConfigurationManager.UseLastKnownGoodConfiguration
                         && validationParameters.ConfigurationManager.LastKnownGoodConfiguration != null
@@ -851,10 +847,13 @@ namespace System.IdentityModel.Tokens.Jwt
             if (claimsPrincipal != null)
                 return claimsPrincipal;
 
-            throw exceptionThrown;
+            exceptionThrown.Throw();
+
+            // This should be unreachable code, adding to make the complier happy.
+            return null;
         }
 
-        private ClaimsPrincipal ValidateJWE(string decryptedJwt, JwtSecurityToken outerToken, TokenValidationParameters validationParameters, BaseConfiguration currentConfiguration, out SecurityToken signatureValidatedToken, out Exception exceptionThrown)
+        private ClaimsPrincipal ValidateJWE(string decryptedJwt, JwtSecurityToken outerToken, TokenValidationParameters validationParameters, BaseConfiguration currentConfiguration, out SecurityToken signatureValidatedToken, out ExceptionDispatchInfo exceptionThrown)
         {
             exceptionThrown = null;
             signatureValidatedToken = null;
@@ -867,12 +866,12 @@ namespace System.IdentityModel.Tokens.Jwt
             }
             catch (Exception ex)
             {
-                exceptionThrown = ex;
+                exceptionThrown = ExceptionDispatchInfo.Capture(ex);
                 return null;
             }
         }
 
-        private ClaimsPrincipal ValidateJWS(string token, TokenValidationParameters validationParameters, BaseConfiguration currentConfiguration, out SecurityToken signatureValidatedToken, out Exception exceptionThrown)
+        private ClaimsPrincipal ValidateJWS(string token, TokenValidationParameters validationParameters, BaseConfiguration currentConfiguration, out SecurityToken signatureValidatedToken, out ExceptionDispatchInfo exceptionThrown)
         {
             exceptionThrown = null;
             signatureValidatedToken = null;
@@ -883,7 +882,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
             catch (Exception ex)
             {
-                exceptionThrown = ex;
+                exceptionThrown = ExceptionDispatchInfo.Capture(ex);
                 return null;
             }
         }

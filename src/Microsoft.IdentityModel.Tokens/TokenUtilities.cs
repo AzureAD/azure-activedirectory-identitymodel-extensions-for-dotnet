@@ -204,5 +204,22 @@ namespace Microsoft.IdentityModel.Tokens
 
             return result;
         }
+
+        /// <summary>
+        /// Check whether the given exception type is recoverable by LKG.
+        /// </summary>
+        /// <param name="exception">The exception to check.</param>
+        /// <returns><c>true</c> if the exception is certain types of exceptions otherwise, <c>false</c>.</returns>
+        internal static bool IsRecoverableException(Exception exception)
+        {
+            // using 'GetType()' instead of 'is' as SecurityTokenUnableToValidException (and others) extend SecurityTokenInvalidSignatureException
+            // we want to make sure that the clause for SecurityTokenUnableToValidateException is hit so that the ValidationFailure is checked
+            return exception.GetType().Equals(typeof(SecurityTokenInvalidSignatureException))
+                   || exception is SecurityTokenInvalidSigningKeyException
+                   || exception is SecurityTokenInvalidIssuerException
+                   // we should not try to revalidate with the LKG or request a refresh if the token has an invalid lifetime
+                   || (exception as SecurityTokenUnableToValidateException)?.ValidationFailure != ValidationFailure.InvalidLifetime
+                   || exception is SecurityTokenSignatureKeyNotFoundException;
+        }
     }
 }

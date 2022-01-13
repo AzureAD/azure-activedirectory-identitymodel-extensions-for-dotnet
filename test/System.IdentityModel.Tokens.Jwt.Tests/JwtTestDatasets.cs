@@ -71,7 +71,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 {
                     new JwtTheoryData
                     {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigValid",
+                        TestId = nameof(Default.AsymmetricJws) + "_TVPInvalid_ConfigValid",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -86,7 +86,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigIssuerInvalid",
+                        TestId = nameof(Default.AsymmetricJws) + "_TVPInvalid_ConfigIssuerInvalid",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -101,7 +101,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigIssuerInvalid" + "_IssuerValidatorReturnsTrue",
+                        TestId = nameof(Default.AsymmetricJws) + "_TVPInvalid_ConfigIssuerInvalid_IssuerValidatorReturnsTrue",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -116,7 +116,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigSigningKeysInvalid",
+                        TestId = nameof(Default.AsymmetricJws) + "_TVPInvalid_ConfigSigningKeysInvalid",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -131,7 +131,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigSigningKeysInvalid" + "_SigningKeyResolverValid",
+                        TestId = nameof(Default.AsymmetricJws) + "_TVPInvalid_ConfigSigningKeysInvalid_SigningKeyResolverValid",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -146,7 +146,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigValid" + "_IssuerSigningKeyValidatorReturnsFalse",
+                        TestId = nameof(Default.AsymmetricJws) + "_TVPInvalid_ConfigValid_IssuerSigningKeyValidatorReturnsFalse",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -162,7 +162,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {   
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigValid" + "_SignatureValidatorReturnsNull",
+                        TestId = nameof(Default.AsymmetricJws) + "_TVPInvalid_ConfigValid_SignatureValidatorReturnsNull",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -178,7 +178,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10505: ")
                     },
                     new JwtTheoryData {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "CannotObtainConfig",
+                        TestId = nameof(Default.AsymmetricJws) + "_TVPInvalid_CannotObtainConfig",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -193,7 +193,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "TVPValid" + "_" + "CannotObtainConfig",
+                        TestId = nameof(Default.AsymmetricJws) + "_TVPValid_CannotObtainConfig",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -246,7 +246,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     new JwtTheoryData
                     {
                         First = true,
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigKeyInvalid" + "_" + "LKGValid",
+                        TestId = nameof(Default.AsymmetricJws) + "_ConfigKeyInvalid_LKGValid",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -260,7 +260,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigKeyInvalidKidMatches" + "_" + "LKGValid",
+                        TestId = nameof(Default.AsymmetricJws) + "_ConfigKeyInvalidKidMatches_LKGValid",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -274,7 +274,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigKeyInvalidKeyAndIssuer" + "_" + "LKGValid",
+                        TestId = nameof(Default.AsymmetricJws) + "_ConfigKeyInvalidKeyAndIssuer_LKGValid",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -288,7 +288,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigIssuerInvalid" + "_" + "LKGValid",
+                        TestId = nameof(Default.AsymmetricJws) + "_ConfigIssuerInvalid_LKGValid",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -302,7 +302,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigInvalid" + "_" + "IssuerSigningKeyValidationFails" + "_" + "LKGValid",
+                        TestId = nameof(Default.AsymmetricJws) + "_ConfigInvalid_IssuerSigningKeyValidationFails_LKGValid",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -324,7 +324,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigInvalid" + "_" + "ConfigKeyInvalid" + "_" + "LKGExpired",
+                        TestId = nameof(Default.AsymmetricJws) + "_ConfigInvalid_ConfigKeyInvalid_LKGExpired",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -339,7 +339,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigInvalid" + "_" + "ConfigIssuerInvalid" + "_" + "LKGExpired",
+                        TestId = nameof(Default.AsymmetricJws) + "_ConfigInvalid_ConfigIssuerInvalid_LKGExpired",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -354,7 +354,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigInvalid" + "_" + "ConfigKeyInvalidKidMatches" + "_" + "LKGExpired",
+                        TestId = nameof(Default.AsymmetricJws) + "_ConfigInvalid_ConfigKeyInvalidKidMatches_LKGExpired",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -369,7 +369,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigInvalid" + "_" + "ConfigKeyInvalidKeyAndIssuer" + "_" + "LKGExpired",
+                        TestId = nameof(Default.AsymmetricJws) + "_ConfigInvalid_ConfigKeyInvalidKeyAndIssuer_LKGExpired",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -384,7 +384,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigInvalid" + "_" + "IssuerSigningKeyValidationFails" + "_" + "LKGExpired",
+                        TestId = nameof(Default.AsymmetricJws) + "_ConfigInvalid_IssuerSigningKeyValidationFails_LKGExpired",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -407,7 +407,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigInvalid" + "_" + "ConfigKeyInvalid" + "_" + "LKGIssuerInvalid" + "_" + "RefreshedConfigValid",
+                        TestId = nameof(Default.AsymmetricJws) + "_ConfigInvalid_ConfigKeyInvalid_LKGIssuerInvalid_RefreshedConfigValid",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -421,7 +421,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigInvalid" + "_" + "ConfigKeyInvalid" + "_" + "LKGIssuerInvalid" + "_" + "RefreshedConfigKeyInvalid",
+                        TestId = nameof(Default.AsymmetricJws) + "_ConfigInvalid_ConfigKeyInvalid_LKGIssuerInvalid_RefreshedConfigKeyInvalid",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -436,7 +436,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigInvalid" + "_" + "ConfigKeyInvalid" + "_" + "LKGFeatureOff",
+                        TestId = nameof(Default.AsymmetricJws) + "_ConfigInvalid_ConfigKeyInvalid_LKGFeatureOff",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -451,7 +451,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(Default.AsymmetricJws) + "_" + "ConfigInvalid" + "_" + "ConfigKeyInvalid" + "_" + "LKGFeatureOff" + "_RequestRefreshSucceeds",
+                        TestId = nameof(Default.AsymmetricJws) + "_ConfigInvalid_ConfigKeyInvalid_LKGFeatureOff_RequestRefreshSucceeds",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -465,7 +465,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(expiredJws) + "_" + "ConfigKeyInvalid" + "_" + "LKGValid" + "_TokenNotYetValid",
+                        TestId = nameof(expiredJws) + "_ConfigKeyInvalid_LKGValid_TokenNotYetValid",
                         Token = expiredJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -518,7 +518,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 {
                     new JwtTheoryData
                     {
-                        TestId = nameof(jwe) + "_" + "ConfigKeyInvalid" + "_" + "LKGValid",
+                        TestId = nameof(jwe) + "_ConfigKeyInvalid_LKGValid",
                         Token = jwe,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -533,7 +533,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(jwe) + "_" + "ConfigKeyInvalidKidMatches" + "_" + "LKGValid",
+                        TestId = nameof(jwe) + "_ConfigKeyInvalidKidMatches_LKGValid",
                         Token = jwe,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -547,7 +547,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(jwe) + "_" + "ConfigKeyInvalidKeyAndIssuer" + "_" + "LKGValid",
+                        TestId = nameof(jwe) + "_ConfigKeyInvalidKeyAndIssuer_LKGValid",
                         Token = jwe,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -562,7 +562,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(jwe) + "_" + "ConfigIssuerInvalid" + "_" + "LKGValid",
+                        TestId = nameof(jwe) + "_ConfigIssuerInvalid_LKGValid",
                         Token = jwe,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -577,7 +577,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(jwe) + "_" + "ConfigIssuerSigningKeyValidationFails" + "_" + "LKGValid",
+                        TestId = nameof(jwe) + "_ConfigIssuerSigningKeyValidationFails_LKGValid",
                         Token = jwe,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -600,7 +600,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(jwe) + "_" + "ConfigKeyInvalid" + "_" + "LKGExpired",
+                        TestId = nameof(jwe) + "_ConfigKeyInvalid_LKGExpired",
                         Token = jwe,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -616,7 +616,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(jwe) + "_" + "ConfigIssuerInvalid" + "_" + "LKGExpired",
+                        TestId = nameof(jwe) + "_ConfigIssuerInvalid_LKGExpired",
                         Token = jwe,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -632,7 +632,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(jwe) + "_" + "ConfigKeyInvalidKidMatches" + "_" + "LKGExpired",
+                        TestId = nameof(jwe) + "_ConfigKeyInvalidKidMatches_LKGExpired",
                         Token = jwe,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -648,7 +648,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(jwe) + "_" + "ConfigKeyInvalidKeyAndIssuer" + "_" + "LKGExpired",
+                        TestId = nameof(jwe) + "_ConfigKeyInvalidKeyAndIssuer_LKGExpired",
                         Token = jwe,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -664,7 +664,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(jwe) + "_" + "ConfigIssuerSigningKeyValidationFails" + "_" + "LKGExpired",
+                        TestId = nameof(jwe) + "_ConfigIssuerSigningKeyValidationFails_LKGExpired",
                         Token = jwe,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -688,7 +688,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(jwe) + "_" + "ConfigKeyInvalid" + "_" + "LKGIssuerInvalid" + "_" + "RefreshedConfigValid",
+                        TestId = nameof(jwe) + "_ConfigKeyInvalid_LKGIssuerInvalid_RefreshedConfigValid",
                         Token = jwe,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -703,7 +703,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(jwe) + "_" + "ConfigKeyInvalid" + "_" + "LKGIssuerInvalid" + "_" + "RefreshedConfigKeyInvalid",
+                        TestId = nameof(jwe) + "_ConfigKeyInvalid_LKGIssuerInvalid_RefreshedConfigKeyInvalid",
                         Token = jwe,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -719,7 +719,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(jwe) + "_" + "ConfigKeyInvalid" + "_" + "LKGFeatureOff",
+                        TestId = nameof(jwe) + "_ConfigKeyInvalid_LKGFeatureOff",
                         Token = jwe,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -735,7 +735,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(jwe) + "_" + "ConfigKeyInvalid" + "_" + "LKGFeatureOff" + "_RequestRefreshSucceeds",
+                        TestId = nameof(jwe) + "_ConfigKeyInvalid_LKGFeatureOff_RequestRefreshSucceeds",
                         Token = jwe,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -750,7 +750,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(notYetValidJwe) + "_" + "ConfigKeyInvalid" + "_" + "LKGValid" + "_TokenNotYetValid",
+                        TestId = nameof(notYetValidJwe) + "_ConfigKeyInvalid_LKGValid_TokenNotYetValid",
                         Token = notYetValidJwe,
                         ValidationParameters = new TokenValidationParameters
                         {
