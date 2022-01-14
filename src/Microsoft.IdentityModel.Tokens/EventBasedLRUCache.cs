@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
@@ -214,7 +215,11 @@ namespace Microsoft.IdentityModel.Tokens
                     // remove expired items if needed
                     if (_removeExpiredValues && DateTime.UtcNow >= _dueForExpiredValuesRemoval)
                     {
-                        RemoveExpiredValues();
+                        if (_maintainLRU)
+                            RemoveExpiredValuesLRU();
+                        else
+                            RemoveExpiredValues();
+
                         _dueForExpiredValuesRemoval = DateTime.UtcNow.AddSeconds(_removeExpiredValuesIntervalInSeconds);
                     }
 
@@ -248,7 +253,11 @@ namespace Microsoft.IdentityModel.Tokens
             Interlocked.Decrement(ref _taskCount);
         }
 
-        internal int RemoveExpiredValues()
+        /// <summary>
+        /// Remove all expired cache items from _doubleLinkedList and _map.
+        /// </summary>
+        /// <returns>Number of items removed.</returns>
+        internal int RemoveExpiredValuesLRU()
         {
             int numItemsRemoved = 0;
             try
@@ -271,6 +280,35 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (ObjectDisposedException ex)
             {
+                LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10902, LogHelper.MarkAsNonPII(nameof(RemoveExpiredValuesLRU)), ex));
+            }
+
+            return numItemsRemoved;
+        }
+
+        /// <summary>
+        /// Remove all expired cache items from the _map ONLY. This is called for the non-LRU (_maintainLRU = false) scenaro.
+        /// The enumerator returned from the dictionary is safe to use concurrently with reads and writes to the dictionary, according to the MS document.
+        /// </summary>
+        /// <returns>Number of items removed.</returns>
+        internal int RemoveExpiredValues()
+        {
+            int numItemsRemoved = 0;
+            try
+            {
+                foreach (var node in _map)
+                {
+                    if (node.Value.ExpirationTime < DateTime.UtcNow)
+                    {
+                        if (_map.TryRemove(node.Value.Key, out var cacheItem))
+                            OnItemRemoved?.Invoke(cacheItem.Value);
+
+                        numItemsRemoved++;
+                    }
+                }
+            }
+            catch (ObjectDisposedException ex)
+            {
                 LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10902, LogHelper.MarkAsNonPII(nameof(RemoveExpiredValues)), ex));
             }
 
@@ -281,13 +319,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// Remove items from the LinkedList by the desired compaction percentage.
         /// This should be a private method.
         /// </summary>
-        private void RemoveLRUs()
+        private void CompactLRU()
         {
-            // use the smaller of _map.Count and _capacity as the current count
-            int currentCount = Math.Min(_map.Count, _capacity);
-
-            // use the _capacity for the newCacheSize calculation in the case where the cache is experiencing overflow
-            var newCacheSize = currentCount - (int)(currentCount * _compactionPercentage);
+            var newCacheSize = CalculateNewCacheSize();
             while (_map.Count > newCacheSize && _doubleLinkedList.Count > 0)
             {
                 var lru = _doubleLinkedList.Last;
@@ -296,6 +330,40 @@ namespace Microsoft.IdentityModel.Tokens
 
                 _doubleLinkedList.RemoveLast();
             }
+        }
+
+        /// <summary>
+        /// Remove items from the Dictionary by the desired compaction percentage.
+        /// Since _map does not have LRU order, items are simply removed from using FirstOrDefault(). 
+        /// </summary>
+        private void Compact()
+        {
+            var newCacheSize = CalculateNewCacheSize();
+            while (_map.Count > newCacheSize)
+            {
+                // Since all items could have been removed by the public TryRemove() method, leaving the map empty, we need to check if a default value is returned.
+                // Remove the item from the map only if the returned item is NOT default value.
+                var item = _map.FirstOrDefault();
+                if (!item.Equals(default))
+                {
+                    if (_map.TryRemove(item.Key, out var cacheItem))
+                        OnItemRemoved?.Invoke(cacheItem.Value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// When the cache is at _maxCapacityPercentage, it needs to be compacted by _compactionPercentage.
+        /// This method calculates the new size of the cache after being compacted.
+        /// </summary>
+        /// <returns>The new target cache size after compaction.</returns>
+        protected int CalculateNewCacheSize()
+        {
+            // use the smaller of _map.Count and _capacity
+            int currentCount = Math.Min(_map.Count, _capacity);
+
+            // use the _capacity for the newCacheSize calculation in the case where the cache is experiencing overflow
+            return currentCount - (int)(currentCount * _compactionPercentage);
         }
 
         /// <summary>
@@ -347,21 +415,26 @@ namespace Microsoft.IdentityModel.Tokens
                 // if cache is at _maxCapacityPercentage, trim it by _compactionPercentage
                 if ((double)_map.Count / _capacity >= _maxCapacityPercentage)
                 {
-                    _eventQueue.Enqueue(() =>
+                    if (_maintainLRU)
+                        _eventQueue.Enqueue(CompactLRU);
+                    else
+                        _eventQueue.Enqueue(Compact);
+                }
+
+                var newCacheItem = new LRUCacheItem<TKey, TValue>(key, value, expirationTime);
+
+                // add the new node to the _doubleLinkedList if _maintainLRU == true
+                if (_maintainLRU)
+                {
+                    AddActionToEventQueue(() =>
                     {
-                        RemoveLRUs();
+                        // Add a remove operation in case two threads are trying to add the same value. Only the second remove will succeed in this case.
+                        _doubleLinkedList.Remove(newCacheItem);
+                        _doubleLinkedList.AddFirst(newCacheItem);
                     });
                 }
-                // add the new node
-                var existingCacheItem = new LRUCacheItem<TKey, TValue>(key, value, expirationTime);
-                AddActionToEventQueue(() =>
-                {
-                    // Add a remove operation in case two threads are trying to add the same value. Only the second remove will succeed in this case.
-                    _doubleLinkedList.Remove(existingCacheItem);
-                    _doubleLinkedList.AddFirst(existingCacheItem);
-                });
 
-                _map[key] = existingCacheItem;
+                _map[key] = newCacheItem;
             }
 
             return true;
@@ -409,20 +482,20 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        /// Each time a node gets accessed, it gets moved to the beginning (head) of the list.
+        /// Each time a node gets accessed, it gets moved to the beginning (head) of the list if the _maintainLRU == true
         public bool TryGetValue(TKey key, out TValue value)
         {
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
-            if (!_map.ContainsKey(key))
+            if (!_map.TryGetValue(key, out var cacheItem))
             {
                 value = default;
                 return false;
             }
 
             // make sure node hasn't been removed by a different thread
-            if (_map.TryGetValue(key, out var cacheItem) && _maintainLRU)
+            if (_maintainLRU)
             {
                 AddActionToEventQueue(() =>
                 {
@@ -441,21 +514,19 @@ namespace Microsoft.IdentityModel.Tokens
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
-            if (!_map.TryGetValue(key, out var cacheItem))
+            if (!_map.TryRemove(key, out var cacheItem))
             {
                 value = default;
                 return false;
             }
 
-            value = cacheItem.Value;
-            AddActionToEventQueue(() => _doubleLinkedList.Remove(cacheItem));
-            if (_map.TryRemove(key, out cacheItem))
-            {
-                OnItemRemoved?.Invoke(cacheItem.Value);
-                return true;
-            }
+            if (_maintainLRU)
+                AddActionToEventQueue(() => _doubleLinkedList.Remove(cacheItem));
 
-            return false;
+            value = cacheItem.Value;
+            OnItemRemoved?.Invoke(cacheItem.Value);
+
+            return true;
         }
 
         #region FOR TESTING (INTERNAL ONLY)
