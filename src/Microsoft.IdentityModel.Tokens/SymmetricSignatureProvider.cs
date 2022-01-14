@@ -160,7 +160,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="keyedHashAlgorithm">The <see cref="KeyedHashAlgorithm"/>" in use.</param>
         protected virtual void ReleaseKeyedHashAlgorithm(KeyedHashAlgorithm keyedHashAlgorithm)
         {
-            _keyedHashObjectPool.Free(keyedHashAlgorithm);
+            if (keyedHashAlgorithm != null)
+                _keyedHashObjectPool.Free(keyedHashAlgorithm);
         }
 
         /// <summary>
