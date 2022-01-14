@@ -745,21 +745,17 @@ namespace System.IdentityModel.Tokens.Jwt
             if (tokenParts.Length != JwtConstants.JwsSegmentCount && tokenParts.Length != JwtConstants.JweSegmentCount)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12741, token)));
 
-            ClaimsPrincipal claimsPrincipal;
-            SecurityToken signatureValidatedToken;
+
             if (tokenParts.Length == JwtConstants.JweSegmentCount)
             {
                 var jwtToken = ReadJwtToken(token);
                 var decryptedJwt = DecryptToken(jwtToken, validationParameters);
-                claimsPrincipal = ValidateToken(decryptedJwt, jwtToken, validationParameters, out signatureValidatedToken);
+                return  ValidateToken(decryptedJwt, jwtToken, validationParameters, out validatedToken);
             }
             else
             {
-                claimsPrincipal = ValidateToken(token, null, validationParameters, out signatureValidatedToken);
+                return ValidateToken(token, null, validationParameters, out validatedToken);
             }
-
-            validatedToken = signatureValidatedToken;
-            return claimsPrincipal;
         }
 
         /// <summary>
