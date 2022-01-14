@@ -88,14 +88,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
         /// <summary>
-        /// Verifies the RemoveExpiredValues() method (non LRU) working as expected.
+        /// Verifies that the RemoveExpiredValues() method (non LRU) is working as expected.
         /// </summary>
         [Fact]
         public void RemoveExpiredValues()
         {
             int size = 10;
             int expiredInSeconds = 1;
-            int waitInSeconds = 2 * 1000 * expiredInSeconds;
+            int waitInMiliSeconds = 2 * 1000 * expiredInSeconds;
 
             TestUtilities.WriteHeader($"{this}.RemoveExpiredValues");
             var context = new CompareContext($"{this}.RemoveExpiredValues");
@@ -103,14 +103,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             AddItemsToCache(cache, size, expiredInSeconds);
 
             cache.WaitForProcessing();
-            Thread.Sleep(waitInSeconds);
+            Thread.Sleep(waitInMiliSeconds);
             cache.RemoveExpiredValues();
 
             AssertCache(cache, size, context);
         }
 
         /// <summary>
-        /// Verifies the RemoveExpiredValuesLRU() method working as expected.
+        /// Verifies that the RemoveExpiredValuesLRU() method is working as expected.
         /// </summary>
         [Fact]
         public void RemoveExpiredValuesLRU()
@@ -125,7 +125,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             AddItemsToCache(cache, size, expiredInSeconds);
 
             cache.WaitForProcessing();
-            Thread.Sleep(2000);
+            Thread.Sleep(waitInSeconds);
             cache.RemoveExpiredValuesLRU();
 
             AssertCache(cache, size, context);
@@ -274,7 +274,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             TestUtilities.WriteHeader($"{this}.MaintainLRUOrder");
             var context = new CompareContext($"{this}.MaintainLRUOrder");
-            var cache = new EventBasedLRUCache<int, string>(10, removeExpiredValues: false);
+            var cache = new EventBasedLRUCache<int, string>(10, removeExpiredValues: false, maintainLRU: true);
             for (int i = 0; i <= 1000; i++)
             {
                 cache.SetValue(i, Guid.NewGuid().ToString());

@@ -569,11 +569,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         internal void WaitForProcessing()
         {
-            while (true)
-            {
-                if (_eventQueue.Count == 0)
-                    return;
-            }
+            // The _eventQueue can be non-empty only if _maintainLRU = true.
+            // If _maintainLRU = false, neither the _doubleLinkedList nor _eventQueue will be used.
+            if (!_maintainLRU)
+                return;
+
+            while (!_eventQueue.IsEmpty);
         }
 
         #endregion
