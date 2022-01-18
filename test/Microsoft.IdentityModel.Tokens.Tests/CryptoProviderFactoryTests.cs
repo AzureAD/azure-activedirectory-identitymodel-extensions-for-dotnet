@@ -33,8 +33,6 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Azure.Services.AppAuthentication;
-using Microsoft.IdentityModel.KeyVaultExtensions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
@@ -1037,7 +1035,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             long taskIdleTimeoutInSeconds = 1;
             var cache = new InMemoryCryptoProviderCache();
             var factory = new CryptoProviderFactory(cache);
-            SetTaskIdleTimeoutInSeconds(cache, taskIdleTimeoutInSeconds); // set the event queue task idle timeout
 
             // create signing providers
             var signingProviders = CreateSigningProviders(factory);
@@ -1060,9 +1057,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             foreach (var provider in verifyingProviders)
                 cache.TryRemove(provider);
 
-            WaitTillTaskComplete(cache, WaitTimeForTaskToStopInSeconds(taskIdleTimeoutInSeconds)); // wait for the event queue task to complete
-            Assert.True(cache.TaskCount == 0, $"ProviderCache_EnsureNoHangingTasks: unexpected task count: {cache.TaskCount}, expected: 0");
-
             //=============================================================================================
             // repeat the steps and verify tasks will be restarted again and stopped when cache is empty...
             //=============================================================================================
@@ -1074,10 +1068,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             foreach (var provider in signingProviders)
                 cache.TryRemove(provider);
 
-            AssertNoHangingingTasks(cache, "ProviderCache_EnsureNoHangingTasks");
-
-            // Dispose() should not throw any exception.
+            // Dispose() should stop the event queue task if it is running.
             cache.Dispose();
+
+            AssertNoHangingingTasks(cache, "ProviderCache_EnsureNoHangingTasks");
         }
 
         /// <summary>
@@ -1088,7 +1082,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             var cache = new InMemoryCryptoProviderCache();
             var factory = new CryptoProviderFactory(cache);
-            SetTaskIdleTimeoutInSeconds(cache, 1); // set the event queue task idle timeout
 
             int count = 5;
             List<Thread> signingThreads = new List<Thread>(count);
@@ -1107,12 +1100,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 verifyingThreads.Add(thread);
             }
 
-            // The Dispose() call should not dispose of the cache resources, otherwise other threads will run into exceptions.
-            // However, this can change in the future.
-            cache.Dispose();
-
-            WaitTillTaskComplete(cache, WaitTimeForTaskToStopInSeconds(cache.EventQueueTaskIdleTimeoutInSeconds)); // wait for the event queue task to complete
-
             // wait for all threads to finish
             foreach (Thread thread in signingThreads)
                 thread.Join();
@@ -1120,10 +1107,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             foreach (Thread thread in verifyingThreads)
                 thread.Join();
 
-            AssertNoHangingingTasks(cache, "ProviderCache_EnsureNoException_MultipleThreads");
-
-            // Call Dispose() one more time to ensure no ill effects.
+            // Dispose() should stop the event queue task if it is running.
             cache.Dispose();
+
+            AssertNoHangingingTasks(cache, "ProviderCache_EnsureNoException_MultipleThreads");
         }
 
         /// <summary>
@@ -1135,7 +1122,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             var cache = new InMemoryCryptoProviderCache();
             CryptoProviderFactory cryptoProviderFactory = new CryptoProviderFactory(cache);
-            SetTaskIdleTimeoutInSeconds(cache, 1); // set the event queue task idle timeout
 
             var testClaims = new List<Claim>
             {
@@ -1159,6 +1145,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var handler = new JwtSecurityTokenHandler();
             _ = handler.WriteToken(token);
 
+            // Dispose() should stop the event queue task if it is running.
+            cache.Dispose();
+
             // when JwtHeader is created with SymmetricEncryptingCredentials, the provider will not be added to cache (an error in logic???)
             AssertNoHangingingTasks(cache, "ProviderCache_EnsureNoLeakingTasks_SecurityTokenHandler_SymmetricEncryptingCredentials");
         }
@@ -1172,7 +1161,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             var cache = new InMemoryCryptoProviderCache();
             CryptoProviderFactory cryptoProviderFactory = new CryptoProviderFactory(cache);
-            SetTaskIdleTimeoutInSeconds(cache, 1); // set the event queue task idle timeout
+
             var testClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.AuthenticationMethod, Default.AuthenticationMethod, ClaimValueTypes.String, Default.Issuer),
@@ -1198,33 +1187,22 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var handler = new JwtSecurityTokenHandler();
             _ = handler.WriteToken(token);
 
+            // Dispose() should stop the event queue task if it is running.
+            cache.Dispose();
+
             AssertNoHangingingTasks(cache, "ProviderCache_EnsureNoLeakingTasks_SecurityTokenHandler_SigningCredentials");
         }
 
         private void AssertNoHangingingTasks(InMemoryCryptoProviderCache cache, string callName)
         {
-            WaitTillTaskComplete(cache, WaitTimeForTaskToStopInSeconds(cache.EventQueueTaskIdleTimeoutInSeconds)); // wait for the event queue task to complete
+            WaitTillTaskComplete(cache, MaxEventQueueTaskWaitTimeInSeconds); // wait for the event queue task to complete
             Assert.True(cache.TaskCount == 0, $"{callName}: unexpected task count: {cache.TaskCount}, expected: 0");
         }
 
         /// <summary>
-        /// Set the LRU cache event queue task idle timeout, the task will end after being idle for the specified time interval.
-        /// The default value is 120 seconds so setting this to a smaller value can reduce the time needed to run unit tests.
+        /// The max wait time (in seconds) for the event queue task to exit.
         /// </summary>
-        /// <param name="cache">The LRU cache to set the task execution time.</param>
-        /// <param name="taskIdleTimeoutInSeconds">The value to set to, in seconds.</param>
-        private void SetTaskIdleTimeoutInSeconds(InMemoryCryptoProviderCache cache, long taskIdleTimeoutInSeconds)
-        {
-            cache.EventQueueTaskIdleTimeoutInSeconds = taskIdleTimeoutInSeconds;
-        }
-
-        /// <summary>
-        /// Calculate the wait time for a task to stop.
-        /// This is for adding more time allowing the task to exit properly.
-        /// </summary>
-        /// <param name="taskExecutionTimeInSeconds">The time the event queue task runs.</param>
-        /// <returns>2 times of the taskExecutionTimeInSeconds. Note that 2 is just a reasonable factor which should provide enough time for the task to exit but not keeping tests waiting/sleeping for too long.</returns>
-        private long WaitTimeForTaskToStopInSeconds(long taskExecutionTimeInSeconds) => 3 * taskExecutionTimeInSeconds;
+        private int MaxEventQueueTaskWaitTimeInSeconds => 5;
 
         /// <summary>
         /// Helper method to wait for the event queue tasks to start, up to the specified time in seconds.
