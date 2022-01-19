@@ -264,7 +264,7 @@ namespace Microsoft.IdentityModel.Validators
                 if (jsonWebToken.TryGetPayloadValue(AadIssuerValidatorConstants.Tid, out string tid))
                     return tid;
 
-                if (jsonWebToken.TryGetPayloadValue(AadIssuerValidatorConstants.Tid, out string tenantId))
+                if (jsonWebToken.TryGetPayloadValue(AadIssuerValidatorConstants.TenantId, out string tenantId))
                     return tenantId;
 
                 // Since B2C doesn't have "tid" as default, get it from issuer
