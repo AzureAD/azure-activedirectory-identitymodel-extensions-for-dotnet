@@ -26,7 +26,10 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Security.Cryptography;
+using System.Text;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -311,6 +314,39 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
 
+        internal static bool TryConvertToX509SecurityKey(JsonWebKey webKey, IDictionary<JsonWebKey, ConvertKeyInfo> convertKeyInfos, out SecurityKey key)
+        {
+            if (webKey.ConvertedSecurityKey is X509SecurityKey)
+            {
+                key = webKey.ConvertedSecurityKey;
+                return true;
+            }
+
+            key = null;
+            if (webKey.X5c == null || webKey.X5c.Count == 0)
+            {
+                convertKeyInfos.Add(webKey, new ConvertKeyInfo(LogHelper.FormatInvariant(LogMessages.IDX10814, LogHelper.MarkAsNonPII(typeof(X509SecurityKey)), webKey, JsonWebKeyParameterNames.X5c)));
+                return false;
+            }
+
+            try
+            {
+                // only the first certificate should be used to perform signing operations
+                // https://datatracker.ietf.org/doc/html/rfc7517#section-4.7
+                key = new X509SecurityKey(webKey);
+                return true;
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                convertKeyInfos.Add(webKey, new ConvertKeyInfo(LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(X509SecurityKey)), webKey, ex)));
+                LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(X509SecurityKey)), webKey, ex), ex));
+            }
+
+            return false;
+        }
+
         internal static bool TryCreateToRsaSecurityKey(JsonWebKey webKey, out SecurityKey key)
         {
             if (webKey.ConvertedSecurityKey is RsaSecurityKey)
@@ -336,6 +372,46 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
 
+        internal static bool TryCreateToRsaSecurityKey(JsonWebKey webKey, IDictionary<JsonWebKey, ConvertKeyInfo> convertKeyInfos, out SecurityKey key)
+        {
+            if (webKey.ConvertedSecurityKey is RsaSecurityKey)
+            {
+                key = webKey.ConvertedSecurityKey;
+                return true;
+            }
+
+            key = null;
+            if (string.IsNullOrWhiteSpace(webKey.E) || string.IsNullOrWhiteSpace(webKey.N))
+            {
+                var missingComponent = new List<string>();
+                if (string.IsNullOrWhiteSpace(webKey.E))
+                    missingComponent.Add(JsonWebKeyParameterNames.E);
+
+                if (string.IsNullOrWhiteSpace(webKey.N))
+                    missingComponent.Add(JsonWebKeyParameterNames.N);
+
+                if (convertKeyInfos.ContainsKey(webKey))
+                    convertKeyInfos[webKey].ConvertKeyMessage += LogHelper.FormatInvariant(LogMessages.IDX10814, LogHelper.MarkAsNonPII(typeof(RsaSecurityKey)), webKey, string.Join(", ", missingComponent));
+                else
+                    convertKeyInfos.Add(webKey, new ConvertKeyInfo(LogHelper.FormatInvariant(LogMessages.IDX10814, LogHelper.MarkAsNonPII(typeof(RsaSecurityKey)), webKey, string.Join(", ", missingComponent))));
+
+                return false;
+            }               
+
+            try
+            {
+                key = new RsaSecurityKey(webKey);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                convertKeyInfos.Add(webKey, new ConvertKeyInfo(LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(RsaSecurityKey)), webKey, ex)));
+                LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(RsaSecurityKey)), webKey, ex), ex));
+            }
+
+            return false;
+        }
+
         internal static bool TryConvertToECDsaSecurityKey(JsonWebKey webKey, out SecurityKey key)
         {
             if (webKey.ConvertedSecurityKey is ECDsaSecurityKey)
@@ -355,6 +431,45 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (Exception ex)
             {
+                LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(ECDsaSecurityKey)), webKey, ex), ex));
+            }
+
+            return false;
+        }
+
+        internal static bool TryConvertToECDsaSecurityKey(JsonWebKey webKey, IDictionary<JsonWebKey, ConvertKeyInfo> convertKeyInfos, out SecurityKey key)
+        {
+            if (webKey.ConvertedSecurityKey is ECDsaSecurityKey)
+            {
+                key = webKey.ConvertedSecurityKey;
+                return true;
+            }
+
+            key = null;
+            if (string.IsNullOrEmpty(webKey.Crv) || string.IsNullOrEmpty(webKey.X) || string.IsNullOrEmpty(webKey.Y))
+            {
+                var missingComponent = new List<string>();
+                if (string.IsNullOrEmpty(webKey.Crv))
+                    missingComponent.Add(JsonWebKeyParameterNames.Crv);
+
+                if (string.IsNullOrEmpty(webKey.X))
+                    missingComponent.Add(JsonWebKeyParameterNames.X);
+
+                if (string.IsNullOrEmpty(webKey.Y))
+                    missingComponent.Add(JsonWebKeyParameterNames.Y);
+
+                convertKeyInfos.Add(webKey, new ConvertKeyInfo(LogHelper.FormatInvariant(LogMessages.IDX10814, LogHelper.MarkAsNonPII(typeof(ECDsaSecurityKey)), webKey, string.Join(", ", missingComponent))));
+                return false;
+            }
+
+            try
+            {
+                key = new ECDsaSecurityKey(webKey, !string.IsNullOrEmpty(webKey.D));
+                return true;
+            }
+            catch (Exception ex)
+            {
+                convertKeyInfos.Add(webKey, new ConvertKeyInfo(LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(ECDsaSecurityKey)), webKey, ex)));
                 LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(ECDsaSecurityKey)), webKey, ex), ex));
             }
 

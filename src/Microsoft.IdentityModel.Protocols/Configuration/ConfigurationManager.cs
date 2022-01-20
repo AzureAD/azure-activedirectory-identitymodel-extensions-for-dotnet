@@ -31,7 +31,6 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Protocols

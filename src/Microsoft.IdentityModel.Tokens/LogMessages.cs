@@ -253,7 +253,8 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10810 = "IDX10810: Unable to convert the JsonWebKey: '{0}' to a X509SecurityKey, RsaSecurityKey or ECDSASecurityKey.";
         //public const string IDX10811 = "IDX10811:"
         public const string IDX10812 = "IDX10812: Unable to create a {0} from the properties found in the JsonWebKey: '{1}'.";
-        public const string IDX10813 = "IDX10813: Unable to create a {0} from the properties found in the JsonWebKey: '{1}', Exception '{2}'.";
+        public const string IDX10813 = "IDX10813: Unable to create a {0} from the properties found in the JsonWebKey: '{1}'. Exception: '{2}'.";
+        public const string IDX10814 = "IDX10814: Unable to create a {0} from the properties found in the JsonWebKey: '{1}'. Missing: '{2}'.";
 
         //EventBasedLRUCache errors
         public const string IDX10900 = "IDX10900: EventBasedLRUCache._eventQueue encountered an error while processing a cache operation. Exception '{0}'.";
