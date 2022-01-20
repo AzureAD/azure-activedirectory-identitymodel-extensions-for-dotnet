@@ -27,22 +27,30 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.IdentityModel.Protocols.Configuration
+namespace Microsoft.IdentityModel.Tokens
 {
-    /// <summary>
-    /// Interface that defines a executor for validating configuration data.
-    /// </summary>
-    /// <typeparam name="T">The type of the configuration metadata.</typeparam>
-    public interface IConfigurationValidationExecutor<T>
+    internal class ConvertKeyInfo
     {
         /// <summary>
-        /// Validate the retrieved configuration by using <see cref="IConfigurationValidator{T}"/>.
+        /// Initializes an instance of <see cref="ConvertKeyInfo"/>.
         /// </summary>
-        /// <param name="configuration">Configuration of type T.</param>
-        void ValidateConfiguration(T configuration);
+        /// <param name="convertKeyMessage">.</param>
+        public ConvertKeyInfo(string convertKeyMessage)
+        {
+            ConvertKeyMessage = convertKeyMessage;
+        }
+
+        internal string ConvertKeyMessage { get; set; }
+
+        /// <summary>
+        /// Gets or sets a bool indicating if the convert key was successful.
+        /// </summary>
+        [DefaultValue(false)]
+        internal bool Succeeded { get; set; } = false;
     }
 }

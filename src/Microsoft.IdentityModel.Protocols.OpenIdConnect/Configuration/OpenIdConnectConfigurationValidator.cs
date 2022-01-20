@@ -65,12 +65,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
 
             if (openIdConnectConfiguration.SigningKeys.Count < MinimumNumberOfKeys)
             {
-                if (openIdConnectConfiguration.JsonWebKeySet.KeyConvertError.Any())
+                if (openIdConnectConfiguration.JsonWebKeySet.ConvertKeyInfos.Any())
                 {
                     return new ConfigurationValidationResult
                     {
                         Exception = new ConfigurationValidationException("The OpenIdConnectConfiguration's valid signing keys are less than the minimum requirment: {MinimumNumberOfKeys}. " +
-                        "Invalid keys:" + string.Join("; ", openIdConnectConfiguration.JsonWebKeySet.KeyConvertError.Select(x => x.Key.ToString() + ": " + x.Value))),
+                        "Invalid keys:" + string.Join("; ", openIdConnectConfiguration.JsonWebKeySet.ConvertKeyInfos.Select(x => x.Key.ToString() + ": " + x.Value))),
                         Succeeded = false
                     };
                 }

@@ -93,6 +93,11 @@ namespace Microsoft.IdentityModel.Tokens
         public virtual IDictionary<string, object> AdditionalData { get; } = new Dictionary<string, object>();
 
         /// <summary>
+        /// Gets a <see cref="IDictionary{JsonWebKey, ConvertKeyInfo}"/> that contains convert key information.
+        /// </summary>
+        internal IDictionary<JsonWebKey, ConvertKeyInfo> ConvertKeyInfos { get; } = new Dictionary<JsonWebKey, ConvertKeyInfo>();
+
+        /// <summary>
         /// Gets the <see cref="IList{JsonWebKey}"/>.
         /// </summary>       
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeySetParameterNames.Keys, Required = Required.Default)]
@@ -111,11 +116,6 @@ namespace Microsoft.IdentityModel.Tokens
         public bool SkipUnresolvedJsonWebKeys { get; set; } = DefaultSkipUnresolvedJsonWebKeys;
 
         /// <summary>
-        /// Gets a <see cref="IDictionary{JsonWebKey, String}"/> that contains convert key error message.
-        /// </summary>
-        public virtual IDictionary<JsonWebKey, string> KeyConvertError { get; } = new Dictionary<JsonWebKey, string>();
-
-        /// <summary>
         /// Returns the JsonWebKeys as a <see cref="IList{SecurityKey}"/>.
         /// </summary>
         /// <remarks>
@@ -132,6 +132,8 @@ namespace Microsoft.IdentityModel.Tokens
                 if (!string.IsNullOrEmpty(webKey.Use) && !webKey.Use.Equals(JsonWebKeyUseNames.Sig, StringComparison.Ordinal))
                 {
                     LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX10808, webKey, webKey.Use));
+                    ConvertKeyInfos.Add(webKey, new ConvertKeyInfo(LogHelper.FormatInvariant(LogMessages.IDX10808, webKey, webKey.Use)));
+
                     if (!SkipUnresolvedJsonWebKeys)
                         signingKeys.Add(webKey);
 
@@ -145,21 +147,22 @@ namespace Microsoft.IdentityModel.Tokens
                     // in this case, even though RSA was specified, we can't resolve.
                     if ((webKey.X5c == null || webKey.X5c.Count == 0) && (string.IsNullOrEmpty(webKey.E) && string.IsNullOrEmpty(webKey.N)))
                     {
+                        var missingComponent = new List<string>(){ JsonWebKeyParameterNames.X5c, JsonWebKeyParameterNames.E, JsonWebKeyParameterNames.N };
+                        ConvertKeyInfos.Add(webKey, new ConvertKeyInfo(LogHelper.FormatInvariant(LogMessages.IDX10814, LogHelper.MarkAsNonPII(typeof(RsaSecurityKey)), webKey, string.Join(", ", missingComponent))));
                         rsaKeyResolved = false;
                     }
                     else
                     {
-
                         // in this case X509SecurityKey should be resolved.
                         if (webKey.X5c != null && webKey.X5c.Count != 0)
-                            if (JsonWebKeyConverter.TryConvertToX509SecurityKey(webKey, out SecurityKey securityKey))
+                            if (JsonWebKeyConverter.TryConvertToX509SecurityKey(webKey, ConvertKeyInfos, out SecurityKey securityKey))
                                 signingKeys.Add(securityKey);
                             else
                                 rsaKeyResolved = false;
 
                         // in this case RsaSecurityKey should be resolved.
                         if (!string.IsNullOrEmpty(webKey.E) && !string.IsNullOrEmpty(webKey.N))
-                            if (JsonWebKeyConverter.TryCreateToRsaSecurityKey(webKey, out SecurityKey securityKey))
+                            if (JsonWebKeyConverter.TryCreateToRsaSecurityKey(webKey, ConvertKeyInfos, out SecurityKey securityKey))
                                 signingKeys.Add(securityKey);
                             else
                                 rsaKeyResolved = false;
@@ -170,7 +173,7 @@ namespace Microsoft.IdentityModel.Tokens
                 }
                 else if (JsonWebAlgorithmsKeyTypes.EllipticCurve.Equals(webKey.Kty, StringComparison.Ordinal))
                 {
-                    if (JsonWebKeyConverter.TryConvertToECDsaSecurityKey(webKey, out SecurityKey securityKey))
+                    if (JsonWebKeyConverter.TryConvertToECDsaSecurityKey(webKey, ConvertKeyInfos, out SecurityKey securityKey))
                         signingKeys.Add(securityKey);
                     else if (!SkipUnresolvedJsonWebKeys)
                         signingKeys.Add(webKey);
@@ -178,6 +181,7 @@ namespace Microsoft.IdentityModel.Tokens
                 else
                 {
                     LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX10810, webKey));
+                    ConvertKeyInfos.Add(webKey, new ConvertKeyInfo(LogMessages.IDX10810));
 
                     if (!SkipUnresolvedJsonWebKeys)
                         signingKeys.Add(webKey);

@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.Protocols
             }
 
             if (exceptions.Any())
-                throw new ConfigurationValidationException("Invalid configuraiton", new AggregateException(exceptions));
+                throw new ConfigurationValidationException(LogMessages.IDX20810, new AggregateException(exceptions));
         }
     }
 }

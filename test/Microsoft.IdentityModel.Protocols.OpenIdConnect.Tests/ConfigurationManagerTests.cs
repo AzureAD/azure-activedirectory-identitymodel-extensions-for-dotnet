@@ -382,7 +382,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 {
                     ConfigurationRetreiver = new OpenIdConnectConfigurationRetriever(),
                     DocumentRetriever = new FileDocumentRetriever(),
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "Invalid configuraiton:"),
+                    ExpectedException = new ExpectedException(typeof(ConfigurationValidationException), "Invalid configuraiton:"),
                     MetadataAddress = "OpenIdConnectMetadataBadX509DataBadBase64Data.json",
                     TestId = "InvalidConfiguration_BadX509Data"
                 });
@@ -391,7 +391,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 {
                     ConfigurationRetreiver = new OpenIdConnectConfigurationRetriever(),
                     DocumentRetriever = new FileDocumentRetriever(),
-                    ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "Invalid configuraiton:"),
+                    ExpectedException = new ExpectedException(typeof(ConfigurationValidationException), "Invalid configuraiton:"),
                     MetadataAddress = "OpenIdConnectMetadata.json",
                     TestId = "InvalidConfiguration_BadBase64Data"
                 });
