@@ -150,6 +150,11 @@ namespace Microsoft.IdentityModel.Protocols
                         _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
                         if (_currentConfiguration == null) // Throw an exception if there's no configuration to return.
                             throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX20803, (MetadataAddress ?? "null")), ex));
+                        else if (ex is ConfigurationValidationException)
+                        {
+                            _currentConfiguration = null;
+                            throw LogHelper.LogExceptionMessage(ex);
+                        }
                         else
                             LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX20806, (MetadataAddress ?? "null")), ex));
                     }

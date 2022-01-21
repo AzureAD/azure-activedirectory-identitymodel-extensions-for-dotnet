@@ -314,7 +314,7 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
 
-        internal static bool TryConvertToX509SecurityKey(JsonWebKey webKey, IDictionary<JsonWebKey, ConvertKeyInfo> convertKeyInfos, out SecurityKey key)
+        internal static bool TryConvertToX509SecurityKey(JsonWebKey webKey, IDictionary<JsonWebKey, string> convertKeyInfos, out SecurityKey key)
         {
             if (webKey.ConvertedSecurityKey is X509SecurityKey)
             {
@@ -325,7 +325,7 @@ namespace Microsoft.IdentityModel.Tokens
             key = null;
             if (webKey.X5c == null || webKey.X5c.Count == 0)
             {
-                convertKeyInfos.Add(webKey, new ConvertKeyInfo(LogHelper.FormatInvariant(LogMessages.IDX10814, LogHelper.MarkAsNonPII(typeof(X509SecurityKey)), webKey, JsonWebKeyParameterNames.X5c)));
+                convertKeyInfos.Add(webKey, LogHelper.FormatInvariant(LogMessages.IDX10814, LogHelper.MarkAsNonPII(typeof(X509SecurityKey)), webKey, JsonWebKeyParameterNames.X5c));
                 return false;
             }
 
@@ -336,11 +336,9 @@ namespace Microsoft.IdentityModel.Tokens
                 key = new X509SecurityKey(webKey);
                 return true;
             }
-#pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
             {
-                convertKeyInfos.Add(webKey, new ConvertKeyInfo(LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(X509SecurityKey)), webKey, ex)));
+                convertKeyInfos.Add(webKey, LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(X509SecurityKey)), webKey, ex));
                 LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(X509SecurityKey)), webKey, ex), ex));
             }
 
@@ -372,7 +370,7 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
 
-        internal static bool TryCreateToRsaSecurityKey(JsonWebKey webKey, IDictionary<JsonWebKey, ConvertKeyInfo> convertKeyInfos, out SecurityKey key)
+        internal static bool TryCreateToRsaSecurityKey(JsonWebKey webKey, IDictionary<JsonWebKey, string> convertKeyInfos, out SecurityKey key)
         {
             if (webKey.ConvertedSecurityKey is RsaSecurityKey)
             {
@@ -391,9 +389,9 @@ namespace Microsoft.IdentityModel.Tokens
                     missingComponent.Add(JsonWebKeyParameterNames.N);
 
                 if (convertKeyInfos.ContainsKey(webKey))
-                    convertKeyInfos[webKey].ConvertKeyMessage += LogHelper.FormatInvariant(LogMessages.IDX10814, LogHelper.MarkAsNonPII(typeof(RsaSecurityKey)), webKey, string.Join(", ", missingComponent));
+                    convertKeyInfos[webKey] += LogHelper.FormatInvariant(LogMessages.IDX10814, LogHelper.MarkAsNonPII(typeof(RsaSecurityKey)), webKey, string.Join(", ", missingComponent));
                 else
-                    convertKeyInfos.Add(webKey, new ConvertKeyInfo(LogHelper.FormatInvariant(LogMessages.IDX10814, LogHelper.MarkAsNonPII(typeof(RsaSecurityKey)), webKey, string.Join(", ", missingComponent))));
+                    convertKeyInfos.Add(webKey, LogHelper.FormatInvariant(LogMessages.IDX10814, LogHelper.MarkAsNonPII(typeof(RsaSecurityKey)), webKey, string.Join(", ", missingComponent)));
 
                 return false;
             }               
@@ -405,7 +403,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (Exception ex)
             {
-                convertKeyInfos.Add(webKey, new ConvertKeyInfo(LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(RsaSecurityKey)), webKey, ex)));
+                convertKeyInfos.Add(webKey, LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(RsaSecurityKey)), webKey, ex));
                 LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(RsaSecurityKey)), webKey, ex), ex));
             }
 
@@ -437,7 +435,7 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
 
-        internal static bool TryConvertToECDsaSecurityKey(JsonWebKey webKey, IDictionary<JsonWebKey, ConvertKeyInfo> convertKeyInfos, out SecurityKey key)
+        internal static bool TryConvertToECDsaSecurityKey(JsonWebKey webKey, IDictionary<JsonWebKey, string> convertKeyInfos, out SecurityKey key)
         {
             if (webKey.ConvertedSecurityKey is ECDsaSecurityKey)
             {
@@ -458,7 +456,7 @@ namespace Microsoft.IdentityModel.Tokens
                 if (string.IsNullOrEmpty(webKey.Y))
                     missingComponent.Add(JsonWebKeyParameterNames.Y);
 
-                convertKeyInfos.Add(webKey, new ConvertKeyInfo(LogHelper.FormatInvariant(LogMessages.IDX10814, LogHelper.MarkAsNonPII(typeof(ECDsaSecurityKey)), webKey, string.Join(", ", missingComponent))));
+                convertKeyInfos.Add(webKey, LogHelper.FormatInvariant(LogMessages.IDX10814, LogHelper.MarkAsNonPII(typeof(ECDsaSecurityKey)), webKey, string.Join(", ", missingComponent)));
                 return false;
             }
 
@@ -469,7 +467,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (Exception ex)
             {
-                convertKeyInfos.Add(webKey, new ConvertKeyInfo(LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(ECDsaSecurityKey)), webKey, ex)));
+                convertKeyInfos.Add(webKey, LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(ECDsaSecurityKey)), webKey, ex));
                 LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(ECDsaSecurityKey)), webKey, ex), ex));
             }
 

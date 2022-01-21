@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
             {
                 return new ConfigurationValidationResult
                 {
-                    Exception = new ConfigurationValidationException("The OpenIdConnectConfiguration did not contain any JsonWebKeys."),
+                    Exception = new ConfigurationValidationException(LogMessages.IDX21817),
                     Succeeded = false
                 };
             }
@@ -69,8 +69,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
                 {
                     return new ConfigurationValidationResult
                     {
-                        Exception = new ConfigurationValidationException("The OpenIdConnectConfiguration's valid signing keys are less than the minimum requirment: {MinimumNumberOfKeys}. " +
-                        "Invalid keys:" + string.Join("; ", openIdConnectConfiguration.JsonWebKeySet.ConvertKeyInfos.Select(x => x.Key.ToString() + ": " + x.Value))),
+                        Exception = new ConfigurationValidationException(LogHelper.FormatInvariant(LogMessages.IDX21818, LogHelper.MarkAsNonPII(MinimumNumberOfKeys), string.Join("; ", openIdConnectConfiguration.JsonWebKeySet.ConvertKeyInfos.Select(x => x.Key.ToString() + ": " + x.Value)))),
                         Succeeded = false
                     };
                 }
@@ -78,7 +77,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
                 {
                     return new ConfigurationValidationResult
                     {
-                        Exception = new ConfigurationValidationException("The OpenIdConnectConfiguration's valid signing keys are less than the minimum requirment: {MinimumNumberOfKeys}."),
+                        Exception = new ConfigurationValidationException(LogHelper.FormatInvariant(LogMessages.IDX21819, LogHelper.MarkAsNonPII(MinimumNumberOfKeys), LogHelper.MarkAsNonPII(openIdConnectConfiguration.SigningKeys.Count))),
                         Succeeded = false
                     };
                 }
