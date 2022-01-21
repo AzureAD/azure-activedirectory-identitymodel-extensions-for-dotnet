@@ -102,12 +102,13 @@ namespace Microsoft.IdentityModel.Protocols
                 ConfigurationValidationResult result = validator.Validate(configuration);
                 if (!result.Succeeded)
                 {
-                    exceptions.Add(result.Exception);
+                    //exceptions.Add(result.Exception);
+                    throw new ConfigurationValidationException(LogMessages.IDX20810, result.Exception);
                 }
             }
 
-            if (exceptions.Any())
-                throw new ConfigurationValidationException(LogMessages.IDX20810, new AggregateException(exceptions));
+            //if (exceptions.Any())
+                //throw new ConfigurationValidationException(LogMessages.IDX20810, new AggregateException(exceptions));
         }
     }
 }

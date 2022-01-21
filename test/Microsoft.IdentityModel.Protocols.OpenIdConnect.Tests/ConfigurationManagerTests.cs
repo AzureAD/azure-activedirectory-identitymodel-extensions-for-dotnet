@@ -369,7 +369,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             {
                 var theoryData = new TheoryData<ConfigurationManagerTheoryData<OpenIdConnectConfiguration>>();
 
-                theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
+                /*theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
                 {
                     ConfigurationRetreiver = new OpenIdConnectConfigurationRetriever(),
                     DocumentRetriever = new FileDocumentRetriever(),
@@ -383,18 +383,28 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ConfigurationRetreiver = new OpenIdConnectConfigurationRetriever(),
                     DocumentRetriever = new FileDocumentRetriever(),
                     ExpectedException = new ExpectedException(typeof(ConfigurationValidationException), "Invalid configuraiton:"),
-                    MetadataAddress = "OpenIdConnectMetadataBadX509DataBadBase64Data.json",
+                    First = true,
+                    MetadataAddress = "OpenIdConnectMetadataBadX509Data.json",
                     TestId = "InvalidConfiguration_BadX509Data"
-                });
+                });*/
 
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
                 {
                     ConfigurationRetreiver = new OpenIdConnectConfigurationRetriever(),
                     DocumentRetriever = new FileDocumentRetriever(),
-                    ExpectedException = new ExpectedException(typeof(ConfigurationValidationException), "Invalid configuraiton:"),
-                    MetadataAddress = "OpenIdConnectMetadata.json",
+                    ExpectedException = new ExpectedException(typeof(ConfigurationValidationException), "IDX20810: ", typeof(ConfigurationValidationException)),
+                    MetadataAddress = "OpenIdConnectMetadataBadBase64DataMissEorN.json",
                     TestId = "InvalidConfiguration_BadBase64Data"
                 });
+
+                /*theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
+                {
+                    ConfigurationRetreiver = new OpenIdConnectConfigurationRetriever(),
+                    DocumentRetriever = new FileDocumentRetriever(),
+                    ExpectedException = new ExpectedException(typeof(ConfigurationValidationException), "Invalid configuraiton:"),
+                    MetadataAddress = "OpenIdConnectMetadataBadBase64DataMissEorN.json",
+                    TestId = "InvalidConfiguration_BadBase64Data"
+                });*/
 
                 return theoryData;
             }
