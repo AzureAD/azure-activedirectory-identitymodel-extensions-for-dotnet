@@ -28,9 +28,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Protocols
@@ -58,17 +55,16 @@ namespace Microsoft.IdentityModel.Protocols
         public ConfigurationValidationExecutor(IConfigurationValidator<T> defaultConfigurationValidator, IConfigurationValidator<T> additionalConfigurationValidator)
             : this(defaultConfigurationValidator)
         {
-            //DefaultConfigurationValidator = defaultConfigurationValidator ?? throw LogHelper.LogArgumentNullException(nameof(defaultConfigurationValidator));
             AdditionalConfigurationValidator = additionalConfigurationValidator ?? throw LogHelper.LogArgumentNullException(nameof(additionalConfigurationValidator));
         }
 
         /// <summary>
-        /// Additional Configuration Validator.
+        /// The additional Configuration Validator.
         /// </summary>
         public IConfigurationValidator<T> AdditionalConfigurationValidator { get; }
 
         /// <summary>
-        /// Default Configuration Validator.
+        /// The default Configuration Validator.
         /// </summary>
         public IConfigurationValidator<T> DefaultConfigurationValidator { get; }
 
@@ -92,8 +88,6 @@ namespace Microsoft.IdentityModel.Protocols
                 DefaultConfigurationValidator
             };
 
-            var exceptions = new List<ConfigurationValidationException>();
-
             if (AdditionalConfigurationValidator != null)
                 allValidators.Add(AdditionalConfigurationValidator);
 
@@ -102,13 +96,9 @@ namespace Microsoft.IdentityModel.Protocols
                 ConfigurationValidationResult result = validator.Validate(configuration);
                 if (!result.Succeeded)
                 {
-                    //exceptions.Add(result.Exception);
                     throw new ConfigurationValidationException(LogMessages.IDX20810, result.Exception);
                 }
             }
-
-            //if (exceptions.Any())
-                //throw new ConfigurationValidationException(LogMessages.IDX20810, new AggregateException(exceptions));
         }
     }
 }

@@ -69,7 +69,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
                 {
                     return new ConfigurationValidationResult
                     {
-                        Exception = new ConfigurationValidationException(LogHelper.FormatInvariant(LogMessages.IDX21818, LogHelper.MarkAsNonPII(MinimumNumberOfKeys), string.Join("; ", openIdConnectConfiguration.JsonWebKeySet.ConvertKeyInfos.Select(x => x.Key.ToString() + ": " + x.Value)))),
+                        Exception = new ConfigurationValidationException(LogHelper.FormatInvariant(LogMessages.IDX21818, LogHelper.MarkAsNonPII(MinimumNumberOfKeys), string.Join("\n", openIdConnectConfiguration.JsonWebKeySet.ConvertKeyInfos.Select(x => x.Key.Kid.ToString() + ": " + string.Join("; ", x.Value))))),
                         Succeeded = false
                     };
                 }
