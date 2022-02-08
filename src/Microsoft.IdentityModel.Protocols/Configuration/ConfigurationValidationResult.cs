@@ -35,11 +35,6 @@ namespace Microsoft.IdentityModel.Protocols
     public class ConfigurationValidationResult
     {
         /// <summary>
-        /// Default constructor.
-        /// </summary>
-        public ConfigurationValidationResult() { }
-
-        /// <summary>
         /// Gets or sets the <see cref="ConfigurationValidationException"/> that occurred during validation of the SignedHttpRequest.
         /// </summary>
         public ConfigurationValidationException Exception { get; set; }

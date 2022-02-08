@@ -142,7 +142,7 @@ namespace Microsoft.IdentityModel.Protocols
                         _currentConfiguration = await _configRetriever.GetConfigurationAsync(MetadataAddress, _docRetriever, CancellationToken.None).ConfigureAwait(false);
                         _lastRefresh = now;
                         _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval);
-                        if ( ValidationExecutor != null && ValidationExecutor.ShouldValidateConfiguration )
+                        if (ValidationExecutor != null && ValidationExecutor.ShouldValidateConfiguration)
                             ValidationExecutor.ValidateConfiguration(_currentConfiguration);
                     }
                     catch (Exception ex)

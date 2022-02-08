@@ -94,7 +94,7 @@ namespace Microsoft.IdentityModel.Tokens
         public virtual IDictionary<string, object> AdditionalData { get; } = new Dictionary<string, object>();
 
         /// <summary>
-        /// Gets a <see cref="IDictionary{JsonWebKey, ConvertKeyInfo}"/> that contains convert key information.
+        /// Gets a <see cref="IDictionary{JsonWebKey, List}"/> that contains convert key information.
         /// </summary>
         internal IDictionary<JsonWebKey, List<string>> ConvertKeyInfos { get; } = new Dictionary<JsonWebKey, List<string>>();
 
@@ -132,7 +132,7 @@ namespace Microsoft.IdentityModel.Tokens
                 // https://datatracker.ietf.org/doc/html/rfc7517#section-4.2
                 if (!string.IsNullOrEmpty(webKey.Use) && !webKey.Use.Equals(JsonWebKeyUseNames.Sig, StringComparison.Ordinal))
                 {
-                    string convertKeyInfo = LogHelper.FormatInvariant(LogMessages.IDX10808, webKey, webKey.Use);
+                    string convertKeyInfo = LogHelper.FormatInvariant(LogMessages.IDX10808, webKey, LogHelper.MarkAsNonPII(webKey.Use));
                     LogHelper.LogInformation(convertKeyInfo);
                     ConvertKeyInfos.Add(webKey, new List<string> { convertKeyInfo });
 
@@ -150,7 +150,7 @@ namespace Microsoft.IdentityModel.Tokens
                     if ((webKey.X5c == null || webKey.X5c.Count == 0) && (string.IsNullOrEmpty(webKey.E) && string.IsNullOrEmpty(webKey.N)))
                     {                     
                         var missingComponent = new List<string> { JsonWebKeyParameterNames.X5c, JsonWebKeyParameterNames.E, JsonWebKeyParameterNames.N };
-                        string convertKeyInfo = LogHelper.FormatInvariant(LogMessages.IDX10814, LogHelper.MarkAsNonPII(typeof(RsaSecurityKey)), webKey, string.Join(", ", missingComponent));
+                        string convertKeyInfo = LogHelper.FormatInvariant(LogMessages.IDX10814, LogHelper.MarkAsNonPII(typeof(RsaSecurityKey)), webKey, LogHelper.MarkAsNonPII(string.Join(", ", missingComponent)));
                         ConvertKeyInfos.Add(webKey, new List<string> { convertKeyInfo });
                         rsaKeyResolved = false;
                     }
@@ -198,7 +198,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (webKey.X5c == null || webKey.X5c.Count == 0)
             {
-                convertKeyInfos.Add(webKey, new List<string> { LogHelper.FormatInvariant(LogMessages.IDX10814, LogHelper.MarkAsNonPII(typeof(X509SecurityKey)), webKey, JsonWebKeyParameterNames.X5c) });
+                convertKeyInfos.Add(webKey, new List<string> { LogHelper.FormatInvariant(LogMessages.IDX10814, LogHelper.MarkAsNonPII(typeof(X509SecurityKey)), webKey,  LogHelper.MarkAsNonPII(JsonWebKeyParameterNames.X5c)) });
                 return false;
             }
 
@@ -216,7 +216,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (missingComponent.Count > 0)
             {
-                string convertKeyInfo = LogHelper.FormatInvariant(LogMessages.IDX10814, LogHelper.MarkAsNonPII(typeof(RsaSecurityKey)), webKey, string.Join(", ", missingComponent));
+                string convertKeyInfo = LogHelper.FormatInvariant(LogMessages.IDX10814, LogHelper.MarkAsNonPII(typeof(RsaSecurityKey)), webKey, LogHelper.MarkAsNonPII(string.Join(", ", missingComponent)));
                 if (convertKeyInfos.ContainsKey(webKey))
                     convertKeyInfos[webKey].Add(convertKeyInfo);
                 else

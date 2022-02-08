@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
         /// <summary>
         /// 1 is the default minimum number of keys.
         /// </summary>
-        public static readonly int DefaultMinimumNumberOfKeys = 1;
+        private const int DefaultMinimumNumberOfKeys = 1;
 
         /// <summary>
         /// Validates a OpenIdConnectConfiguration by using current policy.
@@ -65,22 +65,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
 
             if (openIdConnectConfiguration.SigningKeys.Count < MinimumNumberOfKeys)
             {
-                if (openIdConnectConfiguration.JsonWebKeySet.ConvertKeyInfos.Any())
+                return new ConfigurationValidationResult
                 {
-                    return new ConfigurationValidationResult
-                    {
-                        Exception = new ConfigurationValidationException(LogHelper.FormatInvariant(LogMessages.IDX21818, LogHelper.MarkAsNonPII(MinimumNumberOfKeys), string.Join("\n", openIdConnectConfiguration.JsonWebKeySet.ConvertKeyInfos.Select(x => x.Key.Kid.ToString() + ": " + string.Join("; ", x.Value))))),
-                        Succeeded = false
-                    };
-                }
-                else
-                {
-                    return new ConfigurationValidationResult
-                    {
-                        Exception = new ConfigurationValidationException(LogHelper.FormatInvariant(LogMessages.IDX21819, LogHelper.MarkAsNonPII(MinimumNumberOfKeys), LogHelper.MarkAsNonPII(openIdConnectConfiguration.SigningKeys.Count))),
-                        Succeeded = false
-                    };
-                }
+                    Exception = new ConfigurationValidationException(
+                        openIdConnectConfiguration.JsonWebKeySet.ConvertKeyInfos.Any() ?
+                        LogHelper.FormatInvariant(LogMessages.IDX21818, LogHelper.MarkAsNonPII(MinimumNumberOfKeys), string.Join("\n", openIdConnectConfiguration.JsonWebKeySet.ConvertKeyInfos.Select(x => x.Key.Kid.ToString() + ": " + string.Join("; ", x.Value)))) :
+                        LogHelper.FormatInvariant(LogMessages.IDX21819, LogHelper.MarkAsNonPII(MinimumNumberOfKeys), LogHelper.MarkAsNonPII(openIdConnectConfiguration.SigningKeys.Count))),
+                    Succeeded = false
+                };
             }
 
             return new ConfigurationValidationResult
@@ -97,7 +89,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
             get { return _minimumNumberOfKeys; }
             set
             {
-                if (value < _minimumNumberOfKeys)
+                if (value < DefaultMinimumNumberOfKeys)
                     throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX21816, LogHelper.MarkAsNonPII(DefaultMinimumNumberOfKeys), LogHelper.MarkAsNonPII(value))));
 
                 _minimumNumberOfKeys = value;
