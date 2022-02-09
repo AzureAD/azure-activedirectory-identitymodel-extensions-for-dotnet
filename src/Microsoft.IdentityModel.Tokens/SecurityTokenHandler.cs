@@ -27,6 +27,7 @@
 
 using System;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using System.Xml;
 
 namespace Microsoft.IdentityModel.Tokens

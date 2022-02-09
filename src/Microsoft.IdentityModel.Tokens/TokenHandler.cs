@@ -28,6 +28,7 @@
 using Microsoft.IdentityModel.Logging;
 using System;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -73,5 +74,17 @@ namespace Microsoft.IdentityModel.Tokens
             get => _defaultTokenLifetimeInMinutes;
             set => _defaultTokenLifetimeInMinutes = (value < 1) ? throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), FormatInvariant(LogMessages.IDX10104, LogHelper.MarkAsNonPII(value)))) : value;
         }
+
+        #region methods
+
+        /// <summary>
+        /// Validates a token.
+        /// </summary>
+        /// <param name="token">The token to be validated.</param>
+        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <returns>A <see cref="TokenValidationResult"/></returns>
+        public virtual Task<TokenValidationResult> ValidateTokenAsync(string token, TokenValidationParameters validationParameters) => throw new NotImplementedException();
+
+        #endregion
     }
 }

@@ -34,6 +34,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
@@ -1648,5 +1649,10 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             throw new NotImplementedException();
         }
+
+        /// <inheritdoc/>
+        /// No implementation since this class has been deprecated.
+        /// 
+        public override Task<TokenValidationResult> ValidateTokenAsync(string token, TokenValidationParameters validationParameters) => throw new NotImplementedException();
     }
 }

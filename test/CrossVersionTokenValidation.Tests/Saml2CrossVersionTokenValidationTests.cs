@@ -92,6 +92,10 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
             IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipalFrom4xUsing5xHandler, claimsPrincipalFrom5xUsing4xHandler, context);
             IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipalFrom5xUsing5xHandler, claimsPrincipalFrom5xUsing4xHandler, context);
 
+            // the results from ValidateTokenAsync() and ValidateToken() should be the same
+            var tokenValidationResult = samlHandler5x.ValidateTokenAsync(token4x, theoryData.ValidationParameters5x);
+            IdentityComparer.AreClaimsIdentitiesEqual(claimsPrincipalFrom5xUsing5xHandler.Identity as ClaimsIdentity, tokenValidationResult.Result.ClaimsIdentity, context);
+
             TestUtilities.AssertFailIfErrors(context);
         }
 
@@ -240,6 +244,19 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
 
             AreSaml2TokensEqual(validatedToken4x, validatedToken5x, context);
             IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipal4x, claimsPrincipal5x, context);
+
+            // verify the results from asynchronous and synchronous are the same
+            TokenValidationResult tokenValidationResult = null;
+            try
+            {
+                tokenValidationResult = new Tokens.Saml2.Saml2SecurityTokenHandler().ValidateTokenAsync(theoryData.TokenString4x, theoryData.ValidationParameters5x).Result;
+            }
+            catch (Exception ex)
+            {
+                context.Diffs.Add($"CrossVersionTokenValidationTestsData.ValidateToken threw: '{ex}'.");
+            }
+            IdentityComparer.AreClaimsIdentitiesEqual(claimsPrincipal5x.Identity as ClaimsIdentity, tokenValidationResult.ClaimsIdentity, context);
+
             TestUtilities.AssertFailIfErrors(context);
         }
 
