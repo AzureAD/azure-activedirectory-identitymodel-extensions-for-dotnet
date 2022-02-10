@@ -1651,8 +1651,26 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <inheritdoc/>
-        /// No implementation since this class has been deprecated.
-        /// 
-        public override Task<TokenValidationResult> ValidateTokenAsync(string token, TokenValidationParameters validationParameters) => throw new NotImplementedException();
+        public override Task<TokenValidationResult> ValidateTokenAsync(string token, TokenValidationParameters validationParameters)
+        {
+            try
+            {
+                var claimsPrincipal = ValidateToken(token, validationParameters, out var validatedToken);
+                return Task.FromResult(new TokenValidationResult
+                {
+                    SecurityToken = validatedToken,
+                    ClaimsIdentity = claimsPrincipal?.Identity as ClaimsIdentity,
+                    IsValid = true,
+                });
+            }
+            catch (Exception ex)
+            {
+                return Task.FromResult(new TokenValidationResult
+                {
+                    IsValid = false,
+                    Exception = ex
+                });
+            }
+        }
     }
 }
