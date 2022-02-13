@@ -94,12 +94,6 @@ namespace Microsoft.IdentityModel.Tokens
         internal SecurityKey ConvertedSecurityKey { get; set; }
 
         /// <summary>
-        /// If this was failed converted to a SecurityKey, this field will be set.
-        /// </summary>
-        [JsonIgnore]
-        internal string ConvertKeyInfo { get; set; }
-
-        /// <summary>
         /// When deserializing from JSON any properties that are not defined will be placed here.
         /// </summary>
         [JsonExtensionData]

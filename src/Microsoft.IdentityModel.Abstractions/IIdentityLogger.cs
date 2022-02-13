@@ -25,51 +25,25 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Diagnostics.Tracing;
 
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Abstractions
 {
     /// <summary>
-    /// An opaque context used to store work when working with authentication artifacts.
+    /// Interface for Logging.
     /// </summary>
-    public class CallContext
+    public interface IIdentityLogger
     {
         /// <summary>
-        /// Instantiates a new <see cref="CallContext"/> with a default activityId.
+        /// Checks to see if logging is enabled at given <paramref name="eventLevel"/>.
         /// </summary>
-        public CallContext()
-        {
-        }
+        /// <param name="eventLevel">Log level of an Event.</param>
+        bool IsEnabled(EventLevel eventLevel);
 
         /// <summary>
-        /// Instantiates a new <see cref="CallContext"/> with an activityId.
+        /// Writes a log entry.
         /// </summary>
-        public CallContext(Guid activityId)
-        {
-            ActivityId = activityId;
-        }
-
-        /// <summary>
-        /// Gets or set a <see cref="Guid"/> that will be used in the call to EventSource.SetCurrentThreadActivityId before logging.
-        /// </summary>
-        public Guid ActivityId { get; set; } = Guid.Empty;
-
-        /// <summary>
-        /// Gets or sets a boolean controlling if logs are written into the context.
-        /// Useful when debugging.
-        /// </summary>
-        public bool CaptureLogs { get; set; } = false;
-
-        /// <summary>
-        /// The collection of logs associated with a request. Use <see cref="CaptureLogs"/> to control capture.
-        /// </summary>
-        public ICollection<string> Logs { get; private set; } = new Collection<string>();
-
-        /// <summary>
-        /// Gets or sets an <see cref="IDictionary{String, Object}"/> that enables custom extensibility scenarios.
-        /// </summary>
-        public IDictionary<string, object> PropertyBag { get; set; }
+        /// <param name="entry">Defines a structured message to be logged at the provided <see cref="LogEntry.EventLevel"/>.</param>
+        void Log(LogEntry entry);
     }
 }

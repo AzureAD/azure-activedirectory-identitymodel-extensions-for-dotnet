@@ -240,10 +240,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 // Inform the user that the LKG is expired.
                 if (!validationParameters.ConfigurationManager.IsLastKnownGoodValid)
-                {
                     LogHelper.LogInformation(TokenLogMessages.IDX10263);
-                    return false;
-                }
                 else                
                     currentConfiguration = validationParameters.ConfigurationManager.LastKnownGoodConfiguration;
             }

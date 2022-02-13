@@ -25,24 +25,31 @@
 //
 //------------------------------------------------------------------------------
 
-using System.ComponentModel;
+using System.Diagnostics.Tracing;
 
-namespace Microsoft.IdentityModel.Protocols
+namespace Microsoft.IdentityModel.Abstractions
 {
     /// <summary>
-    /// Represents the result of validation a <see cref="IConfigurationValidator{T}"/>.
+    /// Defines the structure of a log entry.
     /// </summary>
-    public class ConfigurationValidationResult
+    public class LogEntry
     {
         /// <summary>
-        /// Gets or sets the error message that occurred during validation of the configuration.
+        /// Defines the <see cref="EventLevel"/>.
         /// </summary>
-        public string ErrorMessage { get; set; }
+        public EventLevel EventLevel { get; set; }
 
         /// <summary>
-        /// Gets or sets a bool indicating if the configuration validation was successful.
+        /// Message to be logged.
         /// </summary>
-        [DefaultValue(false)]
-        public bool Succeeded { get; set; } = false;
+        public string Message { get; set; }
+
+        /// <summary>
+        /// A unique identifier for a request that can help with diagnostics across components.
+        /// </summary>
+        /// <remarks>
+        /// Also referred to as ActivityId in Microsoft.IdentityModel.Tokens.CallContext.
+        /// </remarks>
+        public string CorrelationId { get; set; }
     }
 }

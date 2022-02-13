@@ -277,8 +277,8 @@ namespace Microsoft.IdentityModel.SampleTests
         {
             TestWithGeneratedToken_Deprecated(
                 testTokenCreator.CreateTokenWithNoSignature,
-                typeof(SecurityTokenInvalidSignatureException),
-                "IDX10504");
+                typeof(ArgumentException),
+                "IDX12741");
         }
 
         /// <summary>
@@ -289,8 +289,8 @@ namespace Microsoft.IdentityModel.SampleTests
         {
             TestWithGeneratedToken_Deprecated(
                 testTokenCreator.CreateTokenWithInvalidSignature,
-                typeof(SecurityTokenInvalidSignatureException),
-                "IDX10511");
+                typeof(ArgumentException),
+                "IDX12741");
         }
 
         /// <summary>
