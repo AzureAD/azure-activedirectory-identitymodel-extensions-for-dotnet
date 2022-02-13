@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.Tracing;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -67,6 +68,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// The collection of logs associated with a request. Use <see cref="CaptureLogs"/> to control capture.
         /// </summary>
         public ICollection<string> Logs { get; private set; } = new Collection<string>();
+
+        /// <summary>
+        /// Gets or sets a logger to which logs will be written to.
+        /// </summary>
+        protected IIdentityLogger Logger { get; set; } = NullIdentityModelLogger.Instance;
 
         /// <summary>
         /// Gets or sets an <see cref="IDictionary{String, Object}"/> that enables custom extensibility scenarios.
