@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\..\build\commonTest.props" />
+  <Import Project="..\..\build\common.props" />
 
   <PropertyGroup>
     <AssemblyName>Microsoft.IdentityModel.TestExtensions</AssemblyName>
