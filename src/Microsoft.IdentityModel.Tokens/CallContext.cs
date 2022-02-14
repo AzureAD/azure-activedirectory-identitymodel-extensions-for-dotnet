@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets a logger to which logs will be written to.
         /// </summary>
-        protected IIdentityLogger Logger { get; set; } = NullIdentityModelLogger.Instance;
+        public IIdentityLogger Logger { get; set; } = NullIdentityModelLogger.Instance;
 
         /// <summary>
         /// Gets or sets an <see cref="IDictionary{String, Object}"/> that enables custom extensibility scenarios.
