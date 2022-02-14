@@ -937,7 +937,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <returns>A <see cref="JsonWebToken"/></returns>
         /// <exception cref="ArgumentNullException"><paramref name="token"/> is null or empty.</exception>
         /// <exception cref="ArgumentException">'token.Length' is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
-        public virtual SecurityToken ReadToken(string token)
+        public override SecurityToken ReadToken(string token)
         {
             return ReadJsonWebToken(token);
         }

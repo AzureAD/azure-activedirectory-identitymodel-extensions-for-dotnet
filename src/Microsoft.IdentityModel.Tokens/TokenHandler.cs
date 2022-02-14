@@ -85,6 +85,15 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>A <see cref="TokenValidationResult"/></returns>
         public virtual Task<TokenValidationResult> ValidateTokenAsync(string token, TokenValidationParameters validationParameters) => throw new NotImplementedException();
 
+        /// <summary>
+        /// Converts a string into an instance of <see cref="SecurityToken"/>.
+        /// </summary>
+        /// <param name="token">The string to be deserialized.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="token"/> is null or empty.</exception>
+        /// <exception cref="ArgumentException">'token.Length' is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
+        /// <returns>A <see cref="SecurityToken"/>.</returns>
+        public virtual SecurityToken ReadToken(string token) => throw new NotImplementedException();
+
         #endregion
     }
 }

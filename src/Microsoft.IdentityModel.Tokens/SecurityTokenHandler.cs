@@ -115,16 +115,6 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Deserializes from string a token of the type handled by this instance.
-        /// </summary>
-        /// <param name="tokenString">The string to be deserialized.</param>
-        /// <returns>SecurityToken instance which represents the serialized token.</returns>
-        public virtual SecurityToken ReadToken(string tokenString)
-        {
-            return null;
-        }
-
-        /// <summary>
         /// Gets security token.
         /// </summary>
         /// <param name="reader"><see cref="XmlReader"/>.</param>
