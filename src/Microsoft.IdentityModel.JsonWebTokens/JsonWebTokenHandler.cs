@@ -950,9 +950,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <returns>A <see cref="TokenValidationResult"/></returns>
         public virtual TokenValidationResult ValidateToken(string token, TokenValidationParameters validationParameters)
         {
-            var validationResult = ValidateTokenAsync(token, validationParameters);
-            validationResult.Wait();
-            return validationResult.Result;
+            return ValidateTokenAsync(token, validationParameters).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         /// <inheritdoc/>

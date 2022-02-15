@@ -209,12 +209,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     IsValid = true,
                 });
             }
-            catch (Exception ex)
+            // only catch and return the SecurityTokenException via the TokenValidationResult, all other types of exceptions should be handled by the caller, ex., ArgumentException, ArgumentNullException...
+            catch (SecurityTokenException ste)
             {
                 return Task.FromResult(new TokenValidationResult
                 {
                     IsValid = false,
-                    Exception = ex
+                    Exception = ste
                 });
             }
         }
