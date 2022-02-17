@@ -82,6 +82,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="token">The token to be validated.</param>
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="token"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="validationParameters"/> is null or empty.</exception>
+        /// <exception cref="ArgumentException">'token.Length' is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         /// <returns>A <see cref="TokenValidationResult"/></returns>
         public virtual Task<TokenValidationResult> ValidateTokenAsync(string token, TokenValidationParameters validationParameters) => throw new NotImplementedException();
 
