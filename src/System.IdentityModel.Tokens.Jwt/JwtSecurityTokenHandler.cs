@@ -1663,13 +1663,12 @@ namespace System.IdentityModel.Tokens.Jwt
                     IsValid = true,
                 });
             }
-            // only catch and return the SecurityTokenException via the TokenValidationResult, all other types of exceptions should be handled by the caller, ex., ArgumentException, ArgumentNullException...
-            catch (SecurityTokenException ste)
+            catch (Exception ex)
             {
                 return Task.FromResult(new TokenValidationResult
                 {
                     IsValid = false,
-                    Exception = ste
+                    Exception = ex
                 });
             }
         }
