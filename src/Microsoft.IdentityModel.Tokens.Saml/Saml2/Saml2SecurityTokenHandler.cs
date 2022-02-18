@@ -205,7 +205,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 return Task.FromResult(new TokenValidationResult
                 {
                     SecurityToken = validatedToken,
-                    ClaimsIdentity = claimsPrincipal?.Identity as ClaimsIdentity,
+                    ClaimsIdentity = claimsPrincipal?.Identities.First(),
                     IsValid = true,
                 });
             }
