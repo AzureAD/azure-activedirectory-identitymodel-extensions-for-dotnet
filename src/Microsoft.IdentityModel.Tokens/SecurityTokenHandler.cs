@@ -27,6 +27,7 @@
 
 using System;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using System.Xml;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -111,16 +112,6 @@ namespace Microsoft.IdentityModel.Tokens
         public virtual bool CanReadToken(string tokenString)
         {
             return false;
-        }
-
-        /// <summary>
-        /// Deserializes from string a token of the type handled by this instance.
-        /// </summary>
-        /// <param name="tokenString">The string to be deserialized.</param>
-        /// <returns>SecurityToken instance which represents the serialized token.</returns>
-        public virtual SecurityToken ReadToken(string tokenString)
-        {
-            return null;
         }
 
         /// <summary>

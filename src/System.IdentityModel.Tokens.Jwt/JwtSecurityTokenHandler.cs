@@ -34,6 +34,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
@@ -1647,6 +1648,29 @@ namespace System.IdentityModel.Tokens.Jwt
         public override void WriteToken(XmlWriter writer, SecurityToken token)
         {
             throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public override Task<TokenValidationResult> ValidateTokenAsync(string token, TokenValidationParameters validationParameters)
+        {
+            try
+            {
+                var claimsPrincipal = ValidateToken(token, validationParameters, out var validatedToken);
+                return Task.FromResult(new TokenValidationResult
+                {
+                    SecurityToken = validatedToken,
+                    ClaimsIdentity = claimsPrincipal?.Identity as ClaimsIdentity,
+                    IsValid = true,
+                });
+            }
+            catch (Exception ex)
+            {
+                return Task.FromResult(new TokenValidationResult
+                {
+                    IsValid = false,
+                    Exception = ex
+                });
+            }
         }
     }
 }

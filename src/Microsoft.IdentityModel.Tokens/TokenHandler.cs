@@ -28,6 +28,7 @@
 using Microsoft.IdentityModel.Logging;
 using System;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -73,5 +74,28 @@ namespace Microsoft.IdentityModel.Tokens
             get => _defaultTokenLifetimeInMinutes;
             set => _defaultTokenLifetimeInMinutes = (value < 1) ? throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), FormatInvariant(LogMessages.IDX10104, LogHelper.MarkAsNonPII(value)))) : value;
         }
+
+        #region methods
+
+        /// <summary>
+        /// Validates a token.
+        /// On a validation failure, no exception will be thrown; instead, the exception will be set in the returned TokenValidationResult.Exception property.
+        /// Callers should always check the TokenValidationResult.IsValid property to verify the validity of the result.
+        /// </summary>
+        /// <param name="token">The token to be validated.</param>
+        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <returns>A <see cref="TokenValidationResult"/></returns>
+        public virtual Task<TokenValidationResult> ValidateTokenAsync(string token, TokenValidationParameters validationParameters) => throw new NotImplementedException();
+
+        /// <summary>
+        /// Converts a string into an instance of <see cref="SecurityToken"/>.
+        /// </summary>
+        /// <param name="token">The string to be deserialized.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="token"/> is null or empty.</exception>
+        /// <exception cref="ArgumentException">'token.Length' is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
+        /// <returns>A <see cref="SecurityToken"/>.</returns>
+        public virtual SecurityToken ReadToken(string token) => throw new NotImplementedException();
+
+        #endregion
     }
 }
