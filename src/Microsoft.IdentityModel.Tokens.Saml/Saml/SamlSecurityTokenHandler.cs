@@ -1175,18 +1175,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             return ValidateToken(samlToken, samlToken.Assertion.CanonicalString, validationParameters, out validatedToken);
         }
 
-        /// <summary>
-        /// Validates a token.
-        /// ArgumentNullException (parameters are null or empty) and ArgumentException (token length exceeds the maximum size) will be thrown on invalid parameters.
-        /// On a validation failure, no exception will be thrown; instead, the exception will be set in the returned TokenValidationResult.Exception property.
-        /// Callers should always catch and handle invalid argument exceptions, and check the TokenValidationResult.IsValid property to verify the validity of the result.
-        /// </summary>
-        /// <param name="token">The token to be validated.</param>
-        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="token"/> is null or empty.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="validationParameters"/> is null or empty.</exception>
-        /// <exception cref="ArgumentException">'token.Length' is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
-        /// <returns>A <see cref="TokenValidationResult"/></returns>
+        /// <inheritdoc/>
         public override Task<TokenValidationResult> ValidateTokenAsync(string token, TokenValidationParameters validationParameters)
         {
             try
