@@ -26,27 +26,56 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Microsoft.IdentityModel.Logging;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Logging
 {
     /// <summary>
     /// An opaque context used to store work when working with authentication artifacts.
     /// </summary>
-    public class CallContext : LoggerContext
+    public class LoggerContext
     {
         /// <summary>
-        /// Instantiates a new <see cref="CallContext"/> with a default activityId.
+        /// Instantiates a new <see cref="LoggerContext"/> with a default activityId.
         /// </summary>
-        public CallContext() : base()
+        public LoggerContext()
         {
         }
 
         /// <summary>
-        /// Instantiates a new <see cref="CallContext"/> with an activityId.
+        /// Instantiates a new <see cref="LoggerContext"/> with an activityId.
         /// </summary>
-        public CallContext(Guid activityId) : base(activityId)
+        /// <param name="activityId"></param>
+        public LoggerContext(Guid activityId)
         {
+            ActivityId = activityId;
         }
+
+        /// <summary>
+        /// Gets or sets a string that helps with setting breakpoints when debugging.
+        /// </summary>
+        public string Id { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Gets or set a <see cref="Guid"/> that will be used in the call to EventSource.SetCurrentThreadActivityId before logging.
+        /// </summary>
+        public Guid ActivityId { get; set; } = Guid.Empty;
+
+        /// <summary>
+        /// Gets or sets a boolean controlling if logs are written into the context.
+        /// Useful when debugging.
+        /// </summary>
+        public bool CaptureLogs { get; set; } = false;
+
+        /// <summary>
+        /// The collection of logs associated with a request. Use <see cref="CaptureLogs"/> to control capture.
+        /// </summary>
+        public ICollection<string> Logs { get; private set; } = new Collection<string>();
+
+        /// <summary>
+        /// Gets or sets an <see cref="IDictionary{String, Object}"/> that enables custom extensibility scenarios.
+        /// </summary>
+        public IDictionary<string, object> PropertyBag { get; set; }
     }
 }
