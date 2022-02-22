@@ -26,50 +26,27 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
     /// An opaque context used to store work when working with authentication artifacts.
     /// </summary>
-    public class CallContext
+    public class CallContext : LoggerContext
     {
         /// <summary>
         /// Instantiates a new <see cref="CallContext"/> with a default activityId.
         /// </summary>
-        public CallContext()
+        public CallContext() : base()
         {
         }
 
         /// <summary>
         /// Instantiates a new <see cref="CallContext"/> with an activityId.
         /// </summary>
-        public CallContext(Guid activityId)
+        public CallContext(Guid activityId) : base(activityId)
         {
-            ActivityId = activityId;
         }
-
-        /// <summary>
-        /// Gets or set a <see cref="Guid"/> that will be used in the call to EventSource.SetCurrentThreadActivityId before logging.
-        /// </summary>
-        public Guid ActivityId { get; set; } = Guid.Empty;
-
-        /// <summary>
-        /// Gets or sets a boolean controlling if logs are written into the context.
-        /// Useful when debugging.
-        /// </summary>
-        public bool CaptureLogs { get; set; } = false;
-
-        /// <summary>
-        /// The collection of logs associated with a request. Use <see cref="CaptureLogs"/> to control capture.
-        /// </summary>
-        public ICollection<string> Logs { get; private set; } = new Collection<string>();
-
-        /// <summary>
-        /// Gets or sets an <see cref="IDictionary{String, Object}"/> that enables custom extensibility scenarios.
-        /// </summary>
-        public IDictionary<string, object> PropertyBag { get; set; }
     }
 }
