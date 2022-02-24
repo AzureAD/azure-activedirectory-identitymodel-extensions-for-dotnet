@@ -26,4 +26,10 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup Condition="'$(IncludeVersionAnalyzer)'=='true' And ('$(TargetFramework)' == 'net472' Or '$(TargetFramework)' == 'netstandard2.0')">
+    <PackageReference Include="Microsoft.Identity.VersionMatchAnalyzer" Version="$(IdentityVersionAnalyzerVersion)">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
 </Project>

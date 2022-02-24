@@ -1,0 +1,7 @@
+<!-- This file may be overwritten by automation. Only values allowed here are VersionPrefix and VersionSuffix.  -->
+<Project>
+    <PropertyGroup>
+      <IncludeVersionAnalyzer>false</IncludeVersionAnalyzer>
+      <IdentityVersionAnalyzerVersion>1.1.0</IdentityVersionAnalyzerVersion>
+    </PropertyGroup>
+</Project>

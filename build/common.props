@@ -3,6 +3,7 @@
   <Import Project="dependencies.props" />
   <Import Project="targets.props" />
   <Import Project="version.props" />
+  <Import Project="analyzer.props" />
 
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
