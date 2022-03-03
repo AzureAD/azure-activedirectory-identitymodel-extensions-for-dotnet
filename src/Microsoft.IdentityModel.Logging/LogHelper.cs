@@ -38,6 +38,11 @@ namespace Microsoft.IdentityModel.Logging
     public class LogHelper
     {
         /// <summary>
+        /// Gets or sets a logger to which logs will be written to.
+        /// </summary>
+        public static IIdentityLogger Logger { get; set; } = NullIdentityModelLogger.Instance;
+
+        /// <summary>
         /// Logs an exception using the event source logger and returns new <see cref="ArgumentNullException"/> exception.
         /// </summary>
         /// <param name="argument">argument that is null or empty.</param>
