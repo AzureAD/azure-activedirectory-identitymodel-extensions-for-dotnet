@@ -70,11 +70,6 @@ namespace Microsoft.IdentityModel.Tokens
         public ICollection<string> Logs { get; private set; } = new Collection<string>();
 
         /// <summary>
-        /// Gets or sets a logger to which logs will be written to.
-        /// </summary>
-        public IIdentityLogger Logger { get; set; } = NullIdentityModelLogger.Instance;
-
-        /// <summary>
         /// Gets or sets an <see cref="IDictionary{String, Object}"/> that enables custom extensibility scenarios.
         /// </summary>
         public IDictionary<string, object> PropertyBag { get; set; }
