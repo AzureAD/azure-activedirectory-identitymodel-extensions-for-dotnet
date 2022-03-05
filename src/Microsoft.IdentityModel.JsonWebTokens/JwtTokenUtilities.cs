@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Regex that is used to figure out if a token is in JWS format.
         /// </summary>
         public static Regex RegexJws = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.Compiled | RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(100));
-        
+
         /// <summary>
         /// Regex that is used to figure out if a token is in JWE format.
         /// </summary>
@@ -200,6 +200,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     Validators.ValidateAlgorithm(decryptionParameters.Enc, key, jwtToken, validationParameters);
                     decryptedTokenBytes = DecryptToken(cryptoProviderFactory, key, decryptionParameters);
+                    X509SecurityKey x509Key = key as X509SecurityKey;
+                    if (x509Key != null)
+                        LogHelper.LogInformation(TokenLogMessages.IDX10903, x509Key.Certificate?.Thumbprint);
                     decryptionSucceeded = true;
                     break;
                 }
@@ -420,7 +423,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal static SecurityKey ResolveTokenSigningKey(string kid, string x5t, TokenValidationParameters validationParameters)
         {
             if (!string.IsNullOrEmpty(kid))
-            {              
+            {
                 if (validationParameters.IssuerSigningKey != null
                     && string.Equals(validationParameters.IssuerSigningKey.KeyId, kid, validationParameters.IssuerSigningKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
                     return validationParameters.IssuerSigningKey;
