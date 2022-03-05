@@ -30,20 +30,20 @@ using System.Diagnostics.Tracing;
 namespace Microsoft.IdentityModel.Logging
 {
     /// <summary>
-    /// Represents an object used to perform logging.
+    /// Interface for Logging.
     /// </summary>
     public interface IIdentityLogger
     {
         /// <summary>
-        /// Checks if the given <paramref name="eventLevel"/> is enabled.
+        /// Checks to see if logging is enabled at given <paramref name="eventLevel"/>.
         /// </summary>
-        /// <param name="eventLevel">Defines the level of an event.</param>
+        /// <param name="eventLevel">Log level of an Event.</param>
         bool IsEnabled(EventLevel eventLevel);
 
         /// <summary>
         /// Writes a log entry.
         /// </summary>
-        /// <param name="entry">Defines a structured message to be logged at the given <see cref="LogEntry.EventLevel"/>.</param>
+        /// <param name="entry">Defines a structured message to be logged at the provided <see cref="LogEntry.EventLevel"/>.</param>
         void Log(LogEntry entry);
     }
 }

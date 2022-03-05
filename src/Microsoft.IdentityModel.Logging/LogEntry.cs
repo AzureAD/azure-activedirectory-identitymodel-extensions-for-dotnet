@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <summary>
         /// Message to be logged.
         /// </summary>
-        public string LogMessage { get; set; }
+        public string Message { get; set; }
 
         /// <summary>
         /// A unique identifier for a request that can help with diagnostics across components.

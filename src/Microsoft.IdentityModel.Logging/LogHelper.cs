@@ -259,6 +259,9 @@ namespace Microsoft.IdentityModel.Logging
             if (IdentityModelEventSource.Logger.IsEnabled() && IdentityModelEventSource.Logger.LogLevel >= eventLevel)
                 IdentityModelEventSource.Logger.Write(eventLevel, exception.InnerException, exception.Message);
 
+            if (Logger.IsEnabled(eventLevel))
+                Logger.Log(WriteEntry(eventLevel, exception.InnerException, exception.Message, null));
+
             return exception;
         }
 
@@ -271,6 +274,9 @@ namespace Microsoft.IdentityModel.Logging
         {
             if (IdentityModelEventSource.Logger.IsEnabled())
                 IdentityModelEventSource.Logger.WriteInformation(message, args);
+
+            if (Logger.IsEnabled(EventLevel.Informational))
+                Logger.Log(WriteEntry(EventLevel.Informational, null, message, args));
         }
 
         /// <summary>
@@ -282,6 +288,9 @@ namespace Microsoft.IdentityModel.Logging
         {
             if (IdentityModelEventSource.Logger.IsEnabled())
                 IdentityModelEventSource.Logger.WriteVerbose(message, args);
+
+            if (Logger.IsEnabled(EventLevel.Verbose))
+                Logger.Log(WriteEntry(EventLevel.Verbose, null, message, args));
         }
 
         /// <summary>
@@ -293,6 +302,9 @@ namespace Microsoft.IdentityModel.Logging
         {
             if (IdentityModelEventSource.Logger.IsEnabled())
                 IdentityModelEventSource.Logger.WriteWarning(message, args);
+
+            if (Logger.IsEnabled(EventLevel.Warning))
+                Logger.Log(WriteEntry(EventLevel.Warning, null, message, args));
         }
 
         /// <summary>
@@ -314,6 +326,9 @@ namespace Microsoft.IdentityModel.Logging
 
             if (IdentityModelEventSource.Logger.IsEnabled() && IdentityModelEventSource.Logger.LogLevel >= eventLevel)
                 IdentityModelEventSource.Logger.Write(eventLevel, innerException, message);
+
+            if (Logger.IsEnabled(eventLevel))
+                Logger.Log(WriteEntry(eventLevel, innerException, message, null));
 
             if (innerException != null) 
                 if (string.IsNullOrEmpty(argumentName))
@@ -375,6 +390,31 @@ namespace Microsoft.IdentityModel.Logging
         public static object MarkAsNonPII(object arg)
         {
             return new NonPII(arg);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="LogEntry"/> by using the provided event level, exception argument, string argument and arguments list.
+        /// </summary>
+        /// <param name="level"><see cref="EventLevel"/></param>
+        /// <param name="innerException"><see cref="Exception"/></param>
+        /// <param name="message">The log message.</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
+        private static LogEntry WriteEntry(EventLevel level, Exception innerException, string message, params object[] args)
+        {
+            if (innerException != null)
+            {
+                // if PII is turned off and 'innerException' is a System exception only display the exception type
+                if (!IdentityModelEventSource.ShowPII && !LogHelper.IsCustomException(innerException))
+                    message = string.Format(CultureInfo.InvariantCulture, "Message: {0}, InnerException: {1}", message, innerException.GetType());
+                else // otherwise it's safe to display the entire exception message
+                    message = string.Format(CultureInfo.InvariantCulture, "Message: {0}, InnerException: {1}", message, innerException.Message);
+            }
+
+            LogEntry entry = new LogEntry();
+            entry.EventLevel = level;
+            entry.Message = args != null ? FormatInvariant(message, args) : message;
+
+            return entry;
         }
     }
 }
