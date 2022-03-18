@@ -673,11 +673,11 @@ namespace Microsoft.IdentityModel.TestUtils
 
             context.Diffs.Clear();
             IdentityComparer.AreX509Certificate2Equal(certificate, null, context);
-            Assert.True(context.Diffs.Count(s => s == "X509Certificate2:") == 1);
+            Assert.True(context.Diffs.Count(s => s.Contains("X509Certificate2:")) == 1);
 
             context.Diffs.Clear();
             IdentityComparer.AreX509Certificate2Equal(null, certificate, context);
-            Assert.True(context.Diffs.Count(s => s == "X509Certificate2:") == 1);
+            Assert.True(context.Diffs.Count(s => s.Contains("X509Certificate2:")) == 1);
         }
     }
 }

@@ -445,7 +445,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 
     public class SignedHttpRequestUtilityTheoryData : TheoryDataBase
     {
-        public CallContext CallContext { get; set; } = new CallContext();
 
         public Uri HttpRequestUri { get; set; }
 

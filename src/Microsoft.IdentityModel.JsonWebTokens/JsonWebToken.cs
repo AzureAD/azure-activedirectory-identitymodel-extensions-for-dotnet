@@ -27,21 +27,55 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
-using Microsoft.IdentityModel.Json;
-using Microsoft.IdentityModel.Json.Linq;
+using System.Text;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+
+#if NET45
+using Microsoft.IdentityModel.Json;
+using Microsoft.IdentityModel.Json.Linq;
+using JsonClaimSet = Microsoft.IdentityModel.JsonWebTokens.JsonClaimSet45;
+#else
+using System.Text.Json;
+#endif
 
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
     /// <summary>
     /// A <see cref="SecurityToken"/> designed for representing a JSON Web Token (JWT). 
     /// </summary>
-    public class JsonWebToken : SecurityToken
+    public class JsonWebToken : SecurityToken, IClaimProvider, IJsonClaimSet
     {
+        private char[] _hChars;
+        private char[] _pChars;
+        private char[] _sChars;
+
+        private Lazy<string> _act;
+        private Lazy<string> _alg;
+        private Lazy<IEnumerable<string>> _audiences;
+        private Lazy<string> _cty;
+        private Lazy<string> _enc;
+        private Lazy<string> _encodedHeader;
+        private Lazy<string> _encodedPayload;
+        private Lazy<string> _encodedSignature;
+        private Lazy<DateTime> _iat;
+        private Lazy<string> _id;
+        private Lazy<string> _iss;
+        private Lazy<string> _kid;
+        private Lazy<string> _sub;
+        private Lazy<string> _typ;
+        private Lazy<DateTime> _validFrom;
+        private Lazy<DateTime> _validTo;
+        private Lazy<string> _x5t;
+        private Lazy<string> _zip;
+        //internal byte[] _ciphertextBytes;
+        internal byte[] _initializationVectorBytes;
+        //internal byte[] _authenticationTagBytes;
+        internal byte[] _encodedHeaderAsciiBytes;
+        internal byte[] _encryptedKeyBytes;
+
         /// <summary>
         /// Initializes a new instance of <see cref="JsonWebToken"/> from a string in JWS or JWE Compact serialized format.
         /// </summary>
@@ -49,20 +83,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <exception cref="ArgumentNullException">'jwtEncodedString' is null or empty.</exception>
         /// <exception cref="ArgumentException">'jwtEncodedString' is not in JWS or JWE Compact serialization format.</exception>
         /// <remarks>
+        /// see: https://datatracker.ietf.org/doc/html/rfc7519 (JWT)
+        /// see: https://datatracker.ietf.org/doc/html/rfc7515 (JWS)
+        /// see: https://datatracker.ietf.org/doc/html/rfc7516 (JWE)
+        /// <para>
         /// The contents of the returned <see cref="JsonWebToken"/> have not been validated, the JSON Web Token is simply decoded. Validation can be accomplished using the validation methods in <see cref="JsonWebTokenHandler"/>
+        /// </para>
         /// </remarks>
         public JsonWebToken(string jwtEncodedString)
         {
             if (string.IsNullOrEmpty(jwtEncodedString))
                 throw new ArgumentNullException(nameof(jwtEncodedString));
 
-            // Max number of segments is set to JwtConstants.MaxJwtSegmentCount + 1 so that we know if there were more than 5 segments present.
-            // In the case where JwtEncodedString has greater than 5 segments, the length of tokenParts will always be 6.
-            var tokenParts = jwtEncodedString.Split(new char[] { '.' }, JwtConstants.MaxJwtSegmentCount + 1);
-            if (tokenParts.Length == JwtConstants.JwsSegmentCount || tokenParts.Length == JwtConstants.JweSegmentCount)
-                Decode(tokenParts, jwtEncodedString);
-            else
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14100, jwtEncodedString)));
+            Initialize();
+            ReadToken(jwtEncodedString);
         }
 
         /// <summary>
@@ -70,6 +104,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <param name="header">A string containing JSON which represents the cryptographic operations applied to the JWT and optionally any additional properties of the JWT.</param>
         /// <param name="payload">A string containing JSON which represents the claims contained in the JWT. Each claim is a JSON object of the form { Name, Value }.</param>
+        /// <remarks>
+        /// see: https://datatracker.ietf.org/doc/html/rfc7519 (JWT)
+        /// see: https://datatracker.ietf.org/doc/html/rfc7515 (JWS)
+        /// see: https://datatracker.ietf.org/doc/html/rfc7516 (JWE)
+        /// <para>
+        /// The contents of the returned <see cref="JsonWebToken"/> have not been validated, the JSON Web Token is simply decoded. Validation can be accomplished using the validation methods in <see cref="JsonWebTokenHandler"/>
+        /// </para>
+        /// </remarks>
         /// <exception cref="ArgumentNullException">'header' is null.</exception>
         /// <exception cref="ArgumentNullException">'payload' is null.</exception>
         public JsonWebToken(string header, string payload)
@@ -82,7 +124,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             try
             {
-                Header = JObject.Parse(header);
+                Header = new JsonClaimSet(header);
             }
             catch (Exception ex)
             {
@@ -91,188 +133,190 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             try
             {
-                Payload = JObject.Parse(payload);
+                Payload = new JsonClaimSet(payload);
             }
             catch (Exception ex)
             {
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14302, payload), ex));
             }
-        }
 
-        /// <summary>
-        /// Gets the 'value' of the 'actort' claim { actort, 'value' }.
-        /// </summary>
-        /// <remarks>If the 'actort' claim is not found, an empty string is returned.</remarks> 
-        public string Actor => Payload.Value<string>(JwtRegisteredClaimNames.Actort) ?? string.Empty;
-
-        /// <summary>
-        /// Gets the 'value' of the 'alg' claim { alg, 'value' }.
-        /// </summary>
-        /// <remarks>If the 'alg' claim is not found, an empty string is returned.</remarks>   
-        public string Alg => Header.Value<string>(JwtHeaderParameterNames.Alg) ?? string.Empty;
-
-        /// <summary>
-        /// Gets the list of 'aud' claim { aud, 'value' }.
-        /// </summary>
-        /// <remarks>If the 'aud' claim is not found, enumeration will be empty.</remarks>
-        public IEnumerable<string> Audiences
-        {
-            get
-            {
-                if (Payload.GetValue(JwtRegisteredClaimNames.Aud, StringComparison.Ordinal) is JToken value)
-                {
-                    if (value.Type is JTokenType.String)
-                        return new List<string> { value.ToObject<string>() };
-                    else if (value.Type is JTokenType.Array)
-                        return value.ToObject<List<string>>();
-                }
-
-                return Enumerable.Empty<string>();
-            }
+            Initialize();
         }
 
         /// <summary>
         /// Gets the AuthenticationTag from the original raw data of this instance when it was created.
         /// </summary>
-        /// <remarks>The original JSON Compact serialized format passed into the constructor. <see cref="JsonWebToken(string)"/></remarks>
-        public string AuthenticationTag { get; private set; }
-
-        /// <summary>
-        /// Gets the Ciphertext from the original raw data of this instance when it was created.
-        /// </summary>
-        /// <remarks>The original JSON Compact serialized format passed into the constructor. <see cref="JsonWebToken(string)"/></remarks>
-        public string Ciphertext { get; private set; }
-
-        /// <summary>
-        /// Gets a <see cref="IEnumerable{Claim}"/><see cref="Claim"/> for each JSON { name, value }.
-        /// </summary>
-        public virtual IEnumerable<Claim> Claims
+        /// <remarks>
+        /// Contains the results of a Authentication Encryption with Associated Data (AEAD).
+        /// see: https://datatracker.ietf.org/doc/html/rfc7516#section-2
+        /// <para>
+        /// If this JWT is not encrypted with an algorithms that uses an Authentication Tag, an empty string will be returned.
+        /// </para>
+        /// </remarks>
+        public string AuthenticationTag
         {
+            // TODO - use lazy
             get
             {
-                if (InnerToken != null)
-                    return InnerToken.Claims;
-
-                if (!Payload.HasValues)
-                    return Enumerable.Empty<Claim>();
-
-                var claims = new List<Claim>();
-                string issuer = this.Issuer ?? ClaimsIdentity.DefaultIssuer;
-
-                // there is some code redundancy here that was not factored as this is a high use method. Each identity received from the host will pass through here.
-                foreach (var entry in Payload)
-                {
-                    if (entry.Value == null)
-                    {
-                        claims.Add(new Claim(entry.Key, string.Empty, JsonClaimValueTypes.JsonNull, issuer, issuer));
-                        continue;
-                    }
-
-                    if (entry.Value.Type is JTokenType.String)
-                    {
-                        var claimValue = entry.Value.ToObject<string>();
-                        claims.Add(new Claim(entry.Key, claimValue, ClaimValueTypes.String, issuer, issuer));
-                        continue;
-                    }
-
-                    var jtoken = entry.Value;
-                    if (jtoken != null)
-                    {
-                        AddClaimsFromJToken(claims, entry.Key, jtoken, issuer);
-                        continue;
-                    }
-
-                }
-
-                return claims;
+                return AuthenticationTagBytes == null ? string.Empty : UTF8Encoding.UTF8.GetString(AuthenticationTagBytes);
             }
         }
 
         /// <summary>
-        /// Gets the 'value' of the 'cty' claim { cty, 'value' }.
+        ///
         /// </summary>
-        /// <remarks>If the 'cty' claim is not found, an empty string is returned.</remarks>   
-        public string Cty => Header.Value<string>(JwtHeaderParameterNames.Cty) ?? string.Empty;
+        internal byte[] AuthenticationTagBytes
+        {
+            get;
+            set;
+        }
 
         /// <summary>
-        /// Gets the 'value' of the 'enc' claim { enc, 'value' }.
+        /// Gets the Ciphertext representing the encrypted JWT in the original raw data.
         /// </summary>
-        /// <remarks>If the 'enc' value is not found, an empty string is returned.</remarks>   
-        public string Enc => Header.Value<string>(JwtHeaderParameterNames.Enc) ?? string.Empty;
+        /// <remarks>
+        /// When decrypted using values in the JWE header will contain the plaintext payload.
+        /// see: https://datatracker.ietf.org/doc/html/rfc7516#section-2
+        /// <para>
+        /// If this JWT is not encrypted, an empty string will be returned.
+        /// </para>
+        /// </remarks>
+        public string Ciphertext
+        {
+            // TODO - use lazy
+            get
+            {
+                return CipherTextBytes == null ? string.Empty : UTF8Encoding.UTF8.GetString(CipherTextBytes);
+            }
+        }
 
         /// <summary>
-        /// Gets the EncryptedKey from the original raw data of this instance when it was created.
+        ///
         /// </summary>
-        /// <remarks>The original JSON Compact serialized format passed into the constructor. <see cref="JsonWebToken(string)"/></remarks>
-        public string EncryptedKey { get; private set; }
-
-        /// <summary>
-        /// Represents the cryptographic operations applied to the JWT and optionally any additional properties of the JWT. 
-        /// </summary>
-        internal JObject Header { get; private set; } = new JObject();
-
-        /// <summary>
-        /// Gets the 'value' of the 'jti' claim { jti, ''value' }.
-        /// </summary>
-        /// <remarks>If the 'jti' claim is not found, an empty string is returned.</remarks>
-        public override string Id => Payload.Value<string>(JwtRegisteredClaimNames.Jti) ?? string.Empty;
-
-        /// <summary>
-        /// Gets the InitializationVector from the original raw data of this instance when it was created.
-        /// </summary>
-        /// <remarks>The original JSON Compact serialized format passed into the constructor. <see cref="JsonWebToken(string)"/></remarks>
-        public string InitializationVector { get; private set; }
-
-        /// <summary>
-        /// Gets the <see cref="JsonWebToken"/> associated with this instance.
-        /// </summary>
-        public JsonWebToken InnerToken { get; internal set; }
-
-        /// <summary>
-        /// Gets the 'value' of the 'iat' claim { iat, 'value' } converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
-        /// </summary>
-        /// <remarks>If the 'iat' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
-        public DateTime IssuedAt => JwtTokenUtilities.GetDateTime(JwtRegisteredClaimNames.Iat, Payload);
-
-        /// <summary>
-        /// Gets the 'value' of the 'iss' claim { iss, 'value' }.
-        /// </summary>
-        /// <remarks>If the 'iss' claim is not found, an empty string is returned.</remarks>   
-        public override string Issuer => Payload.Value<string>(JwtRegisteredClaimNames.Iss) ?? string.Empty;
-
-        /// <summary>
-        /// Gets the 'value' of the 'kid' claim { kid, 'value' }.
-        /// </summary>
-        /// <remarks>If the 'kid' claim is not found, an empty string is returned.</remarks>   
-        public string Kid => Header.Value<string>(JwtHeaderParameterNames.Kid) ?? string.Empty;
-
-        /// <summary>
-        /// Represents the JSON payload.
-        /// </summary>
-        internal JObject Payload { get; private set; } = new JObject();
+        internal byte[] CipherTextBytes
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Gets the EncodedHeader from the original raw data of this instance when it was created.
         /// </summary>
-        /// <remarks>The original JSON Compact serialized format passed into the constructor. <see cref="JsonWebToken(string)"/></remarks>
-        public string EncodedHeader { get; internal set; }
+        /// <remarks>
+        /// The original Base64UrlEncoded string of the JWT header.
+        /// </remarks>
+        public string EncodedHeader => _encodedHeader.Value;
+
+        /// <summary>
+        /// Gets the Encrypted Content Encryption Key.
+        /// </summary>
+        /// <remarks>
+        /// For some algorithms this value may be null even though the JWT was encrypted.
+        /// see: https://datatracker.ietf.org/doc/html/rfc7516#section-2
+        /// <para>
+        /// If not found, an empty string is returned.
+        /// </para>
+        /// </remarks>
+        public string EncryptedKey { get; internal set; }
+
+        internal byte[] EncryptedKeyBytes { get; set; }
 
         /// <summary>
         /// Gets the EncodedPayload from the original raw data of this instance when it was created.
         /// </summary>
-        /// <remarks>The original JSON Compact serialized format passed into the constructor. <see cref="JsonWebToken(string)"/></remarks>
-        public string EncodedPayload { get; internal set; }
+        /// <remarks>
+        /// The original Base64UrlEncoded of the JWT payload.
+        /// </remarks>
+        public string EncodedPayload => _encodedPayload.Value;
 
         /// <summary>
         /// Gets the EncodedSignature from the original raw data of this instance when it was created.
         /// </summary>
-        /// <remarks>The original JSON Compact serialized format passed into the constructor. <see cref="JsonWebToken(string)"/></remarks>
-        public string EncodedSignature { get; internal set; }
+        /// <remarks>
+        /// The original Base64UrlEncoded of the JWT signature.
+        /// If the JWT was not signed, an empty string is returned.
+        /// </remarks>
+        public string EncodedSignature => _encodedSignature.Value;
 
         /// <summary>
         /// Gets the original raw data of this instance when it was created.
         /// </summary>
+        /// <remarks>
+        /// The original Base64UrlEncoded of the JWT.
+        /// </remarks>
         public string EncodedToken { get; private set; }
+
+        internal bool HasPayloadClaim(string claimName)
+        {
+            return Payload.HasClaim(claimName);
+        }
+
+        internal JsonClaimSet Header { get; set; }
+
+        internal byte[] HeaderAsciiBytes { get; set; }
+
+        private void Initialize()
+        {
+            _act = new Lazy<string>(ActorFactory);
+            _alg = new Lazy<string>(AlgFactory);
+            _audiences = new Lazy<IEnumerable<string>>(AudiencesFactory);
+            _cty = new Lazy<string>(CtyFactory);
+            _enc = new Lazy<string>(EncFactory);
+            _encodedHeader = new Lazy<string>(EncodedHeaderFactory);
+            _encodedPayload = new Lazy<string>(EncodedPayloadFactory);
+            _encodedSignature = new Lazy<string>(EncodedSignatureFactory);
+            _iat = new Lazy<DateTime>(IatFactory);
+            _id = new Lazy<string>(IdFactory);
+            _iss = new Lazy<string>(IssuerFactory);
+            _kid = new Lazy<string>(KidFactory);
+            _sub = new Lazy<string>(SubFactory);
+            _typ = new Lazy<string>(TypFactory);
+            _validTo = new Lazy<DateTime>(ValidToFactory);
+            _validFrom = new Lazy<DateTime>(ValidFromFactory);
+            _x5t = new Lazy<string>(X5tFactory);
+            _zip = new Lazy<string>(ZipFactory);
+        }
+
+        internal byte[] InitializationVectorBytes { get; set; }
+
+        /// <summary>
+        /// Gets the Initialization Vector used when encrypting the plaintext.
+        /// </summary>
+        /// <remarks>
+        /// see: https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.1.4
+        /// <para>
+        /// Some algorithms may not use an Initialization Vector.
+        /// If not found an empty string is returned.
+        /// </para>
+        /// </remarks>
+        public string InitializationVector { get; internal set; }
+
+        /// <summary>
+        /// Gets the <see cref="JsonWebToken"/> associated with this instance.
+        /// </summary>
+        /// <remarks>
+        /// see: https://datatracker.ietf.org/doc/html/rfc7516#section-2
+        /// For encrypted tokens {JWE}, this represents the JWT that was encrypted.
+        /// <para>
+        /// If the JWT is not encrypted, this value will be null.
+        /// </para>
+        /// </remarks>
+        public JsonWebToken InnerToken { get; internal set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool IsEncrypted { get => CipherTextBytes != null; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool IsSigned { get; internal set; }
+
+        /// <summary>
+        ///
+        /// </summary>
+        internal JsonClaimSet Payload { get; set; }
 
         /// <summary>
         /// Not implemented.
@@ -280,246 +324,254 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public override SecurityKey SecurityKey { get; }
 
         /// <summary>
-        /// Not implemented.
+        /// Gets or sets the <see cref="SecurityKey"/> that was used to sign this token.
         /// </summary>
-        public override SecurityKey SigningKey
+        /// <remarks>
+        /// If the JWT was not signed or validated, this value will be null.
+        /// </remarks>
+        public override SecurityKey SigningKey { get; set; }
+
+        /// <summary>
+        ///
+        /// </summary>
+        internal byte[] MessageBytes{ get; set; }
+
+        private void ReadToken(string encodedJson)
         {
-            set;
-            get;
-        }
-
-        /// <summary>
-        /// Gets the 'value' of the 'sub' claim { sub, 'value' }.
-        /// </summary>
-        /// <remarks>If the 'sub' claim is not found, an empty string is returned.</remarks>   
-        public string Subject => Payload.Value<string>(JwtRegisteredClaimNames.Sub) ?? string.Empty;
-
-        /// <summary>
-        /// Gets the 'value' of the 'typ' claim { typ, 'value' }.
-        /// </summary>
-        /// <remarks>If the 'typ' claim is not found, an empty string is returned.</remarks>   
-        public string Typ => Header.Value<string>(JwtHeaderParameterNames.Typ) ?? string.Empty;
-
-        /// <summary>
-        /// Gets the 'value' of the 'nbf' claim { nbf, 'value' } converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
-        /// </summary>
-        /// <remarks>If the 'nbf' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
-        public override DateTime ValidFrom => JwtTokenUtilities.GetDateTime(JwtRegisteredClaimNames.Nbf, Payload);
-
-        /// <summary>
-        /// Gets the 'value' of the 'exp' claim { exp, 'value' } converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
-        /// </summary>
-        /// <remarks>If the 'exp' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
-        public override DateTime ValidTo => JwtTokenUtilities.GetDateTime(JwtRegisteredClaimNames.Exp, Payload);
-
-        /// <summary>
-        /// Gets the 'value' of the 'x5t' claim { x5t, 'value' }.
-        /// </summary>
-        /// <remarks>If the 'x5t' claim is not found, an empty string is returned.</remarks>   
-        public string X5t => Header.Value<string>(JwtHeaderParameterNames.X5t) ?? string.Empty;
-
-        /// <summary>
-        /// Gets the 'value' of the 'zip' claim { zip, 'value' }.
-        /// </summary>
-        /// <remarks>If the 'zip' claim is not found, an empty string is returned.</remarks>   
-        public string Zip => Header.Value<string>(JwtHeaderParameterNames.Zip) ?? String.Empty;
-
-        /// <summary>
-        /// Decodes the string into the header, payload and signature.
-        /// </summary>
-        /// <param name="tokenParts">the tokenized string.</param>
-        /// <param name="rawData">the original token.</param>
-        private void Decode(string[] tokenParts, string rawData)
-        {
-            LogHelper.LogInformation(LogMessages.IDX14106, rawData);
-            try
+            List<int> dots = new List<int>();
+            int index = 0;
+            while (index < encodedJson.Length && dots.Count <= JwtConstants.MaxJwtSegmentCount + 1)
             {
-                Header = JObject.Parse(Base64UrlEncoder.Decode(tokenParts[0]));
-            }
-            catch (Exception ex)
-            {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14102, tokenParts[0], rawData), ex));
+                if (encodedJson[index] == '.')
+                    dots.Add(index);
+
+                index++;
             }
 
-            if (tokenParts.Length == JwtConstants.JweSegmentCount)
-                DecodeJwe(tokenParts);
-            else
-                DecodeJws(tokenParts);
-
-            EncodedToken = rawData;
-        }
-
-        private static void AddClaimsFromJToken(List<Claim> claims, string claimType, JToken jtoken, string issuer)
-        {
-            if (jtoken.Type is JTokenType.Object)
+            EncodedToken = encodedJson;
+            if (dots.Count == JwtConstants.JwsSegmentCount - 1)
             {
-                claims.Add(new Claim(claimType, jtoken.ToString(Formatting.None), JsonClaimValueTypes.Json, issuer, issuer));
-            }
-            else if (jtoken.Type is JTokenType.Array)
-            {
-                var jarray = jtoken as JArray;
-                foreach (var item in jarray)
+                IsSigned = !(dots[1] + 1 == encodedJson.Length);
+                _hChars = encodedJson.ToCharArray(0, dots[0]);
+                _pChars = encodedJson.ToCharArray(dots[0] + 1, dots[1] - dots[0] - 1);
+                MessageBytes = Encoding.UTF8.GetBytes(encodedJson.ToCharArray(0, dots[1]));
+                try
                 {
-                    switch (item.Type)
-                    {
-                        case JTokenType.Object:
-                            claims.Add(new Claim(claimType, item.ToString(Formatting.None), JsonClaimValueTypes.Json, issuer, issuer));
-                            break;
+                    _sChars = IsSigned ? encodedJson.ToCharArray(dots[1] + 1, encodedJson.Length - dots[1] - 1) : string.Empty.ToCharArray();
+                    SignatureBytes = Base64UrlEncoder.UnsafeDecode(_sChars);
+                    Header = new JsonClaimSet(Base64UrlEncoder.UnsafeDecode(_hChars));
+                }
+                catch(Exception ex)
+                {
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14102, encodedJson.Substring(0, dots[0]), encodedJson), ex));
+                }
 
-                        // only go one level deep on arrays.
-                        case JTokenType.Array:
-                            claims.Add(new Claim(claimType, item.ToString(Formatting.None), JsonClaimValueTypes.JsonArray, issuer, issuer));
-                            break;
+                try
+                {
+                    Payload = new JsonClaimSet(Base64UrlEncoder.UnsafeDecode(_pChars));
+                }
+                catch(Exception ex)
+                {
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14101, encodedJson.Substring(dots[0], dots[1] - dots[0]), encodedJson), ex));
+                }
+            }
+            else if (dots.Count == JwtConstants.JweSegmentCount - 1)
+            {
+                _hChars = encodedJson.ToCharArray(0, dots[0]);
+                if (_hChars.Length == 0)
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14307, encodedJson)));
 
-                        default:
-                            AddDefaultClaimFromJToken(claims, claimType, item, issuer);
-                            break;
-                    }
+                HeaderAsciiBytes = Encoding.ASCII.GetBytes(_hChars);
+                try
+                {
+                    Header = new JsonClaimSet(Base64UrlEncoder.UnsafeDecode(_hChars));
+                }
+                catch (Exception ex)
+                {
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14102, encodedJson.Substring(0, dots[0]), encodedJson), ex));
+                }
+
+                // dir does not have any key bytes
+                char[] encryptedKeyBytes = encodedJson.ToCharArray(dots[0] + 1, dots[1] - dots[0] - 1);
+                if (encryptedKeyBytes.Length != 0)
+                    EncryptedKeyBytes = Base64UrlEncoder.UnsafeDecode(encryptedKeyBytes);
+
+                char[] ivChars = encodedJson.ToCharArray(dots[1] + 1, dots[2] - dots[1] - 1);
+                if (ivChars.Length == 0)
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14308, encodedJson)));
+
+                try
+                {
+                    InitializationVectorBytes = Base64UrlEncoder.UnsafeDecode(ivChars);
+                }
+                catch (Exception ex)
+                {
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14309, encodedJson, encodedJson), ex));
+                }
+
+                char[] authTagChars = encodedJson.ToCharArray(dots[3] + 1, encodedJson.Length - dots[3] - 1);
+                if (authTagChars.Length == 0)
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14310, encodedJson)));
+
+                try
+                {
+                    AuthenticationTagBytes = Base64UrlEncoder.UnsafeDecode(authTagChars);
+                }
+                catch (Exception ex)
+                {
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14311, encodedJson, encodedJson), ex));
+                }
+
+                char[] cipherTextBytes = encodedJson.ToCharArray(dots[2] + 1, dots[3] - dots[2] - 1);
+                if (cipherTextBytes.Length == 0)
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14306, encodedJson)));
+
+                try
+                {
+                    CipherTextBytes = Base64UrlEncoder.UnsafeDecode(encodedJson.ToCharArray(dots[2] + 1, dots[3] - dots[2] - 1));
+                }
+                catch (Exception ex)
+                {
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14312, encodedJson, encodedJson), ex));
                 }
             }
             else
             {
-                AddDefaultClaimFromJToken(claims, claimType, jtoken, issuer);
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14100, encodedJson)));
             }
-        }
-
-        private static void AddDefaultClaimFromJToken(List<Claim> claims, string claimType, JToken jtoken, string issuer)
-        {
-            if (jtoken is JValue jvalue)
-            {
-                // String is special because item.ToString(Formatting.None) will result in "/"string/"". The quotes will be added.
-                // Boolean needs item.ToString otherwise 'true' => 'True'
-                if (jvalue.Type is JTokenType.String)
-                    claims.Add(new Claim(claimType, jvalue.Value.ToString(), ClaimValueTypes.String, issuer, issuer));
-                // DateTime claims require special processing. jtoken.ToString(Formatting.None) will result in "\"dateTimeValue\"". The quotes will be added.
-                else if (jvalue.Value is DateTime dateTimeValue)
-                    claims.Add(new Claim(claimType, dateTimeValue.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, issuer, issuer));
-                else
-                    claims.Add(new Claim(claimType, jtoken.ToString(Formatting.None), GetClaimValueType(jvalue.Value), issuer, issuer));
-            }
-            else
-                claims.Add(new Claim(claimType, jtoken.ToString(Formatting.None), GetClaimValueType(jtoken), issuer, issuer));
         }
 
         /// <summary>
-        /// Decodes the payload and signature from the JWE parts.
+        ///
         /// </summary>
-        /// <param name="tokenParts">Parts of the JWE including the header.</param>
+        internal byte[] SignatureBytes { get; set; }
+
+        #region Claims
+        /// <summary>
+        /// Gets the 'value' of the 'actort' claim the payload.
+        /// </summary>
         /// <remarks>
-        /// Assumes Header has already been set.
-        /// According to the JWE documentation (https://datatracker.ietf.org/doc/html/rfc7516#section-2), it is possible for the EncryptedKey, InitializationVector, and AuthenticationTag to be empty strings.
+        /// If the 'actort' claim is not found, an empty string is returned.
         /// </remarks>
-        private void DecodeJwe(string[] tokenParts)
-        {
-            EncodedHeader = tokenParts[0];
-            EncryptedKey = tokenParts[1];
-            InitializationVector = tokenParts[2];
-            Ciphertext = !string.IsNullOrWhiteSpace(tokenParts[3]) ? tokenParts[3] : throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14306));
-            AuthenticationTag = tokenParts[4];
-        }
+        public string Actor => _act.Value;
 
         /// <summary>
-        /// Decodes the payload and signature from the JWS parts.
+        /// Gets the 'value' of the 'alg' claim from the header.
         /// </summary>
-        /// <param name="tokenParts">Parts of the JWS including the header.</param>
-        /// <remarks>Assumes Header has already been set.</remarks>
-        private void DecodeJws(string[] tokenParts)
+        /// <remarks>
+        /// Identifies the cryptographic algorithm used to encrypt or determine the value of the Content Encryption Key.
+        /// Applicable to an encrypted JWT {JWE}.
+        /// see: https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.1
+        /// <para>
+        /// If the 'alg' claim is not found, an empty string is returned.
+        /// </para>
+        /// </remarks>
+        public string Alg => _alg.Value;
+
+        /// <summary>
+        /// Gets the list of 'aud' claims from the payload.
+        /// </summary>
+        /// <remarks>
+        /// Identifies the recipients that the JWT is intended for.
+        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.3
+        /// <para>
+        /// If the 'aud' claim is not found, enumeration will be empty.
+        /// </para>
+        /// </remarks>
+        public IEnumerable<string> Audiences => _audiences.Value;
+
+        /// <summary>
+        /// Gets a <see cref="IEnumerable{Claim}"/> where each claim in the JWT { name, value } is returned as a <see cref="Claim"/>.
+        /// </summary>
+        /// <remarks>
+        /// A <see cref="Claim"/> requires each value to be represented as a string. If the value was not a string, then <see cref="Claim.Type"/> contains the json type.
+        /// <see cref="JsonClaimValueTypes"/> and <see cref="ClaimValueTypes"/> to determine the json type.
+        /// </remarks>
+        public virtual IEnumerable<Claim> Claims
         {
-            // Log if CTY is set, assume compact JWS
-            if (!string.IsNullOrEmpty(Cty))
-                LogHelper.LogVerbose(LogHelper.FormatInvariant(LogMessages.IDX14105, Payload.Value<string>(JwtHeaderParameterNames.Cty)));
-
-            try
+            get
             {
-                Payload = JObject.Parse(Base64UrlEncoder.Decode(tokenParts[1]));
-            }
-            catch (Exception ex)
-            {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14101, tokenParts[1], EncodedToken), ex));
-            }
+                if (InnerToken != null)
+                    return InnerToken.Claims;
 
-            EncodedHeader = tokenParts[0];
-            EncodedPayload = tokenParts[1];
-            EncodedSignature = tokenParts[2];
+                return Payload.Claims(Issuer ?? ClaimsIdentity.DefaultIssuer);
+
+            }
         }
 
-        private static string GetClaimValueType(object obj)
-        {
-            if (obj == null)
-                return JsonClaimValueTypes.JsonNull;
+        #if !NET45
+        /// <summary>
+        /// 
+        /// </summary>
+        public virtual IDictionary<string, object> ClaimsIdentityProperties => Payload.ClaimsIdentityProperties;
+        #endif
 
-            var objType = obj.GetType();
+        /// <summary>
+        /// Gets the 'value' of the 'cty' claim from the header.
+        /// </summary>
+        /// <remarks>
+        /// Used by JWS applications to declare the media type[IANA.MediaTypes] of the secured content (the payload).
+        /// see: https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.12 (JWE)
+        /// see: https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.10 (JWS)
+        /// <para>
+        /// If the 'cty' claim is not found, an empty string is returned.
+        /// </para>
+        /// </remarks>
+        public string Cty => _cty.Value;
 
-            if (objType == typeof(string))
-                return ClaimValueTypes.String;
-
-            if (objType == typeof(int))
-                return ClaimValueTypes.Integer;
-
-            if (objType == typeof(bool))
-                return ClaimValueTypes.Boolean;
-
-            if (objType == typeof(double))
-                return ClaimValueTypes.Double;
-
-            if (objType == typeof(long))
-            {
-                long l = (long)obj;
-                if (l >= int.MinValue && l <= int.MaxValue)
-                    return ClaimValueTypes.Integer;
-
-                return ClaimValueTypes.Integer64;
-            }
-
-            if (objType == typeof(DateTime))
-                return ClaimValueTypes.DateTime;
-
-            if (objType == typeof(JObject))
-                return JsonClaimValueTypes.Json;
-
-            if (objType == typeof(JArray))
-                return JsonClaimValueTypes.JsonArray;
-
-            return objType.ToString();
-        }
+        /// <summary>
+        /// Gets the 'value' of the 'enc' claim from the header.
+        /// </summary>
+        /// <remarks>
+        /// Identifies the content encryption algorithm used to perform authenticated encryption
+        /// on the plaintext to produce the ciphertext and the Authentication Tag.
+        /// see: https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.2
+        /// </remarks>
+        public string Enc => _enc.Value;
 
         /// <summary>
         /// Gets a <see cref="Claim"/> representing the { key, 'value' } pair corresponding to the provided <paramref name="key"/>.
         /// </summary>
-        /// <remarks>If the key has no corresponding value, this method will throw.</remarks>   
+        /// <remarks>
+        /// A <see cref="Claim"/> requires each value to be represented as a string. If the value was not a string, then <see cref="Claim.Type"/> contains the json type.
+        /// <see cref="JsonClaimValueTypes"/> and <see cref="ClaimValueTypes"/> to determine the json type.
+        /// <para>
+        /// If the key has no corresponding value, this method will throw.
+        /// </para>
+        /// </remarks>
         public Claim GetClaim(string key)
         {
-            string issuer = Issuer ?? ClaimsIdentity.DefaultIssuer;
-
-            if (!Payload.TryGetValue(key, out var jTokenValue))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14304, key)));
-
-            if (jTokenValue.Type == JTokenType.Null)
-                return new Claim(key, string.Empty, JsonClaimValueTypes.JsonNull, issuer, issuer);
-            else if (jTokenValue.Type is JTokenType.Object)
-                return new Claim(key, jTokenValue.ToString(Formatting.None), JsonClaimValueTypes.Json, issuer, issuer);
-            else if (jTokenValue.Type is JTokenType.Array)
-                return new Claim(key, jTokenValue.ToString(Formatting.None), JsonClaimValueTypes.JsonArray, issuer, issuer);
-            else if (jTokenValue is JValue jvalue)
-            {
-                // String is special because item.ToString(Formatting.None) will result in "/"string/"". The quotes will be added.
-                // Boolean needs item.ToString otherwise 'true' => 'True'
-                if (jvalue.Type is JTokenType.String)
-                    return new Claim(key, jvalue.Value.ToString(), ClaimValueTypes.String, issuer, issuer);
-                // DateTime claims require special processing. jTokenValue.ToString(Formatting.None) will result in "\"dateTimeValue\"". The quotes will be added.
-                else if (jvalue.Value is DateTime dateTimeValue)
-                    return new Claim(key, dateTimeValue.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, issuer, issuer);
-                else
-                    return new Claim(key, jTokenValue.ToString(Formatting.None), GetClaimValueType(jvalue.Value), issuer, issuer);
-            }
-            else
-                return new Claim(key, jTokenValue.ToString(Formatting.None), GetClaimValueType(jTokenValue), issuer, issuer);
+            return Payload.GetClaim(key, Issuer ?? ClaimsIdentity.DefaultIssuer);
         }
 
         /// <summary>
-        /// Gets the 'value' corresponding to the provided key from the JWT payload { key, 'value' }.
+        /// Gets the 'value' corresponding to key from the JWT header transformed as type 'T'.
         /// </summary>
-        /// <remarks>If the key has no corresponding value, this method will throw. </remarks>   
+        /// <remarks>
+        /// The expectation is that the 'value' corresponds to a type are expected in a JWT token.
+        /// The 5 basic types: number, string, true / false, nil, array (of basic types).
+        /// This is not a general purpose translation layer for complex types.
+        /// </remarks>
+        /// <returns>The value as <typeparamref name="T"/>.</returns>
+        /// <exception cref="ArgumentException">if claim is not found or a transformation to <typeparamref name="T"/> cannot be made.</exception>
+        public T GetHeaderValue<T>(string key)
+        {
+            if (string.IsNullOrEmpty(key))
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            return Header.GetValue<T>(key);
+        }
+
+        /// <summary>
+        /// Gets the 'value' corresponding to key from the JWT payload transformed as type 'T'.
+        /// </summary>
+        /// <remarks>
+        /// The expectation is that the 'value' corresponds to a type are expected in a JWT token.
+        /// The 5 basic types: number, string, true / false, nil, array (of basic types).
+        /// This is not a general purpose translation layer for complex types.
+        /// </remarks>
+        /// <returns>The value as <typeparamref name="T"/>.</returns>
+        /// <exception cref="ArgumentException">if claim is not found or a transformation to <typeparamref name="T"/> cannot be made.</exception>
         public T GetPayloadValue<T>(string key)
         {
             if (string.IsNullOrEmpty(key))
@@ -528,152 +580,323 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (typeof(T).Equals(typeof(Claim)))
                 return (T)(object)GetClaim(key);
 
-            if (!Payload.TryGetValue(key, out var jTokenValue))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14304, key)));
-
-            T value;
-            try
-            {
-                value = jTokenValue.ToObject<T>();
-            }
-            catch (Exception ex)
-            {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14305, key, LogHelper.MarkAsNonPII(typeof(T)), LogHelper.MarkAsNonPII(jTokenValue.Type)), ex));
-            }
-
-            return value;
+            return Payload.GetValue<T>(key);
         }
 
         /// <summary>
-        /// Tries to get the <see cref="Claim"/> representing the { key, 'value' } pair corresponding to the provided <paramref name="key"/>.
+        /// Gets the 'value' of the 'jti' claim from the payload.
         /// </summary>
-        /// <remarks>If the key has no corresponding value, returns false. Otherwise returns true. </remarks>   
+        /// <remarks>
+        /// Provides a unique identifier for the JWT.
+        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.7
+        /// <para>
+        /// If the 'jti' claim is not found, an empty string is returned.
+        /// </para>
+        /// </remarks>
+        public override string Id => _id.Value;
+
+        /// <summary>
+        /// Gets the 'value' of the 'iat' claim converted to a <see cref="DateTime"/> from the payload.
+        /// </summary>
+        /// <remarks>
+        /// Identifies the time at which the JWT was issued.
+        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.6
+        /// <para>
+        /// If the 'iat' claim is not found, then <see cref="DateTime.MinValue"/> is returned.
+        /// </para>
+        /// </remarks>
+        public DateTime IssuedAt => _iat.Value;
+
+        /// <summary>
+        /// Gets the 'value' of the 'iss' claim from the payload.
+        /// </summary>
+        /// <remarks>
+        /// Identifies the principal that issued the JWT.
+        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.1
+        /// <para>
+        /// If the 'iss' claim is not found, an empty string is returned.
+        /// </para>
+        /// </remarks>
+        public override string Issuer => _iss.Value;
+
+        /// <summary>
+        /// Gets the 'value' of the 'kid' claim from the header.
+        /// </summary>
+        /// <remarks>
+        /// 'kid'is a hint indicating which key was used to secure the JWS.
+        /// see: https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.4 (JWS)
+        /// see: https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.6 (JWE)
+        /// <para>
+        /// If the 'kid' claim is not found, an empty string is returned.
+        /// </para>
+        /// </remarks>
+        public string Kid => _kid.Value;
+
+        /// <summary>
+        /// Gets the 'value' of the 'sub' claim from the payload.
+        /// </summary>
+        /// <remarks>
+        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.2
+        /// Identifies the principal that is the subject of the JWT.
+        /// <para>
+        /// If the 'sub' claim is not found, an empty string is returned.
+        /// </para>
+        /// </remarks>
+        public string Subject => _sub.Value;
+
+        /// <summary>
+        /// Try to get a <see cref="Claim"/> representing the { key, 'value' } pair corresponding to the provided <paramref name="key"/>.
+        /// </summary>
+        /// <remarks>
+        /// A <see cref="Claim"/> requires each value to be represented as a string. If the value was not a string, then <see cref="Claim.Type"/> contains the json type.
+        /// <see cref="JsonClaimValueTypes"/> and <see cref="ClaimValueTypes"/> to determine the json type.
+        /// </remarks>
+        /// <returns>true if successful, false otherwise.</returns>
         public bool TryGetClaim(string key, out Claim value)
         {
-            string issuer = Issuer ?? ClaimsIdentity.DefaultIssuer;
-
-            if (!Payload.TryGetValue(key, out var jTokenValue))
-            {
-                value = null;
-                return false;
-            }
-
-            if (jTokenValue.Type == JTokenType.Null)
-                value = new Claim(key, string.Empty, JsonClaimValueTypes.JsonNull, issuer, issuer);
-            else if (jTokenValue.Type is JTokenType.Object)
-                value = new Claim(key, jTokenValue.ToString(Formatting.None), JsonClaimValueTypes.Json, issuer, issuer);
-            else if (jTokenValue.Type is JTokenType.Array)
-                value = new Claim(key, jTokenValue.ToString(Formatting.None), JsonClaimValueTypes.JsonArray, issuer, issuer);
-            else if (jTokenValue is JValue jvalue)
-            {
-                // String is special because item.ToString(Formatting.None) will result in "/"string/"". The quotes will be added.
-                // Boolean needs item.ToString otherwise 'true' => 'True'
-                if (jvalue.Type is JTokenType.String)
-                    value = new Claim(key, jvalue.Value.ToString(), ClaimValueTypes.String, issuer, issuer);
-                // DateTime claims require special processing. jTokenValue.ToString(Formatting.None) will result in "\"dateTimeValue\"". The quotes will be added.
-                else if (jvalue.Value is DateTime dateTimeValue)
-                    value = new Claim(key, dateTimeValue.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, issuer);
-                else
-                    value = new Claim(key, jTokenValue.ToString(Formatting.None), GetClaimValueType(jvalue.Value), issuer, issuer);
-            }
-            else
-                value = new Claim(key, jTokenValue.ToString(Formatting.None), GetClaimValueType(jTokenValue), issuer, issuer);
-
-            return true;
+            return Payload.TryGetClaim(key, Issuer ?? ClaimsIdentity.DefaultIssuer, out value);
         }
 
         /// <summary>
-        /// Tries to get the 'value' corresponding to the provided key from the JWT payload { key, 'value' }.
+        /// Tries to get the value
         /// </summary>
-        /// <remarks>If the key has no corresponding value, returns false. Otherwise returns true. </remarks>   
-        public bool TryGetPayloadValue<T>(string key, out T value)
+        /// <remarks>
+        /// The expectation is that the 'value' corresponds to a type expected in a JWT token.
+        /// </remarks>
+        /// <returns>true if successful, false otherwise.</returns>
+        public bool TryGetValue<T>(string key, out T value)
         {
             if (string.IsNullOrEmpty(key))
             {
-                value = default(T);
+                value = default;
                 return false;
             }
 
-            if (typeof(T).Equals(typeof(Claim)))
-            {
-                var foundClaim = TryGetClaim(key, out var claim);
-                value = (T)(object)claim;
-                return foundClaim;
-            }
-
-            if (!Payload.TryGetValue(key, out var jTokenValue))
-            {
-                value = default(T);
-                return false;
-            }
-
-            try
-            {
-                value = jTokenValue.ToObject<T>();
-            }
-            catch (Exception)
-            {
-                value = default(T);
-                return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Gets the 'value' corresponding to the provided key from the JWT header { key, 'value' }.
-        /// </summary>
-        /// <remarks>If the key has no corresponding value, this method will throw. </remarks>   
-        public T GetHeaderValue<T>(string key)
-        {
-            if (string.IsNullOrEmpty(key))
-                throw LogHelper.LogArgumentNullException(nameof(key));
-
-            if (!Header.TryGetValue(key, out var jTokenValue))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14303, key)));
-
-            T value;
-            try
-            {
-                value = jTokenValue.ToObject<T>();
-            }
-            catch (Exception ex)
-            {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14305, key, LogHelper.MarkAsNonPII(typeof(T)), LogHelper.MarkAsNonPII(jTokenValue.Type)), ex));
-            }
-
-            return value;
+            return Payload.TryGetValue(key, out value);
         }
 
         /// <summary>
         /// Tries to get the value corresponding to the provided key from the JWT header { key, 'value' }.
         /// </summary>
-        /// <remarks>If the key has no corresponding value, returns false. Otherwise returns true. </remarks>   
+        /// <remarks>
+        /// The expectation is that the 'value' corresponds to a type expected in a JWT token.
+        /// The 5 basic types: number, string, true / false, nil, array (of basic types).
+        /// This is not a general purpose translation layer for complex types.
+        /// </remarks>
+        /// <returns>true if successful, false otherwise.</returns>
         public bool TryGetHeaderValue<T>(string key, out T value)
         {
             if (string.IsNullOrEmpty(key))
             {
-                value = default(T);
+                value = default;
                 return false;
             }
 
-            if (!Header.TryGetValue(key, out var jTokenValue))
-            {
-                value = default(T);
-                return false;
-            }
-
-            try
-            {
-                value = jTokenValue.ToObject<T>();
-            }
-            catch (Exception)
-            {
-                value = default(T);
-                return false;
-            }
-
-            return true;
+            return Header.TryGetValue(key, out value);
         }
+
+        /// <summary>
+        /// Try to get the 'value' corresponding to key from the JWT payload transformed as type 'T'.
+        /// </summary>
+        /// <remarks>
+        /// The expectation is that the 'value' corresponds to a type are expected in a JWT token.
+        /// The 5 basic types: number, string, true / false, nil, array (of basic types).
+        /// This is not a general purpose translation layer for complex types.
+        /// </remarks>
+        /// <returns>true if successful, false otherwise.</returns>
+        public bool TryGetPayloadValue<T>(string key, out T value)
+        {
+            if (string.IsNullOrEmpty(key))
+            {
+                value = default;
+                return false;
+            }
+
+            if (typeof(T).Equals(typeof(Claim)))
+            {
+                bool foundClaim = TryGetClaim(key, out var claim);
+                value = (T)(object)claim;
+                return foundClaim;
+            }
+
+            return Payload.TryGetValue(key, out value);
+        }
+
+        /// <summary>
+        /// Gets the 'value' of the 'typ' claim from the header.
+        /// </summary>
+        /// <remarks>
+        /// Is used by JWT applications to declare the media type.
+        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-5.1
+        /// <para>
+        /// If the 'typ' claim is not found, an empty string is returned.
+        /// </para>
+        /// </remarks>
+        public string Typ => _typ.Value;
+
+        /// <summary>
+        /// Gets the 'value' of the 'x5t' claim from the header.
+        /// </summary>
+        /// <remarks>
+        /// Is the base64url-encoded SHA-1 thumbprint(a.k.a.digest) of the DER encoding of the X.509 certificate used to sign this token.
+        /// see : https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.7
+        /// <para>
+        /// If the 'x5t' claim is not found, an empty string is returned.
+        /// </para>
+        /// </remarks>
+        public string X5t => _x5t.Value;
+
+        /// <summary>
+        /// Gets the 'value' of the 'nbf' claim converted to a <see cref="DateTime"/> from the payload.
+        /// </summary>
+        /// <remarks>
+        /// Identifies the time before which the JWT MUST NOT be accepted for processing.
+        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.5
+        /// <para>
+        /// If the 'nbf' claim is not found, then <see cref="DateTime.MinValue"/> is returned.
+        /// </para>
+        /// </remarks>
+        public override DateTime ValidFrom => _validFrom.Value;
+
+        /// <summary>
+        /// Gets the 'value' of the 'exp' claim converted to a <see cref="DateTime"/> from the payload.
+        /// </summary>
+        /// <remarks>
+        /// Identifies the expiration time on or after which the JWT MUST NOT be accepted for processing.
+        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.4
+        /// <para>
+        /// If the 'exp' claim is not found, then <see cref="DateTime.MinValue"/> is returned.
+        /// </para>
+        /// </remarks>
+        public override DateTime ValidTo => _validTo.Value;
+
+        /// <summary>
+        /// Gets the 'value' of the 'zip' claim from the header.
+        /// </summary>
+        /// <remarks>
+        /// The "zip" (compression algorithm) applied to the plaintext before encryption, if any.
+        /// see: https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.3
+        /// <para>
+        /// If the 'zip' claim is not found, an empty string is returned.
+        /// </para>
+        /// </remarks>
+        public string Zip => _zip.Value;
+        #endregion
+
+        #region Factories for Lazy
+        private string ActorFactory()
+        {
+            return (InnerToken == null) ? Payload.GetStringValue(JwtRegisteredClaimNames.Actort) : InnerToken.Payload.GetStringValue(JwtRegisteredClaimNames.Actort);
+        }
+
+        private string AlgFactory()
+        {
+            return Header.GetStringValue(JwtHeaderParameterNames.Alg);
+        }
+
+        private IEnumerable<string> AudiencesFactory()
+        {
+#if NET45
+            if (Payload.TryGetValue(JwtRegisteredClaimNames.Aud, out JToken value))
+            {
+                if (value.Type is JTokenType.String)
+                    return new List<string> { value.ToObject<string>() };
+                else if (value.Type is JTokenType.Array)
+                    return value.ToObject<List<string>>();
+            }
+#else
+            if (Payload.TryGetValue(JwtRegisteredClaimNames.Aud, out JsonElement audiences))
+            {
+                if (audiences.ValueKind == JsonValueKind.String)
+                    return new List<string> { audiences.GetString() };
+
+                if (audiences.ValueKind == JsonValueKind.Array)
+                {
+                    List<string> retVal = new List<string>();
+                    foreach (JsonElement jsonElement in audiences.EnumerateArray())
+                        retVal.Add(jsonElement.ToString());
+
+                    return retVal;
+                }
+            }
+#endif
+            return Enumerable.Empty<string>();
+        }
+
+        private string CtyFactory()
+        {
+            return Header.GetStringValue(JwtHeaderParameterNames.Cty);
+        }
+
+        private string EncFactory()
+        {
+            return Header.GetStringValue(JwtHeaderParameterNames.Enc);
+        }
+
+        private string EncodedHeaderFactory()
+        {
+            return new string(_hChars);
+        }
+
+        private string EncodedPayloadFactory()
+        {
+            return new string(_pChars);
+        }
+
+        private string EncodedSignatureFactory()
+        {
+            return new string(_sChars);
+        }
+
+        private string IdFactory()
+        {
+            return Payload.GetStringValue(JwtRegisteredClaimNames.Jti);
+        }
+
+        private DateTime IatFactory()
+        {
+            return Payload.GetDateTime(JwtRegisteredClaimNames.Iat);
+        }
+
+        private string IssuerFactory()
+        {
+            return Payload.GetStringValue(JwtRegisteredClaimNames.Iss);
+        }
+
+        private string KidFactory()
+        {
+            return Header.GetStringValue(JwtHeaderParameterNames.Kid);
+        }
+
+        private string SubFactory()
+        {
+            return Payload.GetStringValue(JwtRegisteredClaimNames.Sub);
+        }
+
+        private string TypFactory()
+        {
+            return Header.GetStringValue(JwtHeaderParameterNames.Typ);
+        }
+
+        private string X5tFactory()
+        {
+            return Header.GetStringValue(JwtHeaderParameterNames.X5t);
+        }
+
+        private DateTime ValidFromFactory()
+        {
+            return Payload.GetDateTime(JwtRegisteredClaimNames.Nbf);
+        }
+
+        private DateTime ValidToFactory()
+        {
+            return Payload.GetDateTime(JwtRegisteredClaimNames.Exp);
+        }
+
+        private string ZipFactory()
+        {
+            return Header.GetStringValue(JwtHeaderParameterNames.Zip);
+        }
+        #endregion
     }
 }

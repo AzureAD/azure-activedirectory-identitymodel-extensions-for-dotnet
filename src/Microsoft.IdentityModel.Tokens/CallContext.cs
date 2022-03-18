@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or set a <see cref="Guid"/> that will be used in the call to EventSource.SetCurrentThreadActivityId before logging.
+        /// Gets or sets a <see cref="Guid"/> that will be used in the call to EventSource.SetCurrentThreadActivityId before logging.
         /// </summary>
         public Guid ActivityId { get; set; } = Guid.Empty;
 

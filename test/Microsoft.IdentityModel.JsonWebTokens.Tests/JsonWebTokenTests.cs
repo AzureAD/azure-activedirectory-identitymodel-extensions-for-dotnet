@@ -32,12 +32,18 @@ using System.IdentityModel.Tokens.Jwt;
 using System.IdentityModel.Tokens.Jwt.Tests;
 using System.Linq;
 using System.Security.Claims;
-using Microsoft.IdentityModel.Json;
-using Microsoft.IdentityModel.Json.Linq;
-using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
+using Microsoft.IdentityModel.Json;
+using Microsoft.IdentityModel.Json.Linq;
+
+#if NET452
+using JsonReaderException = Microsoft.IdentityModel.Json.JsonReaderException;
+#else
+using System.Text.Json;
+using JsonReaderException = System.Text.Json.JsonException;
+#endif
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
@@ -46,7 +52,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
     public class JsonWebTokenTests
     {
         private static DateTime dateTime = new DateTime(2000, 01, 01, 0, 0, 0);
-        private string jObject = $@"{{""intarray"":[1,2,3], ""array"":[1,""2"",3], ""jobject"": {{ ""string1"":""string1value"", ""string2"":""string2value"" }},""string"":""bob"", ""float"":42.0, ""integer"":42, ""nill"": null, ""bool"" : true, ""dateTime"": ""{dateTime}"", ""dateTimeIso8061"": ""{dateTime.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture)}"" }}";
+        private string jsonString = $@"{{""intarray"":[1,2,3], ""array"":[1,""2"",3], ""jobject"": {{""string1"":""string1value"",""string2"":""string2value""}},""string"":""bob"", ""float"":42.0, ""integer"":42, ""nill"": null, ""bool"" : true, ""dateTime"": ""{dateTime}"", ""dateTimeIso8061"": ""{dateTime.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture)}"" }}";
         private List<Claim> payloadClaims = new List<Claim>()
         {
             new Claim("intarray", @"[1,2,3]", JsonClaimValueTypes.JsonArray, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
@@ -133,7 +139,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public void GetClaim()
         {
             var context = new CompareContext();
-            var jsonWebToken = new JsonWebToken("{}", jObject.ToString());
+            var jsonWebToken = new JsonWebToken("{}", jsonString);
 
             foreach (var claim in payloadClaims)
             {
@@ -159,7 +165,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public void TryGetClaim()
         {
             var context = new CompareContext();
-            var jsonWebToken = new JsonWebToken("{}", jObject.ToString());
+            var jsonWebToken = new JsonWebToken("{}", jsonString);
 
             // Tries to retrieve a value that does not exist in the payload.
             var success = jsonWebToken.TryGetClaim("doesnotexist", out Claim doesNotExist);
@@ -192,70 +198,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         // Test checks to make sure that the 'Audiences' claim can be successfully retrieved when multiple audiences are present.
         // It also checks that the rest of the claims match up as well
         [Fact]
-        public void GetMultipleAudiences()
+        public void CompareJwtSecurityTokenWithJsonSecurityTokenMultipleAudiences()
         {
             var context = new CompareContext();
-            var tokenString = "eyJhbGciOiJSUzI1NiJ9.eyJhdWQiOlsiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UxLmNvbSIsImh0dHA6Ly9EZWZhdWx0LkF1ZGllbmNlMi5jb20iLCJodHRwOi8vRGVmYXVsdC5BdWRpZW5jZTMuY29tIiwiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2U0LmNvbSJdLCJleHAiOjE1Mjg4NTAyNzgsImlhdCI6MTUyODg1MDI3OCwiaXNzIjoiaHR0cDovL0RlZmF1bHQuSXNzdWVyLmNvbSIsIm5vbmNlIjoiRGVmYXVsdC5Ob25jZSIsInN1YiI6InVybjpvYXNpczpuYW1zOnRjOlNBTUw6MS4xOm5hbWVpZC1mb3JtYXQ6WDUwOVN1YmplY3ROYW1lIn0.";
-            var jsonWebToken = new JsonWebToken(tokenString);
-            var jwtSecurityToken = new JwtSecurityToken(tokenString);
+            string payload = @"{""aud"":[""http://Default.Audience.com"", ""http://Default.Audience1.com"", ""http://Default.Audience2.com"", ""http://Default.Audience3.com"", ""http://Default.Audience4.com""]}";
+            string header = "{}";
+            var jsonWebToken = new JsonWebToken(header, payload);
+            var jwtSecurityToken = new JwtSecurityToken($"{Base64UrlEncoder.Encode(header)}.{Base64UrlEncoder.Encode(payload)}.");
             IdentityComparer.AreEqual(jsonWebToken.Claims, jwtSecurityToken.Claims);
             IdentityComparer.AreEqual(jsonWebToken.Audiences, jwtSecurityToken.Audiences, context);
-            TestUtilities.AssertFailIfErrors(context);
-        }
-
-        // Test checks to make sure that claim values of various types can be successfully retrieved from the header.
-        [Fact]
-        public void GetHeaderValues()
-        {
-            var context = new CompareContext();
-            IdentityModelEventSource.ShowPII = true;
-            TestUtilities.WriteHeader($"{this}.GetHeaderValues");
-
-            var token = new JsonWebToken(jObject, "{}");
-
-            var intarray = token.GetHeaderValue<int[]>("intarray");
-            IdentityComparer.AreEqual(new int[] { 1, 2, 3 }, intarray, context);
-
-            var array = token.GetHeaderValue<object[]>("array");
-            IdentityComparer.AreEqual(new object[] { 1L, "2", 3L }, array, context);
-
-            // only possible internally within the library since we're using Microsoft.IdentityModel.Json.Linq.JObject
-            var jobject = token.GetHeaderValue<JObject>("jobject");
-            IdentityComparer.AreEqual(JObject.Parse(@"{ ""string1"":""string1value"", ""string2"":""string2value"" }"), jobject, context);
-
-            var name = token.GetHeaderValue<string>("string");
-            IdentityComparer.AreEqual("bob", name, context);
-
-            var floatingPoint = token.GetHeaderValue<float>("float");
-            IdentityComparer.AreEqual(42.0, floatingPoint, context);
-
-            var integer = token.GetHeaderValue<int>("integer");
-            IdentityComparer.AreEqual(42, integer, context);
-
-            var nill = token.GetHeaderValue<object>("nill");
-            IdentityComparer.AreEqual(nill, null, context);
-
-            var boolean = token.GetHeaderValue<bool>("bool");
-            IdentityComparer.AreEqual(boolean, true, context);
-
-            try // Try to retrieve a value that doesn't exist in the header.
-            {
-                token.GetHeaderValue<int>("doesnotexist");
-            }
-            catch (Exception ex)
-            {
-                ExpectedException.ArgumentException("IDX14303:").ProcessException(ex, context);
-            }
-
-            try // Try to retrieve an integer when the value is actually a string.
-            {
-                token.GetHeaderValue<int>("string");
-            }
-            catch (Exception ex)
-            {
-                ExpectedException.ArgumentException("IDX14305:", typeof(System.FormatException)).ProcessException(ex, context);
-            }
-
             TestUtilities.AssertFailIfErrors(context);
         }
 
@@ -266,7 +217,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var context = new CompareContext();
             TestUtilities.WriteHeader($"{this}.TryGetHeaderValues");
 
-            var token = new JsonWebToken(jObject, "{}");
+            var token = new JsonWebToken(jsonString, "{}");
 
             var success = token.TryGetHeaderValue("intarray", out int[] intarray);
             IdentityComparer.AreEqual(new int[] { 1, 2, 3 }, intarray, context);
@@ -276,11 +227,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             IdentityComparer.AreEqual(new object[] { 1L, "2", 3L }, array, context);
             IdentityComparer.AreEqual(true, success, context);
 
+#if NET452
             // only possible internally within the library since we're using Microsoft.IdentityModel.Json.Linq.JObject
             success = token.TryGetHeaderValue("jobject", out JObject jobject);
             IdentityComparer.AreEqual(JObject.Parse(@"{ ""string1"":""string1value"", ""string2"":""string2value"" }"), jobject, context);
             IdentityComparer.AreEqual(true, success, context);
-
+#endif
             success = token.TryGetHeaderValue("string", out string name);
             IdentityComparer.AreEqual("bob", name, context);
             IdentityComparer.AreEqual(true, success, context);
@@ -319,38 +271,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var context = new CompareContext();
             TestUtilities.WriteHeader($"{this}.GetPayloadValues");
 
-            var token = new JsonWebToken("{}", jObject);
+            var token = new JsonWebToken("{}", jsonString);
 
-            var intarray = token.GetPayloadValue<int[]>("intarray");
-            IdentityComparer.AreEqual(new int[] { 1, 2, 3 }, intarray, context);
+//        private string jsonString = $@"{""array"":[1,""2"",3], ""jobject"": {{""string1"":""string1value"",""string2"":""string2value""}},""string"":""bob"", ""float"":42.0, ""integer"":42, ""nill"": null, ""bool"" : true, ""dateTime"": ""{dateTime}"", ""dateTimeIso8061"": ""{dateTime.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture)}"" }}";
 
-            var array = token.GetPayloadValue<object[]>("array");
-            IdentityComparer.AreEqual(new object[] { 1L, "2", 3L }, array, context);
-
-            // only possible internally within the library since we're using Microsoft.IdentityModel.Json.Linq.JObject
-            var jobject = token.GetPayloadValue<JObject>("jobject");
-            IdentityComparer.AreEqual(JObject.Parse(@"{ ""string1"":""string1value"", ""string2"":""string2value"" }"), jobject, context);
-
-            var name = token.GetPayloadValue<string>("string");
-            IdentityComparer.AreEqual("bob", name, context);
-
-            var floatingPoint = token.GetPayloadValue<float>("float");
-            IdentityComparer.AreEqual(42.0, floatingPoint, context);
-
-            var integer = token.GetPayloadValue<int>("integer");
-            IdentityComparer.AreEqual(42, integer, context);
-
-            var nill = token.GetPayloadValue<object>("nill");
-            IdentityComparer.AreEqual(nill, null, context);
-
-            var boolean = token.GetPayloadValue<bool>("bool");
-            IdentityComparer.AreEqual(boolean, true, context);
-
-            var dateTimeValue = token.GetPayloadValue<string>("dateTime");
-            IdentityComparer.AreEqual(dateTimeValue, dateTime.ToString(), context);
-
-            var dateTimeIso8061Value = token.GetPayloadValue<DateTime>("dateTimeIso8061");
-            IdentityComparer.AreEqual(dateTimeIso8061Value, dateTime, context);
 
             try // Try to retrieve a value that doesn't exist in the header.
             {
@@ -367,7 +291,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
             catch (Exception ex)
             {
+#if NET452
                 ExpectedException.ArgumentException("IDX14305:", typeof(System.FormatException)).ProcessException(ex, context);
+#else
+                ExpectedException.ArgumentException("IDX14305:", typeof(System.Text.Json.JsonException)).ProcessException(ex, context);
+#endif
             }
 
             TestUtilities.AssertFailIfErrors(context);
@@ -380,7 +308,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var context = new CompareContext();
             TestUtilities.WriteHeader($"{this}.TryGetPayloadValues");
 
-            var token = new JsonWebToken("{}", jObject);
+            var token = new JsonWebToken("{}", jsonString);
 
             var success = token.TryGetPayloadValue("intarray", out int[] intarray);
             IdentityComparer.AreEqual(new int[] { 1, 2, 3 }, intarray, context);
@@ -390,11 +318,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             IdentityComparer.AreEqual(new object[] { 1L, "2", 3L }, array, context);
             IdentityComparer.AreEqual(true, success, context);
 
+#if NET452
             // only possible internally within the library since we're using Microsoft.IdentityModel.Json.Linq.JObject
             success = token.TryGetPayloadValue("jobject", out JObject jobject);
             IdentityComparer.AreEqual(JObject.Parse(@"{ ""string1"":""string1value"", ""string2"":""string2value"" }"), jobject, context);
             IdentityComparer.AreEqual(true, success, context);
-
+#endif
             success = token.TryGetPayloadValue("string", out string name);
             IdentityComparer.AreEqual("bob", name, context);
             IdentityComparer.AreEqual(true, success, context);
@@ -420,7 +349,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             IdentityComparer.AreEqual(true, success, context);
 
             var dateTimeIso8061Value = token.GetPayloadValue<DateTime>("dateTimeIso8061");
-            IdentityComparer.AreEqual(dateTimeIso8061Value, dateTime, context);
+            IdentityComparer.AreEqual(dateTimeIso8061Value, dateTime.ToUniversalTime(), context);
             IdentityComparer.AreEqual(true, success, context);
 
             success = token.TryGetPayloadValue("doesnotexist", out int doesNotExist);
@@ -461,10 +390,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 return new TheoryData<ParseTimeValuesTheoryData>
                 {
-                    // Dates as strings
-                    new ParseTimeValuesTheoryData
+                    new ParseTimeValuesTheoryData("DatesAsStrings")
                     {
-                        First = true,
                         Payload = Default.PayloadString,
                         Header = new JObject
                         {
@@ -473,10 +400,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             { JwtHeaderParameterNames.Typ, JwtConstants.HeaderType }
                         }.ToString(Formatting.None)
                     },
-                    // Dates as longs
-                    new ParseTimeValuesTheoryData
+                    new ParseTimeValuesTheoryData("DatesAsLongs")
                     {
-                        First = true,
                         Payload = new JObject()
                         {
                             { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
@@ -493,10 +418,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             { JwtHeaderParameterNames.Typ, JwtConstants.HeaderType }
                         }.ToString(Formatting.None)
                     },
-                    // Dates as integers
-                    new ParseTimeValuesTheoryData
+                    new ParseTimeValuesTheoryData("DatesAsFloats")
                     {
-                        First = true,
                         Payload = new JObject()
                         {
                             { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
@@ -545,63 +468,72 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 JwtTestData.InvalidNumberOfSegmentsData("IDX14100:", theoryData);
                 JwtTestData.ValidEncodedSegmentsData(theoryData);
 
-                theoryData.Add(new JwtTheoryData
+                theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.InvalidHeader))
                 {
-                    TestId = nameof(EncodedJwts.InvalidHeader),
                     Token = EncodedJwts.InvalidHeader,
-                    ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX14102:", inner: typeof(JsonReaderException))
+#if NET452
+                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14102:", typeof(JsonReaderException), false ),
+#else
+                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14102:", typeof(JsonReaderException), true),
+#endif
                 });
 
-                theoryData.Add(new JwtTheoryData
+                theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.InvalidPayload))
                 {
-                    TestId = nameof(EncodedJwts.InvalidPayload),
                     Token = EncodedJwts.InvalidPayload,
-                    ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX14101:", inner: typeof(JsonReaderException))
+#if NET452
+                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14101:", typeof(JsonReaderException), false ),
+#else
+                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14101:", typeof(JsonReaderException), true),
+#endif
                 });
 
-                theoryData.Add(new JwtTheoryData
+                theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.JWSEmptyHeader))
                 {
-                    TestId = nameof(EncodedJwts.JWSEmptyHeader),
                     Token = EncodedJwts.JWSEmptyHeader,
-                    ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX14102:", inner: typeof(JsonReaderException))
+#if NET452
+                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14102:", typeof(JsonReaderException), false ),
+#else
+                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14102:", typeof(JsonReaderException), true),
+#endif
                 });
 
-                theoryData.Add(new JwtTheoryData
+                theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.JWSEmptyPayload))
                 {
-                    TestId = nameof(EncodedJwts.JWSEmptyPayload),
                     Token = EncodedJwts.JWSEmptyPayload,
-                    ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX14101:", inner: typeof(JsonReaderException))
+#if NET452
+                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14101:", typeof(JsonReaderException), false ),
+#else
+                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14101:", typeof(JsonReaderException), true),
+#endif
                 });
 
-                theoryData.Add(new JwtTheoryData
+                theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.JWEEmptyHeader))
                 {
-                    TestId = nameof(EncodedJwts.JWEEmptyHeader),
                     Token = EncodedJwts.JWEEmptyHeader,
-                    ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX14102:", inner: typeof(JsonReaderException))
+                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14307:"),
                 });
 
-                theoryData.Add(new JwtTheoryData
+                theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.JWEEmptyEncryptedKey))
                 {
-                    TestId = nameof(EncodedJwts.JWEEmptyEncryptedKey),
                     Token = EncodedJwts.JWEEmptyEncryptedKey,
                 });
 
-                theoryData.Add(new JwtTheoryData
+                theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.JWEEmptyIV))
                 {
-                    TestId = nameof(EncodedJwts.JWEEmptyIV),
+                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14308:"),
                     Token = EncodedJwts.JWEEmptyIV,
                 });
 
-                theoryData.Add(new JwtTheoryData
+                theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.JWEEmptyCiphertext))
                 {
-                    TestId = nameof(EncodedJwts.JWEEmptyCiphertext),
                     Token = EncodedJwts.JWEEmptyCiphertext,
                     ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX14306:")
                 });
 
-                theoryData.Add(new JwtTheoryData
+                theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.JWEEmptyAuthenticationTag))
                 {
-                    TestId = nameof(EncodedJwts.JWEEmptyAuthenticationTag),
+                    ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX14310:"),
                     Token = EncodedJwts.JWEEmptyAuthenticationTag,
                 });
 
@@ -632,6 +564,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
     public class ParseTimeValuesTheoryData : TheoryDataBase
     {
+        public ParseTimeValuesTheoryData(string testId) : base(testId) { }
+
         public string Payload { get; set; }
 
         public string Header { get; set; }

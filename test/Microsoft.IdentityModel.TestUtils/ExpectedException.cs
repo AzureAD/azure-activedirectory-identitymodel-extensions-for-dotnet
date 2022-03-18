@@ -159,6 +159,13 @@ namespace Microsoft.IdentityModel.TestUtils
                 {
                     HandleError("exception.InnerException != expectedException.InnerTypeExpected." + "\nexception.InnerException: '" + exception.InnerException + "\nInnerTypeExpected: " + InnerTypeExpected, errors);
                 }
+
+                if (!string.IsNullOrWhiteSpace(InnerSubstringExpected) && !exception.InnerException.Message.Contains(InnerSubstringExpected))
+                {
+                    HandleError($"!InnerException.Message.Contains('{InnerSubstringExpected}').\nInnerException.Message: {exception.InnerException.Message} \nexpectedException.InnerSubstringExpected: {InnerSubstringExpected}", errors);
+                    return;
+                }
+
             }
 
             if (PropertiesExpected != null && PropertiesExpected.Count > 0)
@@ -317,6 +324,8 @@ namespace Microsoft.IdentityModel.TestUtils
         public Dictionary<string, object> PropertiesExpected { get; set; } = new Dictionary<string, object>();
 
         public string SubstringExpected { get; set; }
+
+        public string InnerSubstringExpected { get; set; }
 
         public override string ToString()
         {

@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="System.IdentityModel.Tokens.Jwt.JwtSecurityToken">
+    <Position X="4.5" Y="2.25" Width="4.25" />
+    <Members>
+      <Field Name="_payload" Hidden="true" />
+      <Method Name="Decode" Hidden="true" />
+      <Method Name="DecodeJwe" Hidden="true" />
+      <Method Name="DecodeJws" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>hAESICAIAAiEgAAEEIAQgAQgAAAAACAAACAA4AASIAA=</HashCode>
+      <FileName>JwtSecurityToken.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Microsoft.IdentityModel.Tokens.SecurityToken">
+    <Position X="10" Y="2.25" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="System.IdentityModel.Tokens.Jwt.JwtPayload">
+    <Position X="13.25" Y="2.25" Width="2.25" />
+    <Members>
+      <Method Name="AddClaimsFromJToken" Hidden="true" />
+      <Method Name="AddDefaultClaimFromJToken" Hidden="true" />
+      <Method Name="AddDictionaryClaims" Hidden="true" />
+      <Method Name="AddFirstPriorityClaims" Hidden="true" />
+      <Method Name="GetClaimValueType" Hidden="true" />
+      <Method Name="GetDateTime" Hidden="true" />
+      <Method Name="GetIListClaims" Hidden="true" />
+      <Method Name="GetIntClaim" Hidden="true" />
+      <Method Name="GetStandardClaim" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>ABACIGgAMAABgAQAANAAAAAAIBFEASAAQCAEoQAACGQ=</HashCode>
+      <FileName>JwtPayload.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="System.IdentityModel.Tokens.Jwt.JwtHeader">
+    <Position X="16.25" Y="2.25" Width="2.25" />
+    <Members>
+      <Method Name="GetStandardClaim" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAIAAIAAAAAIQAiAAAAAFgAAAAAKgAIAACAAA=</HashCode>
+      <FileName>JwtHeader.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

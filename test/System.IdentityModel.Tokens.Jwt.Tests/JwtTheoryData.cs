@@ -32,6 +32,11 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 {
     public class JwtTheoryData : TheoryDataBase
     {
+        public JwtTheoryData(string testId) : base(testId)
+        { }
+
+        public JwtTheoryData() { }
+
         public string Actor { get; set; }
 
         public TokenValidationParameters ActorTokenValidationParameters { get; set; }

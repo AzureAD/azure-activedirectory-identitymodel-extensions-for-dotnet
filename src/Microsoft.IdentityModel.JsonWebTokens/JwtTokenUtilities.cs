@@ -180,6 +180,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // keep track of exceptions thrown, keys that were tried
             var exceptionStrings = new StringBuilder();
             var keysAttempted = new StringBuilder();
+            string zipAlgorithm = null;
             foreach (SecurityKey key in decryptionParameters.Keys)
             {
                 var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
@@ -189,19 +190,54 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     continue;
                 }
 
-                if (!cryptoProviderFactory.IsSupportedAlgorithm(decryptionParameters.Enc, key))
-                {
-                    algorithmNotSupportedByCryptoProvider = true;
-                    LogHelper.LogWarning(TokenLogMessages.IDX10611, LogHelper.MarkAsNonPII(decryptionParameters.Enc), key);
-                    continue;
-                }
-
                 try
                 {
-                    Validators.ValidateAlgorithm(decryptionParameters.Enc, key, jwtToken, validationParameters);
-                    decryptedTokenBytes = DecryptToken(cryptoProviderFactory, key, decryptionParameters);
-                    decryptionSucceeded = true;
-                    break;
+                    if (decryptionParameters.JsonWebToken == null)
+                    {
+                        if (!cryptoProviderFactory.IsSupportedAlgorithm(decryptionParameters.Enc, key))
+                        {
+                            algorithmNotSupportedByCryptoProvider = true;
+                            LogHelper.LogWarning(TokenLogMessages.IDX10611, LogHelper.MarkAsNonPII(decryptionParameters.Enc), key);
+                            continue;
+                        }
+
+                        Validators.ValidateAlgorithm(decryptionParameters.Enc, key, jwtToken, validationParameters);
+                        decryptedTokenBytes = DecryptToken(
+                            cryptoProviderFactory,
+                            key,
+                            decryptionParameters.Enc,
+                            decryptionParameters.CipherTextBytes,
+                            decryptionParameters.HeaderAsciiBytes,
+                            decryptionParameters.InitializationVectorBytes,
+                            decryptionParameters.AuthenticationTagBytes);
+
+                        zipAlgorithm = decryptionParameters.Zip;
+                        decryptionSucceeded = true;
+                        break;
+                    }
+                    else
+                    {
+                        if (!cryptoProviderFactory.IsSupportedAlgorithm(decryptionParameters.JsonWebToken.Enc, key))
+                        {
+                            algorithmNotSupportedByCryptoProvider = true;
+                            LogHelper.LogWarning(TokenLogMessages.IDX10611, LogHelper.MarkAsNonPII(decryptionParameters.Enc), key);
+                            continue;
+                        }
+
+                        Validators.ValidateAlgorithm(decryptionParameters.JsonWebToken.Enc, key, jwtToken, validationParameters);
+                        decryptedTokenBytes = DecryptToken(
+                            cryptoProviderFactory,
+                            key,
+                            decryptionParameters.JsonWebToken.Enc,
+                            decryptionParameters.JsonWebToken.CipherTextBytes,
+                            decryptionParameters.JsonWebToken.HeaderAsciiBytes,
+                            decryptionParameters.JsonWebToken.InitializationVectorBytes,
+                            decryptionParameters.JsonWebToken.AuthenticationTagBytes);
+
+                        zipAlgorithm = decryptionParameters.JsonWebToken.Zip;
+                        decryptionSucceeded = true;
+                        break;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -213,17 +249,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             ValidateDecryption(decryptionParameters, decryptionSucceeded, algorithmNotSupportedByCryptoProvider, exceptionStrings, keysAttempted);
-
-            if (string.IsNullOrEmpty(decryptionParameters.Zip))
-                return Encoding.UTF8.GetString(decryptedTokenBytes);
-
             try
             {
-                return decryptionParameters.DecompressionFunction(decryptedTokenBytes, decryptionParameters.Zip);
+                if (string.IsNullOrEmpty(zipAlgorithm))
+                    return Encoding.UTF8.GetString(decryptedTokenBytes);
+
+                return decryptionParameters.DecompressionFunction(decryptedTokenBytes, zipAlgorithm);
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new SecurityTokenDecompressionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10679, decryptionParameters.Zip), ex));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenDecompressionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10679, zipAlgorithm), ex));
             }
         }
 
@@ -239,18 +274,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10609, decryptionParameters.EncodedToken)));
         }
 
-        private static byte[] DecryptToken(CryptoProviderFactory cryptoProviderFactory, SecurityKey key, JwtTokenDecryptionParameters decryptionParameters)
+        private static byte[] DecryptToken(CryptoProviderFactory cryptoProviderFactory, SecurityKey key, string encAlg, byte[] ciphertext, byte[] headerAscii, byte[] initializationVector, byte[] authenticationTag)
         {
-            using (AuthenticatedEncryptionProvider decryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(key, decryptionParameters.Enc))
+            using (AuthenticatedEncryptionProvider decryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(key, encAlg))
             {
                 if (decryptionProvider == null)
-                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10610, key, LogHelper.MarkAsNonPII(decryptionParameters.Enc))));
+                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10610, key, LogHelper.MarkAsNonPII(encAlg))));
 
                 return decryptionProvider.Decrypt(
-                    Base64UrlEncoder.DecodeBytes(decryptionParameters.Ciphertext),
-                    Encoding.ASCII.GetBytes(decryptionParameters.EncodedHeader),
-                    Base64UrlEncoder.DecodeBytes(decryptionParameters.InitializationVector),
-                    Base64UrlEncoder.DecodeBytes(decryptionParameters.AuthenticationTag));
+                    ciphertext,
+                    headerAscii,
+                    initializationVector,
+                    authenticationTag);
             }
         }
 
@@ -334,7 +369,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return decryptionKeys;
 
         }
-
 
         /// <summary>
         /// Gets the <see cref="DateTime"/> using the number of seconds from 1970-01-01T0:0:0Z (UTC)

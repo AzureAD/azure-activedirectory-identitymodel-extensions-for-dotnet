@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Microsoft.IdentityModel.JsonWebTokens.JsonWebToken">
+    <Position X="4.5" Y="1" Width="6" />
+    <Members>
+      <Field Name="_act" Hidden="true" />
+      <Field Name="_alg" Hidden="true" />
+      <Field Name="_audiences" Hidden="true" />
+      <Field Name="_cty" Hidden="true" />
+      <Field Name="_enc" Hidden="true" />
+      <Field Name="_encodedHeader" Hidden="true" />
+      <Field Name="_encodedHeaderAsciiBytes" Hidden="true" />
+      <Field Name="_encodedPayload" Hidden="true" />
+      <Field Name="_encodedSignature" Hidden="true" />
+      <Field Name="_encryptedKeyBytes" Hidden="true" />
+      <Field Name="_hChars" Hidden="true" />
+      <Field Name="_iat" Hidden="true" />
+      <Field Name="_id" Hidden="true" />
+      <Field Name="_initializationVectorBytes" Hidden="true" />
+      <Field Name="_iss" Hidden="true" />
+      <Field Name="_kid" Hidden="true" />
+      <Field Name="_pChars" Hidden="true" />
+      <Field Name="_sChars" Hidden="true" />
+      <Field Name="_sub" Hidden="true" />
+      <Field Name="_typ" Hidden="true" />
+      <Field Name="_validFrom" Hidden="true" />
+      <Field Name="_validTo" Hidden="true" />
+      <Field Name="_x5t" Hidden="true" />
+      <Field Name="_zip" Hidden="true" />
+      <Method Name="ActorFactory" Hidden="true" />
+      <Method Name="AlgFactory" Hidden="true" />
+      <Method Name="AudiencesFactory" Hidden="true" />
+      <Property Name="AuthenticationTagBytes" Hidden="true" />
+      <Property Name="CipherTextBytes" Hidden="true" />
+      <Method Name="CtyFactory" Hidden="true" />
+      <Method Name="EncFactory" Hidden="true" />
+      <Method Name="EncodedHeaderFactory" Hidden="true" />
+      <Method Name="EncodedPayloadFactory" Hidden="true" />
+      <Method Name="EncodedSignatureFactory" Hidden="true" />
+      <Property Name="EncryptedKeyBytes" Hidden="true" />
+      <Method Name="HasPayloadClaim" Hidden="true" />
+      <Property Name="Header" Hidden="true" />
+      <Property Name="HeaderAsciiBytes" Hidden="true" />
+      <Method Name="IatFactory" Hidden="true" />
+      <Method Name="IdFactory" Hidden="true" />
+      <Property Name="InitializationVectorBytes" Hidden="true" />
+      <Method Name="Initialize" Hidden="true" />
+      <Property Name="IsEncrypted" Hidden="true" />
+      <Property Name="IsSigned" Hidden="true" />
+      <Method Name="IssuerFactory" Hidden="true" />
+      <Method Name="KidFactory" Hidden="true" />
+      <Property Name="MessageBytes" Hidden="true" />
+      <Property Name="Payload" Hidden="true" />
+      <Method Name="ReadToken" Hidden="true" />
+      <Property Name="SignatureBytes" Hidden="true" />
+      <Method Name="SubFactory" Hidden="true" />
+      <Method Name="TypFactory" Hidden="true" />
+      <Method Name="ValidFromFactory" Hidden="true" />
+      <Method Name="ValidToFactory" Hidden="true" />
+      <Method Name="X5tFactory" Hidden="true" />
+      <Method Name="ZipFactory" Hidden="true" />
+    </Members>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>rDczYCAABCyukxBUJIReyBWgiKN0BiKAoKQEIKASEEE=</HashCode>
+      <FileName>JsonWebToken.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Microsoft.IdentityModel.Tokens.SecurityToken">
+    <Position X="11.25" Y="1" Width="2" />
+    <TypeIdentifier />
+  </Class>
+  <Interface Name="Microsoft.IdentityModel.Tokens.IClaimSet">
+    <Position X="1.25" Y="2.25" Width="2.25" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="Microsoft.IdentityModel.Tokens.IJsonClaimSet">
+    <Position X="1" Y="3.75" Width="2.75" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="Microsoft.IdentityModel.Tokens.IClaimProvider">
+    <Position X="1.75" Y="0.75" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

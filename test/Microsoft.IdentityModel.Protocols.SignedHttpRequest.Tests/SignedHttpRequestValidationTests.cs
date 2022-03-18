@@ -1310,8 +1310,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 var signedHttpRequest = SignedHttpRequestTestUtils.CreateDefaultSignedHttpRequestToken(SignedHttpRequestTestUtils.DefaultSignedHttpRequestPayload.ToString(Formatting.None));
                 var validPopKey = SignedHttpRequestTestUtils.DefaultSigningCredentials.Key;
                 var invalidPopKey = KeyingMaterial.RsaSecurityKey1;
-                return new TheoryData<ValidateSignedHttpRequestTheoryData>
-                {
+                var theoryData = new TheoryData<ValidateSignedHttpRequestTheoryData>();
+
+                theoryData.Add(
                     new ValidateSignedHttpRequestTheoryData
                     {
                         First = true,
@@ -1319,14 +1320,18 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         PopKey = null,
                         ExpectedException = new ExpectedException(typeof(ArgumentNullException)),
                         TestId = "InvalidNullPopKey",
-                    },
+                    });
+
+                theoryData.Add(
                     new ValidateSignedHttpRequestTheoryData
                     {
                         SignedHttpRequestToken = signedHttpRequest,
-                        PopKey =  invalidPopKey,
+                        PopKey = invalidPopKey,
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidSignatureException), "IDX23034"),
                         TestId = "InvalidPopKeySignatureValidationFails",
-                    },
+                    });
+
+                theoryData.Add(
                     new ValidateSignedHttpRequestTheoryData
                     {
                         SignedHttpRequestToken = signedHttpRequest,
@@ -1341,7 +1346,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         },
                         ExpectedException = new ExpectedException(typeof(NotImplementedException)),
                         TestId = "InvalidDelegateThrows",
-                    },
+                    });
+
+                theoryData.Add(
                     new ValidateSignedHttpRequestTheoryData
                     {
                         SignedHttpRequestToken = new JsonWebToken(signedHttpRequest.EncodedHeader + "." + signedHttpRequest.EncodedPayload + "."),
@@ -1349,7 +1356,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         ExpectedPopKey = validPopKey,
                         ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidSignatureException), "IDX23009", typeof(ArgumentNullException)),
                         TestId = "InvalidUnsignedRequest",
-                    },
+                    });
+
+                theoryData.Add(
                     new ValidateSignedHttpRequestTheoryData
                     {
                         SignedHttpRequestToken = signedHttpRequest,
@@ -1363,15 +1372,18 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                             }
                         },
                         TestId = "ValidDelegate",
-                    },
+                    });
+
+                theoryData.Add(
                     new ValidateSignedHttpRequestTheoryData
                     {
                         SignedHttpRequestToken = signedHttpRequest,
                         PopKey = validPopKey,
                         ExpectedPopKey = validPopKey,
                         TestId = "ValidTest",
-                    },
-                };
+                    });
+
+                return theoryData;
             }
         }
 
@@ -1756,8 +1768,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             // set SignedHttpRequestToken if set and if JsonWebToken, otherwise set "dummy" value
             return new SignedHttpRequestValidationContext(SignedHttpRequestToken is JsonWebToken jwt ? jwt.EncodedToken : "dummy", httpRequestData, tokenValidationParameters, SignedHttpRequestValidationParameters, callContext);
         }
-
-        public CallContext CallContext { get; set; } = new CallContext();
 
         public SignedHttpRequestValidationResult ExpectedSignedHttpRequestValidationResult { get; set; }
 
