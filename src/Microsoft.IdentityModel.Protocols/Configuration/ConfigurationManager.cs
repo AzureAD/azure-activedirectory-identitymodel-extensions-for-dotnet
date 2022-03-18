@@ -49,6 +49,7 @@ namespace Microsoft.IdentityModel.Protocols
         private readonly SemaphoreSlim _refreshLock;
         private readonly IDocumentRetriever _docRetriever;
         private readonly IConfigurationRetriever<T> _configRetriever;
+        private readonly IConfigurationValidator<T> _configValidator;
         private T _currentConfiguration;
 
         /// <summary>
@@ -107,6 +108,23 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
+        /// Instantiates a new <see cref="ConfigurationManager{T}"/> with cinfiguration validator that manages automatic and controls refreshing on configuration data.
+        /// </summary>
+        /// <param name="metadataAddress">The address to obtain configuration.</param>
+        /// <param name="configRetriever">The <see cref="IConfigurationRetriever{T}"/></param>
+        /// <param name="docRetriever">The <see cref="IDocumentRetriever"/> that reaches out to obtain the configuration.</param>
+        /// <param name="configValidator">The <see cref="IConfigurationValidator{T}"/></param>
+        /// <exception cref="ArgumentNullException">If 'configValidator' is null.</exception>
+        public ConfigurationManager(string metadataAddress, IConfigurationRetriever<T> configRetriever, IDocumentRetriever docRetriever, IConfigurationValidator<T> configValidator)
+            :this(metadataAddress, configRetriever, docRetriever)
+        {
+            if (configValidator == null)
+                throw LogHelper.LogArgumentNullException(nameof(configValidator));
+
+            _configValidator = configValidator;
+        }
+
+        /// <summary>
         /// Obtains an updated version of Configuration.
         /// </summary>
         /// <returns>Configuration of type T.</returns>
@@ -142,12 +160,25 @@ namespace Microsoft.IdentityModel.Protocols
                         _currentConfiguration = await _configRetriever.GetConfigurationAsync(MetadataAddress, _docRetriever, CancellationToken.None).ConfigureAwait(false);
                         _lastRefresh = now;
                         _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval);
+                        if (_configValidator != null)
+                        {
+                            ConfigurationValidationResult result = _configValidator.Validate(_currentConfiguration);
+                            if (!result.Succeeded)
+                            {
+                                throw new ConfigurationValidationException(LogMessages.IDX20810, result.Exception);
+                            }
+                        }
                     }
                     catch (Exception ex)
                     {
                         _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
                         if (_currentConfiguration == null) // Throw an exception if there's no configuration to return.
                             throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX20803, (MetadataAddress ?? "null")), ex));
+                        else if (ex is ConfigurationValidationException)
+                        {
+                            _currentConfiguration = null;
+                            throw LogHelper.LogExceptionMessage(ex);
+                        }
                         else
                             LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX20806, (MetadataAddress ?? "null")), ex));
                     }
