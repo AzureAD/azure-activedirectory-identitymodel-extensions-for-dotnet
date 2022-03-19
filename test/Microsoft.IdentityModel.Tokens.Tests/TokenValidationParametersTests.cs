@@ -21,8 +21,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 51)
-                Assert.True(false, "Number of properties has changed from 51 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 52)
+                Assert.True(false, "Number of properties has changed from 52 to: " + properties.Length + ", adjust tests");
 
             TokenValidationParameters actorValidationParameters = new TokenValidationParameters();
             SecurityKey issuerSigningKey = KeyingMaterial.DefaultX509Key_2048_Public;
@@ -140,8 +140,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 51)
-                Assert.True(false, "Number of public fields has changed from 51 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 52)
+                Assert.True(false, "Number of public fields has changed from 52 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
@@ -150,7 +150,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     {
                         new KeyValuePair<string, List<object>>("ActorValidationParameters", new List<object>{(TokenValidationParameters)null, new TokenValidationParameters(), new TokenValidationParameters()}),
                         new KeyValuePair<string, List<object>>("AuthenticationType", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                        //new KeyValuePair<string, List<object>>("CertificateValidator", new List<object>{(string)null, X509CertificateValidator.None, X509CertificateValidatorEx.None}),
                         new KeyValuePair<string, List<object>>("ClockSkew", new List<object>{TokenValidationParameters.DefaultClockSkew, TimeSpan.FromHours(2), TimeSpan.FromMinutes(1)}),
                         new KeyValuePair<string, List<object>>("IgnoreTrailingSlashWhenValidatingAudience",  new List<object>{true, false, true}),
                         new KeyValuePair<string, List<object>>("IssuerSigningKey", new List<object>{(SecurityKey)null, KeyingMaterial.DefaultX509Key_2048, KeyingMaterial.RsaSecurityKey_2048}),

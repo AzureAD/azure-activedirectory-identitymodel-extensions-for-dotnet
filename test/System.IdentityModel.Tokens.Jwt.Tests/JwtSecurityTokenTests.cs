@@ -394,7 +394,17 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 var theoryData = new TheoryData<JwtTheoryData>();
 
                 JwtTestData.InvalidRegExSegmentsData(theoryData);
-                JwtTestData.InvalidNumberOfSegmentsData("IDX12741:", theoryData);
+                JwtTestData.InvalidNumberOfSegmentsData(
+                    new List<string>
+                    {
+                        "IDX12741",
+                        "IDX12741:",
+                        "IDX12741:",
+                        "IDX12741:",
+                        "IDX12740:",
+                        "IDX12741:"
+                    },
+                    theoryData);
                 JwtTestData.InvalidEncodedSegmentsData("", theoryData);
                 JwtTestData.ValidEncodedSegmentsData(theoryData);
 
