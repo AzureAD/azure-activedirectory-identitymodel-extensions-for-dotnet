@@ -70,6 +70,8 @@ namespace Microsoft.IdentityModel.Xml.Tests
             return VerifyResult;
         }
 
+        public override bool Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength) => throw new System.NotImplementedException();
+
         public bool VerifyResult { get; set; } = true;
     }
 }

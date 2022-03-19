@@ -54,6 +54,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         {
             SetDefaultTimesOnTokenCreation = false
         };
+
         private readonly Uri _baseUriHelper = new Uri("http://localhost", UriKind.Absolute);
         private readonly HttpClient _defaultHttpClient = new HttpClient();
 
@@ -523,12 +524,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>A <see cref="TokenValidationResult"/>.</returns>
-        internal virtual Task<TokenValidationResult> ValidateAccessTokenAsync(string accessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
+        internal async virtual Task<TokenValidationResult> ValidateAccessTokenAsync(string accessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(accessToken))
                 throw LogHelper.LogArgumentNullException(nameof(accessToken));
-            var tokenValidationResult = _jwtTokenHandler.ValidateToken(accessToken, signedHttpRequestValidationContext.AccessTokenValidationParameters);
-            return Task.FromResult(tokenValidationResult);
+
+            return await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.TokenHandler.ValidateTokenAsync(accessToken, signedHttpRequestValidationContext.AccessTokenValidationParameters).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -632,8 +633,20 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                         if (signatureProvider == null)
                             throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(Tokens.LogMessages.IDX10636, popKey.ToString(), LogHelper.MarkAsNonPII(signedHttpRequest.Alg))));
 
-                        if (signatureProvider.Verify(Encoding.UTF8.GetBytes(signedHttpRequest.EncodedHeader + "." + signedHttpRequest.EncodedPayload), Base64UrlEncoder.DecodeBytes(signedHttpRequest.EncodedSignature)))
-                            return popKey;
+#if NET45
+                        if (signatureProvider.Verify(signedHttpRequest.MessageBytes, signedHttpRequest.SignatureBytes))
+#else
+                        if(EncodingUtils.PerformEncodingDependentOperation<bool, string, int, SignatureProvider>(
+                            signedHttpRequest.EncodedToken,
+                            0,
+                            signedHttpRequest.Dot2,
+                            Encoding.UTF8,
+                            signedHttpRequest.EncodedToken,
+                            signedHttpRequest.Dot2,
+                            signatureProvider,
+                            JsonWebTokenHandler.ValidateSignature))
+#endif
+                        return popKey;
                     }
                     finally
                     {

@@ -115,6 +115,9 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
             return VerifyAsync(input, signature, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
+        /// <inheritdoc/>
+        public override bool Verify(byte[] input, int inputOffset, int lengthOffset, byte[] signature, int signatureOffset, int signatureLength) => throw new NotImplementedException();
+
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>

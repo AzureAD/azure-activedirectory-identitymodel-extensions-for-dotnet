@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10103 = "IDX10103: RoleClaimType cannot be null or whitespace.";
         public const string IDX10104 = "IDX10104: TokenLifetimeInMinutes must be greater than zero. value: '{0}'";
         public const string IDX10105 = "IDX10105: ClaimValue that is a collection of collections is not supported. Such ClaimValue is found for ClaimType : '{0}'";
-        public const string IDX10106 = "IDX10106: The parameter {0} had an invalid value: '{1}'.";
+        //public const string IDX10106 = "IDX10106:";
         public const string IDX10107 = "IDX10107: When setting RefreshInterval, the value must be greater than MinimumRefreshInterval: '{0}'. value: '{1}'.";
         public const string IDX10108 = "IDX10108: When setting AutomaticRefreshInterval, the value must be greater than MinimumAutomaticRefreshInterval: '{0}'. value: '{1}'.";
         public const string IDX10109 = "IDX10109: Warning: Claims is being accessed without first reading the properties TokenValidationResult.IsValid or TokenValidationResult.Exception. This could be a potential security issue.";
@@ -143,7 +143,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10618 = "IDX10618: Key unwrap failed using decryption Keys: '{0}'.\nExceptions caught:\n '{1}'.\ntoken: '{2}'.";
         public const string IDX10619 = "IDX10619: Decryption failed. Algorithm: '{0}'. Either the Encryption Algorithm: '{1}' or none of the Security Keys are supported by the CryptoProviderFactory.";
         public const string IDX10620 = "IDX10620: Unable to obtain a CryptoProviderFactory, both EncryptingCredentials.CryptoProviderFactory and EncryptingCredentials.Key.CrypoProviderFactory are null.";
-        public const string IDX10903 = "IDX10903: Token decryption succeeded. With thumbprint: '{0}'.";
+        //public const string IDX10903 = "IDX10903: Token decryption succeeded. With thumbprint: '{0}'.";
 
         // Formating
         public const string IDX10400 = "IDX10400: Unable to decode: '{0}' as Base64url encoded string.";
@@ -178,7 +178,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10652 = "IDX10652: The algorithm '{0}' is not supported.";
         public const string IDX10653 = "IDX10653: The encryption algorithm '{0}' requires a key size of at least '{1}' bits. Key '{2}', is of size: '{3}'.";
         public const string IDX10654 = "IDX10654: Decryption failed. Cryptographic operation exception: '{0}'.";
-        public const string IDX10655 = "IDX10655: 'length' must be greater than 1: '{0}'";
+        public const string IDX10655 = "IDX10655: '{0}' must be greater than 1, was: '{1}'";
         // public const string IDX10656 = "IDX10656:";
         public const string IDX10657 = "IDX10657: The SecurityKey provided for the symmetric key wrap algorithm cannot be converted to byte array. Type is: '{0}'.";
         public const string IDX10658 = "IDX10658: WrapKey failed, exception from cryptographic operation: '{0}'";
@@ -241,6 +241,8 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10713 = "IDX10713: Encrytion/Decryption using algorithm '{0}' is only supported on Windows platform.";
         public const string IDX10714 = "IDX10714: Unable to perform the decryption. There is a authentication tag mismatch.";
         public const string IDX10715 = "IDX10715: Encryption using algorithm: '{0}' is not supported.";
+        public const string IDX10716 = "IDX10716: '{0}' must be greater than 0, was: '{1}'";
+        public const string IDX10717 = "IDX10717: '{0} + {1}' must not be greater than {2}, '{3} + {4} > {5}'.";
 
         // Json specific errors
         //public const string IDX10801 = "IDX10801:"
@@ -256,6 +258,10 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10812 = "IDX10812: Unable to create a {0} from the properties found in the JsonWebKey: '{1}'.";
         public const string IDX10813 = "IDX10813: Unable to create a {0} from the properties found in the JsonWebKey: '{1}', Exception '{2}'.";
         public const string IDX10814 = "IDX10814: Unable to create a {0} from the properties found in the JsonWebKey: '{1}'. Missing: '{2}'.";
+
+        // Base64UrlEncoding
+        public const string IDX10820 = "IDX10820: Invalid character found in Base64UrlEncoding. Character: '{0}', Encoding: '{1}'.";
+        public const string IDX10821 = "IDX10821: Incorrect padding detected in Base64UrlEncoding. Encoding: '{0}'.";
 
         //EventBasedLRUCache errors
         public const string IDX10900 = "IDX10900: EventBasedLRUCache._eventQueue encountered an error while processing a cache operation. Exception '{0}'.";

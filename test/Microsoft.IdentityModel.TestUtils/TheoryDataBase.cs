@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.TestUtils
 {
@@ -36,15 +37,27 @@ namespace Microsoft.IdentityModel.TestUtils
     /// </summary>
     public class TheoryDataBase
     {
-        public TheoryDataBase()
+        public TheoryDataBase() : this(Guid.NewGuid().ToString())
+        {
+        }
+
+        public TheoryDataBase(string testId)
         {
             IdentityModelEventSource.ShowPII = true;
+            CallContext = new CallContext
+            {
+                CaptureLogs = true,
+            };
+
+            TestId = testId;
         }
 
         public TheoryDataBase(bool showPII)
         {
             IdentityModelEventSource.ShowPII = showPII;
         }
+
+        public CallContext CallContext { get; set; } = new CallContext();
 
         public ExpectedException ExpectedException { get; set; } = ExpectedException.NoExceptionExpected;
 

@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
@@ -106,6 +107,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     public class SignedHttpRequestValidationParameters
     {
         private TimeSpan _signedHttpRequestLifetime = DefaultSignedHttpRequestLifetime;
+        private TokenHandler _tokenHandler = new JsonWebTokenHandler();
 
         /// <summary>
         /// Gets or sets a value indicating whether the unsigned query parameters are accepted or not.
@@ -201,6 +203,23 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// Gets or sets the <see cref="SignatureValidatorAsync"/> delegate.
         /// </summary>
         public SignatureValidatorAsync SignatureValidatorAsync { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="TokenHandler"/> to AccessToken inside the SignedHttpRequest.
+        /// </summary>
+        public TokenHandler TokenHandler
+        {
+            get
+            {
+                return _tokenHandler;
+            }
+
+            set
+            {
+                _tokenHandler = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
+            }
+        }
+
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="SignedHttpRequestClaimTypes.Ts"/> claim should be validated or not.

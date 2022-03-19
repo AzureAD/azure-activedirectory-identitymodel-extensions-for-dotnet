@@ -1685,13 +1685,13 @@ namespace System.IdentityModel.Tokens.Jwt
             return JwtTokenUtilities.DecryptJwtToken(jwtToken, validationParameters, new JwtTokenDecryptionParameters
             {
                 Alg = jwtToken.Header.Alg,
-                AuthenticationTag = jwtToken.RawAuthenticationTag,
-                Ciphertext = jwtToken.RawCiphertext,
+                AuthenticationTagBytes = Base64UrlEncoder.DecodeBytes(jwtToken.RawAuthenticationTag),
+                CipherTextBytes = Base64UrlEncoder.DecodeBytes(jwtToken.RawCiphertext),
                 DecompressionFunction = JwtTokenUtilities.DecompressToken,
                 Enc = jwtToken.Header.Enc,
-                EncodedHeader = jwtToken.EncodedHeader,
+                HeaderAsciiBytes = Encoding.ASCII.GetBytes(jwtToken.EncodedHeader),
                 EncodedToken = jwtToken.RawData,
-                InitializationVector= jwtToken.RawInitializationVector,
+                InitializationVectorBytes = Base64UrlEncoder.DecodeBytes(jwtToken.RawInitializationVector),
                 Keys = keys,
                 Zip = jwtToken.Header.Zip,
             });

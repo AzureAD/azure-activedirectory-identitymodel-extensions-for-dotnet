@@ -128,6 +128,28 @@ namespace Microsoft.IdentityModel.Tokens
         public abstract bool Verify(byte[] input, byte[] signature);
 
         /// <summary>
+        /// Verifies that a signature created over the 'input' matches the signature. Using <see cref="SecurityKey"/> and 'algorithm' passed to <see cref="SignatureProvider( SecurityKey, string )"/>.
+        /// </summary>
+        /// <param name="input">The bytes to verify.</param>
+        /// <param name="inputOffset">offset in to input bytes to caculate hash.</param>
+        /// <param name="inputLength">number of bytes of signature to use.</param>
+        /// <param name="signature">signature to compare against.</param>
+        /// <param name="signatureOffset"></param>
+        /// <param name="signatureLength"></param>
+        /// <returns>true if computed signature matches the signature parameter, false otherwise.</returns>
+        /// <exception cref="ArgumentNullException">'input' is null.</exception>
+        /// <exception cref="ArgumentNullException">'signature' is null.</exception>
+        /// <exception cref="ArgumentException">'input.Length' == 0.</exception>
+        /// <exception cref="ArgumentException">'signature.Length' == 0. </exception>
+        /// <exception cref="ArgumentException">'length &lt; 1'</exception>
+        /// <exception cref="ArgumentException">'offset + length &gt; input.Length'</exception>
+        /// <exception cref="ObjectDisposedException"><see cref="Dispose(bool)"/> has been called.</exception>
+        public virtual bool Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength)
+        {
+            throw LogHelper.LogExceptionMessage(new NotSupportedException());
+        }
+
+        /// <summary>
         /// Gets or sets a bool indicating if this <see cref="SignatureProvider"/> is expected to create signatures.
         /// </summary>
         public bool WillCreateSignatures { get; protected set; }

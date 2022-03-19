@@ -353,6 +353,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>Verify is thread safe.</remarks>
         public override bool Verify(byte[] input, byte[] signature)
         {
+            // The reason this method doesn't call through to: Verify(input, 0, input.Length, signature, 0, signature.Length);
+            // Is because this method's contract is to check the entire signature, if the signature was truncated and signature.Length
+            // was passed, the signature may verify.
+
             if (input == null || input.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(input));
 
@@ -382,6 +386,103 @@ namespace Microsoft.IdentityModel.Tokens
                 if (!_disposed)
                     _asymmetricAdapterObjectPool.Free(asym);
             }
+        }
+
+        /// <inheritdoc/>
+        public override bool Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength)
+        {
+            if (input == null || input.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(input));
+
+            if (signature == null || signature.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(signature));
+
+            if (inputOffset < 0)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10716,
+                        LogHelper.MarkAsNonPII(nameof(inputOffset)),
+                        LogHelper.MarkAsNonPII(inputOffset))));
+
+            if (inputLength < 1)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10655,
+                        LogHelper.MarkAsNonPII(nameof(inputLength)),
+                        LogHelper.MarkAsNonPII(inputLength))));
+
+            if (inputOffset + inputLength > input.Length)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10717,
+                        LogHelper.MarkAsNonPII(nameof(inputOffset)),
+                        LogHelper.MarkAsNonPII(nameof(inputLength)),
+                        LogHelper.MarkAsNonPII(nameof(input)),
+                        LogHelper.MarkAsNonPII(inputOffset),
+                        LogHelper.MarkAsNonPII(inputLength),
+                        LogHelper.MarkAsNonPII(input.Length))));
+
+            if (signatureOffset < 0)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10716,
+                        LogHelper.MarkAsNonPII(nameof(signatureOffset)),
+                        LogHelper.MarkAsNonPII(signatureOffset))));
+
+            if (signatureLength < 1)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10655,
+                        LogHelper.MarkAsNonPII(nameof(signatureLength)),
+                        LogHelper.MarkAsNonPII(signatureLength))));
+
+            if (signatureOffset + signatureLength > signature.Length)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10717,
+                        LogHelper.MarkAsNonPII(nameof(signatureOffset)),
+                        LogHelper.MarkAsNonPII(nameof(signatureLength)),
+                        LogHelper.MarkAsNonPII(nameof(signature)),
+                        LogHelper.MarkAsNonPII(signatureOffset),
+                        LogHelper.MarkAsNonPII(signatureLength),
+                        LogHelper.MarkAsNonPII(signature.Length))));
+
+            if (_disposed)
+            {
+                CryptoProviderCache?.TryRemove(this);
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
+            }
+
+            AsymmetricAdapter asym = null;
+            try
+            {
+                asym = _asymmetricAdapterObjectPool.Allocate();
+
+                if (signature.Length == signatureLength)
+                {
+                    return asym.Verify(input, inputOffset, inputLength, signature);
+                }
+                else
+                {
+                    // AsymetricAdapter.Verify could do this.
+                    // Having the logic here, handles EC and RSA. We can revisit when we start using spans in 3.1+.
+                    byte[] signatureBytes = new byte[signatureLength];
+                    Array.Copy(signature, 0, signatureBytes, 0, signatureLength);
+                    return asym.Verify(input, inputOffset, inputLength, signatureBytes);
+                }
+            }
+            catch
+            {
+                CryptoProviderCache?.TryRemove(this);
+                Dispose(true);
+                throw;
+            }
+            finally
+            {
+                if (!_disposed)
+                    _asymmetricAdapterObjectPool.Free(asym);
+            }
+
         }
 
         /// <summary>

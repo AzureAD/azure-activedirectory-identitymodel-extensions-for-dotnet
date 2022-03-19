@@ -43,6 +43,7 @@ namespace Microsoft.IdentityModel.Tokens
     delegate byte[] DecryptDelegate(byte[] bytes);
     delegate byte[] SignDelegate(byte[] bytes);
     delegate bool VerifyDelegate(byte[] bytes, byte[] signature);
+    delegate bool VerifyDelegateWithLength(byte[] bytes, int start, int length, byte[] signature);
 
     /// <summary>
     /// This adapter abstracts the 'RSA' differences between versions of .Net targets.
@@ -70,13 +71,13 @@ namespace Microsoft.IdentityModel.Tokens
 #if DESKTOP
         private bool _useRSAOeapPadding = false;
 #endif
-
         private bool _disposeCryptoOperators = false;
         private bool _disposed = false;
         private DecryptDelegate DecryptFunction = DecryptFunctionNotFound;
         private EncryptDelegate EncryptFunction = EncryptFunctionNotFound;
         private SignDelegate SignatureFunction = SignatureFunctionNotFound;
         private VerifyDelegate VerifyFunction = VerifyFunctionNotFound;
+        private VerifyDelegateWithLength VerifyFunctionWithLength = VerifyFunctionWithLengthNotFound;
 
         // Encryption algorithms do not need a HashAlgorithm, this is called by RSAKeyWrap
         internal AsymmetricAdapter(SecurityKey key, string algorithm, bool requirePrivateKey)
@@ -183,6 +184,7 @@ namespace Microsoft.IdentityModel.Tokens
             ECDsa = ecdsaSecurityKey.ECDsa;
             SignatureFunction = SignWithECDsa;
             VerifyFunction = VerifyWithECDsa;
+            VerifyFunctionWithLength = VerifyWithECDsaWithLength;
         }
 
         private void InitializeUsingRsa(RSA rsa, string algorithm)
@@ -202,7 +204,9 @@ namespace Microsoft.IdentityModel.Tokens
                 EncryptFunction = EncryptWithRsaCryptoServiceProviderProxy;
                 SignatureFunction = SignWithRsaCryptoServiceProviderProxy;
                 VerifyFunction = VerifyWithRsaCryptoServiceProviderProxy;
-
+#if NET461_OR_GREATER
+                VerifyFunctionWithLength = VerifyWithRsaCryptoServiceProviderProxyWithLength;
+#endif
                 // RSACryptoServiceProviderProxy will track if a new RSA object is created and dispose appropriately.
                 _disposeCryptoOperators = true;
                 return;
@@ -259,6 +263,7 @@ namespace Microsoft.IdentityModel.Tokens
             EncryptFunction = EncryptWithRsa;
             SignatureFunction = SignWithRsa;
             VerifyFunction = VerifyWithRsa;
+            VerifyFunctionWithLength = VerifyWithRsaWithLength;
 #endif
         }
 
@@ -312,7 +317,18 @@ namespace Microsoft.IdentityModel.Tokens
             return VerifyFunction(bytes, signature);
         }
 
+        internal bool Verify(byte[] bytes, int start, int length, byte[] signature)
+        {
+            return VerifyFunctionWithLength(bytes, start, length, signature);
+        }
+
         private static bool VerifyFunctionNotFound(byte[] bytes, byte[] signature)
+        {
+            // we should never get here, its a bug if we do.
+            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogMessages.IDX10686));
+        }
+
+        private static bool VerifyFunctionWithLengthNotFound(byte[] bytes, int start, int length, byte[] signature)
         {
             // we should never get here, its a bug if we do.
             throw LogHelper.LogExceptionMessage(new NotSupportedException(LogMessages.IDX10686));
@@ -323,8 +339,14 @@ namespace Microsoft.IdentityModel.Tokens
             return ECDsa.VerifyHash(HashAlgorithm.ComputeHash(bytes), signature);
         }
 
+        private bool VerifyWithECDsaWithLength(byte[] bytes, int start, int length, byte[] signature)
+        {
+            return ECDsa.VerifyHash(HashAlgorithm.ComputeHash(bytes, start, length), signature);
+        }
+
         #region NET61+ related code
 #if NET461 || NET472 || NETSTANDARD2_0 || NET6_0
+
         // HasAlgorithmName was introduced into Net46
         internal AsymmetricAdapter(SecurityKey key, string algorithm, HashAlgorithm hashAlgorithm, HashAlgorithmName hashAlgorithmName, bool requirePrivateKey)
             : this(key, algorithm, hashAlgorithm, requirePrivateKey)
@@ -357,6 +379,11 @@ namespace Microsoft.IdentityModel.Tokens
         {
             return RSA.VerifyHash(HashAlgorithm.ComputeHash(bytes), signature, HashAlgorithmName, RSASignaturePadding);
         }
+
+        private bool VerifyWithRsaWithLength(byte[] bytes, int start, int length, byte[] signature)
+        {
+            return RSA.VerifyHash(HashAlgorithm.ComputeHash(bytes, start, length), signature, HashAlgorithmName, RSASignaturePadding);
+        }
 #endif
 #endregion
 
@@ -383,10 +410,18 @@ namespace Microsoft.IdentityModel.Tokens
         {
             return RsaCryptoServiceProviderProxy.VerifyData(bytes, HashAlgorithm, signature);
         }
+
+    #if NET461_OR_GREATER
+        private bool VerifyWithRsaCryptoServiceProviderProxyWithLength(byte[] bytes, int offset, int length, byte[] signature)
+        {
+            return RsaCryptoServiceProviderProxy.VerifyDataWithLength(bytes, offset, length, HashAlgorithm, HashAlgorithmName, signature);
+        }
+    #endif
+
 #endif
 #endregion
 
-#region NET45 'lightup' code
+        #region NET45 'lightup' code
         // the idea here is if a user has defined their application to target 4.6.1+ but some layer in the stack kicks down below, this code builds delegates
         // for decrypting, encryption, signing and validating when we detect that the instance of RSA is RSACng and RSACng is supported by the framework.
 #if NET45
@@ -622,7 +657,7 @@ namespace Microsoft.IdentityModel.Tokens
             return _rsaPkcs1VerifyMethod(RSA, input, signature, _lightUpHashAlgorithmName);
         }
 #endif
-#endregion
+        #endregion
 
     }
 }

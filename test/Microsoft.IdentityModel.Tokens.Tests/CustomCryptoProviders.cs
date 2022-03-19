@@ -454,6 +454,8 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             DisposeCalled = true;
         }
+
+        public override bool Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength) => throw new NotImplementedException();
     }
 
     public interface ICustomObject { }

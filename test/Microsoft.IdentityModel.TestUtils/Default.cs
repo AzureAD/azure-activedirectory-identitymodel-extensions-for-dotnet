@@ -394,7 +394,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant).ToString() },
                 { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore).ToString()},
                 { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString() },
-            }.ToString();
+            }.ToString(Json.Formatting.None);
         }
 
         public static List<Claim> PayloadClaims
@@ -428,23 +428,23 @@ namespace Microsoft.IdentityModel.TestUtils
         public static List<Claim> PayloadJsonClaims
         {
             get => new List<Claim>
-                    {
-                        new Claim(JwtRegisteredClaimNames.Aud, Audience, ClaimValueTypes.String),
-                        new Claim(JwtRegisteredClaimNames.Iss, Issuer, ClaimValueTypes.String),
-                        new Claim("ClaimValueTypes.String", "ClaimValueTypes.String.Value", ClaimValueTypes.String),
-                        new Claim("ClaimValueTypes.Boolean.true", "true", ClaimValueTypes.Boolean),
-                        new Claim("ClaimValueTypes.Boolean.false", "false", ClaimValueTypes.Boolean),
-                        new Claim("ClaimValueTypes.Double", "123.4", ClaimValueTypes.Double),
-                        new Claim("ClaimValueTypes.DateTime.IS8061", "2019-11-15T14:31:21.6101326Z", ClaimValueTypes.DateTime),
-                        new Claim("ClaimValueTypes.DateTime", "2019-11-15", ClaimValueTypes.DateTime),
-                        new Claim("ClaimValueTypes.JsonClaimValueTypes.Json1", @"{""jsonProperty1"":""jsonvalue1""}", System.IdentityModel.Tokens.Jwt.JsonClaimValueTypes.Json),
-                        new Claim("ClaimValueTypes.JsonClaimValueTypes.Json2", @"{""jsonProperty2"":""jsonvalue2""}", System.IdentityModel.Tokens.Jwt.JsonClaimValueTypes.Json),
-                        new Claim("ClaimValueTypes.JsonClaimValueTypes.JsonNull", "", System.IdentityModel.Tokens.Jwt.JsonClaimValueTypes.JsonNull),
-                        new Claim("ClaimValueTypes.JsonClaimValueTypes.JsonArray1", @"[1,2,3]", System.IdentityModel.Tokens.Jwt.JsonClaimValueTypes.JsonArray),
-                        new Claim("ClaimValueTypes.JsonClaimValueTypes.JsonArray2", @"[1,""2"",3]", System.IdentityModel.Tokens.Jwt.JsonClaimValueTypes.JsonArray),
-                        new Claim("ClaimValueTypes.JsonClaimValueTypes.Integer1", "1", ClaimValueTypes.Integer),
-                        new Claim(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString(), ClaimValueTypes.String, Issuer, Issuer)
-                    };
+            {
+                new Claim(JwtRegisteredClaimNames.Aud, Audience, ClaimValueTypes.String),
+                new Claim(JwtRegisteredClaimNames.Iss, Issuer, ClaimValueTypes.String),
+                new Claim("ClaimValueTypes.String", "ClaimValueTypes.String.Value", ClaimValueTypes.String),
+                new Claim("ClaimValueTypes.Boolean.true", "true", ClaimValueTypes.Boolean),
+                new Claim("ClaimValueTypes.Boolean.false", "false", ClaimValueTypes.Boolean),
+                new Claim("ClaimValueTypes.Double", "123.4", ClaimValueTypes.Double),
+                new Claim("ClaimValueTypes.DateTime.IS8061", "2019-11-15T14:31:21.6101326Z", ClaimValueTypes.DateTime),
+                new Claim("ClaimValueTypes.DateTime", "2019-11-15", ClaimValueTypes.DateTime),
+                new Claim("ClaimValueTypes.JsonClaimValueTypes.Json1", @"{""jsonProperty1"":""jsonvalue1""}", System.IdentityModel.Tokens.Jwt.JsonClaimValueTypes.Json),
+                new Claim("ClaimValueTypes.JsonClaimValueTypes.Json2", @"{""jsonProperty2"":""jsonvalue2""}", System.IdentityModel.Tokens.Jwt.JsonClaimValueTypes.Json),
+                new Claim("ClaimValueTypes.JsonClaimValueTypes.JsonNull", "", System.IdentityModel.Tokens.Jwt.JsonClaimValueTypes.JsonNull),
+                new Claim("ClaimValueTypes.JsonClaimValueTypes.JsonArray1", @"[1,2,3]", System.IdentityModel.Tokens.Jwt.JsonClaimValueTypes.JsonArray),
+                new Claim("ClaimValueTypes.JsonClaimValueTypes.JsonArray2", @"[1,""2"",3]", System.IdentityModel.Tokens.Jwt.JsonClaimValueTypes.JsonArray),
+                new Claim("ClaimValueTypes.JsonClaimValueTypes.Integer1", "1", ClaimValueTypes.Integer),
+                new Claim(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString(), ClaimValueTypes.String, Issuer, Issuer)
+            };
         }
 
         public static Dictionary<string, object> PayloadJsonDictionary

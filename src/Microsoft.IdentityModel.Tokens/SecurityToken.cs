@@ -26,6 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
+using System.Security.Claims;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -34,6 +36,11 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public abstract class SecurityToken
     {
+        internal virtual IEnumerable<Claim> CreateClaims(string issuer)
+        {
+            return new List<Claim>();
+        }
+
         /// <summary>
         /// This must be overridden to get the Id of this <see cref="SecurityToken"/>.
         /// </summary>
