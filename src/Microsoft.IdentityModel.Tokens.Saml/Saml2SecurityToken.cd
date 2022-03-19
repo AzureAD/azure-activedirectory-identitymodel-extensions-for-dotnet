@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Microsoft.IdentityModel.Tokens.Saml2.Saml2Assertion">
+    <Position X="10.5" Y="1" Width="1.5" />
+    <Members>
+      <Field Name="_canonicalString" Hidden="true" />
+      <Field Name="_id" Hidden="true" />
+      <Field Name="_issueInstant" Hidden="true" />
+      <Field Name="_issuer" Hidden="true" />
+      <Property Name="XmlTokenStream" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>IAESAABAAAAAAAAAAJFAAAAAAAAABgAAAAACAJACAAE=</HashCode>
+      <FileName>Saml2\Saml2Assertion.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityToken">
+    <Position X="8.25" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAESAAAAAAAAAAAAAgAAAAAAAAAAACAAACAAAAAQAAA=</HashCode>
+      <FileName>Saml2\Saml2SecurityToken.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Assertion" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Microsoft.IdentityModel.Tokens.Saml2.Saml2AttributeStatement">
+    <Position X="12.75" Y="1" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Saml2\Saml2AttributeStatement.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Attributes" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Microsoft.IdentityModel.Tokens.Saml2.Saml2Attribute">
+    <Position X="16.75" Y="1" Width="3" />
+    <Members>
+      <Field Name="_attributeValueXsiType" Hidden="true" />
+      <Field Name="_friendlyName" Hidden="true" />
+      <Field Name="_name" Hidden="true" />
+      <Field Name="_nameFormat" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAAIAAAAAAAAAAAAAAAAAQACAAAAAACAAAwAAIACIA=</HashCode>
+      <FileName>Saml2\Saml2Attribute.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Microsoft.IdentityModel.Tokens.SecurityToken">
+    <Position X="5.5" Y="1" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

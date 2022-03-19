@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Microsoft.IdentityModel.Tokens.Saml.SamlSecurityToken">
+    <Position X="4.5" Y="2" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAESAAAAAAAAAAAAAgAAAAAAAAAAACAAACAAAAAQAAA=</HashCode>
+      <FileName>Saml\SamlSecurityToken.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Assertion" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Microsoft.IdentityModel.Tokens.Saml.SamlAssertion">
+    <Position X="7.25" Y="2" Width="2.5" />
+    <Members>
+      <Field Name="_assertionId" Hidden="true" />
+      <Field Name="_canonicalString" Hidden="true" />
+      <Field Name="_issueInstant" Hidden="true" />
+      <Field Name="_issuer" Hidden="true" />
+      <Property Name="XmlTokenStream" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>IAEQAQBAAAQAAAAAABEAAAAAAEAABgAAAAACAJACAAE=</HashCode>
+      <FileName>Saml\SamlAssertion.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Microsoft.IdentityModel.Tokens.SecurityToken">
+    <Position X="2.5" Y="2" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="Microsoft.IdentityModel.Tokens.Saml.SamlAttributeStatement">
+    <Position X="10.5" Y="2" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Saml\SamlAttributeStatement.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Attributes" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Microsoft.IdentityModel.Tokens.Saml.SamlAttribute">
+    <Position X="13.5" Y="2" Width="2.75" />
+    <Members>
+      <Field Name="_attributeValueXsiType" Hidden="true" />
+      <Field Name="_name" Hidden="true" />
+      <Field Name="_nameSpace" Hidden="true" />
+      <Field Name="_originalIssuer" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>CAAAIAAAAAAAAAAAQAAAAAQAAAAAIAACAAAgAAAACIA=</HashCode>
+      <FileName>Saml\SamlAttribute.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

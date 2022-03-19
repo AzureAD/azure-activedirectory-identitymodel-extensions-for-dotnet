@@ -314,6 +314,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return;
             }
 
+            // TODO - brentsch, we do not need to log here
             if (!validationParameters.ValidateIssuerSigningKey)
             {
                 LogHelper.LogVerbose(LogMessages.IDX10237);

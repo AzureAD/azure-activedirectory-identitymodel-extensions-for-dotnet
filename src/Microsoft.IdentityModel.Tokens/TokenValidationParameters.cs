@@ -160,6 +160,14 @@ namespace Microsoft.IdentityModel.Tokens
     public delegate string TypeValidator(string type, SecurityToken securityToken, TokenValidationParameters validationParameters);
 
     /// <summary>
+    /// Definition for TransformBeforeSignatureValidation.
+    /// </summary>
+    /// <param name="token">The <see cref="SecurityToken"/> that is being validated.</param>
+    /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+    /// <returns>A transformed <see cref="SecurityToken"/>.</returns>
+    public delegate SecurityToken TransformBeforeSignatureValidation(SecurityToken token, TokenValidationParameters validationParameters);
+
+    /// <summary>
     /// Contains a set of parameters that are used by a <see cref="SecurityTokenHandler"/> when validating a <see cref="SecurityToken"/>.
     /// </summary>
     public class TokenValidationParameters
@@ -227,6 +235,7 @@ namespace Microsoft.IdentityModel.Tokens
             TokenReader = other.TokenReader;
             TokenReplayCache = other.TokenReplayCache;
             TokenReplayValidator = other.TokenReplayValidator;
+            TransformBeforeSignatureValidation = other.TransformBeforeSignatureValidation;
             TryAllIssuerSigningKeys = other.TryAllIssuerSigningKeys;
             TypeValidator = other.TypeValidator;
             ValidateActor = other.ValidateActor;
@@ -492,6 +501,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// priority.
         /// </remarks>
         public IssuerValidatorUsingConfiguration IssuerValidatorUsingConfiguration { get; set; }
+
+        /// <summary>
+        /// Gets or sets a delegate that will be called to transform a token to a supported format before validation.
+        /// </summary>
+        public TransformBeforeSignatureValidation TransformBeforeSignatureValidation { get; set; }
 
         /// <summary>
         /// Gets or sets a delegate that will be used to validate the lifetime of the token

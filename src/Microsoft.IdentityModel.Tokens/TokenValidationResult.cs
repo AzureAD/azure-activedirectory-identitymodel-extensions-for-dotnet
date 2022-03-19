@@ -10,14 +10,38 @@ namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
     /// Contains artifacts obtained when a SecurityToken is validated.
+    /// A SecurityTokenHandler returns an instance that captures the results of validating a token.
     /// </summary>
     public class TokenValidationResult
     {
-        private Lazy<IDictionary<string, object>> _claims => new Lazy<IDictionary<string, object>>(() => TokenUtilities.CreateDictionaryFromClaims(ClaimsIdentity?.Claims));
-
-        private bool _isValid;
-        private bool _hasIsValidOrExceptionBeenRead = false;
+        private Lazy<IDictionary<string, object>> _claims;
+        private ClaimsIdentity _claimsIdentity;
         private Exception _exception;
+        private bool _hasIsValidOrExceptionBeenRead = false;
+        private bool _isValid = false;
+        private TokenValidationParameters _validationParameters;
+
+        /// <summary>
+        /// Creates an instance of <see cref="TokenValidationResult"/>
+        /// </summary>
+        public TokenValidationResult()
+        {
+            Initialize();
+        }
+
+        /// <summary>
+        /// This ctor is used by the JsonWebTokenHandler as part of delaying creation of ClaimsIdentity.
+        /// </summary>
+        /// <param name="securityToken"></param>
+        /// <param name="validationParameters"></param>
+        /// <param name="issuer"></param>
+        internal TokenValidationResult(SecurityToken securityToken, TokenValidationParameters validationParameters, string issuer)
+        {
+            _validationParameters = validationParameters;
+            Issuer = issuer;
+            SecurityToken = securityToken;
+            Initialize();
+        }
 
         /// <summary>
         /// The <see cref="Dictionary{String, Object}"/> created from the validated security token.
@@ -36,7 +60,36 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// The <see cref="ClaimsIdentity"/> created from the validated security token.
         /// </summary>
-        public ClaimsIdentity ClaimsIdentity { get; set; }
+        public ClaimsIdentity ClaimsIdentity
+        {
+            get
+            {
+                if (_claimsIdentity == null)
+                    _claimsIdentity = CreateClaimsIdentity();
+
+                return _claimsIdentity;
+            }
+            set
+            {
+                _claimsIdentity = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
+            }
+        }
+
+        /// <summary>
+        /// This call is for JWTs, SamlTokenHandler will set the ClaimsPrincipal.
+        /// </summary>
+        /// <returns></returns>
+        private ClaimsIdentity CreateClaimsIdentity()
+        {
+            if (_validationParameters != null && SecurityToken != null && Issuer != null)
+            {
+                ClaimsIdentity claimsIdentity = _validationParameters.CreateClaimsIdentity(SecurityToken, Issuer);
+                claimsIdentity.AddClaims(SecurityToken.CreateClaims(Issuer));
+                return claimsIdentity;
+            }
+
+            return null;
+        }
 
         /// <summary>
         /// Gets or sets the <see cref="Exception"/> that occurred during validation.
@@ -52,6 +105,11 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 _exception = value;
             }
+        }
+
+        private void Initialize()
+        {
+            _claims = new Lazy<IDictionary<string, object>>(() => TokenUtilities.CreateDictionaryFromClaims(ClaimsIdentity?.Claims));
         }
 
         /// <summary>
