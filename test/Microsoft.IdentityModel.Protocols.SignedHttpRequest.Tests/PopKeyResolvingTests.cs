@@ -617,7 +617,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(GetPopKeysFromJkuAsyncTheoryData))]
+        [Theory (Skip = "flaky"), MemberData(nameof(GetPopKeysFromJkuAsyncTheoryData))]
         public async Task GetPopKeysFromJkuAsync(ResolvePopKeyTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.GetPopKeysFromJkuAsync", theoryData);
@@ -844,8 +844,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             // set SignedHttpRequestToken if set and if JsonWebToken, otherwise set "dummy" value
             return new SignedHttpRequestValidationContext(SignedHttpRequestToken is JsonWebToken jwt ? jwt.EncodedToken : "dummy", httpRequestData, SignedHttpRequestTestUtils.DefaultTokenValidationParameters, SignedHttpRequestValidationParameters, callContext);
         }
-
-        public CallContext CallContext { get; set; } = new CallContext();
 
         internal JObject ConfirmationClaim { get; set; }
 

@@ -12,6 +12,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// </summary>
     internal class JwtTokenDecryptionParameters
     {
+        public byte[] CipherTextBytes { get; set; }
+
+        public byte[] HeaderAsciiBytes { get; set; }
+
+        public byte[] InitializationVectorBytes { get; set; }
+
+        public byte[] AuthenticationTagBytes { get; set; }
+
         /// <summary>
         /// Gets or sets signature algorithm that was used to create the signature.
         /// </summary>
@@ -51,6 +59,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Gets or sets the InitializationVector from the original raw data of this instance when it was created.
         /// </summary>
         public string InitializationVector { get; set; }
+
+        public JsonWebToken JsonWebToken { get; set; }
 
         /// <summary>
         /// Gets or sets the collection of <see cref="SecurityKey"/>s to attempt to decrypt with.
