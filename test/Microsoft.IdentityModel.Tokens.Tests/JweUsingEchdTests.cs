@@ -26,9 +26,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public void CreateJweEcdhEsTests(CreateEcdhEsTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateJweEcdhEsTests", theoryData);
-            context.AddClaimTypeToIgnoreWhenComparing("exp");
-            context.AddClaimTypeToIgnoreWhenComparing("iat");
-            context.AddClaimTypeToIgnoreWhenComparing("nbf");
+            context.AddClaimTypesToIgnoreWhenComparing("exp", "iat", "nbf");
+            context.AddDictionaryKeysToIgnoreWhenComparing("exp", "iat", "nbf");
 
             try
             {
