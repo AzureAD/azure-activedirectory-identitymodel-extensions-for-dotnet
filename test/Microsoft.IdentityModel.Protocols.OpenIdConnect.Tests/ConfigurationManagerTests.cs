@@ -403,7 +403,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ConfigurationRetreiver = new OpenIdConnectConfigurationRetriever(),
                     ConfigurationValidator = openIdConnectConfigurationValidator2,
                     DocumentRetriever = new FileDocumentRetriever(),
-                    ExpectedException = new ExpectedException(typeof(ConfigurationValidationException), "IDX20810: ", typeof(ConfigurationValidationException)),
                     ExpectedErrorMessage = "IDX21818: ",
                     MetadataAddress = "OpenIdConnectMetadata.json",
                     TestId = "ValidConfiguration_NotEnoughKey"
@@ -414,7 +413,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ConfigurationRetreiver = new OpenIdConnectConfigurationRetriever(),
                     ConfigurationValidator = openIdConnectConfigurationValidator2,
                     DocumentRetriever = new FileDocumentRetriever(),
-                    ExpectedException = new ExpectedException(typeof(ConfigurationValidationException), "IDX20810: ", typeof(ConfigurationValidationException)),
                     ExpectedErrorMessage = "IDX10810: ",
                     MetadataAddress = "OpenIdConnectMetadataUnrecognizedKty.json",
                     TestId = "InvalidConfiguration_UnrecognizedKty"
@@ -425,7 +423,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ConfigurationRetreiver = new OpenIdConnectConfigurationRetriever(),
                     ConfigurationValidator = openIdConnectConfigurationValidator2,
                     DocumentRetriever = new FileDocumentRetriever(),
-                    ExpectedException = new ExpectedException(typeof(ConfigurationValidationException), "IDX20810: ", typeof(ConfigurationValidationException)),
                     ExpectedErrorMessage = "IDX21817: ",
                     MetadataAddress = "JsonWebKeySetUnrecognizedKty.json",
                     TestId = "InvalidConfiguration_EmptyJsonWenKeySet"
@@ -436,7 +433,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ConfigurationRetreiver = new OpenIdConnectConfigurationRetriever(),
                     ConfigurationValidator = openIdConnectConfigurationValidator2,
                     DocumentRetriever = new FileDocumentRetriever(),
-                    ExpectedException = new ExpectedException(typeof(ConfigurationValidationException), "IDX20810: ", typeof(ConfigurationValidationException)),
                     ExpectedErrorMessage = "IDX10814: ",
                     MetadataAddress = "OpenIdConnectMetadataBadRsaDataMissingComponent.json",
                     TestId = "InvalidConfiguration_RsaKeyMissingComponent"
