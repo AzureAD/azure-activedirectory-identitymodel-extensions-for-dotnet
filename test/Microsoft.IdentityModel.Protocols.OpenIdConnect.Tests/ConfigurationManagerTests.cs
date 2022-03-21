@@ -26,7 +26,9 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.IO;
 using System.Reflection;
 using System.Threading;
@@ -360,22 +362,23 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             try
             {
+                //create a listener and enable it for logs
+                var listener = TestUtils.SampleListener.CreateLoggerListener(EventLevel.Warning);
+
                 var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(theoryData.MetadataAddress, theoryData.ConfigurationRetreiver, theoryData.DocumentRetriever, theoryData.ConfigurationValidator);
                 var configuration = configurationManager.GetConfigurationAsync().Result;
-                theoryData.ExpectedException.ProcessNoException();
-            }
-            catch (AggregateException ex)
-            {
-                ex.Handle((x) =>
-                {
-                    theoryData.ExpectedException.ProcessException(x, context);
-                    theoryData.ExpectedInnerException.ProcessException(x.InnerException, context);
-                    if (theoryData.ExpectedExceptionMessage != null)
-                        Assert.Contains(theoryData.ExpectedExceptionMessage, x.InnerException.Message);
 
-                    theoryData.ExpectedException.ProcessException(x);
-                    return true;
-                });
+                if (theoryData.ExpectedException.GetType().Equals(typeof(ConfigurationValidationException)))
+                {
+                    if (!listener.TraceBuffer.Contains(theoryData.ExpectedException.SubstringExpected) && !listener.TraceBuffer.Contains(theoryData.ExpectedInnerException.SubstringExpected))
+                        context.AddDiff($"Expected exception to contain: '{theoryData.ExpectedException.SubstringExpected}'.{Environment.NewLine}Log is:{Environment.NewLine}'{listener.TraceBuffer}'");
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
 
             TestUtilities.AssertFailIfErrors(context);

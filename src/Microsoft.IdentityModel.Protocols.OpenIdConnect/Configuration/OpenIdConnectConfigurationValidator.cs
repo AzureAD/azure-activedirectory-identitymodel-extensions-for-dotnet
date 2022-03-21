@@ -67,6 +67,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
 
             if (numberOfValidKeys < MinimumNumberOfKeys)
             {
+                var convertKeyInfos = string.Join("\n", openIdConnectConfiguration.JsonWebKeySet.Keys.Where(key => !string.IsNullOrEmpty(key.ConvertKeyInfo)).Select(key => key.Kid.ToString() + ": " + key.ConvertKeyInfo));
                 return new ConfigurationValidationResult
                 {
                     Exception = new ConfigurationValidationException(
@@ -74,7 +75,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
                             LogMessages.IDX21818,
                             LogHelper.MarkAsNonPII(MinimumNumberOfKeys),
                             LogHelper.MarkAsNonPII(numberOfValidKeys),
-                            string.Join("\n", openIdConnectConfiguration.JsonWebKeySet.Keys.Where(key => !string.IsNullOrEmpty(key.ConvertKeyInfo)).Select(key => key.Kid.ToString() + ": " + key.ConvertKeyInfo)))),
+                            string.IsNullOrEmpty(convertKeyInfos) ? "None" : convertKeyInfos)),
                     Succeeded = false
                 };
             }

@@ -157,28 +157,24 @@ namespace Microsoft.IdentityModel.Protocols
                     {
                         // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
                         // The transport should have it's own timeouts, etc..
-                        _currentConfiguration = await _configRetriever.GetConfigurationAsync(MetadataAddress, _docRetriever, CancellationToken.None).ConfigureAwait(false);
+                        var configuration = await _configRetriever.GetConfigurationAsync(MetadataAddress, _docRetriever, CancellationToken.None).ConfigureAwait(false);
                         _lastRefresh = now;
                         _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval);
                         if (_configValidator != null)
                         {
-                            ConfigurationValidationResult result = _configValidator.Validate(_currentConfiguration);
-                            if (!result.Succeeded)
-                            {
-                                throw new ConfigurationValidationException(LogMessages.IDX20810, result.Exception);
-                            }
+                            ConfigurationValidationResult result = _configValidator.Validate(configuration);
+                            if (!result.Succeeded)                          
+                                LogHelper.LogWarning(LogMessages.IDX20810, result.Exception);
                         }
+
+                        _currentConfiguration = configuration;
+
                     }
                     catch (Exception ex)
                     {
                         _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
                         if (_currentConfiguration == null) // Throw an exception if there's no configuration to return.
                             throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX20803, (MetadataAddress ?? "null")), ex));
-                        else if (ex is ConfigurationValidationException)
-                        {
-                            _currentConfiguration = null;
-                            throw LogHelper.LogExceptionMessage(ex);
-                        }
                         else
                             LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX20806, (MetadataAddress ?? "null")), ex));
                     }
