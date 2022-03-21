@@ -35,9 +35,9 @@ namespace Microsoft.IdentityModel.Protocols
     public class ConfigurationValidationResult
     {
         /// <summary>
-        /// Gets or sets the <see cref="ConfigurationValidationException"/> that occurred during validation of the SignedHttpRequest.
+        /// Gets or sets the error message that occurred during validation of the configuration.
         /// </summary>
-        public ConfigurationValidationException Exception { get; set; }
+        public string ErrorMessage { get; set; }
 
         /// <summary>
         /// Gets or sets a bool indicating if the configuration validation was successful.

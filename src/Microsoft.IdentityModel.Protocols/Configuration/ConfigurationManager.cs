@@ -164,7 +164,7 @@ namespace Microsoft.IdentityModel.Protocols
                         {
                             ConfigurationValidationResult result = _configValidator.Validate(configuration);
                             if (!result.Succeeded)                          
-                                LogHelper.LogWarning(LogMessages.IDX20810, result.Exception);
+                                LogHelper.LogWarning(LogMessages.IDX20810, result.ErrorMessage);
                         }
 
                         _currentConfiguration = configuration;

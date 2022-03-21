@@ -59,7 +59,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
             {
                 return new ConfigurationValidationResult
                 {
-                    Exception = new ConfigurationValidationException(LogMessages.IDX21817),
+                    ErrorMessage = LogMessages.IDX21817,
                     Succeeded = false
                 };
             }
@@ -70,12 +70,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
                 var convertKeyInfos = string.Join("\n", openIdConnectConfiguration.JsonWebKeySet.Keys.Where(key => !string.IsNullOrEmpty(key.ConvertKeyInfo)).Select(key => key.Kid.ToString() + ": " + key.ConvertKeyInfo));
                 return new ConfigurationValidationResult
                 {
-                    Exception = new ConfigurationValidationException(
-                        LogHelper.FormatInvariant(
-                            LogMessages.IDX21818,
-                            LogHelper.MarkAsNonPII(MinimumNumberOfKeys),
-                            LogHelper.MarkAsNonPII(numberOfValidKeys),
-                            string.IsNullOrEmpty(convertKeyInfos) ? "None" : convertKeyInfos)),
+                    ErrorMessage = LogHelper.FormatInvariant(
+                        LogMessages.IDX21818,
+                        LogHelper.MarkAsNonPII(MinimumNumberOfKeys),
+                        LogHelper.MarkAsNonPII(numberOfValidKeys),
+                        string.IsNullOrEmpty(convertKeyInfos) ? "None" : convertKeyInfos),
                     Succeeded = false
                 };
             }
