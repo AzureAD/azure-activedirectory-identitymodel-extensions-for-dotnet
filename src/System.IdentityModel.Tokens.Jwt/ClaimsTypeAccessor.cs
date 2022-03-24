@@ -35,7 +35,8 @@ using System.Linq;
 namespace System.IdentityModel.Tokens.Jwt
 {
     /// <summary>
-    /// Defines the inbound and outbound mapping for claim claim types from jwt to .net claim 
+    /// Defines extension methods to access claims by purpose, and not by name, making it compatible
+    /// with several versions of tokens.
     /// </summary>
     public static partial class ClaimPrincipalExtensions
     {
