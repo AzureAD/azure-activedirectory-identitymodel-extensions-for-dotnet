@@ -1,0 +1,141 @@
+﻿<#+
+class ClaimsKnowledge
+{
+    public ClaimsKnowledge(string accessorName, bool multipleInstances, bool usableForAuthorization, bool generateMapping, string privacyCategory, string longClaimName, params string[] shortClaimName)
+    {
+        AccessorName = accessorName;
+        ShortClaimNames = shortClaimName;
+        LongClaimName = longClaimName;
+        HasMultipleInstances = multipleInstances;
+        PrivacyCategory = privacyCategory;
+        IsUsableInAuthorizationPolicies = usableForAuthorization;
+        GenerateMapping = generateMapping;
+    }
+
+    /// <summary>
+    /// Name of the accessor
+    /// </summary>
+    public string AccessorName { get; set; }
+
+    /// <summary>
+    /// Short claim type name
+    /// </summary>
+    public string[] ShortClaimNames { get; set; }
+
+    /// <summary>
+    /// Long claim type name
+    /// </summary>
+    public string LongClaimName { get; set; }
+
+    /// <summary>
+    /// Does the claim appear in multiple instances?
+    /// </summary>
+    public bool HasMultipleInstances { get; set; }
+
+    /// <summary>
+    /// Privacy category for the claim
+    /// </summary>
+    public string PrivacyCategory { get; set; }
+
+    /// <summary>
+    /// Is the claim usable in authorization policies?
+    /// </summary>
+    public bool IsUsableInAuthorizationPolicies { get; set; }
+
+    /// <summary>
+    /// Should the claims mapping be generated?
+    /// </summary>
+    public bool GenerateMapping { get; set; }
+
+    public IEnumerable<string> AllClaimNames 
+    => ShortClaimNames.Union(new string[]{LongClaimName}).Where(c => !string.IsNullOrEmpty(c));
+}
+
+ClaimsKnowledge[] claimsKnowledge = new ClaimsKnowledge[]
+{
+        new ClaimsKnowledge("Actor", false, false, true, "", "ClaimTypes.Actor", "JwtRegisteredClaimNames.Actort"),
+        new ClaimsKnowledge("IsGuest", false, true, false, "", "\"acct\""),
+        new ClaimsKnowledge("LastAuthenticatedTime", false, false, false, "", "\"auth_time\""),
+        new ClaimsKnowledge("Birthdate", false, false, true, "EUII", "ClaimTypes.DateOfBirth", "JwtRegisteredClaimNames.Birthdate"),
+        new ClaimsKnowledge("Country", false, false, false, "EUII", "\"ctry\""),
+        new ClaimsKnowledge("Email", false, false, true, "EUII", "ClaimTypes.Email", "JwtRegisteredClaimNames.Email"),
+        new ClaimsKnowledge("FamilyName", false, false, true, "EUII", "ClaimTypes.Surname", "JwtRegisteredClaimNames.FamilyName"),
+        new ClaimsKnowledge("Gender", false, false, true, "EUII", "ClaimTypes.Gender", "JwtRegisteredClaimNames.Gender"),
+        new ClaimsKnowledge("GivenName", false, false, true, "EUII", "ClaimTypes.GivenName", "JwtRegisteredClaimNames.GivenName"),
+        new ClaimsKnowledge("Nameid", false, false, true, "", "ClaimTypes.NameIdentifier", "JwtRegisteredClaimNames.NameId"),
+        new ClaimsKnowledge("Sub", false, false, true, "", "ClaimTypes.NameIdentifier", "JwtRegisteredClaimNames.Sub"),
+        new ClaimsKnowledge("Website", false, false, true, "", "ClaimTypes.Webpage", "JwtRegisteredClaimNames.Website"),
+        new ClaimsKnowledge("UniqueName", false, false, true, "", "ClaimTypes.Name", "JwtRegisteredClaimNames.UniqueName"),
+        new ClaimsKnowledge("ObjectId", false, true, true, "EUPI", "\"http://schemas.microsoft.com/identity/claims/objectidentifier\"", "\"oid\""),
+        new ClaimsKnowledge("Scopes", true, true, true, "", "\"http://schemas.microsoft.com/identity/claims/scope\"", "\"scp\""),
+        new ClaimsKnowledge("TenantId", false, true, true, "OII", "\"http://schemas.microsoft.com/identity/claims/tenantid\"", "\"tid\""),
+        new ClaimsKnowledge("Acr", false, false, true, "", "\"http://schemas.microsoft.com/claims/authnclassreference\"", "\"acr\""),
+        new ClaimsKnowledge("Adfs1Email", false, false, true, "EUPI", "\"http://schemas.xmlsoap.org/claims/EmailAddress\"", "\"adfs1email\""),
+        new ClaimsKnowledge("Adfs1Upn", false, false, true, "EUPI", "\"http://schemas.xmlsoap.org/claims/UPN\"", "\"adfs1upn\""),
+        new ClaimsKnowledge("Amr", false, false, true, "", "\"http://schemas.microsoft.com/claims/authnmethodsreferences\"", "\"amr\""),
+        new ClaimsKnowledge("AuthMethod", false, false, true, "", "ClaimTypes.AuthenticationMethod", "\"authmethod\""),
+        new ClaimsKnowledge("CertAppPolicy", false, false, true, "", "\"http://schemas.microsoft.com/2012/12/certificatecontext/extension/applicationpolicy\"", "\"certapppolicy\""),
+        new ClaimsKnowledge("CertAuthorityKeyIdentifier", false, false, true, "", "\"http://schemas.microsoft.com/2012/12/certificatecontext/extension/authoritykeyidentifier\"", "\"certauthoritykeyidentifier\""),
+        new ClaimsKnowledge("CertBasicVonstraints", false, false, true, "", "\"http://schemas.microsoft.com/2012/12/certificatecontext/extension/basicconstraints\"", "\"certbasicconstraints\""),
+        new ClaimsKnowledge("CertEku", false, false, true, "", "\"http://schemas.microsoft.com/2012/12/certificatecontext/extension/eku\"", "\"certeku\""),
+        new ClaimsKnowledge("CertIssuer", false, false, true, "", "\"http://schemas.microsoft.com/2012/12/certificatecontext/field/issuer\"", "\"certissuer\""),
+        new ClaimsKnowledge("CertIssuerName", false, false, true, "", "\"http://schemas.microsoft.com/2012/12/certificatecontext/field/issuername\"", "\"certissuername\""),
+        new ClaimsKnowledge("CertKeyUsage", false, false, true, "", "\"http://schemas.microsoft.com/2012/12/certificatecontext/extension/keyusage\"", "\"certkeyusage\""),
+        new ClaimsKnowledge("CertNotAfter", false, false, true, "", "\"http://schemas.microsoft.com/2012/12/certificatecontext/field/notafter\"", "\"certnotafter\""),
+        new ClaimsKnowledge("CertNotBefore", false, false, true, "", "\"http://schemas.microsoft.com/2012/12/certificatecontext/field/notbefore\"", "\"certnotbefore\""),
+        new ClaimsKnowledge("CertPolicy", false, false, true, "", "\"http://schemas.microsoft.com/2012/12/certificatecontext/extension/certificatepolicy\"", "\"certpolicy\""),
+        new ClaimsKnowledge("CertPublickey", false, false, true, "", "ClaimTypes.Rsa", "\"certpublickey\""),
+        new ClaimsKnowledge("CertRawData", false, false, true, "", "\"http://schemas.microsoft.com/2012/12/certificatecontext/field/rawdata\"", "\"certrawdata\""),
+        new ClaimsKnowledge("CertSerialNumber", false, false, true, "", "ClaimTypes.SerialNumber", "\"certserialnumber\""),
+        new ClaimsKnowledge("CertSignatureAlgorithm", false, false, true, "", "\"http://schemas.microsoft.com/2012/12/certificatecontext/field/signaturealgorithm\"", "\"certsignaturealgorithm\""),
+        new ClaimsKnowledge("CertSubject", false, false, true, "", "\"http://schemas.microsoft.com/2012/12/certificatecontext/field/subject\"", "\"certsubject\""),
+        new ClaimsKnowledge("CertSubjectAltName", false, false, true, "", "\"http://schemas.microsoft.com/2012/12/certificatecontext/extension/san\"", "\"certsubjectaltname\""),
+        new ClaimsKnowledge("CertSubjectKeyIdentifier", false, false, true, "", "\"http://schemas.microsoft.com/2012/12/certificatecontext/extension/subjectkeyidentifier\"", "\"certsubjectkeyidentifier\""),
+        new ClaimsKnowledge("CertSubjectName", false, false, true, "", "\"http://schemas.microsoft.com/2012/12/certificatecontext/field/subjectname\"", "\"certsubjectname\""),
+        new ClaimsKnowledge("CertTemplateInformation", false, false, true, "", "\"http://schemas.microsoft.com/2012/12/certificatecontext/extension/certificatetemplateinformation\"", "\"certtemplateinformation\""),
+        new ClaimsKnowledge("CertTemplateName", false, false, true, "", "\"http://schemas.microsoft.com/2012/12/certificatecontext/extension/certificatetemplatename\"", "\"certtemplatename\""),
+        new ClaimsKnowledge("CertThumbprint", false, false, true, "", "ClaimTypes.Thumbprint", "\"certthumbprint\""),
+        new ClaimsKnowledge("CertX509Version", false, false, true, "", "\"http://schemas.microsoft.com/2012/12/certificatecontext/field/x509version\"", "\"certx509version\""),
+        new ClaimsKnowledge("ClientApplication", false, true, true, "", "\"http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-client-application\"", "\"clientapplication\""),
+        new ClaimsKnowledge("ClientIp", false, false, true, "EUPI", "\"http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-client-ip\"", "\"clientip\""),
+        new ClaimsKnowledge("ClientUserAgent", false, false, true, "", "\"http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-client-user-agent\"", "\"clientuseragent\""),
+        new ClaimsKnowledge("CommonName", false, false, true, "EUPI", "\"http://schemas.xmlsoap.org/claims/CommonName\"", "\"commonname\""),
+        new ClaimsKnowledge("DenyOnlyPrimaryGroupSid", false, false, true, "", "ClaimTypes.DenyOnlyPrimaryGroupSid", "\"denyonlyprimarygroupsid\""),
+        new ClaimsKnowledge("DenyOnlyPrimarySid", false, false, true, "", "ClaimTypes.DenyOnlyPrimarySid", "\"denyonlyprimarysid\""),
+        new ClaimsKnowledge("DenyOnlySid", false, false, true, "", "ClaimTypes.DenyOnlySid", "\"denyonlysid\""),
+        new ClaimsKnowledge("DevicedIspName", false, false, true, "", "\"http://schemas.microsoft.com/2012/01/devicecontext/claims/displayname\"", "\"devicedispname\""),
+        new ClaimsKnowledge("DeviceId", false, false, true, "", "\"http://schemas.microsoft.com/2012/01/devicecontext/claims/identifier\"", "\"deviceid\""),
+        new ClaimsKnowledge("DeviceIsManaged", false, false, true, "", "\"http://schemas.microsoft.com/2012/01/devicecontext/claims/ismanaged\"", "\"deviceismanaged\""),
+        new ClaimsKnowledge("DeviceOsType", false, false, true, "", "\"http://schemas.microsoft.com/2012/01/devicecontext/claims/ostype\"", "\"deviceostype\""),
+        new ClaimsKnowledge("DeviceOsVer", false, false, true, "", "\"http://schemas.microsoft.com/2012/01/devicecontext/claims/osversion\"", "\"deviceosver\""),
+        new ClaimsKnowledge("DeviceOwner", false, false, true, "", "\"http://schemas.microsoft.com/2012/01/devicecontext/claims/userowner\"", "\"deviceowner\""),
+        new ClaimsKnowledge("DeviceRegId", false, false, true, "", "\"http://schemas.microsoft.com/2012/01/devicecontext/claims/registrationid\"", "\"deviceregid\""),
+        new ClaimsKnowledge("EndpointPath", false, false, true, "", "\"http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-endpoint-absolute-path\"", "\"endpointpath\""),
+        new ClaimsKnowledge("ForwardedClientIp", false, false, true, "", "\"http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-forwarded-client-ip\"", "\"forwardedclientip\"", "\"fwt\""),
+        new ClaimsKnowledge("Group", true, false, true, "", "\"http://schemas.xmlsoap.org/claims/Group\"", "\"group\""),
+        new ClaimsKnowledge("GroupsId", true, false, true, "", "ClaimTypes.GroupSid", "\"groupsid\""),
+        new ClaimsKnowledge("IdTyp", false, false, true, "", "\"idtyp\""),
+        new ClaimsKnowledge("Idp", false, false, true, "", "\"http://schemas.microsoft.com/identity/claims/identityprovider\"", "\"idp\""),
+        new ClaimsKnowledge("InsideCorporateNetwork", false, false, true, "", "\"http://schemas.microsoft.com/ws/2012/01/insidecorporatenetwork\"", "\"insidecorporatenetwork\""),
+        new ClaimsKnowledge("IsRegisteredUser", false, false, true, "", "\"http://schemas.microsoft.com/2012/01/devicecontext/claims/isregistereduser\"", "\"isregistereduser\""),
+        new ClaimsKnowledge("LoginHint", false, false, false, "", "\"login_hint\""),
+        new ClaimsKnowledge("Ppid", false, false, true, "", "\"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/privatepersonalidentifier\"", "\"ppid\""),
+        new ClaimsKnowledge("Primarygroupsid", false, false, true, "", "ClaimTypes.PrimaryGroupSid", "\"primarygroupsid\""),
+        new ClaimsKnowledge("Primarysid", false, false, true, "", "ClaimTypes.PrimarySid", "\"primarysid\""),
+        new ClaimsKnowledge("Proxy", false, false, true, "", "\"http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-proxy\"", "\"proxy\""),
+        new ClaimsKnowledge("PwdChgEndpoint", false, false, true, "", "\"http://schemas.microsoft.com/ws/2012/01/passwordchangeurl\"", "\"pwdchgurl\""),
+        new ClaimsKnowledge("PwdExpDays", false, false, true, "", "\"http://schemas.microsoft.com/ws/2012/01/passwordexpirationdays\"", "\"pwdexpdays\""),
+        new ClaimsKnowledge("PwdExpTime", false, false, true, "", "\"http://schemas.microsoft.com/ws/2012/01/passwordexpirationtime\"", "\"pwdexptime\""),
+        new ClaimsKnowledge("RelyingPartyTrustId", false, false, true, "", "\"http://schemas.microsoft.com/2012/01/requestcontext/claims/relyingpartytrustid\"", "\"relyingpartytrustid\""),
+        new ClaimsKnowledge("Role", true, true, true, "", "ClaimTypes.Role", "\"role\"", "\"roles\""),
+        new ClaimsKnowledge("Sid", false, false, true, "", "\"sid\""),
+        new ClaimsKnowledge("Upn", false, false, true, "", "ClaimTypes.Upn", "\"upn\""),
+        new ClaimsKnowledge("Winaccountname", false, false, true, "", "ClaimTypes.WindowsAccountName", "\"winaccountname\""),
+        new ClaimsKnowledge("VerifiedPrimaryEmail", false, false, true, "EUPI", "\"verified_primary_email\""),
+        new ClaimsKnowledge("VerifiedSecondaryEmail", false, false, true, "EUPI", "\"verified_secondary_email\""),
+        new ClaimsKnowledge("VNet", false, false, true, "", "\"vnet\""),
+        new ClaimsKnowledge("PreferedDataLocation", false, false, true, "", "\"xms_pdl\""),
+        new ClaimsKnowledge("UserPreferedLanguage", false, false, true, "", "\"xms_tpl\""),
+        new ClaimsKnowledge("ZeroTouchDeploymentId", false, false, true, "", "\"ztdid\""),
+};
+#>
