@@ -56,7 +56,7 @@ namespace System.IdentityModel.Tokens.Jwt
    foreach(string shortClaimType in c.ShortClaimNames)
    {
 #>
-                { <#=shortClaimType#>, <#=c.LongClaimName#> },
+            { <#=shortClaimType#>, <#=c.LongClaimName#> },
 <#
    }
  }
