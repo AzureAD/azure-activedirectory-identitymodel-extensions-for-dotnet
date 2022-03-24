@@ -16,6 +16,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="ClaimsAccessorsDoc.md">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ClaimsAccessorsDoc.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -28,6 +36,15 @@
   </ItemGroup>
   
    <ItemGroup>
+    <None Update="ClaimsAccessorsDoc.md">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ClaimsAccessorsDoc.tt</DependentUpon>
+    </None>
+    <None Update="ClaimsAccessorsDoc.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ClaimsAccessorsDoc.md</LastGenOutput>
+    </None>
     <None Update="ClaimsKnowledge.tti">
       <Generator></Generator>
     </None>
