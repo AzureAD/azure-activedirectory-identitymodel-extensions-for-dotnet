@@ -2212,7 +2212,6 @@ namespace System.IdentityModel.Tokens.Jwt
             /// Returns the first claim corresponding to ForwardedClientIp claim on a ClaimsPrincipal
             /// <list type="bullet">
             /// <item><description>"forwardedclientip"</description></item>
-            /// <item><description>"fwt"</description></item>
             /// <item><description>"http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-forwarded-client-ip"</description></item>
             /// </list>
             /// </summary>
@@ -2225,7 +2224,6 @@ namespace System.IdentityModel.Tokens.Jwt
                  }
                  return claimsPrincipal.GetClaimValue(
                      "forwardedclientip",
-                     "fwt",
                      "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-forwarded-client-ip");
             }
 
@@ -2233,7 +2231,6 @@ namespace System.IdentityModel.Tokens.Jwt
             /// Returns the first claim corresponding to ForwardedClientIp claim on a ClaimsIdentity
             /// <list type="bullet">
             /// <item><description>"forwardedclientip"</description></item>
-            /// <item><description>"fwt"</description></item>
             /// <item><description>"http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-forwarded-client-ip"</description></item>
             /// </list>
             /// </summary>
@@ -2246,7 +2243,6 @@ namespace System.IdentityModel.Tokens.Jwt
                  }
                  return claimsIdentity.GetClaimValue(
                      "forwardedclientip",
-                     "fwt",
                      "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-forwarded-client-ip");
             }
             /// <summary>

@@ -99,7 +99,6 @@ namespace System.IdentityModel.Tokens.Jwt
             { "deviceregid", "http://schemas.microsoft.com/2012/01/devicecontext/claims/registrationid" },
             { "endpointpath", "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-endpoint-absolute-path" },
             { "forwardedclientip", "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-forwarded-client-ip" },
-            { "fwt", "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-forwarded-client-ip" },
             { "group", "http://schemas.xmlsoap.org/claims/Group" },
             { "groupsid", ClaimTypes.GroupSid },
             { "idp", "http://schemas.microsoft.com/identity/claims/identityprovider" },

@@ -111,7 +111,7 @@ ClaimsKnowledge[] claimsKnowledge = new ClaimsKnowledge[]
         new ClaimsKnowledge("DeviceOwner", false, false, true, "", "\"http://schemas.microsoft.com/2012/01/devicecontext/claims/userowner\"", "\"deviceowner\""),
         new ClaimsKnowledge("DeviceRegId", false, false, true, "", "\"http://schemas.microsoft.com/2012/01/devicecontext/claims/registrationid\"", "\"deviceregid\""),
         new ClaimsKnowledge("EndpointPath", false, false, true, "", "\"http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-endpoint-absolute-path\"", "\"endpointpath\""),
-        new ClaimsKnowledge("ForwardedClientIp", false, false, true, "", "\"http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-forwarded-client-ip\"", "\"forwardedclientip\"", "\"fwt\""),
+        new ClaimsKnowledge("ForwardedClientIp", false, false, true, "", "\"http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-forwarded-client-ip\"", "\"forwardedclientip\""),
         new ClaimsKnowledge("Group", true, false, true, "", "\"http://schemas.xmlsoap.org/claims/Group\"", "\"group\""),
         new ClaimsKnowledge("GroupsId", true, false, true, "", "ClaimTypes.GroupSid", "\"groupsid\""),
         new ClaimsKnowledge("IdTyp", false, false, true, "", "\"idtyp\""),
