@@ -514,6 +514,7 @@ namespace System.IdentityModel.Tokens.Jwt
             /// <item><description>ClaimTypes.Name</description></item>
             /// </list>
             /// This method returns information that is NOT safe to use for authorization.
+            /// The privacy classification of the information returned is EUPI.
             /// </summary>
             /// <param name="claimsPrincipal">Claims ClaimsPrincipal from which to get the UniqueName.</param>
             public static string GetUniqueName(this ClaimsPrincipal claimsPrincipal)
@@ -534,6 +535,7 @@ namespace System.IdentityModel.Tokens.Jwt
             /// <item><description>ClaimTypes.Name</description></item>
             /// </list>
             /// This method returns information that is NOT safe to use for authorization.
+            /// The privacy classification of the information returned is EUPI.
             /// </summary>
             /// <param name="claimsIdentity">Claims ClaimsIdentity from which to get the UniqueName.</param>
             public static string GetUniqueName(this ClaimsIdentity claimsIdentity)
@@ -829,15 +831,15 @@ namespace System.IdentityModel.Tokens.Jwt
                      "http://schemas.microsoft.com/claims/authnmethodsreferences");
             }
             /// <summary>
-            /// Returns the first claim corresponding to AuthMethod claim on a ClaimsPrincipal
+            /// Returns the first claim corresponding to AuthenticationMethod claim on a ClaimsPrincipal
             /// <list type="bullet">
             /// <item><description>"authmethod"</description></item>
             /// <item><description>ClaimTypes.AuthenticationMethod</description></item>
             /// </list>
             /// This method returns information that is NOT safe to use for authorization.
             /// </summary>
-            /// <param name="claimsPrincipal">Claims ClaimsPrincipal from which to get the AuthMethod.</param>
-            public static string GetAuthMethod(this ClaimsPrincipal claimsPrincipal)
+            /// <param name="claimsPrincipal">Claims ClaimsPrincipal from which to get the AuthenticationMethod.</param>
+            public static string GetAuthenticationMethod(this ClaimsPrincipal claimsPrincipal)
             {
                  if (claimsPrincipal == null)
                  {
@@ -849,15 +851,15 @@ namespace System.IdentityModel.Tokens.Jwt
             }
 
             /// <summary>
-            /// Returns the first claim corresponding to AuthMethod claim on a ClaimsIdentity
+            /// Returns the first claim corresponding to AuthenticationMethod claim on a ClaimsIdentity
             /// <list type="bullet">
             /// <item><description>"authmethod"</description></item>
             /// <item><description>ClaimTypes.AuthenticationMethod</description></item>
             /// </list>
             /// This method returns information that is NOT safe to use for authorization.
             /// </summary>
-            /// <param name="claimsIdentity">Claims ClaimsIdentity from which to get the AuthMethod.</param>
-            public static string GetAuthMethod(this ClaimsIdentity claimsIdentity)
+            /// <param name="claimsIdentity">Claims ClaimsIdentity from which to get the AuthenticationMethod.</param>
+            public static string GetAuthenticationMethod(this ClaimsIdentity claimsIdentity)
             {
                  if (claimsIdentity == null)
                  {
@@ -2474,7 +2476,7 @@ namespace System.IdentityModel.Tokens.Jwt
             /// <item><description>"idp"</description></item>
             /// <item><description>"http://schemas.microsoft.com/identity/claims/identityprovider"</description></item>
             /// </list>
-            /// This method returns information that is NOT safe to use for authorization.
+            /// This method returns information that is safe to use for authorization.
             /// </summary>
             /// <param name="claimsPrincipal">Claims ClaimsPrincipal from which to get the Idp.</param>
             public static string GetIdp(this ClaimsPrincipal claimsPrincipal)
@@ -2494,7 +2496,7 @@ namespace System.IdentityModel.Tokens.Jwt
             /// <item><description>"idp"</description></item>
             /// <item><description>"http://schemas.microsoft.com/identity/claims/identityprovider"</description></item>
             /// </list>
-            /// This method returns information that is NOT safe to use for authorization.
+            /// This method returns information that is safe to use for authorization.
             /// </summary>
             /// <param name="claimsIdentity">Claims ClaimsIdentity from which to get the Idp.</param>
             public static string GetIdp(this ClaimsIdentity claimsIdentity)
@@ -2513,7 +2515,7 @@ namespace System.IdentityModel.Tokens.Jwt
             /// <item><description>"insidecorporatenetwork"</description></item>
             /// <item><description>"http://schemas.microsoft.com/ws/2012/01/insidecorporatenetwork"</description></item>
             /// </list>
-            /// This method returns information that is NOT safe to use for authorization.
+            /// This method returns information that is safe to use for authorization.
             /// </summary>
             /// <param name="claimsPrincipal">Claims ClaimsPrincipal from which to get the InsideCorporateNetwork.</param>
             public static string GetInsideCorporateNetwork(this ClaimsPrincipal claimsPrincipal)
@@ -2533,7 +2535,7 @@ namespace System.IdentityModel.Tokens.Jwt
             /// <item><description>"insidecorporatenetwork"</description></item>
             /// <item><description>"http://schemas.microsoft.com/ws/2012/01/insidecorporatenetwork"</description></item>
             /// </list>
-            /// This method returns information that is NOT safe to use for authorization.
+            /// This method returns information that is safe to use for authorization.
             /// </summary>
             /// <param name="claimsIdentity">Claims ClaimsIdentity from which to get the InsideCorporateNetwork.</param>
             public static string GetInsideCorporateNetwork(this ClaimsIdentity claimsIdentity)
@@ -2552,7 +2554,7 @@ namespace System.IdentityModel.Tokens.Jwt
             /// <item><description>"isregistereduser"</description></item>
             /// <item><description>"http://schemas.microsoft.com/2012/01/devicecontext/claims/isregistereduser"</description></item>
             /// </list>
-            /// This method returns information that is NOT safe to use for authorization.
+            /// This method returns information that is safe to use for authorization.
             /// </summary>
             /// <param name="claimsPrincipal">Claims ClaimsPrincipal from which to get the IsRegisteredUser.</param>
             public static string GetIsRegisteredUser(this ClaimsPrincipal claimsPrincipal)
@@ -2572,7 +2574,7 @@ namespace System.IdentityModel.Tokens.Jwt
             /// <item><description>"isregistereduser"</description></item>
             /// <item><description>"http://schemas.microsoft.com/2012/01/devicecontext/claims/isregistereduser"</description></item>
             /// </list>
-            /// This method returns information that is NOT safe to use for authorization.
+            /// This method returns information that is safe to use for authorization.
             /// </summary>
             /// <param name="claimsIdentity">Claims ClaimsIdentity from which to get the IsRegisteredUser.</param>
             public static string GetIsRegisteredUser(this ClaimsIdentity claimsIdentity)
@@ -2621,15 +2623,16 @@ namespace System.IdentityModel.Tokens.Jwt
                      "login_hint");
             }
             /// <summary>
-            /// Returns the first claim corresponding to Ppid claim on a ClaimsPrincipal
+            /// Returns the first claim corresponding to PrivatePersonalIdentifier claim on a ClaimsPrincipal
             /// <list type="bullet">
             /// <item><description>"ppid"</description></item>
             /// <item><description>"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/privatepersonalidentifier"</description></item>
             /// </list>
             /// This method returns information that is NOT safe to use for authorization.
+            /// The privacy classification of the information returned is EUPI.
             /// </summary>
-            /// <param name="claimsPrincipal">Claims ClaimsPrincipal from which to get the Ppid.</param>
-            public static string GetPpid(this ClaimsPrincipal claimsPrincipal)
+            /// <param name="claimsPrincipal">Claims ClaimsPrincipal from which to get the PrivatePersonalIdentifier.</param>
+            public static string GetPrivatePersonalIdentifier(this ClaimsPrincipal claimsPrincipal)
             {
                  if (claimsPrincipal == null)
                  {
@@ -2641,15 +2644,16 @@ namespace System.IdentityModel.Tokens.Jwt
             }
 
             /// <summary>
-            /// Returns the first claim corresponding to Ppid claim on a ClaimsIdentity
+            /// Returns the first claim corresponding to PrivatePersonalIdentifier claim on a ClaimsIdentity
             /// <list type="bullet">
             /// <item><description>"ppid"</description></item>
             /// <item><description>"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/privatepersonalidentifier"</description></item>
             /// </list>
             /// This method returns information that is NOT safe to use for authorization.
+            /// The privacy classification of the information returned is EUPI.
             /// </summary>
-            /// <param name="claimsIdentity">Claims ClaimsIdentity from which to get the Ppid.</param>
-            public static string GetPpid(this ClaimsIdentity claimsIdentity)
+            /// <param name="claimsIdentity">Claims ClaimsIdentity from which to get the PrivatePersonalIdentifier.</param>
+            public static string GetPrivatePersonalIdentifier(this ClaimsIdentity claimsIdentity)
             {
                  if (claimsIdentity == null)
                  {
@@ -2665,7 +2669,7 @@ namespace System.IdentityModel.Tokens.Jwt
             /// <item><description>"primarygroupsid"</description></item>
             /// <item><description>ClaimTypes.PrimaryGroupSid</description></item>
             /// </list>
-            /// This method returns information that is NOT safe to use for authorization.
+            /// This method returns information that is safe to use for authorization.
             /// </summary>
             /// <param name="claimsPrincipal">Claims ClaimsPrincipal from which to get the PrimaryGroupSid.</param>
             public static string GetPrimaryGroupSid(this ClaimsPrincipal claimsPrincipal)
@@ -2685,7 +2689,7 @@ namespace System.IdentityModel.Tokens.Jwt
             /// <item><description>"primarygroupsid"</description></item>
             /// <item><description>ClaimTypes.PrimaryGroupSid</description></item>
             /// </list>
-            /// This method returns information that is NOT safe to use for authorization.
+            /// This method returns information that is safe to use for authorization.
             /// </summary>
             /// <param name="claimsIdentity">Claims ClaimsIdentity from which to get the PrimaryGroupSid.</param>
             public static string GetPrimaryGroupSid(this ClaimsIdentity claimsIdentity)
@@ -2704,7 +2708,7 @@ namespace System.IdentityModel.Tokens.Jwt
             /// <item><description>"primarysid"</description></item>
             /// <item><description>ClaimTypes.PrimarySid</description></item>
             /// </list>
-            /// This method returns information that is NOT safe to use for authorization.
+            /// This method returns information that is safe to use for authorization.
             /// </summary>
             /// <param name="claimsPrincipal">Claims ClaimsPrincipal from which to get the PrimarySid.</param>
             public static string GetPrimarySid(this ClaimsPrincipal claimsPrincipal)
@@ -2724,7 +2728,7 @@ namespace System.IdentityModel.Tokens.Jwt
             /// <item><description>"primarysid"</description></item>
             /// <item><description>ClaimTypes.PrimarySid</description></item>
             /// </list>
-            /// This method returns information that is NOT safe to use for authorization.
+            /// This method returns information that is safe to use for authorization.
             /// </summary>
             /// <param name="claimsIdentity">Claims ClaimsIdentity from which to get the PrimarySid.</param>
             public static string GetPrimarySid(this ClaimsIdentity claimsIdentity)
@@ -2981,7 +2985,7 @@ namespace System.IdentityModel.Tokens.Jwt
             /// <list type="bullet">
             /// <item><description>"sid"</description></item>
             /// </list>
-            /// This method returns information that is NOT safe to use for authorization.
+            /// This method returns information that is safe to use for authorization.
             /// </summary>
             /// <param name="claimsPrincipal">Claims ClaimsPrincipal from which to get the Sid.</param>
             public static string GetSid(this ClaimsPrincipal claimsPrincipal)
@@ -2999,7 +3003,7 @@ namespace System.IdentityModel.Tokens.Jwt
             /// <list type="bullet">
             /// <item><description>"sid"</description></item>
             /// </list>
-            /// This method returns information that is NOT safe to use for authorization.
+            /// This method returns information that is safe to use for authorization.
             /// </summary>
             /// <param name="claimsIdentity">Claims ClaimsIdentity from which to get the Sid.</param>
             public static string GetSid(this ClaimsIdentity claimsIdentity)
@@ -3018,6 +3022,7 @@ namespace System.IdentityModel.Tokens.Jwt
             /// <item><description>ClaimTypes.Upn</description></item>
             /// </list>
             /// This method returns information that is NOT safe to use for authorization.
+            /// The privacy classification of the information returned is EUPI.
             /// </summary>
             /// <param name="claimsPrincipal">Claims ClaimsPrincipal from which to get the Upn.</param>
             public static string GetUpn(this ClaimsPrincipal claimsPrincipal)
@@ -3038,6 +3043,7 @@ namespace System.IdentityModel.Tokens.Jwt
             /// <item><description>ClaimTypes.Upn</description></item>
             /// </list>
             /// This method returns information that is NOT safe to use for authorization.
+            /// The privacy classification of the information returned is EUPI.
             /// </summary>
             /// <param name="claimsIdentity">Claims ClaimsIdentity from which to get the Upn.</param>
             public static string GetUpn(this ClaimsIdentity claimsIdentity)
@@ -3051,15 +3057,16 @@ namespace System.IdentityModel.Tokens.Jwt
                      ClaimTypes.Upn);
             }
             /// <summary>
-            /// Returns the first claim corresponding to WinAccountName claim on a ClaimsPrincipal
+            /// Returns the first claim corresponding to WindowsAccountName claim on a ClaimsPrincipal
             /// <list type="bullet">
             /// <item><description>"winaccountname"</description></item>
             /// <item><description>ClaimTypes.WindowsAccountName</description></item>
             /// </list>
             /// This method returns information that is NOT safe to use for authorization.
+            /// The privacy classification of the information returned is EUPI.
             /// </summary>
-            /// <param name="claimsPrincipal">Claims ClaimsPrincipal from which to get the WinAccountName.</param>
-            public static string GetWinAccountName(this ClaimsPrincipal claimsPrincipal)
+            /// <param name="claimsPrincipal">Claims ClaimsPrincipal from which to get the WindowsAccountName.</param>
+            public static string GetWindowsAccountName(this ClaimsPrincipal claimsPrincipal)
             {
                  if (claimsPrincipal == null)
                  {
@@ -3071,15 +3078,16 @@ namespace System.IdentityModel.Tokens.Jwt
             }
 
             /// <summary>
-            /// Returns the first claim corresponding to WinAccountName claim on a ClaimsIdentity
+            /// Returns the first claim corresponding to WindowsAccountName claim on a ClaimsIdentity
             /// <list type="bullet">
             /// <item><description>"winaccountname"</description></item>
             /// <item><description>ClaimTypes.WindowsAccountName</description></item>
             /// </list>
             /// This method returns information that is NOT safe to use for authorization.
+            /// The privacy classification of the information returned is EUPI.
             /// </summary>
-            /// <param name="claimsIdentity">Claims ClaimsIdentity from which to get the WinAccountName.</param>
-            public static string GetWinAccountName(this ClaimsIdentity claimsIdentity)
+            /// <param name="claimsIdentity">Claims ClaimsIdentity from which to get the WindowsAccountName.</param>
+            public static string GetWindowsAccountName(this ClaimsIdentity claimsIdentity)
             {
                  if (claimsIdentity == null)
                  {
