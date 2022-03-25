@@ -64,13 +64,8 @@ namespace System.IdentityModel.Tokens.Jwt
      }
 #>
             /// </list>
+            /// This method returns information that is <#= c.IsUsableInAuthorizationPolicies ? string.Empty : "NOT " #>safe to use for authorization.
 <#
-     if (c.IsUsableInAuthorizationPolicies)
-     {
-#>
-            /// This method returns information that is safe to use for authorization.
-<#
-     }
      if (!string.IsNullOrEmpty(c.PrivacyCategory))
      {
 #>
@@ -102,13 +97,8 @@ namespace System.IdentityModel.Tokens.Jwt
      }
 #>
             /// </list>
+            /// This method returns information that is <#= c.IsUsableInAuthorizationPolicies ? string.Empty : "NOT " #>safe to use for authorization.
 <#
-     if (c.IsUsableInAuthorizationPolicies)
-     {
-#>
-            /// This method returns information that is safe to use for authorization.
-<#
-     }
      if (!string.IsNullOrEmpty(c.PrivacyCategory))
      {
 #>
@@ -145,13 +135,8 @@ namespace System.IdentityModel.Tokens.Jwt
      }
 #>
             /// </list>
+            /// This method returns information that is <#= c.IsUsableInAuthorizationPolicies ? string.Empty : "NOT " #>safe to use for authorization.
 <#
-     if (c.IsUsableInAuthorizationPolicies)
-     {
-#>
-            /// This method returns information that is safe to use for authorization.
-<#
-     }
      if (!string.IsNullOrEmpty(c.PrivacyCategory))
      {
 #>
@@ -183,13 +168,8 @@ namespace System.IdentityModel.Tokens.Jwt
      }
 #>
             /// </list>
+            /// This method returns information that is <#= c.IsUsableInAuthorizationPolicies ? string.Empty : "NOT " #>safe to use for authorization.
 <#
-     if (c.IsUsableInAuthorizationPolicies)
-     {
-#>
-            /// This method returns information that is safe to use for authorization.
-<#
-     }
      if (!string.IsNullOrEmpty(c.PrivacyCategory))
      {
 #>
