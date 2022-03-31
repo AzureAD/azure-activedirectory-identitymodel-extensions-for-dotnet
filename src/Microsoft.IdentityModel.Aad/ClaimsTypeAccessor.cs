@@ -32,7 +32,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Linq;
 
-namespace System.IdentityModel.Tokens.Jwt
+namespace System.IdentityModel.Aad
 {
     /// <summary>
     /// Defines extension methods to access claims by purpose, and not by name, making it compatible

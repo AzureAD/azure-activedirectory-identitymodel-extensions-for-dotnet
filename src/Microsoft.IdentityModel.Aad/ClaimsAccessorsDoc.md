@@ -12,7 +12,7 @@ string | GetGivenName | False | EUII | JwtRegisteredClaimNames.GivenName<BR/> Cl
 string | GetNameId | False |  | JwtRegisteredClaimNames.NameId<BR/> ClaimTypes.NameIdentifier
 string | GetSubject | False |  | JwtRegisteredClaimNames.Sub<BR/> ClaimTypes.NameIdentifier
 string | GetWebsite | False |  | JwtRegisteredClaimNames.Website<BR/> ClaimTypes.Webpage
-string | GetUniqueName | False |  | JwtRegisteredClaimNames.UniqueName<BR/> ClaimTypes.Name
+string | GetUniqueName | False | EUPI | JwtRegisteredClaimNames.UniqueName<BR/> ClaimTypes.Name
 string | GetObjectId | True | EUPI | "oid"<BR/> "http://schemas.microsoft.com/identity/claims/objectidentifier"
 IEnumerable<string> | GetScopes | True |  | "scp"<BR/> "http://schemas.microsoft.com/identity/claims/scope"
 string | GetTenantId | True | OII | "tid"<BR/> "http://schemas.microsoft.com/identity/claims/tenantid"
@@ -20,7 +20,7 @@ string | GetAcr | False |  | "acr"<BR/> "http://schemas.microsoft.com/claims/aut
 string | GetAdfs1Email | False | EUPI | "adfs1email"<BR/> "http://schemas.xmlsoap.org/claims/EmailAddress"
 string | GetAdfs1Upn | False | EUPI | "adfs1upn"<BR/> "http://schemas.xmlsoap.org/claims/UPN"
 string | GetAmr | False |  | "amr"<BR/> "http://schemas.microsoft.com/claims/authnmethodsreferences"
-string | GetAuthMethod | False |  | "authmethod"<BR/> ClaimTypes.AuthenticationMethod
+string | GetAuthenticationMethod | False |  | "authmethod"<BR/> ClaimTypes.AuthenticationMethod
 string | GetCertAppPolicy | False |  | "certapppolicy"<BR/> "http://schemas.microsoft.com/2012/12/certificatecontext/extension/applicationpolicy"
 string | GetCertAuthorityKeyIdentifier | False |  | "certauthoritykeyidentifier"<BR/> "http://schemas.microsoft.com/2012/12/certificatecontext/extension/authoritykeyidentifier"
 string | GetCertBasicConstraints | False |  | "certbasicconstraints"<BR/> "http://schemas.microsoft.com/2012/12/certificatecontext/extension/basicconstraints"
@@ -62,21 +62,21 @@ string | GetForwardedClientIp | False |  | "forwardedclientip"<BR/> "http://sche
 IEnumerable<string> | GetGroup | False |  | "group"<BR/> "http://schemas.xmlsoap.org/claims/Group"
 IEnumerable<string> | GetGroupsId | False |  | "groupsid"<BR/> ClaimTypes.GroupSid
 string | GetTokenType | False |  | "idtyp"
-string | GetIdp | False |  | "idp"<BR/> "http://schemas.microsoft.com/identity/claims/identityprovider"
-string | GetInsideCorporateNetwork | False |  | "insidecorporatenetwork"<BR/> "http://schemas.microsoft.com/ws/2012/01/insidecorporatenetwork"
-string | GetIsRegisteredUser | False |  | "isregistereduser"<BR/> "http://schemas.microsoft.com/2012/01/devicecontext/claims/isregistereduser"
-string | GetPpid | False |  | "ppid"<BR/> "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/privatepersonalidentifier"
-string | GetPrimaryGroupSid | False |  | "primarygroupsid"<BR/> ClaimTypes.PrimaryGroupSid
-string | GetPrimarySid | False |  | "primarysid"<BR/> ClaimTypes.PrimarySid
+string | GetIdp | True |  | "idp"<BR/> "http://schemas.microsoft.com/identity/claims/identityprovider"
+string | GetInsideCorporateNetwork | True |  | "insidecorporatenetwork"<BR/> "http://schemas.microsoft.com/ws/2012/01/insidecorporatenetwork"
+string | GetIsRegisteredUser | True |  | "isregistereduser"<BR/> "http://schemas.microsoft.com/2012/01/devicecontext/claims/isregistereduser"
+string | GetPrivatePersonalIdentifier | False | EUPI | "ppid"<BR/> "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/privatepersonalidentifier"
+string | GetPrimaryGroupSid | True |  | "primarygroupsid"<BR/> ClaimTypes.PrimaryGroupSid
+string | GetPrimarySid | True |  | "primarysid"<BR/> ClaimTypes.PrimarySid
 string | GetProxy | False |  | "proxy"<BR/> "http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-proxy"
 string | GetPwdChgEndpoint | False |  | "pwdchgurl"<BR/> "http://schemas.microsoft.com/ws/2012/01/passwordchangeurl"
 string | GetPwdExpDays | False |  | "pwdexpdays"<BR/> "http://schemas.microsoft.com/ws/2012/01/passwordexpirationdays"
 string | GetPwdExpTime | False |  | "pwdexptime"<BR/> "http://schemas.microsoft.com/ws/2012/01/passwordexpirationtime"
 string | GetRelyingPartyTrustId | False |  | "relyingpartytrustid"<BR/> "http://schemas.microsoft.com/2012/01/requestcontext/claims/relyingpartytrustid"
 IEnumerable<string> | GetRole | True |  | "role"<BR/> "roles"<BR/> ClaimTypes.Role
-string | GetSid | False |  | "sid"
-string | GetUpn | False |  | "upn"<BR/> ClaimTypes.Upn
-string | GetWinAccountName | False |  | "winaccountname"<BR/> ClaimTypes.WindowsAccountName
+string | GetSid | True |  | "sid"
+string | GetUpn | False | EUPI | "upn"<BR/> ClaimTypes.Upn
+string | GetWindowsAccountName | False | EUPI | "winaccountname"<BR/> ClaimTypes.WindowsAccountName
 string | GetVerifiedPrimaryEmail | False | EUPI | "verified_primary_email"
 string | GetVerifiedSecondaryEmail | False | EUPI | "verified_secondary_email"
 string | GetVNet | False |  | "vnet"
