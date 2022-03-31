@@ -4,7 +4,10 @@
 Type | Accessor | Used for authorization | Privacy | Claims
 --   | --       | --                     | --      | --     
 string | GetActor | False |  | actort<BR/> http://schemas.xmlsoap.org/ws/2009/09/identity/claims/actor
+string | GetIsGuestAccount | True |  | acct
+string | GetLastAuthenticatedTime | False |  | auth_time
 string | GetBirthdate | False | EUII | birthdate<BR/> http://schemas.xmlsoap.org/ws/2005/05/identity/claims/dateofbirth
+string | GetCountry | False | EUII | ctry
 string | GetEmail | False | EUII | email<BR/> http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress
 string | GetFamilyName | False | EUII | family_name<BR/> http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname
 string | GetGender | False | EUII | gender<BR/> http://schemas.xmlsoap.org/ws/2005/05/identity/claims/gender
@@ -16,7 +19,7 @@ string | GetUniqueName | False | EUPI | unique_name<BR/> http://schemas.xmlsoap.
 string | GetObjectId | True | EUPI | oid<BR/> http://schemas.microsoft.com/identity/claims/objectidentifier
 IEnumerable<string> | GetScopes | True |  | scp<BR/> http://schemas.microsoft.com/identity/claims/scope
 string | GetTenantId | True | OII | tid<BR/> http://schemas.microsoft.com/identity/claims/tenantid
-string | GetAcr | False |  | acr<BR/> http://schemas.microsoft.com/claims/authnclassreference
+string | GetAuthenticationContextClassReference | False |  | acr<BR/> http://schemas.microsoft.com/claims/authnclassreference
 string | GetAdfs1Email | False | EUPI | adfs1email<BR/> http://schemas.xmlsoap.org/claims/EmailAddress
 string | GetAdfs1Upn | False | EUPI | adfs1upn<BR/> http://schemas.xmlsoap.org/claims/UPN
 string | GetAmr | False |  | amr<BR/> http://schemas.microsoft.com/claims/authnmethodsreferences
@@ -50,12 +53,12 @@ string | GetCommonName | False | EUPI | commonname<BR/> http://schemas.xmlsoap.o
 string | GetDenyOnlyPrimaryGroupSid | False |  | denyonlyprimarygroupsid<BR/> http://schemas.microsoft.com/ws/2008/06/identity/claims/denyonlyprimarygroupsid
 string | GetDenyOnlyPrimarySid | False |  | denyonlyprimarysid<BR/> http://schemas.microsoft.com/ws/2008/06/identity/claims/denyonlyprimarysid
 string | GetDenyOnlySid | False |  | denyonlysid<BR/> http://schemas.xmlsoap.org/ws/2005/05/identity/claims/denyonlysid
-string | GetDevicedIspName | False |  | devicedispname<BR/> http://schemas.microsoft.com/2012/01/devicecontext/claims/displayname
+string | GetDeviceDisplayName | False |  | devicedispname<BR/> http://schemas.microsoft.com/2012/01/devicecontext/claims/displayname
 string | GetDeviceId | False |  | deviceid<BR/> http://schemas.microsoft.com/2012/01/devicecontext/claims/identifier
 string | GetDeviceIsManaged | False |  | deviceismanaged<BR/> http://schemas.microsoft.com/2012/01/devicecontext/claims/ismanaged
 string | GetDeviceOsType | False |  | deviceostype<BR/> http://schemas.microsoft.com/2012/01/devicecontext/claims/ostype
 string | GetDeviceOsVer | False |  | deviceosver<BR/> http://schemas.microsoft.com/2012/01/devicecontext/claims/osversion
-string | GetDeviceOwner | False |  | deviceowner<BR/> http://schemas.microsoft.com/2012/01/devicecontext/claims/userowner
+string | GetDeviceOwner | False | EUPI | deviceowner<BR/> http://schemas.microsoft.com/2012/01/devicecontext/claims/userowner
 string | GetDeviceRegId | False |  | deviceregid<BR/> http://schemas.microsoft.com/2012/01/devicecontext/claims/registrationid
 string | GetEndpointPath | False |  | endpointpath<BR/> http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-endpoint-absolute-path
 string | GetForwardedClientIp | False |  | forwardedclientip<BR/> http://schemas.microsoft.com/2012/01/requestcontext/claims/x-ms-forwarded-client-ip
@@ -65,6 +68,7 @@ string | GetTokenType | False |  | idtyp
 string | GetIdp | True |  | idp<BR/> http://schemas.microsoft.com/identity/claims/identityprovider
 string | GetInsideCorporateNetwork | True |  | insidecorporatenetwork<BR/> http://schemas.microsoft.com/ws/2012/01/insidecorporatenetwork
 string | GetIsRegisteredUser | True |  | isregistereduser<BR/> http://schemas.microsoft.com/2012/01/devicecontext/claims/isregistereduser
+string | GetLoginHint | False |  | login_hint
 string | GetPrivatePersonalIdentifier | False | EUPI | ppid<BR/> http://schemas.xmlsoap.org/ws/2005/05/identity/claims/privatepersonalidentifier
 string | GetPrimaryGroupSid | True |  | primarygroupsid<BR/> http://schemas.microsoft.com/ws/2008/06/identity/claims/primarygroupsid
 string | GetPrimarySid | True |  | primarysid<BR/> http://schemas.microsoft.com/ws/2008/06/identity/claims/primarysid

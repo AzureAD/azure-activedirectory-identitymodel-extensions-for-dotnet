@@ -14,7 +14,7 @@
 Type | Accessor | Used for authorization | Privacy | Claims
 --   | --       | --                     | --      | --     
 <# 
-  foreach(ClaimsKnowledge c in claimsKnowledge.Where(c => c.GenerateMapping)) 
+  foreach(ClaimsKnowledge c in claimsKnowledge) 
   {
 #>
 <#=c.HasMultipleInstances ? "IEnumerable<string>" : "string" #> | Get<#=c.AccessorName #> | <#= c.IsUsableInAuthorizationPolicies #> | <#= c.PrivacyCategory #> | <#= string.Join("<BR/> ",c.AllClaimNames.Select(c => GetClaimValue(c))) #>

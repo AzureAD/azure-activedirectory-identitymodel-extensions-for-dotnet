@@ -80,14 +80,14 @@ namespace System.IdentityModel.Aad
                      ClaimTypes.Actor);
             }
             /// <summary>
-            /// Returns the first claim corresponding to IsGuest claim on a ClaimsPrincipal
+            /// Returns the first claim corresponding to IsGuestAccount claim on a ClaimsPrincipal
             /// <list type="bullet">
             /// <item><description>"acct"</description></item>
             /// </list>
             /// This method returns information that is safe to use for authorization.
             /// </summary>
-            /// <param name="claimsPrincipal">Claims ClaimsPrincipal from which to get the IsGuest.</param>
-            public static string GetIsGuest(this ClaimsPrincipal claimsPrincipal)
+            /// <param name="claimsPrincipal">Claims ClaimsPrincipal from which to get the IsGuestAccount.</param>
+            public static string GetIsGuestAccount(this ClaimsPrincipal claimsPrincipal)
             {
                  if (claimsPrincipal == null)
                  {
@@ -98,14 +98,14 @@ namespace System.IdentityModel.Aad
             }
 
             /// <summary>
-            /// Returns the first claim corresponding to IsGuest claim on a ClaimsIdentity
+            /// Returns the first claim corresponding to IsGuestAccount claim on a ClaimsIdentity
             /// <list type="bullet">
             /// <item><description>"acct"</description></item>
             /// </list>
             /// This method returns information that is safe to use for authorization.
             /// </summary>
-            /// <param name="claimsIdentity">Claims ClaimsIdentity from which to get the IsGuest.</param>
-            public static string GetIsGuest(this ClaimsIdentity claimsIdentity)
+            /// <param name="claimsIdentity">Claims ClaimsIdentity from which to get the IsGuestAccount.</param>
+            public static string GetIsGuestAccount(this ClaimsIdentity claimsIdentity)
             {
                  if (claimsIdentity == null)
                  {
@@ -672,15 +672,15 @@ namespace System.IdentityModel.Aad
                      "http://schemas.microsoft.com/identity/claims/tenantid");
             }
             /// <summary>
-            /// Returns the first claim corresponding to Acr claim on a ClaimsPrincipal
+            /// Returns the first claim corresponding to AuthenticationContextClassReference claim on a ClaimsPrincipal
             /// <list type="bullet">
             /// <item><description>"acr"</description></item>
             /// <item><description>"http://schemas.microsoft.com/claims/authnclassreference"</description></item>
             /// </list>
             /// This method returns information that is NOT safe to use for authorization.
             /// </summary>
-            /// <param name="claimsPrincipal">Claims ClaimsPrincipal from which to get the Acr.</param>
-            public static string GetAcr(this ClaimsPrincipal claimsPrincipal)
+            /// <param name="claimsPrincipal">Claims ClaimsPrincipal from which to get the AuthenticationContextClassReference.</param>
+            public static string GetAuthenticationContextClassReference(this ClaimsPrincipal claimsPrincipal)
             {
                  if (claimsPrincipal == null)
                  {
@@ -692,15 +692,15 @@ namespace System.IdentityModel.Aad
             }
 
             /// <summary>
-            /// Returns the first claim corresponding to Acr claim on a ClaimsIdentity
+            /// Returns the first claim corresponding to AuthenticationContextClassReference claim on a ClaimsIdentity
             /// <list type="bullet">
             /// <item><description>"acr"</description></item>
             /// <item><description>"http://schemas.microsoft.com/claims/authnclassreference"</description></item>
             /// </list>
             /// This method returns information that is NOT safe to use for authorization.
             /// </summary>
-            /// <param name="claimsIdentity">Claims ClaimsIdentity from which to get the Acr.</param>
-            public static string GetAcr(this ClaimsIdentity claimsIdentity)
+            /// <param name="claimsIdentity">Claims ClaimsIdentity from which to get the AuthenticationContextClassReference.</param>
+            public static string GetAuthenticationContextClassReference(this ClaimsIdentity claimsIdentity)
             {
                  if (claimsIdentity == null)
                  {
@@ -2006,15 +2006,15 @@ namespace System.IdentityModel.Aad
                      ClaimTypes.DenyOnlySid);
             }
             /// <summary>
-            /// Returns the first claim corresponding to DevicedIspName claim on a ClaimsPrincipal
+            /// Returns the first claim corresponding to DeviceDisplayName claim on a ClaimsPrincipal
             /// <list type="bullet">
             /// <item><description>"devicedispname"</description></item>
             /// <item><description>"http://schemas.microsoft.com/2012/01/devicecontext/claims/displayname"</description></item>
             /// </list>
             /// This method returns information that is NOT safe to use for authorization.
             /// </summary>
-            /// <param name="claimsPrincipal">Claims ClaimsPrincipal from which to get the DevicedIspName.</param>
-            public static string GetDevicedIspName(this ClaimsPrincipal claimsPrincipal)
+            /// <param name="claimsPrincipal">Claims ClaimsPrincipal from which to get the DeviceDisplayName.</param>
+            public static string GetDeviceDisplayName(this ClaimsPrincipal claimsPrincipal)
             {
                  if (claimsPrincipal == null)
                  {
@@ -2026,15 +2026,15 @@ namespace System.IdentityModel.Aad
             }
 
             /// <summary>
-            /// Returns the first claim corresponding to DevicedIspName claim on a ClaimsIdentity
+            /// Returns the first claim corresponding to DeviceDisplayName claim on a ClaimsIdentity
             /// <list type="bullet">
             /// <item><description>"devicedispname"</description></item>
             /// <item><description>"http://schemas.microsoft.com/2012/01/devicecontext/claims/displayname"</description></item>
             /// </list>
             /// This method returns information that is NOT safe to use for authorization.
             /// </summary>
-            /// <param name="claimsIdentity">Claims ClaimsIdentity from which to get the DevicedIspName.</param>
-            public static string GetDevicedIspName(this ClaimsIdentity claimsIdentity)
+            /// <param name="claimsIdentity">Claims ClaimsIdentity from which to get the DeviceDisplayName.</param>
+            public static string GetDeviceDisplayName(this ClaimsIdentity claimsIdentity)
             {
                  if (claimsIdentity == null)
                  {
@@ -2207,6 +2207,7 @@ namespace System.IdentityModel.Aad
             /// <item><description>"http://schemas.microsoft.com/2012/01/devicecontext/claims/userowner"</description></item>
             /// </list>
             /// This method returns information that is NOT safe to use for authorization.
+            /// The privacy classification of the information returned is EUPI.
             /// </summary>
             /// <param name="claimsPrincipal">Claims ClaimsPrincipal from which to get the DeviceOwner.</param>
             public static string GetDeviceOwner(this ClaimsPrincipal claimsPrincipal)
@@ -2227,6 +2228,7 @@ namespace System.IdentityModel.Aad
             /// <item><description>"http://schemas.microsoft.com/2012/01/devicecontext/claims/userowner"</description></item>
             /// </list>
             /// This method returns information that is NOT safe to use for authorization.
+            /// The privacy classification of the information returned is EUPI.
             /// </summary>
             /// <param name="claimsIdentity">Claims ClaimsIdentity from which to get the DeviceOwner.</param>
             public static string GetDeviceOwner(this ClaimsIdentity claimsIdentity)
