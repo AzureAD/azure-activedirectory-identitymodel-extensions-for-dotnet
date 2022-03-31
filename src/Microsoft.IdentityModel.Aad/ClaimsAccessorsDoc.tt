@@ -1,8 +1,11 @@
 ﻿<#@ template debug="false" hostspecific="false" language="C#" #>
 <#@ assembly name="System.Core" #>
+<#@ assembly name="netstandard" #>
+<#@ assembly name="$(SolutionDir)\src\System.IdentityModel.Tokens.Jwt\bin\Debug\netstandard2.0\System.IdentityModel.Tokens.Jwt.dll" #>
 <#@ import namespace="System.Linq" #>
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.IdentityModel.Tokens.Jwt" #>
 <#@ output extension=".md" #>
 <#@ include file="ClaimsKnowledge.tti" #>
 
@@ -14,7 +17,32 @@ Type | Accessor | Used for authorization | Privacy | Claims
   foreach(ClaimsKnowledge c in claimsKnowledge.Where(c => c.GenerateMapping)) 
   {
 #>
-<#=c.HasMultipleInstances ? "IEnumerable<string>" : "string" #> | Get<#=c.AccessorName #> | <#= c.IsUsableInAuthorizationPolicies #> | <#= c.PrivacyCategory #> | <#= string.Join("<BR/> ", c.AllClaimNames) #>
+<#=c.HasMultipleInstances ? "IEnumerable<string>" : "string" #> | Get<#=c.AccessorName #> | <#= c.IsUsableInAuthorizationPolicies #> | <#= c.PrivacyCategory #> | <#= string.Join("<BR/> ",c.AllClaimNames.Select(c => GetClaimValue(c))) #>
 <#
   }
+#>
+
+<#+
+private string GetClaimValue(string c)
+{
+ if (c.StartsWith("\""))
+ {
+  return c.Trim('"');
+ }
+ else
+ {
+  if (c.StartsWith("JwtRegisteredClaimNames"))
+  {
+   return typeof(JwtRegisteredClaimNames).GetField(c.Substring(c.IndexOf('.')+1)).GetValue(null).ToString();
+  }
+  else if (c.StartsWith("ClaimTypes"))
+  {
+   return typeof(System.Security.Claims.ClaimTypes).GetField(c.Substring(c.IndexOf('.')+1)).GetValue(null).ToString();
+  }
+  else
+  {
+   return c;
+  }
+ }
+}
 #>
