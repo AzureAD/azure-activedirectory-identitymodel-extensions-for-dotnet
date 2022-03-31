@@ -193,5 +193,21 @@ namespace System.IdentityModel.Aad
      }
  }
 #>
+
+
+            private static Dictionary<string, string[]> equivalentClaims = new Dictionary<string, string[]>
+            {
+<#
+  foreach(ClaimsKnowledge c in claimsKnowledge) 
+  {
+        foreach(string claim in c.AllClaimNames)
+        {
+#>
+                { <#=claim#>, new string[]{ <#= string.Join(", ", c.AllClaimNames) #> } },
+<#
+        }
+  }
+#>
+            };
         }
 }

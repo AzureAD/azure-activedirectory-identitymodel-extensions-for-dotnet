@@ -55,6 +55,99 @@ namespace System.IdentityModel.Aad
             return user.Claims.Any(claim => requiredClaims.Contains(claim.Type));
         }
 
+        /// <summary>
+        /// Get the first value of a claim or its equivalent
+        /// </summary>
+        /// <param name="user">Claims principal</param>
+        /// <param name="claimType">Claims type</param>
+        /// <returns></returns>
+        public static string GetEquivalentClaim(this ClaimsPrincipal user, string claimType)
+        {
+            if (equivalentClaims.TryGetValue(claimType, out string[] equivalents))
+            {
+                return GetClaimValue(user, equivalents);
+            }
+            else
+            {
+                return null;
+            }    
+        }
+
+        /// <summary>
+        /// Get the first value of a claim or its equivalent
+        /// </summary>
+        /// <param name="claimsIdentity">Claims identity.</param>
+        /// <param name="claimType">Claims type</param>
+        /// <returns></returns>
+        public static string GetEquivalentClaim(this ClaimsIdentity claimsIdentity, string claimType)
+        {
+            if (equivalentClaims.TryGetValue(claimType, out string[] equivalents))
+            {
+                return GetClaimValue(claimsIdentity, equivalents);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Get the first value of a claim or its equivalent
+        /// </summary>
+        /// <param name="user">Claims principal</param>
+        /// <param name="claimType">Claims type.</param>
+        /// <returns>All the values of the claims or its equivalents.</returns>
+        public static IEnumerable<string> GetAllEquivalentClaims(this ClaimsPrincipal user, string claimType)
+        {
+            if (user is null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            if (string.IsNullOrEmpty(claimType))
+            {
+                throw new ArgumentException($"'{nameof(claimType)}' cannot be null or empty.", nameof(claimType));
+            }
+
+            if (equivalentClaims.TryGetValue(claimType, out string[] equivalents))
+            {
+                return GetAllClaimValues(user, equivalents);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Get the first value of a claim or its equivalent
+        /// </summary>
+        /// <param name="claimsIdentity">Claims identity.</param>
+        /// <param name="claimType">Claims type.</param>
+        /// <returns>All the values of the claims or its equivalents.</returns>
+        public static IEnumerable<string> GetAllEquivalentClaims(this ClaimsIdentity claimsIdentity, string claimType)
+        {
+            if (claimsIdentity is null)
+            {
+                throw new ArgumentNullException(nameof(claimsIdentity));
+            }
+
+            if (string.IsNullOrEmpty(claimType))
+            {
+                throw new ArgumentException($"'{nameof(claimType)}' cannot be null or empty.", nameof(claimType));
+            }
+
+            if (equivalentClaims.TryGetValue(claimType, out string[] equivalents))
+            {
+                return GetAllClaimValues(claimsIdentity, equivalents);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+
         /// <summary> 
         /// Get the value of a claim including several overrides of the claims (due to ASP.NET 
         /// and ASP.NET Core using Claims mapping) 
