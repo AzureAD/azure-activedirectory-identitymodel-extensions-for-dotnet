@@ -36,9 +36,10 @@
 // DON'T UPDATE MANUALLY
 
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-namespace System.IdentityModel.Tokens.Jwt
+namespace System.IdentityModel.Aad
 {
     /// <summary>
     /// Defines extension methods to access claims by purpose, and not by name, making it compatible

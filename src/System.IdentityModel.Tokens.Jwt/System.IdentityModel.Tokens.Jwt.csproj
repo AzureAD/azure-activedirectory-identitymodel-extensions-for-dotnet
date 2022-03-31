@@ -27,44 +27,4 @@
     <ProjectReference Include="..\Microsoft.IdentityModel.Tokens\Microsoft.IdentityModel.Tokens.csproj" />
   </ItemGroup>
   
-   <ItemGroup>
-    <None Update="ClaimsAccessorsDoc.md">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>ClaimsAccessorsDoc.tt</DependentUpon>
-    </None>
-    <None Update="ClaimsAccessorsDoc.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ClaimsAccessorsDoc.md</LastGenOutput>
-    </None>
-    <None Update="ClaimsKnowledge.tti">
-      <Generator></Generator>
-    </None>
-    <None Update="ClaimTypeAccessor.tt">
-      <LastGenOutput>ClaimTypeAccessor.gen.cs</LastGenOutput>
-      <Generator>TextTemplatingFileGenerator</Generator>
-    </None>
-    <None Update="ClaimTypeMapping.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ClaimTypeMapping.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="ClaimTypeAccessor.gen.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>ClaimTypeAccessor.tt</DependentUpon>
-    </Compile>
-    <Compile Update="ClaimTypeMapping.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>ClaimTypeMapping.tt</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
 </Project>
