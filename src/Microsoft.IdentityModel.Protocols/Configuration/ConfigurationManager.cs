@@ -116,7 +116,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <param name="configValidator">The <see cref="IConfigurationValidator{T}"/></param>
         /// <exception cref="ArgumentNullException">If 'configValidator' is null.</exception>
         public ConfigurationManager(string metadataAddress, IConfigurationRetriever<T> configRetriever, IDocumentRetriever docRetriever, IConfigurationValidator<T> configValidator)
-            : this(metadataAddress, configRetriever, docRetriever)
+            :this(metadataAddress, configRetriever, docRetriever)
         {
             if (configValidator == null)
                 throw LogHelper.LogArgumentNullException(nameof(configValidator));
