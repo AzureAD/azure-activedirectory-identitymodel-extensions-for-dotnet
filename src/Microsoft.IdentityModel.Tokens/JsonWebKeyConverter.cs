@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 
@@ -276,7 +277,7 @@ namespace Microsoft.IdentityModel.Tokens
                 key = new SymmetricSecurityKey(webKey);
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(SymmetricSecurityKey)), webKey, ex), ex));
             }
@@ -305,7 +306,9 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (Exception ex)
             {
-                LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(X509SecurityKey)), webKey, ex), ex));
+                string convertKeyInfo = LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(X509SecurityKey)), webKey, ex);
+                webKey.ConvertKeyInfo = convertKeyInfo;
+                LogHelper.LogExceptionMessage(new InvalidOperationException(convertKeyInfo, ex));
             }
 
             return false;
@@ -330,7 +333,9 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (Exception ex)
             {
-                LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(RsaSecurityKey)), webKey, ex), ex));
+                string convertKeyInfo = LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(RsaSecurityKey)), webKey, ex);
+                webKey.ConvertKeyInfo = convertKeyInfo;
+                LogHelper.LogExceptionMessage(new InvalidOperationException(convertKeyInfo, ex));
             }
 
             return false;
@@ -346,7 +351,20 @@ namespace Microsoft.IdentityModel.Tokens
 
             key = null;
             if (string.IsNullOrEmpty(webKey.Crv) || string.IsNullOrEmpty(webKey.X) || string.IsNullOrEmpty(webKey.Y))
+            {
+                var missingComponent = new List<string>();
+                if (string.IsNullOrEmpty(webKey.Crv))
+                    missingComponent.Add(JsonWebKeyParameterNames.Crv);
+
+                if (string.IsNullOrEmpty(webKey.X))
+                    missingComponent.Add(JsonWebKeyParameterNames.X);
+
+                if (string.IsNullOrEmpty(webKey.Y))
+                    missingComponent.Add(JsonWebKeyParameterNames.Y);
+
+                webKey.ConvertKeyInfo = LogHelper.FormatInvariant(LogMessages.IDX10814, LogHelper.MarkAsNonPII(typeof(ECDsaSecurityKey)), webKey, string.Join(", ", missingComponent));
                 return false;
+            }
 
             try
             {
@@ -355,7 +373,9 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (Exception ex)
             {
-                LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(ECDsaSecurityKey)), webKey, ex), ex));
+                string convertKeyInfo = LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(ECDsaSecurityKey)), webKey, ex);
+                webKey.ConvertKeyInfo = convertKeyInfo;
+                LogHelper.LogExceptionMessage(new InvalidOperationException(convertKeyInfo, ex));
             }
 
             return false;
