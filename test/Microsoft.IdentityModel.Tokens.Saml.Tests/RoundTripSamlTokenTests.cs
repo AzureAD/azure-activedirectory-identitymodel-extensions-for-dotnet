@@ -78,6 +78,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 // ensure the SamlAssertion.CanonicalString can be validated needed for OnBehalfOf flows.
                 var principal5 = theoryData.Handler.ValidateToken((principal.Identity as ClaimsIdentity).BootstrapContext as string, theoryData.ValidationParameters, out SecurityToken validatedToken5);
 
+                // the RawToken values can be different and should have no effect on other property values and need to be ignored
+                context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>> { { typeof(SamlSecurityToken), new List<string> { "RawToken" } }, { typeof(Saml2SecurityToken), new List<string> { "RawToken" } } };
+
                 IdentityComparer.AreEqual(validatedToken, validatedToken2, context);
                 IdentityComparer.AreEqual(validatedToken, validatedToken3, context);
                 IdentityComparer.AreEqual(validatedToken, validatedToken4, context);

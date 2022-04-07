@@ -485,7 +485,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 theoryData.ExpectedException.ProcessNoException(context);
                 context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
                 {
-                    { typeof(JsonWebToken), new List<string> { "EncodedToken", "AuthenticationTag", "Ciphertext", "InitializationVector" } },
+                    { typeof(JsonWebToken), new List<string> { "EncodedToken", "AuthenticationTag", "Ciphertext", "InitializationVector", "RawToken" } },
                 };
 
                 var jweTokenFromJwtHandler = new JsonWebToken(jweFromJwtHandler);
@@ -716,7 +716,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
                 context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
                 {
-                    { typeof(JsonWebToken), new List<string> { "EncodedToken", "AuthenticationTag", "Ciphertext", "InitializationVector" } },
+                    { typeof(JsonWebToken), new List<string> { "EncodedToken", "AuthenticationTag", "Ciphertext", "InitializationVector", "RawToken" } },
                 };
 
                 IdentityComparer.AreEqual(jweTokenFromSecurityTokenDescriptor, jweTokenFromString, context);
@@ -1229,7 +1229,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
             {
-                { typeof(JsonWebToken), new List<string> { "EncodedToken", "AuthenticationTag", "Ciphertext", "InitializationVector", "EncryptedKey" } },
+                { typeof(JsonWebToken), new List<string> { "EncodedToken", "AuthenticationTag", "Ciphertext", "InitializationVector", "EncryptedKey", "RawToken" } },
             };
             IdentityComparer.AreEqual(jwtToken, jwtTokenToCompare, context);
 
@@ -1751,7 +1751,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         //RsaPss produces different signatures
                         PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
                         {
-                            { typeof(JsonWebToken), new List<string> { "EncodedToken", "EncodedSignature" } },
+                            { typeof(JsonWebToken), new List<string> { "EncodedToken", "EncodedSignature", "RawToken" } },
                         },
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {

@@ -776,7 +776,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
         {
             public WsFederationSigninMessageTheoryData()
             {
-                PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>> { { typeof(SamlAssertion), new List<string> { "Signature", "SigningCredentials", "CanonicalString" } }, { typeof(Saml2Assertion), new List<string> { "Signature", "SigningCredentials", "CanonicalString" } } };
+                PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>> { { typeof(SamlAssertion), new List<string> { "Signature", "SigningCredentials", "CanonicalString" } }, { typeof(Saml2Assertion), new List<string> { "Signature", "SigningCredentials", "CanonicalString" } }, { typeof(SamlSecurityToken), new List<string> { "RawToken" } }, { typeof(Saml2SecurityToken), new List<string> { "RawToken" } } };
                 TokenValidationParameters = new TokenValidationParameters
                 {
                     IssuerSigningKey = Default.AsymmetricSigningKey,

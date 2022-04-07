@@ -272,7 +272,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Gets the original raw data of this instance when it was created.
         /// </summary>
-        public string EncodedToken { get; private set; }
+        public string EncodedToken { get => RawToken; private set { RawToken = value; } }
 
         /// <summary>
         /// Not implemented.
@@ -346,7 +346,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             else
                 DecodeJws(tokenParts);
 
-            EncodedToken = rawData;
+            RawToken = rawData;
         }
 
         private static void AddClaimsFromJToken(List<Claim> claims, string claimType, JToken jtoken, string issuer)

@@ -1224,6 +1224,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 throw LogExceptionMessage(new SecurityTokenValidationException(
                     FormatInvariant(TokenLogMessages.IDX10254, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII("ValidateToken"), LogHelper.MarkAsNonPII(GetType()), LogHelper.MarkAsNonPII("ValidateSignature"), LogHelper.MarkAsNonPII(typeof(SamlSecurityToken)))));
 
+            // save the original raw token
+            samlToken.RawToken = token;
+
             return ValidateToken(samlToken, token, validationParameters, out validatedToken);
         }
 

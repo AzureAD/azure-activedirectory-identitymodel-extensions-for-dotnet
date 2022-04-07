@@ -245,7 +245,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
                 {
                     { typeof(JwtHeader), new List<string> { "Item" } },
-                    { typeof(JwtPayload), new List<string> { "Item" } }
+                    { typeof(JwtPayload), new List<string> { "Item" } },
+                    { typeof(JwtSecurityToken), new List<string> { "RawToken" } }
                 }
             };
 
@@ -649,7 +650,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 //RsaPss produces different signatures
                 PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
                 {
-                    { typeof(JwtSecurityToken), new List<string> { "RawSignature", "RawData" } },
+                    { typeof(JwtSecurityToken), new List<string> { "RawSignature", "RawData", "RawToken" } },
                 },
                 ValidationParameters = new TokenValidationParameters
                 {

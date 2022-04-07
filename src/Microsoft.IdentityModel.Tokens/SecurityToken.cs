@@ -64,5 +64,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// This must be overridden to get the time when this <see cref="SecurityToken"/> is no longer Valid.
         /// </summary>
         public abstract DateTime ValidTo { get; }
+
+        /// <summary>
+        /// Gets the original raw data of this instance when it was created.
+        /// </summary>
+        public string RawToken { get; protected internal set; }
     }
 }

@@ -328,7 +328,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
             context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
             {
                 { typeof(Saml2Assertion), new List<string> { "IssueInstant", "InclusiveNamespacesPrefixList", "Signature", "SigningCredentials", "CanonicalString" } },
-                { typeof(Saml2SecurityToken), new List<string> { "SigningKey" } },
+                { typeof(Saml2SecurityToken), new List<string> { "SigningKey", "RawToken" } },
             };
 
             try
@@ -1127,7 +1127,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
             context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
             {
                 { typeof(Saml2Assertion), new List<string> { "IssueInstant", "InclusiveNamespacesPrefixList", "Signature", "SigningCredentials", "CanonicalString" } },
-                { typeof(Saml2SecurityToken), new List<string> { "SigningKey" } },
+                { typeof(Saml2SecurityToken), new List<string> { "SigningKey", "RawToken" } },
             };
 
             try

@@ -349,7 +349,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <remarks>The original JSON Compact serialized format passed to one of the two constructors <see cref="JwtSecurityToken(string)"/>
         /// or <see cref="JwtSecurityToken( JwtHeader, JwtPayload, string, string, string )"/></remarks>
-        public string RawData { get; private set; }
+        public string RawData { get => RawToken; private set { RawToken = value; } }
 
         /// <summary>
         /// Gets the original raw data of this instance when it was created.
@@ -515,7 +515,7 @@ namespace System.IdentityModel.Tokens.Jwt
             else
                 DecodeJws(tokenParts);
 
-            RawData = rawData;
+            RawToken = rawData;
         }
 
         /// <summary>

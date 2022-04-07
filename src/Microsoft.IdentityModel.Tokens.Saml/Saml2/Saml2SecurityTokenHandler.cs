@@ -290,6 +290,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             ValidateIssuerSecurityKey(samlToken.SigningKey, samlToken, validationParameters);
             validatedToken = samlToken;
+
+            // save the original raw token
+            validatedToken.RawToken = token;
+
             var identity = CreateClaimsIdentity(samlToken, issuer, validationParameters);
             if (validationParameters.SaveSigninToken)
                 identity.BootstrapContext = samlToken.Assertion.CanonicalString;
