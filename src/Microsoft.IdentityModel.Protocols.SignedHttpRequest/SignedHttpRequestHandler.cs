@@ -103,7 +103,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             return message + "." + JwtTokenUtilities.CreateEncodedSignature(message, signedHttpRequestDescriptor.SigningCredentials, false);
         }
 
-
         /// <summary>
         /// Creates a JSON representation of a HttpRequest payload.
         /// </summary>
@@ -209,7 +208,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (string.IsNullOrEmpty(httpMethod))
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor.HttpRequestData.Method));
 
-            if (!httpMethod.ToUpperInvariant().Equals(httpMethod, StringComparison.Ordinal))
+            if (!httpMethod.ToUpperInvariant().Equals(httpMethod))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23002, LogHelper.MarkAsNonPII(httpMethod))));
 
             payload.Add(SignedHttpRequestClaimTypes.M, httpMethod);
@@ -856,7 +855,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (!signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AcceptUnsignedQueryParameters && sanitizedQueryParams.Any())
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23029, LogHelper.MarkAsNonPII(string.Join(", ", sanitizedQueryParams.Select(x => x.Key))))));
 
-            if (!string.Equals(expectedBase64UrlEncodedHash, qClaimBase64UrlEncodedHash, StringComparison.Ordinal))
+            if (!string.Equals(expectedBase64UrlEncodedHash, qClaimBase64UrlEncodedHash))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.Q), expectedBase64UrlEncodedHash, qClaimBase64UrlEncodedHash)));
         }
 
@@ -924,7 +923,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (!signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AcceptUnsignedHeaders && sanitizedHeaders.Any())
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23026, LogHelper.MarkAsNonPII(string.Join(", ", sanitizedHeaders.Select(x => x.Key))))));
 
-            if (!string.Equals(expectedBase64UrlEncodedHash, hClaimBase64UrlEncodedHash, StringComparison.Ordinal))
+            if (!string.Equals(expectedBase64UrlEncodedHash, hClaimBase64UrlEncodedHash))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.H), expectedBase64UrlEncodedHash, hClaimBase64UrlEncodedHash)));
         }
 
@@ -958,7 +957,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.B), e), e));
             }
 
-            if (!string.Equals(expectedBase64UrlEncodedHash, bClaim, StringComparison.Ordinal))
+            if (!string.Equals(expectedBase64UrlEncodedHash, bClaim))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidBClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.B), expectedBase64UrlEncodedHash, bClaim)));
         }
         #endregion
@@ -1102,7 +1101,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             {
                 foreach (var key in popKeys)
                 {
-                    if (string.Equals(key.KeyId, kid.ToString(), StringComparison.Ordinal))
+                    if (string.Equals(key.KeyId, kid.ToString()))
                         return key;
                 }
 
@@ -1189,7 +1188,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 jwkPopKeyThumprint = Base64UrlEncoder.Encode(popKey.ComputeJwkThumbprint());
 
             // validate reference
-            if (!string.Equals(cnfReferenceId, jwkPopKeyThumprint, StringComparison.Ordinal))
+            if (!string.Equals(cnfReferenceId, jwkPopKeyThumprint))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23033, cnfReferenceId, jwkPopKeyThumprint, confirmationClaim)));
 
             return popKey;

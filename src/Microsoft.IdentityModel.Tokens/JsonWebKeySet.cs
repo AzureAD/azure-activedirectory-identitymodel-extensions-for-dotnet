@@ -123,7 +123,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 // skip if "use" (Public Key Use) parameter is not empty or "sig".
                 // https://datatracker.ietf.org/doc/html/rfc7517#section-4.2
-                if (!string.IsNullOrEmpty(webKey.Use) && !webKey.Use.Equals(JsonWebKeyUseNames.Sig, StringComparison.Ordinal))
+                if (!string.IsNullOrEmpty(webKey.Use) && !webKey.Use.Equals(JsonWebKeyUseNames.Sig))
                 {
                     string convertKeyInfo = LogHelper.FormatInvariant(LogMessages.IDX10808, webKey, webKey.Use);
                     webKey.ConvertKeyInfo = convertKeyInfo;
@@ -134,7 +134,7 @@ namespace Microsoft.IdentityModel.Tokens
                     continue;
                 }
 
-                if (JsonWebAlgorithmsKeyTypes.RSA.Equals(webKey.Kty, StringComparison.Ordinal))
+                if (JsonWebAlgorithmsKeyTypes.RSA.Equals(webKey.Kty))
                 {
                     var rsaKeyResolved = true;
 
@@ -167,7 +167,7 @@ namespace Microsoft.IdentityModel.Tokens
                     if (!rsaKeyResolved && !SkipUnresolvedJsonWebKeys)
                         signingKeys.Add(webKey);
                 }
-                else if (JsonWebAlgorithmsKeyTypes.EllipticCurve.Equals(webKey.Kty, StringComparison.Ordinal))
+                else if (JsonWebAlgorithmsKeyTypes.EllipticCurve.Equals(webKey.Kty))
                 {
                     if (JsonWebKeyConverter.TryConvertToECDsaSecurityKey(webKey, out SecurityKey securityKey))
                         signingKeys.Add(securityKey);

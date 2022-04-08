@@ -17,7 +17,7 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Usage", "CA2207:Initialize value type static fields inline", Justification = "Vendored component", Scope = "namespaceanddescendants", Target = "Microsoft.IdentityModel.Json")]
 [assembly: SuppressMessage("Performance", "CA1810:Initialize reference type static fields inline", Justification = "Vendored component", Scope = "namespaceanddescendants", Target = "Microsoft.IdentityModel.Json")]
 [assembly: SuppressMessage("Performance", "CA1825:Avoid zero-length array allocations.", Justification = "vendored", Scope = "namespaceanddescendants", Target = "Microsoft.IdentityModel.Json")]
-[assembly: SuppressMessage("Globalization", "CA1307:Specify StringComparison", Justification = "Vendored component", Scope = "namespaceanddescendants", Target = "Microsoft.IdentityModel.Json")]
+[assembly: SuppressMessage("Globalization", "CA1307:Specify StringComparison", Justification = "Vendored component", Scope = "module")]
 [assembly: SuppressMessage("Performance", "CA1820:Test for empty strings using string length", Justification = "Vendored component", Scope = "namespaceanddescendants", Target = "Microsoft.IdentityModel.Json")]
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Vendored component", Scope = "namespaceanddescendants", Target = "Microsoft.IdentityModel.Json")]
 

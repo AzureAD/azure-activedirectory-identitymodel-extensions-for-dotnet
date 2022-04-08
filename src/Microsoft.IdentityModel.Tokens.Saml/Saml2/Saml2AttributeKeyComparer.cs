@@ -92,11 +92,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             public bool Equals(AttributeKey other)
             {
                 return other != null &&
-                    FriendlyName.Equals(other.FriendlyName, StringComparison.Ordinal) &&
-                    Name.Equals(other.Name, StringComparison.Ordinal) &&
-                    NameFormat.Equals(other.NameFormat, StringComparison.Ordinal) &&
-                    ValueType.Equals(other.ValueType, StringComparison.Ordinal) &&
-                    OriginalIssuer.Equals(other.OriginalIssuer, StringComparison.Ordinal);
+                    FriendlyName.Equals(other.FriendlyName) &&
+                    Name.Equals(other.Name) &&
+                    NameFormat.Equals(other.NameFormat) &&
+                    ValueType.Equals(other.ValueType) &&
+                    OriginalIssuer.Equals(other.OriginalIssuer);
             }
         }
 

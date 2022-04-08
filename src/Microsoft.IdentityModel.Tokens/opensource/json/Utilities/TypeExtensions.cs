@@ -582,7 +582,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 
             while (current != null)
             {
-                if (string.Equals(current.FullName, fullTypeName, StringComparison.Ordinal))
+                if (string.Equals(current.FullName, fullTypeName))
                 {
                     match = current;
                     return true;
@@ -595,7 +595,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             {
                 foreach (Type i in type.GetInterfaces())
                 {
-                    if (string.Equals(i.Name, fullTypeName, StringComparison.Ordinal))
+                    if (string.Equals(i.Name, fullTypeName))
                     {
                         match = type;
                         return true;

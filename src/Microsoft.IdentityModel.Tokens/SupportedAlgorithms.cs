@@ -236,11 +236,11 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (key is JsonWebKey jsonWebKey)
             {
-                if (JsonWebAlgorithmsKeyTypes.RSA.Equals(jsonWebKey.Kty, StringComparison.Ordinal))
+                if (JsonWebAlgorithmsKeyTypes.RSA.Equals(jsonWebKey.Kty))
                     return IsSupportedRsaAlgorithm(algorithm, key);
-                else if (JsonWebAlgorithmsKeyTypes.EllipticCurve.Equals(jsonWebKey.Kty, StringComparison.Ordinal))
+                else if (JsonWebAlgorithmsKeyTypes.EllipticCurve.Equals(jsonWebKey.Kty))
                     return IsSupportedEcdsaAlgorithm(algorithm);
-                else if (JsonWebAlgorithmsKeyTypes.Octet.Equals(jsonWebKey.Kty, StringComparison.Ordinal))
+                else if (JsonWebAlgorithmsKeyTypes.Octet.Equals(jsonWebKey.Kty))
                     return IsSupportedSymmetricAlgorithm(algorithm);
 
                 return false;
@@ -280,9 +280,9 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 return false;
 
-            return algorithm.Equals(SecurityAlgorithms.Aes128Gcm, StringComparison.Ordinal)
-               || algorithm.Equals(SecurityAlgorithms.Aes192Gcm, StringComparison.Ordinal)
-               || algorithm.Equals(SecurityAlgorithms.Aes256Gcm, StringComparison.Ordinal);
+            return algorithm.Equals(SecurityAlgorithms.Aes128Gcm)
+               || algorithm.Equals(SecurityAlgorithms.Aes192Gcm)
+               || algorithm.Equals(SecurityAlgorithms.Aes256Gcm);
         }
 
         internal static bool IsAesCbc(string algorithm)
@@ -290,9 +290,9 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 return false;
 
-            return algorithm.Equals(SecurityAlgorithms.Aes128CbcHmacSha256, StringComparison.Ordinal)
-               || algorithm.Equals(SecurityAlgorithms.Aes192CbcHmacSha384, StringComparison.Ordinal)
-               || algorithm.Equals(SecurityAlgorithms.Aes256CbcHmacSha512, StringComparison.Ordinal);
+            return algorithm.Equals(SecurityAlgorithms.Aes128CbcHmacSha256)
+               || algorithm.Equals(SecurityAlgorithms.Aes192CbcHmacSha384)
+               || algorithm.Equals(SecurityAlgorithms.Aes256CbcHmacSha512);
         }
 
         private static bool IsSupportedEcdsaAlgorithm(string algorithm)

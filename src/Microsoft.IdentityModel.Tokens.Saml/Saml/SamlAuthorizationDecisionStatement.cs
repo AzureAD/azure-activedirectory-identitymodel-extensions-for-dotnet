@@ -97,9 +97,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 if (string.IsNullOrEmpty(value))
                     throw LogArgumentNullException(nameof(value));
 
-                if (SamlConstants.AccessDecision.Deny.Equals(value, StringComparison.Ordinal)
-                    || SamlConstants.AccessDecision.Permit.Equals(value, StringComparison.Ordinal)
-                    || SamlConstants.AccessDecision.Indeterminate.Equals(value, StringComparison.Ordinal))
+                if (SamlConstants.AccessDecision.Deny.Equals(value)
+                    || SamlConstants.AccessDecision.Permit.Equals(value)
+                    || SamlConstants.AccessDecision.Indeterminate.Equals(value))
                     _decision = value;
                 else
                     throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11508));

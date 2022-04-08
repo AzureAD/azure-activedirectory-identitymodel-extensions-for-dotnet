@@ -14,3 +14,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Design", "CA1065:Do not raise exceptions in unexpected locations", Justification = "Current design", Scope = "member", Target = "~P:Microsoft.IdentityModel.Xml.DelegatingXmlDictionaryWriter.UseInnerWriter")]
 [assembly: SuppressMessage("Naming", "CA1720:Identifier contains type name", Justification = "Breaking change", Scope = "member", Target = "~F:Microsoft.IdentityModel.Xml.XmlSignatureConstants.Elements.Object")]
 [assembly: SuppressMessage("Naming", "CA1720:Identifier contains type name", Justification = "Breaking change", Scope = "member", Target = "~M:Microsoft.IdentityModel.Xml.XmlUtil.NormalizeEmptyString(System.String)~System.String")]
+[assembly: SuppressMessage("Globalization", "CA1307:Specify StringComparison", Justification = "Vendored component", Scope = "module")]

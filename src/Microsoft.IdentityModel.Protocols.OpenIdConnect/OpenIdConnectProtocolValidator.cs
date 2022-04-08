@@ -345,7 +345,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             if (string.IsNullOrEmpty(validationContext.ValidatedIdToken.Payload.Sub))
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogMessages.IDX21346));
 
-            if (!string.Equals(validationContext.ValidatedIdToken.Payload.Sub, sub, StringComparison.Ordinal))
+            if (!string.Equals(validationContext.ValidatedIdToken.Payload.Sub, sub))
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21338, validationContext.ValidatedIdToken.Payload.Sub, sub)));
         }
 
@@ -421,7 +421,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                     {
                         throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogMessages.IDX21308));
                     }
-                    else if (!string.Equals(idToken.Payload.Azp, validationContext.ClientId, StringComparison.Ordinal))
+                    else if (!string.Equals(idToken.Payload.Azp, validationContext.ClientId))
                     {
                         throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21340, idToken.Payload.Azp, validationContext.ClientId)));
                     }
@@ -498,7 +498,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             var hashBytes = hashAlgorithm.ComputeHash(Encoding.ASCII.GetBytes(hashItem));
             var hashString = Base64UrlEncoder.Encode(hashBytes, 0, hashBytes.Length / 2);
-            if (!string.Equals(expectedValue, hashString, StringComparison.Ordinal))
+            if (!string.Equals(expectedValue, hashString))
             {
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogHelper.FormatInvariant(LogMessages.IDX21300, expectedValue, hashItem, LogHelper.MarkAsNonPII(algorithm))));
             }
@@ -638,7 +638,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             else if (string.IsNullOrEmpty(nonceFoundInJwt))
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21349, LogHelper.MarkAsNonPII(RequireNonce))));
 
-            if (!string.Equals(nonceFoundInJwt, validationContext.Nonce, StringComparison.Ordinal))
+            if (!string.Equals(nonceFoundInJwt, validationContext.Nonce))
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21321, validationContext.Nonce, nonceFoundInJwt, validationContext.ValidatedIdToken)));
 
             if (RequireTimeStampInNonce)
@@ -715,7 +715,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidStateException(LogHelper.FormatInvariant(LogMessages.IDX21330, LogHelper.MarkAsNonPII(RequireState))));
             }
 
-            if (!string.Equals(validationContext.State, validationContext.ProtocolMessage.State, StringComparison.Ordinal))
+            if (!string.Equals(validationContext.State, validationContext.ProtocolMessage.State))
             {
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidStateException(LogHelper.FormatInvariant(LogMessages.IDX21331, validationContext.State, validationContext.ProtocolMessage.State)));
             }

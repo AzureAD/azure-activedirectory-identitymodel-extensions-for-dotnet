@@ -194,8 +194,8 @@ namespace Microsoft.IdentityModel.Tokens
 #if DESKTOP
             if (rsa is RSACryptoServiceProvider rsaCryptoServiceProvider)
             {
-                _useRSAOeapPadding = algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
-                                  || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal);
+                _useRSAOeapPadding = algorithm.Equals(SecurityAlgorithms.RsaOAEP)
+                                  || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap);
 
                 RsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(rsaCryptoServiceProvider);
                 DecryptFunction = DecryptWithRsaCryptoServiceProviderProxy;
@@ -215,10 +215,10 @@ namespace Microsoft.IdentityModel.Tokens
             // This requires 4.6+ to be installed. If a dependent library is targeting 4.5, 4.5.1, 4.5.2 or 4.6
             // they will bind to our Net45 target, but the type is RSACng.
             // The 'lightup' code will bind to the correct operators.
-            else if (rsa.GetType().ToString().Equals(_rsaCngTypeName, StringComparison.Ordinal) && IsRsaCngSupported())
+            else if (rsa.GetType().ToString().Equals(_rsaCngTypeName) && IsRsaCngSupported())
             {
-                _useRSAOeapPadding = algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
-                                  || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal);
+                _useRSAOeapPadding = algorithm.Equals(SecurityAlgorithms.RsaOAEP)
+                                  || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap);
 
                 _lightUpHashAlgorithmName = GetLightUpHashAlgorithmName();
                 DecryptFunction = DecryptNet45;
@@ -236,12 +236,12 @@ namespace Microsoft.IdentityModel.Tokens
 #endif
 
 #if NET461 || NET472 || NETSTANDARD2_0
-            if (algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha256, StringComparison.Ordinal) ||
-                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha256Signature, StringComparison.Ordinal) ||
-                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha384, StringComparison.Ordinal) ||
-                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha384Signature, StringComparison.Ordinal) ||
-                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha512, StringComparison.Ordinal) ||
-                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha512Signature, StringComparison.Ordinal))
+            if (algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha256) ||
+                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha256Signature) ||
+                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha384) ||
+                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha384Signature) ||
+                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha512) ||
+                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha512Signature))
             {
                 RSASignaturePadding = RSASignaturePadding.Pss;
             }
@@ -251,7 +251,7 @@ namespace Microsoft.IdentityModel.Tokens
                 RSASignaturePadding = RSASignaturePadding.Pkcs1;
             }
 
-            RSAEncryptionPadding = (algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal) || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal))
+            RSAEncryptionPadding = (algorithm.Equals(SecurityAlgorithms.RsaOAEP) || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap))
                         ? RSAEncryptionPadding.OaepSHA1
                         : RSAEncryptionPadding.Pkcs1;
             RSA = rsa;

@@ -194,8 +194,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             jwtPayload.Add("dateTime", dateTime);
             var dateTimeClaim = jwtPayload.Claims.First();
 
-            Assert.True(string.Equals(dateTimeClaim.ValueType, ClaimValueTypes.DateTime, StringComparison.Ordinal), "dateTimeClaim.Type != ClaimValueTypes.DateTime");
-            Assert.True(string.Equals(dateTimeClaim.Value, dateTime.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), StringComparison.Ordinal), "dateTimeClaim.Value != dateTime.ToUniversalTime('o', CultureInfo.InvariantCulture).ToString()");
+            Assert.True(string.Equals(dateTimeClaim.ValueType, ClaimValueTypes.DateTime), "dateTimeClaim.Type != ClaimValueTypes.DateTime");
+            Assert.True(string.Equals(dateTimeClaim.Value, dateTime.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture)), "dateTimeClaim.Value != dateTime.ToUniversalTime('o', CultureInfo.InvariantCulture).ToString()");
         }
 
         [Fact]

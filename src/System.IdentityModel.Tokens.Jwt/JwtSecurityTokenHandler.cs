@@ -593,7 +593,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     var header = new JwtHeader(encryptingCredentials, OutboundAlgorithmMap, tokenType);
                     var encryptionResult = encryptionProvider.Encrypt(Encoding.UTF8.GetBytes(innerJwt.RawData), Encoding.ASCII.GetBytes(header.Base64UrlEncode()));
-                    return JwtConstants.DirectKeyUseAlg.Equals(encryptingCredentials.Alg, StringComparison.Ordinal) ? new JwtSecurityToken(
+                    return JwtConstants.DirectKeyUseAlg.Equals(encryptingCredentials.Alg) ? new JwtSecurityToken(
                                     header,
                                     innerJwt,
                                     header.Base64UrlEncode(),
@@ -1189,7 +1189,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (kidMatched)
                 {
-                    var isKidInTVP = keysInTokenValidationParameters.Any(x => x.KeyId.Equals(jwtToken.Header.Kid, StringComparison.Ordinal));
+                    var isKidInTVP = keysInTokenValidationParameters.Any(x => x.KeyId.Equals(jwtToken.Header.Kid));
                     var keyLocation = isKidInTVP ? "TokenValidationParameters" : "Configuration";
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(
                         LogHelper.FormatInvariant(TokenLogMessages.IDX10511,
@@ -1578,7 +1578,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (keys == null)
                 keys = GetAllDecryptionKeys(validationParameters);
 
-            if (jwtToken.Header.Alg.Equals(JwtConstants.DirectKeyUseAlg, StringComparison.Ordinal))
+            if (jwtToken.Header.Alg.Equals(JwtConstants.DirectKeyUseAlg))
                 return keys;
 
             var unwrappedKeys = new List<SecurityKey>();
