@@ -788,7 +788,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     var rawHeader = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(header.ToString(Formatting.None)));
                     var encryptionResult = encryptionProvider.Encrypt(plainText, Encoding.ASCII.GetBytes(rawHeader));
-                    return JwtConstants.DirectKeyUseAlg.Equals(encryptingCredentials.Alg, StringComparison.Ordinal) ?
+                    return JwtConstants.DirectKeyUseAlg.Equals(encryptingCredentials.Alg) ?
                         string.Join(".", rawHeader, string.Empty, Base64UrlEncoder.Encode(encryptionResult.IV), Base64UrlEncoder.Encode(encryptionResult.Ciphertext), Base64UrlEncoder.Encode(encryptionResult.AuthenticationTag)):
                         string.Join(".", rawHeader, Base64UrlEncoder.Encode(wrappedKey), Base64UrlEncoder.Encode(encryptionResult.IV), Base64UrlEncoder.Encode(encryptionResult.Ciphertext), Base64UrlEncoder.Encode(encryptionResult.AuthenticationTag));
                 }
@@ -819,7 +819,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (keys == null)
                 keys = JwtTokenUtilities.GetAllDecryptionKeys(validationParameters);
 
-            if (jwtToken.Alg.Equals(JwtConstants.DirectKeyUseAlg, StringComparison.Ordinal))
+            if (jwtToken.Alg.Equals(JwtConstants.DirectKeyUseAlg))
                 return keys;
 
             var unwrappedKeys = new List<SecurityKey>();
@@ -1285,7 +1285,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 if (kidMatched)
                 {
-                    var isKidInTVP = keysInTokenValidationParameters.Any(x => x.KeyId.Equals(jwtToken.Kid, StringComparison.Ordinal));
+                    var isKidInTVP = keysInTokenValidationParameters.Any(x => x.KeyId.Equals(jwtToken.Kid));
                     var keyLocation = isKidInTVP ? "TokenValidationParameters" : "Configuration";
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(
                         LogHelper.FormatInvariant(TokenLogMessages.IDX10511,

@@ -161,7 +161,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (validAudience.Length == tokenAudience.Length)
             {
-                if (string.Equals(validAudience, tokenAudience, StringComparison.Ordinal))
+                if (string.Equals(validAudience, tokenAudience))
                     return true;
             }
             else if (validationParameters.IgnoreTrailingSlashWhenValidatingAudience && AudiencesMatchIgnoringTrailingSlash(tokenAudience, validAudience))
@@ -251,7 +251,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (configuration != null)
             {
-                if (string.Equals(configuration.Issuer, issuer, StringComparison.Ordinal))
+                if (string.Equals(configuration.Issuer, issuer))
                 {
                     LogHelper.LogInformation(LogMessages.IDX10236, issuer);
                     return issuer;
@@ -262,7 +262,7 @@ namespace Microsoft.IdentityModel.Tokens
                     { InvalidIssuer = issuer });
             }
 
-            if (string.Equals(validationParameters.ValidIssuer, issuer, StringComparison.Ordinal))
+            if (string.Equals(validationParameters.ValidIssuer, issuer))
             {
                 LogHelper.LogInformation(LogMessages.IDX10236, issuer);
                 return issuer;
@@ -278,7 +278,7 @@ namespace Microsoft.IdentityModel.Tokens
                         continue;
                     }
 
-                    if (string.Equals(str, issuer, StringComparison.Ordinal))
+                    if (string.Equals(str, issuer))
                     {
                         LogHelper.LogInformation(LogMessages.IDX10236, issuer);
                         return issuer;

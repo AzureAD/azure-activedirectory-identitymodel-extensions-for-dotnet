@@ -81,9 +81,9 @@ namespace Microsoft.IdentityModel.Json.Serialization
             {
                 Type converterType = typeConverter.GetType();
 
-                if (!string.Equals(converterType.FullName, "System.ComponentModel.ComponentConverter", StringComparison.Ordinal)
-                    && !string.Equals(converterType.FullName, "System.ComponentModel.ReferenceConverter", StringComparison.Ordinal)
-                    && !string.Equals(converterType.FullName, "System.Windows.Forms.Design.DataSourceConverter", StringComparison.Ordinal)
+                if (!string.Equals(converterType.FullName, "System.ComponentModel.ComponentConverter")
+                    && !string.Equals(converterType.FullName, "System.ComponentModel.ReferenceConverter")
+                    && !string.Equals(converterType.FullName, "System.Windows.Forms.Design.DataSourceConverter")
                     && converterType != typeof(TypeConverter))
                 {
                     return typeConverter.CanConvertTo(typeof(string));
@@ -291,7 +291,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
 
                 // only test on attribute type name
                 // attribute assembly could change because of type forwarding, etc
-                if (string.Equals(attributeType.FullName, "System.ComponentModel.DataAnnotations.MetadataTypeAttribute", StringComparison.Ordinal))
+                if (string.Equals(attributeType.FullName, "System.ComponentModel.DataAnnotations.MetadataTypeAttribute"))
                 {
                     const string metadataClassTypeName = "MetadataClassType";
 

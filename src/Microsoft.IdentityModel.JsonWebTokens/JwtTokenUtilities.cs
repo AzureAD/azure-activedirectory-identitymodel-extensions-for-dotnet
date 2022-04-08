@@ -285,7 +285,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             wrappedKey = null;
 
             // if direct algorithm, look for support
-            if (JwtConstants.DirectKeyUseAlg.Equals(encryptingCredentials.Alg, StringComparison.Ordinal))
+            if (JwtConstants.DirectKeyUseAlg.Equals(encryptingCredentials.Alg))
             {
                 if (!cryptoProviderFactory.IsSupportedAlgorithm(encryptingCredentials.Enc, encryptingCredentials.Key))
                     throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10615, LogHelper.MarkAsNonPII(encryptingCredentials.Enc), encryptingCredentials.Key)));
@@ -298,11 +298,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10615, LogHelper.MarkAsNonPII(encryptingCredentials.Alg), encryptingCredentials.Key)));
 
                 // only 128, 384 and 512 AesCbcHmac for CEK algorithm
-                if (SecurityAlgorithms.Aes128CbcHmacSha256.Equals(encryptingCredentials.Enc, StringComparison.Ordinal))
+                if (SecurityAlgorithms.Aes128CbcHmacSha256.Equals(encryptingCredentials.Enc))
                     securityKey = new SymmetricSecurityKey(JwtTokenUtilities.GenerateKeyBytes(256));
-                else if (SecurityAlgorithms.Aes192CbcHmacSha384.Equals(encryptingCredentials.Enc, StringComparison.Ordinal))
+                else if (SecurityAlgorithms.Aes192CbcHmacSha384.Equals(encryptingCredentials.Enc))
                     securityKey = new SymmetricSecurityKey(JwtTokenUtilities.GenerateKeyBytes(384));
-                else if (SecurityAlgorithms.Aes256CbcHmacSha512.Equals(encryptingCredentials.Enc, StringComparison.Ordinal))
+                else if (SecurityAlgorithms.Aes256CbcHmacSha512.Equals(encryptingCredentials.Enc))
                     securityKey = new SymmetricSecurityKey(JwtTokenUtilities.GenerateKeyBytes(512));
                 else
                     throw LogHelper.LogExceptionMessage(
@@ -401,7 +401,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 foreach (SecurityKey signingKey in configuration.SigningKeys)
                 {
-                    if (signingKey != null && string.Equals(signingKey.KeyId, x5t, StringComparison.Ordinal))
+                    if (signingKey != null && string.Equals(signingKey.KeyId, x5t))
                         return signingKey;
                 }
             }
@@ -453,7 +453,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     foreach (SecurityKey signingKey in validationParameters.IssuerSigningKeys)
                     {
-                        if (signingKey != null && string.Equals(signingKey.KeyId, x5t, StringComparison.Ordinal))
+                        if (signingKey != null && string.Equals(signingKey.KeyId, x5t))
                         {
                             return signingKey;
                         }
