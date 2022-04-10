@@ -68,6 +68,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the original raw data of this instance when it was created.
         /// </summary>
-        public string RawToken { get; protected internal set; }
+        public string RawToken { get; set; }
     }
 }
