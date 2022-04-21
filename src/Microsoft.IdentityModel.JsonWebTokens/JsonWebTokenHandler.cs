@@ -320,7 +320,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 payload[JwtRegisteredClaimNames.Nbf] = EpochTime.GetIntDate(tokenDescriptor.NotBefore.Value);
             }
 
-            return CreateTokenPrivate(payload.ToString(Formatting.None), tokenDescriptor.SigningCredentials, tokenDescriptor.EncryptingCredentials, tokenDescriptor.CompressionAlgorithm, tokenDescriptor.AdditionalHeaderClaims, tokenDescriptor.AdditionalInnerHeaderClaims, tokenDescriptor.TokenType);
+            return CreateTokenPrivate(
+                payload.ToString(Formatting.None),
+                tokenDescriptor.SigningCredentials,
+                tokenDescriptor.EncryptingCredentials,
+                tokenDescriptor.CompressionAlgorithm,
+                tokenDescriptor.AdditionalHeaderClaims,
+                tokenDescriptor.AdditionalInnerHeaderClaims,
+                tokenDescriptor.TokenType);
         }
 
         /// <summary>
@@ -406,7 +413,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <see cref="JwtHeaderParameterNames.X5t"/>, <see cref="JwtHeaderParameterNames.Enc"/>, and/or <see cref="JwtHeaderParameterNames.Zip"/>
         /// are present inside of <paramref name="additionalHeaderClaims"/>.</exception>
         /// <returns>A JWE in compact serialization format.</returns>
-        public virtual string CreateToken(string payload, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials, IDictionary<string, object> additionalHeaderClaims)
+        public virtual string CreateToken(
+            string payload,
+            SigningCredentials signingCredentials,
+            EncryptingCredentials encryptingCredentials,
+            IDictionary<string, object> additionalHeaderClaims)
         {
             if (string.IsNullOrEmpty(payload))
                 throw LogHelper.LogArgumentNullException(nameof(payload));
@@ -491,7 +502,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <see cref="JwtHeaderParameterNames.X5t"/>, <see cref="JwtHeaderParameterNames.Enc"/>, and/or <see cref="JwtHeaderParameterNames.Zip"/>
         /// are present inside of <paramref name="additionalHeaderClaims"/>.</exception>
         /// <returns>A JWE in compact serialization format.</returns>
-        public virtual string CreateToken(string payload, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials, string compressionAlgorithm, IDictionary<string, object> additionalHeaderClaims, IDictionary<string, object> additionalInnerHeaderClaims)
+        public virtual string CreateToken(
+            string payload,
+            SigningCredentials signingCredentials,
+            EncryptingCredentials encryptingCredentials,
+            string compressionAlgorithm,
+            IDictionary<string, object> additionalHeaderClaims,
+            IDictionary<string, object> additionalInnerHeaderClaims)
         {
             if (string.IsNullOrEmpty(payload))
                 throw LogHelper.LogArgumentNullException(nameof(payload));
@@ -511,7 +528,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (additionalInnerHeaderClaims == null)
                 throw LogHelper.LogArgumentNullException(nameof(additionalInnerHeaderClaims));
 
-            return CreateTokenPrivate(payload, signingCredentials, encryptingCredentials, compressionAlgorithm, additionalHeaderClaims, additionalInnerHeaderClaims, null);
+            return CreateTokenPrivate(
+                payload,
+                signingCredentials,
+                encryptingCredentials,
+                compressionAlgorithm,
+                additionalHeaderClaims,
+                additionalInnerHeaderClaims,
+                null);
         }
 
         /// <summary>
@@ -531,7 +555,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <see cref="JwtHeaderParameterNames.X5t"/>, <see cref="JwtHeaderParameterNames.Enc"/>, and/or <see cref="JwtHeaderParameterNames.Zip"/>
         /// are present inside of <paramref name="additionalHeaderClaims"/>.</exception>
         /// <returns>A JWE in compact serialization format.</returns>
-        public virtual string CreateToken(string payload, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials, string compressionAlgorithm, IDictionary<string, object> additionalHeaderClaims)
+        public virtual string CreateToken(
+            string payload,
+            SigningCredentials signingCredentials,
+            EncryptingCredentials encryptingCredentials,
+            string compressionAlgorithm,
+            IDictionary<string, object> additionalHeaderClaims)
         {
             if (string.IsNullOrEmpty(payload))
                 throw LogHelper.LogArgumentNullException(nameof(payload));
@@ -551,7 +580,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return CreateTokenPrivate(payload, signingCredentials, encryptingCredentials, compressionAlgorithm, additionalHeaderClaims, null, null);
         }
 
-        private string CreateTokenPrivate(string payload, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials, string compressionAlgorithm, IDictionary<string, object> additionalHeaderClaims, IDictionary<string, object> additionalInnerHeaderClaims, string tokenType)
+        private string CreateTokenPrivate(
+            string payload,
+            SigningCredentials signingCredentials,
+            EncryptingCredentials encryptingCredentials,
+            string compressionAlgorithm,
+            IDictionary<string, object> additionalHeaderClaims,
+            IDictionary<string, object> additionalInnerHeaderClaims,
+            string tokenType)
         {
             if (additionalHeaderClaims?.Count > 0 && additionalHeaderClaims.Keys.Intersect(JwtTokenUtilities.DefaultHeaderParameters, StringComparer.OrdinalIgnoreCase).Any())
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(LogMessages.IDX14116, LogHelper.MarkAsNonPII(nameof(additionalHeaderClaims)), LogHelper.MarkAsNonPII(string.Join(", ", JwtTokenUtilities.DefaultHeaderParameters)))));
@@ -591,6 +627,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(LogMessages.IDX14307, ex, payload)));
             }
+
             payload = jsonPayload != null ? jsonPayload.ToString(Formatting.None) : payload;
             var rawPayload = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(payload));
             var message = rawHeader + "." + rawPayload;
