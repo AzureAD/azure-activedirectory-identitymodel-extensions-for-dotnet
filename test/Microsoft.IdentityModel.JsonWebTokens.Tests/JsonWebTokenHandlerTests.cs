@@ -1227,10 +1227,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         [Theory, MemberData(nameof(CreateJWEWithPayloadStringTheoryData))]
         public void CreateJWEWithPayloadString(CreateTokenTheoryData theoryData)
         {
-            var context = TestUtilities.WriteHeader($"{this}.CreateJWEWithAdditionalHeaderClaims", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.CreateJWEWithPayloadString", theoryData);
             var handler = new JsonWebTokenHandler();
             string jwtTokenWithSigning = null;
             JsonWebToken jsonTokenWithSigning = null;
+            CompressionProviderFactory.Default = new CompressionProviderFactory();
             try
             {
                 var jwtToken = handler.CreateToken(theoryData.Payload, theoryData.TokenDescriptor.EncryptingCredentials, theoryData.TokenDescriptor.AdditionalHeaderClaims);
@@ -1339,7 +1340,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
                             SigningCredentials = Default.SymmetricSigningCredentials,
-                            CompressionAlgorithm = CompressionAlgorithms.Deflate,
                             EncryptingCredentials = Default.SymmetricEncryptingCredentials,
                             AdditionalHeaderClaims = new Dictionary<string, object>{{JwtHeaderParameterNames.Cty, "str_outer"}},
                             AdditionalInnerHeaderClaims = new Dictionary<string, object>{{JwtHeaderParameterNames.Cty, "str_inner"}}
@@ -3390,7 +3390,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
         public override AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData)
         {
-            byte[] nonce = new byte[AesGcm.NonceSize];
+            byte[] nonce = new byte[Tokens.AesGcm.NonceSize];
 
             // Generate random nonce
             var random = RandomNumberGenerator.Create();
@@ -3401,10 +3401,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
         public override AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData, byte[] iv)
         {
-            byte[] authenticationTag = new byte[AesGcm.TagSize];
+            byte[] authenticationTag = new byte[Tokens.AesGcm.TagSize];
             byte[] ciphertext = new byte[plaintext.Length];
 
-            using (var aes = new AesGcm(GetKeyBytes(Key)))
+            using (var aes = new Tokens.AesGcm(GetKeyBytes(Key)))
             {
                 aes.Encrypt(iv, plaintext, ciphertext, authenticationTag, authenticatedData);
             }

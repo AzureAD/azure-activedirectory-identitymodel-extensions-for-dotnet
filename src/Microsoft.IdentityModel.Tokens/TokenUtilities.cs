@@ -244,7 +244,7 @@ namespace Microsoft.IdentityModel.Tokens
                     LogHelper.LogInformation(TokenLogMessages.IDX10263);
                     return false;
                 }
-                else                
+                else
                     currentConfiguration = validationParameters.ConfigurationManager.LastKnownGoodConfiguration;
             }
 

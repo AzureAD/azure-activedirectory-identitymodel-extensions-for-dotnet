@@ -320,7 +320,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 payload[JwtRegisteredClaimNames.Nbf] = EpochTime.GetIntDate(tokenDescriptor.NotBefore.Value);
             }
 
-            return CreateTokenPrivate(payload.ToString(Formatting.None), tokenDescriptor.SigningCredentials, tokenDescriptor.EncryptingCredentials, tokenDescriptor.CompressionAlgorithm, tokenDescriptor.AdditionalHeaderClaims, tokenDescriptor.AdditionalInnerHeaderClaims, tokenDescriptor.TokenType);
+            return CreateTokenPrivate(
+                payload.ToString(Formatting.None),
+                tokenDescriptor.SigningCredentials,
+                tokenDescriptor.EncryptingCredentials,
+                tokenDescriptor.CompressionAlgorithm,
+                tokenDescriptor.AdditionalHeaderClaims,
+                tokenDescriptor.AdditionalInnerHeaderClaims,
+                tokenDescriptor.TokenType);
         }
 
         /// <summary>
@@ -406,7 +413,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <see cref="JwtHeaderParameterNames.X5t"/>, <see cref="JwtHeaderParameterNames.Enc"/>, and/or <see cref="JwtHeaderParameterNames.Zip"/>
         /// are present inside of <paramref name="additionalHeaderClaims"/>.</exception>
         /// <returns>A JWE in compact serialization format.</returns>
-        public virtual string CreateToken(string payload, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials, IDictionary<string, object> additionalHeaderClaims)
+        public virtual string CreateToken(
+            string payload,
+            SigningCredentials signingCredentials,
+            EncryptingCredentials encryptingCredentials,
+            IDictionary<string, object> additionalHeaderClaims)
         {
             if (string.IsNullOrEmpty(payload))
                 throw LogHelper.LogArgumentNullException(nameof(payload));
@@ -491,7 +502,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <see cref="JwtHeaderParameterNames.X5t"/>, <see cref="JwtHeaderParameterNames.Enc"/>, and/or <see cref="JwtHeaderParameterNames.Zip"/>
         /// are present inside of <paramref name="additionalHeaderClaims"/>.</exception>
         /// <returns>A JWE in compact serialization format.</returns>
-        public virtual string CreateToken(string payload, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials, string compressionAlgorithm, IDictionary<string, object> additionalHeaderClaims, IDictionary<string, object> additionalInnerHeaderClaims)
+        public virtual string CreateToken(
+            string payload,
+            SigningCredentials signingCredentials,
+            EncryptingCredentials encryptingCredentials,
+            string compressionAlgorithm,
+            IDictionary<string, object> additionalHeaderClaims,
+            IDictionary<string, object> additionalInnerHeaderClaims)
         {
             if (string.IsNullOrEmpty(payload))
                 throw LogHelper.LogArgumentNullException(nameof(payload));
@@ -511,7 +528,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (additionalInnerHeaderClaims == null)
                 throw LogHelper.LogArgumentNullException(nameof(additionalInnerHeaderClaims));
 
-            return CreateTokenPrivate(payload, signingCredentials, encryptingCredentials, compressionAlgorithm, additionalHeaderClaims, additionalInnerHeaderClaims, null);
+            return CreateTokenPrivate(
+                payload,
+                signingCredentials,
+                encryptingCredentials,
+                compressionAlgorithm,
+                additionalHeaderClaims,
+                additionalInnerHeaderClaims,
+                null);
         }
 
         /// <summary>
@@ -531,7 +555,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <see cref="JwtHeaderParameterNames.X5t"/>, <see cref="JwtHeaderParameterNames.Enc"/>, and/or <see cref="JwtHeaderParameterNames.Zip"/>
         /// are present inside of <paramref name="additionalHeaderClaims"/>.</exception>
         /// <returns>A JWE in compact serialization format.</returns>
-        public virtual string CreateToken(string payload, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials, string compressionAlgorithm, IDictionary<string, object> additionalHeaderClaims)
+        public virtual string CreateToken(
+            string payload,
+            SigningCredentials signingCredentials,
+            EncryptingCredentials encryptingCredentials,
+            string compressionAlgorithm,
+            IDictionary<string, object> additionalHeaderClaims)
         {
             if (string.IsNullOrEmpty(payload))
                 throw LogHelper.LogArgumentNullException(nameof(payload));
@@ -551,7 +580,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return CreateTokenPrivate(payload, signingCredentials, encryptingCredentials, compressionAlgorithm, additionalHeaderClaims, null, null);
         }
 
-        private string CreateTokenPrivate(string payload, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials, string compressionAlgorithm, IDictionary<string, object> additionalHeaderClaims, IDictionary<string, object> additionalInnerHeaderClaims, string tokenType)
+        private string CreateTokenPrivate(
+            string payload,
+            SigningCredentials signingCredentials,
+            EncryptingCredentials encryptingCredentials,
+            string compressionAlgorithm,
+            IDictionary<string, object> additionalHeaderClaims,
+            IDictionary<string, object> additionalInnerHeaderClaims,
+            string tokenType)
         {
             if (additionalHeaderClaims?.Count > 0 && additionalHeaderClaims.Keys.Intersect(JwtTokenUtilities.DefaultHeaderParameters, StringComparer.OrdinalIgnoreCase).Any())
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(LogMessages.IDX14116, LogHelper.MarkAsNonPII(nameof(additionalHeaderClaims)), LogHelper.MarkAsNonPII(string.Join(", ", JwtTokenUtilities.DefaultHeaderParameters)))));
@@ -561,7 +597,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             var header = CreateDefaultJWSHeader(signingCredentials, tokenType);
 
-            if (encryptingCredentials ==  null && additionalHeaderClaims != null && additionalHeaderClaims.Count > 0)
+            if (encryptingCredentials == null && additionalHeaderClaims != null && additionalHeaderClaims.Count > 0)
                 header.Merge(JObject.FromObject(additionalHeaderClaims));
 
             header.Merge(JObject.FromObject(AddCtyClaimDefaultValue(additionalInnerHeaderClaims)));
@@ -591,6 +627,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(LogMessages.IDX14307, ex, payload)));
             }
+
             payload = jsonPayload != null ? jsonPayload.ToString(Formatting.None) : payload;
             var rawPayload = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(payload));
             var message = rawHeader + "." + rawPayload;
@@ -630,6 +667,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return compressionProvider.Compress(Encoding.UTF8.GetBytes(token)) ?? throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10680, LogHelper.MarkAsNonPII(compressionAlgorithm))));
         }
 
+        private static StringComparison GetStringComparisonRuleIf509(SecurityKey securityKey) => (securityKey is X509SecurityKey)
+                            ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
+        private static StringComparison GetStringComparisonRuleIf509OrECDsa(SecurityKey securityKey) => (securityKey is X509SecurityKey
+                            || securityKey is ECDsaSecurityKey)
+                            ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+        
         /// <summary>
         /// Creates a <see cref="ClaimsIdentity"/> from a <see cref="JsonWebToken"/>.
         /// </summary>
@@ -852,13 +896,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 throw LogHelper.LogExceptionMessage(new ArgumentException(TokenLogMessages.IDX10620));
 
             byte[] wrappedKey = null;
-            SecurityKey securityKey = JwtTokenUtilities.GetSecurityKey(encryptingCredentials, cryptoProviderFactory, out wrappedKey);
+            SecurityKey securityKey = JwtTokenUtilities.GetSecurityKey(encryptingCredentials, cryptoProviderFactory, additionalHeaderClaims, out wrappedKey);
 
             using (var encryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(securityKey, encryptingCredentials.Enc))
             {
                 if (encryptionProvider == null)
                     throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX14103));
 
+                // we will have to make changes to creteing the JWE header and add the epk value as per https://datatracker.ietf.org/doc/html/rfc7518#section-4.1 and see example here: https://datatracker.ietf.org/doc/html/rfc7518#appendix-C
                 var header = CreateDefaultJWEHeader(encryptingCredentials, compressionAlgorithm, tokenType);
 
                 if (additionalHeaderClaims != null)
@@ -909,6 +954,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     keys = new List<SecurityKey> { key };
             }
 
+            // on decryption for ECDH-ES, we get the public key from the EPK value see: https://datatracker.ietf.org/doc/html/rfc7518#appendix-C
+            // we need the ECDSASecurityKey for the receiver, use TokenValidationParameters.TokenDecryptionKey
+
             // control gets here if:
             // 1. User specified delegate: TokenDecryptionKeyResolver returned null
             // 2. ResolveTokenDecryptionKey returned null
@@ -916,7 +964,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (keys == null)
                 keys = JwtTokenUtilities.GetAllDecryptionKeys(validationParameters);
 
-            if (jwtToken.Alg.Equals(JwtConstants.DirectKeyUseAlg))
+            if (jwtToken.Alg.Equals(JwtConstants.DirectKeyUseAlg, StringComparison.Ordinal)
+                || jwtToken.Alg.Equals(SecurityAlgorithms.EcdhEs, StringComparison.Ordinal))
                 return keys;
 
             var unwrappedKeys = new List<SecurityKey>();
@@ -927,6 +976,24 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 try
                 {
+#if NET472 || NETCOREAPP3_1
+                    if (SupportedAlgorithms.EcdsaWrapAlgorithms.Contains(jwtToken.Alg))
+                    {
+                        //// on decryption we get the public key from the EPK value see: https://datatracker.ietf.org/doc/html/rfc7518#appendix-C
+                        var ecdhKeyExchangeProvider = new EcdhKeyExchangeProvider(
+                            key as ECDsaSecurityKey,
+                            validationParameters.TokenDecryptionKey as ECDsaSecurityKey,
+                            jwtToken.Alg,
+                            jwtToken.Enc);
+                        jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Apu, out string apu);
+                        jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Apv, out string apv);
+                        SecurityKey kdf = ecdhKeyExchangeProvider.GenerateKdf(apu, apv);
+                        var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(kdf, ecdhKeyExchangeProvider.GetEncryptionAlgorithm());
+                        var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.EncryptedKey));
+                        unwrappedKeys.Add(new SymmetricSecurityKey(unwrappedKey));
+                    }
+                    else
+#endif
                     if (key.CryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Alg, key))
                     {
                         var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(key, jwtToken.Alg);
@@ -963,17 +1030,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
+            StringComparison stringComparison = GetStringComparisonRuleIf509OrECDsa(validationParameters.TokenDecryptionKey);
             if (!string.IsNullOrEmpty(jwtToken.Kid))
             {
                 if (validationParameters.TokenDecryptionKey != null
-                    && string.Equals(validationParameters.TokenDecryptionKey.KeyId, jwtToken.Kid, validationParameters.TokenDecryptionKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+                    && string.Equals(validationParameters.TokenDecryptionKey.KeyId, jwtToken.Kid, stringComparison))
                     return validationParameters.TokenDecryptionKey;
 
                 if (validationParameters.TokenDecryptionKeys != null)
                 {
                     foreach (var key in validationParameters.TokenDecryptionKeys)
                     {
-                        if (key != null && string.Equals(key.KeyId, jwtToken.Kid, key is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+                        if (key != null && string.Equals(key.KeyId, jwtToken.Kid, GetStringComparisonRuleIf509OrECDsa(key)))
                             return key;
                     }
                 }
@@ -983,7 +1051,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 if (validationParameters.TokenDecryptionKey != null)
                 {
-                    if (string.Equals(validationParameters.TokenDecryptionKey.KeyId, jwtToken.X5t, validationParameters.TokenDecryptionKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+                    if (string.Equals(validationParameters.TokenDecryptionKey.KeyId, jwtToken.X5t, stringComparison))
                         return validationParameters.TokenDecryptionKey;
 
                     var x509Key = validationParameters.TokenDecryptionKey as X509SecurityKey;
@@ -995,7 +1063,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     foreach (var key in validationParameters.TokenDecryptionKeys)
                     {
-                        if (key != null && string.Equals(key.KeyId, jwtToken.X5t, key is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+                        if (key != null && string.Equals(key.KeyId, jwtToken.X5t, GetStringComparisonRuleIf509(key)))
                             return key;
 
                         var x509Key = key as X509SecurityKey;
@@ -1004,6 +1072,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     }
                 }
             }
+
             return null;
         }
 

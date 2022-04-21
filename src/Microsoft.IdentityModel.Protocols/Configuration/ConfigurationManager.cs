@@ -163,7 +163,7 @@ namespace Microsoft.IdentityModel.Protocols
                         if (_configValidator != null)
                         {
                             ConfigurationValidationResult result = _configValidator.Validate(configuration);
-                            if (!result.Succeeded)                          
+                            if (!result.Succeeded)
                                 LogHelper.LogWarning(LogMessages.IDX20810, result.ErrorMessage);
                         }
 

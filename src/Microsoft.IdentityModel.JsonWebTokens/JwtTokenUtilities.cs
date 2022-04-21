@@ -280,6 +280,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal static SecurityKey GetSecurityKey(EncryptingCredentials encryptingCredentials, CryptoProviderFactory cryptoProviderFactory, out byte[] wrappedKey)
         {
+            return GetSecurityKey(encryptingCredentials, cryptoProviderFactory, null, out wrappedKey);
+        }
+
+        internal static SecurityKey GetSecurityKey(
+            EncryptingCredentials encryptingCredentials,
+            CryptoProviderFactory cryptoProviderFactory,
+            IDictionary<string, object> additionalHeaderClaims,
+            out byte[] wrappedKey)
+        {
             SecurityKey securityKey = null;
             KeyWrapProvider kwProvider = null;
             wrappedKey = null;
@@ -292,6 +301,38 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 securityKey = encryptingCredentials.Key;
             }
+#if NET472 || NETCOREAPP3_1
+            else if (SupportedAlgorithms.EcdsaWrapAlgorithms.Contains(encryptingCredentials.Alg))
+            {
+                // on decryption we get the public key from the EPK value see: https://datatracker.ietf.org/doc/html/rfc7518#appendix-C
+                string apu = null, apv = null;
+                if (additionalHeaderClaims != null && additionalHeaderClaims.Count > 0)
+                {
+                    if (additionalHeaderClaims.TryGetValue(JwtHeaderParameterNames.Apu, out object objApu))
+                        apu = (objApu != null) ? objApu.ToString() : null;
+
+                    if (additionalHeaderClaims.TryGetValue(JwtHeaderParameterNames.Apv, out object objApv))
+                        apv = (objApv != null) ? objApv.ToString() : null;
+                }
+
+                EcdhKeyExchangeProvider ecdhKeyExchangeProvider = new EcdhKeyExchangeProvider(encryptingCredentials.Key as ECDsaSecurityKey, encryptingCredentials.KeyExchangePublicKey, encryptingCredentials.Alg, encryptingCredentials.Enc);
+                SecurityKey kdf = ecdhKeyExchangeProvider.GenerateKdf(apu, apv);
+                kwProvider = cryptoProviderFactory.CreateKeyWrapProvider(kdf, ecdhKeyExchangeProvider.GetEncryptionAlgorithm());
+
+                // only 128, 384 and 512 AesKeyWrap for CEK algorithm
+                if (SecurityAlgorithms.Aes128KW.Equals(kwProvider.Algorithm, StringComparison.Ordinal))
+                    securityKey = new SymmetricSecurityKey(JwtTokenUtilities.GenerateKeyBytes(256));
+                else if (SecurityAlgorithms.Aes192KW.Equals(kwProvider.Algorithm, StringComparison.Ordinal))
+                    securityKey = new SymmetricSecurityKey(JwtTokenUtilities.GenerateKeyBytes(384));
+                else if (SecurityAlgorithms.Aes256KW.Equals(kwProvider.Algorithm, StringComparison.Ordinal))
+                    securityKey = new SymmetricSecurityKey(JwtTokenUtilities.GenerateKeyBytes(512));
+                else
+                    throw LogHelper.LogExceptionMessage(
+                        new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10617, LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes128KW), LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes192KW), LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes256KW), LogHelper.MarkAsNonPII(kwProvider.Algorithm))));
+
+                wrappedKey = kwProvider.WrapKey(((SymmetricSecurityKey)securityKey).Key);
+            }
+#endif
             else
             {
                 if (!cryptoProviderFactory.IsSupportedAlgorithm(encryptingCredentials.Alg, encryptingCredentials.Key))

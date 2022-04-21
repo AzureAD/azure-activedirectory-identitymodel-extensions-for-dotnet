@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return ConvertFromSymmetricSecurityKey(symmetricKey);
             else if (key is X509SecurityKey x509Key)
                 return ConvertFromX509SecurityKey(x509Key);
-#if NET472 || NETSTANDARD2_0
+#if NET472 || NETSTANDARD2_0 || NETCOREAPP3_1
             else if (key is ECDsaSecurityKey ecdsaSecurityKey)
                 return ConvertFromECDsaSecurityKey(ecdsaSecurityKey);
 #endif
@@ -181,7 +181,7 @@ namespace Microsoft.IdentityModel.Tokens
             };
         }
 
-#if NET472 || NETSTANDARD2_0
+#if NET472 || NETSTANDARD2_0 || NETCOREAPP3_1
         /// <summary>
         /// Converts a <see cref="ECDsaSecurityKey"/> into a <see cref="JsonWebKey"/>
         /// </summary>
