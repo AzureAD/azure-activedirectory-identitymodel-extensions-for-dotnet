@@ -1231,6 +1231,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var handler = new JsonWebTokenHandler();
             string jwtTokenWithSigning = null;
             JsonWebToken jsonTokenWithSigning = null;
+            CompressionProviderFactory.Default = new CompressionProviderFactory();
             try
             {
                 var jwtToken = handler.CreateToken(theoryData.Payload, theoryData.TokenDescriptor.EncryptingCredentials, theoryData.TokenDescriptor.AdditionalHeaderClaims);
