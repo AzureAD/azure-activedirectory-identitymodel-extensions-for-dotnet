@@ -1227,7 +1227,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         [Theory, MemberData(nameof(CreateJWEWithPayloadStringTheoryData))]
         public void CreateJWEWithPayloadString(CreateTokenTheoryData theoryData)
         {
-            var context = TestUtilities.WriteHeader($"{this}.CreateJWEWithAdditionalHeaderClaims", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.CreateJWEWithPayloadString", theoryData);
             var handler = new JsonWebTokenHandler();
             string jwtTokenWithSigning = null;
             JsonWebToken jsonTokenWithSigning = null;
@@ -1339,7 +1339,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
                             SigningCredentials = Default.SymmetricSigningCredentials,
-                            CompressionAlgorithm = CompressionAlgorithms.Deflate,
                             EncryptingCredentials = Default.SymmetricEncryptingCredentials,
                             AdditionalHeaderClaims = new Dictionary<string, object>{{JwtHeaderParameterNames.Cty, "str_outer"}},
                             AdditionalInnerHeaderClaims = new Dictionary<string, object>{{JwtHeaderParameterNames.Cty, "str_inner"}}

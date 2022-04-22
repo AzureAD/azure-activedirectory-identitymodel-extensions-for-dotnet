@@ -597,7 +597,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             var header = CreateDefaultJWSHeader(signingCredentials, tokenType);
 
-            if (encryptingCredentials ==  null && additionalHeaderClaims != null && additionalHeaderClaims.Count > 0)
+            if (encryptingCredentials == null && additionalHeaderClaims != null && additionalHeaderClaims.Count > 0)
                 header.Merge(JObject.FromObject(additionalHeaderClaims));
 
             header.Merge(JObject.FromObject(AddCtyClaimDefaultValue(additionalInnerHeaderClaims)));
