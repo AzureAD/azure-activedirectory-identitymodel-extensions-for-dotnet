@@ -6,7 +6,6 @@
     <AssemblyName>Microsoft.IdentityModel.Extensions.AspNetCore</AssemblyName>
     <Description>A package containing an extension for AspNetCore users integrating with IdentityModel library.</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>Microsoft.IdentityModel.Extensions.AspNetCore</PackageId>
     <PackageTags>.NET;Windows;Authentication;Identity;Extensions;AspNetCore</PackageTags>
   </PropertyGroup>
@@ -27,7 +26,7 @@
     <ProjectReference Include="..\Microsoft.IdentityModel.Abstractions\Microsoft.IdentityModel.Abstractions.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'net5.0' ">
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(AspNetCoreMinSupportedVersion)" />
   </ItemGroup>
 
