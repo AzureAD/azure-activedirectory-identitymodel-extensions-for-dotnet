@@ -97,6 +97,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Val
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.SampleTests", "test\Microsoft.IdentityModel.SampleTests\Microsoft.IdentityModel.SampleTests.csproj", "{578FDF8F-6568-448A-AB93-D94269593932}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Abstractions", "src\Microsoft.IdentityModel.Abstractions\Microsoft.IdentityModel.Abstractions.csproj", "{8057C69A-3D1E-46A3-86E4-E6B26249DD25}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -227,6 +229,10 @@ Global
 		{578FDF8F-6568-448A-AB93-D94269593932}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{578FDF8F-6568-448A-AB93-D94269593932}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{578FDF8F-6568-448A-AB93-D94269593932}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8057C69A-3D1E-46A3-86E4-E6B26249DD25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8057C69A-3D1E-46A3-86E4-E6B26249DD25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8057C69A-3D1E-46A3-86E4-E6B26249DD25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8057C69A-3D1E-46A3-86E4-E6B26249DD25}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -266,6 +272,7 @@ Global
 		{DA585910-0E6C-45A5-AABD-30917130FD63} = {BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}
 		{D17F097F-6024-40BA-A7A0-015BB90F203B} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 		{578FDF8F-6568-448A-AB93-D94269593932} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
+		{8057C69A-3D1E-46A3-86E4-E6B26249DD25} = {BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2F681326-7ED4-45F6-BD1D-1119EA388F42}
