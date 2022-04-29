@@ -91,7 +91,7 @@ namespace Microsoft.IdentityModel.Xml
                 if (string.IsNullOrEmpty(value))
                     throw LogArgumentNullException(nameof(value));
 
-                if (!string.Equals(value,SecurityAlgorithms.ExclusiveC14n, StringComparison.Ordinal) && !string.Equals(value, SecurityAlgorithms.ExclusiveC14nWithComments, StringComparison.Ordinal))
+                if (!string.Equals(value,SecurityAlgorithms.ExclusiveC14n) && !string.Equals(value, SecurityAlgorithms.ExclusiveC14nWithComments))
                     throw LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX30204, LogHelper.MarkAsNonPII(CanonicalizationMethod), LogHelper.MarkAsNonPII(SecurityAlgorithms.ExclusiveC14n), LogHelper.MarkAsNonPII(SecurityAlgorithms.ExclusiveC14nWithComments))));
 
                 _canonicalizationMethod = value;
@@ -155,7 +155,7 @@ namespace Microsoft.IdentityModel.Xml
             {
                 using (var signedInfoWriter = XmlDictionaryWriter.CreateTextWriter(Stream.Null))
                 {
-                    signedInfoWriter.StartCanonicalization(stream, _canonicalizationMethod.Equals(SecurityAlgorithms.ExclusiveC14nWithComments, StringComparison.Ordinal), null);
+                    signedInfoWriter.StartCanonicalization(stream, _canonicalizationMethod.Equals(SecurityAlgorithms.ExclusiveC14nWithComments), null);
                     _dsigSerializer.WriteSignedInfo(signedInfoWriter, this);
                     signedInfoWriter.Flush();
                     signedInfoWriter.EndCanonicalization();

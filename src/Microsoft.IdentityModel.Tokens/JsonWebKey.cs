@@ -349,11 +349,11 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(Kty))
                 return false;
 
-            if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.EllipticCurve, StringComparison.Ordinal))
+            if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.EllipticCurve))
                 return CanComputeECThumbprint();
-            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.RSA, StringComparison.Ordinal))
+            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.RSA))
                 return CanComputeRsaThumbprint();
-            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.Octet, StringComparison.Ordinal))
+            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.Octet))
                 return CanComputeOctThumbprint();
             else
                 return false;
@@ -369,11 +369,11 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(Kty))
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, LogHelper.MarkAsNonPII(nameof(Kty)))));
 
-            if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.EllipticCurve, StringComparison.Ordinal))
+            if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.EllipticCurve))
                 return ComputeECThumbprint();
-            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.RSA, StringComparison.Ordinal))
+            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.RSA))
                 return ComputeRsaThumbprint();
-            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.Octet, StringComparison.Ordinal))
+            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.Octet))
                 return ComputeOctThumbprint();
             else
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10706, LogHelper.MarkAsNonPII(nameof(Kty)), LogHelper.MarkAsNonPII(string.Join(", ", JsonWebAlgorithmsKeyTypes.EllipticCurve, JsonWebAlgorithmsKeyTypes.RSA, JsonWebAlgorithmsKeyTypes.Octet)), LogHelper.MarkAsNonPII(nameof(Kty)))));
@@ -442,9 +442,9 @@ namespace Microsoft.IdentityModel.Tokens
             if (!string.IsNullOrEmpty(Kid))
                 jwk.Add(JsonWebKeyParameterNames.Kid, Kid);
 
-            if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.EllipticCurve, StringComparison.Ordinal))
+            if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.EllipticCurve))
                 PopulateWithPublicEcParams(jwk);
-            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.RSA, StringComparison.Ordinal))
+            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.RSA))
                 PopulateWithPublicRsaParams(jwk);
             else
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10707, LogHelper.MarkAsNonPII(nameof(Kty)), LogHelper.MarkAsNonPII(string.Join(", ", JsonWebAlgorithmsKeyTypes.EllipticCurve, JsonWebAlgorithmsKeyTypes.RSA)), LogHelper.MarkAsNonPII(nameof(Kty)))));

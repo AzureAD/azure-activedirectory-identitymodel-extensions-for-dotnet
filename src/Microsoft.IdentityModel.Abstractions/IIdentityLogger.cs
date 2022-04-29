@@ -30,7 +30,7 @@ using System.Diagnostics.Tracing;
 namespace Microsoft.IdentityModel.Abstractions
 {
     /// <summary>
-    /// Interface for Logging.
+    /// Interface that needs to be implemented by classes providing logging in Microsoft identity libraries.
     /// </summary>
     public interface IIdentityLogger
     {

@@ -45,29 +45,29 @@ namespace Microsoft.IdentityModel.Logging
         public static IIdentityLogger Logger { get; set; } = NullIdentityModelLogger.Instance;
 
         /// <summary>
-        /// Indicates whether or the log message header (contains library version, date/time, and PII debugging information) has been written.
+        /// Indicates whether the log message header (contains library version, date/time, and PII debugging information) has been written.
         /// </summary>
-        private static bool HeaderWritten { get; set; } = false;
+        private static bool _isHeaderWritten { get; set; } = false;
 
         /// <summary>
         /// The log message that indicates the current library version.
         /// </summary>
-        private static string _versionLogMessage = "Library version of Microsoft.IdentityModel: {0}.";
+        private static string _versionLogMessage = "Microsoft.IdentityModel version: {0}. ";
 
         /// <summary>
         /// The log message that indicates the date.
         /// </summary>
-        private static string _dateLogMessage = "Date: {0}.";
+        private static string _dateLogMessage = "Date: {0}. ";
 
         /// <summary>
         /// The log message that is shown when PII is off.
         /// </summary>
-        private static string _piiOffLogMessage = "PII (personally identifiable information) logging is currently turned off. Set IdentityModelEventSource.ShowPII to 'true' to view the full details of exceptions.";
+        private static string _piiOffLogMessage = "PII (personally identifiable information) logging is currently turned off. Set IdentityModelEventSource.ShowPII to 'true' to view the full details of exceptions. ";
 
         /// <summary>
         /// The log message that is shown when PII is off.
         /// </summary>
-        private static string _piiOnLogMessage = "PII (personally identifiable information) logging is currently turned on. Set IdentityModelEventSource.ShowPII to 'false' to hide PII from log messages.";
+        private static string _piiOnLogMessage = "PII (personally identifiable information) logging is currently turned on. Set IdentityModelEventSource.ShowPII to 'false' to hide PII from log messages. ";
 
         /// <summary>
         /// Logs an exception using the event source logger and returns new <see cref="ArgumentNullException"/> exception.
@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <remarks>EventLevel is set to Error.</remarks>
         public static ArgumentNullException LogArgumentNullException(string argument)
         {
-            return LogArgumentException<ArgumentNullException>(EventLevel.Error, argument, "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object.", argument);
+            return LogArgumentException<ArgumentNullException>(EventLevel.Error, argument, "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object. ", argument);
         }
 
         /// <summary>
@@ -435,29 +435,29 @@ namespace Microsoft.IdentityModel.Logging
             {
                 // if PII is turned off and 'innerException' is a System exception only display the exception type
                 if (!IdentityModelEventSource.ShowPII && !LogHelper.IsCustomException(innerException))
-                    message = string.Format(CultureInfo.InvariantCulture, "Message: {0}, InnerException: {1}", message, innerException.GetType());
+                    message = string.Format(CultureInfo.InvariantCulture, "Message: {0}, InnerException: {1}. ", message, innerException.GetType());
                 else // otherwise it's safe to display the entire exception message
-                    message = string.Format(CultureInfo.InvariantCulture, "Message: {0}, InnerException: {1}", message, innerException.Message);
+                    message = string.Format(CultureInfo.InvariantCulture, "Message: {0}, InnerException: {1}. ", message, innerException.Message);
+            }
+
+            // Logs basic information (library version, DateTime, whether PII is ON/OFF) once before any log messages are written.
+            if (!_isHeaderWritten)
+            {
+                _isHeaderWritten = true;
+
+                LogEntry headerEntry = new LogEntry();
+                headerEntry.EventLevel = EventLevel.LogAlways;
+                headerEntry.Message = string.Format(CultureInfo.InvariantCulture, _versionLogMessage, typeof(IdentityModelEventSource).GetTypeInfo().Assembly.GetName().Version.ToString());
+                Logger.Log(headerEntry);
+
+                headerEntry.Message = string.Format(CultureInfo.InvariantCulture, _dateLogMessage, DateTime.UtcNow);
+                Logger.Log(headerEntry);
+
+                headerEntry.Message = IdentityModelEventSource.ShowPII ? _piiOnLogMessage : _piiOffLogMessage;
+                Logger.Log(headerEntry);
             }
 
             LogEntry entry = new LogEntry();
-
-            // Logs basic information (library version, DateTime, whether PII is ON/OFF) once before any log messages are written.
-            if (!HeaderWritten)
-            {
-                entry.EventLevel = EventLevel.LogAlways;
-                entry.Message = string.Format(CultureInfo.InvariantCulture, _versionLogMessage, typeof(IdentityModelEventSource).GetTypeInfo().Assembly.GetName().Version.ToString());
-                Logger.Log(entry);
-
-                entry.Message = string.Format(CultureInfo.InvariantCulture, _dateLogMessage, DateTime.UtcNow);
-                Logger.Log(entry);
-
-                entry.Message = IdentityModelEventSource.ShowPII ? _piiOnLogMessage : _piiOffLogMessage;
-                Logger.Log(entry);
-
-                HeaderWritten = true;
-            }
-
             entry.EventLevel = level;
             entry.Message = args != null ? FormatInvariant(message, args) : message;
 

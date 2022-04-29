@@ -233,7 +233,7 @@ namespace Microsoft.IdentityModel.Tokens
             key = null;
             try
             {
-                if (JsonWebAlgorithmsKeyTypes.RSA.Equals(webKey.Kty, StringComparison.Ordinal))
+                if (JsonWebAlgorithmsKeyTypes.RSA.Equals(webKey.Kty))
                 {
                     if (TryConvertToX509SecurityKey(webKey, out key))
                         return true;
@@ -241,11 +241,11 @@ namespace Microsoft.IdentityModel.Tokens
                     if (TryCreateToRsaSecurityKey(webKey, out key))
                         return true;
                 }
-                else if (JsonWebAlgorithmsKeyTypes.EllipticCurve.Equals(webKey.Kty, StringComparison.Ordinal))
+                else if (JsonWebAlgorithmsKeyTypes.EllipticCurve.Equals(webKey.Kty))
                 {
                     return TryConvertToECDsaSecurityKey(webKey, out key);
                 }
-                else if (JsonWebAlgorithmsKeyTypes.Octet.Equals(webKey.Kty, StringComparison.Ordinal))
+                else if (JsonWebAlgorithmsKeyTypes.Octet.Equals(webKey.Kty))
                 {
                     return TryConvertToSymmetricSecurityKey(webKey, out key);
                 }

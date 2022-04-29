@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Tokens
                     continue;
 
                 string jsonClaimType = claim.Type;
-                object jsonClaimValue = claim.ValueType.Equals(ClaimValueTypes.String, StringComparison.Ordinal) ? claim.Value : GetClaimValueUsingValueType(claim);
+                object jsonClaimValue = claim.ValueType.Equals(ClaimValueTypes.String) ? claim.Value : GetClaimValueUsingValueType(claim);
                 object existingValue;
 
                 // If there is an existing value, append to it.

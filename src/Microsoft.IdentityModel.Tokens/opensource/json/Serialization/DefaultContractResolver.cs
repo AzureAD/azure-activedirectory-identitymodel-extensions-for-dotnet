@@ -277,7 +277,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
                 // MemberBase is problematic to serialize. Large, self referencing instances, etc
                 if (typeof(Exception).IsAssignableFrom(objectType))
                 {
-                    serializableMembers = serializableMembers.Where(m => !string.Equals(m.Name, "TargetSite", StringComparison.Ordinal)).ToList();
+                    serializableMembers = serializableMembers.Where(m => !string.Equals(m.Name, "TargetSite")).ToList();
                 }
             }
             else

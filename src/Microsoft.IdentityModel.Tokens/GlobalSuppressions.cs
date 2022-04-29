@@ -17,7 +17,7 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Usage", "CA2207:Initialize value type static fields inline", Justification = "Vendored component", Scope = "namespaceanddescendants", Target = "Microsoft.IdentityModel.Json")]
 [assembly: SuppressMessage("Performance", "CA1810:Initialize reference type static fields inline", Justification = "Vendored component", Scope = "namespaceanddescendants", Target = "Microsoft.IdentityModel.Json")]
 [assembly: SuppressMessage("Performance", "CA1825:Avoid zero-length array allocations.", Justification = "vendored", Scope = "namespaceanddescendants", Target = "Microsoft.IdentityModel.Json")]
-[assembly: SuppressMessage("Globalization", "CA1307:Specify StringComparison", Justification = "Vendored component", Scope = "namespaceanddescendants", Target = "Microsoft.IdentityModel.Json")]
+[assembly: SuppressMessage("Globalization", "CA1307:Specify StringComparison", Justification = "Vendored component", Scope = "module")]
 [assembly: SuppressMessage("Performance", "CA1820:Test for empty strings using string length", Justification = "Vendored component", Scope = "namespaceanddescendants", Target = "Microsoft.IdentityModel.Json")]
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Vendored component", Scope = "namespaceanddescendants", Target = "Microsoft.IdentityModel.Json")]
 
@@ -54,6 +54,7 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Globalization", "CA1305:Specify IFormatProvider", Justification = "Not using Globalization", Scope = "member", Target = "~M:Microsoft.IdentityModel.Tokens.Interop.Kernel32.GetMessage(System.Int32,System.IntPtr)~System.String")]
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Exception is written to a string", Scope = "member", Target = "~M:Microsoft.IdentityModel.Tokens.EventBasedLRUCache`2.EventQueueTaskAction")]
 [assembly: SuppressMessage("Design", "CA1001:Types That own disposable fields should be disposable", Justification = "Exceptions can occurr if disposed of", Scope = "type", Target = "~T:Microsoft.IdentityModel.Tokens.EventBasedLRUCache`2")]
+[assembly: SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Consistency", Scope = "member", Target = "~P:Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.AdditionalInnerHeaderClaims")]
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Used as validation", Scope = "member", Target = "~M:Microsoft.IdentityModel.Tokens.InternalValidators.ValidateLifetimeAndIssuerAfterSignatureNotValidatedJwt(Microsoft.IdentityModel.Tokens.SecurityToken,System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.String,Microsoft.IdentityModel.Tokens.TokenValidationParameters,Microsoft.IdentityModel.Tokens.BaseConfiguration,System.Text.StringBuilder,System.Int32,System.Int32)")]
 #if NET472 || NETSTANDARD2_0
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Used to determine appropriate code path to take.", Scope = "member", Target = "~M:Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.ConvertFromECDsaSecurityKey(Microsoft.IdentityModel.Tokens.ECDsaSecurityKey)~Microsoft.IdentityModel.Tokens.JsonWebKey")]
