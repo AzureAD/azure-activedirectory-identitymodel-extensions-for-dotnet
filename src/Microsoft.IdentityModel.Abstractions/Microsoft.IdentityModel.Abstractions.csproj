@@ -8,6 +8,8 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>Microsoft.IdentityModel.Abstractions</PackageId>
     <PackageTags>.NET;Windows;Authentication;Identity;Abstractions</PackageTags>
+    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(SrcTargets);netstandard1.3</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">$(SrcStandardTargets);netstandard1.3</TargetFrameworks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
