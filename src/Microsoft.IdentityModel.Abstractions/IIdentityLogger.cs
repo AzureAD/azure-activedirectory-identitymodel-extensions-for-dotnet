@@ -25,8 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Diagnostics.Tracing;
-
 namespace Microsoft.IdentityModel.Abstractions
 {
     /// <summary>
@@ -35,15 +33,15 @@ namespace Microsoft.IdentityModel.Abstractions
     public interface IIdentityLogger
     {
         /// <summary>
-        /// Checks to see if logging is enabled at given <paramref name="eventLevel"/>.
+        /// Checks to see if logging is enabled at given <paramref name="eventLogLevel"/>.
         /// </summary>
-        /// <param name="eventLevel">Log level of an Event.</param>
-        bool IsEnabled(EventLevel eventLevel);
+        /// <param name="eventLogLevel">Log level of a message.</param>
+        bool IsEnabled(EventLogLevel eventLogLevel);
 
         /// <summary>
         /// Writes a log entry.
         /// </summary>
-        /// <param name="entry">Defines a structured message to be logged at the provided <see cref="LogEntry.EventLevel"/>.</param>
+        /// <param name="entry">Defines a structured message to be logged at the provided <see cref="LogEntry.EventLogLevel"/>.</param>
         void Log(LogEntry entry);
     }
 }

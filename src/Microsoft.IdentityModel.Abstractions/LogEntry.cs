@@ -25,8 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Diagnostics.Tracing;
-
 namespace Microsoft.IdentityModel.Abstractions
 {
     /// <summary>
@@ -35,9 +33,9 @@ namespace Microsoft.IdentityModel.Abstractions
     public class LogEntry
     {
         /// <summary>
-        /// Defines the <see cref="EventLevel"/>.
+        /// Defines the <see cref="EventLogLevel"/>.
         /// </summary>
-        public EventLevel EventLevel { get; set; }
+        public EventLogLevel EventLogLevel { get; set; }
 
         /// <summary>
         /// Message to be logged.
