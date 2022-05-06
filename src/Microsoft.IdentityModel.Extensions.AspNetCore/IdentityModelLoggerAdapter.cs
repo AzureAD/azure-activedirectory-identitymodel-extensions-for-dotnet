@@ -102,7 +102,7 @@ namespace Microsoft.IdentityModel.Extensions.AspNetCore
         private static string FormatEntry(LogEntry entry)
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append(entry.CorrelationId).Append(";");
+            sb.Append(entry.CorrelationId).Append("");
             sb.Append(entry.Message);
             return sb.ToString();
         }
