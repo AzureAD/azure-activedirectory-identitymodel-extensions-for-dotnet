@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </exception>
         internal ECDsaAdapter()
         {
-#if NET472
+#if NET472 || NETCOREAPP3_1
             CreateECDsaFunction = CreateECDsaUsingECParams;
 #elif NETSTANDARD2_0
             // Although NETSTANDARD2_0 specifies that ECParameters are supported, we still need to call SupportsECParameters()
@@ -278,7 +278,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-#if NET472 || NETSTANDARD2_0
+#if NET472 || NETSTANDARD2_0 || NETCOREAPP3_1
         /// <summary>
         /// Creates an ECDsa object using the <paramref name="jsonWebKey"/> and <paramref name="usePrivateKey"/>.
         /// 'ECParameters' structure is available in .NET Framework 4.7+, .NET Standard 1.6+, and .NET Core 1.0+.
@@ -366,7 +366,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>True if <see cref="ECParameters"/> structure is supported, false otherwise.</returns>
         internal static bool SupportsECParameters()
         {
-#if NET472
+#if NET472 || NETCOREAPP3_1
             return true;
 #else
             try
