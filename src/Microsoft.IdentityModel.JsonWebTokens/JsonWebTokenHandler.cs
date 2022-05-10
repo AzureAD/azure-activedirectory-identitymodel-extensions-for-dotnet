@@ -679,9 +679,24 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return CreateClaimsIdentity(jwtToken, validationParameters, actualIssuer);
         }
 
-        private ClaimsIdentity CreateClaimsIdentity(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string actualIssuer)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="jwtToken"></param>
+        /// <param name="validationParameters"></param>
+        /// <param name="issuer"></param>
+        /// <returns></returns>
+        protected virtual ClaimsIdentity CreateClaimsIdentity(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer)
         {
-            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, actualIssuer);
+
+            if (jwtToken == null)
+                throw LogHelper.LogArgumentNullException(nameof(jwtToken));
+
+            if (validationParameters == null)
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+
+
+            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, issuer);
             foreach (Claim jwtClaim in jwtToken.Claims)
             {
                 string claimType = jwtClaim.Type;
@@ -693,17 +708,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     if (CanReadToken(jwtClaim.Value))
                     {
                         JsonWebToken actor = ReadToken(jwtClaim.Value) as JsonWebToken;
-                        identity.Actor = CreateClaimsIdentity(actor, validationParameters, actualIssuer);
+                        identity.Actor = CreateClaimsIdentity(actor, validationParameters, issuer);
                     }
                 }
 
                 if (jwtClaim.Properties.Count == 0)
                 {
-                    identity.AddClaim(new Claim(claimType, jwtClaim.Value, jwtClaim.ValueType, actualIssuer, actualIssuer, identity));
+                    identity.AddClaim(new Claim(claimType, jwtClaim.Value, jwtClaim.ValueType, issuer, issuer, identity));
                 }
                 else
                 {
-                    Claim claim = new Claim(claimType, jwtClaim.Value, jwtClaim.ValueType, actualIssuer, actualIssuer, identity);
+                    Claim claim = new Claim(claimType, jwtClaim.Value, jwtClaim.ValueType, issuer, issuer, identity);
 
                     foreach (var kv in jwtClaim.Properties)
                         claim.Properties[kv.Key] = kv.Value;
