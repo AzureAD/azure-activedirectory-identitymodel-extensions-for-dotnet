@@ -29,6 +29,7 @@ using System;
 using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.IO;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -237,7 +238,32 @@ namespace Microsoft.IdentityModel.Logging.Tests
 
              var exception = LogHelper.LogExceptionMessage(new ArgumentException("This is the first parameter '{0}'. This is the second parameter '{1}'."));
         }
+
+        [Fact]
+        public void EventLevelToEventLogLevelMapping()
+        {
+            var logger = new TestLogger();
+            LogHelper.Logger = logger;
+
+            var arg = "Test argument.";
+            var guid = Guid.NewGuid().ToString();
+            var errorMessage = "Test exception message";
+            var infoMessage = "Test information Message. {0}";
+            var verboseMessage = "Test verbose Message. {0}";
+            var warnMessage = "Warn Message. {0}";
+
+            LogHelper.LogExceptionMessage(EventLevel.Error, new ArgumentException(errorMessage));
+            LogHelper.LogArgumentNullException(guid);
+            LogHelper.LogInformation(infoMessage, LogHelper.MarkAsNonPII(arg));
+            LogHelper.LogVerbose(verboseMessage, LogHelper.MarkAsNonPII(arg));
+            LogHelper.LogWarning(warnMessage, LogHelper.MarkAsNonPII(arg));
+
+            Assert.True(logger.ContainsLogOfSpecificLevel(errorMessage, EventLogLevel.Error));
+            Assert.True(logger.ContainsLogOfSpecificLevel("Microsoft.IdentityModel Version:", EventLogLevel.LogAlways));
+            Assert.True(logger.ContainsLogOfSpecificLevel("IDX10000:", EventLogLevel.Error));
+            Assert.True(logger.ContainsLogOfSpecificLevel(string.Format(infoMessage, arg), EventLogLevel.Informational));
+            Assert.True(logger.ContainsLogOfSpecificLevel(string.Format(verboseMessage, arg), EventLogLevel.Verbose));
+            Assert.True(logger.ContainsLogOfSpecificLevel(string.Format(warnMessage, arg), EventLogLevel.Warning));
+        }
     }
-
-
 }

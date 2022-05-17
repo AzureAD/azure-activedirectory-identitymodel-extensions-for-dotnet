@@ -28,24 +28,42 @@
 namespace Microsoft.IdentityModel.Abstractions
 {
     /// <summary>
-    /// A minimalistic <see cref="IIdentityLogger"/> implementation that is disabled by default and doesn't log.
+    /// Defines Event Log Levels.
     /// </summary>
-    public sealed class NullIdentityModelLogger : IIdentityLogger
+    public enum EventLogLevel
     {
         /// <summary>
-        /// Default instance of <see cref="NullIdentityModelLogger"/>.
+        /// No level filtering is done on this log level. Log messages of all levels will be logged.
         /// </summary>
-        public static NullIdentityModelLogger Instance { get; } = new NullIdentityModelLogger();
+        LogAlways = 0,
 
-        private NullIdentityModelLogger() { }
+        /// <summary>
+        /// Logs that describe an unrecoverable application or system crash, or a catastrophic failure that requires
+        /// immediate attention.
+        /// </summary>
+        Critical = 1,
 
-        /// <inheritdoc/>
-        public bool IsEnabled(EventLogLevel eventLogLevel) => false;
+        /// <summary>
+        /// Logs that highlight when the current flow of execution is stopped due to a failure. These should indicate a
+        /// failure in the current activity, not an application-wide failure.
+        /// </summary>
+        Error = 2,
 
-        /// <inheritdoc/>
-        public void Log(LogEntry entry)
-        {
-            // no-op
-        }
+        /// <summary>
+        /// Logs that highlight an abnormal or unexpected event in the application flow, but do not otherwise cause the
+        /// application execution to stop.
+        /// </summary>
+        Warning = 3,
+
+        /// <summary>
+        /// Logs that track the general flow of the application. These logs should have long-term value.
+        /// </summary>
+        Informational = 4,
+
+        /// <summary>
+        /// Logs that are used for interactive investigation during development. These logs should primarily contain
+        /// information useful for debugging and have no long-term value.
+        /// </summary>
+        Verbose = 5
     }
 }

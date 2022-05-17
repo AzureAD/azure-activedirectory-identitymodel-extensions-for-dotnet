@@ -57,7 +57,6 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         static ConfigurationManager()
         {
-            LogHelper.LogVerbose("Assembly version info: " + LogHelper.MarkAsNonPII(typeof(ConfigurationManager<T>).AssemblyQualifiedName));
         }
 
         /// <summary>
