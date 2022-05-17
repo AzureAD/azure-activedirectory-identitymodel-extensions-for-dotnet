@@ -203,6 +203,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     X509SecurityKey x509Key = key as X509SecurityKey;
                     if (x509Key != null)
                         LogHelper.LogInformation(TokenLogMessages.IDX10903, x509Key.Certificate?.Thumbprint);
+
                     decryptionSucceeded = true;
                     break;
                 }
