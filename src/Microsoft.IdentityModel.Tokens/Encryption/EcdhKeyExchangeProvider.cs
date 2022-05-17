@@ -26,13 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.IO;
 using System.Security.Cryptography;
-using System.Text;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -182,25 +177,6 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10715, LogHelper.MarkAsNonPII(enc))));
         }
 
-        private static ECParameters GetECParametersFromKey(SecurityKey key, bool isPrivate, string nameOfKey)
-        {
-            if (key is ECDsaSecurityKey ecdsaKey)
-            {
-                return ecdsaKey.ECDsa.ExportParameters(isPrivate);
-            }
-            else if (key is JsonWebKey jwk
-                && JsonWebKeyConverter.TryConvertToECDsaSecurityKey(jwk, out SecurityKey securityKey))
-            {
-                return ((ECDsaSecurityKey)securityKey).ECDsa.ExportParameters(isPrivate);
-            }
-            else
-            {
-                throw LogHelper.LogArgumentException<ArgumentException>(
-                    nameOfKey,
-                    LogHelper.FormatInvariant(LogMessages.IDX11002, LogHelper.MarkAsNonPII(nameOfKey)));
-            }
-        }
-
         private void ValidateCurves(string privateKeyArgName, string publicKeyArgName)
         {
             if (_ecParamsPrivate.Curve.Equals(_ecParamsPublic.Curve))
@@ -233,22 +209,6 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentException<ArgumentException>(
                     nameOfKey,
                     LogHelper.FormatInvariant(LogMessages.IDX11002, LogHelper.MarkAsNonPII(nameOfKey)));
-            }
-        }
-
-        private void ValidateCurves(string privateKeyArgName, string publicKeyArgName)
-        {
-            if (_ecParamsPrivate.Curve.Equals(_ecParamsPublic.Curve))
-            {
-                throw LogHelper.LogArgumentException<ArgumentException>(
-                    privateKeyArgName,
-                    LogHelper.FormatInvariant(
-                        LogMessages.IDX11000,
-                        LogHelper.MarkAsNonPII(privateKeyArgName),
-                        LogHelper.MarkAsNonPII(_ecParamsPrivate.Curve.ToString()),
-                        LogHelper.MarkAsNonPII(publicKeyArgName),
-                        LogHelper.MarkAsNonPII(_ecParamsPublic.Curve.ToString()))
-                    );
             }
         }
 
