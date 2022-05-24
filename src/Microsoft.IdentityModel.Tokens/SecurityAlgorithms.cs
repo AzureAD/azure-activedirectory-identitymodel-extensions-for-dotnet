@@ -51,6 +51,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         // See: https://datatracker.ietf.org/doc/html/rfc7518#section-4.1
         public const string Aes128KW = "A128KW";
+        public const string Aes192KW = "A192KW";
         public const string Aes256KW = "A256KW";
         public const string RsaPKCS1 = "RSA1_5";
         public const string RsaOAEP = "RSA-OAEP";
@@ -119,6 +120,13 @@ namespace Microsoft.IdentityModel.Tokens
         internal const string DefaultAsymmetricKeyWrapAlgorithm = RsaOaepKeyWrap;
         internal const string DefaultSymmetricEncryptionAlgorithm = Aes128CbcHmacSha256;
 
+        // See: https://datatracker.ietf.org/doc/html/rfc7518#section-4.6
+        public const string EcdhEsA128kw = "ECDH-ES+A128KW";
+        public const string EcdhEsA192kw = "ECDH-ES+A192KW";
+        public const string EcdhEsA256kw = "ECDH-ES+A256KW";
+
+        // See: https://datatracker.ietf.org/doc/html/rfc7518#section-4.6
+        public const string EcdhEs = "ECDH-ES";
 #pragma warning restore 1591
     }
 }

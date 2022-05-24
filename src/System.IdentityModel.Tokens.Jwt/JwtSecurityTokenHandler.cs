@@ -693,9 +693,6 @@ namespace System.IdentityModel.Tokens.Jwt
             string tokenType,
             IDictionary<string, object> additionalHeaderClaims)
         {
-            if (encryptingCredentials == null)
-                throw LogHelper.LogArgumentNullException(nameof(encryptingCredentials));
-
             var cryptoProviderFactory = encryptingCredentials.CryptoProviderFactory ?? encryptingCredentials.Key.CryptoProviderFactory;
 
             if (cryptoProviderFactory == null)

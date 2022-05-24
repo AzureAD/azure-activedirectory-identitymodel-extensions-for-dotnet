@@ -145,6 +145,14 @@ namespace Microsoft.IdentityModel.TestUtils
         public static X509SecurityKey NotYetValidX509SecurityKey_Public = new X509SecurityKey(NotYetValidX509Cert_Public);
         public static SigningCredentials NotYetValidX509SigningCreds_Public = new SigningCredentials(NotYetValidX509SecurityKey_Public, SecurityAlgorithms.RsaSha256Signature);
 
+#if NET472 || NETCOREAPP3_1
+        //encoded strings for "AliceInformation", "BobInformation", "AliceNotMatchingInfo", and "BobNotMatchingInfo"
+        public static string ApuExample1 = "QWxpY2VJbmZvcm1hdGlvbg";
+        public static string ApvExample1 = "Qm9iSW5mb3JtYXRpb24";
+        public static string ApuExample2 = "QWxpY2VOb3RNYWNoaW5nSW5mbw";
+        public static string ApvExample2 = "Qm9iTm90TWFjaGluZ0luZm8";
+#endif
+
         public static SecurityKey DefaultAADSigningKey
         {
             get
