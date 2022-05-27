@@ -723,12 +723,22 @@ namespace Microsoft.IdentityModel.Tokens
         /// It is possible that a token issued for the same audience could be from a different tenant. For example an application could accept users from
         /// contoso.onmicrosoft.com but not fabrikam.onmicrosoft.com, both valid tenants. An application that accepts tokens from fabrikam could forward them
         /// to the application that accepts tokens for contoso.
-        /// This boolean only applies to default issuer validation. If <see cref= "IssuerValidator" /> is set, it will be called regardless of whether this
+        /// This boolean only applies to default issuer validation. If <see cref="IssuerValidator"/> is set, it will be called regardless of whether this
         /// property is true or false.
         /// The default is <c>true</c>.
         /// </remarks>
         [DefaultValue(true)]
         public bool ValidateIssuer { get; set; }
+
+        /// <summary>
+        /// Gets or sets a boolean to control if the issuer will be validated with LKG configuration during token validation.
+        /// </summary>
+        /// <remarks>
+        /// This boolean only applies to when <see cref="IssuerValidator"/> is AadIssuerValidator".
+        /// The default is <c>false</c>.
+        /// </remarks>
+        [DefaultValue(false)]
+        internal bool ValidateIssuerWithLKG { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean that controls if validation of the <see cref="SecurityKey"/> that signed the securityToken is called.

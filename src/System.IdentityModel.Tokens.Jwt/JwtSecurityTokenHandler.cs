@@ -926,6 +926,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     if (TokenUtilities.IsRecoverableConfiguration(validationParameters, currentConfiguration, out currentConfiguration))
                     {
+                        validationParameters.ValidateIssuerWithLKG = true;
                         claimsPrincipal = outerToken != null ? ValidateJWE(token, outerToken, validationParameters, currentConfiguration, out signatureValidatedToken, out exceptionThrown) :
                             ValidateJWS(token, validationParameters, currentConfiguration, out signatureValidatedToken, out exceptionThrown);
 
@@ -945,8 +946,11 @@ namespace System.IdentityModel.Tokens.Jwt
 
                         // Only try to re-validate using the newly obtained config if it doesn't reference equal the previously used configuration.
                         if (lastConfig != currentConfiguration)
+                        {
+                            validationParameters.ValidateIssuerWithLKG = false;
                             claimsPrincipal = outerToken != null ? ValidateJWE(token, outerToken, validationParameters, currentConfiguration, out signatureValidatedToken, out exceptionThrown) :
                                 ValidateJWS(token, validationParameters, currentConfiguration, out signatureValidatedToken, out exceptionThrown);
+                        }
                     }
                 }
             }

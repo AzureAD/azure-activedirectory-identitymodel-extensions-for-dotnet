@@ -44,12 +44,15 @@ namespace Microsoft.IdentityModel.Validators
     /// </summary>
     public class AadIssuerValidator
     {
+        internal const string V2EndpointSuffix = "/v2.0";
+
         internal AadIssuerValidator(
             HttpClient httpClient,
             string aadAuthority)
         {
             HttpClient = httpClient;
-            IsV2Authority = aadAuthority.Contains("v2.0");
+            AadAuthority = aadAuthority;
+            IsV2Authority = aadAuthority.Contains(V2EndpointSuffix);
             if (IsV2Authority)
             {
                 AadAuthorityV2 = aadAuthority.TrimEnd('/');
@@ -58,7 +61,7 @@ namespace Microsoft.IdentityModel.Validators
             else
             {
                 AadAuthorityV1 = aadAuthority.TrimEnd('/');
-                AadAuthorityV2 = AadAuthorityV1 + "/v2.0";
+                AadAuthorityV2 = AadAuthorityV1 + V2EndpointSuffix;
             }
         }
 
@@ -66,6 +69,7 @@ namespace Microsoft.IdentityModel.Validators
 
         internal string AadIssuerV1 { get; set; }
         internal string AadIssuerV2 { get; set; }
+        internal string AadAuthority { get; set; }
         internal string AadAuthorityV2 { get; set; }
         internal string AadAuthorityV1 { get; set; }
         internal bool IsV2Authority { get; set; }
@@ -120,22 +124,26 @@ namespace Microsoft.IdentityModel.Validators
 
             try
             {
-                if (securityToken.Issuer.EndsWith("v2.0", StringComparison.OrdinalIgnoreCase))
+                string AadIssuer;
+                if (validationParameters.ValidateIssuerWithLKG)
                 {
-                    if (AadIssuerV2 == null)
-                        AadIssuerV2 = CreateConfigManager(AadAuthorityV2).GetConfigurationAsync().ConfigureAwait(false).GetAwaiter().GetResult().Issuer;
-
-                    if (IsValidIssuer(AadIssuerV2, tenantId, issuer))
-                        return issuer;
+                    AadIssuer = validationParameters.ConfigurationManager.LastKnownGoodConfiguration.Issuer;
                 }
                 else
                 {
-                    if (AadIssuerV1 == null)
-                        AadIssuerV1 = CreateConfigManager(AadAuthorityV1).GetConfigurationAsync().ConfigureAwait(false).GetAwaiter().GetResult().Issuer;
-
-                    if (IsValidIssuer(AadIssuerV1, tenantId, issuer))
-                        return issuer;
+                    if (validationParameters.ConfigurationManager != null)
+                    {
+                        AadIssuer = validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult().Issuer;
+                    }
+                    else
+                    {
+                        string effectiveAuthority = GetEffectiveAuthorityFromToken(AadAuthority, securityToken);
+                        AadIssuer = CreateConfigManager(effectiveAuthority).GetConfigurationAsync().ConfigureAwait(false).GetAwaiter().GetResult().Issuer;
+                    }
                 }
+
+                if (IsValidIssuer(AadIssuer, tenantId, issuer))
+                    return issuer;
             }
             catch (Exception ex)
             {
@@ -187,12 +195,38 @@ namespace Microsoft.IdentityModel.Validators
             return GetAadIssuerValidator(aadAuthority, null);
         }
 
+        /// <summary>
+        /// Get the effective authority based on the token version.
+        /// </summary>
+        /// <param name="authority">The authority to query for metadata.</param>
+        /// <param name="securityToken">Received security token.</param>
+        /// <returns></returns>
+        public string GetEffectiveAuthorityFromToken(string authority, SecurityToken securityToken)
+        {
+            _ = authority ?? throw LogHelper.LogArgumentNullException(nameof(authority));
+            _ = securityToken ?? throw LogHelper.LogArgumentNullException(nameof(securityToken));
+
+            string effectiveAuthority = authority;
+            if (securityToken.Issuer.EndsWith(V2EndpointSuffix, StringComparison.OrdinalIgnoreCase))
+            {
+                if (!IsV2Authority)
+                    effectiveAuthority = effectiveAuthority.Replace(V2EndpointSuffix, string.Empty);
+            }
+            else
+            {
+                if (IsV2Authority)
+                    effectiveAuthority = effectiveAuthority.TrimEnd('/') + V2EndpointSuffix;
+            }
+
+            return effectiveAuthority;
+        }
+
         private static string CreateV1Authority(string aadV2Authority)
         {
             if (aadV2Authority.Contains(AadIssuerValidatorConstants.Organizations))
-                return aadV2Authority.Replace($"{AadIssuerValidatorConstants.Organizations}/v2.0", AadIssuerValidatorConstants.Common);
+                return aadV2Authority.Replace($"{AadIssuerValidatorConstants.Organizations}{V2EndpointSuffix}", AadIssuerValidatorConstants.Common);
 
-            return aadV2Authority.Replace("/v2.0", string.Empty);
+            return aadV2Authority.Replace(V2EndpointSuffix, string.Empty);
         }
 
         private ConfigurationManager<OpenIdConnectConfiguration> CreateConfigManager(
