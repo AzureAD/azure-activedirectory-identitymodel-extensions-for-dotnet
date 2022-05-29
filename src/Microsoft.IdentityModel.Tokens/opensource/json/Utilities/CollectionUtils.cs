@@ -380,12 +380,25 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
         public static T[] ArrayEmpty<T>()
         {
+#if NET6_0
+
+            T[] array = Empty<T>() as T[];
+#else
             T[] array = Enumerable.Empty<T>() as T[];
+#endif
             Debug.Assert(array != null);
             // Defensively guard against a version of Linq where Enumerable.Empty<T> doesn't
             // return an array, but throw in debug versions so a better strategy can be
             // used if that ever happens.
             return array ?? new T[0];
         }
+
+#if NET6_0
+        // netcoreapp3 introduced a change where Enumerable.Empty<T> no longer
+        // returns an Array.Empty<T> but a EmptyPartition<T>.Instance
+        // this makes the cast a breaking change for any version after netcore3
+        // if support for any framework after netcore3ever added this would be need to be modified.
+        private static IEnumerable<TResult> Empty<TResult>() => Array.Empty<TResult>();
+#endif
     }
 }

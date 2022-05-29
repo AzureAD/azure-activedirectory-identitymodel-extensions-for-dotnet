@@ -32,6 +32,8 @@ using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+#pragma warning disable SYSLIB0028 // Type or member is obsolete
+#pragma warning disable SYSLIB0027 // Type or member is obsolete
 
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
@@ -514,4 +516,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     }
 }
 
+#pragma warning restore SYSLIB0027 // Type or member is obsolete
+#pragma warning restore SYSLIB0028 // Type or member is obsolete
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

@@ -89,7 +89,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     {
 #if NET_CORE
         [PlatformSpecific(TestPlatforms.Linux | TestPlatforms.OSX)]
-
         [Fact]
         public void AesGcmEncryptionOnLinuxAndMac()
         {

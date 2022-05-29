@@ -83,7 +83,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (SupportedAlgorithms.IsAesGcm(algorithm))
                 {
-#if NETSTANDARD2_0
+#if NETSTANDARD2_0 || NET6_0
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     throw LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10713, LogHelper.MarkAsNonPII(algorithm))));
 #endif

@@ -328,7 +328,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.1) },
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.000001) },
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
@@ -343,7 +343,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.1) },
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.000001) },
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
@@ -358,7 +358,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfigWithMatchingKid, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.1) },
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfigWithMatchingKid, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.000001) },
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
@@ -373,7 +373,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectIssuerAndSigningKeysConfig, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.1) },
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectIssuerAndSigningKeysConfig, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.000001) },
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
@@ -388,7 +388,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(validConfigKeyValidationFails, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.1) },
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(validConfigKeyValidationFails, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.000001) },
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
@@ -604,7 +604,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         Token = jwe,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.1) },
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.000001) },
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
@@ -620,7 +620,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         Token = jwe,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.1) },
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.000001) },
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
@@ -636,7 +636,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         Token = jwe,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfigWithMatchingKid, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.1) },
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfigWithMatchingKid, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.000001) },
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
@@ -652,7 +652,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         Token = jwe,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectIssuerAndSigningKeysConfig, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.1) },
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectIssuerAndSigningKeysConfig, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.000001) },
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
@@ -668,7 +668,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         Token = jwe,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(validConfigKeyValidationFails, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.1) },
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(validConfigKeyValidationFails, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.000001) },
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,

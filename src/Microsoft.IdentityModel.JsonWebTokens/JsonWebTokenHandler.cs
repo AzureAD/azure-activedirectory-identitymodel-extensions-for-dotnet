@@ -667,6 +667,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return compressionProvider.Compress(Encoding.UTF8.GetBytes(token)) ?? throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10680, LogHelper.MarkAsNonPII(compressionAlgorithm))));
         }
 
+        private static StringComparison GetStringComparisonRuleIf509(SecurityKey securityKey) => (securityKey is X509SecurityKey)
+                            ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
+        private static StringComparison GetStringComparisonRuleIf509OrECDsa(SecurityKey securityKey) => (securityKey is X509SecurityKey
+                            || securityKey is ECDsaSecurityKey)
+                            ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+        
         /// <summary>
         /// Creates a <see cref="ClaimsIdentity"/> from a <see cref="JsonWebToken"/>.
         /// </summary>
@@ -889,7 +896,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 throw LogHelper.LogExceptionMessage(new ArgumentException(TokenLogMessages.IDX10620));
 
             byte[] wrappedKey = null;
-            SecurityKey securityKey = JwtTokenUtilities.GetSecurityKey(encryptingCredentials, cryptoProviderFactory, out wrappedKey);
+            SecurityKey securityKey = JwtTokenUtilities.GetSecurityKey(encryptingCredentials, cryptoProviderFactory, additionalHeaderClaims, out wrappedKey);
 
             using (var encryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(securityKey, encryptingCredentials.Enc))
             {
@@ -897,7 +904,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogMessages.IDX14103));
 
                 var header = CreateDefaultJWEHeader(encryptingCredentials, compressionAlgorithm, tokenType);
-
                 if (additionalHeaderClaims != null)
                     header.Merge(JObject.FromObject(additionalHeaderClaims));
 
@@ -946,6 +952,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     keys = new List<SecurityKey> { key };
             }
 
+            // on decryption for ECDH-ES, we get the public key from the EPK value see: https://datatracker.ietf.org/doc/html/rfc7518#appendix-C
+            // we need the ECDSASecurityKey for the receiver, use TokenValidationParameters.TokenDecryptionKey
+
             // control gets here if:
             // 1. User specified delegate: TokenDecryptionKeyResolver returned null
             // 2. ResolveTokenDecryptionKey returned null
@@ -953,7 +962,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (keys == null)
                 keys = JwtTokenUtilities.GetAllDecryptionKeys(validationParameters);
 
-            if (jwtToken.Alg.Equals(JwtConstants.DirectKeyUseAlg))
+            if (jwtToken.Alg.Equals(JwtConstants.DirectKeyUseAlg, StringComparison.Ordinal)
+                || jwtToken.Alg.Equals(SecurityAlgorithms.EcdhEs, StringComparison.Ordinal))
                 return keys;
 
             var unwrappedKeys = new List<SecurityKey>();
@@ -964,6 +974,24 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 try
                 {
+#if NET472 || NET6_0
+                    if (SupportedAlgorithms.EcdsaWrapAlgorithms.Contains(jwtToken.Alg))
+                    {
+                        //// on decryption we get the public key from the EPK value see: https://datatracker.ietf.org/doc/html/rfc7518#appendix-C
+                        var ecdhKeyExchangeProvider = new EcdhKeyExchangeProvider(
+                            key as ECDsaSecurityKey,
+                            validationParameters.TokenDecryptionKey as ECDsaSecurityKey,
+                            jwtToken.Alg,
+                            jwtToken.Enc);
+                        jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Apu, out string apu);
+                        jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Apv, out string apv);
+                        SecurityKey kdf = ecdhKeyExchangeProvider.GenerateKdf(apu, apv);
+                        var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(kdf, ecdhKeyExchangeProvider.GetEncryptionAlgorithm());
+                        var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.EncryptedKey));
+                        unwrappedKeys.Add(new SymmetricSecurityKey(unwrappedKey));
+                    }
+                    else
+#endif
                     if (key.CryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Alg, key))
                     {
                         var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(key, jwtToken.Alg);
@@ -1000,17 +1028,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
+            StringComparison stringComparison = GetStringComparisonRuleIf509OrECDsa(validationParameters.TokenDecryptionKey);
             if (!string.IsNullOrEmpty(jwtToken.Kid))
             {
                 if (validationParameters.TokenDecryptionKey != null
-                    && string.Equals(validationParameters.TokenDecryptionKey.KeyId, jwtToken.Kid, validationParameters.TokenDecryptionKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+                    && string.Equals(validationParameters.TokenDecryptionKey.KeyId, jwtToken.Kid, stringComparison))
                     return validationParameters.TokenDecryptionKey;
 
                 if (validationParameters.TokenDecryptionKeys != null)
                 {
                     foreach (var key in validationParameters.TokenDecryptionKeys)
                     {
-                        if (key != null && string.Equals(key.KeyId, jwtToken.Kid, key is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+                        if (key != null && string.Equals(key.KeyId, jwtToken.Kid, GetStringComparisonRuleIf509OrECDsa(key)))
                             return key;
                     }
                 }
@@ -1020,7 +1049,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 if (validationParameters.TokenDecryptionKey != null)
                 {
-                    if (string.Equals(validationParameters.TokenDecryptionKey.KeyId, jwtToken.X5t, validationParameters.TokenDecryptionKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+                    if (string.Equals(validationParameters.TokenDecryptionKey.KeyId, jwtToken.X5t, stringComparison))
                         return validationParameters.TokenDecryptionKey;
 
                     var x509Key = validationParameters.TokenDecryptionKey as X509SecurityKey;
@@ -1032,7 +1061,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     foreach (var key in validationParameters.TokenDecryptionKeys)
                     {
-                        if (key != null && string.Equals(key.KeyId, jwtToken.X5t, key is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+                        if (key != null && string.Equals(key.KeyId, jwtToken.X5t, GetStringComparisonRuleIf509(key)))
                             return key;
 
                         var x509Key = key as X509SecurityKey;
@@ -1041,6 +1070,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     }
                 }
             }
+
             return null;
         }
 
@@ -1192,7 +1222,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                         // Only try to re-validate using the newly obtained config if it doesn't reference equal the previously used configuration.
                         if (lastConfig != currentConfiguration)
-                            return decryptedJwt != null ? ValidateJWE(outerToken, decryptedJwt, validationParameters, currentConfiguration) : ValidateJWS(token, validationParameters, currentConfiguration); ;
+                            return decryptedJwt != null ? ValidateJWE(outerToken, decryptedJwt, validationParameters, currentConfiguration) : ValidateJWS(token, validationParameters, currentConfiguration);
                     }
                 }
             }
