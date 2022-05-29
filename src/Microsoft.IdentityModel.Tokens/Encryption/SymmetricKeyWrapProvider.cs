@@ -345,6 +345,14 @@ namespace Microsoft.IdentityModel.Tokens
                 return;
             }
 
+            if (SecurityAlgorithms.Aes192KW.Equals(algorithm) || SecurityAlgorithms.Aes192KeyWrap.Equals(algorithm))
+            {
+                if (key.Length != 24)
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10662, LogHelper.MarkAsNonPII(algorithm), LogHelper.MarkAsNonPII(128), Key.KeyId, LogHelper.MarkAsNonPII(key.Length << 3))));
+
+                return;
+            }
+
             if (SecurityAlgorithms.Aes256KW.Equals(algorithm) || (SecurityAlgorithms.Aes256KeyWrap.Equals(algorithm)))
             {
                 if (key.Length != 32)

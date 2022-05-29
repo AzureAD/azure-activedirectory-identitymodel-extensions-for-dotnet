@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
         }
 
-#if NET472 || NETSTANDARD2_0
+#if NET472 || NETSTANDARD2_0 || NET6_0
         /// <summary>
         /// When overridden in a derived class, sets the System.Runtime.Serialization.SerializationInfo
         /// with information about the exception.

@@ -38,6 +38,8 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     internal static class SupportedAlgorithms
     {
+        private const int RsaMinKeySize = 2048;
+
         internal static readonly ICollection<string> EcdsaSigningAlgorithms = new Collection<string>
         {
             SecurityAlgorithms.EcdsaSha256,
@@ -100,8 +102,13 @@ namespace Microsoft.IdentityModel.Tokens
         {
             SecurityAlgorithms.Aes128KW,
             SecurityAlgorithms.Aes128KeyWrap,
+            SecurityAlgorithms.Aes192KW,
+            SecurityAlgorithms.Aes192KeyWrap,
             SecurityAlgorithms.Aes256KW,
-            SecurityAlgorithms.Aes256KeyWrap
+            SecurityAlgorithms.Aes256KeyWrap,
+            SecurityAlgorithms.EcdhEsA128kw,
+            SecurityAlgorithms.EcdhEsA192kw,
+            SecurityAlgorithms.EcdhEsA256kw
         };
 
         internal static readonly ICollection<string> SymmetricSigningAlgorithms = new Collection<string>
@@ -114,7 +121,14 @@ namespace Microsoft.IdentityModel.Tokens
             SecurityAlgorithms.HmacSha512Signature
         };
 
-#if NET461 || NET472 || NETSTANDARD2_0
+        internal static readonly ICollection<string> EcdsaWrapAlgorithms = new Collection<string>
+        {
+            SecurityAlgorithms.EcdhEsA128kw,
+            SecurityAlgorithms.EcdhEsA192kw,
+            SecurityAlgorithms.EcdhEsA256kw
+        };
+
+#if NET461 || NET472 || NETSTANDARD2_0 || NET6_0
         /// <summary>
         /// Creating a Signature requires the use of a <see cref="HashAlgorithm"/>.
         /// This method returns the <see cref="HashAlgorithmName"/>
@@ -317,7 +331,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return false;
 
             if (key is RsaSecurityKey || key is X509SecurityKey || (key is JsonWebKey rsaJsonWebKey && rsaJsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA))
-                return key.KeySize >= 2048;
+                return key.KeySize >= RsaMinKeySize;
 
             return false;
         }
@@ -349,7 +363,7 @@ namespace Microsoft.IdentityModel.Tokens
             // RSA-PSS is not available on .NET 4.5
             LogHelper.LogInformation(LogMessages.IDX10692);
             return false;
-#elif NET461 || NET472 || NETSTANDARD2_0
+#elif NET461 || NET472 || NETSTANDARD2_0 || NET6_0
             // RSACryptoServiceProvider doesn't support RSA-PSS
             if (key is RsaSecurityKey rsa && rsa.Rsa is RSACryptoServiceProvider)
             {

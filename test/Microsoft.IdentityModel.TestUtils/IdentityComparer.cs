@@ -348,12 +348,19 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static bool AreClaimsEnumsEqual(object object1, object object2, CompareContext context)
         {
-
             IEnumerable<Claim> t1 = (IEnumerable<Claim>)object1;
             IEnumerable<Claim> t2 = (IEnumerable<Claim>)object2;
 
-            var claims1 = new List<Claim>(t1);
-            var claims2 = new List<Claim>(t2);
+            var claims1 = new List<Claim>();
+            foreach (Claim c1 in t1)
+                if (!context.ClaimTypesToIgnoreWhenComparing.Contains(c1.Type))
+                    claims1.Add(c1);
+
+            var claims2 = new List<Claim>();
+            foreach (Claim c2 in t2)
+                if (!context.ClaimTypesToIgnoreWhenComparing.Contains(c2.Type))
+                    claims2.Add(c2);
+
             if (claims1.Count != claims2.Count)
             {
                 context.Diffs.Add($"claims1.Count != claims2.Count: {claims1.Count}, {claims2.Count}");

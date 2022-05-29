@@ -34,6 +34,7 @@ using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
+#pragma warning disable SYSLIB0013 // Type or member is obsolete
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 {
@@ -250,6 +251,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 #elif NET472
             if (!message.SkuTelemetryValue.Equals("ID_NET472"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET472");
+#elif NET6_0
+            if (!message.SkuTelemetryValue.Equals("ID_NET6_0"))
+                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET6_0");
 #elif NET_CORE
             if (!message.SkuTelemetryValue.Equals("ID_NETSTANDARD2_0"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NETSTANDARD2_0");
@@ -520,6 +524,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 #elif NET472
             if (!message.SkuTelemetryValue.Equals("ID_NET472"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET472");
+#elif NET6_0
+            if (!message.SkuTelemetryValue.Equals("ID_NET6_0"))
+                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NETCOREAPP3_1");
 #elif NET_CORE
             if (!message.SkuTelemetryValue.Equals("ID_NETSTANDARD2_0"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NETSTANDARD2_0");
@@ -647,5 +654,5 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     }
 }
 
+#pragma warning restore SYSLIB0013 // Type or member is obsolete
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-

@@ -93,5 +93,21 @@ namespace System.IdentityModel.Tokens.Jwt
         /// See: https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.3
         /// </summary>
         public const string Zip = Microsoft.IdentityModel.JsonWebTokens.JwtHeaderParameterNames.Zip;
+
+        /// <summary>
+        /// See: https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.1
+        /// </summary>
+        public const string Epk = Microsoft.IdentityModel.JsonWebTokens.JwtHeaderParameterNames.Epk;
+
+        /// <summary>
+        /// See: https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.2
+        /// </summary>
+        public const string Apu = Microsoft.IdentityModel.JsonWebTokens.JwtHeaderParameterNames.Apu;
+
+        /// <summary>
+        /// See: https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.3
+        /// </summary>
+        public const string Apv = Microsoft.IdentityModel.JsonWebTokens.JwtHeaderParameterNames.Apv;
+
     }
 }

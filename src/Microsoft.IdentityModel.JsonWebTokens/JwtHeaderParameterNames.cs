@@ -93,5 +93,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// See: https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.3
         /// </summary>
         public const string Zip = "zip";
+
+        /// <summary>
+        /// See: https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.1
+        /// </summary>
+        public const string Epk = "epk";
+
+        /// <summary>
+        /// See: https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.2
+        /// </summary>
+        public const string Apu = "apu";
+
+        /// <summary>
+        /// See: https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.1.3
+        /// </summary>
+        public const string Apv = "apv";
     }
 }
