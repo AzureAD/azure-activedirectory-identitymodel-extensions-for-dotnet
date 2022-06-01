@@ -312,6 +312,9 @@ namespace Microsoft.IdentityModel.Logging.Tests
 
     public class LoggerTheoryData : TheoryDataBase
     {
+        public LoggerTheoryData() : base(false)
+        { }
+
         public IIdentityLogger Logger { get; set; } = null;
 
         public bool ShouldMessageBeLogged { get; set; }
