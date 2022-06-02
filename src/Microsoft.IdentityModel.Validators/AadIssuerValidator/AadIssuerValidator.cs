@@ -201,21 +201,23 @@ namespace Microsoft.IdentityModel.Validators
         /// <param name="authority">The authority to query for metadata.</param>
         /// <param name="securityToken">Received security token.</param>
         /// <returns></returns>
-        public string GetEffectiveAuthorityFromToken(string authority, SecurityToken securityToken)
+        public static string GetEffectiveAuthorityFromToken(string authority, SecurityToken securityToken)
         {
             _ = authority ?? throw LogHelper.LogArgumentNullException(nameof(authority));
             _ = securityToken ?? throw LogHelper.LogArgumentNullException(nameof(securityToken));
 
-            string effectiveAuthority = authority;
+            string effectiveAuthority = authority.TrimEnd('/');
+            bool IsV2Authority = authority.Contains(V2EndpointSuffix);
             if (securityToken.Issuer.EndsWith(V2EndpointSuffix, StringComparison.OrdinalIgnoreCase))
             {
                 if (!IsV2Authority)
-                    effectiveAuthority = effectiveAuthority.Replace(V2EndpointSuffix, string.Empty);
+                    effectiveAuthority = effectiveAuthority + V2EndpointSuffix;
             }
             else
             {
                 if (IsV2Authority)
-                    effectiveAuthority = effectiveAuthority.TrimEnd('/') + V2EndpointSuffix;
+                    effectiveAuthority = CreateV1Authority(effectiveAuthority);
+
             }
 
             return effectiveAuthority;

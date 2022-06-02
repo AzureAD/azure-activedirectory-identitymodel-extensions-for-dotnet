@@ -69,6 +69,11 @@ namespace Microsoft.IdentityModel.TestUtils
             };
 #endif
 
+            AadClaims = new List<Claim>
+            {
+                new Claim(Default.Tid, "tenantId", ClaimValueTypes.String, Default.Issuer),
+            };
+
             DefaultClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.Country, "USA", ClaimValueTypes.String, Default.Issuer),
@@ -151,6 +156,12 @@ namespace Microsoft.IdentityModel.TestUtils
             DerivedClaimsIdentityDefaultClaims = new ClaimsIdentity(DefaultClaims);
             DerivedClaimsIdentityDerivedClaims = new ClaimsIdentity(DerivedClaims);
             DefaultClaimsPrincipal = new ClaimsPrincipal(DefaultClaimsIdentity);
+        }
+
+        public static List<Claim> AadClaims
+        {
+            get;
+            private set;
         }
 
         public static List<Claim> DefaultClaims
