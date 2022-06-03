@@ -341,7 +341,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 dataset.Add(Default.Issuer, null, new TokenValidationParameters { ValidIssuer = NotDefault.Issuer }, new OpenIdConnectConfiguration { Issuer = Default.Issuer }, ExpectedException.NoExceptionExpected);
                 dataset.Add(Default.Issuer, null, new TokenValidationParameters { ValidIssuers = invalidIssuers }, new OpenIdConnectConfiguration { Issuer = Default.Issuer }, ExpectedException.NoExceptionExpected);
 
-
                 return dataset;
             }
         }
@@ -369,7 +368,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 DateTime? notBefore;
                 DateTime? expires;
 
-                //                           notbefore  expires    
+                //notbefore  expires    
                 var dataset = new TheoryData<DateTime?, DateTime?, SecurityToken, TokenValidationParameters, ExpectedException>();
 
                 dataset.Add(null, null, null, null, ExpectedException.ArgumentNullException());
