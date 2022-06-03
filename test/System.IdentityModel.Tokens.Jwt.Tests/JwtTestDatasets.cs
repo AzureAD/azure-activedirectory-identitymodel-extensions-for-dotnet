@@ -112,7 +112,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             ValidateAudience = false,
                             ValidateLifetime = false,
                         },
-                        ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10260: "),
+                        ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10205: "),
                     },
                     new JwtTheoryData
                     {
