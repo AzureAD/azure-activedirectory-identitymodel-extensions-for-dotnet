@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 namespace Microsoft.IdentityModel.Abstractions
 {
@@ -19,7 +18,7 @@ namespace Microsoft.IdentityModel.Abstractions
         /// <summary>
         /// The underlying properties making up the <see cref="TelemetryEventDetails"/>.
         /// </summary>
-        protected internal Dictionary<string, object> PropertyValues { get; } = new Dictionary<string, object>();
+        protected internal IDictionary<string, object> PropertyValues { get; } = new Dictionary<string, object>();
 
         /// <summary>
         /// Name of the telemetry event, should be unique between events.
@@ -29,11 +28,11 @@ namespace Microsoft.IdentityModel.Abstractions
         /// <summary>
         /// Properties which describe the event.
         /// </summary>
-        public virtual IDictionary<string, object> Properties
+        public virtual IReadOnlyDictionary<string, object> Properties
         {
             get
             {
-                return new ReadOnlyDictionary<string, object>(PropertyValues);
+                return (IReadOnlyDictionary<string, object>)PropertyValues;
             }
         }
 

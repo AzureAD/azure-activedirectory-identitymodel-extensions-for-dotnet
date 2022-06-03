@@ -85,7 +85,61 @@ namespace Microsoft.IdentityModel.Logging.Tests
             Assert.Equal("bar", (eventDetails.Properties["foo"] as Foo)?.Bar);
         }
 
+        [Fact]
+        public void VerifyExtensibilityForClassification()
+        {
+            TelemetryEventDetailsWithClassification eventDetails = new TelemetryEventDetailsWithClassification();
+            eventDetails.SetProperty("Protocol", "Bearer");
+            eventDetails.SetProperty("TokenIdentity", "Bob Jones", true);
+            eventDetails.SetProperty("DataCenter", "CO1", false);
+
+            Assert.Equal(3, eventDetails.Properties.Count);
+            Assert.True(eventDetails.IsPersonalData["TokenIdentity"]);
+            Assert.False(eventDetails.IsPersonalData["Protocol"]);
+            Assert.False(eventDetails.IsPersonalData["DataCenter"]);
+        }
+
         #region Dummy Implementation
+        internal class TelemetryEventDetailsWithClassification : TelemetryEventDetails
+        {
+            internal IDictionary<string, bool> PersonalDataDecoration = new Dictionary<string, bool>();
+
+            public IReadOnlyDictionary<string, bool> IsPersonalData
+            {
+                get
+                {
+                    return (IReadOnlyDictionary<string, bool>)PersonalDataDecoration;
+                }
+            }
+
+            public override void  SetProperty(
+                string key,
+                string value)
+            {
+                SetPropertyCore(key, value);
+            }
+
+            public void SetProperty(
+               string key,
+               string value,
+               bool isPersonal)
+            {
+                SetPropertyCore(key, value, isPersonal);
+            }
+
+            private void SetPropertyCore(
+                string key,
+                object value,
+                bool isPersonal = false)
+            {
+                if (key == null)
+                    throw new ArgumentNullException(nameof(key));
+
+                PropertyValues[key] = value;
+                PersonalDataDecoration[key] = isPersonal;
+            }
+        }
+
         internal class CustomTelemetryEventDetails : TelemetryEventDetails
         {
             internal void SetProperty(
