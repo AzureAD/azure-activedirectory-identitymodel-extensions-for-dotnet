@@ -86,6 +86,21 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
+                        TestId = nameof(Default.AsymmetricJws) + "_TVPInvalid_ConfigValid_ValidateSignatureLast",
+                        Token = Default.AsymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(validConfig),
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                            ValidateSignatureLast = true,
+                        },
+                    },
+                    new JwtTheoryData
+                    {
                         TestId = nameof(Default.AsymmetricJws) + "_TVPInvalid_ConfigIssuerInvalid",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
