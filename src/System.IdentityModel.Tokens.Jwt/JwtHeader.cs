@@ -137,7 +137,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Initializes a new instance of <see cref="JwtHeader"/>.
         /// With the Header Parameters:
-        /// <para>{ { typ, JWT }, { alg, SigningCredentials.Algorithm } }</para>
+        /// <para>{ { typ, JWT }, { alg, EncryptingCredentials.Algorithm } }</para>
         /// </summary>
         /// <param name="encryptingCredentials"><see cref="EncryptingCredentials"/> used when creating a JWS Compact JSON.</param>
         /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
@@ -150,7 +150,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Initializes a new instance of <see cref="JwtHeader"/>.
         /// With the Header Parameters:
-        /// <para>{ { typ, JWT }, { alg, SigningCredentials.Algorithm } }</para>
+        /// <para>{ { typ, JWT }, { alg, EncryptingCredentials.Algorithm } }</para>
         /// </summary>
         /// <param name="encryptingCredentials"><see cref="EncryptingCredentials"/> used when creating a JWS Compact JSON.</param>
         /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
@@ -164,7 +164,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Initializes a new instance of <see cref="JwtHeader"/>.
         /// With the Header Parameters:
-        /// <para>{ { typ, JWT }, { alg, SigningCredentials.Algorithm } }</para>
+        /// <para>{ { typ, JWT }, { alg, EncryptingCredentials.Algorithm } }</para>
         /// </summary>
         /// <param name="encryptingCredentials"><see cref="EncryptingCredentials"/> used when creating a JWS Compact JSON.</param>
         /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
