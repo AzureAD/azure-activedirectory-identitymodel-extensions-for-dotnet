@@ -121,7 +121,7 @@ namespace Microsoft.IdentityModel.Tokens
         public ClaimsIdentity Subject { get; set; }
 
         /// <summary>
-        /// 
+        /// Gets or sets a bool that controls if token creation will set default 'cty' if not specified.
         /// </summary>
         public bool SetDefaultCtyClaim { get; set; } = true;
     }

@@ -1229,8 +1229,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateJWEWithPayloadString", theoryData);
             var handler = new JsonWebTokenHandler();
-            string jwtTokenWithSigning = null;
-            JsonWebToken jsonTokenWithSigning = null;
             CompressionProviderFactory.Default = new CompressionProviderFactory();
             try
             {
@@ -1239,7 +1237,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
                 if (theoryData.TokenDescriptor.AdditionalHeaderClaims.TryGetValue(JwtHeaderParameterNames.Cty, out object ctyValue))
                 {
-                    if (!jsonToken.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object headerCtyValue) || (jsonTokenWithSigning != null && !jsonTokenWithSigning.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object _)))
+                    if (!jsonToken.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object headerCtyValue) || (jsonToken != null && !jsonToken.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object _)))
                     {
                         context.AddDiff($"'Cty' claim does not exist in the outer header but present in theoryData.AdditionalHeaderClaims.");
                     }
@@ -1248,7 +1246,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 }
                 else if (theoryData.TokenDescriptor.SetDefaultCtyClaim)
                 {
-                    if (!jsonToken.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object headerCtyValue) || (jsonTokenWithSigning != null && !jsonTokenWithSigning.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object _)))
+                    if (!jsonToken.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object headerCtyValue) || (jsonToken != null && !jsonToken.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object _)))
                     {
                         context.AddDiff($"'Cty' claim does not exist in the outer header. It is expected to have the default value '{JwtConstants.HeaderType}'.");
                     }
@@ -1257,7 +1255,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 }
                 else
                 {
-                    if (jsonToken.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object headerCtyValue) || (jsonTokenWithSigning != null && jsonTokenWithSigning.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object _)))
+                    if (jsonToken.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object headerCtyValue) || (jsonToken != null && jsonToken.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object _)))
                     {
                         context.AddDiff($"'Cty' claim does exist in the outer header. It is not expected to exist since SetDefaultCtyClaim is '{theoryData.TokenDescriptor.SetDefaultCtyClaim}'.");
                     }
@@ -1266,7 +1264,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 if (theoryData.TokenDescriptor.AdditionalInnerHeaderClaims != null)
                 {
                     theoryData.ValidationParameters.ValidateLifetime = false;
-                    var result = handler.ValidateToken(jwtTokenWithSigning, theoryData.ValidationParameters);
+                    var result = handler.ValidateToken(jwtToken, theoryData.ValidationParameters);
                     var token = result.SecurityToken as JsonWebToken;
                     if (theoryData.TokenDescriptor.AdditionalInnerHeaderClaims.TryGetValue(JwtHeaderParameterNames.Cty, out object innerCtyValue))
                     {
