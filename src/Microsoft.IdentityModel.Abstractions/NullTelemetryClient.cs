@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.Abstractions
             IDictionary<string, string> stringProperties = null,
             IDictionary<string, long> longProperties = null,
             IDictionary<string, bool> boolProperties = null,
-            IDictionary<string, DateTime> DateTimeProperties = null,
+            IDictionary<string, DateTime> dateTimeProperties = null,
             IDictionary<string, double> doubleProperties = null,
             IDictionary<string, Guid> guidProperties = null)
         {
