@@ -88,6 +88,36 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
         /// <summary>
+        /// Verifies that the Compact() and CompactLRU() are called when the number of cached items exceeds the specified percentage.
+        /// </summary>
+        [Fact]
+        public void CompactCache()
+        {
+            int capacity = 10;
+            int expiredInSeconds = 1;
+            int waitInMiliSeconds = 2 * 1000 * expiredInSeconds;
+
+            TestUtilities.WriteHeader($"{this}.CompactCache");
+            var context = new CompareContext($"{this}.CompactCache");
+            var cache = new EventBasedLRUCache<int, string>(capacity, removeExpiredValues: true, maintainLRU: false);
+
+            // add 3 times the capacity to start the compaction process
+            AddItemsToCache(cache, 3 * capacity, expiredInSeconds);
+
+            // allows the event queue task to be started to compact the cache
+            Thread.Sleep(100);
+
+            // wait until the event queue is empty
+            cache.WaitForProcessing();
+
+            // the number of cached items should be below the capacity after compaction
+            if (cache.MapCount > capacity)
+                context.AddDiff($"The cache size should be less than {capacity}.");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        /// <summary>
         /// Verifies that the RemoveExpiredValues() method (non LRU) is working as expected.
         /// </summary>
         [Fact]
