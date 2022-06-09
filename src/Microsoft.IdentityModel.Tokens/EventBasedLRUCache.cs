@@ -95,6 +95,10 @@ namespace Microsoft.IdentityModel.Tokens
         private const int EventQueueTaskDoNotStop = 2; // force the task to continue even it has past the _eventQueueTaskStopTime, see StartEventQueueTaskIfNotRunning() for more details.
         private int _eventQueueTaskState = EventQueueTaskStopped;
 
+        private const int CompactionNotQueued = 0; // compaction action not in the event queue
+        private const int CompactionQueuedOrRunning = 1; // compaction action in the event queue or currently in progress
+        private int _compactionState = CompactionNotQueued;
+
         // set to true when the AppDomain is to be unloaded or the default AppDomain process is ready to exit
         private bool _shouldStopImmediately = false;
 
@@ -330,6 +334,9 @@ namespace Microsoft.IdentityModel.Tokens
 
                 _doubleLinkedList.RemoveLast();
             }
+
+            // reset _compactionState so the compaction action can be queued again when needed
+            _compactionState = CompactionNotQueued;
         }
 
         /// <summary>
@@ -350,6 +357,9 @@ namespace Microsoft.IdentityModel.Tokens
                         OnItemRemoved?.Invoke(cacheItem.Value);
                 }
             }
+
+            // reset _compactionState so the compaction action can be queued again when needed
+            _compactionState = CompactionNotQueued;
         }
 
         /// <summary>
@@ -415,10 +425,13 @@ namespace Microsoft.IdentityModel.Tokens
                 // if cache is at _maxCapacityPercentage, trim it by _compactionPercentage
                 if ((double)_map.Count / _capacity >= _maxCapacityPercentage)
                 {
-                    if (_maintainLRU)
-                        _eventQueue.Enqueue(CompactLRU);
-                    else
-                        _eventQueue.Enqueue(Compact);
+                    if (Interlocked.CompareExchange(ref _compactionState, CompactionQueuedOrRunning, CompactionNotQueued) == CompactionNotQueued)
+                    {
+                        if (_maintainLRU)
+                            AddActionToEventQueue(CompactLRU);
+                        else
+                            AddActionToEventQueue(Compact);
+                    }
                 }
 
                 var newCacheItem = new LRUCacheItem<TKey, TValue>(key, value, expirationTime);
@@ -569,11 +582,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         internal void WaitForProcessing()
         {
-            // The _eventQueue can be non-empty only if _maintainLRU = true.
-            // If _maintainLRU = false, neither the _doubleLinkedList nor _eventQueue will be used.
-            if (!_maintainLRU)
-                return;
-
             while (!_eventQueue.IsEmpty);
         }
 
