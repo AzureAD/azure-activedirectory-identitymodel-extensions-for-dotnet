@@ -52,12 +52,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 var memoryStream = new MemoryStream();
 
                 BinaryFormatter formatter = new BinaryFormatter();
+#pragma warning disable SYSLIB0011 // Type or member is obsolete
                 formatter.Serialize(memoryStream, exception);
+#pragma warning restore SYSLIB0011 // Type or member is obsolete
 
                 memoryStream.Seek(0, SeekOrigin.Begin);
 
                 formatter.Binder = new ExceptionSerializationBinder();
+#pragma warning disable SYSLIB0011 // Type or member is obsolete
                 var serializedException = formatter.Deserialize(memoryStream);
+#pragma warning restore SYSLIB0011 // Type or member is obsolete
 
                 theoryData.ExpectedException.ProcessNoException(context);
 

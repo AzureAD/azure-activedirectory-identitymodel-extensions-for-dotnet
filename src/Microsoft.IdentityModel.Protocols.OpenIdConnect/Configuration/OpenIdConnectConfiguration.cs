@@ -39,8 +39,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     /// Contains OpenIdConnect configuration that can be populated from a json string.
     /// </summary>
     [JsonObject]
-    public class OpenIdConnectConfiguration
+    public class OpenIdConnectConfiguration : BaseConfiguration
     {
+        private const string _className = "Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfiguration";
+
         /// <summary>
         /// Deserializes the json string into an <see cref="OpenIdConnectConfiguration"/> object.
         /// </summary>
@@ -91,12 +93,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             try
             {
-                LogHelper.LogVerbose(LogMessages.IDX21806, json, this);
+                LogHelper.LogVerbose(LogMessages.IDX21806, json, LogHelper.MarkAsNonPII(_className));
                 JsonConvert.PopulateObject(json, this);
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX21815, json, GetType()), ex));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX21815, json, LogHelper.MarkAsNonPII(_className)), ex));
             }
         }
 
@@ -224,7 +226,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Gets or sets the 'issuer'.
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.Issuer, Required = Required.Default)]
-        public string Issuer { get; set; }
+        public override string Issuer { get; set; }
 
         /// <summary>
         /// Gets or sets the 'jwks_uri'
@@ -325,7 +327,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Gets the <see cref="ICollection{SecurityKey}"/> that the IdentityProvider indicates are to be used signing tokens.
         /// </summary>
         [JsonIgnore]
-        public ICollection<SecurityKey> SigningKeys { get; } = new Collection<SecurityKey>();
+        public override ICollection<SecurityKey> SigningKeys { get; } = new Collection<SecurityKey>();
 
         /// <summary>
         /// Gets the collection of 'subject_types_supported'.

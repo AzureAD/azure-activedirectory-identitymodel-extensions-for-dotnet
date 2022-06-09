@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Tokens
                     continue;
 
                 string jsonClaimType = claim.Type;
-                object jsonClaimValue = claim.ValueType.Equals(ClaimValueTypes.String, StringComparison.Ordinal) ? claim.Value : GetClaimValueUsingValueType(claim);
+                object jsonClaimValue = claim.ValueType.Equals(ClaimValueTypes.String) ? claim.Value : GetClaimValueUsingValueType(claim);
                 object existingValue;
 
                 // If there is an existing value, append to it.
@@ -152,6 +152,34 @@ namespace Microsoft.IdentityModel.Tokens
                     yield return key;
         }
 
+
+        /// <summary>
+        /// Returns all <see cref="SecurityKey"/> provided in <paramref name="configuration"/>.
+        /// </summary>
+        /// <param name="configuration">The <see cref="BaseConfiguration"/> that contains signing keys used for validation.</param>
+        /// <returns>Returns all <see cref="SecurityKey"/> provided in provided in <paramref name="configuration"/>.</returns>
+        internal static IEnumerable<SecurityKey> GetAllSigningKeys(BaseConfiguration configuration)
+        {
+            LogHelper.LogInformation(TokenLogMessages.IDX10265);
+
+            if (configuration?.SigningKeys != null)
+                foreach (SecurityKey key in configuration.SigningKeys)
+                    yield return key;
+        }
+
+        /// <summary>
+        /// Returns all <see cref="SecurityKey"/> provided in <paramref name="configuration"/> and <paramref name="validationParameters"/>.
+        /// </summary>
+        /// <param name="configuration">The <see cref="BaseConfiguration"/> that contains signing keys used for validation.</param>
+        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <returns>Returns all <see cref="SecurityKey"/> provided in provided in <paramref name="configuration"/> and <paramref name="validationParameters"/>.</returns>
+        internal static IEnumerable<SecurityKey> GetAllSigningKeys(TokenValidationParameters validationParameters, BaseConfiguration configuration)
+        {
+            LogHelper.LogInformation(TokenLogMessages.IDX10264);
+
+            return GetAllSigningKeys(configuration).Concat(GetAllSigningKeys(validationParameters));
+        }
+
         /// <summary>
         /// Merges claims. If a claim with same type exists in both <paramref name="claims"/> and <paramref name="subjectClaims"/>, the one in claims will be kept.
         /// </summary>
@@ -175,6 +203,52 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Check whether the given exception type is recoverable by LKG.
+        /// </summary>
+        /// <param name="exception">The exception to check.</param>
+        /// <returns><c>true</c> if the exception is certain types of exceptions otherwise, <c>false</c>.</returns>
+        internal static bool IsRecoverableException(Exception exception)
+        {
+            // using 'GetType()' instead of 'is' as SecurityTokenUnableToValidException (and others) extend SecurityTokenInvalidSignatureException
+            // we want to make sure that the clause for SecurityTokenUnableToValidateException is hit so that the ValidationFailure is checked
+            return exception.GetType().Equals(typeof(SecurityTokenInvalidSignatureException))
+                   || exception is SecurityTokenInvalidSigningKeyException
+                   || exception is SecurityTokenInvalidIssuerException
+                   // we should not try to revalidate with the LKG or request a refresh if the token has an invalid lifetime
+                   || (exception as SecurityTokenUnableToValidateException)?.ValidationFailure != ValidationFailure.InvalidLifetime
+                   || exception is SecurityTokenSignatureKeyNotFoundException;
+        }
+
+        /// <summary>
+        /// Check whether the given configuration is recoverable by LKG.
+        /// </summary>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validation.</param>
+        /// <param name="configuration">The <see cref="BaseConfiguration"/> to check.</param>
+        /// <param name="currentConfiguration">The updated <see cref="BaseConfiguration"/>.</param>
+        /// <returns><c>true</c> if the configuration is recoverable otherwise, <c>false</c>.</returns>
+        internal static bool IsRecoverableConfiguration(TokenValidationParameters validationParameters, BaseConfiguration configuration, out BaseConfiguration currentConfiguration)
+        {
+            bool isRecoverableConfiguration = (validationParameters.ConfigurationManager.UseLastKnownGoodConfiguration
+                && validationParameters.ConfigurationManager.LastKnownGoodConfiguration != null
+                && !ReferenceEquals(configuration, validationParameters.ConfigurationManager.LastKnownGoodConfiguration));
+
+            currentConfiguration = configuration;
+            if (isRecoverableConfiguration)
+            {
+                // Inform the user that the LKG is expired.
+                if (!validationParameters.ConfigurationManager.IsLastKnownGoodValid)
+                {
+                    LogHelper.LogInformation(TokenLogMessages.IDX10263);
+                    return false;
+                }
+                else
+                    currentConfiguration = validationParameters.ConfigurationManager.LastKnownGoodConfiguration;
+            }
+
+            return isRecoverableConfiguration;
         }
     }
 }

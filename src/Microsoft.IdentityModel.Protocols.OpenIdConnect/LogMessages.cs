@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         internal const string IDX21305 = "IDX21305: OpenIdConnectProtocolValidationContext.ProtocolMessage.Code is null, there is no 'code' in the OpenIdConnect Response to validate.";
         internal const string IDX21306 = "IDX21306: The 'c_hash' claim was not a string in the 'id_token', but a 'code' was in the OpenIdConnectMessage, 'id_token': '{0}'.";
         internal const string IDX21307 = "IDX21307: The 'c_hash' claim was not found in the id_token, but a 'code' was in the OpenIdConnectMessage, id_token: '{0}'";
-        internal const string IDX21308 = "IDX21308: 'Azp' claim exists in the 'id_token' but 'ciient_id' is null. Cannot validate the 'azp' claim.";
+        internal const string IDX21308 = "IDX21308: 'azp' claim exists in the 'id_token' but 'client_id' is null. Cannot validate the 'azp' claim.";
         internal const string IDX21309 = "IDX21309: Validating 'at_hash' using id_token and access_token.";
         internal const string IDX21310 = "IDX21310: OpenIdConnectProtocolValidationContext.ProtocolMessage.AccessToken is null, there is no 'token' in the OpenIdConnect Response to validate.";
         internal const string IDX21311 = "IDX21311: The 'at_hash' claim was not a string in the 'id_token', but an 'access_token' was in the OpenIdConnectMessage, 'id_token': '{0}'.";
@@ -100,6 +100,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         internal const string IDX21812 = "IDX21812: Retrieving json web keys from: '{0}'.";
         internal const string IDX21813 = "IDX21813: Deserializing json web keys: '{0}'.";
         internal const string IDX21815 = "IDX21815: Error deserializing json: '{0}' into '{1}'.";
+        internal const string IDX21816 = "IDX21816: The number of signing keys must be greater or equal to '{0}'. Value: '{1}'.";
+        internal const string IDX21817 = "IDX21817: The OpenIdConnectConfiguration did not contain any JsonWebKeys. This is required to validate the configuration.";
+        internal const string IDX21818 = "IDX21818: The OpenIdConnectConfiguration's valid signing keys cannot be less than {0}. Values: {1}. Invalid keys: {2}";
 #pragma warning restore 1591
     }
 }

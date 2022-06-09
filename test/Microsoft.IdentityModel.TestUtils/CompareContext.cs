@@ -54,6 +54,7 @@ namespace Microsoft.IdentityModel.TestUtils
             if (other == null)
                 return;
 
+            ClaimTypesToIgnoreWhenComparing = other.ClaimTypesToIgnoreWhenComparing;
             ExpectRawData = other.ExpectRawData;
             IgnoreClaimsIdentityType = other.IgnoreClaimsIdentityType;
             IgnoreClaimsPrincipalType = other.IgnoreClaimsPrincipalType;
@@ -70,6 +71,13 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             Diffs.Add(diff);
         }
+
+        public void AddClaimTypeToIgnoreWhenComparing(string claimType)
+        {
+            ClaimTypesToIgnoreWhenComparing.Add(claimType);
+        }
+
+        public ISet<string> ClaimTypesToIgnoreWhenComparing { get; set; } = new HashSet<string>();
 
         public List<string> Diffs { get; set; } = new List<string>();
 

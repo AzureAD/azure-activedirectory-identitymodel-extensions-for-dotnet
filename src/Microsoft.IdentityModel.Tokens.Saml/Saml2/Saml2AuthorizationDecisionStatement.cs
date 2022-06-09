@@ -94,9 +94,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (string.IsNullOrEmpty(value))
                     throw LogArgumentNullException(nameof(value));
 
-                if (Saml2Constants.AccessDecision.Deny.Equals(value, StringComparison.Ordinal)
-                    || Saml2Constants.AccessDecision.Permit.Equals(value, StringComparison.Ordinal)
-                    || Saml2Constants.AccessDecision.Indeterminate.Equals(value, StringComparison.Ordinal))
+                if (Saml2Constants.AccessDecision.Deny.Equals(value)
+                    || Saml2Constants.AccessDecision.Permit.Equals(value)
+                    || Saml2Constants.AccessDecision.Indeterminate.Equals(value))
                     _decision = value;
                 else
                     throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX13310));
@@ -130,7 +130,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     throw LogArgumentNullException(nameof(value));
 
                 if (!value.IsAbsoluteUri)
-                    throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13300, nameof(Resource), value)));
+                    throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13300, MarkAsNonPII(nameof(Resource)), value)));
 
                 _resource = value;
             }

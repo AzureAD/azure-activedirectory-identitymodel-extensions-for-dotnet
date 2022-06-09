@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogArgumentNullException(nameof(reader));
 
             if (!reader.IsStartElement())
-                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX30026, reader.NodeType)));
+                throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX30026, MarkAsNonPII(reader.NodeType))));
 
             // When multiple signed elements are being processed, the EnvelopedSignatureReader always creates a new XmlTokenStreamReader.
             // This creates a chain of readers.
@@ -180,7 +180,7 @@ namespace Microsoft.IdentityModel.Xml
                 }
                 default:
                 {
-                    throw LogExceptionMessage(new XmlException(FormatInvariant(LogMessages.IDX30406, InnerReader.NodeType)));
+                    throw LogExceptionMessage(new XmlException(FormatInvariant(LogMessages.IDX30406, MarkAsNonPII(InnerReader.NodeType))));
                 }
             }
         }

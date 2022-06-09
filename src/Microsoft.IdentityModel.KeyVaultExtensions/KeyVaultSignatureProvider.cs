@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
                     _hash = SHA512.Create();
                     break;
                 default:
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10652, algorithm), nameof(algorithm)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10652, LogHelper.MarkAsNonPII(algorithm)), nameof(algorithm)));
             }
         }
 

@@ -33,7 +33,7 @@ using Microsoft.IdentityModel.Logging;
 using System.Reflection;
 #endif
 
-#if NET461 || NET472 || NETSTANDARD2_0
+#if NET461 || NET472 || NETSTANDARD2_0 || NET6_0
 using System.Security.Cryptography.X509Certificates;
 #endif
 
@@ -110,7 +110,7 @@ namespace Microsoft.IdentityModel.Tokens
                     else if (securityKey is ECDsaSecurityKey edcsaSecurityKeyFromJsonWebKey)
                         InitializeUsingEcdsaSecurityKey(edcsaSecurityKeyFromJsonWebKey);
                     else
-                        throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10684, algorithm, key)));
+                        throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10684, LogHelper.MarkAsNonPII(algorithm), key)));
                 }
             }
             else if (key is ECDsaSecurityKey ecdsaKey)
@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.Tokens
                 InitializeUsingEcdsaSecurityKey(ecdsaKey);
             }
             else
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10684, algorithm, key)));
+                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10684, LogHelper.MarkAsNonPII(algorithm), key)));
         }
 
         internal byte[] Decrypt(byte[] data)
@@ -194,8 +194,8 @@ namespace Microsoft.IdentityModel.Tokens
 #if DESKTOP
             if (rsa is RSACryptoServiceProvider rsaCryptoServiceProvider)
             {
-                _useRSAOeapPadding = algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
-                                  || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal);
+                _useRSAOeapPadding = algorithm.Equals(SecurityAlgorithms.RsaOAEP)
+                                  || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap);
 
                 RsaCryptoServiceProviderProxy = new RSACryptoServiceProviderProxy(rsaCryptoServiceProvider);
                 DecryptFunction = DecryptWithRsaCryptoServiceProviderProxy;
@@ -215,10 +215,10 @@ namespace Microsoft.IdentityModel.Tokens
             // This requires 4.6+ to be installed. If a dependent library is targeting 4.5, 4.5.1, 4.5.2 or 4.6
             // they will bind to our Net45 target, but the type is RSACng.
             // The 'lightup' code will bind to the correct operators.
-            else if (rsa.GetType().ToString().Equals(_rsaCngTypeName, StringComparison.Ordinal) && IsRsaCngSupported())
+            else if (rsa.GetType().ToString().Equals(_rsaCngTypeName) && IsRsaCngSupported())
             {
-                _useRSAOeapPadding = algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal)
-                                  || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal);
+                _useRSAOeapPadding = algorithm.Equals(SecurityAlgorithms.RsaOAEP)
+                                  || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap);
 
                 _lightUpHashAlgorithmName = GetLightUpHashAlgorithmName();
                 DecryptFunction = DecryptNet45;
@@ -231,17 +231,17 @@ namespace Microsoft.IdentityModel.Tokens
             else
             {
                 // In NET45 we only support RSACryptoServiceProvider or "System.Security.Cryptography.RSACng"
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10687, typeof(RSACryptoServiceProvider).ToString(), _rsaCngTypeName, rsa.GetType().ToString())));
+                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10687, LogHelper.MarkAsNonPII(typeof(RSACryptoServiceProvider).ToString()), LogHelper.MarkAsNonPII(_rsaCngTypeName), LogHelper.MarkAsNonPII(rsa.GetType().ToString()))));
             }
 #endif
 
-#if NET461 || NET472 || NETSTANDARD2_0
-            if (algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha256, StringComparison.Ordinal) ||
-                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha256Signature, StringComparison.Ordinal) ||
-                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha384, StringComparison.Ordinal) ||
-                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha384Signature, StringComparison.Ordinal) ||
-                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha512, StringComparison.Ordinal) ||
-                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha512Signature, StringComparison.Ordinal))
+#if NET461 || NET472 || NETSTANDARD2_0 || NET6_0
+            if (algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha256) ||
+                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha256Signature) ||
+                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha384) ||
+                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha384Signature) ||
+                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha512) ||
+                algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha512Signature))
             {
                 RSASignaturePadding = RSASignaturePadding.Pss;
             }
@@ -251,7 +251,7 @@ namespace Microsoft.IdentityModel.Tokens
                 RSASignaturePadding = RSASignaturePadding.Pkcs1;
             }
 
-            RSAEncryptionPadding = (algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.Ordinal) || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap, StringComparison.Ordinal))
+            RSAEncryptionPadding = (algorithm.Equals(SecurityAlgorithms.RsaOAEP) || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap))
                         ? RSAEncryptionPadding.OaepSHA1
                         : RSAEncryptionPadding.Pkcs1;
             RSA = rsa;
@@ -270,7 +270,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             else
             {
-#if NET472
+#if NET472 || NET6_0
                 var rsa = RSA.Create(rsaSecurityKey.Parameters);
 #else
                 var rsa = RSA.Create();
@@ -323,8 +323,8 @@ namespace Microsoft.IdentityModel.Tokens
             return ECDsa.VerifyHash(HashAlgorithm.ComputeHash(bytes), signature);
         }
 
-#region NET61+ related code
-#if NET461 || NET472 || NETSTANDARD2_0
+        #region NET61+ related code
+#if NET461 || NET472 || NETSTANDARD2_0 || NET6_0
         // HasAlgorithmName was introduced into Net46
         internal AsymmetricAdapter(SecurityKey key, string algorithm, HashAlgorithm hashAlgorithm, HashAlgorithmName hashAlgorithmName, bool requirePrivateKey)
             : this(key, algorithm, hashAlgorithm, requirePrivateKey)

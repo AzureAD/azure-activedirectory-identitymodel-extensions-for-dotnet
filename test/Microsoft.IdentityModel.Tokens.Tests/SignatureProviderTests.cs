@@ -413,11 +413,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 try
                 {
                     SecurityKey key = null;
-                    if (algorithm.Equals(ALG.EcdsaSha256, StringComparison.Ordinal))
+                    if (algorithm.Equals(ALG.EcdsaSha256))
                     {
                         key = KEY.Ecdsa256Key;
                     }
-                    else if (algorithm.Equals(ALG.EcdsaSha384, StringComparison.Ordinal))
+                    else if (algorithm.Equals(ALG.EcdsaSha384))
                     {
                         key = KEY.Ecdsa384Key;
                     }

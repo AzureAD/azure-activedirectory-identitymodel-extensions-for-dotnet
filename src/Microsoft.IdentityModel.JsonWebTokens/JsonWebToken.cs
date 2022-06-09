@@ -407,7 +407,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="tokenParts">Parts of the JWE including the header.</param>
         /// <remarks>
         /// Assumes Header has already been set.
-        /// According to the JWE documentation (https://tools.ietf.org/html/rfc7516#section-2), it is possible for the EncryptedKey, InitializationVector, and AuthenticationTag to be empty strings.
+        /// According to the JWE documentation (https://datatracker.ietf.org/doc/html/rfc7516#section-2), it is possible for the EncryptedKey, InitializationVector, and AuthenticationTag to be empty strings.
         /// </remarks>
         private void DecodeJwe(string[] tokenParts)
         {
@@ -538,7 +538,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14305, key, typeof(T), jTokenValue.Type), ex));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14305, key, LogHelper.MarkAsNonPII(typeof(T)), LogHelper.MarkAsNonPII(jTokenValue.Type)), ex));
             }
 
             return value;
@@ -639,7 +639,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14305, key, typeof(T), jTokenValue.Type), ex));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14305, key, LogHelper.MarkAsNonPII(typeof(T)), LogHelper.MarkAsNonPII(jTokenValue.Type)), ex));
             }
 
             return value;

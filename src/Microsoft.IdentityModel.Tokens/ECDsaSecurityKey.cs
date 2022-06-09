@@ -113,10 +113,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// Determines whether the <see cref="ECDsaSecurityKey"/> can compute a JWK thumbprint.
         /// </summary>
         /// <returns><c>true</c> if JWK thumbprint can be computed; otherwise, <c>false</c>.</returns>
-        /// <remarks>https://tools.ietf.org/html/rfc7638</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7638</remarks>
         public override bool CanComputeJwkThumbprint()
         {
-#if NET472 || NETSTANDARD2_0
+#if NET472 || NETSTANDARD2_0 || NET6_0
             if (ECDsaAdapter.SupportsECParameters())
                 return true;
 #endif
@@ -127,10 +127,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// Computes a sha256 hash over the <see cref="ECDsaSecurityKey"/>.
         /// </summary>
         /// <returns>A JWK thumbprint.</returns>
-        /// <remarks>https://tools.ietf.org/html/rfc7638</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7638</remarks>
         public override byte[] ComputeJwkThumbprint()
         {
-#if NET472 || NETSTANDARD2_0
+#if NET472 || NETSTANDARD2_0 || NET6_0
             if (ECDsaAdapter.SupportsECParameters())
             {
                 ECParameters parameters = ECDsa.ExportParameters(false);

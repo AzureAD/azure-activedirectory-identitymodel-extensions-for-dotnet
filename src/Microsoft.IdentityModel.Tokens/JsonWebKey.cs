@@ -35,12 +35,13 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Represents a JSON Web Key as defined in http://tools.ietf.org/html/rfc7517.
+    /// Represents a JSON Web Key as defined in https://datatracker.ietf.org/doc/html/rfc7517.
     /// </summary>
     [JsonObject]
     public class JsonWebKey : SecurityKey
     {
         private string _kid;
+        private const string _className = "Microsoft.IdentityModel.Tokens.JsonWebKey";
 
         /// <summary>
         /// Returns a new instance of <see cref="JsonWebKey"/>.
@@ -77,12 +78,12 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                LogHelper.LogVerbose(LogMessages.IDX10806, json, this);
+                LogHelper.LogVerbose(LogMessages.IDX10806, json, LogHelper.MarkAsNonPII(_className));
                 JsonConvert.PopulateObject(json, this);
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10805, json, GetType()), ex));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10805, json, LogHelper.MarkAsNonPII(_className)), ex));
             }
         }
 
@@ -91,6 +92,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         [JsonIgnore]
         internal SecurityKey ConvertedSecurityKey { get; set; }
+
+        /// <summary>
+        /// If this was failed converted to a SecurityKey, this field will be set.
+        /// </summary>
+        [JsonIgnore]
+        internal string ConvertKeyInfo { get; set; }
 
         /// <summary>
         /// When deserializing from JSON any properties that are not defined will be placed here.
@@ -314,10 +321,10 @@ namespace Microsoft.IdentityModel.Tokens
         internal RSAParameters CreateRsaParameters()
         {
             if (string.IsNullOrEmpty(N))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, this, "Modulus")));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII("Modulus"))));
 
             if (string.IsNullOrEmpty(E))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, this, "Exponent")));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII("Exponent"))));
 
             return new RSAParameters
             {
@@ -336,17 +343,17 @@ namespace Microsoft.IdentityModel.Tokens
         /// Determines whether the <see cref="JsonWebKey"/> can compute a JWK thumbprint.
         /// </summary>
         /// <returns><c>true</c> if JWK thumbprint can be computed; otherwise, <c>false</c>.</returns>
-        /// <remarks>https://tools.ietf.org/html/rfc7638</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7638</remarks>
         public override bool CanComputeJwkThumbprint()
         {
             if (string.IsNullOrEmpty(Kty))
                 return false;
 
-            if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.EllipticCurve, StringComparison.Ordinal))
+            if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.EllipticCurve))
                 return CanComputeECThumbprint();
-            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.RSA, StringComparison.Ordinal))
+            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.RSA))
                 return CanComputeRsaThumbprint();
-            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.Octet, StringComparison.Ordinal))
+            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.Octet))
                 return CanComputeOctThumbprint();
             else
                 return false;
@@ -356,20 +363,20 @@ namespace Microsoft.IdentityModel.Tokens
         /// Computes a sha256 hash over the <see cref="JsonWebKey"/>.
         /// </summary>
         /// <returns>A JWK thumbprint.</returns>
-        /// <remarks>https://tools.ietf.org/html/rfc7638</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7638</remarks>
         public override byte[] ComputeJwkThumbprint()
         {
             if (string.IsNullOrEmpty(Kty))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(Kty))));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, LogHelper.MarkAsNonPII(nameof(Kty)))));
 
-            if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.EllipticCurve, StringComparison.Ordinal))
+            if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.EllipticCurve))
                 return ComputeECThumbprint();
-            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.RSA, StringComparison.Ordinal))
+            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.RSA))
                 return ComputeRsaThumbprint();
-            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.Octet, StringComparison.Ordinal))
+            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.Octet))
                 return ComputeOctThumbprint();
             else
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10706, nameof(Kty), string.Join(", ", JsonWebAlgorithmsKeyTypes.EllipticCurve, JsonWebAlgorithmsKeyTypes.RSA, JsonWebAlgorithmsKeyTypes.Octet), nameof(Kty))));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10706, LogHelper.MarkAsNonPII(nameof(Kty)), LogHelper.MarkAsNonPII(string.Join(", ", JsonWebAlgorithmsKeyTypes.EllipticCurve, JsonWebAlgorithmsKeyTypes.RSA, JsonWebAlgorithmsKeyTypes.Octet)), LogHelper.MarkAsNonPII(nameof(Kty)))));
         }
 
         private bool CanComputeOctThumbprint()
@@ -380,7 +387,7 @@ namespace Microsoft.IdentityModel.Tokens
         private byte[] ComputeOctThumbprint()
         {
             if (string.IsNullOrEmpty(K))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(K))));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, LogHelper.MarkAsNonPII(nameof(K)))));
 
             var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.K}"":""{K}"",""{JsonWebKeyParameterNames.Kty}"":""{Kty}""}}";
             return Utility.GenerateSha256Hash(canonicalJwk);
@@ -394,10 +401,10 @@ namespace Microsoft.IdentityModel.Tokens
         private byte[] ComputeRsaThumbprint()
         {
             if (string.IsNullOrEmpty(E))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(E))));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, LogHelper.MarkAsNonPII(nameof(E)))));
 
             if (string.IsNullOrEmpty(N))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(N))));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, LogHelper.MarkAsNonPII(nameof(N)))));
 
             var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.E}"":""{E}"",""{JsonWebKeyParameterNames.Kty}"":""{Kty}"",""{JsonWebKeyParameterNames.N}"":""{N}""}}";
             return Utility.GenerateSha256Hash(canonicalJwk);
@@ -411,13 +418,13 @@ namespace Microsoft.IdentityModel.Tokens
         private byte[] ComputeECThumbprint()
         {
             if (string.IsNullOrEmpty(Crv))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(Crv))));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, LogHelper.MarkAsNonPII(nameof(Crv)))));
 
             if (string.IsNullOrEmpty(X))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(X))));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, LogHelper.MarkAsNonPII(nameof(X)))));
 
             if (string.IsNullOrEmpty(Y))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, nameof(Y))));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10705, LogHelper.MarkAsNonPII(nameof(Y)))));
 
             var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.Crv}"":""{Crv}"",""{JsonWebKeyParameterNames.Kty}"":""{Kty}"",""{JsonWebKeyParameterNames.X}"":""{X}"",""{JsonWebKeyParameterNames.Y}"":""{Y}""}}";
             return Utility.GenerateSha256Hash(canonicalJwk);
@@ -427,7 +434,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Creates a JsonWebKey representation of an asymmetric public key.
         /// </summary>
         /// <returns>JsonWebKey representation of an asymmetric public key.</returns>
-        /// <remarks>https://tools.ietf.org/html/rfc7800#section-3.2</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7800#section-3.2</remarks>
         internal string RepresentAsAsymmetricPublicJwk()
         {
             JObject jwk = new JObject();
@@ -435,12 +442,12 @@ namespace Microsoft.IdentityModel.Tokens
             if (!string.IsNullOrEmpty(Kid))
                 jwk.Add(JsonWebKeyParameterNames.Kid, Kid);
 
-            if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.EllipticCurve, StringComparison.Ordinal))
+            if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.EllipticCurve))
                 PopulateWithPublicEcParams(jwk);
-            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.RSA, StringComparison.Ordinal))
+            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.RSA))
                 PopulateWithPublicRsaParams(jwk);
             else
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10707, nameof(Kty), string.Join(", ", JsonWebAlgorithmsKeyTypes.EllipticCurve, JsonWebAlgorithmsKeyTypes.RSA), nameof(Kty))));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10707, LogHelper.MarkAsNonPII(nameof(Kty)), LogHelper.MarkAsNonPII(string.Join(", ", JsonWebAlgorithmsKeyTypes.EllipticCurve, JsonWebAlgorithmsKeyTypes.RSA)), LogHelper.MarkAsNonPII(nameof(Kty)))));
 
             return jwk.ToString(Formatting.None);
         }
@@ -448,13 +455,13 @@ namespace Microsoft.IdentityModel.Tokens
         private void PopulateWithPublicEcParams(JObject jwk)
         {
             if (string.IsNullOrEmpty(Crv))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10708, nameof(Crv))));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10708, LogHelper.MarkAsNonPII(nameof(Crv)))));
 
             if (string.IsNullOrEmpty(X))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10708, nameof(X))));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10708, LogHelper.MarkAsNonPII(nameof(X)))));
 
             if (string.IsNullOrEmpty(Y))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10708, nameof(Y))));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10708, LogHelper.MarkAsNonPII(nameof(Y)))));
 
             jwk.Add(JsonWebKeyParameterNames.Crv, Crv);
             jwk.Add(JsonWebKeyParameterNames.Kty, Kty);
@@ -465,10 +472,10 @@ namespace Microsoft.IdentityModel.Tokens
         private void PopulateWithPublicRsaParams(JObject jwk)
         {
             if (string.IsNullOrEmpty(E))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10709, nameof(E))));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10709, LogHelper.MarkAsNonPII(nameof(E)))));
 
             if (string.IsNullOrEmpty(N))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10709, nameof(N))));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10709, LogHelper.MarkAsNonPII(nameof(N)))));
 
             jwk.Add(JsonWebKeyParameterNames.E, E);
             jwk.Add(JsonWebKeyParameterNames.Kty, Kty);

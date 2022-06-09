@@ -29,6 +29,7 @@ using System;
 using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.Linq;
+using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.IdentityModel.Logging
 {
@@ -38,13 +39,33 @@ namespace Microsoft.IdentityModel.Logging
     public class LogHelper
     {
         /// <summary>
+        /// Gets or sets a logger to which logs will be written to.
+        /// </summary>
+        public static IIdentityLogger Logger { get; set; } = NullIdentityModelLogger.Instance;
+
+        /// <summary>
+        /// Indicates whether the log message header (contains library version, date/time, and PII debugging information) has been written.
+        /// </summary>
+        private static bool _isHeaderWritten = false;
+
+        /// <summary>
+        /// The log message that is shown when PII is off.
+        /// </summary>
+        private static string _piiOffLogMessage = "PII logging is OFF. See https://aka.ms/IdentityModel/PII for details. ";
+
+        /// <summary>
+        /// The log message that is shown when PII is on.
+        /// </summary>
+        private static string _piiOnLogMessage = "PII logging is ON, do not use in production. See https://aka.ms/IdentityModel/PII for details. ";
+
+        /// <summary>
         /// Logs an exception using the event source logger and returns new <see cref="ArgumentNullException"/> exception.
         /// </summary>
         /// <param name="argument">argument that is null or empty.</param>
         /// <remarks>EventLevel is set to Error.</remarks>
         public static ArgumentNullException LogArgumentNullException(string argument)
         {
-            return LogArgumentException<ArgumentNullException>(EventLevel.Error, argument, "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object.", argument);
+            return LogArgumentException<ArgumentNullException>(EventLevel.Error, argument, "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object. ", argument);
         }
 
         /// <summary>
@@ -254,6 +275,10 @@ namespace Microsoft.IdentityModel.Logging
             if (IdentityModelEventSource.Logger.IsEnabled() && IdentityModelEventSource.Logger.LogLevel >= eventLevel)
                 IdentityModelEventSource.Logger.Write(eventLevel, exception.InnerException, exception.Message);
 
+            EventLogLevel eventLogLevel = Enum.IsDefined(typeof(EventLogLevel), (int)eventLevel) ? (EventLogLevel)eventLevel : EventLogLevel.Error;
+            if (Logger.IsEnabled(eventLogLevel))
+                Logger.Log(WriteEntry((EventLogLevel)eventLevel, exception.InnerException, exception.Message, null));
+
             return exception;
         }
 
@@ -264,8 +289,11 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         public static void LogInformation(string message, params object[] args)
         {
-            if (IdentityModelEventSource.Logger.IsEnabled())
+            if (IdentityModelEventSource.Logger.IsEnabled() && IdentityModelEventSource.Logger.LogLevel >= EventLevel.Informational)
                 IdentityModelEventSource.Logger.WriteInformation(message, args);
+
+            if (Enum.IsDefined(typeof(EventLogLevel), (int)EventLevel.Informational) && Logger.IsEnabled((EventLogLevel)EventLevel.Informational))
+                Logger.Log(WriteEntry((EventLogLevel)EventLevel.Informational, null, message, args));
         }
 
         /// <summary>
@@ -277,6 +305,9 @@ namespace Microsoft.IdentityModel.Logging
         {
             if (IdentityModelEventSource.Logger.IsEnabled())
                 IdentityModelEventSource.Logger.WriteVerbose(message, args);
+
+            if (Enum.IsDefined(typeof(EventLogLevel), (int)EventLevel.Verbose) && Logger.IsEnabled((EventLogLevel)EventLevel.Verbose))
+                Logger.Log(WriteEntry((EventLogLevel)EventLevel.Verbose, null, message, args));
         }
 
         /// <summary>
@@ -288,6 +319,9 @@ namespace Microsoft.IdentityModel.Logging
         {
             if (IdentityModelEventSource.Logger.IsEnabled())
                 IdentityModelEventSource.Logger.WriteWarning(message, args);
+
+            if (Enum.IsDefined(typeof(EventLogLevel), (int)EventLevel.Warning) && Logger.IsEnabled((EventLogLevel)EventLevel.Warning))
+                Logger.Log(WriteEntry((EventLogLevel)EventLevel.Warning, null, message, args));
         }
 
         /// <summary>
@@ -309,6 +343,10 @@ namespace Microsoft.IdentityModel.Logging
 
             if (IdentityModelEventSource.Logger.IsEnabled() && IdentityModelEventSource.Logger.LogLevel >= eventLevel)
                 IdentityModelEventSource.Logger.Write(eventLevel, innerException, message);
+
+            EventLogLevel eventLogLevel = Enum.IsDefined(typeof(EventLogLevel), (int)eventLevel) ? (EventLogLevel)eventLevel : EventLogLevel.Error;
+            if (Logger.IsEnabled(eventLogLevel))
+                Logger.Log(WriteEntry((EventLogLevel)eventLevel, innerException, message, null));
 
             if (innerException != null) 
                 if (string.IsNullOrEmpty(argumentName))
@@ -344,18 +382,80 @@ namespace Microsoft.IdentityModel.Logging
 
         private static string RemovePII(object arg)
         {
-            if (arg == null)
-                return string.Empty;
-
-            if (arg is Exception ex && ex.GetType().FullName.StartsWith("Microsoft.IdentityModel.", StringComparison.Ordinal))
+            if (arg is Exception ex && IsCustomException(ex))
                 return ex.ToString();
 
-            return arg.GetType().ToString();
+            if (arg is NonPII)
+                return arg.ToString();
+
+            return string.Format(CultureInfo.InvariantCulture, IdentityModelEventSource.HiddenPIIString, arg?.GetType().ToString() ?? "Null");
         }
 
         internal static bool IsCustomException(Exception ex)
         {
             return ex.GetType().FullName.StartsWith("Microsoft.IdentityModel.", StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Marks a log message argument (<paramref name="arg"/>) as NonPII.
+        /// </summary>
+        /// <param name="arg">A log message argument to be marked as NonPII.</param>
+        /// <returns>An argument marked as NonPII.</returns>
+        /// <remarks>
+        /// Marking an argument as NonPII in <see cref="LogHelper.FormatInvariant"/> calls will result in logging
+        /// that argument in cleartext, regardless of the <see cref="IdentityModelEventSource.ShowPII"/> flag value.
+        /// </remarks>
+        public static object MarkAsNonPII(object arg)
+        {
+            return new NonPII(arg);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="LogEntry"/> by using the provided event level, exception argument, string argument and arguments list.
+        /// </summary>
+        /// <param name="eventLogLevel"><see cref="EventLogLevel"/></param>
+        /// <param name="innerException"><see cref="Exception"/></param>
+        /// <param name="message">The log message.</param>
+        /// <param name="args">An object array that contains zero or more objects to format.</param>
+        private static LogEntry WriteEntry(EventLogLevel eventLogLevel, Exception innerException, string message, params object[] args)
+        {
+            if (string.IsNullOrEmpty(message))
+                return null;
+
+            if (innerException != null)
+            {
+                // if PII is turned off and 'innerException' is a System exception only display the exception type
+                if (!IdentityModelEventSource.ShowPII && !LogHelper.IsCustomException(innerException))
+                    message = string.Format(CultureInfo.InvariantCulture, "Message: {0}, InnerException: {1}. ", message, innerException.GetType());
+                else // otherwise it's safe to display the entire exception message
+                    message = string.Format(CultureInfo.InvariantCulture, "Message: {0}, InnerException: {1}. ", message, innerException.Message);
+            }
+
+            message = args == null ? message : FormatInvariant(message, args);
+
+            // Logs basic information (library version, DateTime, whether PII is ON/OFF) once before any log messages are written.
+            if (!_isHeaderWritten)
+            {
+                string headerMessage = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "Microsoft.IdentityModel Version: {0}. Date {1}. {2}",
+                    typeof(IdentityModelEventSource).Assembly.GetName().Version.ToString(),
+                    DateTime.UtcNow,
+                    IdentityModelEventSource.ShowPII ? _piiOnLogMessage : _piiOffLogMessage);
+
+                LogEntry headerEntry = new LogEntry();
+                headerEntry.EventLogLevel = EventLogLevel.LogAlways;
+                headerEntry.Message = headerMessage;
+                Logger.Log(headerEntry);
+
+                _isHeaderWritten = true;
+            }
+
+            LogEntry entry = new LogEntry();
+            entry.EventLogLevel = eventLogLevel;
+            entry.Message = message;
+
+            return entry;
         }
     }
 }

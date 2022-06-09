@@ -29,12 +29,42 @@ using System;
 using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.IO;
+using Microsoft.IdentityModel.Abstractions;
+using Microsoft.IdentityModel.TestUtils;
 using Xunit;
+
+#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.Logging.Tests
 {
     public class LoggerTests
     {
+        [Fact]
+        public void EventLevelToEventLogLevelMapping()
+        {
+            var logger = new TestLogger();
+            LogHelper.Logger = logger;
+
+            var arg = "Test argument.";
+            var guid = Guid.NewGuid().ToString();
+            var errorMessage = "Test exception message";
+            var infoMessage = "Test information Message. {0}";
+            var verboseMessage = "Test verbose Message. {0}";
+            var warnMessage = "Warn Message. {0}";
+
+            LogHelper.LogExceptionMessage(EventLevel.Error, new ArgumentException(errorMessage));
+            LogHelper.LogArgumentNullException(guid);
+            LogHelper.LogInformation(infoMessage, LogHelper.MarkAsNonPII(arg));
+            LogHelper.LogVerbose(verboseMessage, LogHelper.MarkAsNonPII(arg));
+            LogHelper.LogWarning(warnMessage, LogHelper.MarkAsNonPII(arg));
+
+            Assert.True(logger.ContainsLogOfSpecificLevel(errorMessage, EventLogLevel.Error));
+            Assert.True(logger.ContainsLogOfSpecificLevel("IDX10000:", EventLogLevel.Error));
+            Assert.True(logger.ContainsLogOfSpecificLevel(string.Format(infoMessage, arg), EventLogLevel.Informational));
+            Assert.True(logger.ContainsLogOfSpecificLevel(string.Format(verboseMessage, arg), EventLogLevel.Verbose));
+            Assert.True(logger.ContainsLogOfSpecificLevel(string.Format(warnMessage, arg), EventLogLevel.Warning));
+        }
+
         [Fact]
         public void LogMessageAndThrowException()
         {
@@ -236,18 +266,63 @@ namespace Microsoft.IdentityModel.Logging.Tests
 
              var exception = LogHelper.LogExceptionMessage(new ArgumentException("This is the first parameter '{0}'. This is the second parameter '{1}'."));
         }
-    }
 
-    class SampleListener : EventListener
-    {
-        public string TraceBuffer { get; set; }
-
-        protected override void OnEventWritten(EventWrittenEventArgs eventData)
+        [Theory, MemberData(nameof(LoggerTestTheoryData))]
+        public void LoggerInstanceTests(LoggerTheoryData theoryData)
         {
-            if (eventData != null && eventData.Payload.Count > 0)
+            LogHelper.Logger = theoryData.Logger;
+
+            if (theoryData.Logger != null)
             {
-                TraceBuffer += eventData.Payload[0] + "\n";
+                Assert.True(theoryData.ShouldMessageBeLogged == LogHelper.Logger.IsEnabled(theoryData.EventLogLevel));
+            }
+        }
+
+        public static TheoryData<LoggerTheoryData> LoggerTestTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<LoggerTheoryData>();
+
+                theoryData.Add(new LoggerTheoryData
+                {
+                    TestId = "NullLoggerInstanceNoMessage",
+                    Logger = NullIdentityModelLogger.Instance,
+                    ShouldMessageBeLogged = false
+                });
+
+                theoryData.Add(new LoggerTheoryData
+                {
+                    TestId = "LoggerInstanceNoMessage",
+                    Logger = new TestLogger() { IsLoggerEnabled = false },
+                    ShouldMessageBeLogged = false
+                });
+
+                theoryData.Add(new LoggerTheoryData
+                {
+                    TestId = "LoggerInstanceWithMessage",
+                    Logger = new TestLogger() { IsLoggerEnabled = true },
+                    ShouldMessageBeLogged = true
+                });
+
+                return theoryData;
             }
         }
     }
+
+    public class LoggerTheoryData : TheoryDataBase
+    {
+        public LoggerTheoryData() : base(false)
+        { }
+
+        public IIdentityLogger Logger { get; set; } = null;
+
+        public bool ShouldMessageBeLogged { get; set; }
+
+        public string Message { get; set; } = "Test Message";
+
+        public EventLogLevel EventLogLevel { get; set; } = EventLogLevel.Informational;
+    }
 }
+
+#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

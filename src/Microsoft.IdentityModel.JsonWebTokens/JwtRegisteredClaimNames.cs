@@ -29,7 +29,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 {
     /// <summary>
     /// List of registered claims from different sources
-    /// http://tools.ietf.org/html/rfc7519#section-4
+    /// https://datatracker.ietf.org/doc/html/rfc7519#section-4
     /// http://openid.net/specs/openid-connect-core-1_0.html#IDToken
     /// </summary>
     public struct JwtRegisteredClaimNames
@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public const string Amr = "amr";
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
+        /// https://datatracker.ietf.org/doc/html/rfc7519#section-4
         /// </summary>
         public const string Aud = "aud";
 
@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public const string Email = "email";
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
+        /// https://datatracker.ietf.org/doc/html/rfc7519#section-4
         /// </summary>
         public const string Exp = "exp";
 
@@ -104,17 +104,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public const string GivenName = "given_name";
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
+        /// https://datatracker.ietf.org/doc/html/rfc7519#section-4
         /// </summary>
         public const string Iat = "iat";
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
+        /// https://datatracker.ietf.org/doc/html/rfc7519#section-4
         /// </summary>
         public const string Iss = "iss";
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
+        /// https://datatracker.ietf.org/doc/html/rfc7519#section-4
         /// </summary>
         public const string Jti = "jti";
 
@@ -133,7 +133,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public const string Nonce = "nonce";
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
+        /// https://datatracker.ietf.org/doc/html/rfc7519#section-4
         /// </summary>
         public const string Nbf = "nbf";
 
@@ -157,12 +157,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public const string Sid = "sid";
 
         /// <summary>
-        /// http://tools.ietf.org/html/rfc7519#section-4
+        /// https://datatracker.ietf.org/doc/html/rfc7519#section-4
         /// </summary>
         public const string Sub = "sub";
 
         /// <summary>
-        /// https://tools.ietf.org/html/rfc7519#section-5
+        /// https://datatracker.ietf.org/doc/html/rfc7519#section-5
         /// </summary>
         public const string Typ = "typ";
 

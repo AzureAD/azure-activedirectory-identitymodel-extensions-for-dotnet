@@ -68,7 +68,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     signedHttpRequestDescriptor.SigningCredentials.Key is AsymmetricSecurityKey ? typeof(AsymmetricSignatureProvider).ToString() : typeof(SymmetricSignatureProvider).ToString(),
                     true,
                     out _))
-                    context.Diffs.Add(LogHelper.FormatInvariant("SignedHttpRequest cached SignatureProvider (Signing), Key: '{0}', Algorithm: '{1}'", signedHttpRequestDescriptor.SigningCredentials.Key, signedHttpRequestDescriptor.SigningCredentials.Algorithm));
+                    context.Diffs.Add(LogHelper.FormatInvariant("SignedHttpRequest cached SignatureProvider (Signing), Key: '{0}', Algorithm: '{1}'", signedHttpRequestDescriptor.SigningCredentials.Key, LogHelper.MarkAsNonPII(signedHttpRequestDescriptor.SigningCredentials.Algorithm)));
 
 
                 var signedHttpRequestValidationContext = new SignedHttpRequestValidationContext(signedHttpRequest, theoryData.HttpRequestData, theoryData.TokenValidationParameters, theoryData.SignedHttpRequestValidationParameters);
@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     signedHttpRequestDescriptor.SigningCredentials.Key is AsymmetricSecurityKey ? typeof(AsymmetricSignatureProvider).ToString() : typeof(SymmetricSignatureProvider).ToString(),
                     false,
                     out _))
-                    context.Diffs.Add(LogHelper.FormatInvariant("SignedHttpRequest cached SignatureProvider (Validate), Key: '{0}', Algorithm: '{1}'", signedHttpRequestDescriptor.SigningCredentials.Key, signedHttpRequestDescriptor.SigningCredentials.Algorithm));
+                    context.Diffs.Add(LogHelper.FormatInvariant("SignedHttpRequest cached SignatureProvider (Validate), Key: '{0}', Algorithm: '{1}'", signedHttpRequestDescriptor.SigningCredentials.Key, LogHelper.MarkAsNonPII(signedHttpRequestDescriptor.SigningCredentials.Algorithm)));
 
                 IdentityComparer.AreBoolsEqual(result.IsValid, theoryData.IsValid, context);
 

@@ -68,17 +68,27 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns>A resolved <see cref="SecurityKey"/>.</returns>
-    /// <remarks>https://tools.ietf.org/html/rfc7800#section-3.4</remarks>
+    /// <remarks>https://datatracker.ietf.org/doc/html/rfc7800#section-3.4</remarks>
     public delegate Task<SecurityKey> PopKeyResolverFromKeyIdAsync(string kid, SecurityToken validatedAccessToken, SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
 
     /// <summary>
     /// A delegate that will be called to check if SignedHttpRequest is replayed, if set.
     /// </summary>
-    /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
+    /// <param name="signedHttpRequest">A SignedHttpRequest which contains the 'nonce' claim to validate.</param>
     /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns>Expected to throw an appropriate exception if SignedHttpRequest replay is detected.</returns>
     public delegate Task ReplayValidatorAsync(SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// A delegate that will take control over SignedHttpRequest nonce validation, if set.
+    /// </summary>
+    /// <param name="key">the key use to validate server nonce.</param>
+    /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
+    /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+    /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+    /// <returns>Expected to throw an appropriate exception if SignedHttpRequest replay is detected.</returns>
+    public delegate bool NonceValidatorAsync(SecurityKey key, SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
 
     /// <summary>
     /// A delegate that will take control over SignedHttpRequest signature validation, if set.
@@ -100,13 +110,13 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <summary>
         /// Gets or sets a value indicating whether the unsigned query parameters are accepted or not.
         /// </summary>
-        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-5.1</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-5.1</remarks>
         public bool AcceptUnsignedQueryParameters { get; set; } = true;
 
         /// <summary>
         /// Gets or sets a value indicating whether the unsigned headers are accepted or not. 
         /// </summary>
-        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-5.1</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-5.1</remarks>
         public bool AcceptUnsignedHeaders { get; set; } = true;
 
         /// <summary>
@@ -139,8 +149,13 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <summary>
         /// Gets or sets the <see cref="HttpClientProvider"/> delegate.
         /// </summary>
-        /// <remarks>https://tools.ietf.org/html/rfc7800#section-3.5</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7800#section-3.5</remarks>
         public HttpClientProvider HttpClientProvider { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="NonceValidatorAsync"/> delegate.
+        /// </summary>
+        public NonceValidatorAsync NonceValidatorAsync { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="PopKeyResolverAsync"/> delegate.
@@ -155,7 +170,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <summary>
         /// Gets or sets a value indicating whether TLS is required when obtaining a JWK set using the 'jku' claim.
         /// </summary>
-        /// <remarks>https://tools.ietf.org/html/rfc7800#section-3.5</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7800#section-3.5</remarks>
         public bool RequireHttpsForJkuResourceRetrieval { get; set; } = true;
 
         /// <summary>
@@ -190,43 +205,43 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="SignedHttpRequestClaimTypes.Ts"/> claim should be validated or not.
         /// </summary>
-        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
+        /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
         public bool ValidateTs { get; set; } = true;
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="SignedHttpRequestClaimTypes.M"/> claim should be validated or not.
         /// </summary>
-        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
+        /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
         public bool ValidateM { get; set; } = true;
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="SignedHttpRequestClaimTypes.U"/> claim should be validated or not.
         /// </summary>
-        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
+        /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
         public bool ValidateU { get; set; } = true;
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="SignedHttpRequestClaimTypes.P"/> claim should be validated or not.
         /// </summary>
-        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
+        /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
         public bool ValidateP { get; set; } = true;
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="SignedHttpRequestClaimTypes.Q"/> claim should be validated or not.
         /// </summary>
-        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
+        /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
         public bool ValidateQ { get; set; } = false;
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="SignedHttpRequestClaimTypes.H"/> claim should be validated or not.
         /// </summary>
-        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
+        /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
         public bool ValidateH { get; set; } = false;
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="SignedHttpRequestClaimTypes.B"/> claim should be validated or not.
         /// </summary>
-        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
+        /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
         public bool ValidateB { get; set; } = false;
 
         /// <summary>

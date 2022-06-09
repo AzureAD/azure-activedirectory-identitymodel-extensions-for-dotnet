@@ -63,15 +63,8 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(cryptoProviderCacheOptions));
 
             _cryptoProviderCacheOptions = cryptoProviderCacheOptions;
-            _signingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, removeExpiredValues: false, comparer: StringComparer.Ordinal) { OnItemRemoved = OnSignatureProviderRemovedFromCache };
-            _verifyingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, removeExpiredValues: false, comparer: StringComparer.Ordinal) { OnItemRemoved = OnSignatureProviderRemovedFromCache };
-        }
-
-        private void OnSignatureProviderRemovedFromCache(SignatureProvider signatureProvider)
-        {
-            signatureProvider.CryptoProviderCache = null;
-            if (signatureProvider.RefCount == 0)
-                signatureProvider.Dispose();
+            _signingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, removeExpiredValues: false, comparer: StringComparer.Ordinal) { OnItemRemoved = (SignatureProvider signatureProvider) => signatureProvider.CryptoProviderCache = null };
+            _verifyingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, removeExpiredValues: false, comparer: StringComparer.Ordinal) { OnItemRemoved = (SignatureProvider signatureProvider) => signatureProvider.CryptoProviderCache = null };
         }
 
         /// <summary>
@@ -89,8 +82,8 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentException<ArgumentException>(nameof(tryTakeTimeout), $"{nameof(tryTakeTimeout)} must be greater than zero");
 
             _cryptoProviderCacheOptions = cryptoProviderCacheOptions;
-            _signingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, options, StringComparer.Ordinal, tryTakeTimeout, false) { OnItemRemoved = OnSignatureProviderRemovedFromCache };
-            _verifyingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, options, StringComparer.Ordinal, tryTakeTimeout, false) { OnItemRemoved = OnSignatureProviderRemovedFromCache };
+            _signingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, options, StringComparer.Ordinal, false) { OnItemRemoved = (SignatureProvider signatureProvider) => signatureProvider.CryptoProviderCache = null };
+            _verifyingSignatureProviders = new EventBasedLRUCache<string, SignatureProvider>(cryptoProviderCacheOptions.SizeLimit, options, StringComparer.Ordinal, false) { OnItemRemoved = (SignatureProvider signatureProvider) => signatureProvider.CryptoProviderCache = null };
         }
 
         /// <summary>
@@ -241,6 +234,8 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
+        /// Note: the EventBasedLRUCache is no longer being disposed of, but since this is a public class and can be used as base class of
+        /// custom cache implementations, we need to keep it as some implementations may override Dispose().
         /// </summary>
         public void Dispose()
         {
@@ -258,12 +253,11 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (!_disposed)
             {
+                // Stop the event queue tasks if they are running.
+                _signingSignatureProviders.StopEventQueueTask();
+                _verifyingSignatureProviders.StopEventQueueTask();
+
                 _disposed = true;
-                if (disposing)
-                {
-                    _signingSignatureProviders.Dispose();
-                    _verifyingSignatureProviders.Dispose();
-                }
             }
         }
 
@@ -321,10 +315,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         internal long TaskCount => _signingSignatureProviders.TaskCount + _verifyingSignatureProviders.TaskCount;
 
-        /// <summary>
-        /// FOR TESTING PURPOSES ONLY.
-        /// </summary>
-        internal long TaskExecutionTimeInSeconds => _signingSignatureProviders.TaskExecutionTimeInSeconds;
         #endregion
     }
 }

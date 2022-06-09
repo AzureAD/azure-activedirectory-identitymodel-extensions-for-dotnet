@@ -38,6 +38,8 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     internal static class SupportedAlgorithms
     {
+        private const int RsaMinKeySize = 2048;
+
         internal static readonly ICollection<string> EcdsaSigningAlgorithms = new Collection<string>
         {
             SecurityAlgorithms.EcdsaSha256,
@@ -100,8 +102,13 @@ namespace Microsoft.IdentityModel.Tokens
         {
             SecurityAlgorithms.Aes128KW,
             SecurityAlgorithms.Aes128KeyWrap,
+            SecurityAlgorithms.Aes192KW,
+            SecurityAlgorithms.Aes192KeyWrap,
             SecurityAlgorithms.Aes256KW,
-            SecurityAlgorithms.Aes256KeyWrap
+            SecurityAlgorithms.Aes256KeyWrap,
+            SecurityAlgorithms.EcdhEsA128kw,
+            SecurityAlgorithms.EcdhEsA192kw,
+            SecurityAlgorithms.EcdhEsA256kw
         };
 
         internal static readonly ICollection<string> SymmetricSigningAlgorithms = new Collection<string>
@@ -114,7 +121,14 @@ namespace Microsoft.IdentityModel.Tokens
             SecurityAlgorithms.HmacSha512Signature
         };
 
-#if NET461 || NET472 || NETSTANDARD2_0
+        internal static readonly ICollection<string> EcdsaWrapAlgorithms = new Collection<string>
+        {
+            SecurityAlgorithms.EcdhEsA128kw,
+            SecurityAlgorithms.EcdhEsA192kw,
+            SecurityAlgorithms.EcdhEsA256kw
+        };
+
+#if NET461 || NET472 || NETSTANDARD2_0 || NET6_0
         /// <summary>
         /// Creating a Signature requires the use of a <see cref="HashAlgorithm"/>.
         /// This method returns the <see cref="HashAlgorithmName"/>
@@ -156,7 +170,7 @@ namespace Microsoft.IdentityModel.Tokens
                     return HashAlgorithmName.SHA512;
             }
 
-            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(algorithm), LogHelper.FormatInvariant(LogMessages.IDX10652, algorithm)));
+            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(algorithm), LogHelper.FormatInvariant(LogMessages.IDX10652, LogHelper.MarkAsNonPII(algorithm))));
         }
 #endif
 
@@ -211,7 +225,7 @@ namespace Microsoft.IdentityModel.Tokens
                     return SecurityAlgorithms.Sha512Digest;
             }
 
-            throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10652, algorithm), nameof(algorithm)));
+            throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10652, LogHelper.MarkAsNonPII(algorithm)), nameof(algorithm)));
         }
 
         /// <summary>
@@ -236,11 +250,11 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (key is JsonWebKey jsonWebKey)
             {
-                if (JsonWebAlgorithmsKeyTypes.RSA.Equals(jsonWebKey.Kty, StringComparison.Ordinal))
+                if (JsonWebAlgorithmsKeyTypes.RSA.Equals(jsonWebKey.Kty))
                     return IsSupportedRsaAlgorithm(algorithm, key);
-                else if (JsonWebAlgorithmsKeyTypes.EllipticCurve.Equals(jsonWebKey.Kty, StringComparison.Ordinal))
+                else if (JsonWebAlgorithmsKeyTypes.EllipticCurve.Equals(jsonWebKey.Kty))
                     return IsSupportedEcdsaAlgorithm(algorithm);
-                else if (JsonWebAlgorithmsKeyTypes.Octet.Equals(jsonWebKey.Kty, StringComparison.Ordinal))
+                else if (JsonWebAlgorithmsKeyTypes.Octet.Equals(jsonWebKey.Kty))
                     return IsSupportedSymmetricAlgorithm(algorithm);
 
                 return false;
@@ -280,9 +294,9 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 return false;
 
-            return algorithm.Equals(SecurityAlgorithms.Aes128Gcm, StringComparison.Ordinal)
-               || algorithm.Equals(SecurityAlgorithms.Aes192Gcm, StringComparison.Ordinal)
-               || algorithm.Equals(SecurityAlgorithms.Aes256Gcm, StringComparison.Ordinal);
+            return algorithm.Equals(SecurityAlgorithms.Aes128Gcm)
+               || algorithm.Equals(SecurityAlgorithms.Aes192Gcm)
+               || algorithm.Equals(SecurityAlgorithms.Aes256Gcm);
         }
 
         internal static bool IsAesCbc(string algorithm)
@@ -290,9 +304,9 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 return false;
 
-            return algorithm.Equals(SecurityAlgorithms.Aes128CbcHmacSha256, StringComparison.Ordinal)
-               || algorithm.Equals(SecurityAlgorithms.Aes192CbcHmacSha384, StringComparison.Ordinal)
-               || algorithm.Equals(SecurityAlgorithms.Aes256CbcHmacSha512, StringComparison.Ordinal);
+            return algorithm.Equals(SecurityAlgorithms.Aes128CbcHmacSha256)
+               || algorithm.Equals(SecurityAlgorithms.Aes192CbcHmacSha384)
+               || algorithm.Equals(SecurityAlgorithms.Aes256CbcHmacSha512);
         }
 
         private static bool IsSupportedEcdsaAlgorithm(string algorithm)
@@ -317,7 +331,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return false;
 
             if (key is RsaSecurityKey || key is X509SecurityKey || (key is JsonWebKey rsaJsonWebKey && rsaJsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.RSA))
-                return key.KeySize >= 2048;
+                return key.KeySize >= RsaMinKeySize;
 
             return false;
         }
@@ -349,7 +363,7 @@ namespace Microsoft.IdentityModel.Tokens
             // RSA-PSS is not available on .NET 4.5
             LogHelper.LogInformation(LogMessages.IDX10692);
             return false;
-#elif NET461 || NET472 || NETSTANDARD2_0
+#elif NET461 || NET472 || NETSTANDARD2_0 || NET6_0
             // RSACryptoServiceProvider doesn't support RSA-PSS
             if (key is RsaSecurityKey rsa && rsa.Rsa is RSACryptoServiceProvider)
             {

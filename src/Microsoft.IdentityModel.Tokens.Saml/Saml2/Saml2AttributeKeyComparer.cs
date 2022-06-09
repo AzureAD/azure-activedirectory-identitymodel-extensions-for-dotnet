@@ -34,8 +34,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// <summary>
     /// Comparison class supporting multi-part keys for a dictionary
     /// </summary>
-    internal class Saml2AttributeKeyComparer : IEqualityComparer<Saml2AttributeKeyComparer.AttributeKey>
+    internal sealed class Saml2AttributeKeyComparer : IEqualityComparer<Saml2AttributeKeyComparer.AttributeKey>
     {
+        public static readonly Saml2AttributeKeyComparer Instance = new Saml2AttributeKeyComparer();
+
+        private Saml2AttributeKeyComparer()
+        {
+        }
+
         public class AttributeKey
         {
             readonly int _hashCode;
@@ -86,11 +92,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             public bool Equals(AttributeKey other)
             {
                 return other != null &&
-                    FriendlyName.Equals(other.FriendlyName, StringComparison.Ordinal) &&
-                    Name.Equals(other.Name, StringComparison.Ordinal) &&
-                    NameFormat.Equals(other.NameFormat, StringComparison.Ordinal) &&
-                    ValueType.Equals(other.ValueType, StringComparison.Ordinal) &&
-                    OriginalIssuer.Equals(other.OriginalIssuer, StringComparison.Ordinal);
+                    FriendlyName.Equals(other.FriendlyName) &&
+                    Name.Equals(other.Name) &&
+                    NameFormat.Equals(other.NameFormat) &&
+                    ValueType.Equals(other.ValueType) &&
+                    OriginalIssuer.Equals(other.OriginalIssuer);
             }
         }
 
@@ -99,10 +105,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <inheritdoc/>
         public bool Equals(AttributeKey x, AttributeKey y)
         {
-            if (x == null && y == null)
-                return true;
-            else if (x == null || y == null)
-                return false;
+            if (x == null)
+                return y == null;
 
             return x.Equals(y);
         }

@@ -40,39 +40,16 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     /// <typeparam name="T">The type of <see cref="IDocumentRetriever"/>.</typeparam>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
-    public class ConfigurationManager<T> : IConfigurationManager<T> where T : class
+    public class ConfigurationManager<T> : BaseConfigurationManager, IConfigurationManager<T> where T : class
     {
-        /// <summary>
-        /// 12 hours is the default time interval that afterwards, <see cref="GetConfigurationAsync()"/> will obtain new configuration.
-        /// </summary>
-        public static readonly TimeSpan DefaultAutomaticRefreshInterval = new TimeSpan(0, 12, 0, 0);
-
-        /// <summary>
-        /// 5 minutes is the default time interval that must pass for <see cref="RequestRefresh"/> to obtain a new configuration.
-        /// </summary>
-        public static readonly TimeSpan DefaultRefreshInterval = new TimeSpan(0, 0, 5, 0);
-
-        /// <summary>
-        /// 5 minutes is the minimum value for automatic refresh. <see cref="AutomaticRefreshInterval"/> can not be set less than this value.
-        /// </summary>
-        public static readonly TimeSpan MinimumAutomaticRefreshInterval = new TimeSpan(0, 0, 5, 0);
-
-        /// <summary>
-        /// 1 second is the minimum time interval that must pass for <see cref="RequestRefresh"/> to obtain new configuration.
-        /// </summary>
-        public static readonly TimeSpan MinimumRefreshInterval = new TimeSpan(0, 0, 0, 1);
-
-        private static TimeSpan _jitter = new TimeSpan(0,1,0,0);
-        private TimeSpan _automaticRefreshInterval = DefaultAutomaticRefreshInterval.Add(TimeSpan.FromMinutes(new Random().Next((int)_jitter.TotalMinutes)));
-        private TimeSpan _refreshInterval = DefaultRefreshInterval;
         private DateTimeOffset _syncAfter = DateTimeOffset.MinValue;
         private DateTimeOffset _lastRefresh = DateTimeOffset.MinValue;
         private bool _isFirstRefreshRequest = true;
 
         private readonly SemaphoreSlim _refreshLock;
-        private readonly string _metadataAddress;
         private readonly IDocumentRetriever _docRetriever;
         private readonly IConfigurationRetriever<T> _configRetriever;
+        private readonly IConfigurationValidator<T> _configValidator;
         private T _currentConfiguration;
 
         /// <summary>
@@ -80,7 +57,6 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         static ConfigurationManager()
         {
-            LogHelper.LogVerbose("Assembly version info: " + typeof(ConfigurationManager<T>).AssemblyQualifiedName);
         }
 
         /// <summary>
@@ -124,47 +100,34 @@ namespace Microsoft.IdentityModel.Protocols
             if (docRetriever == null)
                 throw LogHelper.LogArgumentNullException(nameof(docRetriever));
 
-            _metadataAddress = metadataAddress;
+            MetadataAddress = metadataAddress;
             _docRetriever = docRetriever;
             _configRetriever = configRetriever;
             _refreshLock = new SemaphoreSlim(1);
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="TimeSpan"/> that controls how often an automatic metadata refresh should occur.
+        /// Instantiates a new <see cref="ConfigurationManager{T}"/> with cinfiguration validator that manages automatic and controls refreshing on configuration data.
         /// </summary>
-        public TimeSpan AutomaticRefreshInterval
+        /// <param name="metadataAddress">The address to obtain configuration.</param>
+        /// <param name="configRetriever">The <see cref="IConfigurationRetriever{T}"/></param>
+        /// <param name="docRetriever">The <see cref="IDocumentRetriever"/> that reaches out to obtain the configuration.</param>
+        /// <param name="configValidator">The <see cref="IConfigurationValidator{T}"/></param>
+        /// <exception cref="ArgumentNullException">If 'configValidator' is null.</exception>
+        public ConfigurationManager(string metadataAddress, IConfigurationRetriever<T> configRetriever, IDocumentRetriever docRetriever, IConfigurationValidator<T> configValidator)
+            :this(metadataAddress, configRetriever, docRetriever)
         {
-            get { return _automaticRefreshInterval; }
-            set
-            {
-                if (value < MinimumAutomaticRefreshInterval)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX20107, MinimumAutomaticRefreshInterval, value)));
+            if (configValidator == null)
+                throw LogHelper.LogArgumentNullException(nameof(configValidator));
 
-                _automaticRefreshInterval = value;
-            }
-        }
-
-        /// <summary>
-        /// The minimum time between retrievals, in the event that a retrieval failed, or that a refresh was explicitly requested.
-        /// </summary>
-        public TimeSpan RefreshInterval
-        {
-            get { return _refreshInterval; }
-            set
-            {
-                if (value < MinimumRefreshInterval)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX20106, MinimumRefreshInterval, value)));
-
-                _refreshInterval = value;
-            }
+            _configValidator = configValidator;
         }
 
         /// <summary>
         /// Obtains an updated version of Configuration.
         /// </summary>
         /// <returns>Configuration of type T.</returns>
-        /// <remarks>If the time since the last call is less than <see cref="AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
+        /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
         public async Task<T> GetConfigurationAsync()
         {
             return await GetConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
@@ -175,7 +138,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         /// <param name="cancel">CancellationToken</param>
         /// <returns>Configuration of type T.</returns>
-        /// <remarks>If the time since the last call is less than <see cref="AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
+        /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
         public async Task<T> GetConfigurationAsync(CancellationToken cancel)
         {
             DateTimeOffset now = DateTimeOffset.UtcNow;
@@ -193,18 +156,26 @@ namespace Microsoft.IdentityModel.Protocols
                     {
                         // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
                         // The transport should have it's own timeouts, etc..
-                        _currentConfiguration = await _configRetriever.GetConfigurationAsync(_metadataAddress, _docRetriever, CancellationToken.None).ConfigureAwait(false);
-                        Contract.Assert(_currentConfiguration != null);
+                        var configuration = await _configRetriever.GetConfigurationAsync(MetadataAddress, _docRetriever, CancellationToken.None).ConfigureAwait(false);
                         _lastRefresh = now;
-                        _syncAfter = DateTimeUtil.Add(now.UtcDateTime, _automaticRefreshInterval);
+                        _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval);
+                        if (_configValidator != null)
+                        {
+                            ConfigurationValidationResult result = _configValidator.Validate(configuration);
+                            if (!result.Succeeded)
+                                LogHelper.LogWarning(LogMessages.IDX20810, result.ErrorMessage);
+                        }
+
+                        _currentConfiguration = configuration;
+
                     }
                     catch (Exception ex)
                     {
-                        _syncAfter = DateTimeUtil.Add(now.UtcDateTime, _automaticRefreshInterval < _refreshInterval ? _automaticRefreshInterval : _refreshInterval);
+                        _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
                         if (_currentConfiguration == null) // Throw an exception if there's no configuration to return.
-                            throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX20803, (_metadataAddress ?? "null")), ex));
+                            throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX20803, (MetadataAddress ?? "null")), ex));
                         else
-                            LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX20806, (_metadataAddress ?? "null")), ex));
+                            LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX20806, (MetadataAddress ?? "null")), ex));
                     }
                 }
 
@@ -212,9 +183,7 @@ namespace Microsoft.IdentityModel.Protocols
                 if (_currentConfiguration != null)
                     return _currentConfiguration;
                 else
-                {
-                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX20803, (_metadataAddress ?? "null"))));
-                }
+                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX20803, (MetadataAddress ?? "null"))));
             }
             finally
             {
@@ -223,11 +192,25 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
-        /// Requests that then next call to <see cref="GetConfigurationAsync()"/> obtain new configuration.
-        /// <para>If it is a first force refresh or the last refresh was greater than <see cref="RefreshInterval"/> then the next call to <see cref="GetConfigurationAsync()"/> will retrieve new configuration.</para>
-        /// <para>If <see cref="RefreshInterval"/> == <see cref="TimeSpan.MaxValue"/> then this method does nothing.</para>
+        /// Obtains an updated version of Configuration.
         /// </summary>
-        public void RequestRefresh()
+        /// <param name="cancel">CancellationToken</param>
+        /// <returns>Configuration of type BaseConfiguration    .</returns>
+        /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
+        public override async Task<BaseConfiguration> GetBaseConfigurationAsync(CancellationToken cancel)
+        {
+            var obj = await GetConfigurationAsync(cancel).ConfigureAwait(false);
+            if (obj is BaseConfiguration)
+                return obj as BaseConfiguration;
+            return null;
+        }
+
+        /// <summary>
+        /// Requests that then next call to <see cref="GetConfigurationAsync()"/> obtain new configuration.
+        /// <para>If it is a first force refresh or the last refresh was greater than <see cref="BaseConfigurationManager.RefreshInterval"/> then the next call to <see cref="GetConfigurationAsync()"/> will retrieve new configuration.</para>
+        /// <para>If <see cref="BaseConfigurationManager.RefreshInterval"/> == <see cref="TimeSpan.MaxValue"/> then this method does nothing.</para>
+        /// </summary>
+        public override void RequestRefresh()
         {
             DateTimeOffset now = DateTimeOffset.UtcNow;
             if (_isFirstRefreshRequest)
@@ -240,5 +223,25 @@ namespace Microsoft.IdentityModel.Protocols
                 _syncAfter = now;
             }
         }
+
+        /// <summary>
+        /// 12 hours is the default time interval that afterwards, <see cref="GetBaseConfigurationAsync(CancellationToken)"/> will obtain new configuration.
+        /// </summary>
+        public new static readonly TimeSpan DefaultAutomaticRefreshInterval = BaseConfigurationManager.DefaultAutomaticRefreshInterval;
+
+        /// <summary>
+        /// 5 minutes is the default time interval that must pass for <see cref="RequestRefresh"/> to obtain a new configuration.
+        /// </summary>
+        public new static readonly TimeSpan DefaultRefreshInterval = BaseConfigurationManager.DefaultRefreshInterval;
+
+        /// <summary>
+        /// 5 minutes is the minimum value for automatic refresh. <see cref="MinimumAutomaticRefreshInterval"/> can not be set less than this value.
+        /// </summary>
+        public new static readonly TimeSpan MinimumAutomaticRefreshInterval = BaseConfigurationManager.MinimumAutomaticRefreshInterval;
+
+        /// <summary>
+        /// 1 second is the minimum time interval that must pass for <see cref="MinimumRefreshInterval"/> to  obtain new configuration.
+        /// </summary>
+        public new static readonly TimeSpan MinimumRefreshInterval = BaseConfigurationManager.MinimumRefreshInterval;
     }
 }

@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             try
             {
-#if NET461 || NET472 || NETCOREAPP2_1
+#if NET461 || NET472 || NETCOREAPP2_1 || NET6_0
                 AsymmetricAdapter asymmetricdapter = new AsymmetricAdapter(theoryData.SecurityKey, theoryData.Algorithm, hashAlgorithm, SupportedAlgorithms.GetHashAlgorithmName(theoryData.Algorithm), true);
 #else
                 AsymmetricAdapter asymmetricdapter = new AsymmetricAdapter(theoryData.SecurityKey, theoryData.Algorithm, hashAlgorithm, true);
@@ -69,6 +69,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public static TheoryData<AsymmetricAdapterTheoryData> AsymmetricAdapterUsageTestCases
         {
+#pragma warning disable SYSLIB0028 // Type or member is obsolete
             get => new TheoryData<AsymmetricAdapterTheoryData>
             {
                 // X509
@@ -82,7 +83,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
                 // RSA
                 // RSACertificateExtensions.GetRSAPrivateKey - this results in 
-                #if NET461 || NET472 || NETCOREAPP2_1
+                #if NET461 || NET472 || NETCOREAPP2_1 || NET6_0
                 new AsymmetricAdapterTheoryData
                 {
                     Algorithm = SecurityAlgorithms.RsaSha256,
@@ -102,7 +103,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 },
 
                 // RSA.Create
-                #if NET472 || NETCOREAPP2_1
+                #if NET472 || NETCOREAPP2_1 || NET6_0
                 new AsymmetricAdapterTheoryData
                 {
                     Algorithm = SecurityAlgorithms.RsaSha256,
@@ -140,7 +141,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = "KeyingMaterial_Ecdsa256Key"
                 },
 
-                #if NET472 || NETCOREAPP2_1
+                #if NET472 || NETCOREAPP2_1 || NET6_0
                 new AsymmetricAdapterTheoryData
                 {
                     Algorithm = SecurityAlgorithms.EcdsaSha256,
@@ -151,6 +152,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 #endif
 
             };
+#pragma warning restore SYSLIB0028 // Type or member is obsolete
         }
 
         public class AsymmetricAdapterTheoryData : TheoryDataBase

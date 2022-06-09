@@ -278,7 +278,7 @@ namespace Microsoft.IdentityModel.Json.Linq.JsonPath
                     return false;
             }
 
-            return string.Equals(currentValueString, queryValueString, StringComparison.Ordinal);
+            return string.Equals(currentValueString, queryValueString);
         }
 
         internal static bool EqualsWithStrictMatch(JValue value, JValue queryValue)

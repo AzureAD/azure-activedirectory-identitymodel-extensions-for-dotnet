@@ -93,7 +93,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         private static bool IsSupportedCompressionAlgorithm(string algorithm)
         {
-            return CompressionAlgorithms.Deflate.Equals(algorithm, StringComparison.Ordinal);
+            return CompressionAlgorithms.Deflate.Equals(algorithm);
         }
 
         /// <summary>
@@ -109,10 +109,10 @@ namespace Microsoft.IdentityModel.Tokens
             if (CustomCompressionProvider != null && CustomCompressionProvider.IsSupportedAlgorithm(algorithm))
                 return CustomCompressionProvider;
 
-            if (algorithm.Equals(CompressionAlgorithms.Deflate, StringComparison.Ordinal))
+            if (algorithm.Equals(CompressionAlgorithms.Deflate))
                 return new DeflateCompressionProvider();
 
-            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10652, algorithm)));
+            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10652, LogHelper.MarkAsNonPII(algorithm))));
         }
     }
 }

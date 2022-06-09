@@ -234,7 +234,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 if (string.IsNullOrEmpty(majorVersion))
                     throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.Assertion, SamlConstants.Attributes.MajorVersion);
 
-                if (!majorVersion.Equals(SamlConstants.MajorVersionValue, StringComparison.Ordinal))
+                if (!majorVersion.Equals(SamlConstants.MajorVersionValue))
                     throw LogReadException(LogMessages.IDX11116, majorVersion);
 
                 // @MinorVersion - required - must be "1"
@@ -242,7 +242,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 if (string.IsNullOrEmpty(minorVersion))
                     throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.Assertion, SamlConstants.Attributes.MinorVersion);
 
-                if (!minorVersion.Equals(SamlConstants.MinorVersionValue, StringComparison.Ordinal))
+                if (!minorVersion.Equals(SamlConstants.MinorVersionValue))
                     throw LogReadException(LogMessages.IDX11117, minorVersion);
 
                 // @AssertionId - required

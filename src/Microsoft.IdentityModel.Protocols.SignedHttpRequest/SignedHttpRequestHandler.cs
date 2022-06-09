@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// <remarks>The handler implementation is based on 'A Method for Signing HTTP Requests for OAuth' specification.</remarks>
     public class SignedHttpRequestHandler
     {
-        // (https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3.2)
+        // (https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3.2)
         // "Encodes the name and value of the header as "name: value" and appends it to the string buffer separated by a newline "\n" character."
         private readonly string _newlineSeparator = "\n";
 
@@ -88,13 +88,13 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (signedHttpRequestDescriptor.AdditionalHeaderClaims != null && signedHttpRequestDescriptor.AdditionalHeaderClaims.Count != 0)
             {
                 if (signedHttpRequestDescriptor.AdditionalHeaderClaims.Keys.Intersect(JwtTokenUtilities.DefaultHeaderParameters, StringComparer.OrdinalIgnoreCase).Any())
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(JsonWebTokens.LogMessages.IDX14116, nameof(signedHttpRequestDescriptor.AdditionalHeaderClaims), string.Join(", ", JwtTokenUtilities.DefaultHeaderParameters))));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(JsonWebTokens.LogMessages.IDX14116, LogHelper.MarkAsNonPII(nameof(signedHttpRequestDescriptor.AdditionalHeaderClaims)), LogHelper.MarkAsNonPII(string.Join(", ", JwtTokenUtilities.DefaultHeaderParameters)))));
 
                 header.Merge(JObject.FromObject(signedHttpRequestDescriptor.AdditionalHeaderClaims));
             }
 
             // set the "typ" header claim to "pop"
-            // https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-6.2
+            // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-6.2
             header[JwtHeaderParameterNames.Alg] = signedHttpRequestDescriptor.SigningCredentials.Algorithm;
             header[JwtHeaderParameterNames.Typ] = SignedHttpRequestConstants.TokenType;
 
@@ -102,7 +102,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
             return message + "." + JwtTokenUtilities.CreateEncodedSignature(message, signedHttpRequestDescriptor.SigningCredentials, false);
         }
-
 
         /// <summary>
         /// Creates a JSON representation of a HttpRequest payload.
@@ -209,8 +208,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (string.IsNullOrEmpty(httpMethod))
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor.HttpRequestData.Method));
 
-            if (!httpMethod.ToUpperInvariant().Equals(httpMethod, StringComparison.Ordinal))
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23002, httpMethod)));
+            if (!httpMethod.ToUpperInvariant().Equals(httpMethod))
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23002, LogHelper.MarkAsNonPII(httpMethod))));
 
             payload.Add(SignedHttpRequestClaimTypes.M, httpMethod);
         }
@@ -236,7 +235,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (!httpRequestUri.IsAbsoluteUri)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23001, httpRequestUri.OriginalString)));
 
-            // https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3
+            // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3
             // u claim: The HTTP URL host component as a JSON string. This MAY include the port separated from the host by a colon in host:port format.
             // Including the port if it not the default port for the httpRequestUri scheme.
             var httpUrlHostComponent = httpRequestUri.Host;
@@ -311,7 +310,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             }
             catch (Exception e)
             {
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, SignedHttpRequestClaimTypes.Q, e), e));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.Q), e), e));
             }
         }
 
@@ -351,7 +350,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             }
             catch (Exception e)
             {
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, SignedHttpRequestClaimTypes.H, e), e));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.H), e), e));
             }
         }
 
@@ -380,7 +379,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             }
             catch (Exception e)
             {
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, SignedHttpRequestClaimTypes.B, e), e));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.B), e), e));
             }
         }
 
@@ -435,7 +434,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     else if (signedHttpRequestSigningKey is AsymmetricSecurityKey asymmetricSecurityKey)
                         jsonWebKey = JsonWebKeyConverter.ConvertFromSecurityKey(asymmetricSecurityKey);
                     else
-                        throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23032, signedHttpRequestSigningKey != null ? signedHttpRequestSigningKey.GetType().ToString() : "null")));
+                        throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23032, LogHelper.MarkAsNonPII(signedHttpRequestSigningKey != null ? signedHttpRequestSigningKey.GetType().ToString() : "null"))));
 
                     // set the jwk thumbprint as the Kid
                     jsonWebKey.Kid = Base64UrlEncoder.Encode(jsonWebKey.ComputeJwkThumbprint());
@@ -444,7 +443,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             }
             catch (Exception e)
             {
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, ConfirmationClaimTypes.Cnf, e), e));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, LogHelper.MarkAsNonPII(ConfirmationClaimTypes.Cnf), e), e));
             }
         }
         #endregion
@@ -470,7 +469,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
                 // read access token ("at")
                 if (!signedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.At, out string accessToken) || string.IsNullOrEmpty(accessToken))
-                    throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidAtClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, SignedHttpRequestClaimTypes.At)));
+                    throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidAtClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.At))));
 
                 // validate access token ("at")
                 var tokenValidationResult = await ValidateAccessTokenAsync(accessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
@@ -482,6 +481,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
                 // validate signed http request signature
                 signedHttpRequest.SigningKey = await ValidateSignatureAsync(signedHttpRequest, popKey, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+
+                // validate nonce claim
+                ValidateNonceAsync(signedHttpRequest, popKey, signedHttpRequestValidationContext, cancellationToken);
 
                 // validate signed http request payload
                 var validatedSignedHttpRequest = await ValidateSignedHttpRequestPayloadAsync(signedHttpRequest, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
@@ -549,7 +551,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestValidationContext));
 
             if (!(signedHttpRequest is JsonWebToken jwtSignedHttpRequest))
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestValidationException(LogHelper.FormatInvariant(LogMessages.IDX23030, signedHttpRequest.GetType(), typeof(JsonWebToken), signedHttpRequest)));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestValidationException(LogHelper.FormatInvariant(LogMessages.IDX23030, LogHelper.MarkAsNonPII(signedHttpRequest.GetType()), LogHelper.MarkAsNonPII(typeof(JsonWebToken)), signedHttpRequest)));
 
             var validationParameters = signedHttpRequestValidationContext.SignedHttpRequestValidationParameters;
 
@@ -628,7 +630,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     {
                         signatureProvider = popKey.CryptoProviderFactory.CreateForVerifying(popKey, signedHttpRequest.Alg, false);
                         if (signatureProvider == null)
-                            throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(Tokens.LogMessages.IDX10636, popKey.ToString(), signedHttpRequest.Alg ?? "Null")));
+                            throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(Tokens.LogMessages.IDX10636, popKey.ToString(), LogHelper.MarkAsNonPII(signedHttpRequest.Alg))));
 
                         if (signatureProvider.Verify(Encoding.UTF8.GetBytes(signedHttpRequest.EncodedHeader + "." + signedHttpRequest.EncodedPayload), Base64UrlEncoder.DecodeBytes(signedHttpRequest.EncodedSignature)))
                             return popKey;
@@ -649,6 +651,27 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         }
 
         /// <summary>
+        /// Validates the nonce claim of the signed http request.
+        /// </summary>
+        /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
+        /// <param name="popKey">A Pop key used to validate the signed http request nonce signature.</param>
+        /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
+        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+        internal virtual void ValidateNonceAsync(JsonWebToken signedHttpRequest, SecurityKey popKey, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.NonceValidatorAsync != null)
+                    if (!signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.NonceValidatorAsync(popKey, signedHttpRequest, signedHttpRequestValidationContext, cancellationToken))
+                        throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidNonceClaimException("SignedHttpRequest nonce validation failed."));
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidNonceClaimException(LogHelper.FormatInvariant(LogMessages.IDX23036, ex.ToString()), ex));
+            }
+        }
+
+        /// <summary>
         /// Validates the signed http request lifetime ("ts").
         /// </summary>
         /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
@@ -661,14 +684,14 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         internal virtual void ValidateTsClaim(JsonWebToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
         {
             if (!signedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.Ts, out long tsClaimValue))
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidTsClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, SignedHttpRequestClaimTypes.Ts)));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidTsClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.Ts))));
 
             DateTime utcNow = DateTime.UtcNow;
             DateTime signedHttpRequestCreationTime = EpochTime.DateTime(tsClaimValue);
             DateTime signedHttpRequestExpirationTime = signedHttpRequestCreationTime.Add(signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.SignedHttpRequestLifetime);
 
             if (utcNow > signedHttpRequestExpirationTime)
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidTsClaimException(LogHelper.FormatInvariant(LogMessages.IDX23010, utcNow, signedHttpRequestExpirationTime)));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidTsClaimException(LogHelper.FormatInvariant(LogMessages.IDX23010, LogHelper.MarkAsNonPII(utcNow), LogHelper.MarkAsNonPII(signedHttpRequestExpirationTime))));
         }
 
         /// <summary>
@@ -689,14 +712,14 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogArgumentNullException(nameof(expectedHttpMethod));
 
             if (!signedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.M, out string httpMethod) || httpMethod == null)
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidMClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, SignedHttpRequestClaimTypes.M)));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidMClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.M))));
 
             // "get " is functionally the same as "GET".
             // different implementations might use differently formatted http verbs and we shouldn't fault.
             httpMethod = httpMethod.Trim();
             expectedHttpMethod = expectedHttpMethod.Trim();
             if (!string.Equals(expectedHttpMethod, httpMethod, StringComparison.OrdinalIgnoreCase))
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidMClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, SignedHttpRequestClaimTypes.M, expectedHttpMethod, httpMethod)));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidMClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.M), LogHelper.MarkAsNonPII(expectedHttpMethod), LogHelper.MarkAsNonPII(httpMethod))));
         }
 
         /// <summary>
@@ -720,9 +743,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidUClaimException(LogHelper.FormatInvariant(LogMessages.IDX23001, httpRequestUri.OriginalString)));
 
             if (!signedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.U, out string uClaimValue) || uClaimValue == null)
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidUClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, SignedHttpRequestClaimTypes.U)));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidUClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.U))));
 
-            // https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-3.2
+            // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3.2
             // u: The HTTP URL host component as a JSON string.
             // This MAY include the port separated from the host by a colon in host:port format.
             var expectedUClaimValue = httpRequestUri.Host;
@@ -730,7 +753,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
             if (!string.Equals(expectedUClaimValue, uClaimValue, StringComparison.OrdinalIgnoreCase) &&
                 !string.Equals(expectedUClaimValueIncludingPort, uClaimValue, StringComparison.OrdinalIgnoreCase))
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidUClaimException(LogHelper.FormatInvariant(LogMessages.IDX23012, SignedHttpRequestClaimTypes.U, expectedUClaimValue, expectedUClaimValueIncludingPort, uClaimValue)));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidUClaimException(LogHelper.FormatInvariant(LogMessages.IDX23012, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.U), expectedUClaimValue, expectedUClaimValueIncludingPort, uClaimValue)));
         }
 
         /// <summary>
@@ -752,14 +775,14 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
             httpRequestUri = EnsureAbsoluteUri(httpRequestUri);
             if (!signedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.P, out string pClaimValue) || pClaimValue == null)
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, SignedHttpRequestClaimTypes.P)));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.P))));
 
             // relax comparison by trimming start and ending forward slashes
             pClaimValue = pClaimValue.Trim('/');
             var expectedPClaimValue = httpRequestUri.AbsolutePath.Trim('/');
 
             if (!string.Equals(expectedPClaimValue, pClaimValue, StringComparison.OrdinalIgnoreCase))
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, SignedHttpRequestClaimTypes.P, expectedPClaimValue, pClaimValue)));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.P), expectedPClaimValue, pClaimValue)));
         }
 
         /// <summary>
@@ -780,7 +803,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogArgumentNullException(nameof(httpRequestUri));
 
             if (!signedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.Q, out JArray qClaim) || qClaim == null)
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, SignedHttpRequestClaimTypes.Q)));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.Q))));
 
             httpRequestUri = EnsureAbsoluteUri(httpRequestUri);
             var sanitizedQueryParams = SanitizeQueryParams(httpRequestUri);
@@ -796,7 +819,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             }
             catch (Exception e)
             {
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23024, SignedHttpRequestClaimTypes.Q, qClaim.ToString(), e), e));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23024, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.Q), qClaim.ToString(), e), e));
             }
 
             try
@@ -807,7 +830,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 {
                     if (!sanitizedQueryParams.TryGetValue(queryParamName, out var queryParamsValue))
                     {
-                        throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23028, queryParamName, string.Join(", ", sanitizedQueryParams.Select(x => x.Key)))));
+                        throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23028, LogHelper.MarkAsNonPII(queryParamName), LogHelper.MarkAsNonPII(string.Join(", ", sanitizedQueryParams.Select(x => x.Key))))));
                     }
                     else
                     {
@@ -826,14 +849,14 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             }
             catch (Exception e)
             {
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23025, SignedHttpRequestClaimTypes.Q, e), e));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23025, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.Q), e), e));
             }
 
             if (!signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AcceptUnsignedQueryParameters && sanitizedQueryParams.Any())
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23029, string.Join(", ", sanitizedQueryParams.Select(x => x.Key)))));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23029, LogHelper.MarkAsNonPII(string.Join(", ", sanitizedQueryParams.Select(x => x.Key))))));
 
-            if (!string.Equals(expectedBase64UrlEncodedHash, qClaimBase64UrlEncodedHash, StringComparison.Ordinal))
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, SignedHttpRequestClaimTypes.Q, expectedBase64UrlEncodedHash, qClaimBase64UrlEncodedHash)));
+            if (!string.Equals(expectedBase64UrlEncodedHash, qClaimBase64UrlEncodedHash))
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.Q), expectedBase64UrlEncodedHash, qClaimBase64UrlEncodedHash)));
         }
 
         /// <summary>
@@ -849,7 +872,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         internal virtual void ValidateHClaim(JsonWebToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
         {
             if (!signedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.H, out JArray hClaim) || hClaim == null)
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, SignedHttpRequestClaimTypes.H)));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.H))));
 
             var sanitizedHeaders = SanitizeHeaders(signedHttpRequestValidationContext.HttpRequestData.Headers);
 
@@ -864,7 +887,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             }
             catch (Exception e)
             {
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23024, SignedHttpRequestClaimTypes.H, hClaim.ToString(), e), e));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23024, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.H), hClaim.ToString(), e), e));
             }
 
             try
@@ -875,7 +898,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 {
                     if (!sanitizedHeaders.TryGetValue(headerName, out var headerValue))
                     {
-                        throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23027, headerName, string.Join(", ", sanitizedHeaders.Select(x => x.Key)))));
+                        throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23027, LogHelper.MarkAsNonPII(headerName), LogHelper.MarkAsNonPII(string.Join(", ", sanitizedHeaders.Select(x => x.Key))))));
                     }
                     else
                     {
@@ -894,14 +917,14 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             }
             catch (Exception e)
             {
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23025, SignedHttpRequestClaimTypes.H, e), e));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23025, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.H), e), e));
             }
 
             if (!signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AcceptUnsignedHeaders && sanitizedHeaders.Any())
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23026, string.Join(", ", sanitizedHeaders.Select(x => x.Key)))));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23026, LogHelper.MarkAsNonPII(string.Join(", ", sanitizedHeaders.Select(x => x.Key))))));
 
-            if (!string.Equals(expectedBase64UrlEncodedHash, hClaimBase64UrlEncodedHash, StringComparison.Ordinal))
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, SignedHttpRequestClaimTypes.H, expectedBase64UrlEncodedHash, hClaimBase64UrlEncodedHash)));
+            if (!string.Equals(expectedBase64UrlEncodedHash, hClaimBase64UrlEncodedHash))
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.H), expectedBase64UrlEncodedHash, hClaimBase64UrlEncodedHash)));
         }
 
         /// <summary>
@@ -922,7 +945,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 httpRequestBody = new byte[0];
 
             if (!signedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.B, out string bClaim) || bClaim == null)
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidBClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, SignedHttpRequestClaimTypes.B)));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidBClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.B))));
 
             string expectedBase64UrlEncodedHash;
             try
@@ -931,11 +954,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             }
             catch (Exception e)
             {
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, SignedHttpRequestClaimTypes.B, e), e));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.B), e), e));
             }
 
-            if (!string.Equals(expectedBase64UrlEncodedHash, bClaim, StringComparison.Ordinal))
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidBClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, SignedHttpRequestClaimTypes.B, expectedBase64UrlEncodedHash, bClaim)));
+            if (!string.Equals(expectedBase64UrlEncodedHash, bClaim))
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidBClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.B), expectedBase64UrlEncodedHash, bClaim)));
         }
         #endregion
 
@@ -982,7 +1005,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             else if (validatedAccessToken.TryGetPayloadValue(ConfirmationClaimTypes.Cnf, out string cnfString) && !string.IsNullOrEmpty(cnfString))
                 return JObject.Parse(cnfString);
             else
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidCnfClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, ConfirmationClaimTypes.Cnf)));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidCnfClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(ConfirmationClaimTypes.Cnf))));
         }
 
         /// <summary>
@@ -994,7 +1017,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
-        /// <remarks>https://tools.ietf.org/html/rfc7800#section-3.1</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7800#section-3.1</remarks>
         internal virtual async Task<SecurityKey> ResolvePopKeyFromCnfClaimAsync(JObject cnf, JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
             if (cnf == null)
@@ -1030,7 +1053,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 if (key is AsymmetricSecurityKey)
                     return jsonWebKey;
                 else
-                    throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23015, key.GetType().ToString())));
+                    throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23015, LogHelper.MarkAsNonPII(key.GetType().ToString()))));
             }
             else
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23016, jsonWebKey.ToString())));
@@ -1049,7 +1072,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (JsonWebKeyConverter.TryConvertToSymmetricSecurityKey(jwk, out _))
                 return jwk;
             else
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23019, jwk.GetType().ToString())));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23019, LogHelper.MarkAsNonPII(jwk.GetType().ToString()))));
         }
 
         /// <summary>
@@ -1073,12 +1096,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             }
             // If there are multiple keys in the referenced JWK Set document, a "kid" member MUST also be included
             // with the referenced key's JWK also containing the same "kid" value.
-            // https://tools.ietf.org/html/rfc7800#section-3.5
+            // https://datatracker.ietf.org/doc/html/rfc7800#section-3.5
             else if (cnf.TryGetValue(ConfirmationClaimTypes.Kid, StringComparison.Ordinal, out var kid))
             {
                 foreach (var key in popKeys)
                 {
-                    if (string.Equals(key.KeyId, kid.ToString(), StringComparison.Ordinal))
+                    if (string.Equals(key.KeyId, kid.ToString()))
                         return key;
                 }
 
@@ -1165,7 +1188,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 jwkPopKeyThumprint = Base64UrlEncoder.Encode(popKey.ComputeJwkThumbprint());
 
             // validate reference
-            if (!string.Equals(cnfReferenceId, jwkPopKeyThumprint, StringComparison.Ordinal))
+            if (!string.Equals(cnfReferenceId, jwkPopKeyThumprint))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23033, cnfReferenceId, jwkPopKeyThumprint, confirmationClaim)));
 
             return popKey;
@@ -1211,10 +1234,10 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <summary>
         /// Sanitizes the query params to comply with the specification.
         /// </summary>
-        /// <remarks>https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-7.5.</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-7.5.</remarks>
         private static Dictionary<string, string> SanitizeQueryParams(Uri httpRequestUri)
         {
-            // Remove repeated query params according to the spec: https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-7.5.
+            // Remove repeated query params according to the spec: https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-7.5.
             // "If a header or query parameter is repeated on either the outgoing request from the client or the
             // incoming request to the protected resource, that query parameter or header name MUST NOT be covered by the hash and signature."
             var sanitizedQueryParams = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -1246,7 +1269,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
             if (repeatedQueryParams.Any())
             {
-                LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX23004, string.Join(", ", repeatedQueryParams)));
+                LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX23004, LogHelper.MarkAsNonPII(string.Join(", ", repeatedQueryParams))));
 
                 foreach (var repeatedQueryParam in repeatedQueryParams)
                 {
@@ -1262,12 +1285,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// Sanitizes the headers to comply with the specification.
         /// </summary>
         /// <remarks>
-        /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-4.1
-        /// https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-7.5
+        /// https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-4.1
+        /// https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-7.5
         /// </remarks>
         private static Dictionary<string, string> SanitizeHeaders(IDictionary<string, IEnumerable<string>> headers)
         {
-            // Remove repeated headers according to the spec: https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-7.5.
+            // Remove repeated headers according to the spec: https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-7.5.
             // "If a header or query parameter is repeated on either the outgoing request from the client or the
             // incoming request to the protected resource, that query parameter or header name MUST NOT be covered by the hash and signature."
             var sanitizedHeaders = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -1279,7 +1302,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 if (string.IsNullOrEmpty(headerName))
                     continue;
 
-                // Don't include the authorization header (https://tools.ietf.org/html/draft-ietf-oauth-signed-http-request-03#section-4.1).
+                // Don't include the authorization header (https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-4.1).
                 if (string.Equals(headerName, SignedHttpRequestConstants.AuthorizationHeader, StringComparison.OrdinalIgnoreCase))
                     continue;
 
@@ -1300,7 +1323,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
             if (repeatedHeaders.Any())
             {
-                LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX23005, string.Join(", ", repeatedHeaders)));
+                LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX23005, LogHelper.MarkAsNonPII(string.Join(", ", repeatedHeaders))));
 
                 foreach (var repeatedHeaderName in repeatedHeaders)
                 {

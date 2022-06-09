@@ -36,10 +36,12 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// Contains a collection of <see cref="JsonWebKey"/> that can be populated from a json string.
     /// </summary>
-    /// <remarks>provides support for http://tools.ietf.org/html/rfc7517.</remarks>
+    /// <remarks>provides support for https://datatracker.ietf.org/doc/html/rfc7517.</remarks>
     [JsonObject]
     public class JsonWebKeySet
     {
+        private const string _className = "Microsoft.IdentityModel.Tokens.JsonWebKeySet";
+
         /// <summary>
         /// Returns a new instance of <see cref="JsonWebKeySet"/>.
         /// </summary>
@@ -75,12 +77,12 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                LogHelper.LogVerbose(LogMessages.IDX10806, json, this);
+                LogHelper.LogVerbose(LogMessages.IDX10806, json, LogHelper.MarkAsNonPII(_className));
                 JsonConvert.PopulateObject(json, this);
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10805, json, GetType()), ex));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10805, json, LogHelper.MarkAsNonPII(_className)), ex));
             }
         }
 
@@ -120,37 +122,42 @@ namespace Microsoft.IdentityModel.Tokens
             foreach (var webKey in Keys)
             {
                 // skip if "use" (Public Key Use) parameter is not empty or "sig".
-                // https://tools.ietf.org/html/rfc7517#section-4.2
-                if (!string.IsNullOrEmpty(webKey.Use) && !webKey.Use.Equals(JsonWebKeyUseNames.Sig, StringComparison.Ordinal))
+                // https://datatracker.ietf.org/doc/html/rfc7517#section-4.2
+                if (!string.IsNullOrEmpty(webKey.Use) && !webKey.Use.Equals(JsonWebKeyUseNames.Sig))
                 {
-                    LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX10808, webKey, webKey.Use));
+                    string convertKeyInfo = LogHelper.FormatInvariant(LogMessages.IDX10808, webKey, webKey.Use);
+                    webKey.ConvertKeyInfo = convertKeyInfo;
+                    LogHelper.LogInformation(convertKeyInfo);
                     if (!SkipUnresolvedJsonWebKeys)
                         signingKeys.Add(webKey);
 
                     continue;
                 }
 
-                if (JsonWebAlgorithmsKeyTypes.RSA.Equals(webKey.Kty, StringComparison.Ordinal))
+                if (JsonWebAlgorithmsKeyTypes.RSA.Equals(webKey.Kty))
                 {
                     var rsaKeyResolved = true;
 
                     // in this case, even though RSA was specified, we can't resolve.
                     if ((webKey.X5c == null || webKey.X5c.Count == 0) && (string.IsNullOrEmpty(webKey.E) && string.IsNullOrEmpty(webKey.N)))
                     {
+                        var missingComponent = new List<string> { JsonWebKeyParameterNames.X5c, JsonWebKeyParameterNames.E, JsonWebKeyParameterNames.N };
+                        string convertKeyInfo = LogHelper.FormatInvariant(LogMessages.IDX10814, LogHelper.MarkAsNonPII(typeof(RsaSecurityKey)), webKey, LogHelper.MarkAsNonPII(string.Join(", ", missingComponent)));
+                        webKey.ConvertKeyInfo = convertKeyInfo;
+                        LogHelper.LogInformation(convertKeyInfo);
                         rsaKeyResolved = false;
                     }
                     else
                     {
-
                         // in this case X509SecurityKey should be resolved.
-                        if (webKey.X5c != null && webKey.X5c.Count != 0)
+                        if (IsValidX509SecurityKey(webKey))
                             if (JsonWebKeyConverter.TryConvertToX509SecurityKey(webKey, out SecurityKey securityKey))
                                 signingKeys.Add(securityKey);
                             else
                                 rsaKeyResolved = false;
 
                         // in this case RsaSecurityKey should be resolved.
-                        if (!string.IsNullOrEmpty(webKey.E) && !string.IsNullOrEmpty(webKey.N))
+                        if (IsValidRsaSecurityKey(webKey))
                             if (JsonWebKeyConverter.TryCreateToRsaSecurityKey(webKey, out SecurityKey securityKey))
                                 signingKeys.Add(securityKey);
                             else
@@ -160,7 +167,7 @@ namespace Microsoft.IdentityModel.Tokens
                     if (!rsaKeyResolved && !SkipUnresolvedJsonWebKeys)
                         signingKeys.Add(webKey);
                 }
-                else if (JsonWebAlgorithmsKeyTypes.EllipticCurve.Equals(webKey.Kty, StringComparison.Ordinal))
+                else if (JsonWebAlgorithmsKeyTypes.EllipticCurve.Equals(webKey.Kty))
                 {
                     if (JsonWebKeyConverter.TryConvertToECDsaSecurityKey(webKey, out SecurityKey securityKey))
                         signingKeys.Add(securityKey);
@@ -169,7 +176,9 @@ namespace Microsoft.IdentityModel.Tokens
                 }
                 else
                 {
-                    LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX10810, webKey));
+                    string convertKeyInfo = LogHelper.FormatInvariant(LogMessages.IDX10810, webKey);
+                    webKey.ConvertKeyInfo = convertKeyInfo;
+                    LogHelper.LogInformation(convertKeyInfo);
 
                     if (!SkipUnresolvedJsonWebKeys)
                         signingKeys.Add(webKey);
@@ -177,6 +186,38 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             return signingKeys;
+        }
+
+        private static bool IsValidX509SecurityKey(JsonWebKey webKey)
+        {
+            if (webKey.X5c == null || webKey.X5c.Count == 0)
+            {
+                webKey.ConvertKeyInfo = LogHelper.FormatInvariant(LogMessages.IDX10814, LogHelper.MarkAsNonPII(typeof(X509SecurityKey)), webKey, LogHelper.MarkAsNonPII(JsonWebKeyParameterNames.X5c));
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool IsValidRsaSecurityKey(JsonWebKey webKey)
+        {
+            var missingComponent = new List<string>();
+            if (string.IsNullOrWhiteSpace(webKey.E))
+                missingComponent.Add(JsonWebKeyParameterNames.E);
+
+            if (string.IsNullOrWhiteSpace(webKey.N))
+                missingComponent.Add(JsonWebKeyParameterNames.N);
+
+            if (missingComponent.Count > 0)
+            {
+                string convertKeyInfo = LogHelper.FormatInvariant(LogMessages.IDX10814, LogHelper.MarkAsNonPII(typeof(RsaSecurityKey)), webKey, LogHelper.MarkAsNonPII(string.Join(", ", missingComponent)));
+                if (string.IsNullOrEmpty(webKey.ConvertKeyInfo))
+                    webKey.ConvertKeyInfo = convertKeyInfo;
+                else
+                    webKey.ConvertKeyInfo += convertKeyInfo;
+            }
+
+            return missingComponent.Count == 0;
         }
     }
 }

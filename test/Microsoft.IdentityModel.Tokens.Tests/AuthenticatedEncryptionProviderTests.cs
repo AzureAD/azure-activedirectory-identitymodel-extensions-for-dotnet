@@ -89,7 +89,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     {
 #if NET_CORE
         [PlatformSpecific(TestPlatforms.Linux | TestPlatforms.OSX)]
-
         [Fact]
         public void AesGcmEncryptionOnLinuxAndMac()
         {
@@ -115,6 +114,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+#if NET_CORE
+        [PlatformSpecific(TestPlatforms.Windows)]
         [Fact]
         public void AesGcm_Dispose()
         {
@@ -131,6 +132,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 expectedException.ProcessException(ex);
             }
         }
+#endif
 
         [Theory, MemberData(nameof(AEPConstructorTheoryData))]
         public void Constructors(string testId, SymmetricSecurityKey key, string algorithm, ExpectedException ee)
