@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.Abstractions
         /// <param name="stringProperties">Key value pair of strings to long with the event.</param>
         /// <param name="longProperties">Key value pair of longs to long with the event.</param>
         /// <param name="boolProperties">Key value pair of bools to long with the event.</param>
-        /// <param name="DateTimeProperties">Key value pair of DateTimes to long with the event.</param>
+        /// <param name="dateTimeProperties">Key value pair of DateTimes to long with the event.</param>
         /// <param name="doubleProperties">Key value pair of doubles to long with the event.</param>
         /// <param name="guidProperties">Key value pair of Guids to long with the event.</param>
         void TrackEvent(
@@ -71,7 +71,7 @@ namespace Microsoft.IdentityModel.Abstractions
             IDictionary<string, string> stringProperties = null,
             IDictionary<string, long> longProperties = null,
             IDictionary<string, bool> boolProperties = null,
-            IDictionary<string, DateTime> DateTimeProperties = null,
+            IDictionary<string, DateTime> dateTimeProperties = null,
             IDictionary<string, double> doubleProperties = null,
             IDictionary<string, Guid> guidProperties = null);
     }
