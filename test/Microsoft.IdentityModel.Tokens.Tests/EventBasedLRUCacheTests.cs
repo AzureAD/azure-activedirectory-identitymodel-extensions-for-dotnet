@@ -105,10 +105,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             AddItemsToCache(cache, 3 * capacity, expiredInSeconds);
 
             // allows the event queue task to be started to compact the cache
-            Thread.Sleep(100);
-
-            // wait until the event queue is empty
             cache.WaitForProcessing();
+            Thread.Sleep(waitInMiliSeconds);
 
             // the number of cached items should be below the capacity after compaction
             if (cache.MapCount > capacity)
