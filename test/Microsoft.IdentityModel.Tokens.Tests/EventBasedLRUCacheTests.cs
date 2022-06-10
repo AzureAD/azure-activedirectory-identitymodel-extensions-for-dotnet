@@ -104,11 +104,17 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             // add 3 times the capacity to start the compaction process
             AddItemsToCache(cache, 3 * capacity, expiredInSeconds);
 
-            // allows the event queue task to be started to compact the cache
+            // allows the compaction event to be processed
             cache.WaitForProcessing();
-            Thread.Sleep(waitInMiliSeconds);
 
-            // the number of cached items should be below the capacity after compaction
+            // keep checking the cache size, up to 1 min, until it is reduced
+            for (int i = 0; i < 10; i++)
+            {
+                // wait 0.1 sec if the cache size > the capacity
+                if (cache.MapCount > capacity)
+                    Thread.Sleep(100); // sleep 0.1 sec
+            }
+
             if (cache.MapCount > capacity)
                 context.AddDiff($"The cache size should be less than {capacity}.");
 
