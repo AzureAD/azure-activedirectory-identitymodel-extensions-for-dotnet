@@ -1237,7 +1237,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
                 if (theoryData.TokenDescriptor.AdditionalHeaderClaims.TryGetValue(JwtHeaderParameterNames.Cty, out object ctyValue))
                 {
-                    if (!jsonToken.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object headerCtyValue) || (jsonToken != null && !jsonToken.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object _)))
+                    if (!jsonToken.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object headerCtyValue))
                     {
                         context.AddDiff($"'Cty' claim does not exist in the outer header but present in theoryData.AdditionalHeaderClaims.");
                     }
@@ -1246,7 +1246,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 }
                 else if (theoryData.TokenDescriptor.SetDefaultCtyClaim)
                 {
-                    if (!jsonToken.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object headerCtyValue) || (jsonToken != null && !jsonToken.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object _)))
+                    if (!jsonToken.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object headerCtyValue))
                     {
                         context.AddDiff($"'Cty' claim does not exist in the outer header. It is expected to have the default value '{JwtConstants.HeaderType}'.");
                     }
@@ -1255,7 +1255,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 }
                 else
                 {
-                    if (jsonToken.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object headerCtyValue) || (jsonToken != null && jsonToken.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object _)))
+                    if (jsonToken.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object headerCtyValue))
                     {
                         context.AddDiff($"'Cty' claim does exist in the outer header. It is not expected to exist since SetDefaultCtyClaim is '{theoryData.TokenDescriptor.SetDefaultCtyClaim}'.");
                     }
@@ -1275,20 +1275,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         else
                             IdentityComparer.AreEqual(innerCtyValue.ToString(), headerCtyValue.ToString(), context);
                     }
-                    else if (theoryData.TokenDescriptor.SetDefaultCtyClaim)
-                    {
-                        if (!token.InnerToken.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object headerCtyValue))
-                        {
-                            context.AddDiff($"'Cty' claim does not exist in the inner header. It is expected to have the default value '{JwtConstants.HeaderType}'.");
-                        }
-                        else
-                            IdentityComparer.AreEqual(JwtConstants.HeaderType, headerCtyValue.ToString(), context);
-                    }
                     else
                     {
                         if (token.InnerToken.TryGetHeaderValue(JwtHeaderParameterNames.Cty, out object headerCtyValue))
                         {
-                            context.AddDiff($"'Cty' claim does exist in the inner header. It is not expected exist since SetDefaultCtyClaim is'{theoryData.TokenDescriptor.SetDefaultCtyClaim}'.");
+                            context.AddDiff($"It is not expected to have 'Cty' claim in the inner header.");
                         }
                     }
 

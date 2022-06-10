@@ -130,7 +130,7 @@ namespace System.IdentityModel.Tokens.Jwt
             else
                 Typ = tokenType;
 
-            AddAdditionalClaims(additionalInnerHeaderClaims);
+            AddAdditionalClaims(additionalInnerHeaderClaims, false);
             SigningCredentials = signingCredentials;
         }
 
@@ -196,7 +196,47 @@ namespace System.IdentityModel.Tokens.Jwt
             else
                 Typ = tokenType;
 
-            AddAdditionalClaims(additionalHeaderClaims);
+            AddAdditionalClaims(additionalHeaderClaims, true);
+            EncryptingCredentials = encryptingCredentials;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="JwtHeader"/>.
+        /// With the Header Parameters:
+        /// <para>{ { typ, JWT }, { alg, SigningCredentials.Algorithm } }</para>
+        /// </summary>
+        /// <param name="encryptingCredentials"><see cref="EncryptingCredentials"/> Used when creating a JWS Compact JSON.</param>
+        /// <param name="outboundAlgorithmMap"> Provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
+        /// <param name="tokenType"> Provides the token type</param>
+        /// <param name="additionalHeaderClaims"> Defines the dictionary containing any custom header claims that need to be added to the outer JWT token header.</param>
+        /// <param name="setDefaultCtyClaim"> Controls if token creation will set default 'cty' if not specified</param>
+        /// <exception cref="ArgumentNullException"> If 'encryptingCredentials' is null.</exception>
+        public JwtHeader(EncryptingCredentials encryptingCredentials, IDictionary<string, string> outboundAlgorithmMap, string tokenType, IDictionary<string, object> additionalHeaderClaims, bool setDefaultCtyClaim)
+            : base(StringComparer.Ordinal)
+        {
+            if (encryptingCredentials == null)
+                throw LogHelper.LogArgumentNullException(nameof(encryptingCredentials));
+
+            string outboundAlg;
+            if (outboundAlgorithmMap != null && outboundAlgorithmMap.TryGetValue(encryptingCredentials.Alg, out outboundAlg))
+                Alg = outboundAlg;
+            else
+                Alg = encryptingCredentials.Alg;
+
+            if (outboundAlgorithmMap != null && outboundAlgorithmMap.TryGetValue(encryptingCredentials.Enc, out outboundAlg))
+                Enc = outboundAlg;
+            else
+                Enc = encryptingCredentials.Enc;
+
+            if (!string.IsNullOrEmpty(encryptingCredentials.Key.KeyId))
+                Kid = encryptingCredentials.Key.KeyId;
+
+            if (string.IsNullOrEmpty(tokenType))
+                Typ = JwtConstants.HeaderType;
+            else
+                Typ = tokenType;
+
+            AddAdditionalClaims(additionalHeaderClaims, setDefaultCtyClaim);
             EncryptingCredentials = encryptingCredentials;
         }
 
@@ -386,20 +426,20 @@ namespace System.IdentityModel.Tokens.Jwt
             return null;
         }
 
-        internal void AddAdditionalClaims(IDictionary<string, object> additionalHeaderClaims)
+        internal void AddAdditionalClaims(IDictionary<string, object> additionalHeaderClaims, bool setDefaultCtyClaim)
         {
             if (additionalHeaderClaims?.Count > 0 && additionalHeaderClaims.Keys.Intersect(DefaultHeaderParameters, StringComparer.OrdinalIgnoreCase).Any())
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(LogMessages.IDX12742, nameof(additionalHeaderClaims), string.Join(", ", DefaultHeaderParameters))));
 
             if (additionalHeaderClaims != null)
             {
-                if (!additionalHeaderClaims.TryGetValue(JwtHeaderParameterNames.Cty, out _))
+                if (!additionalHeaderClaims.TryGetValue(JwtHeaderParameterNames.Cty, out _) && setDefaultCtyClaim)
                     Cty = JwtConstants.HeaderType;
 
                 foreach (string claim in additionalHeaderClaims.Keys)
                     this[claim] = additionalHeaderClaims[claim];
             }
-            else
+            else if (setDefaultCtyClaim)
                 Cty = JwtConstants.HeaderType;
         }
 
