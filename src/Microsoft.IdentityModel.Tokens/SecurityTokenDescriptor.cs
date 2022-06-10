@@ -122,6 +122,9 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Gets or sets a bool that controls if token creation will set default 'cty' if not specified.
+        /// <remarks>
+        /// Applies to only JWT tokens.
+        /// </remarks>
         /// </summary>
         public bool SetDefaultCtyClaim { get; set; } = true;
     }
