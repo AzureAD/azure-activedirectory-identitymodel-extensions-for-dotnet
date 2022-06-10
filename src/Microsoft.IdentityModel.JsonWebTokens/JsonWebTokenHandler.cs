@@ -209,7 +209,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (additionalHeaderClaims == null)
                 throw LogHelper.LogArgumentNullException(nameof(additionalHeaderClaims));
 
-            return CreateTokenPrivate(payload, null, null, null, additionalHeaderClaims, null, null, true);
+            return CreateTokenPrivate(payload, null, null, null, additionalHeaderClaims, null, null);
         }
 
         /// <summary>
