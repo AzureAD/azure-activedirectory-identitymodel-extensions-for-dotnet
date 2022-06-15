@@ -249,6 +249,15 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX10204)
                 { InvalidIssuer = issuer });
 
+            if (configuration != null)
+            {
+                if (string.Equals(configuration.Issuer, issuer))
+                {
+                    LogHelper.LogInformation(LogMessages.IDX10236, issuer);
+                    return issuer;
+                }
+            }
+
             if (string.Equals(validationParameters.ValidIssuer, issuer))
             {
                 LogHelper.LogInformation(LogMessages.IDX10236, issuer);
@@ -273,14 +282,7 @@ namespace Microsoft.IdentityModel.Tokens
                 }
             }
 
-            if (configuration != null)
-            {
-                if (string.Equals(configuration.Issuer, issuer))
-                {
-                    LogHelper.LogInformation(LogMessages.IDX10236, issuer);
-                    return issuer;
-                }
-            }
+
 
             throw LogHelper.LogExceptionMessage(
                 new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX10205, issuer, (validationParameters.ValidIssuer ?? "null"), Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers), configuration?.Issuer))
