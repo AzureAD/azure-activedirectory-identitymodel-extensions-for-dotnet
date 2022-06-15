@@ -331,7 +331,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="rawData">the original token.</param>
         private void Decode(string[] tokenParts, string rawData)
         {
-            LogHelper.LogInformation(LogMessages.IDX14106, rawData);
             try
             {
                 Header = JObject.Parse(Base64UrlEncoder.Decode(tokenParts[0]));
