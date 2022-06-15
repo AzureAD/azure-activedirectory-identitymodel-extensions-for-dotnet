@@ -120,6 +120,14 @@ namespace Microsoft.IdentityModel.Tokens
         public CryptoProviderFactory CryptoProviderFactory { get; set; }
 
         /// <summary>
+        /// Gets or sets a bool that controls if the encrypted token creation will set default 'cty' if not specified.
+        /// <remarks>
+        /// Applies to only JWT tokens.
+        /// </remarks>
+        /// </summary>
+        public bool SetDefaultCtyClaim { get; set; } = true;
+
+        /// <summary>
         /// Gets the <see cref="SecurityKey"/> used for encryption.
         /// </summary>
         public SecurityKey Key

@@ -65,7 +65,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     else
                         IdentityComparer.AreEqual(ctyValue.ToString(), headerCtyValue.ToString(), context);
                 }
-                else if (theoryData.TokenDescriptor.SetDefaultCtyClaim)
+                else if (theoryData.TokenDescriptor.EncryptingCredentials.SetDefaultCtyClaim)
                 {
                     if (!jsonToken.Header.TryGetValue(JwtHeaderParameterNames.Cty, out object headerCtyValue))
                     {
@@ -78,7 +78,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 {
                     if (jsonToken.Header.TryGetValue(JwtHeaderParameterNames.Cty, out object headerCtyValue))
                     {
-                        context.AddDiff($"'Cty' claim does exist in the outer header. It is not expected to exist since SetDefaultCtyClaim is '{theoryData.TokenDescriptor.SetDefaultCtyClaim}'.");
+                        context.AddDiff($"'Cty' claim does exist in the outer header. It is not expected to exist since SetDefaultCtyClaim is '{theoryData.TokenDescriptor.EncryptingCredentials.SetDefaultCtyClaim}'.");
                     }
                 }
 
@@ -111,6 +111,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         {
             get
             {
+                var NoCtyEncryptionCreds = Default.SymmetricEncryptingCredentials;
+                NoCtyEncryptionCreds.SetDefaultCtyClaim = false;
                 return new TheoryData<CreateTokenTheoryData>
                 {
                     new CreateTokenTheoryData
@@ -119,9 +121,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         TestId = "Unsigned",
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
-                            EncryptingCredentials = Default.SymmetricEncryptingCredentials,
-                            AdditionalHeaderClaims = new Dictionary<string, object>{ {"int", "123" } },
-                            SetDefaultCtyClaim = false
+                            EncryptingCredentials = NoCtyEncryptionCreds,
+                            AdditionalHeaderClaims = new Dictionary<string, object>{ {"int", "123" } }
                         },
                     },
                     new CreateTokenTheoryData

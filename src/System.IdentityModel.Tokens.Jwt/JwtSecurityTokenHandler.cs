@@ -378,7 +378,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 expires,
                 issuedAt,
                 signingCredentials,
-                null, null, null, null, null, false).RawData;
+                null, null, null, null, null).RawData;
         }
 
         /// <summary>
@@ -417,7 +417,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 expires,
                 issuedAt,
                 signingCredentials,
-                encryptingCredentials, null, null, null, null, true).RawData;
+                encryptingCredentials, null, null, null, null).RawData;
         }
 
         /// <summary>
@@ -459,7 +459,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 issuedAt,
                 signingCredentials,
                 encryptingCredentials,
-                claimCollection, null, null, null, true).RawData;
+                claimCollection, null, null, null).RawData;
         }
 
         /// <summary>
@@ -484,8 +484,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 tokenDescriptor.Claims,
                 tokenDescriptor.TokenType,
                 tokenDescriptor.AdditionalHeaderClaims,
-                tokenDescriptor.AdditionalInnerHeaderClaims,
-                tokenDescriptor.SetDefaultCtyClaim);
+                tokenDescriptor.AdditionalInnerHeaderClaims);
         }
 
         /// <summary>
@@ -527,7 +526,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 expires,
                 issuedAt,
                 signingCredentials,
-                encryptingCredentials, null, null, null, null, true);
+                encryptingCredentials, null, null, null, null);
         }
 
         /// <summary>
@@ -572,7 +571,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 issuedAt,
                 signingCredentials,
                 encryptingCredentials,
-                claimCollection, null, null, null, true);
+                claimCollection, null, null, null);
         }
 
         /// <summary>
@@ -610,7 +609,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 notBefore,
                 expires,
                 issuedAt,
-                signingCredentials, null, null, null, null, null, false);
+                signingCredentials, null, null, null, null, null);
         }
 
         /// <summary>
@@ -635,8 +634,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 tokenDescriptor.Claims,
                 tokenDescriptor.TokenType,
                 tokenDescriptor.AdditionalHeaderClaims,
-                tokenDescriptor.AdditionalInnerHeaderClaims,
-                tokenDescriptor.SetDefaultCtyClaim);
+                tokenDescriptor.AdditionalInnerHeaderClaims);
         }
 
         private JwtSecurityToken CreateJwtSecurityTokenPrivate(
@@ -651,8 +649,7 @@ namespace System.IdentityModel.Tokens.Jwt
             IDictionary<string, object> claimCollection,
             string tokenType,
             IDictionary<string, object> additionalHeaderClaims,
-            IDictionary<string, object> additionalInnerHeaderClaims,
-            bool setDefaultCtyClaim)
+            IDictionary<string, object> additionalInnerHeaderClaims)
         {
             if (SetDefaultTimesOnTokenCreation && (!expires.HasValue || !issuedAt.HasValue || !notBefore.HasValue))
             {
@@ -687,8 +684,7 @@ namespace System.IdentityModel.Tokens.Jwt
                         new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature),
                         encryptingCredentials,
                         tokenType,
-                        additionalHeaderClaims,
-                        setDefaultCtyClaim);
+                        additionalHeaderClaims);
             }
 
             return new JwtSecurityToken(header, payload, rawHeader, rawPayload, rawSignature);
@@ -698,8 +694,7 @@ namespace System.IdentityModel.Tokens.Jwt
             JwtSecurityToken innerJwt,
             EncryptingCredentials encryptingCredentials,
             string tokenType,
-            IDictionary<string, object> additionalHeaderClaims,
-            bool setDefaultCtyClaim = true)
+            IDictionary<string, object> additionalHeaderClaims)
         {
             if (encryptingCredentials == null)
                 throw LogHelper.LogArgumentNullException(nameof(encryptingCredentials));
@@ -717,7 +712,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
                 try
                 {
-                    var header = new JwtHeader(encryptingCredentials, OutboundAlgorithmMap, tokenType, additionalHeaderClaims, setDefaultCtyClaim);
+                    var header = new JwtHeader(encryptingCredentials, OutboundAlgorithmMap, tokenType, additionalHeaderClaims);
                     AuthenticatedEncryptionResult encryptionResult = encryptionProvider.Encrypt(Encoding.UTF8.GetBytes(innerJwt.RawData), Encoding.ASCII.GetBytes(header.Base64UrlEncode()));
                     return JwtConstants.DirectKeyUseAlg.Equals(encryptingCredentials.Alg) ?
                         new JwtSecurityToken(

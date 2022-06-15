@@ -330,8 +330,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 tokenDescriptor.CompressionAlgorithm,
                 tokenDescriptor.AdditionalHeaderClaims,
                 tokenDescriptor.AdditionalInnerHeaderClaims,
-                tokenDescriptor.TokenType,
-                tokenDescriptor.SetDefaultCtyClaim);
+                tokenDescriptor.TokenType);
         }
 
         /// <summary>
@@ -591,8 +590,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             string compressionAlgorithm,
             IDictionary<string, object> additionalHeaderClaims,
             IDictionary<string, object> additionalInnerHeaderClaims,
-            string tokenType,
-            bool setDefaultCtyClaim = true)
+            string tokenType)
         {
             if (additionalHeaderClaims?.Count > 0 && additionalHeaderClaims.Keys.Intersect(JwtTokenUtilities.DefaultHeaderParameters, StringComparer.OrdinalIgnoreCase).Any())
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(LogMessages.IDX14116, LogHelper.MarkAsNonPII(nameof(additionalHeaderClaims)), LogHelper.MarkAsNonPII(string.Join(", ", JwtTokenUtilities.DefaultHeaderParameters)))));
@@ -641,7 +639,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (encryptingCredentials != null)
             {
-                additionalHeaderClaims = AddCtyClaimDefaultValue(additionalHeaderClaims, setDefaultCtyClaim);
+                additionalHeaderClaims = AddCtyClaimDefaultValue(additionalHeaderClaims, encryptingCredentials.SetDefaultCtyClaim);
 
                 return EncryptTokenPrivate(message + "." + rawSignature, encryptingCredentials, compressionAlgorithm, additionalHeaderClaims, tokenType);
             }

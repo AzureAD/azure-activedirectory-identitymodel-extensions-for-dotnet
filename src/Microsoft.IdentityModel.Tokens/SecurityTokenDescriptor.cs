@@ -119,13 +119,5 @@ namespace Microsoft.IdentityModel.Tokens
         /// values will be overridden.
         /// </summary>
         public ClaimsIdentity Subject { get; set; }
-
-        /// <summary>
-        /// Gets or sets a bool that controls if token creation will set default 'cty' if not specified.
-        /// <remarks>
-        /// Applies to only JWT tokens.
-        /// </remarks>
-        /// </summary>
-        public bool SetDefaultCtyClaim { get; set; } = true;
     }
 }
