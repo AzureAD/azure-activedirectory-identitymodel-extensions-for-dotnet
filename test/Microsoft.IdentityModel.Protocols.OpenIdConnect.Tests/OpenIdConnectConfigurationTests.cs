@@ -38,7 +38,6 @@ using Xunit;
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 {
     /// <summary>
-    /// 
     /// </summary>
     public class OpenIdConnectConfigurationTests
     {

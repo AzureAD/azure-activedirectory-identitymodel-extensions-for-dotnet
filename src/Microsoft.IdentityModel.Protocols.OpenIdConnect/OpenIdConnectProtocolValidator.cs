@@ -544,11 +544,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidCHashException(LogHelper.FormatInvariant(LogMessages.IDX21306, validationContext.ValidatedIdToken)));
             }
 
+            var idToken = validationContext.ValidatedIdToken;
+
+            var alg = idToken.InnerToken != null ? idToken.InnerToken.Header.Alg : idToken.Header.Alg;
+
             try
             {
-                ValidateHash(chash, validationContext.ProtocolMessage.Code, validationContext.ValidatedIdToken.Header.Alg);
+                ValidateHash(chash, validationContext.ProtocolMessage.Code, alg);
             }
-            catch(OpenIdConnectProtocolException ex)
+            catch (OpenIdConnectProtocolException ex)
             {
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidCHashException(LogMessages.IDX21347, ex));
             }
@@ -590,9 +594,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             if (atHash == null)
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidAtHashException(LogHelper.FormatInvariant(LogMessages.IDX21311, validationContext.ValidatedIdToken)));
 
+            var idToken = validationContext.ValidatedIdToken;
+
+            var alg = idToken.InnerToken != null ? idToken.InnerToken.Header.Alg : idToken.Header.Alg;
+
             try
             {
-                ValidateHash(atHash, validationContext.ProtocolMessage.AccessToken, validationContext.ValidatedIdToken.Header.Alg);
+                ValidateHash(atHash, validationContext.ProtocolMessage.AccessToken, alg);
             }
             catch (OpenIdConnectProtocolException ex)
             {
@@ -666,7 +674,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 {
                     nonceTime = DateTime.FromBinary(ticks);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21327, LogHelper.MarkAsNonPII(timestamp), LogHelper.MarkAsNonPII(DateTime.MinValue.Ticks.ToString(CultureInfo.InvariantCulture)), LogHelper.MarkAsNonPII(DateTime.MaxValue.Ticks.ToString(CultureInfo.InvariantCulture))), ex));
                 }
