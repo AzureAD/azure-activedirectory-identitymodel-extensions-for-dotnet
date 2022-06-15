@@ -500,7 +500,6 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="rawData">the original token.</param>
         internal void Decode(string[] tokenParts, string rawData)
         {
-            LogHelper.LogInformation(LogMessages.IDX12716, rawData);
             try
             {
                 Header = JwtHeader.Base64UrlDeserialize(tokenParts[0]);

@@ -50,7 +50,7 @@ namespace System.IdentityModel.Tokens.Jwt
         internal const string IDX12713 = "IDX12713: Creating actor value using actor.BootstrapContext(as string)";
         internal const string IDX12714 = "IDX12714: Creating actor value using actor.BootstrapContext.rawData";
         internal const string IDX12715 = "IDX12715: Creating actor value by writing the JwtSecurityToken created from actor.BootstrapContext";
-        internal const string IDX12716 = "IDX12716: Decoding token: '{0}' into header, payload and signature.";
+        // internal const string IDX12716 = "IDX12716:";
         internal const string IDX12720 = "IDX12720: Token string does not match the token formats: JWE (header.encryptedKey.iv.ciphertext.tag) or JWS (header.payload.signature)";
         internal const string IDX12721 = "IDX12721: Creating JwtSecurityToken: Issuer: '{0}', Audience: '{1}'";
         internal const string IDX12722 = "IDX12722: Creating security token from the header: '{0}', payload: '{1}' and raw signature: '{2}'.";
