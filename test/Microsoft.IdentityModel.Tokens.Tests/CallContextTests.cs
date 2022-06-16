@@ -16,10 +16,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Theory, MemberData(nameof(CallContextTestTheoryData))]
         public void LoggerInstanceTests(CallContextTheoryData theoryData)
         {
-            var context = new CallContext(theoryData.ActivityId) { Id = theoryData.TestId };
+            var context = new CallContext(theoryData.ActivityId) { DebugId = theoryData.TestId };
 
             Assert.IsAssignableFrom<LoggerContext>(context);
-            Assert.Equal(theoryData.TestId, context.Id);
+            Assert.Equal(theoryData.TestId, context.DebugId);
             Assert.Equal(theoryData.ActivityId, context.ActivityId);
             Assert.False(context.CaptureLogs);
             Assert.Empty(context.Logs);
