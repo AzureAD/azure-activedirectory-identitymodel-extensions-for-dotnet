@@ -65,8 +65,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             get { return typeof(JsonWebToken); }
         }
 
-        internal static IDictionary<string, object> AddCtyClaimDefaultValue(IDictionary<string, object> additionalClaims)
+        internal static IDictionary<string, object> AddCtyClaimDefaultValue(IDictionary<string, object> additionalClaims, bool setDefaultCtyClaim)
         {
+            if (!setDefaultCtyClaim)
+                return additionalClaims;
+
             if (additionalClaims == null)
                 additionalClaims = new Dictionary<string, object> { { JwtHeaderParameterNames.Cty, JwtConstants.HeaderType } };
             else if (!additionalClaims.TryGetValue(JwtHeaderParameterNames.Cty, out _))
@@ -600,7 +603,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (encryptingCredentials == null && additionalHeaderClaims != null && additionalHeaderClaims.Count > 0)
                 header.Merge(JObject.FromObject(additionalHeaderClaims));
 
-            header.Merge(JObject.FromObject(AddCtyClaimDefaultValue(additionalInnerHeaderClaims)));
+            if (additionalInnerHeaderClaims != null && additionalInnerHeaderClaims.Count > 0)
+                header.Merge(JObject.FromObject(additionalInnerHeaderClaims));
 
             var rawHeader = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(header.ToString(Formatting.None)));
             JObject jsonPayload = null;
@@ -635,7 +639,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (encryptingCredentials != null)
             {
-                additionalHeaderClaims = AddCtyClaimDefaultValue(additionalHeaderClaims);
+                additionalHeaderClaims = AddCtyClaimDefaultValue(additionalHeaderClaims, encryptingCredentials.SetDefaultCtyClaim);
+
                 return EncryptTokenPrivate(message + "." + rawSignature, encryptingCredentials, compressionAlgorithm, additionalHeaderClaims, tokenType);
             }
 

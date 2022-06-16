@@ -130,7 +130,7 @@ namespace System.IdentityModel.Tokens.Jwt
             else
                 Typ = tokenType;
 
-            AddAdditionalClaims(additionalInnerHeaderClaims);
+            AddAdditionalClaims(additionalInnerHeaderClaims, false);
             SigningCredentials = signingCredentials;
         }
 
@@ -196,7 +196,7 @@ namespace System.IdentityModel.Tokens.Jwt
             else
                 Typ = tokenType;
 
-            AddAdditionalClaims(additionalHeaderClaims);
+            AddAdditionalClaims(additionalHeaderClaims, encryptingCredentials.SetDefaultCtyClaim);
             EncryptingCredentials = encryptingCredentials;
         }
 
@@ -386,20 +386,20 @@ namespace System.IdentityModel.Tokens.Jwt
             return null;
         }
 
-        internal void AddAdditionalClaims(IDictionary<string, object> additionalHeaderClaims)
+        internal void AddAdditionalClaims(IDictionary<string, object> additionalHeaderClaims, bool setDefaultCtyClaim)
         {
             if (additionalHeaderClaims?.Count > 0 && additionalHeaderClaims.Keys.Intersect(DefaultHeaderParameters, StringComparer.OrdinalIgnoreCase).Any())
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(LogMessages.IDX12742, nameof(additionalHeaderClaims), string.Join(", ", DefaultHeaderParameters))));
 
             if (additionalHeaderClaims != null)
             {
-                if (!additionalHeaderClaims.TryGetValue(JwtHeaderParameterNames.Cty, out _))
+                if (!additionalHeaderClaims.TryGetValue(JwtHeaderParameterNames.Cty, out _) && setDefaultCtyClaim)
                     Cty = JwtConstants.HeaderType;
 
                 foreach (string claim in additionalHeaderClaims.Keys)
                     this[claim] = additionalHeaderClaims[claim];
             }
-            else
+            else if (setDefaultCtyClaim)
                 Cty = JwtConstants.HeaderType;
         }
 

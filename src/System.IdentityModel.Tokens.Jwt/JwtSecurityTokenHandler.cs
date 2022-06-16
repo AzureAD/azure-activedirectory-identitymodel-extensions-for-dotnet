@@ -1105,7 +1105,8 @@ namespace System.IdentityModel.Tokens.Jwt
                         jwtToken.InnerToken.EncodedHeader,
                         encodedPayload, encodedSignature),
                     jwtToken.EncryptingCredentials,
-                    jwtToken.InnerToken.Header.Typ, null).RawData;
+                    jwtToken.InnerToken.Header.Typ,
+                    null).RawData;
             }
 
             // if EncryptingCredentials isn't set, then we need to create JWE
