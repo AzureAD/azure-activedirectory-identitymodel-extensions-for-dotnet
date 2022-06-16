@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <summary>
         /// Gets or sets a string that helps with setting breakpoints when debugging.
         /// </summary>
-        public string Id { get; set; } = string.Empty;
+        public virtual string DebugId { get; set; } = string.Empty;
 
         /// <summary>
         /// The collection of logs associated with a request. Use <see cref="CaptureLogs"/> to control capture.
