@@ -973,7 +973,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 SecurityToken innerToken;
                 ClaimsPrincipal claimsPrincipal = ValidateJWS(decryptedJwt, validationParameters, currentConfiguration, out innerToken, out exceptionThrown);
                 outerToken.InnerToken = innerToken as JwtSecurityToken;
-                signatureValidatedToken = outerToken;
+                signatureValidatedToken = exceptionThrown == null ? outerToken : null;
                 return claimsPrincipal;
             }
             catch (Exception ex)
