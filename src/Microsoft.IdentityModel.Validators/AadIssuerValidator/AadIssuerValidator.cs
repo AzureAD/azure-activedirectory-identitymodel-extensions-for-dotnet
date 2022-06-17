@@ -51,27 +51,63 @@ namespace Microsoft.IdentityModel.Validators
             string aadAuthority)
         {
             HttpClient = httpClient;
-            AadAuthority = aadAuthority;
+            AadAuthority = aadAuthority.TrimEnd('/');
             IsV2Authority = aadAuthority.Contains(V2EndpointSuffix);
-            if (IsV2Authority)
-            {
-                AadAuthorityV2 = aadAuthority.TrimEnd('/');
-                AadAuthorityV1 = CreateV1Authority(AadAuthorityV2);
-            }
-            else
-            {
-                AadAuthorityV1 = aadAuthority.TrimEnd('/');
-                AadAuthorityV2 = AadAuthorityV1 + V2EndpointSuffix;
-            }
         }
 
         private HttpClient HttpClient { get; }
+        private string _aadAuthorityV1;
+        private string _aadAuthorityV2;
+        private ConfigurationManager<OpenIdConnectConfiguration> _configurationManagerV1;
+        private ConfigurationManager<OpenIdConnectConfiguration> _configurationManagerV2;
+
+        internal ConfigurationManager<OpenIdConnectConfiguration> ConfigurationManagerV1
+        {
+            get
+            {
+                if (_configurationManagerV1 == null)
+                    _configurationManagerV1 = CreateConfigManager(AadAuthorityV1);
+            
+                return _configurationManagerV1;
+            }
+        }
+
+        internal ConfigurationManager<OpenIdConnectConfiguration> ConfigurationManagerV2
+        {
+            get
+            {
+                if (_configurationManagerV2 == null)
+                    _configurationManagerV2 = CreateConfigManager(AadAuthorityV2);
+
+                return _configurationManagerV2;
+            }
+        }
+
+        internal string AadAuthorityV1
+        {
+            get
+            {
+                if (_aadAuthorityV1 == null)
+                    _aadAuthorityV1 = IsV2Authority ? CreateV1Authority(AadAuthority) : AadAuthority;
+
+                return _aadAuthorityV1;
+            }
+        }
+
+        internal string AadAuthorityV2
+        {
+            get
+            {
+                if (_aadAuthorityV2 == null)
+                    _aadAuthorityV2 = IsV2Authority ? AadAuthority : AadAuthority + V2EndpointSuffix;
+
+                return _aadAuthorityV2;
+            }
+        }
 
         internal string AadIssuerV1 { get; set; }
         internal string AadIssuerV2 { get; set; }
         internal string AadAuthority { get; set; }
-        internal string AadAuthorityV2 { get; set; }
-        internal string AadAuthorityV1 { get; set; }
         internal bool IsV2Authority { get; set; }
         internal static readonly IDictionary<string, AadIssuerValidator> s_issuerValidators = new ConcurrentDictionary<string, AadIssuerValidator>();
 
@@ -125,22 +161,22 @@ namespace Microsoft.IdentityModel.Validators
             try
             {
                 string AadIssuer;
-                if (validationParameters.ValidateIssuerWithLKG)
-                {
-                    AadIssuer = validationParameters.ConfigurationManager.LastKnownGoodConfiguration.Issuer;
-                }
+                BaseConfigurationManager configurationManager;
+
+                if (validationParameters.ConfigurationManager != null)
+                    configurationManager = validationParameters.ConfigurationManager;
                 else
                 {
-                    if (validationParameters.ConfigurationManager != null)
-                    {
-                        AadIssuer = validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult().Issuer;
-                    }
+                    if (IsV2Authority)
+                        configurationManager = ConfigurationManagerV2;
                     else
-                    {
-                        string effectiveAuthority = GetEffectiveAuthorityFromToken(AadAuthority, securityToken);
-                        AadIssuer = CreateConfigManager(effectiveAuthority).GetConfigurationAsync().ConfigureAwait(false).GetAwaiter().GetResult().Issuer;
-                    }
+                        configurationManager = ConfigurationManagerV1;
                 }
+
+                if (validationParameters.ValidateIssuerWithLKG)
+                    AadIssuer = configurationManager.LastKnownGoodConfiguration.Issuer;
+                else
+                    AadIssuer = configurationManager.GetBaseConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult().Issuer;
 
                 if (IsValidIssuer(AadIssuer, tenantId, issuer))
                     return issuer;
