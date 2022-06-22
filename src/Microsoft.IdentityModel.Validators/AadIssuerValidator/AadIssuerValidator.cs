@@ -58,10 +58,10 @@ namespace Microsoft.IdentityModel.Validators
         private HttpClient HttpClient { get; }
         private string _aadAuthorityV1;
         private string _aadAuthorityV2;
-        private ConfigurationManager<OpenIdConnectConfiguration> _configurationManagerV1;
-        private ConfigurationManager<OpenIdConnectConfiguration> _configurationManagerV2;
+        private BaseConfigurationManager _configurationManagerV1;
+        private BaseConfigurationManager _configurationManagerV2;
 
-        internal ConfigurationManager<OpenIdConnectConfiguration> ConfigurationManagerV1
+        internal BaseConfigurationManager ConfigurationManagerV1
         {
             get
             {
@@ -70,9 +70,14 @@ namespace Microsoft.IdentityModel.Validators
             
                 return _configurationManagerV1;
             }
+
+            set
+            {
+                _configurationManagerV1 = value;
+            }
         }
 
-        internal ConfigurationManager<OpenIdConnectConfiguration> ConfigurationManagerV2
+        internal BaseConfigurationManager ConfigurationManagerV2
         {
             get
             {
@@ -80,6 +85,11 @@ namespace Microsoft.IdentityModel.Validators
                     _configurationManagerV2 = CreateConfigManager(AadAuthorityV2);
 
                 return _configurationManagerV2;
+            }
+
+            set
+            {
+                _configurationManagerV2 = value;
             }
         }
 
@@ -160,26 +170,54 @@ namespace Microsoft.IdentityModel.Validators
 
             try
             {
-                string AadIssuer;
-                BaseConfigurationManager configurationManager;
+                string aadIssuer;
 
                 if (validationParameters.ConfigurationManager != null)
-                    configurationManager = validationParameters.ConfigurationManager;
+                {
+                    if (validationParameters.ValidateIssuerWithLKG)
+                        aadIssuer = validationParameters.ConfigurationManager.LastKnownGoodConfiguration.Issuer;
+                    else
+                        aadIssuer = validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult().Issuer;
+
+                    if (IsValidIssuer(aadIssuer, tenantId, issuer))
+                        return issuer;
+                }
                 else
                 {
-                    if (IsV2Authority)
-                        configurationManager = ConfigurationManagerV2;
-                    else
-                        configurationManager = ConfigurationManagerV1;
+                    // OpenQ: Default or need a trigger(tvp.configManager in JsonWenTokenHandler) to enable LKG and refresh?
+
+                    // OpenQ: aadIssuer or configuration?
+                    aadIssuer = GetEffectiveConfigurationManager().GetBaseConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult().Issuer;
+                    if (IsValidIssuer(aadIssuer, tenantId, issuer))
+                    {
+                        GetEffectiveConfigurationManager().LastKnownGoodConfiguration.Issuer = aadIssuer;
+                        return issuer;
+                    }
+                    else if (GetEffectiveConfigurationManager().LastKnownGoodConfiguration != null
+                        && GetEffectiveConfigurationManager().IsLastKnownGoodValid
+                        && !GetEffectiveConfigurationManager().LastKnownGoodConfiguration.Issuer.Equals(aadIssuer, StringComparison.Ordinal))
+                    {
+                        if (IsValidIssuer(GetEffectiveConfigurationManager().LastKnownGoodConfiguration.Issuer, tenantId, issuer))
+                        {
+                            return GetEffectiveConfigurationManager().LastKnownGoodConfiguration.Issuer;
+                        }
+
+                        // If we were still unable to validate, attempt to refresh the configuration and validate using it
+                        // but ONLY if the currentConfiguration is not null. We want to avoid refreshing the configuration on
+                        // retrieval error as this case should have already been hit before. This refresh handles the case
+                        // where a new valid configuration was somehow published during validation time.
+                        if (aadIssuer != null)
+                        {
+                            GetEffectiveConfigurationManager().RequestRefresh();
+                            string currentIssuer = GetEffectiveConfigurationManager().GetBaseConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult().Issuer;
+                            if (aadIssuer != currentIssuer)
+                            {
+                                if (IsValidIssuer(currentIssuer, tenantId, issuer))
+                                    return issuer;
+                            }
+                        }
+                    }
                 }
-
-                if (validationParameters.ValidateIssuerWithLKG)
-                    AadIssuer = configurationManager.LastKnownGoodConfiguration.Issuer;
-                else
-                    AadIssuer = configurationManager.GetBaseConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult().Issuer;
-
-                if (IsValidIssuer(AadIssuer, tenantId, issuer))
-                    return issuer;
             }
             catch (Exception ex)
             {
@@ -244,19 +282,23 @@ namespace Microsoft.IdentityModel.Validators
 
             string effectiveAuthority = authority.TrimEnd('/');
             bool IsV2Authority = authority.Contains(V2EndpointSuffix);
-            if (securityToken.Issuer.EndsWith(V2EndpointSuffix, StringComparison.OrdinalIgnoreCase))
+            if (securityToken.Issuer.Contains(V2EndpointSuffix))
             {
                 if (!IsV2Authority)
-                    effectiveAuthority = effectiveAuthority + V2EndpointSuffix;
+                    effectiveAuthority += V2EndpointSuffix;
             }
             else
             {
                 if (IsV2Authority)
                     effectiveAuthority = CreateV1Authority(effectiveAuthority);
-
             }
 
             return effectiveAuthority;
+        }
+
+        private BaseConfigurationManager GetEffectiveConfigurationManager()
+        {
+            return IsV2Authority? ConfigurationManagerV2 : ConfigurationManagerV1;
         }
 
         private static string CreateV1Authority(string aadV2Authority)
