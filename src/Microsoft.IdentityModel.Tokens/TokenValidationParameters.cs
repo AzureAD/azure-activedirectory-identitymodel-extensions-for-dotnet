@@ -738,7 +738,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// The default is <c>false</c>.
         /// </remarks>
         [DefaultValue(false)]
-        internal bool ValidateIssuerWithLKG { get; set; }
+        internal bool ValidateWithLKG { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean that controls if validation of the <see cref="SecurityKey"/> that signed the securityToken is called.
