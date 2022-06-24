@@ -57,19 +57,6 @@ namespace Microsoft.IdentityModel.Validators.Tests
         {
             return AadIssuerValidator.GetAadIssuerValidator(authority, _httpClient);
         }
-        [Fact]
-        public void CheckEffectiveAuthorityFromToken()
-        {
-            var context = new CompareContext();
-            var v1Token = new JwtSecurityToken(issuer: ValidatorConstants.V1Issuer);
-            var v2Token = new JwtSecurityToken(issuer: ValidatorConstants.AadIssuer);
-
-            IdentityComparer.AreEqual(AadIssuerValidator.GetEffectiveAuthorityFromToken(ValidatorConstants.AuthorityV1, v1Token), ValidatorConstants.AuthorityV1, context);
-            IdentityComparer.AreEqual(AadIssuerValidator.GetEffectiveAuthorityFromToken(ValidatorConstants.AuthorityV1, v2Token), ValidatorConstants.AuthorityCommonTenantWithV2, context);
-            IdentityComparer.AreEqual(AadIssuerValidator.GetEffectiveAuthorityFromToken(ValidatorConstants.AuthorityCommonTenantWithV2, v1Token), ValidatorConstants.AuthorityV1, context);
-            IdentityComparer.AreEqual(AadIssuerValidator.GetEffectiveAuthorityFromToken(ValidatorConstants.AuthorityCommonTenantWithV2, v2Token), ValidatorConstants.AuthorityCommonTenantWithV2, context);
-            TestUtilities.AssertFailIfErrors(context);
-        }
 
         [Fact]
         public void GetIssuerValidator_NullOrEmptyAuthority_ThrowsException()

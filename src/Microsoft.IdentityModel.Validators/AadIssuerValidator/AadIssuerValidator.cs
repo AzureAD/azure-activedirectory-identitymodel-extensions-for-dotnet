@@ -45,6 +45,7 @@ namespace Microsoft.IdentityModel.Validators
     public class AadIssuerValidator
     {
         internal const string V2EndpointSuffix = "/v2.0";
+        internal const string TenantidTemplate = "{tenantid}";
 
         internal AadIssuerValidator(
             HttpClient httpClient,
@@ -170,53 +171,21 @@ namespace Microsoft.IdentityModel.Validators
 
             try
             {
-                string aadIssuer;
-
-                if (validationParameters.ConfigurationManager != null)
+                var effectiveConfigurationManager = GetEffectiveConfigurationManager();
+                string aadIssuer = effectiveConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult().Issuer;
+                if (IsValidIssuer(aadIssuer, tenantId, issuer))
                 {
-                    if (validationParameters.ValidateIssuerWithLKG)
-                        aadIssuer = validationParameters.ConfigurationManager.LastKnownGoodConfiguration.Issuer;
-                    else
-                        aadIssuer = validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult().Issuer;
-
-                    if (IsValidIssuer(aadIssuer, tenantId, issuer))
-                        return issuer;
+                    // todo: set LKG only token is valid
+                    effectiveConfigurationManager.LastKnownGoodConfiguration = new OpenIdConnectConfiguration() { Issuer = aadIssuer };
+                    return issuer;
                 }
-                else
+                else if (validationParameters.ValidateWithLKG && effectiveConfigurationManager.LastKnownGoodConfiguration != null)
                 {
-                    // OpenQ: Default or need a trigger(tvp.configManager in JsonWenTokenHandler) to enable LKG and refresh?
-
-                    // OpenQ: aadIssuer or configuration?
-                    aadIssuer = GetEffectiveConfigurationManager().GetBaseConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult().Issuer;
+                    aadIssuer = effectiveConfigurationManager.LastKnownGoodConfiguration.Issuer;
                     if (IsValidIssuer(aadIssuer, tenantId, issuer))
-                    {
-                        GetEffectiveConfigurationManager().LastKnownGoodConfiguration.Issuer = aadIssuer;
-                        return issuer;
-                    }
-                    else if (GetEffectiveConfigurationManager().LastKnownGoodConfiguration != null
-                        && GetEffectiveConfigurationManager().IsLastKnownGoodValid
-                        && !GetEffectiveConfigurationManager().LastKnownGoodConfiguration.Issuer.Equals(aadIssuer, StringComparison.Ordinal))
-                    {
-                        if (IsValidIssuer(GetEffectiveConfigurationManager().LastKnownGoodConfiguration.Issuer, tenantId, issuer))
-                        {
-                            return GetEffectiveConfigurationManager().LastKnownGoodConfiguration.Issuer;
-                        }
-
-                        // If we were still unable to validate, attempt to refresh the configuration and validate using it
-                        // but ONLY if the currentConfiguration is not null. We want to avoid refreshing the configuration on
-                        // retrieval error as this case should have already been hit before. This refresh handles the case
-                        // where a new valid configuration was somehow published during validation time.
-                        if (aadIssuer != null)
-                        {
-                            GetEffectiveConfigurationManager().RequestRefresh();
-                            string currentIssuer = GetEffectiveConfigurationManager().GetBaseConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult().Issuer;
-                            if (aadIssuer != currentIssuer)
-                            {
-                                if (IsValidIssuer(currentIssuer, tenantId, issuer))
-                                    return issuer;
-                            }
-                        }
-                    }
+                        return aadIssuer;
+                    else
+                        effectiveConfigurationManager.RequestRefresh();
                 }
             }
             catch (Exception ex)
@@ -269,38 +238,6 @@ namespace Microsoft.IdentityModel.Validators
             return GetAadIssuerValidator(aadAuthority, null);
         }
 
-        /// <summary>
-        /// Get the effective authority based on the token version.
-        /// </summary>
-        /// <param name="authority">The authority to query for metadata.</param>
-        /// <param name="securityToken">Received security token.</param>
-        /// <returns></returns>
-        public static string GetEffectiveAuthorityFromToken(string authority, SecurityToken securityToken)
-        {
-            _ = authority ?? throw LogHelper.LogArgumentNullException(nameof(authority));
-            _ = securityToken ?? throw LogHelper.LogArgumentNullException(nameof(securityToken));
-
-            string effectiveAuthority = authority.TrimEnd('/');
-            bool IsV2Authority = authority.Contains(V2EndpointSuffix);
-            if (securityToken.Issuer.Contains(V2EndpointSuffix))
-            {
-                if (!IsV2Authority)
-                    effectiveAuthority += V2EndpointSuffix;
-            }
-            else
-            {
-                if (IsV2Authority)
-                    effectiveAuthority = CreateV1Authority(effectiveAuthority);
-            }
-
-            return effectiveAuthority;
-        }
-
-        private BaseConfigurationManager GetEffectiveConfigurationManager()
-        {
-            return IsV2Authority? ConfigurationManagerV2 : ConfigurationManagerV1;
-        }
-
         private static string CreateV1Authority(string aadV2Authority)
         {
             if (aadV2Authority.Contains(AadIssuerValidatorConstants.Organizations))
@@ -334,25 +271,19 @@ namespace Microsoft.IdentityModel.Validators
             if (string.IsNullOrEmpty(validIssuerTemplate))
                 return false;
 
-            if (validIssuerTemplate.Contains("{tenantid}"))
+            if (validIssuerTemplate.Contains(TenantidTemplate))
             {
-                try
-                {
-                    string issuerFromTemplate = validIssuerTemplate.Replace("{tenantid}", tenantId);
-
-                    return issuerFromTemplate == actualIssuer;
-                }
-                catch
-                {
-                    // if something faults, ignore
-                }
-
-                return false;
+                return validIssuerTemplate.Replace(TenantidTemplate, tenantId) == actualIssuer;
             }
             else
             {
                 return validIssuerTemplate == actualIssuer;
             }
+        }
+
+        private BaseConfigurationManager GetEffectiveConfigurationManager()
+        {
+            return IsV2Authority ? ConfigurationManagerV2 : ConfigurationManagerV1;
         }
 
         /// <summary>Gets the tenant ID from a token.</summary>
