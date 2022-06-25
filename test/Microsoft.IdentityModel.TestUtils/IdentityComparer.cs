@@ -378,16 +378,16 @@ namespace Microsoft.IdentityModel.TestUtils
             var localContext = new CompareContext(context);
             var matchedClaims = new List<Claim>();
             var notMatched = new List<Claim>();
-            foreach (var t in t1)
+            foreach (Claim claim in claims1)
             {
                 var perClaimContext = new CompareContext(localContext);
                 bool matched = false;
                 for (int i = 0; i < claims2.Count; i++)
                 {
-                    if (AreClaimsEqual(t, claims2[i], perClaimContext))
+                    if (AreClaimsEqual(claim, claims2[i], perClaimContext))
                     {
                         numMatched++;
-                        matchedClaims.Add(t);
+                        matchedClaims.Add(claim);
                         matched = true;
                         claims2.RemoveAt(i);
                         break;
@@ -395,7 +395,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 }
 
                 if (!matched)
-                    notMatched.Add(t);
+                    notMatched.Add(claim);
             }
 
             if (numMatched != numToMatch)
