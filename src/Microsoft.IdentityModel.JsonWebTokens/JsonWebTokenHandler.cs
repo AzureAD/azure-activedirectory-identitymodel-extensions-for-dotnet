@@ -1208,6 +1208,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 TokenValidationResult tokenValidationResult;
                 if (validationParameters.SignatureValidator != null || validationParameters.SignatureValidatorUsingConfiguration != null)
                 {
+                    validationParameters.ValidateSignatureLast = false;
                     return ValidateTokenPayload(
                         ValidateSignatureUsingDelegates(token, validationParameters, configuration),
                         validationParameters,
@@ -1300,8 +1301,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 return validatedJsonWebToken;
             }
-
-            if (validationParameters.SignatureValidator != null)
+            else if (validationParameters.SignatureValidator != null)
             {
                 var validatedToken = validationParameters.SignatureValidator(token, validationParameters);
                 if (validatedToken == null)
@@ -1313,7 +1313,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return validatedJsonWebToken;
             }
 
-            return null;
+            throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10505, token)));
         }
 
         private TokenValidationResult ValidateTokenPayload(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)

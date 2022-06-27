@@ -996,6 +996,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (validationParameters.SignatureValidator != null || validationParameters.SignatureValidatorUsingConfiguration != null)
                 {
+                    validationParameters.ValidateSignatureLast = false;
                     signatureValidatedToken = ValidateSignatureUsingDelegates(token, validationParameters, currentConfiguration);
                     return ValidateTokenPayload(
                         signatureValidatedToken as JwtSecurityToken,
@@ -1052,8 +1053,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
                 return validatedJwt;
             }
-
-            if (validationParameters.SignatureValidator != null)
+            else if (validationParameters.SignatureValidator != null)
             {
                 var validatedJwtToken = validationParameters.SignatureValidator(token, validationParameters);
                 if (validatedJwtToken == null)
@@ -1087,13 +1087,13 @@ namespace System.IdentityModel.Tokens.Jwt
             }
         }
 
-            /// <summary>
-            /// Validates the JSON payload of a <see cref="JwtSecurityToken"/>.
-            /// </summary>
-            /// <param name="jwtToken">The token to validate.</param>
-            /// <param name="validationParameters">Contains validation parameters for the <see cref="JwtSecurityToken"/>.</param>
-            /// <returns>A <see cref="ClaimsPrincipal"/> from the jwt. Does not include the header claims.</returns>
-            protected ClaimsPrincipal ValidateTokenPayload(JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
+        /// <summary>
+        /// Validates the JSON payload of a <see cref="JwtSecurityToken"/>.
+        /// </summary>
+        /// <param name="jwtToken">The token to validate.</param>
+        /// <param name="validationParameters">Contains validation parameters for the <see cref="JwtSecurityToken"/>.</param>
+        /// <returns>A <see cref="ClaimsPrincipal"/> from the jwt. Does not include the header claims.</returns>
+        protected ClaimsPrincipal ValidateTokenPayload(JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
         {
             return ValidateTokenPayload(jwtToken, validationParameters, null);
         }
