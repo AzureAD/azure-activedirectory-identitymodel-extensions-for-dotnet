@@ -236,7 +236,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (!validationParameters.ValidateIssuer)
             {
-                LogHelper.LogInformation(LogMessages.IDX10235);
+                LogHelper.LogWarning(LogMessages.IDX10235);
                 return issuer;
             }
 
@@ -338,7 +338,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (!validationParameters.ValidateIssuerSigningKey)
             {
-                LogHelper.LogInformation(LogMessages.IDX10237);
+                LogHelper.LogVerbose(LogMessages.IDX10237);
                 return;
             }
 
@@ -455,7 +455,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (!validationParameters.ValidateTokenReplay)
             {
-                LogHelper.LogInformation(LogMessages.IDX10246);
+                LogHelper.LogVerbose(LogMessages.IDX10246);
                 return;
             }
 
@@ -514,7 +514,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (validationParameters.TypeValidator == null && (validationParameters.ValidTypes == null || !validationParameters.ValidTypes.Any()))
             {
-                LogHelper.LogInformation(LogMessages.IDX10255);
+                LogHelper.LogVerbose(LogMessages.IDX10255);
                 return type;
             }
 
