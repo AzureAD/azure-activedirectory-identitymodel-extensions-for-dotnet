@@ -171,7 +171,7 @@ namespace Microsoft.IdentityModel.Validators
 
             try
             {
-                var effectiveConfigurationManager = GetEffectiveConfigurationManager();
+                var effectiveConfigurationManager = GetEffectiveConfigurationManager(securityToken);
                 string aadIssuer = effectiveConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult().Issuer;
                 if (IsValidIssuer(aadIssuer, tenantId, issuer))
                 {
@@ -281,9 +281,9 @@ namespace Microsoft.IdentityModel.Validators
             }
         }
 
-        private BaseConfigurationManager GetEffectiveConfigurationManager()
+        private BaseConfigurationManager GetEffectiveConfigurationManager(SecurityToken securityToken)
         {
-            return IsV2Authority ? ConfigurationManagerV2 : ConfigurationManagerV1;
+            return (securityToken.Issuer.EndsWith(V2EndpointSuffix, StringComparison.OrdinalIgnoreCase)) ? ConfigurationManagerV2 : ConfigurationManagerV1;
         }
 
         /// <summary>Gets the tenant ID from a token.</summary>
