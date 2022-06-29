@@ -559,6 +559,15 @@ namespace Microsoft.IdentityModel.Tokens
         public IDictionary<string, Object> PropertyBag { get; set; }
 
         /// <summary>
+        /// Gets or sets a boolean to control if configuration required to be refreshed before token validation.
+        /// </summary>
+        /// <remarks>
+        /// The default is <c>false</c>.
+        /// </remarks>
+        [DefaultValue(false)]
+        public bool RefreshBeforeValidation { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether SAML tokens must have at least one AudienceRestriction.
         /// The default is <c>true</c>.
         /// </summary>
@@ -732,14 +741,13 @@ namespace Microsoft.IdentityModel.Tokens
         public bool ValidateIssuer { get; set; }
 
         /// <summary>
-        /// Gets or sets a boolean to control if the issuer will be validated with LKG configuration during token validation.
+        /// Gets or sets a boolean to control if the LKG configuration will be used for token validation.
         /// </summary>
         /// <remarks>
-        /// This boolean only applies to when <see cref="IssuerValidator"/> is AadIssuerValidator".
         /// The default is <c>false</c>.
         /// </remarks>
         [DefaultValue(false)]
-        internal bool ValidateWithLKG { get; set; }
+        public bool ValidateWithLKG { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean that controls if validation of the <see cref="SecurityKey"/> that signed the securityToken is called.

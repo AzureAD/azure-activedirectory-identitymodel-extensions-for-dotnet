@@ -1223,6 +1223,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     if (currentConfiguration != null)
                     {
                         validationParameters.ConfigurationManager.RequestRefresh();
+                        validationParameters.RefreshBeforeValidation = true;
                         var lastConfig = currentConfiguration;
                         currentConfiguration = validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult();
 

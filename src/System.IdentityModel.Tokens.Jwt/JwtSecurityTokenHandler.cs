@@ -941,6 +941,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     if (currentConfiguration != null)
                     {
                         validationParameters.ConfigurationManager.RequestRefresh();
+                        validationParameters.RefreshBeforeValidation = true;
                         var lastConfig = currentConfiguration;
                         currentConfiguration = validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult();
 

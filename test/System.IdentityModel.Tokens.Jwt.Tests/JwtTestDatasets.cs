@@ -43,8 +43,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
     /// </summary>
     public static class JwtTestDatasets
     {
-        internal const string AadV1Authority = "https://login.microsoftonline.com";
-
         public static List<JwtTheoryData> ValidateJwsWithConfigTheoryData
         {
             get
@@ -236,7 +234,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
-                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(AadV1Authority).Validate,
+                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate,
                             ValidateAudience = false,
                             ValidateLifetime = false,
                         },
@@ -251,7 +249,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
-                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(AadV1Authority).Validate,
+                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate,
                             ValidateAudience = false,
                             ValidateLifetime = false,
                         },
@@ -537,7 +535,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
-                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(AadV1Authority).Validate,
+                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate,
                             ValidateAudience = false,
                             ValidateLifetime = false,
                         }
@@ -552,7 +550,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
-                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(AadV1Authority).Validate,
+                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate,
                             ValidateAudience = false,
                             ValidateLifetime = false,
                         },
@@ -568,7 +566,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
-                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(AadV1Authority).Validate,
+                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate,
                             ValidateAudience = false,
                             ValidateLifetime = false,
                         },
@@ -584,7 +582,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
-                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(AadV1Authority).Validate,
+                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate,
                             ValidateAudience = false,
                             ValidateLifetime = false,
                         },
@@ -886,7 +884,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
-                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(AadV1Authority).Validate,
+                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate,
                             ValidateAudience = false,
                             ValidateLifetime = false,
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
@@ -902,7 +900,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
-                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(AadV1Authority).Validate,
+                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate,
                             ValidateAudience = false,
                             ValidateLifetime = false,
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
@@ -920,7 +918,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
-                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(AadV1Authority).Validate,
+                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate,
                             ValidateAudience = false,
                             ValidateLifetime = false,
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
@@ -938,7 +936,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
-                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(AadV1Authority).Validate,
+                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate,
                             ValidateAudience = false,
                             ValidateLifetime = false,
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
