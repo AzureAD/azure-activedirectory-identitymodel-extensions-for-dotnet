@@ -172,20 +172,24 @@ namespace Microsoft.IdentityModel.Validators
             try
             {
                 var effectiveConfigurationManager = GetEffectiveConfigurationManager(securityToken);
+                if (validationParameters.RefreshBeforeValidation)
+                    effectiveConfigurationManager.RequestRefresh();
+
                 string aadIssuer = effectiveConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult().Issuer;
-                if (IsValidIssuer(aadIssuer, tenantId, issuer))
+
+                if (!validationParameters.ValidateWithLKG)
                 {
-                    // todo: set LKG only token is valid
-                    effectiveConfigurationManager.LastKnownGoodConfiguration = new OpenIdConnectConfiguration() { Issuer = aadIssuer };
-                    return issuer;
-                }
-                else if (validationParameters.ValidateWithLKG && effectiveConfigurationManager.LastKnownGoodConfiguration != null)
-                {
-                    aadIssuer = effectiveConfigurationManager.LastKnownGoodConfiguration.Issuer;
                     if (IsValidIssuer(aadIssuer, tenantId, issuer))
-                        return aadIssuer;
-                    else
-                        effectiveConfigurationManager.RequestRefresh();
+                    {
+                        effectiveConfigurationManager.LastKnownGoodConfiguration = new OpenIdConnectConfiguration() { Issuer = aadIssuer };
+                        return issuer;
+                    }
+                }
+                else
+                {
+                    if (effectiveConfigurationManager.LastKnownGoodConfiguration != null &&
+                        IsValidIssuer(effectiveConfigurationManager.LastKnownGoodConfiguration.Issuer, tenantId, issuer))
+                        return issuer;
                 }
             }
             catch (Exception ex)

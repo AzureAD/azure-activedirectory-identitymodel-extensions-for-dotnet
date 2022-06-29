@@ -45,8 +45,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 48)
-                Assert.True(false, "Number of properties has changed from 44 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 50)
+                Assert.True(false, "Number of properties has changed from 50 to: " + properties.Length + ", adjust tests");
 
             TokenValidationParameters actorValidationParameters = new TokenValidationParameters();
             SecurityKey issuerSigningKey = KeyingMaterial.DefaultX509Key_2048_Public;
@@ -164,8 +164,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 48)
-                Assert.True(false, "Number of public fields has changed from 44 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 50)
+                Assert.True(false, "Number of public fields has changed from 50 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext

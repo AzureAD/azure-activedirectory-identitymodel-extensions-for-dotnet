@@ -60,6 +60,10 @@ namespace Microsoft.IdentityModel.TestUtils
             _referenceDigestValue = Convert.ToBase64String(XmlUtilities.CreateDigestBytes("<OuterXml></OuterXml>", false));
         }
 #endif
+        public static string AadV1Authority
+        {
+            get => "https://login.microsoftonline.com";
+        }
 
         public static string ActorIssuer
         {
