@@ -33,6 +33,7 @@ using Microsoft.IdentityModel.Json.Utilities;
 
 namespace Microsoft.IdentityModel.Json.Linq
 {
+#nullable enable
     internal partial class JObject
     {
         /// <summary>
@@ -45,7 +46,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         public override Task WriteToAsync(JsonWriter writer, CancellationToken cancellationToken, params JsonConverter[] converters)
         {
             Task t = writer.WriteStartObjectAsync(cancellationToken);
-            if (!t.IsCompletedSucessfully())
+            if (!t.IsCompletedSuccessfully())
             {
                 return AwaitProperties(t, 0, writer, cancellationToken, converters);
             }
@@ -53,7 +54,7 @@ namespace Microsoft.IdentityModel.Json.Linq
             for (int i = 0; i < _properties.Count; i++)
             {
                 t = _properties[i].WriteToAsync(writer, cancellationToken, converters);
-                if (!t.IsCompletedSucessfully())
+                if (!t.IsCompletedSuccessfully())
                 {
                     return AwaitProperties(t, i + 1, writer, cancellationToken, converters);
                 }
@@ -97,7 +98,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <returns>
         /// A <see cref="Task{TResult}"/> that represents the asynchronous load. The <see cref="Task{TResult}.Result"/>
         /// property returns a <see cref="JObject"/> that contains the JSON that was read from the specified <see cref="JsonReader"/>.</returns>
-        public new static async Task<JObject> LoadAsync(JsonReader reader, JsonLoadSettings settings, CancellationToken cancellationToken = default)
+        public new static async Task<JObject> LoadAsync(JsonReader reader, JsonLoadSettings? settings, CancellationToken cancellationToken = default)
         {
             ValidationUtils.ArgumentNotNull(reader, nameof(reader));
 
@@ -124,6 +125,7 @@ namespace Microsoft.IdentityModel.Json.Linq
             return o;
         }
     }
+#nullable disable
 }
 
 #endif

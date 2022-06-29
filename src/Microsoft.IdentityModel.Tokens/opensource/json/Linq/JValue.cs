@@ -28,6 +28,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.IdentityModel.Json.Utilities;
 using System.Globalization;
+using System.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
 #if HAVE_DYNAMIC
 using System.Dynamic;
 using System.Linq.Expressions;
@@ -38,6 +40,8 @@ using System.Numerics;
 
 namespace Microsoft.IdentityModel.Json.Linq
 {
+#nullable enable
+#pragma warning disable CS3019 // CLS compliance checking will not be performed because it is not visible from outside this assembly
     /// <summary>
     /// Represents a value in JSON (string, integer, date, etc).
     /// </summary>
@@ -47,9 +51,9 @@ namespace Microsoft.IdentityModel.Json.Linq
 #endif
     {
         private JTokenType _valueType;
-        private object _value;
+        private object? _value;
 
-        internal JValue(object value, JTokenType type)
+        internal JValue(object? value, JTokenType type)
         {
             _value = value;
             _valueType = type;
@@ -62,6 +66,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         public JValue(JValue other)
             : this(other.Value, other.Type)
         {
+            CopyAnnotations(this, other);
         }
 
         /// <summary>
@@ -69,7 +74,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// </summary>
         /// <param name="value">The value.</param>
         public JValue(long value)
-            : this(value, JTokenType.Integer)
+            : this(BoxedPrimitives.Get(value), JTokenType.Integer)
         {
         }
 
@@ -78,7 +83,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// </summary>
         /// <param name="value">The value.</param>
         public JValue(decimal value)
-            : this(value, JTokenType.Float)
+            : this(BoxedPrimitives.Get(value), JTokenType.Float)
         {
         }
 
@@ -95,7 +100,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// Initializes a new instance of the <see cref="JValue"/> class with the given value.
         /// </summary>
         /// <param name="value">The value.</param>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public JValue(ulong value)
             : this(value, JTokenType.Integer)
         {
@@ -106,7 +111,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// </summary>
         /// <param name="value">The value.</param>
         public JValue(double value)
-            : this(value, JTokenType.Float)
+            : this(BoxedPrimitives.Get(value), JTokenType.Float)
         {
         }
 
@@ -144,7 +149,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// </summary>
         /// <param name="value">The value.</param>
         public JValue(bool value)
-            : this(value, JTokenType.Boolean)
+            : this(BoxedPrimitives.Get(value), JTokenType.Boolean)
         {
         }
 
@@ -152,7 +157,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// Initializes a new instance of the <see cref="JValue"/> class with the given value.
         /// </summary>
         /// <param name="value">The value.</param>
-        public JValue(string value)
+        public JValue(string? value)
             : this(value, JTokenType.String)
         {
         }
@@ -170,7 +175,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// Initializes a new instance of the <see cref="JValue"/> class with the given value.
         /// </summary>
         /// <param name="value">The value.</param>
-        public JValue(Uri value)
+        public JValue(Uri? value)
             : this(value, (value != null) ? JTokenType.Uri : JTokenType.Null)
         {
         }
@@ -188,7 +193,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// Initializes a new instance of the <see cref="JValue"/> class with the given value.
         /// </summary>
         /// <param name="value">The value.</param>
-        public JValue(object value)
+        public JValue(object? value)
             : this(value, GetValueType(null, value))
         {
         }
@@ -241,7 +246,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         }
 #endif
 
-        internal static int Compare(JTokenType valueType, object objA, object objB)
+        internal static int Compare(JTokenType valueType, object? objA, object? objB)
         {
             if (objA == objB)
             {
@@ -267,8 +272,8 @@ namespace Microsoft.IdentityModel.Json.Linq
                     }
                     if (objB is BigInteger integerB)
                     {
-                        return -CompareBigInteger(integerB, objA);
-                    }
+                            return -CompareBigInteger(integerB, objA);
+                        }
 #endif
                     if (objA is ulong || objB is ulong || objA is decimal || objB is decimal)
                     {
@@ -300,12 +305,12 @@ namespace Microsoft.IdentityModel.Json.Linq
                         return Convert.ToDecimal(objA, CultureInfo.InvariantCulture).CompareTo(Convert.ToDecimal(objB, CultureInfo.InvariantCulture));
                     }
                     return CompareFloat(objA, objB);
-                }
+                    }
                 case JTokenType.Comment:
                 case JTokenType.String:
                 case JTokenType.Raw:
-                    string s1 = Convert.ToString(objA, CultureInfo.InvariantCulture);
-                    string s2 = Convert.ToString(objB, CultureInfo.InvariantCulture);
+                    string? s1 = Convert.ToString(objA, CultureInfo.InvariantCulture);
+                    string? s2 = Convert.ToString(objB, CultureInfo.InvariantCulture);
 
                     return string.CompareOrdinal(s1, s2);
                 case JTokenType.Boolean:
@@ -353,10 +358,10 @@ namespace Microsoft.IdentityModel.Json.Linq
                         throw new ArgumentException("Object must be of type byte[].");
                     }
 
-                    byte[] bytesA = objA as byte[];
-                    Debug.Assert(bytesA != null);
+                    byte[]? bytesA = objA as byte[];
+                    MiscellaneousUtils.Assert(bytesA != null);
 
-                    return MiscellaneousUtils.ByteArrayCompare(bytesA, bytesB);
+                    return MiscellaneousUtils.ByteArrayCompare(bytesA!, bytesB);
                 case JTokenType.Guid:
                     if (!(objB is Guid))
                     {
@@ -368,7 +373,7 @@ namespace Microsoft.IdentityModel.Json.Linq
 
                     return guid1.CompareTo(guid2);
                 case JTokenType.Uri:
-                    Uri uri2 = objB as Uri;
+                    Uri? uri2 = objB as Uri;
                     if (uri2 == null)
                     {
                         throw new ArgumentException("Object must be of type Uri.");
@@ -407,7 +412,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         }
 
 #if HAVE_EXPRESSIONS
-        private static bool Operation(ExpressionType operation, object objA, object objB, out object result)
+        private static bool Operation(ExpressionType operation, object? objA, object? objB, out object? result)
         {
             if (objA is string || objB is string)
             {
@@ -564,7 +569,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>A <see cref="JValue"/> comment with the given value.</returns>
-        public static JValue CreateComment(string value)
+        public static JValue CreateComment(string? value)
         {
             return new JValue(value, JTokenType.Comment);
         }
@@ -574,7 +579,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>A <see cref="JValue"/> string with the given value.</returns>
-        public static JValue CreateString(string value)
+        public static JValue CreateString(string? value)
         {
             return new JValue(value, JTokenType.String);
         }
@@ -597,7 +602,7 @@ namespace Microsoft.IdentityModel.Json.Linq
             return new JValue(null, JTokenType.Undefined);
         }
 
-        private static JTokenType GetValueType(JTokenType? current, object value)
+        private static JTokenType GetValueType(JTokenType? current, object? value)
         {
             if (value == null)
             {
@@ -694,13 +699,13 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// Gets or sets the underlying token value.
         /// </summary>
         /// <value>The underlying token value.</value>
-        public object Value
+        public object? Value
         {
             get => _value;
             set
             {
-                Type currentType = _value?.GetType();
-                Type newType = value?.GetType();
+                Type? currentType = _value?.GetType();
+                Type? newType = value?.GetType();
 
                 if (currentType != newType)
                 {
@@ -720,7 +725,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         {
             if (converters != null && converters.Length > 0 && _value != null)
             {
-                JsonConverter matchingConverter = JsonSerializer.GetMatchingConverter(converters, _value.GetType());
+                JsonConverter? matchingConverter = JsonSerializer.GetMatchingConverter(converters, _value.GetType());
                 if (matchingConverter != null && matchingConverter.CanWrite)
                 {
                     matchingConverter.WriteJson(writer, _value, JsonSerializer.CreateDefault());
@@ -803,7 +808,7 @@ namespace Microsoft.IdentityModel.Json.Linq
                     }
                     return;
                 case JTokenType.Bytes:
-                    writer.WriteValue((byte[])_value);
+                    writer.WriteValue((byte[]?)_value);
                     return;
                 case JTokenType.Guid:
                     writer.WriteValue((_value != null) ? (Guid?)_value : null);
@@ -812,7 +817,7 @@ namespace Microsoft.IdentityModel.Json.Linq
                     writer.WriteValue((_value != null) ? (TimeSpan?)_value : null);
                     return;
                 case JTokenType.Uri:
-                    writer.WriteValue((Uri)_value);
+                    writer.WriteValue((Uri?)_value);
                     return;
             }
 
@@ -839,7 +844,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <c>true</c> if the current object is equal to the <paramref name="other"/> parameter; otherwise, <c>false</c>.
         /// </returns>
         /// <param name="other">An object to compare with this object.</param>
-        public bool Equals(JValue other)
+        public bool Equals(JValue? other)
         {
             if (other == null)
             {
@@ -856,9 +861,14 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <returns>
         /// <c>true</c> if the specified <see cref="Object"/> is equal to the current <see cref="Object"/>; otherwise, <c>false</c>.
         /// </returns>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            return Equals(obj as JValue);
+            if (obj is JValue v)
+            {
+                return Equals(v);
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -880,6 +890,10 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <summary>
         /// Returns a <see cref="String"/> that represents this instance.
         /// </summary>
+        /// <remarks>
+        /// <c>ToString()</c> returns a non-JSON string value for tokens with a type of <see cref="JTokenType.String"/>.
+        /// If you want the JSON for all token types then you should use <see cref="WriteTo(JsonWriter, JsonConverter[])"/>.
+        /// </remarks>
         /// <returns>
         /// A <see cref="String"/> that represents this instance.
         /// </returns>
@@ -890,7 +904,7 @@ namespace Microsoft.IdentityModel.Json.Linq
                 return string.Empty;
             }
 
-            return _value.ToString();
+            return _value.ToString()!;
         }
 
         /// <summary>
@@ -912,7 +926,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <returns>
         /// A <see cref="String"/> that represents this instance.
         /// </returns>
-        public string ToString(IFormatProvider formatProvider)
+        public string ToString(IFormatProvider? formatProvider)
         {
             return ToString(null, formatProvider);
         }
@@ -925,7 +939,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <returns>
         /// A <see cref="String"/> that represents this instance.
         /// </returns>
-        public string ToString(string format, IFormatProvider formatProvider)
+        public string ToString(string? format, IFormatProvider? formatProvider)
         {
             if (_value == null)
             {
@@ -938,7 +952,7 @@ namespace Microsoft.IdentityModel.Json.Linq
             }
             else
             {
-                return _value.ToString();
+                return _value.ToString()!;
             }
         }
 
@@ -957,7 +971,7 @@ namespace Microsoft.IdentityModel.Json.Linq
 
         private class JValueDynamicProxy : DynamicProxy<JValue>
         {
-            public override bool TryConvert(JValue instance, ConvertBinder binder, out object result)
+            public override bool TryConvert(JValue instance, ConvertBinder binder, [NotNullWhen(true)]out object? result)
             {
                 if (binder.Type == typeof(JValue) || binder.Type == typeof(JToken))
                 {
@@ -965,7 +979,7 @@ namespace Microsoft.IdentityModel.Json.Linq
                     return true;
                 }
 
-                object value = instance.Value;
+                object? value = instance.Value;
 
                 if (value == null)
                 {
@@ -977,9 +991,9 @@ namespace Microsoft.IdentityModel.Json.Linq
                 return true;
             }
 
-            public override bool TryBinaryOperation(JValue instance, BinaryOperationBinder binder, object arg, out object result)
+            public override bool TryBinaryOperation(JValue instance, BinaryOperationBinder binder, object arg, [NotNullWhen(true)]out object? result)
             {
-                object compareValue = arg is JValue value ? value.Value : arg;
+                object? compareValue = arg is JValue value ? value.Value : arg;
 
                 switch (binder.Operation)
                 {
@@ -1023,7 +1037,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         }
 #endif
 
-        int IComparable.CompareTo(object obj)
+        int IComparable.CompareTo(object? obj)
         {
             if (obj == null)
             {
@@ -1031,7 +1045,7 @@ namespace Microsoft.IdentityModel.Json.Linq
             }
 
             JTokenType comparisonType;
-            object otherValue;
+            object? otherValue;
             if (obj is JValue value)
             {
                 otherValue = value.Value;
@@ -1066,7 +1080,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <exception cref="ArgumentException">
         /// 	<paramref name="obj"/> is not of the same type as this instance.
         /// </exception>
-        public int CompareTo(JValue obj)
+        public int CompareTo(JValue? obj)
         {
             if (obj == null)
             {
@@ -1096,80 +1110,82 @@ namespace Microsoft.IdentityModel.Json.Linq
             return TypeCode.Object;
         }
 
-        bool IConvertible.ToBoolean(IFormatProvider provider)
+        bool IConvertible.ToBoolean(IFormatProvider? provider)
         {
             return (bool)this;
         }
 
-        char IConvertible.ToChar(IFormatProvider provider)
+        char IConvertible.ToChar(IFormatProvider? provider)
         {
             return (char)this;
         }
 
-        sbyte IConvertible.ToSByte(IFormatProvider provider)
+        sbyte IConvertible.ToSByte(IFormatProvider? provider)
         {
             return (sbyte)this;
         }
 
-        byte IConvertible.ToByte(IFormatProvider provider)
+        byte IConvertible.ToByte(IFormatProvider? provider)
         {
             return (byte)this;
         }
 
-        short IConvertible.ToInt16(IFormatProvider provider)
+        short IConvertible.ToInt16(IFormatProvider? provider)
         {
             return (short)this;
         }
 
-        ushort IConvertible.ToUInt16(IFormatProvider provider)
+        ushort IConvertible.ToUInt16(IFormatProvider? provider)
         {
             return (ushort)this;
         }
 
-        int IConvertible.ToInt32(IFormatProvider provider)
+        int IConvertible.ToInt32(IFormatProvider? provider)
         {
             return (int)this;
         }
 
-        uint IConvertible.ToUInt32(IFormatProvider provider)
+        uint IConvertible.ToUInt32(IFormatProvider? provider)
         {
             return (uint)this;
         }
 
-        long IConvertible.ToInt64(IFormatProvider provider)
+        long IConvertible.ToInt64(IFormatProvider? provider)
         {
             return (long)this;
         }
 
-        ulong IConvertible.ToUInt64(IFormatProvider provider)
+        ulong IConvertible.ToUInt64(IFormatProvider? provider)
         {
             return (ulong)this;
         }
 
-        float IConvertible.ToSingle(IFormatProvider provider)
+        float IConvertible.ToSingle(IFormatProvider? provider)
         {
             return (float)this;
         }
 
-        double IConvertible.ToDouble(IFormatProvider provider)
+        double IConvertible.ToDouble(IFormatProvider? provider)
         {
             return (double)this;
         }
 
-        decimal IConvertible.ToDecimal(IFormatProvider provider)
+        decimal IConvertible.ToDecimal(IFormatProvider? provider)
         {
             return (decimal)this;
         }
 
-        DateTime IConvertible.ToDateTime(IFormatProvider provider)
+        DateTime IConvertible.ToDateTime(IFormatProvider? provider)
         {
             return (DateTime)this;
         }
 
-        object IConvertible.ToType(Type conversionType, IFormatProvider provider)
+        object IConvertible.ToType(Type conversionType, IFormatProvider? provider)
         {
-            return ToObject(conversionType);
+            return ToObject(conversionType)!;
         }
 #endif
     }
+#nullable disable
+#pragma warning restore CS3019 // CLS compliance checking will not be performed because it is not visible from outside this assembly
 }

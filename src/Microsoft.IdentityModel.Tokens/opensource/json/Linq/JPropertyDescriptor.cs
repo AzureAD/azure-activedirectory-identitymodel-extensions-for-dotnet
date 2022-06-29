@@ -29,6 +29,7 @@ using System.ComponentModel;
 
 namespace Microsoft.IdentityModel.Json.Linq
 {
+#nullable enable
     /// <summary>
     /// Represents a view of a <see cref="JProperty"/>.
     /// </summary>
@@ -67,7 +68,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// The value of a property for a given component.
         /// </returns>
         /// <param name="component">The component with the property for which to retrieve the value.</param>
-        public override object GetValue(object component)
+        public override object? GetValue(object? component)
         {
             return (component as JObject)?[Name];
         }
@@ -85,7 +86,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// </summary>
         /// <param name="component">The component with the property value that is to be set.</param>
         /// <param name="value">The new value.</param>
-        public override void SetValue(object component, object value)
+        public override void SetValue(object? component, object? value)
         {
             if (component is JObject o)
             {
@@ -151,6 +152,7 @@ namespace Microsoft.IdentityModel.Json.Linq
             }
         }
     }
+#nullable disable
 }
 
 #endif

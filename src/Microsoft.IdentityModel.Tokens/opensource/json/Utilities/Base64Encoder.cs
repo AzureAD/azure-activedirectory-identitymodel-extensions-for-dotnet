@@ -32,6 +32,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Json.Utilities
 {
+#nullable enable
     internal class Base64Encoder
     {
         private const int Base64LineSize = 76;
@@ -40,7 +41,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
         private readonly char[] _charsLine = new char[Base64LineSize];
         private readonly TextWriter _writer;
 
-        private byte[] _leftOverBytes;
+        private byte[]? _leftOverBytes;
         private int _leftOverBytesCount;
 
         public Base64Encoder(TextWriter writer)
@@ -78,12 +79,12 @@ namespace Microsoft.IdentityModel.Json.Utilities
 
             if (_leftOverBytesCount > 0)
             {
-                if(FulfillFromLeftover(buffer, index, ref count))
+                if (FulfillFromLeftover(buffer, index, ref count))
                 {
                     return;
                 }
 
-                int num2 = Convert.ToBase64CharArray(_leftOverBytes, 0, 3, _charsLine, 0);
+                int num2 = Convert.ToBase64CharArray(_leftOverBytes!, 0, 3, _charsLine, 0);
                 WriteChars(_charsLine, 0, num2);
             }
 
@@ -128,7 +129,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             int leftOverBytesCount = _leftOverBytesCount;
             while (leftOverBytesCount < 3 && count > 0)
             {
-                _leftOverBytes[leftOverBytesCount++] = buffer[index++];
+                _leftOverBytes![leftOverBytesCount++] = buffer[index++];
                 count--;
             }
 
@@ -145,7 +146,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
         {
             if (_leftOverBytesCount > 0)
             {
-                int count = Convert.ToBase64CharArray(_leftOverBytes, 0, _leftOverBytesCount, _charsLine, 0);
+                int count = Convert.ToBase64CharArray(_leftOverBytes!, 0, _leftOverBytesCount, _charsLine, 0);
                 WriteChars(_charsLine, 0, count);
                 _leftOverBytesCount = 0;
             }
@@ -169,7 +170,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                     return;
                 }
 
-                int num2 = Convert.ToBase64CharArray(_leftOverBytes, 0, 3, _charsLine, 0);
+                int num2 = Convert.ToBase64CharArray(_leftOverBytes!, 0, 3, _charsLine, 0);
                 await WriteCharsAsync(_charsLine, 0, num2, cancellationToken).ConfigureAwait(false);
             }
 
@@ -203,7 +204,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 
             if (_leftOverBytesCount > 0)
             {
-                int count = Convert.ToBase64CharArray(_leftOverBytes, 0, _leftOverBytesCount, _charsLine, 0);
+                int count = Convert.ToBase64CharArray(_leftOverBytes!, 0, _leftOverBytesCount, _charsLine, 0);
                 _leftOverBytesCount = 0;
                 return WriteCharsAsync(_charsLine, 0, count, cancellationToken);
             }
@@ -214,4 +215,5 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
 
     }
+#nullable disable
 }

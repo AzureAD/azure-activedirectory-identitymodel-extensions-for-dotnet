@@ -36,8 +36,23 @@ using Microsoft.IdentityModel.Json.Utilities;
 
 namespace Microsoft.IdentityModel.Json
 {
+#nullable enable
+#pragma warning disable CS3019 // CLS compliance checking will not be performed because it is not visible from outside this assembly
     internal abstract partial class JsonWriter
+#if HAVE_ASYNC_DISPOABLE
+        : IAsyncDisposable
+#endif
     {
+#if HAVE_ASYNC_DISPOABLE
+        async ValueTask IAsyncDisposable.DisposeAsync()
+        {
+            if (_currentState != State.Closed)
+            {
+                await CloseAsync().ConfigureAwait(false);
+            }
+        }
+#endif
+
         internal Task AutoCompleteAsync(JsonToken tokenBeingWritten, CancellationToken cancellationToken)
         {
             State oldState = _currentState;
@@ -225,7 +240,7 @@ namespace Microsoft.IdentityModel.Json
         /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
         /// <remarks>The default behaviour is to execute synchronously, returning an already-completed task. Derived
         /// classes can override this behaviour for true asynchronicity.</remarks>
-        public virtual Task WriteRawAsync(string json, CancellationToken cancellationToken = default)
+        public virtual Task WriteRawAsync(string? json, CancellationToken cancellationToken = default)
         {
             if (cancellationToken.IsCancellationRequested)
             {
@@ -291,7 +306,7 @@ namespace Microsoft.IdentityModel.Json
                 if (_currentState == State.Property)
                 {
                     t = WriteNullAsync(cancellationToken);
-                    if (!t.IsCompletedSucessfully())
+                    if (!t.IsCompletedSuccessfully())
                     {
                         return AwaitProperty(t, levelsToComplete, token, cancellationToken);
                     }
@@ -302,7 +317,7 @@ namespace Microsoft.IdentityModel.Json
                     if (_currentState != State.ObjectStart && _currentState != State.ArrayStart)
                     {
                         t = WriteIndentAsync(cancellationToken);
-                        if (!t.IsCompletedSucessfully())
+                        if (!t.IsCompletedSuccessfully())
                         {
                             return AwaitIndent(t, levelsToComplete, token, cancellationToken);
                         }
@@ -310,7 +325,7 @@ namespace Microsoft.IdentityModel.Json
                 }
 
                 t = WriteEndAsync(token, cancellationToken);
-                if (!t.IsCompletedSucessfully())
+                if (!t.IsCompletedSuccessfully())
                 {
                     return AwaitEnd(t, levelsToComplete, cancellationToken);
                 }
@@ -546,7 +561,7 @@ namespace Microsoft.IdentityModel.Json
         /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
         /// <remarks>The default behaviour is to execute synchronously, returning an already-completed task. Derived
         /// classes can override this behaviour for true asynchronicity.</remarks>
-        public virtual Task WriteCommentAsync(string text, CancellationToken cancellationToken = default)
+        public virtual Task WriteCommentAsync(string? text, CancellationToken cancellationToken = default)
         {
             if (cancellationToken.IsCancellationRequested)
             {
@@ -570,7 +585,7 @@ namespace Microsoft.IdentityModel.Json
         /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
         /// <remarks>The default behaviour is to execute synchronously, returning an already-completed task. Derived
         /// classes can override this behaviour for true asynchronicity.</remarks>
-        public virtual Task WriteRawValueAsync(string json, CancellationToken cancellationToken = default)
+        public virtual Task WriteRawValueAsync(string? json, CancellationToken cancellationToken = default)
         {
             if (cancellationToken.IsCancellationRequested)
             {
@@ -673,7 +688,7 @@ namespace Microsoft.IdentityModel.Json
         /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
         /// <remarks>The default behaviour is to execute synchronously, returning an already-completed task. Derived
         /// classes can override this behaviour for true asynchronicity.</remarks>
-        public Task WriteTokenAsync(JsonToken token, object value, CancellationToken cancellationToken = default)
+        public Task WriteTokenAsync(JsonToken token, object? value, CancellationToken cancellationToken = default)
         {
             if (cancellationToken.IsCancellationRequested)
             {
@@ -691,10 +706,10 @@ namespace Microsoft.IdentityModel.Json
                     return WriteStartArrayAsync(cancellationToken);
                 case JsonToken.StartConstructor:
                     ValidationUtils.ArgumentNotNull(value, nameof(value));
-                    return WriteStartConstructorAsync(value.ToString(), cancellationToken);
+                    return WriteStartConstructorAsync(value.ToString()!, cancellationToken);
                 case JsonToken.PropertyName:
                     ValidationUtils.ArgumentNotNull(value, nameof(value));
-                    return WritePropertyNameAsync(value.ToString(), cancellationToken);
+                    return WritePropertyNameAsync(value.ToString()!, cancellationToken);
                 case JsonToken.Comment:
                     return WriteCommentAsync(value?.ToString(), cancellationToken);
                 case JsonToken.Integer:
@@ -755,7 +770,7 @@ namespace Microsoft.IdentityModel.Json
                         return WriteValueAsync(guid, cancellationToken);
                     }
 
-                    return WriteValueAsync((byte[])value, cancellationToken);
+                    return WriteValueAsync((byte[]?)value, cancellationToken);
                 default:
                     throw MiscellaneousUtils.CreateArgumentOutOfRangeException(nameof(token), token, "Unexpected token type.");
             }
@@ -768,7 +783,7 @@ namespace Microsoft.IdentityModel.Json
             do
             {
                 // write a JValue date when the constructor is for a date
-                if (writeDateConstructorAsDate && reader.TokenType == JsonToken.StartConstructor && string.Equals(reader.Value.ToString(), "Date"))
+                if (writeDateConstructorAsDate && reader.TokenType == JsonToken.StartConstructor && string.Equals(reader.Value?.ToString(), "Date", StringComparison.Ordinal))
                 {
                     await WriteConstructorDateAsync(reader, cancellationToken).ConfigureAwait(false);
                 }
@@ -785,7 +800,7 @@ namespace Microsoft.IdentityModel.Json
                 && writeChildren
                 && await reader.ReadAsync(cancellationToken).ConfigureAwait(false));
 
-            if (initialDepth < CalculateWriteTokenFinalDepth(reader))
+            if (IsWriteTokenIncomplete(reader, writeChildren, initialDepth))
             {
                 throw JsonWriterException.Create(this, "Unexpected end when reading token.", null);
             }
@@ -801,7 +816,7 @@ namespace Microsoft.IdentityModel.Json
             do
             {
                 // write a JValue date when the constructor is for a date
-                if (reader.TokenType == JsonToken.StartConstructor && string.Equals(reader.Value.ToString(), "Date"))
+                if (reader.TokenType == JsonToken.StartConstructor && string.Equals(reader.Value?.ToString(), "Date", StringComparison.Ordinal))
                 {
                     WriteConstructorDate(reader);
                 }
@@ -831,7 +846,7 @@ namespace Microsoft.IdentityModel.Json
                 throw JsonWriterException.Create(this, "Unexpected token when reading date constructor. Expected Integer, got " + reader.TokenType, null);
             }
 
-            DateTime date = DateTimeUtils.ConvertJavaScriptTicksToDateTime((long)reader.Value);
+            DateTime date = DateTimeUtils.ConvertJavaScriptTicksToDateTime((long)reader.Value!);
 
             if (!await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
             {
@@ -929,7 +944,7 @@ namespace Microsoft.IdentityModel.Json
         /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
         /// <remarks>The default behaviour is to execute synchronously, returning an already-completed task. Derived
         /// classes can override this behaviour for true asynchronicity.</remarks>
-        public virtual Task WriteValueAsync(byte[] value, CancellationToken cancellationToken = default)
+        public virtual Task WriteValueAsync(byte[]? value, CancellationToken cancellationToken = default)
         {
             if (cancellationToken.IsCancellationRequested)
             {
@@ -1290,7 +1305,7 @@ namespace Microsoft.IdentityModel.Json
         /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
         /// <remarks>The default behaviour is to execute synchronously, returning an already-completed task. Derived
         /// classes can override this behaviour for true asynchronicity.</remarks>
-        public virtual Task WriteValueAsync(object value, CancellationToken cancellationToken = default)
+        public virtual Task WriteValueAsync(object? value, CancellationToken cancellationToken = default)
         {
             if (cancellationToken.IsCancellationRequested)
             {
@@ -1309,7 +1324,7 @@ namespace Microsoft.IdentityModel.Json
         /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
         /// <remarks>The default behaviour is to execute synchronously, returning an already-completed task. Derived
         /// classes can override this behaviour for true asynchronicity.</remarks>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public virtual Task WriteValueAsync(sbyte value, CancellationToken cancellationToken = default)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -1329,7 +1344,7 @@ namespace Microsoft.IdentityModel.Json
         /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
         /// <remarks>The default behaviour is to execute synchronously, returning an already-completed task. Derived
         /// classes can override this behaviour for true asynchronicity.</remarks>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public virtual Task WriteValueAsync(sbyte? value, CancellationToken cancellationToken = default)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -1387,7 +1402,7 @@ namespace Microsoft.IdentityModel.Json
         /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
         /// <remarks>The default behaviour is to execute synchronously, returning an already-completed task. Derived
         /// classes can override this behaviour for true asynchronicity.</remarks>
-        public virtual Task WriteValueAsync(string value, CancellationToken cancellationToken = default)
+        public virtual Task WriteValueAsync(string? value, CancellationToken cancellationToken = default)
         {
             if (cancellationToken.IsCancellationRequested)
             {
@@ -1444,7 +1459,7 @@ namespace Microsoft.IdentityModel.Json
         /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
         /// <remarks>The default behaviour is to execute synchronously, returning an already-completed task. Derived
         /// classes can override this behaviour for true asynchronicity.</remarks>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public virtual Task WriteValueAsync(uint value, CancellationToken cancellationToken = default)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -1464,7 +1479,7 @@ namespace Microsoft.IdentityModel.Json
         /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
         /// <remarks>The default behaviour is to execute synchronously, returning an already-completed task. Derived
         /// classes can override this behaviour for true asynchronicity.</remarks>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public virtual Task WriteValueAsync(uint? value, CancellationToken cancellationToken = default)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -1484,7 +1499,7 @@ namespace Microsoft.IdentityModel.Json
         /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
         /// <remarks>The default behaviour is to execute synchronously, returning an already-completed task. Derived
         /// classes can override this behaviour for true asynchronicity.</remarks>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public virtual Task WriteValueAsync(ulong value, CancellationToken cancellationToken = default)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -1504,7 +1519,7 @@ namespace Microsoft.IdentityModel.Json
         /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
         /// <remarks>The default behaviour is to execute synchronously, returning an already-completed task. Derived
         /// classes can override this behaviour for true asynchronicity.</remarks>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public virtual Task WriteValueAsync(ulong? value, CancellationToken cancellationToken = default)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -1524,7 +1539,7 @@ namespace Microsoft.IdentityModel.Json
         /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
         /// <remarks>The default behaviour is to execute synchronously, returning an already-completed task. Derived
         /// classes can override this behaviour for true asynchronicity.</remarks>
-        public virtual Task WriteValueAsync(Uri value, CancellationToken cancellationToken = default)
+        public virtual Task WriteValueAsync(Uri? value, CancellationToken cancellationToken = default)
         {
             if (cancellationToken.IsCancellationRequested)
             {
@@ -1543,7 +1558,7 @@ namespace Microsoft.IdentityModel.Json
         /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
         /// <remarks>The default behaviour is to execute synchronously, returning an already-completed task. Derived
         /// classes can override this behaviour for true asynchronicity.</remarks>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public virtual Task WriteValueAsync(ushort value, CancellationToken cancellationToken = default)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -1563,7 +1578,7 @@ namespace Microsoft.IdentityModel.Json
         /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
         /// <remarks>The default behaviour is to execute synchronously, returning an already-completed task. Derived
         /// classes can override this behaviour for true asynchronicity.</remarks>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public virtual Task WriteValueAsync(ushort? value, CancellationToken cancellationToken = default)
         {
             if (cancellationToken.IsCancellationRequested)
@@ -1781,7 +1796,7 @@ namespace Microsoft.IdentityModel.Json
                         }
 #endif
 
-                        // write an unknown null value, fix https://github.com/JamesNK/Microsoft.IdentityModel.Json/issues/1460
+                        // write an unknown null value, fix https://github.com/JamesNK/Newtonsoft.Json/issues/1460
                         if (value == null)
                         {
                             return writer.WriteNullAsync(cancellationToken);
@@ -1792,6 +1807,8 @@ namespace Microsoft.IdentityModel.Json
             }
         }
     }
+#nullable disable
+#pragma warning restore CS3019 // CLS compliance checking will not be performed because it is not visible from outside this assembly
 }
 
 #endif

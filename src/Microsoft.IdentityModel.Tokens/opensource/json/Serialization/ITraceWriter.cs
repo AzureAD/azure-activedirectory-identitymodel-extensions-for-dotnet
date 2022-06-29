@@ -4,6 +4,7 @@ using System.Diagnostics;
 
 namespace Microsoft.IdentityModel.Json.Serialization
 {
+#nullable enable
     /// <summary>
     /// Represents a trace writer.
     /// </summary>
@@ -23,6 +24,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
         /// <param name="level">The <see cref="TraceLevel"/> at which to write this trace.</param>
         /// <param name="message">The trace message.</param>
         /// <param name="ex">The trace exception. This parameter is optional.</param>
-        void Trace(TraceLevel level, string message, Exception ex);
+        void Trace(TraceLevel level, string message, Exception? ex);
     }
+#nullable disable
 }

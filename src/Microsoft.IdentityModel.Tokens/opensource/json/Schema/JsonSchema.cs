@@ -30,8 +30,10 @@ using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.Json.Utilities;
 using System.Globalization;
 
+
 namespace Microsoft.IdentityModel.Json.Schema
 {
+#nullable disable
     /// <summary>
     /// <para>
     /// An in-memory representation of a JSON Schema.
@@ -241,9 +243,7 @@ namespace Microsoft.IdentityModel.Json.Schema
 
         internal string Location { get; set; }
 
-#pragma warning disable CA1305 // Specify IFormatProvider
         private readonly string _internalId = Guid.NewGuid().ToString("N");
-#pragma warning restore CA1305 // Specify IFormatProvider
 
         internal string InternalId => _internalId;
 

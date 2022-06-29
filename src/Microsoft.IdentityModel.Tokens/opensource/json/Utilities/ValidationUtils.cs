@@ -24,12 +24,15 @@
 #endregion
 
 using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.IdentityModel.Json.Utilities
 {
+#nullable enable
     internal static class ValidationUtils
     {
-        public static void ArgumentNotNull(object value, string parameterName)
+        public static void ArgumentNotNull([NotNull]object? value, string parameterName)
         {
             if (value == null)
             {
@@ -37,4 +40,5 @@ namespace Microsoft.IdentityModel.Json.Utilities
             }
         }
     }
+#nullable disable
 }

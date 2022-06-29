@@ -35,6 +35,7 @@ using Microsoft.IdentityModel.Json.Utilities;
 
 namespace Microsoft.IdentityModel.Json.Converters
 {
+#nullable enable
     /// <summary>
     /// Converts an <see cref="ExpandoObject"/> to and from JSON.
     /// </summary>
@@ -46,7 +47,7 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// <param name="writer">The <see cref="JsonWriter"/> to write to.</param>
         /// <param name="value">The value.</param>
         /// <param name="serializer">The calling serializer.</param>
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             // can write is set to false
         }
@@ -59,12 +60,12 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// <param name="existingValue">The existing value of object being read.</param>
         /// <param name="serializer">The calling serializer.</param>
         /// <returns>The object value.</returns>
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             return ReadValue(reader);
         }
 
-        private object ReadValue(JsonReader reader)
+        private object? ReadValue(JsonReader reader)
         {
             if (!reader.MoveToContent())
             {
@@ -89,7 +90,7 @@ namespace Microsoft.IdentityModel.Json.Converters
 
         private object ReadList(JsonReader reader)
         {
-            IList<object> list = new List<object>();
+            IList<object?> list = new List<object?>();
 
             while (reader.Read())
             {
@@ -98,7 +99,7 @@ namespace Microsoft.IdentityModel.Json.Converters
                     case JsonToken.Comment:
                         break;
                     default:
-                        object v = ReadValue(reader);
+                        object? v = ReadValue(reader);
 
                         list.Add(v);
                         break;
@@ -112,21 +113,21 @@ namespace Microsoft.IdentityModel.Json.Converters
 
         private object ReadObject(JsonReader reader)
         {
-            IDictionary<string, object> expandoObject = new ExpandoObject();
+            IDictionary<string, object?> expandoObject = new ExpandoObject();
 
             while (reader.Read())
             {
                 switch (reader.TokenType)
                 {
                     case JsonToken.PropertyName:
-                        string propertyName = reader.Value.ToString();
+                        string propertyName = reader.Value!.ToString()!;
 
                         if (!reader.Read())
                         {
                             throw JsonSerializationException.Create(reader, "Unexpected end when reading ExpandoObject.");
                         }
 
-                        object v = ReadValue(reader);
+                        object? v = ReadValue(reader);
 
                         expandoObject[propertyName] = v;
                         break;
@@ -160,6 +161,7 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// </value>
         public override bool CanWrite => false;
     }
+#nullable disable
 }
 
 #endif

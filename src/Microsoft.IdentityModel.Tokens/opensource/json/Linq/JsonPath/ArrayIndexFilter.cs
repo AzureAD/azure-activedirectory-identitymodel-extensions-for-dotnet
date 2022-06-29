@@ -4,17 +4,18 @@ using Microsoft.IdentityModel.Json.Utilities;
 
 namespace Microsoft.IdentityModel.Json.Linq.JsonPath
 {
+#nullable enable
     internal class ArrayIndexFilter : PathFilter
     {
         public int? Index { get; set; }
 
-        public override IEnumerable<JToken> ExecuteFilter(JToken root, IEnumerable<JToken> current, bool errorWhenNoMatch)
+        public override IEnumerable<JToken> ExecuteFilter(JToken root, IEnumerable<JToken> current, JsonSelectSettings? settings)
         {
             foreach (JToken t in current)
             {
                 if (Index != null)
                 {
-                    JToken v = GetTokenIndex(t, errorWhenNoMatch, Index.GetValueOrDefault());
+                    JToken? v = GetTokenIndex(t, settings, Index.GetValueOrDefault());
 
                     if (v != null)
                     {
@@ -32,7 +33,7 @@ namespace Microsoft.IdentityModel.Json.Linq.JsonPath
                     }
                     else
                     {
-                        if (errorWhenNoMatch)
+                        if (settings?.ErrorWhenNoMatch ?? false)
                         {
                             throw new JsonException("Index * not valid on {0}.".FormatWith(CultureInfo.InvariantCulture, t.GetType().Name));
                         }
@@ -41,4 +42,5 @@ namespace Microsoft.IdentityModel.Json.Linq.JsonPath
             }
         }
     }
+#nullable disable
 }

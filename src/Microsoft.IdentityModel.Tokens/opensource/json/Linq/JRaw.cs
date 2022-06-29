@@ -28,6 +28,7 @@ using System.IO;
 
 namespace Microsoft.IdentityModel.Json.Linq
 {
+#nullable enable
     /// <summary>
     /// Represents a raw JSON string.
     /// </summary>
@@ -46,7 +47,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// Initializes a new instance of the <see cref="JRaw"/> class.
         /// </summary>
         /// <param name="rawJson">The raw json.</param>
-        public JRaw(object rawJson)
+        public JRaw(object? rawJson)
             : base(rawJson, JTokenType.Raw)
         {
         }
@@ -72,4 +73,5 @@ namespace Microsoft.IdentityModel.Json.Linq
             return new JRaw(this);
         }
     }
+#nullable disable
 }

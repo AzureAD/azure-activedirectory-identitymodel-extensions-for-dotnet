@@ -38,13 +38,11 @@ namespace Microsoft.IdentityModel.Json
     [Flags]
     internal enum DefaultValueHandling
     {
-#pragma warning disable CA1008 // Enums should have zero value
-                              /// <summary>
-                              /// Include members where the member value is the same as the member's default value when serializing objects.
-                              /// Included members are written to JSON. Has no effect when deserializing.
-                              /// </summary>
+        /// <summary>
+        /// Include members where the member value is the same as the member's default value when serializing objects.
+        /// Included members are written to JSON. Has no effect when deserializing.
+        /// </summary>
         Include = 0,
-#pragma warning restore CA1008 // Enums should have zero value
 
         /// <summary>
         /// Ignore members where the member value is the same as the member's default value when serializing objects
