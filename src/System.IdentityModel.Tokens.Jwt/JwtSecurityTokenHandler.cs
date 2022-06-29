@@ -994,14 +994,17 @@ namespace System.IdentityModel.Tokens.Jwt
             exceptionThrown = null;
             try
             {
+                ClaimsPrincipal claimsPrincipal;
                 if (validationParameters.SignatureValidator != null || validationParameters.SignatureValidatorUsingConfiguration != null)
                 {
-                    validationParameters.ValidateSignatureLast = false;
                     signatureValidatedToken = ValidateSignatureUsingDelegates(token, validationParameters, currentConfiguration);
-                    return ValidateTokenPayload(
-                        signatureValidatedToken as JwtSecurityToken,
-                        validationParameters,
-                        currentConfiguration);
+                    claimsPrincipal = ValidateTokenPayload(signatureValidatedToken as JwtSecurityToken, validationParameters, currentConfiguration);
+
+                    // use protected virtual method that does not take in configuration for back compatibility purposes
+                    if (currentConfiguration == null)
+                        ValidateIssuerSecurityKey(signatureValidatedToken.SigningKey, signatureValidatedToken as JwtSecurityToken, validationParameters);
+                    else
+                        Validators.ValidateIssuerSecurityKey(signatureValidatedToken.SigningKey, signatureValidatedToken, validationParameters, currentConfiguration);
                 }
                 else
                 {
@@ -1009,26 +1012,21 @@ namespace System.IdentityModel.Tokens.Jwt
 
                     if (validationParameters.ValidateSignatureLast)
                     {
-                        ClaimsPrincipal claimsPrincipal = ValidateTokenPayload(jwtToken, validationParameters, currentConfiguration);
-                        jwtToken = ValidateSignature(token, jwtToken, validationParameters, currentConfiguration);
+                        claimsPrincipal = ValidateTokenPayload(jwtToken, validationParameters, currentConfiguration);
+                        jwtToken = ValidateSignatureAndIssuerSecurityKey(token, jwtToken, validationParameters, currentConfiguration);
                         signatureValidatedToken = jwtToken;
-
-                        if (currentConfiguration == null)
-                            ValidateIssuerSecurityKey(jwtToken.SigningKey, jwtToken, validationParameters);
-                        else
-                            Validators.ValidateIssuerSecurityKey(jwtToken.SigningKey, jwtToken, validationParameters, currentConfiguration);
-
-                        return claimsPrincipal;
                     }
                     else
                     {
-                        signatureValidatedToken = ValidateSignature(token, jwtToken, validationParameters, currentConfiguration);
-                        return ValidateTokenPayload(
+                        signatureValidatedToken = ValidateSignatureAndIssuerSecurityKey(token, jwtToken, validationParameters, currentConfiguration);
+                        claimsPrincipal = ValidateTokenPayload(
                              signatureValidatedToken as JwtSecurityToken,
                              validationParameters,
                              currentConfiguration);
                     }
                 }
+
+                return claimsPrincipal;
             }
             catch (Exception ex)
             {
@@ -1066,6 +1064,19 @@ namespace System.IdentityModel.Tokens.Jwt
             }
 
             return null;
+        }
+
+        private JwtSecurityToken ValidateSignatureAndIssuerSecurityKey(string token, JwtSecurityToken jwtToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+        {
+            JwtSecurityToken validatedToken = ValidateSignature(token, jwtToken, validationParameters, configuration);
+
+            // use protected virtual method that does not take in configuration for back compatibility purposes
+            if (configuration == null)
+                ValidateIssuerSecurityKey(jwtToken.SigningKey, jwtToken, validationParameters);
+            else
+                Validators.ValidateIssuerSecurityKey(jwtToken.SigningKey, jwtToken, validationParameters, configuration);
+
+            return validatedToken;
         }
 
         private JwtSecurityToken GetJwtSecurityTokenFromToken(string token, TokenValidationParameters validationParameters)
@@ -1123,15 +1134,6 @@ namespace System.IdentityModel.Tokens.Jwt
             }
 
             Validators.ValidateTokenType(jwtToken.Header.Typ, jwtToken, validationParameters);
-
-            if (!validationParameters.ValidateSignatureLast)
-            {
-                // use protected virtual method that does not take in configuration for back compatibility purposes
-                if (configuration == null)
-                    ValidateIssuerSecurityKey(jwtToken.SigningKey, jwtToken, validationParameters);
-                else
-                    Validators.ValidateIssuerSecurityKey(jwtToken.SigningKey, jwtToken, validationParameters, configuration);
-            }
 
             var identity = CreateClaimsIdentity(jwtToken, issuer, validationParameters);
             if (validationParameters.SaveSigninToken)

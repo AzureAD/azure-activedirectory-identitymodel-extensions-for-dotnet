@@ -1208,11 +1208,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 TokenValidationResult tokenValidationResult;
                 if (validationParameters.SignatureValidator != null || validationParameters.SignatureValidatorUsingConfiguration != null)
                 {
-                    validationParameters.ValidateSignatureLast = false;
-                    return ValidateTokenPayload(
-                        ValidateSignatureUsingDelegates(token, validationParameters, configuration),
-                        validationParameters,
-                        configuration);
+                    var validatedToken = ValidateSignatureUsingDelegates(token, validationParameters, configuration);
+                    tokenValidationResult = ValidateTokenPayload(validatedToken, validationParameters, configuration);
+                    Validators.ValidateIssuerSecurityKey(validatedToken.SigningKey, validatedToken, validationParameters, configuration);
                 }
                 else
                 {
@@ -1236,16 +1234,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         tokenValidationResult = ValidateTokenPayload(jsonWebToken, validationParameters, configuration);
                         if (tokenValidationResult.IsValid)
                         {
-                            tokenValidationResult.SecurityToken = ValidateSignature(token, jsonWebToken, validationParameters, configuration);
-                            Validators.ValidateIssuerSecurityKey(tokenValidationResult.SecurityToken.SigningKey, jsonWebToken, validationParameters);
+                            tokenValidationResult.SecurityToken = ValidateSignatureAndIssuerSecurityKey(token, jsonWebToken, validationParameters, configuration);
                         }
                     }
                     else
                     {
-                        tokenValidationResult = ValidateTokenPayload(
-                             ValidateSignature(token, jsonWebToken, validationParameters, configuration),
-                             validationParameters,
-                             configuration);
+                        var validatedToken = ValidateSignatureAndIssuerSecurityKey(token, jsonWebToken, validationParameters, configuration);
+                        tokenValidationResult = ValidateTokenPayload(validatedToken, validationParameters, configuration);
                     }
                 }
 
@@ -1316,6 +1311,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10505, token)));
         }
 
+        private static JsonWebToken ValidateSignatureAndIssuerSecurityKey(string token, JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+        {
+            JsonWebToken validatedToken = ValidateSignature(token, jsonWebToken, validationParameters, configuration);
+            Validators.ValidateIssuerSecurityKey(validatedToken.SigningKey, jsonWebToken, validationParameters, configuration);
+
+            return validatedToken;
+        }
+
         private TokenValidationResult ValidateTokenPayload(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
         {
             var expires = jsonWebToken.TryGetClaim(JwtRegisteredClaimNames.Exp, out var _) ? (DateTime?)jsonWebToken.ValidTo : null;
@@ -1336,9 +1339,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 // this code will still work properly.
                 ValidateToken(jsonWebToken.Actor, validationParameters.ActorValidationParameters ?? validationParameters);
             }
-
-            if (!validationParameters.ValidateSignatureLast)
-                Validators.ValidateIssuerSecurityKey(jsonWebToken.SigningKey, jsonWebToken, validationParameters, configuration);
 
             string type = Validators.ValidateTokenType(jsonWebToken.Typ, jsonWebToken, validationParameters);
 
