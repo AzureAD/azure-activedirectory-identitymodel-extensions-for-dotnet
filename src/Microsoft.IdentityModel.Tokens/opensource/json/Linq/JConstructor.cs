@@ -31,12 +31,14 @@ using System.Globalization;
 
 namespace Microsoft.IdentityModel.Json.Linq
 {
+#nullable enable
+#pragma warning disable CA1062 // Validate arguments of public methods
     /// <summary>
     /// Represents a JSON constructor.
     /// </summary>
-    internal partial class JConstructor : JContainer
+    public partial class JConstructor : JContainer
     {
-        private string _name;
+        private string? _name;
         private readonly List<JToken> _values = new List<JToken>();
 
         /// <summary>
@@ -45,12 +47,17 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <value>The container's children tokens.</value>
         protected override IList<JToken> ChildrenTokens => _values;
 
-        internal override int IndexOfItem(JToken item)
+        internal override int IndexOfItem(JToken? item)
         {
+            if (item == null)
+            {
+                return -1;
+            }
+
             return _values.IndexOfReference(item);
         }
 
-        internal override void MergeItem(object content, JsonMergeSettings settings)
+        internal override void MergeItem(object content, JsonMergeSettings? settings)
         {
             if (!(content is JConstructor c))
             {
@@ -68,7 +75,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// Gets or sets the name of this constructor.
         /// </summary>
         /// <value>The constructor name.</value>
-        public string Name
+        public string? Name
         {
             get => _name;
             set => _name = value;
@@ -154,7 +161,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <param name="converters">A collection of <see cref="JsonConverter"/> which will be used when writing the token.</param>
         public override void WriteTo(JsonWriter writer, params JsonConverter[] converters)
         {
-            writer.WriteStartConstructor(_name);
+            writer.WriteStartConstructor(_name!);
 
             int count = _values.Count;
             for (int i = 0; i < count; i++)
@@ -169,7 +176,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// Gets the <see cref="JToken"/> with the specified key.
         /// </summary>
         /// <value>The <see cref="JToken"/> with the specified key.</value>
-        public override JToken this[object key]
+        public override JToken? this[object key]
         {
             get
             {
@@ -197,7 +204,13 @@ namespace Microsoft.IdentityModel.Json.Linq
 
         internal override int GetDeepHashCode()
         {
-            return _name.GetHashCode() ^ ContentsHashCode();
+            int hash;
+#if HAVE_GETHASHCODE_STRING_COMPARISON
+            hash = _name?.GetHashCode(StringComparison.Ordinal) ?? 0;
+#else
+            hash = _name?.GetHashCode() ?? 0;
+#endif
+            return hash ^ ContentsHashCode();
         }
 
         /// <summary>
@@ -217,7 +230,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <param name="settings">The <see cref="JsonLoadSettings"/> used to load the JSON.
         /// If this is <c>null</c>, default load settings will be used.</param>
         /// <returns>A <see cref="JConstructor"/> that contains the JSON that was read from the specified <see cref="JsonReader"/>.</returns>
-        public new static JConstructor Load(JsonReader reader, JsonLoadSettings settings)
+        public new static JConstructor Load(JsonReader reader, JsonLoadSettings? settings)
         {
             if (reader.TokenType == JsonToken.None)
             {
@@ -234,7 +247,7 @@ namespace Microsoft.IdentityModel.Json.Linq
                 throw JsonReaderException.Create(reader, "Error reading JConstructor from JsonReader. Current JsonReader item is not a constructor: {0}".FormatWith(CultureInfo.InvariantCulture, reader.TokenType));
             }
 
-            JConstructor c = new JConstructor((string)reader.Value);
+            JConstructor c = new JConstructor((string)reader.Value!);
             c.SetLineInfo(reader as IJsonLineInfo, settings);
 
             c.ReadTokenFrom(reader, settings);
@@ -242,4 +255,6 @@ namespace Microsoft.IdentityModel.Json.Linq
             return c;
         }
     }
+#nullable disable
+#pragma warning restore CA1062 // Validate arguments of public methods
 }

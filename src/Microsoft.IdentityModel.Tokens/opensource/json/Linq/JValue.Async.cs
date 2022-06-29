@@ -36,9 +36,11 @@ using Microsoft.IdentityModel.Json.Utilities;
 
 namespace Microsoft.IdentityModel.Json.Linq
 {
-#pragma warning disable CA1036 // Should define operators since implements IComparable
-    internal partial class JValue
-#pragma warning restore CA1036 // Should define operators since implements IComparable
+#nullable enable
+#pragma warning disable CA1062 // Validate arguments of public methods
+#pragma warning disable CA1036 // Override methods on comparable types
+
+    public partial class JValue
     {
         /// <summary>
         /// Writes this token to a <see cref="JsonWriter"/> asynchronously.
@@ -51,7 +53,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         {
             if (converters != null && converters.Length > 0 && _value != null)
             {
-                JsonConverter matchingConverter = JsonSerializer.GetMatchingConverter(converters, _value.GetType());
+                JsonConverter? matchingConverter = JsonSerializer.GetMatchingConverter(converters, _value.GetType());
                 if (matchingConverter != null && matchingConverter.CanWrite)
                 {
                     // TODO: Call WriteJsonAsync when it exists.
@@ -123,18 +125,21 @@ namespace Microsoft.IdentityModel.Json.Linq
 
                     return writer.WriteValueAsync(Convert.ToDateTime(_value, CultureInfo.InvariantCulture), cancellationToken);
                 case JTokenType.Bytes:
-                    return writer.WriteValueAsync((byte[])_value, cancellationToken);
+                    return writer.WriteValueAsync((byte[]?)_value, cancellationToken);
                 case JTokenType.Guid:
                     return writer.WriteValueAsync(_value != null ? (Guid?)_value : null, cancellationToken);
                 case JTokenType.TimeSpan:
                     return writer.WriteValueAsync(_value != null ? (TimeSpan?)_value : null, cancellationToken);
                 case JTokenType.Uri:
-                    return writer.WriteValueAsync((Uri)_value, cancellationToken);
+                    return writer.WriteValueAsync((Uri?)_value, cancellationToken);
             }
 
             throw MiscellaneousUtils.CreateArgumentOutOfRangeException(nameof(Type), _valueType, "Unexpected token type.");
         }
     }
+#nullable disable
+#pragma warning restore CA1062 // Validate arguments of public methods
+#pragma warning restore CA1036 // Override methods on comparable types
 }
 
 #endif

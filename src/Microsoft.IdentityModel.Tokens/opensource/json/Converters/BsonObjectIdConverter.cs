@@ -28,13 +28,16 @@ using Microsoft.IdentityModel.Json.Bson;
 using System.Globalization;
 using Microsoft.IdentityModel.Json.Utilities;
 
+#nullable disable
+
 namespace Microsoft.IdentityModel.Json.Converters
 {
+#pragma warning disable CA1062 // Validate arguments of public methods
     /// <summary>
     /// Converts a <see cref="BsonObjectId"/> to and from JSON and BSON.
     /// </summary>
     [Obsolete("BSON reading and writing has been moved to its own package. See https://www.nuget.org/packages/Microsoft.IdentityModel.Json.Bson for more details.")]
-    internal class BsonObjectIdConverter : JsonConverter
+    public class BsonObjectIdConverter : JsonConverter
     {
         /// <summary>
         /// Writes the JSON representation of the object.
@@ -88,4 +91,5 @@ namespace Microsoft.IdentityModel.Json.Converters
             return (objectType == typeof(BsonObjectId));
         }
     }
+#pragma warning restore CA1062 // Validate arguments of public methods
 }

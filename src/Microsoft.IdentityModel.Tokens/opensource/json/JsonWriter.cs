@@ -40,10 +40,11 @@ using System.Linq;
 
 namespace Microsoft.IdentityModel.Json
 {
+#nullable enable
     /// <summary>
     /// Represents a writer that provides a fast, non-cached, forward-only way of generating JSON data.
     /// </summary>
-    internal abstract partial class JsonWriter : IDisposable
+    public abstract partial class JsonWriter : IDisposable
     {
         internal enum State
         {
@@ -62,7 +63,7 @@ namespace Microsoft.IdentityModel.Json
         // array that gives a new state based on the current state an the token being written
         private static readonly State[][] StateArray;
 
-        internal static readonly State[][] StateArrayTempate = new[]
+        internal static readonly State[][] StateArrayTemplate = new[]
         {
             //                                      Start                    PropertyName            ObjectStart         Object            ArrayStart              Array                   ConstructorStart        Constructor             Closed       Error
             //
@@ -78,9 +79,9 @@ namespace Microsoft.IdentityModel.Json
 
         internal static State[][] BuildStateArray()
         {
-            List<State[]> allStates = StateArrayTempate.ToList();
-            State[] errorStates = StateArrayTempate[0];
-            State[] valueStates = StateArrayTempate[7];
+            List<State[]> allStates = StateArrayTemplate.ToList();
+            State[] errorStates = StateArrayTemplate[0];
+            State[] valueStates = StateArrayTemplate[7];
 
             EnumInfo enumValuesAndNames = EnumUtils.GetEnumValuesAndNames(typeof(JsonToken));
 
@@ -116,7 +117,7 @@ namespace Microsoft.IdentityModel.Json
             StateArray = BuildStateArray();
         }
 
-        private List<JsonPosition> _stack;
+        private List<JsonPosition>? _stack;
         private JsonPosition _currentPosition;
         private State _currentState;
         private Formatting _formatting;
@@ -182,7 +183,9 @@ namespace Microsoft.IdentityModel.Json
                     case State.Start:
                         return WriteState.Start;
                     default:
+#pragma warning disable CA1065 // Do not raise exceptions in unexpected locations
                         throw JsonWriterException.Create(this, "Invalid state: " + _currentState, null);
+#pragma warning restore CA1065 // Do not raise exceptions in unexpected locations
                 }
             }
         }
@@ -201,7 +204,7 @@ namespace Microsoft.IdentityModel.Json
         }
 
         /// <summary>
-        /// Gets the path of the writer.
+        /// Gets the path of the writer. 
         /// </summary>
         public string Path
         {
@@ -218,7 +221,7 @@ namespace Microsoft.IdentityModel.Json
 
                 JsonPosition? current = insideContainer ? (JsonPosition?)_currentPosition : null;
 
-                return JsonPosition.BuildPath(_stack, current);
+                return JsonPosition.BuildPath(_stack!, current);
             }
         }
 
@@ -226,8 +229,8 @@ namespace Microsoft.IdentityModel.Json
         private DateTimeZoneHandling _dateTimeZoneHandling;
         private StringEscapeHandling _stringEscapeHandling;
         private FloatFormatHandling _floatFormatHandling;
-        private string _dateFormatString;
-        private CultureInfo _culture;
+        private string? _dateFormatString;
+        private CultureInfo? _culture;
 
         /// <summary>
         /// Gets or sets a value indicating how JSON text output should be formatted.
@@ -325,7 +328,7 @@ namespace Microsoft.IdentityModel.Json
         /// <summary>
         /// Gets or sets how <see cref="DateTime"/> and <see cref="DateTimeOffset"/> values are formatted when writing JSON text.
         /// </summary>
-        public string DateFormatString
+        public string? DateFormatString
         {
             get => _dateFormatString;
             set => _dateFormatString = value;
@@ -522,7 +525,7 @@ namespace Microsoft.IdentityModel.Json
         /// A value is only required for tokens that have an associated value, e.g. the <see cref="String"/> property name for <see cref="JsonToken.PropertyName"/>.
         /// <c>null</c> can be passed to the method for tokens that don't have a value, e.g. <see cref="JsonToken.StartObject"/>.
         /// </param>
-        public void WriteToken(JsonToken token, object value)
+        public void WriteToken(JsonToken token, object? value)
         {
             switch (token)
             {
@@ -537,11 +540,11 @@ namespace Microsoft.IdentityModel.Json
                     break;
                 case JsonToken.StartConstructor:
                     ValidationUtils.ArgumentNotNull(value, nameof(value));
-                    WriteStartConstructor(value.ToString());
+                    WriteStartConstructor(value.ToString()!);
                     break;
                 case JsonToken.PropertyName:
                     ValidationUtils.ArgumentNotNull(value, nameof(value));
-                    WritePropertyName(value.ToString());
+                    WritePropertyName(value.ToString()!);
                     break;
                 case JsonToken.Comment:
                     WriteComment(value?.ToString());
@@ -579,8 +582,9 @@ namespace Microsoft.IdentityModel.Json
                     }
                     break;
                 case JsonToken.String:
-                    ValidationUtils.ArgumentNotNull(value, nameof(value));
-                    WriteValue(value.ToString());
+                    // Allow for a null string. This matches JTokenReader behavior which can read
+                    // a JsonToken.String with a null value.
+                    WriteValue(value?.ToString());
                     break;
                 case JsonToken.Boolean:
                     ValidationUtils.ArgumentNotNull(value, nameof(value));
@@ -625,7 +629,7 @@ namespace Microsoft.IdentityModel.Json
                     }
                     else
                     {
-                        WriteValue((byte[])value);
+                        WriteValue((byte[])value!);
                     }
                     break;
                 default:
@@ -649,7 +653,7 @@ namespace Microsoft.IdentityModel.Json
             do
             {
                 // write a JValue date when the constructor is for a date
-                if (writeDateConstructorAsDate && reader.TokenType == JsonToken.StartConstructor && string.Equals(reader.Value.ToString(), "Date"))
+                if (writeDateConstructorAsDate && reader.TokenType == JsonToken.StartConstructor && string.Equals(reader.Value?.ToString(), "Date", StringComparison.Ordinal))
                 {
                     WriteConstructorDate(reader);
                 }
@@ -666,10 +670,17 @@ namespace Microsoft.IdentityModel.Json
                 && writeChildren
                 && reader.Read());
 
-            if (initialDepth < CalculateWriteTokenFinalDepth(reader))
+            if (IsWriteTokenIncomplete(reader, writeChildren, initialDepth))
             {
                 throw JsonWriterException.Create(this, "Unexpected end when reading token.", null);
             }
+        }
+
+        private bool IsWriteTokenIncomplete(JsonReader reader, bool writeChildren, int initialDepth)
+        {
+            int finalDepth = CalculateWriteTokenFinalDepth(reader);
+            return initialDepth < finalDepth ||
+                (writeChildren && initialDepth == finalDepth && JsonTokenUtils.IsStartToken(reader.TokenType));
         }
 
         private int CalculateWriteTokenInitialDepth(JsonReader reader)
@@ -696,7 +707,7 @@ namespace Microsoft.IdentityModel.Json
 
         private void WriteConstructorDate(JsonReader reader)
         {
-            if (!JavaScriptUtils.TryGetDateFromConstructorJson(reader, out DateTime dateTime, out string errorMessage))
+            if (!JavaScriptUtils.TryGetDateFromConstructorJson(reader, out DateTime dateTime, out string? errorMessage))
             {
                 throw JsonWriterException.Create(this, errorMessage, null);
             }
@@ -787,7 +798,7 @@ namespace Microsoft.IdentityModel.Json
                 {
                     int currentLevel = top - i;
 
-                    if (_stack[currentLevel].Type == type)
+                    if (_stack![currentLevel].Type == type)
                     {
                         levelsToComplete = i + 2;
                         break;
@@ -909,7 +920,7 @@ namespace Microsoft.IdentityModel.Json
         /// Writes raw JSON without changing the writer's state.
         /// </summary>
         /// <param name="json">The raw JSON to write.</param>
-        public virtual void WriteRaw(string json)
+        public virtual void WriteRaw(string? json)
         {
             InternalWriteRaw();
         }
@@ -918,7 +929,7 @@ namespace Microsoft.IdentityModel.Json
         /// Writes raw JSON where a value is expected and updates the writer's state.
         /// </summary>
         /// <param name="json">The raw JSON to write.</param>
-        public virtual void WriteRawValue(string json)
+        public virtual void WriteRawValue(string? json)
         {
             // hack. want writer to change state as if a value had been written
             UpdateScopeWithFinishedValue();
@@ -930,7 +941,7 @@ namespace Microsoft.IdentityModel.Json
         /// Writes a <see cref="String"/> value.
         /// </summary>
         /// <param name="value">The <see cref="String"/> value to write.</param>
-        public virtual void WriteValue(string value)
+        public virtual void WriteValue(string? value)
         {
             InternalWriteValue(JsonToken.String);
         }
@@ -948,7 +959,7 @@ namespace Microsoft.IdentityModel.Json
         /// Writes a <see cref="UInt32"/> value.
         /// </summary>
         /// <param name="value">The <see cref="UInt32"/> value to write.</param>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public virtual void WriteValue(uint value)
         {
             InternalWriteValue(JsonToken.Integer);
@@ -967,7 +978,7 @@ namespace Microsoft.IdentityModel.Json
         /// Writes a <see cref="UInt64"/> value.
         /// </summary>
         /// <param name="value">The <see cref="UInt64"/> value to write.</param>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public virtual void WriteValue(ulong value)
         {
             InternalWriteValue(JsonToken.Integer);
@@ -1013,7 +1024,7 @@ namespace Microsoft.IdentityModel.Json
         /// Writes a <see cref="UInt16"/> value.
         /// </summary>
         /// <param name="value">The <see cref="UInt16"/> value to write.</param>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public virtual void WriteValue(ushort value)
         {
             InternalWriteValue(JsonToken.Integer);
@@ -1041,7 +1052,7 @@ namespace Microsoft.IdentityModel.Json
         /// Writes a <see cref="SByte"/> value.
         /// </summary>
         /// <param name="value">The <see cref="SByte"/> value to write.</param>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public virtual void WriteValue(sbyte value)
         {
             InternalWriteValue(JsonToken.Integer);
@@ -1114,7 +1125,7 @@ namespace Microsoft.IdentityModel.Json
         /// Writes a <see cref="Nullable{T}"/> of <see cref="UInt32"/> value.
         /// </summary>
         /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="UInt32"/> value to write.</param>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public virtual void WriteValue(uint? value)
         {
             if (value == null)
@@ -1147,7 +1158,7 @@ namespace Microsoft.IdentityModel.Json
         /// Writes a <see cref="Nullable{T}"/> of <see cref="UInt64"/> value.
         /// </summary>
         /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="UInt64"/> value to write.</param>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public virtual void WriteValue(ulong? value)
         {
             if (value == null)
@@ -1228,7 +1239,7 @@ namespace Microsoft.IdentityModel.Json
         /// Writes a <see cref="Nullable{T}"/> of <see cref="UInt16"/> value.
         /// </summary>
         /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="UInt16"/> value to write.</param>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public virtual void WriteValue(ushort? value)
         {
             if (value == null)
@@ -1277,7 +1288,7 @@ namespace Microsoft.IdentityModel.Json
         /// Writes a <see cref="Nullable{T}"/> of <see cref="SByte"/> value.
         /// </summary>
         /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="SByte"/> value to write.</param>
-        // [ClsCompliant(false)]
+        [CLSCompliant(false)]
         public virtual void WriteValue(sbyte? value)
         {
             if (value == null)
@@ -1376,7 +1387,7 @@ namespace Microsoft.IdentityModel.Json
         /// Writes a <see cref="Byte"/>[] value.
         /// </summary>
         /// <param name="value">The <see cref="Byte"/>[] value to write.</param>
-        public virtual void WriteValue(byte[] value)
+        public virtual void WriteValue(byte[]? value)
         {
             if (value == null)
             {
@@ -1392,7 +1403,7 @@ namespace Microsoft.IdentityModel.Json
         /// Writes a <see cref="Uri"/> value.
         /// </summary>
         /// <param name="value">The <see cref="Uri"/> value to write.</param>
-        public virtual void WriteValue(Uri value)
+        public virtual void WriteValue(Uri? value)
         {
             if (value == null)
             {
@@ -1409,7 +1420,7 @@ namespace Microsoft.IdentityModel.Json
         /// An error will raised if the value cannot be written as a single JSON token.
         /// </summary>
         /// <param name="value">The <see cref="Object"/> value to write.</param>
-        public virtual void WriteValue(object value)
+        public virtual void WriteValue(object? value)
         {
             if (value == null)
             {
@@ -1435,7 +1446,7 @@ namespace Microsoft.IdentityModel.Json
         /// Writes a comment <c>/*...*/</c> containing the specified text.
         /// </summary>
         /// <param name="text">Text to place inside the comment.</param>
-        public virtual void WriteComment(string text)
+        public virtual void WriteComment(string? text)
         {
             InternalWriteComment();
         }
@@ -1449,7 +1460,9 @@ namespace Microsoft.IdentityModel.Json
             InternalWriteWhitespace(ws);
         }
 
+#pragma warning disable CA1063 // Implement IDisposable Correctly
         void IDisposable.Dispose()
+#pragma warning restore CA1063 // Implement IDisposable Correctly
         {
             Dispose(true);
             GC.SuppressFinalize(this);
@@ -1647,7 +1660,7 @@ namespace Microsoft.IdentityModel.Json
                         }
 #endif
 
-                        // write an unknown null value, fix https://github.com/JamesNK/Microsoft.IdentityModel.Json/issues/1460
+                        // write an unknown null value, fix https://github.com/JamesNK/Newtonsoft.Json/issues/1460
                         if (value == null)
                         {
                             writer.WriteNull();
@@ -1778,4 +1791,5 @@ namespace Microsoft.IdentityModel.Json
             AutoComplete(JsonToken.Comment);
         }
     }
+#nullable disable
 }

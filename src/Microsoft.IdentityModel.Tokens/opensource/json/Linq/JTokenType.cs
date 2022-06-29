@@ -25,10 +25,11 @@
 
 namespace Microsoft.IdentityModel.Json.Linq
 {
+#pragma warning disable CA1720 // Identifier contains type name
     /// <summary>
     /// Specifies the type of token.
     /// </summary>
-    internal enum JTokenType
+    public enum JTokenType
     {
         /// <summary>
         /// No token type has been set.
@@ -120,4 +121,5 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// </summary>
         TimeSpan = 17
     }
+#pragma warning restore CA1720 // Identifier contains type name
 }

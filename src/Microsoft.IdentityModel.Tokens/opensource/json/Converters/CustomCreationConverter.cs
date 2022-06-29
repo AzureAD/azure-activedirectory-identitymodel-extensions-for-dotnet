@@ -29,11 +29,13 @@ using Microsoft.IdentityModel.Json.Utilities;
 
 namespace Microsoft.IdentityModel.Json.Converters
 {
+#pragma warning disable CA1062 // Validate arguments of public methods
+#nullable enable
     /// <summary>
     /// Creates a custom object.
     /// </summary>
     /// <typeparam name="T">The object type to convert.</typeparam>
-    internal abstract class CustomCreationConverter<T> : JsonConverter
+    public abstract class CustomCreationConverter<T> : JsonConverter
     {
         /// <summary>
         /// Writes the JSON representation of the object.
@@ -41,7 +43,7 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// <param name="writer">The <see cref="JsonWriter"/> to write to.</param>
         /// <param name="value">The value.</param>
         /// <param name="serializer">The calling serializer.</param>
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             throw new NotSupportedException("CustomCreationConverter should only be used while deserializing.");
         }
@@ -54,7 +56,7 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// <param name="existingValue">The existing value of object being read.</param>
         /// <param name="serializer">The calling serializer.</param>
         /// <returns>The object value.</returns>
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             if (reader.TokenType == JsonToken.Null)
             {
@@ -98,4 +100,6 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// </value>
         public override bool CanWrite => false;
     }
+#nullable disable
+#pragma warning restore CA1062 // Validate arguments of public methods
 }

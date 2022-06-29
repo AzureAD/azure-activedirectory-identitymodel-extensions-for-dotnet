@@ -30,8 +30,12 @@ using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.Json.Utilities;
 using System.Globalization;
 
+
 namespace Microsoft.IdentityModel.Json.Schema
 {
+#nullable disable
+#pragma warning disable CA2227 // Collection properties should be read only
+#pragma warning disable CA1305 // Specify IFormatProvider
     /// <summary>
     /// <para>
     /// An in-memory representation of a JSON Schema.
@@ -41,7 +45,7 @@ namespace Microsoft.IdentityModel.Json.Schema
     /// </note>
     /// </summary>
     [Obsolete("JSON Schema validation has been moved to its own package. See https://www.newtonsoft.com/jsonschema for more details.")]
-    internal class JsonSchema
+    public class JsonSchema
     {
         /// <summary>
         /// Gets or sets the id.
@@ -241,9 +245,7 @@ namespace Microsoft.IdentityModel.Json.Schema
 
         internal string Location { get; set; }
 
-#pragma warning disable CA1305 // Specify IFormatProvider
         private readonly string _internalId = Guid.NewGuid().ToString("N");
-#pragma warning restore CA1305 // Specify IFormatProvider
 
         internal string InternalId => _internalId;
 
@@ -352,4 +354,6 @@ namespace Microsoft.IdentityModel.Json.Schema
             return writer.ToString();
         }
     }
+#pragma warning restore CA2227 // Collection properties should be read only
+#pragma warning restore CA1305 // Specify IFormatProvider
 }

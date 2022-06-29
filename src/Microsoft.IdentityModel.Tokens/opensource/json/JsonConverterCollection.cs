@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Json
     /// <summary>
     /// Represents a collection of <see cref="JsonConverter"/>.
     /// </summary>
-    internal class JsonConverterCollection : Collection<JsonConverter>
+    public class JsonConverterCollection : Collection<JsonConverter>
     {
     }
 }

@@ -31,13 +31,22 @@ using System.Runtime.Serialization.Formatters;
 using Microsoft.IdentityModel.Json.Serialization;
 using System.Runtime.Serialization;
 using System.Diagnostics;
+using System.Runtime;
+#if !HAVE_LINQ
+using Microsoft.IdentityModel.Json.Utilities.LinqBridge;
+#else
+using System.Linq;
+#endif
 
 namespace Microsoft.IdentityModel.Json
 {
+#nullable enable
+#pragma warning disable CA1062 // Validate arguments of public methods
+#pragma warning disable CA2227 // Collection properties should be read only
     /// <summary>
     /// Specifies the settings on a <see cref="JsonSerializer"/> object.
     /// </summary>
-    internal class JsonSerializerSettings
+    public class JsonSerializerSettings
     {
         internal const ReferenceLoopHandling DefaultReferenceLoopHandling = ReferenceLoopHandling.Error;
         internal const MissingMemberHandling DefaultMissingMemberHandling = MissingMemberHandling.Ignore;
@@ -61,6 +70,7 @@ namespace Microsoft.IdentityModel.Json
         internal static readonly CultureInfo DefaultCulture;
         internal const bool DefaultCheckAdditionalContent = false;
         internal const string DefaultDateFormatString = @"yyyy'-'MM'-'dd'T'HH':'mm':'ss.FFFFFFFK";
+        internal const int DefaultMaxDepth = 64;
 
         internal Formatting? _formatting;
         internal DateFormatHandling? _dateFormatHandling;
@@ -69,11 +79,11 @@ namespace Microsoft.IdentityModel.Json
         internal FloatFormatHandling? _floatFormatHandling;
         internal FloatParseHandling? _floatParseHandling;
         internal StringEscapeHandling? _stringEscapeHandling;
-        internal CultureInfo _culture;
+        internal CultureInfo? _culture;
         internal bool? _checkAdditionalContent;
         internal int? _maxDepth;
         internal bool _maxDepthSet;
-        internal string _dateFormatString;
+        internal string? _dateFormatString;
         internal bool _dateFormatStringSet;
         internal TypeNameAssemblyFormatHandling? _typeNameAssemblyFormatHandling;
         internal DefaultValueHandling? _defaultValueHandling;
@@ -225,27 +235,27 @@ namespace Microsoft.IdentityModel.Json
         /// serializing .NET objects to JSON and vice versa.
         /// </summary>
         /// <value>The contract resolver.</value>
-        public IContractResolver ContractResolver { get; set; }
+        public IContractResolver? ContractResolver { get; set; }
 
         /// <summary>
         /// Gets or sets the equality comparer used by the serializer when comparing references.
         /// </summary>
         /// <value>The equality comparer.</value>
-        public IEqualityComparer EqualityComparer { get; set; }
+        public IEqualityComparer? EqualityComparer { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="IReferenceResolver"/> used by the serializer when resolving references.
         /// </summary>
         /// <value>The reference resolver.</value>
         [Obsolete("ReferenceResolver property is obsolete. Use the ReferenceResolverProvider property to set the IReferenceResolver: settings.ReferenceResolverProvider = () => resolver")]
-        public IReferenceResolver ReferenceResolver
+        public IReferenceResolver? ReferenceResolver
         {
             get => ReferenceResolverProvider?.Invoke();
             set
             {
                 ReferenceResolverProvider = (value != null)
                     ? () => value
-                    : (Func<IReferenceResolver>)null;
+                    : (Func<IReferenceResolver?>?)null;
             }
         }
 
@@ -253,49 +263,49 @@ namespace Microsoft.IdentityModel.Json
         /// Gets or sets a function that creates the <see cref="IReferenceResolver"/> used by the serializer when resolving references.
         /// </summary>
         /// <value>A function that creates the <see cref="IReferenceResolver"/> used by the serializer when resolving references.</value>
-        public Func<IReferenceResolver> ReferenceResolverProvider { get; set; }
+        public Func<IReferenceResolver?>? ReferenceResolverProvider { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="ITraceWriter"/> used by the serializer when writing trace messages.
         /// </summary>
         /// <value>The trace writer.</value>
-        public ITraceWriter TraceWriter { get; set; }
+        public ITraceWriter? TraceWriter { get; set; }
 
-        ///// <summary>
-        ///// Gets or sets the <see cref="SerializationBinder"/> used by the serializer when resolving type names.
-        ///// </summary>
-        ///// <value>The binder.</value>
-        //[Obsolete("Binder is obsolete. Use SerializationBinder instead.")]
-        //public SerializationBinder Binder
-        //{
-        //    get
-        //    {
-        //        if (SerializationBinder == null)
-        //        {
-        //            return null;
-        //        }
+        /// <summary>
+        /// Gets or sets the <see cref="SerializationBinder"/> used by the serializer when resolving type names.
+        /// </summary>
+        /// <value>The binder.</value>
+        [Obsolete("Binder is obsolete. Use SerializationBinder instead.")]
+        public SerializationBinder? Binder
+        {
+            get
+            {
+                if (SerializationBinder == null)
+                {
+                    return null;
+                }
 
-        //        if (SerializationBinder is SerializationBinderAdapter adapter)
-        //        {
-        //            return adapter.SerializationBinder;
-        //        }
+                if (SerializationBinder is SerializationBinderAdapter adapter)
+                {
+                    return adapter.SerializationBinder;
+                }
 
-        //        throw new InvalidOperationException("Cannot get SerializationBinder because an ISerializationBinder was previously set.");
-        //    }
-        //    set => SerializationBinder = value == null ? null : new SerializationBinderAdapter(value);
-        //}
+                throw new InvalidOperationException("Cannot get SerializationBinder because an ISerializationBinder was previously set.");
+            }
+            set => SerializationBinder = value == null ? null : new SerializationBinderAdapter(value);
+        }
 
         /// <summary>
         /// Gets or sets the <see cref="ISerializationBinder"/> used by the serializer when resolving type names.
         /// </summary>
         /// <value>The binder.</value>
-        public ISerializationBinder SerializationBinder { get; set; }
+        public ISerializationBinder? SerializationBinder { get; set; }
 
         /// <summary>
         /// Gets or sets the error handler called during serialization and deserialization.
         /// </summary>
         /// <value>The error handler called during serialization and deserialization.</value>
-        public EventHandler<ErrorEventArgs> Error { get; set; }
+        public EventHandler<ErrorEventArgs>? Error { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="StreamingContext"/> used by the serializer when invoking serialization callback methods.
@@ -325,11 +335,11 @@ namespace Microsoft.IdentityModel.Json
         /// <summary>
         /// Gets or sets the maximum depth allowed when reading JSON. Reading past this depth will throw a <see cref="JsonReaderException"/>.
         /// A null value means there is no maximum.
-        /// The default value is <c>null</c>.
+        /// The default value is <c>64</c>.
         /// </summary>
         public int? MaxDepth
         {
-            get => _maxDepth;
+            get => _maxDepthSet ? _maxDepth : DefaultMaxDepth;
             set
             {
                 if (value <= 0)
@@ -451,5 +461,47 @@ namespace Microsoft.IdentityModel.Json
         {
             Converters = new List<JsonConverter>();
         }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JsonSerializerSettings"/> class
+        /// using values copied from the passed in <see cref="JsonSerializerSettings"/>.
+        /// </summary>
+        public JsonSerializerSettings(JsonSerializerSettings original)
+        {
+            _floatParseHandling = original._floatParseHandling;
+            _floatFormatHandling = original._floatFormatHandling;
+            _dateParseHandling = original._dateParseHandling;
+            _dateTimeZoneHandling = original._dateTimeZoneHandling;
+            _dateFormatHandling = original._dateFormatHandling;
+            _formatting = original._formatting;
+            _maxDepth = original._maxDepth;
+            _maxDepthSet = original._maxDepthSet;
+            _dateFormatString = original._dateFormatString;
+            _dateFormatStringSet = original._dateFormatStringSet;
+            _context = original._context;
+            Error = original.Error;
+            SerializationBinder = original.SerializationBinder;
+            TraceWriter = original.TraceWriter;
+            _culture = original._culture;
+            ReferenceResolverProvider = original.ReferenceResolverProvider;
+            EqualityComparer = original.EqualityComparer;
+            ContractResolver = original.ContractResolver;
+            _constructorHandling = original._constructorHandling;
+            _typeNameAssemblyFormatHandling = original._typeNameAssemblyFormatHandling;
+            _metadataPropertyHandling = original._metadataPropertyHandling;
+            _typeNameHandling = original._typeNameHandling;
+            _preserveReferencesHandling = original._preserveReferencesHandling;
+            Converters = original.Converters.ToList();
+            _defaultValueHandling = original._defaultValueHandling;
+            _nullValueHandling = original._nullValueHandling;
+            _objectCreationHandling = original._objectCreationHandling;
+            _missingMemberHandling = original._missingMemberHandling;
+            _referenceLoopHandling = original._referenceLoopHandling;
+            _checkAdditionalContent = original._checkAdditionalContent;
+            _stringEscapeHandling = original._stringEscapeHandling;
+        }
     }
+#nullable disable
+#pragma warning restore CA1062 // Validate arguments of public methods
+#pragma warning restore CA2227 // Collection properties should be read only
 }

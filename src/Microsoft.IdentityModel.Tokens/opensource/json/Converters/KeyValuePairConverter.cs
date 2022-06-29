@@ -31,10 +31,12 @@ using System.Reflection;
 
 namespace Microsoft.IdentityModel.Json.Converters
 {
+#nullable enable
+#pragma warning disable CA1062 // Validate arguments of public methods
     /// <summary>
     /// Converts a <see cref="KeyValuePair{TKey,TValue}"/> to and from JSON.
     /// </summary>
-    internal class KeyValuePairConverter : JsonConverter
+    public class KeyValuePairConverter : JsonConverter
     {
         private const string KeyName = "Key";
         private const string ValueName = "Value";
@@ -56,11 +58,17 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// <param name="writer">The <see cref="JsonWriter"/> to write to.</param>
         /// <param name="value">The value.</param>
         /// <param name="serializer">The calling serializer.</param>
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
+            if (value == null)
+            {
+                writer.WriteNull();
+                return;
+            }
+
             ReflectionObject reflectionObject = ReflectionObjectPerType.Get(value.GetType());
 
-            DefaultContractResolver resolver = serializer.ContractResolver as DefaultContractResolver;
+            DefaultContractResolver? resolver = serializer.ContractResolver as DefaultContractResolver;
 
             writer.WriteStartObject();
             writer.WritePropertyName((resolver != null) ? resolver.GetResolvedPropertyName(KeyName) : KeyName);
@@ -78,7 +86,7 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// <param name="existingValue">The existing value of object being read.</param>
         /// <param name="serializer">The calling serializer.</param>
         /// <returns>The object value.</returns>
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             if (reader.TokenType == JsonToken.Null)
             {
@@ -90,13 +98,13 @@ namespace Microsoft.IdentityModel.Json.Converters
                 return null;
             }
 
-            object key = null;
-            object value = null;
+            object? key = null;
+            object? value = null;
 
             reader.ReadAndAssert();
 
             Type t = ReflectionUtils.IsNullableType(objectType)
-                ? Nullable.GetUnderlyingType(objectType)
+                ? Nullable.GetUnderlyingType(objectType)!
                 : objectType;
 
             ReflectionObject reflectionObject = ReflectionObjectPerType.Get(t);
@@ -105,7 +113,7 @@ namespace Microsoft.IdentityModel.Json.Converters
 
             while (reader.TokenType == JsonToken.PropertyName)
             {
-                string propertyName = reader.Value.ToString();
+                string propertyName = reader.Value!.ToString()!;
                 if (string.Equals(propertyName, KeyName, StringComparison.OrdinalIgnoreCase))
                 {
                     reader.ReadForTypeAndAssert(keyContract, false);
@@ -126,7 +134,7 @@ namespace Microsoft.IdentityModel.Json.Converters
                 reader.ReadAndAssert();
             }
 
-            return reflectionObject.Creator(key, value);
+            return reflectionObject.Creator!(key, value);
         }
 
         /// <summary>
@@ -139,7 +147,7 @@ namespace Microsoft.IdentityModel.Json.Converters
         public override bool CanConvert(Type objectType)
         {
             Type t = (ReflectionUtils.IsNullableType(objectType))
-                ? Nullable.GetUnderlyingType(objectType)
+                ? Nullable.GetUnderlyingType(objectType)!
                 : objectType;
 
             if (t.IsValueType() && t.IsGenericType())
@@ -150,4 +158,6 @@ namespace Microsoft.IdentityModel.Json.Converters
             return false;
         }
     }
+#nullable disable
+#pragma warning restore CA1062 // Validate arguments of public methods
 }

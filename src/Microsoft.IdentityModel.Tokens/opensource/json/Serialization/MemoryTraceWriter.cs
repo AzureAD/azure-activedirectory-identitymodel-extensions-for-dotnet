@@ -6,11 +6,12 @@ using System.Text;
 
 namespace Microsoft.IdentityModel.Json.Serialization
 {
+#nullable enable
     /// <summary>
     /// Represents a trace writer that writes to memory. When the trace message limit is
     /// reached then old trace messages will be removed as new messages are added.
     /// </summary>
-    internal class MemoryTraceWriter : ITraceWriter
+    public class MemoryTraceWriter : ITraceWriter
     {
         private readonly Queue<string> _traceMessages;
         private readonly object _lock;
@@ -41,7 +42,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
         /// <param name="level">The <see cref="TraceLevel"/> at which to write this trace.</param>
         /// <param name="message">The trace message.</param>
         /// <param name="ex">The trace exception. This parameter is optional.</param>
-        public void Trace(TraceLevel level, string message, Exception ex)
+        public void Trace(TraceLevel level, string message, Exception? ex)
         {
             StringBuilder sb = new StringBuilder();
             sb.Append(DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff", CultureInfo.InvariantCulture));
@@ -97,4 +98,5 @@ namespace Microsoft.IdentityModel.Json.Serialization
             }
         }
     }
+#nullable disable
 }

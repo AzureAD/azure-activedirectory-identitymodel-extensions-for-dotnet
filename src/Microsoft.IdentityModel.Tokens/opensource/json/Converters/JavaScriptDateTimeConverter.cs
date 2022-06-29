@@ -29,10 +29,12 @@ using Microsoft.IdentityModel.Json.Utilities;
 
 namespace Microsoft.IdentityModel.Json.Converters
 {
+#nullable enable
+#pragma warning disable CA1062 // Validate arguments of public methods
     /// <summary>
     /// Converts a <see cref="DateTime"/> to and from a JavaScript <c>Date</c> constructor (e.g. <c>new Date(52231943)</c>).
     /// </summary>
-    internal class JavaScriptDateTimeConverter : DateTimeConverterBase
+    public class JavaScriptDateTimeConverter : DateTimeConverterBase
     {
         /// <summary>
         /// Writes the JSON representation of the object.
@@ -40,7 +42,7 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// <param name="writer">The <see cref="JsonWriter"/> to write to.</param>
         /// <param name="value">The value.</param>
         /// <param name="serializer">The calling serializer.</param>
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             long ticks;
 
@@ -74,7 +76,7 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// <param name="existingValue">The existing property value of the JSON that is being converted.</param>
         /// <param name="serializer">The calling serializer.</param>
         /// <returns>The object value.</returns>
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             if (reader.TokenType == JsonToken.Null)
             {
@@ -86,19 +88,19 @@ namespace Microsoft.IdentityModel.Json.Converters
                 return null;
             }
 
-            if (reader.TokenType != JsonToken.StartConstructor || !string.Equals(reader.Value.ToString(), "Date"))
+            if (reader.TokenType != JsonToken.StartConstructor || !string.Equals(reader.Value?.ToString(), "Date", StringComparison.Ordinal))
             {
                 throw JsonSerializationException.Create(reader, "Unexpected token or value when parsing date. Token: {0}, Value: {1}".FormatWith(CultureInfo.InvariantCulture, reader.TokenType, reader.Value));
             }
 
-            if (!JavaScriptUtils.TryGetDateFromConstructorJson(reader, out DateTime d, out string errorMessage))
+            if (!JavaScriptUtils.TryGetDateFromConstructorJson(reader, out DateTime d, out string? errorMessage))
             {
                 throw JsonSerializationException.Create(reader, errorMessage);
             }
 
 #if HAVE_DATE_TIME_OFFSET
             Type t = (ReflectionUtils.IsNullableType(objectType))
-                ? Nullable.GetUnderlyingType(objectType)
+                ? Nullable.GetUnderlyingType(objectType)!
                 : objectType;
             if (t == typeof(DateTimeOffset))
             {
@@ -108,4 +110,6 @@ namespace Microsoft.IdentityModel.Json.Converters
             return d;
         }
     }
+#nullable disable
+#pragma warning restore CA1062 // Validate arguments of public methods
 }

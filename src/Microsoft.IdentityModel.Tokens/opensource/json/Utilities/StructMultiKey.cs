@@ -27,6 +27,7 @@ using System;
 
 namespace Microsoft.IdentityModel.Json.Utilities
 {
+#nullable enable
     internal readonly struct StructMultiKey<T1, T2> : IEquatable<StructMultiKey<T1, T2>>
     {
         public readonly T1 Value1;
@@ -43,7 +44,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             return (Value1?.GetHashCode() ?? 0) ^ (Value2?.GetHashCode() ?? 0);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (!(obj is StructMultiKey<T1, T2> key))
             {
@@ -58,4 +59,5 @@ namespace Microsoft.IdentityModel.Json.Utilities
             return (Equals(Value1, other.Value1) && Equals(Value2, other.Value2));
         }
     }
+#nullable disable
 }

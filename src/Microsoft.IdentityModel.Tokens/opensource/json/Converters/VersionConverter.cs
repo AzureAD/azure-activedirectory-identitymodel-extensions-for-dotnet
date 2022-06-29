@@ -29,10 +29,12 @@ using Microsoft.IdentityModel.Json.Utilities;
 
 namespace Microsoft.IdentityModel.Json.Converters
 {
+#nullable enable
+#pragma warning disable CA1062 // Validate arguments of public methods
     /// <summary>
     /// Converts a <see cref="Version"/> to and from a string (e.g. <c>"1.2.3.4"</c>).
     /// </summary>
-    internal class VersionConverter : JsonConverter
+    public class VersionConverter : JsonConverter
     {
         /// <summary>
         /// Writes the JSON representation of the object.
@@ -40,7 +42,7 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// <param name="writer">The <see cref="JsonWriter"/> to write to.</param>
         /// <param name="value">The value.</param>
         /// <param name="serializer">The calling serializer.</param>
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             if (value == null)
             {
@@ -64,7 +66,7 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// <param name="existingValue">The existing property value of the JSON that is being converted.</param>
         /// <param name="serializer">The calling serializer.</param>
         /// <returns>The object value.</returns>
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             if (reader.TokenType == JsonToken.Null)
             {
@@ -76,7 +78,7 @@ namespace Microsoft.IdentityModel.Json.Converters
                 {
                     try
                     {
-                        Version v = new Version((string)reader.Value);
+                        Version v = new Version((string)reader.Value!);
                         return v;
                     }
                     catch (Exception ex)
@@ -103,4 +105,6 @@ namespace Microsoft.IdentityModel.Json.Converters
             return objectType == typeof(Version);
         }
     }
+#nullable disable
+#pragma warning restore CA1062 // Validate arguments of public methods
 }

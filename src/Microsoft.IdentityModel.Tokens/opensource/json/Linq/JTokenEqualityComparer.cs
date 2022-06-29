@@ -27,10 +27,11 @@ using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Json.Linq
 {
+#nullable enable
     /// <summary>
     /// Compares tokens to determine whether they are equal.
     /// </summary>
-    internal class JTokenEqualityComparer : IEqualityComparer<JToken>
+    public class JTokenEqualityComparer : IEqualityComparer<JToken>
     {
         /// <summary>
         /// Determines whether the specified objects are equal.
@@ -40,7 +41,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <returns>
         /// <c>true</c> if the specified objects are equal; otherwise, <c>false</c>.
         /// </returns>
-        public bool Equals(JToken x, JToken y)
+        public bool Equals(JToken? x, JToken? y)
         {
             return JToken.DeepEquals(x, y);
         }
@@ -61,4 +62,5 @@ namespace Microsoft.IdentityModel.Json.Linq
             return obj.GetDeepHashCode();
         }
     }
+#nullable disable
 }

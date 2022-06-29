@@ -32,8 +32,11 @@ using System.Linq;
 
 #endif
 
+#nullable disable
+
 namespace Microsoft.IdentityModel.Json.Schema
 {
+#pragma warning disable CA2227 // Collection properties should be read only
     /// <summary>
     /// <para>
     /// Resolves <see cref="JsonSchema"/> from an id.
@@ -43,7 +46,7 @@ namespace Microsoft.IdentityModel.Json.Schema
     /// </note>
     /// </summary>
     [Obsolete("JSON Schema validation has been moved to its own package. See https://www.newtonsoft.com/jsonschema for more details.")]
-    internal class JsonSchemaResolver
+    public class JsonSchemaResolver
     {
         /// <summary>
         /// Gets or sets the loaded schemas.
@@ -66,14 +69,15 @@ namespace Microsoft.IdentityModel.Json.Schema
         /// <returns>A <see cref="JsonSchema"/> for the specified reference.</returns>
         public virtual JsonSchema GetSchema(string reference)
         {
-            JsonSchema schema = LoadedSchemas.SingleOrDefault(s => string.Equals(s.Id, reference));
+            JsonSchema schema = LoadedSchemas.SingleOrDefault(s => string.Equals(s.Id, reference, StringComparison.Ordinal));
 
             if (schema == null)
             {
-                schema = LoadedSchemas.SingleOrDefault(s => string.Equals(s.Location, reference));
+                schema = LoadedSchemas.SingleOrDefault(s => string.Equals(s.Location, reference, StringComparison.Ordinal));
             }
 
             return schema;
         }
     }
+#pragma warning restore CA2227 // Collection properties should be read only
 }

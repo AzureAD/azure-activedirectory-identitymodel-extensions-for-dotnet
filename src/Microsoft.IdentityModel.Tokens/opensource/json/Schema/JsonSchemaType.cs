@@ -25,8 +25,11 @@
 
 using System;
 
+
 namespace Microsoft.IdentityModel.Json.Schema
 {
+#pragma warning disable CA1720 // Identifier contains type name
+#pragma warning disable CA1714 // Flags enums should have plural names
     /// <summary>
     /// <para>
     /// The value types allowed by the <see cref="JsonSchema"/>.
@@ -37,7 +40,7 @@ namespace Microsoft.IdentityModel.Json.Schema
     /// </summary>
     [Flags]
     [Obsolete("JSON Schema validation has been moved to its own package. See https://www.newtonsoft.com/jsonschema for more details.")]
-    internal enum JsonSchemaType
+    public enum JsonSchemaType
     {
         /// <summary>
         /// No type specified.
@@ -83,5 +86,7 @@ namespace Microsoft.IdentityModel.Json.Schema
         /// Any type.
         /// </summary>
         Any = String | Float | Integer | Boolean | Object | Array | Null
+#pragma warning restore CA1720 // Identifier contains type name
+#pragma warning restore CA1714 // Flags enums should have plural names
     }
 }

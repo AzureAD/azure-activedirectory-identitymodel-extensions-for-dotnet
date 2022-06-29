@@ -34,10 +34,12 @@ using System.Numerics;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Json.Serialization;
 using Microsoft.IdentityModel.Json.Utilities;
+using System.Diagnostics;
 
 namespace Microsoft.IdentityModel.Json
 {
-    internal partial class JsonTextReader
+#nullable enable
+    public partial class JsonTextReader
     {
         // It's not safe to perform the async methods here in a derived class as if the synchronous equivalent
         // has been overriden then the asychronous method will no longer be doing the same operation
@@ -78,7 +80,7 @@ namespace Microsoft.IdentityModel.Json
                         return ParseObjectAsync(cancellationToken);
                     case State.PostValue:
                         Task<bool> task = ParsePostValueAsync(false, cancellationToken);
-                        if (task.IsCompletedSucessfully())
+                        if (task.IsCompletedSuccessfully())
                         {
                             if (task.Result)
                             {
@@ -110,6 +112,8 @@ namespace Microsoft.IdentityModel.Json
 
         private async Task<bool> ParsePostValueAsync(bool ignoreComments, CancellationToken cancellationToken)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             while (true)
             {
                 char currentChar = _chars[_charPos];
@@ -193,6 +197,8 @@ namespace Microsoft.IdentityModel.Json
 
         private async Task<bool> ReadFromFinishedAsync(CancellationToken cancellationToken)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             if (await EnsureCharsAsync(0, false, cancellationToken).ConfigureAwait(false))
             {
                 await EatWhitespaceAsync(cancellationToken).ConfigureAwait(false);
@@ -222,6 +228,8 @@ namespace Microsoft.IdentityModel.Json
 
         private async Task<int> ReadDataAsync(bool append, int charsRequired, CancellationToken cancellationToken)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             if (_isEndOfFile)
             {
                 return 0;
@@ -244,6 +252,8 @@ namespace Microsoft.IdentityModel.Json
 
         private async Task<bool> ParseValueAsync(CancellationToken cancellationToken)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             while (true)
             {
                 char currentChar = _chars[_charPos];
@@ -373,6 +383,8 @@ namespace Microsoft.IdentityModel.Json
 
         private async Task ReadStringIntoBufferAsync(char quote, CancellationToken cancellationToken)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             int charPos = _charPos;
             int initialPosition = _charPos;
             int lastWritePosition = _charPos;
@@ -531,7 +543,7 @@ namespace Microsoft.IdentityModel.Json
             _charPos++;
 
             Task<bool> task = EnsureCharsAsync(1, append, cancellationToken);
-            if (task.IsCompletedSucessfully())
+            if (task.IsCompletedSuccessfully())
             {
                 SetNewLine(task.Result);
                 return AsyncUtils.CompletedTask;
@@ -589,6 +601,8 @@ namespace Microsoft.IdentityModel.Json
 
         private async Task<bool> ParseObjectAsync(CancellationToken cancellationToken)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             while (true)
             {
                 char currentChar = _chars[_charPos];
@@ -646,6 +660,8 @@ namespace Microsoft.IdentityModel.Json
 
         private async Task ParseCommentAsync(bool setToken, CancellationToken cancellationToken)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             // should have already parsed / character before reaching this method
             _charPos++;
 
@@ -742,6 +758,8 @@ namespace Microsoft.IdentityModel.Json
 
         private async Task EatWhitespaceAsync(CancellationToken cancellationToken)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             while (true)
             {
                 char currentChar = _chars[_charPos];
@@ -798,6 +816,8 @@ namespace Microsoft.IdentityModel.Json
 
         private async Task<bool> MatchValueWithTrailingSeparatorAsync(string value, CancellationToken cancellationToken)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             // will match value and then move to the next character, checking that it is a separator character
             if (!await MatchValueAsync(value, cancellationToken).ConfigureAwait(false))
             {
@@ -812,7 +832,7 @@ namespace Microsoft.IdentityModel.Json
             return IsSeparator(_chars[_charPos]) || _chars[_charPos] == '\0';
         }
 
-        private async Task MatchAndSetAsync(string value, JsonToken newToken, object tokenValue, CancellationToken cancellationToken)
+        private async Task MatchAndSetAsync(string value, JsonToken newToken, object? tokenValue, CancellationToken cancellationToken)
         {
             if (await MatchValueWithTrailingSeparatorAsync(value, cancellationToken).ConfigureAwait(false))
             {
@@ -841,6 +861,8 @@ namespace Microsoft.IdentityModel.Json
 
         private async Task ParseConstructorAsync(CancellationToken cancellationToken)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             if (await MatchValueWithTrailingSeparatorAsync("new", cancellationToken).ConfigureAwait(false))
             {
                 await EatWhitespaceAsync(cancellationToken).ConfigureAwait(false);
@@ -939,6 +961,8 @@ namespace Microsoft.IdentityModel.Json
 
         private async Task ParseNumberAsync(ReadType readType, CancellationToken cancellationToken)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             ShiftBufferIfNeeded();
 
             char firstChar = _chars[_charPos];
@@ -956,6 +980,8 @@ namespace Microsoft.IdentityModel.Json
 
         private async Task<bool> ParsePropertyAsync(CancellationToken cancellationToken)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             char firstChar = _chars[_charPos];
             char quoteChar;
 
@@ -1008,6 +1034,8 @@ namespace Microsoft.IdentityModel.Json
 
         private async Task ReadNumberIntoBufferAsync(CancellationToken cancellationToken)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             int charPos = _charPos;
 
             while (true)
@@ -1042,6 +1070,8 @@ namespace Microsoft.IdentityModel.Json
 
         private async Task ParseUnquotedPropertyAsync(CancellationToken cancellationToken)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             int initialPosition = _charPos;
 
             // parse unquoted property name until whitespace or colon
@@ -1091,6 +1121,8 @@ namespace Microsoft.IdentityModel.Json
 
         private async Task HandleNullAsync(CancellationToken cancellationToken)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             if (await EnsureCharsAsync(1, true, cancellationToken).ConfigureAwait(false))
             {
                 if (_chars[_charPos + 1] == 'u')
@@ -1109,6 +1141,8 @@ namespace Microsoft.IdentityModel.Json
 
         private async Task ReadFinishedAsync(CancellationToken cancellationToken)
         {
+            MiscellaneousUtils.Assert(_chars != null);
+
             if (await EnsureCharsAsync(0, false, cancellationToken).ConfigureAwait(false))
             {
                 await EatWhitespaceAsync(cancellationToken).ConfigureAwait(false);
@@ -1131,9 +1165,10 @@ namespace Microsoft.IdentityModel.Json
             SetToken(JsonToken.None);
         }
 
-        private async Task<object> ReadStringValueAsync(ReadType readType, CancellationToken cancellationToken)
+        private async Task<object?> ReadStringValueAsync(ReadType readType, CancellationToken cancellationToken)
         {
             EnsureBuffer();
+            MiscellaneousUtils.Assert(_chars != null);
 
             switch (_currentState)
             {
@@ -1266,9 +1301,10 @@ namespace Microsoft.IdentityModel.Json
             }
         }
 
-        private async Task<object> ReadNumberValueAsync(ReadType readType, CancellationToken cancellationToken)
+        private async Task<object?> ReadNumberValueAsync(ReadType readType, CancellationToken cancellationToken)
         {
             EnsureBuffer();
+            MiscellaneousUtils.Assert(_chars != null);
 
             switch (_currentState)
             {
@@ -1395,6 +1431,7 @@ namespace Microsoft.IdentityModel.Json
         internal async Task<bool?> DoReadAsBooleanAsync(CancellationToken cancellationToken)
         {
             EnsureBuffer();
+            MiscellaneousUtils.Assert(_chars != null);
 
             switch (_currentState)
             {
@@ -1522,14 +1559,16 @@ namespace Microsoft.IdentityModel.Json
         /// property returns the <see cref="byte"/>[]. This result will be <c>null</c> at the end of an array.</returns>
         /// <remarks>Derived classes must override this method to get asynchronous behaviour. Otherwise it will
         /// execute synchronously, returning an already-completed task.</remarks>
-        public override Task<byte[]> ReadAsBytesAsync(CancellationToken cancellationToken = default)
+        public override Task<byte[]?> ReadAsBytesAsync(CancellationToken cancellationToken = default)
         {
             return _safeAsync ? DoReadAsBytesAsync(cancellationToken) : base.ReadAsBytesAsync(cancellationToken);
         }
 
-        internal async Task<byte[]> DoReadAsBytesAsync(CancellationToken cancellationToken)
+        internal async Task<byte[]?> DoReadAsBytesAsync(CancellationToken cancellationToken)
         {
             EnsureBuffer();
+            MiscellaneousUtils.Assert(_chars != null);
+
             bool isWrapped = false;
 
             switch (_currentState)
@@ -1563,7 +1602,7 @@ namespace Microsoft.IdentityModel.Json
                             case '"':
                             case '\'':
                                 await ParseStringAsync(currentChar, ReadType.ReadAsBytes, cancellationToken).ConfigureAwait(false);
-                                byte[] data = (byte[])Value;
+                                byte[]? data = (byte[]?)Value;
                                 if (isWrapped)
                                 {
                                     await ReaderReadAndAssertAsync(cancellationToken).ConfigureAwait(false);
@@ -1642,7 +1681,7 @@ namespace Microsoft.IdentityModel.Json
             if (Value != null && Value.ToString() == JsonTypeReflector.TypePropertyName)
             {
                 await ReaderReadAndAssertAsync(cancellationToken).ConfigureAwait(false);
-                if (Value != null && Value.ToString().StartsWith("System.Byte[]", StringComparison.Ordinal))
+                if (Value != null && Value.ToString()!.StartsWith("System.Byte[]", StringComparison.Ordinal))
                 {
                     await ReaderReadAndAssertAsync(cancellationToken).ConfigureAwait(false);
                     if (Value.ToString() == JsonTypeReflector.ValuePropertyName)
@@ -1753,16 +1792,17 @@ namespace Microsoft.IdentityModel.Json
         /// property returns the <see cref="string"/>. This result will be <c>null</c> at the end of an array.</returns>
         /// <remarks>Derived classes must override this method to get asynchronous behaviour. Otherwise it will
         /// execute synchronously, returning an already-completed task.</remarks>
-        public override Task<string> ReadAsStringAsync(CancellationToken cancellationToken = default)
+        public override Task<string?> ReadAsStringAsync(CancellationToken cancellationToken = default)
         {
             return _safeAsync ? DoReadAsStringAsync(cancellationToken) : base.ReadAsStringAsync(cancellationToken);
         }
 
-        internal async Task<string> DoReadAsStringAsync(CancellationToken cancellationToken)
+        internal async Task<string?> DoReadAsStringAsync(CancellationToken cancellationToken)
         {
-            return (string)await ReadStringValueAsync(ReadType.ReadAsString, cancellationToken).ConfigureAwait(false);
+            return (string?)await ReadStringValueAsync(ReadType.ReadAsString, cancellationToken).ConfigureAwait(false);
         }
     }
+#nullable disable
 }
 
 #endif

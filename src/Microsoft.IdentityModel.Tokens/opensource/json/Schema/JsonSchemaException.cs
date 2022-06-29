@@ -26,8 +26,10 @@
 using System;
 using System.Runtime.Serialization;
 
+
 namespace Microsoft.IdentityModel.Json.Schema
 {
+#pragma warning disable CA2229 // Implement serialization constructors
     /// <summary>
     /// <para>
     /// Returns detailed information about the schema exception.
@@ -40,7 +42,7 @@ namespace Microsoft.IdentityModel.Json.Schema
     [Serializable]
 #endif
     [Obsolete("JSON Schema validation has been moved to its own package. See https://www.newtonsoft.com/jsonschema for more details.")]
-    internal class JsonSchemaException : JsonException
+    public class JsonSchemaException : JsonException
     {
         /// <summary>
         /// Gets the line number indicating where the error occurred.
@@ -110,4 +112,5 @@ namespace Microsoft.IdentityModel.Json.Schema
             LinePosition = linePosition;
         }
     }
+#pragma warning restore CA2229 // Implement serialization constructors
 }

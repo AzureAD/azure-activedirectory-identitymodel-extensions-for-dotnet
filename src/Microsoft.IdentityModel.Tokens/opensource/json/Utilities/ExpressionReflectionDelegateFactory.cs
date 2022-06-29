@@ -35,6 +35,7 @@ using Microsoft.IdentityModel.Json.Serialization;
 
 namespace Microsoft.IdentityModel.Json.Utilities
 {
+#nullable enable
     internal class ExpressionReflectionDelegateFactory : ReflectionDelegateFactory
     {
         private static readonly ExpressionReflectionDelegateFactory _instance = new ExpressionReflectionDelegateFactory();
@@ -57,7 +58,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             return compiled;
         }
 
-        public override MethodCall<T, object> CreateMethodCall<T>(MethodBase method)
+        public override MethodCall<T, object?> CreateMethodCall<T>(MethodBase method)
         {
             ValidationUtils.ArgumentNotNull(method, nameof(method));
 
@@ -70,7 +71,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 
             LambdaExpression lambdaExpression = Expression.Lambda(typeof(MethodCall<T, object>), callExpression, targetParameterExpression, argsParameterExpression);
 
-            MethodCall<T, object> compiled = (MethodCall<T, object>)lambdaExpression.Compile();
+            MethodCall<T, object?> compiled = (MethodCall<T, object?>)lambdaExpression.Compile();
             return compiled;
         }
 
@@ -79,9 +80,16 @@ namespace Microsoft.IdentityModel.Json.Utilities
             public Expression Value;
             public ParameterExpression Variable;
             public bool IsOut;
+
+            public ByRefParameter(Expression value, ParameterExpression variable, bool isOut)
+            {
+                Value = value;
+                Variable = variable;
+                IsOut = isOut;
+            }
         }
 
-        private Expression BuildMethodCall(MethodBase method, Type type, ParameterExpression targetParameterExpression, ParameterExpression argsParameterExpression)
+        private Expression BuildMethodCall(MethodBase method, Type type, ParameterExpression? targetParameterExpression, ParameterExpression argsParameterExpression)
         {
             ParameterInfo[] parametersInfo = method.GetParameters();
 
@@ -104,7 +112,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                     bool isByRef = false;
                     if (parameterType.IsByRef)
                     {
-                        parameterType = parameterType.GetElementType();
+                        parameterType = parameterType.GetElementType()!;
                         isByRef = true;
                     }
 
@@ -117,7 +125,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                     if (isByRef)
                     {
                         ParameterExpression variable = Expression.Variable(parameterType);
-                        refParameterMap.Add(new ByRefParameter {Value = argExpression, Variable = variable, IsOut = parameter.IsOut});
+                        refParameterMap.Add(new ByRefParameter(argExpression, variable, parameter.IsOut));
 
                         argExpression = variable;
                     }
@@ -137,7 +145,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             }
             else
             {
-                Expression readParameter = EnsureCastExpression(targetParameterExpression, method.DeclaringType);
+                Expression readParameter = EnsureCastExpression(targetParameterExpression!, method.DeclaringType!);
 
                 callExpression = Expression.Call(readParameter, (MethodInfo)method, argsExpression);
             }
@@ -187,7 +195,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             // avoid error from expressions compiler because of abstract class
             if (type.IsAbstract())
             {
-                return () => (T)Activator.CreateInstance(type);
+                return () => (T)Activator.CreateInstance(type)!;
             }
 
             try
@@ -207,11 +215,11 @@ namespace Microsoft.IdentityModel.Json.Utilities
             {
                 // an error can be thrown if constructor is not valid on Win8
                 // will have INVOCATION_FLAGS_NON_W8P_FX_API invocation flag
-                return () => (T)Activator.CreateInstance(type);
+                return () => (T)Activator.CreateInstance(type)!;
             }
         }
 
-        public override Func<T, object> CreateGet<T>(PropertyInfo propertyInfo)
+        public override Func<T, object?> CreateGet<T>(PropertyInfo propertyInfo)
         {
             ValidationUtils.ArgumentNotNull(propertyInfo, nameof(propertyInfo));
 
@@ -221,7 +229,11 @@ namespace Microsoft.IdentityModel.Json.Utilities
             ParameterExpression parameterExpression = Expression.Parameter(instanceType, "instance");
             Expression resultExpression;
 
-            MethodInfo getMethod = propertyInfo.GetGetMethod(true);
+            MethodInfo? getMethod = propertyInfo.GetGetMethod(true);
+            if (getMethod == null)
+            {
+                throw new ArgumentException("Property does not have a getter.");
+            }
 
             if (getMethod.IsStatic)
             {
@@ -229,7 +241,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             }
             else
             {
-                Expression readParameter = EnsureCastExpression(parameterExpression, propertyInfo.DeclaringType);
+                Expression readParameter = EnsureCastExpression(parameterExpression, propertyInfo.DeclaringType!);
 
                 resultExpression = Expression.MakeMemberAccess(readParameter, propertyInfo);
             }
@@ -238,11 +250,11 @@ namespace Microsoft.IdentityModel.Json.Utilities
 
             LambdaExpression lambdaExpression = Expression.Lambda(typeof(Func<T, object>), resultExpression, parameterExpression);
 
-            Func<T, object> compiled = (Func<T, object>)lambdaExpression.Compile();
+            Func<T, object?> compiled = (Func<T, object?>)lambdaExpression.Compile();
             return compiled;
         }
 
-        public override Func<T, object> CreateGet<T>(FieldInfo fieldInfo)
+        public override Func<T, object?> CreateGet<T>(FieldInfo fieldInfo)
         {
             ValidationUtils.ArgumentNotNull(fieldInfo, nameof(fieldInfo));
 
@@ -255,24 +267,24 @@ namespace Microsoft.IdentityModel.Json.Utilities
             }
             else
             {
-                Expression sourceExpression = EnsureCastExpression(sourceParameter, fieldInfo.DeclaringType);
+                Expression sourceExpression = EnsureCastExpression(sourceParameter, fieldInfo.DeclaringType!);
 
                 fieldExpression = Expression.Field(sourceExpression, fieldInfo);
             }
 
             fieldExpression = EnsureCastExpression(fieldExpression, typeof(object));
 
-            Func<T, object> compiled = Expression.Lambda<Func<T, object>>(fieldExpression, sourceParameter).Compile();
+            Func<T, object?> compiled = Expression.Lambda<Func<T, object?>>(fieldExpression, sourceParameter).Compile();
             return compiled;
         }
 
-        public override Action<T, object> CreateSet<T>(FieldInfo fieldInfo)
+        public override Action<T, object?> CreateSet<T>(FieldInfo fieldInfo)
         {
             ValidationUtils.ArgumentNotNull(fieldInfo, nameof(fieldInfo));
 
             // use reflection for structs
             // expression doesn't correctly set value
-            if (fieldInfo.DeclaringType.IsValueType() || fieldInfo.IsInitOnly)
+            if (fieldInfo.DeclaringType!.IsValueType() || fieldInfo.IsInitOnly)
             {
                 return LateBoundReflectionDelegateFactory.Instance.CreateSet<T>(fieldInfo);
             }
@@ -287,7 +299,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             }
             else
             {
-                Expression sourceExpression = EnsureCastExpression(sourceParameterExpression, fieldInfo.DeclaringType);
+                Expression sourceExpression = EnsureCastExpression(sourceParameterExpression, fieldInfo.DeclaringType!);
 
                 fieldExpression = Expression.Field(sourceExpression, fieldInfo);
             }
@@ -298,17 +310,17 @@ namespace Microsoft.IdentityModel.Json.Utilities
 
             LambdaExpression lambdaExpression = Expression.Lambda(typeof(Action<T, object>), assignExpression, sourceParameterExpression, valueParameterExpression);
 
-            Action<T, object> compiled = (Action<T, object>)lambdaExpression.Compile();
+            Action<T, object?> compiled = (Action<T, object?>)lambdaExpression.Compile();
             return compiled;
         }
 
-        public override Action<T, object> CreateSet<T>(PropertyInfo propertyInfo)
+        public override Action<T, object?> CreateSet<T>(PropertyInfo propertyInfo)
         {
             ValidationUtils.ArgumentNotNull(propertyInfo, nameof(propertyInfo));
 
             // use reflection for structs
             // expression doesn't correctly set value
-            if (propertyInfo.DeclaringType.IsValueType())
+            if (propertyInfo.DeclaringType!.IsValueType())
             {
                 return LateBoundReflectionDelegateFactory.Instance.CreateSet<T>(propertyInfo);
             }
@@ -321,7 +333,11 @@ namespace Microsoft.IdentityModel.Json.Utilities
             ParameterExpression valueParameter = Expression.Parameter(valueType, "value");
             Expression readValueParameter = EnsureCastExpression(valueParameter, propertyInfo.PropertyType);
 
-            MethodInfo setMethod = propertyInfo.GetSetMethod(true);
+            MethodInfo? setMethod = propertyInfo.GetSetMethod(true);
+            if (setMethod == null)
+            {
+                throw new ArgumentException("Property does not have a setter.");
+            }
 
             Expression setExpression;
             if (setMethod.IsStatic)
@@ -330,14 +346,14 @@ namespace Microsoft.IdentityModel.Json.Utilities
             }
             else
             {
-                Expression readInstanceParameter = EnsureCastExpression(instanceParameter, propertyInfo.DeclaringType);
+                Expression readInstanceParameter = EnsureCastExpression(instanceParameter, propertyInfo.DeclaringType!);
 
                 setExpression = Expression.Call(readInstanceParameter, setMethod, readValueParameter);
             }
 
-            LambdaExpression lambdaExpression = Expression.Lambda(typeof(Action<T, object>), setExpression, instanceParameter, valueParameter);
+            LambdaExpression lambdaExpression = Expression.Lambda(typeof(Action<T, object?>), setExpression, instanceParameter, valueParameter);
 
-            Action<T, object> compiled = (Action<T, object>)lambdaExpression.Compile();
+            Action<T, object?> compiled = (Action<T, object?>)lambdaExpression.Compile();
             return compiled;
         }
         
@@ -357,7 +373,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 
                 if (allowWidening && targetType.IsPrimitive())
                 {
-                    MethodInfo toTargetTypeMethod = typeof(Convert)
+                    MethodInfo? toTargetTypeMethod = typeof(Convert)
                         .GetMethod("To" + targetType.Name, new[] { typeof(object) });
 
                     if (toTargetTypeMethod != null)
@@ -378,6 +394,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             return Expression.Convert(expression, targetType);
         }
     }
+#nullable disable
 }
 
 #endif

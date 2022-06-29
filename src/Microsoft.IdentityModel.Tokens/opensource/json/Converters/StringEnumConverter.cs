@@ -41,10 +41,12 @@ using System.Linq;
 
 namespace Microsoft.IdentityModel.Json.Converters
 {
+#nullable enable
+#pragma warning disable CA1062 // Validate arguments of public methods
     /// <summary>
     /// Converts an <see cref="Enum"/> to and from its name string value.
     /// </summary>
-    internal class StringEnumConverter : JsonConverter
+    public class StringEnumConverter : JsonConverter
     {
         /// <summary>
         /// Gets or sets a value indicating whether the written enum text should be camel case.
@@ -82,7 +84,7 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// Gets or sets the naming strategy used to resolve how enum text is written.
         /// </summary>
         /// <value>The naming strategy used to resolve how enum text is written.</value>
-        public NamingStrategy NamingStrategy { get; set; }
+        public NamingStrategy? NamingStrategy { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether integer values are allowed when serializing and deserializing.
@@ -175,7 +177,7 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// <param name="writer">The <see cref="JsonWriter"/> to write to.</param>
         /// <param name="value">The value.</param>
         /// <param name="serializer">The calling serializer.</param>
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             if (value == null)
             {
@@ -185,7 +187,7 @@ namespace Microsoft.IdentityModel.Json.Converters
 
             Enum e = (Enum)value;
 
-            if (!EnumUtils.TryToString(e.GetType(), value, NamingStrategy, out string enumName))
+            if (!EnumUtils.TryToString(e.GetType(), value, NamingStrategy, out string? enumName))
             {
                 if (!AllowIntegerValues)
                 {
@@ -209,7 +211,7 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// <param name="existingValue">The existing value of object being read.</param>
         /// <param name="serializer">The calling serializer.</param>
         /// <returns>The object value.</returns>
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             if (reader.TokenType == JsonToken.Null)
             {
@@ -222,20 +224,20 @@ namespace Microsoft.IdentityModel.Json.Converters
             }
 
             bool isNullable = ReflectionUtils.IsNullableType(objectType);
-            Type t = isNullable ? Nullable.GetUnderlyingType(objectType) : objectType;
+            Type t = isNullable ? Nullable.GetUnderlyingType(objectType)! : objectType;
 
             try
             {
                 if (reader.TokenType == JsonToken.String)
                 {
-                    string enumText = reader.Value.ToString();
+                    string? enumText = reader.Value?.ToString();
 
-                    if (enumText == string.Empty && isNullable)
+                    if (StringUtils.IsNullOrEmpty(enumText) && isNullable)
                     {
                         return null;
                     }
 
-                    return EnumUtils.ParseEnum(t, NamingStrategy, enumText, !AllowIntegerValues);
+                    return EnumUtils.ParseEnum(t, NamingStrategy, enumText!, !AllowIntegerValues);
                 }
 
                 if (reader.TokenType == JsonToken.Integer)
@@ -267,10 +269,12 @@ namespace Microsoft.IdentityModel.Json.Converters
         public override bool CanConvert(Type objectType)
         {
             Type t = (ReflectionUtils.IsNullableType(objectType))
-                ? Nullable.GetUnderlyingType(objectType)
+                ? Nullable.GetUnderlyingType(objectType)!
                 : objectType;
 
             return t.IsEnum();
         }
     }
+#nullable disable
+#pragma warning restore CA1062 // Validate arguments of public methods
 }

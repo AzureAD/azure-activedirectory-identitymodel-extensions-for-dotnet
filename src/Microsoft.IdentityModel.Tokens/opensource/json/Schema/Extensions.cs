@@ -28,6 +28,8 @@ using System.Collections.Generic;
 using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.Json.Utilities;
 
+#nullable disable
+
 namespace Microsoft.IdentityModel.Json.Schema
 {
     /// <summary>
@@ -39,7 +41,7 @@ namespace Microsoft.IdentityModel.Json.Schema
     /// </note>
     /// </summary>
     [Obsolete("JSON Schema validation has been moved to its own package. See https://www.newtonsoft.com/jsonschema for more details.")]
-    internal static class Extensions
+    public static class Extensions
     {
         /// <summary>
         /// <para>

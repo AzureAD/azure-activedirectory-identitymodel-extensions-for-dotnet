@@ -37,7 +37,9 @@ namespace Microsoft.IdentityModel.Json
     /// when deserializing with a value other than <see cref="TypeNameHandling.None"/>.
     /// </remarks>
     [Flags]
-    internal enum TypeNameHandling
+#pragma warning disable CA1714 // Flags enums should have plural names
+    public enum TypeNameHandling
+#pragma warning restore CA1714 // Flags enums should have plural names
     {
         /// <summary>
         /// Do not include the .NET type name when serializing types.

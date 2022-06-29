@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 #if HAVE_BIG_INTEGER
 using System.Numerics;
 #endif
@@ -36,6 +37,7 @@ using System.Text.RegularExpressions;
 #endif
 using Microsoft.IdentityModel.Json.Serialization;
 using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 #if !HAVE_LINQ
 using Microsoft.IdentityModel.Json.Utilities.LinqBridge;
 #endif
@@ -46,6 +48,7 @@ using System.Data.SqlTypes;
 
 namespace Microsoft.IdentityModel.Json.Utilities
 {
+#nullable enable
     internal enum PrimitiveTypeCode
     {
         Empty = 0,
@@ -94,8 +97,14 @@ namespace Microsoft.IdentityModel.Json.Utilities
 
     internal class TypeInformation
     {
-        public Type Type { get; set; }
-        public PrimitiveTypeCode TypeCode { get; set; }
+        public Type Type { get; }
+        public PrimitiveTypeCode TypeCode { get; }
+
+        public TypeInformation(Type type, PrimitiveTypeCode typeCode)
+        {
+            Type = type;
+            TypeCode = typeCode;
+        }
     }
 
     internal enum ParseResult
@@ -163,25 +172,25 @@ namespace Microsoft.IdentityModel.Json.Utilities
         private static readonly TypeInformation[] PrimitiveTypeCodes =
         {
             // need all of these. lookup against the index with TypeCode value
-            new TypeInformation { Type = typeof(object), TypeCode = PrimitiveTypeCode.Empty },
-            new TypeInformation { Type = typeof(object), TypeCode = PrimitiveTypeCode.Object },
-            new TypeInformation { Type = typeof(object), TypeCode = PrimitiveTypeCode.DBNull },
-            new TypeInformation { Type = typeof(bool), TypeCode = PrimitiveTypeCode.Boolean },
-            new TypeInformation { Type = typeof(char), TypeCode = PrimitiveTypeCode.Char },
-            new TypeInformation { Type = typeof(sbyte), TypeCode = PrimitiveTypeCode.SByte },
-            new TypeInformation { Type = typeof(byte), TypeCode = PrimitiveTypeCode.Byte },
-            new TypeInformation { Type = typeof(short), TypeCode = PrimitiveTypeCode.Int16 },
-            new TypeInformation { Type = typeof(ushort), TypeCode = PrimitiveTypeCode.UInt16 },
-            new TypeInformation { Type = typeof(int), TypeCode = PrimitiveTypeCode.Int32 },
-            new TypeInformation { Type = typeof(uint), TypeCode = PrimitiveTypeCode.UInt32 },
-            new TypeInformation { Type = typeof(long), TypeCode = PrimitiveTypeCode.Int64 },
-            new TypeInformation { Type = typeof(ulong), TypeCode = PrimitiveTypeCode.UInt64 },
-            new TypeInformation { Type = typeof(float), TypeCode = PrimitiveTypeCode.Single },
-            new TypeInformation { Type = typeof(double), TypeCode = PrimitiveTypeCode.Double },
-            new TypeInformation { Type = typeof(decimal), TypeCode = PrimitiveTypeCode.Decimal },
-            new TypeInformation { Type = typeof(DateTime), TypeCode = PrimitiveTypeCode.DateTime },
-            new TypeInformation { Type = typeof(object), TypeCode = PrimitiveTypeCode.Empty }, // no 17 in TypeCode for some reason
-            new TypeInformation { Type = typeof(string), TypeCode = PrimitiveTypeCode.String }
+            new TypeInformation(typeof(object), PrimitiveTypeCode.Empty), 
+            new TypeInformation(typeof(object), PrimitiveTypeCode.Object), 
+            new TypeInformation(typeof(object), PrimitiveTypeCode.DBNull), 
+            new TypeInformation(typeof(bool), PrimitiveTypeCode.Boolean), 
+            new TypeInformation(typeof(char), PrimitiveTypeCode.Char), 
+            new TypeInformation(typeof(sbyte), PrimitiveTypeCode.SByte), 
+            new TypeInformation(typeof(byte), PrimitiveTypeCode.Byte), 
+            new TypeInformation(typeof(short), PrimitiveTypeCode.Int16), 
+            new TypeInformation(typeof(ushort), PrimitiveTypeCode.UInt16), 
+            new TypeInformation(typeof(int), PrimitiveTypeCode.Int32), 
+            new TypeInformation(typeof(uint), PrimitiveTypeCode.UInt32), 
+            new TypeInformation(typeof(long), PrimitiveTypeCode.Int64), 
+            new TypeInformation(typeof(ulong), PrimitiveTypeCode.UInt64), 
+            new TypeInformation(typeof(float), PrimitiveTypeCode.Single), 
+            new TypeInformation(typeof(double), PrimitiveTypeCode.Double), 
+            new TypeInformation(typeof(decimal), PrimitiveTypeCode.Decimal), 
+            new TypeInformation(typeof(DateTime), PrimitiveTypeCode.DateTime), 
+            new TypeInformation(typeof(object), PrimitiveTypeCode.Empty), // no 17 in TypeCode for some reason
+            new TypeInformation(typeof(string), PrimitiveTypeCode.String)
         };
 #endif
 
@@ -207,7 +216,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             // performance?
             if (ReflectionUtils.IsNullableType(t))
             {
-                Type nonNullable = Nullable.GetUnderlyingType(t);
+                Type nonNullable = Nullable.GetUnderlyingType(t)!;
                 if (nonNullable.IsEnum())
                 {
                     Type nullableUnderlyingType = typeof(Nullable<>).MakeGenericType(Enum.GetUnderlyingType(nonNullable));
@@ -248,14 +257,14 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
         }
 
-        private static readonly ThreadSafeStore<StructMultiKey<Type, Type>, Func<object, object>> CastConverters =
-            new ThreadSafeStore<StructMultiKey<Type, Type>, Func<object, object>>(CreateCastConverter);
+        private static readonly ThreadSafeStore<StructMultiKey<Type, Type>, Func<object?, object?>?> CastConverters =
+            new ThreadSafeStore<StructMultiKey<Type, Type>, Func<object?, object?>?>(CreateCastConverter);
 
-        private static Func<object, object> CreateCastConverter(StructMultiKey<Type, Type> t)
+        private static Func<object?, object?>? CreateCastConverter(StructMultiKey<Type, Type> t)
         {
             Type initialType = t.Value1;
             Type targetType = t.Value2;
-            MethodInfo castMethodInfo = targetType.GetMethod("op_Implicit", new[] { initialType })
+            MethodInfo? castMethodInfo = targetType.GetMethod("op_Implicit", new[] { initialType })
                 ?? targetType.GetMethod("op_Explicit", new[] { initialType });
 
             if (castMethodInfo == null)
@@ -263,7 +272,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                 return null;
             }
 
-            MethodCall<object, object> call = JsonTypeReflector.ReflectionDelegateFactory.CreateMethodCall<object>(castMethodInfo);
+            MethodCall<object?, object?> call = JsonTypeReflector.ReflectionDelegateFactory.CreateMethodCall<object?>(castMethodInfo);
 
             return o => call(null, o);
         }
@@ -363,14 +372,12 @@ namespace Microsoft.IdentityModel.Json.Utilities
 
         public static object Convert(object initialValue, CultureInfo culture, Type targetType)
         {
-            switch (TryConvertInternal(initialValue, culture, targetType, out object value))
+            switch (TryConvertInternal(initialValue, culture, targetType, out object? value))
             {
                 case ConvertResult.Success:
-                    return value;
+                    return value!;
                 case ConvertResult.CannotConvertNull:
-#pragma warning disable CA2201 // Do not raise reserved exception types
                     throw new Exception("Can not convert null {0} into non-nullable {1}.".FormatWith(CultureInfo.InvariantCulture, initialValue.GetType(), targetType));
-#pragma warning restore CA2201 // Do not raise reserved exception types
                 case ConvertResult.NotInstantiableType:
                     throw new ArgumentException("Target type {0} is not a value type or a non-abstract class.".FormatWith(CultureInfo.InvariantCulture, targetType), nameof(targetType));
                 case ConvertResult.NoValidConversion:
@@ -380,7 +387,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             }
         }
 
-        private static bool TryConvert(object initialValue, CultureInfo culture, Type targetType, out object value)
+        private static bool TryConvert(object? initialValue, CultureInfo culture, Type targetType, out object? value)
         {
             try
             {
@@ -399,7 +406,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             }
         }
 
-        private static ConvertResult TryConvertInternal(object initialValue, CultureInfo culture, Type targetType, out object value)
+        private static ConvertResult TryConvertInternal(object? initialValue, CultureInfo culture, Type targetType, out object? value)
         {
             if (initialValue == null)
             {
@@ -408,7 +415,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 
             if (ReflectionUtils.IsNullableType(targetType))
             {
-                targetType = Nullable.GetUnderlyingType(targetType);
+                targetType = Nullable.GetUnderlyingType(targetType)!;
             }
 
             Type initialType = initialValue.GetType();
@@ -426,7 +433,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                 {
                     if (initialValue is string)
                     {
-                        value = Enum.Parse(targetType, initialValue.ToString(), true);
+                        value = Enum.Parse(targetType, initialValue.ToString()!, true);
                         return ConvertResult.Success;
                     }
                     else if (IsInteger(initialValue))
@@ -484,7 +491,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                 }
                 if (targetType == typeof(Version))
                 {
-                    if (VersionTryParse(s, out Version result))
+                    if (VersionTryParse(s, out Version? result))
                     {
                         value = result;
                         return ConvertResult.Success;
@@ -497,6 +504,18 @@ namespace Microsoft.IdentityModel.Json.Utilities
                     value = Type.GetType(s, true);
                     return ConvertResult.Success;
                 }
+#if HAVE_DATE_ONLY
+                if (targetType == typeof(DateOnly))
+                {
+                    value = DateOnly.ParseExact(s, "yyyy'-'MM'-'dd", CultureInfo.InvariantCulture);
+                    return ConvertResult.Success;
+                }
+                if (targetType == typeof(TimeOnly))
+                {
+                    value = TimeOnly.ParseExact(s, "HH':'mm':'ss.FFFFFFF", CultureInfo.InvariantCulture);
+                    return ConvertResult.Success;
+                }
+#endif
             }
 
 #if HAVE_BIG_INTEGER
@@ -569,7 +588,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
         /// The converted type. If conversion was unsuccessful, the initial value
         /// is returned if assignable to the target type.
         /// </returns>
-        public static object ConvertOrCast(object initialValue, CultureInfo culture, Type targetType)
+        public static object? ConvertOrCast(object? initialValue, CultureInfo culture, Type targetType)
         {
             if (targetType == typeof(object))
             {
@@ -581,27 +600,27 @@ namespace Microsoft.IdentityModel.Json.Utilities
                 return null;
             }
 
-            if (TryConvert(initialValue, culture, targetType, out object convertedValue))
+            if (TryConvert(initialValue, culture, targetType, out object? convertedValue))
             {
                 return convertedValue;
             }
 
-            return EnsureTypeAssignable(initialValue, ReflectionUtils.GetObjectType(initialValue), targetType);
+            return EnsureTypeAssignable(initialValue, ReflectionUtils.GetObjectType(initialValue)!, targetType);
         }
 #endregion
 
-        private static object EnsureTypeAssignable(object value, Type initialType, Type targetType)
+        private static object? EnsureTypeAssignable(object? value, Type initialType, Type targetType)
         {
-            Type valueType = value?.GetType();
-
             if (value != null)
             {
+                Type valueType = value.GetType();
+
                 if (targetType.IsAssignableFrom(valueType))
                 {
                     return value;
                 }
 
-                Func<object, object> castConverter = CastConverters.Get(new StructMultiKey<Type, Type>(valueType, targetType));
+                Func<object?, object?>? castConverter = CastConverters.Get(new StructMultiKey<Type, Type>(valueType, targetType));
                 if (castConverter != null)
                 {
                     return castConverter(value);
@@ -618,7 +637,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             throw new ArgumentException("Could not cast or convert from {0} to {1}.".FormatWith(CultureInfo.InvariantCulture, initialType?.ToString() ?? "{null}", targetType));
         }
 
-        public static bool VersionTryParse(string input, out Version result)
+        public static bool VersionTryParse(string input, [NotNullWhen(true)]out Version? result)
         {
 #if HAVE_VERSION_TRY_PARSE
             return Version.TryParse(input, out result);
@@ -1568,4 +1587,5 @@ namespace Microsoft.IdentityModel.Json.Utilities
             return true;
         }
     }
+#nullable disable
 }

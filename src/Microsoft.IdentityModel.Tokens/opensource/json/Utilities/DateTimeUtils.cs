@@ -30,6 +30,7 @@ using System.Globalization;
 
 namespace Microsoft.IdentityModel.Json.Utilities
 {
+#nullable enable
     internal static class DateTimeUtils
     {
         internal static readonly long InitialJavaScriptDateTicks = 621355968000000000;
@@ -179,9 +180,9 @@ namespace Microsoft.IdentityModel.Json.Utilities
 
         internal static long ConvertDateTimeToJavaScriptTicks(DateTime dateTime, TimeSpan offset)
         {
-            long universialTicks = ToUniversalTicks(dateTime, offset);
+            long universalTicks = ToUniversalTicks(dateTime, offset);
 
-            return UniversialTicksToJavaScriptTicks(universialTicks);
+            return UniversalTicksToJavaScriptTicks(universalTicks);
         }
 
         internal static long ConvertDateTimeToJavaScriptTicks(DateTime dateTime)
@@ -193,12 +194,12 @@ namespace Microsoft.IdentityModel.Json.Utilities
         {
             long ticks = (convertToUtc) ? ToUniversalTicks(dateTime) : dateTime.Ticks;
 
-            return UniversialTicksToJavaScriptTicks(ticks);
+            return UniversalTicksToJavaScriptTicks(ticks);
         }
 
-        private static long UniversialTicksToJavaScriptTicks(long universialTicks)
+        private static long UniversalTicksToJavaScriptTicks(long universalTicks)
         {
-            long javaScriptTicks = (universialTicks - InitialJavaScriptDateTicks) / 10000;
+            long javaScriptTicks = (universalTicks - InitialJavaScriptDateTicks) / 10000;
 
             return javaScriptTicks;
         }
@@ -341,7 +342,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             return d;
         }
 
-        internal static bool TryParseDateTime(StringReference s, DateTimeZoneHandling dateTimeZoneHandling, string dateFormatString, CultureInfo culture, out DateTime dt)
+        internal static bool TryParseDateTime(StringReference s, DateTimeZoneHandling dateTimeZoneHandling, string? dateFormatString, CultureInfo culture, out DateTime dt)
         {
             if (s.Length > 0)
             {
@@ -364,7 +365,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                     }
                 }
 
-                if (!string.IsNullOrEmpty(dateFormatString))
+                if (!StringUtils.IsNullOrEmpty(dateFormatString))
                 {
                     if (TryParseDateTimeExact(s.ToString(), dateTimeZoneHandling, dateFormatString, culture, out dt))
                     {
@@ -377,7 +378,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             return false;
         }
 
-        internal static bool TryParseDateTime(string s, DateTimeZoneHandling dateTimeZoneHandling, string dateFormatString, CultureInfo culture, out DateTime dt)
+        internal static bool TryParseDateTime(string s, DateTimeZoneHandling dateTimeZoneHandling, string? dateFormatString, CultureInfo culture, out DateTime dt)
         {
             if (s.Length > 0)
             {
@@ -400,7 +401,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                     }
                 }
 
-                if (!string.IsNullOrEmpty(dateFormatString))
+                if (!StringUtils.IsNullOrEmpty(dateFormatString))
                 {
                     if (TryParseDateTimeExact(s, dateTimeZoneHandling, dateFormatString, culture, out dt))
                     {
@@ -414,7 +415,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
         }
 
 #if HAVE_DATE_TIME_OFFSET
-        internal static bool TryParseDateTimeOffset(StringReference s, string dateFormatString, CultureInfo culture, out DateTimeOffset dt)
+        internal static bool TryParseDateTimeOffset(StringReference s, string? dateFormatString, CultureInfo culture, out DateTimeOffset dt)
         {
             if (s.Length > 0)
             {
@@ -437,7 +438,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                     }
                 }
 
-                if (!string.IsNullOrEmpty(dateFormatString))
+                if (!StringUtils.IsNullOrEmpty(dateFormatString))
                 {
                     if (TryParseDateTimeOffsetExact(s.ToString(), dateFormatString, culture, out dt))
                     {
@@ -450,7 +451,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             return false;
         }
 
-        internal static bool TryParseDateTimeOffset(string s, string dateFormatString, CultureInfo culture, out DateTimeOffset dt)
+        internal static bool TryParseDateTimeOffset(string s, string? dateFormatString, CultureInfo culture, out DateTimeOffset dt)
         {
             if (s.Length > 0)
             {
@@ -475,7 +476,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                     }
                 }
 
-                if (!string.IsNullOrEmpty(dateFormatString))
+                if (!StringUtils.IsNullOrEmpty(dateFormatString))
                 {
                     if (TryParseDateTimeOffsetExact(s, dateFormatString, culture, out dt))
                     {
@@ -618,9 +619,9 @@ namespace Microsoft.IdentityModel.Json.Utilities
         #endregion
 
         #region Write
-        internal static void WriteDateTimeString(TextWriter writer, DateTime value, DateFormatHandling format, string formatString, CultureInfo culture)
+        internal static void WriteDateTimeString(TextWriter writer, DateTime value, DateFormatHandling format, string? formatString, CultureInfo culture)
         {
-            if (string.IsNullOrEmpty(formatString))
+            if (StringUtils.IsNullOrEmpty(formatString))
             {
                 char[] chars = new char[64];
                 int pos = WriteDateTimeString(chars, 0, value, null, value.Kind, format);
@@ -751,9 +752,9 @@ namespace Microsoft.IdentityModel.Json.Utilities
         }
 
 #if HAVE_DATE_TIME_OFFSET
-        internal static void WriteDateTimeOffsetString(TextWriter writer, DateTimeOffset value, DateFormatHandling format, string formatString, CultureInfo culture)
+        internal static void WriteDateTimeOffsetString(TextWriter writer, DateTimeOffset value, DateFormatHandling format, string? formatString, CultureInfo culture)
         {
-            if (string.IsNullOrEmpty(formatString))
+            if (StringUtils.IsNullOrEmpty(formatString))
             {
                 char[] chars = new char[64];
                 int pos = WriteDateTimeString(chars, 0, (format == DateFormatHandling.IsoDateFormat) ? value.DateTime : value.UtcDateTime, value.Offset, DateTimeKind.Local, format);
@@ -821,5 +822,6 @@ namespace Microsoft.IdentityModel.Json.Utilities
             // Return 1-based day-of-month
             day = n - days[m - 1] + 1;
         }
+#nullable disable
     }
 }

@@ -1,10 +1,12 @@
 ﻿namespace Microsoft.IdentityModel.Json
 {
+#nullable enable
+#pragma warning disable CA1716 // Identifiers should not match keywords
     /// <summary>
     /// Provides an interface for using pooled arrays.
     /// </summary>
     /// <typeparam name="T">The array type content.</typeparam>
-    internal interface IArrayPool<T>
+    public interface IArrayPool<T>
     {
         /// <summary>
         /// Rent an array from the pool. This array must be returned when it is no longer needed.
@@ -17,6 +19,8 @@
         /// Return an array to the pool.
         /// </summary>
         /// <param name="array">The array that is being returned.</param>
-        void Return(T[] array);
+        void Return(T[]? array);
     }
+#pragma warning restore CA1716 // Identifiers should not match keywords
+#nullable disable
 }

@@ -27,10 +27,11 @@ using System;
 
 namespace Microsoft.IdentityModel.Json
 {
+#pragma warning disable CA1720 // Identifier contains type name
     /// <summary>
     /// Specifies the state of the <see cref="JsonWriter"/>.
     /// </summary>
-    internal enum WriteState
+    public enum WriteState
     {
         /// <summary>
         /// An exception has been thrown, which has left the <see cref="JsonWriter"/> in an invalid state.
@@ -45,7 +46,7 @@ namespace Microsoft.IdentityModel.Json
         Closed = 1,
 
         /// <summary>
-        /// An object is being written.
+        /// An object is being written. 
         /// </summary>
         Object = 2,
 
@@ -69,4 +70,5 @@ namespace Microsoft.IdentityModel.Json
         /// </summary>
         Start = 6
     }
+#pragma warning restore CA1720 // Identifier contains type name
 }

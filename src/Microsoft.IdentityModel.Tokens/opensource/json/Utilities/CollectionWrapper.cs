@@ -37,6 +37,7 @@ using System.Linq;
 
 namespace Microsoft.IdentityModel.Json.Utilities
 {
+#nullable enable
     internal interface IWrappedCollection : IList
     {
         object UnderlyingCollection { get; }
@@ -44,9 +45,9 @@ namespace Microsoft.IdentityModel.Json.Utilities
 
     internal class CollectionWrapper<T> : ICollection<T>, IWrappedCollection
     {
-        private readonly IList _list;
-        private readonly ICollection<T> _genericCollection;
-        private object _syncRoot;
+        private readonly IList? _list;
+        private readonly ICollection<T>? _genericCollection;
+        private object? _syncRoot;
 
         public CollectionWrapper(IList list)
         {
@@ -77,7 +78,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             }
             else
             {
-                _list.Add(item);
+                _list!.Add(item);
             }
         }
 
@@ -89,7 +90,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             }
             else
             {
-                _list.Clear();
+                _list!.Clear();
             }
         }
 
@@ -101,7 +102,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             }
             else
             {
-                return _list.Contains(item);
+                return _list!.Contains(item);
             }
         }
 
@@ -113,7 +114,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             }
             else
             {
-                _list.CopyTo(array, arrayIndex);
+                _list!.CopyTo(array, arrayIndex);
             }
         }
 
@@ -127,7 +128,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                 }
                 else
                 {
-                    return _list.Count;
+                    return _list!.Count;
                 }
             }
         }
@@ -142,7 +143,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                 }
                 else
                 {
-                    return _list.IsReadOnly;
+                    return _list!.IsReadOnly;
                 }
             }
         }
@@ -155,11 +156,11 @@ namespace Microsoft.IdentityModel.Json.Utilities
             }
             else
             {
-                bool contains = _list.Contains(item);
+                bool contains = _list!.Contains(item);
 
                 if (contains)
                 {
-                    _list.Remove(item);
+                    _list!.Remove(item);
                 }
 
                 return contains;
@@ -168,33 +169,33 @@ namespace Microsoft.IdentityModel.Json.Utilities
 
         public virtual IEnumerator<T> GetEnumerator()
         {
-            return (_genericCollection ?? _list.Cast<T>()).GetEnumerator();
+            return (_genericCollection ?? _list!.Cast<T>()).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((IEnumerable)_genericCollection ?? _list).GetEnumerator();
+            return ((IEnumerable)_genericCollection! ?? _list!).GetEnumerator();
         }
 
-        int IList.Add(object value)
+        int IList.Add(object? value)
         {
             VerifyValueType(value);
-            Add((T)value);
+            Add((T)value!);
 
             return (Count - 1);
         }
 
-        bool IList.Contains(object value)
+        bool IList.Contains(object? value)
         {
             if (IsCompatibleObject(value))
             {
-                return Contains((T)value);
+                return Contains((T)value!);
             }
 
             return false;
         }
 
-        int IList.IndexOf(object value)
+        int IList.IndexOf(object? value)
         {
             if (_genericCollection != null)
             {
@@ -203,7 +204,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 
             if (IsCompatibleObject(value))
             {
-                return _list.IndexOf((T)value);
+                return _list!.IndexOf((T)value!);
             }
 
             return -1;
@@ -216,10 +217,10 @@ namespace Microsoft.IdentityModel.Json.Utilities
                 throw new InvalidOperationException("Wrapped ICollection<T> does not support RemoveAt.");
             }
 
-            _list.RemoveAt(index);
+            _list!.RemoveAt(index);
         }
 
-        void IList.Insert(int index, object value)
+        void IList.Insert(int index, object? value)
         {
             if (_genericCollection != null)
             {
@@ -227,7 +228,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             }
 
             VerifyValueType(value);
-            _list.Insert(index, (T)value);
+            _list!.Insert(index, (T)value!);
         }
 
         bool IList.IsFixedSize
@@ -241,20 +242,20 @@ namespace Microsoft.IdentityModel.Json.Utilities
                 }
                 else
                 {
-                    return _list.IsFixedSize;
+                    return _list!.IsFixedSize;
                 }
             }
         }
 
-        void IList.Remove(object value)
+        void IList.Remove(object? value)
         {
             if (IsCompatibleObject(value))
             {
-                Remove((T)value);
+                Remove((T)value!);
             }
         }
 
-        object IList.this[int index]
+        object? IList.this[int index]
         {
             get
             {
@@ -263,7 +264,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                     throw new InvalidOperationException("Wrapped ICollection<T> does not support indexer.");
                 }
 
-                return _list[index];
+                return _list![index];
             }
             set
             {
@@ -273,7 +274,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                 }
 
                 VerifyValueType(value);
-                _list[index] = (T)value;
+                _list![index] = (T?)value;
             }
         }
 
@@ -297,7 +298,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             }
         }
 
-        private static void VerifyValueType(object value)
+        private static void VerifyValueType(object? value)
         {
             if (!IsCompatibleObject(value))
             {
@@ -305,7 +306,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             }
         }
 
-        private static bool IsCompatibleObject(object value)
+        private static bool IsCompatibleObject(object? value)
         {
             if (!(value is T) && (value != null || (typeof(T).IsValueType() && !ReflectionUtils.IsNullableType(typeof(T)))))
             {
@@ -315,6 +316,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             return true;
         }
 
-        public object UnderlyingCollection => (object)_genericCollection ?? _list;
+        public object UnderlyingCollection => (object)_genericCollection! ?? _list!;
     }
+#nullable disable
 }

@@ -27,15 +27,18 @@ using System;
 using System.Collections.Generic;
 using System.Collections;
 using System.Threading;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
 #if !HAVE_LINQ
 using Microsoft.IdentityModel.Json.Utilities.LinqBridge;
 #else
 using System.Linq;
-
 #endif
 
 namespace Microsoft.IdentityModel.Json.Utilities
 {
+#nullable enable
     internal interface IWrappedDictionary
         : IDictionary
     {
@@ -44,12 +47,12 @@ namespace Microsoft.IdentityModel.Json.Utilities
 
     internal class DictionaryWrapper<TKey, TValue> : IDictionary<TKey, TValue>, IWrappedDictionary
     {
-        private readonly IDictionary _dictionary;
-        private readonly IDictionary<TKey, TValue> _genericDictionary;
+        private readonly IDictionary? _dictionary;
+        private readonly IDictionary<TKey, TValue>? _genericDictionary;
 #if HAVE_READ_ONLY_COLLECTIONS
-        private readonly IReadOnlyDictionary<TKey, TValue> _readOnlyDictionary;
+        private readonly IReadOnlyDictionary<TKey, TValue>? _readOnlyDictionary;
 #endif
-        private object _syncRoot;
+        private object? _syncRoot;
 
         public DictionaryWrapper(IDictionary dictionary)
         {
@@ -74,11 +77,20 @@ namespace Microsoft.IdentityModel.Json.Utilities
         }
 #endif
 
+        internal IDictionary<TKey, TValue> GenericDictionary
+        {
+            get
+            {
+                MiscellaneousUtils.Assert(_genericDictionary != null);
+                return _genericDictionary;
+            }
+        }
+
         public void Add(TKey key, TValue value)
         {
             if (_dictionary != null)
             {
-                _dictionary.Add(key, value);
+                _dictionary.Add(key!, value);
             }
             else if (_genericDictionary != null)
             {
@@ -94,7 +106,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
         {
             if (_dictionary != null)
             {
-                return _dictionary.Contains(key);
+                return _dictionary.Contains(key!);
             }
 #if HAVE_READ_ONLY_COLLECTIONS
             else if (_readOnlyDictionary != null)
@@ -104,7 +116,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
             else
             {
-                return _genericDictionary.ContainsKey(key);
+                return GenericDictionary.ContainsKey(key);
             }
         }
 
@@ -124,7 +136,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
                 else
                 {
-                    return _genericDictionary.Keys;
+                    return GenericDictionary.Keys;
                 }
             }
         }
@@ -133,9 +145,9 @@ namespace Microsoft.IdentityModel.Json.Utilities
         {
             if (_dictionary != null)
             {
-                if (_dictionary.Contains(key))
+                if (_dictionary.Contains(key!))
                 {
-                    _dictionary.Remove(key);
+                    _dictionary.Remove(key!);
                     return true;
                 }
                 else
@@ -151,22 +163,26 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
             else
             {
-                return _genericDictionary.Remove(key);
+                return GenericDictionary.Remove(key);
             }
         }
 
-        public bool TryGetValue(TKey key, out TValue value)
+#pragma warning disable CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member (possibly because of nullability attributes).
+        public bool TryGetValue(TKey key, out TValue? value)
+#pragma warning restore CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member (possibly because of nullability attributes).
         {
             if (_dictionary != null)
             {
-                if (!_dictionary.Contains(key))
+                if (!_dictionary.Contains(key!))
                 {
+#pragma warning disable CS8653 // A default expression introduces a null value for a type parameter.
                     value = default;
+#pragma warning restore CS8653 // A default expression introduces a null value for a type parameter.
                     return false;
                 }
                 else
                 {
-                    value = (TValue)_dictionary[key];
+                    value = (TValue)_dictionary[key!]!;
                     return true;
                 }
             }
@@ -178,7 +194,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
             else
             {
-                return _genericDictionary.TryGetValue(key, out value);
+                return GenericDictionary.TryGetValue(key, out value);
             }
         }
 
@@ -198,7 +214,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
                 else
                 {
-                    return _genericDictionary.Values;
+                    return GenericDictionary.Values;
                 }
             }
         }
@@ -209,7 +225,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             {
                 if (_dictionary != null)
                 {
-                    return (TValue)_dictionary[key];
+                    return (TValue)_dictionary[key!]!;
                 }
 #if HAVE_READ_ONLY_COLLECTIONS
                 else if (_readOnlyDictionary != null)
@@ -219,14 +235,14 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
                 else
                 {
-                    return _genericDictionary[key];
+                    return GenericDictionary[key];
                 }
             }
             set
             {
                 if (_dictionary != null)
                 {
-                    _dictionary[key] = value;
+                    _dictionary[key!] = value;
                 }
 #if HAVE_READ_ONLY_COLLECTIONS
                 else if (_readOnlyDictionary != null)
@@ -236,7 +252,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
                 else
                 {
-                    _genericDictionary[key] = value;
+                    GenericDictionary[key] = value;
                 }
             }
         }
@@ -273,7 +289,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
             else
             {
-                _genericDictionary.Clear();
+                GenericDictionary.Clear();
             }
         }
 
@@ -291,7 +307,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
             else
             {
-                return _genericDictionary.Contains(item);
+                return GenericDictionary.Contains(item);
             }
         }
 
@@ -306,7 +322,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                     while (e.MoveNext())
                     {
                         DictionaryEntry entry = e.Entry;
-                        array[arrayIndex++] = new KeyValuePair<TKey, TValue>((TKey)entry.Key, (TValue)entry.Value);
+                        array[arrayIndex++] = new KeyValuePair<TKey, TValue>((TKey)entry.Key, (TValue)entry.Value!);
                     }
                 }
                 finally
@@ -322,7 +338,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
             else
             {
-                _genericDictionary.CopyTo(array, arrayIndex);
+                GenericDictionary.CopyTo(array, arrayIndex);
             }
         }
 
@@ -342,7 +358,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
                 else
                 {
-                    return _genericDictionary.Count;
+                    return GenericDictionary.Count;
                 }
             }
         }
@@ -363,7 +379,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
                 else
                 {
-                    return _genericDictionary.IsReadOnly;
+                    return GenericDictionary.IsReadOnly;
                 }
             }
         }
@@ -372,13 +388,13 @@ namespace Microsoft.IdentityModel.Json.Utilities
         {
             if (_dictionary != null)
             {
-                if (_dictionary.Contains(item.Key))
+                if (_dictionary.Contains(item.Key!))
                 {
-                    object value = _dictionary[item.Key];
+                    object? value = _dictionary[item.Key!];
 
                     if (Equals(value, item.Value))
                     {
-                        _dictionary.Remove(item.Key);
+                        _dictionary.Remove(item.Key!);
                         return true;
                     }
                     else
@@ -399,7 +415,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
             else
             {
-                return _genericDictionary.Remove(item);
+                return GenericDictionary.Remove(item);
             }
         }
 
@@ -407,7 +423,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
         {
             if (_dictionary != null)
             {
-                return _dictionary.Cast<DictionaryEntry>().Select(de => new KeyValuePair<TKey, TValue>((TKey)de.Key, (TValue)de.Value)).GetEnumerator();
+                return _dictionary.Cast<DictionaryEntry>().Select(de => new KeyValuePair<TKey, TValue>((TKey)de.Key, (TValue)de.Value!)).GetEnumerator();
             }
 #if HAVE_READ_ONLY_COLLECTIONS
             else if (_readOnlyDictionary != null)
@@ -417,7 +433,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
             else
             {
-                return _genericDictionary.GetEnumerator();
+                return GenericDictionary.GetEnumerator();
             }
         }
 
@@ -426,7 +442,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             return GetEnumerator();
         }
 
-        void IDictionary.Add(object key, object value)
+        void IDictionary.Add(object key, object? value)
         {
             if (_dictionary != null)
             {
@@ -440,11 +456,11 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
             else
             {
-                _genericDictionary.Add((TKey)key, (TValue)value);
+                GenericDictionary.Add((TKey)key, (TValue)value!);
             }
         }
 
-        object IDictionary.this[object key]
+        object? IDictionary.this[object key]
         {
             get
             {
@@ -460,7 +476,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
                 else
                 {
-                    return _genericDictionary[(TKey)key];
+                    return GenericDictionary[(TKey)key];
                 }
             }
             set
@@ -477,7 +493,13 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
                 else
                 {
-                    _genericDictionary[(TKey)key] = (TValue)value;
+                    // Consider changing this code to call GenericDictionary.Remove when value is null.
+                    //
+#pragma warning disable CS8601 // Possible null reference assignment.
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+                    GenericDictionary[(TKey)key] = (TValue)value;
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning restore CS8601 // Possible null reference assignment.
                 }
             }
         }
@@ -496,9 +518,9 @@ namespace Microsoft.IdentityModel.Json.Utilities
 
             public object Key => Entry.Key;
 
-            public object Value => Entry.Value;
+            public object? Value => Entry.Value;
 
-            public object Current => new DictionaryEntry(_e.Current.Key, _e.Current.Value);
+            public object Current => new DictionaryEntry(_e.Current.Key!, _e.Current.Value);
 
             public bool MoveNext()
             {
@@ -525,7 +547,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
             else
             {
-                return new DictionaryEnumerator<TKey, TValue>(_genericDictionary.GetEnumerator());
+                return new DictionaryEnumerator<TKey, TValue>(GenericDictionary.GetEnumerator());
             }
         }
 
@@ -543,7 +565,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
             else
             {
-                return _dictionary.Contains(key);
+                return _dictionary!.Contains(key);
             }
         }
 
@@ -563,7 +585,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
                 else
                 {
-                    return _dictionary.IsFixedSize;
+                    return _dictionary!.IsFixedSize;
                 }
             }
         }
@@ -584,7 +606,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
                 else
                 {
-                    return _dictionary.Keys;
+                    return _dictionary!.Keys;
                 }
             }
         }
@@ -603,7 +625,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
             else
             {
-                _genericDictionary.Remove((TKey)key);
+                GenericDictionary.Remove((TKey)key);
             }
         }
 
@@ -623,7 +645,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
                 else
                 {
-                    return _dictionary.Values;
+                    return _dictionary!.Values;
                 }
             }
         }
@@ -642,7 +664,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
             else
             {
-                _genericDictionary.CopyTo((KeyValuePair<TKey, TValue>[])array, index);
+                GenericDictionary.CopyTo((KeyValuePair<TKey, TValue>[])array, index);
             }
         }
 
@@ -690,9 +712,10 @@ namespace Microsoft.IdentityModel.Json.Utilities
 #endif
                 else
                 {
-                    return _genericDictionary;
+                    return GenericDictionary;
                 }
             }
         }
     }
+#nullable disable
 }

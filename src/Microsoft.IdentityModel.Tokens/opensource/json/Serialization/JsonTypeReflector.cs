@@ -33,6 +33,7 @@ using System.Security;
 using System.Security.Permissions;
 #endif
 using Microsoft.IdentityModel.Json.Utilities;
+using System.Runtime.CompilerServices;
 #if !HAVE_LINQ
 using Microsoft.IdentityModel.Json.Utilities.LinqBridge;
 #else
@@ -42,6 +43,8 @@ using System.Runtime.Serialization;
 
 namespace Microsoft.IdentityModel.Json.Serialization
 {
+#nullable enable
+#pragma warning disable CA1062 // Validate arguments of public methods
     internal static class JsonTypeReflector
     {
         private static bool? _dynamicCodeGeneration;
@@ -58,15 +61,15 @@ namespace Microsoft.IdentityModel.Json.Serialization
 
         public const string ConcurrentDictionaryTypeName = "System.Collections.Concurrent.ConcurrentDictionary`2";
 
-        private static readonly ThreadSafeStore<Type, Func<object[], object>> CreatorCache =
-            new ThreadSafeStore<Type, Func<object[], object>>(GetCreator);
+        private static readonly ThreadSafeStore<Type, Func<object[]?, object>> CreatorCache = 
+            new ThreadSafeStore<Type, Func<object[]?, object>>(GetCreator);
 
 #if !(NET20 || DOTNET)
-        private static readonly ThreadSafeStore<Type, Type> AssociatedMetadataTypesCache = new ThreadSafeStore<Type, Type>(GetAssociateMetadataTypeFromAttribute);
-        private static ReflectionObject _metadataTypeAttributeReflectionObject;
+        private static readonly ThreadSafeStore<Type, Type?> AssociatedMetadataTypesCache = new ThreadSafeStore<Type, Type?>(GetAssociateMetadataTypeFromAttribute);
+        private static ReflectionObject? _metadataTypeAttributeReflectionObject;
 #endif
 
-        public static T GetCachedAttribute<T>(object attributeProvider) where T : Attribute
+        public static T? GetCachedAttribute<T>(object attributeProvider) where T : Attribute
         {
             return CachedAttributeGetter<T>.GetAttribute(attributeProvider);
         }
@@ -81,9 +84,9 @@ namespace Microsoft.IdentityModel.Json.Serialization
             {
                 Type converterType = typeConverter.GetType();
 
-                if (!string.Equals(converterType.FullName, "System.ComponentModel.ComponentConverter")
-                    && !string.Equals(converterType.FullName, "System.ComponentModel.ReferenceConverter")
-                    && !string.Equals(converterType.FullName, "System.Windows.Forms.Design.DataSourceConverter")
+                if (!string.Equals(converterType.FullName, "System.ComponentModel.ComponentConverter", StringComparison.Ordinal)
+                    && !string.Equals(converterType.FullName, "System.ComponentModel.ReferenceConverter", StringComparison.Ordinal)
+                    && !string.Equals(converterType.FullName, "System.Windows.Forms.Design.DataSourceConverter", StringComparison.Ordinal)
                     && converterType != typeof(TypeConverter))
                 {
                     return typeConverter.CanConvertTo(typeof(string));
@@ -96,14 +99,14 @@ namespace Microsoft.IdentityModel.Json.Serialization
 #endif
 
 #if HAVE_DATA_CONTRACTS
-        public static DataContractAttribute GetDataContractAttribute(Type type)
+        public static DataContractAttribute? GetDataContractAttribute(Type type)
         {
             // DataContractAttribute does not have inheritance
-            Type currentType = type;
+            Type? currentType = type;
 
             while (currentType != null)
             {
-                DataContractAttribute result = CachedAttributeGetter<DataContractAttribute>.GetAttribute(currentType);
+                DataContractAttribute? result = CachedAttributeGetter<DataContractAttribute>.GetAttribute(currentType);
                 if (result != null)
                 {
                     return result;
@@ -115,7 +118,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
             return null;
         }
 
-        public static DataMemberAttribute GetDataMemberAttribute(MemberInfo memberInfo)
+        public static DataMemberAttribute? GetDataMemberAttribute(MemberInfo memberInfo)
         {
             // DataMemberAttribute does not have inheritance
 
@@ -127,16 +130,16 @@ namespace Microsoft.IdentityModel.Json.Serialization
 
             // search property and then search base properties if nothing is returned and the property is virtual
             PropertyInfo propertyInfo = (PropertyInfo)memberInfo;
-            DataMemberAttribute result = CachedAttributeGetter<DataMemberAttribute>.GetAttribute(propertyInfo);
+            DataMemberAttribute? result = CachedAttributeGetter<DataMemberAttribute>.GetAttribute(propertyInfo);
             if (result == null)
             {
                 if (propertyInfo.IsVirtual())
                 {
-                    Type currentType = propertyInfo.DeclaringType;
+                    Type? currentType = propertyInfo.DeclaringType;
 
                     while (result == null && currentType != null)
                     {
-                        PropertyInfo baseProperty = (PropertyInfo)ReflectionUtils.GetMemberInfoFromType(currentType, propertyInfo);
+                        PropertyInfo? baseProperty = (PropertyInfo?)ReflectionUtils.GetMemberInfoFromType(currentType, propertyInfo);
                         if (baseProperty != null && baseProperty.IsVirtual())
                         {
                             result = CachedAttributeGetter<DataMemberAttribute>.GetAttribute(baseProperty);
@@ -153,14 +156,14 @@ namespace Microsoft.IdentityModel.Json.Serialization
 
         public static MemberSerialization GetObjectMemberSerialization(Type objectType, bool ignoreSerializableAttribute)
         {
-            JsonObjectAttribute objectAttribute = GetCachedAttribute<JsonObjectAttribute>(objectType);
+            JsonObjectAttribute? objectAttribute = GetCachedAttribute<JsonObjectAttribute>(objectType);
             if (objectAttribute != null)
             {
                 return objectAttribute.MemberSerialization;
             }
 
 #if HAVE_DATA_CONTRACTS
-            DataContractAttribute dataContractAttribute = GetDataContractAttribute(objectType);
+            DataContractAttribute? dataContractAttribute = GetDataContractAttribute(objectType);
             if (dataContractAttribute != null)
             {
                 return MemberSerialization.OptIn;
@@ -178,13 +181,13 @@ namespace Microsoft.IdentityModel.Json.Serialization
             return MemberSerialization.OptOut;
         }
 
-        public static JsonConverter GetJsonConverter(object attributeProvider)
+        public static JsonConverter? GetJsonConverter(object attributeProvider)
         {
-            JsonConverterAttribute converterAttribute = GetCachedAttribute<JsonConverterAttribute>(attributeProvider);
+            JsonConverterAttribute? converterAttribute = GetCachedAttribute<JsonConverterAttribute>(attributeProvider);
 
             if (converterAttribute != null)
             {
-                Func<object[], object> creator = CreatorCache.Get(converterAttribute.ConverterType);
+                Func<object[]?, object> creator = CreatorCache.Get(converterAttribute.ConverterType);
                 if (creator != null)
                 {
                     return (JsonConverter)creator(converterAttribute.ConverterParameters);
@@ -200,19 +203,19 @@ namespace Microsoft.IdentityModel.Json.Serialization
         /// <param name="converterType">The <see cref="JsonConverter"/> type to create.</param>
         /// <param name="args">Optional arguments to pass to an initializing constructor of the JsonConverter.
         /// If <c>null</c>, the default constructor is used.</param>
-        public static JsonConverter CreateJsonConverterInstance(Type converterType, object[] args)
+        public static JsonConverter CreateJsonConverterInstance(Type converterType, object[]? args)
         {
-            Func<object[], object> converterCreator = CreatorCache.Get(converterType);
+            Func<object[]?, object> converterCreator = CreatorCache.Get(converterType);
             return (JsonConverter)converterCreator(args);
         }
 
-        public static NamingStrategy CreateNamingStrategyInstance(Type namingStrategyType, object[] args)
+        public static NamingStrategy CreateNamingStrategyInstance(Type namingStrategyType, object[]? args)
         {
-            Func<object[], object> converterCreator = CreatorCache.Get(namingStrategyType);
+            Func<object[]?, object> converterCreator = CreatorCache.Get(namingStrategyType);
             return (NamingStrategy)converterCreator(args);
         }
 
-        public static NamingStrategy GetContainerNamingStrategy(JsonContainerAttribute containerAttribute)
+        public static NamingStrategy? GetContainerNamingStrategy(JsonContainerAttribute containerAttribute)
         {
             if (containerAttribute.NamingStrategyInstance == null)
             {
@@ -227,9 +230,9 @@ namespace Microsoft.IdentityModel.Json.Serialization
             return containerAttribute.NamingStrategyInstance;
         }
 
-        private static Func<object[], object> GetCreator(Type type)
+        private static Func<object[]?, object> GetCreator(Type type)
         {
-            Func<object> defaultConstructor = (ReflectionUtils.HasDefaultConstructor(type, false))
+            Func<object>? defaultConstructor = (ReflectionUtils.HasDefaultConstructor(type, false))
                 ? ReflectionDelegateFactory.CreateDefaultConstructor<object>(type)
                 : null;
 
@@ -248,7 +251,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
 
                             return param.GetType();
                         }).ToArray();
-                        ConstructorInfo parameterizedConstructorInfo = type.GetConstructor(paramTypes);
+                        ConstructorInfo? parameterizedConstructorInfo = type.GetConstructor(paramTypes);
 
                         if (parameterizedConstructorInfo != null)
                         {
@@ -276,12 +279,12 @@ namespace Microsoft.IdentityModel.Json.Serialization
         }
 
 #if !(NET20 || DOTNET)
-        private static Type GetAssociatedMetadataType(Type type)
+        private static Type? GetAssociatedMetadataType(Type type)
         {
             return AssociatedMetadataTypesCache.Get(type);
         }
 
-        private static Type GetAssociateMetadataTypeFromAttribute(Type type)
+        private static Type? GetAssociateMetadataTypeFromAttribute(Type type)
         {
             Attribute[] customAttributes = ReflectionUtils.GetAttributes(type, null, true);
 
@@ -291,7 +294,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
 
                 // only test on attribute type name
                 // attribute assembly could change because of type forwarding, etc
-                if (string.Equals(attributeType.FullName, "System.ComponentModel.DataAnnotations.MetadataTypeAttribute"))
+                if (string.Equals(attributeType.FullName, "System.ComponentModel.DataAnnotations.MetadataTypeAttribute", StringComparison.Ordinal))
                 {
                     const string metadataClassTypeName = "MetadataClassType";
 
@@ -300,7 +303,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
                         _metadataTypeAttributeReflectionObject = ReflectionObject.Create(attributeType, metadataClassTypeName);
                     }
 
-                    return (Type)_metadataTypeAttributeReflectionObject.GetValue(attribute, metadataClassTypeName);
+                    return (Type?)_metadataTypeAttributeReflectionObject.GetValue(attribute, metadataClassTypeName);
                 }
             }
 
@@ -308,12 +311,12 @@ namespace Microsoft.IdentityModel.Json.Serialization
         }
 #endif
 
-        private static T GetAttribute<T>(Type type) where T : Attribute
+        private static T? GetAttribute<T>(Type type) where T : Attribute
         {
-            T attribute;
+            T? attribute;
 
 #if !(NET20 || DOTNET)
-            Type metadataType = GetAssociatedMetadataType(type);
+            Type? metadataType = GetAssociatedMetadataType(type);
             if (metadataType != null)
             {
                 attribute = ReflectionUtils.GetAttribute<T>(metadataType, true);
@@ -342,15 +345,15 @@ namespace Microsoft.IdentityModel.Json.Serialization
             return null;
         }
 
-        private static T GetAttribute<T>(MemberInfo memberInfo) where T : Attribute
+        private static T? GetAttribute<T>(MemberInfo memberInfo) where T : Attribute
         {
-            T attribute;
+            T? attribute;
 
 #if !(NET20 || DOTNET)
-            Type metadataType = GetAssociatedMetadataType(memberInfo.DeclaringType);
+            Type? metadataType = GetAssociatedMetadataType(memberInfo.DeclaringType!);
             if (metadataType != null)
             {
-                MemberInfo metadataTypeMemberInfo = ReflectionUtils.GetMemberInfoFromType(metadataType, memberInfo);
+                MemberInfo? metadataTypeMemberInfo = ReflectionUtils.GetMemberInfoFromType(metadataType, memberInfo);
 
                 if (metadataTypeMemberInfo != null)
                 {
@@ -373,7 +376,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
             {
                 foreach (Type typeInterface in memberInfo.DeclaringType.GetInterfaces())
                 {
-                    MemberInfo interfaceTypeMemberInfo = ReflectionUtils.GetMemberInfoFromType(typeInterface, memberInfo);
+                    MemberInfo? interfaceTypeMemberInfo = ReflectionUtils.GetMemberInfoFromType(typeInterface, memberInfo);
 
                     if (interfaceTypeMemberInfo != null)
                     {
@@ -423,7 +426,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
         }
 #endif
 
-        public static T GetAttribute<T>(object provider) where T : Attribute
+        public static T? GetAttribute<T>(object provider) where T : Attribute
         {
             if (provider is Type type)
             {
@@ -459,7 +462,9 @@ namespace Microsoft.IdentityModel.Json.Serialization
             {
                 if (_dynamicCodeGeneration == null)
                 {
-#if HAVE_CAS
+#if HAVE_DYNAMIC_CODE_COMPILED
+                    _dynamicCodeGeneration = RuntimeFeature.IsDynamicCodeCompiled;
+#elif HAVE_CAS
                     try
                     {
                         new ReflectionPermission(ReflectionPermissionFlag.MemberAccess).Demand();
@@ -515,7 +520,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
         {
             get
             {
-#if !(PORTABLE40 || PORTABLE || DOTNET || NETSTANDARD2_0 || NET6_0)
+#if !(PORTABLE40 || PORTABLE || DOTNET || NETSTANDARD2_0)
                 if (DynamicCodeGeneration)
                 {
                     return DynamicReflectionDelegateFactory.Instance;
@@ -528,4 +533,6 @@ namespace Microsoft.IdentityModel.Json.Serialization
             }
         }
     }
+#nullable disable
+#pragma warning restore CA1062 // Validate arguments of public methods
 }

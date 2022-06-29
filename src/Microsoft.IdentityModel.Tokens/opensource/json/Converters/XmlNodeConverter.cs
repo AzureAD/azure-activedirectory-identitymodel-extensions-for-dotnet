@@ -38,9 +38,12 @@ using System.Xml.Linq;
 #endif
 using Microsoft.IdentityModel.Json.Utilities;
 using System.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.IdentityModel.Json.Converters
 {
+#nullable enable
+#pragma warning disable CA1062 // Validate arguments of public methods
     #region XmlNodeWrappers
 #if HAVE_XML_DOCUMENT
     internal class XmlDocumentWrapper : XmlNodeWrapper, IXmlDocument
@@ -53,38 +56,38 @@ namespace Microsoft.IdentityModel.Json.Converters
             _document = document;
         }
 
-        public IXmlNode CreateComment(string data)
+        public IXmlNode CreateComment(string? data)
         {
             return new XmlNodeWrapper(_document.CreateComment(data));
         }
 
-        public IXmlNode CreateTextNode(string text)
+        public IXmlNode CreateTextNode(string? text)
         {
             return new XmlNodeWrapper(_document.CreateTextNode(text));
         }
 
-        public IXmlNode CreateCDataSection(string data)
+        public IXmlNode CreateCDataSection(string? data)
         {
             return new XmlNodeWrapper(_document.CreateCDataSection(data));
         }
 
-        public IXmlNode CreateWhitespace(string text)
+        public IXmlNode CreateWhitespace(string? text)
         {
             return new XmlNodeWrapper(_document.CreateWhitespace(text));
         }
 
-        public IXmlNode CreateSignificantWhitespace(string text)
+        public IXmlNode CreateSignificantWhitespace(string? text)
         {
             return new XmlNodeWrapper(_document.CreateSignificantWhitespace(text));
         }
 
-        public IXmlNode CreateXmlDeclaration(string version, string encoding, string standalone)
+        public IXmlNode CreateXmlDeclaration(string version, string? encoding, string? standalone)
         {
             return new XmlDeclarationWrapper(_document.CreateXmlDeclaration(version, encoding, standalone));
         }
 
 #if HAVE_XML_DOCUMENT_TYPE
-        public IXmlNode CreateXmlDocumentType(string name, string publicId, string systemId, string internalSubset)
+        public IXmlNode CreateXmlDocumentType(string name, string? publicId, string? systemId, string? internalSubset)
         {
             return new XmlDocumentTypeWrapper(_document.CreateDocumentType(name, publicId, systemId, null));
         }
@@ -105,7 +108,7 @@ namespace Microsoft.IdentityModel.Json.Converters
             return new XmlElementWrapper(_document.CreateElement(qualifiedName, namespaceUri));
         }
 
-        public IXmlNode CreateAttribute(string name, string value)
+        public IXmlNode CreateAttribute(string name, string? value)
         {
             XmlNodeWrapper attribute = new XmlNodeWrapper(_document.CreateAttribute(name));
             attribute.Value = value;
@@ -113,7 +116,7 @@ namespace Microsoft.IdentityModel.Json.Converters
             return attribute;
         }
 
-        public IXmlNode CreateAttribute(string qualifiedName, string namespaceUri, string value)
+        public IXmlNode CreateAttribute(string qualifiedName, string? namespaceUri, string? value)
         {
             XmlNodeWrapper attribute = new XmlNodeWrapper(_document.CreateAttribute(qualifiedName, namespaceUri));
             attribute.Value = value;
@@ -121,7 +124,7 @@ namespace Microsoft.IdentityModel.Json.Converters
             return attribute;
         }
 
-        public IXmlElement DocumentElement
+        public IXmlElement? DocumentElement
         {
             get
             {
@@ -149,10 +152,10 @@ namespace Microsoft.IdentityModel.Json.Converters
         {
             XmlNodeWrapper xmlAttributeWrapper = (XmlNodeWrapper)attribute;
 
-            _element.SetAttributeNode((XmlAttribute)xmlAttributeWrapper.WrappedNode);
+            _element.SetAttributeNode((XmlAttribute)xmlAttributeWrapper.WrappedNode!);
         }
 
-        public string GetPrefixOfNamespace(string namespaceUri)
+        public string? GetPrefixOfNamespace(string namespaceUri)
         {
             return _element.GetPrefixOfNamespace(namespaceUri);
         }
@@ -170,15 +173,15 @@ namespace Microsoft.IdentityModel.Json.Converters
             _declaration = declaration;
         }
 
-        public string Version => _declaration.Version;
+        public string? Version => _declaration.Version;
 
-        public string Encoding
+        public string? Encoding
         {
             get => _declaration.Encoding;
             set => _declaration.Encoding = value;
         }
 
-        public string Standalone
+        public string? Standalone
         {
             get => _declaration.Standalone;
             set => _declaration.Standalone = value;
@@ -198,32 +201,32 @@ namespace Microsoft.IdentityModel.Json.Converters
 
         public string Name => _documentType.Name;
 
-        public string System => _documentType.SystemId;
+        public string? System => _documentType.SystemId;
 
-        public string Public => _documentType.PublicId;
+        public string? Public => _documentType.PublicId;
 
-        public string InternalSubset => _documentType.InternalSubset;
+        public string? InternalSubset => _documentType.InternalSubset;
 
-        public override string LocalName => "DOCTYPE";
+        public override string? LocalName => "DOCTYPE";
     }
 #endif
 
     internal class XmlNodeWrapper : IXmlNode
     {
         private readonly XmlNode _node;
-        private List<IXmlNode> _childNodes;
-        private List<IXmlNode> _attributes;
+        private List<IXmlNode>? _childNodes;
+        private List<IXmlNode>? _attributes;
 
         public XmlNodeWrapper(XmlNode node)
         {
             _node = node;
         }
 
-        public object WrappedNode => _node;
+        public object? WrappedNode => _node;
 
         public XmlNodeType NodeType => _node.NodeType;
 
-        public virtual string LocalName => _node.LocalName;
+        public virtual string? LocalName => _node.LocalName;
 
         public List<IXmlNode> ChildNodes
         {
@@ -284,7 +287,7 @@ namespace Microsoft.IdentityModel.Json.Converters
                     }
                     else
                     {
-                        _attributes = new List<IXmlNode>(_node.Attributes.Count);
+                        _attributes = new List<IXmlNode>(_node.Attributes!.Count);
                         foreach (XmlAttribute attribute in _node.Attributes)
                         {
                             _attributes.Add(WrapNode(attribute));
@@ -309,11 +312,11 @@ namespace Microsoft.IdentityModel.Json.Converters
             }
         }
 
-        public IXmlNode ParentNode
+        public IXmlNode? ParentNode
         {
             get
             {
-                XmlNode node = _node is XmlAttribute attribute ? attribute.OwnerElement : _node.ParentNode;
+                XmlNode? node = _node is XmlAttribute attribute ? attribute.OwnerElement : _node.ParentNode;
 
                 if (node == null)
                 {
@@ -324,7 +327,7 @@ namespace Microsoft.IdentityModel.Json.Converters
             }
         }
 
-        public string Value
+        public string? Value
         {
             get => _node.Value;
             set => _node.Value = value;
@@ -340,7 +343,7 @@ namespace Microsoft.IdentityModel.Json.Converters
             return newChild;
         }
 
-        public string NamespaceUri => _node.NamespaceURI;
+        public string? NamespaceUri => _node.NamespaceURI;
     }
 #endif
 #endregion
@@ -348,14 +351,14 @@ namespace Microsoft.IdentityModel.Json.Converters
 #region Interfaces
     internal interface IXmlDocument : IXmlNode
     {
-        IXmlNode CreateComment(string text);
-        IXmlNode CreateTextNode(string text);
-        IXmlNode CreateCDataSection(string data);
-        IXmlNode CreateWhitespace(string text);
-        IXmlNode CreateSignificantWhitespace(string text);
-        IXmlNode CreateXmlDeclaration(string version, string encoding, string standalone);
+        IXmlNode CreateComment(string? text);
+        IXmlNode CreateTextNode(string? text);
+        IXmlNode CreateCDataSection(string? data);
+        IXmlNode CreateWhitespace(string? text);
+        IXmlNode CreateSignificantWhitespace(string? text);
+        IXmlNode CreateXmlDeclaration(string version, string? encoding, string? standalone);
 #if HAVE_XML_DOCUMENT_TYPE
-        IXmlNode CreateXmlDocumentType(string name, string publicId, string systemId, string internalSubset);
+        IXmlNode CreateXmlDocumentType(string name, string? publicId, string? systemId, string? internalSubset);
 #endif
         IXmlNode CreateProcessingInstruction(string target, string data);
         IXmlElement CreateElement(string elementName);
@@ -363,42 +366,42 @@ namespace Microsoft.IdentityModel.Json.Converters
         IXmlNode CreateAttribute(string name, string value);
         IXmlNode CreateAttribute(string qualifiedName, string namespaceUri, string value);
 
-        IXmlElement DocumentElement { get; }
+        IXmlElement? DocumentElement { get; }
     }
 
     internal interface IXmlDeclaration : IXmlNode
     {
-        string Version { get; }
-        string Encoding { get; set; }
-        string Standalone { get; set; }
+        string? Version { get; }
+        string? Encoding { get; set; }
+        string? Standalone { get; set; }
     }
 
     internal interface IXmlDocumentType : IXmlNode
     {
         string Name { get; }
-        string System { get; }
-        string Public { get; }
-        string InternalSubset { get; }
+        string? System { get; }
+        string? Public { get; }
+        string? InternalSubset { get; }
     }
 
     internal interface IXmlElement : IXmlNode
     {
         void SetAttributeNode(IXmlNode attribute);
-        string GetPrefixOfNamespace(string namespaceUri);
+        string? GetPrefixOfNamespace(string namespaceUri);
         bool IsEmpty { get; }
     }
 
     internal interface IXmlNode
     {
         XmlNodeType NodeType { get; }
-        string LocalName { get; }
+        string? LocalName { get; }
         List<IXmlNode> ChildNodes { get; }
         List<IXmlNode> Attributes { get; }
-        IXmlNode ParentNode { get; }
-        string Value { get; set; }
+        IXmlNode? ParentNode { get; }
+        string? Value { get; set; }
         IXmlNode AppendChild(IXmlNode newChild);
-        string NamespaceUri { get; }
-        object WrappedNode { get; }
+        string? NamespaceUri { get; }
+        object? WrappedNode { get; }
     }
 #endregion
 
@@ -416,15 +419,15 @@ namespace Microsoft.IdentityModel.Json.Converters
 
         public override XmlNodeType NodeType => XmlNodeType.XmlDeclaration;
 
-        public string Version => Declaration.Version;
+        public string? Version => Declaration.Version;
 
-        public string Encoding
+        public string? Encoding
         {
             get => Declaration.Encoding;
             set => Declaration.Encoding = value;
         }
 
-        public string Standalone
+        public string? Standalone
         {
             get => Declaration.Standalone;
             set => Declaration.Standalone = value;
@@ -443,18 +446,18 @@ namespace Microsoft.IdentityModel.Json.Converters
 
         public string Name => _documentType.Name;
 
-        public string System => _documentType.SystemId;
+        public string? System => _documentType.SystemId;
 
-        public string Public => _documentType.PublicId;
+        public string? Public => _documentType.PublicId;
 
-        public string InternalSubset => _documentType.InternalSubset;
+        public string? InternalSubset => _documentType.InternalSubset;
 
-        public override string LocalName => "DOCTYPE";
+        public override string? LocalName => "DOCTYPE";
     }
 
     internal class XDocumentWrapper : XContainerWrapper, IXmlDocument
     {
-        private XDocument Document => (XDocument)WrappedNode;
+        private XDocument Document => (XDocument)WrappedNode!;
 
         public XDocumentWrapper(XDocument document)
             : base(document)
@@ -488,37 +491,37 @@ namespace Microsoft.IdentityModel.Json.Converters
             }
         }
 
-        public IXmlNode CreateComment(string text)
+        public IXmlNode CreateComment(string? text)
         {
-            return new XObjectWrapper(new XComment(text));
+            return new XObjectWrapper(new XComment(text!));
         }
 
-        public IXmlNode CreateTextNode(string text)
+        public IXmlNode CreateTextNode(string? text)
         {
-            return new XObjectWrapper(new XText(text));
+            return new XObjectWrapper(new XText(text!));
         }
 
-        public IXmlNode CreateCDataSection(string data)
+        public IXmlNode CreateCDataSection(string? data)
         {
-            return new XObjectWrapper(new XCData(data));
+            return new XObjectWrapper(new XCData(data!));
         }
 
-        public IXmlNode CreateWhitespace(string text)
+        public IXmlNode CreateWhitespace(string? text)
         {
-            return new XObjectWrapper(new XText(text));
+            return new XObjectWrapper(new XText(text!));
         }
 
-        public IXmlNode CreateSignificantWhitespace(string text)
+        public IXmlNode CreateSignificantWhitespace(string? text)
         {
-            return new XObjectWrapper(new XText(text));
+            return new XObjectWrapper(new XText(text!));
         }
 
-        public IXmlNode CreateXmlDeclaration(string version, string encoding, string standalone)
+        public IXmlNode CreateXmlDeclaration(string version, string? encoding, string? standalone)
         {
             return new XDeclarationWrapper(new XDeclaration(version, encoding, standalone));
         }
 
-        public IXmlNode CreateXmlDocumentType(string name, string publicId, string systemId, string internalSubset)
+        public IXmlNode CreateXmlDocumentType(string name, string? publicId, string? systemId, string? internalSubset)
         {
             return new XDocumentTypeWrapper(new XDocumentType(name, publicId, systemId, internalSubset));
         }
@@ -550,7 +553,7 @@ namespace Microsoft.IdentityModel.Json.Converters
             return new XAttributeWrapper(new XAttribute(XName.Get(localName, namespaceUri), value));
         }
 
-        public IXmlElement DocumentElement
+        public IXmlElement? DocumentElement
         {
             get
             {
@@ -579,20 +582,20 @@ namespace Microsoft.IdentityModel.Json.Converters
 
     internal class XTextWrapper : XObjectWrapper
     {
-        private XText Text => (XText)WrappedNode;
+        private XText Text => (XText)WrappedNode!;
 
         public XTextWrapper(XText text)
             : base(text)
         {
         }
 
-        public override string Value
+        public override string? Value
         {
             get => Text.Value;
-            set => Text.Value = value;
+            set => Text.Value = value ?? string.Empty;
         }
 
-        public override IXmlNode ParentNode
+        public override IXmlNode? ParentNode
         {
             get
             {
@@ -608,20 +611,20 @@ namespace Microsoft.IdentityModel.Json.Converters
 
     internal class XCommentWrapper : XObjectWrapper
     {
-        private XComment Text => (XComment)WrappedNode;
+        private XComment Text => (XComment)WrappedNode!;
 
         public XCommentWrapper(XComment text)
             : base(text)
         {
         }
 
-        public override string Value
+        public override string? Value
         {
             get => Text.Value;
-            set => Text.Value = value;
+            set => Text.Value = value ?? string.Empty;
         }
 
-        public override IXmlNode ParentNode
+        public override IXmlNode? ParentNode
         {
             get
             {
@@ -637,27 +640,27 @@ namespace Microsoft.IdentityModel.Json.Converters
 
     internal class XProcessingInstructionWrapper : XObjectWrapper
     {
-        private XProcessingInstruction ProcessingInstruction => (XProcessingInstruction)WrappedNode;
+        private XProcessingInstruction ProcessingInstruction => (XProcessingInstruction)WrappedNode!;
 
         public XProcessingInstructionWrapper(XProcessingInstruction processingInstruction)
             : base(processingInstruction)
         {
         }
 
-        public override string LocalName => ProcessingInstruction.Target;
+        public override string? LocalName => ProcessingInstruction.Target;
 
-        public override string Value
+        public override string? Value
         {
             get => ProcessingInstruction.Data;
-            set => ProcessingInstruction.Data = value;
+            set => ProcessingInstruction.Data = value ?? string.Empty;
         }
     }
 
     internal class XContainerWrapper : XObjectWrapper
     {
-        private List<IXmlNode> _childNodes;
+        private List<IXmlNode>? _childNodes;
 
-        private XContainer Container => (XContainer)WrappedNode;
+        private XContainer Container => (XContainer)WrappedNode!;
 
         public XContainerWrapper(XContainer container)
             : base(container)
@@ -692,7 +695,7 @@ namespace Microsoft.IdentityModel.Json.Converters
 
         protected virtual bool HasChildNodes => Container.LastNode != null;
 
-        public override IXmlNode ParentNode
+        public override IXmlNode? ParentNode
         {
             get
             {
@@ -761,26 +764,26 @@ namespace Microsoft.IdentityModel.Json.Converters
 
     internal class XObjectWrapper : IXmlNode
     {
-        private readonly XObject _xmlObject;
+        private readonly XObject? _xmlObject;
 
-        public XObjectWrapper(XObject xmlObject)
+        public XObjectWrapper(XObject? xmlObject)
         {
             _xmlObject = xmlObject;
         }
 
-        public object WrappedNode => _xmlObject;
+        public object? WrappedNode => _xmlObject;
 
-        public virtual XmlNodeType NodeType => _xmlObject.NodeType;
+        public virtual XmlNodeType NodeType => _xmlObject?.NodeType ?? XmlNodeType.None;
 
-        public virtual string LocalName => null;
+        public virtual string? LocalName => null;
 
         public virtual List<IXmlNode> ChildNodes => XmlNodeConverter.EmptyChildNodes;
 
         public virtual List<IXmlNode> Attributes => XmlNodeConverter.EmptyChildNodes;
 
-        public virtual IXmlNode ParentNode => null;
+        public virtual IXmlNode? ParentNode => null;
 
-        public virtual string Value
+        public virtual string? Value
         {
             get => null;
             set => throw new InvalidOperationException();
@@ -791,29 +794,29 @@ namespace Microsoft.IdentityModel.Json.Converters
             throw new InvalidOperationException();
         }
 
-        public virtual string NamespaceUri => null;
+        public virtual string? NamespaceUri => null;
     }
 
     internal class XAttributeWrapper : XObjectWrapper
     {
-        private XAttribute Attribute => (XAttribute)WrappedNode;
+        private XAttribute Attribute => (XAttribute)WrappedNode!;
 
         public XAttributeWrapper(XAttribute attribute)
             : base(attribute)
         {
         }
 
-        public override string Value
+        public override string? Value
         {
             get => Attribute.Value;
-            set => Attribute.Value = value;
+            set => Attribute.Value = value ?? string.Empty;
         }
 
-        public override string LocalName => Attribute.Name.LocalName;
+        public override string? LocalName => Attribute.Name.LocalName;
 
-        public override string NamespaceUri => Attribute.Name.NamespaceName;
+        public override string? NamespaceUri => Attribute.Name.NamespaceName;
 
-        public override IXmlNode ParentNode
+        public override IXmlNode? ParentNode
         {
             get
             {
@@ -829,9 +832,9 @@ namespace Microsoft.IdentityModel.Json.Converters
 
     internal class XElementWrapper : XContainerWrapper, IXmlElement
     {
-        private List<IXmlNode> _attributes;
+        private List<IXmlNode>? _attributes;
 
-        private XElement Element => (XElement)WrappedNode;
+        private XElement Element => (XElement)WrappedNode!;
 
         public XElementWrapper(XElement element)
             : base(element)
@@ -853,7 +856,7 @@ namespace Microsoft.IdentityModel.Json.Converters
                 // cache results to prevent multiple reads which kills perf in large documents
                 if (_attributes == null)
                 {
-                    if (!Element.HasAttributes && !HasImplicitNamespaceAttribute(NamespaceUri))
+                    if (!Element.HasAttributes && !HasImplicitNamespaceAttribute(NamespaceUri!))
                     {
                         _attributes = XmlNodeConverter.EmptyChildNodes;
                     }
@@ -867,7 +870,7 @@ namespace Microsoft.IdentityModel.Json.Converters
 
                         // ensure elements created with a namespace but no namespace attribute are converted correctly
                         // e.g. new XElement("{http://example.com}MyElement");
-                        string namespaceUri = NamespaceUri;
+                        string namespaceUri = NamespaceUri!;
                         if (HasImplicitNamespaceAttribute(namespaceUri))
                         {
                             _attributes.Insert(0, new XAttributeWrapper(new XAttribute("xmlns", namespaceUri)));
@@ -881,9 +884,9 @@ namespace Microsoft.IdentityModel.Json.Converters
 
         private bool HasImplicitNamespaceAttribute(string namespaceUri)
         {
-            if (!string.IsNullOrEmpty(namespaceUri) && namespaceUri != ParentNode?.NamespaceUri)
+            if (!StringUtils.IsNullOrEmpty(namespaceUri) && namespaceUri != ParentNode?.NamespaceUri)
             {
-                if (string.IsNullOrEmpty(GetPrefixOfNamespace(namespaceUri)))
+                if (StringUtils.IsNullOrEmpty(GetPrefixOfNamespace(namespaceUri)))
                 {
                     bool namespaceDeclared = false;
 
@@ -891,7 +894,7 @@ namespace Microsoft.IdentityModel.Json.Converters
                     {
                         foreach (XAttribute attribute in Element.Attributes())
                         {
-                            if (attribute.Name.LocalName == "xmlns" && string.IsNullOrEmpty(attribute.Name.NamespaceName) && attribute.Value == namespaceUri)
+                            if (attribute.Name.LocalName == "xmlns" && StringUtils.IsNullOrEmpty(attribute.Name.NamespaceName) && attribute.Value == namespaceUri)
                             {
                                 namespaceDeclared = true;
                             }
@@ -915,17 +918,17 @@ namespace Microsoft.IdentityModel.Json.Converters
             return result;
         }
 
-        public override string Value
+        public override string? Value
         {
             get => Element.Value;
-            set => Element.Value = value;
+            set => Element.Value = value ?? string.Empty;
         }
 
-        public override string LocalName => Element.Name.LocalName;
+        public override string? LocalName => Element.Name.LocalName;
 
-        public override string NamespaceUri => Element.Name.NamespaceName;
+        public override string? NamespaceUri => Element.Name.NamespaceName;
 
-        public string GetPrefixOfNamespace(string namespaceUri)
+        public string? GetPrefixOfNamespace(string namespaceUri)
         {
             return Element.GetPrefixOfNamespace(namespaceUri);
         }
@@ -938,7 +941,7 @@ namespace Microsoft.IdentityModel.Json.Converters
     /// <summary>
     /// Converts XML to and from JSON.
     /// </summary>
-    internal class XmlNodeConverter : JsonConverter
+    public class XmlNodeConverter : JsonConverter
     {
         internal static readonly List<IXmlNode> EmptyChildNodes = new List<IXmlNode>();
 
@@ -954,7 +957,7 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// Gets or sets the name of the root element to insert when deserializing to XML if the JSON structure has produced multiple root elements.
         /// </summary>
         /// <value>The name of the deserialized root element.</value>
-        public string DeserializeRootElementName { get; set; }
+        public string? DeserializeRootElementName { get; set; }
 
         /// <summary>
         /// Gets or sets a value to indicate whether to write the Json.NET array attribute.
@@ -985,7 +988,7 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// <param name="writer">The <see cref="JsonWriter"/> to write to.</param>
         /// <param name="serializer">The calling serializer.</param>
         /// <param name="value">The value.</param>
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             if (value == null)
             {
@@ -1031,9 +1034,9 @@ namespace Microsoft.IdentityModel.Json.Converters
 
         private void PushParentNamespaces(IXmlNode node, XmlNamespaceManager manager)
         {
-            List<IXmlNode> parentElements = null;
+            List<IXmlNode>? parentElements = null;
 
-            IXmlNode parent = node;
+            IXmlNode? parent = node;
             while ((parent = parent.ParentNode) != null)
             {
                 if (parent.NodeType == XmlNodeType.Element)
@@ -1058,7 +1061,7 @@ namespace Microsoft.IdentityModel.Json.Converters
                     {
                         if (attribute.NamespaceUri == "http://www.w3.org/2000/xmlns/" && attribute.LocalName != "xmlns")
                         {
-                            manager.AddNamespace(attribute.LocalName, attribute.Value);
+                            manager.AddNamespace(attribute.LocalName!, attribute.Value!);
                         }
                     }
                 }
@@ -1067,17 +1070,17 @@ namespace Microsoft.IdentityModel.Json.Converters
 
         private string ResolveFullName(IXmlNode node, XmlNamespaceManager manager)
         {
-            string prefix = (node.NamespaceUri == null || (node.LocalName == "xmlns" && node.NamespaceUri == "http://www.w3.org/2000/xmlns/"))
+            string? prefix = (node.NamespaceUri == null || (node.LocalName == "xmlns" && node.NamespaceUri == "http://www.w3.org/2000/xmlns/"))
                 ? null
                 : manager.LookupPrefix(node.NamespaceUri);
 
-            if (!string.IsNullOrEmpty(prefix))
+            if (!StringUtils.IsNullOrEmpty(prefix))
             {
                 return prefix + ":" + XmlConvert.DecodeName(node.LocalName);
             }
             else
             {
-                return XmlConvert.DecodeName(node.LocalName);
+                return XmlConvert.DecodeName(node.LocalName)!;
             }
         }
 
@@ -1130,7 +1133,7 @@ namespace Microsoft.IdentityModel.Json.Converters
             {
                 if (attribute.LocalName == "Array" && attribute.NamespaceUri == JsonNamespaceUri)
                 {
-                    return XmlConvert.ToBoolean(attribute.Value);
+                    return XmlConvert.ToBoolean(attribute.Value!);
                 }
             }
 
@@ -1160,9 +1163,9 @@ namespace Microsoft.IdentityModel.Json.Converters
 
                     // value of dictionary will be a single IXmlNode when there is one for a name,
                     // or a List<IXmlNode> when there are multiple
-                    Dictionary<string, object> nodesGroupedByName = null;
+                    Dictionary<string, object>? nodesGroupedByName = null;
 
-                    string nodeName = null;
+                    string? nodeName = null;
 
                     for (int i = 0; i < node.ChildNodes.Count; i++)
                     {
@@ -1200,7 +1203,7 @@ namespace Microsoft.IdentityModel.Json.Converters
                         }
                         else
                         {
-                            if (!nodesGroupedByName.TryGetValue(currentNodeName, out object value))
+                            if (!nodesGroupedByName.TryGetValue(currentNodeName, out object? value))
                             {
                                 nodesGroupedByName.Add(currentNodeName, childNode);
                             }
@@ -1208,7 +1211,7 @@ namespace Microsoft.IdentityModel.Json.Converters
                             {
                                 if (!(value is List<IXmlNode> nodes))
                                 {
-                                    nodes = new List<IXmlNode> {(IXmlNode)value};
+                                    nodes = new List<IXmlNode> {(IXmlNode)value!};
                                     nodesGroupedByName[currentNodeName] = nodes;
                                 }
 
@@ -1219,7 +1222,7 @@ namespace Microsoft.IdentityModel.Json.Converters
 
                     if (nodesGroupedByName == null)
                     {
-                        WriteGroupedNodes(writer, manager, writePropertyName, node.ChildNodes, nodeName);
+                        WriteGroupedNodes(writer, manager, writePropertyName, node.ChildNodes, nodeName!);
                     }
                     else
                     {
@@ -1313,9 +1316,13 @@ namespace Microsoft.IdentityModel.Json.Converters
                             if (attribute.NamespaceUri == "http://www.w3.org/2000/xmlns/")
                             {
                                 string namespacePrefix = (attribute.LocalName != "xmlns")
-                                    ? XmlConvert.DecodeName(attribute.LocalName)
+                                    ? XmlConvert.DecodeName(attribute.LocalName)!
                                     : string.Empty;
-                                string namespaceUri = attribute.Value;
+                                string? namespaceUri = attribute.Value;
+                                if (namespaceUri == null)
+                                {
+                                    throw new JsonSerializationException("Namespace attribute must have a value.");
+                                }
 
                                 manager.AddNamespace(namespacePrefix, namespaceUri);
                             }
@@ -1400,17 +1407,17 @@ namespace Microsoft.IdentityModel.Json.Converters
                     writer.WritePropertyName(GetPropertyName(node, manager));
                     writer.WriteStartObject();
 
-                    if (!string.IsNullOrEmpty(declaration.Version))
+                    if (!StringUtils.IsNullOrEmpty(declaration.Version))
                     {
                         writer.WritePropertyName("@version");
                         writer.WriteValue(declaration.Version);
                     }
-                    if (!string.IsNullOrEmpty(declaration.Encoding))
+                    if (!StringUtils.IsNullOrEmpty(declaration.Encoding))
                     {
                         writer.WritePropertyName("@encoding");
                         writer.WriteValue(declaration.Encoding);
                     }
-                    if (!string.IsNullOrEmpty(declaration.Standalone))
+                    if (!StringUtils.IsNullOrEmpty(declaration.Standalone))
                     {
                         writer.WritePropertyName("@standalone");
                         writer.WriteValue(declaration.Standalone);
@@ -1423,22 +1430,22 @@ namespace Microsoft.IdentityModel.Json.Converters
                     writer.WritePropertyName(GetPropertyName(node, manager));
                     writer.WriteStartObject();
 
-                    if (!string.IsNullOrEmpty(documentType.Name))
+                    if (!StringUtils.IsNullOrEmpty(documentType.Name))
                     {
                         writer.WritePropertyName("@name");
                         writer.WriteValue(documentType.Name);
                     }
-                    if (!string.IsNullOrEmpty(documentType.Public))
+                    if (!StringUtils.IsNullOrEmpty(documentType.Public))
                     {
                         writer.WritePropertyName("@public");
                         writer.WriteValue(documentType.Public);
                     }
-                    if (!string.IsNullOrEmpty(documentType.System))
+                    if (!StringUtils.IsNullOrEmpty(documentType.System))
                     {
                         writer.WritePropertyName("@system");
                         writer.WriteValue(documentType.System);
                     }
-                    if (!string.IsNullOrEmpty(documentType.InternalSubset))
+                    if (!StringUtils.IsNullOrEmpty(documentType.InternalSubset))
                     {
                         writer.WritePropertyName("@internalSubset");
                         writer.WriteValue(documentType.InternalSubset);
@@ -1473,7 +1480,7 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// <param name="existingValue">The existing value of object being read.</param>
         /// <param name="serializer">The calling serializer.</param>
         /// <returns>The object value.</returns>
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             switch (reader.TokenType)
             {
@@ -1486,8 +1493,8 @@ namespace Microsoft.IdentityModel.Json.Converters
             }
 
             XmlNamespaceManager manager = new XmlNamespaceManager(new NameTable());
-            IXmlDocument document = null;
-            IXmlNode rootNode = null;
+            IXmlDocument? document = null;
+            IXmlNode? rootNode = null;
 
 #if HAVE_XLINQ
             if (typeof(XObject).IsAssignableFrom(objectType))
@@ -1532,7 +1539,7 @@ namespace Microsoft.IdentityModel.Json.Converters
                 throw JsonSerializationException.Create(reader, "Unexpected type when converting XML: " + objectType);
             }
 
-            if (!string.IsNullOrEmpty(DeserializeRootElementName))
+            if (!StringUtils.IsNullOrEmpty(DeserializeRootElementName))
             {
                 ReadElement(reader, document, rootNode, DeserializeRootElementName, manager);
             }
@@ -1545,7 +1552,7 @@ namespace Microsoft.IdentityModel.Json.Converters
 #if HAVE_XLINQ
             if (objectType == typeof(XElement))
             {
-                XElement element = (XElement)document.DocumentElement.WrappedNode;
+                XElement element = (XElement)document.DocumentElement!.WrappedNode!;
                 element.Remove();
 
                 return element;
@@ -1554,7 +1561,7 @@ namespace Microsoft.IdentityModel.Json.Converters
 #if HAVE_XML_DOCUMENT
             if (objectType == typeof(XmlElement))
             {
-                return document.DocumentElement.WrappedNode;
+                return document.DocumentElement!.WrappedNode;
             }
 #endif
 
@@ -1581,7 +1588,7 @@ namespace Microsoft.IdentityModel.Json.Converters
                         return;
                     default:
                         // processing instructions and the xml declaration start with ?
-                        if (!string.IsNullOrEmpty(propertyName) && propertyName[0] == '?')
+                        if (!StringUtils.IsNullOrEmpty(propertyName) && propertyName[0] == '?')
                         {
                             CreateInstruction(reader, document, currentNode, propertyName);
                             return;
@@ -1611,13 +1618,13 @@ namespace Microsoft.IdentityModel.Json.Converters
 
         private void ReadElement(JsonReader reader, IXmlDocument document, IXmlNode currentNode, string propertyName, XmlNamespaceManager manager)
         {
-            if (string.IsNullOrEmpty(propertyName))
+            if (StringUtils.IsNullOrEmpty(propertyName))
             {
                 throw JsonSerializationException.Create(reader, "XmlNodeConverter cannot convert JSON with an empty property name to XML.");
             }
 
-            Dictionary<string, string> attributeNameValues = null;
-            string elementPrefix = null;
+            Dictionary<string, string?>? attributeNameValues = null;
+            string? elementPrefix = null;
 
             if (!EncodeSpecialCharacters)
             {
@@ -1629,7 +1636,7 @@ namespace Microsoft.IdentityModel.Json.Converters
                 if (propertyName.StartsWith('@'))
                 {
                     string attributeName = propertyName.Substring(1);
-                    string attributePrefix = MiscellaneousUtils.GetPrefix(attributeName);
+                    string? attributePrefix = MiscellaneousUtils.GetPrefix(attributeName);
 
                     AddAttribute(reader, document, currentNode, propertyName, attributeName, manager, attributePrefix);
                     return;
@@ -1649,7 +1656,7 @@ namespace Microsoft.IdentityModel.Json.Converters
                         case JsonTypeReflector.TypePropertyName:
                         case JsonTypeReflector.ValuePropertyName:
                             string attributeName = propertyName.Substring(1);
-                            string attributePrefix = manager.LookupPrefix(JsonNamespaceUri);
+                            string? attributePrefix = manager.LookupPrefix(JsonNamespaceUri);
                             AddAttribute(reader, document, currentNode, propertyName, attributeName, manager, attributePrefix);
                             return;
                     }
@@ -1666,7 +1673,7 @@ namespace Microsoft.IdentityModel.Json.Converters
             CreateElement(reader, document, currentNode, propertyName, manager, elementPrefix, attributeNameValues);
         }
 
-        private void CreateElement(JsonReader reader, IXmlDocument document, IXmlNode currentNode, string elementName, XmlNamespaceManager manager, string elementPrefix, Dictionary<string, string> attributeNameValues)
+        private void CreateElement(JsonReader reader, IXmlDocument document, IXmlNode currentNode, string elementName, XmlNamespaceManager manager, string? elementPrefix, Dictionary<string, string?>? attributeNameValues)
         {
             IXmlElement element = CreateElement(elementName, document, elementPrefix, manager);
 
@@ -1675,12 +1682,14 @@ namespace Microsoft.IdentityModel.Json.Converters
             if (attributeNameValues != null)
             {
                 // add attributes to newly created element
-                foreach (KeyValuePair<string, string> nameValue in attributeNameValues)
+                foreach (KeyValuePair<string, string?> nameValue in attributeNameValues)
                 {
                     string encodedName = XmlConvert.EncodeName(nameValue.Key);
-                    string attributePrefix = MiscellaneousUtils.GetPrefix(nameValue.Key);
+                    string? attributePrefix = MiscellaneousUtils.GetPrefix(nameValue.Key);
 
-                    IXmlNode attribute = (!string.IsNullOrEmpty(attributePrefix)) ? document.CreateAttribute(encodedName, manager.LookupNamespace(attributePrefix) ?? string.Empty, nameValue.Value) : document.CreateAttribute(encodedName, nameValue.Value);
+                    IXmlNode attribute = (!StringUtils.IsNullOrEmpty(attributePrefix))
+                        ? document.CreateAttribute(encodedName, manager.LookupNamespace(attributePrefix) ?? string.Empty, nameValue.Value!)
+                        : document.CreateAttribute(encodedName, nameValue.Value!);
 
                     element.SetAttributeNode(attribute);
                 }
@@ -1694,7 +1703,7 @@ namespace Microsoft.IdentityModel.Json.Converters
                 case JsonToken.Boolean:
                 case JsonToken.Date:
                 case JsonToken.Bytes:
-                    string text = ConvertTokenToXmlValue(reader);
+                    string? text = ConvertTokenToXmlValue(reader);
                     if (text != null)
                     {
                         element.AppendChild(document.CreateTextNode(text));
@@ -1718,7 +1727,7 @@ namespace Microsoft.IdentityModel.Json.Converters
             }
         }
 
-        private static void AddAttribute(JsonReader reader, IXmlDocument document, IXmlNode currentNode, string propertyName, string attributeName, XmlNamespaceManager manager, string attributePrefix)
+        private static void AddAttribute(JsonReader reader, IXmlDocument document, IXmlNode currentNode, string propertyName, string attributeName, XmlNamespaceManager manager, string? attributePrefix)
         {
             if (currentNode.NodeType == XmlNodeType.Document)
             {
@@ -1726,16 +1735,16 @@ namespace Microsoft.IdentityModel.Json.Converters
             }
 
             string encodedName = XmlConvert.EncodeName(attributeName);
-            string attributeValue = ConvertTokenToXmlValue(reader);
+            string attributeValue = ConvertTokenToXmlValue(reader)!;
 
-            IXmlNode attribute = (!string.IsNullOrEmpty(attributePrefix))
-                ? document.CreateAttribute(encodedName, manager.LookupNamespace(attributePrefix), attributeValue)
+            IXmlNode attribute = (!StringUtils.IsNullOrEmpty(attributePrefix))
+                ? document.CreateAttribute(encodedName, manager.LookupNamespace(attributePrefix)!, attributeValue)
                 : document.CreateAttribute(encodedName, attributeValue);
 
             ((IXmlElement)currentNode).SetAttributeNode(attribute);
         }
 
-        private static string ConvertTokenToXmlValue(JsonReader reader)
+        private static string? ConvertTokenToXmlValue(JsonReader reader)
         {
             switch (reader.TokenType)
             {
@@ -1782,7 +1791,7 @@ namespace Microsoft.IdentityModel.Json.Converters
 #endif
                 }
                 case JsonToken.Bytes:
-                    return Convert.ToBase64String((byte[])reader.Value);
+                    return Convert.ToBase64String((byte[])reader.Value!);
                 case JsonToken.Null:
                     return null;
                 default:
@@ -1792,7 +1801,7 @@ namespace Microsoft.IdentityModel.Json.Converters
 
         private void ReadArrayElements(JsonReader reader, IXmlDocument document, string propertyName, IXmlNode currentNode, XmlNamespaceManager manager)
         {
-            string elementPrefix = MiscellaneousUtils.GetPrefix(propertyName);
+            string? elementPrefix = MiscellaneousUtils.GetPrefix(propertyName);
 
             IXmlElement nestedArrayElement = CreateElement(propertyName, document, elementPrefix, manager);
 
@@ -1858,9 +1867,9 @@ namespace Microsoft.IdentityModel.Json.Converters
             return true;
         }
 
-        private Dictionary<string, string> ReadAttributeElements(JsonReader reader, XmlNamespaceManager manager)
+        private Dictionary<string, string?>? ReadAttributeElements(JsonReader reader, XmlNamespaceManager manager)
         {
-            Dictionary<string, string> attributeNameValues = null;
+            Dictionary<string, string?>? attributeNameValues = null;
             bool finished = false;
 
             // read properties until first non-attribute is encountered
@@ -1869,19 +1878,19 @@ namespace Microsoft.IdentityModel.Json.Converters
                 switch (reader.TokenType)
                 {
                     case JsonToken.PropertyName:
-                        string attributeName = reader.Value.ToString();
+                        string attributeName = reader.Value!.ToString()!;
 
-                        if (!string.IsNullOrEmpty(attributeName))
+                        if (!StringUtils.IsNullOrEmpty(attributeName))
                         {
                             char firstChar = attributeName[0];
-                            string attributeValue;
+                            string? attributeValue;
 
                             switch (firstChar)
                             {
                                 case '@':
                                     if (attributeNameValues == null)
                                     {
-                                        attributeNameValues = new Dictionary<string, string>();
+                                        attributeNameValues = new Dictionary<string, string?>();
                                     }
 
                                     attributeName = attributeName.Substring(1);
@@ -1889,9 +1898,9 @@ namespace Microsoft.IdentityModel.Json.Converters
                                     attributeValue = ConvertTokenToXmlValue(reader);
                                     attributeNameValues.Add(attributeName, attributeValue);
 
-                                    if (IsNamespaceAttribute(attributeName, out string namespacePrefix))
+                                    if (IsNamespaceAttribute(attributeName, out string? namespacePrefix))
                                     {
-                                        manager.AddNamespace(namespacePrefix, attributeValue);
+                                        manager.AddNamespace(namespacePrefix, attributeValue!);
                                     }
                                     break;
                                 case '$':
@@ -1904,12 +1913,12 @@ namespace Microsoft.IdentityModel.Json.Converters
                                         case JsonTypeReflector.ValuePropertyName:
                                             // check that JsonNamespaceUri is in scope
                                             // if it isn't then add it to document and namespace manager
-                                            string jsonPrefix = manager.LookupPrefix(JsonNamespaceUri);
+                                            string? jsonPrefix = manager.LookupPrefix(JsonNamespaceUri);
                                             if (jsonPrefix == null)
                                             {
                                                 if (attributeNameValues == null)
                                                 {
-                                                    attributeNameValues = new Dictionary<string, string>();
+                                                    attributeNameValues = new Dictionary<string, string?>();
                                                 }
 
                                                 // ensure that the prefix used is free
@@ -1941,7 +1950,7 @@ namespace Microsoft.IdentityModel.Json.Converters
 
                                             if (attributeNameValues == null)
                                             {
-                                                attributeNameValues = new Dictionary<string, string>();
+                                                attributeNameValues = new Dictionary<string, string?>();
                                             }
 
                                             attributeValue = reader.Value?.ToString();
@@ -1979,12 +1988,12 @@ namespace Microsoft.IdentityModel.Json.Converters
         {
             if (propertyName == DeclarationName)
             {
-                string version = null;
-                string encoding = null;
-                string standalone = null;
+                string? version = null;
+                string? encoding = null;
+                string? standalone = null;
                 while (reader.Read() && reader.TokenType != JsonToken.EndObject)
                 {
-                    switch (reader.Value.ToString())
+                    switch (reader.Value?.ToString())
                     {
                         case "@version":
                             reader.ReadAndAssert();
@@ -2003,12 +2012,17 @@ namespace Microsoft.IdentityModel.Json.Converters
                     }
                 }
 
+                if (version == null)
+                {
+                    throw JsonSerializationException.Create(reader, "Version not specified for XML declaration.");
+                }
+
                 IXmlNode declaration = document.CreateXmlDeclaration(version, encoding, standalone);
                 currentNode.AppendChild(declaration);
             }
             else
             {
-                IXmlNode instruction = document.CreateProcessingInstruction(propertyName.Substring(1), ConvertTokenToXmlValue(reader));
+                IXmlNode instruction = document.CreateProcessingInstruction(propertyName.Substring(1), ConvertTokenToXmlValue(reader)!);
                 currentNode.AppendChild(instruction);
             }
         }
@@ -2016,13 +2030,13 @@ namespace Microsoft.IdentityModel.Json.Converters
 #if HAVE_XML_DOCUMENT_TYPE
         private void CreateDocumentType(JsonReader reader, IXmlDocument document, IXmlNode currentNode)
         {
-            string name = null;
-            string publicId = null;
-            string systemId = null;
-            string internalSubset = null;
+            string? name = null;
+            string? publicId = null;
+            string? systemId = null;
+            string? internalSubset = null;
             while (reader.Read() && reader.TokenType != JsonToken.EndObject)
             {
-                switch (reader.Value.ToString())
+                switch (reader.Value?.ToString())
                 {
                     case "@name":
                         reader.ReadAndAssert();
@@ -2045,17 +2059,22 @@ namespace Microsoft.IdentityModel.Json.Converters
                 }
             }
 
+            if (name == null)
+            {
+                throw JsonSerializationException.Create(reader, "Name not specified for XML document type.");
+            }
+
             IXmlNode documentType = document.CreateXmlDocumentType(name, publicId, systemId, internalSubset);
             currentNode.AppendChild(documentType);
         }
 #endif
 
-        private IXmlElement CreateElement(string elementName, IXmlDocument document, string elementPrefix, XmlNamespaceManager manager)
+        private IXmlElement CreateElement(string elementName, IXmlDocument document, string? elementPrefix, XmlNamespaceManager manager)
         {
             string encodeName = EncodeSpecialCharacters ? XmlConvert.EncodeLocalName(elementName) : XmlConvert.EncodeName(elementName);
-            string ns = string.IsNullOrEmpty(elementPrefix) ? manager.DefaultNamespace : manager.LookupNamespace(elementPrefix);
+            string? ns = StringUtils.IsNullOrEmpty(elementPrefix) ? manager.DefaultNamespace : manager.LookupNamespace(elementPrefix);
 
-            IXmlElement element = (!string.IsNullOrEmpty(ns)) ? document.CreateElement(encodeName, ns) : document.CreateElement(encodeName);
+            IXmlElement element = (!StringUtils.IsNullOrEmpty(ns)) ? document.CreateElement(encodeName, ns) : document.CreateElement(encodeName);
 
             return element;
         }
@@ -2072,7 +2091,7 @@ namespace Microsoft.IdentityModel.Json.Converters
                             throw JsonSerializationException.Create(reader, "JSON root object has multiple properties. The root object must have a single property in order to create a valid XML document. Consider specifying a DeserializeRootElementName.");
                         }
 
-                        string propertyName = reader.Value.ToString();
+                        string propertyName = reader.Value!.ToString()!;
                         reader.ReadAndAssert();
 
                         if (reader.TokenType == JsonToken.StartArray)
@@ -2086,8 +2105,8 @@ namespace Microsoft.IdentityModel.Json.Converters
 
                             if (count == 1 && WriteArrayAttribute)
                             {
-                                MiscellaneousUtils.GetQualifiedNameParts(propertyName, out string elementPrefix, out string localName);
-                                string ns = string.IsNullOrEmpty(elementPrefix) ? manager.DefaultNamespace : manager.LookupNamespace(elementPrefix);
+                                MiscellaneousUtils.GetQualifiedNameParts(propertyName, out string? elementPrefix, out string localName);
+                                string? ns = StringUtils.IsNullOrEmpty(elementPrefix) ? manager.DefaultNamespace : manager.LookupNamespace(elementPrefix);
 
                                 foreach (IXmlNode childNode in currentNode.ChildNodes)
                                 {
@@ -2105,7 +2124,7 @@ namespace Microsoft.IdentityModel.Json.Converters
                         }
                         continue;
                     case JsonToken.StartConstructor:
-                        string constructorName = reader.Value.ToString();
+                        string constructorName = reader.Value!.ToString()!;
 
                         while (reader.Read() && reader.TokenType != JsonToken.EndConstructor)
                         {
@@ -2113,7 +2132,7 @@ namespace Microsoft.IdentityModel.Json.Converters
                         }
                         break;
                     case JsonToken.Comment:
-                        currentNode.AppendChild(document.CreateComment((string)reader.Value));
+                        currentNode.AppendChild(document.CreateComment((string)reader.Value!));
                         break;
                     case JsonToken.EndObject:
                     case JsonToken.EndArray:
@@ -2131,7 +2150,7 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// <param name="attributeName">Attribute name to test.</param>
         /// <param name="prefix">The attribute name prefix if it has one, otherwise an empty string.</param>
         /// <returns><c>true</c> if attribute name is for a namespace attribute, otherwise <c>false</c>.</returns>
-        private bool IsNamespaceAttribute(string attributeName, out string prefix)
+        private bool IsNamespaceAttribute(string attributeName, [NotNullWhen(true)]out string? prefix)
         {
             if (attributeName.StartsWith("xmlns", StringComparison.Ordinal))
             {
@@ -2212,6 +2231,8 @@ namespace Microsoft.IdentityModel.Json.Converters
         }
 #endif
     }
+#nullable disable
+#pragma warning restore CA1062 // Validate arguments of public methods
 }
 
 #endif

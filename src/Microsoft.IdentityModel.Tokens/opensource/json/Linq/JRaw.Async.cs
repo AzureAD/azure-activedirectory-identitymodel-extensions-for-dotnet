@@ -32,7 +32,8 @@ using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Json.Linq
 {
-    internal partial class JRaw
+#pragma warning disable CA1062 // Validate arguments of public methods
+    public partial class JRaw
     {
         /// <summary>
         /// Asynchronously creates an instance of <see cref="JRaw"/> with the content of the reader's current token.
@@ -52,6 +53,7 @@ namespace Microsoft.IdentityModel.Json.Linq
             }
         }
     }
+#pragma warning restore CA1062 // Validate arguments of public methods
 }
 
 #endif

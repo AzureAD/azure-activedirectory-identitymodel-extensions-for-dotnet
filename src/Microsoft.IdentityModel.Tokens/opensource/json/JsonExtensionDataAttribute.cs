@@ -7,7 +7,7 @@ namespace Microsoft.IdentityModel.Json
     /// and write values during serialization.
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
-    internal class JsonExtensionDataAttribute : Attribute
+    public class JsonExtensionDataAttribute : Attribute
     {
         /// <summary>
         /// Gets or sets a value that indicates whether to write extension data when serializing the object.

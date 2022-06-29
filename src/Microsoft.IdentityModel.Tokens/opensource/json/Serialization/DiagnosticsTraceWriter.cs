@@ -5,10 +5,11 @@ using DiagnosticsTrace = System.Diagnostics.Trace;
 
 namespace Microsoft.IdentityModel.Json.Serialization
 {
+#nullable enable
     /// <summary>
     /// Represents a trace writer that writes to the application's <see cref="TraceListener"/> instances.
     /// </summary>
-    internal class DiagnosticsTraceWriter : ITraceWriter
+    public class DiagnosticsTraceWriter : ITraceWriter
     {
         /// <summary>
         /// Gets the <see cref="TraceLevel"/> that will be used to filter the trace messages passed to the writer.
@@ -43,7 +44,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
         /// <param name="level">The <see cref="TraceLevel"/> at which to write this trace.</param>
         /// <param name="message">The trace message.</param>
         /// <param name="ex">The trace exception. This parameter is optional.</param>
-        public void Trace(TraceLevel level, string message, Exception ex)
+        public void Trace(TraceLevel level, string message, Exception? ex)
         {
             if (level == TraceLevel.Off)
             {
@@ -59,12 +60,12 @@ namespace Microsoft.IdentityModel.Json.Serialization
                 {
                     lock (listener)
                     {
-                        listener.TraceEvent(eventCache, "Microsoft.IdentityModel.Json", traceEventType, 0, message);
+                        listener.TraceEvent(eventCache, "Newtonsoft.Json", traceEventType, 0, message);
                     }
                 }
                 else
                 {
-                    listener.TraceEvent(eventCache, "Microsoft.IdentityModel.Json", traceEventType, 0, message);
+                    listener.TraceEvent(eventCache, "Newtonsoft.Json", traceEventType, 0, message);
                 }
 
                 if (DiagnosticsTrace.AutoFlush)
@@ -74,6 +75,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
             }
         }
     }
+#nullable disable
 }
 
 #endif

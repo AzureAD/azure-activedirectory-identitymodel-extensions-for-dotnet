@@ -31,7 +31,7 @@ using Microsoft.IdentityModel.Json.Utilities;
 
 namespace Microsoft.IdentityModel.Json.Linq
 {
-    internal partial class JTokenWriter
+    public partial class JTokenWriter
     {
         // This is the only method that can benefit from Task-based asynchronicity, and that only when
         // the reader provides it.

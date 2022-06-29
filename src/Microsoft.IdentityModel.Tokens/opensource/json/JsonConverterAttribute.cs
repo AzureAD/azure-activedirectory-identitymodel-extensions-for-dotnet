@@ -29,11 +29,12 @@ using System.Globalization;
 
 namespace Microsoft.IdentityModel.Json
 {
+#nullable enable
     /// <summary>
     /// Instructs the <see cref="JsonSerializer"/> to use the specified <see cref="JsonConverter"/> when serializing the member or class.
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface | AttributeTargets.Enum | AttributeTargets.Parameter, AllowMultiple = false)]
-    internal sealed class JsonConverterAttribute : Attribute
+    public sealed class JsonConverterAttribute : Attribute
     {
         private readonly Type _converterType;
 
@@ -47,7 +48,7 @@ namespace Microsoft.IdentityModel.Json
         /// The parameter list to use when constructing the <see cref="JsonConverter"/> described by <see cref="ConverterType"/>.
         /// If <c>null</c>, the default constructor is used.
         /// </summary>
-        public object[] ConverterParameters { get; }
+        public object[]? ConverterParameters { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonConverterAttribute"/> class.
@@ -74,4 +75,5 @@ namespace Microsoft.IdentityModel.Json
             ConverterParameters = converterParameters;
         }
     }
+#nullable disable
 }

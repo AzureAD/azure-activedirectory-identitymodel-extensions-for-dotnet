@@ -32,6 +32,7 @@ using System.Numerics;
 
 namespace Microsoft.IdentityModel.Json.Serialization
 {
+#nullable enable
     internal class TraceJsonWriter : JsonWriter
     {
         private readonly JsonWriter _innerWriter;
@@ -144,7 +145,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
             }
         }
 
-        public override void WriteValue(byte[] value)
+        public override void WriteValue(byte[]? value)
         {
             _textWriter.WriteValue(value);
             _innerWriter.WriteValue(value);
@@ -321,7 +322,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
             }
         }
 
-        public override void WriteValue(object value)
+        public override void WriteValue(object? value)
         {
 #if HAVE_BIG_INTEGER
             if (value is BigInteger)
@@ -389,7 +390,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
             }
         }
 
-        public override void WriteValue(string value)
+        public override void WriteValue(string? value)
         {
             _textWriter.WriteValue(value);
             _innerWriter.WriteValue(value);
@@ -459,7 +460,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
             }
         }
 
-        public override void WriteValue(Uri value)
+        public override void WriteValue(Uri? value)
         {
             _textWriter.WriteValue(value);
             _innerWriter.WriteValue(value);
@@ -501,7 +502,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
             base.WriteWhitespace(ws);
         }
 
-        public override void WriteComment(string text)
+        public override void WriteComment(string? text)
         {
             _textWriter.WriteComment(text);
             _innerWriter.WriteComment(text);
@@ -566,7 +567,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
             base.WriteEndObject();
         }
 
-        public override void WriteRawValue(string json)
+        public override void WriteRawValue(string? json)
         {
             _textWriter.WriteRawValue(json);
             _innerWriter.WriteRawValue(json);
@@ -575,7 +576,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
             InternalWriteValue(JsonToken.Undefined);
         }
 
-        public override void WriteRaw(string json)
+        public override void WriteRaw(string? json)
         {
             _textWriter.WriteRaw(json);
             _innerWriter.WriteRaw(json);
@@ -595,4 +596,5 @@ namespace Microsoft.IdentityModel.Json.Serialization
             _innerWriter.Flush();
         }
     }
+#nullable disable
 }

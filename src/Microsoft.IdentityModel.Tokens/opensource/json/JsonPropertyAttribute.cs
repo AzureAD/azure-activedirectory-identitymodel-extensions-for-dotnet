@@ -28,11 +28,12 @@ using Microsoft.IdentityModel.Json.Serialization;
 
 namespace Microsoft.IdentityModel.Json
 {
+#nullable enable
     /// <summary>
     /// Instructs the <see cref="JsonSerializer"/> to always serialize the member with the specified name.
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Parameter, AllowMultiple = false)]
-    internal sealed class JsonPropertyAttribute : Attribute
+    public sealed class JsonPropertyAttribute : Attribute
     {
         // yuck. can't set nullable properties on an attribute in C#
         // have to use this approach to get an unset default state
@@ -52,7 +53,7 @@ namespace Microsoft.IdentityModel.Json
         /// Gets or sets the <see cref="JsonConverter"/> type used when serializing the property's collection items.
         /// </summary>
         /// <value>The collection's items <see cref="JsonConverter"/> type.</value>
-        public Type ItemConverterType { get; set; }
+        public Type? ItemConverterType { get; set; }
 
         /// <summary>
         /// The parameter list to use when constructing the <see cref="JsonConverter"/> described by <see cref="ItemConverterType"/>.
@@ -65,13 +66,13 @@ namespace Microsoft.IdentityModel.Json
         /// [JsonProperty(ItemConverterType = typeof(MyContainerConverter), ItemConverterParameters = new object[] { 123, "Four" })]
         /// </code>
         /// </example>
-        public object[] ItemConverterParameters { get; set; }
+        public object[]? ItemConverterParameters { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="Type"/> of the <see cref="NamingStrategy"/>.
         /// </summary>
         /// <value>The <see cref="Type"/> of the <see cref="NamingStrategy"/>.</value>
-        public Type NamingStrategyType { get; set; }
+        public Type? NamingStrategyType { get; set; }
 
         /// <summary>
         /// The parameter list to use when constructing the <see cref="NamingStrategy"/> described by <see cref="JsonPropertyAttribute.NamingStrategyType"/>.
@@ -84,7 +85,7 @@ namespace Microsoft.IdentityModel.Json
         /// [JsonProperty(NamingStrategyType = typeof(MyNamingStrategy), NamingStrategyParameters = new object[] { 123, "Four" })]
         /// </code>
         /// </example>
-        public object[] NamingStrategyParameters { get; set; }
+        public object[]? NamingStrategyParameters { get; set; }
 
         /// <summary>
         /// Gets or sets the null value handling used when serializing this property.
@@ -172,7 +173,7 @@ namespace Microsoft.IdentityModel.Json
         /// Gets or sets the name of the property.
         /// </summary>
         /// <value>The name of the property.</value>
-        public string PropertyName { get; set; }
+        public string? PropertyName { get; set; }
 
         /// <summary>
         /// Gets or sets the reference loop handling used when serializing the property's collection items.
@@ -220,4 +221,5 @@ namespace Microsoft.IdentityModel.Json
             PropertyName = propertyName;
         }
     }
+#nullable disable
 }

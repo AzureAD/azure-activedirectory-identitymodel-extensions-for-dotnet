@@ -29,6 +29,7 @@ using System.Globalization;
 
 namespace Microsoft.IdentityModel.Json.Serialization
 {
+#nullable enable
     internal class DefaultReferenceResolver : IReferenceResolver
     {
         private int _referenceCount;
@@ -52,15 +53,15 @@ namespace Microsoft.IdentityModel.Json.Serialization
 
         public object ResolveReference(object context, string reference)
         {
-            GetMappings(context).TryGetByFirst(reference, out object value);
-            return value;
+            GetMappings(context).TryGetByFirst(reference, out object? value);
+            return value!;
         }
 
         public string GetReference(object context, object value)
         {
             BidirectionalDictionary<string, object> mappings = GetMappings(context);
 
-            if (!mappings.TryGetBySecond(value, out string reference))
+            if (!mappings.TryGetBySecond(value, out string? reference))
             {
                 _referenceCount++;
                 reference = _referenceCount.ToString(CultureInfo.InvariantCulture);
@@ -80,4 +81,5 @@ namespace Microsoft.IdentityModel.Json.Serialization
             return GetMappings(context).TryGetBySecond(value, out _);
         }
     }
+#nullable disable
 }

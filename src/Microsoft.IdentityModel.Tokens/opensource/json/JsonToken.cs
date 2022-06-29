@@ -29,10 +29,11 @@ using System.Text;
 
 namespace Microsoft.IdentityModel.Json
 {
+#pragma warning disable CA1720 // Identifier contains type name
     /// <summary>
     /// Specifies the type of JSON token.
     /// </summary>
-    internal enum JsonToken
+    public enum JsonToken
     {
         /// <summary>
         /// This is returned by the <see cref="JsonReader"/> if a read method has not been called.
@@ -124,4 +125,6 @@ namespace Microsoft.IdentityModel.Json
         /// </summary>
         Bytes = 17
     }
+#pragma warning restore CA1720 // Identifier contains type name
+
 }

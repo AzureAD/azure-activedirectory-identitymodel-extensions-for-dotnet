@@ -31,6 +31,8 @@ using System.Threading.Tasks;
 #endif
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
 #if !HAVE_LINQ
 using Microsoft.IdentityModel.Json.Utilities.LinqBridge;
 #else
@@ -39,9 +41,10 @@ using System.Linq;
 
 namespace Microsoft.IdentityModel.Json.Utilities
 {
+#nullable enable
     internal static class BufferUtils
     {
-        public static char[] RentBuffer(IArrayPool<char> bufferPool, int minSize)
+        public static char[] RentBuffer(IArrayPool<char>? bufferPool, int minSize)
         {
             if (bufferPool == null)
             {
@@ -52,12 +55,12 @@ namespace Microsoft.IdentityModel.Json.Utilities
             return buffer;
         }
 
-        public static void ReturnBuffer(IArrayPool<char> bufferPool, char[] buffer)
+        public static void ReturnBuffer(IArrayPool<char>? bufferPool, char[]? buffer)
         {
             bufferPool?.Return(buffer);
         }
 
-        public static char[] EnsureBufferSize(IArrayPool<char> bufferPool, int size, char[] buffer)
+        public static char[] EnsureBufferSize(IArrayPool<char>? bufferPool, int size, char[]? buffer)
         {
             if (bufferPool == null)
             {
@@ -123,15 +126,16 @@ namespace Microsoft.IdentityModel.Json.Utilities
             return SingleQuoteCharEscapeFlags;
         }
 
-        public static bool ShouldEscapeJavaScriptString(string s, bool[] charEscapeFlags)
+        public static bool ShouldEscapeJavaScriptString(string? s, bool[] charEscapeFlags)
         {
             if (s == null)
             {
                 return false;
             }
 
-            foreach (char c in s)
+            for (int i = 0; i < s.Length; i++)
             {
+                char c = s[i];
                 if (c >= charEscapeFlags.Length || charEscapeFlags[c])
                 {
                     return true;
@@ -141,8 +145,8 @@ namespace Microsoft.IdentityModel.Json.Utilities
             return false;
         }
 
-        public static void WriteEscapedJavaScriptString(TextWriter writer, string s, char delimiter, bool appendDelimiters,
-            bool[] charEscapeFlags, StringEscapeHandling stringEscapeHandling, IArrayPool<char> bufferPool, ref char[] writeBuffer)
+        public static void WriteEscapedJavaScriptString(TextWriter writer, string? s, char delimiter, bool appendDelimiters,
+            bool[] charEscapeFlags, StringEscapeHandling stringEscapeHandling, IArrayPool<char>? bufferPool, ref char[]? writeBuffer)
         {
             // leading delimiter
             if (appendDelimiters)
@@ -150,7 +154,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                 writer.Write(delimiter);
             }
 
-            if (!string.IsNullOrEmpty(s))
+            if (!StringUtils.IsNullOrEmpty(s))
             {
                 int lastWritePosition = FirstCharToEscape(s, charEscapeFlags, stringEscapeHandling);
                 if (lastWritePosition == -1)
@@ -181,7 +185,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                             continue;
                         }
 
-                        string escapedValue;
+                        string? escapedValue;
 
                         switch (c)
                         {
@@ -230,7 +234,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                                             writeBuffer = BufferUtils.EnsureBufferSize(bufferPool, UnicodeTextLength, writeBuffer);
                                         }
 
-                                        StringUtils.ToCharAsUnicode(c, writeBuffer);
+                                        StringUtils.ToCharAsUnicode(c, writeBuffer!);
 
                                         // slightly hacky but it saves multiple conditions in if test
                                         escapedValue = EscapedUnicodeText;
@@ -248,7 +252,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                             continue;
                         }
 
-                        bool isEscapedUnicodeText = string.Equals(escapedValue, EscapedUnicodeText);
+                        bool isEscapedUnicodeText = string.Equals(escapedValue, EscapedUnicodeText, StringComparison.Ordinal);
 
                         if (i > lastWritePosition)
                         {
@@ -263,7 +267,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                                 // copy it over when creating new buffer
                                 if (isEscapedUnicodeText)
                                 {
-                                    Debug.Assert(writeBuffer != null, "Write buffer should never be null because it is set when the escaped unicode text is encountered.");
+                                    MiscellaneousUtils.Assert(writeBuffer != null, "Write buffer should never be null because it is set when the escaped unicode text is encountered.");
 
                                     Array.Copy(writeBuffer, newBuffer, UnicodeTextLength);
                                 }
@@ -286,11 +290,12 @@ namespace Microsoft.IdentityModel.Json.Utilities
                         }
                         else
                         {
+                            MiscellaneousUtils.Assert(writeBuffer != null);
                             writer.Write(writeBuffer, 0, UnicodeTextLength);
                         }
                     }
 
-                    Debug.Assert(lastWritePosition != 0);
+                    MiscellaneousUtils.Assert(lastWritePosition != 0);
                     length = s.Length - lastWritePosition;
                     if (length > 0)
                     {
@@ -314,13 +319,13 @@ namespace Microsoft.IdentityModel.Json.Utilities
             }
         }
 
-        public static string ToEscapedJavaScriptString(string value, char delimiter, bool appendDelimiters, StringEscapeHandling stringEscapeHandling)
+        public static string ToEscapedJavaScriptString(string? value, char delimiter, bool appendDelimiters, StringEscapeHandling stringEscapeHandling)
         {
             bool[] charEscapeFlags = GetCharEscapeFlags(stringEscapeHandling, delimiter);
 
             using (StringWriter w = StringUtils.CreateStringWriter(value?.Length ?? 16))
             {
-                char[] buffer = null;
+                char[]? buffer = null;
                 WriteEscapedJavaScriptString(w, value, delimiter, appendDelimiters, charEscapeFlags, stringEscapeHandling, null, ref buffer);
                 return w.ToString();
             }
@@ -371,7 +376,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                 return WriteEscapedJavaScriptStringWithDelimitersAsync(writer, s, delimiter, charEscapeFlags, stringEscapeHandling, client, writeBuffer, cancellationToken);
             }
 
-            if (string.IsNullOrEmpty(s))
+            if (StringUtils.IsNullOrEmpty(s))
             {
                 return cancellationToken.CancelIfRequestedAsync() ?? AsyncUtils.CompletedTask;
             }
@@ -383,15 +388,15 @@ namespace Microsoft.IdentityModel.Json.Utilities
             bool[] charEscapeFlags, StringEscapeHandling stringEscapeHandling, JsonTextWriter client, char[] writeBuffer, CancellationToken cancellationToken)
         {
             Task task = writer.WriteAsync(delimiter, cancellationToken);
-            if (!task.IsCompletedSucessfully())
+            if (!task.IsCompletedSuccessfully())
             {
                 return WriteEscapedJavaScriptStringWithDelimitersAsync(task, writer, s, delimiter, charEscapeFlags, stringEscapeHandling, client, writeBuffer, cancellationToken);
             }
 
-            if (!string.IsNullOrEmpty(s))
+            if (!StringUtils.IsNullOrEmpty(s))
             {
                 task = WriteEscapedJavaScriptStringWithoutDelimitersAsync(writer, s, charEscapeFlags, stringEscapeHandling, client, writeBuffer, cancellationToken);
-                if (task.IsCompletedSucessfully())
+                if (task.IsCompletedSuccessfully())
                 {
                     return writer.WriteAsync(delimiter, cancellationToken);
                 }
@@ -406,7 +411,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
         {
             await task.ConfigureAwait(false);
 
-            if (!string.IsNullOrEmpty(s))
+            if (!StringUtils.IsNullOrEmpty(s))
             {
                 await WriteEscapedJavaScriptStringWithoutDelimitersAsync(writer, s, charEscapeFlags, stringEscapeHandling, client, writeBuffer, cancellationToken).ConfigureAwait(false);
             }
@@ -450,7 +455,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 
             int length;
             bool isEscapedUnicodeText = false;
-            string escapedValue = null;
+            string? escapedValue = null;
 
             for (int i = lastWritePosition; i < s.Length; i++)
             {
@@ -539,7 +544,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                 lastWritePosition = i + 1;
                 if (!isEscapedUnicodeText)
                 {
-                    await writer.WriteAsync(escapedValue, cancellationToken).ConfigureAwait(false);
+                    await writer.WriteAsync(escapedValue!, cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
@@ -565,7 +570,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
         }
 #endif
 
-        public static bool TryGetDateFromConstructorJson(JsonReader reader, out DateTime dateTime, out string errorMessage)
+        public static bool TryGetDateFromConstructorJson(JsonReader reader, out DateTime dateTime, [NotNullWhen(false)]out string? errorMessage)
         {
             dateTime = default;
             errorMessage = null;
@@ -626,7 +631,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             return true;
         }
 
-        private static bool TryGetDateConstructorValue(JsonReader reader, out long? integer, out string errorMessage)
+        private static bool TryGetDateConstructorValue(JsonReader reader, out long? integer, [NotNullWhen(false)] out string? errorMessage)
         {
             integer = null;
             errorMessage = null;
@@ -646,8 +651,9 @@ namespace Microsoft.IdentityModel.Json.Utilities
                 return false;
             }
 
-            integer = (long)reader.Value;
+            integer = (long)reader.Value!;
             return true;
         }
     }
+#nullable disable
 }

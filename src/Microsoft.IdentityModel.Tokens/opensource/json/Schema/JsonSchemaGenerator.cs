@@ -37,6 +37,8 @@ using System.Linq;
 
 #endif
 
+#nullable disable
+
 namespace Microsoft.IdentityModel.Json.Schema
 {
     /// <summary>
@@ -48,7 +50,7 @@ namespace Microsoft.IdentityModel.Json.Schema
     /// </note>
     /// </summary>
     [Obsolete("JSON Schema validation has been moved to its own package. See https://www.newtonsoft.com/jsonschema for more details.")]
-    internal class JsonSchemaGenerator
+    public class JsonSchemaGenerator
     {
         /// <summary>
         /// Gets or sets how undefined schemas are handled by the serializer.
@@ -173,7 +175,7 @@ namespace Microsoft.IdentityModel.Json.Schema
         {
             JsonContainerAttribute containerAttribute = JsonTypeReflector.GetCachedAttribute<JsonContainerAttribute>(type);
 
-            if (!string.IsNullOrEmpty(containerAttribute?.Title))
+            if (!StringUtils.IsNullOrEmpty(containerAttribute?.Title))
             {
                 return containerAttribute.Title;
             }
@@ -185,7 +187,7 @@ namespace Microsoft.IdentityModel.Json.Schema
         {
             JsonContainerAttribute containerAttribute = JsonTypeReflector.GetCachedAttribute<JsonContainerAttribute>(type);
 
-            if (!string.IsNullOrEmpty(containerAttribute?.Description))
+            if (!StringUtils.IsNullOrEmpty(containerAttribute?.Description))
             {
                 return containerAttribute.Description;
             }
@@ -202,7 +204,7 @@ namespace Microsoft.IdentityModel.Json.Schema
         {
             JsonContainerAttribute containerAttribute = JsonTypeReflector.GetCachedAttribute<JsonContainerAttribute>(type);
 
-            if (!string.IsNullOrEmpty(containerAttribute?.Id))
+            if (!StringUtils.IsNullOrEmpty(containerAttribute?.Id))
             {
                 return containerAttribute.Id;
             }
@@ -230,7 +232,7 @@ namespace Microsoft.IdentityModel.Json.Schema
             string resolvedId = GetTypeId(type, false);
             string explicitId = GetTypeId(type, true);
 
-            if (!string.IsNullOrEmpty(resolvedId))
+            if (!StringUtils.IsNullOrEmpty(resolvedId))
             {
                 JsonSchema resolvedSchema = _resolver.GetSchema(resolvedId);
                 if (resolvedSchema != null)
