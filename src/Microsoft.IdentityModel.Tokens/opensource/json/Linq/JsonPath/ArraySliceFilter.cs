@@ -5,13 +5,14 @@ using Microsoft.IdentityModel.Json.Utilities;
 
 namespace Microsoft.IdentityModel.Json.Linq.JsonPath
 {
+#nullable enable
     internal class ArraySliceFilter : PathFilter
     {
         public int? Start { get; set; }
         public int? End { get; set; }
         public int? Step { get; set; }
 
-        public override IEnumerable<JToken> ExecuteFilter(JToken root, IEnumerable<JToken> current, bool errorWhenNoMatch)
+        public override IEnumerable<JToken> ExecuteFilter(JToken root, IEnumerable<JToken> current, JsonSelectSettings? settings)
         {
             if (Step == 0)
             {
@@ -56,7 +57,7 @@ namespace Microsoft.IdentityModel.Json.Linq.JsonPath
                     }
                     else
                     {
-                        if (errorWhenNoMatch)
+                        if (settings?.ErrorWhenNoMatch ?? false)
                         {
                             throw new JsonException("Array slice of {0} to {1} returned no results.".FormatWith(CultureInfo.InvariantCulture,
                                 Start != null ? Start.GetValueOrDefault().ToString(CultureInfo.InvariantCulture) : "*",
@@ -66,7 +67,7 @@ namespace Microsoft.IdentityModel.Json.Linq.JsonPath
                 }
                 else
                 {
-                    if (errorWhenNoMatch)
+                    if (settings?.ErrorWhenNoMatch ?? false)
                     {
                         throw new JsonException("Array slice is not valid on {0}.".FormatWith(CultureInfo.InvariantCulture, t.GetType().Name));
                     }
@@ -84,4 +85,5 @@ namespace Microsoft.IdentityModel.Json.Linq.JsonPath
             return (index > stopIndex);
         }
     }
+#nullable disable
 }

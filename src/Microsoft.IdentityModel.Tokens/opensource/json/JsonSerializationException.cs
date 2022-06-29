@@ -30,6 +30,7 @@ using System.Text;
 
 namespace Microsoft.IdentityModel.Json
 {
+#nullable enable
     /// <summary>
     /// The exception thrown when an error occurs during JSON serialization or deserialization.
     /// </summary>
@@ -54,7 +55,7 @@ namespace Microsoft.IdentityModel.Json
         /// Gets the path to the JSON where the error occurred.
         /// </summary>
         /// <value>The path to the JSON where the error occurred.</value>
-        public string Path { get; }
+        public string? Path { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonSerializationException"/> class.
@@ -107,7 +108,7 @@ namespace Microsoft.IdentityModel.Json
         /// <param name="lineNumber">The line number indicating where the error occurred.</param>
         /// <param name="linePosition">The line position indicating where the error occurred.</param>
         /// <param name="innerException">The exception that is the cause of the current exception, or <c>null</c> if no inner exception is specified.</param>
-        public JsonSerializationException(string message, string path, int lineNumber, int linePosition, Exception innerException)
+        public JsonSerializationException(string message, string path, int lineNumber, int linePosition, Exception? innerException)
             : base(message, innerException)
         {
             Path = path;
@@ -120,12 +121,12 @@ namespace Microsoft.IdentityModel.Json
             return Create(reader, message, null);
         }
 
-        internal static JsonSerializationException Create(JsonReader reader, string message, Exception ex)
+        internal static JsonSerializationException Create(JsonReader reader, string message, Exception? ex)
         {
             return Create(reader as IJsonLineInfo, reader.Path, message, ex);
         }
 
-        internal static JsonSerializationException Create(IJsonLineInfo lineInfo, string path, string message, Exception ex)
+        internal static JsonSerializationException Create(IJsonLineInfo? lineInfo, string path, string message, Exception? ex)
         {
             message = JsonPosition.FormatMessage(lineInfo, path, message);
 
@@ -145,4 +146,5 @@ namespace Microsoft.IdentityModel.Json
             return new JsonSerializationException(message, path, lineNumber, linePosition, ex);
         }
     }
+#nullable disable
 }

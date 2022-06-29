@@ -35,6 +35,7 @@ using System.Collections;
 
 namespace Microsoft.IdentityModel.Json.Linq
 {
+#nullable enable
     /// <summary>
     /// Represents a collection of <see cref="JToken"/> objects.
     /// </summary>
@@ -88,7 +89,7 @@ namespace Microsoft.IdentityModel.Json.Linq
                     return JEnumerable<JToken>.Empty;
                 }
 
-                return new JEnumerable<JToken>(_enumerable.Values<T, JToken>(key));
+                return new JEnumerable<JToken>(_enumerable.Values<T, JToken>(key)!);
             }
         }
 
@@ -111,7 +112,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <returns>
         /// 	<c>true</c> if the specified <see cref="Object"/> is equal to this instance; otherwise, <c>false</c>.
         /// </returns>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj is JEnumerable<T> enumerable)
             {
@@ -125,7 +126,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// Returns a hash code for this instance.
         /// </summary>
         /// <returns>
-        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
         /// </returns>
         public override int GetHashCode()
         {
@@ -137,4 +138,5 @@ namespace Microsoft.IdentityModel.Json.Linq
             return _enumerable.GetHashCode();
         }
     }
+#nullable disable
 }

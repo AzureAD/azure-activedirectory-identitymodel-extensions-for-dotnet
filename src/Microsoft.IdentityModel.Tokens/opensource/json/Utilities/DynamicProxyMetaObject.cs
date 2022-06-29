@@ -32,12 +32,13 @@ using System.Linq.Expressions;
 
 namespace Microsoft.IdentityModel.Json.Utilities
 {
+#nullable enable
     internal sealed class DynamicProxyMetaObject<T> : DynamicMetaObject
     {
         private readonly DynamicProxy<T> _proxy;
 
         internal DynamicProxyMetaObject(Expression expression, T value, DynamicProxy<T> proxy)
-            : base(expression, BindingRestrictions.Empty, value)
+            : base(expression, BindingRestrictions.Empty, value!)
         {
             _proxy = proxy;
         }
@@ -109,7 +110,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                     new GetBinderAdapter(binder),
                     NoArgs,
                     fallback(null),
-                    e => binder.FallbackInvoke(e, args, null)
+                    e => binder.FallbackInvoke(e!, args, null)
                     ),
                 null
                 );
@@ -164,7 +165,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                 : base.BindDeleteIndex(binder, indexes);
         }
 
-        private delegate DynamicMetaObject Fallback(DynamicMetaObject errorSuggestion);
+        private delegate DynamicMetaObject Fallback(DynamicMetaObject? errorSuggestion);
 
         private static Expression[] NoArgs => CollectionUtils.ArrayEmpty<Expression>();
 
@@ -197,7 +198,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             Type t = binder.GetType();
             while (!t.IsVisible())
             {
-                t = t.BaseType();
+                t = t.BaseType()!;
             }
             return Expression.Constant(binder, t);
         }
@@ -206,7 +207,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
         /// Helper method for generating a MetaObject which calls a
         /// specific method on Dynamic that returns a result
         /// </summary>
-        private DynamicMetaObject CallMethodWithResult(string methodName, DynamicMetaObjectBinder binder, IEnumerable<Expression> args, Fallback fallback, Fallback fallbackInvoke = null)
+        private DynamicMetaObject CallMethodWithResult(string methodName, DynamicMetaObjectBinder binder, IEnumerable<Expression> args, Fallback fallback, Fallback? fallbackInvoke = null)
         {
             //
             // First, call fallback to do default binding
@@ -217,7 +218,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             return BuildCallMethodWithResult(methodName, binder, args, fallbackResult, fallbackInvoke);
         }
 
-        private DynamicMetaObject BuildCallMethodWithResult(string methodName, DynamicMetaObjectBinder binder, IEnumerable<Expression> args, DynamicMetaObject fallbackResult, Fallback fallbackInvoke)
+        private DynamicMetaObject BuildCallMethodWithResult(string methodName, DynamicMetaObjectBinder binder, IEnumerable<Expression> args, DynamicMetaObject fallbackResult, Fallback? fallbackInvoke)
         {
             //
             // Build a new expression like:
@@ -256,7 +257,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                     Expression.Condition(
                         Expression.Call(
                             Expression.Constant(_proxy),
-                            typeof(DynamicProxy<T>).GetMethod(methodName),
+                            typeof(DynamicProxy<T>).GetMethod(methodName)!,
                             callArgs
                             ),
                         resultMetaObject.Expression,
@@ -304,7 +305,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                     Expression.Condition(
                         Expression.Call(
                             Expression.Constant(_proxy),
-                            typeof(DynamicProxy<T>).GetMethod(methodName),
+                            typeof(DynamicProxy<T>).GetMethod(methodName)!,
                             callArgs
                             ),
                         result,
@@ -342,7 +343,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                 Expression.Condition(
                     Expression.Call(
                         Expression.Constant(_proxy),
-                        typeof(DynamicProxy<T>).GetMethod(methodName),
+                        typeof(DynamicProxy<T>).GetMethod(methodName)!,
                         callArgs
                         ),
                     Expression.Empty(),
@@ -366,7 +367,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
 
         public override IEnumerable<string> GetDynamicMemberNames()
         {
-            return _proxy.GetDynamicMemberNames((T)Value);
+            return _proxy.GetDynamicMemberNames((T)Value!);
         }
 
         // It is okay to throw NotSupported from this binder. This object
@@ -380,12 +381,13 @@ namespace Microsoft.IdentityModel.Json.Utilities
             {
             }
 
-            public override DynamicMetaObject FallbackGetMember(DynamicMetaObject target, DynamicMetaObject errorSuggestion)
+            public override DynamicMetaObject FallbackGetMember(DynamicMetaObject target, DynamicMetaObject? errorSuggestion)
             {
                 throw new NotSupportedException();
             }
         }
     }
+#nullable disable
 }
 
 #endif

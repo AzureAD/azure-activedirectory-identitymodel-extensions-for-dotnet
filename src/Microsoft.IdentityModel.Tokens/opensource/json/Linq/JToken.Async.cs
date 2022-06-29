@@ -33,6 +33,7 @@ using Microsoft.IdentityModel.Json.Utilities;
 
 namespace Microsoft.IdentityModel.Json.Linq
 {
+#nullable enable
     internal abstract partial class JToken
     {
         /// <summary>
@@ -65,7 +66,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
         /// <returns>
         /// A <see cref="Task{TResult}"/> that represents the asynchronous creation. The
-        /// <see cref="Task{TResult}.Result"/> property returns a <see cref="JToken"/> that contains
+        /// <see cref="Task{TResult}.Result"/> property returns a <see cref="JToken"/> that contains 
         /// the token and its descendant tokens
         /// that were read from the reader. The runtime type of the token is determined
         /// by the token type of the first token encountered in the reader.
@@ -84,12 +85,12 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
         /// <returns>
         /// A <see cref="Task{TResult}"/> that represents the asynchronous creation. The
-        /// <see cref="Task{TResult}.Result"/> property returns a <see cref="JToken"/> that contains
+        /// <see cref="Task{TResult}.Result"/> property returns a <see cref="JToken"/> that contains 
         /// the token and its descendant tokens
         /// that were read from the reader. The runtime type of the token is determined
         /// by the token type of the first token encountered in the reader.
         /// </returns>
-        public static async Task<JToken> ReadFromAsync(JsonReader reader, JsonLoadSettings settings, CancellationToken cancellationToken = default)
+        public static async Task<JToken> ReadFromAsync(JsonReader reader, JsonLoadSettings? settings, CancellationToken cancellationToken = default)
         {
             ValidationUtils.ArgumentNotNull(reader, nameof(reader));
 
@@ -101,7 +102,7 @@ namespace Microsoft.IdentityModel.Json.Linq
                 }
             }
 
-            IJsonLineInfo lineInfo = reader as IJsonLineInfo;
+            IJsonLineInfo? lineInfo = reader as IJsonLineInfo;
 
             switch (reader.TokenType)
             {
@@ -123,7 +124,7 @@ namespace Microsoft.IdentityModel.Json.Linq
                     v.SetLineInfo(lineInfo, settings);
                     return v;
                 case JsonToken.Comment:
-                    v = JValue.CreateComment(reader.Value.ToString());
+                    v = JValue.CreateComment(reader.Value?.ToString());
                     v.SetLineInfo(lineInfo, settings);
                     return v;
                 case JsonToken.Null:
@@ -168,11 +169,12 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// that were read from the reader. The runtime type of the token is determined
         /// by the token type of the first token encountered in the reader.
         /// </returns>
-        public static Task<JToken> LoadAsync(JsonReader reader, JsonLoadSettings settings, CancellationToken cancellationToken = default)
+        public static Task<JToken> LoadAsync(JsonReader reader, JsonLoadSettings? settings, CancellationToken cancellationToken = default)
         {
             return ReadFromAsync(reader, settings, cancellationToken);
         }
     }
+#nullable disable
 }
 
 #endif

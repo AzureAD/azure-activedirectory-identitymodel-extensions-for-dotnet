@@ -32,6 +32,8 @@ using Microsoft.IdentityModel.Json.Utilities;
 
 namespace Microsoft.IdentityModel.Json.Linq
 {
+#nullable enable
+#pragma warning disable CA1068 // CancellationToken parameters must come last
     internal partial class JProperty
     {
         /// <summary>
@@ -44,7 +46,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         public override Task WriteToAsync(JsonWriter writer, CancellationToken cancellationToken, params JsonConverter[] converters)
         {
             Task task = writer.WritePropertyNameAsync(_name, cancellationToken);
-            if (task.IsCompletedSucessfully())
+            if (task.IsCompletedSuccessfully())
             {
                 return WriteValueAsync(writer, cancellationToken, converters);
             }
@@ -59,9 +61,7 @@ namespace Microsoft.IdentityModel.Json.Linq
             await WriteValueAsync(writer, cancellationToken, converters).ConfigureAwait(false);
         }
 
-#pragma warning disable CA1068 // CancellationToken parameters must come last
         private Task WriteValueAsync(JsonWriter writer, CancellationToken cancellationToken, JsonConverter[] converters)
-#pragma warning restore CA1068 // CancellationToken parameters must come last
         {
             JToken value = Value;
             return value != null
@@ -90,7 +90,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous creation. The <see cref="Task{TResult}.Result"/>
         /// property returns a <see cref="JProperty"/> that contains the JSON that was read from the specified <see cref="JsonReader"/>.</returns>
-        public new static async Task<JProperty> LoadAsync(JsonReader reader, JsonLoadSettings settings, CancellationToken cancellationToken = default)
+        public new static async Task<JProperty> LoadAsync(JsonReader reader, JsonLoadSettings? settings, CancellationToken cancellationToken = default)
         {
             if (reader.TokenType == JsonToken.None)
             {
@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.Json.Linq
                 throw JsonReaderException.Create(reader, "Error reading JProperty from JsonReader. Current JsonReader item is not a property: {0}".FormatWith(CultureInfo.InvariantCulture, reader.TokenType));
             }
 
-            JProperty p = new JProperty((string)reader.Value);
+            JProperty p = new JProperty((string)reader.Value!);
             p.SetLineInfo(reader as IJsonLineInfo, settings);
 
             await p.ReadTokenFromAsync(reader, settings, cancellationToken).ConfigureAwait(false);
@@ -115,6 +115,8 @@ namespace Microsoft.IdentityModel.Json.Linq
             return p;
         }
     }
+#nullable disable
+#pragma warning restore CA1068 // CancellationToken parameters must come last
 }
 
 #endif

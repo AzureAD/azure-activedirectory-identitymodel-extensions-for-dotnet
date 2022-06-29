@@ -27,6 +27,7 @@ using System;
 
 namespace Microsoft.IdentityModel.Json.Serialization
 {
+#nullable enable
     /// <summary>
     /// Provides data for the Error event.
     /// </summary>
@@ -36,7 +37,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
         /// Gets the current object the error event is being raised against.
         /// </summary>
         /// <value>The current object the error event is being raised against.</value>
-        public object CurrentObject { get; }
+        public object? CurrentObject { get; }
 
         /// <summary>
         /// Gets the error context.
@@ -49,10 +50,11 @@ namespace Microsoft.IdentityModel.Json.Serialization
         /// </summary>
         /// <param name="currentObject">The current object.</param>
         /// <param name="errorContext">The error context.</param>
-        public ErrorEventArgs(object currentObject, ErrorContext errorContext)
+        public ErrorEventArgs(object? currentObject, ErrorContext errorContext)
         {
             CurrentObject = currentObject;
             ErrorContext = errorContext;
         }
     }
+#nullable disable
 }

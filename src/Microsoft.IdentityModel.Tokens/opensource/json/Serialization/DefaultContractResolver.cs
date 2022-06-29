@@ -55,6 +55,7 @@ using Microsoft.IdentityModel.Json.Serialization;
 
 namespace Microsoft.IdentityModel.Json.Serialization
 {
+#nullable enable
     /// <summary>
     /// Used by <see cref="JsonSerializer"/> to resolve a <see cref="JsonContract"/> for a given <see cref="System.Type"/>.
     /// </summary>
@@ -168,7 +169,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
         /// Gets or sets the naming strategy used to resolve how property names and dictionary keys are serialized.
         /// </summary>
         /// <value>The naming strategy used to resolve how property names and dictionary keys are serialized.</value>
-        public NamingStrategy NamingStrategy { get; set; }
+        public NamingStrategy? NamingStrategy { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DefaultContractResolver"/> class.
@@ -198,6 +199,25 @@ namespace Microsoft.IdentityModel.Json.Serialization
             return _contractCache.Get(type);
         }
 
+        private static bool FilterMembers(MemberInfo member)
+        {
+            if (member is PropertyInfo property)
+            {
+                if (ReflectionUtils.IsIndexedProperty(property))
+                {
+                    return false;
+                }
+
+                return !ReflectionUtils.IsByRefLikeType(property.PropertyType);
+            }
+            else if (member is FieldInfo field)
+            {
+                return !ReflectionUtils.IsByRefLikeType(field.FieldType);
+            }
+
+            return true;
+        }
+
         /// <summary>
         /// Gets the serializable members for the type.
         /// </summary>
@@ -214,20 +234,23 @@ namespace Microsoft.IdentityModel.Json.Serialization
 
             MemberSerialization memberSerialization = JsonTypeReflector.GetObjectMemberSerialization(objectType, ignoreSerializableAttribute);
 
+            // Exclude index properties
+            // Do not filter ByRef types here because accessing FieldType/PropertyType can trigger additonal assembly loads
             IEnumerable<MemberInfo> allMembers = ReflectionUtils.GetFieldsAndProperties(objectType, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
-                .Where(m => !ReflectionUtils.IsIndexedProperty(m));
+                .Where(m => m is PropertyInfo p ? !ReflectionUtils.IsIndexedProperty(p) : true);
 
             List<MemberInfo> serializableMembers = new List<MemberInfo>();
 
             if (memberSerialization != MemberSerialization.Fields)
             {
 #if HAVE_DATA_CONTRACTS
-                DataContractAttribute dataContractAttribute = JsonTypeReflector.GetDataContractAttribute(objectType);
+                DataContractAttribute? dataContractAttribute = JsonTypeReflector.GetDataContractAttribute(objectType);
 #endif
 
 #pragma warning disable 618
+                // Exclude index properties and ByRef types
                 List<MemberInfo> defaultMembers = ReflectionUtils.GetFieldsAndProperties(objectType, DefaultMembersSearchFlags)
-                    .Where(m => !ReflectionUtils.IsIndexedProperty(m)).ToList();
+                    .Where(FilterMembers).ToList();
 #pragma warning restore 618
 
                 foreach (MemberInfo member in allMembers)
@@ -277,7 +300,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
                 // MemberBase is problematic to serialize. Large, self referencing instances, etc
                 if (typeof(Exception).IsAssignableFrom(objectType))
                 {
-                    serializableMembers = serializableMembers.Where(m => !string.Equals(m.Name, "TargetSite")).ToList();
+                    serializableMembers = serializableMembers.Where(m => !string.Equals(m.Name, "TargetSite", StringComparison.Ordinal)).ToList();
                 }
             }
             else
@@ -330,17 +353,18 @@ namespace Microsoft.IdentityModel.Json.Serialization
             contract.MemberSerialization = JsonTypeReflector.GetObjectMemberSerialization(contract.NonNullableUnderlyingType, ignoreSerializableAttribute);
             contract.Properties.AddRange(CreateProperties(contract.NonNullableUnderlyingType, contract.MemberSerialization));
 
-            Func<string, string> extensionDataNameResolver = null;
+            Func<string, string>? extensionDataNameResolver = null;
 
-            JsonObjectAttribute attribute = JsonTypeReflector.GetCachedAttribute<JsonObjectAttribute>(contract.NonNullableUnderlyingType);
+            JsonObjectAttribute? attribute = JsonTypeReflector.GetCachedAttribute<JsonObjectAttribute>(contract.NonNullableUnderlyingType);
             if (attribute != null)
             {
                 contract.ItemRequired = attribute._itemRequired;
                 contract.ItemNullValueHandling = attribute._itemNullValueHandling;
+                contract.MissingMemberHandling = attribute._missingMemberHandling;
 
                 if (attribute.NamingStrategyType != null)
                 {
-                    NamingStrategy namingStrategy = JsonTypeReflector.GetContainerNamingStrategy(attribute);
+                    NamingStrategy namingStrategy = JsonTypeReflector.GetContainerNamingStrategy(attribute)!;
                     extensionDataNameResolver = s => namingStrategy.GetDictionaryKey(s);
                 }
             }
@@ -354,7 +378,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
 
             if (contract.IsInstantiable)
             {
-                ConstructorInfo overrideConstructor = GetAttributeConstructor(contract.NonNullableUnderlyingType);
+                ConstructorInfo? overrideConstructor = GetAttributeConstructor(contract.NonNullableUnderlyingType);
 
                 // check if a JsonConstructorAttribute has been defined and use that
                 if (overrideConstructor != null)
@@ -375,7 +399,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
                 }
                 else if (contract.DefaultCreator == null || contract.DefaultCreatorNonPublic)
                 {
-                    ConstructorInfo constructor = GetParameterizedConstructor(contract.NonNullableUnderlyingType);
+                    ConstructorInfo? constructor = GetParameterizedConstructor(contract.NonNullableUnderlyingType);
                     if (constructor != null)
                     {
                         contract.ParameterizedCreator = JsonTypeReflector.ReflectionDelegateFactory.CreateParameterizedConstructor(constructor);
@@ -386,7 +410,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
                 {
                     // value types always have default constructor
                     // check whether there is a constructor that matches with non-writable properties on value type
-                    ConstructorInfo constructor = GetImmutableConstructor(contract.NonNullableUnderlyingType, contract.Properties);
+                    ConstructorInfo? constructor = GetImmutableConstructor(contract.NonNullableUnderlyingType, contract.Properties);
                     if (constructor != null)
                     {
                         contract.OverrideCreator = JsonTypeReflector.ReflectionDelegateFactory.CreateParameterizedConstructor(constructor);
@@ -395,14 +419,14 @@ namespace Microsoft.IdentityModel.Json.Serialization
                 }
             }
 
-            MemberInfo extensionDataMember = GetExtensionDataMemberForType(contract.NonNullableUnderlyingType);
+            MemberInfo? extensionDataMember = GetExtensionDataMemberForType(contract.NonNullableUnderlyingType);
             if (extensionDataMember != null)
             {
                 SetExtensionDataDelegates(contract, extensionDataMember);
             }
 
             // serializing DirectoryInfo without ISerializable will stackoverflow
-            // https://github.com/JamesNK/Microsoft.IdentityModel.Json/issues/1541
+            // https://github.com/JamesNK/Newtonsoft.Json/issues/1541
             if (Array.IndexOf(BlacklistedTypeNames, objectType.FullName) != -1)
             {
                 contract.OnSerializingCallbacks.Add(ThrowUnableToSerializeError);
@@ -416,7 +440,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
             throw new JsonSerializationException("Unable to serialize instance of '{0}'.".FormatWith(CultureInfo.InvariantCulture, o.GetType()));
         }
 
-        private MemberInfo GetExtensionDataMemberForType(Type type)
+        private MemberInfo? GetExtensionDataMemberForType(Type type)
         {
             IEnumerable<MemberInfo> members = GetClassHierarchyForType(type).SelectMany(baseType =>
             {
@@ -427,7 +451,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
                 return m;
             });
 
-            MemberInfo extensionDataMember = members.LastOrDefault(m =>
+            MemberInfo? extensionDataMember = members.LastOrDefault(m =>
             {
                 MemberTypes memberType = m.MemberType();
                 if (memberType != MemberTypes.Property && memberType != MemberTypes.Field)
@@ -443,12 +467,12 @@ namespace Microsoft.IdentityModel.Json.Serialization
 
                 if (!ReflectionUtils.CanReadMemberValue(m, true))
                 {
-                    throw new JsonException("Invalid extension data attribute on '{0}'. Member '{1}' must have a getter.".FormatWith(CultureInfo.InvariantCulture, GetClrTypeFullName(m.DeclaringType), m.Name));
+                    throw new JsonException("Invalid extension data attribute on '{0}'. Member '{1}' must have a getter.".FormatWith(CultureInfo.InvariantCulture, GetClrTypeFullName(m.DeclaringType!), m.Name));
                 }
 
                 Type t = ReflectionUtils.GetMemberUnderlyingType(m);
 
-                if (ReflectionUtils.ImplementsGenericDefinition(t, typeof(IDictionary<,>), out Type dictionaryType))
+                if (ReflectionUtils.ImplementsGenericDefinition(t, typeof(IDictionary<,>), out Type? dictionaryType))
                 {
                     Type keyType = dictionaryType.GetGenericArguments()[0];
                     Type valueType = dictionaryType.GetGenericArguments()[1];
@@ -459,7 +483,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
                     }
                 }
 
-                throw new JsonException("Invalid extension data attribute on '{0}'. Member '{1}' type must implement IDictionary<string, JToken>.".FormatWith(CultureInfo.InvariantCulture, GetClrTypeFullName(m.DeclaringType), m.Name));
+                throw new JsonException("Invalid extension data attribute on '{0}'. Member '{1}' type must implement IDictionary<string, JToken>.".FormatWith(CultureInfo.InvariantCulture, GetClrTypeFullName(m.DeclaringType!), m.Name));
             });
 
             return extensionDataMember;
@@ -467,7 +491,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
 
         private static void SetExtensionDataDelegates(JsonObjectContract contract, MemberInfo member)
         {
-            JsonExtensionDataAttribute extensionDataAttribute = ReflectionUtils.GetAttribute<JsonExtensionDataAttribute>(member);
+            JsonExtensionDataAttribute? extensionDataAttribute = ReflectionUtils.GetAttribute<JsonExtensionDataAttribute>(member);
             if (extensionDataAttribute == null)
             {
                 return;
@@ -475,10 +499,10 @@ namespace Microsoft.IdentityModel.Json.Serialization
 
             Type t = ReflectionUtils.GetMemberUnderlyingType(member);
 
-            ReflectionUtils.ImplementsGenericDefinition(t, typeof(IDictionary<,>), out Type dictionaryType);
+            ReflectionUtils.ImplementsGenericDefinition(t, typeof(IDictionary<,>), out Type? dictionaryType);
 
-            Type keyType = dictionaryType.GetGenericArguments()[0];
-            Type valueType = dictionaryType.GetGenericArguments()[1];
+            Type keyType = dictionaryType!.GetGenericArguments()[0];
+            Type valueType = dictionaryType!.GetGenericArguments()[1];
 
             Type createdType;
 
@@ -492,27 +516,27 @@ namespace Microsoft.IdentityModel.Json.Serialization
                 createdType = t;
             }
 
-            Func<object, object> getExtensionDataDictionary = JsonTypeReflector.ReflectionDelegateFactory.CreateGet<object>(member);
+            Func<object, object?> getExtensionDataDictionary = JsonTypeReflector.ReflectionDelegateFactory.CreateGet<object>(member);
 
             if (extensionDataAttribute.ReadData)
             {
-                Action<object, object> setExtensionDataDictionary = (ReflectionUtils.CanSetMemberValue(member, true, false))
+                Action<object, object?>? setExtensionDataDictionary = (ReflectionUtils.CanSetMemberValue(member, true, false))
                  ? JsonTypeReflector.ReflectionDelegateFactory.CreateSet<object>(member)
                  : null;
                 Func<object> createExtensionDataDictionary = JsonTypeReflector.ReflectionDelegateFactory.CreateDefaultConstructor<object>(createdType);
-                MethodInfo setMethod = t.GetProperty("Item", BindingFlags.Public | BindingFlags.Instance, null, valueType, new[] { keyType }, null)?.GetSetMethod();
+                MethodInfo? setMethod = t.GetProperty("Item", BindingFlags.Public | BindingFlags.Instance, null, valueType, new[] { keyType }, null)?.GetSetMethod();
                 if (setMethod == null)
                 {
                     // Item is explicitly implemented and non-public
                     // get from dictionary interface
-                    setMethod = dictionaryType.GetProperty("Item", BindingFlags.Public | BindingFlags.Instance, null, valueType, new[] { keyType }, null)?.GetSetMethod();
+                    setMethod = dictionaryType!.GetProperty("Item", BindingFlags.Public | BindingFlags.Instance, null, valueType, new[] { keyType }, null)?.GetSetMethod();
                 }
 
-                MethodCall<object, object> setExtensionDataDictionaryValue = JsonTypeReflector.ReflectionDelegateFactory.CreateMethodCall<object>(setMethod);
+                MethodCall<object, object?> setExtensionDataDictionaryValue = JsonTypeReflector.ReflectionDelegateFactory.CreateMethodCall<object>(setMethod!);
 
                 ExtensionDataSetter extensionDataSetter = (o, key, value) =>
                 {
-                    object dictionary = getExtensionDataDictionary(o);
+                    object? dictionary = getExtensionDataDictionary(o);
                     if (dictionary == null)
                     {
                         if (setExtensionDataDictionary == null)
@@ -538,7 +562,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
 
                 ExtensionDataGetter extensionDataGetter = o =>
                 {
-                    object dictionary = getExtensionDataDictionary(o);
+                    object? dictionary = getExtensionDataDictionary(o);
                     if (dictionary == null)
                     {
                         return null;
@@ -569,7 +593,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
             {
                 foreach (KeyValuePair<TEnumeratorKey, TEnumeratorValue> item in _e)
                 {
-                    yield return new KeyValuePair<object, object>(item.Key, item.Value);
+                    yield return new KeyValuePair<object, object>(item.Key!, item.Value!);
                 }
             }
 
@@ -579,7 +603,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
             }
         }
 
-        private ConstructorInfo GetAttributeConstructor(Type objectType)
+        private ConstructorInfo? GetAttributeConstructor(Type objectType)
         {
             IEnumerator<ConstructorInfo> en = objectType.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Where(c => c.IsDefined(typeof(JsonConstructorAttribute), true)).GetEnumerator();
 
@@ -603,7 +627,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
             return null;
         }
 
-        private ConstructorInfo GetImmutableConstructor(Type objectType, JsonPropertyCollection memberProperties)
+        private ConstructorInfo? GetImmutableConstructor(Type objectType, JsonPropertyCollection memberProperties)
         {
             IEnumerable<ConstructorInfo> constructors = objectType.GetConstructors();
             IEnumerator<ConstructorInfo> en = constructors.GetEnumerator();
@@ -617,7 +641,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
                     {
                         foreach (ParameterInfo parameterInfo in parameters)
                         {
-                            JsonProperty memberProperty = MatchProperty(memberProperties, parameterInfo.Name, parameterInfo.ParameterType);
+                            JsonProperty? memberProperty = MatchProperty(memberProperties, parameterInfo.Name!, parameterInfo.ParameterType);
                             if (memberProperty == null || memberProperty.Writable)
                             {
                                 return null;
@@ -632,7 +656,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
             return null;
         }
 
-        private ConstructorInfo GetParameterizedConstructor(Type objectType)
+        private ConstructorInfo? GetParameterizedConstructor(Type objectType)
         {
 #if PORTABLE
             IEnumerable<ConstructorInfo> constructors = objectType.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
@@ -665,11 +689,16 @@ namespace Microsoft.IdentityModel.Json.Serialization
         {
             ParameterInfo[] constructorParameters = constructor.GetParameters();
 
-            JsonPropertyCollection parameterCollection = new JsonPropertyCollection(constructor.DeclaringType);
+            JsonPropertyCollection parameterCollection = new JsonPropertyCollection(constructor.DeclaringType!);
 
             foreach (ParameterInfo parameterInfo in constructorParameters)
             {
-                JsonProperty matchingMemberProperty = MatchProperty(memberProperties, parameterInfo.Name, parameterInfo.ParameterType);
+                if (parameterInfo.Name == null)
+                {
+                    continue;
+                }
+
+                JsonProperty? matchingMemberProperty = MatchProperty(memberProperties, parameterInfo.Name, parameterInfo.ParameterType);
 
                 // ensure that property will have a name from matching property or from parameterinfo
                 // parameterinfo could have no name if generated by a proxy (I'm looking at you Castle)
@@ -687,7 +716,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
             return parameterCollection;
         }
 
-        private JsonProperty MatchProperty(JsonPropertyCollection properties, string name, Type type)
+        private JsonProperty? MatchProperty(JsonPropertyCollection properties, string name, Type type)
         {
             // it is possible to generate a member with a null name using Reflection.Emit
             // protect against an ArgumentNullException from GetClosestMatchProperty by testing for null here
@@ -696,7 +725,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
                 return null;
             }
 
-            JsonProperty property = properties.GetClosestMatchProperty(name);
+            JsonProperty? property = properties.GetClosestMatchProperty(name);
             // must match type as well as name
             if (property == null || property.PropertyType != type)
             {
@@ -712,13 +741,13 @@ namespace Microsoft.IdentityModel.Json.Serialization
         /// <param name="matchingMemberProperty">The matching member property.</param>
         /// <param name="parameterInfo">The constructor parameter.</param>
         /// <returns>A created <see cref="JsonProperty"/> for the given <see cref="ParameterInfo"/>.</returns>
-        protected virtual JsonProperty CreatePropertyFromConstructorParameter(JsonProperty matchingMemberProperty, ParameterInfo parameterInfo)
+        protected virtual JsonProperty CreatePropertyFromConstructorParameter(JsonProperty? matchingMemberProperty, ParameterInfo parameterInfo)
         {
             JsonProperty property = new JsonProperty();
             property.PropertyType = parameterInfo.ParameterType;
             property.AttributeProvider = new ReflectionAttributeProvider(parameterInfo);
 
-            SetPropertySettingsFromAttributes(property, parameterInfo, parameterInfo.Name, parameterInfo.Member.DeclaringType, MemberSerialization.OptOut, out _);
+            SetPropertySettingsFromAttributes(property, parameterInfo, parameterInfo.Name!, parameterInfo.Member.DeclaringType!, MemberSerialization.OptOut, out _);
 
             property.Readable = false;
             property.Writable = true;
@@ -751,7 +780,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
         /// </summary>
         /// <param name="objectType">Type of the object.</param>
         /// <returns>The contract's default <see cref="JsonConverter" />.</returns>
-        protected virtual JsonConverter ResolveContractConverter(Type objectType)
+        protected virtual JsonConverter? ResolveContractConverter(Type objectType)
         {
             return JsonTypeReflector.GetJsonConverter(objectType);
         }
@@ -766,7 +795,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
 #endif
         private void InitializeContract(JsonContract contract)
         {
-            JsonContainerAttribute containerAttribute = JsonTypeReflector.GetCachedAttribute<JsonContainerAttribute>(contract.NonNullableUnderlyingType);
+            JsonContainerAttribute? containerAttribute = JsonTypeReflector.GetCachedAttribute<JsonContainerAttribute>(contract.NonNullableUnderlyingType);
             if (containerAttribute != null)
             {
                 contract.IsReference = containerAttribute._isReference;
@@ -774,7 +803,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
 #if HAVE_DATA_CONTRACTS
             else
             {
-                DataContractAttribute dataContractAttribute = JsonTypeReflector.GetDataContractAttribute(contract.NonNullableUnderlyingType);
+                DataContractAttribute? dataContractAttribute = JsonTypeReflector.GetDataContractAttribute(contract.NonNullableUnderlyingType);
                 // doesn't have a null value
                 if (dataContractAttribute != null && dataContractAttribute.IsReference)
                 {
@@ -804,11 +833,11 @@ namespace Microsoft.IdentityModel.Json.Serialization
         {
             GetCallbackMethodsForType(
                 t,
-                out List<SerializationCallback> onSerializing,
-                out List<SerializationCallback> onSerialized,
-                out List<SerializationCallback> onDeserializing,
-                out List<SerializationCallback> onDeserialized,
-                out List<SerializationErrorCallback> onError);
+                out List<SerializationCallback>? onSerializing,
+                out List<SerializationCallback>? onSerialized,
+                out List<SerializationCallback>? onDeserializing,
+                out List<SerializationCallback>? onDeserialized,
+                out List<SerializationErrorCallback>? onError);
 
             if (onSerializing != null)
             {
@@ -836,7 +865,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
             }
         }
 
-        private void GetCallbackMethodsForType(Type type, out List<SerializationCallback> onSerializing, out List<SerializationCallback> onSerialized, out List<SerializationCallback> onDeserializing, out List<SerializationCallback> onDeserialized, out List<SerializationErrorCallback> onError)
+        private void GetCallbackMethodsForType(Type type, out List<SerializationCallback>? onSerializing, out List<SerializationCallback>? onSerialized, out List<SerializationCallback>? onDeserializing, out List<SerializationCallback>? onDeserialized, out List<SerializationErrorCallback>? onError)
         {
             onSerializing = null;
             onSerialized = null;
@@ -847,11 +876,11 @@ namespace Microsoft.IdentityModel.Json.Serialization
             foreach (Type baseType in GetClassHierarchyForType(type))
             {
                 // while we allow more than one OnSerialized total, only one can be defined per class
-                MethodInfo currentOnSerializing = null;
-                MethodInfo currentOnSerialized = null;
-                MethodInfo currentOnDeserializing = null;
-                MethodInfo currentOnDeserialized = null;
-                MethodInfo currentOnError = null;
+                MethodInfo? currentOnSerializing = null;
+                MethodInfo? currentOnSerialized = null;
+                MethodInfo? currentOnDeserializing = null;
+                MethodInfo? currentOnDeserialized = null;
+                MethodInfo? currentOnError = null;
 
                 bool skipSerializing = ShouldSkipSerializing(baseType);
                 bool skipDeserialized = ShouldSkipDeserialized(baseType);
@@ -859,13 +888,13 @@ namespace Microsoft.IdentityModel.Json.Serialization
                 foreach (MethodInfo method in baseType.GetMethods(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
                 {
                     // compact framework errors when getting parameters for a generic method
-                    // but generic methods should not be callbacks anyway
+                    // lame, but generic methods should not be callbacks anyway
                     if (method.ContainsGenericParameters)
                     {
                         continue;
                     }
 
-                    Type prevAttributeType = null;
+                    Type? prevAttributeType = null;
                     ParameterInfo[] parameters = method.GetParameters();
 
                     if (!skipSerializing && IsValidCallback(method, parameters, typeof(OnSerializingAttribute), currentOnSerializing, ref prevAttributeType))
@@ -961,7 +990,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
         {
             List<Type> ret = new List<Type>();
 
-            Type current = type;
+            Type? current = type;
             while (current != null && current != typeof(object))
             {
                 ret.Add(current);
@@ -983,10 +1012,10 @@ namespace Microsoft.IdentityModel.Json.Serialization
             JsonDictionaryContract contract = new JsonDictionaryContract(objectType);
             InitializeContract(contract);
 
-            JsonContainerAttribute containerAttribute = JsonTypeReflector.GetAttribute<JsonContainerAttribute>(objectType);
+            JsonContainerAttribute? containerAttribute = JsonTypeReflector.GetAttribute<JsonContainerAttribute>(objectType);
             if (containerAttribute?.NamingStrategyType != null)
             {
-                NamingStrategy namingStrategy = JsonTypeReflector.GetContainerNamingStrategy(containerAttribute);
+                NamingStrategy namingStrategy = JsonTypeReflector.GetContainerNamingStrategy(containerAttribute)!;
                 contract.DictionaryKeyResolver = s => namingStrategy.GetDictionaryKey(s);
             }
             else
@@ -994,7 +1023,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
                 contract.DictionaryKeyResolver = ResolveDictionaryKey;
             }
 
-            ConstructorInfo overrideConstructor = GetAttributeConstructor(contract.NonNullableUnderlyingType);
+            ConstructorInfo? overrideConstructor = GetAttributeConstructor(contract.NonNullableUnderlyingType);
 
             if (overrideConstructor != null)
             {
@@ -1032,7 +1061,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
             JsonArrayContract contract = new JsonArrayContract(objectType);
             InitializeContract(contract);
 
-            ConstructorInfo overrideConstructor = GetAttributeConstructor(contract.NonNullableUnderlyingType);
+            ConstructorInfo? overrideConstructor = GetAttributeConstructor(contract.NonNullableUnderlyingType);
 
             if (overrideConstructor != null)
             {
@@ -1099,7 +1128,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
 
             if (contract.IsInstantiable)
             {
-                ConstructorInfo constructorInfo = contract.NonNullableUnderlyingType.GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, new[] {typeof(SerializationInfo), typeof(StreamingContext)}, null);
+                ConstructorInfo? constructorInfo = contract.NonNullableUnderlyingType.GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, new[] {typeof(SerializationInfo), typeof(StreamingContext)}, null);
                 if (constructorInfo != null)
                 {
                     ObjectConstructor<object> creator = JsonTypeReflector.ReflectionDelegateFactory.CreateParameterizedConstructor(constructorInfo);
@@ -1123,10 +1152,10 @@ namespace Microsoft.IdentityModel.Json.Serialization
             JsonDynamicContract contract = new JsonDynamicContract(objectType);
             InitializeContract(contract);
 
-            JsonContainerAttribute containerAttribute = JsonTypeReflector.GetAttribute<JsonContainerAttribute>(objectType);
+            JsonContainerAttribute? containerAttribute = JsonTypeReflector.GetAttribute<JsonContainerAttribute>(objectType);
             if (containerAttribute?.NamingStrategyType != null)
             {
-                NamingStrategy namingStrategy = JsonTypeReflector.GetContainerNamingStrategy(containerAttribute);
+                NamingStrategy namingStrategy = JsonTypeReflector.GetContainerNamingStrategy(containerAttribute)!;
                 contract.PropertyNameResolver = s => namingStrategy.GetDictionaryKey(s);
             }
             else
@@ -1168,7 +1197,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
             }
 
             t = ReflectionUtils.EnsureNotNullableType(t);
-            JsonContainerAttribute containerAttribute = JsonTypeReflector.GetCachedAttribute<JsonContainerAttribute>(t);
+            JsonContainerAttribute? containerAttribute = JsonTypeReflector.GetCachedAttribute<JsonContainerAttribute>(t);
 
             if (containerAttribute is JsonObjectAttribute)
             {
@@ -1197,7 +1226,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
 
             if (typeof(IEnumerable).IsAssignableFrom(t))
             {
-                return CreateArrayContract(t);
+                return CreateArrayContract(objectType);
             }
 
             if (CanConvertToString(t))
@@ -1264,10 +1293,17 @@ namespace Microsoft.IdentityModel.Json.Serialization
                 return true;
             }
 
+#if HAVE_DATE_ONLY
+            if (type == typeof(DateOnly) || type == typeof(TimeOnly))
+            {
+                return true;
+            }
+#endif
+
             return false;
         }
 
-        private static bool IsValidCallback(MethodInfo method, ParameterInfo[] parameters, Type attributeType, MethodInfo currentCallback, ref Type prevAttributeType)
+        private static bool IsValidCallback(MethodInfo method, ParameterInfo[] parameters, Type attributeType, MethodInfo? currentCallback, ref Type? prevAttributeType)
         {
             if (!method.IsDefined(attributeType, false))
             {
@@ -1276,36 +1312,36 @@ namespace Microsoft.IdentityModel.Json.Serialization
 
             if (currentCallback != null)
             {
-                throw new JsonException("Invalid attribute. Both '{0}' and '{1}' in type '{2}' have '{3}'.".FormatWith(CultureInfo.InvariantCulture, method, currentCallback, GetClrTypeFullName(method.DeclaringType), attributeType));
+                throw new JsonException("Invalid attribute. Both '{0}' and '{1}' in type '{2}' have '{3}'.".FormatWith(CultureInfo.InvariantCulture, method, currentCallback, GetClrTypeFullName(method.DeclaringType!), attributeType));
             }
 
             if (prevAttributeType != null)
             {
-                throw new JsonException("Invalid Callback. Method '{3}' in type '{2}' has both '{0}' and '{1}'.".FormatWith(CultureInfo.InvariantCulture, prevAttributeType, attributeType, GetClrTypeFullName(method.DeclaringType), method));
+                throw new JsonException("Invalid Callback. Method '{3}' in type '{2}' has both '{0}' and '{1}'.".FormatWith(CultureInfo.InvariantCulture, prevAttributeType, attributeType, GetClrTypeFullName(method.DeclaringType!), method));
             }
 
             if (method.IsVirtual)
             {
-                throw new JsonException("Virtual Method '{0}' of type '{1}' cannot be marked with '{2}' attribute.".FormatWith(CultureInfo.InvariantCulture, method, GetClrTypeFullName(method.DeclaringType), attributeType));
+                throw new JsonException("Virtual Method '{0}' of type '{1}' cannot be marked with '{2}' attribute.".FormatWith(CultureInfo.InvariantCulture, method, GetClrTypeFullName(method.DeclaringType!), attributeType));
             }
 
             if (method.ReturnType != typeof(void))
             {
-                throw new JsonException("Serialization Callback '{1}' in type '{0}' must return void.".FormatWith(CultureInfo.InvariantCulture, GetClrTypeFullName(method.DeclaringType), method));
+                throw new JsonException("Serialization Callback '{1}' in type '{0}' must return void.".FormatWith(CultureInfo.InvariantCulture, GetClrTypeFullName(method.DeclaringType!), method));
             }
 
             if (attributeType == typeof(OnErrorAttribute))
             {
                 if (parameters == null || parameters.Length != 2 || parameters[0].ParameterType != typeof(StreamingContext) || parameters[1].ParameterType != typeof(ErrorContext))
                 {
-                    throw new JsonException("Serialization Error Callback '{1}' in type '{0}' must have two parameters of type '{2}' and '{3}'.".FormatWith(CultureInfo.InvariantCulture, GetClrTypeFullName(method.DeclaringType), method, typeof(StreamingContext), typeof(ErrorContext)));
+                    throw new JsonException("Serialization Error Callback '{1}' in type '{0}' must have two parameters of type '{2}' and '{3}'.".FormatWith(CultureInfo.InvariantCulture, GetClrTypeFullName(method.DeclaringType!), method, typeof(StreamingContext), typeof(ErrorContext)));
                 }
             }
             else
             {
                 if (parameters == null || parameters.Length != 1 || parameters[0].ParameterType != typeof(StreamingContext))
                 {
-                    throw new JsonException("Serialization Callback '{1}' in type '{0}' must have a single parameter of type '{2}'.".FormatWith(CultureInfo.InvariantCulture, GetClrTypeFullName(method.DeclaringType), method, typeof(StreamingContext)));
+                    throw new JsonException("Serialization Callback '{1}' in type '{0}' must have a single parameter of type '{2}'.".FormatWith(CultureInfo.InvariantCulture, GetClrTypeFullName(method.DeclaringType!), method, typeof(StreamingContext)));
                 }
             }
 
@@ -1318,7 +1354,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
         {
             if (type.IsGenericTypeDefinition() || !type.ContainsGenericParameters())
             {
-                return type.FullName;
+                return type.FullName!;
             }
 
             return "{0}.{1}".FormatWith(CultureInfo.InvariantCulture, type.Namespace, type.Name);
@@ -1351,7 +1387,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
                     // nametable is not thread-safe for multiple writers
                     lock (nameTable)
                     {
-                        property.PropertyName = nameTable.Add(property.PropertyName);
+                        property.PropertyName = nameTable.Add(property.PropertyName!);
                     }
 
                     properties.AddProperty(property);
@@ -1377,7 +1413,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
             // warning - this method use to cause errors with Intellitrace. Retest in VS Ultimate after changes
             IValueProvider valueProvider;
 
-#if !(PORTABLE40 || PORTABLE || DOTNET || NETSTANDARD2_0 || NET6_0)
+#if !(PORTABLE40 || PORTABLE || DOTNET || NETSTANDARD2_0 || NET6_0_OR_GREATER)
             if (DynamicCodeGeneration)
             {
                 valueProvider = new DynamicValueProvider(member);
@@ -1409,7 +1445,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
             property.ValueProvider = CreateMemberValueProvider(member);
             property.AttributeProvider = new ReflectionAttributeProvider(member);
 
-            SetPropertySettingsFromAttributes(property, member, member.Name, member.DeclaringType, memberSerialization, out bool allowNonPublicAccess);
+            SetPropertySettingsFromAttributes(property, member, member.Name, member.DeclaringType!, memberSerialization, out bool allowNonPublicAccess);
 
             if (memberSerialization != MemberSerialization.Fields)
             {
@@ -1439,11 +1475,11 @@ namespace Microsoft.IdentityModel.Json.Serialization
         private void SetPropertySettingsFromAttributes(JsonProperty property, object attributeProvider, string name, Type declaringType, MemberSerialization memberSerialization, out bool allowNonPublicAccess)
         {
 #if HAVE_DATA_CONTRACTS
-            DataContractAttribute dataContractAttribute = JsonTypeReflector.GetDataContractAttribute(declaringType);
+            DataContractAttribute? dataContractAttribute = JsonTypeReflector.GetDataContractAttribute(declaringType);
 
-            MemberInfo memberInfo = attributeProvider as MemberInfo;
+            MemberInfo? memberInfo = attributeProvider as MemberInfo;
 
-            DataMemberAttribute dataMemberAttribute;
+            DataMemberAttribute? dataMemberAttribute;
             if (dataContractAttribute != null && memberInfo != null)
             {
                 dataMemberAttribute = JsonTypeReflector.GetDataMemberAttribute((MemberInfo)memberInfo);
@@ -1454,8 +1490,8 @@ namespace Microsoft.IdentityModel.Json.Serialization
             }
 #endif
 
-            JsonPropertyAttribute propertyAttribute = JsonTypeReflector.GetAttribute<JsonPropertyAttribute>(attributeProvider);
-            JsonRequiredAttribute requiredAttribute = JsonTypeReflector.GetAttribute<JsonRequiredAttribute>(attributeProvider);
+            JsonPropertyAttribute? propertyAttribute = JsonTypeReflector.GetAttribute<JsonPropertyAttribute>(attributeProvider);
+            JsonRequiredAttribute? requiredAttribute = JsonTypeReflector.GetAttribute<JsonRequiredAttribute>(attributeProvider);
 
             string mappedName;
             bool hasSpecifiedName;
@@ -1477,9 +1513,9 @@ namespace Microsoft.IdentityModel.Json.Serialization
                 hasSpecifiedName = false;
             }
 
-            JsonContainerAttribute containerAttribute = JsonTypeReflector.GetAttribute<JsonContainerAttribute>(declaringType);
+            JsonContainerAttribute? containerAttribute = JsonTypeReflector.GetAttribute<JsonContainerAttribute>(declaringType);
 
-            NamingStrategy namingStrategy;
+            NamingStrategy? namingStrategy;
             if (propertyAttribute?.NamingStrategyType != null)
             {
                 namingStrategy = JsonTypeReflector.CreateNamingStrategyInstance(propertyAttribute.NamingStrategyType, propertyAttribute.NamingStrategyParameters);
@@ -1501,7 +1537,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
             {
                 property.PropertyName = ResolvePropertyName(mappedName);
             }
-
+            
             property.UnderlyingName = name;
 
             bool hasMemberAttribute = false;
@@ -1582,7 +1618,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
             // the class type might have a converter but the property converter takes precedence
             property.Converter = JsonTypeReflector.GetJsonConverter(attributeProvider);
 
-            DefaultValueAttribute defaultValueAttribute = JsonTypeReflector.GetAttribute<DefaultValueAttribute>(attributeProvider);
+            DefaultValueAttribute? defaultValueAttribute = JsonTypeReflector.GetAttribute<DefaultValueAttribute>(attributeProvider);
             if (defaultValueAttribute != null)
             {
                 property.DefaultValue = defaultValueAttribute.Value;
@@ -1605,24 +1641,24 @@ namespace Microsoft.IdentityModel.Json.Serialization
             }
         }
 
-        private Predicate<object> CreateShouldSerializeTest(MemberInfo member)
+        private Predicate<object>? CreateShouldSerializeTest(MemberInfo member)
         {
-            MethodInfo shouldSerializeMethod = member.DeclaringType.GetMethod(JsonTypeReflector.ShouldSerializePrefix + member.Name, ReflectionUtils.EmptyTypes);
+            MethodInfo? shouldSerializeMethod = member.DeclaringType!.GetMethod(JsonTypeReflector.ShouldSerializePrefix + member.Name, ReflectionUtils.EmptyTypes);
 
             if (shouldSerializeMethod == null || shouldSerializeMethod.ReturnType != typeof(bool))
             {
                 return null;
             }
 
-            MethodCall<object, object> shouldSerializeCall =
+            MethodCall<object, object?> shouldSerializeCall =
                 JsonTypeReflector.ReflectionDelegateFactory.CreateMethodCall<object>(shouldSerializeMethod);
 
-            return o => (bool)shouldSerializeCall(o);
+            return o => (bool)shouldSerializeCall(o)!;
         }
 
         private void SetIsSpecifiedActions(JsonProperty property, MemberInfo member, bool allowNonPublicAccess)
         {
-            MemberInfo specifiedMember = member.DeclaringType.GetProperty(member.Name + JsonTypeReflector.SpecifiedPostfix, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            MemberInfo? specifiedMember = member.DeclaringType!.GetProperty(member.Name + JsonTypeReflector.SpecifiedPostfix, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             if (specifiedMember == null)
             {
                 specifiedMember = member.DeclaringType.GetField(member.Name + JsonTypeReflector.SpecifiedPostfix, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
@@ -1633,7 +1669,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
                 return;
             }
 
-            Func<object, object> specifiedPropertyGet = JsonTypeReflector.ReflectionDelegateFactory.CreateGet<object>(specifiedMember);
+            Func<object, object> specifiedPropertyGet = JsonTypeReflector.ReflectionDelegateFactory.CreateGet<object>(specifiedMember)!;
 
             property.GetIsSpecified = o => (bool)specifiedPropertyGet(o);
 
@@ -1700,4 +1736,5 @@ namespace Microsoft.IdentityModel.Json.Serialization
             return ResolvePropertyName(propertyName);
         }
     }
+#nullable disable
 }

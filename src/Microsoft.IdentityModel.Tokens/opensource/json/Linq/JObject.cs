@@ -37,6 +37,8 @@ using System.Linq.Expressions;
 using System.IO;
 using Microsoft.IdentityModel.Json.Utilities;
 using System.Globalization;
+using System.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
 #if !HAVE_LINQ
 using Microsoft.IdentityModel.Json.Utilities.LinqBridge;
 #else
@@ -45,13 +47,14 @@ using System.Linq;
 
 namespace Microsoft.IdentityModel.Json.Linq
 {
+#nullable enable
     /// <summary>
     /// Represents a JSON object.
     /// </summary>
     /// <example>
     ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParse" title="Parsing a JSON Object from Text" />
     /// </example>
-    internal partial class JObject : JContainer, IDictionary<string, JToken>, INotifyPropertyChanged
+    internal partial class JObject : JContainer, IDictionary<string, JToken?>, INotifyPropertyChanged
 #if HAVE_COMPONENT_MODEL
         , ICustomTypeDescriptor
 #endif
@@ -70,13 +73,13 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <summary>
         /// Occurs when a property value changes.
         /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
 #if HAVE_INOTIFY_PROPERTY_CHANGING
         /// <summary>
         /// Occurs when a property value is changing.
         /// </summary>
-        public event PropertyChangingEventHandler PropertyChanging;
+        public event PropertyChangingEventHandler? PropertyChanging;
 #endif
 
         /// <summary>
@@ -123,23 +126,28 @@ namespace Microsoft.IdentityModel.Json.Linq
             return _properties.Compare(t._properties);
         }
 
-        internal override int IndexOfItem(JToken item)
+        internal override int IndexOfItem(JToken? item)
         {
+            if (item == null)
+            {
+                return -1;
+            }
+
             return _properties.IndexOfReference(item);
         }
 
-        internal override void InsertItem(int index, JToken item, bool skipParentCheck)
+        internal override bool InsertItem(int index, JToken? item, bool skipParentCheck)
         {
             // don't add comments to JObject, no name to reference comment by
             if (item != null && item.Type == JTokenType.Comment)
             {
-                return;
+                return false;
             }
 
-            base.InsertItem(index, item, skipParentCheck);
+            return base.InsertItem(index, item, skipParentCheck);
         }
 
-        internal override void ValidateToken(JToken o, JToken existing)
+        internal override void ValidateToken(JToken o, JToken? existing)
         {
             ValidationUtils.ArgumentNotNull(o, nameof(o));
 
@@ -166,16 +174,16 @@ namespace Microsoft.IdentityModel.Json.Linq
             }
         }
 
-        internal override void MergeItem(object content, JsonMergeSettings settings)
+        internal override void MergeItem(object content, JsonMergeSettings? settings)
         {
             if (!(content is JObject o))
             {
                 return;
             }
 
-            foreach (KeyValuePair<string, JToken> contentItem in o)
+            foreach (KeyValuePair<string, JToken?> contentItem in o)
             {
-                JProperty existingProperty = Property(contentItem.Key, settings?.PropertyNameComparison ?? StringComparison.Ordinal);
+                JProperty? existingProperty = Property(contentItem.Key, settings?.PropertyNameComparison ?? StringComparison.Ordinal);
 
                 if (existingProperty == null)
                 {
@@ -262,7 +270,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// </summary>
         /// <param name="name">The property name.</param>
         /// <returns>A <see cref="JProperty"/> with the specified name or <c>null</c>.</returns>
-        public JProperty Property(string name)
+        public JProperty? Property(string name)
         {
             return Property(name, StringComparison.Ordinal);
         }
@@ -275,14 +283,14 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <param name="name">The property name.</param>
         /// <param name="comparison">One of the enumeration values that specifies how the strings will be compared.</param>
         /// <returns>A <see cref="JProperty"/> matched with the specified name or <c>null</c>.</returns>
-        public JProperty Property(string name, StringComparison comparison)
+        public JProperty? Property(string name, StringComparison comparison)
         {
             if (name == null)
             {
                 return null;
             }
 
-            if (_properties.TryGetValue(name, out JToken property))
+            if (_properties.TryGetValue(name, out JToken? property))
             {
                 return (JProperty)property;
             }
@@ -316,7 +324,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// Gets the <see cref="JToken"/> with the specified key.
         /// </summary>
         /// <value>The <see cref="JToken"/> with the specified key.</value>
-        public override JToken this[object key]
+        public override JToken? this[object key]
         {
             get
             {
@@ -346,29 +354,29 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// Gets or sets the <see cref="JToken"/> with the specified property name.
         /// </summary>
         /// <value></value>
-        public JToken this[string propertyName]
+        public JToken? this[string propertyName]
         {
             get
             {
                 ValidationUtils.ArgumentNotNull(propertyName, nameof(propertyName));
 
-                JProperty property = Property(propertyName);
+                JProperty? property = Property(propertyName, StringComparison.Ordinal);
 
                 return property?.Value;
             }
             set
             {
-                JProperty property = Property(propertyName);
+                JProperty? property = Property(propertyName, StringComparison.Ordinal);
                 if (property != null)
                 {
-                    property.Value = value;
+                    property.Value = value!;
                 }
                 else
                 {
 #if HAVE_INOTIFY_PROPERTY_CHANGING
                     OnPropertyChanging(propertyName);
 #endif
-                    Add(new JProperty(propertyName, value));
+                    Add(propertyName, value);
                     OnPropertyChanged(propertyName);
                 }
             }
@@ -397,7 +405,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <exception cref="JsonReaderException">
         ///     <paramref name="reader"/> is not valid JSON.
         /// </exception>
-        public new static JObject Load(JsonReader reader, JsonLoadSettings settings)
+        public new static JObject Load(JsonReader reader, JsonLoadSettings? settings)
         {
             ValidationUtils.ArgumentNotNull(reader, nameof(reader));
 
@@ -453,7 +461,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <example>
         ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParse" title="Parsing a JSON Object from Text" />
         /// </example>
-        public new static JObject Parse(string json, JsonLoadSettings settings)
+        public new static JObject Parse(string json, JsonLoadSettings? settings)
         {
             using (JsonReader reader = new JsonTextReader(new StringReader(json)))
             {
@@ -488,7 +496,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         {
             JToken token = FromObjectInternal(o, jsonSerializer);
 
-            if (token != null && token.Type != JTokenType.Object)
+            if (token.Type != JTokenType.Object)
             {
                 throw new ArgumentException("Object serialized to {0}. JObject instance expected.".FormatWith(CultureInfo.InvariantCulture, token.Type));
             }
@@ -518,7 +526,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// </summary>
         /// <param name="propertyName">Name of the property.</param>
         /// <returns>The <see cref="Microsoft.IdentityModel.Json.Linq.JToken"/> with the specified property name.</returns>
-        public JToken GetValue(string propertyName)
+        public JToken? GetValue(string? propertyName)
         {
             return GetValue(propertyName, StringComparison.Ordinal);
         }
@@ -531,7 +539,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <param name="propertyName">Name of the property.</param>
         /// <param name="comparison">One of the enumeration values that specifies how the strings will be compared.</param>
         /// <returns>The <see cref="Microsoft.IdentityModel.Json.Linq.JToken"/> with the specified property name.</returns>
-        public JToken GetValue(string propertyName, StringComparison comparison)
+        public JToken? GetValue(string? propertyName, StringComparison comparison)
         {
             if (propertyName == null)
             {
@@ -553,7 +561,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <param name="value">The value.</param>
         /// <param name="comparison">One of the enumeration values that specifies how the strings will be compared.</param>
         /// <returns><c>true</c> if a value was successfully retrieved; otherwise, <c>false</c>.</returns>
-        public bool TryGetValue(string propertyName, StringComparison comparison, out JToken value)
+        public bool TryGetValue(string propertyName, StringComparison comparison, [NotNullWhen(true)]out JToken? value)
         {
             value = GetValue(propertyName, comparison);
             return (value != null);
@@ -565,7 +573,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// </summary>
         /// <param name="propertyName">Name of the property.</param>
         /// <param name="value">The value.</param>
-        public void Add(string propertyName, JToken value)
+        public void Add(string propertyName, JToken? value)
         {
             Add(new JProperty(propertyName, value));
         }
@@ -582,7 +590,7 @@ namespace Microsoft.IdentityModel.Json.Linq
             return _properties.Contains(propertyName);
         }
 
-        ICollection<string> IDictionary<string, JToken>.Keys => _properties.Keys;
+        ICollection<string> IDictionary<string, JToken?>.Keys => _properties.Keys;
 
         /// <summary>
         /// Removes the property with the specified name.
@@ -591,7 +599,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <returns><c>true</c> if item was successfully removed; otherwise, <c>false</c>.</returns>
         public bool Remove(string propertyName)
         {
-            JProperty property = Property(propertyName);
+            JProperty? property = Property(propertyName, StringComparison.Ordinal);
             if (property == null)
             {
                 return false;
@@ -607,9 +615,9 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <param name="propertyName">Name of the property.</param>
         /// <param name="value">The value.</param>
         /// <returns><c>true</c> if a value was successfully retrieved; otherwise, <c>false</c>.</returns>
-        public bool TryGetValue(string propertyName, out JToken value)
+        public bool TryGetValue(string propertyName, [NotNullWhen(true)]out JToken? value)
         {
-            JProperty property = Property(propertyName);
+            JProperty? property = Property(propertyName, StringComparison.Ordinal);
             if (property == null)
             {
                 value = null;
@@ -620,24 +628,24 @@ namespace Microsoft.IdentityModel.Json.Linq
             return true;
         }
 
-        ICollection<JToken> IDictionary<string, JToken>.Values => throw new NotImplementedException();
+        ICollection<JToken?> IDictionary<string, JToken?>.Values => throw new NotImplementedException();
 
         #endregion
 
         #region ICollection<KeyValuePair<string,JToken>> Members
-        void ICollection<KeyValuePair<string, JToken>>.Add(KeyValuePair<string, JToken> item)
+        void ICollection<KeyValuePair<string, JToken?>>.Add(KeyValuePair<string, JToken?> item)
         {
             Add(new JProperty(item.Key, item.Value));
         }
 
-        void ICollection<KeyValuePair<string, JToken>>.Clear()
+        void ICollection<KeyValuePair<string, JToken?>>.Clear()
         {
             RemoveAll();
         }
 
-        bool ICollection<KeyValuePair<string, JToken>>.Contains(KeyValuePair<string, JToken> item)
+        bool ICollection<KeyValuePair<string, JToken?>>.Contains(KeyValuePair<string, JToken?> item)
         {
-            JProperty property = Property(item.Key);
+            JProperty? property = Property(item.Key, StringComparison.Ordinal);
             if (property == null)
             {
                 return false;
@@ -646,7 +654,7 @@ namespace Microsoft.IdentityModel.Json.Linq
             return (property.Value == item.Value);
         }
 
-        void ICollection<KeyValuePair<string, JToken>>.CopyTo(KeyValuePair<string, JToken>[] array, int arrayIndex)
+        void ICollection<KeyValuePair<string, JToken?>>.CopyTo(KeyValuePair<string, JToken?>[] array, int arrayIndex)
         {
             if (array == null)
             {
@@ -668,16 +676,16 @@ namespace Microsoft.IdentityModel.Json.Linq
             int index = 0;
             foreach (JProperty property in _properties)
             {
-                array[arrayIndex + index] = new KeyValuePair<string, JToken>(property.Name, property.Value);
+                array[arrayIndex + index] = new KeyValuePair<string, JToken?>(property.Name, property.Value);
                 index++;
             }
         }
 
-        bool ICollection<KeyValuePair<string, JToken>>.IsReadOnly => false;
+        bool ICollection<KeyValuePair<string, JToken?>>.IsReadOnly => false;
 
-        bool ICollection<KeyValuePair<string, JToken>>.Remove(KeyValuePair<string, JToken> item)
+        bool ICollection<KeyValuePair<string, JToken?>>.Remove(KeyValuePair<string, JToken?> item)
         {
-            if (!((ICollection<KeyValuePair<string, JToken>>)this).Contains(item))
+            if (!((ICollection<KeyValuePair<string, JToken?>>)this).Contains(item))
             {
                 return false;
             }
@@ -698,11 +706,11 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <returns>
         /// A <see cref="IEnumerator{T}"/> that can be used to iterate through the collection.
         /// </returns>
-        public IEnumerator<KeyValuePair<string, JToken>> GetEnumerator()
+        public IEnumerator<KeyValuePair<string, JToken?>> GetEnumerator()
         {
             foreach (JProperty property in _properties)
             {
-                yield return new KeyValuePair<string, JToken>(property.Name, property.Value);
+                yield return new KeyValuePair<string, JToken?>(property.Name, property.Value);
             }
         }
 
@@ -735,16 +743,17 @@ namespace Microsoft.IdentityModel.Json.Linq
             return ((ICustomTypeDescriptor)this).GetProperties(null);
         }
 
-        PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties(Attribute[] attributes)
+        PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties(Attribute[]? attributes)
         {
-            PropertyDescriptorCollection descriptors = new PropertyDescriptorCollection(null);
-
-            foreach (KeyValuePair<string, JToken> propertyValue in this)
+            PropertyDescriptor[] propertiesArray = new PropertyDescriptor[Count];
+            int i = 0;
+            foreach (KeyValuePair<string, JToken?> propertyValue in this)
             {
-                descriptors.Add(new JPropertyDescriptor(propertyValue.Key));
+                propertiesArray[i] = new JPropertyDescriptor(propertyValue.Key);
+                i++;
             }
 
-            return descriptors;
+            return new PropertyDescriptorCollection(propertiesArray);
         }
 
         AttributeCollection ICustomTypeDescriptor.GetAttributes()
@@ -752,12 +761,12 @@ namespace Microsoft.IdentityModel.Json.Linq
             return AttributeCollection.Empty;
         }
 
-        string ICustomTypeDescriptor.GetClassName()
+        string? ICustomTypeDescriptor.GetClassName()
         {
             return null;
         }
 
-        string ICustomTypeDescriptor.GetComponentName()
+        string? ICustomTypeDescriptor.GetComponentName()
         {
             return null;
         }
@@ -767,22 +776,22 @@ namespace Microsoft.IdentityModel.Json.Linq
             return new TypeConverter();
         }
 
-        EventDescriptor ICustomTypeDescriptor.GetDefaultEvent()
+        EventDescriptor? ICustomTypeDescriptor.GetDefaultEvent()
         {
             return null;
         }
 
-        PropertyDescriptor ICustomTypeDescriptor.GetDefaultProperty()
+        PropertyDescriptor? ICustomTypeDescriptor.GetDefaultProperty()
         {
             return null;
         }
 
-        object ICustomTypeDescriptor.GetEditor(Type editorBaseType)
+        object? ICustomTypeDescriptor.GetEditor(Type editorBaseType)
         {
             return null;
         }
 
-        EventDescriptorCollection ICustomTypeDescriptor.GetEvents(Attribute[] attributes)
+        EventDescriptorCollection ICustomTypeDescriptor.GetEvents(Attribute[]? attributes)
         {
             return EventDescriptorCollection.Empty;
         }
@@ -792,7 +801,7 @@ namespace Microsoft.IdentityModel.Json.Linq
             return EventDescriptorCollection.Empty;
         }
 
-        object ICustomTypeDescriptor.GetPropertyOwner(PropertyDescriptor pd)
+        object? ICustomTypeDescriptor.GetPropertyOwner(PropertyDescriptor? pd)
         {
             if (pd is JPropertyDescriptor)
             {
@@ -805,7 +814,7 @@ namespace Microsoft.IdentityModel.Json.Linq
 
 #endif
 
-#if HAVE_DYNAMIC
+#if HAVE_DYNAMIC                            
         /// <summary>
         /// Returns the <see cref="DynamicMetaObject"/> responsible for binding operations performed on this object.
         /// </summary>
@@ -820,7 +829,7 @@ namespace Microsoft.IdentityModel.Json.Linq
 
         private class JObjectDynamicProxy : DynamicProxy<JObject>
         {
-            public override bool TryGetMember(JObject instance, GetMemberBinder binder, out object result)
+            public override bool TryGetMember(JObject instance, GetMemberBinder binder, out object? result)
             {
                 // result can be null
                 result = instance[binder.Name];
@@ -846,4 +855,5 @@ namespace Microsoft.IdentityModel.Json.Linq
         }
 #endif
     }
+#nullable disable
 }

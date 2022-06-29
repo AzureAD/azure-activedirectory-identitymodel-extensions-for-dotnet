@@ -33,8 +33,27 @@ using Microsoft.IdentityModel.Json.Utilities;
 
 namespace Microsoft.IdentityModel.Json
 {
+#nullable enable
     internal abstract partial class JsonReader
+#if HAVE_ASYNC_DISPOABLE
+        : IAsyncDisposable
+#endif
     {
+#if HAVE_ASYNC_DISPOABLE
+        ValueTask IAsyncDisposable.DisposeAsync()
+        {
+            try
+            {
+                Dispose(true);
+                return default;
+            }
+            catch (Exception exc)
+            {
+                return ValueTask.FromException(exc);
+            }
+        }
+#endif
+
         /// <summary>
         /// Asynchronously reads the next JSON token from the source.
         /// </summary>
@@ -101,12 +120,12 @@ namespace Microsoft.IdentityModel.Json
         /// property returns the <see cref="byte"/>[]. This result will be <c>null</c> at the end of an array.</returns>
         /// <remarks>The default behaviour is to execute synchronously, returning an already-completed task. Derived
         /// classes can override this behaviour for true asynchronicity.</remarks>
-        public virtual Task<byte[]> ReadAsBytesAsync(CancellationToken cancellationToken = default)
+        public virtual Task<byte[]?> ReadAsBytesAsync(CancellationToken cancellationToken = default)
         {
-            return cancellationToken.CancelIfRequestedAsync<byte[]>() ?? Task.FromResult(ReadAsBytes());
+            return cancellationToken.CancelIfRequestedAsync<byte[]?>() ?? Task.FromResult(ReadAsBytes());
         }
 
-        internal async Task<byte[]> ReadArrayIntoByteArrayAsync(CancellationToken cancellationToken)
+        internal async Task<byte[]?> ReadArrayIntoByteArrayAsync(CancellationToken cancellationToken)
         {
             List<byte> buffer = new List<byte>();
 
@@ -199,9 +218,9 @@ namespace Microsoft.IdentityModel.Json
         /// property returns the <see cref="string"/>. This result will be <c>null</c> at the end of an array.</returns>
         /// <remarks>The default behaviour is to execute synchronously, returning an already-completed task. Derived
         /// classes can override this behaviour for true asynchronicity.</remarks>
-        public virtual Task<string> ReadAsStringAsync(CancellationToken cancellationToken = default)
+        public virtual Task<string?> ReadAsStringAsync(CancellationToken cancellationToken = default)
         {
-            return cancellationToken.CancelIfRequestedAsync<string>() ?? Task.FromResult(ReadAsString());
+            return cancellationToken.CancelIfRequestedAsync<string?>() ?? Task.FromResult(ReadAsString());
         }
 
         internal async Task<bool> ReadAndMoveToContentAsync(CancellationToken cancellationToken)
@@ -241,6 +260,7 @@ namespace Microsoft.IdentityModel.Json
             }
         }
     }
+#nullable disable
 }
 
 #endif

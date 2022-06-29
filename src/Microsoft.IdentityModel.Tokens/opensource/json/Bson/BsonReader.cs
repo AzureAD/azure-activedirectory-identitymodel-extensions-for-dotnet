@@ -32,6 +32,8 @@ using Microsoft.IdentityModel.Json.Serialization;
 using Microsoft.IdentityModel.Json.Utilities;
 using Microsoft.IdentityModel.Json.Linq;
 
+#nullable disable
+
 namespace Microsoft.IdentityModel.Json.Bson
 {
     /// <summary>

@@ -31,6 +31,7 @@ using System.Text;
 
 namespace Microsoft.IdentityModel.Json.Serialization
 {
+#nullable enable
     internal class TraceJsonReader : JsonReader, IJsonLineInfo
     {
         private readonly JsonReader _innerReader;
@@ -68,16 +69,16 @@ namespace Microsoft.IdentityModel.Json.Serialization
             return value;
         }
 
-        public override string ReadAsString()
+        public override string? ReadAsString()
         {
-            string value = _innerReader.ReadAsString();
+            string? value = _innerReader.ReadAsString();
             WriteCurrentToken();
             return value;
         }
 
-        public override byte[] ReadAsBytes()
+        public override byte[]? ReadAsBytes()
         {
-            byte[] value = _innerReader.ReadAsBytes();
+            byte[]? value = _innerReader.ReadAsBytes();
             WriteCurrentToken();
             return value;
         }
@@ -136,9 +137,9 @@ namespace Microsoft.IdentityModel.Json.Serialization
 
         public override JsonToken TokenType => _innerReader.TokenType;
 
-        public override object Value => _innerReader.Value;
+        public override object? Value => _innerReader.Value;
 
-        public override Type ValueType => _innerReader.ValueType;
+        public override Type? ValueType => _innerReader.ValueType;
 
         public override void Close()
         {
@@ -154,4 +155,5 @@ namespace Microsoft.IdentityModel.Json.Serialization
 
         int IJsonLineInfo.LinePosition => (_innerReader is IJsonLineInfo lineInfo) ? lineInfo.LinePosition : 0;
     }
+#nullable disable
 }

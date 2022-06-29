@@ -35,6 +35,8 @@ using Microsoft.IdentityModel.Json.Utilities;
 using Microsoft.IdentityModel.Json.Linq;
 using System.Globalization;
 
+#nullable disable
+
 namespace Microsoft.IdentityModel.Json.Bson
 {
     /// <summary>
@@ -390,9 +392,7 @@ namespace Microsoft.IdentityModel.Json.Bson
 #if HAVE_CHAR_TO_STRING_WITH_CULTURE
             s = value.ToString(CultureInfo.InvariantCulture);
 #else
-#pragma warning disable CA1305 // Specify IFormatProvider
             s = value.ToString();
-#pragma warning restore CA1305 // Specify IFormatProvider
 #endif
             AddToken(new BsonString(s, true));
         }

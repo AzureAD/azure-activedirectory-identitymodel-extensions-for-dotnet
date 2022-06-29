@@ -3,17 +3,23 @@ using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Json.Linq.JsonPath
 {
+#nullable enable
     internal class QueryFilter : PathFilter
     {
-        public QueryExpression Expression { get; set; }
+        internal QueryExpression Expression;
 
-        public override IEnumerable<JToken> ExecuteFilter(JToken root, IEnumerable<JToken> current, bool errorWhenNoMatch)
+        public QueryFilter(QueryExpression expression)
+        {
+            Expression = expression;
+        }
+
+        public override IEnumerable<JToken> ExecuteFilter(JToken root, IEnumerable<JToken> current, JsonSelectSettings? settings)
         {
             foreach (JToken t in current)
             {
                 foreach (JToken v in t)
                 {
-                    if (Expression.IsMatch(root, v))
+                    if (Expression.IsMatch(root, v, settings))
                     {
                         yield return v;
                     }
@@ -21,4 +27,5 @@ namespace Microsoft.IdentityModel.Json.Linq.JsonPath
             }
         }
     }
+#nullable disable
 }
