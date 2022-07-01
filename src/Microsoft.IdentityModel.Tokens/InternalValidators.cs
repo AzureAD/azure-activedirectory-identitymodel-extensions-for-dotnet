@@ -81,12 +81,12 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             if (validLifetime && validIssuer)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(
-                    LogHelper.FormatInvariant(TokenLogMessages.IDX10501,
-                    kid,
+                throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(TokenLogMessages.IDX10501,
+                    LogHelper.MarkAsNonPII(kid),
                     LogHelper.MarkAsNonPII(numKeysInTokenValidationParameters),
                     LogHelper.MarkAsNonPII(numKeysInConfiguration),
-                    exceptionStrings, securityToken)));
+                    exceptionStrings,
+                    securityToken)));
             else
             {
                 var validationFailure = ValidationFailure.None;
@@ -100,11 +100,13 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new SecurityTokenUnableToValidateException(
                     validationFailure,
                     LogHelper.FormatInvariant(TokenLogMessages.IDX10516,
-                    kid,
+                    LogHelper.MarkAsNonPII(kid),
                     LogHelper.MarkAsNonPII(numKeysInTokenValidationParameters),
                     LogHelper.MarkAsNonPII(numKeysInConfiguration),
-                    exceptionStrings, securityToken,
-                    LogHelper.MarkAsNonPII(validLifetime), validIssuer)));
+                    exceptionStrings,
+                    securityToken,
+                    LogHelper.MarkAsNonPII(validLifetime),
+                    LogHelper.MarkAsNonPII(validIssuer))));
             }
         }
 
@@ -156,7 +158,7 @@ namespace Microsoft.IdentityModel.Tokens
 
                 throw LogHelper.LogExceptionMessage(new SecurityTokenUnableToValidateException(
                     validationFailure,
-                    LogHelper.FormatInvariant(TokenLogMessages.IDX10515, keyInfo, exceptionStrings, securityToken, LogHelper.MarkAsNonPII(validLifetime), validIssuer)));
+                    LogHelper.FormatInvariant(TokenLogMessages.IDX10515, keyInfo, exceptionStrings, securityToken, LogHelper.MarkAsNonPII(validLifetime), LogHelper.MarkAsNonPII(validIssuer))));
             }
         }
     }

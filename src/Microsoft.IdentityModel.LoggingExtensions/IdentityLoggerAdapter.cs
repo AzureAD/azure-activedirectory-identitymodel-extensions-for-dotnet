@@ -64,7 +64,6 @@ namespace Microsoft.IdentityModel.LoggingExtensions
                 switch (entry.EventLogLevel)
                 {
                     case EventLogLevel.Critical:
-                    case EventLogLevel.LogAlways:
                         _logger.LogCritical(entry.Message);
                         break;
 
@@ -84,6 +83,10 @@ namespace Microsoft.IdentityModel.LoggingExtensions
                         _logger.LogDebug(entry.Message);
                         break;
 
+                    case EventLogLevel.LogAlways:
+                        _logger.LogTrace(entry.Message);
+                        break;
+
                     default:
                         break;
                 }
@@ -95,7 +98,6 @@ namespace Microsoft.IdentityModel.LoggingExtensions
             switch (eventLogLevel)
             {
                 case EventLogLevel.Critical:
-                case EventLogLevel.LogAlways:
                     return LogLevel.Critical;
 
                 case EventLogLevel.Error:
@@ -106,6 +108,9 @@ namespace Microsoft.IdentityModel.LoggingExtensions
 
                 case EventLogLevel.Informational:
                     return LogLevel.Information;
+
+                case EventLogLevel.LogAlways:
+                    return LogLevel.Trace;
 
                 case EventLogLevel.Verbose:
                 default:

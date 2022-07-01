@@ -194,11 +194,11 @@ namespace Microsoft.IdentityModel.Validators
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40001, issuer), ex));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40001, LogHelper.MarkAsNonPII(issuer)), ex));
             }
 
             // If a valid issuer is not found, throw
-            throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40001, issuer)));
+            throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40001, LogHelper.MarkAsNonPII(issuer))));
         }
 
         /// <summary>

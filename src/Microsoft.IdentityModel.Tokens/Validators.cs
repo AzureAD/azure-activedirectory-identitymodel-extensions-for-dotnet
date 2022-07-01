@@ -130,7 +130,10 @@ namespace Microsoft.IdentityModel.Tokens
                 return;
 
             throw LogHelper.LogExceptionMessage(
-                new SecurityTokenInvalidAudienceException(LogHelper.FormatInvariant(LogMessages.IDX10214, Utility.SerializeAsSingleCommaDelimitedString(audiences), (validationParameters.ValidAudience ?? "null"), Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences)))
+                new SecurityTokenInvalidAudienceException(LogHelper.FormatInvariant(LogMessages.IDX10214,
+                LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(audiences)),
+                LogHelper.MarkAsNonPII(validationParameters.ValidAudience ?? "null"),
+                LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences))))
                 { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences) });
         }
 
@@ -148,7 +151,7 @@ namespace Microsoft.IdentityModel.Tokens
 
                     if (AudiencesMatch(validationParameters, tokenAudience, validAudience))
                     {
-                        LogHelper.LogInformation(LogMessages.IDX10234, tokenAudience);
+                        LogHelper.LogInformation(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
                         return true;
                     }
                 }
@@ -185,7 +188,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (string.CompareOrdinal(validAudience, 0, tokenAudience, 0, length) == 0)
             {
-                LogHelper.LogInformation(LogMessages.IDX10234, tokenAudience);
+                LogHelper.LogInformation(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
                 return true;
             }
 
@@ -260,7 +263,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (string.Equals(validationParameters.ValidIssuer, issuer))
             {
-                LogHelper.LogInformation(LogMessages.IDX10236, issuer);
+                LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer));
                 return issuer;
             }
 
@@ -276,15 +279,18 @@ namespace Microsoft.IdentityModel.Tokens
 
                     if (string.Equals(str, issuer))
                     {
-                        LogHelper.LogInformation(LogMessages.IDX10236, issuer);
+                        LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer));
                         return issuer;
                     }
                 }
             }
 
             throw LogHelper.LogExceptionMessage(
-                new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX10205, issuer, (validationParameters.ValidIssuer ?? "null"), Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers), configuration?.Issuer))
-                { InvalidIssuer = issuer });
+                new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX10205,
+                LogHelper.MarkAsNonPII(issuer),
+                LogHelper.MarkAsNonPII(validationParameters.ValidIssuer ?? "null"),
+                LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers)),
+                LogHelper.MarkAsNonPII(configuration?.Issuer))) { InvalidIssuer = issuer });
         }
 
         /// <summary>
