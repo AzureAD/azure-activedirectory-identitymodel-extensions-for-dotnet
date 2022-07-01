@@ -55,11 +55,30 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.Throws<ArgumentNullException>(() => handler.CreateToken("Payload", Default.SymmetricEncryptingCredentials, (Dictionary<string, object>) null));
         }
 
-        [Fact]
-        public void ValidateTokenValidationResult()
+        [Theory, MemberData(nameof(TokenValidationClaimsTheoryData))]
+        public void ValidateTokenValidationResult(JsonWebTokenTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateTokenValidationResult");
+            var tokenValidationResult = theoryData.TokenHandler.ValidateToken(theoryData.AccessToken, theoryData.ValidationParameters);
+            Assert.Equal(tokenValidationResult.Claims, TokenUtilities.CreateDictionaryFromClaims(tokenValidationResult.ClaimsIdentity.Claims));
+        }
 
+        [Theory, MemberData(nameof(TokenValidationClaimsTheoryData))]
+        public void ValidateTokenDerivedHandlerValidationResult(JsonWebTokenTheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.ValidateTokenDerivedHandlerValidationResult");
+            var derivedJsonWebTokenHandler = new DerivedJsonWebTokenHandler(); 
+            var tokenValidationResult = theoryData.TokenHandler.ValidateToken(theoryData.AccessToken, theoryData.ValidationParameters);
+            var tokenValidationDerivedResult = derivedJsonWebTokenHandler.ValidateToken(theoryData.AccessToken, theoryData.ValidationParameters);
+            IdentityComparer.AreEqual(tokenValidationResult.Claims, TokenUtilities.CreateDictionaryFromClaims(tokenValidationResult.ClaimsIdentity.Claims));
+            IdentityComparer.AreEqual(tokenValidationDerivedResult.Claims, TokenUtilities.CreateDictionaryFromClaims(tokenValidationDerivedResult.ClaimsIdentity.Claims));
+            IdentityComparer.AreEqual(tokenValidationResult.Claims, tokenValidationDerivedResult.Claims);
+            IdentityComparer.AreEqual(tokenValidationResult.ClaimsIdentity.Claims, tokenValidationDerivedResult.ClaimsIdentity.Claims);
+        }
+
+        public static TheoryData<JsonWebTokenTheoryData> TokenValidationClaimsTheoryData()
+        {
+            var theoryData = new TheoryData<JsonWebTokenTheoryData>();
             var tokenHandler = new JsonWebTokenHandler();
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -78,8 +97,28 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
             };
 
-            var tokenValidationResult = tokenHandler.ValidateToken(accessToken, tokenValidationParameters);
-            Assert.Equal(tokenValidationResult.Claims, TokenUtilities.CreateDictionaryFromClaims(tokenValidationResult.ClaimsIdentity.Claims));
+            theoryData.Add(new JsonWebTokenTheoryData()
+            {
+                TokenHandler = tokenHandler,
+                AccessToken = accessToken,
+                ValidationParameters = tokenValidationParameters
+            });
+
+            tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(Default.PayloadAllShortClaims),
+                SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+            };
+            accessToken = tokenHandler.CreateToken(tokenDescriptor);
+
+            theoryData.Add(new JsonWebTokenTheoryData()
+            {
+                TokenHandler = tokenHandler,
+                AccessToken = accessToken,
+                ValidationParameters = tokenValidationParameters
+            });
+
+            return theoryData;
         }
 
         [Theory, MemberData(nameof(TokenValidationTheoryData))]
@@ -3408,6 +3447,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
 
             return new AuthenticatedEncryptionResult(Key, ciphertext, iv, authenticationTag); 
+        }
+    }
+
+    public class DerivedJsonWebTokenHandler : JsonWebTokenHandler
+    {
+        /// <summary>
+        /// Creates a <see cref="ClaimsIdentity"/> from a <see cref="JsonWebToken"/>.
+        /// </summary>
+        /// <param name="jwtToken">The <see cref="JsonWebToken"/> to use as a <see cref="Claim"/> source.</param>
+        /// <param name="validationParameters">Contains parameters for validating the token.</param>
+        /// <param name="issuer">Specifies the issuer for the <see cref="ClaimsIdentity"/>.</param>
+        /// <returns>A <see cref="ClaimsIdentity"/> containing the <see cref="JsonWebToken.Claims"/>.</returns>
+        protected override ClaimsIdentity CreateClaimsIdentity(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer)
+        {
+            return base.CreateClaimsIdentity(jwtToken, validationParameters, issuer);
         }
     }
 }

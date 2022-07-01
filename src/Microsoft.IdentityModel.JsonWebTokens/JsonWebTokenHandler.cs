@@ -654,7 +654,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         private static StringComparison GetStringComparisonRuleIf509OrECDsa(SecurityKey securityKey) => (securityKey is X509SecurityKey
                             || securityKey is ECDsaSecurityKey)
                             ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
-        
+
         /// <summary>
         /// Creates a <see cref="ClaimsIdentity"/> from a <see cref="JsonWebToken"/>.
         /// </summary>
@@ -663,38 +663,43 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <returns>A <see cref="ClaimsIdentity"/> containing the <see cref="JsonWebToken.Claims"/>.</returns>
         protected virtual ClaimsIdentity CreateClaimsIdentity(JsonWebToken jwtToken, TokenValidationParameters validationParameters)
         {
-            if (jwtToken == null)
-                throw LogHelper.LogArgumentNullException(nameof(jwtToken));
+            _ = jwtToken ?? throw LogHelper.LogArgumentNullException(nameof(jwtToken));
 
-            if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+            return CreateClaimsIdentityPrivate(jwtToken, validationParameters, GetActualIssuer(jwtToken));
+        }
 
-            var actualIssuer = jwtToken.Issuer;
+        /// <summary>
+        /// Creates a <see cref="ClaimsIdentity"/> from a <see cref="JsonWebToken"/> with the specified issuer.
+        /// </summary>
+        /// <param name="jwtToken">The <see cref="JsonWebToken"/> to use as a <see cref="Claim"/> source.</param>
+        /// <param name="validationParameters">Contains parameters for validating the token.</param>
+        /// <param name="issuer">Specifies the issuer for the <see cref="ClaimsIdentity"/>.</param>
+        /// <returns>A <see cref="ClaimsIdentity"/> containing the <see cref="JsonWebToken.Claims"/>.</returns>
+        protected virtual ClaimsIdentity CreateClaimsIdentity(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer)
+        {
+            _ = jwtToken ?? throw LogHelper.LogArgumentNullException(nameof(jwtToken));
+
+            if (string.IsNullOrWhiteSpace(issuer))
+                issuer = GetActualIssuer(jwtToken);
+
+            return CreateClaimsIdentityPrivate(jwtToken, validationParameters, issuer);
+        }
+
+        private static string GetActualIssuer(JsonWebToken jwtToken)
+        {
+            string actualIssuer = jwtToken.Issuer;
             if (string.IsNullOrWhiteSpace(actualIssuer))
             {
                 LogHelper.LogVerbose(TokenLogMessages.IDX10244, ClaimsIdentity.DefaultIssuer);
                 actualIssuer = ClaimsIdentity.DefaultIssuer;
             }
 
-            return CreateClaimsIdentity(jwtToken, validationParameters, actualIssuer);
+            return actualIssuer;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="jwtToken"></param>
-        /// <param name="validationParameters"></param>
-        /// <param name="issuer"></param>
-        /// <returns></returns>
-        protected virtual ClaimsIdentity CreateClaimsIdentity(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer)
+        private ClaimsIdentity CreateClaimsIdentityPrivate(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer)
         {
-
-            if (jwtToken == null)
-                throw LogHelper.LogArgumentNullException(nameof(jwtToken));
-
-            if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
-
+            _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, issuer);
             foreach (Claim jwtClaim in jwtToken.Claims)
