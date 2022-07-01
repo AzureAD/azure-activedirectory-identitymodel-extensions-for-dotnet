@@ -71,7 +71,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
             AadClaims = new List<Claim>
             {
-                new Claim(Default.Tid, "tenantId", ClaimValueTypes.String, Default.Issuer),
+                new Claim("tid", "tenantId", ClaimValueTypes.String, Default.Issuer),
             };
 
             DefaultClaims = new List<Claim>
