@@ -394,7 +394,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
                 { JwtRegisteredClaimNames.GivenName, "Bob" },
                 { JwtRegisteredClaimNames.Iss, Default.Issuer },
-                { Default.Tid, "tentantId" },
+                { "tid", "tentantId" },
                 { JwtRegisteredClaimNames.Aud, Default.Audience },
                 { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant).ToString() },
                 { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore).ToString()},
@@ -1263,10 +1263,6 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 #endif
-        public static string Tid
-        {
-            get => "tid";
-        }
 
         public static string Uri
         {
