@@ -147,7 +147,7 @@ namespace Microsoft.IdentityModel.Json
 
             if (CloseOutput && _writer != null)
             {
-#if HAVE_ASYNC_DISPOABLE
+#if HAVE_ASYNC_DISPOSABLE
                 await _writer.DisposeAsync().ConfigureAwait(false);
 #else
                 // DisposeAsync isn't available. Instead, flush any remaining content with FlushAsync
