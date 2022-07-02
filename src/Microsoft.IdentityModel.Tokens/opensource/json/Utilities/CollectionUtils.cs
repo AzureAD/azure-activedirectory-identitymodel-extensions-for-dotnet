@@ -43,6 +43,7 @@ using Microsoft.IdentityModel.Json.Serialization;
 
 namespace Microsoft.IdentityModel.Json.Utilities
 {
+#nullable enable
     internal static class CollectionUtils
     {
         /// <summary>
@@ -116,17 +117,17 @@ namespace Microsoft.IdentityModel.Json.Utilities
             return false;
         }
 
-        public static ConstructorInfo ResolveEnumerableCollectionConstructor(Type collectionType, Type collectionItemType)
+        public static ConstructorInfo? ResolveEnumerableCollectionConstructor(Type collectionType, Type collectionItemType)
         {
             Type genericConstructorArgument = typeof(IList<>).MakeGenericType(collectionItemType);
 
             return ResolveEnumerableCollectionConstructor(collectionType, collectionItemType, genericConstructorArgument);
         }
 
-        public static ConstructorInfo ResolveEnumerableCollectionConstructor(Type collectionType, Type collectionItemType, Type constructorArgumentType)
+        public static ConstructorInfo? ResolveEnumerableCollectionConstructor(Type collectionType, Type collectionItemType, Type constructorArgumentType)
         {
             Type genericEnumerable = typeof(IEnumerable<>).MakeGenericType(collectionItemType);
-            ConstructorInfo match = null;
+            ConstructorInfo? match = null;
 
             foreach (ConstructorInfo constructor in collectionType.GetConstructors(BindingFlags.Public | BindingFlags.Instance))
             {
@@ -248,11 +249,12 @@ namespace Microsoft.IdentityModel.Json.Utilities
                     return i;
                 }
             }
+
             return -1;
         }
 
 #if HAVE_FAST_REVERSE
-        // faster reverse in .NET Framework with value types - https://github.com/JamesNK/Microsoft.IdentityModel.Json/issues/1430
+        // faster reverse in .NET Framework with value types - https://github.com/JamesNK/Newtonsoft.Json/issues/1430
         public static void FastReverse<T>(this List<T> list)
         {
             int i = 0;
@@ -288,7 +290,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
                     break;
                 }
 
-                object v = currentArray[0];
+                object? v = currentArray[0];
                 if (v is IList list)
                 {
                     currentArray = list;
@@ -316,9 +318,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             int currentValuesLength = list.Count;
             if (currentValuesLength != dimensionLength)
             {
-#pragma warning disable CA2201 // Do not raise reserved exception types
                 throw new Exception("Cannot deserialize non-cubical array as multidimensional array.");
-#pragma warning restore CA2201 // Do not raise reserved exception types
             }
 
             int[] newIndices = new int[dimension + 1];
@@ -342,11 +342,11 @@ namespace Microsoft.IdentityModel.Json.Utilities
                 int index = indices[i];
                 if (i == indices.Length - 1)
                 {
-                    return currentList[index];
+                    return currentList[index]!;
                 }
                 else
                 {
-                    currentList = (IList)currentList[index];
+                    currentList = (IList)currentList[index]!;
                 }
             }
             return currentList;
@@ -367,38 +367,24 @@ namespace Microsoft.IdentityModel.Json.Utilities
             return multidimensionalArray;
         }
 
-        // 4.6 has Array.Empty<T> to return a cached empty array. Lacking that in other
-        // frameworks, Enumerable.Empty<T> happens to be implemented as a cached empty
-        // array in all versions (in .NET Core the same instance as Array.Empty<T>).
-        // This includes the internal Linq bridge for 2.0.
-        // Since this method is simple and only 11 bytes long in a release build it's
-        // pretty much guaranteed to be inlined, giving us fast access of that cached
-        // array. With 4.5 and up we use AggressiveInlining just to be sure, so it's
-        // effectively the same as calling Array.Empty<T> even when not available.
-#if HAVE_METHOD_IMPL_ATTRIBUTE
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
         public static T[] ArrayEmpty<T>()
         {
-#if NET6_0
-
-            T[] array = Empty<T>() as T[];
+#if !HAS_ARRAY_EMPTY
+            // Enumerable.Empty<T> no longer returns an empty array in .NET Core 3.0
+            return EmptyArrayContainer<T>.Empty;
 #else
-            T[] array = Enumerable.Empty<T>() as T[];
+            return Array.Empty<T>();
 #endif
-            Debug.Assert(array != null);
-            // Defensively guard against a version of Linq where Enumerable.Empty<T> doesn't
-            // return an array, but throw in debug versions so a better strategy can be
-            // used if that ever happens.
-            return array ?? new T[0];
         }
 
-#if NET6_0
-        // netcoreapp3 introduced a change where Enumerable.Empty<T> no longer
-        // returns an Array.Empty<T> but a EmptyPartition<T>.Instance
-        // this makes the cast a breaking change for any version after netcore3
-        // if support for any framework after netcore3ever added this would be need to be modified.
-        private static IEnumerable<TResult> Empty<TResult>() => Array.Empty<TResult>();
+#if !HAS_ARRAY_EMPTY
+        private static class EmptyArrayContainer<T>
+        {
+#pragma warning disable CA1825 // Avoid zero-length array allocations.
+            public static readonly T[] Empty = new T[0];
+#pragma warning restore CA1825 // Avoid zero-length array allocations.
+        }
 #endif
     }
+#nullable disable
 }

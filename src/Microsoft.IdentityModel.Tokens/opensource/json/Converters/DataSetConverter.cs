@@ -30,6 +30,7 @@ using Microsoft.IdentityModel.Json.Serialization;
 
 namespace Microsoft.IdentityModel.Json.Converters
 {
+#nullable enable
     /// <summary>
     /// Converts a <see cref="DataSet"/> to and from JSON.
     /// </summary>
@@ -41,7 +42,7 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// <param name="writer">The <see cref="JsonWriter"/> to write to.</param>
         /// <param name="value">The value.</param>
         /// <param name="serializer">The calling serializer.</param>
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             if (value == null)
             {
@@ -50,7 +51,7 @@ namespace Microsoft.IdentityModel.Json.Converters
             }
 
             DataSet dataSet = (DataSet)value;
-            DefaultContractResolver resolver = serializer.ContractResolver as DefaultContractResolver;
+            DefaultContractResolver? resolver = serializer.ContractResolver as DefaultContractResolver;
 
             DataTableConverter converter = new DataTableConverter();
 
@@ -74,7 +75,7 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// <param name="existingValue">The existing value of object being read.</param>
         /// <param name="serializer">The calling serializer.</param>
         /// <returns>The object value.</returns>
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             if (reader.TokenType == JsonToken.Null)
             {
@@ -84,7 +85,7 @@ namespace Microsoft.IdentityModel.Json.Converters
             // handle typed datasets
             DataSet ds = (objectType == typeof(DataSet))
                 ? new DataSet()
-                : (DataSet)Activator.CreateInstance(objectType);
+                : (DataSet)Activator.CreateInstance(objectType)!;
 
             DataTableConverter converter = new DataTableConverter();
 
@@ -92,10 +93,10 @@ namespace Microsoft.IdentityModel.Json.Converters
 
             while (reader.TokenType == JsonToken.PropertyName)
             {
-                DataTable dt = ds.Tables[(string)reader.Value];
+                DataTable? dt = ds.Tables[(string)reader.Value!];
                 bool exists = (dt != null);
 
-                dt = (DataTable)converter.ReadJson(reader, typeof(DataTable), dt, serializer);
+                dt = (DataTable)converter.ReadJson(reader, typeof(DataTable), dt, serializer)!;
 
                 if (!exists)
                 {
@@ -120,6 +121,7 @@ namespace Microsoft.IdentityModel.Json.Converters
             return typeof(DataSet).IsAssignableFrom(valueType);
         }
     }
+#nullable disable
 }
 
 #endif

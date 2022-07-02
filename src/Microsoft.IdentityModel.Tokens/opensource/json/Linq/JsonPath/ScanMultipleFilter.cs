@@ -2,19 +2,25 @@ using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Json.Linq.JsonPath
 {
+#nullable enable
     internal class ScanMultipleFilter : PathFilter
     {
-        public List<string> Names { get; set; }
+        private List<string> _names;
 
-        public override IEnumerable<JToken> ExecuteFilter(JToken root, IEnumerable<JToken> current, bool errorWhenNoMatch)
+        public ScanMultipleFilter(List<string> names)
+        {
+            _names = names;
+        }
+
+        public override IEnumerable<JToken> ExecuteFilter(JToken root, IEnumerable<JToken> current, JsonSelectSettings? settings)
         {
             foreach (JToken c in current)
             {
-                JToken value = c;
+                JToken? value = c;
 
                 while (true)
                 {
-                    JContainer container = value as JContainer;
+                    JContainer? container = value as JContainer;
 
                     value = GetNextScanValue(c, container, value);
                     if (value == null)
@@ -24,7 +30,7 @@ namespace Microsoft.IdentityModel.Json.Linq.JsonPath
 
                     if (value is JProperty property)
                     {
-                        foreach (string name in Names)
+                        foreach (string name in _names)
                         {
                             if (property.Name == name)
                             {
@@ -32,9 +38,9 @@ namespace Microsoft.IdentityModel.Json.Linq.JsonPath
                             }
                         }
                     }
-
                 }
             }
         }
     }
+#nullable disable
 }

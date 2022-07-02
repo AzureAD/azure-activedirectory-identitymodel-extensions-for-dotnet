@@ -29,6 +29,8 @@ using System.IO;
 using System.Text;
 using Microsoft.IdentityModel.Json.Utilities;
 
+#nullable disable
+
 namespace Microsoft.IdentityModel.Json.Bson
 {
     internal class BsonBinaryWriter

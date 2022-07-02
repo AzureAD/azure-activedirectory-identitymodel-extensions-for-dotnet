@@ -25,9 +25,11 @@
 
 namespace Microsoft.IdentityModel.Json.Serialization
 {
+#nullable enable
     /// <summary>
     /// Represents a method that constructs an object.
     /// </summary>
     /// <typeparam name="T">The object type to create.</typeparam>
-    internal delegate object ObjectConstructor<T>(params object[] args);
+    internal delegate object ObjectConstructor<T>(params object?[] args);
+#nullable disable
 }

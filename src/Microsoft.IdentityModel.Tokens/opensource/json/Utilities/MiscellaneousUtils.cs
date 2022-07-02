@@ -31,14 +31,23 @@ using System.Reflection;
 using System.Text;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.IdentityModel.Json.Utilities
 {
+#nullable enable
     internal delegate T Creator<T>();
 
     internal static class MiscellaneousUtils
     {
-        public static bool ValueEquals(object objA, object objB)
+        [Conditional("DEBUG")]
+        public static void Assert([DoesNotReturnIf(false)] bool condition, string? message = null)
+        {
+            Debug.Assert(condition, message);
+        }
+
+        public static bool ValueEquals(object? objA, object? objB)
         {
             if (objA == objB)
             {
@@ -77,14 +86,14 @@ namespace Microsoft.IdentityModel.Json.Utilities
             return new ArgumentOutOfRangeException(paramName, newMessage);
         }
 
-        public static string ToString(object value)
+        public static string ToString(object? value)
         {
             if (value == null)
             {
                 return "{null}";
             }
 
-            return (value is string s) ? @"""" + s + @"""" : value.ToString();
+            return (value is string s) ? @"""" + s + @"""" : value!.ToString()!;
         }
 
         public static int ByteArrayCompare(byte[] a1, byte[] a2)
@@ -107,9 +116,9 @@ namespace Microsoft.IdentityModel.Json.Utilities
             return 0;
         }
 
-        public static string GetPrefix(string qualifiedName)
+        public static string? GetPrefix(string qualifiedName)
         {
-            GetQualifiedNameParts(qualifiedName, out string prefix, out _);
+            GetQualifiedNameParts(qualifiedName, out string? prefix, out _);
 
             return prefix;
         }
@@ -121,9 +130,9 @@ namespace Microsoft.IdentityModel.Json.Utilities
             return localName;
         }
 
-        public static void GetQualifiedNameParts(string qualifiedName, out string prefix, out string localName)
+        public static void GetQualifiedNameParts(string qualifiedName, out string? prefix, out string localName)
         {
-            int colonPosition = qualifiedName.IndexOf(':');
+            int colonPosition = StringUtils.IndexOf(qualifiedName, ':');
 
             if ((colonPosition == -1 || colonPosition == 0) || (qualifiedName.Length - 1) == colonPosition)
             {
@@ -140,9 +149,10 @@ namespace Microsoft.IdentityModel.Json.Utilities
         internal static RegexOptions GetRegexOptions(string optionsText)
         {
             RegexOptions options = RegexOptions.None;
-            foreach (char c in optionsText)
+
+            for (int i = 0; i < optionsText.Length; i++)
             {
-                switch (c)
+                switch (optionsText[i])
                 {
                     case 'i':
                         options |= RegexOptions.IgnoreCase;
@@ -162,4 +172,5 @@ namespace Microsoft.IdentityModel.Json.Utilities
             return options;
         }
     }
+#nullable disable
 }

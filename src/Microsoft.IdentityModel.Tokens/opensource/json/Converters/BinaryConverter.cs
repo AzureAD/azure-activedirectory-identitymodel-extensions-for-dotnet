@@ -28,14 +28,14 @@ using System;
 using System.Globalization;
 using Microsoft.IdentityModel.Json.Utilities;
 using System.Collections.Generic;
-using System.Reflection;
-
+using System.Diagnostics;
 #if HAVE_ADO_NET
 using System.Data.SqlTypes;
 #endif
 
 namespace Microsoft.IdentityModel.Json.Converters
 {
+#nullable enable
     /// <summary>
     /// Converts a binary value to and from a base 64 string value.
     /// </summary>
@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Json.Converters
 #if HAVE_LINQ
         private const string BinaryTypeName = "System.Data.Linq.Binary";
         private const string BinaryToArrayName = "ToArray";
-        private static ReflectionObject _reflectionObject;
+        private static ReflectionObject? _reflectionObject;
 #endif
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// <param name="writer">The <see cref="JsonWriter"/> to write to.</param>
         /// <param name="value">The value.</param>
         /// <param name="serializer">The calling serializer.</param>
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             if (value == null)
             {
@@ -72,7 +72,9 @@ namespace Microsoft.IdentityModel.Json.Converters
             if (value.GetType().FullName == BinaryTypeName)
             {
                 EnsureReflectionObject(value.GetType());
-                return (byte[])_reflectionObject.GetValue(value, BinaryToArrayName);
+                MiscellaneousUtils.Assert(_reflectionObject != null);
+
+                return (byte[])_reflectionObject.GetValue(value, BinaryToArrayName)!;
             }
 #endif
 #if HAVE_ADO_NET
@@ -103,7 +105,7 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// <param name="existingValue">The existing value of object being read.</param>
         /// <param name="serializer">The calling serializer.</param>
         /// <returns>The object value.</returns>
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             if (reader.TokenType == JsonToken.Null)
             {
@@ -125,7 +127,7 @@ namespace Microsoft.IdentityModel.Json.Converters
             {
                 // current token is already at base64 string
                 // unable to call ReadAsBytes so do it the old fashion way
-                string encodedData = reader.Value.ToString();
+                string encodedData = reader.Value!.ToString()!;
                 data = Convert.FromBase64String(encodedData);
             }
             else
@@ -134,15 +136,16 @@ namespace Microsoft.IdentityModel.Json.Converters
             }
 
             Type t = (ReflectionUtils.IsNullableType(objectType))
-                ? Nullable.GetUnderlyingType(objectType)
+                ? Nullable.GetUnderlyingType(objectType)!
                 : objectType;
 
 #if HAVE_LINQ
             if (t.FullName == BinaryTypeName)
             {
                 EnsureReflectionObject(t);
+                MiscellaneousUtils.Assert(_reflectionObject != null);
 
-                return _reflectionObject.Creator(data);
+                return _reflectionObject.Creator!(data);
             }
 #endif
 
@@ -205,6 +208,7 @@ namespace Microsoft.IdentityModel.Json.Converters
             return false;
         }
     }
+#nullable disable
 }
 
 #endif

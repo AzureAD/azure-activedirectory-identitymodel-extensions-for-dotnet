@@ -24,9 +24,11 @@
 #endregion
 
 using System;
+using System.Threading;
 
 namespace Microsoft.IdentityModel.Json
 {
+#nullable enable
     /// <summary>
     /// The default JSON name table implementation.
     /// </summary>
@@ -53,12 +55,13 @@ namespace Microsoft.IdentityModel.Json
         }
 
         /// <summary>
-        /// Gets the string containing the same characters as the specified range of characters in the given array.
+        /// Gets a string containing the same characters as the specified range of characters in the given array.
         /// </summary>
         /// <param name="key">The character array containing the name to find.</param>
         /// <param name="start">The zero-based index into the array specifying the first character of the name.</param>
         /// <param name="length">The number of characters in the name.</param>
-        public override string Get(char[] key, int start, int length)
+        /// <returns>A string containing the same characters as the specified range of characters in the given array.</returns>
+        public override string? Get(char[] key, int start, int length)
         {
             if (length == 0)
             {
@@ -77,7 +80,8 @@ namespace Microsoft.IdentityModel.Json
             hashCode -= hashCode >> 5;
 
             // make sure index is evaluated before accessing _entries, otherwise potential race condition causing IndexOutOfRangeException
-            var index = hashCode & _mask;
+            int mask = Volatile.Read(ref _mask);
+            var index = hashCode & mask;
             var entries = _entries;
 
             for (Entry entry = entries[index]; entry != null; entry = entry.Next)
@@ -96,6 +100,7 @@ namespace Microsoft.IdentityModel.Json
         /// </summary>
         /// <param name="key">The string to add.</param>
         /// <remarks>This method is not thread-safe.</remarks>
+        /// <returns>The resolved string.</returns>
         public string Add(string key)
         {
             if (key == null)
@@ -119,7 +124,7 @@ namespace Microsoft.IdentityModel.Json
             hashCode -= hashCode >> 5;
             for (Entry entry = _entries[hashCode & _mask]; entry != null; entry = entry.Next)
             {
-                if (entry.HashCode == hashCode && entry.Value.Equals(key))
+                if (entry.HashCode == hashCode && entry.Value.Equals(key, StringComparison.Ordinal))
                 {
                     return entry.Value;
                 }
@@ -158,7 +163,12 @@ namespace Microsoft.IdentityModel.Json
                 }
             }
             _entries = newEntries;
-            _mask = newMask;
+
+#if NET20 || NET35 || NET40
+            Thread.VolatileWrite(ref _mask, newMask);
+#else
+            Volatile.Write(ref _mask, newMask);
+#endif
         }
 
         private static bool TextEquals(string str1, char[] str2, int str2Start, int str2Length)
@@ -192,4 +202,5 @@ namespace Microsoft.IdentityModel.Json
             }
         }
     }
+#nullable disable
 }

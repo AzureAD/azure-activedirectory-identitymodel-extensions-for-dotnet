@@ -27,12 +27,13 @@ using System;
 
 namespace Microsoft.IdentityModel.Json.Serialization
 {
+#nullable enable
     /// <summary>
     /// Provides information surrounding an error.
     /// </summary>
     internal class ErrorContext
     {
-        internal ErrorContext(object originalObject, object member, string path, Exception error)
+        internal ErrorContext(object? originalObject, object? member, string path, Exception error)
         {
             OriginalObject = originalObject;
             Member = member;
@@ -52,13 +53,13 @@ namespace Microsoft.IdentityModel.Json.Serialization
         /// Gets the original object that caused the error.
         /// </summary>
         /// <value>The original object that caused the error.</value>
-        public object OriginalObject { get; }
+        public object? OriginalObject { get; }
 
         /// <summary>
         /// Gets the member that caused the error.
         /// </summary>
         /// <value>The member that caused the error.</value>
-        public object Member { get; }
+        public object? Member { get; }
 
         /// <summary>
         /// Gets the path of the JSON location where the error occurred.
@@ -72,4 +73,5 @@ namespace Microsoft.IdentityModel.Json.Serialization
         /// <value><c>true</c> if handled; otherwise, <c>false</c>.</value>
         public bool Handled { get; set; }
     }
+#nullable disable
 }

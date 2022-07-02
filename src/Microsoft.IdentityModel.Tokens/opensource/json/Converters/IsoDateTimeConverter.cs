@@ -29,6 +29,7 @@ using Microsoft.IdentityModel.Json.Utilities;
 
 namespace Microsoft.IdentityModel.Json.Converters
 {
+#nullable enable
     /// <summary>
     /// Converts a <see cref="DateTime"/> to and from the ISO 8601 date format (e.g. <c>"2008-04-12T12:53Z"</c>).
     /// </summary>
@@ -37,8 +38,8 @@ namespace Microsoft.IdentityModel.Json.Converters
         private const string DefaultDateTimeFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ss.FFFFFFFK";
 
         private DateTimeStyles _dateTimeStyles = DateTimeStyles.RoundtripKind;
-        private string _dateTimeFormat;
-        private CultureInfo _culture;
+        private string? _dateTimeFormat;
+        private CultureInfo? _culture;
 
         /// <summary>
         /// Gets or sets the date time styles used when converting a date to and from JSON.
@@ -54,10 +55,10 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// Gets or sets the date time format used when converting a date to and from JSON.
         /// </summary>
         /// <value>The date time format used when converting a date to and from JSON.</value>
-        public string DateTimeFormat
+        public string? DateTimeFormat
         {
             get => _dateTimeFormat ?? string.Empty;
-            set => _dateTimeFormat = (string.IsNullOrEmpty(value)) ? null : value;
+            set => _dateTimeFormat = (StringUtils.IsNullOrEmpty(value)) ? null : value;
         }
 
         /// <summary>
@@ -76,7 +77,7 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// <param name="writer">The <see cref="JsonWriter"/> to write to.</param>
         /// <param name="value">The value.</param>
         /// <param name="serializer">The calling serializer.</param>
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
         {
             string text;
 
@@ -104,7 +105,7 @@ namespace Microsoft.IdentityModel.Json.Converters
 #endif
             else
             {
-                throw new JsonSerializationException("Unexpected value when converting date. Expected DateTime or DateTimeOffset, got {0}.".FormatWith(CultureInfo.InvariantCulture, ReflectionUtils.GetObjectType(value)));
+                throw new JsonSerializationException("Unexpected value when converting date. Expected DateTime or DateTimeOffset, got {0}.".FormatWith(CultureInfo.InvariantCulture, ReflectionUtils.GetObjectType(value)!));
             }
 
             writer.WriteValue(text);
@@ -118,7 +119,7 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// <param name="existingValue">The existing value of object being read.</param>
         /// <param name="serializer">The calling serializer.</param>
         /// <returns>The object value.</returns>
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
         {
             bool nullable = ReflectionUtils.IsNullableType(objectType);
             if (reader.TokenType == JsonToken.Null)
@@ -133,7 +134,7 @@ namespace Microsoft.IdentityModel.Json.Converters
 
 #if HAVE_DATE_TIME_OFFSET
             Type t = (nullable)
-                ? Nullable.GetUnderlyingType(objectType)
+                ? Nullable.GetUnderlyingType(objectType)!
                 : objectType;
 #endif
 
@@ -142,7 +143,7 @@ namespace Microsoft.IdentityModel.Json.Converters
 #if HAVE_DATE_TIME_OFFSET
                 if (t == typeof(DateTimeOffset))
                 {
-                    return (reader.Value is DateTimeOffset) ? reader.Value : new DateTimeOffset((DateTime)reader.Value);
+                    return (reader.Value is DateTimeOffset) ? reader.Value : new DateTimeOffset((DateTime)reader.Value!);
                 }
 
                 // converter is expected to return a DateTime
@@ -160,17 +161,19 @@ namespace Microsoft.IdentityModel.Json.Converters
                 throw JsonSerializationException.Create(reader, "Unexpected token parsing date. Expected String, got {0}.".FormatWith(CultureInfo.InvariantCulture, reader.TokenType));
             }
 
-            string dateText = reader.Value.ToString();
+            string? dateText = reader.Value?.ToString();
 
-            if (string.IsNullOrEmpty(dateText) && nullable)
+            if (StringUtils.IsNullOrEmpty(dateText) && nullable)
             {
                 return null;
             }
 
+            MiscellaneousUtils.Assert(dateText != null);
+
 #if HAVE_DATE_TIME_OFFSET
             if (t == typeof(DateTimeOffset))
             {
-                if (!string.IsNullOrEmpty(_dateTimeFormat))
+                if (!StringUtils.IsNullOrEmpty(_dateTimeFormat))
                 {
                     return DateTimeOffset.ParseExact(dateText, _dateTimeFormat, Culture, _dateTimeStyles);
                 }
@@ -181,7 +184,7 @@ namespace Microsoft.IdentityModel.Json.Converters
             }
 #endif
 
-            if (!string.IsNullOrEmpty(_dateTimeFormat))
+            if (!StringUtils.IsNullOrEmpty(_dateTimeFormat))
             {
                 return DateTime.ParseExact(dateText, _dateTimeFormat, Culture, _dateTimeStyles);
             }
@@ -191,4 +194,5 @@ namespace Microsoft.IdentityModel.Json.Converters
             }
         }
     }
+#nullable disable
 }

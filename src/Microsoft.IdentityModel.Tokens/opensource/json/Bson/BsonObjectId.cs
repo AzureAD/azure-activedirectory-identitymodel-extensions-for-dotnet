@@ -26,6 +26,8 @@
 using System;
 using Microsoft.IdentityModel.Json.Utilities;
 
+#nullable disable
+
 namespace Microsoft.IdentityModel.Json.Bson
 {
     /// <summary>

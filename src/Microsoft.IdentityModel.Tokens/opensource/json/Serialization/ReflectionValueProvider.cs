@@ -30,6 +30,7 @@ using System.Globalization;
 
 namespace Microsoft.IdentityModel.Json.Serialization
 {
+#nullable enable
     /// <summary>
     /// Get and set values for a <see cref="MemberInfo"/> using reflection.
     /// </summary>
@@ -52,7 +53,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
         /// </summary>
         /// <param name="target">The target to set the value on.</param>
         /// <param name="value">The value to set on the target.</param>
-        public void SetValue(object target, object value)
+        public void SetValue(object target, object? value)
         {
             try
             {
@@ -69,7 +70,7 @@ namespace Microsoft.IdentityModel.Json.Serialization
         /// </summary>
         /// <param name="target">The target to get the value from.</param>
         /// <returns>The value.</returns>
-        public object GetValue(object target)
+        public object? GetValue(object target)
         {
             try
             {
@@ -87,4 +88,5 @@ namespace Microsoft.IdentityModel.Json.Serialization
             }
         }
     }
+#nullable disable
 }

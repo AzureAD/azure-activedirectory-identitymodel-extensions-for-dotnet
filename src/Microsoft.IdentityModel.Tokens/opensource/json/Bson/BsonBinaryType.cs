@@ -25,6 +25,8 @@
 
 using System;
 
+#nullable disable
+
 namespace Microsoft.IdentityModel.Json.Bson
 {
     internal enum BsonBinaryType : byte

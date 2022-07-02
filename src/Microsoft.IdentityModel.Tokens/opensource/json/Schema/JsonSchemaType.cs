@@ -25,6 +25,7 @@
 
 using System;
 
+
 namespace Microsoft.IdentityModel.Json.Schema
 {
     /// <summary>

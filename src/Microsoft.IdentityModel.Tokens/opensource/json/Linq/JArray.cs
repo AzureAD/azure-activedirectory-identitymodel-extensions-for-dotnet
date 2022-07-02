@@ -32,6 +32,7 @@ using System.Globalization;
 
 namespace Microsoft.IdentityModel.Json.Linq
 {
+#nullable enable
     /// <summary>
     /// Represents a JSON array.
     /// </summary>
@@ -99,7 +100,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         }
 
         /// <summary>
-        /// Loads an <see cref="JArray"/> from a <see cref="JsonReader"/>.
+        /// Loads an <see cref="JArray"/> from a <see cref="JsonReader"/>. 
         /// </summary>
         /// <param name="reader">A <see cref="JsonReader"/> that will be read for the content of the <see cref="JArray"/>.</param>
         /// <returns>A <see cref="JArray"/> that contains the JSON that was read from the specified <see cref="JsonReader"/>.</returns>
@@ -109,13 +110,13 @@ namespace Microsoft.IdentityModel.Json.Linq
         }
 
         /// <summary>
-        /// Loads an <see cref="JArray"/> from a <see cref="JsonReader"/>.
+        /// Loads an <see cref="JArray"/> from a <see cref="JsonReader"/>. 
         /// </summary>
         /// <param name="reader">A <see cref="JsonReader"/> that will be read for the content of the <see cref="JArray"/>.</param>
         /// <param name="settings">The <see cref="JsonLoadSettings"/> used to load the JSON.
         /// If this is <c>null</c>, default load settings will be used.</param>
         /// <returns>A <see cref="JArray"/> that contains the JSON that was read from the specified <see cref="JsonReader"/>.</returns>
-        public new static JArray Load(JsonReader reader, JsonLoadSettings settings)
+        public new static JArray Load(JsonReader reader, JsonLoadSettings? settings)
         {
             if (reader.TokenType == JsonToken.None)
             {
@@ -163,7 +164,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <example>
         ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParseArray" title="Parsing a JSON Array from Text" />
         /// </example>
-        public new static JArray Parse(string json, JsonLoadSettings settings)
+        public new static JArray Parse(string json, JsonLoadSettings? settings)
         {
             using (JsonReader reader = new JsonTextReader(new StringReader(json)))
             {
@@ -227,7 +228,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// Gets the <see cref="JToken"/> with the specified key.
         /// </summary>
         /// <value>The <see cref="JToken"/> with the specified key.</value>
-        public override JToken this[object key]
+        public override JToken? this[object key]
         {
             get
             {
@@ -263,14 +264,19 @@ namespace Microsoft.IdentityModel.Json.Linq
             set => SetItem(index, value);
         }
 
-        internal override int IndexOfItem(JToken item)
+        internal override int IndexOfItem(JToken? item)
         {
+            if (item == null)
+            {
+                return -1;
+            }
+
             return _values.IndexOfReference(item);
         }
 
-        internal override void MergeItem(object content, JsonMergeSettings settings)
+        internal override void MergeItem(object content, JsonMergeSettings? settings)
         {
-            IEnumerable a = (IsMultiContent(content) || content is JArray)
+            IEnumerable? a = (IsMultiContent(content) || content is JArray)
                 ? (IEnumerable)content
                 : null;
             if (a == null)
@@ -395,4 +401,5 @@ namespace Microsoft.IdentityModel.Json.Linq
             return ContentsHashCode();
         }
     }
+#nullable disable
 }

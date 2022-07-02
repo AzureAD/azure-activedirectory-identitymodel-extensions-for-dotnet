@@ -30,6 +30,7 @@ using System.Text;
 
 namespace Microsoft.IdentityModel.Json
 {
+#nullable enable
     /// <summary>
     /// The exception thrown when an error occurs while writing JSON text.
     /// </summary>
@@ -42,7 +43,7 @@ namespace Microsoft.IdentityModel.Json
         /// Gets the path to the JSON where the error occurred.
         /// </summary>
         /// <value>The path to the JSON where the error occurred.</value>
-        public string Path { get; }
+        public string? Path { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonWriterException"/> class.
@@ -93,22 +94,23 @@ namespace Microsoft.IdentityModel.Json
         /// <param name="message">The error message that explains the reason for the exception.</param>
         /// <param name="path">The path to the JSON where the error occurred.</param>
         /// <param name="innerException">The exception that is the cause of the current exception, or <c>null</c> if no inner exception is specified.</param>
-        public JsonWriterException(string message, string path, Exception innerException)
+        public JsonWriterException(string message, string path, Exception? innerException)
             : base(message, innerException)
         {
             Path = path;
         }
 
-        internal static JsonWriterException Create(JsonWriter writer, string message, Exception ex)
+        internal static JsonWriterException Create(JsonWriter writer, string message, Exception? ex)
         {
             return Create(writer.ContainerPath, message, ex);
         }
 
-        internal static JsonWriterException Create(string path, string message, Exception ex)
+        internal static JsonWriterException Create(string path, string message, Exception? ex)
         {
             message = JsonPosition.FormatMessage(null, path, message);
 
             return new JsonWriterException(message, path, ex);
         }
     }
+#nullable disable
 }

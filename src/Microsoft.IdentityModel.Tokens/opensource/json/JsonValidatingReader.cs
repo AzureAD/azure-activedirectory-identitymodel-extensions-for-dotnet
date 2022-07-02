@@ -41,6 +41,8 @@ using System.Linq;
 
 #endif
 
+#nullable disable
+
 namespace Microsoft.IdentityModel.Json
 {
     /// <summary>
@@ -121,7 +123,7 @@ namespace Microsoft.IdentityModel.Json
         public override int Depth => _reader.Depth;
 
         /// <summary>
-        /// Gets the path of the current JSON token.
+        /// Gets the path of the current JSON token. 
         /// </summary>
         public override string Path => _reader.Path;
 
