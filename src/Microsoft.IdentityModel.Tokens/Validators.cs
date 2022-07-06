@@ -256,10 +256,6 @@ namespace Microsoft.IdentityModel.Tokens
                     LogHelper.LogInformation(LogMessages.IDX10236, issuer);
                     return issuer;
                 }
-
-                throw LogHelper.LogExceptionMessage(
-                    new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX10260, issuer, (validationParameters.ValidIssuer ?? "null"), Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers), configuration.Issuer))
-                    { InvalidIssuer = issuer });
             }
 
             if (string.Equals(validationParameters.ValidIssuer, issuer))
@@ -268,7 +264,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return issuer;
             }
 
-            if (null != validationParameters.ValidIssuers)
+            if (validationParameters.ValidIssuers != null)
             {
                 foreach (string str in validationParameters.ValidIssuers)
                 {
@@ -287,7 +283,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             throw LogHelper.LogExceptionMessage(
-                new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX10205, issuer, (validationParameters.ValidIssuer ?? "null"), Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers)))
+                new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX10205, issuer, (validationParameters.ValidIssuer ?? "null"), Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers), configuration?.Issuer))
                 { InvalidIssuer = issuer });
         }
 
