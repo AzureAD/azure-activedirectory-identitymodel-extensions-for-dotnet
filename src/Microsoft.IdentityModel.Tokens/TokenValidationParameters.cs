@@ -236,6 +236,7 @@ namespace Microsoft.IdentityModel.Tokens
             NameClaimType = other.NameClaimType;
             NameClaimTypeRetriever = other.NameClaimTypeRetriever;
             PropertyBag = other.PropertyBag;
+            RefreshBeforeValidation = other.RefreshBeforeValidation;
             RequireAudience = other.RequireAudience;
             RequireExpirationTime = other.RequireExpirationTime;
             RequireSignedTokens = other.RequireSignedTokens;
@@ -258,6 +259,7 @@ namespace Microsoft.IdentityModel.Tokens
             ValidateLifetime = other.ValidateLifetime;
             ValidateSignatureLast = other.ValidateSignatureLast;
             ValidateTokenReplay = other.ValidateTokenReplay;
+            ValidateWithLKG = other.ValidateWithLKG;
             ValidAlgorithms = other.ValidAlgorithms;
             ValidAudience = other.ValidAudience;
             ValidAudiences = other.ValidAudiences;
