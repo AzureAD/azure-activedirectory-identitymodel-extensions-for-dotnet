@@ -41,7 +41,6 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     internal class TokenUtilities
     {
-
         /// <summary>
         /// A URI that represents the JSON XML data type.
         /// </summary>
