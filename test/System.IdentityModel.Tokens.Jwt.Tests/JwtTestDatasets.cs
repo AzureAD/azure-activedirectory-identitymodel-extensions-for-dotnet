@@ -32,6 +32,7 @@ using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Validators;
 using Xunit;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
@@ -222,6 +223,37 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             ValidIssuer = Default.Issuer
                         },
                         ShouldSetLastKnownConfiguration = false
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(Default.AsymmetricJws) + "_TVPInvalid_ConfigIssuerValid_AadIssuerValidatorReturnsTrue",
+                        Token = Default.AadAsymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(validConfig),
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        },
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(Default.AsymmetricJws) + "_TVPInvalid_ConfigIssuerInvalid_AadIssuerValidatorThrow",
+                        Token = Default.AadAsymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig),
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        },
+                        ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX40001: "),
                     },
                 };
             }
@@ -492,7 +524,69 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             ValidateLifetime = true,
                         },
                         ExpectedException = new ExpectedException(typeof(SecurityTokenUnableToValidateException))
-                    }
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(Default.AsymmetricJws) + "_ConfigIssuerInvalid_AadIssuerValidatorThrow_LKGValid",
+                        Token = Default.AadAsymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig, validConfig),
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(Default.AsymmetricJws) + "_ConfigIssuerInvalid_AadIssuerValidatorThrow_LKGInvalid",
+                        Token = Default.AadAsymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig, incorrectIssuerAndSigningKeysConfig),
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        },
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidIssuerException))
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(Default.AsymmetricJws) + "_ConfigInvalid_AadIssuerValidatorThrow_LKGIssuerInvalid_RefreshedConfigKeyInvalid",
+                        Token = Default.AadAsymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig, incorrectIssuerAndSigningKeysConfig, incorrectSigningKeysConfig),
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        },
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenSignatureKeyNotFoundException))
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(Default.AsymmetricJws) + "_ConfigInvalid_AadIssuerValidatorThrow_LKGIssuerInvalid_RequestRefreshSucceeds",
+                        Token = Default.AadAsymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig, incorrectSigningKeysConfig, validConfig),
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        },
+                    },
                 };
             }
         }
@@ -502,6 +596,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             get
             {
                 var jwe = new JsonWebTokenHandler().CreateToken(Default.PayloadString, Default.SymmetricSigningCredentials, Default.SymmetricEncryptingCredentials);
+                var aadJwe = new JsonWebTokenHandler().CreateToken(Default.AadPayloadString, Default.SymmetricSigningCredentials, Default.SymmetricEncryptingCredentials);
                 var validConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
                 validConfig.SigningKeys.Add(Default.SymmetricSigningKey256);
 
@@ -778,7 +873,75 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             TokenDecryptionKey = Default.SymmetricEncryptingCredentials.Key
                         },
                         ExpectedException = new ExpectedException(typeof(SecurityTokenUnableToValidateException))
-                    }
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(aadJwe) + "_ConfigIssuerInvalid_AadIssuerValidatorThrow_LKGValid",
+                        Token = aadJwe,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig, validConfig),
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
+                        }
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(aadJwe) + "_ConfigIssuerInvalid_AadIssuerValidatorThrow_LKGInvalid",
+                        Token = aadJwe,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig, incorrectIssuerAndSigningKeysConfig),
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
+
+                        },
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidIssuerException))
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(aadJwe) + "_ConfigInvalid_AadIssuerValidatorThrow_LKGIssuerInvalid_RefreshedConfigKeyInvalid",
+                        Token = aadJwe,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig, incorrectIssuerAndSigningKeysConfig, incorrectSigningKeysConfig),
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
+
+                        },
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenSignatureKeyNotFoundException))
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(aadJwe) + "_ConfigInvalid_AadIssuerValidatorThrow_LKGIssuerInvalid_RequestRefreshSucceeds",
+                        Token = aadJwe,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig, incorrectSigningKeysConfig, validConfig),
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
+                        },
+                    },
                 };
             }
         }

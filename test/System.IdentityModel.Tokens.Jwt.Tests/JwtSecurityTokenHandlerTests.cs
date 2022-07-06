@@ -35,6 +35,7 @@ using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Validators;
 using Xunit;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
@@ -2061,6 +2062,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             try
             {
+                AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).ConfigurationManagerV1 = theoryData.ValidationParameters.ConfigurationManager;
                 new JwtSecurityTokenHandler().ValidateToken(theoryData.Token, theoryData.ValidationParameters, out _);
                 if (theoryData.ShouldSetLastKnownConfiguration && theoryData.ValidationParameters.ConfigurationManager.LastKnownGoodConfiguration == null)
                     context.AddDiff("validationResult.IsValid, but the configuration was not set as the LastKnownGoodConfiguration");
@@ -2111,6 +2113,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             try
             {
+                AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).ConfigurationManagerV1 = theoryData.ValidationParameters.ConfigurationManager;
                 new JwtSecurityTokenHandler().ValidateToken(theoryData.Token, theoryData.ValidationParameters, out _);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
@@ -2131,6 +2134,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             try
             {
+                AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).ConfigurationManagerV1 = theoryData.ValidationParameters.ConfigurationManager;
                 new JwtSecurityTokenHandler().ValidateToken(theoryData.Token, theoryData.ValidationParameters, out _);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
