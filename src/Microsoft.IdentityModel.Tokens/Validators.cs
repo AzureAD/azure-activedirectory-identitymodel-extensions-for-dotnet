@@ -282,8 +282,6 @@ namespace Microsoft.IdentityModel.Tokens
                 }
             }
 
-
-
             throw LogHelper.LogExceptionMessage(
                 new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX10205, issuer, (validationParameters.ValidIssuer ?? "null"), Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers), configuration?.Issuer))
                 { InvalidIssuer = issuer });
