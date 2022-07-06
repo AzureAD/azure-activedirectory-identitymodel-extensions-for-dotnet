@@ -44,30 +44,81 @@ namespace Microsoft.IdentityModel.Validators
     /// </summary>
     public class AadIssuerValidator
     {
+        internal const string V2EndpointSuffix = "/v2.0";
+        internal const string TenantidTemplate = "{tenantid}";
+
         internal AadIssuerValidator(
             HttpClient httpClient,
             string aadAuthority)
         {
             HttpClient = httpClient;
-            IsV2Authority = aadAuthority.Contains("v2.0");
-            if (IsV2Authority)
-            {
-                AadAuthorityV2 = aadAuthority.TrimEnd('/');
-                AadAuthorityV1 = CreateV1Authority(AadAuthorityV2);
-            }
-            else
-            {
-                AadAuthorityV1 = aadAuthority.TrimEnd('/');
-                AadAuthorityV2 = AadAuthorityV1 + "/v2.0";
-            }
+            AadAuthority = aadAuthority.TrimEnd('/');
+            IsV2Authority = aadAuthority.Contains(V2EndpointSuffix);
         }
 
         private HttpClient HttpClient { get; }
+        private string _aadAuthorityV1;
+        private string _aadAuthorityV2;
+        private BaseConfigurationManager _configurationManagerV1;
+        private BaseConfigurationManager _configurationManagerV2;
+
+        internal BaseConfigurationManager ConfigurationManagerV1
+        {
+            get
+            {
+                if (_configurationManagerV1 == null)
+                    _configurationManagerV1 = CreateConfigManager(AadAuthorityV1);
+            
+                return _configurationManagerV1;
+            }
+
+            set
+            {
+                _configurationManagerV1 = value;
+            }
+        }
+
+        internal BaseConfigurationManager ConfigurationManagerV2
+        {
+            get
+            {
+                if (_configurationManagerV2 == null)
+                    _configurationManagerV2 = CreateConfigManager(AadAuthorityV2);
+
+                return _configurationManagerV2;
+            }
+
+            set
+            {
+                _configurationManagerV2 = value;
+            }
+        }
+
+        internal string AadAuthorityV1
+        {
+            get
+            {
+                if (_aadAuthorityV1 == null)
+                    _aadAuthorityV1 = IsV2Authority ? CreateV1Authority(AadAuthority) : AadAuthority;
+
+                return _aadAuthorityV1;
+            }
+        }
+
+        internal string AadAuthorityV2
+        {
+            get
+            {
+                if (_aadAuthorityV2 == null)
+                    _aadAuthorityV2 = IsV2Authority ? AadAuthority : AadAuthority + V2EndpointSuffix;
+
+                return _aadAuthorityV2;
+            }
+        }
 
         internal string AadIssuerV1 { get; set; }
         internal string AadIssuerV2 { get; set; }
-        internal string AadAuthorityV2 { get; set; }
-        internal string AadAuthorityV1 { get; set; }
+        internal string AadAuthority { get; set; }
         internal bool IsV2Authority { get; set; }
         internal static readonly IDictionary<string, AadIssuerValidator> s_issuerValidators = new ConcurrentDictionary<string, AadIssuerValidator>();
 
@@ -120,20 +171,24 @@ namespace Microsoft.IdentityModel.Validators
 
             try
             {
-                if (securityToken.Issuer.EndsWith("v2.0", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (AadIssuerV2 == null)
-                        AadIssuerV2 = CreateConfigManager(AadAuthorityV2).GetConfigurationAsync().ConfigureAwait(false).GetAwaiter().GetResult().Issuer;
+                var effectiveConfigurationManager = GetEffectiveConfigurationManager(securityToken);
+                if (validationParameters.RefreshBeforeValidation)
+                    effectiveConfigurationManager.RequestRefresh();
 
-                    if (IsValidIssuer(AadIssuerV2, tenantId, issuer))
+                string aadIssuer = effectiveConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult().Issuer;
+
+                if (!validationParameters.ValidateWithLKG)
+                {
+                    if (IsValidIssuer(aadIssuer, tenantId, issuer))
+                    {
+                        effectiveConfigurationManager.LastKnownGoodConfiguration = new OpenIdConnectConfiguration() { Issuer = aadIssuer };
                         return issuer;
+                    }
                 }
                 else
                 {
-                    if (AadIssuerV1 == null)
-                        AadIssuerV1 = CreateConfigManager(AadAuthorityV1).GetConfigurationAsync().ConfigureAwait(false).GetAwaiter().GetResult().Issuer;
-
-                    if (IsValidIssuer(AadIssuerV1, tenantId, issuer))
+                    if (effectiveConfigurationManager.LastKnownGoodConfiguration != null &&
+                        IsValidIssuer(effectiveConfigurationManager.LastKnownGoodConfiguration.Issuer, tenantId, issuer))
                         return issuer;
                 }
             }
@@ -190,9 +245,9 @@ namespace Microsoft.IdentityModel.Validators
         private static string CreateV1Authority(string aadV2Authority)
         {
             if (aadV2Authority.Contains(AadIssuerValidatorConstants.Organizations))
-                return aadV2Authority.Replace($"{AadIssuerValidatorConstants.Organizations}/v2.0", AadIssuerValidatorConstants.Common);
+                return aadV2Authority.Replace($"{AadIssuerValidatorConstants.Organizations}{V2EndpointSuffix}", AadIssuerValidatorConstants.Common);
 
-            return aadV2Authority.Replace("/v2.0", string.Empty);
+            return aadV2Authority.Replace(V2EndpointSuffix, string.Empty);
         }
 
         private ConfigurationManager<OpenIdConnectConfiguration> CreateConfigManager(
@@ -220,25 +275,19 @@ namespace Microsoft.IdentityModel.Validators
             if (string.IsNullOrEmpty(validIssuerTemplate))
                 return false;
 
-            if (validIssuerTemplate.Contains("{tenantid}"))
+            if (validIssuerTemplate.Contains(TenantidTemplate))
             {
-                try
-                {
-                    string issuerFromTemplate = validIssuerTemplate.Replace("{tenantid}", tenantId);
-
-                    return issuerFromTemplate == actualIssuer;
-                }
-                catch
-                {
-                    // if something faults, ignore
-                }
-
-                return false;
+                return validIssuerTemplate.Replace(TenantidTemplate, tenantId) == actualIssuer;
             }
             else
             {
                 return validIssuerTemplate == actualIssuer;
             }
+        }
+
+        private BaseConfigurationManager GetEffectiveConfigurationManager(SecurityToken securityToken)
+        {
+            return (securityToken.Issuer.EndsWith(V2EndpointSuffix, StringComparison.OrdinalIgnoreCase)) ? ConfigurationManagerV2 : ConfigurationManagerV1;
         }
 
         /// <summary>Gets the tenant ID from a token.</summary>
