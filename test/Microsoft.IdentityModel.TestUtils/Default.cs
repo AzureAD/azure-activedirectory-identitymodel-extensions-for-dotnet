@@ -60,6 +60,10 @@ namespace Microsoft.IdentityModel.TestUtils
             _referenceDigestValue = Convert.ToBase64String(XmlUtilities.CreateDigestBytes("<OuterXml></OuterXml>", false));
         }
 #endif
+        public static string AadV1Authority
+        {
+            get => "https://login.microsoftonline.com";
+        }
 
         public static string ActorIssuer
         {
@@ -383,6 +387,21 @@ namespace Microsoft.IdentityModel.TestUtils
             get => "<OuterXml></OuterXml>";
         }
 #if !CrossVersionTokenValidation
+        public static string AadPayloadString
+        {
+            get => new JObject()
+            {
+                { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
+                { JwtRegisteredClaimNames.GivenName, "Bob" },
+                { JwtRegisteredClaimNames.Iss, Default.Issuer },
+                { "tid", "tentantId" },
+                { JwtRegisteredClaimNames.Aud, Default.Audience },
+                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant).ToString() },
+                { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore).ToString()},
+                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString() },
+            }.ToString();
+        }
+
         public static string PayloadString
         {
             get => new JObject()
@@ -1087,6 +1106,11 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             get => Jwt(X509SecurityTokenDescriptor(X509AsymmetricSigningCredentials));
         }
+
+        public static string AadAsymmetricJws
+        {
+            get => Jwt(X509SecurityTokenDescriptor(null, X509AsymmetricSigningCredentials, ClaimSets.AadClaims));
+        }
 #endif
 
         public static SecurityTokenDescriptor SymmetricEncryptSignSecurityTokenDescriptor()
@@ -1239,6 +1263,7 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 #endif
+
         public static string Uri
         {
             get => "http://referenceUri";

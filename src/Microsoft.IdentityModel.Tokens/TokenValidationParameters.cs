@@ -236,6 +236,7 @@ namespace Microsoft.IdentityModel.Tokens
             NameClaimType = other.NameClaimType;
             NameClaimTypeRetriever = other.NameClaimTypeRetriever;
             PropertyBag = other.PropertyBag;
+            RefreshBeforeValidation = other.RefreshBeforeValidation;
             RequireAudience = other.RequireAudience;
             RequireExpirationTime = other.RequireExpirationTime;
             RequireSignedTokens = other.RequireSignedTokens;
@@ -258,6 +259,7 @@ namespace Microsoft.IdentityModel.Tokens
             ValidateLifetime = other.ValidateLifetime;
             ValidateSignatureLast = other.ValidateSignatureLast;
             ValidateTokenReplay = other.ValidateTokenReplay;
+            ValidateWithLKG = other.ValidateWithLKG;
             ValidAlgorithms = other.ValidAlgorithms;
             ValidAudience = other.ValidAudience;
             ValidAudiences = other.ValidAudiences;
@@ -559,6 +561,15 @@ namespace Microsoft.IdentityModel.Tokens
         public IDictionary<string, Object> PropertyBag { get; set; }
 
         /// <summary>
+        /// Gets or sets a boolean to control if configuration required to be refreshed before token validation.
+        /// </summary>
+        /// <remarks>
+        /// The default is <c>false</c>.
+        /// </remarks>
+        [DefaultValue(false)]
+        public bool RefreshBeforeValidation { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether SAML tokens must have at least one AudienceRestriction.
         /// The default is <c>true</c>.
         /// </summary>
@@ -724,12 +735,21 @@ namespace Microsoft.IdentityModel.Tokens
         /// It is possible that a token issued for the same audience could be from a different tenant. For example an application could accept users from
         /// contoso.onmicrosoft.com but not fabrikam.onmicrosoft.com, both valid tenants. An application that accepts tokens from fabrikam could forward them
         /// to the application that accepts tokens for contoso.
-        /// This boolean only applies to default issuer validation. If <see cref= "IssuerValidator" /> is set, it will be called regardless of whether this
+        /// This boolean only applies to default issuer validation. If <see cref="IssuerValidator"/> is set, it will be called regardless of whether this
         /// property is true or false.
         /// The default is <c>true</c>.
         /// </remarks>
         [DefaultValue(true)]
         public bool ValidateIssuer { get; set; }
+
+        /// <summary>
+        /// Gets or sets a boolean to control if the LKG configuration will be used for token validation.
+        /// </summary>
+        /// <remarks>
+        /// The default is <c>false</c>.
+        /// </remarks>
+        [DefaultValue(false)]
+        public bool ValidateWithLKG { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean that controls if validation of the <see cref="SecurityKey"/> that signed the securityToken is called.
