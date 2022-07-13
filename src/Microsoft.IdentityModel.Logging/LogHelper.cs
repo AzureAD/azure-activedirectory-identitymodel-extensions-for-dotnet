@@ -58,6 +58,13 @@ namespace Microsoft.IdentityModel.Logging
         /// </summary>
         private static string _piiOnLogMessage = "PII logging is ON, do not use in production. See https://aka.ms/IdentityModel/PII for details. ";
 
+        // internal for testing purposes only
+        internal static bool HeaderWritten
+        {
+            get { return _isHeaderWritten; }
+            set { _isHeaderWritten = value; }
+        }
+
         /// <summary>
         /// Logs an exception using the event source logger and returns new <see cref="ArgumentNullException"/> exception.
         /// </summary>
@@ -433,27 +440,23 @@ namespace Microsoft.IdentityModel.Logging
 
             message = args == null ? message : FormatInvariant(message, args);
 
-            // Logs basic information (library version, DateTime, whether PII is ON/OFF) once before any log messages are written.
+            LogEntry entry = new LogEntry();
+            entry.EventLogLevel = eventLogLevel;
+
+            // Prefix header (library version, DateTime, whether PII is ON/OFF) to the first message logged by Wilson.
             if (!_isHeaderWritten)
             {
-                string headerMessage = string.Format(
-                    CultureInfo.InvariantCulture,
-                    "Microsoft.IdentityModel Version: {0}. Date {1}. {2}",
+                string headerMessage = string.Format(CultureInfo.InvariantCulture, "Microsoft.IdentityModel Version: {0}. Date {1}. {2}",
                     typeof(IdentityModelEventSource).Assembly.GetName().Version.ToString(),
                     DateTime.UtcNow,
                     IdentityModelEventSource.ShowPII ? _piiOnLogMessage : _piiOffLogMessage);
 
-                LogEntry headerEntry = new LogEntry();
-                headerEntry.EventLogLevel = EventLogLevel.LogAlways;
-                headerEntry.Message = headerMessage;
-                Logger.Log(headerEntry);
+                entry.Message = headerMessage + Environment.NewLine + message;
 
                 _isHeaderWritten = true;
             }
-
-            LogEntry entry = new LogEntry();
-            entry.EventLogLevel = eventLogLevel;
-            entry.Message = message;
+            else
+                entry.Message = message;
 
             return entry;
         }

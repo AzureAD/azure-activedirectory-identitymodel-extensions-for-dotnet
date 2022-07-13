@@ -44,6 +44,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
         {
             var logger = new TestLogger();
             LogHelper.Logger = logger;
+            LogHelper.HeaderWritten = false;
 
             var arg = "Test argument.";
             var guid = Guid.NewGuid().ToString();
@@ -53,12 +54,15 @@ namespace Microsoft.IdentityModel.Logging.Tests
             var warnMessage = "Warn Message. {0}";
 
             LogHelper.LogExceptionMessage(EventLevel.Error, new ArgumentException(errorMessage));
+            Assert.True(logger.LogStartsWith("Microsoft.IdentityModel Version:", EventLogLevel.Error));
+            Assert.True(logger.ContainsLogOfSpecificLevel(errorMessage, EventLogLevel.Error));
+            Assert.True(LogHelper.HeaderWritten);
+
             LogHelper.LogArgumentNullException(guid);
             LogHelper.LogInformation(infoMessage, LogHelper.MarkAsNonPII(arg));
             LogHelper.LogVerbose(verboseMessage, LogHelper.MarkAsNonPII(arg));
             LogHelper.LogWarning(warnMessage, LogHelper.MarkAsNonPII(arg));
-
-            Assert.True(logger.ContainsLogOfSpecificLevel(errorMessage, EventLogLevel.Error));
+           
             Assert.True(logger.ContainsLogOfSpecificLevel("IDX10000:", EventLogLevel.Error));
             Assert.True(logger.ContainsLogOfSpecificLevel(string.Format(infoMessage, arg), EventLogLevel.Informational));
             Assert.True(logger.ContainsLogOfSpecificLevel(string.Format(verboseMessage, arg), EventLogLevel.Verbose));
