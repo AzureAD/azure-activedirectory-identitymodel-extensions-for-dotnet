@@ -229,6 +229,7 @@ namespace Microsoft.IdentityModel.Tokens
             IgnoreTrailingSlashWhenValidatingAudience = other.IgnoreTrailingSlashWhenValidatingAudience;
             IssuerSigningKey = other.IssuerSigningKey;
             IssuerSigningKeyResolver = other.IssuerSigningKeyResolver;
+            IssuerSigningKeyResolverUsingConfiguration = other.IssuerSigningKeyResolverUsingConfiguration;
             IssuerSigningKeys = other.IssuerSigningKeys;
             IssuerSigningKeyValidator = other.IssuerSigningKeyValidator;
             IssuerValidator = other.IssuerValidator;
