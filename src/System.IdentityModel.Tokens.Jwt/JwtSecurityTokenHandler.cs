@@ -664,7 +664,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     notBefore = now;
             }
 
-            LogHelper.LogVerbose(LogMessages.IDX12721, (audience ?? "null"), (issuer ?? "null"));
+            LogHelper.LogVerbose(LogMessages.IDX12721, LogHelper.MarkAsNonPII(audience ?? "null"), LogHelper.MarkAsNonPII(issuer ?? "null"));
             JwtPayload payload = new JwtPayload(issuer, audience, (subject == null ? null : OutboundClaimTypeTransform(subject.Claims)), (claimCollection == null ? null : OutboundClaimTypeTransform(claimCollection)), notBefore, expires, issuedAt);
             JwtHeader header = new JwtHeader(signingCredentials, OutboundAlgorithmMap, tokenType, additionalInnerHeaderClaims);
 
@@ -1387,12 +1387,14 @@ namespace System.IdentityModel.Tokens.Jwt
                 {
                     var isKidInTVP = keysInTokenValidationParameters.Any(x => x.KeyId.Equals(jwtToken.Header.Kid));
                     var keyLocation = isKidInTVP ? "TokenValidationParameters" : "Configuration";
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(
-                        LogHelper.FormatInvariant(TokenLogMessages.IDX10511,
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10511,
                         keysAttempted,
                         LogHelper.MarkAsNonPII(numKeysInTokenValidationParameters),
-                        LogHelper.MarkAsNonPII(numKeysInConfiguration), LogHelper.MarkAsNonPII(keyLocation),
-                        jwtToken.Header.Kid, exceptionStrings, jwtToken)));
+                        LogHelper.MarkAsNonPII(numKeysInConfiguration),
+                        LogHelper.MarkAsNonPII(keyLocation),
+                        LogHelper.MarkAsNonPII(jwtToken.Header.Kid),
+                        exceptionStrings,
+                        jwtToken)));
                 }
 
                 DateTime? expires = (jwtToken.Payload.Exp == null) ? null : new DateTime?(jwtToken.ValidTo);
@@ -1411,12 +1413,12 @@ namespace System.IdentityModel.Tokens.Jwt
             }
 
             if (keysAttempted.Length > 0)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(
-                    LogHelper.FormatInvariant(TokenLogMessages.IDX10503,
+                throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(TokenLogMessages.IDX10503,
                     keysAttempted,
                     LogHelper.MarkAsNonPII(numKeysInTokenValidationParameters),
                     LogHelper.MarkAsNonPII(numKeysInConfiguration),
-                    exceptionStrings, jwtToken)));
+                    exceptionStrings,
+                    jwtToken)));
 
             throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(TokenLogMessages.IDX10500));
         }
@@ -1449,7 +1451,7 @@ namespace System.IdentityModel.Tokens.Jwt
             var actualIssuer = issuer;
             if (string.IsNullOrWhiteSpace(issuer))
             {
-                LogHelper.LogVerbose(TokenLogMessages.IDX10244, ClaimsIdentity.DefaultIssuer);
+                LogHelper.LogVerbose(TokenLogMessages.IDX10244, LogHelper.MarkAsNonPII(ClaimsIdentity.DefaultIssuer));
                 actualIssuer = ClaimsIdentity.DefaultIssuer;
             }
             
