@@ -43,6 +43,31 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             new Claim("dateTimeIso8061", dateTime.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
         };
 
+
+        // This test is designed to test that all properties of a JWE can be accessed.
+        // Some properties rely on an inner token and the Payload can be null.
+        [Fact]
+        public void JWETouchAllProperties()
+        {
+            var context = new CompareContext();
+            var jsonWebTokenHandler = new JsonWebTokenHandler();
+            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
+            {
+                SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes256_Sha512_512,
+                Subject = new ClaimsIdentity(Default.PayloadClaims),
+                TokenType = "TokenType"
+            };
+
+            string jwe = jsonWebTokenHandler.CreateToken(tokenDescriptor);
+            JsonWebToken jsonWebToken = new JsonWebToken(jwe);
+            JsonWebToken jsonWebToken2 = new JsonWebToken(jwe);
+
+            IdentityComparer.AreEqual(jsonWebToken, jsonWebToken2, context);
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
         // Test checks to make sure that the JsonWebToken.GetClaim() method is able to retrieve every Claim returned by the Claims property (with the exception 
         // of Claims that are JObjects or arrays, as those are converted to strings by the GetClaim() method).
         [Fact]
