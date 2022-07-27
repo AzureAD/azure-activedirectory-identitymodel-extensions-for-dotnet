@@ -638,6 +638,9 @@ namespace Microsoft.IdentityModel.TestUtils
             int numMatched = 0;
             foreach (string key in dictionary1.Keys)
             {
+                if (context.ClaimTypesToIgnoreWhenComparing.Contains(key))
+                    continue;
+
                 if (dictionary2.ContainsKey(key))
                 {
                     if (dictionary1[key].GetType() != dictionary2[key].GetType())
