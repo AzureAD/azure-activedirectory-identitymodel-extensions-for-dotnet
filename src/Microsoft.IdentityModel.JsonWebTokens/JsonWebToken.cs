@@ -478,6 +478,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
             else
             {
+#if NET45
+                Payload = new JsonClaimSet("{}");
+#else
+                Payload = new JsonClaimSet(JsonDocument.Parse("{}"));
+#endif
                 Dot4 = encodedJson.IndexOf('.', Dot3 + 1);
 
                 // JWE needs to have 4 dots
