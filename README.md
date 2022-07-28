@@ -19,7 +19,7 @@ Internally at Microsoft we were quickly required to remove all 3rd party librari
 Since there were some breaking changes, given the time-line we had to maintain two releases.
 
 Both of these branches were public and moved forward mostly in lock-step.\
-Once we finished our SignedHttpRequest functionality in the 6.x branch, we realized the delta between 5.x aqnd 6.x was too large to maintain in both branches.\
+Once we finished our SignedHttpRequest functionality in the 6.x branch, we realized the delta between 5.x and 6.x was too large to maintain in both branches.\
 We decided now was the time to switch to a single release branch.\
 Since internally the versioning was at 6.4.2, we needed to release at 6.5.0.
 
@@ -59,7 +59,7 @@ The scenarios supported by IdentityModel extensions for .NET are described in [S
 
 We leverage [Stack Overflow](http://stackoverflow.com/) to work with the community on supporting Azure Active Directory and its SDKs, including this one! We highly recommend you ask your questions on Stack Overflow (we're all on there!) Also browse existing issues to see if someone has had your question before.
 
-We recommend you use the "adal" tag so we can see it! Here is the latest Q&A on Stack Overflow for ADAL: [http://stackoverflow.com/questions/tagged/adal](http://stackoverflow.com/questions/tagged/adal)
+We recommend you use the "adal" tag so we can see it! Here is the latest Q&A on Stack Overflow for IdentityModel: [https://stackoverflow.com/questions/tagged/identityModel](https://stackoverflow.com/questions/tagged/identityModel)
 
 ## Security Reporting
 
