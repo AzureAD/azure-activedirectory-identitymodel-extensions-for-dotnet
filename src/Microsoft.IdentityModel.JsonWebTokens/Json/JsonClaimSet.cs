@@ -1,6 +1,5 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 #if !NET45
 
@@ -431,7 +430,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             throw LogHelper.LogExceptionMessage(new FormatException(LogHelper.FormatInvariant(LogMessages.IDX14300, claimName, jsonElement.ToString(), typeof(long))));
         }
 
-        #region Factories for Lazy
+#region Factories for Lazy
         private IDictionary<string, object> GetClaimsIdentityProperties()
         {
             Dictionary<string, object> identityProperties = new Dictionary<string, object>();
@@ -441,7 +440,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             return identityProperties;
         }
-        #endregion
+#endregion
     }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }

@@ -21,7 +21,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// <summary>
     /// A <see cref="SecurityToken"/> designed for representing a JSON Web Token (JWT). 
     /// </summary>
-    public class JsonWebToken : SecurityToken, IJsonClaimSet
+    public class JsonWebToken : SecurityToken//, IJsonClaimSet
     {
         private char[] _hChars;
 #if NET45
@@ -138,10 +138,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             get
             {
                 if (_authenticationTag == null)
-                {
-
                     _authenticationTag = AuthenticationTagBytes == null ? string.Empty : UTF8Encoding.UTF8.GetString(AuthenticationTagBytes);
-                }
 
                 return _authenticationTag;
 
@@ -582,9 +579,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             get
             {
                 if (_act == null)
-                {
                     _act = (InnerToken == null) ? Payload.GetStringValue(JwtRegisteredClaimNames.Actort) : InnerToken.Payload.GetStringValue(JwtRegisteredClaimNames.Actort);
-                }
 
                 return _act;
             }
@@ -606,9 +601,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             get
             {
                 if (_alg == null)
-                {
                     _alg = Header.GetStringValue(JwtHeaderParameterNames.Alg);
-                }
 
                 return _alg;
             }
