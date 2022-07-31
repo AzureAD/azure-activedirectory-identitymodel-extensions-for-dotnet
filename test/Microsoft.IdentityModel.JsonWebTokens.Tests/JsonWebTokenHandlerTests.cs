@@ -2961,35 +2961,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        // Feature is off pending additional memory tests.
-        /*
-        // Test checks that headers created with additional claims are not added to JsonWebTokenManager.KeyToHeaderCache.
-        [Fact]
-        public void HeaderCacheTest()
-        {
-            TestUtilities.WriteHeader($"{this}.HeaderCacheTest");
-            var context = new CompareContext();
-            var handler = new JsonWebTokenHandler();
-            JsonWebTokenManager.KeyToHeaderCache.Clear();
-
-            handler.CreateToken(Default.PayloadString, Default.AsymmetricSigningCredentials, new Dictionary<string, object> { { "string", "string" } });
-            if (!JsonWebTokenManager.KeyToHeaderCache.IsEmpty)
-                context.AddDiff("JsonWebTokenManager.KeyToHeaderCache is not empty. Headers created with additional claims SHOULD NOT be added to the cache.");
-
-            handler.CreateToken(Default.PayloadString, Default.AsymmetricSigningCredentials);
-            if (JsonWebTokenManager.KeyToHeaderCache.IsEmpty)
-                context.AddDiff("JsonWebTokenManager.KeyToHeaderCache is empty. Headers created without additional claims SHOULD be added to the cache.");
-
-            JsonWebTokenManager.KeyToHeaderCache.Clear();
-            // If the the additionalHeaderClaims dictionary is empty we should still add a header to the cache.
-            handler.CreateToken(Default.PayloadString, Default.AsymmetricSigningCredentials, new Dictionary<string, object>());
-            if (JsonWebTokenManager.KeyToHeaderCache.IsEmpty)
-                context.AddDiff("JsonWebTokenManager.KeyToHeaderCache is empty. Headers created without additional claims SHOULD be added to the cache.");
-
-            TestUtilities.AssertFailIfErrors(context);
-        }
-        */
-
         [Theory, MemberData(nameof(JWECompressionTheoryData))]
         public void JWECompressionTest(CreateTokenTheoryData theoryData)
         {
