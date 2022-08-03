@@ -1148,7 +1148,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 else
                 {
                     // second and third parameters are null as they are only used when the token is a JWE
-                    return await ValidateTokenAsync(token, null, null, validationParameters).ConfigureAwait(false);
+                    return await ValidateTokenAsync(token,
+                        null,
+                        null,
+                        validationParameters).ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
@@ -1173,6 +1176,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <returns></returns>
         private async Task<TokenValidationResult> ValidateTokenAsync(string token, JsonWebToken outerToken, string decryptedJwt, TokenValidationParameters validationParameters)
         {
+            if (validationParameters.TokenConverter != null)
+            {
+                if (token != null)
+                    token = validationParameters.TokenConverter(token, validationParameters);
+
+                if (decryptedJwt != null)
+                    decryptedJwt = validationParameters.TokenConverter(decryptedJwt, validationParameters);
+            }
+
             BaseConfiguration currentConfiguration = null;
             if (validationParameters.ConfigurationManager != null)
             {

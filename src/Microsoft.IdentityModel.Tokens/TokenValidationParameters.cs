@@ -40,6 +40,15 @@ namespace Microsoft.IdentityModel.Tokens
     /// priority.</remarks>
     public delegate IEnumerable<SecurityKey> IssuerSigningKeyResolver(string token, SecurityToken securityToken, string kid, TokenValidationParameters validationParameters);
 
+
+    /// <summary>
+    /// Definition for TokenConverter.
+    /// </summary>
+    /// <param name="token">The <see cref="string"/> representation of the token that is being validated.</param>
+    /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+    /// <returns>A token in string format.</returns>
+    public delegate string TokenConverter(string token, TokenValidationParameters validationParameters);
+
     /// <summary>
     /// Definition for IssuerSigningKeyResolverUsingConfiguration.
     /// </summary>
@@ -227,6 +236,7 @@ namespace Microsoft.IdentityModel.Tokens
             TokenReader = other.TokenReader;
             TokenReplayCache = other.TokenReplayCache;
             TokenReplayValidator = other.TokenReplayValidator;
+            TokenConverter = other.TokenConverter;
             TryAllIssuerSigningKeys = other.TryAllIssuerSigningKeys;
             TypeValidator = other.TypeValidator;
             ValidateActor = other.ValidateActor;
@@ -461,6 +471,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// priority.
         /// </remarks>
         public IssuerSigningKeyResolverUsingConfiguration IssuerSigningKeyResolverUsingConfiguration { get; set; }
+
+        /// <summary>
+        /// Gets or sets a delegate that will be called to convert a token to a supported format before validation.
+        /// </summary>
+        public TokenConverter TokenConverter { get; set; }
 
         /// <summary>
         /// Gets or sets an <see cref="IEnumerable{SecurityKey}"/> used for signature validation.
