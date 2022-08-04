@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Azure.KeyVault.Cryptography" Version="$(MicrosoftAzureKeyVaultCryptographyVersion)" />
+    <PackageReference Include="Microsoft.Azure.KeyVault.Cryptography"  />
   </ItemGroup>
 
   <ItemGroup>

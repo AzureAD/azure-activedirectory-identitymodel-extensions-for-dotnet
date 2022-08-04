@@ -48,13 +48,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet">
-      <Version>0.12.1</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="6.5.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens.Saml" Version="6.5.1" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt">
-      <Version>6.5.1</Version>
+    <PackageReference Include="BenchmarkDotNet" VersionOverride="0.21.1"/>
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" VersionOverride="6.5.1" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens.Saml" VersionOverride="6.5.1" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" VersionOverride="6.5.1" />
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

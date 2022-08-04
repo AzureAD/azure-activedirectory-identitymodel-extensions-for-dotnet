@@ -27,8 +27,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.IdentityModel.Protocol.Extensions" Version="$(MicrosoftIdentityModelProtocolExtensionsVersion)" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="$(SystemIdentityModelTokensJwtVersion4x)" />
+     <!-- VersionOverride for specific tests only -->
+    <PackageReference Include="Microsoft.IdentityModel.Protocol.Extensions" VersionOverride="$(MicrosoftIdentityModelProtocolExtensionsVersion)" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" VersionOverride="$(SystemIdentityModelTokensJwtVersion4x)" />
   </ItemGroup>
   
   <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
