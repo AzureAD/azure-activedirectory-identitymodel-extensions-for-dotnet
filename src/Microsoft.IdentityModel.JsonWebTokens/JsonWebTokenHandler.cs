@@ -1251,6 +1251,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             try
             {
                 TokenValidationResult tokenValidationResult;
+                if (validationParameters.TransformBeforeSignatureValidation != null)
+                    jsonWebToken = validationParameters.TransformBeforeSignatureValidation(jsonWebToken, validationParameters) as JsonWebToken;
+
                 if (validationParameters.SignatureValidator != null || validationParameters.SignatureValidatorUsingConfiguration != null)
                 {
                     var validatedToken = ValidateSignatureUsingDelegates(jsonWebToken.EncodedToken, validationParameters, configuration);
