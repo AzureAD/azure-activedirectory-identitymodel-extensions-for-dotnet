@@ -164,7 +164,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     /// <param name="token">The <see cref="SecurityToken"/> that is being validated.</param>
     /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-    /// <returns>A  transformed <see cref="SecurityToken"/>.</returns>
+    /// <returns>A transformed <see cref="SecurityToken"/>.</returns>
     public delegate SecurityToken TransformBeforeSignatureValidation(SecurityToken token, TokenValidationParameters validationParameters);
 
     /// <summary>
