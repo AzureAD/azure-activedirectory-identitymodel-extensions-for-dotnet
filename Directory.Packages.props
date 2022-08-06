@@ -24,7 +24,7 @@
     <PackageVersion Include="Microsoft.Azure.Services.AppAuthentication" Version="1.0.3" />
     <PackageVersion Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.0.0" />
     <PackageVersion Include="Microsoft.CSharp" Version="4.5.0" />
-    <PackageVersion Include="Microsoft.DotNet.ApiCompat" Version="1.0.0-beta.19225.5" />
+    <PackageVersion Include="Microsoft.DotNet.ApiCompat" Version="5.0.0-beta.19626.1" />
     <PackageVersion Include="Microsoft.DotNet.XUnitExtensions" Version="2.4.0-prerelease-63213-02" />
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="2.1.1" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="2.1.1" />
