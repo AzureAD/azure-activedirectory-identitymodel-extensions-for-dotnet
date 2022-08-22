@@ -147,7 +147,7 @@ namespace Microsoft.IdentityModel.Validators
 
             try
             {
-                var effectiveConfigurationManager = GetEffectiveConfigurationManager(securityToken);
+                var effectiveConfigurationManager = GetEffectiveConfigurationManager(securityToken, validationParameters);
                 if (validationParameters.RefreshBeforeValidation)
                     effectiveConfigurationManager.RequestRefresh();
 
@@ -261,8 +261,16 @@ namespace Microsoft.IdentityModel.Validators
             }
         }
 
-        private BaseConfigurationManager GetEffectiveConfigurationManager(SecurityToken securityToken)
+        private BaseConfigurationManager GetEffectiveConfigurationManager(SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
+            if (validationParameters.ConfigurationManager != null)
+            {
+                if (IsV2Authority)
+                    ConfigurationManagerV2 = validationParameters.ConfigurationManager;
+                else
+                    ConfigurationManagerV1 = validationParameters.ConfigurationManager;
+            }
+
             return (securityToken.Issuer.EndsWith(V2EndpointSuffix, StringComparison.OrdinalIgnoreCase)) ? ConfigurationManagerV2 : ConfigurationManagerV1;
         }
 
