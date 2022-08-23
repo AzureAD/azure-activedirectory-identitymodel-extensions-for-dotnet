@@ -1384,8 +1384,8 @@ namespace System.IdentityModel.Tokens.Jwt
                     validationParameters,
                     configuration,
                     exceptionStrings,
-                    numKeysInTokenValidationParameters,
-                    numKeysInConfiguration);
+                    numKeysInConfiguration,
+                    numKeysInTokenValidationParameters);
             }
 
             if (keysAttempted.Length > 0)
