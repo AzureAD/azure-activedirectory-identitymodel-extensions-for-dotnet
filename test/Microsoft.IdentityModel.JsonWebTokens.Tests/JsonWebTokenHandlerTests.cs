@@ -66,14 +66,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         [Theory, MemberData(nameof(TokenValidationClaimsTheoryData))]
         public void ValidateTokenDerivedHandlerValidationResult(JsonWebTokenTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.ValidateTokenDerivedHandlerValidationResult");
-            var derivedJsonWebTokenHandler = new DerivedJsonWebTokenHandler(); 
+            var context = TestUtilities.WriteHeader($"{this}.ValidateTokenDerivedHandlerValidationResult", theoryData);
+            var derivedJsonWebTokenHandler = new DerivedJsonWebTokenHandler();
             var tokenValidationResult = theoryData.TokenHandler.ValidateToken(theoryData.AccessToken, theoryData.ValidationParameters);
             var tokenValidationDerivedResult = derivedJsonWebTokenHandler.ValidateToken(theoryData.AccessToken, theoryData.ValidationParameters);
-            IdentityComparer.AreEqual(tokenValidationResult.Claims, TokenUtilities.CreateDictionaryFromClaims(tokenValidationResult.ClaimsIdentity.Claims));
-            IdentityComparer.AreEqual(tokenValidationDerivedResult.Claims, TokenUtilities.CreateDictionaryFromClaims(tokenValidationDerivedResult.ClaimsIdentity.Claims));
-            IdentityComparer.AreEqual(tokenValidationResult.Claims, tokenValidationDerivedResult.Claims);
-            IdentityComparer.AreEqual(tokenValidationResult.ClaimsIdentity.Claims, tokenValidationDerivedResult.ClaimsIdentity.Claims);
+            IdentityComparer.AreEqual(tokenValidationResult.Claims, TokenUtilities.CreateDictionaryFromClaims(tokenValidationResult.ClaimsIdentity.Claims), context);
+            IdentityComparer.AreEqual(tokenValidationDerivedResult.Claims, TokenUtilities.CreateDictionaryFromClaims(tokenValidationDerivedResult.ClaimsIdentity.Claims), context);
+            IdentityComparer.AreEqual(tokenValidationResult.Claims, tokenValidationDerivedResult.Claims, context);
+            IdentityComparer.AreEqual(tokenValidationResult.ClaimsIdentity.Claims, tokenValidationDerivedResult.ClaimsIdentity.Claims, context);
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<JsonWebTokenTheoryData> TokenValidationClaimsTheoryData()
