@@ -1376,16 +1376,19 @@ namespace System.IdentityModel.Tokens.Jwt
                 DateTime? expires = (jwtToken.Payload.Exp == null) ? null : new DateTime?(jwtToken.ValidTo);
                 DateTime? notBefore = (jwtToken.Payload.Nbf == null) ? null : new DateTime?(jwtToken.ValidFrom);
 
-                InternalValidators.ValidateLifetimeAndIssuerAfterSignatureNotValidatedJwt(
-                    jwtToken,
-                    notBefore,
-                    expires,
-                    jwtToken.Header.Kid,
-                    validationParameters,
-                    configuration,
-                    exceptionStrings,
-                    numKeysInConfiguration,
-                    numKeysInTokenValidationParameters);
+                if (!validationParameters.ValidateSignatureLast)
+                {
+                    InternalValidators.ValidateLifetimeAndIssuerAfterSignatureNotValidatedJwt(
+                        jwtToken,
+                        notBefore,
+                        expires,
+                        jwtToken.Header.Kid,
+                        validationParameters,
+                        configuration,
+                        exceptionStrings,
+                        numKeysInConfiguration,
+                        numKeysInTokenValidationParameters);
+                }
             }
 
             if (keysAttempted.Length > 0)

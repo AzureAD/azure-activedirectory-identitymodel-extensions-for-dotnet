@@ -1499,16 +1499,19 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 var expires = jwtToken.TryGetClaim(JwtRegisteredClaimNames.Exp, out var _) ? (DateTime?)jwtToken.ValidTo : null;
                 var notBefore = jwtToken.TryGetClaim(JwtRegisteredClaimNames.Nbf, out var _) ? (DateTime?)jwtToken.ValidFrom : null;
 
-                InternalValidators.ValidateLifetimeAndIssuerAfterSignatureNotValidatedJwt(
-                    jwtToken,
-                    notBefore,
-                    expires,
-                    jwtToken.Kid,
-                    validationParameters,
-                    configuration,
-                    exceptionStrings,
-                    numKeysInTokenValidationParameters,
-                    numKeysInConfiguration);
+                if (!validationParameters.ValidateSignatureLast)
+                {
+                    InternalValidators.ValidateLifetimeAndIssuerAfterSignatureNotValidatedJwt(
+                        jwtToken,
+                        notBefore,
+                        expires,
+                        jwtToken.Kid,
+                        validationParameters,
+                        configuration,
+                        exceptionStrings,
+                        numKeysInTokenValidationParameters,
+                        numKeysInConfiguration);
+                }
             }
 
             if (keysAttempted.Length > 0)
