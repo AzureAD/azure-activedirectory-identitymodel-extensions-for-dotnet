@@ -20,6 +20,7 @@ namespace Microsoft.IdentityModel.Tokens
         private bool _hasIsValidOrExceptionBeenRead = false;
         private bool _isValid = false;
         private TokenValidationParameters _validationParameters;
+        private TokenHandler _tokenHandler;
 
         /// <summary>
         /// Creates an instance of <see cref="TokenValidationResult"/>
@@ -33,11 +34,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// This ctor is used by the JsonWebTokenHandler as part of delaying creation of ClaimsIdentity.
         /// </summary>
         /// <param name="securityToken"></param>
+        /// <param name="tokenHandler"></param>
         /// <param name="validationParameters"></param>
         /// <param name="issuer"></param>
-        internal TokenValidationResult(SecurityToken securityToken, TokenValidationParameters validationParameters, string issuer)
+        internal TokenValidationResult(SecurityToken securityToken, TokenHandler tokenHandler, TokenValidationParameters validationParameters, string issuer)
         {
             _validationParameters = validationParameters;
+            _tokenHandler = tokenHandler;
             Issuer = issuer;
             SecurityToken = securityToken;
             Initialize();
@@ -81,12 +84,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns></returns>
         private ClaimsIdentity CreateClaimsIdentity()
         {
-            if (_validationParameters != null && SecurityToken != null && Issuer != null)
-            {
-                ClaimsIdentity claimsIdentity = _validationParameters.CreateClaimsIdentity(SecurityToken, Issuer);
-                claimsIdentity.AddClaims(SecurityToken.CreateClaims(Issuer));
-                return claimsIdentity;
-            }
+            if (_validationParameters != null && SecurityToken != null && _tokenHandler != null && Issuer != null)
+                return _tokenHandler.CreateClaimsIdentityInternal(SecurityToken, _validationParameters, Issuer);
 
             return null;
         }

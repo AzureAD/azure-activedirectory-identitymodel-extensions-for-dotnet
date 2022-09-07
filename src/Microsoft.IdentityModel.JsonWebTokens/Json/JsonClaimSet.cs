@@ -96,7 +96,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (jsonElement.TryGetInt16(out short _))
                     return new Claim(key, jsonElement.ToString(), ClaimValueTypes.Integer, issuer, issuer);
                 else if (jsonElement.TryGetInt32(out int _))
-                    return new Claim(key, jsonElement.ToString(), ClaimValueTypes.Integer32, issuer, issuer);
+                    return new Claim(key, jsonElement.ToString(), ClaimValueTypes.Integer, issuer, issuer);
                 else if (jsonElement.TryGetInt64(out long _))
                     return new Claim(key, jsonElement.ToString(), ClaimValueTypes.Integer64, issuer, issuer);
                 else if (jsonElement.TryGetDecimal(out decimal _))
