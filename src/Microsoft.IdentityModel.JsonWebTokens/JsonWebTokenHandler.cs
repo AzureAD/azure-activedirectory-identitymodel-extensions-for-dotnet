@@ -685,6 +685,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return CreateClaimsIdentityPrivate(jwtToken, validationParameters, issuer);
         }
 
+        internal override ClaimsIdentity CreateClaimsIdentityInternal(SecurityToken securityToken, TokenValidationParameters tokenValidationParameters, string issuer)
+        {
+            return CreateClaimsIdentity(securityToken as JsonWebToken, tokenValidationParameters, issuer);
+        }
+
         private static string GetActualIssuer(JsonWebToken jwtToken)
         {
             string actualIssuer = jwtToken.Issuer;
@@ -1402,10 +1407,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             string tokenType = Validators.ValidateTokenType(jsonWebToken.Typ, jsonWebToken, validationParameters);
-            return new TokenValidationResult(jsonWebToken, validationParameters.Clone(), issuer)
+            return new TokenValidationResult(jsonWebToken, this, validationParameters.Clone(), issuer)
             {
-                SecurityToken = jsonWebToken,
-                Issuer = issuer,
                 IsValid = true,
                 TokenType = tokenType
             };

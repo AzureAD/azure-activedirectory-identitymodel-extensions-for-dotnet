@@ -4,6 +4,7 @@
 using Microsoft.IdentityModel.Logging;
 using System;
 using System.ComponentModel;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
@@ -71,6 +72,17 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentException">'token.Length' is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         /// <returns>A <see cref="SecurityToken"/>.</returns>
         public virtual SecurityToken ReadToken(string token) => throw new NotImplementedException();
+
+        /// <summary>
+        /// Called by base class to create a <see cref="ClaimsIdentity"/>.
+        /// Currently only used by the JsonWebTokenHandler to allow for a Lazy creation.
+        /// </summary>
+        /// <param name="securityToken">the <see cref="SecurityToken"/> that has the Claims.</param>
+        /// <param name="tokenValidationParameters">the <see cref="TokenValidationParameters"/> that was used to validate the token.</param>
+        /// <param name="issuer">the 'issuer' to use by default when creating a Claim.</param>
+        /// <returns>A <see cref="ClaimsIdentity"/>.</returns>
+        /// <exception cref="NotImplementedException"></exception>
+        internal virtual ClaimsIdentity CreateClaimsIdentityInternal(SecurityToken securityToken, TokenValidationParameters tokenValidationParameters, string issuer) => throw new NotImplementedException();
 
         #endregion
     }
