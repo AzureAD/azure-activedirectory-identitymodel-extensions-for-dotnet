@@ -1303,8 +1303,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 
         public Dictionary<string, object> AdditionalPayloadClaims { get; set; }
 
-        public CallContext CallContext { get; set; } = new CallContext();
-
         public string CustomNonceValue { get; set; }
 
         public object ExpectedClaimValue { get; set; }

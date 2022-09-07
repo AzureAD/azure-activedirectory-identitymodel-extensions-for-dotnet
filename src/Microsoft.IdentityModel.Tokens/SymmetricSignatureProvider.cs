@@ -202,6 +202,10 @@ namespace Microsoft.IdentityModel.Tokens
             if (signature == null || signature.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(signature));
 
+            // The reason this method doesn't call through to: Verify(input, 0, input.Length, signature, 0, signature.Length);
+            // Is because this method's contract is to check the entire signature, if the signature was truncated and signature.Length
+            // was passed, the signature may verify.
+
             if (_disposed)
             {
                 CryptoProviderCache?.TryRemove(this);
@@ -243,14 +247,70 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="InvalidOperationException">If the internal <see cref="KeyedHashAlgorithm"/> is null. This can occur if a derived type deletes it or does not create it.</exception>
         public bool Verify(byte[] input, byte[] signature, int length)
         {
+            if (input == null)
+                throw LogHelper.LogArgumentNullException(nameof(input));
+
+            return Verify(input, 0, input.Length, signature, 0, length);
+        }
+
+        /// <inheritdoc/>
+        public override bool Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength)
+        {
             if (input == null || input.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(input));
 
             if (signature == null || signature.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(signature));
 
-            if (length < 1)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10655, LogHelper.MarkAsNonPII(length))));
+            if (inputOffset < 0)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10716,
+                        LogHelper.MarkAsNonPII(nameof(inputOffset)),
+                        LogHelper.MarkAsNonPII(inputOffset))));
+
+            if (inputLength < 1)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10655,
+                        LogHelper.MarkAsNonPII(nameof(inputLength)),
+                        LogHelper.MarkAsNonPII(inputLength))));
+
+            if (inputOffset + inputLength > input.Length)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10717,
+                        LogHelper.MarkAsNonPII(nameof(inputOffset)),
+                        LogHelper.MarkAsNonPII(nameof(inputLength)),
+                        LogHelper.MarkAsNonPII(nameof(input)),
+                        LogHelper.MarkAsNonPII(inputOffset),
+                        LogHelper.MarkAsNonPII(inputLength),
+                        LogHelper.MarkAsNonPII(input.Length))));
+
+            if (signatureOffset < 0)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10716,
+                        LogHelper.MarkAsNonPII(nameof(signatureOffset)),
+                        LogHelper.MarkAsNonPII(signatureOffset))));
+
+            if (signatureLength < 1)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10655,
+                        LogHelper.MarkAsNonPII(nameof(signatureLength)),
+                        LogHelper.MarkAsNonPII(signatureLength))));
+
+            if (signatureLength + signatureOffset > signature.Length)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10717,
+                        LogHelper.MarkAsNonPII(nameof(signatureOffset)),
+                        LogHelper.MarkAsNonPII(nameof(signatureLength)),
+                        LogHelper.MarkAsNonPII(nameof(signature)),
+                        LogHelper.MarkAsNonPII(signatureOffset),
+                        LogHelper.MarkAsNonPII(signatureLength),
+                        LogHelper.MarkAsNonPII(signature.Length))));
 
             if (_disposed)
             {
@@ -259,14 +319,14 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             LogHelper.LogInformation(LogMessages.IDX10643, input);
-            KeyedHashAlgorithm keyedHashAlgorithm = GetKeyedHashAlgorithm(GetKeyBytes(Key), Algorithm);
+            KeyedHashAlgorithm keyedHashAlgorithm = null;
             try
             {
-                return Utility.AreEqual(signature, keyedHashAlgorithm.ComputeHash(input), length);
+                keyedHashAlgorithm = GetKeyedHashAlgorithm(GetKeyBytes(Key), Algorithm);
+                return Utility.AreEqual(signature, keyedHashAlgorithm.ComputeHash(input, inputOffset, inputLength), signatureLength);
             }
             catch
             {
-                CryptoProviderCache?.TryRemove(this);
                 Dispose(true);
                 throw;
             }
@@ -276,6 +336,7 @@ namespace Microsoft.IdentityModel.Tokens
                     ReleaseKeyedHashAlgorithm(keyedHashAlgorithm);
             }
         }
+
 
         #region IDisposable Members
 
