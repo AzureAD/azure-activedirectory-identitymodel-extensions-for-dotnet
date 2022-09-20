@@ -1515,18 +1515,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         jwtToken)));
                 }
 
-                var expires = jwtToken.HasPayloadClaim(JwtRegisteredClaimNames.Exp) ? (DateTime?)jwtToken.ValidTo : null;
-                var notBefore = jwtToken.HasPayloadClaim(JwtRegisteredClaimNames.Nbf) ? (DateTime?)jwtToken.ValidFrom : null;
-                InternalValidators.ValidateLifetimeAndIssuerAfterSignatureNotValidatedJwt(
-                    jwtToken,
-                    notBefore,
-                    expires,
-                    jwtToken.Kid,
-                    validationParameters,
-                    configuration,
-                    exceptionStrings,
-                    numKeysInTokenValidationParameters,
-                    numKeysInConfiguration);
+                var expires = jwtToken.TryGetClaim(JwtRegisteredClaimNames.Exp, out var _) ? (DateTime?)jwtToken.ValidTo : null;
+                var notBefore = jwtToken.TryGetClaim(JwtRegisteredClaimNames.Nbf, out var _) ? (DateTime?)jwtToken.ValidFrom : null;
+
+                if (!validationParameters.ValidateSignatureLast)
+                {
+                    InternalValidators.ValidateLifetimeAndIssuerAfterSignatureNotValidatedJwt(
+                        jwtToken,
+                        notBefore,
+                        expires,
+                        jwtToken.Kid,
+                        validationParameters,
+                        configuration,
+                        exceptionStrings,
+                        numKeysInTokenValidationParameters,
+                        numKeysInConfiguration);
+                }
             }
 
             if (keysAttempted.Length > 0)
