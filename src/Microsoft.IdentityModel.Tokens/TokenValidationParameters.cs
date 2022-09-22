@@ -365,7 +365,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>This is a shallow Clone.</remarks>
         public virtual TokenValidationParameters Clone()
         {
-            return new TokenValidationParameters(this);
+            return new(this)
+            {
+                IsClone = true
+            };
         }
 
         /// <summary>
@@ -450,6 +453,17 @@ namespace Microsoft.IdentityModel.Tokens
         /// priority.
         /// </remarks>
         public IssuerSigningKeyValidatorUsingConfiguration IssuerSigningKeyValidatorUsingConfiguration { get; set; }
+
+        /// <summary>
+        /// Gets a <see cref="IDictionary{String, Object}"/> that is unique to this instance.
+        /// Calling <see cref="Clone"/> will result in a new instance of this IDictionary.
+        /// </summary>
+        public IDictionary<string, object> InstancePropertyBag { get; } = new Dictionary<string, object>();
+
+        /// <summary>
+        /// Gets a value indicating if <see cref="Clone"/> was called to obtain this instance.
+        /// </summary>
+        public bool IsClone { get; protected set; } = false;
 
         /// <summary>
         /// Gets or sets the <see cref="SecurityKey"/> that is to be used for signature validation.
@@ -565,7 +579,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the <see cref="IDictionary{String, Object}"/> that contains a collection of custom key/value pairs. This allows addition of parameters that could be used in custom token validation scenarios.
         /// </summary>
-        public IDictionary<string, Object> PropertyBag { get; set; }
+        public IDictionary<string, object> PropertyBag { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean to control if configuration required to be refreshed before token validation.
