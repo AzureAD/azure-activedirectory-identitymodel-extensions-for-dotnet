@@ -210,6 +210,7 @@ namespace Microsoft.IdentityModel.Tokens
             ClockSkew = other.ClockSkew;
             ConfigurationManager = other.ConfigurationManager;
             CryptoProviderFactory = other.CryptoProviderFactory;
+            DebugId = other.DebugId;
             IgnoreTrailingSlashWhenValidatingAudience = other.IgnoreTrailingSlashWhenValidatingAudience;
             IssuerSigningKey = other.IssuerSigningKey;
             IssuerSigningKeyResolver = other.IssuerSigningKeyResolver;
@@ -252,6 +253,7 @@ namespace Microsoft.IdentityModel.Tokens
             ValidIssuer = other.ValidIssuer;
             ValidIssuers = other.ValidIssuers;
             ValidTypes = other.ValidTypes;
+            LogAllPolicyFailuresAsError = other.LogAllPolicyFailuresAsError;
         }
 
         /// <summary>
@@ -270,6 +272,7 @@ namespace Microsoft.IdentityModel.Tokens
             ValidateIssuerSigningKey = false;
             ValidateLifetime = true;
             ValidateTokenReplay = false;
+            LogAllPolicyFailuresAsError = true;
         }
 
         /// <summary>
@@ -408,6 +411,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// Users can override the default <see cref="CryptoProviderFactory"/> with this property. This factory will be used for creating signature providers.
         /// </summary>
         public CryptoProviderFactory CryptoProviderFactory { get; set; }
+
+        /// <summary>
+        /// Gets or sets a string that helps with setting breakpoints when debugging.
+        /// </summary>
+        public string DebugId { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean that controls if a '/' is significant at the end of the audience.
@@ -825,5 +833,16 @@ namespace Microsoft.IdentityModel.Tokens
         /// The default is <c>null</c>.
         /// </summary>
         public IEnumerable<string> ValidTypes { get; set; }
+
+        /// <summary>
+        /// Gets or sets a <see cref="bool"/> that will decide if cause of a policy failure needs to be logged as an error.
+        /// Default value is <c>true</c> for backward compatibility of the behavior.
+        /// If set to false, exceptions are logged as Information and then thrown.
+        /// </summary>
+        /// <remarks>
+        /// When multiple polices are defined, all of them are tried until one succeeds and setting this property to false will reduce the noise in the logs. 
+        /// </remarks>
+        [DefaultValue(true)]
+        public bool LogAllPolicyFailuresAsError { get; set; }
     }
 }

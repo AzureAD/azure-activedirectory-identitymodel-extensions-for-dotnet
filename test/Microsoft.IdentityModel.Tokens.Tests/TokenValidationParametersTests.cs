@@ -21,8 +21,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 52)
-                Assert.True(false, "Number of properties has changed from 52 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 54)
+                Assert.True(false, "Number of properties has changed from 54 to: " + properties.Length + ", adjust tests");
 
             TokenValidationParameters actorValidationParameters = new TokenValidationParameters();
             SecurityKey issuerSigningKey = KeyingMaterial.DefaultX509Key_2048_Public;
@@ -82,7 +82,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 ValidAudiences = validAudiences,
                 ValidIssuer = validIssuer,
                 ValidIssuers = validIssuers,
-                ValidTypes = validTypes
+                ValidTypes = validTypes,
+                LogAllPolicyFailuresAsError = true
             };
 
             Assert.True(object.ReferenceEquals(actorValidationParameters, validationParametersInline.ActorValidationParameters));
@@ -120,6 +121,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParametersSets.ValidIssuer = validIssuer;
             validationParametersSets.ValidIssuers = validIssuers;
             validationParametersSets.ValidTypes = validTypes;
+            validationParametersSets.LogAllPolicyFailuresAsError = true;
 
             var compareContext = new CompareContext();
             IdentityComparer.AreEqual(validationParametersInline, validationParametersSets, compareContext);
@@ -140,8 +142,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 52)
-                Assert.True(false, "Number of public fields has changed from 52 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 54)
+                Assert.True(false, "Number of public fields has changed from 54 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext
