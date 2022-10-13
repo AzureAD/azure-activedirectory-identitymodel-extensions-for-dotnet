@@ -112,7 +112,7 @@ namespace Microsoft.IdentityModel.Tokens
                     LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences))))
             { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences) };
 
-            if (!validationParameters.LogAllPolicyFailuresAsError)
+            if (!validationParameters.LogValidationExceptions)
                 throw ex;
 
             throw LogHelper.LogExceptionMessage(ex);
@@ -274,7 +274,7 @@ namespace Microsoft.IdentityModel.Tokens
                     LogHelper.MarkAsNonPII(configuration?.Issuer)))
             { InvalidIssuer = issuer };
 
-            if (!validationParameters.LogAllPolicyFailuresAsError)
+            if (!validationParameters.LogValidationExceptions)
                 throw ex;
 
             throw LogHelper.LogExceptionMessage(ex);

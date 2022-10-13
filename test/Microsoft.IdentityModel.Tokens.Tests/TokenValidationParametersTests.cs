@@ -71,6 +71,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 IssuerSigningKeys = issuerSigningKeys,
                 IssuerValidator = ValidationDelegates.IssuerValidatorEcho,
                 LifetimeValidator = ValidationDelegates.LifetimeValidatorReturnsTrue,
+                LogValidationExceptions = true,
                 PropertyBag = propertyBag,
                 SignatureValidator = ValidationDelegates.SignatureValidatorReturnsJwtTokenAsIs,
                 SaveSigninToken = true,
@@ -82,8 +83,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 ValidAudiences = validAudiences,
                 ValidIssuer = validIssuer,
                 ValidIssuers = validIssuers,
-                ValidTypes = validTypes,
-                LogAllPolicyFailuresAsError = true
+                ValidTypes = validTypes
             };
 
             Assert.True(object.ReferenceEquals(actorValidationParameters, validationParametersInline.ActorValidationParameters));
@@ -109,6 +109,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParametersSets.IssuerSigningKeys = issuerSigningKeysDup;
             validationParametersSets.IssuerValidator = ValidationDelegates.IssuerValidatorEcho;
             validationParametersSets.LifetimeValidator = ValidationDelegates.LifetimeValidatorReturnsTrue;
+            validationParametersSets.LogValidationExceptions = true;
             validationParametersSets.PropertyBag = propertyBag;
             validationParametersSets.SignatureValidator = ValidationDelegates.SignatureValidatorReturnsJwtTokenAsIs;
             validationParametersSets.SaveSigninToken = true;
@@ -121,8 +122,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParametersSets.ValidIssuer = validIssuer;
             validationParametersSets.ValidIssuers = validIssuers;
             validationParametersSets.ValidTypes = validTypes;
-            validationParametersSets.LogAllPolicyFailuresAsError = true;
-
+            
             var compareContext = new CompareContext();
             IdentityComparer.AreEqual(validationParametersInline, validationParametersSets, compareContext);
             IdentityComparer.AreEqual(validationParametersInline.Clone() as TokenValidationParameters, validationParametersInline, compareContext);
