@@ -219,6 +219,7 @@ namespace Microsoft.IdentityModel.Tokens
             IssuerSigningKeyValidator = other.IssuerSigningKeyValidator;
             IssuerValidator = other.IssuerValidator;
             LifetimeValidator = other.LifetimeValidator;
+            LogValidationExceptions = other.LogValidationExceptions;
             NameClaimType = other.NameClaimType;
             NameClaimTypeRetriever = other.NameClaimTypeRetriever;
             PropertyBag = other.PropertyBag;
@@ -253,7 +254,6 @@ namespace Microsoft.IdentityModel.Tokens
             ValidIssuer = other.ValidIssuer;
             ValidIssuers = other.ValidIssuers;
             ValidTypes = other.ValidTypes;
-            LogAllPolicyFailuresAsError = other.LogAllPolicyFailuresAsError;
         }
 
         /// <summary>
@@ -261,6 +261,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>        
         public TokenValidationParameters()
         {
+            LogValidationExceptions = true;
             RequireExpirationTime = true;
             RequireSignedTokens = true;
             RequireAudience = true;
@@ -272,7 +273,6 @@ namespace Microsoft.IdentityModel.Tokens
             ValidateIssuerSigningKey = false;
             ValidateLifetime = true;
             ValidateTokenReplay = false;
-            LogAllPolicyFailuresAsError = true;
         }
 
         /// <summary>
@@ -524,6 +524,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// Even if <see cref="ValidateLifetime"/> is false, this delegate will still be called.
         /// </remarks>
         public LifetimeValidator LifetimeValidator { get; set; }
+
+        /// <summary>
+        /// Gets or sets a <see cref="bool"/> that will decide if validation failure needs to be logged as an error.
+        /// Default value is <c>true</c> for backward compatibility of the behavior.
+        /// If set to false, validation failures are logged as Information and then thrown.
+        /// </summary>
+        [DefaultValue(true)]
+        public bool LogValidationExceptions { get; set; }
 
         /// <summary>
         /// Gets or sets a <see cref="string"/> that defines the <see cref="ClaimsIdentity.NameClaimType"/>.
@@ -833,16 +841,5 @@ namespace Microsoft.IdentityModel.Tokens
         /// The default is <c>null</c>.
         /// </summary>
         public IEnumerable<string> ValidTypes { get; set; }
-
-        /// <summary>
-        /// Gets or sets a <see cref="bool"/> that will decide if cause of a policy failure needs to be logged as an error.
-        /// Default value is <c>true</c> for backward compatibility of the behavior.
-        /// If set to false, exceptions are logged as Information and then thrown.
-        /// </summary>
-        /// <remarks>
-        /// When multiple polices are defined, all of them are tried until one succeeds and setting this property to false will reduce the noise in the logs. 
-        /// </remarks>
-        [DefaultValue(true)]
-        public bool LogAllPolicyFailuresAsError { get; set; }
     }
 }
