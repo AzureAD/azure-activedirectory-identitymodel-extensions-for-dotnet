@@ -757,6 +757,8 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <exception cref="ArgumentException"><see cref="CanReadToken(string)"/></exception>
         /// <remarks><para>If the <paramref name="token"/> is in JWE Compact Serialization format, only the protected header will be deserialized.</para>
         /// This method is unable to decrypt the payload. Use <see cref="ValidateToken(string, TokenValidationParameters, out SecurityToken)"/>to obtain the payload.</remarks>
+        /// <remarks>The token is NOT validated and no security decisions should be made about the contents.
+        /// <para>Use <see cref="ValidateTokenAsync(string, TokenValidationParameters)"/> to ensure the token is acceptable.</para></remarks>
         public JwtSecurityToken ReadJwtToken(string token)
         {
             if (string.IsNullOrEmpty(token))
@@ -783,6 +785,8 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <exception cref="ArgumentException"><see cref="CanReadToken(string)"/></exception>
         /// <remarks><para>If the <paramref name="token"/> is in JWE Compact Serialization format, only the protected header will be deserialized.</para>
         /// This method is unable to decrypt the payload. Use <see cref="ValidateToken(string, TokenValidationParameters, out SecurityToken)"/>to obtain the payload.</remarks>
+        /// <remarks>The token is NOT validated and no security decisions should be made about the contents.
+        /// <para>Use <see cref="ValidateTokenAsync(string, TokenValidationParameters)"/> to ensure the token is acceptable.</para></remarks>
         public override SecurityToken ReadToken(string token)
         {
             return ReadJwtToken(token);
