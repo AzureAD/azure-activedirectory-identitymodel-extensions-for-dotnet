@@ -571,9 +571,14 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or sets a delegate that will be called to obtain the NameClaimType to use when creating a ClaimsIdentity
-        /// after validating a token.
+        /// Gets or sets a delegate that will be called to set the property <see cref="ClaimsIdentity.NameClaimType"/> after validating a token.
         /// </summary>
+        /// <remarks>
+        /// The function will be passed:
+        /// <para>The <see cref="SecurityToken"/> that is being validated.</para>
+        /// <para>The issuer associated with the token.</para>
+        /// <para>Returns the value that will set the property <see cref="ClaimsIdentity.NameClaimType"/>.</para>
+        /// </remarks>
         public Func<SecurityToken, string, string> NameClaimTypeRetriever { get; set; }
 
         /// <summary>
@@ -636,9 +641,14 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or sets a delegate that will be called to obtain the RoleClaimType to use when creating a ClaimsIdentity
-        /// after validating a token.
+        /// Gets or sets a delegate that will be called to set the property <see cref="ClaimsIdentity.RoleClaimType"/> after validating a token.
         /// </summary>
+        /// <remarks>
+        /// The function will be passed:
+        /// <para>The <see cref="SecurityToken"/> that is being validated.</para>
+        /// <para>The issuer associated with the token.</para>
+        /// <para>Returns the value that will set the property <see cref="ClaimsIdentity.RoleClaimType"/>.</para>
+        /// </remarks>
         public Func<SecurityToken, string, string> RoleClaimTypeRetriever { get; set; }
 
         /// <summary>
