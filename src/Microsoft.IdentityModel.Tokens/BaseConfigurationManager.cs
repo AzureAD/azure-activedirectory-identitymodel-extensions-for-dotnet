@@ -41,9 +41,9 @@ namespace Microsoft.IdentityModel.Tokens
         public static readonly TimeSpan DefaultAutomaticRefreshInterval = new TimeSpan(0, 12, 0, 0);
 
         /// <summary>
-        /// 1 hour is the default time interval that a last known good configuration will last for.
+        /// 4 hours is the default time interval that a last known good configuration will last for.
         /// </summary>
-        public static readonly TimeSpan DefaultLastKnownGoodConfigurationLifetime = new TimeSpan(0, 1, 0, 0);
+        public static readonly TimeSpan DefaultLastKnownGoodConfigurationLifetime = new TimeSpan(0, 4, 0, 0);
 
         /// <summary>
         /// 5 minutes is the default time interval that must pass for <see cref="RequestRefresh"/> to obtain a new configuration.

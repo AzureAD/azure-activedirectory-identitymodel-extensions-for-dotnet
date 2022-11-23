@@ -134,7 +134,8 @@ namespace Microsoft.IdentityModel.Protocols
                         // The transport should have it's own timeouts, etc..
                         var configuration = await _configRetriever.GetConfigurationAsync(MetadataAddress, _docRetriever, CancellationToken.None).ConfigureAwait(false);
                         _lastRefresh = now;
-                        _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval);
+                        // Add 1 hour jitter to avoid spike traffic to ESTS.
+                        _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval + TimeSpan.FromMinutes(new Random().Next(60)));
                         if (_configValidator != null)
                         {
                             ConfigurationValidationResult result = _configValidator.Validate(configuration);
