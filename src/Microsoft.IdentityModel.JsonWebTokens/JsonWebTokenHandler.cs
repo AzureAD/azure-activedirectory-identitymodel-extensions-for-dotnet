@@ -1174,11 +1174,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     jsonWebToken = new JsonWebToken(token);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     return new TokenValidationResult
                     {
-                        Exception = LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14100, token))),
+                        Exception = LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14100, token, ex))),
                         IsValid = false
                     };
                 }
