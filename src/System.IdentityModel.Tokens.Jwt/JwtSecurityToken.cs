@@ -254,7 +254,7 @@ namespace System.IdentityModel.Tokens.Jwt
         public JwtHeader Header { get; internal set; }
 
         /// <summary>
-        /// Gets the 'value' of the 'JWT ID' claim { jti, ''value' }.
+        /// Gets the 'value' of the 'JWT ID' claim { jti, 'value' }.
         /// </summary>
         /// <remarks>If the 'JWT ID' claim is not found, an empty string is returned.</remarks>
         public override string Id
