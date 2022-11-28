@@ -78,10 +78,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // Json.net recognized DateTime by default.
             if (jsonElement.ValueKind == JsonValueKind.String)
             {
-                if (jsonElement.TryGetDateTime(out DateTime dateTimeValue))
-                    return new Claim(key, dateTimeValue.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, issuer, issuer);
-                else
+                try
+                {
+                    if (jsonElement.TryGetDateTime(out DateTime dateTimeValue))
+                        return new Claim(key, dateTimeValue.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, issuer, issuer);
+                    else
+                        return new Claim(key, jsonElement.ToString(), ClaimValueTypes.String, issuer, issuer);
+                }
+                catch(IndexOutOfRangeException)
+                {
                     return new Claim(key, jsonElement.ToString(), ClaimValueTypes.String, issuer, issuer);
+                }
             }
             else if (jsonElement.ValueKind == JsonValueKind.Null)
                 return new Claim(key, string.Empty, JsonClaimValueTypes.JsonNull, issuer, issuer);

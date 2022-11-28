@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -572,6 +572,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.True(string.Equals(claimA.ValueType, ClaimValueTypes.DateTime), "ClaimValueType is not DateTime.");
             // claim value shouldn't contain any quotes
             Assert.DoesNotContain("\"", claimA.Value);
+        }
+
+        [Fact]
+        public void EscapedClaims()
+        {
+            string json = @"{""family_name"":""\u0027\u0027"",""given_name"":""\u0027\u0027"",""name"":""謝京螢""}";
+            string jsonEncoded = Base64UrlEncoder.Encode("{}") + "." + Base64UrlEncoder.Encode(json) + ".";
+            JsonWebToken encodedToken = new JsonWebToken(jsonEncoded);
+            _ = encodedToken.Claims;
         }
     }
 
