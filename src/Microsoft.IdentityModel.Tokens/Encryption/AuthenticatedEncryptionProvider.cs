@@ -59,9 +59,12 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (SupportedAlgorithms.IsAesGcm(algorithm))
                 {
-#if NETSTANDARD2_0 || NET6_0
-                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                    throw LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10713, LogHelper.MarkAsNonPII(algorithm))));
+#if NETSTANDARD2_0
+                    if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                        throw LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10713, LogHelper.MarkAsNonPII(algorithm))));
+#elif NET6_0_OR_GREATER
+                    if(!System.Security.Cryptography.AesGcm.IsSupported)
+                        throw LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10713, LogHelper.MarkAsNonPII(algorithm))));
 #endif
                     InitializeUsingAesGcm();
                 }
