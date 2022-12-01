@@ -177,7 +177,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException("IDX10232: ")
                     },
                     new JwtTheoryData
-                    {   
+                    {
                         TestId = nameof(Default.AsymmetricJws) + "_TVPInvalid_ConfigValid_SignatureValidatorReturnsNull",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
@@ -254,6 +254,22 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             ValidateLifetime = false,
                         },
                         ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX40001: "),
+                    },
+                    new JwtTheoryData {
+                        TestId = nameof(Default.AsymmetricJws) + "_TVPValid_ConfigNotSet_TryAllIssuerSigningKeysFalse",
+                        Token = Default.AsymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = null,
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                            IssuerSigningKey = KeyingMaterial.DefaultX509Key_2048,
+                            ValidIssuer = Default.Issuer,
+                            TryAllIssuerSigningKeys = false
+                        }
                     },
                 };
             }
