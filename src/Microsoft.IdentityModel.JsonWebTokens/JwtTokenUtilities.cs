@@ -441,24 +441,25 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <remarks>If key fails to resolve, then null is returned</remarks>
         internal static SecurityKey ResolveTokenSigningKey(string kid, string x5t, TokenValidationParameters validationParameters, BaseConfiguration configuration)
         {
-            if (configuration?.SigningKeys == null)
-                return null;
-
-            if (!string.IsNullOrEmpty(kid))
+            if (configuration?.SigningKeys != null)
             {
-                foreach (SecurityKey signingKey in configuration.SigningKeys)
+
+                if (!string.IsNullOrEmpty(kid))
                 {
-                    if (signingKey != null && string.Equals(signingKey.KeyId, kid, signingKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
-                        return signingKey;
+                    foreach (SecurityKey signingKey in configuration.SigningKeys)
+                    {
+                        if (signingKey != null && string.Equals(signingKey.KeyId, kid, signingKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+                            return signingKey;
+                    }
                 }
-            }
 
-            if (!string.IsNullOrEmpty(x5t))
-            {
-                foreach (SecurityKey signingKey in configuration.SigningKeys)
+                if (!string.IsNullOrEmpty(x5t))
                 {
-                    if (signingKey != null && string.Equals(signingKey.KeyId, x5t))
-                        return signingKey;
+                    foreach (SecurityKey signingKey in configuration.SigningKeys)
+                    {
+                        if (signingKey != null && string.Equals(signingKey.KeyId, x5t))
+                            return signingKey;
+                    }
                 }
             }
 
