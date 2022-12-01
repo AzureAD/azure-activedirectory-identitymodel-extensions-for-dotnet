@@ -149,9 +149,13 @@ namespace Microsoft.IdentityModel.Protocols
                     {
                         _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
                         if (_currentConfiguration == null) // Throw an exception if there's no configuration to return.
-                            throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX20803, (MetadataAddress ?? "null")), ex));
+                            throw LogHelper.LogExceptionMessage(
+                                new InvalidOperationException(
+                                    LogHelper.FormatInvariant(LogMessages.IDX20803, LogHelper.MarkAsNonPII(MetadataAddress ?? "null")), ex));
                         else
-                            LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX20806, (MetadataAddress ?? "null")), ex));
+                            LogHelper.LogExceptionMessage(
+                                new InvalidOperationException(
+                                    LogHelper.FormatInvariant(LogMessages.IDX20806, LogHelper.MarkAsNonPII(MetadataAddress ?? "null")), ex));
                     }
                 }
 
@@ -159,7 +163,9 @@ namespace Microsoft.IdentityModel.Protocols
                 if (_currentConfiguration != null)
                     return _currentConfiguration;
                 else
-                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX20803, (MetadataAddress ?? "null"))));
+                    throw LogHelper.LogExceptionMessage(
+                        new InvalidOperationException(
+                            LogHelper.FormatInvariant(LogMessages.IDX20803, LogHelper.MarkAsNonPII(MetadataAddress ?? "null"))));
             }
             finally
             {
