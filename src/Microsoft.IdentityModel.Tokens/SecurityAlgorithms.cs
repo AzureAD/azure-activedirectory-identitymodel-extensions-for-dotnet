@@ -25,7 +25,7 @@ namespace Microsoft.IdentityModel.Tokens
         // See: https://www.w3.org/TR/xmlenc-core1/#sec-RSA-OAEP
         public const string RsaOaepKeyWrap = "http://www.w3.org/2001/04/xmlenc#rsa-oaep";
 
-        // See: https://datatracker.ietf.org/doc/html/rfc7518#section-4.1
+        // See: https://datatracker.ietf.org/doc/html/rfc7518#section-4-1
         public const string Aes128KW = "A128KW";
         public const string Aes192KW = "A192KW";
         public const string Aes256KW = "A256KW";
@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string EnvelopedSignature = "http://www.w3.org/2000/09/xmldsig#enveloped-signature";
 
         // See http://www.w3.org/TR/2002/REC-xmlenc-core-20021210/#sec-SHA256
-        // and https://datatracker.ietf.org/doc/html/rfc6931#section-2.1.3
+        // and https://datatracker.ietf.org/doc/html/rfc6931#section-2-1-3
         public const string Sha256Digest = "http://www.w3.org/2001/04/xmlenc#sha256";
         public const string Sha384Digest = "http://www.w3.org/2001/04/xmldsig-more#sha384";
         public const string Sha512Digest = "http://www.w3.org/2001/04/xmlenc#sha512";
@@ -50,22 +50,22 @@ namespace Microsoft.IdentityModel.Tokens
         public const string Sha384 = "SHA384";
         public const string Sha512 = "SHA512";
 
-        // See: https://datatracker.ietf.org/doc/html/rfc6931#section-2.3.6
+        // See: https://datatracker.ietf.org/doc/html/rfc6931#section-2-3-6
         public const string EcdsaSha256Signature = "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256";
         public const string EcdsaSha384Signature = "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha384";
         public const string EcdsaSha512Signature = "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha512";
 
-        // See: https://datatracker.ietf.org/doc/html/rfc6931#section-2.2.2
+        // See: https://datatracker.ietf.org/doc/html/rfc6931#section-2-2-2
         public const string HmacSha256Signature = "http://www.w3.org/2001/04/xmldsig-more#hmac-sha256";
         public const string HmacSha384Signature = "http://www.w3.org/2001/04/xmldsig-more#hmac-sha384";
         public const string HmacSha512Signature = "http://www.w3.org/2001/04/xmldsig-more#hmac-sha512";
 
-        // See: https://datatracker.ietf.org/doc/html/rfc6931#section-2.3.2
+        // See: https://datatracker.ietf.org/doc/html/rfc6931#section-2-3-2
         public const string RsaSha256Signature = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
         public const string RsaSha384Signature = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha384";
         public const string RsaSha512Signature = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha512";
 
-        // See: https://datatracker.ietf.org/doc/html/rfc6931#section-2.3.10
+        // See: https://datatracker.ietf.org/doc/html/rfc6931#section-2-3-10
         public const string RsaSsaPssSha256Signature = "http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1";
         public const string RsaSsaPssSha384Signature = "http://www.w3.org/2007/05/xmldsig-more#sha384-rsa-MGF1";
         public const string RsaSsaPssSha512Signature = "http://www.w3.org/2007/05/xmldsig-more#sha512-rsa-MGF1";
@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string RsaSsaPssSha384 = "PS384";
         public const string RsaSsaPssSha512 = "PS512";
 
-        // See: https://datatracker.ietf.org/doc/html/rfc7518#section-5.1
+        // See: https://datatracker.ietf.org/doc/html/rfc7518#section-5-1
         public const string Aes128CbcHmacSha256 = "A128CBC-HS256";
         public const string Aes192CbcHmacSha384 = "A192CBC-HS384";
         public const string Aes256CbcHmacSha512 = "A256CBC-HS512";
@@ -96,12 +96,12 @@ namespace Microsoft.IdentityModel.Tokens
         internal const string DefaultAsymmetricKeyWrapAlgorithm = RsaOaepKeyWrap;
         internal const string DefaultSymmetricEncryptionAlgorithm = Aes128CbcHmacSha256;
 
-        // See: https://datatracker.ietf.org/doc/html/rfc7518#section-4.6
+        // See: https://datatracker.ietf.org/doc/html/rfc7518#section-4-6
         public const string EcdhEsA128kw = "ECDH-ES+A128KW";
         public const string EcdhEsA192kw = "ECDH-ES+A192KW";
         public const string EcdhEsA256kw = "ECDH-ES+A256KW";
 
-        // See: https://datatracker.ietf.org/doc/html/rfc7518#section-4.6
+        // See: https://datatracker.ietf.org/doc/html/rfc7518#section-4-6
         public const string EcdhEs = "ECDH-ES";
 #pragma warning restore 1591
     }
