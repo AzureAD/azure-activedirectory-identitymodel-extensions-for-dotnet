@@ -23,7 +23,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </summary>
         /// <param name="jsonWebKey">JsonWebKey representation of an asymmetric public key.</param>
         /// <returns>A "jwk" claim as a JSON string.</returns>
-        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7800#section-3.2</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7800#section-3-2</remarks>
         public static string CreateJwkClaim(JsonWebKey jsonWebKey)
         {
             if (jsonWebKey == null)
@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </summary>
         /// <param name="signedHttpRequest">A signed http request.</param>
         /// <returns>A SignedHttpRequest value prefixed with the word "PoP".</returns>
-        /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-4.1</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-4-1</remarks>
         public static string CreateSignedHttpRequestHeader(string signedHttpRequest)
         {
             if (string.IsNullOrEmpty(signedHttpRequest))

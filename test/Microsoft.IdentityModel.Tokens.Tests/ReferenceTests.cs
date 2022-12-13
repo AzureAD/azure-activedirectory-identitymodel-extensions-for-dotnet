@@ -16,7 +16,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     /// <summary>
     /// Tests for references in specs
-    /// https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3
+    /// https://datatracker.ietf.org/doc/html/rfc7518#appendix-A-3
     /// </summary>
     public class ReferenceTests
     {
