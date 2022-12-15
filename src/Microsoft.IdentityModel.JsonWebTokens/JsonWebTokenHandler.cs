@@ -1224,8 +1224,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 if (tokenValidationResult.IsValid)
                 {
-                    // Set current configuration as LKG if it exists and has not already been set as the LKG.
-                    if (currentConfiguration != null && !ReferenceEquals(currentConfiguration, validationParameters.ConfigurationManager.LastKnownGoodConfiguration))
+                    // Set current configuration as LKG if it exists.
+                    if (currentConfiguration != null)
                         validationParameters.ConfigurationManager.LastKnownGoodConfiguration = currentConfiguration;
 
                     return tokenValidationResult;
