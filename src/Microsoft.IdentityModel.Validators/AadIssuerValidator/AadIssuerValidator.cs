@@ -244,7 +244,7 @@ namespace Microsoft.IdentityModel.Validators
                 new ConfigurationManager<OpenIdConnectConfiguration>(
                     $"{aadAuthority}{AadIssuerValidatorConstants.OidcEndpoint}",
                     new OpenIdConnectConfigurationRetriever())
-                { LastKnownGoodLifetime = new TimeSpan(0, 24, 0, 0) }; ;
+                { LastKnownGoodLifetime = new TimeSpan(0, 24, 0, 0) };
             }
         }
 
