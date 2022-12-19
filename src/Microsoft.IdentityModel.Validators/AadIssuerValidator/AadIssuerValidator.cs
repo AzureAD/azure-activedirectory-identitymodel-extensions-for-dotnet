@@ -20,6 +20,8 @@ namespace Microsoft.IdentityModel.Validators
     /// </summary>
     public class AadIssuerValidator
     {
+        private static readonly TimeSpan LastKnownGoodConfigurationLifetime = new TimeSpan(0, 24, 0, 0);
+
         internal const string V2EndpointSuffix = "/v2.0";
         internal const string TenantidTemplate = "{tenantid}";
 
@@ -235,14 +237,16 @@ namespace Microsoft.IdentityModel.Validators
                  new ConfigurationManager<OpenIdConnectConfiguration>(
                      $"{aadAuthority}{AadIssuerValidatorConstants.OidcEndpoint}",
                      new OpenIdConnectConfigurationRetriever(),
-                     HttpClient);
+                     HttpClient)
+                 { LastKnownGoodLifetime = LastKnownGoodConfigurationLifetime };
             }
             else
             {
                 return
                 new ConfigurationManager<OpenIdConnectConfiguration>(
                     $"{aadAuthority}{AadIssuerValidatorConstants.OidcEndpoint}",
-                    new OpenIdConnectConfigurationRetriever());
+                    new OpenIdConnectConfigurationRetriever())
+                { LastKnownGoodLifetime = LastKnownGoodConfigurationLifetime };
             }
         }
 

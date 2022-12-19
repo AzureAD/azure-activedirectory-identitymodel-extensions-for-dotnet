@@ -1224,8 +1224,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 if (tokenValidationResult.IsValid)
                 {
-                    // Set current configuration as LKG if it exists and has not already been set as the LKG.
-                    if (currentConfiguration != null && !ReferenceEquals(currentConfiguration, validationParameters.ConfigurationManager.LastKnownGoodConfiguration))
+                    // Set current configuration as LKG if it exists.
+                    if (currentConfiguration != null)
                         validationParameters.ConfigurationManager.LastKnownGoodConfiguration = currentConfiguration;
 
                     return tokenValidationResult;
@@ -1234,15 +1234,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 // we want to make sure that the clause for SecurityTokenUnableToValidateException is hit so that the ValidationFailure is checked
                 else if (TokenUtilities.IsRecoverableException(tokenValidationResult.Exception))
                 {
-                    if (TokenUtilities.IsRecoverableConfiguration(validationParameters, currentConfiguration, out currentConfiguration))
-                    {
-                        validationParameters.ValidateWithLKG = true;
-                        tokenValidationResult = ValidateToken(jsonWebToken, validationParameters, currentConfiguration);
-
-                        if (tokenValidationResult.IsValid)
-                            return tokenValidationResult;
-                    }
-
                     // If we were still unable to validate, attempt to refresh the configuration and validate using it
                     // but ONLY if the currentConfiguration is not null. We want to avoid refreshing the configuration on
                     // retrieval error as this case should have already been hit before. This refresh handles the case
@@ -1257,9 +1248,24 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         // Only try to re-validate using the newly obtained config if it doesn't reference equal the previously used configuration.
                         if (lastConfig != currentConfiguration)
                         {
-                            validationParameters.ValidateWithLKG = false;
-                            return ValidateToken(jsonWebToken, validationParameters, currentConfiguration);
+                            tokenValidationResult = ValidateToken(jsonWebToken, validationParameters, currentConfiguration);
+
+                            if (tokenValidationResult.IsValid)
+                            {
+                                validationParameters.ConfigurationManager.LastKnownGoodConfiguration = currentConfiguration;
+                                return tokenValidationResult;
+                            }
                         }
+                    }
+
+                    if (TokenUtilities.IsRecoverableConfiguration(validationParameters, currentConfiguration, out currentConfiguration))
+                    {
+                        validationParameters.RefreshBeforeValidation = false;
+                        validationParameters.ValidateWithLKG = true;
+                        tokenValidationResult = ValidateToken(jsonWebToken, validationParameters, currentConfiguration);
+
+                        if (tokenValidationResult.IsValid)
+                            return tokenValidationResult;
                     }
                 }
             }

@@ -70,17 +70,12 @@ namespace Microsoft.IdentityModel.Tokens
         {
             get
             {
-                // only set this value the first time the last known good configuration is used for validation
-                // AND if there is actually a LKG set
-                if (_lastKnownGoodConfigFirstUse == null && _lastKnownGoodConfiguration != null)
-                    _lastKnownGoodConfigFirstUse = DateTime.UtcNow;
-
                 return _lastKnownGoodConfiguration;
             }
             set
             {
                 _lastKnownGoodConfiguration = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
-                _lastKnownGoodConfigFirstUse = null; // reset this value as a new last known good configuration was set (and has not been used yet)
+                _lastKnownGoodConfigFirstUse = DateTime.UtcNow;
             }
         }
 
