@@ -1319,7 +1319,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return new TokenValidationResult
                 {
                     Exception = ex,
-                    IsValid = false
+                    IsValid = false,
+                    TokenOnFailedValidation = validationParameters.IncludeTokenOnFailedValidation ? jsonWebToken : null
                 };
             }
         }
@@ -1354,7 +1355,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return new TokenValidationResult
                 {
                     Exception = ex,
-                    IsValid = false
+                    IsValid = false,
+                    TokenOnFailedValidation = validationParameters.IncludeTokenOnFailedValidation ? jwtToken : null
                 };
             }
         }

@@ -23,6 +23,11 @@ namespace Microsoft.IdentityModel.Tokens
         private TokenHandler _tokenHandler;
 
         /// <summary>
+        /// The <see cref="SecurityToken"/> to be returned when a validation fails.
+        /// </summary>
+        public SecurityToken TokenOnFailedValidation { get; internal set; }
+
+        /// <summary>
         /// Creates an instance of <see cref="TokenValidationResult"/>
         /// </summary>
         public TokenValidationResult()

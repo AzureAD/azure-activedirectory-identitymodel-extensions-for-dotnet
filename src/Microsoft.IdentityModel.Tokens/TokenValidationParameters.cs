@@ -865,5 +865,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// The default is <c>null</c>.
         /// </summary>
         public IEnumerable<string> ValidTypes { get; set; }
+
+        /// <summary>
+        /// Gets or sets the flag that indicates whether to include the <see cref="SecurityToken"/> when the validation fails.
+        /// </summary>
+        public bool IncludeTokenOnFailedValidation { get; set; } = false;
     }
 }
