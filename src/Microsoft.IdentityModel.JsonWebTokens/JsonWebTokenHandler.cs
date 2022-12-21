@@ -1219,7 +1219,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
             }
 
-            TokenValidationResult tokenValidationResult = ValidateToken(jsonWebToken, validationParameters, currentConfiguration);
+            TokenValidationResult tokenValidationResult = await ValidateTokenAsync(jsonWebToken, validationParameters, currentConfiguration).ConfigureAwait(false);
             if (validationParameters.ConfigurationManager != null)
             {
                 if (tokenValidationResult.IsValid)
@@ -1243,12 +1243,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         validationParameters.ConfigurationManager.RequestRefresh();
                         validationParameters.RefreshBeforeValidation = true;
                         var lastConfig = currentConfiguration;
-                        currentConfiguration = validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).GetAwaiter().GetResult();
+                        currentConfiguration = await validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
 
                         // Only try to re-validate using the newly obtained config if it doesn't reference equal the previously used configuration.
                         if (lastConfig != currentConfiguration)
                         {
-                            tokenValidationResult = ValidateToken(jsonWebToken, validationParameters, currentConfiguration);
+                            tokenValidationResult = await ValidateTokenAsync(jsonWebToken, validationParameters, currentConfiguration).ConfigureAwait(false);
 
                             if (tokenValidationResult.IsValid)
                             {
@@ -1262,7 +1262,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     {
                         validationParameters.RefreshBeforeValidation = false;
                         validationParameters.ValidateWithLKG = true;
-                        tokenValidationResult = ValidateToken(jsonWebToken, validationParameters, currentConfiguration);
+                        tokenValidationResult = await ValidateTokenAsync(jsonWebToken, validationParameters, currentConfiguration).ConfigureAwait(false);
 
                         if (tokenValidationResult.IsValid)
                             return tokenValidationResult;
@@ -1273,15 +1273,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return tokenValidationResult;
         }
 
-        private TokenValidationResult ValidateToken(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+        private async Task<TokenValidationResult> ValidateTokenAsync(
+            JsonWebToken jsonWebToken,
+            TokenValidationParameters validationParameters,
+            BaseConfiguration configuration)
         {
             if (jsonWebToken.IsEncrypted)
-                return ValidateJWE(jsonWebToken, validationParameters, configuration);
+                return await ValidateJWEAsync(jsonWebToken, validationParameters, configuration).ConfigureAwait(false);
 
-            return ValidateJWS(jsonWebToken, validationParameters, configuration);
+            return await ValidateJWSAsync(jsonWebToken, validationParameters, configuration).ConfigureAwait(false);
         }
 
-        private TokenValidationResult ValidateJWS(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+        private async Task<TokenValidationResult> ValidateJWSAsync(
+            JsonWebToken jsonWebToken,
+            TokenValidationParameters validationParameters,
+            BaseConfiguration configuration)
         {
             try
             {
@@ -1292,21 +1298,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (validationParameters.SignatureValidator != null || validationParameters.SignatureValidatorUsingConfiguration != null)
                 {
                     var validatedToken = ValidateSignatureUsingDelegates(jsonWebToken.EncodedToken, validationParameters, configuration);
-                    tokenValidationResult = ValidateTokenPayload(validatedToken, validationParameters, configuration);
+                    tokenValidationResult = await ValidateTokenPayloadAsync(validatedToken, validationParameters, configuration).ConfigureAwait(false);
                     Validators.ValidateIssuerSecurityKey(validatedToken.SigningKey, validatedToken, validationParameters, configuration);
                 }
                 else
                 {
                     if (validationParameters.ValidateSignatureLast)
                     {
-                        tokenValidationResult = ValidateTokenPayload(jsonWebToken, validationParameters, configuration);
+                        tokenValidationResult = await ValidateTokenPayloadAsync(jsonWebToken, validationParameters, configuration).ConfigureAwait(false);
                         if (tokenValidationResult.IsValid)
                             tokenValidationResult.SecurityToken = ValidateSignatureAndIssuerSecurityKey(jsonWebToken, validationParameters, configuration);
                     }
                     else
                     {
                         var validatedToken = ValidateSignatureAndIssuerSecurityKey(jsonWebToken, validationParameters, configuration);
-                        tokenValidationResult = ValidateTokenPayload(validatedToken, validationParameters, configuration);
+                        tokenValidationResult = await ValidateTokenPayloadAsync(validatedToken, validationParameters, configuration).ConfigureAwait(false);
                     }
                 }
 
@@ -1324,7 +1330,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
 
-        private TokenValidationResult ValidateJWE(JsonWebToken jwtToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+        private async Task<TokenValidationResult> ValidateJWEAsync(
+            JsonWebToken jwtToken,
+            TokenValidationParameters validationParameters,
+            BaseConfiguration configuration)
         {
             try
             {
@@ -1333,7 +1342,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (!readTokenResult.IsValid)
                     return readTokenResult;
 
-                TokenValidationResult tokenValidationResult = ValidateJWS(readTokenResult.SecurityToken as JsonWebToken, validationParameters, configuration);
+                TokenValidationResult tokenValidationResult = await ValidateJWSAsync(readTokenResult.SecurityToken as JsonWebToken, validationParameters, configuration).ConfigureAwait(false);
                 if (!tokenValidationResult.IsValid)
                     return tokenValidationResult;
 
@@ -1395,7 +1404,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return validatedToken;
         }
 
-        private TokenValidationResult ValidateTokenPayload(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+        private async Task<TokenValidationResult> ValidateTokenPayloadAsync(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
         {
             var expires = jsonWebToken.HasPayloadClaim(JwtRegisteredClaimNames.Exp) ? (DateTime?)jsonWebToken.ValidTo : null;
             var notBefore = jsonWebToken.HasPayloadClaim(JwtRegisteredClaimNames.Nbf) ? (DateTime?)jsonWebToken.ValidFrom : null;
@@ -1413,7 +1422,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 // and (since issuer validation occurs first) came from a trusted authority.
                 // NOTE: More than one nested actor token should not be considered a valid token, but if we somehow encounter one,
                 // this code will still work properly.
-                ValidateToken(jsonWebToken.Actor, validationParameters.ActorValidationParameters ?? validationParameters);
+                TokenValidationResult tokenValidationResult = await ValidateTokenAsync(jsonWebToken.Actor, validationParameters.ActorValidationParameters ?? validationParameters).ConfigureAwait(false);
+                if (!tokenValidationResult.IsValid)
+                    return tokenValidationResult;
             }
 
             string tokenType = Validators.ValidateTokenType(jsonWebToken.Typ, jsonWebToken, validationParameters);
