@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols;
@@ -160,6 +161,85 @@ namespace Microsoft.IdentityModel.Validators
                     if (IsValidIssuer(aadIssuer, tenantId, issuer))
                     {
                         effectiveConfigurationManager.LastKnownGoodConfiguration = new OpenIdConnectConfiguration() { Issuer = aadIssuer };
+                        return issuer;
+                    }
+                }
+                else
+                {
+                    if (effectiveConfigurationManager.LastKnownGoodConfiguration != null &&
+                        IsValidIssuer(effectiveConfigurationManager.LastKnownGoodConfiguration.Issuer, tenantId, issuer))
+                        return issuer;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40001, LogHelper.MarkAsNonPII(issuer)), ex));
+            }
+
+            // If a valid issuer is not found, throw
+            throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40001, LogHelper.MarkAsNonPII(issuer))));
+        }
+
+        /// <summary>
+        /// Validate the issuer for single and multi-tenant applications of various audiences (Work and School accounts, or Work and School accounts +
+        /// Personal accounts) and the various clouds.
+        /// </summary>
+        /// <param name="issuer">Issuer to validate (will be tenanted).</param>
+        /// <param name="securityToken">Received security token.</param>
+        /// <param name="validationParameters">Token validation parameters.</param>
+        /// <example><code>
+        /// AadIssuerValidator aadIssuerValidator = AadIssuerValidator.GetAadIssuerValidator(authority, httpClient);
+        /// TokenValidationParameters.IssuerValidator = aadIssuerValidator.ValidateAsync;
+        /// </code></example>
+        /// <remarks>The issuer is considered as valid if it has the same HTTP scheme and authority as the
+        /// authority from the configuration file, has a tenant ID, and optionally v2.0 (if this web API
+        /// accepts both V1 and V2 tokens).</remarks>
+        /// <returns>The <c>issuer</c> if it's valid, or otherwise <c>SecurityTokenInvalidIssuerException</c> is thrown.</returns>
+        /// <exception cref="ArgumentNullException"> if <paramref name="securityToken"/> is null.</exception>
+        /// <exception cref="ArgumentNullException"> if <paramref name="validationParameters"/> is null.</exception>
+        /// <exception cref="SecurityTokenInvalidIssuerException">if the issuer is invalid or if there is a network issue. </exception>
+        public async Task<string> ValidateAsync(
+            string issuer,
+            SecurityToken securityToken,
+            TokenValidationParameters validationParameters)
+        {
+            _ = issuer ?? throw LogHelper.LogArgumentNullException(nameof(issuer));
+            _ = securityToken ?? throw LogHelper.LogArgumentNullException(nameof(securityToken));
+            _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+
+            string tenantId = GetTenantIdFromToken(securityToken);
+
+            if (string.IsNullOrWhiteSpace(tenantId))
+                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40003));
+
+            if (validationParameters.ValidIssuers != null)
+            {
+                foreach (var validIssuerTemplate in validationParameters.ValidIssuers)
+                {
+                    if (IsValidIssuer(validIssuerTemplate, tenantId, issuer))
+                        return issuer;
+                }
+            }
+
+            if (validationParameters.ValidIssuer != null)
+            {
+                if (IsValidIssuer(validationParameters.ValidIssuer, tenantId, issuer))
+                    return issuer;
+            }
+
+            try
+            {
+                var effectiveConfigurationManager = GetEffectiveConfigurationManager(securityToken);
+                if (validationParameters.RefreshBeforeValidation)
+                    effectiveConfigurationManager.RequestRefresh();
+
+                BaseConfiguration currentConfiguration = await effectiveConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
+
+                if (!validationParameters.ValidateWithLKG)
+                {
+                    if (IsValidIssuer(currentConfiguration.Issuer, tenantId, issuer))
+                    {
+                        effectiveConfigurationManager.LastKnownGoodConfiguration = new OpenIdConnectConfiguration() { Issuer = currentConfiguration.Issuer };
                         return issuer;
                     }
                 }
