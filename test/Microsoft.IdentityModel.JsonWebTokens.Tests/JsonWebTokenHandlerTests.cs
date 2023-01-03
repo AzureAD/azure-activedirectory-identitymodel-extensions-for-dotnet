@@ -2846,6 +2846,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         },
                         ExpectedException = ExpectedException.SecurityTokenNoExpirationException("IDX10225:")
                     },
+                    new JwtTheoryData("JWS_DotMissingInnerException")
+                    {
+                        Token = "abcde.efgh",
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer,
+                        },
+                        ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14100:", typeof(ArgumentException))
+                    }
                 };
             }
         }
