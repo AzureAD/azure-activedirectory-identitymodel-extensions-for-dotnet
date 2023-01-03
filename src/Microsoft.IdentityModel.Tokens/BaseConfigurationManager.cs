@@ -3,6 +3,8 @@
 
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
@@ -19,6 +21,8 @@ namespace Microsoft.IdentityModel.Tokens
         private TimeSpan _lastKnownGoodLifetime = DefaultLastKnownGoodConfigurationLifetime;
         private BaseConfiguration _lastKnownGoodConfiguration;
         private DateTime? _lastKnownGoodConfigFirstUse = null;
+        //could replace by EventBasedLRUCache
+        private Dictionary<SecurityKey, DateTime> LastKnownGoodSigningKeysSet = new Dictionary<SecurityKey, DateTime>();
 
         /// <summary>
         /// Gets or sets the <see cref="TimeSpan"/> that controls how often an automatic metadata refresh should occur.
@@ -70,12 +74,40 @@ namespace Microsoft.IdentityModel.Tokens
         {
             get
             {
-                return _lastKnownGoodConfiguration;
+                foreach (KeyValuePair<SecurityKey, DateTime> signingKeyItem in LastKnownGoodSigningKeysSet)
+                {
+                    if (signingKeyItem.Value < DateTime.UtcNow)
+                        LastKnownGoodSigningKeysSet.Remove(signingKeyItem.Key);
+                }
+
+                if (LastKnownGoodSigningKeysSet.Keys == null || LastKnownGoodSigningKeysSet.Keys.Count == 0)
+                    return null;
+                else
+                {
+                    BaseConfiguration lkgConfiguration = new LastKnownGoodConfiguration() { Issuer = _lastKnownGoodConfiguration.Issuer };
+                    lkgConfiguration.SigningKeys.Concat(LastKnownGoodSigningKeysSet.Keys);
+                    return lkgConfiguration;
+                }
             }
             set
             {
                 _lastKnownGoodConfiguration = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
                 _lastKnownGoodConfigFirstUse = DateTime.UtcNow;
+
+                //remove expired signing key to avoid memory leak
+                foreach (KeyValuePair<SecurityKey, DateTime> signingKeyItem in LastKnownGoodSigningKeysSet)
+                {
+                    if (signingKeyItem.Value < DateTime.UtcNow)
+                        LastKnownGoodSigningKeysSet.Remove(signingKeyItem.Key);
+                }
+
+                foreach (SecurityKey signingKey in value.SigningKeys)
+                {
+                    if (LastKnownGoodSigningKeysSet.ContainsKey(signingKey))
+                        LastKnownGoodSigningKeysSet[signingKey] = DateTime.UtcNow + LastKnownGoodLifetime;
+                    else
+                        LastKnownGoodSigningKeysSet.Add(signingKey, DateTime.UtcNow + LastKnownGoodLifetime);
+                }
             }
         }
 
@@ -141,4 +173,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public abstract void RequestRefresh();
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class LastKnownGoodConfiguration : BaseConfiguration{}
 }
