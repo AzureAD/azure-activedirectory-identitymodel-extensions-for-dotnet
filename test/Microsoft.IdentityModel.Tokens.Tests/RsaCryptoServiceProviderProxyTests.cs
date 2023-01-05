@@ -1,35 +1,11 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
-#if NET461
+#if NET461 || NET472
 using System.Security.Cryptography.X509Certificates;
 #endif
 
-#if NET452 || NET461
+#if NET452 || NET461 || NET472
 
 using System;
 using System.Security.Cryptography;
@@ -83,7 +59,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
-#if NET461
+#if NET461 || NET472
                 var rsaCsp = new RSACryptoServiceProvider();
                 rsaCsp.ImportParameters(KeyingMaterial.RsaParameters_2048);
 #else
@@ -135,7 +111,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
-#if NET461
+#if NET461 || NET472
                 var rsaFromX509Cert = new RSACryptoServiceProvider();
                 var rsaCng = KeyingMaterial.DefaultCert_2048.GetRSAPrivateKey() as RSACng;
                 var parameters = rsaCng.ExportParameters(true);
@@ -209,7 +185,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
-#if NET461
+#if NET461 || NET472
                 var rsaCsp = new RSACryptoServiceProvider();
                 rsaCsp.ImportParameters(KeyingMaterial.RsaParameters_2048);
 #else
@@ -278,15 +254,15 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
-#if NET461
+#if NET461 || NET472
                 var rsaCsp = new RSACryptoServiceProvider();
                 rsaCsp.ImportParameters(KeyingMaterial.RsaParameters_2048);
 #else
-                var rsaCsp = KeyingMaterial.DefaultCert_2048.PrivateKey as RSACryptoServiceProvider;
+                var rsaCsp = KeyingMaterial.CertSelfSigned2048_SHA256_2.PrivateKey as RSACryptoServiceProvider;
 #endif
 
                 var guid = Guid.NewGuid().ToByteArray();
-                var hashAlgorithm = SHA1.Create();
+                var hashAlgorithm = SHA256.Create();
 
                 return new TheoryData<RSACryptoServiceProviderProxyTheoryData>
                 {
@@ -321,7 +297,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         HashAlgorithm = hashAlgorithm,
                         Input = guid,
                         RsaCryptoServiceProvider = rsaCsp,
-                        TestId = "Test4",
+                        TestId = "Test5",
                         UseOAEP = true
                     }
                 };
@@ -352,14 +328,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
-#if NET461
+#if NET461 || NET472
                 var rsaCsp = new RSACryptoServiceProvider();
                 rsaCsp.ImportParameters(KeyingMaterial.RsaParameters_2048);
 #else
-                var rsaCsp = KeyingMaterial.DefaultCert_2048.PrivateKey as RSACryptoServiceProvider;
+                var rsaCsp = KeyingMaterial.CertSelfSigned1024_SHA256.PrivateKey as RSACryptoServiceProvider;
 #endif
 
-                var hashAlgorithm = SHA1.Create();
+                var hashAlgorithm = SHA256.Create();
                 return new TheoryData<RSACryptoServiceProviderProxyTheoryData>
                 {
                     new RSACryptoServiceProviderProxyTheoryData

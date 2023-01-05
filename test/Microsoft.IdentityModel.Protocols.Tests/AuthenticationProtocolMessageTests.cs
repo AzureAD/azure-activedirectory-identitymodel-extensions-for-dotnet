@@ -1,29 +1,5 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -40,28 +16,26 @@ namespace Microsoft.IdentityModel.Protocols.Tests
         [Fact]
         public void Defaults()
         {
-            List<string> errors = new List<string>();
+            var context = new CompareContext();
             string issuerAddress = "http://www.gotjwt.com";
+            var script = "<script language=\"javascript\">window.setTimeout(function() {document.forms[0].submit();}, 0);</script>";
 
             AuthenticationProtocolMessage authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage();
-            if (!IdentityComparer.AreStringsEqual(authenticationProtocolMessage.IssuerAddress, string.Empty, CompareContext.Default))
-            {
-                errors.Add("authenticationProtocolMessage.IssuerAddress != string.Empty: " + authenticationProtocolMessage.IssuerAddress ?? "null");
-            }
+            IdentityComparer.AreStringsEqual(authenticationProtocolMessage.IssuerAddress, string.Empty, context);
 
             authenticationProtocolMessage = new DerivedAuthenticationProtocolMessage() { IssuerAddress = issuerAddress };
-            if (!IdentityComparer.AreStringsEqual(authenticationProtocolMessage.IssuerAddress, issuerAddress, CompareContext.Default))
-            {
-                errors.Add("authenticationProtocolMessage.IssuerAddress != issuerAddress: " + authenticationProtocolMessage.IssuerAddress ?? "null" + " , " + issuerAddress);
-            }
+            IdentityComparer.AreStringsEqual(authenticationProtocolMessage.IssuerAddress, issuerAddress, context);
+
+            if (!authenticationProtocolMessage.Script.Equals(script))
+                context.Diffs.Add("The value of authenticationProtocolMessage.Script should be '" + script + "'.");
 
             if (authenticationProtocolMessage.Parameters == null)
-            {
-                errors.Add("uthenticationProtocolMessage.Parameters .IssuerAddress != issuerAddress: " + authenticationProtocolMessage.IssuerAddress ?? "null" + " , " + issuerAddress);
-            }
+                context.Diffs.Add("authenticationProtocolMessage.Parameters == null");
 
-            Assert.NotNull(authenticationProtocolMessage.Parameters);
-            Assert.Equal(0, authenticationProtocolMessage.Parameters.Count);
+            if (authenticationProtocolMessage.Parameters.Count != 0)
+                context.Diffs.Add("authenticationProtocolMessage.Parameters.Count != 0");
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         [Fact]
@@ -73,6 +47,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             {
                 "IssuerAddress",
                 "PostTitle",
+                "Script",
                 "ScriptButtonText",
                 "ScriptDisabledText",
             };
@@ -80,7 +55,8 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             var context = new GetSetContext();
             foreach(string property in properties)
             {
-                TestUtilities.SetGet(authenticationProtocolMessage, property, null, ExpectedException.ArgumentNullException(substringExpected: "value"), context);
+                TestUtilities.SetGet(authenticationProtocolMessage, property, null, ExpectedException.ArgumentNullException(substringExpected: property), context);
+                TestUtilities.SetGet(authenticationProtocolMessage, property, "", ExpectedException.NoExceptionExpected, context);
                 TestUtilities.SetGet(authenticationProtocolMessage, property, property, ExpectedException.NoExceptionExpected, context);
                 TestUtilities.SetGet(authenticationProtocolMessage, property, "    ", ExpectedException.NoExceptionExpected, context);
                 TestUtilities.SetGet(authenticationProtocolMessage, property, "\t\n\r", ExpectedException.NoExceptionExpected, context);

@@ -1,29 +1,5 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -56,7 +32,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public static readonly List<Tuple<JsonWebKey, JsonWebKey, string>> JsonRsaSecurityKeys = new List<Tuple<JsonWebKey, JsonWebKey, string>>
         {
-            { KeyingMaterial.JsonWebKeyRsa256, KeyingMaterial.JsonWebKeyRsa256Public, "JsonKey1" },
+            { KeyingMaterial.JsonWebKeyRsa_2048, KeyingMaterial.JsonWebKeyRsa_2048_Public, "JsonKey1" },
         };
 
         public static readonly List<Tuple<JsonWebKey, JsonWebKey, string>> JsonX509SecurityKeys = new List<Tuple<JsonWebKey, JsonWebKey, string>>
@@ -102,6 +78,22 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             { SecurityAlgorithms.RsaSha512Signature, SecurityAlgorithms.RsaSha512Signature },
         };
 
+        public static List<Tuple<string, string>> RsaPssSigningAlgorithms = new List<Tuple<string, string>>
+        {
+            { SecurityAlgorithms.RsaSsaPssSha256, SecurityAlgorithms.RsaSsaPssSha256 },
+            { SecurityAlgorithms.RsaSsaPssSha256, SecurityAlgorithms.RsaSsaPssSha256Signature },
+            { SecurityAlgorithms.RsaSsaPssSha256Signature, SecurityAlgorithms.RsaSsaPssSha256 },
+            { SecurityAlgorithms.RsaSsaPssSha256Signature, SecurityAlgorithms.RsaSsaPssSha256Signature },
+            { SecurityAlgorithms.RsaSsaPssSha384, SecurityAlgorithms.RsaSsaPssSha384 },
+            { SecurityAlgorithms.RsaSsaPssSha384, SecurityAlgorithms.RsaSsaPssSha384Signature },
+            { SecurityAlgorithms.RsaSsaPssSha384Signature, SecurityAlgorithms.RsaSsaPssSha384 },
+            { SecurityAlgorithms.RsaSsaPssSha384Signature, SecurityAlgorithms.RsaSsaPssSha384Signature },
+            { SecurityAlgorithms.RsaSsaPssSha512, SecurityAlgorithms.RsaSsaPssSha512 },
+            { SecurityAlgorithms.RsaSsaPssSha512, SecurityAlgorithms.RsaSsaPssSha512Signature },
+            { SecurityAlgorithms.RsaSsaPssSha512Signature, SecurityAlgorithms.RsaSsaPssSha512 },
+            { SecurityAlgorithms.RsaSsaPssSha512Signature, SecurityAlgorithms.RsaSsaPssSha512Signature },
+        };
+
         public static readonly List<Tuple<X509SecurityKey, X509SecurityKey, string>> X509SecurityKeys = new List<Tuple<X509SecurityKey, X509SecurityKey, string>>
         {
             { KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256_Public, "X509Key1" },
@@ -132,6 +124,20 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = theoryData.TestId + algorithm.Item1 + algorithm.Item2,
                     VerifyAlgorithm = algorithm.Item2,
                     VerifyKey = theoryData.VerifyKey
+                });
+        }
+
+        public static void AddRsaPssAlgorithmVariations(SignatureProviderTheoryData theoryData, TheoryData<SignatureProviderTheoryData> variations)
+        {
+            foreach (var algorithm in RsaPssSigningAlgorithms)
+                variations.Add(new SignatureProviderTheoryData
+                {
+                    SigningAlgorithm = algorithm.Item1,
+                    SigningKey = theoryData.SigningKey,
+                    TestId = theoryData.TestId + algorithm.Item1 + algorithm.Item2,
+                    VerifyAlgorithm = algorithm.Item2,
+                    VerifyKey = theoryData.VerifyKey,
+                    ExpectedException = theoryData.ExpectedException,
                 });
         }
     }

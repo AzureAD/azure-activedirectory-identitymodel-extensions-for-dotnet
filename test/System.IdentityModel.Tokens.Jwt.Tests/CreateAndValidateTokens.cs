@@ -1,33 +1,10 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System.Collections.Generic;
 using System.Globalization;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
@@ -163,7 +140,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             validateKey = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA384_Public;
             validationParameters.IssuerSigningKey = validateKey;
 
-            ExpectedException expectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10503:");
+            ExpectedException expectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10503:");
             try
             {
                 cp = handler.ValidateToken(jwt, validationParameters, out validatedSecurityToken);
@@ -346,7 +323,10 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var theoryData = new TheoryData<JwtTheoryData>();
             var handler = new JwtSecurityTokenHandler();
             var asymmetricSecurityTokenDescriptor = Default.AsymmetricSignSecurityTokenDescriptor(null);
-            var cryptorProviderFactory = new CryptoProviderFactory { CacheSignatureProviders = true };
+
+            var cache = new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None, 50);
+
+            var cryptorProviderFactory = new CryptoProviderFactory(cache);
             asymmetricSecurityTokenDescriptor.SigningCredentials.CryptoProviderFactory = cryptorProviderFactory;
             var asymmetricTokenValidationParameters = Default.AsymmetricSignTokenValidationParameters;
             asymmetricTokenValidationParameters.CryptoProviderFactory = cryptorProviderFactory;
@@ -473,14 +453,21 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var claimsPrincipal6 = handler.ValidateToken(encodedJwt6, theoryData.ValidationParameters, out validatedJwtToken6);
 
             var context = new CompareContext();
-            var localContext = new CompareContext
+            var localContext = new CompareContext("localContext", theoryData);
+
+            if (localContext.PropertiesToIgnoreWhenComparing == null)
             {
-                PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+                localContext.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
                 {
                     { typeof(JwtHeader), new List<string> { "Item" } },
                     { typeof(JwtPayload), new List<string> { "Item" } }
-                }
-            };
+                };
+            }
+            else
+            {
+                localContext.PropertiesToIgnoreWhenComparing.Add(typeof(JwtHeader), new List<string> { "Item" });
+                localContext.PropertiesToIgnoreWhenComparing.Add(typeof(JwtPayload), new List<string> { "Item" });
+            }
 
             if (!IdentityComparer.AreJwtSecurityTokensEqual(jwtToken1, jwtToken2, localContext))
             {
@@ -628,6 +615,28 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters
             });
 
+#if NET461 || NET_CORE
+            // RsaPss is not supported on .NET < 4.6
+            var rsaPssSigningCredentials = new SigningCredentials(Default.AsymmetricSigningKey, SecurityAlgorithms.RsaSsaPssSha256);
+            theoryData.Add(new JwtTheoryData
+            {
+                TestId = "Test7",
+                TokenDescriptor = Default.SecurityTokenDescriptor(null, rsaPssSigningCredentials, ClaimSets.DefaultClaims),
+                //RsaPss produces different signatures
+                PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+                {
+                    { typeof(JwtSecurityToken), new List<string> { "RawSignature", "RawData" } },
+                },
+                ValidationParameters = new TokenValidationParameters
+                {
+                    IssuerSigningKey = Default.AsymmetricSigningKey,
+                    ValidateAudience = false,
+                    ValidateLifetime = false,
+                    ValidateIssuer = false,
+                }
+            });
+#endif
+
             return theoryData;
         }
 
@@ -671,7 +680,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     Token = Default.AsymmetricJwt,
                     }
                 };
-            }                  
+            }
         }
 
         [Theory, MemberData(nameof(RoundTripJWEParams))]
@@ -827,7 +836,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     IssuerSigningKey = NotDefault.SymmetricSigningKey256,
                     TokenDecryptionKey = Default.SymmetricEncryptionKey256,
                 },
-                ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:")
+                ExpectedException.SecurityTokenUnableToValidateException("IDX10516:")
             );
 
             // encryption key not found
@@ -947,7 +956,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     ValidateLifetime = false
                 },
                 expectedPayload,
-                ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:")
+                ExpectedException.SecurityTokenUnableToValidateException("IDX10516:")
             );
 
             theoryData.Add(
@@ -1174,13 +1183,13 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             ClaimsIdentity subject =
                 new ClaimsIdentity(
-                    new List<Claim> 
-                    {   new Claim(_nameClaimTypeForDelegate, delegateName), 
-                        new Claim(validationParametersNameClaimType, validationParameterName), 
-                        new Claim(ClaimsIdentity.DefaultNameClaimType, defaultName), 
+                    new List<Claim>
+                    {   new Claim(_nameClaimTypeForDelegate, delegateName),
+                        new Claim(validationParametersNameClaimType, validationParameterName),
+                        new Claim(ClaimsIdentity.DefaultNameClaimType, defaultName),
                         new Claim(_roleClaimTypeForDelegate, delegateRole),
-                        new Claim(validationParametersRoleClaimType, validationParameterRole), 
-                        new Claim(ClaimsIdentity.DefaultRoleClaimType, defaultRole), 
+                        new Claim(validationParametersRoleClaimType, validationParameterRole),
+                        new Claim(ClaimsIdentity.DefaultRoleClaimType, defaultRole),
                     });
 
             JwtSecurityToken jwt = handler.CreateJwtSecurityToken(issuer: "https://gotjwt.com", signingCredentials: KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2, subject: subject) as JwtSecurityToken;

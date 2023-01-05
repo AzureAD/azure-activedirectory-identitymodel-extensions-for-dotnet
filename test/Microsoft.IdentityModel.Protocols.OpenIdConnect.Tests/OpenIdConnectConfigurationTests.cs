@@ -1,29 +1,5 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -38,7 +14,6 @@ using Xunit;
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 {
     /// <summary>
-    /// 
     /// </summary>
     public class OpenIdConnectConfigurationTests
     {
@@ -91,6 +66,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.NotNull(configuration.IdTokenEncryptionAlgValuesSupported);
             Assert.NotNull(configuration.IdTokenEncryptionEncValuesSupported);
             Assert.NotNull(configuration.IdTokenSigningAlgValuesSupported);
+            Assert.NotNull(configuration.IntrospectionEndpointAuthMethodsSupported);
+            Assert.NotNull(configuration.IntrospectionEndpointAuthSigningAlgValuesSupported);
             Assert.NotNull(configuration.RequestObjectEncryptionAlgValuesSupported);
             Assert.NotNull(configuration.RequestObjectEncryptionEncValuesSupported);
             Assert.NotNull(configuration.RequestObjectSigningAlgValuesSupported);
@@ -107,14 +84,32 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.NotNull(configuration.UserInfoEndpointSigningAlgValuesSupported);
         }
 
+        // If the OpenIdConnect metadata has a "SigningKeys" claim, it should NOT be deserialized into the corresponding OpenIdConnectConfiguration.SigningKeys property.
+        // This value should only be populated from the 'jwks_uri' claim.
+        [Fact]
+        public void DeserializeOpenIdConnectConfigurationWithSigningKeys()
+        {
+            TestUtilities.WriteHeader($"{this}.DeserializeOpenIdConnectConfigurationWithSigningKeys");
+            var context = new CompareContext();
+
+            var config = OpenIdConnectConfiguration.Create(
+                OpenIdConnectConfiguration.Write(new OpenIdConnectConfiguration(OpenIdConfigData.JsonWithSigningKeys)));
+
+            // "SigningKeys" should be found in AdditionalData.
+            if (!config.AdditionalData.ContainsKey("SigningKeys"))
+                context.AddDiff(@"!config.AdditionalData.ContainsKey(""SigningKeys"")");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
         [Fact]
         public void GetSets()
         {
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
             Type type = typeof(OpenIdConnectConfiguration);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 44)
-                Assert.True(false, "Number of properties has changed from 44 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 47)
+                Assert.True(false, "Number of properties has changed from 47 to: " + properties.Length + ", adjust tests");
 
             TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(configuration, "OpenIdConnectConfiguration_GetSets");
 
@@ -128,6 +123,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                             new KeyValuePair<string, List<object>>("ClaimsParameterSupported", new List<object>{false, true, false}),
                             new KeyValuePair<string, List<object>>("EndSessionEndpoint", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                             new KeyValuePair<string, List<object>>("HttpLogoutSupported", new List<object>{false, true, true}),
+                            new KeyValuePair<string, List<object>>("IntrospectionEndpoint", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                             new KeyValuePair<string, List<object>>("Issuer",  new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                             new KeyValuePair<string, List<object>>("JwksUri",  new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                             new KeyValuePair<string, List<object>>("JsonWebKeySet",  new List<object>{null, new JsonWebKeySet()}),
@@ -153,6 +149,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             string end_Session_Endpoint = Guid.NewGuid().ToString();
             string frontchannelLogoutSessionSupported = "true";
             string frontchannelLogoutSupported = "true";
+            string introspection_Endpoint = Guid.NewGuid().ToString();
             string issuer = Guid.NewGuid().ToString();
             string jwks_Uri = Guid.NewGuid().ToString();
             string token_Endpoint = Guid.NewGuid().ToString();
@@ -163,6 +160,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 EndSessionEndpoint = end_Session_Endpoint,
                 FrontchannelLogoutSessionSupported = frontchannelLogoutSessionSupported,
                 FrontchannelLogoutSupported = frontchannelLogoutSupported,
+                IntrospectionEndpoint = introspection_Endpoint,
                 Issuer = issuer,
                 JwksUri = jwks_Uri,
                 TokenEndpoint = token_Endpoint,
@@ -185,6 +183,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             if (!string.Equals(configuration.FrontchannelLogoutSupported, frontchannelLogoutSupported))
                 errors.Add(string.Format(CultureInfo.InvariantCulture, "configuration.FrontchannelLogoutSupported != efrontchannelLogoutSessionSupported. '{0}', '{1}'.", configuration.FrontchannelLogoutSupported, frontchannelLogoutSupported));
+
+            if (!string.Equals(configuration.IntrospectionEndpoint, introspection_Endpoint))
+                errors.Add(string.Format(CultureInfo.InvariantCulture, "configuration.IntrospectionEndpoint != introspection_Endpoint. '{0}', '{1}'.", configuration.IntrospectionEndpoint, introspection_Endpoint));
 
             if (!string.Equals(configuration.Issuer, issuer))
                 errors.Add(string.Format(CultureInfo.InvariantCulture, "configuration.Issuer != issuer. '{0}', '{1}'.", configuration.Issuer, issuer));
@@ -229,7 +230,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var oidcWithEmptyCollections = new OpenIdConnectConfiguration();
             var oidcWithEmptyCollectionsJson = OpenIdConnectConfiguration.Write(oidcWithEmptyCollections);
 
-            IdentityComparer.AreEqual(oidcWithEmptyCollectionsJson, "{\"JsonWebKeySet\":null,\"SigningKeys\":[]}", context);
+            IdentityComparer.AreEqual(oidcWithEmptyCollectionsJson, "{\"JsonWebKeySet\":null}", context);
 
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -253,6 +254,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 "id_token_encryption_alg_values_supported",
                 "id_token_encryption_enc_values_supported",
                 "id_token_signing_alg_values_supported",
+                "introspection_endpoint_auth_methods_supported",
+                "introspection_endpoint_auth_signing_alg_values_supported",
                 "request_object_encryption_alg_values_supported",
                 "request_object_encryption_enc_values_supported",
                 "request_object_signing_alg_values_supported",

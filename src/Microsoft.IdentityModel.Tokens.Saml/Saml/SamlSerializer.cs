@@ -1,29 +1,5 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -53,7 +29,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// Gets or sets the <see cref="DSigSerializer"/> to use for reading / writing the <see cref="Xml.Signature"/>
         /// </summary>
         /// <exception cref="ArgumentNullException">if value is null.</exception>
-        /// <remarks>Passed to <see cref="EnvelopedSignatureReader"/> and <see cref="EnvelopedSignatureWriter"/>.</remarks>
+        /// <remarks>Will be passed to readers that process xmlDsig such as <see cref="EnvelopedSignatureReader"/> and <see cref="EnvelopedSignatureWriter"/>.</remarks>
         public DSigSerializer DSigSerializer
         {
             get => _dsigSerializer;
@@ -215,52 +191,53 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <summary>
         /// Reads a &lt;saml:Assertion> element.
         /// </summary>
-        /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="SamlAssertion"/> element.</param>
+        /// <param name="reader">A <see cref="XmlReader"/> positioned at a 'saml:assertion' element.</param>
         /// <returns>A <see cref="SamlAssertion"/> instance.</returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="reader"/> is null.</exception>
         public virtual SamlAssertion ReadAssertion(XmlReader reader)
         {
             XmlUtil.CheckReaderOnEntry(reader, SamlConstants.Elements.Assertion, SamlConstants.Namespace);
 
             try
             {
-                var envelopeReader = new EnvelopedSignatureReader(XmlDictionaryReader.CreateDictionaryReader(reader));
+                var envelopeReader = new EnvelopedSignatureReader(reader) { Serializer = DSigSerializer };
 
                 // @xsi:type
                 XmlUtil.ValidateXsiType(envelopeReader, SamlConstants.Types.AssertionType, SamlConstants.Namespace);
 
                 // @MajorVersion - required - must be "1"
-                var majorVersion = envelopeReader.GetAttribute(SamlConstants.Attributes.MajorVersion, null);
+                var majorVersion = envelopeReader.GetAttribute(SamlConstants.Attributes.MajorVersion);
                 if (string.IsNullOrEmpty(majorVersion))
-                    throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.Assertion, SamlConstants.Attributes.MajorVersion);
+                    throw LogReadException(LogMessages.IDX11115, MarkAsNonPII(SamlConstants.Elements.Assertion), MarkAsNonPII(SamlConstants.Attributes.MajorVersion));
 
-                if (!majorVersion.Equals(SamlConstants.MajorVersionValue, StringComparison.Ordinal))
-                    throw LogReadException(LogMessages.IDX11116, majorVersion);
+                if (!majorVersion.Equals(SamlConstants.MajorVersionValue))
+                    throw LogReadException(LogMessages.IDX11116, MarkAsNonPII(majorVersion));
 
                 // @MinorVersion - required - must be "1"
-                var minorVersion = envelopeReader.GetAttribute(SamlConstants.Attributes.MinorVersion, null);
+                var minorVersion = envelopeReader.GetAttribute(SamlConstants.Attributes.MinorVersion);
                 if (string.IsNullOrEmpty(minorVersion))
-                    throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.Assertion, SamlConstants.Attributes.MinorVersion);
+                    throw LogReadException(LogMessages.IDX11115, MarkAsNonPII(SamlConstants.Elements.Assertion), MarkAsNonPII(SamlConstants.Attributes.MinorVersion));
 
-                if (!minorVersion.Equals(SamlConstants.MinorVersionValue, StringComparison.Ordinal))
-                    throw LogReadException(LogMessages.IDX11117, minorVersion);
+                if (!minorVersion.Equals(SamlConstants.MinorVersionValue))
+                    throw LogReadException(LogMessages.IDX11117, MarkAsNonPII(minorVersion));
 
                 // @AssertionId - required
-                var assertionId = envelopeReader.GetAttribute(SamlConstants.Attributes.AssertionID, null);
+                var assertionId = envelopeReader.GetAttribute(SamlConstants.Attributes.AssertionID);
                 if (string.IsNullOrEmpty(assertionId))
-                    throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.Assertion, SamlConstants.Attributes.AssertionID);
+                    throw LogReadException(LogMessages.IDX11115, MarkAsNonPII(SamlConstants.Elements.Assertion), MarkAsNonPII(SamlConstants.Attributes.AssertionID));
 
                 if (!IsAssertionIdValid(assertionId))
                     throw LogReadException(LogMessages.IDX11121, assertionId);
 
                 // @Issuer - required
-                var issuer = envelopeReader.GetAttribute(SamlConstants.Attributes.Issuer, null);
+                var issuer = envelopeReader.GetAttribute(SamlConstants.Attributes.Issuer);
                 if (string.IsNullOrEmpty(issuer))
-                    throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.Assertion, SamlConstants.Attributes.Issuer);
+                    throw LogReadException(LogMessages.IDX11115, MarkAsNonPII(SamlConstants.Elements.Assertion), MarkAsNonPII(SamlConstants.Attributes.Issuer));
 
                 // @IssueInstant - required
-                var issueInstantAttribute = envelopeReader.GetAttribute(SamlConstants.Attributes.IssueInstant, null);
+                var issueInstantAttribute = envelopeReader.GetAttribute(SamlConstants.Attributes.IssueInstant);
                 if (string.IsNullOrEmpty(issueInstantAttribute))
-                    throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.Assertion, SamlConstants.Attributes.IssueInstant);
+                    throw LogReadException(LogMessages.IDX11115, MarkAsNonPII(SamlConstants.Elements.Assertion), MarkAsNonPII(SamlConstants.Attributes.IssueInstant));
 
                 var issueInstant = DateTime.ParseExact(issueInstantAttribute, SamlConstants.AcceptedDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None).ToUniversalTime();
 
@@ -303,8 +280,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                 return new SamlAssertion(assertionId, issuer, issueInstant, conditions, advice, statements)
                 {
-                    // attach signedXml for validation of signature
-                    Signature = envelopeReader.Signature
+                    // attach signature for verification
+                    Signature = envelopeReader.Signature,
+                    XmlTokenStream = envelopeReader.XmlTokenStream
                 };
             }
             catch (Exception ex)
@@ -338,11 +316,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 // @xsi:type
                 XmlUtil.ValidateXsiType(reader, SamlConstants.Types.AttributeType, SamlConstants.Namespace);
 
-                attribute.Name = reader.GetAttribute(SamlConstants.Attributes.AttributeName, null);
+                attribute.Name = reader.GetAttribute(SamlConstants.Attributes.AttributeName);
                 if (string.IsNullOrEmpty(attribute.Name))
                     throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.Attribute, SamlConstants.Attributes.AttributeName);
 
-                attribute.Namespace = reader.GetAttribute(SamlConstants.Attributes.AttributeNamespace, null);
+                attribute.Namespace = reader.GetAttribute(SamlConstants.Attributes.AttributeNamespace);
                 if (string.IsNullOrEmpty(attribute.Namespace))
                     throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.Attribute, SamlConstants.Attributes.AttributeNamespace);
 
@@ -509,14 +487,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                 var authenticationStatement = new SamlAuthenticationStatement();
 
-                var authInstance = reader.GetAttribute(SamlConstants.Attributes.AuthenticationInstant, null);
+                var authInstance = reader.GetAttribute(SamlConstants.Attributes.AuthenticationInstant);
                 if (string.IsNullOrEmpty(authInstance))
                     throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.AuthenticationStatement, SamlConstants.Attributes.AuthenticationInstant);
 
                 authenticationStatement.AuthenticationInstant = DateTime.ParseExact(
                     authInstance, SamlConstants.AcceptedDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None).ToUniversalTime();
 
-                var authenticationMethod = reader.GetAttribute(SamlConstants.Attributes.AuthenticationMethod, null);
+                var authenticationMethod = reader.GetAttribute(SamlConstants.Attributes.AuthenticationMethod);
                 if (string.IsNullOrEmpty(authenticationMethod))
                     throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.AuthenticationStatement, SamlConstants.Attributes.AuthenticationMethod);
 
@@ -526,8 +504,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 authenticationStatement.Subject = ReadSubject(reader);
                 if (reader.IsStartElement(SamlConstants.Elements.SubjectLocality, SamlConstants.Namespace))
                 {
-                    authenticationStatement.DnsAddress = reader.GetAttribute(SamlConstants.Elements.DNSAddress, null);
-                    authenticationStatement.IPAddress = reader.GetAttribute(SamlConstants.Elements.IPAddress, null);
+                    authenticationStatement.DnsAddress = reader.GetAttribute(SamlConstants.Elements.DNSAddress);
+                    authenticationStatement.IPAddress = reader.GetAttribute(SamlConstants.Elements.IPAddress);
 
                     bool isEmptyElement = reader.IsEmptyElement;
                     reader.MoveToContent();
@@ -570,7 +548,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 // @xsi:type
                 XmlUtil.ValidateXsiType(reader, SamlConstants.Types.AuthorityBindingType, SamlConstants.Namespace);
 
-                var authKind = reader.GetAttribute(SamlConstants.Attributes.AuthorityKind, null);
+                var authKind = reader.GetAttribute(SamlConstants.Attributes.AuthorityKind);
                 if (string.IsNullOrEmpty(authKind))
                     throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.AuthorityBinding, SamlConstants.Attributes.AuthorityKind);
 
@@ -600,11 +578,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 else
                     authorityKind = new XmlQualifiedName(localName, nameSpace);
 
-                var binding = reader.GetAttribute(SamlConstants.Attributes.Binding, null);
+                var binding = reader.GetAttribute(SamlConstants.Attributes.Binding);
                 if (string.IsNullOrEmpty(binding))
                     throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11512));
 
-                var location = reader.GetAttribute(SamlConstants.Attributes.Location, null);
+                var location = reader.GetAttribute(SamlConstants.Attributes.Location);
                 if (string.IsNullOrEmpty(location))
                     throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11513));
 
@@ -644,13 +622,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                 var statement = new SamlAuthorizationDecisionStatement();
 
-                var resource = reader.GetAttribute(SamlConstants.Attributes.Resource, null);
+                var resource = reader.GetAttribute(SamlConstants.Attributes.Resource);
                 if (string.IsNullOrEmpty(resource))
                     throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.AuthorizationDecisionStatement, SamlConstants.Attributes.Resource);
 
                 statement.Resource = resource;
 
-                var decision = reader.GetAttribute(SamlConstants.Attributes.Decision, null);
+                var decision = reader.GetAttribute(SamlConstants.Attributes.Decision);
                 if (string.IsNullOrEmpty(decision))
                     throw LogReadException(LogMessages.IDX11115, SamlConstants.Elements.AuthorizationDecisionStatement, SamlConstants.Attributes.Decision);
 
@@ -730,12 +708,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 XmlUtil.ValidateXsiType(reader, SamlConstants.Types.ConditionsType, SamlConstants.Namespace);
 
                 var nbf = DateTimeUtil.GetMinValue(DateTimeKind.Utc);
-                var time = reader.GetAttribute(SamlConstants.Attributes.NotBefore, null);
+                var time = reader.GetAttribute(SamlConstants.Attributes.NotBefore);
                 if (!string.IsNullOrEmpty(time))
                     nbf = DateTime.ParseExact(time, SamlConstants.AcceptedDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None).ToUniversalTime();
 
                 var notOnOrAfter = DateTimeUtil.GetMaxValue(DateTimeKind.Utc);
-                time = reader.GetAttribute(SamlConstants.Attributes.NotOnOrAfter, null);
+                time = reader.GetAttribute(SamlConstants.Attributes.NotOnOrAfter);
                 if (!string.IsNullOrEmpty(time))
                     notOnOrAfter = DateTime.ParseExact(time, SamlConstants.AcceptedDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None).ToUniversalTime();
 
@@ -895,11 +873,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     // @xsi:type
                     XmlUtil.ValidateXsiType(reader, SamlConstants.Types.NameIDType, SamlConstants.Namespace);
 
-                    var nameFormat = reader.GetAttribute(SamlConstants.Attributes.Format, null);
+                    var nameFormat = reader.GetAttribute(SamlConstants.Attributes.Format);
                     if (!string.IsNullOrEmpty(nameFormat))
                         subject.NameFormat = nameFormat;
 
-                    var nameQualifier = reader.GetAttribute(SamlConstants.Attributes.NameQualifier, null);
+                    var nameQualifier = reader.GetAttribute(SamlConstants.Attributes.NameQualifier);
                     if (!string.IsNullOrEmpty(nameQualifier))
                         subject.NameQualifier = nameQualifier;
 

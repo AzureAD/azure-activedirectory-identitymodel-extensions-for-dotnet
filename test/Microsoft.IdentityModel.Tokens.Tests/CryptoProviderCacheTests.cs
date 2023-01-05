@@ -1,31 +1,8 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -41,6 +18,22 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     /// </summary>
     public class CryptoProviderCacheTests
     {
+        public static Func<CryptoProviderCache> CreateCacheForTesting = new Func<CryptoProviderCache>(() =>
+        {
+            return new InMemoryCryptoProviderCache(new CryptoProviderCacheOptions(), TaskCreationOptions.None, 50);
+        });
+
+        [Fact]
+        public void CryptoProviderCacheOptions()
+        {
+            var options = new CryptoProviderCacheOptions();
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => options.SizeLimit = 0);
+            Assert.Throws<ArgumentOutOfRangeException>(() => options.SizeLimit = -1);
+            Assert.Throws<ArgumentOutOfRangeException>(() => options.SizeLimit = 10);
+            options.SizeLimit = 11;
+        }
+
         /// <summary>
         /// Tests that a cache key generated from a <see cref="SignatureProvider"/> or a set of components are equal.
         /// </summary>
@@ -179,8 +172,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             try
             {
+                bool shouldCreate = CryptoProviderFactory.ShouldCacheSignatureProvider(theoryData.SignatureProvider);
+
                 var added = theoryData.CryptoProviderCache.TryAdd(theoryData.SignatureProvider);
-                if (theoryData.Added != added)
+                if (theoryData.Added != added && shouldCreate)
                     context.Diffs.Add($"theoryData.Added:'{theoryData.Added}' != theoryData.CryptoProviderCache.TryAdd(theoryData.SignatureProvider)");
 
                 theoryData.ExpectedException.ProcessNoException(context);
@@ -197,7 +192,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
-                var sharedCache = new InMemoryCryptoProviderCache();
+                var sharedCache = CreateCacheForTesting();
+
                 var theoryData = new TheoryData<CryptoProviderCacheTheoryData>
                 {
                     new CryptoProviderCacheTheoryData
@@ -233,7 +229,63 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         CryptoProviderCache = sharedCache,
                         SignatureProvider = new AsymmetricSignatureProvider(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm),
                         TestId = "AsymmetricSignatureProviderAddedSecondTime"
-                    }
+                    },
+                    new CryptoProviderCacheTheoryData
+                    {
+                        Added = true,
+                        CryptoProviderCache = sharedCache,
+                        SignatureProvider = new AsymmetricSignatureProvider(KeyingMaterial.RsaSecurityKey1, ALG.RsaSha256, false),
+                        TestId = nameof(KeyingMaterial.RsaSecurityKey_2048)
+                    },
+                    // test signing signature provider
+                    new CryptoProviderCacheTheoryData
+                    {
+                        Added = true,
+                        CryptoProviderCache = sharedCache,
+                        SignatureProvider = new AsymmetricSignatureProvider(KeyingMaterial.RsaSecurityKey_2048, ALG.RsaSha256, true),
+                        TestId = nameof(KeyingMaterial.RsaSecurityKey_2048)
+                    },
+                    new CryptoProviderCacheTheoryData
+                    {
+                        Added = true,
+                        CryptoProviderCache = sharedCache,
+                        SignatureProvider = new AsymmetricSignatureProvider(KeyingMaterial.DefaultX509Key_2048_Public, ALG.RsaSha256, false),
+                        TestId = nameof(KeyingMaterial.DefaultX509Key_2048_Public)
+                    },
+                    new CryptoProviderCacheTheoryData
+                    {
+                        Added = true,
+                        CryptoProviderCache = sharedCache,
+                        SignatureProvider = new AsymmetricSignatureProvider(KeyingMaterial.JsonWebKeyRsa_2048_Public, ALG.RsaSha256, false),
+                        TestId = nameof(KeyingMaterial.JsonWebKeyRsa_2048_Public)
+                    },
+                    // test symmetric signature provider
+                    new CryptoProviderCacheTheoryData
+                    {
+                        Added = true,
+                        CryptoProviderCache = sharedCache,
+                        SignatureProvider = new SymmetricSignatureProvider(KeyingMaterial.DefaultSymmetricSecurityKey_384, ALG.HmacSha384, true),
+                        TestId = nameof(KeyingMaterial.DefaultSymmetricSecurityKey_256)
+                    },
+#if NET472 || NET_CORE
+                    // ecdsa signature provider should be added to the cache on NET472 and NET_CORE.
+                    new CryptoProviderCacheTheoryData
+                    {
+                        Added = true,
+                        CryptoProviderCache = sharedCache,
+                        SignatureProvider = new AsymmetricSignatureProvider(KeyingMaterial.Ecdsa256Key_Public, ALG.EcdsaSha256, false),
+                        TestId = nameof(KeyingMaterial.Ecdsa256Key_Public)
+                    },
+#else
+                    // ecdsa signature provider should NOT be added to the cache on NET452 and NET461.
+                    new CryptoProviderCacheTheoryData
+                    {
+                        Added = false,
+                        CryptoProviderCache = sharedCache,
+                        SignatureProvider = new AsymmetricSignatureProvider(KeyingMaterial.Ecdsa256Key_Public, ALG.EcdsaSha256, false),
+                        TestId = nameof(KeyingMaterial.Ecdsa256Key_Public)
+                    },
+#endif
                 };
 
                 return theoryData;
@@ -267,11 +319,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
+                var cryptoProviderCache = CreateCacheForTesting();
+
                 var theoryData = new TheoryData<CryptoProviderCacheTheoryData>
                 {
                     new CryptoProviderCacheTheoryData
                     {
                         Algorithm = ALG.RsaSha256,
+                        CryptoProviderCache = cryptoProviderCache,
                         ExpectedException = EE.ArgumentNullException(),
                         First = true,
                         TestId = "SecurityKeyNULL",
@@ -279,6 +334,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     },
                     new CryptoProviderCacheTheoryData
                     {
+                        CryptoProviderCache = cryptoProviderCache,
                         ExpectedException = EE.ArgumentNullException(),
                         SecurityKey = Default.AsymmetricSigningKey,
                         TestId = "AlgorithmNULL",
@@ -287,6 +343,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     new CryptoProviderCacheTheoryData
                     {
                         Algorithm = string.Empty,
+                        CryptoProviderCache = cryptoProviderCache,
                         ExpectedException = EE.ArgumentNullException(),
                         SecurityKey = Default.AsymmetricSigningKey,
                         TestId = "AlgorithmString.Empty",
@@ -295,6 +352,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     new CryptoProviderCacheTheoryData
                     {
                         Algorithm = ALG.RsaSha256,
+                        CryptoProviderCache = cryptoProviderCache,
                         ExpectedException = EE.ArgumentNullException(),
                         SecurityKey = Default.AsymmetricSigningKey,
                         TestId = "TypeofProviderNULL"
@@ -302,6 +360,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     new CryptoProviderCacheTheoryData
                     {
                         Algorithm = ALG.RsaSha256,
+                        CryptoProviderCache = cryptoProviderCache,
                         ExpectedException = EE.ArgumentNullException(),
                         SecurityKey = Default.AsymmetricSigningKey,
                         TestId = "TypeofProviderString.Empty",
@@ -310,7 +369,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 };
 
                 // Test different methods of finding
-                var cryptoProviderCache = new InMemoryCryptoProviderCache();
+
                 var derivedKey = new DerivedSecurityKey("kid", 256);
                 var derivedKey2 = new DerivedSecurityKey("kid2", 256);
                 var signatureProvider = new CustomSignatureProvider(derivedKey, ALG.RsaSha256, true);
@@ -370,6 +429,23 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
+        /// <summary>
+        /// Checks that the Dispose() method is properly called on the InMemoryCryptoProviderCache.
+        [Fact]
+        public void CryptoProviderCacheDispose()
+        {
+            TestUtilities.WriteHeader($"{this}.CryptoProviderCacheDispose");
+            var context = new CompareContext();
+            var cache = new InMemoryCryptoProviderCachePublic();
+
+            cache.Dispose();
+
+            if (!cache.DisposeCalled)
+                context.AddDiff("InMemoryCryptoProviderCachePublic was not properly disposed of.");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
         [Theory, MemberData(nameof(TryRemoveTheoryData))]
         public void TryRemove(CryptoProviderCacheTheoryData theoryData)
         {
@@ -394,48 +470,57 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
+                var cache = CreateCacheForTesting();
+
                 var theoryData =  new TheoryData<CryptoProviderCacheTheoryData>
                 {
                     new CryptoProviderCacheTheoryData
                     {
+                        CryptoProviderCache = cache,
                         ExpectedException = EE.ArgumentNullException(),
                         First = true,
                         TestId = "SignatureProviderNULL"
                     },
                     new CryptoProviderCacheTheoryData
                     {
+                        CryptoProviderCache = cache,
                         Removed = false,
                         SignatureProvider = new SymmetricSignatureProvider(Default.SymmetricSigningKey256, ALG.HmacSha256),
                         TestId = "EmptyCache"
                     },
                     new CryptoProviderCacheTheoryData
                     {
+                        CryptoProviderCache = cache,
                         Removed = false,
                         SignatureProvider = new CustomSignatureProvider(new DerivedSecurityKey(null, 256), ALG.HmacSha256),
                         TestId = "KeyIdnull"
                     },
                     new CryptoProviderCacheTheoryData
                     {
+                        CryptoProviderCache = cache,
                         Removed = false,
                         SignatureProvider = new CustomSignatureProvider(new DerivedSecurityKey(string.Empty, 256), ALG.HmacSha256),
                         TestId = "KeyIdString.empty"
                     },
                     new CryptoProviderCacheTheoryData
                     {
+                        CryptoProviderCache = cache,
                         Removed = false,
                         SignatureProvider = new CustomSignatureProvider(new DerivedSecurityKey("kid", 256), ALG.HmacSha256),
                         TestId = "CryptoProviderFactorynull"
                     },
                     new CryptoProviderCacheTheoryData
                     {
+                        CryptoProviderCache = cache,
                         Removed = false,
-                        SignatureProvider = new CustomSignatureProvider(new DerivedSecurityKey("kid", 256), ALG.HmacSha256){CryptoProviderCache = new InMemoryCryptoProviderCache()},
+                        SignatureProvider = new CustomSignatureProvider(new DerivedSecurityKey("kid", 256), ALG.HmacSha256){CryptoProviderCache = cache},
                         TestId = "CryptoProvider!=ReferenceEquals"
                     }
                 };
 
                 // SignatureProvider found and removed
-                var cryptoProviderCache = new InMemoryCryptoProviderCache();
+                var cryptoProviderCache = CreateCacheForTesting();
+
                 var signatureProvider = new CustomSignatureProvider(new DerivedSecurityKey("kid", 256), ALG.HmacSha256);
                 cryptoProviderCache.TryAdd(signatureProvider);
                 theoryData.Add(new CryptoProviderCacheTheoryData
@@ -454,7 +539,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     TestId = "SignatureProviderWasNotRemoved"
                 });
 
-                cryptoProviderCache = new InMemoryCryptoProviderCache();
+                cryptoProviderCache = CreateCacheForTesting();
+
                 signatureProvider = new CustomSignatureProvider(new DerivedSecurityKey("kid", 256), ALG.HmacSha256);
                 cryptoProviderCache.TryAdd(signatureProvider);
 
@@ -508,13 +594,17 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
     }
 
-    public class CryptoProviderCacheTheoryData : TheoryDataBase
+    public class CryptoProviderCacheTheoryData : TheoryDataBase, IDisposable
     {
         public bool Added { get; set; } = true;
 
         public string Algorithm { get; set; }
 
-        public CryptoProviderCache CryptoProviderCache { get; set; } = new InMemoryCryptoProviderCache();
+#if NETCOREAPP
+        public CryptoProviderCache CryptoProviderCache { get; set; }
+#elif NET452 || NET461 || NET472
+        public CryptoProviderCache CryptoProviderCache { get; set; }
+#endif
 
         public bool Found { get; set; }
 
@@ -531,10 +621,20 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public string TypeofProvider { get; set; }
 
         public bool WillCreateSignatures { get; set; }
+
+        public void Dispose()
+        {
+            InMemoryCryptoProviderCachePublic?.Dispose();
+        }
     }
 
     public class InMemoryCryptoProviderCachePublic : InMemoryCryptoProviderCache
     {
+        public InMemoryCryptoProviderCachePublic() : base(new CryptoProviderCacheOptions(), TaskCreationOptions.None, 50)
+        {}
+
+        public bool DisposeCalled { get; set; } = false;
+
         public string GetCacheKeyPublic(SignatureProvider signatureProvider)
         {
             return base.GetCacheKey(signatureProvider);
@@ -543,6 +643,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public string GetCacheKeyPublic(SecurityKey securityKey, string algorithm, string typeofProvider)
         {
             return base.GetCacheKey(securityKey, algorithm, typeofProvider);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            DisposeCalled = true;
+            base.Dispose(disposing);
         }
     }
 }

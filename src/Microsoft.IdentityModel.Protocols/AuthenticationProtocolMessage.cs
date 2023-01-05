@@ -1,29 +1,5 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -40,6 +16,7 @@ namespace Microsoft.IdentityModel.Protocols
     public abstract class AuthenticationProtocolMessage
     {
         private string _postTitle = "Working...";
+        private string _script = "<script language=\"javascript\">window.setTimeout(function() {document.forms[0].submit();}, 0);</script>"; 
         private string _scriptButtonText = "Submit";
         private string _scriptDisabledText = "Script is disabled. Click Submit to continue.";
 
@@ -79,12 +56,14 @@ namespace Microsoft.IdentityModel.Protocols
             strBuilder.Append("</p><input type=\"submit\" value=\"");
             strBuilder.Append(HtmlEncode(ScriptButtonText));
             strBuilder.Append("\" /></noscript>");
-            strBuilder.Append("</form><script language=\"javascript\">window.setTimeout('document.forms[0].submit()', 0);</script></body></html>");
+            strBuilder.Append("</form>");
+            strBuilder.Append(Script);
+            strBuilder.Append("</body></html>");
             return strBuilder.ToString();
         }
 
         /// <summary>
-        /// Builds a Url using the current IssuerAddress and the parameters that have been set.
+        /// Builds a URL using the current IssuerAddress and the parameters that have been set.
         /// </summary>
         /// <returns>UrlEncoded string.</returns>
         /// <remarks>Each parameter &lt;Key, Value&gt; is first transformed using <see cref="Uri.EscapeDataString(string)"/>.</remarks>
@@ -146,7 +125,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    throw LogHelper.LogArgumentNullException("value");
+                    throw LogHelper.LogArgumentNullException(nameof(IssuerAddress));
 
                 _issuerAddress = value;
             }
@@ -177,7 +156,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    throw LogHelper.LogArgumentNullException("value");
+                    throw LogHelper.LogArgumentNullException(nameof(PostTitle));
 
                 _postTitle = value;
             }
@@ -235,6 +214,26 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
+        /// Gets the script used when constructing the post string.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">If the 'value' is null.</exception>
+        public string Script
+        {
+            get
+            {
+                return _script;
+            }
+
+            set
+            {
+                if (value == null)
+                    throw LogHelper.LogArgumentNullException(nameof(Script));
+
+                _script = value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the script button text used when constructing the post string.
         /// </summary>
         /// <exception cref="ArgumentNullException">If the 'value' is null.</exception>
@@ -248,7 +247,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    throw LogHelper.LogArgumentNullException("value");
+                    throw LogHelper.LogArgumentNullException(nameof(ScriptButtonText));
 
                 _scriptButtonText = value;
             }
@@ -268,7 +267,7 @@ namespace Microsoft.IdentityModel.Protocols
             set
             {
                 if (value == null)
-                    throw LogHelper.LogArgumentNullException("value");
+                    throw LogHelper.LogArgumentNullException(nameof(ScriptDisabledText));
 
                 _scriptDisabledText = value;
             }

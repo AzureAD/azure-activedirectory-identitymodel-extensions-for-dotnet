@@ -1,29 +1,5 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -32,19 +8,28 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using Xunit;
 
 namespace Microsoft.IdentityModel.TestUtils
 {
     public class GetSetContext
     {
-        private List<string> _errors = new List<string>();
-
         private List<KeyValuePair<string, List<object>>> _propertyNamesAndSetGetValues;
 
-        public List<string> Errors { get { return _errors; } }
+        /// <summary>
+        /// Any errors will be put here.
+        /// </summary>
+        public List<string> Errors { get; } = new List<string>();
 
+        /// <summary>
+        /// The 'TKey' in <see cref="KeyValuePair{TKey, TValue}"/> is the name of the Method to call.
+        /// The first 'TValue' is the default value, the others will be used to perform a 'set / get' and then check values are equal. This catches the error where an assignment is made to the wrong private variable.
+        /// </summary>
         public List<KeyValuePair<string, List<object>>> PropertyNamesAndSetGetValue { get { return _propertyNamesAndSetGetValues; } set { _propertyNamesAndSetGetValues = value; } }
 
+        /// <summary>
+        /// This is an instance of the object that is to be tested.
+        /// </summary>
         public object Object { get; set; }
     }
 
@@ -327,13 +312,16 @@ namespace Microsoft.IdentityModel.TestUtils
         public static ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, ISecurityTokenValidator tokenValidator, ExpectedException expectedException)
         {
             ClaimsPrincipal retVal = null;
+            SecurityToken validatedToken = null;
             try
             {
-                retVal = tokenValidator.ValidateToken(securityToken, validationParameters, out SecurityToken validatedToken);
+                retVal = tokenValidator.ValidateToken(securityToken, validationParameters, out validatedToken);
+                Assert.True(validatedToken != null);
                 expectedException.ProcessNoException();
             }
             catch (Exception ex)
             {
+                Assert.True(validatedToken == null);
                 expectedException.ProcessException(ex);
             }
 

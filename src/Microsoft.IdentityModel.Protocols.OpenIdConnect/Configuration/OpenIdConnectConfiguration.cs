@@ -1,29 +1,5 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -39,8 +15,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     /// Contains OpenIdConnect configuration that can be populated from a json string.
     /// </summary>
     [JsonObject]
-    public class OpenIdConnectConfiguration
+    public class OpenIdConnectConfiguration : BaseConfiguration
     {
+        private const string _className = "Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfiguration";
+
         /// <summary>
         /// Deserializes the json string into an <see cref="OpenIdConnectConfiguration"/> object.
         /// </summary>
@@ -91,12 +69,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             try
             {
-                LogHelper.LogVerbose(LogMessages.IDX21806, json, this);
+                LogHelper.LogVerbose(LogMessages.IDX21806, json, LogHelper.MarkAsNonPII(_className));
                 JsonConvert.PopulateObject(json, this);
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX21815, json, GetType()), ex));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX21815, json, LogHelper.MarkAsNonPII(_className)), ex));
             }
         }
 
@@ -203,16 +181,34 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public ICollection<string> IdTokenSigningAlgValuesSupported { get; } = new Collection<string>();
 
         /// <summary>
+        /// Gets or sets the 'introspection_endpoint'.
+        /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.IntrospectionEndpoint, Required = Required.Default)]
+        public string IntrospectionEndpoint { get; set; }
+
+        /// <summary>
+        /// Gets the collection of 'introspection_endpoint_auth_methods_supported'.
+        /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.IntrospectionEndpointAuthMethodsSupported, Required = Required.Default)]
+        public ICollection<string> IntrospectionEndpointAuthMethodsSupported { get; } = new Collection<string>();
+
+        /// <summary>
+        /// Gets the collection of 'introspection_endpoint_auth_signing_alg_values_supported'.
+        /// </summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.IntrospectionEndpointAuthSigningAlgValuesSupported, Required = Required.Default)]
+        public ICollection<string> IntrospectionEndpointAuthSigningAlgValuesSupported { get; } = new Collection<string>();
+
+        /// <summary>
         /// Gets or sets the 'issuer'.
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.Issuer, Required = Required.Default)]
-        public string Issuer { get; set; }
+        public override string Issuer { get; set; }
 
         /// <summary>
         /// Gets or sets the 'jwks_uri'
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.JwksUri, Required = Required.Default)]
-        public string JwksUri{ get; set; }
+        public string JwksUri { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="JsonWebKeySet"/>
@@ -306,7 +302,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <summary>
         /// Gets the <see cref="ICollection{SecurityKey}"/> that the IdentityProvider indicates are to be used signing tokens.
         /// </summary>
-        public ICollection<SecurityKey> SigningKeys { get; } = new Collection<SecurityKey>();
+        [JsonIgnore]
+        public override ICollection<SecurityKey> SigningKeys { get; } = new Collection<SecurityKey>();
 
         /// <summary>
         /// Gets the collection of 'subject_types_supported'.
@@ -463,6 +460,28 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         }
 
         /// <summary>
+        /// Gets a bool that determines if the 'introspection_endpoint_auth_methods_supported' (IntrospectionEndpointAuthMethodsSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'introspection_endpoint_auth_methods_supported' (IntrospectionEndpointAuthMethodsSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeIntrospectionEndpointAuthMethodsSupported()
+        {
+            return IntrospectionEndpointAuthMethodsSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'introspection_endpoint_auth_signing_alg_values_supported' (IntrospectionEndpointAuthSigningAlgValuesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'introspection_endpoint_auth_signing_alg_values_supported' (IntrospectionEndpointAuthSigningAlgValuesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeIntrospectionEndpointAuthSigningAlgValuesSupported()
+        {
+            return IntrospectionEndpointAuthSigningAlgValuesSupported.Count > 0;
+        }
+
+        /// <summary>
         /// Gets a bool that determines if the 'request_object_encryption_alg_values_supported' (RequestObjectEncryptionAlgValuesSupported) property should be serialized.
         /// This is used by Json.NET in order to conditionally serialize properties.
         /// </summary>
@@ -515,6 +534,17 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public bool ShouldSerializeResponseTypesSupported()
         {
             return ResponseTypesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'SigningKeys' property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>This method always returns false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeSigningKeys()
+        {
+            return false;
         }
 
         /// <summary>

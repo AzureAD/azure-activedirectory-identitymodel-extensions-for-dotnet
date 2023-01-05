@@ -1,33 +1,10 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Reflection;
 using System.Threading;
 using Microsoft.IdentityModel.TestUtils;
@@ -80,7 +57,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
         [Theory, MemberData(nameof(GetMetadataTheoryData))]
         public void GetMetadataTest(DocumentRetrieverTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.GetMetadataTest", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.GetMetadataTest", theoryData);
             try
             {
                 string doc = theoryData.DocumentRetriever.GetDocumentAsync(theoryData.Address, CancellationToken.None).Result;
@@ -91,10 +68,20 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             {
                 aex.Handle((x) =>
                 {
+                    if (x.Data.Count > 0)
+                    {
+                        if (!x.Data.Contains(HttpDocumentRetriever.StatusCode))
+                            context.AddDiff("!x.Data.Contains(HttpResponseConstants.StatusCode)");
+                        if (!x.Data.Contains(HttpDocumentRetriever.ResponseContent))
+                            context.AddDiff("!x.Data.Contains(HttpResponseConstants.ResponseContent)");
+                        IdentityComparer.AreEqual(x.Data[HttpDocumentRetriever.StatusCode], theoryData.ExpectedStatusCode, context);
+                    }
                     theoryData.ExpectedException.ProcessException(x);
                     return true;
                 });
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<DocumentRetrieverTheoryData> GetMetadataTheoryData
@@ -159,6 +146,45 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                     TestId = "AAD common: WsFed"
                 });
 
+                theoryData.Add(new DocumentRetrieverTheoryData
+                {
+                    Address = "https://login.windows.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration",
+                    DocumentRetriever = documentRetriever,
+                    ExpectedException = new ExpectedException(typeof(IOException), "IDX20807:"),
+                    ExpectedStatusCode = HttpStatusCode.BadRequest,
+                    TestId = "Client Miss Configuration"
+                });
+
+                theoryData.Add(new DocumentRetrieverTheoryData
+                {
+                    Address = "https://login.windows.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration",
+                    DocumentRetriever = new HttpDocumentRetriever(HttpResponseMessageUtils.SetupHttpClientThatReturns("ValidJson.json", HttpStatusCode.RequestTimeout)),
+                    TestId = "RequestTimeout_RefreshSucceeds"
+                });
+
+                theoryData.Add(new DocumentRetrieverTheoryData
+                {
+                    Address = "https://login.windows.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration",
+                    DocumentRetriever = new HttpDocumentRetriever(HttpResponseMessageUtils.SetupHttpClientThatReturns("ValidJson.json", HttpStatusCode.ServiceUnavailable)),
+                    TestId = "ServiceUnavailable_RefreshSucceeds"
+                });
+
+                theoryData.Add(new DocumentRetrieverTheoryData
+                {
+                    Address = "https://login.windows.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration",
+                    DocumentRetriever = new HttpDocumentRetriever(HttpResponseMessageUtils.SetupHttpClientThatReturns("ValidJson.json", HttpStatusCode.ServiceUnavailable)),
+                    TestId = "ServiceUnavailable_RefreshSucceeds"
+                });
+
+                theoryData.Add(new DocumentRetrieverTheoryData
+                {
+                    Address = "https://login.windows.net/f686d426-8d16-42db-81b7-ab578e110ccd/.well-known/openid-configuration",
+                    DocumentRetriever = new HttpDocumentRetriever(HttpResponseMessageUtils.SetupHttpClientThatReturns("ValidJson.json", HttpStatusCode.NotFound)),
+                    ExpectedException = new ExpectedException(typeof(IOException), "IDX20807:"),
+                    ExpectedStatusCode = HttpStatusCode.NotFound,
+                    TestId = "NotFound_NoRefresh"
+                });
+
                 return theoryData;
             }
         }
@@ -169,6 +195,8 @@ namespace Microsoft.IdentityModel.Protocols.Tests
         public string Address { get; set; }
 
         public IDocumentRetriever DocumentRetriever { get; set; }
+
+        public HttpStatusCode ExpectedStatusCode { get; set; }
 
         public override string ToString()
         {

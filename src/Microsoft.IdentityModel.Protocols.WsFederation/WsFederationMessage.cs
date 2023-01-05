@@ -1,29 +1,5 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Xml;
@@ -83,10 +59,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <remarks><see cref="WsFederationMessage"/>.IssuerAddress is NOT set/>. Parameters are parsed from <see cref="Uri.Query"/>.</remarks>
         public static WsFederationMessage FromUri(Uri uri)
         {
-            LogHelper.LogVerbose(FormatInvariant(LogMessages.IDX22901, uri.ToString()));
-
             if (uri != null && uri.Query.Length > 1)
+            {
+                LogHelper.LogVerbose(FormatInvariant(LogMessages.IDX22901, uri.ToString()));
                 return FromQueryString(uri.Query.Substring(1));
+            }
 
             return new WsFederationMessage();
         }
@@ -99,7 +76,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             if (wsFederationMessage == null)
             {
-                LogHelper.LogWarning(FormatInvariant(LogMessages.IDX22000, nameof(wsFederationMessage)));
+                LogHelper.LogWarning(FormatInvariant(LogMessages.IDX22000, LogHelper.MarkAsNonPII(nameof(wsFederationMessage))));
                 return;
             }
 
@@ -117,7 +94,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             if (parameters == null)
             {
-                LogHelper.LogWarning(FormatInvariant(LogMessages.IDX22000, nameof(parameters)));
+                LogHelper.LogWarning(FormatInvariant(LogMessages.IDX22000, LogHelper.MarkAsNonPII(nameof(parameters))));
                 return;
             }
 
@@ -176,12 +153,12 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             if (string.IsNullOrEmpty(wresult))
             {
-                LogHelper.LogWarning(FormatInvariant(LogMessages.IDX22000, nameof(wresult)));
+                LogHelper.LogWarning(FormatInvariant(LogMessages.IDX22000, LogHelper.MarkAsNonPII(nameof(wresult))));
                 return null;
             }
 
             // find first <RequestedSecurityToken>
-            var tokenStartIndex = wresult.IndexOf(WsTrustConstants.Elements.RequestedSecurityToken);
+            var tokenStartIndex = wresult.IndexOf(WsTrustConstants.Elements.RequestedSecurityToken, StringComparison.Ordinal);
             if (tokenStartIndex == -1)
             {
                 LogHelper.LogWarning(LogMessages.IDX22904);
@@ -208,7 +185,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             }
 
             // find matching </RequestedSecurityToken>
-            var tokenEndIndex = wresult.IndexOf(WsTrustConstants.Elements.RequestedSecurityToken, tokenStartIndex);
+            var tokenEndIndex = wresult.IndexOf(WsTrustConstants.Elements.RequestedSecurityToken, tokenStartIndex, StringComparison.InvariantCulture);
             if (tokenEndIndex == -1)
             {
                 LogHelper.LogWarning(LogMessages.IDX22904);
@@ -244,24 +221,14 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             if (Wresult == null)
             {
-                LogHelper.LogWarning(FormatInvariant(LogMessages.IDX22000, nameof(Wresult)));
+                LogHelper.LogWarning(FormatInvariant(LogMessages.IDX22000, LogHelper.MarkAsNonPII(nameof(Wresult))));
                 return null;
             }
 
             string token = null;
             using (var sr = new StringReader(Wresult))
+            using (var xmlReader = new XmlTextReader(sr) { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null })
             {
-                var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit };
-#if NET45 || NET451
-                settings.XmlResolver = null;
-#endif
-
-#if NETSTANDARD1_4
-                var xmlReader = XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(Wresult), XmlDictionaryReaderQuotas.Max);
-#else
-                var xmlReader = new XmlTextReader(sr);
-#endif
-
                 // Read StartElement <RequestSecurityTokenResponseCollection> this is possible for wstrust 1.3 and 1.4
                 if (XmlUtil.IsStartElement(xmlReader, WsTrustConstants.Elements.RequestSecurityTokenResponseCollection, WsTrustNamespaceNon2005List))
                     xmlReader.ReadStartElement();
@@ -297,9 +264,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                                         writer.WriteNode(xmlReader, true);
                                         writer.Flush();
                                     }
-                                    ms.Seek(0, SeekOrigin.Begin);
-                                    var tokenBytes = ms.ToArray();
-                                    token = Encoding.UTF8.GetString(tokenBytes);
+                                    token = Encoding.UTF8.GetString(ms.GetBuffer(), 0, (int)ms.Length);
                                 }
 
                                 // </RequestedSecurityToken>
@@ -324,11 +289,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 if (token == null)
                     throw LogExceptionMessage(new WsFederationException(LogMessages.IDX22902));
 
-#if NETSTANDARD1_4
-                return Wresult.Contains("%0D") ? GetToken(Wresult) : token;
-#else
                 return token;
-#endif
             }
         }
 

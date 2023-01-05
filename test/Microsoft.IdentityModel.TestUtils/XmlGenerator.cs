@@ -1,29 +1,5 @@
-﻿//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -48,7 +24,9 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static string Generate(XmlEement dataElement)
         {
-            var stringBuilder = new StringBuilder($"<{dataElement.Name}>");
+            int initialCapacity = (dataElement.Name.Length + 3) * 2;
+            var stringBuilder = new StringBuilder(initialCapacity);
+            stringBuilder.Append('<').Append(dataElement.Name).Append('>');
             if (dataElement.Value is string str)
                 stringBuilder.Append(str);
             else if (dataElement.Value is XmlEement element)
@@ -59,7 +37,7 @@ namespace Microsoft.IdentityModel.TestUtils
             else
                 throw new TestException($"dataElement.Value must be of type: '{typeof(string)}' or '{typeof(XmlEement)} or '{typeof(List<XmlEement>)}' was: {dataElement.Value.GetType()}.");
 
-            stringBuilder.Append($"</{dataElement.Name}>");
+            stringBuilder.Append("</").Append(dataElement.Name).Append('>');
             return stringBuilder.ToString();
         }
     }
@@ -358,7 +336,7 @@ namespace Microsoft.IdentityModel.TestUtils
             writer.Flush();
 
             // for debugging purposes use a local variable.
-            var retval = Encoding.UTF8.GetString(memoryStream.ToArray());
+            var retval = Encoding.UTF8.GetString(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
             return retval;
         }
 
@@ -370,7 +348,7 @@ namespace Microsoft.IdentityModel.TestUtils
             serializer.WriteSignedInfo(writer, signedInfo);
             writer.Flush();
 
-            var retval = Encoding.UTF8.GetString(memoryStream.ToArray());
+            var retval = Encoding.UTF8.GetString(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
             return retval;
         }
 
@@ -393,7 +371,7 @@ namespace Microsoft.IdentityModel.TestUtils
             serializer.WriteReference(writer, reference);
             writer.Flush();
 
-            var retval = Encoding.UTF8.GetString(memoryStream.ToArray());
+            var retval = Encoding.UTF8.GetString(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
             return retval;
         }
 
@@ -450,10 +428,10 @@ namespace Microsoft.IdentityModel.TestUtils
         public static string TransformsXml(string prefix, List<string> transforms, string @namespace)
         {
             var stringBuilder = new StringBuilder();
-            stringBuilder.Append($"<{prefix}Transforms {@namespace}>");
+            stringBuilder.Append('<').Append(prefix).Append("Transforms ").Append(@namespace).Append('>');
             foreach (var transform in transforms)
                 stringBuilder.Append(transform);
-            stringBuilder.Append($"</{prefix}Transforms >");
+            stringBuilder.Append("</").Append(prefix).Append("Transforms >");
 
             return stringBuilder.ToString();
         }

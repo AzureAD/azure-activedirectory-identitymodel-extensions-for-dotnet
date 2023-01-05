@@ -1,7 +1,7 @@
 param(
     [string]$buildType="Debug",
     [string]$dotnetDir="c:\Program Files\dotnet",
-    [string]$msbuildDir="C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin",
+    [string]$msbuildDir="C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin",
     [string]$root=$PSScriptRoot,
     [string]$runTests="YES",
     [string]$failBuildOnTest="YES",
@@ -63,6 +63,14 @@ function ClearBaselineFiles($root)
 }
 
 ################################################# Functions ############################################################
+
+if ($env:VSINSTALLDIR)
+{
+    if (Test-Path($env:VSINSTALLDIR+"\MSBuild\Current\Bin"))
+    {
+        $msbuildDir = $env:VSINSTALLDIR+"\MSBuild\Current\Bin";
+    }
+}
 
 WriteSectionHeader("build.ps1 - parameters");
 Write-Host "buildType:                  " $buildType;
@@ -172,8 +180,8 @@ if ($runTests -eq "YES")
             Write-Host ">>> Set-Location $root\test\$name"
             pushd
             Set-Location $root\test\$name
-            Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'test $name.csproj' --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -v q -c $buildType"
-            $p = Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "test $name.csproj --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -v q -c $buildType"
+            Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'test $name.csproj' --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -v n -c $buildType"
+            $p = Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "test $name.csproj --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -v n -c $buildType"
 
             if($p.ExitCode -ne 0)
             {

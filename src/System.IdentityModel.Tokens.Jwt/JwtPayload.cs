@@ -1,32 +1,9 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Json.Linq;
@@ -62,11 +39,11 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Initializes a new instance of the <see cref="JwtPayload"/> class with claims added for each parameter specified. Default string comparer <see cref="StringComparer.Ordinal"/>. 
         /// </summary>
-        /// <param name="issuer">If this value is not null, a { iss, 'issuer' } claim will be added.</param>
-        /// <param name="audience">If this value is not null, a { aud, 'audience' } claim will be added</param>
+        /// <param name="issuer">If this value is not null, a { iss, 'issuer' } claim will be added, overwriting any 'iss' claim in 'claims' if present.</param>
+        /// <param name="audience">If this value is not null, a { aud, 'audience' } claim will be added, appending to any 'aud' claims in 'claims' if present.</param>
         /// <param name="claims">If this value is not null then for each <see cref="Claim"/> a { 'Claim.Type', 'Claim.Value' } is added. If duplicate claims are found then a { 'Claim.Type', List&lt;object&gt; } will be created to contain the duplicate values.</param>
-        /// <param name="notBefore">If notbefore.HasValue is 'true' a { nbf, 'value' } claim is added.</param>
-        /// <param name="expires">If expires.HasValue is 'true' a { exp, 'value' } claim is added.</param>
+        /// <param name="notBefore">If notbefore.HasValue a { nbf, 'value' } claim is added, overwriting any 'nbf' claim in 'claims' if present.</param>
+        /// <param name="expires">If expires.HasValue a { exp, 'value' } claim is added, overwriting any 'exp' claim in 'claims' if present.</param>
         public JwtPayload(string issuer, string audience, IEnumerable<Claim> claims, DateTime? notBefore, DateTime? expires)
            : this(issuer, audience, claims, notBefore, expires, null)
         {
@@ -75,14 +52,14 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Initializes a new instance of the <see cref="JwtPayload"/> class with claims added for each parameter specified. Default string comparer <see cref="StringComparer.Ordinal"/>. 
         /// </summary>
-        /// <param name="issuer">If this value is not null, a { iss, 'issuer' } claim will be added.</param>
-        /// <param name="audience">If this value is not null, a { aud, 'audience' } claim will be added</param>
+        /// <param name="issuer">If this value is not null, a { iss, 'issuer' } claim will be added, overwriting any 'iss' claim in 'claims' if present.</param>
+        /// <param name="audience">If this value is not null, a { aud, 'audience' } claim will be added, appending to any 'aud' claims in 'claims' if present.</param>
         /// <param name="claims">If this value is not null then for each <see cref="Claim"/> a { 'Claim.Type', 'Claim.Value' } is added. If duplicate claims are found then a { 'Claim.Type', List&lt;object&gt; } will be created to contain the duplicate values.</param>
-        /// <param name="notBefore">If notbefore.HasValue is 'true' a { nbf, 'value' } claim is added.</param>
-        /// <param name="expires">If expires.HasValue is 'true' a { exp, 'value' } claim is added.</param>
-        /// <param name="issuedAt">If issuedAt.HasValue is 'true' a { iat, 'value' } claim is added.</param>
+        /// <param name="notBefore">If notbefore.HasValue a { nbf, 'value' } claim is added, overwriting any 'nbf' claim in 'claims' if present.</param>
+        /// <param name="expires">If expires.HasValue a { exp, 'value' } claim is added, overwriting any 'exp' claim in 'claims' if present.</param>
+        /// <param name="issuedAt">If issuedAt.HasValue is 'true' a { iat, 'value' } claim is added, overwriting any 'iat' claim in 'claims' if present.</param>
         /// <remarks>Comparison is set to <see cref="StringComparer.Ordinal"/>
-        /// <para>The 4 parameters: 'issuer', 'audience', 'notBefore', 'expires' take precednece over <see cref="Claim"/>(s) in 'claims'. The values in 'claims' will be overridden.</para></remarks>
+        /// <para>The 4 parameters: 'issuer', 'audience', 'notBefore', 'expires' take precedence over <see cref="Claim"/>(s) in 'claims'. The values will be overridden.</para></remarks>
         /// <exception cref="ArgumentException">If 'expires' &lt;= 'notbefore'.</exception>
         public JwtPayload(string issuer, string audience, IEnumerable<Claim> claims, DateTime? notBefore, DateTime? expires, DateTime? issuedAt)
             : base(StringComparer.Ordinal)
@@ -90,13 +67,52 @@ namespace System.IdentityModel.Tokens.Jwt
             if (claims != null)
                 AddClaims(claims);
 
+            AddFirstPriorityClaims(issuer, audience, notBefore, expires, issuedAt);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JwtPayload"/> class with claims added for each parameter specified. Default string comparer <see cref="StringComparer.Ordinal"/>. 
+        /// </summary>
+        /// <param name="issuer">If this value is not null, a { iss, 'issuer' } claim will be added, overwriting any 'iss' claim in 'claims' and 'claimCollection' if present.</param>
+        /// <param name="audience">If this value is not null, a { aud, 'audience' } claim will be added, appending to any 'aud' claims in 'claims' or 'claimCollection' if present.</param>
+        /// <param name="claims">If this value is not null then for each <see cref="Claim"/> a { 'Claim.Type', 'Claim.Value' } is added. If duplicate claims are found then a { 'Claim.Type', List&lt;object&gt; } will be created to contain the duplicate values.</param>
+        /// <param name="claimsCollection">If both <paramref name="claims"/> and <paramref name="claimsCollection"/> are not null then the values in claims will be combined with the values in claimsCollection. The values found in claimCollection take precedence over those found in claims, so any duplicate
+        /// values will be overridden.</param>
+        /// <param name="notBefore">If notbefore.HasValue a { nbf, 'value' } claim is added, overwriting any 'nbf' claim in 'claims' and 'claimcollection' if present.</param>
+        /// <param name="expires">If expires.HasValue a { exp, 'value' } claim is added, overwriting any 'exp' claim in 'claims' and 'claimcollection' if present.</param>
+        /// <param name="issuedAt">If issuedAt.HasValue is 'true' a { iat, 'value' } claim is added, overwriting any 'iat' claim in 'claims' and 'claimcollection' if present.</param>
+        /// <remarks>Comparison is set to <see cref="StringComparer.Ordinal"/>
+        /// <para>The 4 parameters: 'issuer', 'audience', 'notBefore', 'expires' take precedence over <see cref="Claim"/>(s) in 'claims' and 'claimcollection'. The values will be overridden.</para></remarks>
+        /// <exception cref="ArgumentException">If 'expires' &lt;= 'notbefore'.</exception>
+        public JwtPayload(string issuer, string audience, IEnumerable<Claim> claims, IDictionary<string, object> claimsCollection, DateTime? notBefore, DateTime? expires, DateTime? issuedAt)
+            : base(StringComparer.Ordinal)
+        {
+            if (claims != null)
+                AddClaims(claims);
+
+            if (claimsCollection != null && claimsCollection.Any())
+                AddDictionaryClaims(claimsCollection);
+
+            AddFirstPriorityClaims(issuer, audience, notBefore, expires, issuedAt);
+        }
+
+        /// <summary>
+        /// Adds Nbf, Exp, Iat, Iss and Aud claims to payload
+        /// </summary>
+        /// <param name="issuer">If this value is not null, a { iss, 'issuer' } claim will be added, overwriting any 'iss' claim in <see cref="JwtPayload"/> instance.</param>
+        /// <param name="audience">If this value is not null, a { aud, 'audience' } claim will be added, appending to any 'aud' claims in <see cref="JwtPayload"/> instance.</param>
+        /// <param name="notBefore">If notbefore.HasValue a { nbf, 'value' } claim is added, overwriting any 'nbf' claim in <see cref="JwtPayload"/> instance.</param>
+        /// <param name="expires">If expires.HasValue a { exp, 'value' } claim is added, overwriting any 'exp' claim in <see cref="JwtPayload"/> instance.</param>
+        /// <param name="issuedAt">If issuedAt.HasValue is 'true' a { iat, 'value' } claim is added, overwriting any 'iat' claim in <see cref="JwtPayload"/> instance.</param>
+        internal void AddFirstPriorityClaims(string issuer, string audience, DateTime? notBefore, DateTime? expires, DateTime? issuedAt)
+        {
             if (expires.HasValue)
             {
                 if (notBefore.HasValue)
                 {
                     if (notBefore.Value >= expires.Value)
                     {
-                        throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12401, expires.Value, notBefore.Value)));
+                        throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12401, LogHelper.MarkAsNonPII(expires.Value), LogHelper.MarkAsNonPII(notBefore.Value))));
                     }
 
                     this[JwtRegisteredClaimNames.Nbf] = EpochTime.GetIntDate(notBefore.Value.ToUniversalTime());
@@ -300,6 +316,18 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
+        /// Gets the 'value' of the 'issued at' claim { iat, 'value' } converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
+        /// </summary>
+        /// <remarks>If the 'issued at' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
+        public DateTime IssuedAt
+        {
+            get
+            {
+                return this.GetDateTime(JwtRegisteredClaimNames.Iat);
+            }
+        }
+		
+        /// <summary>
         /// Gets a <see cref="IEnumerable{Claim}"/><see cref="Claim"/> for each JSON { name, value }.
         /// </summary>
         /// <remarks>Each <see cref="Claim"/>(s) returned will have the <see cref="Claim.Type"/> translated according to the mapping found in <see cref="JwtSecurityTokenHandler.InboundClaimTypeMap"/>. Adding and removing to <see cref="JwtSecurityTokenHandler.InboundClaimTypeMap"/> will affect the value of the <see cref="Claim.Type"/>.
@@ -354,7 +382,11 @@ namespace System.IdentityModel.Tokens.Jwt
                                 continue;
                             }
 
-                            claims.Add(new Claim(keyValuePair.Key, JsonConvert.SerializeObject(obj), GetClaimValueType(obj), issuer, issuer));
+                            // DateTime claims require special processing. JsonConvert.SerializeObject(obj) will result in "\"dateTimeValue\"". The quotes will be added.
+                            if (obj is DateTime dateTimeValue)
+                                claims.Add(new Claim(keyValuePair.Key, dateTimeValue.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, issuer, issuer));
+                            else
+                                claims.Add(new Claim(keyValuePair.Key, JsonConvert.SerializeObject(obj), GetClaimValueType(obj), issuer, issuer));
                         }
 
                         continue;
@@ -369,14 +401,18 @@ namespace System.IdentityModel.Tokens.Jwt
                         continue;
                     }
 
-                    claims.Add(new Claim(keyValuePair.Key, JsonConvert.SerializeObject(keyValuePair.Value), GetClaimValueType(keyValuePair.Value), issuer, issuer));
+                    // DateTime claims require special processing. JsonConvert.SerializeObject(keyValuePair.Value) will result in "\"dateTimeValue\"". The quotes will be added.
+                    if (keyValuePair.Value is DateTime dateTime)
+                        claims.Add(new Claim(keyValuePair.Key, dateTime.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, issuer, issuer));
+                    else
+                        claims.Add(new Claim(keyValuePair.Key, JsonConvert.SerializeObject(keyValuePair.Value), GetClaimValueType(keyValuePair.Value), issuer, issuer));
                 }
 
                 return claims;
             }
         }
 
-        private void AddClaimsFromJToken(List<Claim> claims, string claimType, JToken jtoken, string issuer)
+        private static void AddClaimsFromJToken(List<Claim> claims, string claimType, JToken jtoken, string issuer)
         {
             if (jtoken.Type == JTokenType.Object)
             {
@@ -410,7 +446,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
         }
 
-        private void AddDefaultClaimFromJToken(List<Claim> claims, string claimType, JToken jtoken, string issuer)
+        private static void AddDefaultClaimFromJToken(List<Claim> claims, string claimType, JToken jtoken, string issuer)
         {
             JValue jvalue = jtoken as JValue;
             if (jvalue != null)
@@ -419,6 +455,9 @@ namespace System.IdentityModel.Tokens.Jwt
                 // Boolean needs item.ToString otherwise 'true' => 'True'
                 if (jvalue.Type == JTokenType.String)
                     claims.Add(new Claim(claimType, jvalue.Value.ToString(), ClaimValueTypes.String, issuer, issuer));
+                // DateTime claims require special processing. jtoken.ToString(Formatting.None) will result in "\"dateTimeValue\"". The quotes will be added.
+                else if (jvalue.Value is DateTime dateTimeValue)
+                    claims.Add(new Claim(claimType, dateTimeValue.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, issuer, issuer));
                 else
                     claims.Add(new Claim(claimType, jtoken.ToString(Formatting.None), GetClaimValueType(jvalue.Value), issuer, issuer));
             }
@@ -435,11 +474,9 @@ namespace System.IdentityModel.Tokens.Jwt
         public void AddClaim(Claim claim)
         {
             if (claim == null)
-            {
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("claim"));
-            }
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(claim)));
 
-            this.AddClaims(new Claim[] { claim });
+            AddClaims(new Claim[] { claim });
         }
 
         /// <summary>
@@ -448,13 +485,11 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="claims">For each <see cref="Claim"/> a JSON pair { 'Claim.Type', 'Claim.Value' } is added. If duplicate claims are found then a { 'Claim.Type', List&lt;object&gt; } will be created to contain the duplicate values.</param>
         /// <remarks>
         /// <para>Any <see cref="Claim"/> in the <see cref="IEnumerable{Claim}"/> that is null, will be ignored.</para></remarks>
-        /// <exception cref="ArgumentNullException">'claims' is null.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="claims"/> is null.</exception>
         public void AddClaims(IEnumerable<Claim> claims)
         {
             if (claims == null)
-            {
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException("claims"));
-            }
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(claims)));
 
             foreach (Claim claim in claims)
             {
@@ -464,7 +499,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
 
                 string jsonClaimType = claim.Type;
-                object jsonClaimValue = claim.ValueType.Equals(ClaimValueTypes.String, StringComparison.Ordinal) ? claim.Value : GetClaimValueUsingValueType(claim);
+                object jsonClaimValue = claim.ValueType.Equals(ClaimValueTypes.String) ? claim.Value : TokenUtilities.GetClaimValueUsingValueType(claim);
                 object existingValue;
 
                 // If there is an existing value, append to it.
@@ -488,60 +523,18 @@ namespace System.IdentityModel.Tokens.Jwt
             }
         }
 
-        internal static object GetClaimValueUsingValueType(Claim claim)
+        /// <summary>
+        /// Adds claims from dictionary.
+        /// </summary>
+        /// <param name="claimsCollection"> A dictionary of claims.</param>
+        /// <remark> If a key is already present in target dictionary, its value is overridden by the value of the key in claimsCollection.</remark>
+        internal void AddDictionaryClaims(IDictionary<string, object> claimsCollection)
         {
-            if (claim.ValueType == ClaimValueTypes.Boolean)
-            {
-                bool boolValue;
-                if (bool.TryParse(claim.Value, out boolValue))
-                {
-                    return boolValue;
-                }
-            }
+            if (claimsCollection == null)
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(claimsCollection)));
 
-            if (claim.ValueType == ClaimValueTypes.Double)
-            {
-                double doubleValue;
-                if (double.TryParse(claim.Value, out doubleValue))
-                {
-                    return doubleValue;
-                }
-            }
-
-            if (claim.ValueType == ClaimValueTypes.Integer || claim.ValueType == ClaimValueTypes.Integer32)
-            {
-                int intValue;
-                if (int.TryParse(claim.Value, out intValue))
-                {
-                    return intValue;
-                }
-            }
-
-            if (claim.ValueType == ClaimValueTypes.Integer64)
-            {
-                long intValue;
-                if (long.TryParse(claim.Value, out intValue))
-                {
-                    return intValue;
-                }
-            }
-
-            if (claim.ValueType == JsonClaimValueTypes.Json)
-            {
-                return JObject.Parse(claim.Value);
-            }
-
-            if (claim.ValueType == JsonClaimValueTypes.JsonArray)
-            {
-                return JArray.Parse(claim.Value);
-            }
-
-            if (claim.ValueType == JsonClaimValueTypes.JsonNull)
-            {
-                return string.Empty;
-            }
-
-            return claim.Value;
+            foreach (string type in claimsCollection.Keys)
+                this[type] = claimsCollection[type];
         }
 
         internal static string GetClaimValueType(object obj)
@@ -571,6 +564,9 @@ namespace System.IdentityModel.Tokens.Jwt
 
                 return ClaimValueTypes.Integer64;
             }
+
+            if (objType == typeof(DateTime))
+                return ClaimValueTypes.DateTime;
 
             if (objType == typeof(JObject))
                 return JsonClaimValueTypes.Json;
@@ -735,12 +731,12 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (ex is FormatException || ex is ArgumentException || ex is InvalidCastException)
                 {
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(LogMessages.IDX12700, key, (dateValue ?? "<null>")), ex));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(LogMessages.IDX12700, key, LogHelper.MarkAsNonPII((dateValue ?? "Null"))), ex));
                 }
 
                 if (ex is OverflowException)
                 {
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(LogMessages.IDX12701, key, (dateValue ?? "<null>")), ex));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(LogMessages.IDX12701, key, LogHelper.MarkAsNonPII((dateValue ?? "Null"))), ex));
                 }
 
                 throw;

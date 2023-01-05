@@ -1,29 +1,5 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -56,6 +32,7 @@ namespace Microsoft.IdentityModel.TestUtils
             {
                 { typeof(bool).ToString(), AreBoolsEqual },
                 { typeof(Collection<SecurityKey>).ToString(), ContinueCheckingEquality },
+                { typeof(DateTime).ToString(), AreDateTimesEqual },
                 { typeof(Dictionary<string, object>).ToString(), AreObjectDictionariesEqual },
                 { typeof(Dictionary<string, object>.ValueCollection).ToString(), AreValueCollectionsEqual },
                 { typeof(IEnumerable<Claim>).ToString(), AreClaimsEnumsEqual },
@@ -148,6 +125,14 @@ namespace Microsoft.IdentityModel.TestUtils
                 { typeof(SecurityKey).ToString(), CompareAllPublicProperties },
                 { typeof(SecurityToken).ToString(), CompareAllPublicProperties},
                 { typeof(SecurityTokenHandler).ToString(), CompareAllPublicProperties},
+                { typeof(SecurityTokenExpiredException).ToString(), CompareAllPublicProperties},
+                { typeof(SecurityTokenInvalidAlgorithmException).ToString(), CompareAllPublicProperties},
+                { typeof(SecurityTokenInvalidAudienceException).ToString(), CompareAllPublicProperties},
+                { typeof(SecurityTokenInvalidIssuerException).ToString(), CompareAllPublicProperties},
+                { typeof(SecurityTokenInvalidSigningKeyException).ToString(), CompareAllPublicProperties},
+                { typeof(SecurityTokenInvalidLifetimeException).ToString(), CompareAllPublicProperties},
+                { typeof(SecurityTokenInvalidTypeException).ToString(), CompareAllPublicProperties},
+                { typeof(SecurityTokenNotYetValidException).ToString(), CompareAllPublicProperties},
                 { typeof(Signature).ToString(), CompareAllPublicProperties },
                 { typeof(SignedInfo).ToString(), CompareAllPublicProperties },
                 { typeof(SigningCredentials).ToString(), CompareAllPublicProperties },
@@ -164,12 +149,12 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static bool AreBoolsEqual(object object1, object object2, CompareContext context)
         {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, localContext))
+                return context.Merge(localContext);
+
             var bool1 = (bool)object1;
             var bool2 = (bool)object2;
-
-            var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(bool1, bool2, localContext))
-                return context.Merge(localContext);
 
             if (bool1 == bool2)
                 return true;
@@ -255,13 +240,14 @@ namespace Microsoft.IdentityModel.TestUtils
             return AreEnumsEqual<X509Data>(object1 as IEnumerable<X509Data>, object2 as IEnumerable<X509Data>, context, AreEqual);
         }
 
-        public static bool AreEnumsEqual<T>(IEnumerable<T> t1, IEnumerable<T> t2, CompareContext context, Func<T, T, CompareContext, bool> areEqual)
+        public static bool AreEnumsEqual<T>(IEnumerable<T> object1, IEnumerable<T> object2, CompareContext context, Func<T, T, CompareContext, bool> areEqual)
         {
-            List<T> toMatch = new List<T>(t1);
-            List<T> expectedValues = new List<T>(t2);
+            List<T> toMatch = (object1 == null) ? new List<T>() : new List<T>(object1);
+            List<T> expectedValues = (object2 == null) ? new List<T>() : new List<T>(object2);
+
             if (toMatch.Count != expectedValues.Count)
             {
-                context.Diffs.Add("toMatch.Count != expectedToMatch.Count: " + toMatch.Count + ", " + expectedValues.Count + ", typeof: " + t1.GetType().ToString());
+                context.Diffs.Add("toMatch.Count != expectedToMatch.Count: " + toMatch.Count + ", " + expectedValues.Count + ", typeof: " + object1.GetType().ToString());
                 return false;
             }
 
@@ -272,7 +258,7 @@ namespace Microsoft.IdentityModel.TestUtils
             
             // helps debugging to see what didn't match
             List<T> notMatched = new List<T>();
-            foreach (var t in t1)
+            foreach (var t in object1)
             {
                 var perItemContext = new CompareContext(localContext);
                 bool matched = false;
@@ -340,39 +326,46 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static bool AreClaimsEnumsEqual(object object1, object object2, CompareContext context)
         {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, localContext))
+                return context.Merge(localContext);
 
-            IEnumerable<Claim> t1 = (IEnumerable<Claim>)object1;
-            IEnumerable<Claim> t2 = (IEnumerable<Claim>)object2;
+            var claims1 = new List<Claim>();
+            foreach (Claim c1 in (IEnumerable<Claim>)object1)
+                if (!context.ClaimTypesToIgnoreWhenComparing.Contains(c1.Type))
+                    claims1.Add(c1);
 
-            var claims1 = new List<Claim>(t1);
-            var claims2 = new List<Claim>(t2);
+            var claims2 = new List<Claim>();
+            foreach (Claim c2 in (IEnumerable<Claim>)object2)
+                if (!context.ClaimTypesToIgnoreWhenComparing.Contains(c2.Type))
+                    claims2.Add(c2);
+
             if (claims1.Count != claims2.Count)
             {
-                context.Diffs.Add($"claims1.Count != claims2.Count: {claims1.Count}, {claims2.Count}");
-                context.Diffs.Add("claims1:");
+                localContext.Diffs.Add($"claims1.Count != claims2.Count: {claims1.Count}, {claims2.Count}");
+                localContext.Diffs.Add("claims1:");
                 foreach (var claim in claims1)
-                    context.Diffs.Add(claim.Type + ": " + claim.Value + ": " + claim.ValueType + ": " + claim.Issuer + ": " + claim.OriginalIssuer);
+                    localContext.Diffs.Add(claim.Type + ": " + claim.Value + ": " + claim.ValueType + ": " + claim.Issuer + ": " + claim.OriginalIssuer);
 
-                context.Diffs.Add("claims2:");
+                localContext.Diffs.Add("claims2:");
                 foreach (var claim in claims2)
-                    context.Diffs.Add(claim.Type + ": " + claim.Value + ": " + claim.ValueType + ": " + claim.Issuer + ": " + claim.OriginalIssuer);
+                    localContext.Diffs.Add(claim.Type + ": " + claim.Value + ": " + claim.ValueType + ": " + claim.Issuer + ": " + claim.OriginalIssuer);
             }
 
             int numMatched = 0;
             int numToMatch = claims1.Count;
-            var localContext = new CompareContext(context);
             var matchedClaims = new List<Claim>();
             var notMatched = new List<Claim>();
-            foreach (var t in t1)
+            foreach (Claim claim in claims1)
             {
                 var perClaimContext = new CompareContext(localContext);
                 bool matched = false;
                 for (int i = 0; i < claims2.Count; i++)
                 {
-                    if (AreClaimsEqual(t, claims2[i], perClaimContext))
+                    if (AreClaimsEqual(claim, claims2[i], perClaimContext))
                     {
                         numMatched++;
-                        matchedClaims.Add(t);
+                        matchedClaims.Add(claim);
                         matched = true;
                         claims2.RemoveAt(i);
                         break;
@@ -380,7 +373,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 }
 
                 if (!matched)
-                    notMatched.Add(t);
+                    notMatched.Add(claim);
             }
 
             if (numMatched != numToMatch)
@@ -404,46 +397,31 @@ namespace Microsoft.IdentityModel.TestUtils
             return context.Merge(localContext);
         }
 
-        public static bool AreClaimsIdentitiesEnumsEqual(Object object1, Object object2, CompareContext context)
+        public static bool AreClaimsIdentitiesEnumsEqual(object object1, object object2, CompareContext context)
         {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, localContext))
+                return context.Merge(localContext);
+
             IEnumerable<ClaimsIdentity> t1 = (IEnumerable<ClaimsIdentity>)object1;
             IEnumerable<ClaimsIdentity> t2 = (IEnumerable<ClaimsIdentity>)object2;
-
-            if (t1 == null && t2 == null)
-                return true;
-
-            if (t1 == null)
-            {
-                context.Diffs.Add("t1 == null, t2 != null");
-                return false;
-            }
-
-            if (t2 == null)
-            {
-                context.Diffs.Add("t1 != null, t2 == null");
-                return false;
-            }
-
-            if (ReferenceEquals(t1, t2))
-                return true;
 
             var claimsIdentity1 = new List<ClaimsIdentity>(t1);
             var claimsIdentity2 = new List<ClaimsIdentity>(t2);
             if (claimsIdentity1.Count != claimsIdentity2.Count)
             {
-                context.Diffs.Add($"claimsIdentity1.Count != claimsIdentity2.Count: {claimsIdentity1.Count}, {claimsIdentity2.Count}");
-                context.Diffs.Add("claimsIdentity1:");
+                localContext.Diffs.Add($"claimsIdentity1.Count != claimsIdentity2.Count: {claimsIdentity1.Count}, {claimsIdentity2.Count}");
+                localContext.Diffs.Add("claimsIdentity1:");
                 foreach (var identity in claimsIdentity1)
-                    context.Diffs.Add(identity.Name + ": " + identity.Label + ": " + identity.IsAuthenticated + ": " + identity.AuthenticationType + ": " + identity.RoleClaimType + ": " + identity.NameClaimType);
+                    localContext.Diffs.Add(identity.Name + ": " + identity.Label + ": " + identity.IsAuthenticated + ": " + identity.AuthenticationType + ": " + identity.RoleClaimType + ": " + identity.NameClaimType);
 
-                context.Diffs.Add("claimsIdentity2:");
+                localContext.Diffs.Add("claimsIdentity2:");
                 foreach (var identity in claimsIdentity2)
-                    context.Diffs.Add(identity.Name + ": " + identity.Label + ": " + identity.IsAuthenticated + ": " + identity.AuthenticationType + ": " + identity.RoleClaimType + ": " + identity.NameClaimType);
+                    localContext.Diffs.Add(identity.Name + ": " + identity.Label + ": " + identity.IsAuthenticated + ": " + identity.AuthenticationType + ": " + identity.RoleClaimType + ": " + identity.NameClaimType);
             }
 
             int numMatched = 0;
             int numToMatch = claimsIdentity1.Count;
-            var localContext = new CompareContext(context);
             var matchedClaimsIdentities = new List<ClaimsIdentity>();
             var notMatched = new List<ClaimsIdentity>();
             foreach (var t in t1)
@@ -487,41 +465,57 @@ namespace Microsoft.IdentityModel.TestUtils
             return context.Merge(localContext);
         }
 
-        public static bool AreEqual(object t1, object t2)
+        public static bool AreDateTimesEqual(object object1, object object2, CompareContext context)
         {
-            return AreEqual(t1, t2, CompareContext.Default);
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, localContext))
+                return context.Merge(localContext);
+
+            DateTime dateTime1 = (DateTime)object1;
+            DateTime dateTime2 = (DateTime)object2;
+
+            if (dateTime1 != dateTime2)
+                localContext.Diffs.Add($"dateTime1 != dateTime2. '{dateTime1}' != '{dateTime2}'.");
+
+            return context.Merge(localContext);
         }
 
-        public static bool AreEqual(object t1, object t2, CompareContext context)
+        public static bool AreEqual(object object1, object object2)
+        {
+            return AreEqual(object1, object2, CompareContext.Default);
+        }
+
+        public static bool AreEqual(object object1, object object2, CompareContext context)
         {
             var localContext = new CompareContext(context);
           
             // Check if either t1 or t2 are null or references of each other to see if we can terminate early.
-            if (!ContinueCheckingEquality(t1, t2, localContext))
+            if (!ContinueCheckingEquality(object1, object2, localContext))
                 return context.Merge(localContext);
 
             string inter;
             // Use a special function for comparison if required by the specific class of the object.
-            if (_equalityDict.TryGetValue(t1.GetType().ToString(), out Func<Object, object, CompareContext, bool> areEqual))
+            if (_equalityDict.TryGetValue(object1.GetType().ToString(), out Func<Object, object, CompareContext, bool> areEqual))
             {
-                areEqual(t1, t2, localContext);
+                areEqual(object1, object2, localContext);
             } 
             // Check if any of the interfaces that the class uses require a special function.
-            else if ((inter = t1.GetType().GetInterfaces().Select(t => t.ToString()).Intersect(_equalityDict.Keys).FirstOrDefault()) != null)
+            else if ((inter = object1.GetType().GetInterfaces().Select(t => t.ToString()).Intersect(_equalityDict.Keys).FirstOrDefault()) != null)
             {
-                _equalityDict[inter](t1, t2, localContext);
+                _equalityDict[inter](object1, object2, localContext);
             }
 
             return context.Merge(localContext);
         }
 
-        public static bool AreJArraysEqual(Object object1, Object object2, CompareContext context)
+        public static bool AreJArraysEqual(object object1, object object2, CompareContext context)
         {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, localContext))
+                return context.Merge(localContext);
+
             var a1 = (JArray)object1;
             var a2 = (JArray)object2;
-            var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(a1, a2, localContext))
-                return context.Merge(localContext);
 
             if (a1.Count != a2.Count)
             {
@@ -534,11 +528,12 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static bool AreJObjectsEqual(Object object1, Object object2, CompareContext context)
         {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, localContext))
+                return context.Merge(localContext);
+
             var a1 = (JObject)object1;
             var a2 = (JObject)object2;
-            var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(a1, a2, localContext))
-                return context.Merge(localContext);
 
             if (!JToken.DeepEquals(a1,a2))
             {
@@ -568,19 +563,12 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static bool AreBytesEqual(object object1, object object2, CompareContext context)
         {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, localContext))
+                return context.Merge(localContext);
+
             var bytes1 = (byte[]) object1;
             var bytes2 = (byte[]) object2;
-
-            var localContext = new CompareContext(context);
-            if (bytes1 == null && bytes2 == null)
-            {
-                return true;
-            }
-
-            if (bytes1 == null || bytes2 == null)
-            {
-                localContext.Diffs.Add("(bytes1 == null || bytes2 == null)");
-            }
 
             if (bytes1.Length != bytes2.Length)
             {
@@ -634,12 +622,19 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static bool AreObjectDictionariesEqual(Object object1, Object object2, CompareContext context)
         {
-            IDictionary<string, object> dictionary1 = (IDictionary<string, object>)object1;
-            IDictionary<string, object> dictionary2 = (IDictionary<string, object>)object2;
-
             var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(dictionary1, dictionary2, localContext))
+            if (!ContinueCheckingEquality(object1, object2, localContext))
                 return context.Merge(localContext);
+
+            IDictionary<string,object> dictionary1 = new Dictionary<string, object>();
+            foreach (var kv in (IDictionary<string, object>)object1)
+                if (!context.DictionaryKeysToIgnoreWhenComparing.Contains(kv.Key))
+                    dictionary1.Add(kv);
+
+            IDictionary<string, object> dictionary2 = new Dictionary<string, object>();
+            foreach (var kv in (IDictionary<string, object>)object2)
+                if (!context.DictionaryKeysToIgnoreWhenComparing.Contains(kv.Key))
+                    dictionary2.Add(kv);
 
             if (dictionary1.Count != dictionary2.Count)
                 localContext.Diffs.Add($"(dictionary1.Count != dictionary2.Count: {dictionary1.Count}, {dictionary2.Count})");
@@ -647,6 +642,9 @@ namespace Microsoft.IdentityModel.TestUtils
             int numMatched = 0;
             foreach (string key in dictionary1.Keys)
             {
+                if (context.ClaimTypesToIgnoreWhenComparing.Contains(key))
+                    continue;
+
                 if (dictionary2.ContainsKey(key))
                 {
                     if (dictionary1[key].GetType() != dictionary2[key].GetType())
@@ -677,14 +675,50 @@ namespace Microsoft.IdentityModel.TestUtils
             return context.Merge(localContext);
         }
 
-        public static bool AreStringDictionariesEqual(Object object1, Object object2, CompareContext context)
+        public static bool AreStingEnumDictionariesEqual(IDictionary<string, IEnumerable<string>> dictionary1, IDictionary<string, IEnumerable<string>> dictionary2, CompareContext context)
         {
-            IDictionary<string, string> dictionary1 = (IDictionary<string, string>)object1;
-            IDictionary<string, string> dictionary2 = (IDictionary<string, string>)object2;
-
             var localContext = new CompareContext(context);
             if (!ContinueCheckingEquality(dictionary1, dictionary2, localContext))
                 return context.Merge(localContext);
+
+            if (dictionary1.Count != dictionary2.Count)
+                localContext.Diffs.Add($"(dictionary1.Count != dictionary2.Count: {dictionary1.Count}, {dictionary2.Count})");
+
+            int numMatched = 0;
+            foreach (string key in dictionary1.Keys)
+            {
+                if (dictionary2.ContainsKey(key))
+                {
+                    var obj1 = dictionary1[key];
+                    var obj2 = dictionary2[key];
+                    if (obj1.GetType().BaseType == typeof(System.ValueType))
+                    {
+                        if (!obj1.Equals(obj2))
+                            localContext.Diffs.Add(BuildStringDiff(key, obj1, obj2));
+                    }
+                    else
+                    {
+                        if (AreEqual(obj1, obj2, context))
+                            numMatched++;
+                    }
+                }
+                else
+                {
+                    localContext.Diffs.Add("dictionary1[key] ! found in dictionary2. key: " + key);
+                }
+            }
+
+            return context.Merge(localContext);
+        }
+
+        public static bool AreStringDictionariesEqual(Object object1, Object object2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, localContext))
+                return context.Merge(localContext);
+
+            IDictionary<string, string> dictionary1 = (IDictionary<string, string>)object1;
+            IDictionary<string, string> dictionary2 = (IDictionary<string, string>)object2;
 
             if (dictionary1.Count != dictionary2.Count)
                 localContext.Diffs.Add($"(dictionary1.Count != dictionary2.Count: {dictionary1.Count}, {dictionary2.Count})");
@@ -754,12 +788,12 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static bool AreRsaParametersEqual(object object1, object object2, CompareContext context)
         {
-            RSAParameters rsaParameters1 = (RSAParameters) object1;
-            RSAParameters rsaParameters2 = (RSAParameters) object2;
-
             var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(rsaParameters1, rsaParameters2, localContext))
+            if (!ContinueCheckingEquality(object1, object2, localContext))
                 return context.Merge(localContext);
+
+            RSAParameters rsaParameters1 = (RSAParameters)object1;
+            RSAParameters rsaParameters2 = (RSAParameters)object2;
 
             if (!AreBytesEqual(rsaParameters1.D, rsaParameters2.D, context))
             {
@@ -814,12 +848,12 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static bool AreStringsEqual(object object1, object object2, CompareContext context)
         {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, localContext))
+                return context.Merge(localContext);
+
             string str1 = (string)object1;
             string str2 = (string)object2;
-
-            var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(str1, str2, localContext))
-                return context.Merge(localContext);
 
             if (string.IsNullOrEmpty(str1) && string.IsNullOrEmpty(str2))
                 return true;
@@ -843,12 +877,12 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static bool AreUrisEqual(object object1, object object2, CompareContext context)
         {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, localContext))
+                return context.Merge(localContext);
+
             Uri uri1 = (Uri)object1;
             Uri uri2 = (Uri)object2;
-
-            var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(uri1, uri2, localContext))
-                return context.Merge(localContext);
 
             if (!string.Equals(uri1.OriginalString, uri2.OriginalString, context.StringComparison))
             {
@@ -899,10 +933,12 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static bool AreX509Certificate2Equal(object object1, object object2, CompareContext context)
         {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, localContext))
+                return context.Merge(localContext);
+
             var certificate1 = (X509Certificate2)object1;
             var certificate2 = (X509Certificate2)object2;
-
-            var localContext = new CompareContext(context);
 
             if (certificate1 == null && certificate2 == null)
                 return true;
@@ -979,13 +1015,13 @@ namespace Microsoft.IdentityModel.TestUtils
                             localContext.Diffs.Add(BuildStringDiff(propertyInfo.Name, val1, val2));
                         }
 #if CrossVersionTokenValidation
-                        else if (type == typeof(ClaimsIdentity) && String.Equals(propertyInfo.Name, "AuthenticationType", StringComparison.Ordinal) && String.Equals(Convert.ToString(val1), AuthenticationTypes.Federation, StringComparison.Ordinal) && String.Equals(Convert.ToString(val2), "AuthenticationTypes.Federation", StringComparison.Ordinal))
+                        else if (type == typeof(ClaimsIdentity) && String.Equals(propertyInfo.Name, "AuthenticationType") && String.Equals(Convert.ToString(val1), AuthenticationTypes.Federation) && String.Equals(Convert.ToString(val2), "AuthenticationTypes.Federation"))
                             continue;
-                        else if (type == typeof(Claim) && String.Equals(propertyInfo.Name, "Value", StringComparison.Ordinal) && (String.Equals((val1 as string), "urn:oasis:names:tc:SAML:1.0:am:password", StringComparison.Ordinal) || String.Equals((val2 as string), "urn:oasis:names:tc:SAML:1.0:am:password", StringComparison.Ordinal)))
+                        else if (type == typeof(Claim) && String.Equals(propertyInfo.Name, "Value") && (String.Equals((val1 as string), "urn:oasis:names:tc:SAML:1.0:am:password") || String.Equals((val2 as string), "urn:oasis:names:tc:SAML:1.0:am:password")))
                             continue;
-                        else if (type == typeof(ClaimsPrincipal) && String.Equals(propertyInfo.Name, "Claims", StringComparison.Ordinal) && (val1 as IEnumerable<Claim>).Count() == 0)
+                        else if (type == typeof(ClaimsPrincipal) && String.Equals(propertyInfo.Name, "Claims") && (val1 as IEnumerable<Claim>).Count() == 0)
                             continue;
-                        else if (type == typeof(ClaimsIdentity) && String.Equals(propertyInfo.Name, "Claims", StringComparison.Ordinal) && (val1 as IEnumerable<Claim>).Count() == 0)
+                        else if (type == typeof(ClaimsIdentity) && String.Equals(propertyInfo.Name, "Claims") && (val1 as IEnumerable<Claim>).Count() == 0)
                             continue;
 #endif
                         else if (val1.GetType().BaseType == typeof(System.ValueType) && !_equalityDict.Keys.Contains(val1.GetType().ToString()))
@@ -1033,7 +1069,10 @@ namespace Microsoft.IdentityModel.TestUtils
                 return false;
 
             if (!context.IgnoreType && (obj1.GetType() != obj2.GetType()))
-                context.Diffs.Add($"obj1.GetType() != obj2.GetType(). '{obj1} : {obj2}'");
+            {
+                context.Diffs.Add($"obj1.GetType() != obj2.GetType(). '{obj1.GetType()} : {obj2.GetType()}'");
+                return false;
+            }
 
             return true;
         }

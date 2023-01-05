@@ -7,49 +7,72 @@ if(($root -eq $null) -or ($root -eq [System.String]::Empty))
 
 $srcPath = $root + "\src"
 
-Write-Host ">>> Searching for sn.exe..."
-$snTools = Get-ChildItem ${env:ProgramFiles(x86)}\sn.exe -recurse -ErrorAction Ignore | Sort-Object LastWriteTime -descending
 $snTool = $null
+if([System.IO.File]::Exists("C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\sn.exe"))
+{
+    $snTool = Get-ChildItem "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\sn.exe"
+}
+
 $snToolx64 = $null
-foreach ($tool in $snTools)
+if([System.IO.File]::Exists("C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\x64\sn.exe"))
 {
-    if ($tool.DirectoryName.Contains("x64") -and ($snToolx64 -eq $null))
-    {
-        $snToolx64 = $tool
-    }
-    elseif ((-not $tool.DirectoryName.Contains("x64")) -and ($snTool -eq $null))
-    {
-        $snTool = $tool
-    }
+    $snToolx64 = Get-ChildItem "C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\x64\sn.exe"
+}
 
-    if (($snTool -ne $null) -and ($snToolx64 -ne $null))
+if (($snTool -eq $null) -or ($snToolx64 -eq $null))
+{
+    Write-Host ">>> Searching for sn.exe..."
+    $snTools = Get-ChildItem ${env:ProgramFiles(x86)}\sn.exe -recurse -ErrorAction Ignore | Sort-Object LastWriteTime -descending
+    foreach ($tool in $snTools)
     {
-        break
+        if ($tool.DirectoryName.Contains("x64") -and ($snToolx64 -eq $null))
+        {
+            $snToolx64 = $tool
+        }
+        elseif ((-not $tool.DirectoryName.Contains("x64")) -and ($snTool -eq $null))
+        {
+            $snTool = $tool
+        }
+    
+        if (($snTool -ne $null) -and ($snToolx64 -ne $null))
+        {
+            break
+        }
+    }
+    
+    if (($snTool -eq $null) -and ($snToolx64 -eq $null))
+    {
+        Write-Error ">>> Can not find strong name tool..."
+        exit $LASTEXITCODE
     }
 }
 
-if (($snTool -eq $null) -and ($snToolx64 -eq $null))
-{
-    Write-Host ">>> Can not find strong name tool..."
-    exit $LASTEXITCODE
-}
 
-Write-Host ">>> Searching for signtool.exe..."
-$signTools = Get-ChildItem ${env:ProgramFiles(x86)}\signtool.exe -recurse -ErrorAction Ignore | Sort-Object LastWriteTime -descending
 $signTool = $null
-foreach ($tool in $signTools)
+if([System.IO.File]::Exists("C:\Program Files (x86)\Windows Kits\10\bin\10.0.17763.0\x86\signtool.exe"))
 {
-    if ($tool.DirectoryName.Contains("x64"))
-    {
-        $signTool = $tool
-        break
-    }
+    $signTool = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin\10.0.17763.0\x86\signtool.exe"
 }
 
 if ($signTool -eq $null)
 {
-    Write-Host ">>> Can not find signtool.exe..."
-    exit $LASTEXITCODE
+    Write-Error ">>> Searching for signtool.exe..."
+    $signTools = Get-ChildItem ${env:ProgramFiles(x86)}\signtool.exe -recurse -ErrorAction Ignore | Sort-Object LastWriteTime -descending
+
+    foreach ($tool in $signTools)
+    {
+        if ($tool.DirectoryName.Contains("x64"))
+        {
+            $signTool = $tool
+            break
+        }
+    }
+
+    if ($signTool -eq $null)
+    {
+        Write-Error ">>> Can not find signtool.exe..."
+        exit $LASTEXITCODE
+    }
 }
 
 Write-Host "Verify Signing..."
@@ -68,6 +91,14 @@ foreach ($project in $projects)
     {
         $name = $project.name
         $file = Get-ChildItem $srcPath\$name\bin\$buildType\$runtime\$name.dll 2>&1
+
+        if (-not $?)
+        {
+            Write-Warning ("Assembly not found: " + $name + "(" + $runtime + ")")
+            Continue
+        }
+
+        Write-Host ("Verifing: " +  $file.FullName)
         if ( $? )
         {
             $snParams[1] = $file
@@ -93,17 +124,19 @@ foreach ($project in $projects)
 
             if ($unSigned)
             {
-                Write-Host "$file is not correctly strong-named signed."
+                Write-Error ($file.FullName + " is not correctly strong-named signed.")
             }
 
-            $signParams[2] = $file.Name
+            $signParams[2] = $file
             $x = & "$signTool" $signParams 2>&1
             if (-not $?)
             {
-                Write-Host "$file is not Authentication signed."
+                Write-Error ($file.FullName + " is not Authentication signed.")
             }
         }
     }
 }
+
+Write-Host "Verify Signing - Done."
 
 exit $exitCode

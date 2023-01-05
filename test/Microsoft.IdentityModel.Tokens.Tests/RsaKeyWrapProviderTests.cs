@@ -1,29 +1,5 @@
-﻿//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using Microsoft.IdentityModel.TestUtils;
@@ -64,6 +40,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 if (theoryData.WillUnwrap)
                 {
                     provider = new RsaKeyWrapProvider(theoryData.UnwrapKey, theoryData.UnwrapAlgorithm, theoryData.WillUnwrap) { Context = keyWrapContext };
+                    provider.CreateAsymmetricAdapter();
+
                     if (!provider.Algorithm.Equals(theoryData.UnwrapAlgorithm))
                         context.AddDiff($"provider.Algorithm != theoryData.UnwrapAlgorithm: {provider.Algorithm} : {theoryData.UnwrapAlgorithm}.");
 
@@ -73,6 +51,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 else
                 {
                     provider = new RsaKeyWrapProvider(theoryData.WrapKey, theoryData.WrapAlgorithm, theoryData.WillUnwrap) { Context = keyWrapContext };
+
+                    provider.WrapKey(Guid.NewGuid().ToByteArray());
+
                     if (!provider.Algorithm.Equals(theoryData.WrapAlgorithm))
                         context.AddDiff($"provider.Algorithm != theoryData.WrapAlgorithm: {provider.Algorithm} : {theoryData.WrapAlgorithm}.");
 
@@ -115,7 +96,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 },
                 new KeyWrapTheoryData
                 {
-                    ExpectedException = ExpectedException.NotSupportedException("IDX10661:"),
+                    ExpectedException =  ExpectedException.SecurityTokenKeyWrapException("IDX10661:"),
                     TestId = "KeyTooSmall1024",
                     WillUnwrap = false,
                     WrapAlgorithm = SecurityAlgorithms.RsaOAEP,
@@ -123,7 +104,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 },
                 new KeyWrapTheoryData
                 {
-                    ExpectedException = ExpectedException.NotSupportedException("IDX10661:"),
+                    ExpectedException = ExpectedException.SecurityTokenKeyWrapException("IDX10661:"),
                     TestId = "KeyDoesNotMatchAlgorithm",
                     WillUnwrap = false,
                     WrapAlgorithm = SecurityAlgorithms.Aes128KW,
@@ -147,13 +128,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     TestId = "JwkRSA",
                     WillUnwrap = false,
-                    WrapKey = KeyingMaterial.JsonWebKeyRsa256,
+                    WrapKey = KeyingMaterial.JsonWebKeyRsa_2048,
                     WrapAlgorithm = SecurityAlgorithms.RsaPKCS1,
                 },
                 new KeyWrapTheoryData
                 {
                     TestId = "RsaPublicKey",
-                    UnwrapKey = KeyingMaterial.JsonWebKeyRsa256Public,
+                    UnwrapKey = KeyingMaterial.JsonWebKeyRsa_2048_Public,
                     UnwrapAlgorithm = SecurityAlgorithms.RsaPKCS1,
                     WillUnwrap = true
                 }

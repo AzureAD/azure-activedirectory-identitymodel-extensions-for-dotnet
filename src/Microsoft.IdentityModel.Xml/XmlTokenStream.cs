@@ -1,32 +1,9 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
@@ -37,7 +14,7 @@ namespace Microsoft.IdentityModel.Xml
     /// </summary>
     public class XmlTokenStream
     {
-        private List<XmlTokenEntry> _entries = new List<XmlTokenEntry>();
+        private List<XmlToken> _xmlTokens = new List<XmlToken>();
         private string _excludedElement;
         private string _excludedElementNamespace;
 
@@ -48,6 +25,8 @@ namespace Microsoft.IdentityModel.Xml
         {
         }
 
+        internal int SignatureElement { get; set; } = -1;
+
         /// <summary>
         /// Adds a XML node to the collection.
         /// </summary>
@@ -56,7 +35,7 @@ namespace Microsoft.IdentityModel.Xml
         /// <exception cref="ArgumentNullException">if <paramref name="value"/> is null.</exception>
         public void Add(XmlNodeType type, string value)
         {
-            _entries.Add(new XmlTokenEntry(type, value));
+            _xmlTokens.Add(new XmlToken(type, value));
         }
 
         /// <summary>
@@ -72,7 +51,7 @@ namespace Microsoft.IdentityModel.Xml
             if (string.IsNullOrEmpty(localName))
                 throw LogArgumentNullException(nameof(localName));
 
-            _entries.Add(new XmlTokenEntry(XmlNodeType.Attribute, prefix, localName, @namespace, value));
+            _xmlTokens.Add(new XmlToken(XmlNodeType.Attribute, prefix, localName, @namespace, value));
         }
 
         /// <summary>
@@ -88,7 +67,7 @@ namespace Microsoft.IdentityModel.Xml
             if (string.IsNullOrEmpty(localName))
                 throw LogArgumentNullException(nameof(localName));
 
-            _entries.Add(new XmlTokenEntry(XmlNodeType.Element, prefix, localName, @namespace, isEmptyElement));
+            _xmlTokens.Add(new XmlToken(XmlNodeType.Element, prefix, localName, @namespace, isEmptyElement));
         }
 
         /// <summary>
@@ -116,8 +95,10 @@ namespace Microsoft.IdentityModel.Xml
             if (writer == null)
                 throw LogArgumentNullException(nameof(writer));
 
-            var streamWriter = new XmlTokenStreamWriter(_entries, _excludedElement, _excludedElementNamespace);
-            streamWriter.WriteTo(writer);
+            var streamWriter = new XmlTokenStreamWriter(this);
+            streamWriter.WriteTo(writer, _excludedElement, _excludedElementNamespace);
         }
+
+        internal ReadOnlyCollection<XmlToken> XmlTokens => _xmlTokens.AsReadOnly();
     }
 }

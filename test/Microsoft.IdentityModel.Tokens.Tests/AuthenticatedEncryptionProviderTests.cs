@@ -1,35 +1,10 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
-
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.Tokens.Tests
@@ -37,16 +12,27 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     public class AuthenticatedEncryptionTheoryData : TheoryDataBase
     {
         public byte[] AuthenticatedData { get; set; }
+
         public byte[] Bytes { get; set; }
+
         public string DecryptAlgorithm { get; set; }
+
         public SecurityKey DecryptKey { get; set; }
+
+        public AuthenticatedEncryptionProvider DecryptionProvider { get; set; }
+
         public string EncryptAlgorithm { get; set; }
+
+        public AuthenticatedEncryptionProvider EncryptionProvider { get; set; }
+
         public AuthenticatedEncryptionResult EncryptionResults { get; set; }
+
         public SecurityKey EncryptKey { get; set; }
+
         public bool IsSupportedAlgorithm { get; set; }
-        public byte[] KeyBytes { get; set; }
-        public int KeySize { get; set; }
+
         public byte[] Plaintext { get; set; }
+
         public AuthenticatedEncryptionProvider Provider { get; set; }
 
         public override string ToString()
@@ -77,6 +63,53 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     /// </summary>
     public class AuthenticatedEncryptionProviderTests
     {
+#if NET_CORE
+        [PlatformSpecific(TestPlatforms.Linux | TestPlatforms.OSX)]
+        [Fact]
+        public void AesGcmEncryptionOnLinuxAndMac()
+        {
+            Assert.Throws<PlatformNotSupportedException>(() => new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm));
+        }
+#endif
+
+#if NET_CORE
+        [PlatformSpecific(TestPlatforms.Windows)]
+#endif
+        [Fact]
+        public void AesGcmEncryptionOnWindows()
+        {
+            var context = new CompareContext();
+            try
+            {
+                var provider = new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm);
+            }
+            catch (Exception ex)
+            {
+                context.AddDiff($"AuthenticatedEncryptionProvider is not supposed to throw an exception, Exception:{ ex.ToString()}");
+            }
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+#if NET_CORE
+        [PlatformSpecific(TestPlatforms.Windows)]
+        [Fact]
+        public void AesGcm_Dispose()
+        {
+            AuthenticatedEncryptionProvider encryptionProvider = new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm);
+            encryptionProvider.Dispose();
+            var expectedException = ExpectedException.ObjectDisposedException;
+
+            try
+            {
+                encryptionProvider.Decrypt(AES_256_GCM.E, AES_256_GCM.A, AES_256_GCM.IV, AES_256_GCM.T);
+            }
+            catch (Exception ex)
+            {
+                expectedException.ProcessException(ex);
+            }
+        }
+#endif
+
         [Theory, MemberData(nameof(AEPConstructorTheoryData))]
         public void Constructors(string testId, SymmetricSecurityKey key, string algorithm, ExpectedException ee)
         {
@@ -85,6 +118,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 var context = Guid.NewGuid().ToString();
                 var provider = new AuthenticatedEncryptionProvider(key, algorithm) { Context = context };
+                provider.CreateSymmetricSignatureProvider();
 
                 ee.ProcessNoException();
 
@@ -111,14 +145,20 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             theoryData.Add("Test7", Default.SymmetricEncryptionKey128, SecurityAlgorithms.Aes128CbcHmacSha256, ExpectedException.ArgumentOutOfRangeException("IDX10653:"));
             theoryData.Add("Test8", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256CbcHmacSha512, ExpectedException.ArgumentOutOfRangeException("IDX10653:"));
 
-            // set key.CryptoProviderFactory that return null when creating SignatureProvider
+            // set key.CryptoProviderFactory to return null when creating SignatureProvider
             var key = Default.SymmetricEncryptionKey256;
-            key.CryptoProviderFactory = new DerivedCryptoProviderFactory
+            key.CryptoProviderFactory = new AuthenticatedEncryptionCryptoProviderFactory
             {
-                SymmetricSignatureProviderForSigning = null,
-                SymmetricSignatureProviderForVerifying = null
+                SymmetricSignatureProviderForSigning = null
             };
             theoryData.Add("Test9", key, SecurityAlgorithms.Aes128CbcHmacSha256, ExpectedException.ArgumentException("IDX10649:"));
+
+            key = Default.SymmetricEncryptionKey256;
+            key.CryptoProviderFactory = new AuthenticatedEncryptionCryptoProviderFactory
+            {
+                SymmetricSignatureProviderForSigning = new SymmetricSignatureProvider(key, SecurityAlgorithms.HmacSha256),
+            };
+            theoryData.Add("Test10", key, SecurityAlgorithms.Aes128CbcHmacSha256, ExpectedException.NoExceptionExpected);
 
             return theoryData;
         }
@@ -352,6 +392,254 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 TestId = testId
             });
         }
+
+        [Theory, MemberData(nameof(DisposeTheoryData))]
+        public void Dispose(AuthenticatedEncryptionTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.Dispose", theoryData);
+
+            try
+            {
+                var results = theoryData.EncryptionProvider.Encrypt(theoryData.Plaintext, theoryData.AuthenticatedData);
+                var cleartext = theoryData.DecryptionProvider.Decrypt(results.Ciphertext, theoryData.AuthenticatedData, results.IV, results.AuthenticationTag);
+
+                if (!Utility.AreEqual(theoryData.Plaintext, cleartext))
+                    context.AddDiff($"theoryParams.PlainText != clearText. plaintext: '{theoryData.Plaintext}', clearText: '{cleartext}'.");
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+#region DisposeTests
+        public static TheoryData<AuthenticatedEncryptionTheoryData> DisposeTheoryData()
+        {
+            var theoryData = new TheoryData<AuthenticatedEncryptionTheoryData>();
+
+            // these first tests show that dispose is working as expected
+            var decryptionKey = Default.SymmetricEncryptionKey256;
+            var encryptionKey = Default.SymmetricEncryptionKey256;
+
+            var decryptSignatureProvider = new DecryptSymmetricSignatureProvider(encryptionKey, SecurityAlgorithms.HmacSha256);
+            var decryptSignatureProviderDisposed = new DecryptSymmetricSignatureProvider(encryptionKey, SecurityAlgorithms.HmacSha256);
+            decryptSignatureProviderDisposed.Dispose();
+            var encryptSignatureProvider = new EncryptSymmetricSignatureProvider(encryptionKey, SecurityAlgorithms.HmacSha256);
+            var encryptSignatureProviderDisposed = new EncryptSymmetricSignatureProvider(encryptionKey, SecurityAlgorithms.HmacSha256);
+            encryptSignatureProviderDisposed.Dispose();
+
+            decryptionKey.CryptoProviderFactory = new DecryptAuthenticatedEncryptionCryptoProviderFactory
+            {
+                SymmetricSignatureProviderForSigning = decryptSignatureProviderDisposed,
+            };
+            decryptionKey.CryptoProviderFactory.CacheSignatureProviders = false;
+
+            encryptionKey.CryptoProviderFactory = new EncryptAuthenticatedEncryptionCryptoProviderFactory
+            {
+                SymmetricSignatureProviderForSigning = encryptSignatureProvider,
+            };
+            encryptionKey.CryptoProviderFactory.CacheSignatureProviders = false;
+
+            ExpectedException expectedException = ExpectedException.ObjectDisposedException;
+            expectedException.SubstringExpected = encryptSignatureProvider.GetType().ToString();
+            theoryData.Add(new AuthenticatedEncryptionTheoryData
+            {
+                AuthenticatedData = Guid.NewGuid().ToByteArray(),
+                DecryptAlgorithm = SecurityAlgorithms.Aes128CbcHmacSha256,
+                DecryptionProvider = new DecryptAuthenticatedEncryptionProvider(decryptionKey, SecurityAlgorithms.Aes128CbcHmacSha256),
+                EncryptAlgorithm = SecurityAlgorithms.Aes128CbcHmacSha256,
+                EncryptionProvider = new EncryptAuthenticatedEncryptionProvider(encryptionKey, SecurityAlgorithms.Aes128CbcHmacSha256),
+                ExpectedException = expectedException,
+                Plaintext = Guid.NewGuid().ToByteArray(),
+                TestId = "DecryptUsingExtensibility"
+            });
+
+            decryptionKey.CryptoProviderFactory = new DecryptAuthenticatedEncryptionCryptoProviderFactory
+            {
+                SymmetricSignatureProviderForSigning = decryptSignatureProvider
+            };
+            decryptionKey.CryptoProviderFactory.CacheSignatureProviders = false;
+
+            encryptionKey.CryptoProviderFactory = new EncryptAuthenticatedEncryptionCryptoProviderFactory
+            {
+                SymmetricSignatureProviderForSigning = encryptSignatureProviderDisposed
+            };
+            encryptionKey.CryptoProviderFactory.CacheSignatureProviders = false;
+
+            expectedException = ExpectedException.ObjectDisposedException;
+            expectedException.SubstringExpected = encryptSignatureProviderDisposed.GetType().ToString();
+            theoryData.Add(new AuthenticatedEncryptionTheoryData
+            {
+                AuthenticatedData = Guid.NewGuid().ToByteArray(),
+                DecryptAlgorithm = SecurityAlgorithms.Aes128CbcHmacSha256,
+                DecryptionProvider = new DecryptAuthenticatedEncryptionProvider(decryptionKey, SecurityAlgorithms.Aes128CbcHmacSha256),
+                EncryptAlgorithm = SecurityAlgorithms.Aes128CbcHmacSha256,
+                EncryptionProvider = new EncryptAuthenticatedEncryptionProvider(encryptionKey, SecurityAlgorithms.Aes128CbcHmacSha256),
+                ExpectedException = expectedException,
+                Plaintext = Guid.NewGuid().ToByteArray(),
+                TestId = "EncryptUsingExtensibility"
+            });
+
+            var decryptionProvider = new DecryptAuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128CbcHmacSha256);
+            var encryptionProvider = new EncryptAuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128CbcHmacSha256);
+            decryptionProvider.Dispose();
+            expectedException = ExpectedException.ObjectDisposedException;
+            expectedException.SubstringExpected = decryptionProvider.GetType().ToString();
+            theoryData.Add(new AuthenticatedEncryptionTheoryData
+            {
+                AuthenticatedData = Guid.NewGuid().ToByteArray(),
+                DecryptAlgorithm = SecurityAlgorithms.Aes128CbcHmacSha256,
+                DecryptionProvider = decryptionProvider,
+                EncryptAlgorithm = SecurityAlgorithms.Aes128CbcHmacSha256,
+                EncryptionProvider = encryptionProvider,
+                ExpectedException = expectedException,
+                Plaintext = Guid.NewGuid().ToByteArray(),
+                TestId = "Decrypt"
+            });
+
+            decryptionProvider = new DecryptAuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128CbcHmacSha256);
+            encryptionProvider = new EncryptAuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128CbcHmacSha256);
+            encryptionProvider.Dispose();
+            expectedException = ExpectedException.ObjectDisposedException;
+            expectedException.SubstringExpected = encryptionProvider.GetType().ToString();
+            theoryData.Add(new AuthenticatedEncryptionTheoryData
+            {
+                AuthenticatedData = Guid.NewGuid().ToByteArray(),
+                DecryptAlgorithm = SecurityAlgorithms.Aes128CbcHmacSha256,
+                DecryptionProvider = decryptionProvider,
+                EncryptAlgorithm = SecurityAlgorithms.Aes128CbcHmacSha256,
+                EncryptionProvider = encryptionProvider,
+                ExpectedException = expectedException,
+                Plaintext = Guid.NewGuid().ToByteArray(),
+                TestId = "Encrypt"
+            });
+
+            // extensibility tests to show that if a users wants to cache signature providers there is a way to do so.
+            decryptSignatureProvider = new DecryptSymmetricSignatureProvider(decryptionKey, SecurityAlgorithms.HmacSha256);
+            encryptSignatureProvider = new EncryptSymmetricSignatureProvider(encryptionKey, SecurityAlgorithms.HmacSha256);
+
+            decryptionKey = Default.SymmetricEncryptionKey256;
+            decryptionKey.CryptoProviderFactory = new DecryptAuthenticatedEncryptionCryptoProviderFactory
+            {
+                DisposeSignatureProvider = false,
+                SymmetricSignatureProviderForSigning = decryptSignatureProvider
+            };
+            decryptionKey.CryptoProviderFactory.CacheSignatureProviders = false;
+
+            encryptionKey = Default.SymmetricEncryptionKey256;
+            encryptionKey.CryptoProviderFactory = new EncryptAuthenticatedEncryptionCryptoProviderFactory
+            {
+                DisposeSignatureProvider = false,
+                SymmetricSignatureProviderForSigning = encryptSignatureProvider
+            };
+            encryptionKey.CryptoProviderFactory.CacheSignatureProviders = false;
+
+            // dispose, the crypto provider from the key will not dispose SignatureProvider so it can be reused
+            // CryptoProvider.ReleaseSignatureProvider is overloaded.
+            decryptionProvider = new DecryptAuthenticatedEncryptionProvider(decryptionKey, SecurityAlgorithms.Aes128CbcHmacSha256);
+            decryptionProvider.Dispose();
+            decryptionProvider = new DecryptAuthenticatedEncryptionProvider(decryptionKey, SecurityAlgorithms.Aes128CbcHmacSha256);
+
+            encryptionProvider = new EncryptAuthenticatedEncryptionProvider(encryptionKey, SecurityAlgorithms.Aes128CbcHmacSha256);
+            encryptionProvider.Dispose();
+            encryptionProvider = new EncryptAuthenticatedEncryptionProvider(encryptionKey, SecurityAlgorithms.Aes128CbcHmacSha256);
+
+            theoryData.Add(new AuthenticatedEncryptionTheoryData
+            {
+                AuthenticatedData = Guid.NewGuid().ToByteArray(),
+                DecryptAlgorithm = SecurityAlgorithms.Aes128CbcHmacSha256,
+                DecryptionProvider = decryptionProvider,
+                EncryptAlgorithm = SecurityAlgorithms.Aes128CbcHmacSha256,
+                EncryptionProvider = encryptionProvider,
+                Plaintext = Guid.NewGuid().ToByteArray(),
+                TestId = "ExtensibilityCache"
+            });
+
+            // in this case, dispose will be called, expect ObjectDisposedException
+            decryptSignatureProvider = new DecryptSymmetricSignatureProvider(decryptionKey, SecurityAlgorithms.HmacSha256);
+            encryptSignatureProvider = new EncryptSymmetricSignatureProvider(encryptionKey, SecurityAlgorithms.HmacSha256);
+            decryptionKey = Default.SymmetricEncryptionKey256;
+            decryptionKey.CryptoProviderFactory = new DecryptAuthenticatedEncryptionCryptoProviderFactory
+            {
+                DisposeSignatureProvider = true,
+                SymmetricSignatureProviderForSigning = decryptSignatureProvider
+            };
+            decryptionKey.CryptoProviderFactory.CacheSignatureProviders = false;
+
+            encryptionKey = Default.SymmetricEncryptionKey256;
+            encryptionKey.CryptoProviderFactory = new EncryptAuthenticatedEncryptionCryptoProviderFactory
+            {
+                DisposeSignatureProvider = true,
+                SymmetricSignatureProviderForSigning = encryptSignatureProvider
+            };
+            encryptionKey.CryptoProviderFactory.CacheSignatureProviders = false;
+
+            // dispose the DecryptionProvider
+            decryptionProvider = new DecryptAuthenticatedEncryptionProvider(decryptionKey, SecurityAlgorithms.Aes128CbcHmacSha256);
+            decryptionProvider.Dispose();
+            decryptionProvider = new DecryptAuthenticatedEncryptionProvider(decryptionKey, SecurityAlgorithms.Aes128CbcHmacSha256);
+            encryptionProvider = new EncryptAuthenticatedEncryptionProvider(encryptionKey, SecurityAlgorithms.Aes128CbcHmacSha256);
+            expectedException = ExpectedException.ObjectDisposedException;
+            expectedException.SubstringExpected = decryptSignatureProvider.GetType().ToString();
+
+            theoryData.Add(new AuthenticatedEncryptionTheoryData
+            {
+                AuthenticatedData = Guid.NewGuid().ToByteArray(),
+                DecryptAlgorithm = SecurityAlgorithms.Aes128CbcHmacSha256,
+                DecryptionProvider = decryptionProvider,
+                EncryptAlgorithm = SecurityAlgorithms.Aes128CbcHmacSha256,
+                EncryptionProvider = encryptionProvider,
+                ExpectedException = expectedException,
+                Plaintext = Guid.NewGuid().ToByteArray(),
+                TestId = "DecryptExtensibilityCache"
+            });
+
+            // in this case, dispose will be called, expect ObjectDisposedException
+            decryptionKey = Default.SymmetricEncryptionKey256;
+            encryptionKey = Default.SymmetricEncryptionKey256;
+            decryptSignatureProvider = new DecryptSymmetricSignatureProvider(decryptionKey, SecurityAlgorithms.HmacSha256);
+            encryptSignatureProvider = new EncryptSymmetricSignatureProvider(encryptionKey, SecurityAlgorithms.HmacSha256);
+            decryptionKey.CryptoProviderFactory = new DecryptAuthenticatedEncryptionCryptoProviderFactory
+            {
+                DisposeSignatureProvider = true,
+                SymmetricSignatureProviderForSigning = decryptSignatureProvider
+            };
+            decryptionKey.CryptoProviderFactory.CacheSignatureProviders = false;
+
+            encryptionKey.CryptoProviderFactory = new EncryptAuthenticatedEncryptionCryptoProviderFactory
+            {
+                DisposeSignatureProvider = true,
+                SymmetricSignatureProviderForSigning = encryptSignatureProvider
+            };
+            encryptionKey.CryptoProviderFactory.CacheSignatureProviders = false;
+
+            // dispose the EncryptionProvider
+            decryptionProvider = new DecryptAuthenticatedEncryptionProvider(decryptionKey, SecurityAlgorithms.Aes128CbcHmacSha256);
+            encryptionProvider = new EncryptAuthenticatedEncryptionProvider(encryptionKey, SecurityAlgorithms.Aes128CbcHmacSha256);
+            encryptionProvider.Dispose();
+            encryptionProvider = new EncryptAuthenticatedEncryptionProvider(encryptionKey, SecurityAlgorithms.Aes128CbcHmacSha256);
+            expectedException = ExpectedException.ObjectDisposedException;
+            expectedException.SubstringExpected = encryptSignatureProvider.GetType().ToString();
+
+            theoryData.Add(new AuthenticatedEncryptionTheoryData
+            {
+                AuthenticatedData = Guid.NewGuid().ToByteArray(),
+                DecryptAlgorithm = SecurityAlgorithms.Aes128CbcHmacSha256,
+                DecryptionProvider = decryptionProvider,
+                EncryptAlgorithm = SecurityAlgorithms.Aes128CbcHmacSha256,
+                EncryptionProvider = encryptionProvider,
+                ExpectedException = expectedException,
+                Plaintext = Guid.NewGuid().ToByteArray(),
+                TestId = "EcryptExtensibilityCache"
+            });
+
+            return theoryData;
+        }
+#endregion
 
         [Theory, MemberData(nameof(EncryptDecryptTheoryData))]
         public void EncryptDecrypt(AuthenticatedEncryptionTheoryData theoryData)

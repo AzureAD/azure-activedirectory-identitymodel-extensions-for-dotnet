@@ -1,29 +1,5 @@
-﻿//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -120,31 +96,24 @@ namespace Microsoft.IdentityModel.Xml
             set;
         }
 
-        /// <summary>
-        /// Compares two X509Data objects.
-        /// </summary>
+        /// <inheritdoc/>
         public override bool Equals(object obj)
         {
-            var other = obj as X509Data;
-            if (other == null)
-                return false;
-            else if (!IssuerSerial.Equals(other.IssuerSerial) ||
-                string.Compare(SKI, other.SKI, StringComparison.OrdinalIgnoreCase) != 0 || 
-                string.Compare(SubjectName, other.SubjectName, StringComparison.OrdinalIgnoreCase) != 0 ||
-                // certificates may need to be compared in a special way instead of generic string comparison?
-                !Enumerable.SequenceEqual(Certificates.OrderBy(t => t), other.Certificates.OrderBy(t => t)) ||
-                string.Compare(CRL, other.CRL, StringComparison.OrdinalIgnoreCase) != 0)
-                    return false;
-            return true;
+            return obj is X509Data data &&
+                EqualityComparer<IssuerSerial>.Default.Equals(IssuerSerial, data.IssuerSerial) &&
+                string.Equals(SKI, data.SKI, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(SubjectName, data.SubjectName, StringComparison.OrdinalIgnoreCase) &&
+                Enumerable.SequenceEqual(Certificates.OrderBy(t => t), data.Certificates.OrderBy(t => t)) &&
+                string.Equals(CRL, data.CRL, StringComparison.OrdinalIgnoreCase);
         }
-
-        /// <summary>
-        /// Serves as a hash function for X509Data.
-        /// </summary>
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            unchecked
+            {
+                // Certificates is the only immutable property
+                return 794516417 + EqualityComparer<ICollection<string>>.Default.GetHashCode(Certificates);
+            }
         }
-
     }
 }

@@ -1,55 +1,60 @@
-﻿//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System.IO;
 using System.Xml;
 using Microsoft.IdentityModel.Xml;
 using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.Xml.Linq;
 
 namespace Microsoft.IdentityModel.TestUtils
 {
     public static class XmlUtilities
     {
+
+        /// <summary>
+        /// This XmlReader when wrapped as an XmlDictionaryReader will not be able to Canonicalize.
+        /// </summary>
+        /// <param name="xml"></param>
+        /// <returns></returns>
+        public static XmlReader CreateXmlReader(string xml)
+        {
+            if (string.IsNullOrEmpty(xml))
+                return null;
+
+            return XmlReader.Create(new StringReader(xml), new XmlReaderSettings() { XmlResolver = null });
+        }
+
+        /// <summary>
+        /// This XmlReader will be able to Canonicalize.
+        /// </summary>
+        /// <param name="xml"></param>
+        /// <returns></returns>
         public static XmlDictionaryReader CreateDictionaryReader(string xml)
         {
             if (string.IsNullOrEmpty(xml))
                 return null;
 
-            return XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(new StringReader(xml)));
+            return XmlDictionaryReader.CreateTextReader(Encoding.UTF8.GetBytes(xml), XmlDictionaryReaderQuotas.Max);
+        }
+
+        public static XmlReader CreateXDocumentReader(string xml)
+        {
+            if (string.IsNullOrEmpty(xml))
+                return null;
+
+            return XDocument.Parse(xml).CreateReader();
         }
 
         public static EnvelopedSignatureReader CreateEnvelopedSignatureReader(string xml)
         {
-            return new EnvelopedSignatureReader(XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(new StringReader(xml))));
+            return new EnvelopedSignatureReader(CreateDictionaryReader(xml));
         }
 
         public static XmlTokenStream CreateXmlTokenStream(string xml)
         {
-            var xmlTokenStreamReader = new XmlTokenStreamReader(XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(new StringReader(xml))));
+            var xmlTokenStreamReader = new XmlTokenStreamReader(CreateDictionaryReader(xml));
             while (xmlTokenStreamReader.Read());
             return xmlTokenStreamReader.TokenStream;
         }

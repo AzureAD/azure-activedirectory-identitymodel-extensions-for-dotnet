@@ -1,29 +1,5 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 // System.IdentityModel.Tokens.Jwt
 // Range: 12000 - 12999
@@ -50,14 +26,13 @@ namespace System.IdentityModel.Tokens.Jwt
         internal const string IDX12713 = "IDX12713: Creating actor value using actor.BootstrapContext(as string)";
         internal const string IDX12714 = "IDX12714: Creating actor value using actor.BootstrapContext.rawData";
         internal const string IDX12715 = "IDX12715: Creating actor value by writing the JwtSecurityToken created from actor.BootstrapContext";
-        internal const string IDX12716 = "IDX12716: Decoding token: '{0}' into header, payload and signature.";
+        // internal const string IDX12716 = "IDX12716:";
         internal const string IDX12720 = "IDX12720: Token string does not match the token formats: JWE (header.encryptedKey.iv.ciphertext.tag) or JWS (header.payload.signature)";
         internal const string IDX12721 = "IDX12721: Creating JwtSecurityToken: Issuer: '{0}', Audience: '{1}'";
         internal const string IDX12722 = "IDX12722: Creating security token from the header: '{0}', payload: '{1}' and raw signature: '{2}'.";
         internal const string IDX12723 = "IDX12723: Unable to decode the payload '{0}' as Base64Url encoded string. jwtEncodedString: '{1}'.";
         internal const string IDX12729 = "IDX12729: Unable to decode the header '{0}' as Base64Url encoded string. jwtEncodedString: '{1}'.";
         internal const string IDX12730 = "IDX12730: Failed to create the token encryption provider.";
-        internal const string IDX12733 = "IDX12733: Unable to obtain a CryptoProviderFactory, both EncryptingCredentials.CryptoProviderFactory and EncryptingCredentials.Key.CrypoProviderFactory are both null.";
         internal const string IDX12735 = "IDX12735: If JwtSecurityToken.InnerToken != null, then JwtSecurityToken.Header.EncryptingCredentials must be set.";
         internal const string IDX12736 = "IDX12736: JwtSecurityToken.SigningCredentials is not supported when JwtSecurityToken.InnerToken is set.";
         internal const string IDX12737 = "IDX12737: EncryptingCredentials set on JwtSecurityToken.InnerToken is not supported.";
@@ -65,6 +40,7 @@ namespace System.IdentityModel.Tokens.Jwt
         internal const string IDX12739 = "IDX12739: JWT: '{0}' has three segments but is not in proper JWS format.";
         internal const string IDX12740 = "IDX12740: JWT: '{0}' has five segments but is not in proper JWE format.";
         internal const string IDX12741 = "IDX12741: JWT: '{0}' must have three segments (JWS) or five segments (JWE).";
+        internal const string IDX12742 = "IDX12742: ''{0}' cannot contain the following claims: '{1}'. These values are added by default (if necessary) during security token creation.";
 #pragma warning restore 1591
     }
 }

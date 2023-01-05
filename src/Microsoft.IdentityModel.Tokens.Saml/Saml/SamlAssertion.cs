@@ -1,32 +1,12 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Text;
+using System.Xml;
 using Microsoft.IdentityModel.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
@@ -38,6 +18,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     public class SamlAssertion
     {
         private string _assertionId;
+        private string _canonicalString;
         private string _issuer;
         private DateTime _issueInstant;
 
@@ -153,6 +134,46 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         public Signature Signature { get; set; }
 
         /// <summary>
+        /// Gets the canonicalized (ExclusiveC14n) representation without comments.
+        /// </summary>
+        public string CanonicalString
+        {
+            get
+            {
+                if (_canonicalString == null)
+                {
+                    if (XmlTokenStream != null)
+                    {
+                        _canonicalString = CanonicalizingTransfrom.GetString(XmlTokenStream, false, null);
+                    }
+                    else
+                    {
+                        try
+                        {
+                            var serializer = new SamlSerializer();
+                            using (var writer = XmlDictionaryWriter.CreateTextWriter(Stream.Null))
+                            using (var c14nStream = new MemoryStream())
+                            {
+                                writer.StartCanonicalization(c14nStream, false, null);
+                                serializer.WriteAssertion(writer, this);
+                                writer.Flush();
+                                _canonicalString = Encoding.UTF8.GetString(c14nStream.GetBuffer(), 0, (int)c14nStream.Length);
+                            }
+                        }
+                        catch
+                        { }
+                    }
+                }
+
+                return _canonicalString;
+            }
+            internal set
+            {
+                _canonicalString = string.IsNullOrEmpty(value) ? throw LogArgumentNullException(nameof(value)) : value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the <see cref="SigningCredentials"/> used by the issuer to protect the integrity of the assertion.
         /// </summary>
         public SigningCredentials SigningCredentials { get; set; }
@@ -161,5 +182,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// Gets the <see cref="IList{SamlStatement}"/>(s) regarding the subject.
         /// </summary>
         public IList<SamlStatement> Statements { get; }
+
+        internal XmlTokenStream XmlTokenStream { get; set; }
     }
 }

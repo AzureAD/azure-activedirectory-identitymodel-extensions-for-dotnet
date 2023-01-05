@@ -1,29 +1,5 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Security.Cryptography.X509Certificates;
@@ -39,57 +15,100 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void Constructor()
         {
-            X509SecurityKey x509SecurityKey;
             var context = new CompareContext();
-            ExpectedException expectedException = new ExpectedException(typeExpected: typeof(ArgumentNullException), substringExpected: "certificate");
+            var expectedException = new ExpectedException(typeExpected: typeof(ArgumentNullException), substringExpected: "certificate");
             try
             {
-                x509SecurityKey = new X509SecurityKey(null);
-                expectedException.ProcessNoException();
+                new X509SecurityKey((X509Certificate2)null);
+                expectedException.ProcessNoException(context);
             }
             catch (Exception exception)
             {
-                expectedException.ProcessException(exception);
+                expectedException.ProcessException(exception, context);
             }
 
-            X509Certificate2 x509Certificate2 = KeyingMaterial.DefaultCert_2048;
+            var certificate = KeyingMaterial.DefaultCert_2048;
+            expectedException = new ExpectedException(typeExpected: typeof(ArgumentNullException), substringExpected: "keyId");
+            try
+            {
+                new X509SecurityKey(certificate, null);
+                expectedException.ProcessNoException(context);
+            }
+            catch (Exception exception)
+            {
+                expectedException.ProcessException(exception, context);
+            }
+
+            try
+            {
+                new X509SecurityKey(certificate, string.Empty);
+                expectedException.ProcessNoException(context);
+            }
+            catch (Exception exception)
+            {
+                expectedException.ProcessException(exception, context);
+            }
+
             expectedException = ExpectedException.NoExceptionExpected;
             try
             {
-                x509SecurityKey = new X509SecurityKey(x509Certificate2);
-                IdentityComparer.AreEqual(x509SecurityKey.X5t, x509SecurityKey.KeyId);
-                IdentityComparer.AreEqual(x509Certificate2, x509SecurityKey.Certificate, context);
+                var x509SecurityKey = new X509SecurityKey(certificate);
+                IdentityComparer.AreEqual(x509SecurityKey.KeyId, certificate.Thumbprint, context);
+                IdentityComparer.AreEqual(x509SecurityKey.X5t, Base64UrlEncoder.Encode(certificate.GetCertHash()), context);
+                IdentityComparer.AreEqual(certificate, x509SecurityKey.Certificate, context);
             }
             catch (Exception exception)
             {
-                expectedException.ProcessException(exception);
+                expectedException.ProcessException(exception, context);
+            }
+
+            try
+            {
+                var x509SecurityKey = new X509SecurityKey(certificate, "KID");
+                IdentityComparer.AreEqual(x509SecurityKey.KeyId, "KID", context);
+                IdentityComparer.AreEqual(x509SecurityKey.X5t, Base64UrlEncoder.Encode(certificate.GetCertHash()), context);
+                IdentityComparer.AreEqual(certificate, x509SecurityKey.Certificate, context);
+            }
+            catch (Exception exception)
+            {
+                expectedException.ProcessException(exception, context);
             }
 
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Theory, MemberData(nameof(IsSupportedAlgDataSet))]
-        public void IsSupportedAlgorithm(X509SecurityKey key, string alg, bool expectedResult)
+        [Fact]
+        public void CanComputeJwkThumbprint()
         {
-            if (key.CryptoProviderFactory.IsSupportedAlgorithm(alg, key) != expectedResult)
-                Assert.True(false, string.Format("{0} failed with alg: {1}. ExpectedResult: {2}", key, alg, expectedResult));
+            Assert.True(KeyingMaterial.DefaultX509Key_2048.CanComputeJwkThumbprint(), "Couldn't compute JWK thumbprint on an X509SecurityKey.");
+        }
+    }
+
+    public class X509SecurityKeyTheoryData : TheoryDataBase
+    {
+        public X509SecurityKeyTheoryData(X509Certificate2 certificate, string algorithm, bool isSupported, string testId)
+        {
+            X509Certificate = certificate;
+            Algorithm = algorithm;
+            IsSupported = isSupported;
         }
 
-        public static TheoryData<X509SecurityKey, string, bool> IsSupportedAlgDataSet
+        public X509SecurityKeyTheoryData(X509SecurityKey key, string algorithm, bool isSupported, string testId)
         {
-            get
-            {
-                var dataset = new TheoryData<X509SecurityKey, string, bool>();
-                dataset.Add(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, true);
-                dataset.Add(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256_Public, SecurityAlgorithms.RsaSha256, true);
-                dataset.Add(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA512, SecurityAlgorithms.Aes128Encryption, false);
-                dataset.Add(KeyingMaterial.X509SecurityKeySelfSigned1024_SHA256, SecurityAlgorithms.RsaSha384, true);
-                X509SecurityKey testKey = new X509SecurityKey(KeyingMaterial.CertSelfSigned2048_SHA256);
-                testKey.CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.RsaSsaPssSha256Signature });
-                dataset.Add(testKey, SecurityAlgorithms.RsaSsaPssSha256Signature, true);
-                return dataset;
-            }
+            X509SecurityKey = key;
+            Algorithm = algorithm;
+            IsSupported = isSupported;
         }
+
+        public string Algorithm { get; set; }
+
+        string KeyId { get; set; }
+
+        public bool IsSupported { get; set; }
+
+        public X509Certificate X509Certificate { get; set; }
+
+        public X509SecurityKey X509SecurityKey { get; set; }
     }
 }
 

@@ -1,33 +1,8 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.IO;
-using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.Tokens;
@@ -44,6 +19,16 @@ namespace Microsoft.IdentityModel.Xml
     /// </summary>
     public class EnvelopedSignatureWriter : DelegatingXmlDictionaryWriter
     {
+        /// <summary>
+        /// Default name of the SignaturePlaceholder element.
+        /// </summary>
+        /// <remarks>
+        /// Signature placeholder element will be written, and later replaced with a correct signature
+        /// when the envelope is completed. Placeholder element will be written only if <see cref="WriteSignature"/>
+        /// method was explicitly called.
+        /// </remarks>
+        public static readonly string SignaturePlaceholder = "_SignaturePlaceholder";
+
         private MemoryStream _canonicalStream;
         private bool _disposed;
         private DSigSerializer _dsigSerializer = DSigSerializer.Default;
@@ -51,9 +36,10 @@ namespace Microsoft.IdentityModel.Xml
         private string _inclusiveNamespacesPrefixList;
         private XmlWriter _originalWriter;
         private string _referenceUri;
-        private long _signaturePosition;
+        private bool _signaturePlaceholderWritten;
         private SigningCredentials _signingCredentials;
-        private MemoryStream _writerStream;
+        private MemoryStream _internalStream;
+        private object _signatureLock = new object();
 
         /// <summary>
         /// Initializes an instance of <see cref="EnvelopedSignatureWriter"/>. The returned writer can be directly used
@@ -92,13 +78,13 @@ namespace Microsoft.IdentityModel.Xml
 
             _inclusiveNamespacesPrefixList = inclusivePrefixList;
             _referenceUri = referenceId;
-            _writerStream = new MemoryStream();
+            _internalStream = new MemoryStream();
             _canonicalStream = new MemoryStream();
-            InnerWriter = CreateTextWriter(_writerStream, Encoding.UTF8, false);
+            InnerWriter = CreateTextWriter(Stream.Null);
             InnerWriter.StartCanonicalization(_canonicalStream, false, XmlUtil.TokenizeInclusiveNamespacesPrefixList(_inclusiveNamespacesPrefixList));
-            _signaturePosition = -1;
+            InternalWriter = CreateTextWriter(_internalStream, Encoding.UTF8, false);
+            _signaturePlaceholderWritten = false;
         }
-
 
         /// <summary>
         /// Gets or sets the <see cref="DSigSerializer"/> to use.
@@ -111,51 +97,78 @@ namespace Microsoft.IdentityModel.Xml
         }
 
         /// <summary>
-        /// Calculates and inserts the Signature.
+        /// Calculates and inserts/replaces the Signature.
         /// </summary>
         private void OnEndRootElement()
         {
-            if (_signaturePosition == -1)
-                WriteSignature();
-
+            // wrap-up canonicalization
             InnerWriter.WriteEndElement();
             InnerWriter.Flush();
             InnerWriter.EndCanonicalization();
 
             var signature = CreateSignature();
-            var signatureStream = new MemoryStream();
-            var signatureWriter = CreateTextWriter(signatureStream);
-            DSigSerializer.WriteSignature(signatureWriter, signature);
-            signatureWriter.Flush();
-            var signatureBytes = signatureStream.ToArray();
-            var writerBytes = _writerStream.ToArray();
-            byte[] effectiveBytes = new byte[signatureBytes.Length + writerBytes.Length];
-            Array.Copy(writerBytes, effectiveBytes, (int)_signaturePosition);
-            Array.Copy(signatureBytes, 0, effectiveBytes, (int)_signaturePosition, signatureBytes.Length);
-            Array.Copy(writerBytes, (int)_signaturePosition, effectiveBytes, (int)_signaturePosition + signatureBytes.Length, writerBytes.Length - (int)_signaturePosition);
 
-            XmlReader reader = XmlDictionaryReader.CreateTextReader(effectiveBytes, XmlDictionaryReaderQuotas.Max);
-            reader.MoveToContent();
-            _originalWriter.WriteNode(reader, false);
+            // in case when signature placeholder element is written, it needs to be replaced with a correct (real) signature.
+            if (_signaturePlaceholderWritten)
+            {
+                InternalWriter.WriteEndElement();
+                InternalWriter.Flush();
+
+                // create XmlTokenStream out of the internalStream, and write that XmlTokenStream into original writer.
+                // while writing the XmlTokenStream, replace signature (placeholder) element with the real signature (using DSigSerializer).
+                _internalStream.Position = 0;
+                var xmlTokenStreamReader = new XmlTokenStreamReader(XmlDictionaryReader.CreateTextReader(_internalStream, XmlDictionaryReaderQuotas.Max));
+
+                while (xmlTokenStreamReader.Read() != false) ;
+
+                var xmlTokenStreamWriter = new XmlTokenStreamWriter(xmlTokenStreamReader.TokenStream);
+                xmlTokenStreamWriter.WriteAndReplaceSignature(_originalWriter, signature, DSigSerializer);
+            }
+            // write the signature into the internalStream and write the complete internalStream, as a node, into the originalWriter.
+            else
+            {
+                DSigSerializer.WriteSignature(InternalWriter, signature);
+                InternalWriter.WriteEndElement();
+                InternalWriter.Flush();
+
+                _internalStream.Position = 0;
+                XmlReader reader = XmlDictionaryReader.CreateTextReader(_internalStream, XmlDictionaryReaderQuotas.Max);
+                reader.MoveToContent();
+                _originalWriter.WriteNode(reader, false);
+
+                // wrap-up the TracingWriter, if initialized.
+                if (TracingWriter != null)
+                {
+                    DSigSerializer.WriteSignature(TracingWriter, signature);
+                    TracingWriter.WriteEndElement();
+                    TracingWriter.Flush();
+                }
+            }
+
             _originalWriter.Flush();
         }
 
         private Signature CreateSignature()
         {
             CryptoProviderFactory cryptoProviderFactory = _signingCredentials.CryptoProviderFactory ?? _signingCredentials.Key.CryptoProviderFactory;
-            var hashAlgorithm = cryptoProviderFactory.CreateHashAlgorithm(_signingCredentials.Digest);
+            string digestAlgorithm = !string.IsNullOrEmpty(_signingCredentials.Digest) ? _signingCredentials.Digest : SupportedAlgorithms.GetDigestFromSignatureAlgorithm(_signingCredentials.Algorithm);
+            var hashAlgorithm = cryptoProviderFactory.CreateHashAlgorithm(digestAlgorithm);
+
             if (hashAlgorithm == null)
-                throw LogExceptionMessage(new XmlValidationException(FormatInvariant(LogMessages.IDX30213, cryptoProviderFactory.ToString(), _signingCredentials.Digest)));
+                throw LogExceptionMessage(new XmlValidationException(FormatInvariant(LogMessages.IDX30213, MarkAsNonPII(cryptoProviderFactory.GetType().Name), _signingCredentials.Digest)));
 
             Reference reference = null;
             try
             {
-                reference = new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform { InclusiveNamespacesPrefixList = _inclusiveNamespacesPrefixList })
+                lock (_signatureLock)
                 {
-                    Uri = _referenceUri,
-                    DigestValue = Convert.ToBase64String(hashAlgorithm.ComputeHash(_canonicalStream.ToArray())),
-                    DigestMethod = _signingCredentials.Digest
-                };
+                    reference = new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform { InclusiveNamespacesPrefixList = _inclusiveNamespacesPrefixList })
+                    {
+                        Uri = _referenceUri,
+                        DigestValue = Convert.ToBase64String(hashAlgorithm.ComputeHash(_canonicalStream.GetBuffer(), 0, (int)_canonicalStream.Length)),
+                        DigestMethod = digestAlgorithm
+                    };
+                }
             }
             finally
             {
@@ -169,42 +182,51 @@ namespace Microsoft.IdentityModel.Xml
                 SignatureMethod = _signingCredentials.Algorithm
             };
 
-            var canonicalSignedInfoStream = new MemoryStream();
-            var signedInfoWriter = CreateTextWriter(Stream.Null);
-            signedInfoWriter.StartCanonicalization(canonicalSignedInfoStream, false, null);
-            DSigSerializer.WriteSignedInfo(signedInfoWriter, signedInfo);
-            signedInfoWriter.EndCanonicalization();
-            signedInfoWriter.Flush();
-
-            var provider = cryptoProviderFactory.CreateForSigning(_signingCredentials.Key, _signingCredentials.Algorithm);
-            if (provider == null)
-                throw LogExceptionMessage(new XmlValidationException(FormatInvariant(LogMessages.IDX30213, cryptoProviderFactory.ToString(), _signingCredentials.Key.ToString(), _signingCredentials.Algorithm)));
-
-            try
+            using (var canonicalSignedInfoStream = new MemoryStream())
             {
-                return new Signature
+                using (var signedInfoWriter = CreateTextWriter(Stream.Null))
                 {
-                    KeyInfo = new KeyInfo(_signingCredentials.Key),
-                    SignatureValue = Convert.ToBase64String(provider.Sign(canonicalSignedInfoStream.ToArray())),
-                    SignedInfo = signedInfo,
-                };
-            }
-            finally
-            {
-                if (provider != null)
-                    cryptoProviderFactory.ReleaseSignatureProvider(provider);
+                    signedInfoWriter.StartCanonicalization(canonicalSignedInfoStream, false, null);
+                    DSigSerializer.WriteSignedInfo(signedInfoWriter, signedInfo);
+                    signedInfoWriter.EndCanonicalization();
+                    signedInfoWriter.Flush();
+
+                    var provider = cryptoProviderFactory.CreateForSigning(_signingCredentials.Key, _signingCredentials.Algorithm);
+                    if (provider == null)
+                        throw LogExceptionMessage(new XmlValidationException(FormatInvariant(LogMessages.IDX30213, MarkAsNonPII(cryptoProviderFactory.GetType().Name), _signingCredentials.Key.ToString(), MarkAsNonPII(_signingCredentials.Algorithm))));
+
+                    try
+                    {
+                        return new Signature
+                        {
+                            KeyInfo = new KeyInfo(_signingCredentials.Key),
+                            SignatureValue = Convert.ToBase64String(provider.Sign(canonicalSignedInfoStream.ToArray())),
+                            SignedInfo = signedInfo,
+                        };
+                    }
+                    finally
+                    {
+                        if (provider != null)
+                            cryptoProviderFactory.ReleaseSignatureProvider(provider);
+                    }
+                }
             }
         }
 
         /// <summary>
-        /// Sets the position of the signature within the envelope. Call this
-        /// method while writing the envelope to indicate at which point the 
+        /// Call this method while writing the envelope to indicate at which point the
         /// signature should be inserted.
         /// </summary>
+        /// <remarks>
+        /// Signature placeholder element will be written, and later replaced with a correct signature
+        /// when the envelope is completed.
+        /// </remarks>
         public void WriteSignature()
         {
-            InnerWriter.Flush();
-            _signaturePosition = _writerStream.Length;
+            InternalWriter.WriteStartElement(SignaturePlaceholder);
+            InternalWriter.WriteEndElement();
+            InternalWriter.Flush();
+            _signaturePlaceholderWritten = true;
         }
 
         /// <summary>
@@ -261,7 +283,6 @@ namespace Microsoft.IdentityModel.Xml
         }
 
 #region IDisposable Members
-
         /// <summary>
         /// Releases the unmanaged resources used by the System.IdentityModel.Protocols.XmlSignature.EnvelopedSignatureWriter and optionally
         /// releases the managed resources.
@@ -282,10 +303,10 @@ namespace Microsoft.IdentityModel.Xml
 
             if (disposing)
             {
-                if (_writerStream != null)
+                if (_internalStream != null)
                 {
-                    _writerStream.Dispose();
-                    _writerStream = null;
+                    _internalStream.Dispose();
+                    _internalStream = null;
                 }
 
                 if (_canonicalStream != null)
@@ -295,7 +316,6 @@ namespace Microsoft.IdentityModel.Xml
                 }
             }
         }
-
 #endregion
     }
 }

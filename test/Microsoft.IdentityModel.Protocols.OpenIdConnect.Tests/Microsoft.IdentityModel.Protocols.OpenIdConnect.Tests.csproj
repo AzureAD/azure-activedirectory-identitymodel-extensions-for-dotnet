@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\..\build\commonTest.props" />
 
@@ -7,15 +7,12 @@
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <PackageId>Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests</PackageId>
-    <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">$(DotNetCoreAppRuntimeVersion)</RuntimeFrameworkVersion>
-    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(TestTargets)</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netcoreapp2.0</TargetFrameworks>
     <SignAssembly>true</SignAssembly>
     <DelaySign>true</DelaySign>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Update="JsonWebKeySet.json;JsonWebKeySetBadBase64Data.json;JsonWebKeySetBadX509Data.json;JsonWebKeySetEnd2End.json;JsonWebKeySetSingleX509Data.json;OpenIdConnectMetadata.json;OpenIdConnectMetadata2.json;OpenIdConnectMetadataBadBase64Data.json;OpenIdConnectMetadataBadX509Data.json;OpenIdConnectMetadataEnd2End.json;OpenIdConnectMetadataJsonWebKeySetBadUri.json;PingLabsJWKS.json;PingLabs-openid-configuration.json">
+    <None Update="JsonWebKeySet.json;JsonWebKeySetBadBase64Data.json;JsonWebKeySetBadX509Data.json;JsonWebKeySetEnd2End.json;JsonWebKeySetSingleX509Data.json;OpenIdConnectMetadata.json;OpenIdConnectMetadata2.json;JsonWebKeySetUnrecognizedKty.json;JsonWebKeySetBadRsaDataMissingComponent.json;OpenIdConnectMetadataBadBase64Data.json;OpenIdConnectMetadataBadX509Data.json;OpenIdConnectMetadataEnd2End.json;OpenIdConnectMetadataJsonWebKeySetBadUri.json;PingLabsJWKS.json;PingLabs-openid-configuration.json;;JsonWebKeySetEnd2EndEC.json;OpenIdConnectMetadataEnd2EndEC.json;OpenIdConnectMetadataUnrecognizedKty.json;OpenIdConnectMetadataBadRsaDataMissingComponent.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -26,23 +23,8 @@
     <ProjectReference Include="..\Microsoft.IdentityModel.Tokens.Tests\Microsoft.IdentityModel.Tokens.Tests.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitVersion)" />
-    <PackageReference Include="xunit" Version="$(XunitVersion)" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
-    <PackageReference Include="System.Diagnostics.Process" Version="$(CoreFxVersion)" />
-    <PackageReference Include="System.Net.Http" Version="$(CoreFxVersion)" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' Or '$(TargetFramework)' == 'net461' ">
-    <PackageReference Include="xunit.runner.console" Version="$(XunitVersion)" />
-    <Reference Include="System" />
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' Or '$(TargetFramework)' == 'net461'  Or '$(TargetFramework)' == 'net472'">
     <Reference Include="System.Net.Http" />
-    <Reference Include="System.Threading" />
-    <Reference Include="Microsoft.CSharp" />   
   </ItemGroup>
 
   <ItemGroup>

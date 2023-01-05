@@ -1,32 +1,7 @@
-﻿//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
-using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -36,8 +11,9 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class RsaKeyWrapProvider : KeyWrapProvider
     {
-        private AsymmetricAdapter _asymmetricAdapter;
+        private Lazy<AsymmetricAdapter> _asymmetricAdapter;
         private bool _disposed = false;
+        private bool _willUnwrap;
 
         /// <summary>
         /// Initializes a new instance of <see cref="RsaKeyWrapProvider"/> used for wrapping and un-wrappping keys.
@@ -59,13 +35,18 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
-            if (!IsSupportedAlgorithm(key, algorithm))
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, algorithm, key)));
-
             Algorithm = algorithm;
             Key = key;
+            _willUnwrap = willUnwrap;
+            _asymmetricAdapter = new Lazy<AsymmetricAdapter>(CreateAsymmetricAdapter);
+        }
 
-            _asymmetricAdapter = new AsymmetricAdapter(key, algorithm, willUnwrap);
+        internal AsymmetricAdapter CreateAsymmetricAdapter()
+        {
+            if (!IsSupportedAlgorithm(Key, Algorithm))
+                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, LogHelper.MarkAsNonPII(Algorithm), Key)));
+
+            return new AsymmetricAdapter(Key, Algorithm, _willUnwrap);
         }
 
         /// <summary>
@@ -95,7 +76,7 @@ namespace Microsoft.IdentityModel.Tokens
                 if (disposing)
                 {
                     _disposed = true;
-                    _asymmetricAdapter.Dispose();
+                    _asymmetricAdapter.Value.Dispose();
                 }
             }
         }
@@ -108,16 +89,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>true if the algorithm is supported; otherwise, false.</returns>
         protected virtual bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
         {
-            if (key == null)
-                return false;
-
-            if (string.IsNullOrEmpty(algorithm))
-                return false;
-
-            if (key.KeySize < 2048)
-                return false;
-
-            return SupportedAlgorithms.IsSupportedKeyWrapAlgorithm(algorithm, key);
+            return SupportedAlgorithms.IsSupportedRsaKeyWrap(algorithm, key);
         }
 
         /// <summary>
@@ -139,7 +111,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                return _asymmetricAdapter.Decrypt(keyBytes);
+                return _asymmetricAdapter.Value.Decrypt(keyBytes);
             }
             catch (Exception ex)
             {
@@ -166,7 +138,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                return _asymmetricAdapter.Encrypt(keyBytes);
+                return _asymmetricAdapter.Value.Encrypt(keyBytes);
             }
             catch (Exception ex)
             {

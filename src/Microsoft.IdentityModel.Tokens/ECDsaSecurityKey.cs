@@ -1,30 +1,7 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
+using System;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 
@@ -36,6 +13,13 @@ namespace Microsoft.IdentityModel.Tokens
     public class ECDsaSecurityKey : AsymmetricSecurityKey
     {
         private bool? _hasPrivateKey;
+
+        internal ECDsaSecurityKey(JsonWebKey webKey, bool usePrivateKey)
+            : base(webKey)
+        {
+            ECDsa = ECDsaAdapter.Instance.CreateECDsa(webKey, usePrivateKey);
+            webKey.ConvertedSecurityKey = this;
+        }
 
         /// <summary>
         /// Returns a new instance of <see cref="ECDsaSecurityKey"/>.
@@ -99,6 +83,38 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 return ECDsa.KeySize;
             }
+        }
+
+        /// <summary>
+        /// Determines whether the <see cref="ECDsaSecurityKey"/> can compute a JWK thumbprint.
+        /// </summary>
+        /// <returns><c>true</c> if JWK thumbprint can be computed; otherwise, <c>false</c>.</returns>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7638</remarks>
+        public override bool CanComputeJwkThumbprint()
+        {
+#if NET472 || NETSTANDARD2_0 || NET6_0
+            if (ECDsaAdapter.SupportsECParameters())
+                return true;
+#endif
+            return false;
+        }
+
+        /// <summary>
+        /// Computes a sha256 hash over the <see cref="ECDsaSecurityKey"/>.
+        /// </summary>
+        /// <returns>A JWK thumbprint.</returns>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7638</remarks>
+        public override byte[] ComputeJwkThumbprint()
+        {
+#if NET472 || NETSTANDARD2_0 || NET6_0
+            if (ECDsaAdapter.SupportsECParameters())
+            {
+                ECParameters parameters = ECDsa.ExportParameters(false);
+                var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.Crv}"":""{ECDsaAdapter.GetCrvParameterValue(parameters.Curve)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.EllipticCurve}"",""{JsonWebKeyParameterNames.X}"":""{Base64UrlEncoder.Encode(parameters.Q.X)}"",""{JsonWebKeyParameterNames.Y}"":""{Base64UrlEncoder.Encode(parameters.Q.Y)}""}}";
+                return Utility.GenerateSha256Hash(canonicalJwk);
+            }
+#endif
+            throw LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogMessages.IDX10695));
         }
     }
 }

@@ -1,35 +1,12 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
+using System.IO.Compression;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.TestUtils
 {
-    // https://tools.ietf.org/html/rfc7518#appendix-A.3
+    // https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3
     // B.1.  Test Cases for AES_128_CBC_HMAC_SHA_256
     public static class AES_128_CBC_HMAC_SHA_256
     {
@@ -139,7 +116,7 @@ namespace Microsoft.IdentityModel.TestUtils
         }
     }
 
-    // https://tools.ietf.org/html/rfc7518#appendix-A.3
+    // https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3
     // B.2.  Test Cases for AES_192_CBC_HMAC_SHA_256
     public static class AES_192_CBC_HMAC_SHA_384
     {
@@ -253,7 +230,7 @@ namespace Microsoft.IdentityModel.TestUtils
         }
     }
   
-    // https://tools.ietf.org/html/rfc7518#appendix-A.3
+    // https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3
     // B.3.  Test Cases for AES_256_CBC_HMAC_SHA_512
     public static class AES_256_CBC_HMAC_SHA_512
     {
@@ -369,7 +346,88 @@ namespace Microsoft.IdentityModel.TestUtils
         }
     }
 
-    // https://tools.ietf.org/html/rfc7516#appendix-A.3.3
+    // https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.1.4
+    // A.1.4 Content encryption using AES-GCM 256
+    public static class AES_256_GCM
+    {
+        public static string Algorithm
+        {
+            get { return SecurityAlgorithms.Aes256Gcm; }
+        }
+
+        public static byte[] IV
+        {
+            get
+            {
+                return new byte[] { 227, 197, 117, 252, 2, 219, 233, 68, 180, 225, 77, 219 };
+            }
+        }
+
+        public static byte[] P
+        {
+            get
+            {
+                return new byte[] { 84, 104, 101, 32, 116, 114, 117, 101, 32, 115, 105, 103, 110, 32,
+                                    111, 102, 32, 105, 110, 116, 101, 108, 108, 105, 103, 101, 110, 99,
+                                    101, 32, 105, 115, 32, 110, 111, 116, 32, 107, 110, 111, 119, 108,
+                                    101, 100, 103, 101, 32, 98, 117, 116, 32, 105, 109, 97, 103, 105,
+                                    110, 97, 116, 105, 111, 110, 46 };
+            }
+        }
+
+        public static byte[] A
+        {
+            get
+            {
+                return new byte[] { 101, 121, 74, 104, 98, 71, 99, 105, 79, 105, 74, 83, 85, 48, 69,
+                                    116, 84, 48, 70, 70, 85, 67, 73, 115, 73, 109, 86, 117, 89, 121, 73,
+                                    54, 73, 107, 69, 121, 78, 84, 90, 72, 81, 48, 48, 105, 102, 81 };
+            }
+        }
+
+        public static byte[] E
+        {
+            get
+            {
+                return new byte[] { 229, 236, 166, 241, 53, 191, 115, 196, 174, 43, 73, 109, 39, 122,
+                                    233, 96, 140, 206, 120, 52, 51, 237, 48, 11, 190, 219, 186, 80, 111,
+                                    104, 50, 142, 47, 167, 59, 61, 181, 127, 196, 21, 40, 82, 242, 32,
+                                    123, 143, 168, 226, 73, 216, 176, 144, 138, 247, 106, 60, 16, 205,
+                                    160, 109, 64, 63, 192 };
+            }
+        }
+
+        public static byte[] T
+        {
+            get
+            {
+                return new byte[] { 92, 80, 104, 49, 133, 25, 161, 215, 173, 101, 219, 211, 136, 91,
+                                    210, 145 };
+            }
+        }
+
+        public static string EncodedAuthenticationTag
+        {
+            get { return "XFBoMYUZodetZdvTiFvSkQ"; }
+        }
+
+        public static string EncodedCipherText
+        {
+            get { return "5eym8TW_c8SuK0ltJ3rpYIzOeDQz7TALvtu6UG9oMo4vpzs9tX_EFShS8iB7j6jiSdiwkIr3ajwQzaBtQD_A"; }
+        }
+
+        public static string EncodedIV
+        {
+            get { return "48V1_ALb6US04U3b"; }
+        }
+
+        public static string Result
+        {
+            get { return "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00ifQ.OKOawDo13gRp2ojaHV7LFpZcgV7T6DVZKTyKOMTYUmKoTCVJRgckCL9kiMT03JGeipsEdY3mx_etLbbWSrFr05kLzcSr4qKAq7YN7e9jwQRb23nfa6c9d-StnImGyFDbSv04uVuxIp5Zms1gNxKKK2Da14B8S4rzVRltdYwam_lDp5XnZAYpQdb76FdIKLaVmqgfwX7XWRxv2322i-vDxRfqNzo_tETKzpVLzfiwQyeyPGLBIO56YJ7eObdv0je81860ppamavo35UgoRdbYaBcoh9QcfylQr66oc6vFWXRcZ_ZT2LawVCWTIy3brGPi6UklfCpIMfIjf7iGdXKHzg.48V1_ALb6US04U3b.5eym8TW_c8SuK0ltJ3rpYIzOeDQz7TALvtu6UG9oMo4vpzs9tX_EFShS8iB7j6jiSdiwkIr3ajwQzaBtQD_A.XFBoMYUZodetZdvTiFvSkQ"; }
+        }
+    }
+
+    // https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.3.3
     // A.3.3 Key Encryption: Aes128 Key Wrap
     public static class AES128_KeyWrap
     {
@@ -409,7 +467,133 @@ namespace Microsoft.IdentityModel.TestUtils
         }
     }
 
-    // https://tools.ietf.org/html/rfc7516#appendix-A.1.3
+    // https://datatracker.ietf.org/doc/html/rfc7518#appendix-C
+    public static class ECDH_ES
+    {
+        public static byte[] AlgorithmID = new byte[] { 0, 0, 0, 7, 65, 49, 50, 56, 71, 67, 77 };
+
+        public static JsonWebKey AliceEphereralPrivateKey =>
+            new JsonWebKey
+            {
+                Crv = "P-256",
+                D = "0_NxaRPUMQoAJt50Gz8YiTr8gRTwyEaCumd-MToTmIo",
+                Kty = "EC",
+                X = "gI0GAILBdu7T53akrFmMyGcsF3n5dO7MmwNBHKW5SV0",
+                Y = "SLW_xSffzlPWrHEVI30DHM_4egVwt3NQqeUD7nMFpps"
+            };
+
+        public static string AliceEphereralPrivateKeyString =>
+            @"{
+                ""kty"":""EC"",
+                ""crv"":""P-256"",
+                ""x"":""gI0GAILBdu7T53akrFmMyGcsF3n5dO7MmwNBHKW5SV0"",
+                ""y"":""SLW_xSffzlPWrHEVI30DHM_4egVwt3NQqeUD7nMFpps"",
+                ""d"":""0_NxaRPUMQoAJt50Gz8YiTr8gRTwyEaCumd-MToTmIo""
+             }";
+
+        public static JsonWebKey AliceEphereralPublicKey =>
+            new JsonWebKey
+            {
+                Crv = "P-256",
+                Kty = "EC",
+                X = "gI0GAILBdu7T53akrFmMyGcsF3n5dO7MmwNBHKW5SV0",
+                Y = "SLW_xSffzlPWrHEVI30DHM_4egVwt3NQqeUD7nMFpps"
+            };
+
+        public static string AliceEphereralPublicKeyString =>
+            @"{
+                ""kty"":""EC"",
+                ""crv"":""P-256"",
+                ""x"":""gI0GAILBdu7T53akrFmMyGcsF3n5dO7MmwNBHKW5SV0"",
+                ""y"":""SLW_xSffzlPWrHEVI30DHM_4egVwt3NQqeUD7nMFpps""
+             }";
+
+        public static JsonWebKey BobEphereralPrivateKey =>
+            new JsonWebKey
+            {
+                Crv = "P-256",
+                D = "VEmDZpDXXK8p8N0Cndsxs924q6nS1RXFASRl6BfUqdw",
+                Kty = "EC",
+                X = "weNJy2HscCSM6AEDTDg04biOvhFhyyWvOHQfeF_PxMQ",
+                Y = "e8lnCO-AlStT-NJVX-crhB7QRYhiix03illJOVAOyck"
+            };
+
+        public static string BobEphereralPrivateKeyString =>
+            @"{
+                ""kty"":""EC"",
+                ""crv"":""P-256"",
+                ""x"":""weNJy2HscCSM6AEDTDg04biOvhFhyyWvOHQfeF_PxMQ"",
+                ""y"":""e8lnCO-AlStT-NJVX-crhB7QRYhiix03illJOVAOyck"",
+                ""d"":""VEmDZpDXXK8p8N0Cndsxs924q6nS1RXFASRl6BfUqdw""
+            }";
+
+        public static JsonWebKey BobEphereralPublicKey =>
+            new JsonWebKey
+            {
+                Crv = "P-256",
+                Kty = "EC",
+                X = "weNJy2HscCSM6AEDTDg04biOvhFhyyWvOHQfeF_PxMQ",
+                Y = "e8lnCO-AlStT-NJVX-crhB7QRYhiix03illJOVAOyck"
+            };
+
+        public static string BobEphereralPublicString =>
+            @"{
+                ""kty"":""EC"",
+                ""crv"":""P-256"",
+                ""x"":""weNJy2HscCSM6AEDTDg04biOvhFhyyWvOHQfeF_PxMQ"",
+                ""y"":""e8lnCO-AlStT-NJVX-crhB7QRYhiix03illJOVAOyck""
+            }";
+
+        public static byte[] ConcatKDF =
+            new byte[] { 0, 0, 0, 1,
+                         158, 86, 217, 29, 129, 113, 53, 211, 114, 131, 66, 131, 191, 132, 38, 156, 251, 49, 110, 163, 218, 128, 106, 72, 246, 218, 167, 121, 140, 254, 144, 196,
+                         0, 0, 0, 7, 65, 49, 50, 56, 71, 67, 77,
+                         0, 0, 0, 5, 65, 108, 105, 99, 101,
+                         0, 0, 0, 3, 66, 111, 98, 0, 0, 0, 128};
+
+        public static byte[] DerivedKeyBytes = new byte[] { 86, 170, 141, 234, 248, 35, 109, 32, 92, 34, 40, 205, 113, 167, 16, 26 };
+
+        public static string DerivedKeyEncoded = "VqqN6vgjbSBcIijNcacQGg";
+
+        public static string EPKString =>
+            @"{
+                ""alg"":""ECDH-ES"",
+                ""enc"":""A128GCM"",
+                ""apu"":""QWxpY2U"",
+                ""apv"":""Qm9i"",
+                ""epk"":
+                {
+                    ""kty"":""EC"",
+                    ""crv"":""P-256"",
+                    ""x"":""gI0GAILBdu7T53akrFmMyGcsF3n5dO7MmwNBHKW5SV0"",
+                    ""y"":""SLW_xSffzlPWrHEVI30DHM_4egVwt3NQqeUD7nMFpps""
+                }
+              }";
+
+        public static string Alg = "ECDH-ES";
+
+        public static string Enc = "A128GCM";
+
+        public static string Apu = "QWxpY2U";
+
+        public static string Apv = "Qm9i";
+
+        public static int KeyDataLen = 128;
+
+        public static byte[] PartyUInfo = new byte[] { 0, 0, 0, 5, 65, 108, 105, 99, 101 };
+
+        public static byte[] PartyVInfo = new byte[] { 0, 0, 0, 3, 66, 11, 98 };
+
+        public static byte[] OtherInfo = new byte[] { 0, 0, 0, 7, 65, 49, 50, 56, 71, 67, 77, 0, 0, 0, 5, 65, 108, 105, 99, 101, 0, 0, 0, 3, 66, 111, 98, 0, 0, 0, 128 };
+
+        public static byte[] SuppPubInfo = new byte[] { 0, 0, 0, 128 };
+
+        public static byte[] SuppPrivInfo = new byte[] { };
+
+        public static byte[] Z => new byte[] { 158, 86, 217, 29, 129, 113, 53, 211, 114, 131, 66, 131, 191, 132, 38, 156, 251, 49, 110, 163, 218, 128, 106, 72, 246, 218, 167, 121, 140, 254, 144, 196 };
+    }
+
+    // https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.1.3
     // A.1.3 Key wrap: RSAES-OAEP + JsonWebKey
     public static class RSAES_OAEP_KeyWrap
     {
@@ -478,7 +662,7 @@ namespace Microsoft.IdentityModel.TestUtils
         }
     }
 
-    // https://tools.ietf.org/html/rfc7516#appendix-A.2.3
+    // https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.2.3
     // A.2.3 Key wrap: RSAES-PKCS1-v1_5 + JsonWebKey
     public static class RSAES_PKCS1_KeyWrap
     {

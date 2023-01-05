@@ -1,29 +1,5 @@
-﻿//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -189,11 +165,11 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Initializes a new instance of the <see cref="JwtSecurityToken"/> class specifying optional parameters.
         /// </summary>
-        /// <param name="issuer">If this value is not null, a { iss, 'issuer' } claim will be added.</param>
-        /// <param name="audience">If this value is not null, a { aud, 'audience' } claim will be added</param>
+        /// <param name="issuer">If this value is not null, a { iss, 'issuer' } claim will be added, overwriting any 'iss' claim in 'claims' if present.</param>
+        /// <param name="audience">If this value is not null, a { aud, 'audience' } claim will be added, appending to any 'aud' claims in 'claims' if present.</param>
         /// <param name="claims">If this value is not null then for each <see cref="Claim"/> a { 'Claim.Type', 'Claim.Value' } is added. If duplicate claims are found then a { 'Claim.Type', List&lt;object&gt; } will be created to contain the duplicate values.</param>
-        /// <param name="expires">If expires.HasValue a { exp, 'value' } claim is added.</param>
-        /// <param name="notBefore">If notbefore.HasValue a { nbf, 'value' } claim is added.</param>
+        /// <param name="expires">If expires.HasValue a { exp, 'value' } claim is added, overwriting any 'exp' claim in 'claims' if present.</param>
+        /// <param name="notBefore">If notbefore.HasValue a { nbf, 'value' } claim is added, overwriting any 'nbf' claim in 'claims' if present.</param>
         /// <param name="signingCredentials">The <see cref="SigningCredentials"/> that will be used to sign the <see cref="JwtSecurityToken"/>. See <see cref="JwtHeader(SigningCredentials)"/> for details pertaining to the Header Parameter(s).</param>
         /// <exception cref="ArgumentException">If 'expires' &lt;= 'notbefore'.</exception>
         public JwtSecurityToken(string issuer = null, string audience = null, IEnumerable<Claim> claims = null, DateTime? notBefore = null, DateTime? expires = null, SigningCredentials signingCredentials = null)
@@ -201,7 +177,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (expires.HasValue && notBefore.HasValue)
             {
                 if (notBefore >= expires)
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12401, expires.Value, notBefore.Value)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12401, LogHelper.MarkAsNonPII(expires.Value), LogHelper.MarkAsNonPII(notBefore.Value))));
             }
 
             Payload = new JwtPayload(issuer, audience, claims, notBefore, expires);
@@ -278,7 +254,7 @@ namespace System.IdentityModel.Tokens.Jwt
         public JwtHeader Header { get; internal set; }
 
         /// <summary>
-        /// Gets the 'value' of the 'JWT ID' claim { jti, ''value' }.
+        /// Gets the 'value' of the 'JWT ID' claim { jti, 'value' }.
         /// </summary>
         /// <remarks>If the 'JWT ID' claim is not found, an empty string is returned.</remarks>
         public override string Id
@@ -308,7 +284,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
         /// <summary>
         /// Gets the <see cref="JwtPayload"/> associated with this instance.
-        /// Note that if this JWT is nested ( <see cref="JwtSecurityToken.InnerToken"/> != null, this property represnts the payload of the most inner token.
+        /// Note that if this JWT is nested ( <see cref="JwtSecurityToken.InnerToken"/> != null, this property represents the payload of the most inner token.
         /// This property can be null if the content type of the most inner token is unrecognized, in that case
         ///  the content of the token is the string returned by PlainText property.
         /// </summary>
@@ -466,6 +442,20 @@ namespace System.IdentityModel.Tokens.Jwt
                 return DateTime.MinValue;
             }
         }
+		
+        /// <summary>
+        /// Gets the 'value' of the 'issued at' claim { iat, 'value' } converted to a <see cref="DateTime"/> assuming 'value' is seconds since UnixEpoch (UTC 1970-01-01T0:0:0Z).
+        /// </summary>
+        /// <remarks>If the 'issued at' claim is not found, then <see cref="DateTime.MinValue"/> is returned.</remarks>
+        public virtual DateTime IssuedAt
+        {
+            get
+            {
+                if (Payload != null)
+                    return Payload.IssuedAt;
+                return DateTime.MinValue;
+            }
+        }
 
         /// <summary>
         /// Serializes the <see cref="JwtHeader"/> and <see cref="JwtPayload"/>
@@ -486,7 +476,6 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="rawData">the original token.</param>
         internal void Decode(string[] tokenParts, string rawData)
         {
-            LogHelper.LogInformation(LogMessages.IDX12716, rawData);
             try
             {
                 Header = JwtHeader.Base64UrlDeserialize(tokenParts[0]);

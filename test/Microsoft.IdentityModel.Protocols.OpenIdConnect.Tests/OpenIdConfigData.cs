@@ -1,29 +1,5 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System.Collections.Generic;
 using Microsoft.IdentityModel.TestUtils;
@@ -80,6 +56,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
         public static string JsonFile = @"OpenIdConnectMetadata.json";
         public static string OpenIdConnectMetadataFileEnd2End = @"OpenIdConnectMetadataEnd2End.json";
+        public static string OpenIdConnectMetadataFileEnd2EndEC = @"OpenIdConnectMetadataEnd2EndEC.json";
         public static string JsonWebKeySetBadUriFile = @"OpenIdConnectMetadataJsonWebKeySetBadUri.json";
         public static string JsonAllValues =
                                             @"{ ""acr_values_supported"" : [""acr_value1"", ""acr_value2"", ""acr_value3""],
@@ -98,6 +75,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                                                 ""id_token_encryption_alg_values_supported"" : [""RSA1_5"", ""A256KW""],
                                                 ""id_token_encryption_enc_values_supported"" : [""A128CBC-HS256"",""A256CBC-HS512""],
                                                 ""id_token_signing_alg_values_supported"" : [""RS256""],
+                                                ""introspection_endpoint"" : ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/introspect"",
+                                                ""introspection_endpoint_auth_methods_supported"" : [""client_secret_post"",""private_key_jwt""],
+                                                ""introspection_endpoint_auth_signing_alg_values_supported"" : [""ES192"", ""ES256""],
                                                 ""issuer"" : ""https://sts.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/"",
                                                 ""jwks_uri"" : ""JsonWebKeySet.json"",
                                                 ""logout_session_supported"" : true,
@@ -141,6 +121,23 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                                                 ""token_endpoint_auth_methods_supported"":[""client_secret_post"",""private_key_jwt""]
                                             }";
 
+        public static string JsonWithSigningKeys =
+                                            @"{ ""authorization_endpoint"":""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize"",
+                                                ""check_session_iframe"":""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/checksession"",
+                                                ""end_session_endpoint"":""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/logout"",
+                                                ""id_token_signing_alg_values_supported"":[""RS256""],
+                                                ""issuer"":""https://sts.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/"",
+                                                ""jwks_uri"":""JsonWebKeySetSingleX509Data.json"",
+                                                ""microsoft_multi_refresh_token"":true,
+                                                ""response_types_supported"":[""code"",""id_token"",""code id_token""],
+                                                ""response_modes_supported"":[""query"",""fragment"",""form_post""],
+                                                ""scopes_supported"":[""openid""],
+                                                ""subject_types_supported"":[""pairwise""],
+                                                ""token_endpoint"":""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/token"",
+                                                ""token_endpoint_auth_methods_supported"":[""client_secret_post"",""private_key_jwt""],
+                                                ""SigningKeys"":[""key1"",""key2""]
+                                            }";
+
         public static string OpenIdConnectMetadataBadX509DataString = @"{""jwks_uri"":""JsonWebKeySetBadX509Data.json""}";
         public static string OpenIdConnectMetadataBadBase64DataString = @"{""jwks_uri"":""JsonWebKeySetBadBase64Data.json""}";
         public static string OpenIdConnectMetadataBadUriKeysString = @"{""jwks_uri"":""___NoSuchFile___""}";
@@ -180,8 +177,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             SingleX509Data.JsonWebKeySet = DataSets.JsonWebKeySetX509Data;
             SingleX509Data.JwksUri = "JsonWebKeySetSingleX509Data.json";
             SingleX509Data.IdTokenSigningAlgValuesSupported.Add("RS256");
-            AddToCollection(SingleX509Data.ResponseTypesSupported, new string[]{"code", "id_token", "code id_token"});
-            AddToCollection(SingleX509Data.ResponseModesSupported, new string[]{"query", "fragment", "form_post"});
+            AddToCollection(SingleX509Data.ResponseTypesSupported, new string[] { "code", "id_token", "code id_token" });
+            AddToCollection(SingleX509Data.ResponseModesSupported, new string[] { "query", "fragment", "form_post" });
             SingleX509Data.ScopesSupported.Add("openid");
             SingleX509Data.SigningKeys.Add(KeyingMaterial.X509SecurityKey1);
             SingleX509Data.SubjectTypesSupported.Add("pairwise");
@@ -210,8 +207,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             AddToCollection(config.GrantTypesSupported, "authorization_code", "implicit");
             config.HttpLogoutSupported = true;
             AddToCollection(config.IdTokenEncryptionAlgValuesSupported, "RSA1_5", "A256KW");
-            AddToCollection(config.IdTokenEncryptionEncValuesSupported, "A128CBC-HS256","A256CBC-HS512");
+            AddToCollection(config.IdTokenEncryptionEncValuesSupported, "A128CBC-HS256", "A256CBC-HS512");
             AddToCollection(config.IdTokenSigningAlgValuesSupported, "RS256");
+            config.IntrospectionEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/introspect";
+            AddToCollection(config.IntrospectionEndpointAuthMethodsSupported, "client_secret_post", "private_key_jwt");
+            AddToCollection(config.IntrospectionEndpointAuthSigningAlgValuesSupported, "ES192", "ES256");
             config.Issuer = "https://sts.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/";
             config.JwksUri = "JsonWebKeySet.json";
             config.LogoutSessionSupported = true;
@@ -233,7 +233,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             AddToCollection(config.TokenEndpointAuthSigningAlgValuesSupported, "ES192", "ES256");
             AddToCollection(config.UILocalesSupported, "hak-CN", "en-us");
             config.UserInfoEndpoint = "https://login.microsoftonline.com/add29489-7269-41f4-8841-b63c95564420/openid/userinfo";
-            AddToCollection(config.UserInfoEndpointEncryptionAlgValuesSupported, "ECDH-ES+A128KW","ECDH-ES+A192KW");
+            AddToCollection(config.UserInfoEndpointEncryptionAlgValuesSupported, "ECDH-ES+A128KW", "ECDH-ES+A192KW");
             AddToCollection(config.UserInfoEndpointEncryptionEncValuesSupported, "A256CBC-HS512", "A128CBC-HS256");
             AddToCollection(config.UserInfoEndpointSigningAlgValuesSupported, "ES384", "ES512");
 

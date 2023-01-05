@@ -1,29 +1,5 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Security.Cryptography;
@@ -33,24 +9,46 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Security key that allows access to cert
+    /// An <see cref="AsymmetricSecurityKey"/> that is backed by a <see cref="X509Certificate2"/>
     /// </summary>
     public class X509SecurityKey : AsymmetricSecurityKey
     {
-        X509Certificate2 _certificate;
         AsymmetricAlgorithm _privateKey;
         bool _privateKeyAvailabilityDetermined;
         AsymmetricAlgorithm _publicKey;
         object _thisLock = new Object();
 
+        internal X509SecurityKey(JsonWebKey webKey)
+            : base(webKey)
+        {
+            Certificate = new X509Certificate2(Convert.FromBase64String(webKey.X5c[0]));
+            X5t = Base64UrlEncoder.Encode(Certificate.GetCertHash());
+            webKey.ConvertedSecurityKey = this;
+        }
+
         /// <summary>
-        /// Instantiates a <see cref="SecurityKey"/> using a <see cref="X509Certificate2"/>
+        /// Instantiates a <see cref="X509SecurityKey"/> using a <see cref="X509Certificate2"/>
         /// </summary>
-        /// <param name="certificate">The cert to use.</param>
+        /// <param name="certificate">The <see cref="X509Certificate2"/> to use.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="certificate"/> is null.</exception>
         public X509SecurityKey(X509Certificate2 certificate)
         {
-            _certificate = certificate ?? throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(certificate)));
-            KeyId = Base64UrlEncoder.Encode(certificate.GetCertHash());
+            Certificate = certificate ?? throw LogHelper.LogArgumentNullException(nameof(certificate));
+            KeyId = certificate.Thumbprint;
+            X5t = Base64UrlEncoder.Encode(certificate.GetCertHash());
+        }
+
+        /// <summary>
+        /// Instantiates a <see cref="X509SecurityKey"/> using a <see cref="X509Certificate2"/>.
+        /// </summary>
+        /// <param name="certificate">The <see cref="X509Certificate2"/> to use.</param>
+        /// <param name="keyId">The value to set for the KeyId</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="certificate"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="keyId"/> is null or empty.</exception>
+        public X509SecurityKey(X509Certificate2 certificate, string keyId)
+        {
+            Certificate = certificate ?? throw LogHelper.LogArgumentNullException(nameof(certificate));
+            KeyId = string.IsNullOrEmpty(keyId) ? throw LogHelper.LogArgumentNullException(nameof(keyId)) : keyId;
             X5t = Base64UrlEncoder.Encode(certificate.GetCertHash());
         }
 
@@ -80,10 +78,10 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         if (!_privateKeyAvailabilityDetermined)
                         {
-#if NETSTANDARD1_4 || NET461
-                            _privateKey = RSACertificateExtensions.GetRSAPrivateKey(_certificate);
+#if NET461 || NET472 || NETSTANDARD2_0 || NET6_0
+                            _privateKey = RSACertificateExtensions.GetRSAPrivateKey(Certificate);
 #else
-                            _privateKey = _certificate.PrivateKey;
+                            _privateKey = Certificate.PrivateKey;
 #endif
                             _privateKeyAvailabilityDetermined = true;
                         }
@@ -107,10 +105,10 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         if (_publicKey == null)
                         {
-#if NETSTANDARD1_4 || NET461
-                            _publicKey = RSACertificateExtensions.GetRSAPublicKey(_certificate);
+#if NET461 || NET472 || NETSTANDARD2_0 || NET6_0
+                            _publicKey = RSACertificateExtensions.GetRSAPublicKey(Certificate);
 #else
-                            _publicKey = _certificate.PublicKey.Key;
+                            _publicKey = Certificate.PublicKey.Key;
 #endif
                         }
                     }
@@ -129,7 +127,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets a bool indicating if a private key exists.
         /// </summary>
         /// <return>true if it has a private key; otherwise, false.</return>
-        [System.Obsolete("HasPrivateKey method is deprecated, please use PrivateKeyStatus instead.")]
+        [System.Obsolete("HasPrivateKey method is deprecated, please use PrivateKeyStatus.")]
         public override bool HasPrivateKey
         {
             get { return (PrivateKey != null); }
@@ -152,7 +150,30 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public X509Certificate2 Certificate
         {
-            get { return _certificate; }
+            get; private set;
+        }
+
+        internal override string InternalId => X5t;
+
+
+        /// <summary>
+        /// Determines whether the <see cref="X509SecurityKey"/> can compute a JWK thumbprint.
+        /// </summary>
+        /// <returns><c>true</c> if JWK thumbprint can be computed; otherwise, <c>false</c>.</returns>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7638</remarks>
+        public override bool CanComputeJwkThumbprint()
+        {
+            return (PublicKey as RSA) != null ? true : false;
+        }
+
+        /// <summary>
+        /// Computes a sha256 hash over the <see cref="X509SecurityKey"/>.
+        /// </summary>
+        /// <returns>A JWK thumbprint.</returns>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7638</remarks>
+        public override byte[] ComputeJwkThumbprint()
+        {
+            return new RsaSecurityKey(PublicKey as RSA).ComputeJwkThumbprint();
         }
 
         /// <summary>
@@ -161,11 +182,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <return>true if the keys are equal; otherwise, false.</return>
         public override bool Equals(object obj)
         {
-            X509SecurityKey other = obj as X509SecurityKey;
-            if (other == null)
+            if (!(obj is X509SecurityKey other))
                 return false;
 
-            return other.Certificate.Thumbprint.ToString() == _certificate.Thumbprint.ToString();
+            return other.Certificate.Thumbprint.ToString() == Certificate.Thumbprint.ToString();
         }
 
         /// <summary>
@@ -174,7 +194,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <return>An int hash code</return>
         public override int GetHashCode()
         {
-            return _certificate.GetHashCode();
+            return Certificate.GetHashCode();
         }
     }
 }

@@ -1,32 +1,10 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -42,6 +20,34 @@ namespace Microsoft.IdentityModel.Protocols
     {
         private HttpClient _httpClient;
         private static readonly HttpClient _defaultHttpClient = new HttpClient();
+
+        /// <summary>
+        /// The key is used to add status code into <see cref="Exception.Data"/>.
+        /// </summary>
+        public const string StatusCode = "status_code";
+
+        /// <summary>
+        /// The key is used to add response content into <see cref="Exception.Data"/>.
+        /// </summary>
+        public const string ResponseContent = "response_content";
+
+        /// <summary>
+        /// Gets or sets whether additional default headers are added to a <see cref="HttpRequestMessage"/> headers. Set to true by default.
+        /// </summary>
+        public static bool DefaultSendAdditionalHeaderData { get; set; } = true;
+
+        private bool _sendAdditionalHeaderData = DefaultSendAdditionalHeaderData;
+
+        /// <summary>
+        /// Gets or sets whether additional headers are added to a <see cref="HttpRequestMessage"/> headers
+        /// </summary>
+        public bool SendAdditionalHeaderData
+        {
+            get { return _sendAdditionalHeaderData; }
+            set { _sendAdditionalHeaderData = value; }
+        }
+
+        internal IDictionary<string, string> AdditionalHeaderData { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HttpDocumentRetriever"/> class.
@@ -83,17 +89,21 @@ namespace Microsoft.IdentityModel.Protocols
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX20108, address), nameof(address)));
 
             Exception unsuccessfulHttpResponseException;
+            HttpResponseMessage response;
             try
             {
                 LogHelper.LogVerbose(LogMessages.IDX20805, address);
                 var httpClient = _httpClient ?? _defaultHttpClient;
-                var response = await httpClient.GetAsync(address, cancel).ConfigureAwait(false);
-                var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var uri = new Uri(address, UriKind.RelativeOrAbsolute);
+                response = await SendAsyncAndRetryOnNetworkError(httpClient, uri).ConfigureAwait(false);
 
+                var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 if (response.IsSuccessStatusCode)
                     return responseContent;
 
-                 unsuccessfulHttpResponseException = new IOException(LogHelper.FormatInvariant(LogMessages.IDX20807, address, response, responseContent));
+                unsuccessfulHttpResponseException = new IOException(LogHelper.FormatInvariant(LogMessages.IDX20807, address, response, responseContent));
+                unsuccessfulHttpResponseException.Data.Add(StatusCode, response.StatusCode);
+                unsuccessfulHttpResponseException.Data.Add(ResponseContent, responseContent);
             }
             catch (Exception ex)
             {
@@ -101,6 +111,38 @@ namespace Microsoft.IdentityModel.Protocols
             }
 
             throw LogHelper.LogExceptionMessage(unsuccessfulHttpResponseException);
+        }
+
+        private async Task<HttpResponseMessage> SendAsyncAndRetryOnNetworkError(HttpClient httpClient, Uri uri)
+        {
+            int maxAttempt = 2;
+            HttpResponseMessage response = null;
+            for (int i = 1; i <= maxAttempt; i++)
+            {
+                // need to create a new message each time since you cannot send the same message twice
+                using (var message = new HttpRequestMessage(HttpMethod.Get, uri))
+                {
+                    if (SendAdditionalHeaderData)
+                        IdentityModelTelemetryUtil.SetTelemetryData(message, AdditionalHeaderData);
+
+                    response = await httpClient.SendAsync(message).ConfigureAwait(false);
+                    if (response.IsSuccessStatusCode)
+                        return response;
+
+                    if (response.StatusCode.Equals(HttpStatusCode.RequestTimeout) || response.StatusCode.Equals(HttpStatusCode.ServiceUnavailable))
+                    {
+                        if (i < maxAttempt) // logging exception details and that we will attempt to retry document retrieval
+                            LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX20808, response.StatusCode, await response.Content.ReadAsStringAsync().ConfigureAwait(false), message.RequestUri));
+                    }
+                    else // if the exception type does not indicate the need to retry we should break
+                    {
+                        LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX20809, message.RequestUri, response.StatusCode, await response.Content.ReadAsStringAsync().ConfigureAwait(false)));
+                        break;
+                    }
+                }
+            }
+
+            return response;
         }
     }
 }

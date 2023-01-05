@@ -1,29 +1,5 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Globalization;
@@ -188,9 +164,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <summary>
         /// Reads a &lt;saml:Assertion> element.
         /// </summary>
-        /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2Assertion"/> element.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="reader"/> is null.</exception>
-        /// <exception cref="NotSupportedException">if assertion is encrypted.</exception>
+        /// <param name="reader">A <see cref="XmlReader"/> positioned at a 'saml2:assertion' element.</param>
+        /// <exception cref="ArgumentNullException">If <paramref name="reader"/> is null.</exception>
+        /// <exception cref="NotSupportedException">If assertion is encrypted.</exception>
         /// <exception cref="Saml2SecurityTokenReadException">If <paramref name="reader"/> is not positioned at a Saml2Assertion.</exception>
         /// <exception cref="Saml2SecurityTokenReadException">If Version is not '2.0'.</exception>
         /// <exception cref="Saml2SecurityTokenReadException">If 'Id' is missing.</exception>>
@@ -199,12 +175,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>A <see cref="Saml2Assertion"/> instance.</returns>
         public virtual Saml2Assertion ReadAssertion(XmlReader reader)
         {
+            if (reader == null)
+                throw LogArgumentNullException(nameof(reader));
+
             if (reader.IsStartElement(Saml2Constants.Elements.EncryptedAssertion, Saml2Constants.Namespace))
                 throw LogExceptionMessage(new NotSupportedException(LogMessages.IDX13141));
 
             XmlUtil.CheckReaderOnEntry(reader, Saml2Constants.Elements.Assertion, Saml2Constants.Namespace);
 
-            var envelopeReader = new EnvelopedSignatureReader(reader);
+            var envelopeReader = new EnvelopedSignatureReader(reader) { Serializer = DSigSerializer };
             var assertion = new Saml2Assertion(new Saml2NameIdentifier("__TemporaryIssuer__"));
             try
             {
@@ -291,8 +270,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     }
                 }
 
-                // attach signedXml for validation of signature
+                // attach signature for verification
                 assertion.Signature = envelopeReader.Signature;
+                assertion.XmlTokenStream = envelopeReader.XmlTokenStream;
                 return assertion;
             }
             catch (Exception ex)
@@ -655,7 +635,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     reader.ReadStartElement(Saml2Constants.Elements.AuthnContextDeclRef, Saml2Constants.Namespace);
 
                 // Now we have enough data to create the object
-                var authnContext = new Saml2AuthenticationContext(classRef, declRef);
+                var authnContext = new Saml2AuthenticationContext(classRef);
+
+                if (declRef != null)
+                    authnContext.DeclarationReference = declRef;
 
                 // <AuthenticatingAuthority> - 0-OO
                 while (reader.IsStartElement(Saml2Constants.Elements.AuthenticatingAuthority, Saml2Constants.Namespace))
@@ -1022,7 +1005,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <param name="reader">A <see cref="XmlReader"/> positioned at a <see cref="Saml2NameIdentifier"/> element.</param>
         /// <returns>An instance of <see cref="Saml2NameIdentifier"/></returns>
-        internal Saml2NameIdentifier ReadNameIdType(XmlDictionaryReader reader)
+        internal static Saml2NameIdentifier ReadNameIdType(XmlDictionaryReader reader)
         {
             // check that reader is on correct element is made by caller
             try
@@ -2004,7 +1987,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogArgumentNullException(nameof(nameIdentifier));
 
             if (string.IsNullOrEmpty(nameIdentifier.Value))
-                throw LogArgumentNullException(FormatInvariant(LogMessages.IDX13151, Saml2Constants.Elements.NameID, "nameIdentifier.Value"));
+                throw LogArgumentNullException(FormatInvariant(LogMessages.IDX13151, MarkAsNonPII(Saml2Constants.Elements.NameID), MarkAsNonPII("nameIdentifier.Value")));
 
             // @Format - optional
             if (null != nameIdentifier.Format)
@@ -2047,7 +2030,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             // <Audience> - 0-OO
             foreach (Uri uri in proxyRestriction.Audiences)
-                writer.WriteElementString(Prefix, Saml2Constants.Elements.Audience, uri.OriginalString);
+                writer.WriteElementString(Saml2Constants.Elements.Audience, Saml2Constants.Namespace, uri.OriginalString);
 
             writer.WriteEndElement();
         }
@@ -2296,7 +2279,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     throw LogReadException(LogMessages.IDX13136, element);
 
                 if (requireUri && !CanCreateValidUri(value, kind))
-                    throw LogReadException(LogMessages.IDX13107, element, value);
+                    throw LogReadException(LogMessages.IDX13107, element, element, value);
 
                 return new Uri(value, kind);
             }

@@ -1,29 +1,5 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -91,8 +67,8 @@ namespace Microsoft.IdentityModel.Xml
                 if (string.IsNullOrEmpty(value))
                     throw LogArgumentNullException(nameof(value));
 
-                if (!string.Equals(value,SecurityAlgorithms.ExclusiveC14n, StringComparison.Ordinal) && !string.Equals(value, SecurityAlgorithms.ExclusiveC14nWithComments, StringComparison.Ordinal))
-                    throw LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX30204, CanonicalizationMethod, SecurityAlgorithms.ExclusiveC14n, SecurityAlgorithms.ExclusiveC14nWithComments)));
+                if (!string.Equals(value,SecurityAlgorithms.ExclusiveC14n) && !string.Equals(value, SecurityAlgorithms.ExclusiveC14nWithComments))
+                    throw LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX30204, LogHelper.MarkAsNonPII(CanonicalizationMethod), LogHelper.MarkAsNonPII(SecurityAlgorithms.ExclusiveC14n), LogHelper.MarkAsNonPII(SecurityAlgorithms.ExclusiveC14nWithComments))));
 
                 _canonicalizationMethod = value;
             }
@@ -153,16 +129,12 @@ namespace Microsoft.IdentityModel.Xml
             }
             else
             {
-                using (var signedInfoWriter = XmlDictionaryWriter.CreateTextWriter(Stream.Null, Encoding.UTF8, false))
+                using (var signedInfoWriter = XmlDictionaryWriter.CreateTextWriter(Stream.Null))
                 {
-                    using (var c14nStream = new MemoryStream())
-                    {
-                        signedInfoWriter.StartCanonicalization(c14nStream, _canonicalizationMethod.Equals(SecurityAlgorithms.ExclusiveC14nWithComments, StringComparison.Ordinal), null);
-                        _dsigSerializer.WriteSignedInfo(signedInfoWriter, this);
-                        signedInfoWriter.Flush();
-                        signedInfoWriter.EndCanonicalization();
-                        c14nStream.WriteTo(stream);
-                    }
+                    signedInfoWriter.StartCanonicalization(stream, _canonicalizationMethod.Equals(SecurityAlgorithms.ExclusiveC14nWithComments), null);
+                    _dsigSerializer.WriteSignedInfo(signedInfoWriter, this);
+                    signedInfoWriter.Flush();
+                    signedInfoWriter.EndCanonicalization();
                 }
             }
         }

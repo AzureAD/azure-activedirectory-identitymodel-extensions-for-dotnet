@@ -1,29 +1,5 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Logging;
@@ -50,14 +26,8 @@ namespace System.IdentityModel.Tokens.Jwt
     /// </summary>
     public static class JsonExtensions
     {
-        private static Serializer _serializer;
-        private static Deserializer _deserializer;
-
-        static JsonExtensions()
-        {
-           _serializer = JsonConvert.SerializeObject;
-           _deserializer = JsonConvert.DeserializeObject;
-        }
+        private static Serializer _serializer = JsonConvert.SerializeObject;
+        private static Deserializer _deserializer = JsonConvert.DeserializeObject;
 
         /// <summary>
         /// Gets or sets a <see cref="Serializer"/> to use when serializing objects to JSON.
@@ -71,10 +41,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
             set
             {
-                if (value == null)
-                    throw LogHelper.LogExceptionMessage(new ArgumentNullException("value"));
-
-                _serializer = value;
+                _serializer = value ?? throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(value)));
             }
         }
 
@@ -90,10 +57,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
             set
             {
-                if (value == null)
-                    throw LogHelper.LogExceptionMessage(new ArgumentNullException("value"));
-
-                _deserializer = value;
+                _deserializer = value ?? throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(value)));
             }
         }
 

@@ -1,29 +1,5 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -128,6 +104,20 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OpenIdConnectMessage"/> class.
+        /// </summary>
+        /// <param name="json">The JSON object from which the instance is created.</param>
+        [Obsolete("The 'OpenIdConnectMessage(object json)' constructor is obsolete. Please use 'OpenIdConnectMessage(string json)' instead.")]
+        public OpenIdConnectMessage(object json)
+        {
+            if (json == null)
+                throw LogHelper.LogArgumentNullException(nameof(json));
+
+            var jObject = JObject.Parse(json.ToString());
+            SetJsonParameters(jObject);
+        }
+
         private void SetJsonParameters(JObject json)
         {
             if (json == null)
@@ -165,7 +155,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         }
 
         /// <summary>
-        /// Creates a query string using the using the current contents of this <see cref="OpenIdConnectMessage"/>.
+        /// Creates a query string using the current contents of this <see cref="OpenIdConnectMessage"/>.
         /// </summary>
         /// <returns>The uri to use for a redirect.</returns>
         public virtual string CreateLogoutRequestUrl()
@@ -526,18 +516,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <summary>
         /// Gets the string that is sent as telemetry data in an OpenIdConnectMessage.
         /// </summary>
-        public string SkuTelemetryValue { get; set; } =
-#if NET45
-            "ID_NET45";
-#elif NET451
-            "ID_NET451";
-#elif NET461
-            "ID_NET461";
-#elif NETSTANDARD1_4
-            "ID_NETSTANDARD1_4";
-#elif NETSTANDARD2_0
-            "ID_NETSTANDARD2_0";
-#endif
+        public string SkuTelemetryValue { get; set; } = IdentityModelTelemetryUtil.ClientSku;
 
         /// <summary>
         /// Gets or sets 'state'.

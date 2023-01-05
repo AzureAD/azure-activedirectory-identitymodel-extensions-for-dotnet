@@ -1,35 +1,12 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -148,12 +125,17 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var context = TestUtilities.WriteHeader($"{this}.AsymmetricSignAndVerify", theoryData);
             try
             {
+                theoryData.VerifyKey.CryptoProviderFactory = theoryData.CryptoProviderFactory;
                 var signatureProviderVerify = theoryData.CryptoProviderFactory.CreateForVerifying(theoryData.VerifyKey, theoryData.VerifyAlgorithm);
                 var signatureProviderSign = theoryData.CryptoProviderFactory.CreateForSigning(theoryData.SigningKey, theoryData.SigningAlgorithm);
                 var bytes = Encoding.UTF8.GetBytes("GenerateASignature");
                 var signature = signatureProviderSign.Sign(bytes);
-                if (!signatureProviderVerify.Verify(bytes, signature))
-                    throw new CryptographicException();
+                var isValid = signatureProviderVerify.Verify(bytes, signature);
+                if (isValid != theoryData.IsValid)
+                    context.AddDiff($"isValid != theoryData.IsValid. '{isValid}', '{theoryData.IsValid}'.");
+
+                if (signatureProviderVerify.ObjectPoolSize != theoryData.CryptoProviderFactory.SignatureProviderObjectPoolCacheSize)
+                    context.AddDiff($"signatureProviderVerify.ObjectPoolSize != theoryData.CryptoProviderFactory.SignatureProviderObjectPoolCacheSize. '{signatureProviderVerify.ObjectPoolSize}, {theoryData.CryptoProviderFactory.SignatureProviderObjectPoolCacheSize}'.");
 
                 theoryData.ExpectedException.ProcessNoException(context);
             }
@@ -180,18 +162,18 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 new SignatureProviderTheoryData("ECDsa9", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.Ecdsa521Key, KEY.Ecdsa521Key_Public),
 
                 // JsonWebKey
-                new SignatureProviderTheoryData("JsonWebKeyEcdsa1", ALG.EcdsaSha256, ALG.EcdsaSha256, KEY.JsonWebKeyP256, KEY.JsonWebKeyP256_Public),
+                new SignatureProviderTheoryData("JsonWebKeyEcdsa1", ALG.EcdsaSha256, ALG.EcdsaSha256, KEY.JsonWebKeyP256, KEY.JsonWebKeyP256_Public){ CryptoProviderFactory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting()){ CacheSignatureProviders = false, SignatureProviderObjectPoolCacheSize = 10 } },
                 new SignatureProviderTheoryData("JsonWebKeyEcdsa2", ALG.EcdsaSha256Signature, ALG.EcdsaSha256Signature, KEY.JsonWebKeyP256, KEY.JsonWebKeyP256_Public),
                 new SignatureProviderTheoryData("JsonWebKeyEcdsa3", ALG.Aes256KeyWrap, ALG.EcdsaSha256Signature, KEY.JsonWebKeyP256, KEY.JsonWebKeyP256_Public, EE.NotSupportedException("IDX10634:")),
                 new SignatureProviderTheoryData("JsonWebKeyEcdsa4", ALG.EcdsaSha256, ALG.EcdsaSha256, KEY.JsonWebKeyP256, KEY.JsonWebKeyP256_Public),
                 new SignatureProviderTheoryData("JsonWebKeyEcdsa5", ALG.EcdsaSha384, ALG.EcdsaSha384, KEY.JsonWebKeyP384, KEY.JsonWebKeyP384_Public),
                 new SignatureProviderTheoryData("JsonWebKeyEcdsa6", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.JsonWebKeyP521, KEY.JsonWebKeyP521_Public),
-                new SignatureProviderTheoryData("JsonWebKeyEcdsa7", ALG.EcdsaSha256, ALG.EcdsaSha256, KEY.JsonWebKeyP256_BadPrivateKey, KEY.JsonWebKeyP256_Public, EE.CryptographicException(ignoreInnerException: true)),
-                new SignatureProviderTheoryData("JsonWebKeyRsa1", ALG.RsaSha256, ALG.RsaSha256, KEY.JsonWebKeyRsa256, KEY.JsonWebKeyRsa256Public),
-                new SignatureProviderTheoryData("JsonWebKeyRsa2", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.JsonWebKeyRsa256, KEY.JsonWebKeyRsa256Public),
-                new SignatureProviderTheoryData("JsonWebKeyRsa3", ALG.Aes192KeyWrap, ALG.RsaSha256Signature, KEY.JsonWebKeyRsa256, KEY.JsonWebKeyRsa256Public, EE.NotSupportedException("IDX10634:")),
+                new SignatureProviderTheoryData("JsonWebKeyP256_Invalid_D", ALG.EcdsaSha256, ALG.EcdsaSha256, KEY.JsonWebKeyP256_Invalid_D, KEY.JsonWebKeyP256_Public, EE.CryptographicException(ignoreInnerException: true)),
+                new SignatureProviderTheoryData("JsonWebKeyRsa1", ALG.RsaSha256, ALG.RsaSha256, KEY.JsonWebKeyRsa_2048, KEY.JsonWebKeyRsa_2048_Public),
+                new SignatureProviderTheoryData("JsonWebKeyRsa2", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.JsonWebKeyRsa_2048, KEY.JsonWebKeyRsa_2048_Public),
+                new SignatureProviderTheoryData("JsonWebKeyRsa3", ALG.Aes192KeyWrap, ALG.RsaSha256Signature, KEY.JsonWebKeyRsa_2048, KEY.JsonWebKeyRsa_2048_Public, EE.NotSupportedException("IDX10634:")),
 
-                new SignatureProviderTheoryData("RsaSecurityKey1", ALG.RsaSha256, ALG.RsaSha256, KEY.RsaSecurityKey_2048, KEY.RsaSecurityKey_2048_Public),
+                new SignatureProviderTheoryData("RsaSecurityKey1", ALG.RsaSha256, ALG.RsaSha256, KEY.RsaSecurityKey_2048, KEY.RsaSecurityKey_2048_Public){ CryptoProviderFactory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting()){ CacheSignatureProviders = false, SignatureProviderObjectPoolCacheSize = 100 } },
                 new SignatureProviderTheoryData("RsaSecurityKey2", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.RsaSecurityKey_2048, KEY.RsaSecurityKey_2048_Public),
                 new SignatureProviderTheoryData("RsaSecurityKey3", ALG.RsaSha384, ALG.RsaSha384, KEY.RsaSecurityKey_2048, KEY.RsaSecurityKey_2048_Public),
                 new SignatureProviderTheoryData("RsaSecurityKey4", ALG.RsaSha384Signature, ALG.RsaSha384Signature, KEY.RsaSecurityKey_2048, KEY.RsaSecurityKey_2048_Public),
@@ -209,7 +191,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 new SignatureProviderTheoryData("X509SecurityKey5", ALG.RsaSha512, ALG.RsaSha512, KEY.X509SecurityKeySelfSigned2048_SHA256, KEY.X509SecurityKeySelfSigned2048_SHA256_Public),
                 new SignatureProviderTheoryData("X509SecurityKey6", ALG.RsaSha512Signature, ALG.RsaSha512Signature, KEY.X509SecurityKeySelfSigned2048_SHA256, KEY.X509SecurityKeySelfSigned2048_SHA256_Public),
                 new SignatureProviderTheoryData("X509SecurityKey7", ALG.Aes128Encryption, ALG.RsaSha512Signature, KEY.X509SecurityKeySelfSigned2048_SHA256, KEY.X509SecurityKeySelfSigned2048_SHA256_Public, EE.NotSupportedException("IDX10634:")),
-                new SignatureProviderTheoryData("X509SecurityKey8", ALG.RsaSha256Signature, ALG.RsaSha512Signature, KEY.DefaultX509Key_2048, KEY.DefaultX509Key_2048_Public, EE.CryptographicException()),
+                new SignatureProviderTheoryData("X509SecurityKey8", ALG.RsaSha256Signature, ALG.RsaSha512Signature, KEY.DefaultX509Key_2048, KEY.DefaultX509Key_2048_Public, null, false),
 #if NET452
                 new SignatureProviderTheoryData("RsaSecurityKeyWithCspProvider1", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.RsaSecurityKeyWithCspProvider_2048, KEY.RsaSecurityKeyWithCspProvider_2048_Public),
                 new SignatureProviderTheoryData("RsaSecurityKeyWithCspProvider2", ALG.RsaSha384Signature, ALG.RsaSha384Signature, KEY.RsaSecurityKeyWithCspProvider_2048, KEY.RsaSecurityKey_2048_Public),
@@ -219,7 +201,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
                 // Private keys missing
                 new SignatureProviderTheoryData("PrivateKeyMissing1", ALG.EcdsaSha256, ALG.EcdsaSha256, KEY.JsonWebKeyP256_Public, KEY.JsonWebKeyP256_Public, EE.InvalidOperationException("IDX10638:")),
-                new SignatureProviderTheoryData("PrivateKeyMissing2", ALG.RsaSha256, ALG.RsaSha256, KEY.JsonWebKeyRsa256Public, KEY.JsonWebKeyRsa256Public, EE.InvalidOperationException("IDX10638:")),
+                new SignatureProviderTheoryData("PrivateKeyMissing2", ALG.RsaSha256, ALG.RsaSha256, KEY.JsonWebKeyRsa_2048_Public, KEY.JsonWebKeyRsa_2048_Public, EE.InvalidOperationException("IDX10638:")),
                 new SignatureProviderTheoryData("PrivateKeyMissing3", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.RsaSecurityKey_2048_Public,KEY.RsaSecurityKey_2048_Public, EE.InvalidOperationException("IDX10638:")),
                 new SignatureProviderTheoryData("PrivateKeyMissing4", ALG.RsaSha256, ALG.RsaSha256, KEY.X509SecurityKeySelfSigned2048_SHA256_Public, KEY.X509SecurityKeySelfSigned2048_SHA256_Public, EE.InvalidOperationException("IDX10638:")),
 #if NET452
@@ -228,9 +210,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 // .Net Core throws some funky inner exception that GetType() reports as: Internal.Cryptography.CryptoThrowHelper+WindowsCryptographicException
                 new SignatureProviderTheoryData("PrivateKeyMissing5", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.Ecdsa521Key_Public, KEY.Ecdsa521Key_Public, new EE(typeof(Exception)){IgnoreExceptionType = true}),
 #endif
-                // BadKeys
-                new SignatureProviderTheoryData("BadKeys1", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.JsonWebKeyP521WrongX_Public, KEY.JsonWebKeyP521WrongD, EE.InvalidOperationException()),
-                new SignatureProviderTheoryData("BadKeys2", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.JsonWebKeyP521WrongY_Public, KEY.JsonWebKeyP521WrongD, EE.InvalidOperationException()),
+                // Invalid JsonWebKeyComponents
+                new SignatureProviderTheoryData("JsonWebKeyP521_Public_Invalid_X", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.JsonWebKeyP521_Public_Invalid_X, KEY.JsonWebKeyP521, EE.InvalidOperationException()),
+                new SignatureProviderTheoryData("JsonWebKeyP521_Public_Invalid_Y", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.JsonWebKeyP521_Public_Invalid_Y, KEY.JsonWebKeyP521, EE.InvalidOperationException()),
+                new SignatureProviderTheoryData("JsonWebKeyP521_Invalid_D", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.JsonWebKeyP521_Invalid_D, KEY.JsonWebKeyP521_Public, EE.CryptographicException()),
             };
         }
 
@@ -240,12 +223,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var context = TestUtilities.WriteHeader($"{this}.SignAndVerify", theoryData);
             try
             {
+                theoryData.VerifyKey.CryptoProviderFactory = theoryData.CryptoProviderFactory;
                 var signatureProviderVerify = theoryData.CryptoProviderFactory.CreateForVerifying(theoryData.VerifyKey, theoryData.VerifyAlgorithm);
                 var signatureProviderSign = theoryData.CryptoProviderFactory.CreateForSigning(theoryData.SigningKey, theoryData.SigningAlgorithm);
                 var bytes = Encoding.UTF8.GetBytes("GenerateASignature");
                 var signature = signatureProviderSign.Sign(bytes);
                 if (!signatureProviderVerify.Verify(bytes, signature))
                     throw new SecurityTokenInvalidSignatureException("SignatureFailed");
+
+                if (signatureProviderVerify.ObjectPoolSize != theoryData.CryptoProviderFactory.SignatureProviderObjectPoolCacheSize)
+                    context.AddDiff($"signatureProviderVerify.ObjectPoolSize != theoryData.CryptoProviderFactory.SignatureProviderObjectPoolCacheSize. '{signatureProviderVerify.ObjectPoolSize}, {theoryData.CryptoProviderFactory.SignatureProviderObjectPoolCacheSize}'.");
 
                 theoryData.ExpectedException.ProcessNoException(context);
             }
@@ -262,12 +249,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             get => new TheoryData<SignatureProviderTheoryData>
             {
                 // JsonWebKey
-                new SignatureProviderTheoryData("JsonWebKeySymmetric1", ALG.HmacSha256, ALG.HmacSha256, KEY.JsonWebKeySymmetric256, KEY.JsonWebKeySymmetric256),
+                new SignatureProviderTheoryData("JsonWebKeySymmetric1", ALG.HmacSha256, ALG.HmacSha256, KEY.JsonWebKeySymmetric256, KEY.JsonWebKeySymmetric256){ CryptoProviderFactory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting()){ CacheSignatureProviders = false, SignatureProviderObjectPoolCacheSize = 10 } },
                 new SignatureProviderTheoryData("JsonWebKeySymmetric2", ALG.HmacSha256Signature, ALG.HmacSha256Signature, KEY.JsonWebKeySymmetric256, KEY.JsonWebKeySymmetric256),
-                new SignatureProviderTheoryData("JsonWebKeySymmetric3", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.JsonWebKeySymmetric256, KEY.JsonWebKeyRsa256Public, EE.NotSupportedException("IDX10634:")),
-                new SignatureProviderTheoryData("JsonWebKeySymmetric4", ALG.EcdsaSha512Signature, ALG.EcdsaSha512Signature, KEY.JsonWebKeySymmetric256, KEY.JsonWebKeyRsa256Public, EE.NotSupportedException("IDX10634:")),
+                new SignatureProviderTheoryData("JsonWebKeySymmetric3", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.JsonWebKeySymmetric256, KEY.JsonWebKeyRsa_2048_Public, EE.NotSupportedException("IDX10634:")),
+                new SignatureProviderTheoryData("JsonWebKeySymmetric4", ALG.EcdsaSha512Signature, ALG.EcdsaSha512Signature, KEY.JsonWebKeySymmetric256, KEY.JsonWebKeyRsa_2048_Public, EE.NotSupportedException("IDX10634:")),
 
-                new SignatureProviderTheoryData("SymmetricSecurityKey1", ALG.HmacSha256, ALG.HmacSha256, KEY.SymmetricSecurityKey2_256, KEY.SymmetricSecurityKey2_256),
+                new SignatureProviderTheoryData("SymmetricSecurityKey1", ALG.HmacSha256, ALG.HmacSha256, KEY.SymmetricSecurityKey2_256, KEY.SymmetricSecurityKey2_256){ CryptoProviderFactory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting()){ CacheSignatureProviders = false, SignatureProviderObjectPoolCacheSize = 42 } },
                 new SignatureProviderTheoryData("SymmetricSecurityKey2", ALG.HmacSha256, ALG.HmacSha256, Default.SymmetricSigningKey256,  Default.SymmetricSigningKey256),
                 
                 // HmacSha256 <-> HmacSha256Signature
@@ -290,13 +277,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                                                 ALG.HmacSha256Signature,
                                                 new FaultingSymmetricSecurityKey(Default.SymmetricSigningKey256, new CryptographicException("Inner CryptographicException"), null, null, Default.SymmetricSigningKey256.Key),
                                                 KEY.SymmetricSecurityKey2_256,
-                                                EE.InvalidOperationException("IDX10677:", typeof(CryptographicException))),
+                                                EE.CryptographicException("Inner CryptographicException")),
+
                 new SignatureProviderTheoryData("SymmetricSecurityKey13",
                                                 ALG.HmacSha256Signature,
                                                 ALG.HmacSha256Signature,
                                                 KEY.SymmetricSecurityKey2_256,
                                                 new FaultingSymmetricSecurityKey(Default.SymmetricSigningKey256, new CryptographicException("Inner CryptographicException"), null, null, Default.SymmetricSigningKey256.Key),
-                                                EE.InvalidOperationException("IDX10677:", typeof(CryptographicException))),
+                                                EE.CryptographicException("Inner CryptographicException")),
 
                 new SignatureProviderTheoryData("UnknownKeyType1", ALG.HmacSha256Signature, ALG.HmacSha256Signature, NotAsymmetricOrSymmetricSecurityKey.New, KEY.SymmetricSecurityKey2_256, EE.NotSupportedException("IDX10621:")),
                 new SignatureProviderTheoryData("UnknownKeyType2", ALG.HmacSha256Signature, ALG.HmacSha256Signature, KEY.SymmetricSecurityKey2_256, NotAsymmetricOrSymmetricSecurityKey.New, EE.NotSupportedException("IDX10621:")),
@@ -401,11 +389,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 try
                 {
                     SecurityKey key = null;
-                    if (algorithm.Equals(ALG.EcdsaSha256, StringComparison.Ordinal))
+                    if (algorithm.Equals(ALG.EcdsaSha256))
                     {
                         key = KEY.Ecdsa256Key;
                     }
-                    else if (algorithm.Equals(ALG.EcdsaSha384, StringComparison.Ordinal))
+                    else if (algorithm.Equals(ALG.EcdsaSha384))
                     {
                         key = KEY.Ecdsa384Key;
                     }
@@ -704,7 +692,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 },
                 {
                     "Test3",
-                    KEY.JsonWebKeyRsa256,
+                    KEY.JsonWebKeyRsa_2048,
                     ALG.RsaSha256,
                     EE.NoExceptionExpected
                 },
@@ -730,7 +718,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             return theoryData;
         }
-#if NETCOREAPP2_0
+#if NET_CORE
         // Excluding OSX as SignatureTampering test is slow on OSX (~6 minutes)
         // especially tests with IDs RS256 and ES256
         [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.Linux)]
@@ -760,7 +748,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.True(theoryData.VerifySignatureProvider.Verify(theoryData.RawBytes, copiedSignature), "Final check should have verified");
         }
 
-#if NETCOREAPP2_0
+#if NET_CORE
         // Excluding OSX as SignatureTruncation test throws an exception only on OSX
         // This behavior should be fixed with netcore3.0
         // Exceptions is thrown somewhere in System/Security/Cryptography/DerEncoder.cs class which is removed in netcore3.0
@@ -834,7 +822,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
     }
 
-    public class CryptoProviderFactoryTheoryData : TheoryDataBase
+    public class CryptoProviderFactoryTheoryData : TheoryDataBase, IDisposable
     {
         public CryptoProviderFactoryTheoryData() { }
 
@@ -847,7 +835,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestId = testId;
         }
 
-        public CryptoProviderFactory CryptoProviderFactory { get; set; } = new CryptoProviderFactory{ CacheSignatureProviders = false };
+        public CryptoProviderFactory CryptoProviderFactory { get; set; } = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting())
+        {
+            CacheSignatureProviders = false
+        };
 
         public ICryptoProvider CustomCryptoProvider { get; set; }
 
@@ -874,6 +865,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return TestId + ", " + SigningAlgorithm + ", " + SigningKey;
         }
 
+        public void Dispose()
+        {
+            if (CryptoProviderFactory?.CryptoProviderCache is IDisposable disposableCache)
+                disposableCache.Dispose();
+        }
+
         public string VerifyAlgorithm { get; set; }
 
         public SecurityKey VerifyKey { get; set; }
@@ -889,19 +886,24 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     {
         public SignatureProviderTheoryData() { }
 
-        public SignatureProviderTheoryData(string testId, string signingAlgorithm, string verifyAlgorithm, SecurityKey signingKey, SecurityKey verifyKey, EE expectedException = null)
+        public SignatureProviderTheoryData(string testId, string signingAlgorithm, string verifyAlgorithm, SecurityKey signingKey, SecurityKey verifyKey, EE expectedException = null, bool isValid = true)
         {
             SigningAlgorithm = signingAlgorithm;
             VerifyAlgorithm = verifyAlgorithm;
             SigningKey = signingKey;
             VerifyKey = verifyKey;
             ExpectedException = expectedException ?? EE.NoExceptionExpected;
+            IsValid = isValid;
             TestId = testId;
         }
+
+        public bool IsValid { get; set; }
 
         public byte[] RawBytes { get; set; }
 
         public byte[] Signature { get; set; }
+
+        public string SignatureProviderType { get; set; }
 
         public bool VerifySpecifyingLength { get; set; }
     }

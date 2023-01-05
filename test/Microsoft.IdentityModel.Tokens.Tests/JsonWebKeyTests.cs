@@ -1,32 +1,11 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
@@ -142,35 +121,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
         }
 
-        [Theory, MemberData(nameof(IsSupportedAlgDataSet))]
-        public void IsSupportedAlgorithm(JsonWebKey key, string alg, bool expectedResult)
-        {
-            if (key.CryptoProviderFactory.IsSupportedAlgorithm(alg, key) != expectedResult)
-                Assert.True(false, string.Format("{0} failed with alg: {1}. ExpectedResult: {2}", key, alg, expectedResult));
-        }
-
-        public static TheoryData<JsonWebKey, string, bool> IsSupportedAlgDataSet
-        {
-            get
-            {
-                var dataset = new TheoryData<JsonWebKey, string, bool>();
-                dataset.Add(KeyingMaterial.JsonWebKeyP256, SecurityAlgorithms.EcdsaSha256, true);
-                dataset.Add(KeyingMaterial.JsonWebKeyP256, SecurityAlgorithms.RsaSha256Signature, false);
-                dataset.Add(KeyingMaterial.JsonWebKeyRsa256, SecurityAlgorithms.RsaSha256, true);
-                dataset.Add(KeyingMaterial.JsonWebKeyRsa256, SecurityAlgorithms.EcdsaSha256, false);
-                dataset.Add(KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.HmacSha256, true);
-                dataset.Add(KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.RsaSha256Signature, false);
-                JsonWebKey testKey = new JsonWebKey
-                {
-                    Kty = JsonWebAlgorithmsKeyTypes.Octet,
-                    K = KeyingMaterial.DefaultSymmetricKeyEncoded_256
-                };
-                testKey.CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { SecurityAlgorithms.RsaSha256Signature });
-                dataset.Add(testKey, SecurityAlgorithms.RsaSha256Signature, true);
-                return dataset;
-            }
-        }
-
         // Tests to make sure conditional property serialization for JsonWebKeys is working properly.
         [Fact]
         public void ConditionalPropertySerialization()
@@ -204,6 +154,211 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 context.Diffs.Add("x5c is non-empty and should be present in serialized JsonWebKey");
 
             TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
+        public void ComputeJwkThumbprintSpec()
+        {
+            // https://datatracker.ietf.org/doc/html/rfc7638#section-3.1
+            var context = TestUtilities.WriteHeader($"{this}.ComputeJwkThumbprintSpec", "", true);
+
+            var jwk = new JsonWebKey()
+            {
+                Kty = JsonWebAlgorithmsKeyTypes.RSA,
+                E = "AQAB",
+                N = "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMstn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbISD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqbw0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw"
+            };
+
+            var jwkThumbprint = jwk.ComputeJwkThumbprint();
+            var base64UrlEncodedJwkThumbprint = Base64UrlEncoder.Encode(jwkThumbprint);
+
+            var expectedJwkThumbprint = new byte[]
+            {
+                55, 54, 203, 177, 120, 124, 184, 48, 156, 119, 238, 140, 55, 5, 197,
+                225, 111, 251, 158, 133, 151, 21, 144, 31, 30, 76, 89, 177, 17, 130,
+                245, 123
+            };
+            var expectedBase64UrlEncodedThumbprint = "NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs";
+
+            IdentityComparer.AreBytesEqual(jwkThumbprint, expectedJwkThumbprint, context);
+            IdentityComparer.AreStringsEqual(base64UrlEncodedJwkThumbprint, expectedBase64UrlEncodedThumbprint, context);
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Theory, MemberData(nameof(ComputeJwkThumbprintTheoryData))]
+        public void ComputeJwkThumbprint(JwkThumbprintTheoryData theoryData)
+        {
+            Logging.IdentityModelEventSource.ShowPII = true;
+            var context = TestUtilities.WriteHeader($"{this}.ComputeJwkThumbprint", theoryData);
+            try
+            {
+                var jwkThumbprint = Base64UrlEncoder.Encode(theoryData.JWK.ComputeJwkThumbprint());
+                IdentityComparer.AreStringsEqual(jwkThumbprint, theoryData.ExpectedBase64UrlEncodedJwkThumbprint, context);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Theory, MemberData(nameof(ComputeJwkThumbprintTheoryData))]
+        public void CanComputeJwkThumbprint(JwkThumbprintTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.CanComputeJwkThumbprint", theoryData);
+            if (theoryData.CanComputeJwkThumbprint != theoryData.JWK.CanComputeJwkThumbprint())
+                context.AddDiff($"theoryData.CanComputeJwkThumbprint ({theoryData.CanComputeJwkThumbprint}) != theoryData.JWK.CanComputeJwkThumbprint ({theoryData.JWK.CanComputeJwkThumbprint()})");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<JwkThumbprintTheoryData> ComputeJwkThumbprintTheoryData
+        {
+            get
+            {
+                return new TheoryData<JwkThumbprintTheoryData>
+                {
+                    new JwkThumbprintTheoryData
+                    {
+                        First = true,
+                        JWK = new JsonWebKey() { },
+                        CanComputeJwkThumbprint = false,
+                        ExpectedException = ExpectedException.ArgumentException("IDX10705: Cannot create a JWK thumbprint, 'Kty' is null or empty."),
+                        TestId = "InvalidKtyIsNull",
+                    },
+                    new JwkThumbprintTheoryData
+                    {
+                        JWK = new JsonWebKey()
+                        {
+                            Kty = string.Empty
+                        },
+                        CanComputeJwkThumbprint = false,
+                        ExpectedException = ExpectedException.ArgumentException("IDX10705: Cannot create a JWK thumbprint, 'Kty' is null or empty."),
+                        TestId = "InvalidKtyIsEmpty",
+                    },
+                    new JwkThumbprintTheoryData
+                    {
+                        JWK = new JsonWebKey()
+                        {
+                            Kty = "INVALID_DATA"
+                        },
+                        CanComputeJwkThumbprint = false,
+                        ExpectedException = ExpectedException.ArgumentException("IDX10706: Cannot create a JWK thumbprint, 'Kty'"),
+                        TestId = "InvalidKtyNotAsExpected",
+                    },
+                    new JwkThumbprintTheoryData
+                    {
+                        JWK = new JsonWebKey()
+                        {
+                            Kty = JsonWebAlgorithmsKeyTypes.RSA
+                        },
+                        CanComputeJwkThumbprint = false,
+                        ExpectedException = ExpectedException.ArgumentException("IDX10705: Cannot create a JWK thumbprint, 'E'"),
+                        TestId = "InvalidEIsNullOrEmpty"
+                    },
+                    new JwkThumbprintTheoryData
+                    {
+                        JWK = new JsonWebKey()
+                        {
+                            Kty = JsonWebAlgorithmsKeyTypes.RSA,
+                            E = "AQAB"
+                        },
+                        CanComputeJwkThumbprint = false,
+                        ExpectedException = ExpectedException.ArgumentException("IDX10705: Cannot create a JWK thumbprint, 'N'"),
+                        TestId = "InvalidNIsNullOrEmpty"
+                    },
+                    new JwkThumbprintTheoryData
+                    {
+                        JWK = new JsonWebKey()
+                        {
+                            Kty = JsonWebAlgorithmsKeyTypes.Octet
+                        },
+                        CanComputeJwkThumbprint = false,
+                        ExpectedException = ExpectedException.ArgumentException("IDX10705: Cannot create a JWK thumbprint, 'K'"),
+                        TestId = "InvalidKIsNullOrEmpty"
+                    },
+                    new JwkThumbprintTheoryData
+                    {
+                        JWK = new JsonWebKey()
+                        {
+                            Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve
+                        },
+                        CanComputeJwkThumbprint = false,
+                        ExpectedException = ExpectedException.ArgumentException("IDX10705: Cannot create a JWK thumbprint, 'Crv'"),
+                        TestId = "InvalidCrvIsNullOrEmpty"
+                    },
+                    new JwkThumbprintTheoryData
+                    {
+                        JWK = new JsonWebKey()
+                        {
+                            Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve,
+                            Crv = "P-256"
+                        },
+                        CanComputeJwkThumbprint = false,
+                        ExpectedException = ExpectedException.ArgumentException("IDX10705: Cannot create a JWK thumbprint, 'X'"),
+                        TestId = "InvalidCrvIsNullOrEmpty"
+                    },
+                    new JwkThumbprintTheoryData
+                    {
+                        JWK = new JsonWebKey()
+                        {
+                            Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve,
+                            Crv = "P-256",
+                            X = "f83OJ3D2xF1Bg8vub9tLe1gHMzV76e8Tus9uPHvRVEU",
+                        },
+                        CanComputeJwkThumbprint = false,
+                        ExpectedException = ExpectedException.ArgumentException("IDX10705: Cannot create a JWK thumbprint, 'Y'"),
+                        TestId = "InvalidCrvIsNullOrEmpty"
+                    },
+                    new JwkThumbprintTheoryData
+                    {
+                        JWK = new JsonWebKey()
+                        {
+                            Kty = JsonWebAlgorithmsKeyTypes.RSA,
+                            E = "AQAB",
+                            N = "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMstn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbISD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqbw0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw"
+                        },
+                        CanComputeJwkThumbprint = true,
+                        ExpectedBase64UrlEncodedJwkThumbprint = "NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs",
+                        TestId = "ValidRsa"
+                    },
+                    new JwkThumbprintTheoryData
+                    { 
+                        JWK = new JsonWebKey()
+                        {
+                            Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve,
+                            Crv = "P-256",
+                            X = "f83OJ3D2xF1Bg8vub9tLe1gHMzV76e8Tus9uPHvRVEU",
+                            Y = "x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0"
+                        },
+                        CanComputeJwkThumbprint = true,
+                        ExpectedBase64UrlEncodedJwkThumbprint = "oKIywvGUpTVTyxMQ3bwIIeQUudfr_CkLMjCE19ECD-U",
+                        TestId = "ValidEc"
+                    },
+                    new JwkThumbprintTheoryData
+                    {
+                        JWK = new JsonWebKey()
+                        {
+                            Kty = JsonWebAlgorithmsKeyTypes.Octet,
+                            K = "Vbxq2mlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE=" // KeyingMaterial.DefaultSymmetricKeyEncoded_256
+                        },
+                        CanComputeJwkThumbprint = true,
+                        ExpectedBase64UrlEncodedJwkThumbprint = "uQcNOQPV2rRRS-R_VQnj7gRR_19AaHlGbU0f9F5hkUs",
+                        TestId = "ValidOctet"
+                    },
+                };
+            }
+        }
+
+        public class JwkThumbprintTheoryData : TheoryDataBase
+        {
+            public JsonWebKey JWK { get; set; }
+
+            public string ExpectedBase64UrlEncodedJwkThumbprint { get; set; }
+
+            public bool CanComputeJwkThumbprint { get; set; }
         }
     }
 }

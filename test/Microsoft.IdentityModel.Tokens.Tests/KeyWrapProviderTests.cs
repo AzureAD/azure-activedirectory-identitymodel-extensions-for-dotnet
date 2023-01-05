@@ -1,29 +1,5 @@
-﻿//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using Microsoft.IdentityModel.TestUtils;
@@ -53,51 +29,64 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     /// </summary>
     public class KeyWrapProviderTests
     {
-        [Theory, MemberData(nameof(KeyWrapConstructorTheoryData))]
-        public void Constructors(string testId, SecurityKey key, string algorithm, ExpectedException ee)
+        [Theory, MemberData(nameof(KeyWrapConstructorTestCases))]
+        public void Constructors(SupportedAlgorithmTheoryData theoryData)
         {
-            TestUtilities.WriteHeader("Constructors - " + testId, true);
+            var context = TestUtilities.WriteHeader($"{this}.Constructors", theoryData);
+
             try
             {
-                var context = Guid.NewGuid().ToString();
-                var provider = CryptoProviderFactory.Default.CreateKeyWrapProvider(key, algorithm);
-                provider.Context = context;
+                var providerContext = Guid.NewGuid().ToString();
+                var provider = CryptoProviderFactory.Default.CreateKeyWrapProvider(theoryData.SecurityKey, theoryData.Algorithm);
+                provider.Context = providerContext;
 
-                ee.ProcessNoException();
+                // validation is defered until first use
+                provider.WrapKey(Guid.NewGuid().ToByteArray());
 
-                Assert.Equal(provider.Algorithm, algorithm);
-                Assert.Equal(provider.Context, context);
-                Assert.True(ReferenceEquals(provider.Key, key));
+                theoryData.ExpectedException.ProcessNoException(context);
+                if (provider.Algorithm != theoryData.Algorithm)
+                    context.AddDiff($"provider.Algorithm: '{provider.Algorithm}' != theoryData.Algorithm: '{theoryData.Algorithm}'.");
+
+                if (provider.Context != providerContext)
+                    context.AddDiff($"provider.Context: '{provider.Context}' != providerContext: '{providerContext}'.");
+
+                if (!ReferenceEquals(provider.Key, theoryData.SecurityKey))
+                    context.AddDiff("!ReferenceEquals(provider.Key, theoryData.SecurityKey))");
             }
             catch (Exception ex)
             {
-                ee.ProcessException(ex);
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<string, SecurityKey, string, ExpectedException> KeyWrapConstructorTheoryData()
+        public static TheoryData<SupportedAlgorithmTheoryData> KeyWrapConstructorTestCases
         {
-            var theoryData = new TheoryData<string, SecurityKey, string, ExpectedException>();
+            get
+            {
+                var theoryData = new TheoryData<SupportedAlgorithmTheoryData>();
 
-            theoryData.Add("Test1", null, null, ExpectedException.ArgumentNullException());
-            theoryData.Add("Test2", Default.SymmetricEncryptionKey128, null, ExpectedException.ArgumentNullException());
-            theoryData.Add("Test3", Default.SymmetricEncryptionKey128, SecurityAlgorithms.Aes128Encryption, ExpectedException.NotSupportedException("IDX10661:"));
-            theoryData.Add("Test4", Default.SymmetricEncryptionKey128, SecurityAlgorithms.Aes128KW, ExpectedException.NoExceptionExpected);
-            theoryData.Add("Test5", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256KW, ExpectedException.NoExceptionExpected);
+                SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes128KW, null, "SecurityKeyNull", theoryData, ExpectedException.ArgumentNullException("key"));
+                SupportedAlgorithmTheoryData.AddTestCase(null, Default.SymmetricEncryptionKey128, "AlgorithmNull", theoryData, ExpectedException.ArgumentNullException("algorithm"));
+                SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes128Encryption, Default.SymmetricEncryptionKey128, "Aes128Encryption", theoryData, ExpectedException.NotSupportedException("IDX10661:"));
+                SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes256KeyWrap, Default.SymmetricEncryptionKey128, "SymmetricKey_128_Aes256KeyWrap", theoryData, ExpectedException.SecurityTokenKeyWrapException("IDX10662:"));
+                SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes128KeyWrap, Default.SymmetricEncryptionKey256, "SymmetricKey_256_Aes128KeyWrap", theoryData, ExpectedException.SecurityTokenKeyWrapException("IDX10662:"));
+                SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes256KW, Default.SymmetricEncryptionKey128, "SymmetricKey_128_Aes256KW", theoryData, ExpectedException.SecurityTokenKeyWrapException("IDX10662:"));
+                SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes128KW, Default.SymmetricEncryptionKey256, "SymmetricKey_256_Aes128KW", theoryData, ExpectedException.SecurityTokenKeyWrapException("IDX10662:"));
+                SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes256KW, new JsonWebKey { Kty = JsonWebAlgorithmsKeyTypes.RSA, K = KeyingMaterial.JsonWebKeySymmetric128.K }, "JsonWebKey_RSA_Aes256KW", theoryData, ExpectedException.NotSupportedException("IDX10661:"));
+                SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes256KW, KeyingMaterial.RsaSecurityKey_2048, "RsaSecurityKey_Aes256KW", theoryData, ExpectedException.NotSupportedException("IDX10661:"));
+                SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes128KeyWrap, Default.SymmetricEncryptionKey128, "SymmetricKey_Aes128KeyWrap", theoryData);
+                SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes256KeyWrap, Default.SymmetricEncryptionKey256, "SymmetricKey_Aes256KeyWrap", theoryData); ;
+                SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes128KW, Default.SymmetricEncryptionKey128, "SymmetricKey_Aes128KW", theoryData);
+                SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes256KW, Default.SymmetricEncryptionKey256, "SymmetricKey_Aes256KW", theoryData);
+                SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes128KeyWrap, KeyingMaterial.JsonWebKeySymmetric128, "JsonWebKey_Aes128KeyWrap", theoryData);
+                SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes256KeyWrap, KeyingMaterial.JsonWebKeySymmetric256, "JsonWebKey_Aes256KeyWrap", theoryData);
+                SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes128KW, KeyingMaterial.JsonWebKeySymmetric128, "JsonWebKey_Aes128KW", theoryData);
+                SupportedAlgorithmTheoryData.AddTestCase(SecurityAlgorithms.Aes256KW, KeyingMaterial.JsonWebKeySymmetric256, "JsonWebKey_Aes256KW", theoryData);
 
-            theoryData.Add("Test6", Default.SymmetricEncryptionKey128, SecurityAlgorithms.Aes256KW, ExpectedException.ArgumentOutOfRangeException("IDX10662:"));
-            theoryData.Add("Test7", Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes128KW, ExpectedException.ArgumentOutOfRangeException("IDX10662:"));
-
-            JsonWebKey key = new JsonWebKey() { Kty = JsonWebAlgorithmsKeyTypes.Octet };
-            theoryData.Add("Test8", key, SecurityAlgorithms.Aes256KW, ExpectedException.NotSupportedException("IDX10661:"));
-
-            key = new JsonWebKey() { Kty = JsonWebAlgorithmsKeyTypes.RSA, K = KeyingMaterial.JsonWebKeySymmetric128.K };
-            theoryData.Add("Test9", key, SecurityAlgorithms.Aes256KW, ExpectedException.NotSupportedException("IDX10661:"));
-            theoryData.Add("Test10", KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.Aes256KW, ExpectedException.NotSupportedException("IDX10661:"));
-            theoryData.Add("Test11", KeyingMaterial.JsonWebKeySymmetric128, SecurityAlgorithms.Aes128KW, ExpectedException.NoExceptionExpected);
-            theoryData.Add("Test12", KeyingMaterial.JsonWebKeySymmetric256, SecurityAlgorithms.Aes256KW, ExpectedException.NoExceptionExpected);
-
-            return theoryData;
+                return theoryData;
+            }
         }
 
         [Fact]
@@ -221,6 +210,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 ExpectedException = ExpectedException.KeyWrapException("IDX10659:"),
                 Provider = provider,
+                TestId = testId,
                 WrapAlgorithm = algorithm,
                 WrapKey = key,
                 WrappedKey = wrappedKey

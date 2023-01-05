@@ -1,29 +1,5 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Security.Cryptography;
@@ -42,15 +18,32 @@ namespace Microsoft.IdentityModel.Tokens
 
         private PrivateKeyStatus _foundPrivateKey;
 
+        private const string _className = "Microsoft.IdentityModel.Tokens.RsaSecurityKey";
+
+        internal RsaSecurityKey(JsonWebKey webKey)
+            : base(webKey)
+        {
+            IntializeWithRsaParameters(webKey.CreateRsaParameters());
+            webKey.ConvertedSecurityKey = this;
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RsaSecurityKey"/> class.
         /// </summary>
         /// <param name="rsaParameters"><see cref="RSAParameters"/></param>
         public RsaSecurityKey(RSAParameters rsaParameters)
         {
+            IntializeWithRsaParameters(rsaParameters);
+        }
+
+        internal void IntializeWithRsaParameters(RSAParameters rsaParameters)
+        {
             // must have modulus and exponent otherwise the crypto operations fail later
-            if (rsaParameters.Modulus == null || rsaParameters.Exponent == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, rsaParameters.ToString())));
+            if (rsaParameters.Modulus == null)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII("Modulus"))));
+
+            if (rsaParameters.Exponent == null)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10700, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII("Exponent"))));
 
             _hasPrivateKey = rsaParameters.D != null && rsaParameters.DP != null && rsaParameters.DQ != null && rsaParameters.P != null && rsaParameters.Q != null && rsaParameters.InverseQ != null;
             _foundPrivateKey = _hasPrivateKey.Value ? PrivateKeyStatus.Exists : PrivateKeyStatus.DoesNotExist;
@@ -83,7 +76,7 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         // imitate signing
                         byte[] hash = new byte[20];
-#if NET461 || NETSTANDARD1_4 || NETSTANDARD2_0
+#if NET461 || NET472 || NETSTANDARD2_0 || NET6_0
                         Rsa.SignData(hash, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
 #else
                         if (Rsa is RSACryptoServiceProvider rsaCryptoServiceProvider)
@@ -170,5 +163,31 @@ namespace Microsoft.IdentityModel.Tokens
         /// <see cref="RSA"/> instance used to initialize the key.
         /// </summary>
         public RSA Rsa { get; private set; }
+
+        /// <summary>
+        /// Determines whether the <see cref="RsaSecurityKey"/> can compute a JWK thumbprint.
+        /// </summary>
+        /// <returns><c>true</c> if JWK thumbprint can be computed; otherwise, <c>false</c>.</returns>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7638</remarks>
+        public override bool CanComputeJwkThumbprint()
+        {
+            return (Rsa != null || (Parameters.Exponent != null && Parameters.Modulus != null));
+        }
+
+        /// <summary>
+        /// Computes a sha256 hash over the <see cref="RsaSecurityKey"/>.
+        /// </summary>
+        /// <returns>A JWK thumbprint.</returns>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7638</remarks>
+        public override byte[] ComputeJwkThumbprint()
+        {
+            var rsaParameters = Parameters;
+
+            if (rsaParameters.Exponent == null || rsaParameters.Modulus == null)
+                rsaParameters = Rsa.ExportParameters(false);
+
+            var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.E}"":""{Base64UrlEncoder.Encode(rsaParameters.Exponent)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.N}"":""{Base64UrlEncoder.Encode(rsaParameters.Modulus)}""}}";
+            return Utility.GenerateSha256Hash(canonicalJwk);
+        }
     }
 }

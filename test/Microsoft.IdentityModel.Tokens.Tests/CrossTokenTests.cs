@@ -1,32 +1,9 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Tokens.Saml2;
@@ -102,6 +79,123 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
+        [Theory, MemberData(nameof(CanReadTokenTheoryData))]
+        public void CanReadToken(TokenHandlerTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.CanReadToken", theoryData);
+            try
+            {
+                var tokenHandler = theoryData.TokenHandler;
+
+                if (tokenHandler is SecurityTokenHandler securityTokenHandler)
+                {
+                    if (securityTokenHandler.CanReadToken(theoryData.Token) != theoryData.CanReadToken)
+                        context.AddDiff("securityTokenHandler.CanReadToken(theoryData.Token) != theoryData.CanReadToken");
+                }
+                else if (tokenHandler is JsonWebTokenHandler jsonWebTokenHandler)
+                {
+                    if (jsonWebTokenHandler.CanReadToken(theoryData.Token) != theoryData.CanReadToken)
+                        context.AddDiff("jsonWebTokenHandler.CanReadToken(theoryData.Token) != theoryData.CanReadToken");
+                }
+                else
+                {
+                    throw new Exception("Unable to cast TokenHandler");
+                }
+
+                theoryData.ExpectedException.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<TokenHandlerTheoryData> CanReadTokenTheoryData
+        {
+            get
+            {
+                var largeToken = GenerateTokenLargerThanAllowed();
+
+                return new TheoryData<TokenHandlerTheoryData>
+                {
+                    new TokenHandlerTheoryData
+                    {
+                        First = true,
+                        TokenHandler = new JwtSecurityTokenHandler(),
+                        Token = Default.AsymmetricJwt,
+                        CanReadToken = true,
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        TestId = "ValidJwt"
+                    },
+                    new TokenHandlerTheoryData
+                    {
+                        TokenHandler = new JwtSecurityTokenHandler(),
+                        Token = largeToken,
+                        CanReadToken = false,
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        TestId = "TokenTooLargeJwt"
+                    },
+                    new TokenHandlerTheoryData
+                    {
+                        TokenHandler = new JsonWebTokenHandler(),
+                        Token = Default.AsymmetricJwt,
+                        CanReadToken = true,
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        TestId = "ValidJsonWebToken"
+                    },
+                    new TokenHandlerTheoryData
+                    {
+                        TokenHandler = new JsonWebTokenHandler(),
+                        Token = largeToken,
+                        CanReadToken = false,
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        TestId = "TokenTooLargeJsonWebToken"
+                    },
+                    new TokenHandlerTheoryData
+                    {
+                        TokenHandler = new SamlSecurityTokenHandler(),
+                        Token = ReferenceTokens.SamlToken_Valid,
+                        CanReadToken = true,
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        TestId = "ValidSaml1"
+                    },
+                    new TokenHandlerTheoryData
+                    {
+                        TokenHandler = new SamlSecurityTokenHandler(),
+                        Token = largeToken,
+                        CanReadToken = false,
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        TestId = "TokenTooLargeSaml1"
+                    },
+                    new TokenHandlerTheoryData
+                    {
+                        TokenHandler = new Saml2SecurityTokenHandler(),
+                        Token = ReferenceTokens.Saml2Token_Valid,
+                        CanReadToken = true,
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        TestId = "ValidSaml2"
+                    },
+                    new TokenHandlerTheoryData
+                    {
+                        TokenHandler = new Saml2SecurityTokenHandler(),
+                        Token = largeToken,
+                        CanReadToken = false,
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        TestId = "TokenTooLargeSaml2"
+                    },
+                };
+            }
+        }
+
+        private static string GenerateTokenLargerThanAllowed()
+        {
+            byte[] buffer = new byte[(TokenValidationParameters.DefaultMaximumTokenSizeInBytes)];
+            Random r = new Random();
+            r.NextBytes(buffer);
+            return Convert.ToBase64String(buffer);
+        }
     }
 
     public class CrossTokenTheoryData : TheoryDataBase
@@ -111,6 +205,15 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public Saml2SecurityTokenHandler Saml2TokenHandler { get; set; }
         public SecurityTokenDescriptor SecurityTokenDescriptor { get; set; }
         public TokenValidationParameters TokenValidationParameters { get; set; }
+    }
+
+    public class TokenHandlerTheoryData : TheoryDataBase
+    {
+        public bool CanReadToken { get; set; }
+
+        public TokenHandler TokenHandler { get; set; }
+
+        public string Token { get; set; }
     }
 }
 

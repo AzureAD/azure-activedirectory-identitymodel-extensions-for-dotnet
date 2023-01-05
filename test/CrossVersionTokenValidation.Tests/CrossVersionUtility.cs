@@ -1,32 +1,9 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.IdentityModel.Tokens;
+using System.IO;
 using System.Security.Claims;
 using System.Text;
 using System.Xml;
@@ -41,7 +18,7 @@ namespace Microsoft.IdentityModel.Protocols.Extensions.OldVersion
 {
     /// <summary>
     /// Tests for references in specs
-    /// https://tools.ietf.org/html/rfc7518#appendix-A.3
+    /// https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3
     /// </summary>
     public class CrossVersionUtility
     {
@@ -67,22 +44,30 @@ namespace Microsoft.IdentityModel.Protocols.Extensions.OldVersion
 
         public static string WriteSamlToken(SecurityToken4x token)
         {
-            StringBuilder sb = new StringBuilder();
-            XmlWriter writer = XmlWriter.Create(sb);
-            new SamlSecurityTokenHandler4x().WriteToken(writer, token);
-            writer.Flush();
-            writer.Close();
-            return sb.ToString();
+            using (var memoryStream = new MemoryStream())
+            {
+                using (var writer = XmlDictionaryWriter.CreateTextWriter(memoryStream, Encoding.UTF8, false))
+                {
+                    new SamlSecurityTokenHandler4x().WriteToken(writer, token);
+                    writer.Flush();
+                    writer.Close();
+                    return Encoding.UTF8.GetString(memoryStream.ToArray());
+                }
+            }
         }
 
         public static string WriteSaml2Token(SecurityToken4x token)
         {
-            StringBuilder sb = new StringBuilder();
-            XmlWriter writer = XmlWriter.Create(sb);
-            new Saml2SecurityTokenHandler4x().WriteToken(writer, token);
-            writer.Flush();
-            writer.Close();
-            return sb.ToString();
+            using (var memoryStream = new MemoryStream())
+            {
+                using (var writer = XmlDictionaryWriter.CreateTextWriter(memoryStream, Encoding.UTF8, false))
+                {
+                    new Saml2SecurityTokenHandler4x().WriteToken(writer, token);
+                    writer.Flush();
+                    writer.Close();
+                    return Encoding.UTF8.GetString(memoryStream.ToArray());
+                }
+            }
         }
 
         public static bool AreDateTimesEqual(DateTime? date1, DateTime? date2, CompareContext context)

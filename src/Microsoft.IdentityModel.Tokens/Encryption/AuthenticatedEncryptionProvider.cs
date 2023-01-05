@@ -1,41 +1,21 @@
-﻿//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.IO;
 using System.Security.Cryptography;
+using System.Runtime.InteropServices;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
+    delegate AuthenticatedEncryptionResult EncryptionDelegate(byte[] plaintText, byte[] authenticatedData, byte[] iv);
+    delegate byte[] DecryptionDelegate(byte[] cipherText, byte[] authenticatedData, byte[] iv, byte[] authenticationTag);
+
     /// <summary>
     /// Provides authenticated encryption and decryption services.
     /// </summary>
-    public class AuthenticatedEncryptionProvider
+    public class AuthenticatedEncryptionProvider : IDisposable
     {
         private struct AuthenticatedKeys
         {
@@ -43,12 +23,20 @@ namespace Microsoft.IdentityModel.Tokens
             public SymmetricSecurityKey HmacKey;
         }
 
-        private AuthenticatedKeys _authenticatedkeys;
+        private Lazy<AuthenticatedKeys> _authenticatedkeys;
+        private DisposableObjectPool<AesGcm> _aesGcmObjectPool;
+        private CryptoProviderFactory _cryptoProviderFactory;
+        private bool _disposed;
+        private Lazy<bool> _keySizeIsValid;
         private string _hmacAlgorithm;
-        private SymmetricSignatureProvider _symmetricSignatureProvider;
+        private Lazy<SymmetricSignatureProvider> _symmetricSignatureProvider;
+        private DecryptionDelegate DecryptFunction;
+        private EncryptionDelegate EncryptFunction;
+        private const string _className = "Microsoft.IdentityModel.Tokens.AuthenticatedEncryptionProvider";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthenticatedEncryptionProvider"/> class used for encryption and decryption.
+        /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for crypto operations.</param>
         /// <param name="algorithm">The encryption algorithm to apply.</param>
         /// <exception cref="ArgumentNullException">'key' is null.</exception>
@@ -56,7 +44,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentOutOfRangeException">key size is not large enough.</exception>
         /// <exception cref="ArgumentException">'algorithm' is not supported.</exception>
         /// <exception cref="ArgumentException">a symmetricSignatureProvider is not created.</exception>
-        /// </summary>
         public AuthenticatedEncryptionProvider(SecurityKey key, string algorithm)
         {
             if (key == null)
@@ -65,24 +52,173 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrWhiteSpace(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
-            if (!IsSupportedAlgorithm(key, algorithm))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10668, GetType(), algorithm, key)));
-
-            ValidateKeySize(key, algorithm);
-            _authenticatedkeys = GetAlgorithmParameters(key, algorithm);
-            _hmacAlgorithm = GetHmacAlgorithm(algorithm);
-            _symmetricSignatureProvider = key.CryptoProviderFactory.CreateForSigning(_authenticatedkeys.HmacKey, _hmacAlgorithm) as SymmetricSignatureProvider;
-            if (_symmetricSignatureProvider == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10649, Algorithm)));
-
             Key = key;
             Algorithm = algorithm;
+            _cryptoProviderFactory = key.CryptoProviderFactory;
+            if (SupportedAlgorithms.IsSupportedEncryptionAlgorithm(algorithm, key))
+            {
+                if (SupportedAlgorithms.IsAesGcm(algorithm))
+                {
+#if NETSTANDARD2_0 || NET6_0
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    throw LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10713, LogHelper.MarkAsNonPII(algorithm))));
+#endif
+                    InitializeUsingAesGcm();
+                }
+                else
+                    InitializeUsingAesCbc();
+            }
+            else
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10668, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII(algorithm), key)));
+        }
+
+        private void InitializeUsingAesGcm()
+        {
+            _keySizeIsValid = new Lazy<bool>(ValidKeySize);
+            _aesGcmObjectPool = new DisposableObjectPool<AesGcm>(CreateAesGcmInstance);
+            EncryptFunction = EncryptWithAesGcm;
+            DecryptFunction = DecryptWithAesGcm;
+        }
+
+        private void InitializeUsingAesCbc()
+        {
+            _authenticatedkeys = new Lazy<AuthenticatedKeys>(CreateAuthenticatedKeys);
+            _hmacAlgorithm = GetHmacAlgorithm(Algorithm);
+            _symmetricSignatureProvider = new Lazy<SymmetricSignatureProvider>(CreateSymmetricSignatureProvider);
+            EncryptFunction = EncryptWithAesCbc;
+            DecryptFunction = DecryptWithAesCbc;
+        }
+
+        internal bool ValidKeySize()
+        {
+            ValidateKeySize(Key, Algorithm);
+            return true;
+        }
+
+        private AuthenticatedEncryptionResult EncryptWithAesGcm(byte[] plaintext, byte[] authenticatedData, byte[] iv)
+        {
+            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10715, LogHelper.MarkAsNonPII(Algorithm))));
+        }
+
+        private AesGcm CreateAesGcmInstance()
+        {
+            return new AesGcm(GetKeyBytes(Key));
+        }
+
+        private byte[] DecryptWithAesGcm(byte[] ciphertext, byte[] authenticatedData, byte[] iv, byte[] authenticationTag)
+        {
+            _ = _keySizeIsValid.Value;
+            byte[] clearBytes = new byte[ciphertext.Length];
+            AesGcm aes = null;
+            try
+            {
+                aes = _aesGcmObjectPool.Allocate();
+                aes.Decrypt(iv, ciphertext, authenticationTag, clearBytes, authenticatedData);
+            }
+            catch
+            {
+                Dispose(true);
+                throw;
+            }
+            finally
+            {
+                if (!_disposed)
+                    _aesGcmObjectPool.Free(aes);
+            }
+
+            return clearBytes;
+        }
+
+        private AuthenticatedEncryptionResult EncryptWithAesCbc(byte[] plaintext, byte[] authenticatedData, byte[] iv)
+        {
+            using Aes aes = Aes.Create();
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.PKCS7;
+            aes.Key = _authenticatedkeys.Value.AesKey.Key;
+            if (iv != null)
+                aes.IV = iv;
+
+            byte[] ciphertext;
+            try
+            {
+                ciphertext = Transform(aes.CreateEncryptor(), plaintext, 0, plaintext.Length);
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(LogMessages.IDX10654, ex)));
+            }
+
+            byte[] al = Utility.ConvertToBigEndian(authenticatedData.Length * 8);
+            byte[] macBytes = new byte[authenticatedData.Length + aes.IV.Length + ciphertext.Length + al.Length];
+            Array.Copy(authenticatedData, 0, macBytes, 0, authenticatedData.Length);
+            Array.Copy(aes.IV, 0, macBytes, authenticatedData.Length, aes.IV.Length);
+            Array.Copy(ciphertext, 0, macBytes, authenticatedData.Length + aes.IV.Length, ciphertext.Length);
+            Array.Copy(al, 0, macBytes, authenticatedData.Length + aes.IV.Length + ciphertext.Length, al.Length);
+            byte[] macHash = _symmetricSignatureProvider.Value.Sign(macBytes);
+            var authenticationTag = new byte[_authenticatedkeys.Value.HmacKey.Key.Length];
+            Array.Copy(macHash, authenticationTag, authenticationTag.Length);
+
+            return new AuthenticatedEncryptionResult(Key, ciphertext, aes.IV, authenticationTag);
+        }
+
+        private byte[] DecryptWithAesCbc(byte[] ciphertext, byte[] authenticatedData, byte[] iv, byte[] authenticationTag)
+        {
+            // Verify authentication Tag
+            byte[] al = Utility.ConvertToBigEndian(authenticatedData.Length * 8);
+            byte[] macBytes = new byte[authenticatedData.Length + iv.Length + ciphertext.Length + al.Length];
+            Array.Copy(authenticatedData, 0, macBytes, 0, authenticatedData.Length);
+            Array.Copy(iv, 0, macBytes, authenticatedData.Length, iv.Length);
+            Array.Copy(ciphertext, 0, macBytes, authenticatedData.Length + iv.Length, ciphertext.Length);
+            Array.Copy(al, 0, macBytes, authenticatedData.Length + iv.Length + ciphertext.Length, al.Length);
+            if (!_symmetricSignatureProvider.Value.Verify(macBytes, authenticationTag, _authenticatedkeys.Value.HmacKey.Key.Length))
+                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(LogMessages.IDX10650, Base64UrlEncoder.Encode(authenticatedData), Base64UrlEncoder.Encode(iv), Base64UrlEncoder.Encode(authenticationTag))));
+
+            using Aes aes = Aes.Create();
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.PKCS7;
+            aes.Key = _authenticatedkeys.Value.AesKey.Key;
+            aes.IV = iv;
+            try
+            {
+                return Transform(aes.CreateDecryptor(), ciphertext, 0, ciphertext.Length);
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(LogMessages.IDX10654, ex)));
+            }
+        }
+
+        private AuthenticatedKeys CreateAuthenticatedKeys()
+        {
+            ValidateKeySize(Key, Algorithm);
+
+            return GetAlgorithmParameters(Key, Algorithm);
+        }
+
+        internal SymmetricSignatureProvider CreateSymmetricSignatureProvider()
+        {
+            if (!IsSupportedAlgorithm(Key, Algorithm))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10668, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII(Algorithm), Key)));
+
+            ValidateKeySize(Key, Algorithm);
+
+            SymmetricSignatureProvider symmetricSignatureProvider;
+
+            if (Key.CryptoProviderFactory.GetType() == typeof(CryptoProviderFactory))
+                symmetricSignatureProvider = Key.CryptoProviderFactory.CreateForSigning(_authenticatedkeys.Value.HmacKey, _hmacAlgorithm, false) as SymmetricSignatureProvider;
+            else
+                symmetricSignatureProvider = Key.CryptoProviderFactory.CreateForSigning(_authenticatedkeys.Value.HmacKey, _hmacAlgorithm) as SymmetricSignatureProvider;
+
+            if (symmetricSignatureProvider == null)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10649, LogHelper.MarkAsNonPII(Algorithm))));
+
+            return symmetricSignatureProvider;
         }
 
         /// <summary>
         /// Gets the encryption algorithm that is being used.
         /// </summary>
-        public string Algorithm { get; private set; }
+        public string Algorithm { get; }
 
         /// <summary>
         /// Gets or sets a user context for a <see cref="AuthenticatedEncryptionProvider"/>.
@@ -93,7 +229,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the <see cref="SecurityKey"/> that is being used.
         /// </summary>
-        public SecurityKey Key { get; private set; }
+        public SecurityKey Key { get; }
 
         /// <summary>
         /// Encrypts the 'plaintext'
@@ -118,7 +254,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns><see cref="AuthenticatedEncryptionResult"/>containing ciphertext, iv, authenticationtag.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="plaintext"/> is null or empty.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="authenticatedData"/> is null or empty.</exception>
-        /// <exception cref="SecurityTokenEncryptionFailedException">AES crypto operation threw. See inner exception for details.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if the AES crypto operation threw. See inner exception for details.</exception>
+        /// <exception cref="ObjectDisposedException">Thrown if the internal <see cref="SignatureProvider"/> is disposed.</exception>
         public virtual AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData, byte[] iv)
         {
             if (plaintext == null || plaintext.Length == 0)
@@ -127,34 +264,10 @@ namespace Microsoft.IdentityModel.Tokens
             if (authenticatedData == null || authenticatedData.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(authenticatedData));
 
-            Aes aes = Aes.Create();
-            aes.Mode = CipherMode.CBC;
-            aes.Padding = PaddingMode.PKCS7;
-            aes.Key = _authenticatedkeys.AesKey.Key;
-            if (iv != null)
-                aes.IV = iv;
+            if (_disposed)
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
-            byte[] ciphertext;
-            try
-            {
-                ciphertext = Transform(aes.CreateEncryptor(), plaintext, 0, plaintext.Length);
-            }
-            catch(Exception ex)
-            {
-                throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(LogMessages.IDX10654, ex)));
-            }
-
-            byte[] al = Utility.ConvertToBigEndian(authenticatedData.Length * 8);
-            byte[] macBytes = new byte[authenticatedData.Length + aes.IV.Length + ciphertext.Length + al.Length];
-            Array.Copy(authenticatedData, 0, macBytes, 0, authenticatedData.Length);
-            Array.Copy(aes.IV, 0, macBytes, authenticatedData.Length, aes.IV.Length);
-            Array.Copy(ciphertext, 0, macBytes, authenticatedData.Length + aes.IV.Length, ciphertext.Length);
-            Array.Copy(al, 0, macBytes, authenticatedData.Length + aes.IV.Length + ciphertext.Length, al.Length);
-            byte[] macHash = _symmetricSignatureProvider.Sign(macBytes);
-            var authenticationTag = new byte[_authenticatedkeys.HmacKey.Key.Length];
-            Array.Copy(macHash, authenticationTag, authenticationTag.Length);
-
-            return new AuthenticatedEncryptionResult(Key, ciphertext, aes.IV, authenticationTag);
+            return EncryptFunction(plaintext, authenticatedData, iv);
         }
 
         /// <summary>
@@ -169,8 +282,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException"><paramref name="authenticatedData"/> is null or empty.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="iv"/> is null or empty.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="authenticationTag"/> is null or empty.</exception>
-        /// <exception cref="SecurityTokenDecryptionFailedException">signature over authenticationTag fails to verify.</exception>
-        /// <exception cref="SecurityTokenDecryptionFailedException">AES crypto operation threw. See inner exception.</exception>
+        /// <exception cref="SecurityTokenDecryptionFailedException">Thrown if the signature over the authenticationTag fails to verify.</exception>
+        /// <exception cref="SecurityTokenDecryptionFailedException">Thrown if the AES crypto operation threw. See inner exception.</exception>
+        /// <exception cref="ObjectDisposedException">Thrown if the internal <see cref="SignatureProvider"/> is disposed.</exception>
         public virtual byte[] Decrypt(byte[] ciphertext, byte[] authenticatedData, byte[] iv, byte[] authenticationTag)
         {
             if (ciphertext == null || ciphertext.Length == 0)
@@ -185,28 +299,43 @@ namespace Microsoft.IdentityModel.Tokens
             if (authenticationTag == null || authenticationTag.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(authenticationTag));
 
-            // Verify authentication Tag
-            byte[] al = Utility.ConvertToBigEndian(authenticatedData.Length * 8);
-            byte[] macBytes = new byte[authenticatedData.Length + iv.Length + ciphertext.Length + al.Length];
-            Array.Copy(authenticatedData, 0, macBytes, 0, authenticatedData.Length);
-            Array.Copy(iv, 0, macBytes, authenticatedData.Length, iv.Length);
-            Array.Copy(ciphertext, 0, macBytes, authenticatedData.Length + iv.Length, ciphertext.Length);
-            Array.Copy(al, 0, macBytes, authenticatedData.Length + iv.Length + ciphertext.Length, al.Length);
-            if (!_symmetricSignatureProvider.Verify(macBytes, authenticationTag, _authenticatedkeys.HmacKey.Key.Length))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(LogMessages.IDX10650, Base64UrlEncoder.Encode(authenticatedData), Base64UrlEncoder.Encode(iv), Base64UrlEncoder.Encode(authenticationTag))));
+            if (_disposed)
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
-            Aes aes = Aes.Create();
-            aes.Mode = CipherMode.CBC;
-            aes.Padding = PaddingMode.PKCS7;
-            aes.Key = _authenticatedkeys.AesKey.Key;
-            aes.IV = iv;
-            try
+            return DecryptFunction(ciphertext, authenticatedData, iv, authenticationTag);
+        }
+
+        /// <summary>
+        /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Releases managed resources.
+        /// </summary>
+        /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
             {
-                return Transform(aes.CreateDecryptor(), ciphertext, 0, ciphertext.Length);
-            }
-            catch (Exception ex)
-            {
-                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(LogMessages.IDX10654, ex)));
+                _disposed = true;
+                if (disposing)
+                {
+                    if (_symmetricSignatureProvider != null)
+                    {
+                        _cryptoProviderFactory.ReleaseSignatureProvider(_symmetricSignatureProvider.Value);
+                    }
+
+                    if (_aesGcmObjectPool != null)
+                    {
+                        foreach (var item in _aesGcmObjectPool.Items)
+                            item.Value?.Dispose();
+                    }
+                }
             }
         }
 
@@ -218,20 +347,20 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>true if 'key, algorithm' pair is supported.</returns>
         protected virtual bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
         {
-            return SupportedAlgorithms.IsSupportedAuthenticatedEncryptionAlgorithm(algorithm, key);
+            return SupportedAlgorithms.IsSupportedEncryptionAlgorithm(algorithm, key);
         }
 
         private AuthenticatedKeys GetAlgorithmParameters(SecurityKey key, string algorithm)
         {
             int keyLength = -1;
-            if (algorithm.Equals(SecurityAlgorithms.Aes256CbcHmacSha512, StringComparison.Ordinal))
+            if (algorithm.Equals(SecurityAlgorithms.Aes256CbcHmacSha512))
                 keyLength = 32;
-            else if (algorithm.Equals(SecurityAlgorithms.Aes192CbcHmacSha384, StringComparison.Ordinal))
+            else if (algorithm.Equals(SecurityAlgorithms.Aes192CbcHmacSha384))
                 keyLength = 24;
-            else if (algorithm.Equals(SecurityAlgorithms.Aes128CbcHmacSha256, StringComparison.Ordinal))
+            else if (algorithm.Equals(SecurityAlgorithms.Aes128CbcHmacSha256))
                 keyLength = 16;
             else
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10668, GetType(), algorithm, key)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10668, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII(algorithm), key)));
 
             var keyBytes = GetKeyBytes(key);
             byte[] aesKey = new byte[keyLength];
@@ -253,16 +382,16 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns></returns>
         private static string GetHmacAlgorithm(string algorithm)
         {
-            if (SecurityAlgorithms.Aes128CbcHmacSha256.Equals(algorithm, StringComparison.Ordinal))
+            if (SecurityAlgorithms.Aes128CbcHmacSha256.Equals(algorithm))
                     return SecurityAlgorithms.HmacSha256;
 
-            if (SecurityAlgorithms.Aes192CbcHmacSha384.Equals(algorithm, StringComparison.Ordinal))
+            if (SecurityAlgorithms.Aes192CbcHmacSha384.Equals(algorithm))
                 return SecurityAlgorithms.HmacSha384;
 
-            if (SecurityAlgorithms.Aes256CbcHmacSha512.Equals(algorithm, StringComparison.Ordinal))
+            if (SecurityAlgorithms.Aes256CbcHmacSha512.Equals(algorithm))
                     return SecurityAlgorithms.HmacSha512;
 
-            throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10652, algorithm), nameof(algorithm)));
+            throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10652, LogHelper.MarkAsNonPII(algorithm)), nameof(algorithm)));
         }
 
         /// <summary>
@@ -284,8 +413,8 @@ namespace Microsoft.IdentityModel.Tokens
             if (key is SymmetricSecurityKey symmetricSecurityKey)
                 return symmetricSecurityKey.Key;
 
-            if (key is JsonWebKey jsonWebKey && jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
-                return Base64UrlEncoder.DecodeBytes(jsonWebKey.K);
+            if (key is JsonWebKey jsonWebKey && JsonWebKeyConverter.TryConvertToSymmetricSecurityKey(jsonWebKey, out SecurityKey securityKey))
+                return GetKeyBytes(securityKey);
 
             throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10667, key)));
         }
@@ -322,31 +451,55 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
-            if (SecurityAlgorithms.Aes128CbcHmacSha256.Equals(algorithm, StringComparison.Ordinal))
+            if (SecurityAlgorithms.Aes128CbcHmacSha256.Equals(algorithm))
             {
                 if (key.KeySize < 256)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", LogHelper.FormatInvariant(LogMessages.IDX10653, SecurityAlgorithms.Aes128CbcHmacSha256, 256, key.KeyId, key.KeySize)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10653, LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes128CbcHmacSha256), LogHelper.MarkAsNonPII(256), key.KeyId, LogHelper.MarkAsNonPII(key.KeySize))));
 
                 return;
             }
 
-            if (SecurityAlgorithms.Aes192CbcHmacSha384.Equals(algorithm, StringComparison.Ordinal))
+            if (SecurityAlgorithms.Aes192CbcHmacSha384.Equals(algorithm))
             {
                 if (key.KeySize < 384)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", LogHelper.FormatInvariant(LogMessages.IDX10653, SecurityAlgorithms.Aes192CbcHmacSha384, 384, key.KeyId, key.KeySize)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10653, LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes192CbcHmacSha384), LogHelper.MarkAsNonPII(384), key.KeyId, LogHelper.MarkAsNonPII(key.KeySize))));
 
                 return;
             }
 
-            if (SecurityAlgorithms.Aes256CbcHmacSha512.Equals(algorithm, StringComparison.Ordinal))
+            if (SecurityAlgorithms.Aes256CbcHmacSha512.Equals(algorithm))
             {
                 if (key.KeySize < 512)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException("key.KeySize", LogHelper.FormatInvariant(LogMessages.IDX10653, SecurityAlgorithms.Aes256CbcHmacSha512, 512, key.KeyId, key.KeySize)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10653, LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes256CbcHmacSha512), LogHelper.MarkAsNonPII(512), key.KeyId, LogHelper.MarkAsNonPII(key.KeySize))));
 
                 return;
             }
 
-            throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10652, algorithm)));
+            if (SecurityAlgorithms.Aes128Gcm.Equals(algorithm))
+            {
+                if (key.KeySize < 128)
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10653, LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes128Gcm), LogHelper.MarkAsNonPII(128), key.KeyId, LogHelper.MarkAsNonPII(key.KeySize))));
+
+                return;
+            }
+
+            if (SecurityAlgorithms.Aes192Gcm.Equals(algorithm))
+            {
+                if (key.KeySize < 192)
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10653, LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes192Gcm), LogHelper.MarkAsNonPII(192), key.KeyId, LogHelper.MarkAsNonPII(key.KeySize))));
+
+                return;
+            }
+
+            if (SecurityAlgorithms.Aes256Gcm.Equals(algorithm))
+            {
+                if (key.KeySize < 256)
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10653, LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes256Gcm), LogHelper.MarkAsNonPII(256), key.KeyId, LogHelper.MarkAsNonPII(key.KeySize))));
+
+                return;
+            }
+
+            throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10652, LogHelper.MarkAsNonPII(algorithm))));
         }
     }
 }

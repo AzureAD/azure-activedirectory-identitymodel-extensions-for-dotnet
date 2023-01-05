@@ -1,41 +1,18 @@
-﻿//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Globalization;
+using System.IO;
+using System.Text;
 using System.Xml;
 using Microsoft.IdentityModel.TestUtils;
-using Microsoft.IdentityModel.Tokens.Saml2;
 using Microsoft.IdentityModel.Xml;
 using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
-namespace Microsoft.IdentityModel.Tokens.Saml.Tests
+namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
 {
     public class Saml2SerializerTests
     {
@@ -128,7 +105,47 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             var context = TestUtilities.WriteHeader($"{this}.ReadAssertion", theoryData);
             try
             {
+                var reader = XmlUtilities.CreateXmlReader(theoryData.Xml);
+                var assertion = (theoryData.Saml2Serializer as Saml2SerializerPublic).ReadAssertionPublic(reader);
+                theoryData.ExpectedException.ProcessNoException(context);
+
+                IdentityComparer.AreEqual(assertion, theoryData.Assertion, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Theory, MemberData(nameof(ReadAssertionTheoryData))]
+        public void ReadAssertionUsingDictionaryReader(Saml2TheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ReadAssertionUsingDictionaryReader", theoryData);
+            try
+            {
                 var reader = XmlUtilities.CreateDictionaryReader(theoryData.Xml);
+                var assertion = (theoryData.Saml2Serializer as Saml2SerializerPublic).ReadAssertionPublic(reader);
+                theoryData.ExpectedException.ProcessNoException(context);
+
+                IdentityComparer.AreEqual(assertion, theoryData.Assertion, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Theory, MemberData(nameof(ReadAssertionTheoryData))]
+        public void ReadAssertionUsingXDocumentReader(Saml2TheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ReadAssertionUsingXDocumentReader", theoryData);
+            try
+            {
+                var reader = XmlUtilities.CreateXDocumentReader(theoryData.Xml);
                 var assertion = (theoryData.Saml2Serializer as Saml2SerializerPublic).ReadAssertionPublic(reader);
                 theoryData.ExpectedException.ProcessNoException(context);
 
@@ -454,6 +471,55 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         }
         #endregion
 
+        #region Saml2ProxyRestriction
+
+        [Theory, MemberData(nameof(WriteSaml2ProxyRestrictionTheoryData))]
+        public void WriteSaml2ProxyRestriction(Saml2TheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.WriteSaml2ProxyRestriction", theoryData);
+            var context = new CompareContext($"{this}.WriteSaml2ProxyRestriction, {theoryData.TestId}");
+            try
+            {
+                var ms = new MemoryStream();
+                var writer = XmlDictionaryWriter.CreateTextWriter(ms, Encoding.UTF8, false);
+                var envelopedWriter = new EnvelopedSignatureWriter(writer, Default.AsymmetricSigningCredentials, "ref#1");
+                (theoryData.Saml2Serializer as Saml2SerializerPublic).WriteProxyRestrictionPublic(writer, theoryData.ProxyRestriction);
+
+                writer.Flush();
+                var xml = Encoding.UTF8.GetString(ms.ToArray());
+                IdentityComparer.AreEqual(xml, theoryData.Xml, context);
+
+                theoryData.ExpectedException.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<Saml2TheoryData> WriteSaml2ProxyRestrictionTheoryData
+        {
+            get
+            {
+                var proxyRestriction = new Saml2ProxyRestriction();
+                proxyRestriction.Audiences.Add(new Uri(Default.Uri));
+
+                return new TheoryData<Saml2TheoryData>
+                {
+                    new Saml2TheoryData
+                    {
+                        Xml = "<saml:ProxyRestriction xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\"><saml:Audience>http://referenceUri</saml:Audience></saml:ProxyRestriction>",
+                        Saml2Serializer = new Saml2SerializerPublic(),
+                        ProxyRestriction = proxyRestriction,
+                        TestId = "WriteSaml2ProxyRestriction",
+                    }
+                };
+            }
+        }
+        #endregion
+
         #region Saml2Subject
         [Theory, MemberData(nameof(ReadSubjectTheoryData))]
         public void ReadSubject(Saml2TheoryData theoryData)
@@ -515,7 +581,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 return base.ReadAdvice(reader);
             }
 
-            public Saml2Assertion ReadAssertionPublic(XmlDictionaryReader reader)
+            public Saml2Assertion ReadAssertionPublic(XmlReader reader)
             {
                 return base.ReadAssertion(reader);
             }
@@ -558,6 +624,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             public Saml2Subject ReadSubjectPublic(XmlDictionaryReader reader)
             {
                 return base.ReadSubject(reader);
+            }
+
+            public void WriteProxyRestrictionPublic(XmlWriter writer, Saml2ProxyRestriction proxyRestriction)
+            {
+                base.WriteProxyRestriction(writer, proxyRestriction);
             }
         }
     }

@@ -1,29 +1,5 @@
-﻿//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Security.Cryptography;
@@ -37,12 +13,12 @@ namespace Microsoft.IdentityModel.Tokens
     public class SymmetricKeyWrapProvider : KeyWrapProvider
     {
         private static readonly byte[] _defaultIV = new byte[] { 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6 };
-        private static readonly int _blockSizeInBits = 64;
-        private static readonly int _blockSizeInBytes = _blockSizeInBits >> 3;
+        private const int _blockSizeInBits = 64;
+        private const int _blockSizeInBytes = _blockSizeInBits >> 3;
         private static object _encryptorLock = new object();
         private static object _decryptorLock = new object();
 
-        private SymmetricAlgorithm _symmetricAlgorithm;
+        private Lazy<SymmetricAlgorithm> _symmetricAlgorithm;
         private ICryptoTransform _symmetricAlgorithmEncryptor;
         private ICryptoTransform _symmetricAlgorithmDecryptor;
         private bool _disposed;
@@ -66,15 +42,10 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
-            if (!IsSupportedAlgorithm(key, algorithm))
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, algorithm, key)));
-
             Algorithm = algorithm;
             Key = key;
 
-            _symmetricAlgorithm = GetSymmetricAlgorithm(key, algorithm);
-            if (_symmetricAlgorithm == null)
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10669)));
+            _symmetricAlgorithm = new Lazy<SymmetricAlgorithm>(CreateSymmetricAlgorithm);
         }
 
         /// <summary>
@@ -93,6 +64,19 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public override SecurityKey Key { get; }
 
+        private SymmetricAlgorithm CreateSymmetricAlgorithm()
+        {
+            if (!IsSupportedAlgorithm(Key, Algorithm))
+                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, LogHelper.MarkAsNonPII(Algorithm), Key)));
+
+            SymmetricAlgorithm symmetricAlgorithm = GetSymmetricAlgorithm(Key, Algorithm);
+
+            if (symmetricAlgorithm == null)
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10669)));
+
+            return symmetricAlgorithm;
+        }
+
         /// <summary>
         /// Disposes of internal components.
         /// </summary>
@@ -105,8 +89,20 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     if (_symmetricAlgorithm != null)
                     {
-                        _symmetricAlgorithm.Dispose();
+                        _symmetricAlgorithm.Value.Dispose();
                         _symmetricAlgorithm = null;
+                    }
+
+                    if (_symmetricAlgorithmEncryptor != null)
+                    {
+                        _symmetricAlgorithmEncryptor.Dispose();
+                        _symmetricAlgorithmEncryptor = null;
+                    }
+
+                    if (_symmetricAlgorithmDecryptor != null)
+                    {
+                        _symmetricAlgorithmDecryptor.Dispose();
+                        _symmetricAlgorithmDecryptor = null;
                     }
 
                     _disposed = true;
@@ -135,20 +131,24 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="InvalidOperationException">Failed to create symmetric algorithm with provided key and algorithm.</exception>
         protected virtual SymmetricAlgorithm GetSymmetricAlgorithm(SecurityKey key, string algorithm)
         {
+            if (key == null)
+                throw LogHelper.LogArgumentNullException(nameof(key));
+
+            if (!IsSupportedAlgorithm(key, algorithm))
+                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, LogHelper.MarkAsNonPII(algorithm), key)));
+
             byte[] keyBytes = null;
 
-            SymmetricSecurityKey symmetricSecurityKey = key as SymmetricSecurityKey;
-            if (symmetricSecurityKey != null)
+            if (key is SymmetricSecurityKey symmetricSecurityKey)
                 keyBytes = symmetricSecurityKey.Key;
-            else
+            else if (key is JsonWebKey jsonWebKey)
             {
-                JsonWebKey jsonWebKey = key as JsonWebKey;
-                if (jsonWebKey != null && jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
-                    keyBytes = Base64UrlEncoder.DecodeBytes(jsonWebKey.K);
+                if (JsonWebKeyConverter.TryConvertToSymmetricSecurityKey(jsonWebKey, out SecurityKey securityKey))
+                    keyBytes = (securityKey as SymmetricSecurityKey).Key;
             }
 
             if (keyBytes == null)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10657, key.GetType())));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10657, LogHelper.MarkAsNonPII(key.GetType()))));
 
             ValidateKeySize(keyBytes, algorithm);
 
@@ -170,7 +170,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10663, key, algorithm), ex));
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10663, key, LogHelper.MarkAsNonPII(algorithm)), ex));
             }
         }
 
@@ -182,22 +182,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>true if the algorithm is supported; otherwise, false.</returns>
         protected virtual bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
         {
-            if (key == null)
-                return false;
-
-            if (string.IsNullOrEmpty(algorithm))
-                return false;
-
-            if (algorithm.Equals(SecurityAlgorithms.Aes128KW, StringComparison.Ordinal) || algorithm.Equals(SecurityAlgorithms.Aes256KW, StringComparison.Ordinal))
-            {
-                if (key is SymmetricSecurityKey)
-                    return true;
-
-                if (key is JsonWebKey jsonWebKey && jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
-                    return true;
-            }
-
-            return false;
+            return SupportedAlgorithms.IsSupportedSymmetricKeyWrap(algorithm, key);
         }
 
         /// <summary>
@@ -215,7 +200,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(keyBytes));
 
             if (keyBytes.Length % 8 != 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10664, keyBytes.Length << 3), nameof(keyBytes)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10664, LogHelper.MarkAsNonPII(keyBytes.Length << 3)), nameof(keyBytes)));
 
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
@@ -275,7 +260,7 @@ namespace Microsoft.IdentityModel.Tokens
                 lock (_decryptorLock)
                 {
                     if (_symmetricAlgorithmDecryptor == null)
-                        _symmetricAlgorithmDecryptor = _symmetricAlgorithm.CreateDecryptor();
+                        _symmetricAlgorithmDecryptor = _symmetricAlgorithm.Value.CreateDecryptor();
                 }
             }
 
@@ -328,23 +313,31 @@ namespace Microsoft.IdentityModel.Tokens
 
         private void ValidateKeySize(byte[] key, string algorithm)
         {
-            if (SecurityAlgorithms.Aes128KW.Equals(algorithm, StringComparison.Ordinal))
+            if (SecurityAlgorithms.Aes128KW.Equals(algorithm) || SecurityAlgorithms.Aes128KeyWrap.Equals(algorithm))
             {
                 if (key.Length != 16)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key.Length), LogHelper.FormatInvariant(LogMessages.IDX10662, SecurityAlgorithms.Aes128KW, 128, Key.KeyId, key.Length << 3)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10662, LogHelper.MarkAsNonPII(algorithm), LogHelper.MarkAsNonPII(128), Key.KeyId, LogHelper.MarkAsNonPII(key.Length << 3))));
 
                 return;
             }
 
-            if (SecurityAlgorithms.Aes256KW.Equals(algorithm, StringComparison.Ordinal))
+            if (SecurityAlgorithms.Aes192KW.Equals(algorithm) || SecurityAlgorithms.Aes192KeyWrap.Equals(algorithm))
+            {
+                if (key.Length != 24)
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10662, LogHelper.MarkAsNonPII(algorithm), LogHelper.MarkAsNonPII(128), Key.KeyId, LogHelper.MarkAsNonPII(key.Length << 3))));
+
+                return;
+            }
+
+            if (SecurityAlgorithms.Aes256KW.Equals(algorithm) || (SecurityAlgorithms.Aes256KeyWrap.Equals(algorithm)))
             {
                 if (key.Length != 32)
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key.Length), LogHelper.FormatInvariant(LogMessages.IDX10662, SecurityAlgorithms.Aes256KW, 256, Key.KeyId, key.Length << 3)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10662, LogHelper.MarkAsNonPII(algorithm), LogHelper.MarkAsNonPII(256), Key.KeyId, LogHelper.MarkAsNonPII(key.Length << 3))));
 
                 return;
             }
 
-            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(algorithm), LogHelper.FormatInvariant(LogMessages.IDX10652, algorithm)));
+            throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(algorithm), LogHelper.FormatInvariant(LogMessages.IDX10652, LogHelper.MarkAsNonPII(algorithm))));
         }
 
         /// <summary>
@@ -362,7 +355,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(keyBytes));
 
             if (keyBytes.Length % 8 != 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10664, keyBytes.Length << 3), nameof(keyBytes)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10664, LogHelper.MarkAsNonPII(keyBytes.Length << 3)), nameof(keyBytes)));
 
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
@@ -417,7 +410,7 @@ namespace Microsoft.IdentityModel.Tokens
                 lock (_encryptorLock)
                 {
                     if (_symmetricAlgorithmEncryptor == null)
-                        _symmetricAlgorithmEncryptor = _symmetricAlgorithm.CreateEncryptor();
+                        _symmetricAlgorithmEncryptor = _symmetricAlgorithm.Value.CreateEncryptor();
                 }
             }
 

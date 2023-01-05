@@ -1,29 +1,5 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -91,6 +67,10 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
             IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipalFrom4xUsing4xHandler, claimsPrincipalFrom5xUsing4xHandler, context);
             IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipalFrom4xUsing5xHandler, claimsPrincipalFrom5xUsing4xHandler, context);
             IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipalFrom5xUsing5xHandler, claimsPrincipalFrom5xUsing4xHandler, context);
+
+            // the results from ValidateTokenAsync() and ValidateToken() should be the same
+            var tokenValidationResult = samlHandler5x.ValidateTokenAsync(token4x, theoryData.ValidationParameters5x);
+            IdentityComparer.AreClaimsIdentitiesEqual(claimsPrincipalFrom5xUsing5xHandler.Identity as ClaimsIdentity, tokenValidationResult.Result.ClaimsIdentity, context);
 
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -240,6 +220,19 @@ namespace Microsoft.IdentityModel.CrossVersionTokenValidation.Tests
 
             AreSaml2TokensEqual(validatedToken4x, validatedToken5x, context);
             IdentityComparer.AreClaimsPrincipalsEqual(claimsPrincipal4x, claimsPrincipal5x, context);
+
+            // verify the results from asynchronous and synchronous are the same
+            TokenValidationResult tokenValidationResult = null;
+            try
+            {
+                tokenValidationResult = new Tokens.Saml2.Saml2SecurityTokenHandler().ValidateTokenAsync(theoryData.TokenString4x, theoryData.ValidationParameters5x).Result;
+            }
+            catch (Exception ex)
+            {
+                context.Diffs.Add($"CrossVersionTokenValidationTestsData.ValidateToken threw: '{ex}'.");
+            }
+            IdentityComparer.AreClaimsIdentitiesEqual(claimsPrincipal5x.Identity as ClaimsIdentity, tokenValidationResult.ClaimsIdentity, context);
+
             TestUtilities.AssertFailIfErrors(context);
         }
 
