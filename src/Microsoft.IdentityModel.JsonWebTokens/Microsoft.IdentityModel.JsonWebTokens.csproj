@@ -29,6 +29,7 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net461' Or '$(TargetFramework)' == 'net472' Or '$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'net6.0'">
     <PackageReference Include="System.Text.Encoding" Version="$(SystemTextEncoding)" />
+	<PackageReference Include="System.Text.Encodings.Web" Version="$(SystemTextEncodingsWeb)" />
     <PackageReference Include="System.Text.Json" Version="$(SystemTextJson)" />
   </ItemGroup>
 
