@@ -211,6 +211,7 @@ namespace Microsoft.IdentityModel.Tokens
             ConfigurationManager = other.ConfigurationManager;
             CryptoProviderFactory = other.CryptoProviderFactory;
             DebugId = other.DebugId;
+            IncludeTokenOnFailedValidation = other.IncludeTokenOnFailedValidation;
             IgnoreTrailingSlashWhenValidatingAudience = other.IgnoreTrailingSlashWhenValidatingAudience;
             IssuerSigningKey = other.IssuerSigningKey;
             IssuerSigningKeyResolver = other.IssuerSigningKeyResolver;
