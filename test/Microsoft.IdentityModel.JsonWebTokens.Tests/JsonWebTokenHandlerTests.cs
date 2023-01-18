@@ -3358,6 +3358,77 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 },
             };
         }
+
+        [Theory, MemberData(nameof(IncludeSecurityTokenOnFailureTestTheoryData))]
+        public void IncludeSecurityTokenOnFailedValidationTest(CreateTokenTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.IncludeSecurityTokenOnFailedValidationTest", theoryData);
+
+            try
+            {
+                var handler = new JsonWebTokenHandler();
+                var token = handler.CreateToken(theoryData.TokenDescriptor);
+                var validationResult = handler.ValidateToken(token, theoryData.ValidationParameters);
+                if (theoryData.ValidationParameters.IncludeTokenOnFailedValidation)
+                {
+                    Assert.NotNull(validationResult.TokenOnFailedValidation);
+                }
+                else
+                {
+                    Assert.Null(validationResult.TokenOnFailedValidation);
+                }
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<CreateTokenTheoryData> IncludeSecurityTokenOnFailureTestTheoryData()
+        {
+            return new TheoryData<CreateTokenTheoryData>()
+            {
+                new CreateTokenTheoryData
+                {
+                    First = true,
+                    TestId = "TokenExpiredIncludeTokenOnFailedValidation",
+                    TokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Subject = new ClaimsIdentity(Default.PayloadClaimsExpired),
+                        Expires = DateTime.UtcNow.Subtract(new TimeSpan(0, 10, 0)),
+                        IssuedAt = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
+                        NotBefore = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
+                        SigningCredentials = Default.AsymmetricSigningCredentials,
+                    },
+                    ValidationParameters = new TokenValidationParameters
+                    {
+                        IssuerSigningKey = Default.SymmetricSigningKey,
+                        ValidIssuer = Default.Issuer,
+                        IncludeTokenOnFailedValidation = true
+                    }
+                },
+                new CreateTokenTheoryData
+                {
+                    First = true,
+                    TestId = "TokenExpiredNotIncludeTokenOnFailedValidation",
+                    TokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Subject = new ClaimsIdentity(Default.PayloadClaimsExpired),
+                        Expires = DateTime.UtcNow.Subtract(new TimeSpan(0, 10, 0)),
+                        IssuedAt = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
+                        NotBefore = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
+                        SigningCredentials = Default.AsymmetricSigningCredentials,
+                    },
+                    ValidationParameters = new TokenValidationParameters
+                    {
+                        IssuerSigningKey = Default.SymmetricSigningKey,
+                        ValidIssuer = Default.Issuer,
+                    }
+                },
+            };
+        }
     }
 
     public class CreateTokenTheoryData : TheoryDataBase
