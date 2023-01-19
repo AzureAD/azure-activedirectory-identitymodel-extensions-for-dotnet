@@ -929,15 +929,25 @@ namespace System.IdentityModel.Tokens.Jwt
                         }
                     }
 
-                    if (TokenUtilities.IsRecoverableConfiguration(validationParameters, currentConfiguration, out currentConfiguration))
+                    if (validationParameters.ConfigurationManager.UseLastKnownGoodConfiguration)
                     {
-                        validationParameters.ValidateWithLKG = true;
                         validationParameters.RefreshBeforeValidation = false;
-                        claimsPrincipal = outerToken != null ? ValidateJWE(token, outerToken, validationParameters, currentConfiguration, out signatureValidatedToken, out exceptionThrown) :
-                            ValidateJWS(token, validationParameters, currentConfiguration, out signatureValidatedToken, out exceptionThrown);
+                        validationParameters.ValidateWithLKG = true;
+                        var recoverableException = exceptionThrown.SourceException;
+                        string kid = outerToken != null ? outerToken.Header.Kid :
+                            (ValidateSignatureUsingDelegates(token, validationParameters, null) ?? GetJwtSecurityTokenFromToken(token, validationParameters)).Header.Kid;
 
-                        if (claimsPrincipal != null)
-                            return claimsPrincipal;
+                        foreach (BaseConfiguration lkgConfiguration in validationParameters.ConfigurationManager.GetValidLkgConfigurations())
+                        {
+                            if (!lkgConfiguration.Equals(currentConfiguration) && TokenUtilities.IsRecoverableConfiguration(kid, currentConfiguration, lkgConfiguration, recoverableException))
+                            {
+                                claimsPrincipal = outerToken != null ? ValidateJWE(token, outerToken, validationParameters, lkgConfiguration, out signatureValidatedToken, out exceptionThrown) :
+                                    ValidateJWS(token, validationParameters, lkgConfiguration, out signatureValidatedToken, out exceptionThrown);
+
+                                if (claimsPrincipal != null)
+                                    return claimsPrincipal;
+                            }
+                        }
                     }
                 }
             }
@@ -1261,10 +1271,6 @@ namespace System.IdentityModel.Tokens.Jwt
         /// If the <paramref name="token"/> has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature.
         /// This can indicate that a key refresh is required.
         /// </exception>
-        /// <exception cref="SecurityTokenUnableToValidateException">
-        /// If the <paramref name="token"/> has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature as well as the token
-        /// had validation errors or lifetime or issuer. This is not intended to be a signal to refresh keys.
-        /// </exception>
         /// <exception cref="SecurityTokenInvalidSignatureException">If after trying all the <see cref="SecurityKey"/>(s), none result in a validated signature AND the <paramref name="token"/> does not have a key identifier.</exception>
         /// <returns>A <see cref="JwtSecurityToken"/> that has the signature validated if token was signed.</returns>
         /// <remarks><para>If the <paramref name="token"/> is signed, the signature is validated even if <see cref="TokenValidationParameters.RequireSignedTokens"/> is false.</para>
@@ -1388,16 +1394,13 @@ namespace System.IdentityModel.Tokens.Jwt
 
                 if (!validationParameters.ValidateSignatureLast)
                 {
-                    InternalValidators.ValidateLifetimeAndIssuerAfterSignatureNotValidatedJwt(
+                    InternalValidators.ValidateAfterSignatureFailed(
                         jwtToken,
                         notBefore,
                         expires,
-                        jwtToken.Header.Kid,
+                        jwtToken.Audiences,
                         validationParameters,
-                        configuration,
-                        exceptionStrings,
-                        numKeysInConfiguration,
-                        numKeysInTokenValidationParameters);
+                        configuration);
                 }
             }
 

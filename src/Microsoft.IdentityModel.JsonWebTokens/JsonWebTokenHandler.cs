@@ -1230,8 +1230,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                     return tokenValidationResult;
                 }
-                // using 'GetType()' instead of 'is' as SecurityTokenUnableToValidException (and others) extend SecurityTokenInvalidSignatureException
-                // we want to make sure that the clause for SecurityTokenUnableToValidateException is hit so that the ValidationFailure is checked
                 else if (TokenUtilities.IsRecoverableException(tokenValidationResult.Exception))
                 {
                     // If we were still unable to validate, attempt to refresh the configuration and validate using it
@@ -1258,14 +1256,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         }
                     }
 
-                    if (TokenUtilities.IsRecoverableConfiguration(validationParameters, currentConfiguration, out currentConfiguration))
+                    if (validationParameters.ConfigurationManager.UseLastKnownGoodConfiguration)
                     {
                         validationParameters.RefreshBeforeValidation = false;
                         validationParameters.ValidateWithLKG = true;
-                        tokenValidationResult = ValidateToken(jsonWebToken, validationParameters, currentConfiguration);
+                        var recoverableException = tokenValidationResult.Exception;
 
-                        if (tokenValidationResult.IsValid)
-                            return tokenValidationResult;
+                        foreach (BaseConfiguration lkgConfiguration in validationParameters.ConfigurationManager.GetValidLkgConfigurations())
+                        {
+                            if (!lkgConfiguration.Equals(currentConfiguration) && TokenUtilities.IsRecoverableConfiguration(jsonWebToken.Kid, currentConfiguration, lkgConfiguration, recoverableException))
+                            {
+                                tokenValidationResult = ValidateToken(jsonWebToken, validationParameters, lkgConfiguration);
+
+                                if (tokenValidationResult.IsValid)
+                                    return tokenValidationResult;
+                            }
+                        }
                     }
                 }
             }
@@ -1534,16 +1540,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 if (!validationParameters.ValidateSignatureLast)
                 {
-                    InternalValidators.ValidateLifetimeAndIssuerAfterSignatureNotValidatedJwt(
+                    InternalValidators.ValidateAfterSignatureFailed(
                         jwtToken,
                         notBefore,
                         expires,
-                        jwtToken.Kid,
+                        jwtToken.Audiences,
                         validationParameters,
-                        configuration,
-                        exceptionStrings,
-                        numKeysInTokenValidationParameters,
-                        numKeysInConfiguration);
+                        configuration);
                 }
             }
 

@@ -3,6 +3,8 @@
 
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
@@ -19,6 +21,8 @@ namespace Microsoft.IdentityModel.Tokens
         private TimeSpan _lastKnownGoodLifetime = DefaultLastKnownGoodConfigurationLifetime;
         private BaseConfiguration _lastKnownGoodConfiguration;
         private DateTime? _lastKnownGoodConfigFirstUse = null;
+
+        internal EventBasedLRUCache<BaseConfiguration, DateTime> _lastKnownGoodConfigurationCache;
 
         /// <summary>
         /// Gets or sets the <see cref="TimeSpan"/> that controls how often an automatic metadata refresh should occur.
@@ -64,6 +68,15 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Gets all valid last known good configurations.
+        /// </summary>
+        /// <returns>A collection of all valid last known good configurations.</returns>
+        internal ICollection<BaseConfiguration> GetValidLkgConfigurations()
+        {
+            return _lastKnownGoodConfigurationCache.ToArray().Where(x => x.Value.Value > DateTime.UtcNow).Select(x => x.Key).ToArray();
+        }
+
+        /// <summary>
         /// The last known good configuration or LKG (a configuration retrieved in the past that we were able to successfully validate a token against).
         /// </summary>
         public BaseConfiguration LastKnownGoodConfiguration
@@ -76,6 +89,9 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 _lastKnownGoodConfiguration = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
                 _lastKnownGoodConfigFirstUse = DateTime.UtcNow;
+
+                // LRU cache will remove the expired configuration
+                _lastKnownGoodConfigurationCache.SetValue(_lastKnownGoodConfiguration, DateTime.UtcNow + LastKnownGoodLifetime, DateTime.UtcNow + LastKnownGoodLifetime);
             }
         }
 

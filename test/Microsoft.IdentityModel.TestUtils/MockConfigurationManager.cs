@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.TestUtils
@@ -14,7 +15,7 @@ namespace Microsoft.IdentityModel.TestUtils
     /// This type is used for testing the functionality of using a last known good configuration, as well
     /// as a refreshed configuration.
     /// </summary>
-    /// <typeparam name="T">must be a class.</typeparam>
+    /// <typeparam name="T">must be a class inherit from <see cref="BaseConfiguration"/>.</typeparam>
     public class MockConfigurationManager<T> : BaseConfigurationManager, IConfigurationManager<T> where T : class
     {
         private T _configuration;
@@ -32,6 +33,11 @@ namespace Microsoft.IdentityModel.TestUtils
                 throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(configuration)));
 
             _configuration = configuration;
+            _lastKnownGoodConfigurationCache = new EventBasedLRUCache<BaseConfiguration, DateTime>(
+                LastKnownGoodConfigurationCacheOptions.DefaultLastKnownGoodConfigurationSizeLimit,
+                TaskCreationOptions.None,
+                new BaseConfigurationComparer(),
+                true);
         }
 
         /// <summary>
@@ -72,6 +78,30 @@ namespace Microsoft.IdentityModel.TestUtils
                 throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(refreshedConfiguration)));
 
             _refreshedConfiguration = refreshedConfiguration;
+        }
+
+        /// <summary>
+        /// Initializes an new instance of <see cref="MockConfigurationManager{T}"/> with a Configuration instance and a LKG Configuration instance.
+        /// </summary>
+        /// <param name="configuration">Configuration of type OpenIdConnectConfiguration or WsFederationConfiguration.</param>
+        /// <param name="lkgLifetime">The LKG configuration lifetime.</param>
+        public MockConfigurationManager(T configuration, TimeSpan lkgLifetime) : this(configuration)
+        {
+            LastKnownGoodLifetime = lkgLifetime;
+        }
+
+        /// <summary>
+        /// Initializes an new instance of <see cref="MockConfigurationManager{T}"/> with a Configuration instance and a LKG Configuration instance.
+        /// </summary>
+        /// <param name="configuration">Configuration of type OpenIdConnectConfiguration or WsFederationConfiguration.</param>
+        /// <param name="lkgConfiguration">Configuration of type OpenIdConnectConfiguration or WsFederationConfiguration.</param>
+        /// <param name="lkgLifetime">The LKG configuration lifetime.</param>
+        public MockConfigurationManager(T configuration, T lkgConfiguration, TimeSpan lkgLifetime) : this(configuration, lkgLifetime)
+        {
+            if (lkgConfiguration == null)
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(lkgConfiguration)));
+
+            LastKnownGoodConfiguration = lkgConfiguration as BaseConfiguration;
         }
 
         /// <summary>
