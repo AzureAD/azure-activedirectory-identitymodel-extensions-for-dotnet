@@ -2194,7 +2194,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = Default.SymmetricEncryptingCredentials,
-                        ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10516:")
+                        ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10204:")
                     },
                     new CreateTokenTheoryData()
                     {
@@ -2682,7 +2682,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new JwtTheoryData("SymmetricJws_RequireSignedTokens_KeyNotFound")
                     {
                         Token = Default.SymmetricJws,
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501"),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10500"),
                         ValidationParameters = new TokenValidationParameters
                         {
                             ValidateIssuerSigningKey = true,
@@ -2707,7 +2707,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     },
                     new JwtTheoryData("SymmetricJws_RequireSignedTokensNullSigningKey")
                     {
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:"),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10500:"),
                         Token = Default.SymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -3308,7 +3308,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         IssuerSigningKey = Default.SymmetricSigningKey,
                         ValidIssuer = Default.Issuer
                     },
-                    ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10516:")
+                    ExpectedException = ExpectedException.SecurityTokenExpiredException("IDX10223:")
                 },
                 new CreateTokenTheoryData
                 {
@@ -3322,7 +3322,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         IssuerSigningKey = Default.SymmetricSigningKey,
                     },
-                    ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10516:")
+                    ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10204:")
                 },
                 new CreateTokenTheoryData
                 {
@@ -3339,7 +3339,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         IssuerSigningKey = Default.SymmetricSigningKey,
                     },
-                    ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10516:")
+                    ExpectedException = ExpectedException.SecurityTokenExpiredException("IDX10223:")
                 },
                 new CreateTokenTheoryData
                 {
@@ -3353,8 +3353,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         IssuerSigningKey = Default.SymmetricSigningKey,
                         ValidIssuer = Default.Issuer,
+                        ValidateAudience = false
                     },
-                    ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:")
+                    ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10503:")
                 },
             };
         }

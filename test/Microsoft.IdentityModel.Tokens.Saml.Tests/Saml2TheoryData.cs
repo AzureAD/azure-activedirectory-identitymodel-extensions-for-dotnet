@@ -13,6 +13,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
         {
         }
 
+        public Saml2TheoryData(string testId) : base(testId)
+        {
+        }
+
         public Saml2TheoryData(TokenTheoryData tokenTheoryData)
             : base(tokenTheoryData)
         {

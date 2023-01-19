@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Threading;
@@ -28,6 +29,11 @@ namespace Microsoft.IdentityModel.Protocols
                 throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(configuration), LogHelper.FormatInvariant(LogMessages.IDX20000, LogHelper.MarkAsNonPII(nameof(configuration)))));
 
             _configuration = configuration;
+            _lastKnownGoodConfigurationCache = new EventBasedLRUCache<BaseConfiguration, DateTime>(
+                LastKnownGoodConfigurationCacheOptions.DefaultLastKnownGoodConfigurationSizeLimit,
+                TaskCreationOptions.None,
+                new BaseConfigurationComparer(),
+                true);
         }
 
         /// <summary>
