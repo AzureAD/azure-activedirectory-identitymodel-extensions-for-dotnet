@@ -141,11 +141,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             TestUtilities.WriteHeader($"{this}.GetSets", "GetSets", true);
 
+            int ExpectedPropertyCount = 8;
             var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), new FileDocumentRetriever());
             Type type = typeof(ConfigurationManager<OpenIdConnectConfiguration>);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 7)
-                Assert.True(false, "Number of properties has changed from 7 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != ExpectedPropertyCount)
+                Assert.True(false, "Number of properties has changed from {ExpectedPropertyCount} to: " + properties.Length + ", adjust tests");
 
             var defaultAutomaticRefreshInterval = ConfigurationManager<OpenIdConnectConfiguration>.DefaultAutomaticRefreshInterval;
             var defaultRefreshInterval = ConfigurationManager<OpenIdConnectConfiguration>.DefaultRefreshInterval;
@@ -362,6 +363,43 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             //LKG config first use was not reset when a new configuration was set
             if (lkgConfigFirstUse1.Equals(lkgConfigFirstUse2))
                 context.AddDiff("Last known good first use time was not reset when a new LKG configuration was set.");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
+        public void TestConfigurationComparer()
+        {
+            TestUtilities.WriteHeader($"{this}.TestConfigurationComparer", "TestConfigurationComparer", true);
+            var context = new CompareContext();
+
+            var config1 = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
+            config1.SigningKeys.Add(KeyingMaterial.DefaultX509Key_2048);
+            config1.SigningKeys.Add(KeyingMaterial.DefaultRsaSecurityKey1);
+            config1.SigningKeys.Add(KeyingMaterial.DefaultRsaSecurityKey2);
+
+            var config2 = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
+            config2.SigningKeys.Add(KeyingMaterial.DefaultRsaSecurityKey1);
+            config2.SigningKeys.Add(KeyingMaterial.DefaultX509Key_2048);
+            config2.SigningKeys.Add(KeyingMaterial.DefaultRsaSecurityKey2);
+
+            var config3 = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
+            config3.SigningKeys.Add(KeyingMaterial.DefaultRsaSecurityKey1);
+
+            var config4 = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "1" };
+            config3.SigningKeys.Add(KeyingMaterial.DefaultRsaSecurityKey1);
+
+            var configurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(config1, config1);
+            IdentityComparer.AreEqual(configurationManager.GetValidLkgConfiguraitonFromCache().Count, 1, context);
+
+            configurationManager.LastKnownGoodConfiguration = config2;
+            IdentityComparer.AreEqual(configurationManager.GetValidLkgConfiguraitonFromCache().Count, 1, context);
+
+            configurationManager.LastKnownGoodConfiguration = config3;
+            IdentityComparer.AreEqual(configurationManager.GetValidLkgConfiguraitonFromCache().Count, 2, context);
+
+            configurationManager.LastKnownGoodConfiguration = config4;
+            IdentityComparer.AreEqual(configurationManager.GetValidLkgConfiguraitonFromCache().Count, 3, context);
 
             TestUtilities.AssertFailIfErrors(context);
         }

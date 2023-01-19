@@ -1258,14 +1258,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         }
                     }
 
-                    if (TokenUtilities.IsRecoverableConfiguration(validationParameters, currentConfiguration, out currentConfiguration))
+                    if (TokenUtilities.ShouldValidateWithLKG(validationParameters))
                     {
                         validationParameters.RefreshBeforeValidation = false;
                         validationParameters.ValidateWithLKG = true;
-                        tokenValidationResult = ValidateToken(jsonWebToken, validationParameters, currentConfiguration);
+                        var recoverableException = tokenValidationResult.Exception;
 
-                        if (tokenValidationResult.IsValid)
-                            return tokenValidationResult;
+                        foreach (BaseConfiguration lkgConfiguration in validationParameters.ConfigurationManager.GetValidLkgConfiguraitonFromCache())
+                        {
+                            if (!lkgConfiguration.Equals(currentConfiguration) && TokenUtilities.IsRecoverableConfiguration(jsonWebToken.Kid, currentConfiguration, lkgConfiguration, recoverableException))
+                            {
+                                tokenValidationResult = await ValidateTokenAsync(jsonWebToken, validationParameters, lkgConfiguration).ConfigureAwait(false);
+
+                                if (tokenValidationResult.IsValid)
+                                    return tokenValidationResult;
+                            }
+                        }
                     }
                 }
             }

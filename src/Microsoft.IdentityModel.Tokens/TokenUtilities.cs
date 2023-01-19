@@ -190,7 +190,6 @@ namespace Microsoft.IdentityModel.Tokens
             // using 'GetType()' instead of 'is' as SecurityTokenUnableToValidException (and others) extend SecurityTokenInvalidSignatureException
             // we want to make sure that the clause for SecurityTokenUnableToValidateException is hit so that the ValidationFailure is checked
             return exception.GetType().Equals(typeof(SecurityTokenInvalidSignatureException))
-                   || exception is SecurityTokenInvalidSigningKeyException
                    || exception is SecurityTokenInvalidIssuerException
                    // we should not try to revalidate with the LKG or request a refresh if the token has an invalid lifetime
                    || (exception as SecurityTokenUnableToValidateException)?.ValidationFailure != ValidationFailure.InvalidLifetime
@@ -200,30 +199,50 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Check whether the given configuration is recoverable by LKG.
         /// </summary>
-        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validation.</param>
-        /// <param name="configuration">The <see cref="BaseConfiguration"/> to check.</param>
-        /// <param name="currentConfiguration">The updated <see cref="BaseConfiguration"/>.</param>
+        /// <param name="kid">The kid from token."/></param>
+        /// <param name="currentConfiguration">The <see cref="BaseConfiguration"/> to check.</param>
+        /// <param name="lkgConfiguration">The LKG exception to check.</param>
+        /// <param name="currentException">The exception to check.</param>
         /// <returns><c>true</c> if the configuration is recoverable otherwise, <c>false</c>.</returns>
-        internal static bool IsRecoverableConfiguration(TokenValidationParameters validationParameters, BaseConfiguration configuration, out BaseConfiguration currentConfiguration)
+        internal static bool IsRecoverableConfiguration(string kid, BaseConfiguration currentConfiguration, BaseConfiguration lkgConfiguration, Exception currentException)
         {
-            bool isRecoverableConfiguration = (validationParameters.ConfigurationManager.UseLastKnownGoodConfiguration
-                && validationParameters.ConfigurationManager.LastKnownGoodConfiguration != null
-                && !ReferenceEquals(configuration, validationParameters.ConfigurationManager.LastKnownGoodConfiguration));
+            Lazy<bool> isRecoverableIssuer = new Lazy<bool>(() => currentConfiguration.Issuer != lkgConfiguration.Issuer);
+            Lazy<bool> isRecoverableSigningKey = new Lazy<bool>(() => lkgConfiguration.SigningKeys.Any(signingKey => signingKey.KeyId == kid));
 
-            currentConfiguration = configuration;
-            if (isRecoverableConfiguration)
+            if (currentException is SecurityTokenInvalidIssuerException)
             {
-                // Inform the user that the LKG is expired.
-                if (!validationParameters.ConfigurationManager.IsLastKnownGoodValid)
-                {
-                    LogHelper.LogInformation(TokenLogMessages.IDX10263);
-                    return false;
-                }
-                else
-                    currentConfiguration = validationParameters.ConfigurationManager.LastKnownGoodConfiguration;
+                return isRecoverableIssuer.Value;
+            }
+            else if (currentException is SecurityTokenSignatureKeyNotFoundException)
+            {
+                return isRecoverableSigningKey.Value;
+            }
+            else if ((currentException as SecurityTokenUnableToValidateException)?.ValidationFailure == ValidationFailure.InvalidIssuer)
+            {
+                return isRecoverableIssuer.Value && isRecoverableSigningKey.Value;
+            }
+            else if (currentException.GetType().Equals(typeof(SecurityTokenInvalidSignatureException)))
+            {
+                SecurityKey currentSigningKey = currentConfiguration.SigningKeys.FirstOrDefault(x => x.KeyId == kid);
+                if (currentSigningKey == null)
+                    return isRecoverableSigningKey.Value;
+
+                SecurityKey lkgSigningKey = lkgConfiguration.SigningKeys.FirstOrDefault(signingKey => signingKey.KeyId == kid);
+                return lkgSigningKey != null && currentSigningKey.InternalId != lkgSigningKey.InternalId;
             }
 
-            return isRecoverableConfiguration;
+            return false;
+        }
+
+        /// <summary>
+        /// Check if the token can be validated by LKG.
+        /// </summary>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validation.</param>
+        /// <returns><c>true</c> if the token can be validated by LKG, <c>false</c>.</returns>
+        internal static bool ShouldValidateWithLKG(TokenValidationParameters validationParameters)
+        {
+            return  (validationParameters.ConfigurationManager.UseLastKnownGoodConfiguration
+                && validationParameters.ConfigurationManager.GetValidLkgConfiguraitonFromCache() != null);
         }
     }
 }

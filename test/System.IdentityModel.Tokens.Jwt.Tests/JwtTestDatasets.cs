@@ -287,17 +287,23 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 var validConfigKeyValidationFails = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
                 validConfigKeyValidationFails.SigningKeys.Add(KeyingMaterial.DefaultX509Key_2048);
 
-                var invalidIssuerConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "2" };
+                var invalidIssuerConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "1" };
                 invalidIssuerConfig.SigningKeys.Add(KeyingMaterial.DefaultX509Key_2048);
 
                 var incorrectSigningKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
                 incorrectSigningKeysConfig.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
 
-                var incorrectIssuerAndSigningKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "2" };
+                var incorrectIssuerAndSigningKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "1" };
+                incorrectIssuerAndSigningKeysConfig.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
+
+                var incorrectIssuerAndSigningKeysConfig2 = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "2" };
                 incorrectIssuerAndSigningKeysConfig.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
 
                 var incorrectSigningKeysConfigWithMatchingKid = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
                 incorrectSigningKeysConfigWithMatchingKid.SigningKeys.Add(KeyingMaterial.CreateJsonWebKeyEC(JsonWebKeyECTypes.P256, Default.X509AsymmetricSigningCredentials.Key.KeyId, KeyingMaterial.P256_D, KeyingMaterial.P256_X, KeyingMaterial.P256_Y));
+
+                var incorrectIssuerAndIncorrectSigningKeysConfigWithMatchingKid = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "1" };
+                incorrectSigningKeysConfigWithMatchingKid.SigningKeys.Add(KeyingMaterial.CreateJsonWebKeyEC(JsonWebKeyECTypes.P521, Default.X509AsymmetricSigningCredentials.Key.KeyId, KeyingMaterial.P521_D, KeyingMaterial.P521_X, KeyingMaterial.P521_Y));
 
                 var expiredSecurityTokenDescriptor = Default.X509SecurityTokenDescriptor(Default.X509AsymmetricSigningCredentials);
                 expiredSecurityTokenDescriptor.NotBefore = DateTime.UtcNow + TimeSpan.FromDays(1);
@@ -368,6 +374,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
+                        // SecurityTokenInvalidSigningKeyException is no longer a recoverable exception
                         TestId = nameof(Default.AsymmetricJws) + "_ConfigInvalid_IssuerSigningKeyValidationFails_LKGValid",
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
@@ -386,7 +393,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                                 else
                                     return true;
                             },
-                        }
+                        },
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidSigningKeyException))
                     },
                     new JwtTheoryData
                     {
@@ -394,7 +402,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.000001) },
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig, validConfig, TimeSpan.FromMilliseconds(.000001)),
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
@@ -409,7 +417,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.000001) },
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig, validConfig, TimeSpan.FromMilliseconds(.000001)),
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
@@ -424,7 +432,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfigWithMatchingKid, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.000001) },
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfigWithMatchingKid, validConfig, TimeSpan.FromMilliseconds(.000001)),
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
@@ -439,7 +447,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectIssuerAndSigningKeysConfig, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.000001) },
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectIssuerAndSigningKeysConfig, validConfig, TimeSpan.FromMilliseconds(.000001)),
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
@@ -454,7 +462,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         Token = Default.AsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(validConfigKeyValidationFails, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.000001) },
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(validConfigKeyValidationFails, validConfig, TimeSpan.FromMilliseconds(.000001)),
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
@@ -561,7 +569,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(Default.AsymmetricJws) + "_ConfigIssuerInvalid_AadIssuerValidatorThrow_LKGInvalid",
+                        TestId = nameof(Default.AsymmetricJws) + "_ConfigIssuerInvalid_AadIssuerValidatorThrow_LKGSameInvalidIssuer",
                         Token = Default.AadAsymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -573,7 +581,39 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             ValidateAudience = false,
                             ValidateLifetime = false,
                         },
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidIssuerException))
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(Default.AsymmetricJws) + "_ConfigIssuerInvalid_AadIssuerValidatorThrow_LKGDiffInvalidIssuer",
+                        Token = Default.AadAsymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig, incorrectIssuerAndSigningKeysConfig2),
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        },
                         ExpectedException = new ExpectedException(typeof(SecurityTokenUnableToValidateException))
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(Default.AsymmetricJws) + "_ConfigInvalidSigningKeyMatchingKid_AadIssuerValidatorThrow_LKGDiffInvalidSigningKeyMatchingKidAndInvalidIssuer",
+                        Token = Default.AadAsymmetricJws,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfigWithMatchingKid, incorrectIssuerAndSigningKeysConfig),
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        },
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidSignatureException))
                     },
                     new JwtTheoryData
                     {
@@ -639,17 +679,23 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 var validConfigKeyValidationFails = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
                 validConfigKeyValidationFails.SigningKeys.Add(Default.SymmetricSigningKey256);
 
-                var invalidIssuerConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "2" };
+                var invalidIssuerConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "1" };
                 invalidIssuerConfig.SigningKeys.Add(Default.SymmetricSigningKey256);
 
                 var incorrectSigningKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
                 incorrectSigningKeysConfig.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
 
-                var incorrectIssuerAndSigningKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "2" };
+                var incorrectIssuerAndSigningKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "1" };
+                incorrectIssuerAndSigningKeysConfig.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
+
+                var incorrectIssuerAndSigningKeysConfig2 = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "2" };
                 incorrectIssuerAndSigningKeysConfig.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
 
                 var incorrectSigningKeysConfigWithMatchingKid = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
                 incorrectSigningKeysConfigWithMatchingKid.SigningKeys.Add(new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_128.Key) { KeyId = KeyingMaterial.DefaultSymmetricSecurityKey_256.KeyId });
+
+                var incorrectIssuerAndIncorrectSigningKeysConfigWithMatchingKid = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "1" };
+                incorrectSigningKeysConfigWithMatchingKid.SigningKeys.Add(new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_64.Key) { KeyId = KeyingMaterial.DefaultSymmetricSecurityKey_256.KeyId });
 
                 var notYetValidSecurityTokenDescriptor = Default.X509SecurityTokenDescriptor(Default.SymmetricEncryptingCredentials, Default.X509AsymmetricSigningCredentials, null);
                 notYetValidSecurityTokenDescriptor.NotBefore = DateTime.UtcNow + TimeSpan.FromDays(1);
@@ -722,6 +768,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
+                        // SecurityTokenInvalidSigningKeyException is no longer a recoverable exception
                         TestId = nameof(jwe) + "_ConfigIssuerSigningKeyValidationFails_LKGValid",
                         Token = jwe,
                         ValidationParameters = new TokenValidationParameters
@@ -741,7 +788,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                                     return true;
                             },
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
-                        }
+                        },
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidSigningKeyException))
+
                     },
                     new JwtTheoryData
                     {
@@ -749,7 +798,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         Token = jwe,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.000001) },
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfig, validConfig, TimeSpan.FromMilliseconds(.000001)),
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
@@ -765,7 +814,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         Token = jwe,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.000001) },
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig, validConfig, TimeSpan.FromMilliseconds(.000001)),
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
@@ -781,7 +830,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         Token = jwe,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfigWithMatchingKid, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.000001) },
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfigWithMatchingKid, validConfig, TimeSpan.FromMilliseconds(.000001)),
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
@@ -797,7 +846,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         Token = jwe,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectIssuerAndSigningKeysConfig, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.000001) },
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectIssuerAndSigningKeysConfig, validConfig, TimeSpan.FromMilliseconds(.000001)),
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
@@ -813,7 +862,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         Token = jwe,
                         ValidationParameters = new TokenValidationParameters
                         {
-                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(validConfigKeyValidationFails, validConfig) {LastKnownGoodLifetime = TimeSpan.FromMilliseconds(.000001) },
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(validConfigKeyValidationFails, validConfig, TimeSpan.FromMilliseconds(.000001)),
                             ValidateIssuerSigningKey = true,
                             RequireSignedTokens = true,
                             ValidateIssuer = true,
@@ -927,7 +976,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = nameof(aadJwe) + "_ConfigIssuerInvalid_AadIssuerValidatorThrow_LKGInvalid",
+                        TestId = nameof(aadJwe) + "_ConfigIssuerInvalid_AadIssuerValidatorThrow_LKGSameInvalidIssuer",
                         Token = aadJwe,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -939,9 +988,42 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             ValidateAudience = false,
                             ValidateLifetime = false,
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
-
+                        },
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidIssuerException))
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(aadJwe) + "_ConfigIssuerInvalid_AadIssuerValidatorThrow_LKGDiffInvalidIssuer",
+                        Token = aadJwe,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(invalidIssuerConfig, incorrectIssuerAndSigningKeysConfig2),
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
                         },
                         ExpectedException = new ExpectedException(typeof(SecurityTokenUnableToValidateException))
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = nameof(aadJwe) + "_ConfigInvalidSigningKeyMatchingKid_AadIssuerValidatorThrow_LKGDiffInvalidSigningKeyMatchingKidAndInvalidIssuer",
+                        Token = aadJwe,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(incorrectSigningKeysConfigWithMatchingKid, incorrectIssuerAndIncorrectSigningKeysConfigWithMatchingKid),
+                            ValidateIssuerSigningKey = true,
+                            RequireSignedTokens = true,
+                            ValidateIssuer = true,
+                            IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
+                        },
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidSignatureException))
                     },
                     new JwtTheoryData
                     {

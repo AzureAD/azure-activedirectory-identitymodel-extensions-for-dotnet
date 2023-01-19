@@ -3,6 +3,8 @@
 
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
@@ -20,6 +22,9 @@ namespace Microsoft.IdentityModel.Tokens
         private BaseConfiguration _lastKnownGoodConfiguration;
         private DateTime? _lastKnownGoodConfigFirstUse = null;
 
+        private Dictionary<BaseConfiguration, DateTime> _lkgConfigurationCache = null;
+        private IEqualityComparer<BaseConfiguration> _baseConfigurationComparer = new BaseConfigurationComparer();
+
         /// <summary>
         /// Gets or sets the <see cref="TimeSpan"/> that controls how often an automatic metadata refresh should occur.
         /// </summary>
@@ -32,6 +37,18 @@ namespace Microsoft.IdentityModel.Tokens
                     throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX10108, LogHelper.MarkAsNonPII(MinimumAutomaticRefreshInterval), LogHelper.MarkAsNonPII(value))));
 
                 _automaticRefreshInterval = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the BaseConfgiurationComparer that to compare <see cref="BaseConfiguration"/>.
+        /// </summary>
+        public IEqualityComparer<BaseConfiguration> BaseConfigurationComparer
+        {
+            get { return _baseConfigurationComparer; }
+            set
+            {
+                _baseConfigurationComparer = value ?? throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(value)));
             }
         }
 
@@ -64,6 +81,25 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Gets all valid last known good configurations from the cache.
+        /// </summary>
+        /// <returns>A collection of all valid last known good configurations.</returns>
+        internal ICollection<BaseConfiguration> GetValidLkgConfiguraitonFromCache()
+        {
+            if (_lkgConfigurationCache == null)
+                return null;
+
+            var expiredLkgConfiguration = _lkgConfigurationCache.Where(x => x.Value < DateTime.UtcNow).ToArray();
+
+            foreach (KeyValuePair<BaseConfiguration, DateTime> lkgConfiguration in expiredLkgConfiguration)
+            {
+                _lkgConfigurationCache.Remove(lkgConfiguration.Key);
+            }
+
+            return _lkgConfigurationCache.Any() ? _lkgConfigurationCache.Keys : null;
+        }
+
+        /// <summary>
         /// The last known good configuration or LKG (a configuration retrieved in the past that we were able to successfully validate a token against).
         /// </summary>
         public BaseConfiguration LastKnownGoodConfiguration
@@ -76,6 +112,19 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 _lastKnownGoodConfiguration = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
                 _lastKnownGoodConfigFirstUse = DateTime.UtcNow;
+
+                if (_lkgConfigurationCache == null)
+                    _lkgConfigurationCache = new Dictionary<BaseConfiguration, DateTime>(BaseConfigurationComparer);
+                
+                _lkgConfigurationCache[_lastKnownGoodConfiguration] = DateTime.UtcNow + LastKnownGoodLifetime;
+
+                //remove expired configuration to avoid memory leak 
+                var expiredLkgConfiguration = _lkgConfigurationCache.Where(x => x.Value < DateTime.UtcNow).ToArray();
+
+                foreach (KeyValuePair<BaseConfiguration, DateTime> lkgConfiguration in expiredLkgConfiguration)
+                {
+                    _lkgConfigurationCache.Remove(lkgConfiguration.Key);
+                }
             }
         }
 

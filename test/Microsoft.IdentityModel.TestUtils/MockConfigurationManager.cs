@@ -75,6 +75,30 @@ namespace Microsoft.IdentityModel.TestUtils
         }
 
         /// <summary>
+        /// Initializes an new instance of <see cref="MockConfigurationManager{T}"/> with a Configuration instance and a LKG Configuration instance.
+        /// </summary>
+        /// <param name="configuration">Configuration of type OpenIdConnectConfiguration or WsFederationConfiguration.</param>
+        /// <param name="lkgLifetime">The LKG configuration lifetime.</param>
+        public MockConfigurationManager(T configuration, TimeSpan lkgLifetime) : this(configuration)
+        {
+            LastKnownGoodLifetime = lkgLifetime;
+        }
+
+        /// <summary>
+        /// Initializes an new instance of <see cref="MockConfigurationManager{T}"/> with a Configuration instance and a LKG Configuration instance.
+        /// </summary>
+        /// <param name="configuration">Configuration of type OpenIdConnectConfiguration or WsFederationConfiguration.</param>
+        /// <param name="lkgConfiguration">Configuration of type OpenIdConnectConfiguration or WsFederationConfiguration.</param>
+        /// <param name="lkgLifetime">The LKG configuration lifetime.</param>
+        public MockConfigurationManager(T configuration, T lkgConfiguration, TimeSpan lkgLifetime) : this(configuration, lkgLifetime)
+        {
+            if (lkgConfiguration == null)
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(lkgConfiguration)));
+
+            LastKnownGoodConfiguration = lkgConfiguration as BaseConfiguration;
+        }
+
+        /// <summary>
         /// Obtains an updated version of Configuration.
         /// </summary>
         /// <param name="cancel"><see cref="CancellationToken"/>.</param>

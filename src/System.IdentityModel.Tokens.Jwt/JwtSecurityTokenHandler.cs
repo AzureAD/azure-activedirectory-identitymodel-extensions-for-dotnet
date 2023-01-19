@@ -929,15 +929,25 @@ namespace System.IdentityModel.Tokens.Jwt
                         }
                     }
 
-                    if (TokenUtilities.IsRecoverableConfiguration(validationParameters, currentConfiguration, out currentConfiguration))
+                    if (TokenUtilities.ShouldValidateWithLKG(validationParameters))
                     {
-                        validationParameters.ValidateWithLKG = true;
                         validationParameters.RefreshBeforeValidation = false;
-                        claimsPrincipal = outerToken != null ? ValidateJWE(token, outerToken, validationParameters, currentConfiguration, out signatureValidatedToken, out exceptionThrown) :
-                            ValidateJWS(token, validationParameters, currentConfiguration, out signatureValidatedToken, out exceptionThrown);
+                        validationParameters.ValidateWithLKG = true;
+                        var recoverableException = exceptionThrown.SourceException;
+                        string kid = outerToken != null ? outerToken.Header.Kid :
+                            (ValidateSignatureUsingDelegates(token, validationParameters, null) ?? GetJwtSecurityTokenFromToken(token, validationParameters)).Header.Kid;
 
-                        if (claimsPrincipal != null)
-                            return claimsPrincipal;
+                        foreach (BaseConfiguration lkgConfiguration in validationParameters.ConfigurationManager.GetValidLkgConfiguraitonFromCache())
+                        {
+                            if (!lkgConfiguration.Equals(currentConfiguration) && TokenUtilities.IsRecoverableConfiguration(kid, currentConfiguration, lkgConfiguration, recoverableException))
+                            {
+                                claimsPrincipal = outerToken != null ? ValidateJWE(token, outerToken, validationParameters, lkgConfiguration, out signatureValidatedToken, out exceptionThrown) :
+                                    ValidateJWS(token, validationParameters, lkgConfiguration, out signatureValidatedToken, out exceptionThrown);
+
+                                if (claimsPrincipal != null)
+                                    return claimsPrincipal;
+                            }
+                        }
                     }
                 }
             }
