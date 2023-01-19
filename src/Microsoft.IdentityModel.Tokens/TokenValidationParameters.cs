@@ -220,6 +220,7 @@ namespace Microsoft.IdentityModel.Tokens
             IssuerSigningKeyValidator = other.IssuerSigningKeyValidator;
             IssuerValidator = other.IssuerValidator;
             LifetimeValidator = other.LifetimeValidator;
+            LogTokenId = other.LogTokenId;
             LogValidationExceptions = other.LogValidationExceptions;
             NameClaimType = other.NameClaimType;
             NameClaimTypeRetriever = other.NameClaimTypeRetriever;
@@ -262,6 +263,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>        
         public TokenValidationParameters()
         {
+            LogTokenId = true;
             LogValidationExceptions = true;
             RequireExpirationTime = true;
             RequireSignedTokens = true;
@@ -543,6 +545,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// Even if <see cref="ValidateLifetime"/> is false, this delegate will still be called.
         /// </remarks>
         public LifetimeValidator LifetimeValidator { get; set; }
+
+        /// <summary>
+        /// Gets or sets a <see cref="bool"/> that will decide if the token identifier claim needs to be logged.
+        /// Default value is <c>true</c>.
+        /// </summary>
+        [DefaultValue(true)]
+        public bool LogTokenId { get; set; }
 
         /// <summary>
         /// Gets or sets a <see cref="bool"/> that will decide if validation failure needs to be logged as an error.

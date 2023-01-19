@@ -16,7 +16,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class TokenValidationParametersTests
     {
-        int ExpectedPropertyCount = 57;
+        int ExpectedPropertyCount = 58;
 
         [Fact]
         public void Publics()
@@ -74,6 +74,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 IssuerSigningKeys = issuerSigningKeys,
                 IssuerValidator = ValidationDelegates.IssuerValidatorEcho,
                 LifetimeValidator = ValidationDelegates.LifetimeValidatorReturnsTrue,
+                LogTokenId = true,
                 LogValidationExceptions = true,
                 PropertyBag = propertyBag,
                 SignatureValidator = ValidationDelegates.SignatureValidatorReturnsJwtTokenAsIs,
@@ -112,6 +113,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParametersSets.IssuerSigningKeys = issuerSigningKeysDup;
             validationParametersSets.IssuerValidator = ValidationDelegates.IssuerValidatorEcho;
             validationParametersSets.LifetimeValidator = ValidationDelegates.LifetimeValidatorReturnsTrue;
+            validationParametersSets.LogTokenId = true;
             validationParametersSets.LogValidationExceptions = true;
             validationParametersSets.PropertyBag = propertyBag;
             validationParametersSets.SignatureValidator = ValidationDelegates.SignatureValidatorReturnsJwtTokenAsIs;
@@ -125,7 +127,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParametersSets.ValidIssuer = validIssuer;
             validationParametersSets.ValidIssuers = validIssuers;
             validationParametersSets.ValidTypes = validTypes;
-            
+
             var compareContext = new CompareContext();
             IdentityComparer.AreEqual(validationParametersInline, validationParametersSets, compareContext);
 
