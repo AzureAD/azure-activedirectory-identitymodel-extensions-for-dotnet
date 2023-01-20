@@ -53,7 +53,7 @@ The scenarios supported by IdentityModel extensions for .NET are described in [S
 - [Developing ASP.NET Apps with Azure Active Directory](https://docs.microsoft.com/en-us/aspnet/identity/overview/getting-started/developing-aspnet-apps-with-windows-azure-active-directory)
 - [Validating tokens](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki/ValidatingTokens)
 - more generally, the library's [Wiki](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki)
-- the [reference documentation](https://docs.microsoft.com/en-us/dotnet/api/overview/azure/activedirectory/client?view=azure-dotnet)
+- the [reference documentation](https://learn.microsoft.com/en-us/dotnet/api/microsoft.identitymodel.abstractions?view=msal-web-dotnet-latest)
 
 ## Community Help and Support
 
