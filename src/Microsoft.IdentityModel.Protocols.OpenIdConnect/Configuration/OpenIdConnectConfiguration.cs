@@ -315,7 +315,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Gets or sets the 'token_endpoint'.
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.TokenEndpoint, Required = Required.Default)]
-        public string TokenEndpoint { get; set; }
+        public override string TokenEndpoint { get; set; }
 
         /// <summary>
         /// Gets the collection of 'token_endpoint_auth_methods_supported'.
