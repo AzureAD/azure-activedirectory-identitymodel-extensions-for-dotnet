@@ -530,7 +530,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             var count = 1;
             var index = 0;
-            token.IndexOf('.', index);
             while (index < token.Length)
             {
                 var dotIndex = token.IndexOf('.', index);
