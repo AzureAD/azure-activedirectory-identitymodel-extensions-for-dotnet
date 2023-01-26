@@ -110,8 +110,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="inputOffset">offset in to input bytes to caculate hash.</param>
         /// <param name="inputLength">number of bytes of signature to use.</param>
         /// <param name="signature">signature to compare against.</param>
-        /// <param name="signatureOffset"></param>
-        /// <param name="signatureLength"></param>
+        /// <param name="signatureOffset">offset into signature array.</param>
+        /// <param name="signatureLength">how many bytes to verfiy.</param>
         /// <returns>true if computed signature matches the signature parameter, false otherwise.</returns>
         /// <exception cref="ArgumentNullException">'input' is null.</exception>
         /// <exception cref="ArgumentNullException">'signature' is null.</exception>
