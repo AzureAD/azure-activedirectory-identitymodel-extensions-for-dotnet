@@ -373,33 +373,39 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.WriteHeader($"{this}.TestConfigurationComparer", "TestConfigurationComparer", true);
             var context = new CompareContext();
 
-            var config1 = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
-            config1.SigningKeys.Add(KeyingMaterial.DefaultX509Key_2048);
-            config1.SigningKeys.Add(KeyingMaterial.DefaultRsaSecurityKey1);
-            config1.SigningKeys.Add(KeyingMaterial.DefaultRsaSecurityKey2);
+            var config = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "/oauth/token", Issuer = Default.Issuer };
+            config.SigningKeys.Add(KeyingMaterial.DefaultX509Key_2048);
+            config.SigningKeys.Add(KeyingMaterial.DefaultRsaSecurityKey1);
+            config.SigningKeys.Add(KeyingMaterial.DefaultRsaSecurityKey2);
 
-            var config2 = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
-            config2.SigningKeys.Add(KeyingMaterial.DefaultRsaSecurityKey1);
-            config2.SigningKeys.Add(KeyingMaterial.DefaultX509Key_2048);
-            config2.SigningKeys.Add(KeyingMaterial.DefaultRsaSecurityKey2);
+            var configWithSameKeysDiffOrder = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "/oauth/token", Issuer = Default.Issuer };
+            configWithSameKeysDiffOrder.SigningKeys.Add(KeyingMaterial.DefaultRsaSecurityKey1);
+            configWithSameKeysDiffOrder.SigningKeys.Add(KeyingMaterial.DefaultX509Key_2048);
+            configWithSameKeysDiffOrder.SigningKeys.Add(KeyingMaterial.DefaultRsaSecurityKey2);
 
-            var config3 = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
-            config3.SigningKeys.Add(KeyingMaterial.DefaultRsaSecurityKey1);
+            var configWithOverlappingKey = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "/oauth/token", Issuer = Default.Issuer };
+            configWithOverlappingKey.SigningKeys.Add(Default.SymmetricSigningKey256);
 
-            var config4 = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "1" };
-            config3.SigningKeys.Add(KeyingMaterial.DefaultRsaSecurityKey1);
+            var configWithOverlappingKeyDiffissuer = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "/oauth/token", Issuer = Default.Issuer + "1" };
+            configWithOverlappingKeyDiffissuer.SigningKeys.Add(Default.SymmetricSigningKey256);
 
-            var configurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(config1, config1);
-            IdentityComparer.AreEqual(configurationManager.GetValidLkgConfiguraitonFromCache().Count, 1, context);
+            var configWithSameKidDiffKeyMaterial = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "/oauth/token", Issuer = Default.Issuer };
+            configWithSameKidDiffKeyMaterial.SigningKeys.Add(new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_128.Key) { KeyId = KeyingMaterial.DefaultSymmetricSecurityKey_256.KeyId });
 
-            configurationManager.LastKnownGoodConfiguration = config2;
-            IdentityComparer.AreEqual(configurationManager.GetValidLkgConfiguraitonFromCache().Count, 1, context);
+            var configurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(config, config);
+            IdentityComparer.AreEqual(configurationManager.GetValidLkgConfiguraitons().Count, 1, context);
 
-            configurationManager.LastKnownGoodConfiguration = config3;
-            IdentityComparer.AreEqual(configurationManager.GetValidLkgConfiguraitonFromCache().Count, 2, context);
+            configurationManager.LastKnownGoodConfiguration = configWithSameKeysDiffOrder;
+            IdentityComparer.AreEqual(configurationManager.GetValidLkgConfiguraitons().Count, 1, context);
 
-            configurationManager.LastKnownGoodConfiguration = config4;
-            IdentityComparer.AreEqual(configurationManager.GetValidLkgConfiguraitonFromCache().Count, 3, context);
+            configurationManager.LastKnownGoodConfiguration = configWithOverlappingKey;
+            IdentityComparer.AreEqual(configurationManager.GetValidLkgConfiguraitons().Count, 2, context);
+
+            configurationManager.LastKnownGoodConfiguration = configWithOverlappingKeyDiffissuer;
+            IdentityComparer.AreEqual(configurationManager.GetValidLkgConfiguraitons().Count, 3, context);
+
+            configurationManager.LastKnownGoodConfiguration = configWithSameKidDiffKeyMaterial;
+            IdentityComparer.AreEqual(configurationManager.GetValidLkgConfiguraitons().Count, 4, context);
 
             TestUtilities.AssertFailIfErrors(context);
         }

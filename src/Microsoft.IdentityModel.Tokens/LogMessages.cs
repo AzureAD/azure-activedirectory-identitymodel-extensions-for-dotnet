@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Tokens
         // public const string IDX10260 = "IDX10260:";
         public const string IDX10261 = "IDX10261: Unable to retrieve configuration from authority: '{0}'. \nProceeding with token validation in case the relevant properties have been set manually on the TokenValidationParameters. Exception caught: \n {1}. See https://aka.ms/validate-using-configuration-manager for additional information.";
         public const string IDX10262 = "IDX10262: One of the issuers in TokenValidationParameters.ValidIssuers was null or an empty string. See https://aka.ms/wilson/tokenvalidation for details.";
-        public const string IDX10263 = "IDX10263: Unable to re-validate with ConfigurationManager.LastKnownGoodConfiguration as it is expired.";
+        //public const string IDX10263 = "IDX10263: Unable to re-validate with ConfigurationManager.LastKnownGoodConfiguration as it is expired.";
         public const string IDX10264 = "IDX10264: Reading issuer signing keys from validation parameters and configuration.";
         public const string IDX10265 = "IDX10265: Reading issuer signing keys from configuration.";
 

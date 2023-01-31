@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
@@ -469,6 +470,11 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 Task.Run(EventQueueTaskAction);
             }
+        }
+
+        public KeyValuePair<TKey, LRUCacheItem<TKey, TValue>>[] ToArray()
+        {
+            return _map.ToArray();
         }
 
         /// Each time a node gets accessed, it gets moved to the beginning (head) of the list if the _maintainLRU == true

@@ -14,7 +14,7 @@ namespace Microsoft.IdentityModel.TestUtils
     /// This type is used for testing the functionality of using a last known good configuration, as well
     /// as a refreshed configuration.
     /// </summary>
-    /// <typeparam name="T">must be a class.</typeparam>
+    /// <typeparam name="T">must be a class inherit from <see cref="BaseConfiguration"/>.</typeparam>
     public class MockConfigurationManager<T> : BaseConfigurationManager, IConfigurationManager<T> where T : class
     {
         private T _configuration;

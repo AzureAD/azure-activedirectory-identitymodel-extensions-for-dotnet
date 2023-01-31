@@ -22,7 +22,8 @@ namespace Microsoft.IdentityModel.Tokens
         private BaseConfiguration _lastKnownGoodConfiguration;
         private DateTime? _lastKnownGoodConfigFirstUse = null;
 
-        private Dictionary<BaseConfiguration, DateTime> _lkgConfigurationCache = null;
+        private EventBasedLRUCache<BaseConfiguration, DateTime> _lkgConfigurationCache = null;
+        private int _lastKnownGoodConfigurationSizeLimit = DefaultLastKnownGoodConfigurationSizeLimit;
         private IEqualityComparer<BaseConfiguration> _baseConfigurationComparer = new BaseConfigurationComparer();
 
         /// <summary>
@@ -63,6 +64,11 @@ namespace Microsoft.IdentityModel.Tokens
         public static readonly TimeSpan DefaultLastKnownGoodConfigurationLifetime = new TimeSpan(0, 1, 0, 0);
 
         /// <summary>
+        /// 1000 is the default size limit of the cache (in number of items) for last known good configuration.
+        /// </summary>
+        public static readonly int DefaultLastKnownGoodConfigurationSizeLimit = 1000;
+
+        /// <summary>
         /// 5 minutes is the default time interval that must pass for <see cref="RequestRefresh"/> to obtain a new configuration.
         /// </summary>
         public static readonly TimeSpan DefaultRefreshInterval = new TimeSpan(0, 0, 5, 0);
@@ -81,22 +87,15 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets all valid last known good configurations from the cache.
+        /// Gets all valid last known good configurations.
         /// </summary>
         /// <returns>A collection of all valid last known good configurations.</returns>
-        internal ICollection<BaseConfiguration> GetValidLkgConfiguraitonFromCache()
+        internal ICollection<BaseConfiguration> GetValidLkgConfiguraitons()
         {
             if (_lkgConfigurationCache == null)
                 return null;
 
-            var expiredLkgConfiguration = _lkgConfigurationCache.Where(x => x.Value < DateTime.UtcNow).ToArray();
-
-            foreach (KeyValuePair<BaseConfiguration, DateTime> lkgConfiguration in expiredLkgConfiguration)
-            {
-                _lkgConfigurationCache.Remove(lkgConfiguration.Key);
-            }
-
-            return _lkgConfigurationCache.Any() ? _lkgConfigurationCache.Keys : null;
+            return _lkgConfigurationCache.ToArray().Where(x => x.Value.Value > DateTime.UtcNow).Select(x => x.Key).ToArray();
         }
 
         /// <summary>
@@ -114,17 +113,22 @@ namespace Microsoft.IdentityModel.Tokens
                 _lastKnownGoodConfigFirstUse = DateTime.UtcNow;
 
                 if (_lkgConfigurationCache == null)
-                    _lkgConfigurationCache = new Dictionary<BaseConfiguration, DateTime>(BaseConfigurationComparer);
+                    _lkgConfigurationCache = new EventBasedLRUCache<BaseConfiguration, DateTime>(LastKnownGoodConfigurationSizeLimit, TaskCreationOptions.None, BaseConfigurationComparer, true, maintainLRU: true);
                 
-                _lkgConfigurationCache[_lastKnownGoodConfiguration] = DateTime.UtcNow + LastKnownGoodLifetime;
+                // LRU cache will remove the expired configuration
+                _lkgConfigurationCache.SetValue(_lastKnownGoodConfiguration, DateTime.UtcNow + LastKnownGoodLifetime, DateTime.UtcNow + LastKnownGoodLifetime);
+            }
+        }
 
-                //remove expired configuration to avoid memory leak 
-                var expiredLkgConfiguration = _lkgConfigurationCache.Where(x => x.Value < DateTime.UtcNow).ToArray();
-
-                foreach (KeyValuePair<BaseConfiguration, DateTime> lkgConfiguration in expiredLkgConfiguration)
-                {
-                    _lkgConfigurationCache.Remove(lkgConfiguration.Key);
-                }
+        /// <summary>
+        /// The size limit of the cache (in number of items) for last known good configuration.
+        /// </summary>
+        public int LastKnownGoodConfigurationSizeLimit
+        {
+            get { return _lastKnownGoodConfigurationSizeLimit; }
+            set
+            {
+                _lastKnownGoodConfigurationSizeLimit = (value > 0) ? value : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value)));
             }
         }
 

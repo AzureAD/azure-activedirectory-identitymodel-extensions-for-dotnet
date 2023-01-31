@@ -241,8 +241,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns><c>true</c> if the token can be validated by LKG, <c>false</c>.</returns>
         internal static bool ShouldValidateWithLKG(TokenValidationParameters validationParameters)
         {
-            return  (validationParameters.ConfigurationManager.UseLastKnownGoodConfiguration
-                && validationParameters.ConfigurationManager.GetValidLkgConfiguraitonFromCache() != null);
+            ICollection<BaseConfiguration> validLkgConfiguraitons = validationParameters.ConfigurationManager.GetValidLkgConfiguraitons();
+            return (validationParameters.ConfigurationManager.UseLastKnownGoodConfiguration
+                && validLkgConfiguraitons != null
+                && validLkgConfiguraitons.Any());
         }
     }
 }

@@ -937,7 +937,7 @@ namespace System.IdentityModel.Tokens.Jwt
                         string kid = outerToken != null ? outerToken.Header.Kid :
                             (ValidateSignatureUsingDelegates(token, validationParameters, null) ?? GetJwtSecurityTokenFromToken(token, validationParameters)).Header.Kid;
 
-                        foreach (BaseConfiguration lkgConfiguration in validationParameters.ConfigurationManager.GetValidLkgConfiguraitonFromCache())
+                        foreach (BaseConfiguration lkgConfiguration in validationParameters.ConfigurationManager.GetValidLkgConfiguraitons())
                         {
                             if (!lkgConfiguration.Equals(currentConfiguration) && TokenUtilities.IsRecoverableConfiguration(kid, currentConfiguration, lkgConfiguration, recoverableException))
                             {

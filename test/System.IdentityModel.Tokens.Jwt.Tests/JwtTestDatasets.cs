@@ -279,30 +279,30 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         {
             get
             {
-                var validConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
+                var validConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "/oauth/token", Issuer = Default.Issuer };
                 validConfig.SigningKeys.Add(KeyingMaterial.DefaultX509Key_2048);
 
                 // a special IssuerSigningKeyValidator in the tests below is set to fail if this configuration is used in order
                 // to mock issuer signing key validation failure
-                var validConfigKeyValidationFails = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
+                var validConfigKeyValidationFails = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "/oauth/token", Issuer = Default.Issuer };
                 validConfigKeyValidationFails.SigningKeys.Add(KeyingMaterial.DefaultX509Key_2048);
 
-                var invalidIssuerConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "1" };
+                var invalidIssuerConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "/oauth/token", Issuer = Default.Issuer + "1" };
                 invalidIssuerConfig.SigningKeys.Add(KeyingMaterial.DefaultX509Key_2048);
 
                 var incorrectSigningKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
                 incorrectSigningKeysConfig.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
 
-                var incorrectIssuerAndSigningKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "1" };
+                var incorrectIssuerAndSigningKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "/oauth/token", Issuer = Default.Issuer + "1" };
                 incorrectIssuerAndSigningKeysConfig.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
 
-                var incorrectIssuerAndSigningKeysConfig2 = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "2" };
+                var incorrectIssuerAndSigningKeysConfig2 = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "/oauth/token", Issuer = Default.Issuer + "2" };
                 incorrectIssuerAndSigningKeysConfig.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
 
-                var incorrectSigningKeysConfigWithMatchingKid = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
+                var incorrectSigningKeysConfigWithMatchingKid = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "/oauth/token", Issuer = Default.Issuer };
                 incorrectSigningKeysConfigWithMatchingKid.SigningKeys.Add(KeyingMaterial.CreateJsonWebKeyEC(JsonWebKeyECTypes.P256, Default.X509AsymmetricSigningCredentials.Key.KeyId, KeyingMaterial.P256_D, KeyingMaterial.P256_X, KeyingMaterial.P256_Y));
 
-                var incorrectIssuerAndIncorrectSigningKeysConfigWithMatchingKid = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "1" };
+                var incorrectIssuerAndIncorrectSigningKeysConfigWithMatchingKid = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "/oauth/token", Issuer = Default.Issuer + "1" };
                 incorrectSigningKeysConfigWithMatchingKid.SigningKeys.Add(KeyingMaterial.CreateJsonWebKeyEC(JsonWebKeyECTypes.P521, Default.X509AsymmetricSigningCredentials.Key.KeyId, KeyingMaterial.P521_D, KeyingMaterial.P521_X, KeyingMaterial.P521_Y));
 
                 var expiredSecurityTokenDescriptor = Default.X509SecurityTokenDescriptor(Default.X509AsymmetricSigningCredentials);
@@ -676,32 +676,32 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
                 // a special IssuerSigningKeyValidator in the tests below is set to fail if this configuration is used in order
                 // to mock issuer signing key validation failure
-                var validConfigKeyValidationFails = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
+                var validConfigKeyValidationFails = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "/oauth/token", Issuer = Default.Issuer };
                 validConfigKeyValidationFails.SigningKeys.Add(Default.SymmetricSigningKey256);
 
-                var invalidIssuerConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "1" };
+                var invalidIssuerConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "/oauth/token", Issuer = Default.Issuer + "1" };
                 invalidIssuerConfig.SigningKeys.Add(Default.SymmetricSigningKey256);
 
-                var incorrectSigningKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
+                var incorrectSigningKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "/oauth/token", Issuer = Default.Issuer };
                 incorrectSigningKeysConfig.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
 
-                var incorrectIssuerAndSigningKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "1" };
+                var incorrectIssuerAndSigningKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "/oauth/token", Issuer = Default.Issuer + "1" };
                 incorrectIssuerAndSigningKeysConfig.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
 
-                var incorrectIssuerAndSigningKeysConfig2 = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "2" };
+                var incorrectIssuerAndSigningKeysConfig2 = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "/oauth/token", Issuer = Default.Issuer + "2" };
                 incorrectIssuerAndSigningKeysConfig.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
 
-                var incorrectSigningKeysConfigWithMatchingKid = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
+                var incorrectSigningKeysConfigWithMatchingKid = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "/oauth/token", Issuer = Default.Issuer };
                 incorrectSigningKeysConfigWithMatchingKid.SigningKeys.Add(new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_128.Key) { KeyId = KeyingMaterial.DefaultSymmetricSecurityKey_256.KeyId });
 
-                var incorrectIssuerAndIncorrectSigningKeysConfigWithMatchingKid = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer + "1" };
+                var incorrectIssuerAndIncorrectSigningKeysConfigWithMatchingKid = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "/oauth/token", Issuer = Default.Issuer + "1" };
                 incorrectSigningKeysConfigWithMatchingKid.SigningKeys.Add(new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_64.Key) { KeyId = KeyingMaterial.DefaultSymmetricSecurityKey_256.KeyId });
 
                 var notYetValidSecurityTokenDescriptor = Default.X509SecurityTokenDescriptor(Default.SymmetricEncryptingCredentials, Default.X509AsymmetricSigningCredentials, null);
                 notYetValidSecurityTokenDescriptor.NotBefore = DateTime.UtcNow + TimeSpan.FromDays(1);
                 notYetValidSecurityTokenDescriptor.Expires = DateTime.UtcNow + TimeSpan.FromDays(2);
                 var notYetValidJwe = Default.Jwt(notYetValidSecurityTokenDescriptor);
-                var notYetValidJweConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
+                var notYetValidJweConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "/oauth/token", Issuer = Default.Issuer };
                 notYetValidJweConfig.SigningKeys.Add(Default.X509AsymmetricSigningCredentials.Key);
 
                 return new TheoryData<JwtTheoryData>

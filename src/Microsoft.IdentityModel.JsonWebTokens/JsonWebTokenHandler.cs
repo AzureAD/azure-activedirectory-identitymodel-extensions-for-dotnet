@@ -1264,7 +1264,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         validationParameters.ValidateWithLKG = true;
                         var recoverableException = tokenValidationResult.Exception;
 
-                        foreach (BaseConfiguration lkgConfiguration in validationParameters.ConfigurationManager.GetValidLkgConfiguraitonFromCache())
+                        foreach (BaseConfiguration lkgConfiguration in validationParameters.ConfigurationManager.GetValidLkgConfiguraitons())
                         {
                             if (!lkgConfiguration.Equals(currentConfiguration) && TokenUtilities.IsRecoverableConfiguration(jsonWebToken.Kid, currentConfiguration, lkgConfiguration, recoverableException))
                             {
