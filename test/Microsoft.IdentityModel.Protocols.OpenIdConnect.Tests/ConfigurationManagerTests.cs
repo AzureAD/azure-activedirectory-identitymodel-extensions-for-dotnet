@@ -141,12 +141,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             TestUtilities.WriteHeader($"{this}.GetSets", "GetSets", true);
 
-            int ExpectedPropertyCount = 8;
+            int ExpectedPropertyCount = 10;
             var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), new FileDocumentRetriever());
             Type type = typeof(ConfigurationManager<OpenIdConnectConfiguration>);
             PropertyInfo[] properties = type.GetProperties();
             if (properties.Length != ExpectedPropertyCount)
-                Assert.True(false, "Number of properties has changed from {ExpectedPropertyCount} to: " + properties.Length + ", adjust tests");
+                Assert.True(false, $"Number of properties has changed from {ExpectedPropertyCount} to: " + properties.Length + ", adjust tests");
 
             var defaultAutomaticRefreshInterval = ConfigurationManager<OpenIdConnectConfiguration>.DefaultAutomaticRefreshInterval;
             var defaultRefreshInterval = ConfigurationManager<OpenIdConnectConfiguration>.DefaultRefreshInterval;
