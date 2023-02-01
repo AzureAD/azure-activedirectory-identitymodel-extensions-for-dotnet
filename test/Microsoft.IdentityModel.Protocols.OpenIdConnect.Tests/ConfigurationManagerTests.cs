@@ -6,6 +6,7 @@ using System.CodeDom;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.IO;
+using System.Net;
 using System.Reflection;
 using System.Threading;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration;
@@ -98,6 +99,41 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.Equal(ConfigurationManager<OpenIdConnectConfiguration>.DefaultRefreshInterval, new TimeSpan(0, 0, 5, 0));
             Assert.Equal(ConfigurationManager<OpenIdConnectConfiguration>.MinimumAutomaticRefreshInterval, new TimeSpan(0, 0, 5, 0));
             Assert.Equal(ConfigurationManager<OpenIdConnectConfiguration>.MinimumRefreshInterval, new TimeSpan(0, 0, 0, 1));
+        }
+
+        [Fact]
+        public void FetchMetadataFailureTest()
+        {
+            var context = new CompareContext($"{this}.FetchMetadataFailureTest");
+
+            var documentRetriever = new HttpDocumentRetriever(HttpResponseMessageUtils.SetupHttpClientThatReturns("OpenIdConnectMetadata.json", HttpStatusCode.NotFound));
+            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), documentRetriever);
+
+            //First time to fetch metadata
+            try
+            {
+                var configuration = configManager.GetConfigurationAsync().Result;
+            }
+            catch (Exception firstFetchMetadataFailure)
+            {
+                if (firstFetchMetadataFailure.InnerException == null)
+                    context.AddDiff($"Expected exception to contain inner exception for fetch metadata failure.");
+
+                //Fetch metadata again during refresh interval, the exception should be same from above
+                try
+                {
+                    var configuration = configManager.GetConfigurationAsync().Result;
+                }
+                catch (Exception secondFetchMetadataFailure)
+                {
+                    if (secondFetchMetadataFailure.InnerException == null)
+                        context.AddDiff($"Expected exception to contain inner exception for fetch metadata failure.");
+
+                    IdentityComparer.AreEqual(firstFetchMetadataFailure, secondFetchMetadataFailure, context);
+                }
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         [Fact]
