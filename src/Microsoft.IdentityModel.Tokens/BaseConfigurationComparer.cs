@@ -18,7 +18,7 @@ namespace Microsoft.IdentityModel.Tokens
             else if (config1 == null || config2 == null)
                 return false;
             else if (config1.Issuer == config2.Issuer && config1.SigningKeys.Count == config2.SigningKeys.Count
-                     && !config1.SigningKeys.Select(x => x.InternalId).Except(config1.SigningKeys.Select(x => x.InternalId)).Any())
+                     && !config1.SigningKeys.Select(x => x.InternalId).Except(config2.SigningKeys.Select(x => x.InternalId)).Any())
                 return true;
             else
                 return false;
