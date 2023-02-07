@@ -1,5 +1,14 @@
 See the [release notes](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki/Release-Notes) for details on bug fixes and added features.
 
+6.26.1
+=========
+
+### Bug Fixes:
+
+Releasing a Hotfix for Wilson 6.26.0 that reverts async/await changes made in #1996 to address a performance reduction issue.
+- Changes are in #2015
+- Root cause analysis and fix will be tracked in #2017
+
 
 Next release (6.22.1 or 6.23.0)
 =========
