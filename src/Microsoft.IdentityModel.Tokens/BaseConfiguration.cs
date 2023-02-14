@@ -30,5 +30,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// Or the token_endpoint in the OIDC metadata.
         /// </summary>
         public virtual string TokenEndpoint { get; set; }
+
+        /// <summary>
+        /// Gets the <see cref="ICollection{SecurityKey}"/> that the IdentityProvider indicates are to be used in order to decrypt tokens.
+        /// </summary>
+        public virtual ICollection<SecurityKey> TokenDecryptionKeys
+        {
+            get;
+        } = new Collection<SecurityKey>();
     }
 }
