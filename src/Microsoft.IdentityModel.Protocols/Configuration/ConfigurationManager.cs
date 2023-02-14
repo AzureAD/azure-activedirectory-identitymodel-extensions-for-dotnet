@@ -27,6 +27,7 @@ namespace Microsoft.IdentityModel.Protocols
         private readonly IConfigurationRetriever<T> _configRetriever;
         private readonly IConfigurationValidator<T> _configValidator;
         private T _currentConfiguration;
+        private Exception _fetchMetadataFailure;
 
         /// <summary>
         /// Static initializer for a new object. Static initializers run before the first instance of the type is created.
@@ -148,6 +149,7 @@ namespace Microsoft.IdentityModel.Protocols
                     }
                     catch (Exception ex)
                     {
+                        _fetchMetadataFailure = ex;
                         _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
                         if (_currentConfiguration == null) // Throw an exception if there's no configuration to return.
                             throw LogHelper.LogExceptionMessage(
@@ -166,7 +168,7 @@ namespace Microsoft.IdentityModel.Protocols
                 else
                     throw LogHelper.LogExceptionMessage(
                         new InvalidOperationException(
-                            LogHelper.FormatInvariant(LogMessages.IDX20803, LogHelper.MarkAsNonPII(MetadataAddress ?? "null"))));
+                            LogHelper.FormatInvariant(LogMessages.IDX20803, LogHelper.MarkAsNonPII(MetadataAddress ?? "null"), LogHelper.MarkAsNonPII(_fetchMetadataFailure)), _fetchMetadataFailure));
             }
             finally
             {
