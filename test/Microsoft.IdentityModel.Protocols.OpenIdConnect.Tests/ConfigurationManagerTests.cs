@@ -109,7 +109,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var documentRetriever = new HttpDocumentRetriever(HttpResponseMessageUtils.SetupHttpClientThatReturns("OpenIdConnectMetadata.json", HttpStatusCode.NotFound));
             var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), documentRetriever);
 
-            //First time to fetch metadata
+            // First time to fetch metadata
             try
             {
                 var configuration = configManager.GetConfigurationAsync().Result;
@@ -119,7 +119,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 if (firstFetchMetadataFailure.InnerException == null)
                     context.AddDiff($"Expected exception to contain inner exception for fetch metadata failure.");
 
-                //Fetch metadata again during refresh interval, the exception should be same from above
+                // Fetch metadata again during refresh interval, the exception should be same from above
                 try
                 {
                     var configuration = configManager.GetConfigurationAsync().Result;
