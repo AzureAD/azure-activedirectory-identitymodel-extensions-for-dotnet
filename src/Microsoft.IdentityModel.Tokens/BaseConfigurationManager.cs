@@ -64,9 +64,9 @@ namespace Microsoft.IdentityModel.Tokens
         public static readonly TimeSpan DefaultLastKnownGoodConfigurationLifetime = new TimeSpan(0, 1, 0, 0);
 
         /// <summary>
-        /// 1000 is the default size limit of the cache (in number of items) for last known good configuration.
+        /// 10 is the default size limit of the cache (in number of items) for last known good configuration.
         /// </summary>
-        public static readonly int DefaultLastKnownGoodConfigurationSizeLimit = 1000;
+        public static readonly int DefaultLastKnownGoodConfigurationSizeLimit = 10;
 
         /// <summary>
         /// 5 minutes is the default time interval that must pass for <see cref="RequestRefresh"/> to obtain a new configuration.
