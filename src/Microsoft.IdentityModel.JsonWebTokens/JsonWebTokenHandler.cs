@@ -1268,7 +1268,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         {
                             if (!lkgConfiguration.Equals(currentConfiguration) && TokenUtilities.IsRecoverableConfiguration(jsonWebToken.Kid, currentConfiguration, lkgConfiguration, recoverableException))
                             {
-                                tokenValidationResult = await ValidateTokenAsync(jsonWebToken, validationParameters, lkgConfiguration).ConfigureAwait(false);
+                                tokenValidationResult = ValidateToken(jsonWebToken, validationParameters, lkgConfiguration);
 
                                 if (tokenValidationResult.IsValid)
                                     return tokenValidationResult;
