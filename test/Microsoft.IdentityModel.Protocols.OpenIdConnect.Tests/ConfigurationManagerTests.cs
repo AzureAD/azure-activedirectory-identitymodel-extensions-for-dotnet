@@ -116,6 +116,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
             catch (Exception firstFetchMetadataFailure)
             {
+                // Refresh interval is BootstrapRefreshInterval
+                var syncAfter = configManager.GetType().GetField("_syncAfter", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(configManager);
+                if ((DateTimeOffset)syncAfter > DateTime.UtcNow + configManager.BootstrapRefreshInterval)
+                    context.AddDiff($"Expected the refresh interval is not 30 seconds.");
+
                 if (firstFetchMetadataFailure.InnerException == null)
                     context.AddDiff($"Expected exception to contain inner exception for fetch metadata failure.");
 
