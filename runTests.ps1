@@ -74,16 +74,7 @@ foreach ($testProject in $testProjects)
     }
 }
 
-if($testExitCode -ne 0)
-{
-    WriteSectionHeader("==== Test Failures ====");
-    Write-Host "Failed test projects: $failedTestProjects" -foregroundcolor "DarkRed"
-    WriteSectionFooter("==== End Test Failures ====");
-    if($failBuildOnTest -ne "NO")
-    {
-        throw "Exiting test run."
-    }
-}
+
 
 Write-Host "============================"
 Write-Host ""

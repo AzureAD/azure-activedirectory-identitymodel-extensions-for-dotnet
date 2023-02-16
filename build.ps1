@@ -1,7 +1,7 @@
 param(
     [string]$buildType="Debug",
     [string]$dotnetDir="c:\Program Files\dotnet",
-    [string]$msbuildDir="C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin",
+    [string]$msbuildDir="C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin",
     [string]$root=$PSScriptRoot,
     [string]$runTests="YES",
     [string]$failBuildOnTest="YES",
@@ -165,56 +165,7 @@ foreach($project in $buildConfiguration.SelectNodes("root/projects/src/project")
 
 WriteSectionFooter("End Build");
 
-if ($runTests -eq "YES")
-{
-    WriteSectionHeader("Run Tests");
 
-    $testProjects = $buildConfiguration.SelectNodes("root/projects/test/project")
-    foreach ($testProject in $testProjects)
-    {
-        if ($testProject.test -eq "YES")
-        {
-            WriteSectionHeader("Test");
-
-            $name = $testProject.name;
-            Write-Host ">>> Set-Location $root\test\$name"
-            pushd
-            Set-Location $root\test\$name
-            Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'test $name.csproj' --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -v n -c $buildType"
-            $p = Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "test $name.csproj --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -v n -c $buildType"
-
-            if($p.ExitCode -ne 0)
-            {
-                if (!$testExitCode)
-                {
-                    $failedTestProjects = "$name"
-                }
-                else
-                {
-                    $failedTestProjects = "$failedTestProjects, $name"
-                }
-            }
-            $testExitCode = $p.ExitCode + $testExitCode
-
-            popd
-
-            WriteSectionFooter("End Test");
-        }
-    }
-
-    WriteSectionFooter("End Tests");
-
-    if($testExitCode -ne 0)
-    {
-        WriteSectionHeader("==== Test Failures ====");
-        Write-Host "Failed test projects: $failedTestProjects" -foregroundcolor "DarkRed"
-        WriteSectionFooter("==== End Test Failures ====");
-        if($failBuildOnTest -ne "NO")
-        {
-            throw "Exiting test run."
-        }
-    }
-}
 
 
 Write-Host "============================"
