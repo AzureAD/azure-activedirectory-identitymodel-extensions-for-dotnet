@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics.Contracts;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -185,20 +184,27 @@ namespace Microsoft.IdentityModel.Protocols
                         }
 
                         _currentConfiguration = configuration;
-
                     }
                     catch (Exception ex)
                     {
                         _fetchMetadataFailure = ex;
-                        _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
-                        if (_currentConfiguration == null) // Throw an exception if there's no configuration to return.
+
+                        if (_currentConfiguration == null)
+                        {
+                            _syncAfter = DateTimeUtil.Add(now.UtcDateTime, BootstrapRefreshInterval);
+
+                            // Throw an exception if there's no configuration to return.
                             throw LogHelper.LogExceptionMessage(
                                 new InvalidOperationException(
-                                    LogHelper.FormatInvariant(LogMessages.IDX20803, LogHelper.MarkAsNonPII(MetadataAddress ?? "null"), LogHelper.MarkAsNonPII(ex)), ex));
+                                    LogHelper.FormatInvariant(LogMessages.IDX20803, LogHelper.MarkAsNonPII(MetadataAddress ?? Utility.Null), LogHelper.MarkAsNonPII(ex)), ex));
+                        }
                         else
+                        {
+                            _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
                             LogHelper.LogExceptionMessage(
                                 new InvalidOperationException(
-                                    LogHelper.FormatInvariant(LogMessages.IDX20806, LogHelper.MarkAsNonPII(MetadataAddress ?? "null"), LogHelper.MarkAsNonPII(ex)), ex));
+                                    LogHelper.FormatInvariant(LogMessages.IDX20806, LogHelper.MarkAsNonPII(MetadataAddress ?? Utility.Null), LogHelper.MarkAsNonPII(ex)), ex));
+                        }
                     }
                 }
 
@@ -208,7 +214,7 @@ namespace Microsoft.IdentityModel.Protocols
                 else
                     throw LogHelper.LogExceptionMessage(
                         new InvalidOperationException(
-                            LogHelper.FormatInvariant(LogMessages.IDX20803, LogHelper.MarkAsNonPII(MetadataAddress ?? "null"), LogHelper.MarkAsNonPII(_fetchMetadataFailure)), _fetchMetadataFailure));
+                            LogHelper.FormatInvariant(LogMessages.IDX20803, LogHelper.MarkAsNonPII(MetadataAddress ?? Utility.Null), LogHelper.MarkAsNonPII(_fetchMetadataFailure)), _fetchMetadataFailure));
             }
             finally
             {
