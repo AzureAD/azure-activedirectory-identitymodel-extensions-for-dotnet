@@ -28,9 +28,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 
-namespace Microsoft.IdentityModel.Json.Linq
+namespace Microsoft.IdentityModel.Internal.Json.Linq
 {
 #nullable enable
     internal class JPropertyKeyedCollection : Collection<JToken>

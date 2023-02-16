@@ -23,7 +23,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 #endregion
 
-namespace Microsoft.IdentityModel.Json.Linq
+namespace Microsoft.IdentityModel.Internal.Json.Linq
 {
     /// <summary>
     /// Specifies how line information is handled when loading JSON.

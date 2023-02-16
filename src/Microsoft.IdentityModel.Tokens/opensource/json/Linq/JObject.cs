@@ -35,24 +35,24 @@ using System.Dynamic;
 using System.Linq.Expressions;
 #endif
 using System.IO;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Diagnostics.CodeAnalysis;
 #if !HAVE_LINQ
-using Microsoft.IdentityModel.Json.Utilities.LinqBridge;
+using Microsoft.IdentityModel.Internal.Json.Utilities.LinqBridge;
 #else
 using System.Linq;
 #endif
 
-namespace Microsoft.IdentityModel.Json.Linq
+namespace Microsoft.IdentityModel.Internal.Json.Linq
 {
 #nullable enable
     /// <summary>
     /// Represents a JSON object.
     /// </summary>
     /// <example>
-    ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParse" title="Parsing a JSON Object from Text" />
+    ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Internal.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParse" title="Parsing a JSON Object from Text" />
     /// </example>
     internal partial class JObject : JContainer, IDictionary<string, JToken?>, INotifyPropertyChanged
 #if HAVE_COMPONENT_MODEL
@@ -441,7 +441,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         ///     <paramref name="json"/> is not valid JSON.
         /// </exception>
         /// <example>
-        ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParse" title="Parsing a JSON Object from Text" />
+        ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Internal.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParse" title="Parsing a JSON Object from Text" />
         /// </example>
         public new static JObject Parse(string json)
         {
@@ -459,7 +459,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         ///     <paramref name="json"/> is not valid JSON.
         /// </exception>
         /// <example>
-        ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParse" title="Parsing a JSON Object from Text" />
+        ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Internal.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParse" title="Parsing a JSON Object from Text" />
         /// </example>
         public new static JObject Parse(string json, JsonLoadSettings? settings)
         {
@@ -522,23 +522,23 @@ namespace Microsoft.IdentityModel.Json.Linq
         }
 
         /// <summary>
-        /// Gets the <see cref="Microsoft.IdentityModel.Json.Linq.JToken"/> with the specified property name.
+        /// Gets the <see cref="Microsoft.IdentityModel.Internal.Json.Linq.JToken"/> with the specified property name.
         /// </summary>
         /// <param name="propertyName">Name of the property.</param>
-        /// <returns>The <see cref="Microsoft.IdentityModel.Json.Linq.JToken"/> with the specified property name.</returns>
+        /// <returns>The <see cref="Microsoft.IdentityModel.Internal.Json.Linq.JToken"/> with the specified property name.</returns>
         public JToken? GetValue(string? propertyName)
         {
             return GetValue(propertyName, StringComparison.Ordinal);
         }
 
         /// <summary>
-        /// Gets the <see cref="Microsoft.IdentityModel.Json.Linq.JToken"/> with the specified property name.
+        /// Gets the <see cref="Microsoft.IdentityModel.Internal.Json.Linq.JToken"/> with the specified property name.
         /// The exact property name will be searched for first and if no matching property is found then
         /// the <see cref="StringComparison"/> will be used to match a property.
         /// </summary>
         /// <param name="propertyName">Name of the property.</param>
         /// <param name="comparison">One of the enumeration values that specifies how the strings will be compared.</param>
-        /// <returns>The <see cref="Microsoft.IdentityModel.Json.Linq.JToken"/> with the specified property name.</returns>
+        /// <returns>The <see cref="Microsoft.IdentityModel.Internal.Json.Linq.JToken"/> with the specified property name.</returns>
         public JToken? GetValue(string? propertyName, StringComparison comparison)
         {
             if (propertyName == null)
@@ -553,7 +553,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         }
 
         /// <summary>
-        /// Tries to get the <see cref="Microsoft.IdentityModel.Json.Linq.JToken"/> with the specified property name.
+        /// Tries to get the <see cref="Microsoft.IdentityModel.Internal.Json.Linq.JToken"/> with the specified property name.
         /// The exact property name will be searched for first and if no matching property is found then
         /// the <see cref="StringComparison"/> will be used to match a property.
         /// </summary>
@@ -610,7 +610,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         }
 
         /// <summary>
-        /// Tries to get the <see cref="Microsoft.IdentityModel.Json.Linq.JToken"/> with the specified property name.
+        /// Tries to get the <see cref="Microsoft.IdentityModel.Internal.Json.Linq.JToken"/> with the specified property name.
         /// </summary>
         /// <param name="propertyName">Name of the property.</param>
         /// <param name="value">The value.</param>

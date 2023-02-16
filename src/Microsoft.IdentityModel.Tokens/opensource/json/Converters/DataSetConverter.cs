@@ -26,9 +26,9 @@
 #if HAVE_ADO_NET
 using System;
 using System.Data;
-using Microsoft.IdentityModel.Json.Serialization;
+using Microsoft.IdentityModel.Internal.Json.Serialization;
 
-namespace Microsoft.IdentityModel.Json.Converters
+namespace Microsoft.IdentityModel.Internal.Json.Converters
 {
 #nullable enable
     /// <summary>

@@ -31,9 +31,9 @@ using System.Dynamic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 
-namespace Microsoft.IdentityModel.Json.Converters
+namespace Microsoft.IdentityModel.Internal.Json.Converters
 {
 #nullable enable
     /// <summary>

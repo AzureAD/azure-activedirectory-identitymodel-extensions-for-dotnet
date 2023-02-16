@@ -26,14 +26,14 @@
 #if HAVE_LINQ || HAVE_ADO_NET
 using System;
 using System.Globalization;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 using System.Collections.Generic;
 using System.Diagnostics;
 #if HAVE_ADO_NET
 using System.Data.SqlTypes;
 #endif
 
-namespace Microsoft.IdentityModel.Json.Converters
+namespace Microsoft.IdentityModel.Internal.Json.Converters
 {
 #nullable enable
     /// <summary>

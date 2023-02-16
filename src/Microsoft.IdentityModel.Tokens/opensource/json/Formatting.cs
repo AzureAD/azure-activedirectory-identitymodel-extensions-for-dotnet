@@ -23,7 +23,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 #endregion
 
-namespace Microsoft.IdentityModel.Json
+namespace Microsoft.IdentityModel.Internal.Json
 {
     /// <summary>
     /// Specifies formatting options for the <see cref="JsonTextWriter"/>.

@@ -34,7 +34,7 @@ using System.Text.RegularExpressions;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Microsoft.IdentityModel.Json.Utilities
+namespace Microsoft.IdentityModel.Internal.Json.Utilities
 {
 #nullable enable
     internal delegate T Creator<T>();

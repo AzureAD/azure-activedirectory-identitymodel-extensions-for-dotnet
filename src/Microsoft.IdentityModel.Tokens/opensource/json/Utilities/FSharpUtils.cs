@@ -30,10 +30,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using Microsoft.IdentityModel.Json.Serialization;
+using Microsoft.IdentityModel.Internal.Json.Serialization;
 using System.Diagnostics;
 
-namespace Microsoft.IdentityModel.Json.Utilities
+namespace Microsoft.IdentityModel.Internal.Json.Utilities
 {
 #nullable enable
     internal class FSharpFunction

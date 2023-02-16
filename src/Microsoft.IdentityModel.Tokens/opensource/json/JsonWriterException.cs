@@ -28,7 +28,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace Microsoft.IdentityModel.Json
+namespace Microsoft.IdentityModel.Internal.Json
 {
 #nullable enable
     /// <summary>

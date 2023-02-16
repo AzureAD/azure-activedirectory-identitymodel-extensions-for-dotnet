@@ -29,17 +29,17 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.Serialization;
 #if !HAVE_LINQ
-using Microsoft.IdentityModel.Json.Utilities.LinqBridge;
+using Microsoft.IdentityModel.Internal.Json.Utilities.LinqBridge;
 #else
 using System.Linq;
 #endif
 using System.Reflection;
 using System.Text;
-using Microsoft.IdentityModel.Json.Serialization;
+using Microsoft.IdentityModel.Internal.Json.Serialization;
 using System.Runtime.CompilerServices;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Microsoft.IdentityModel.Json.Utilities
+namespace Microsoft.IdentityModel.Internal.Json.Utilities
 {
 #nullable enable
     internal static class EnumUtils
@@ -124,7 +124,7 @@ namespace Microsoft.IdentityModel.Json.Utilities
             return selectedFlagsValues;
         }
 
-        // Used by Microsoft.IdentityModel.Json.Schema
+        // Used by Microsoft.IdentityModel.Internal.Json.Schema
         private static CamelCaseNamingStrategy _camelCaseNamingStrategy = new CamelCaseNamingStrategy();
         public static bool TryToString(Type enumType, object value, bool camelCase, [NotNullWhen(true)]out string? name)
         {

@@ -25,7 +25,7 @@
 
 using System;
 
-namespace Microsoft.IdentityModel.Json
+namespace Microsoft.IdentityModel.Internal.Json
 {
     /// <summary>
     /// Specifies float format handling options when writing special floating point numbers, e.g. <see cref="Double.NaN"/>,

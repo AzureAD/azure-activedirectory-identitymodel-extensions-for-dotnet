@@ -24,16 +24,16 @@
 #endregion
 
 using System;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 
 #nullable disable
 
-namespace Microsoft.IdentityModel.Json.Bson
+namespace Microsoft.IdentityModel.Internal.Json.Bson
 {
     /// <summary>
     /// Represents a BSON Oid (object id).
     /// </summary>
-    [Obsolete("BSON reading and writing has been moved to its own package. See https://www.nuget.org/packages/Microsoft.IdentityModel.Json.Bson for more details.")]
+    [Obsolete("BSON reading and writing has been moved to its own package. See https://www.nuget.org/packages/Microsoft.IdentityModel.Internal.Json.Bson for more details.")]
     internal class BsonObjectId
     {
         /// <summary>

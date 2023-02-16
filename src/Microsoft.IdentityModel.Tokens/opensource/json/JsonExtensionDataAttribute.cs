@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Microsoft.IdentityModel.Json
+namespace Microsoft.IdentityModel.Internal.Json
 {
     /// <summary>
     /// Instructs the <see cref="JsonSerializer"/> to deserialize properties with no matching class member into the specified collection

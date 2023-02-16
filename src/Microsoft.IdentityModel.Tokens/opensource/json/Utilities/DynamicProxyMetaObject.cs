@@ -30,7 +30,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace Microsoft.IdentityModel.Json.Utilities
+namespace Microsoft.IdentityModel.Internal.Json.Utilities
 {
 #nullable enable
     internal sealed class DynamicProxyMetaObject<T> : DynamicMetaObject

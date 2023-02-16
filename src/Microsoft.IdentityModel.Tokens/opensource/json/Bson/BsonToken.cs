@@ -28,7 +28,7 @@ using System.Collections.Generic;
 
 #nullable disable
 
-namespace Microsoft.IdentityModel.Json.Bson
+namespace Microsoft.IdentityModel.Internal.Json.Bson
 {
     internal abstract class BsonToken
     {

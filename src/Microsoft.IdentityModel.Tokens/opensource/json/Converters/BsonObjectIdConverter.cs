@@ -24,16 +24,16 @@
 #endregion
 
 using System;
-using Microsoft.IdentityModel.Json.Bson;
+using Microsoft.IdentityModel.Internal.Json.Bson;
 using System.Globalization;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 
-namespace Microsoft.IdentityModel.Json.Converters
+namespace Microsoft.IdentityModel.Internal.Json.Converters
 {
     /// <summary>
     /// Converts a <see cref="BsonObjectId"/> to and from JSON and BSON.
     /// </summary>
-    [Obsolete("BSON reading and writing has been moved to its own package. See https://www.nuget.org/packages/Microsoft.IdentityModel.Json.Bson for more details.")]
+    [Obsolete("BSON reading and writing has been moved to its own package. See https://www.nuget.org/packages/Microsoft.IdentityModel.Internal.Json.Bson for more details.")]
     internal class BsonObjectIdConverter : JsonConverter
     {
         /// <summary>

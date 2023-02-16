@@ -23,9 +23,9 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 #endregion
 
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 
-namespace Microsoft.IdentityModel.Json.Serialization
+namespace Microsoft.IdentityModel.Internal.Json.Serialization
 {
     /// <summary>
     /// A snake case naming strategy.

@@ -25,10 +25,10 @@
 
 using System;
 using System.Reflection;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 using System.Globalization;
 
-namespace Microsoft.IdentityModel.Json.Serialization
+namespace Microsoft.IdentityModel.Internal.Json.Serialization
 {
 #nullable enable
     /// <summary>

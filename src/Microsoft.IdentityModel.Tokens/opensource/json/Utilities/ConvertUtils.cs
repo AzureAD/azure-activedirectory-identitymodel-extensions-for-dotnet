@@ -35,18 +35,18 @@ using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
 #endif
-using Microsoft.IdentityModel.Json.Serialization;
+using Microsoft.IdentityModel.Internal.Json.Serialization;
 using System.Reflection;
 using System.Diagnostics.CodeAnalysis;
 #if !HAVE_LINQ
-using Microsoft.IdentityModel.Json.Utilities.LinqBridge;
+using Microsoft.IdentityModel.Internal.Json.Utilities.LinqBridge;
 #endif
 #if HAVE_ADO_NET
 using System.Data.SqlTypes;
 
 #endif
 
-namespace Microsoft.IdentityModel.Json.Utilities
+namespace Microsoft.IdentityModel.Internal.Json.Utilities
 {
 #nullable enable
     internal enum PrimitiveTypeCode

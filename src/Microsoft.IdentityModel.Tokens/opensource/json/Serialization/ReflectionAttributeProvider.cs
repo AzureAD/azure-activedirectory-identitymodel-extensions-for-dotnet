@@ -26,9 +26,9 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 
-namespace Microsoft.IdentityModel.Json.Serialization
+namespace Microsoft.IdentityModel.Internal.Json.Serialization
 {
     /// <summary>
     /// Provides methods to get attributes from a <see cref="System.Type"/>, <see cref="MemberInfo"/>, <see cref="ParameterInfo"/> or <see cref="Assembly"/>.

@@ -29,11 +29,11 @@ using System.Globalization;
 #if HAVE_BIG_INTEGER
 using System.Numerics;
 #endif
-using Microsoft.IdentityModel.Json.Linq;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Linq;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 using System.Xml;
-using Microsoft.IdentityModel.Json.Converters;
-using Microsoft.IdentityModel.Json.Serialization;
+using Microsoft.IdentityModel.Internal.Json.Converters;
+using Microsoft.IdentityModel.Internal.Json.Serialization;
 using System.Text;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -42,7 +42,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Xml.Linq;
 #endif
 
-namespace Microsoft.IdentityModel.Json
+namespace Microsoft.IdentityModel.Internal.Json
 {
 #nullable enable
 #pragma warning disable CS3019 // CLS compliance checking will not be performed because it is not visible from outside this assembly
@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Json
     /// Provides methods for converting between .NET types and JSON types.
     /// </summary>
     /// <example>
-    ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Json.Tests\Documentation\SerializationTests.cs" region="SerializeObject" title="Serializing and Deserializing JSON with JsonConvert" />
+    ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Internal.Json.Tests\Documentation\SerializationTests.cs" region="SerializeObject" title="Serializing and Deserializing JSON with JsonConvert" />
     /// </example>
     internal static class JsonConvert
     {

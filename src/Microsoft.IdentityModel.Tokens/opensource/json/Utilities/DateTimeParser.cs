@@ -25,7 +25,7 @@
 
 using System;
 
-namespace Microsoft.IdentityModel.Json.Utilities
+namespace Microsoft.IdentityModel.Internal.Json.Utilities
 {
     internal enum ParserTimeZone
     {

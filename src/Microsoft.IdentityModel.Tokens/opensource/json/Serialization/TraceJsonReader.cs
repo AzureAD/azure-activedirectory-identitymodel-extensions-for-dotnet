@@ -29,7 +29,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 
-namespace Microsoft.IdentityModel.Json.Serialization
+namespace Microsoft.IdentityModel.Internal.Json.Serialization
 {
 #nullable enable
     internal class TraceJsonReader : JsonReader, IJsonLineInfo

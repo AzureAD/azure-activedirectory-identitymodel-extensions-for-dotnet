@@ -26,7 +26,7 @@
 using System;
 using System.Threading;
 
-namespace Microsoft.IdentityModel.Json
+namespace Microsoft.IdentityModel.Internal.Json
 {
 #nullable enable
     /// <summary>

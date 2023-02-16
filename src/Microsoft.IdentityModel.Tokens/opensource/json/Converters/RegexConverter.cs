@@ -25,13 +25,13 @@
 
 using System;
 using System.Text.RegularExpressions;
-using Microsoft.IdentityModel.Json.Bson;
+using Microsoft.IdentityModel.Internal.Json.Bson;
 using System.Globalization;
 using System.Runtime.CompilerServices;
-using Microsoft.IdentityModel.Json.Serialization;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Serialization;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 
-namespace Microsoft.IdentityModel.Json.Converters
+namespace Microsoft.IdentityModel.Internal.Json.Converters
 {
 #nullable enable
     /// <summary>

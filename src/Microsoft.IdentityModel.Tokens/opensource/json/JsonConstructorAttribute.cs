@@ -25,7 +25,7 @@
 
 using System;
 
-namespace Microsoft.IdentityModel.Json
+namespace Microsoft.IdentityModel.Internal.Json
 {
     /// <summary>
     /// Instructs the <see cref="JsonSerializer"/> to use the specified constructor when deserializing that object.

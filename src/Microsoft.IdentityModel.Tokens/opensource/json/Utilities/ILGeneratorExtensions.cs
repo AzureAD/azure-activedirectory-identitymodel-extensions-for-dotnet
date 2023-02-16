@@ -28,7 +28,7 @@ using System;
 using System.Reflection.Emit;
 using System.Reflection;
 
-namespace Microsoft.IdentityModel.Json.Utilities
+namespace Microsoft.IdentityModel.Internal.Json.Utilities
 {
     internal static class ILGeneratorExtensions
     {

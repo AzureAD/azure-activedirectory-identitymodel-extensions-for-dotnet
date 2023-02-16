@@ -23,7 +23,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 #endregion
 
-namespace Microsoft.IdentityModel.Json.Serialization
+namespace Microsoft.IdentityModel.Internal.Json.Serialization
 {
     /// <summary>
     /// Used to resolve references when serializing and deserializing JSON by the <see cref="JsonSerializer"/>.

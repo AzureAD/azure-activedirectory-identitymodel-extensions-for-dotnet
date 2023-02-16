@@ -32,15 +32,15 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Xml;
-using Microsoft.IdentityModel.Json.Serialization;
+using Microsoft.IdentityModel.Internal.Json.Serialization;
 #if HAVE_XLINQ
 using System.Xml.Linq;
 #endif
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 using System.Runtime.CompilerServices;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Microsoft.IdentityModel.Json.Converters
+namespace Microsoft.IdentityModel.Internal.Json.Converters
 {
 #nullable enable
     #region XmlNodeWrappers

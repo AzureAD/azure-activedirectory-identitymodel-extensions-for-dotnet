@@ -35,13 +35,13 @@ using System.Text;
 using System.Runtime.CompilerServices;
 using System.Diagnostics.CodeAnalysis;
 #if !HAVE_LINQ
-using Microsoft.IdentityModel.Json.Utilities.LinqBridge;
+using Microsoft.IdentityModel.Internal.Json.Utilities.LinqBridge;
 #else
 using System.Linq;
 #endif
-using Microsoft.IdentityModel.Json.Serialization;
+using Microsoft.IdentityModel.Internal.Json.Serialization;
 
-namespace Microsoft.IdentityModel.Json.Utilities
+namespace Microsoft.IdentityModel.Internal.Json.Utilities
 {
 #nullable enable
 #if (DOTNET || PORTABLE || PORTABLE40) && !NETSTANDARD2_0

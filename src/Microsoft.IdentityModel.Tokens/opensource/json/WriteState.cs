@@ -25,7 +25,7 @@
 
 using System;
 
-namespace Microsoft.IdentityModel.Json
+namespace Microsoft.IdentityModel.Internal.Json
 {
     /// <summary>
     /// Specifies the state of the <see cref="JsonWriter"/>.

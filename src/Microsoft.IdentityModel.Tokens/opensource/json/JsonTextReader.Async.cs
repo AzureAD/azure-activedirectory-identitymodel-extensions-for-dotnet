@@ -32,11 +32,11 @@ using System.Threading;
 using System.Numerics;
 #endif
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Json.Serialization;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Serialization;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 using System.Diagnostics;
 
-namespace Microsoft.IdentityModel.Json
+namespace Microsoft.IdentityModel.Internal.Json
 {
 #nullable enable
     internal partial class JsonTextReader

@@ -33,11 +33,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using Microsoft.IdentityModel.Json.Serialization;
+using Microsoft.IdentityModel.Internal.Json.Serialization;
 
 #nullable disable
 
-namespace Microsoft.IdentityModel.Json.Utilities.LinqBridge
+namespace Microsoft.IdentityModel.Internal.Json.Utilities.LinqBridge
 {
   /// <summary>
   /// Provides a set of static (Shared in Visual Basic) methods for 
@@ -3032,7 +3032,7 @@ namespace Microsoft.IdentityModel.Json.Utilities.LinqBridge
   }
 }
 
-namespace Microsoft.IdentityModel.Json.Serialization
+namespace Microsoft.IdentityModel.Internal.Json.Serialization
 {
 #pragma warning disable 1591
   internal delegate TResult Func<TResult>();

@@ -30,16 +30,16 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.Serialization;
-using Microsoft.IdentityModel.Json.Utilities;
-using Microsoft.IdentityModel.Json.Serialization;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Serialization;
 #if !HAVE_LINQ
-using Microsoft.IdentityModel.Json.Utilities.LinqBridge;
+using Microsoft.IdentityModel.Internal.Json.Utilities.LinqBridge;
 #else
 using System.Linq;
 
 #endif
 
-namespace Microsoft.IdentityModel.Json.Converters
+namespace Microsoft.IdentityModel.Internal.Json.Converters
 {
 #nullable enable
     /// <summary>
@@ -126,7 +126,7 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// <summary>
         /// Initializes a new instance of the <see cref="StringEnumConverter"/> class.
         /// </summary>
-        /// <param name="namingStrategyType">The <see cref="System.Type"/> of the <see cref="Microsoft.IdentityModel.Json.Serialization.NamingStrategy"/> used to write enum text.</param>
+        /// <param name="namingStrategyType">The <see cref="System.Type"/> of the <see cref="Microsoft.IdentityModel.Internal.Json.Serialization.NamingStrategy"/> used to write enum text.</param>
         public StringEnumConverter(Type namingStrategyType)
         {
             ValidationUtils.ArgumentNotNull(namingStrategyType, nameof(namingStrategyType));
@@ -137,11 +137,11 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// <summary>
         /// Initializes a new instance of the <see cref="StringEnumConverter"/> class.
         /// </summary>
-        /// <param name="namingStrategyType">The <see cref="System.Type"/> of the <see cref="Microsoft.IdentityModel.Json.Serialization.NamingStrategy"/> used to write enum text.</param>
+        /// <param name="namingStrategyType">The <see cref="System.Type"/> of the <see cref="Microsoft.IdentityModel.Internal.Json.Serialization.NamingStrategy"/> used to write enum text.</param>
         /// <param name="namingStrategyParameters">
-        /// The parameter list to use when constructing the <see cref="Microsoft.IdentityModel.Json.Serialization.NamingStrategy"/> described by <paramref name="namingStrategyType"/>.
+        /// The parameter list to use when constructing the <see cref="Microsoft.IdentityModel.Internal.Json.Serialization.NamingStrategy"/> described by <paramref name="namingStrategyType"/>.
         /// If <c>null</c>, the default constructor is used.
-        /// When non-<c>null</c>, there must be a constructor defined in the <see cref="Microsoft.IdentityModel.Json.Serialization.NamingStrategy"/> that exactly matches the number,
+        /// When non-<c>null</c>, there must be a constructor defined in the <see cref="Microsoft.IdentityModel.Internal.Json.Serialization.NamingStrategy"/> that exactly matches the number,
         /// order, and type of these parameters.
         /// </param>
         public StringEnumConverter(Type namingStrategyType, object[] namingStrategyParameters)
@@ -154,11 +154,11 @@ namespace Microsoft.IdentityModel.Json.Converters
         /// <summary>
         /// Initializes a new instance of the <see cref="StringEnumConverter"/> class.
         /// </summary>
-        /// <param name="namingStrategyType">The <see cref="System.Type"/> of the <see cref="Microsoft.IdentityModel.Json.Serialization.NamingStrategy"/> used to write enum text.</param>
+        /// <param name="namingStrategyType">The <see cref="System.Type"/> of the <see cref="Microsoft.IdentityModel.Internal.Json.Serialization.NamingStrategy"/> used to write enum text.</param>
         /// <param name="namingStrategyParameters">
-        /// The parameter list to use when constructing the <see cref="Microsoft.IdentityModel.Json.Serialization.NamingStrategy"/> described by <paramref name="namingStrategyType"/>.
+        /// The parameter list to use when constructing the <see cref="Microsoft.IdentityModel.Internal.Json.Serialization.NamingStrategy"/> described by <paramref name="namingStrategyType"/>.
         /// If <c>null</c>, the default constructor is used.
-        /// When non-<c>null</c>, there must be a constructor defined in the <see cref="Microsoft.IdentityModel.Json.Serialization.NamingStrategy"/> that exactly matches the number,
+        /// When non-<c>null</c>, there must be a constructor defined in the <see cref="Microsoft.IdentityModel.Internal.Json.Serialization.NamingStrategy"/> that exactly matches the number,
         /// order, and type of these parameters.
         /// </param>
         /// <param name="allowIntegerValues"><c>true</c> if integers are allowed when serializing and deserializing; otherwise, <c>false</c>.</param>

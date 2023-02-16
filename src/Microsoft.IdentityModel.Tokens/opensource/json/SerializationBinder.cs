@@ -3,7 +3,7 @@
 using System;
 using System.Reflection;
 
-namespace Microsoft.IdentityModel.Json
+namespace Microsoft.IdentityModel.Internal.Json
 {
     /// <summary>
     /// Allows users to control class loading and mandate what class to load.

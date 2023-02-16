@@ -25,11 +25,11 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.IdentityModel.Json.Serialization;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Serialization;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 using System.Reflection;
 
-namespace Microsoft.IdentityModel.Json.Converters
+namespace Microsoft.IdentityModel.Internal.Json.Converters
 {
 #nullable enable
     /// <summary>

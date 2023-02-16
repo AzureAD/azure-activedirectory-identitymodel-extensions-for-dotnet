@@ -26,14 +26,14 @@
 using System;
 using System.ComponentModel;
 
-namespace Microsoft.IdentityModel.Json
+namespace Microsoft.IdentityModel.Internal.Json
 {
     /// <summary>
     /// Specifies default value handling options for the <see cref="JsonSerializer"/>.
     /// </summary>
     /// <example>
-    ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Json.Tests\Documentation\SerializationTests.cs" region="ReducingSerializedJsonSizeDefaultValueHandlingObject" title="DefaultValueHandling Class" />
-    ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Json.Tests\Documentation\SerializationTests.cs" region="ReducingSerializedJsonSizeDefaultValueHandlingExample" title="DefaultValueHandling Ignore Example" />
+    ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Internal.Json.Tests\Documentation\SerializationTests.cs" region="ReducingSerializedJsonSizeDefaultValueHandlingObject" title="DefaultValueHandling Class" />
+    ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Internal.Json.Tests\Documentation\SerializationTests.cs" region="ReducingSerializedJsonSizeDefaultValueHandlingExample" title="DefaultValueHandling Ignore Example" />
     /// </example>
     [Flags]
     internal enum DefaultValueHandling

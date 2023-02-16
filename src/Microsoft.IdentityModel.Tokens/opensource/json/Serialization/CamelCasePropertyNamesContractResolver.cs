@@ -26,9 +26,9 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 
-namespace Microsoft.IdentityModel.Json.Serialization
+namespace Microsoft.IdentityModel.Internal.Json.Serialization
 {
 #nullable enable
     /// <summary>

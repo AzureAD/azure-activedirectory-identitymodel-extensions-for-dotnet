@@ -31,7 +31,7 @@ using System.Text;
 using System.Collections;
 using System.Diagnostics;
 #if !HAVE_LINQ
-using Microsoft.IdentityModel.Json.Utilities.LinqBridge;
+using Microsoft.IdentityModel.Internal.Json.Utilities.LinqBridge;
 #else
 using System.Linq;
 #endif
@@ -39,9 +39,9 @@ using System.Globalization;
 #if HAVE_METHOD_IMPL_ATTRIBUTE
 using System.Runtime.CompilerServices;
 #endif
-using Microsoft.IdentityModel.Json.Serialization;
+using Microsoft.IdentityModel.Internal.Json.Serialization;
 
-namespace Microsoft.IdentityModel.Json.Utilities
+namespace Microsoft.IdentityModel.Internal.Json.Utilities
 {
 #nullable enable
     internal static class CollectionUtils

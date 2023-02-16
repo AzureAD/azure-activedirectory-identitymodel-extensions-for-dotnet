@@ -27,10 +27,10 @@ using System;
 using System.Collections;
 using System.Globalization;
 using System.Runtime.Serialization.Formatters;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 using System.Runtime.Serialization;
 
-namespace Microsoft.IdentityModel.Json.Serialization
+namespace Microsoft.IdentityModel.Internal.Json.Serialization
 {
 #nullable enable
     internal class JsonSerializerProxy : JsonSerializer

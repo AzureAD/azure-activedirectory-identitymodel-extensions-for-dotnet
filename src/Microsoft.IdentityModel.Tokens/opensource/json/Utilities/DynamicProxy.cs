@@ -27,7 +27,7 @@
 using System.Collections.Generic;
 using System.Dynamic;
 
-namespace Microsoft.IdentityModel.Json.Utilities
+namespace Microsoft.IdentityModel.Internal.Json.Utilities
 {
 #nullable enable
     internal class DynamicProxy<T>

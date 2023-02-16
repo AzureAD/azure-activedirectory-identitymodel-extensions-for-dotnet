@@ -30,7 +30,7 @@ using System.IO;
 using System.Numerics;
 #endif
 
-namespace Microsoft.IdentityModel.Json.Serialization
+namespace Microsoft.IdentityModel.Internal.Json.Serialization
 {
 #nullable enable
     internal class TraceJsonWriter : JsonWriter

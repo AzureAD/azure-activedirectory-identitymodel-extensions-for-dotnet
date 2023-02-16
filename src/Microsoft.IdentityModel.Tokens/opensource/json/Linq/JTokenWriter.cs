@@ -29,9 +29,9 @@ using System.Globalization;
 #if HAVE_BIG_INTEGER
 using System.Numerics;
 #endif
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 
-namespace Microsoft.IdentityModel.Json.Linq
+namespace Microsoft.IdentityModel.Internal.Json.Linq
 {
 #nullable enable
 #pragma warning disable CS3019 // CLS compliance checking will not be performed because it is not visible from outside this assembly

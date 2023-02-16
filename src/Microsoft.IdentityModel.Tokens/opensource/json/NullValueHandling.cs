@@ -23,14 +23,14 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 #endregion
 
-namespace Microsoft.IdentityModel.Json
+namespace Microsoft.IdentityModel.Internal.Json
 {
     /// <summary>
     /// Specifies null value handling options for the <see cref="JsonSerializer"/>.
     /// </summary>
     /// <example>
-    ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Json.Tests\Documentation\SerializationTests.cs" region="ReducingSerializedJsonSizeNullValueHandlingObject" title="NullValueHandling Class" />
-    ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Json.Tests\Documentation\SerializationTests.cs" region="ReducingSerializedJsonSizeNullValueHandlingExample" title="NullValueHandling Ignore Example" />
+    ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Internal.Json.Tests\Documentation\SerializationTests.cs" region="ReducingSerializedJsonSizeNullValueHandlingObject" title="NullValueHandling Class" />
+    ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Internal.Json.Tests\Documentation\SerializationTests.cs" region="ReducingSerializedJsonSizeNullValueHandlingExample" title="NullValueHandling Ignore Example" />
     /// </example>
     internal enum NullValueHandling
     {

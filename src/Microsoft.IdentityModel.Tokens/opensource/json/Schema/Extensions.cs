@@ -25,12 +25,12 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.IdentityModel.Json.Linq;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Linq;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 
 #nullable disable
 
-namespace Microsoft.IdentityModel.Json.Schema
+namespace Microsoft.IdentityModel.Internal.Json.Schema
 {
     /// <summary>
     /// <para>

@@ -25,7 +25,7 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.IdentityModel.Json.Linq.JsonPath;
+using Microsoft.IdentityModel.Internal.Json.Linq.JsonPath;
 #if HAVE_DYNAMIC
 using System.Dynamic;
 using System.Linq.Expressions;
@@ -34,20 +34,20 @@ using System.IO;
 #if HAVE_BIG_INTEGER
 using System.Numerics;
 #endif
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 using System.Diagnostics;
 using System.Globalization;
 using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Diagnostics.CodeAnalysis;
 #if !HAVE_LINQ
-using Microsoft.IdentityModel.Json.Utilities.LinqBridge;
+using Microsoft.IdentityModel.Internal.Json.Utilities.LinqBridge;
 #else
 using System.Linq;
 #endif
-using Microsoft.IdentityModel.Json.Serialization;
+using Microsoft.IdentityModel.Internal.Json.Serialization;
 
-namespace Microsoft.IdentityModel.Json.Linq
+namespace Microsoft.IdentityModel.Internal.Json.Linq
 {
 #nullable enable
 #pragma warning disable CS3019 // CLS compliance checking will not be performed because it is not visible from outside this assembly
@@ -490,7 +490,7 @@ namespace Microsoft.IdentityModel.Json.Linq
 
         #region Cast from operators
         /// <summary>
-        /// Performs an explicit conversion from <see cref="Microsoft.IdentityModel.Json.Linq.JToken"/> to <see cref="System.Boolean"/>.
+        /// Performs an explicit conversion from <see cref="Microsoft.IdentityModel.Internal.Json.Linq.JToken"/> to <see cref="System.Boolean"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -514,7 +514,7 @@ namespace Microsoft.IdentityModel.Json.Linq
 
 #if HAVE_DATE_TIME_OFFSET
         /// <summary>
-        /// Performs an explicit conversion from <see cref="Microsoft.IdentityModel.Json.Linq.JToken"/> to <see cref="System.DateTimeOffset"/>.
+        /// Performs an explicit conversion from <see cref="Microsoft.IdentityModel.Internal.Json.Linq.JToken"/> to <see cref="System.DateTimeOffset"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -858,7 +858,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="Microsoft.IdentityModel.Json.Linq.JToken"/> to <see cref="System.SByte"/>.
+        /// Performs an explicit conversion from <see cref="Microsoft.IdentityModel.Internal.Json.Linq.JToken"/> to <see cref="System.SByte"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -1292,7 +1292,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="Microsoft.IdentityModel.Json.Linq.JToken"/> to <see cref="System.UInt64"/>.
+        /// Performs an explicit conversion from <see cref="Microsoft.IdentityModel.Internal.Json.Linq.JToken"/> to <see cref="System.UInt64"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>

@@ -1,4 +1,4 @@
-﻿namespace Microsoft.IdentityModel.Json.Serialization
+﻿namespace Microsoft.IdentityModel.Internal.Json.Serialization
 {
     /// <summary>
     /// The default naming strategy. Property names and dictionary keys are unchanged.

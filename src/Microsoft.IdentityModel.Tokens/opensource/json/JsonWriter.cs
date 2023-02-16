@@ -29,16 +29,16 @@ using System.IO;
 #if HAVE_BIG_INTEGER
 using System.Numerics;
 #endif
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 using System.Globalization;
 #if !HAVE_LINQ
-using Microsoft.IdentityModel.Json.Utilities.LinqBridge;
+using Microsoft.IdentityModel.Internal.Json.Utilities.LinqBridge;
 #else
 using System.Linq;
 
 #endif
 
-namespace Microsoft.IdentityModel.Json
+namespace Microsoft.IdentityModel.Internal.Json
 {
 #nullable enable
 #pragma warning disable CS3019 // CLS compliance checking will not be performed because it is not visible from outside this assembly

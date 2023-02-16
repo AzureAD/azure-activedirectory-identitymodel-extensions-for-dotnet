@@ -25,19 +25,19 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.IdentityModel.Json.Serialization;
+using Microsoft.IdentityModel.Internal.Json.Serialization;
 #if !HAVE_LINQ
-using Microsoft.IdentityModel.Json.Utilities.LinqBridge;
+using Microsoft.IdentityModel.Internal.Json.Utilities.LinqBridge;
 #else
 using System.Linq;
 #endif
 using System.Globalization;
-using Microsoft.IdentityModel.Json.Utilities;
-using Microsoft.IdentityModel.Json.Linq;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Linq;
 
 #nullable disable
 
-namespace Microsoft.IdentityModel.Json.Schema
+namespace Microsoft.IdentityModel.Internal.Json.Schema
 {
     [Obsolete("JSON Schema validation has been moved to its own package. See https://www.newtonsoft.com/jsonschema for more details.")]
     internal class JsonSchemaBuilder

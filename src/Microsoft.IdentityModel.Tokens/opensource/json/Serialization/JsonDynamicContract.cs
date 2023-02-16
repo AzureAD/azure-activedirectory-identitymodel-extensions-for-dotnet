@@ -27,9 +27,9 @@
 using System;
 using System.Dynamic;
 using System.Runtime.CompilerServices;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 
-namespace Microsoft.IdentityModel.Json.Serialization
+namespace Microsoft.IdentityModel.Internal.Json.Serialization
 {
 #nullable enable
     /// <summary>

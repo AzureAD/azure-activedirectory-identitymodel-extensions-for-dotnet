@@ -3,7 +3,7 @@ using System;
 using System.Diagnostics;
 using DiagnosticsTrace = System.Diagnostics.Trace;
 
-namespace Microsoft.IdentityModel.Json.Serialization
+namespace Microsoft.IdentityModel.Internal.Json.Serialization
 {
 #nullable enable
     /// <summary>

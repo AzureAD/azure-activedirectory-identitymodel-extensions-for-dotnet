@@ -30,15 +30,15 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization.Formatters;
-using Microsoft.IdentityModel.Json.Converters;
-using Microsoft.IdentityModel.Json.Serialization;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Converters;
+using Microsoft.IdentityModel.Internal.Json.Serialization;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 using System.Runtime.Serialization;
-using ErrorEventArgs = Microsoft.IdentityModel.Json.Serialization.ErrorEventArgs;
+using ErrorEventArgs = Microsoft.IdentityModel.Internal.Json.Serialization.ErrorEventArgs;
 using System.Runtime.CompilerServices;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Microsoft.IdentityModel.Json
+namespace Microsoft.IdentityModel.Internal.Json
 {
 #nullable enable
     /// <summary>

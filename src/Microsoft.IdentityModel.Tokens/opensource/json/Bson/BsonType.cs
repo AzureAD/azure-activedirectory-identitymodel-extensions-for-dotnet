@@ -25,7 +25,7 @@
 
 #nullable disable
 
-namespace Microsoft.IdentityModel.Json.Bson
+namespace Microsoft.IdentityModel.Internal.Json.Bson
 {
     internal enum BsonType : sbyte
     {

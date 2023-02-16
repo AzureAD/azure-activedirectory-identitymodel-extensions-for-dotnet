@@ -28,18 +28,18 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using System.IO;
-using Microsoft.IdentityModel.Json.Serialization;
-using Microsoft.IdentityModel.Json.Utilities;
-using Microsoft.IdentityModel.Json.Linq;
+using Microsoft.IdentityModel.Internal.Json.Serialization;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Linq;
 
 #nullable disable
 
-namespace Microsoft.IdentityModel.Json.Bson
+namespace Microsoft.IdentityModel.Internal.Json.Bson
 {
     /// <summary>
     /// Represents a reader that provides fast, non-cached, forward-only access to serialized BSON data.
     /// </summary>
-    [Obsolete("BSON reading and writing has been moved to its own package. See https://www.nuget.org/packages/Microsoft.IdentityModel.Json.Bson for more details.")]
+    [Obsolete("BSON reading and writing has been moved to its own package. See https://www.nuget.org/packages/Microsoft.IdentityModel.Internal.Json.Bson for more details.")]
     internal class BsonReader : JsonReader
     {
         private const int MaxCharBytesSize = 128;

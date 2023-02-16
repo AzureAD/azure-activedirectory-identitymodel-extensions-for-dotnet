@@ -28,7 +28,7 @@ using System.IO;
 using System.Xml;
 using System.Globalization;
 
-namespace Microsoft.IdentityModel.Json.Utilities
+namespace Microsoft.IdentityModel.Internal.Json.Utilities
 {
 #nullable enable
     internal static class DateTimeUtils

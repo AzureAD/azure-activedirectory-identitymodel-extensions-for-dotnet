@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Microsoft.IdentityModel.Json.Linq.JsonPath
+namespace Microsoft.IdentityModel.Internal.Json.Linq.JsonPath
 {
 #nullable enable
     internal class ScanMultipleFilter : PathFilter

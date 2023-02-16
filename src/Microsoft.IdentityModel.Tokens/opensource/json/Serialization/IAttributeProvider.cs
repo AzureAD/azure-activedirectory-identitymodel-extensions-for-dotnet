@@ -26,7 +26,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.IdentityModel.Json.Serialization
+namespace Microsoft.IdentityModel.Internal.Json.Serialization
 {
     /// <summary>
     /// Provides methods to get attributes.

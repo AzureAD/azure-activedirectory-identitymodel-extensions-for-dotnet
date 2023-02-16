@@ -25,9 +25,9 @@
 
 using System;
 using System.Runtime.Serialization;
-using Microsoft.IdentityModel.Json.Serialization;
+using Microsoft.IdentityModel.Internal.Json.Serialization;
 
-namespace Microsoft.IdentityModel.Json
+namespace Microsoft.IdentityModel.Internal.Json
 {
     /// <summary>
     /// Specifies the member serialization options for the <see cref="JsonSerializer"/>.

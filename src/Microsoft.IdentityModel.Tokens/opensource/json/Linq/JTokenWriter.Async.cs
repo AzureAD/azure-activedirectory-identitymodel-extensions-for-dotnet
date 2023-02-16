@@ -27,9 +27,9 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 
-namespace Microsoft.IdentityModel.Json.Linq
+namespace Microsoft.IdentityModel.Internal.Json.Linq
 {
     internal partial class JTokenWriter
     {

@@ -2,11 +2,11 @@
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 
 #if HAVE_BINARY_SERIALIZATION && !HAVE_BINARY_FORMATTER
 
-namespace Microsoft.IdentityModel.Json.Serialization
+namespace Microsoft.IdentityModel.Internal.Json.Serialization
 {
     internal class FormatterConverter : IFormatterConverter
     {

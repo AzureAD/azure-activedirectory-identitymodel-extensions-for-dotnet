@@ -24,11 +24,11 @@
 #endregion
 
 using System;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 
 #nullable disable
 
-namespace Microsoft.IdentityModel.Json.Schema
+namespace Microsoft.IdentityModel.Internal.Json.Schema
 {
     /// <summary>
     /// <para>

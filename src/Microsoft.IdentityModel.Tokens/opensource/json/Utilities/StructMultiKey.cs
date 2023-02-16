@@ -25,7 +25,7 @@
 
 using System;
 
-namespace Microsoft.IdentityModel.Json.Utilities
+namespace Microsoft.IdentityModel.Internal.Json.Utilities
 {
 #nullable enable
     internal readonly struct StructMultiKey<T1, T2> : IEquatable<StructMultiKey<T1, T2>>

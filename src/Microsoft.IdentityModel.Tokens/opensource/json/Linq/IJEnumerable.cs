@@ -25,7 +25,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.IdentityModel.Json.Linq
+namespace Microsoft.IdentityModel.Internal.Json.Linq
 {
     /// <summary>
     /// Represents a collection of <see cref="JToken"/> objects.

@@ -26,10 +26,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 using System.Globalization;
 
-namespace Microsoft.IdentityModel.Json.Linq
+namespace Microsoft.IdentityModel.Internal.Json.Linq
 {
 #nullable enable
     /// <summary>

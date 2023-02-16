@@ -26,7 +26,7 @@
 using System.Globalization;
 using System.IO;
 
-namespace Microsoft.IdentityModel.Json.Linq
+namespace Microsoft.IdentityModel.Internal.Json.Linq
 {
 #nullable enable
     /// <summary>

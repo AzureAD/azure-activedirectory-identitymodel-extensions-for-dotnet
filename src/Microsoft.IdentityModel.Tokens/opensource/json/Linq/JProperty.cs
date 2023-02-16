@@ -26,11 +26,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 using System.Diagnostics;
 using System.Globalization;
 
-namespace Microsoft.IdentityModel.Json.Linq
+namespace Microsoft.IdentityModel.Internal.Json.Linq
 {
     /// <summary>
     /// Represents a JSON property.

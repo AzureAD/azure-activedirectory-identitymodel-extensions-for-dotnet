@@ -31,18 +31,18 @@ using System.IO;
 using System.Numerics;
 #endif
 using System.Text;
-using Microsoft.IdentityModel.Json.Utilities;
-using Microsoft.IdentityModel.Json.Linq;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Linq;
 using System.Globalization;
 
 #nullable disable
 
-namespace Microsoft.IdentityModel.Json.Bson
+namespace Microsoft.IdentityModel.Internal.Json.Bson
 {
     /// <summary>
     /// Represents a writer that provides a fast, non-cached, forward-only way of generating BSON data.
     /// </summary>
-    [Obsolete("BSON reading and writing has been moved to its own package. See https://www.nuget.org/packages/Microsoft.IdentityModel.Json.Bson for more details.")]
+    [Obsolete("BSON reading and writing has been moved to its own package. See https://www.nuget.org/packages/Microsoft.IdentityModel.Internal.Json.Bson for more details.")]
     internal class BsonWriter : JsonWriter
     {
         private readonly BsonBinaryWriter _writer;

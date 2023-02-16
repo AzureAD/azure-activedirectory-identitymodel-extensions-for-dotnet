@@ -34,18 +34,18 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Security;
-using Microsoft.IdentityModel.Json.Linq;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Linq;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 using System.Runtime.Serialization;
 using System.Runtime.CompilerServices;
 using System.Diagnostics.CodeAnalysis;
 #if !HAVE_LINQ
-using Microsoft.IdentityModel.Json.Utilities.LinqBridge;
+using Microsoft.IdentityModel.Internal.Json.Utilities.LinqBridge;
 #else
 using System.Linq;
 #endif
 
-namespace Microsoft.IdentityModel.Json.Serialization
+namespace Microsoft.IdentityModel.Internal.Json.Serialization
 {
 #nullable enable
     internal class JsonSerializerInternalWriter : JsonSerializerInternalBase

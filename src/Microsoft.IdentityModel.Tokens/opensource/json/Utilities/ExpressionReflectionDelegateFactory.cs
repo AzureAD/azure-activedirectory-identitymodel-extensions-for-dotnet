@@ -31,9 +31,9 @@ using System.Text;
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
-using Microsoft.IdentityModel.Json.Serialization;
+using Microsoft.IdentityModel.Internal.Json.Serialization;
 
-namespace Microsoft.IdentityModel.Json.Utilities
+namespace Microsoft.IdentityModel.Internal.Json.Utilities
 {
 #nullable enable
     internal class ExpressionReflectionDelegateFactory : ReflectionDelegateFactory

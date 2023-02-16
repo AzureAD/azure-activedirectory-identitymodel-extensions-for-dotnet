@@ -27,14 +27,14 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Microsoft.IdentityModel.Json
+namespace Microsoft.IdentityModel.Internal.Json
 {
     /// <summary>
     /// Specifies reference handling options for the <see cref="JsonSerializer"/>.
     /// Note that references cannot be preserved when a value is set via a non-default constructor such as types that implement <see cref="T:System.Runtime.Serialization.ISerializable"/>.
     /// </summary>
     /// <example>
-    ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Json.Tests\Documentation\SerializationTests.cs" region="PreservingObjectReferencesOn" title="Preserve Object References" />       
+    ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Internal.Json.Tests\Documentation\SerializationTests.cs" region="PreservingObjectReferencesOn" title="Preserve Object References" />       
     /// </example>
     [Flags]
     internal enum PreserveReferencesHandling

@@ -28,7 +28,7 @@ using System.Collections;
 #if HAVE_CONCURRENT_DICTIONARY
 using System.Collections.Concurrent;
 #endif
-using Microsoft.IdentityModel.Json.Schema;
+using Microsoft.IdentityModel.Internal.Json.Schema;
 using System.Collections.Generic;
 using System.ComponentModel;
 #if HAVE_DYNAMIC
@@ -41,19 +41,19 @@ using System.Runtime.Serialization;
 #if HAVE_CAS
 using System.Security.Permissions;
 #endif
-using Microsoft.IdentityModel.Json.Converters;
-using Microsoft.IdentityModel.Json.Utilities;
-using Microsoft.IdentityModel.Json.Linq;
+using Microsoft.IdentityModel.Internal.Json.Converters;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Linq;
 using System.Runtime.CompilerServices;
 #if !HAVE_LINQ
-using Microsoft.IdentityModel.Json.Utilities.LinqBridge;
+using Microsoft.IdentityModel.Internal.Json.Utilities.LinqBridge;
 #else
 using System.Linq;
 
 #endif
-using Microsoft.IdentityModel.Json.Serialization;
+using Microsoft.IdentityModel.Internal.Json.Serialization;
 
-namespace Microsoft.IdentityModel.Json.Serialization
+namespace Microsoft.IdentityModel.Internal.Json.Serialization
 {
 #nullable enable
     /// <summary>

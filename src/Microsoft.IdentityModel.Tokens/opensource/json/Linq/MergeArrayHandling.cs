@@ -1,4 +1,4 @@
-namespace Microsoft.IdentityModel.Json.Linq
+namespace Microsoft.IdentityModel.Internal.Json.Linq
 {
     /// <summary>
     /// Specifies how JSON arrays are merged together.

@@ -26,12 +26,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.IdentityModel.Json.Linq;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Linq;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 using System.Globalization;
 
 
-namespace Microsoft.IdentityModel.Json.Schema
+namespace Microsoft.IdentityModel.Internal.Json.Schema
 {
 #nullable disable
     /// <summary>

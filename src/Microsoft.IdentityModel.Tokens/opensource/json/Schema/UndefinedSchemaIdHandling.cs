@@ -27,7 +27,7 @@ using System;
 
 #nullable disable
 
-namespace Microsoft.IdentityModel.Json.Schema
+namespace Microsoft.IdentityModel.Internal.Json.Schema
 {
     /// <summary>
     /// <para>

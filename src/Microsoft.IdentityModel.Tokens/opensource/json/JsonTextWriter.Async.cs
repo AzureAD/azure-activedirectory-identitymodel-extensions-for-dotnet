@@ -32,10 +32,10 @@ using System.Threading;
 using System.Numerics;
 #endif
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 using System.Diagnostics;
 
-namespace Microsoft.IdentityModel.Json
+namespace Microsoft.IdentityModel.Internal.Json
 {
 #nullable enable
 #pragma warning disable CS3019 // CLS compliance checking will not be performed because it is not visible from outside this assembly

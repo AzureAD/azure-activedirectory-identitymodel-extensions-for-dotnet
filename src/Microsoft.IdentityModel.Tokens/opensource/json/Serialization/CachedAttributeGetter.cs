@@ -25,9 +25,9 @@
 
 using System;
 using System.Reflection;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 
-namespace Microsoft.IdentityModel.Json.Serialization
+namespace Microsoft.IdentityModel.Internal.Json.Serialization
 {
 #nullable enable
     internal static class CachedAttributeGetter<T> where T : Attribute

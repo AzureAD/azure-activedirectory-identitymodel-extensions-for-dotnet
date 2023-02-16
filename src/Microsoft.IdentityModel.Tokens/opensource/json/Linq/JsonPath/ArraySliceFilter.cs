@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 
-namespace Microsoft.IdentityModel.Json.Linq.JsonPath
+namespace Microsoft.IdentityModel.Internal.Json.Linq.JsonPath
 {
 #nullable enable
     internal class ArraySliceFilter : PathFilter

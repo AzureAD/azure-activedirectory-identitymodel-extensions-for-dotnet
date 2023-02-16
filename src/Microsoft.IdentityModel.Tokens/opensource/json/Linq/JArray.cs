@@ -26,18 +26,18 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 using System.IO;
 using System.Globalization;
 
-namespace Microsoft.IdentityModel.Json.Linq
+namespace Microsoft.IdentityModel.Internal.Json.Linq
 {
 #nullable enable
     /// <summary>
     /// Represents a JSON array.
     /// </summary>
     /// <example>
-    ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParseArray" title="Parsing a JSON Array from Text" />
+    ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Internal.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParseArray" title="Parsing a JSON Array from Text" />
     /// </example>
     internal partial class JArray : JContainer, IList<JToken>
     {
@@ -147,7 +147,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// <param name="json">A <see cref="String"/> that contains JSON.</param>
         /// <returns>A <see cref="JArray"/> populated from the string that contains JSON.</returns>
         /// <example>
-        ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParseArray" title="Parsing a JSON Array from Text" />
+        ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Internal.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParseArray" title="Parsing a JSON Array from Text" />
         /// </example>
         public new static JArray Parse(string json)
         {
@@ -162,7 +162,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         /// If this is <c>null</c>, default load settings will be used.</param>
         /// <returns>A <see cref="JArray"/> populated from the string that contains JSON.</returns>
         /// <example>
-        ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParseArray" title="Parsing a JSON Array from Text" />
+        ///   <code lang="cs" source="..\Src\Microsoft.IdentityModel.Internal.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParseArray" title="Parsing a JSON Array from Text" />
         /// </example>
         public new static JArray Parse(string json, JsonLoadSettings? settings)
         {
@@ -255,7 +255,7 @@ namespace Microsoft.IdentityModel.Json.Linq
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="Microsoft.IdentityModel.Json.Linq.JToken"/> at the specified index.
+        /// Gets or sets the <see cref="Microsoft.IdentityModel.Internal.Json.Linq.JToken"/> at the specified index.
         /// </summary>
         /// <value></value>
         public JToken this[int index]

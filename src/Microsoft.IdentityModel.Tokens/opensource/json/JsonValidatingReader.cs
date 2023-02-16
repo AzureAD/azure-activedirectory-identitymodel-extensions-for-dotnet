@@ -28,14 +28,14 @@ using System.Collections.Generic;
 #if HAVE_BIG_INTEGER
 using System.Numerics;
 #endif
-using Microsoft.IdentityModel.Json.Linq;
-using Microsoft.IdentityModel.Json.Schema;
-using Microsoft.IdentityModel.Json.Utilities;
+using Microsoft.IdentityModel.Internal.Json.Linq;
+using Microsoft.IdentityModel.Internal.Json.Schema;
+using Microsoft.IdentityModel.Internal.Json.Utilities;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.IO;
 #if !HAVE_LINQ
-using Microsoft.IdentityModel.Json.Utilities.LinqBridge;
+using Microsoft.IdentityModel.Internal.Json.Utilities.LinqBridge;
 #else
 using System.Linq;
 
@@ -43,7 +43,7 @@ using System.Linq;
 
 #nullable disable
 
-namespace Microsoft.IdentityModel.Json
+namespace Microsoft.IdentityModel.Internal.Json
 {
     /// <summary>
     /// <para>

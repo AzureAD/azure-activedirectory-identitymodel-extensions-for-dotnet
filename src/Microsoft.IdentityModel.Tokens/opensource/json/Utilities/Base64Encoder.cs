@@ -30,7 +30,7 @@ using System.Threading;
 using System.Threading.Tasks;
 #endif
 
-namespace Microsoft.IdentityModel.Json.Utilities
+namespace Microsoft.IdentityModel.Internal.Json.Utilities
 {
 #nullable enable
     internal class Base64Encoder

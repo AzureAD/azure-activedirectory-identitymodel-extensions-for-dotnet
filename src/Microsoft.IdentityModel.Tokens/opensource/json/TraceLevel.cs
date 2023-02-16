@@ -1,8 +1,8 @@
 ﻿
 #if !HAVE_TRACE_WRITER
-using Microsoft.IdentityModel.Json.Serialization;
+using Microsoft.IdentityModel.Internal.Json.Serialization;
 
-namespace Microsoft.IdentityModel.Json
+namespace Microsoft.IdentityModel.Internal.Json
 {
     /// <summary>
     /// Specifies what messages to output for the <see cref="ITraceWriter"/> class.
