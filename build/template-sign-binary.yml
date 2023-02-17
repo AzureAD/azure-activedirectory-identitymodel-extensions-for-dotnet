@@ -10,8 +10,8 @@ steps:
   displayName: 'Sign ${{ parameters.LibraryName }}'
   inputs:
     ConnectedServiceName: 'IDDP Code Signing'
-    FolderPath: 'src\${{ parameters.LibraryName }}\bin\${{ parameters.BuildConfiguration }}'
-    Pattern: ${{ parameters.LibraryName }}.dll
+    FolderPath: 'src\Microsoft.IdentityModel.Tokens\bin\${{ parameters.BuildConfiguration }}'
+    Pattern: Microsoft.IdentityModel.Internal.Json.dll
     signConfigType: inlineSignParams
     inlineOperation: |
      [
