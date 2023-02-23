@@ -754,6 +754,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <exception cref="SecurityTokenDecryptionFailedException">if the JWE was not able to be decrypted.</exception>
         public string DecryptToken(JsonWebToken jwtToken, TokenValidationParameters validationParameters)
         {
+            return DecryptToken(jwtToken, validationParameters, null);
+        }
+
+        private string DecryptToken(JsonWebToken jwtToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+        {
             if (jwtToken == null)
                 throw LogHelper.LogArgumentNullException(nameof(jwtToken));
 
@@ -763,7 +768,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (string.IsNullOrEmpty(jwtToken.Enc))
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TokenLogMessages.IDX10612)));
 
-            var keys = GetContentEncryptionKeys(jwtToken, validationParameters);
+            var keys = GetContentEncryptionKeys(jwtToken, validationParameters, configuration);
             return JwtTokenUtilities.DecryptJwtToken(
                 jwtToken,
                 validationParameters,
@@ -939,7 +944,43 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
 
-        internal IEnumerable<SecurityKey> GetContentEncryptionKeys(JsonWebToken jwtToken, TokenValidationParameters validationParameters)
+        private static SecurityKey ResolveTokenDecryptionKeyFromConfig(JsonWebToken jwtToken, BaseConfiguration configuration)
+        {
+            if (jwtToken == null)
+                throw LogHelper.LogArgumentNullException(nameof(jwtToken));
+
+            if (!string.IsNullOrEmpty(jwtToken.Kid))
+            {
+                if (configuration.TokenDecryptionKeys != null)
+                {
+                    foreach (var key in configuration.TokenDecryptionKeys)
+                    {
+                        if (key != null && string.Equals(key.KeyId, jwtToken.Kid, GetStringComparisonRuleIf509OrECDsa(key)))
+                            return key;
+                    }
+                }
+            }
+
+            if (!string.IsNullOrEmpty(jwtToken.X5t))
+            {
+                if (configuration.TokenDecryptionKeys != null)
+                {
+                    foreach (var key in configuration.TokenDecryptionKeys)
+                    {
+                        if (key != null && string.Equals(key.KeyId, jwtToken.X5t, GetStringComparisonRuleIf509(key)))
+                            return key;
+
+                        var x509Key = key as X509SecurityKey;
+                        if (x509Key != null && string.Equals(x509Key.X5t, jwtToken.X5t, StringComparison.OrdinalIgnoreCase))
+                            return key;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        internal IEnumerable<SecurityKey> GetContentEncryptionKeys(JsonWebToken jwtToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
         {
             IEnumerable<SecurityKey> keys = null;
 
@@ -950,8 +991,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             else
             {
                 var key = ResolveTokenDecryptionKey(jwtToken.EncodedToken, jwtToken, validationParameters);
+                if (key == null && configuration != null)
+                    key = ResolveTokenDecryptionKeyFromConfig(jwtToken, configuration);
+
                 if (key != null)
-                    keys = new List<SecurityKey> { key };
+                    keys = new List<SecurityKey> { key };                   
             }
 
             // on decryption for ECDH-ES, we get the public key from the EPK value see: https://datatracker.ietf.org/doc/html/rfc7518#appendix-C
@@ -962,7 +1006,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // 2. ResolveTokenDecryptionKey returned null
             // Try all the keys. This is the degenerate case, not concerned about perf.
             if (keys == null)
+            {
                 keys = JwtTokenUtilities.GetAllDecryptionKeys(validationParameters);
+                if (configuration != null)
+                    keys = keys == null ? configuration.TokenDecryptionKeys : keys.Concat(configuration.TokenDecryptionKeys);
+            }
 
             if (jwtToken.Alg.Equals(JwtConstants.DirectKeyUseAlg, StringComparison.Ordinal)
                 || jwtToken.Alg.Equals(SecurityAlgorithms.EcdhEs, StringComparison.Ordinal))
@@ -1329,7 +1377,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             try
             {
-                string jws = DecryptToken(jwtToken, validationParameters);
+                string jws = DecryptToken(jwtToken, validationParameters, configuration);
                 TokenValidationResult readTokenResult = ReadToken(jws, validationParameters);
                 if (!readTokenResult.IsValid)
                     return readTokenResult;
