@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.TestUtils
@@ -32,6 +33,11 @@ namespace Microsoft.IdentityModel.TestUtils
                 throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(configuration)));
 
             _configuration = configuration;
+            _lastKnownGoodConfigurationCache = new EventBasedLRUCache<BaseConfiguration, DateTime>(
+                LastKnownGoodConfigurationCacheOptions.DefaultLastKnownGoodConfigurationSizeLimit,
+                TaskCreationOptions.None,
+                new BaseConfigurationComparer(),
+                true);
         }
 
         /// <summary>

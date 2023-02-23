@@ -23,10 +23,6 @@ namespace Microsoft.IdentityModel.Tokens
         private DateTime? _lastKnownGoodConfigFirstUse = null;
 
         internal EventBasedLRUCache<BaseConfiguration, DateTime> _lastKnownGoodConfigurationCache;
-        //private EventBasedLRUCache<BaseConfiguration, DateTime> _lastKnownGoodConfigurationCache = new EventBasedLRUCache<BaseConfiguration, DateTime>(10, TaskCreationOptions.None, new BaseConfigurationComparer(), true, maintainLRU: true);
-
-        private int _lastKnownGoodConfigurationSizeLimit = DefaultLastKnownGoodConfigurationSizeLimit;
-        private IEqualityComparer<BaseConfiguration> _baseConfigurationComparer = new BaseConfigurationComparer();
 
         /// <summary>
         /// Gets or sets the <see cref="TimeSpan"/> that controls how often an automatic metadata refresh should occur.
@@ -44,18 +40,6 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or sets the BaseConfgiurationComparer that to compare <see cref="BaseConfiguration"/>.
-        /// </summary>
-        public IEqualityComparer<BaseConfiguration> BaseConfigurationComparer
-        {
-            get { return _baseConfigurationComparer; }
-            set
-            {
-                _baseConfigurationComparer = value ?? throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(value)));
-            }
-        }
-
-        /// <summary>
         /// 12 hours is the default time interval that afterwards will obtain new configuration.
         /// </summary>
         public static readonly TimeSpan DefaultAutomaticRefreshInterval = new TimeSpan(0, 12, 0, 0);
@@ -64,11 +48,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// 1 hour is the default time interval that a last known good configuration will last for.
         /// </summary>
         public static readonly TimeSpan DefaultLastKnownGoodConfigurationLifetime = new TimeSpan(0, 1, 0, 0);
-
-        /// <summary>
-        /// 10 is the default size limit of the cache (in number of items) for last known good configuration.
-        /// </summary>
-        public static readonly int DefaultLastKnownGoodConfigurationSizeLimit = 10;
 
         /// <summary>
         /// 5 minutes is the default time interval that must pass for <see cref="RequestRefresh"/> to obtain a new configuration.
@@ -114,23 +93,8 @@ namespace Microsoft.IdentityModel.Tokens
                 _lastKnownGoodConfiguration = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
                 _lastKnownGoodConfigFirstUse = DateTime.UtcNow;
 
-                if (_lastKnownGoodConfigurationCache == null)
-                    _lastKnownGoodConfigurationCache = new EventBasedLRUCache<BaseConfiguration, DateTime>(LastKnownGoodConfigurationSizeLimit, TaskCreationOptions.None, BaseConfigurationComparer, true, maintainLRU: true);
-
                 // LRU cache will remove the expired configuration
                 _lastKnownGoodConfigurationCache.SetValue(_lastKnownGoodConfiguration, DateTime.UtcNow + LastKnownGoodLifetime, DateTime.UtcNow + LastKnownGoodLifetime);
-            }
-        }
-
-        /// <summary>
-        /// The size limit of the cache (in number of items) for last known good configuration.
-        /// </summary>
-        public int LastKnownGoodConfigurationSizeLimit
-        {
-            get { return _lastKnownGoodConfigurationSizeLimit; }
-            set
-            {
-                _lastKnownGoodConfigurationSizeLimit = (value > 0) ? value : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value)));
             }
         }
 
