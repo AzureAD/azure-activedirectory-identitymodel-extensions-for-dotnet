@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Protocols
@@ -33,7 +34,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// Static initializer for a new object. Static initializers run before the first instance of the type is created.
         /// </summary>
         static ConfigurationManager()
-        {
+        {               
         }
 
         /// <summary>
@@ -81,6 +82,12 @@ namespace Microsoft.IdentityModel.Protocols
             _docRetriever = docRetriever;
             _configRetriever = configRetriever;
             _refreshLock = new SemaphoreSlim(1);
+
+            _lastKnownGoodConfigurationCache = new EventBasedLRUCache<BaseConfiguration, DateTime>(
+                LastKnownGoodConfigurationCacheOptions.DefaultLastKnownGoodConfigurationSizeLimit,
+                TaskCreationOptions.None,
+                new BaseConfigurationComparer(),
+                true);
         }
 
         /// <summary>
@@ -98,6 +105,28 @@ namespace Microsoft.IdentityModel.Protocols
                 throw LogHelper.LogArgumentNullException(nameof(configValidator));
 
             _configValidator = configValidator;
+        }
+
+        /// <summary>
+        /// Instantiates a new <see cref="ConfigurationManager{T}"/> with cinfiguration validator that manages automatic and controls refreshing on configuration data.
+        /// </summary>
+        /// <param name="metadataAddress">The address to obtain configuration.</param>
+        /// <param name="configRetriever">The <see cref="IConfigurationRetriever{T}"/></param>
+        /// <param name="docRetriever">The <see cref="IDocumentRetriever"/> that reaches out to obtain the configuration.</param>
+        /// <param name="configValidator">The <see cref="IConfigurationValidator{T}"/></param>
+        /// <param name="lkgCacheOptions">The <see cref="LastKnownGoodConfigurationCacheOptions"/></param>
+        /// <exception cref="ArgumentNullException">If 'configValidator' is null.</exception>
+        public ConfigurationManager(string metadataAddress, IConfigurationRetriever<T> configRetriever, IDocumentRetriever docRetriever, IConfigurationValidator<T> configValidator, LastKnownGoodConfigurationCacheOptions lkgCacheOptions)
+            : this(metadataAddress, configRetriever, docRetriever, configValidator)
+        {
+            if (lkgCacheOptions == null)
+                throw LogHelper.LogArgumentNullException(nameof(lkgCacheOptions));
+
+            _lastKnownGoodConfigurationCache = new EventBasedLRUCache<BaseConfiguration, DateTime>(
+                lkgCacheOptions.LastKnownGoodConfigurationSizeLimit,
+                TaskCreationOptions.None,
+                lkgCacheOptions.BaseConfigurationComparer,
+                true);
         }
 
         /// <summary>

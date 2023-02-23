@@ -1258,13 +1258,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         }
                     }
 
-                    if (TokenUtilities.ShouldValidateWithLKG(validationParameters))
+                    if (validationParameters.ConfigurationManager.UseLastKnownGoodConfiguration)
                     {
                         validationParameters.RefreshBeforeValidation = false;
                         validationParameters.ValidateWithLKG = true;
                         var recoverableException = tokenValidationResult.Exception;
 
-                        foreach (BaseConfiguration lkgConfiguration in validationParameters.ConfigurationManager.GetValidLkgConfiguraitons())
+                        foreach (BaseConfiguration lkgConfiguration in validationParameters.ConfigurationManager.GetValidLkgConfigurations())
                         {
                             if (!lkgConfiguration.Equals(currentConfiguration) && TokenUtilities.IsRecoverableConfiguration(jsonWebToken.Kid, currentConfiguration, lkgConfiguration, recoverableException))
                             {

@@ -22,7 +22,9 @@ namespace Microsoft.IdentityModel.Tokens
         private BaseConfiguration _lastKnownGoodConfiguration;
         private DateTime? _lastKnownGoodConfigFirstUse = null;
 
-        private EventBasedLRUCache<BaseConfiguration, DateTime> _lkgConfigurationCache = null;
+        internal EventBasedLRUCache<BaseConfiguration, DateTime> _lastKnownGoodConfigurationCache;
+        //private EventBasedLRUCache<BaseConfiguration, DateTime> _lastKnownGoodConfigurationCache = new EventBasedLRUCache<BaseConfiguration, DateTime>(10, TaskCreationOptions.None, new BaseConfigurationComparer(), true, maintainLRU: true);
+
         private int _lastKnownGoodConfigurationSizeLimit = DefaultLastKnownGoodConfigurationSizeLimit;
         private IEqualityComparer<BaseConfiguration> _baseConfigurationComparer = new BaseConfigurationComparer();
 
@@ -90,12 +92,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets all valid last known good configurations.
         /// </summary>
         /// <returns>A collection of all valid last known good configurations.</returns>
-        internal ICollection<BaseConfiguration> GetValidLkgConfiguraitons()
+        internal ICollection<BaseConfiguration> GetValidLkgConfigurations()
         {
-            if (_lkgConfigurationCache == null)
+            if (_lastKnownGoodConfigurationCache == null)
                 return null;
 
-            return _lkgConfigurationCache.ToArray().Where(x => x.Value.Value > DateTime.UtcNow).Select(x => x.Key).ToArray();
+            return _lastKnownGoodConfigurationCache.ToArray().Where(x => x.Value.Value > DateTime.UtcNow).Select(x => x.Key).ToArray();
         }
 
         /// <summary>
@@ -112,11 +114,11 @@ namespace Microsoft.IdentityModel.Tokens
                 _lastKnownGoodConfiguration = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
                 _lastKnownGoodConfigFirstUse = DateTime.UtcNow;
 
-                if (_lkgConfigurationCache == null)
-                    _lkgConfigurationCache = new EventBasedLRUCache<BaseConfiguration, DateTime>(LastKnownGoodConfigurationSizeLimit, TaskCreationOptions.None, BaseConfigurationComparer, true, maintainLRU: true);
-                
+                if (_lastKnownGoodConfigurationCache == null)
+                    _lastKnownGoodConfigurationCache = new EventBasedLRUCache<BaseConfiguration, DateTime>(LastKnownGoodConfigurationSizeLimit, TaskCreationOptions.None, BaseConfigurationComparer, true, maintainLRU: true);
+
                 // LRU cache will remove the expired configuration
-                _lkgConfigurationCache.SetValue(_lastKnownGoodConfiguration, DateTime.UtcNow + LastKnownGoodLifetime, DateTime.UtcNow + LastKnownGoodLifetime);
+                _lastKnownGoodConfigurationCache.SetValue(_lastKnownGoodConfiguration, DateTime.UtcNow + LastKnownGoodLifetime, DateTime.UtcNow + LastKnownGoodLifetime);
             }
         }
 

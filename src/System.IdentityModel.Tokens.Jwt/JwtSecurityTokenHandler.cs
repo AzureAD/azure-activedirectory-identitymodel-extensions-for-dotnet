@@ -929,7 +929,7 @@ namespace System.IdentityModel.Tokens.Jwt
                         }
                     }
 
-                    if (TokenUtilities.ShouldValidateWithLKG(validationParameters))
+                    if (validationParameters.ConfigurationManager.UseLastKnownGoodConfiguration)
                     {
                         validationParameters.RefreshBeforeValidation = false;
                         validationParameters.ValidateWithLKG = true;
@@ -937,7 +937,7 @@ namespace System.IdentityModel.Tokens.Jwt
                         string kid = outerToken != null ? outerToken.Header.Kid :
                             (ValidateSignatureUsingDelegates(token, validationParameters, null) ?? GetJwtSecurityTokenFromToken(token, validationParameters)).Header.Kid;
 
-                        foreach (BaseConfiguration lkgConfiguration in validationParameters.ConfigurationManager.GetValidLkgConfiguraitons())
+                        foreach (BaseConfiguration lkgConfiguration in validationParameters.ConfigurationManager.GetValidLkgConfigurations())
                         {
                             if (!lkgConfiguration.Equals(currentConfiguration) && TokenUtilities.IsRecoverableConfiguration(kid, currentConfiguration, lkgConfiguration, recoverableException))
                             {
