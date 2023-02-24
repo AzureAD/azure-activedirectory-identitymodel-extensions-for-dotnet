@@ -73,9 +73,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>A collection of all valid last known good configurations.</returns>
         internal ICollection<BaseConfiguration> GetValidLkgConfigurations()
         {
-            if (_lastKnownGoodConfigurationCache == null)
-                return null;
-
             return _lastKnownGoodConfigurationCache.ToArray().Where(x => x.Value.Value > DateTime.UtcNow).Select(x => x.Key).ToArray();
         }
 

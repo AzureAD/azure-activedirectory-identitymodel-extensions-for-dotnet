@@ -472,7 +472,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        public KeyValuePair<TKey, LRUCacheItem<TKey, TValue>>[] ToArray()
+        internal KeyValuePair<TKey, LRUCacheItem<TKey, TValue>>[] ToArray()
         {
             return _map.ToArray();
         }
