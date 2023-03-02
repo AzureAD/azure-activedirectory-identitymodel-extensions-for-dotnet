@@ -211,6 +211,7 @@ namespace Microsoft.IdentityModel.Tokens
             ConfigurationManager = other.ConfigurationManager;
             CryptoProviderFactory = other.CryptoProviderFactory;
             DebugId = other.DebugId;
+            IncludeTokenOnFailedValidation = other.IncludeTokenOnFailedValidation;
             IgnoreTrailingSlashWhenValidatingAudience = other.IgnoreTrailingSlashWhenValidatingAudience;
             IssuerSigningKey = other.IssuerSigningKey;
             IssuerSigningKeyResolver = other.IssuerSigningKeyResolver;
@@ -219,6 +220,7 @@ namespace Microsoft.IdentityModel.Tokens
             IssuerSigningKeyValidator = other.IssuerSigningKeyValidator;
             IssuerValidator = other.IssuerValidator;
             LifetimeValidator = other.LifetimeValidator;
+            LogTokenId = other.LogTokenId;
             LogValidationExceptions = other.LogValidationExceptions;
             NameClaimType = other.NameClaimType;
             NameClaimTypeRetriever = other.NameClaimTypeRetriever;
@@ -261,6 +263,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>        
         public TokenValidationParameters()
         {
+            LogTokenId = true;
             LogValidationExceptions = true;
             RequireExpirationTime = true;
             RequireSignedTokens = true;
@@ -427,6 +430,10 @@ namespace Microsoft.IdentityModel.Tokens
         [DefaultValue(true)]
         public bool IgnoreTrailingSlashWhenValidatingAudience { get; set; } = true;
 
+        /// <summary>
+        /// Gets or sets the flag that indicates whether to include the <see cref="SecurityToken"/> when the validation fails.
+        /// </summary>
+        public bool IncludeTokenOnFailedValidation { get; set; } = false;
 
         /// <summary>
         /// Gets or sets a delegate for validating the <see cref="SecurityKey"/> that signed the token.
@@ -538,6 +545,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// Even if <see cref="ValidateLifetime"/> is false, this delegate will still be called.
         /// </remarks>
         public LifetimeValidator LifetimeValidator { get; set; }
+
+        /// <summary>
+        /// Gets or sets a <see cref="bool"/> that will decide if the token identifier claim needs to be logged.
+        /// Default value is <c>true</c>.
+        /// </summary>
+        [DefaultValue(true)]
+        public bool LogTokenId { get; set; }
 
         /// <summary>
         /// Gets or sets a <see cref="bool"/> that will decide if validation failure needs to be logged as an error.

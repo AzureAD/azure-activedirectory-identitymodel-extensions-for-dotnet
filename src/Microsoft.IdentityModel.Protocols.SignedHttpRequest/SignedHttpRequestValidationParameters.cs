@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
     /// <returns>A resolved <see cref="SecurityKey"/>.</returns>
-    /// <remarks>https://datatracker.ietf.org/doc/html/rfc7800#section-3.4</remarks>
+    /// <remarks>https://datatracker.ietf.org/doc/html/rfc7800#section-3-4</remarks>
     public delegate Task<SecurityKey> PopKeyResolverFromKeyIdAsync(string kid, SecurityToken validatedAccessToken, SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken);
 
     /// <summary>
@@ -88,13 +88,13 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <summary>
         /// Gets or sets a value indicating whether the unsigned query parameters are accepted or not.
         /// </summary>
-        /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-5.1</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-5-1</remarks>
         public bool AcceptUnsignedQueryParameters { get; set; } = true;
 
         /// <summary>
         /// Gets or sets a value indicating whether the unsigned headers are accepted or not. 
         /// </summary>
-        /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-5.1</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-5-1</remarks>
         public bool AcceptUnsignedHeaders { get; set; } = true;
 
         /// <summary>
@@ -127,7 +127,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <summary>
         /// Gets or sets the <see cref="HttpClientProvider"/> delegate.
         /// </summary>
-        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7800#section-3.5</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7800#section-3-5</remarks>
         public HttpClientProvider HttpClientProvider { get; set; }
 
         /// <summary>
@@ -148,7 +148,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <summary>
         /// Gets or sets a value indicating whether TLS is required when obtaining a JWK set using the 'jku' claim.
         /// </summary>
-        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7800#section-3.5</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7800#section-3-5</remarks>
         public bool RequireHttpsForJkuResourceRetrieval { get; set; } = true;
 
         /// <summary>

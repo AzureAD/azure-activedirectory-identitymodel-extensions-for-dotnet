@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 
@@ -14,6 +15,22 @@ namespace Microsoft.IdentityModel.Tokens
     {
         private bool _disposed;
         private DisposableObjectPool<KeyedHashAlgorithm> _keyedHashObjectPool;
+
+        /// <summary>
+        /// Mapping from algorithm to the expected signature size in bytes.
+        /// </summary>
+        private static readonly Dictionary<string, int> _expectedSignatureSizeInBytes = new Dictionary<string, int>
+        {
+            { SecurityAlgorithms.HmacSha256, 32 },
+            { SecurityAlgorithms.HmacSha256Signature, 32 },
+            { SecurityAlgorithms.HmacSha384, 48 },
+            { SecurityAlgorithms.HmacSha384Signature, 48 },
+            { SecurityAlgorithms.HmacSha512, 64 },
+            { SecurityAlgorithms.HmacSha512Signature, 64 },
+            { SecurityAlgorithms.Aes128CbcHmacSha256, 16 },
+            { SecurityAlgorithms.Aes192CbcHmacSha384, 24 },
+            { SecurityAlgorithms.Aes256CbcHmacSha512, 32 }
+        };
 
         /// <summary>
         /// This is the minimum <see cref="SymmetricSecurityKey"/>.KeySize when creating and verifying signatures.
@@ -256,6 +273,24 @@ namespace Microsoft.IdentityModel.Tokens
         /// <inheritdoc/>
         public override bool Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength)
         {
+            return Verify(input, inputOffset, inputLength, signature, signatureOffset, signatureLength, null);
+        }
+
+        /// <summary>
+        /// This internal method is called from the AuthenticatedEncryptionProvider which passes in the algorithm that defines the size expected for the signature.
+        /// The reason is the way the AuthenticationTag is validated.
+        /// For example when "A128CBC-HS256" is specified, SHA256 will used to create the HMAC and 32 bytes will be generated, but only the first 16 will be validated.
+        /// </summary>
+        /// <param name="input">The bytes to verify.</param>
+        /// <param name="inputOffset">offset in to input bytes to caculate hash.</param>
+        /// <param name="inputLength">number of bytes of signature to use.</param>
+        /// <param name="signature">signature to compare against.</param>
+        /// <param name="signatureOffset">offset into signature array.</param>
+        /// <param name="signatureLength">how many bytes to verfiy.</param>
+        /// <param name="algorithm">algorithm passed by AuthenticatedEncryptionProvider.</param>
+        /// <returns>true if computed signature matches the signature parameter, false otherwise.</returns>
+        internal bool Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength, string algorithm)
+        {
             if (input == null || input.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(input));
 
@@ -311,6 +346,25 @@ namespace Microsoft.IdentityModel.Tokens
                         LogHelper.MarkAsNonPII(signatureOffset),
                         LogHelper.MarkAsNonPII(signatureLength),
                         LogHelper.MarkAsNonPII(signature.Length))));
+
+            string algorithmToValidate = algorithm ?? Algorithm;
+
+            // Check that signature length matches algorithm.
+            // If we don't have an entry for the algorithm in our dictionary, that is probably a bug.
+            // This is why a new message was created, rather than using IDX10640.
+            if (!_expectedSignatureSizeInBytes.TryGetValue(algorithmToValidate, out int expectedSignatureLength))
+                throw LogHelper.LogExceptionMessage(new ArgumentException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10718,
+                        LogHelper.MarkAsNonPII(algorithmToValidate),
+                        LogHelper.MarkAsNonPII(Algorithm))));
+
+            if (expectedSignatureLength != signatureLength)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10719,
+                        LogHelper.MarkAsNonPII(signatureLength),
+                        LogHelper.MarkAsNonPII(expectedSignatureLength))));
 
             if (_disposed)
             {
