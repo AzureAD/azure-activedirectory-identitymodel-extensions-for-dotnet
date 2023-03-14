@@ -820,7 +820,7 @@ namespace Microsoft.IdentityModel.Tokens
         public bool ValidateLifetime { get; set; }
 
         /// <summary>
-        /// Gets or sets a boolean that controls if the the vaidation order of the payload and signature during token validation.
+        /// Gets or sets a boolean that controls the validation order of the payload and signature during token validation.
         /// </summary>
         /// <remarks>If <see cref= "ValidateSignatureLast" /> is set to ture, it will validate payload ahead of signature .
         /// The default is <c>false</c>.
