@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="audiences">The audiences found in the <see cref="SecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-        /// <exception cref="ArgumentNullException">If 'vaidationParameters' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
         /// <exception cref="ArgumentNullException">If 'audiences' is null and <see cref="TokenValidationParameters.ValidateAudience"/> is true.</exception>
         /// <exception cref="SecurityTokenInvalidAudienceException">If <see cref="TokenValidationParameters.ValidAudience"/> is null or whitespace and <see cref="TokenValidationParameters.ValidAudiences"/> is null.</exception>
         /// <exception cref="SecurityTokenInvalidAudienceException">If none of the 'audiences' matched either <see cref="TokenValidationParameters.ValidAudience"/> or one of <see cref="TokenValidationParameters.ValidAudiences"/>.</exception>
@@ -183,7 +183,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
         /// <returns>The issuer to use when creating the "Claim"(s) in a "ClaimsIdentity".</returns>
-        /// <exception cref="ArgumentNullException">If 'vaidationParameters' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
         /// <exception cref="ArgumentNullException">If 'issuer' is null or whitespace and <see cref="TokenValidationParameters.ValidateIssuer"/> is true.</exception>
         /// <exception cref="SecurityTokenInvalidIssuerException">If <see cref="TokenValidationParameters.ValidIssuer"/> is null or whitespace and <see cref="TokenValidationParameters.ValidIssuers"/> is null.</exception>
         /// <exception cref="SecurityTokenInvalidIssuerException">If 'issuer' failed to matched either <see cref="TokenValidationParameters.ValidIssuer"/> or one of <see cref="TokenValidationParameters.ValidIssuers"/>.</exception>
@@ -201,7 +201,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
         /// <param name="configuration">The <see cref="BaseConfiguration"/> required for issuer and signing key validation.</param>
         /// <returns>The issuer to use when creating the "Claim"(s) in a "ClaimsIdentity".</returns>
-        /// <exception cref="ArgumentNullException">If 'vaidationParameters' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
         /// <exception cref="ArgumentNullException">If 'issuer' is null or whitespace and <see cref="TokenValidationParameters.ValidateIssuer"/> is true.</exception>
         /// <exception cref="ArgumentNullException">If ' configuration' is null.</exception>
         /// <exception cref="SecurityTokenInvalidIssuerException">If <see cref="TokenValidationParameters.ValidIssuer"/> is null or whitespace and <see cref="TokenValidationParameters.ValidIssuers"/> is null and <see cref="BaseConfiguration.Issuer"/> is null.</exception>
@@ -288,7 +288,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
         /// <exception cref="ArgumentNullException"> if 'securityKey' is null and ValidateIssuerSigningKey is true.</exception>
         /// <exception cref="ArgumentNullException"> if 'securityToken' is null and ValidateIssuerSigningKey is true.</exception>
-        /// <exception cref="ArgumentNullException"> if 'vaidationParameters' is null.</exception>
+        /// <exception cref="ArgumentNullException"> if 'validationParameters' is null.</exception>
         public static void ValidateIssuerSecurityKey(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             ValidateIssuerSecurityKey(securityKey, securityToken, validationParameters, null);
@@ -370,7 +370,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="expires">The 'expiration' time found in the <see cref="SecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-        /// <exception cref="ArgumentNullException">If 'vaidationParameters' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
         /// <exception cref="SecurityTokenNoExpirationException">If 'expires.HasValue' is false and <see cref="TokenValidationParameters.RequireExpirationTime"/> is true.</exception>
         /// <exception cref="SecurityTokenInvalidLifetimeException">If 'notBefore' is &gt; 'expires'.</exception>
         /// <exception cref="SecurityTokenNotYetValidException">If 'notBefore' is &gt; DateTime.UtcNow.</exception>
