@@ -1542,16 +1542,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 if (!validationParameters.ValidateSignatureLast)
                 {
-                    InternalValidators.ValidateLifetimeAndIssuerAfterSignatureNotValidatedJwt(
+                    InternalValidators.ValidateAfterSignatureFailed(
                         jwtToken,
                         notBefore,
                         expires,
-                        jwtToken.Kid,
+                        jwtToken.Audiences,
                         validationParameters,
-                        configuration,
-                        exceptionStrings,
-                        numKeysInTokenValidationParameters,
-                        numKeysInConfiguration);
+                        configuration);
                 }
             }
 

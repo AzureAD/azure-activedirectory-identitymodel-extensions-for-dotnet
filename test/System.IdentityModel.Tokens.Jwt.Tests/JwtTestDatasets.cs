@@ -143,7 +143,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             ValidateAudience = false,
                             ValidateLifetime = false,
                         },
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501: "),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10503: "),
                     },
                     new JwtTheoryData
                     {
@@ -205,7 +205,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             ValidateAudience = false,
                             ValidateLifetime = false,
                         },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenUnableToValidateException), "IDX10516: ")
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidIssuerException), "IDX10204: ")
                     },
                     new JwtTheoryData
                     {
@@ -454,7 +454,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             ValidateAudience = false,
                             ValidateLifetime = false,
                         },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenUnableToValidateException))
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidIssuerException))
                     },
                     new JwtTheoryData
                     {
@@ -550,7 +550,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             ValidateAudience = false,
                             ValidateLifetime = true,
                         },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenUnableToValidateException))
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenNotYetValidException))
                     },
                     new JwtTheoryData
                     {
@@ -597,7 +597,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             ValidateAudience = false,
                             ValidateLifetime = false,
                         },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenUnableToValidateException))
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidIssuerException))
                     },
                     new JwtTheoryData
                     {
@@ -854,7 +854,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             ValidateLifetime = false,
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
                         },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenUnableToValidateException))
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidIssuerException))
                     },
                     new JwtTheoryData
                     {
@@ -956,7 +956,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             ValidateLifetime = true,
                             TokenDecryptionKey = Default.SymmetricEncryptingCredentials.Key
                         },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenUnableToValidateException))
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenNotYetValidException))
                     },
                     new JwtTheoryData
                     {
@@ -1006,7 +1006,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             ValidateLifetime = false,
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key
                         },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenUnableToValidateException))
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidIssuerException))
                     },
                     new JwtTheoryData
                     {
