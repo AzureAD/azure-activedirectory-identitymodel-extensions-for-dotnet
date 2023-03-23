@@ -45,21 +45,21 @@ namespace Microsoft.IdentityModel.AotCompatibility.Tests
                 testObjDir.Delete(recursive: true);
             }
 
-            var startInfo = new ProcessStartInfo("dotnet", $"publish --self-contained {testAppProject}")
+            var process = new Process();
+            process.StartInfo = new ProcessStartInfo("dotnet", $"publish --self-contained {testAppProject}")
             {
                 RedirectStandardOutput = true,
-                RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 WorkingDirectory = testAppPath
             };
+            process.OutputDataReceived += (sender, e) => _testOutputHelper.WriteLine(e.Data);
+            process.Start();
+            process.BeginOutputReadLine();
 
-            Process proc = Process.Start(startInfo);
-            _testOutputHelper.WriteLine(proc.StandardOutput.ReadToEnd());
+            Assert.True(process.WaitForExit(milliseconds: 30_000), "dotnet publish command timed out after 30 seconds.");
 
-            Assert.True(proc.WaitForExit(milliseconds: 30_000), "dotnet publish command timed out after 30 seconds.");
-
-            Assert.True(proc.ExitCode == 0, "Publishing the AotCompatibility app failed. See test output for more details.");
+            Assert.True(process.ExitCode == 0, "Publishing the AotCompatibility app failed. See test output for more details.");
         }
     }
 }
