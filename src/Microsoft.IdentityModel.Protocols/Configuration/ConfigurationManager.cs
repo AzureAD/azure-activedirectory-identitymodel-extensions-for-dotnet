@@ -127,16 +127,16 @@ namespace Microsoft.IdentityModel.Protocols
             await _refreshLock.WaitAsync(cancel).ConfigureAwait(false);
             try
             {
-                if (_syncAfter <= now)
+                if (_syncAfter <= DateTimeOffset.UtcNow)
                 {
                     try
                     {
                         // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
                         // The transport should have it's own timeouts, etc..
                         var configuration = await _configRetriever.GetConfigurationAsync(MetadataAddress, _docRetriever, CancellationToken.None).ConfigureAwait(false);
-                        _lastRefresh = now;
+                        _lastRefresh = DateTimeOffset.UtcNow;
                         // Add 1 hour jitter to avoid spike traffic to IdentityProvider.
-                        _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval + TimeSpan.FromMinutes(new Random().Next(60)));
+                        _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval + TimeSpan.FromMinutes(new Random().Next(60)));
                         if (_configValidator != null)
                         {
                             ConfigurationValidationResult result = _configValidator.Validate(configuration);
@@ -150,7 +150,7 @@ namespace Microsoft.IdentityModel.Protocols
                     catch (Exception ex)
                     {
                         _fetchMetadataFailure = ex;
-                        _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
+                        _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
                         if (_currentConfiguration == null) // Throw an exception if there's no configuration to return.
                             throw LogHelper.LogExceptionMessage(
                                 new InvalidOperationException(
