@@ -640,7 +640,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     notBefore = now;
             }
 
-            LogHelper.LogVerbose(LogMessages.IDX12721, LogHelper.MarkAsNonPII(audience ?? "null"), LogHelper.MarkAsNonPII(issuer ?? "null"));
+            LogHelper.LogVerbose(LogMessages.IDX12721, LogHelper.MarkAsNonPII(issuer ?? "null"), LogHelper.MarkAsNonPII(audience ?? "null"));
             JwtPayload payload = new JwtPayload(issuer, audience, (subject == null ? null : OutboundClaimTypeTransform(subject.Claims)), (claimCollection == null ? null : OutboundClaimTypeTransform(claimCollection)), notBefore, expires, issuedAt);
             JwtHeader header = new JwtHeader(signingCredentials, OutboundAlgorithmMap, tokenType, additionalInnerHeaderClaims);
 
