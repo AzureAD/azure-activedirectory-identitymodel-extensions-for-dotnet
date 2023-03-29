@@ -9,7 +9,7 @@ using Microsoft.IdentityModel.Logging;
 using System.Reflection;
 #endif
 
-#if NET461 || NET472 || NETSTANDARD2_0 || NET6_0
+#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0
 using System.Security.Cryptography.X509Certificates;
 #endif
 
@@ -215,7 +215,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
 #endif
 
-#if NET461 || NET472 || NETSTANDARD2_0 || NET6_0
+#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0
             if (algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha256) ||
                 algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha256Signature) ||
                 algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha384) ||
@@ -321,7 +321,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
 #region NET61+ related code
-#if NET461 || NET472 || NETSTANDARD2_0 || NET6_0
+#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0
 
         // HasAlgorithmName was introduced into Net46
         internal AsymmetricAdapter(SecurityKey key, string algorithm, HashAlgorithm hashAlgorithm, HashAlgorithmName hashAlgorithmName, bool requirePrivateKey)
