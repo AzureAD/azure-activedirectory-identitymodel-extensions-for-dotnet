@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -191,7 +193,12 @@ namespace Microsoft.IdentityModel.Protocols
 
                         if (_currentConfiguration == null)
                         {
-                            _syncAfter = DateTimeUtil.Add(now.UtcDateTime, BootstrapRefreshInterval);
+                            if (ex.Data.Contains(HttpDocumentRetriever.StatusCode) &&
+                                (ex.Data[HttpDocumentRetriever.StatusCode].Equals(HttpStatusCode.RequestTimeout) ||
+                                ex.Data[HttpDocumentRetriever.StatusCode].Equals(HttpStatusCode.ServiceUnavailable)))
+                                _syncAfter = DateTimeUtil.Add(now.UtcDateTime, BootstrapRefreshInterval);
+                            else
+                                _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
 
                             // Throw an exception if there's no configuration to return.
                             throw LogHelper.LogExceptionMessage(
