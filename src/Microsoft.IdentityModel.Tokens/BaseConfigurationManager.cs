@@ -60,6 +60,11 @@ namespace Microsoft.IdentityModel.Tokens
         public TimeSpan BootstrapRefreshInterval { get; } = new TimeSpan(0, 0, 30);
 
         /// <summary>
+        /// Max number of re-tries to obtain the first configuration.
+        /// </summary>
+        public const int BootstrapRetryCount = 4;
+
+        /// <summary>
         /// Obtains an updated version of <see cref="BaseConfiguration"/> if the appropriate refresh interval has passed.
         /// This method may return a cached version of the configuration.
         /// </summary>

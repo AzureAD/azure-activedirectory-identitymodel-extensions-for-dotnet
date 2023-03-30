@@ -18,6 +18,7 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     /// <typeparam name="T">The type of <see cref="IDocumentRetriever"/>.</typeparam>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:Exceptions are thrown outside of the catch blocks")]
     public class ConfigurationManager<T> : BaseConfigurationManager, IConfigurationManager<T> where T : class
     {
         private DateTimeOffset _syncAfter = DateTimeOffset.MinValue;
@@ -30,6 +31,7 @@ namespace Microsoft.IdentityModel.Protocols
         private readonly IConfigurationValidator<T> _configValidator;
         private T _currentConfiguration;
         private Exception _fetchMetadataFailure;
+        private int _bootStrapRetryCount = 0;
 
         /// <summary>
         /// Static initializer for a new object. Static initializers run before the first instance of the type is created.
@@ -187,31 +189,37 @@ namespace Microsoft.IdentityModel.Protocols
 
                         _currentConfiguration = configuration;
                     }
-                    catch (Exception ex)
+                    catch (IOException ex)
                     {
                         _fetchMetadataFailure = ex;
 
+                        // HttpDocumentRetriever throws an IOException 
                         if (_currentConfiguration == null)
                         {
-                            if (ex.Data.Contains(HttpDocumentRetriever.StatusCode) &&
-                                (ex.Data[HttpDocumentRetriever.StatusCode].Equals(HttpStatusCode.RequestTimeout) ||
-                                ex.Data[HttpDocumentRetriever.StatusCode].Equals(HttpStatusCode.ServiceUnavailable)))
-                                _syncAfter = DateTimeUtil.Add(now.UtcDateTime, BootstrapRefreshInterval);
+                            if (_bootStrapRetryCount++ < BootstrapRetryCount)
+                            {
+                                var statusCode = ex.Data[HttpDocumentRetriever.StatusCode];
+                                if (statusCode != null && (statusCode.Equals(HttpStatusCode.RequestTimeout) || statusCode.Equals(HttpStatusCode.ServiceUnavailable)))
+                                    _syncAfter = DateTimeUtil.Add(now.UtcDateTime, BootstrapRefreshInterval);
+                            }
                             else
                                 _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
-
-                            // Throw an exception if there's no configuration to return.
-                            throw LogHelper.LogExceptionMessage(
-                                new InvalidOperationException(
-                                    LogHelper.FormatInvariant(LogMessages.IDX20803, LogHelper.MarkAsNonPII(MetadataAddress ?? Utility.Null), LogHelper.MarkAsNonPII(ex)), ex));
                         }
                         else
                         {
-                            _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
                             LogHelper.LogExceptionMessage(
                                 new InvalidOperationException(
                                     LogHelper.FormatInvariant(LogMessages.IDX20806, LogHelper.MarkAsNonPII(MetadataAddress ?? Utility.Null), LogHelper.MarkAsNonPII(ex)), ex));
                         }
+                    }
+                    catch (Exception ex)
+                    {
+                        _fetchMetadataFailure = ex;
+                        _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
+                        if (_currentConfiguration != null) // Throw an exception if there's no configuration to return.
+                            LogHelper.LogExceptionMessage(
+                                new InvalidOperationException(
+                                    LogHelper.FormatInvariant(LogMessages.IDX20806, LogHelper.MarkAsNonPII(MetadataAddress ?? Utility.Null), LogHelper.MarkAsNonPII(ex)), ex));
                     }
                 }
 
