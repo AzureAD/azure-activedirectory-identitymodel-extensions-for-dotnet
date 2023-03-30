@@ -306,12 +306,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public override ICollection<SecurityKey> SigningKeys { get; } = new Collection<SecurityKey>();
 
         /// <summary>
-        /// Gets the <see cref="ICollection{SecurityKey}"/> that the IdentityProvider indicates are to be used for decrypting tokens.
-        /// </summary>
-        [JsonIgnore]
-        public override ICollection<SecurityKey> TokenDecryptionKeys { get; } = new Collection<SecurityKey>();
-
-        /// <summary>
         /// Gets the collection of 'subject_types_supported'.
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.SubjectTypesSupported, Required = Required.Default)]

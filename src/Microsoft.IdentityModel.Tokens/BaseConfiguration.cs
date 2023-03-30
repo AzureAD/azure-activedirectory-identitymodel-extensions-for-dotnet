@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Microsoft.IdentityModel.Json;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -34,6 +35,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the <see cref="ICollection{SecurityKey}"/> that the IdentityProvider indicates are to be used in order to decrypt tokens.
         /// </summary>
+        [JsonIgnore]
         public virtual ICollection<SecurityKey> TokenDecryptionKeys
         {
             get;
