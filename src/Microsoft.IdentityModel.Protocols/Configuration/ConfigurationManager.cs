@@ -193,7 +193,7 @@ namespace Microsoft.IdentityModel.Protocols
                     {
                         _fetchMetadataFailure = ex;
 
-                        // HttpDocumentRetriever throws an IOException 
+                        // HttpDocumentRetriever throws an IOException on non-successful status code including HttpStatusCode.RequestTimeout and HttpStatusCode.ServiceUnavailable
                         if (_currentConfiguration == null)
                         {
                             if (_bootStrapRetryCount++ < BootstrapRetryCount)
