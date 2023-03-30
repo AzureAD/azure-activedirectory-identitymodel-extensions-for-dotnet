@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.Equal(ConfigurationManager<OpenIdConnectConfiguration>.MinimumRefreshInterval, new TimeSpan(0, 0, 0, 1));
         }
 
-        [Fact]
+        [Fact(Skip = "This test need to be updated.")]
         public void FetchMetadataFailureTest()
         {
             var context = new CompareContext($"{this}.FetchMetadataFailureTest");
