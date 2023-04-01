@@ -631,7 +631,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 string jweFromJsonHandlerWithKid = theoryData.JsonWebTokenHandler.CreateToken(theoryData.Payload, theoryData.TokenDescriptor.SigningCredentials, theoryData.TokenDescriptor.EncryptingCredentials);
                 var jwtTokenFromJsonHandlerWithKid = new JsonWebToken(jweFromJsonHandlerWithKid);
-                var encryptionKeysFromJsonHandlerWithKid = theoryData.JsonWebTokenHandler.GetContentEncryptionKeys(jwtTokenFromJsonHandlerWithKid, theoryData.ValidationParameters);
+                var encryptionKeysFromJsonHandlerWithKid = theoryData.JsonWebTokenHandler.GetContentEncryptionKeys(jwtTokenFromJsonHandlerWithKid, theoryData.ValidationParameters, theoryData.Configuration);
 
                 IdentityComparer.AreEqual(encryptionKeysFromJsonHandlerWithKid, theoryData.ExpectedDecryptionKeys);
                 theoryData.ExpectedException.ProcessNoException(context);
@@ -643,6 +643,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             TestUtilities.AssertFailIfErrors(context);
         }
+
         public static TheoryData<CreateTokenTheoryData> SecurityTokenDecryptionTheoryData
         {
             get
@@ -652,12 +653,61 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     SetDefaultTimesOnTokenCreation = false
                 };
 
+                var configurationWithDecryptionKeys = new OpenIdConnectConfiguration();
+                configurationWithDecryptionKeys.TokenDecryptionKeys.Add(KeyingMaterial.DefaultSymmetricSecurityKey_256);
+                configurationWithDecryptionKeys.TokenDecryptionKeys.Add(KeyingMaterial.DefaultSymmetricSecurityKey_512);
+
                 tokenHandler.InboundClaimTypeMap.Clear();
                 return new TheoryData<CreateTokenTheoryData>
                 {
                    new CreateTokenTheoryData
                    {
                         First = true,
+                        TestId = "EncryptionKeyInConfig",
+                        Payload = Default.PayloadString,
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                            EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2,
+                            Claims = Default.PayloadDictionary
+                        },
+                        JsonWebTokenHandler = new JsonWebTokenHandler(),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer
+                        },
+                        Configuration = configurationWithDecryptionKeys,
+                        ExpectedDecryptionKeys =  new List<SecurityKey>(){ KeyingMaterial.DefaultSymmetricSecurityKey_256 },
+                        Algorithm = JwtConstants.DirectKeyUseAlg,
+                        EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2_NoKeyId
+                   },
+                   new CreateTokenTheoryData
+                   {
+                        TestId = "ValidEncryptionKeyInConfig",
+                        Payload = Default.PayloadString,
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                            EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2,
+                            Claims = Default.PayloadDictionary
+                        },
+                        JsonWebTokenHandler = new JsonWebTokenHandler(),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                            TokenDecryptionKeys = new List<SecurityKey>(){ KeyingMaterial.DefaultSymmetricSecurityKey_512 },
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer
+                        },
+                        Configuration = configurationWithDecryptionKeys,
+                        ExpectedDecryptionKeys =  new List<SecurityKey>(){ KeyingMaterial.DefaultSymmetricSecurityKey_256 },
+                        Algorithm = JwtConstants.DirectKeyUseAlg,
+                        EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2_NoKeyId
+                   },
+                   new CreateTokenTheoryData
+                   {
                         TestId = "Valid",
                         Payload = Default.PayloadString,
                         TokenDescriptor =  new SecurityTokenDescriptor
@@ -2194,7 +2244,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = Default.SymmetricEncryptingCredentials,
-                        ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10516:")
+                        ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10204:")
                     },
                     new CreateTokenTheoryData()
                     {
@@ -2682,7 +2732,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new JwtTheoryData("SymmetricJws_RequireSignedTokens_KeyNotFound")
                     {
                         Token = Default.SymmetricJws,
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501"),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10500"),
                         ValidationParameters = new TokenValidationParameters
                         {
                             ValidateIssuerSigningKey = true,
@@ -2707,7 +2757,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     },
                     new JwtTheoryData("SymmetricJws_RequireSignedTokensNullSigningKey")
                     {
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:"),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10500:"),
                         Token = Default.SymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
@@ -3308,7 +3358,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         IssuerSigningKey = Default.SymmetricSigningKey,
                         ValidIssuer = Default.Issuer
                     },
-                    ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10516:")
+                    ExpectedException = ExpectedException.SecurityTokenExpiredException("IDX10223:")
                 },
                 new CreateTokenTheoryData
                 {
@@ -3322,7 +3372,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         IssuerSigningKey = Default.SymmetricSigningKey,
                     },
-                    ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10516:")
+                    ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10204:")
                 },
                 new CreateTokenTheoryData
                 {
@@ -3339,7 +3389,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         IssuerSigningKey = Default.SymmetricSigningKey,
                     },
-                    ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10516:")
+                    ExpectedException = ExpectedException.SecurityTokenExpiredException("IDX10223:")
                 },
                 new CreateTokenTheoryData
                 {
@@ -3353,8 +3403,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         IssuerSigningKey = Default.SymmetricSigningKey,
                         ValidIssuer = Default.Issuer,
+                        ValidateAudience = false
                     },
-                    ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:")
+                    ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10503:")
                 },
             };
         }
@@ -3447,6 +3498,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public string Payload { get; set; }
 
         public string CompressionAlgorithm { get; set; }
+
+        public BaseConfiguration Configuration { get; set; }
 
         public CompressionProviderFactory CompressionProviderFactory { get; set; }
 
