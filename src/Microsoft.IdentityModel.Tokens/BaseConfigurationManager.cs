@@ -22,7 +22,12 @@ namespace Microsoft.IdentityModel.Tokens
         private BaseConfiguration _lastKnownGoodConfiguration;
         private DateTime? _lastKnownGoodConfigFirstUse = null;
 
-        internal EventBasedLRUCache<BaseConfiguration, DateTime> _lastKnownGoodConfigurationCache;
+        internal EventBasedLRUCache<BaseConfiguration, DateTime> _lastKnownGoodConfigurationCache =
+             new EventBasedLRUCache<BaseConfiguration, DateTime>(
+                    10,
+                    TaskCreationOptions.None,
+                    new BaseConfigurationComparer(),
+                    true);
 
         /// <summary>
         /// Gets or sets the <see cref="TimeSpan"/> that controls how often an automatic metadata refresh should occur.
