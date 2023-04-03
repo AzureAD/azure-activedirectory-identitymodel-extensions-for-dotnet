@@ -8,6 +8,10 @@ IdentityModel Extensions for .NET provide assemblies that are interesting for we
 
 You can find the release notes for each version [here](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases). Older versions can be found [here](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki/Release-Notes).
 
+## Note about 6.28.0
+We delisted 6.28.0 as we found an edge case where a null reference could occur.
+Please use 6.28.1.
+
 ## Note about 6.x
 
 If you noticed, we bumped the release from 5.x to 6.x\
