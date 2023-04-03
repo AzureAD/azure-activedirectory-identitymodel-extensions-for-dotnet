@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
@@ -27,17 +24,12 @@ namespace Microsoft.IdentityModel.TestUtils
         /// Initializes an new instance of <see cref="MockConfigurationManager{T}"/> with a Configuration instance.
         /// </summary>
         /// <param name="configuration">Configuration of type OpenIdConnectConfiguration or OpenIdConnectConfiguration.</param>
-        public MockConfigurationManager(T configuration)
+        public MockConfigurationManager(T configuration) : base()
         {
             if (configuration == null)
                 throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(configuration)));
 
             _configuration = configuration;
-            _lastKnownGoodConfigurationCache = new EventBasedLRUCache<BaseConfiguration, DateTime>(
-                LastKnownGoodConfigurationCacheOptions.DefaultLastKnownGoodConfigurationSizeLimit,
-                TaskCreationOptions.None,
-                new BaseConfigurationComparer(),
-                true);
         }
 
         /// <summary>

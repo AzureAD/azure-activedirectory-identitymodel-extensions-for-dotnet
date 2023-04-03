@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens.Configuration;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -22,12 +23,7 @@ namespace Microsoft.IdentityModel.Tokens
         private BaseConfiguration _lastKnownGoodConfiguration;
         private DateTime? _lastKnownGoodConfigFirstUse = null;
 
-        internal EventBasedLRUCache<BaseConfiguration, DateTime> _lastKnownGoodConfigurationCache =
-             new EventBasedLRUCache<BaseConfiguration, DateTime>(
-                    10,
-                    TaskCreationOptions.None,
-                    new BaseConfigurationComparer(),
-                    true);
+        internal EventBasedLRUCache<BaseConfiguration, DateTime> _lastKnownGoodConfigurationCache;
 
         /// <summary>
         /// Gets or sets the <see cref="TimeSpan"/> that controls how often an automatic metadata refresh should occur.
@@ -58,6 +54,36 @@ namespace Microsoft.IdentityModel.Tokens
         /// 5 minutes is the default time interval that must pass for <see cref="RequestRefresh"/> to obtain a new configuration.
         /// </summary>
         public static readonly TimeSpan DefaultRefreshInterval = new TimeSpan(0, 0, 5, 0);
+
+        /// <summary>
+        /// The default constructor.
+        /// </summary>
+        public BaseConfigurationManager()
+        {
+            _lastKnownGoodConfigurationCache = new EventBasedLRUCache<BaseConfiguration, DateTime>(
+                LKGConfigurationCacheOptions.DefaultLastKnownGoodConfigurationSizeLimit,
+                TaskCreationOptions.None,
+                new BaseConfigurationComparer(),
+                true);
+        }
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="options">The event queue task creation option.</param>
+        /// <param name="removeExpiredValues">Whether or not to remove expired items.</param>
+        /// <param name="taskCreationOptions">The event queue task creation option, default to None instead of LongRunning as LongRunning will always start a task on a new thread instead of ThreadPool.</param>
+        public BaseConfigurationManager(LKGConfigurationCacheOptions options, bool removeExpiredValues = true, TaskCreationOptions taskCreationOptions = TaskCreationOptions.None)
+        {
+            if (options == null)
+                throw LogHelper.LogArgumentNullException(nameof(options));
+
+            _lastKnownGoodConfigurationCache = new EventBasedLRUCache<BaseConfiguration, DateTime>(
+                options.LastKnownGoodConfigurationSizeLimit,
+                taskCreationOptions,
+                options.BaseConfigurationComparer,
+                removeExpiredValues);
+        }
 
         /// <summary>
         /// Obtains an updated version of <see cref="BaseConfiguration"/> if the appropriate refresh interval has passed.
