@@ -137,11 +137,58 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
 
         [Fact]
+        public void BootstrapRefreshIntervalTest()
+        {
+            var context = new CompareContext($"{this}.BootstrapRefreshIntervalTest");
+
+            var documentRetriever = new HttpDocumentRetriever(HttpResponseMessageUtils.SetupHttpClientThatReturns("OpenIdConnectMetadata.json", HttpStatusCode.NotFound));
+            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), documentRetriever) { BootstrapRefreshMaxAttempt = 1 };
+
+            // First time to fetch metadata
+            try
+            {
+                var configuration = configManager.GetConfigurationAsync().Result;
+            }
+            catch (Exception firstFetchMetadataFailure)
+            {
+                // Refresh interval is BootstrapRefreshInterval
+                var syncAfter = configManager.GetType().GetField("_syncAfter", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(configManager);
+                if ((DateTimeOffset)syncAfter > DateTime.UtcNow + configManager.BootstrapRefreshInterval)
+                    context.AddDiff($"Expected the refresh interval is not 30 seconds.");
+
+                if (firstFetchMetadataFailure.InnerException == null)
+                    context.AddDiff($"Expected exception to contain inner exception for fetch metadata failure.");
+
+                // Fetch metadata again during refresh interval, the exception should be same from above
+                try
+                {
+                    var configuration = configManager.GetConfigurationAsync().Result;
+                }
+                catch (Exception secondFetchMetadataFailure)
+                {
+                    if (secondFetchMetadataFailure.InnerException == null)
+                        context.AddDiff($"Expected exception to contain inner exception for fetch metadata failure.");
+
+                    syncAfter = configManager.GetType().GetField("_syncAfter", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(configManager);
+
+                    // Refresh interval is RefreshInterval
+                    if ((DateTimeOffset)syncAfter < DateTime.UtcNow + configManager.BootstrapRefreshInterval &&
+                        (DateTimeOffset)syncAfter > DateTime.UtcNow + configManager.RefreshInterval)
+                        context.AddDiff($"Expected the refresh interval is not 5 minutes.");
+
+                    IdentityComparer.AreEqual(firstFetchMetadataFailure, secondFetchMetadataFailure, context);
+                }
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
         public void GetSets()
         {
             TestUtilities.WriteHeader($"{this}.GetSets", "GetSets", true);
 
-            int ExpectedPropertyCount = 7;
+            int ExpectedPropertyCount = 8;
             var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), new FileDocumentRetriever());
             Type type = typeof(ConfigurationManager<OpenIdConnectConfiguration>);
             PropertyInfo[] properties = type.GetProperties();

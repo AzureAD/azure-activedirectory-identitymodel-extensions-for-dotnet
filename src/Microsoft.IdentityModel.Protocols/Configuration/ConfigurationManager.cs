@@ -29,6 +29,7 @@ namespace Microsoft.IdentityModel.Protocols
         private readonly IConfigurationValidator<T> _configValidator;
         private T _currentConfiguration;
         private Exception _fetchMetadataFailure;
+        private int _bootstrapRefreshRetryCount = 0;
 
         /// <summary>
         /// Static initializer for a new object. Static initializers run before the first instance of the type is created.
@@ -190,7 +191,13 @@ namespace Microsoft.IdentityModel.Protocols
                     catch (Exception ex)
                     {
                         _fetchMetadataFailure = ex;
-                        _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
+                        _bootstrapRefreshRetryCount = (_bootstrapRefreshRetryCount < int.MaxValue) ? _bootstrapRefreshRetryCount + 1 : int.MaxValue;
+
+                        if (_bootstrapRefreshRetryCount <= BootstrapRefreshMaxAttempt)
+                            _syncAfter = DateTimeUtil.Add(now.UtcDateTime, BootstrapRefreshInterval);
+                        else
+                            _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
+
                         if (_currentConfiguration == null) // Throw an exception if there's no configuration to return.
                             throw LogHelper.LogExceptionMessage(
                                 new InvalidOperationException(
