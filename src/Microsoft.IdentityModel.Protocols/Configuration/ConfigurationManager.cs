@@ -23,6 +23,7 @@ namespace Microsoft.IdentityModel.Protocols
         private DateTimeOffset _syncAfter = DateTimeOffset.MinValue;
         private DateTimeOffset _lastRefresh = DateTimeOffset.MinValue;
         private bool _isFirstRefreshRequest = true;
+        private int _bootstrapRefreshAttempted = 0;
 
         private readonly SemaphoreSlim _refreshLock;
         private readonly IDocumentRetriever _docRetriever;
@@ -193,9 +194,9 @@ namespace Microsoft.IdentityModel.Protocols
 
                         if (_currentConfiguration == null)
                         {
-                            if (ex.Data.Contains(HttpDocumentRetriever.StatusCode) &&
-                                (ex.Data[HttpDocumentRetriever.StatusCode].Equals(HttpStatusCode.RequestTimeout) ||
-                                ex.Data[HttpDocumentRetriever.StatusCode].Equals(HttpStatusCode.ServiceUnavailable)))
+                            _bootstrapRefreshAttempted = (_bootstrapRefreshAttempted < int.MaxValue) ? _bootstrapRefreshAttempted + 1 : int.MaxValue;
+
+                            if (_bootstrapRefreshAttempted <= BootstrapRefreshMaxAttempt)
                                 _syncAfter = DateTimeUtil.Add(now.UtcDateTime, BootstrapRefreshInterval);
                             else
                                 _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);

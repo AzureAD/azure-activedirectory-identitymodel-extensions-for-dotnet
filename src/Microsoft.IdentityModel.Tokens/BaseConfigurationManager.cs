@@ -65,6 +65,11 @@ namespace Microsoft.IdentityModel.Tokens
         public TimeSpan BootstrapRefreshInterval { get; } = new TimeSpan(0, 0, 30);
 
         /// <summary>
+        /// 4 is maximum number of attempts to refresh metadata with the<see cref="BootstrapRefreshInterval"/>.
+        /// </summary>
+        public int BootstrapRefreshMaxAttempt { get; internal set; } = 4;
+
+        /// <summary>
         /// Obtains an updated version of <see cref="BaseConfiguration"/> if the appropriate refresh interval has passed.
         /// This method may return a cached version of the configuration.
         /// </summary>
