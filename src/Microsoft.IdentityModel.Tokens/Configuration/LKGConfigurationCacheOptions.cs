@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace Microsoft.IdentityModel.Tokens.Configuration
 {
     /// <summary>
-    /// Specifies the LKGConfigurationCacheOptions which can be used to configure the internal LKG configuration cache.
+    /// Defines the options which can be used to configure the internal LKG configuration cache.
     /// See <see cref="EventBasedLRUCache{TKey, TValue}"/> for more details.
     /// </summary>
     public class LKGConfigurationCacheOptions
