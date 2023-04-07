@@ -71,18 +71,16 @@ namespace Microsoft.IdentityModel.Tokens
         /// Constructor.
         /// </summary>
         /// <param name="options">The event queue task creation option.</param>
-        /// <param name="removeExpiredValues">Whether or not to remove expired items.</param>
-        /// <param name="taskCreationOptions">The event queue task creation option, default to None instead of LongRunning as LongRunning will always start a task on a new thread instead of ThreadPool.</param>
-        public BaseConfigurationManager(LKGConfigurationCacheOptions options, bool removeExpiredValues = true, TaskCreationOptions taskCreationOptions = TaskCreationOptions.None)
+        public BaseConfigurationManager(LKGConfigurationCacheOptions options)
         {
             if (options == null)
                 throw LogHelper.LogArgumentNullException(nameof(options));
 
             _lastKnownGoodConfigurationCache = new EventBasedLRUCache<BaseConfiguration, DateTime>(
                 options.LastKnownGoodConfigurationSizeLimit,
-                taskCreationOptions,
+                options.TaskCreationOptions,
                 options.BaseConfigurationComparer,
-                removeExpiredValues);
+                options.RemoveExpiredValues);
         }
 
         /// <summary>

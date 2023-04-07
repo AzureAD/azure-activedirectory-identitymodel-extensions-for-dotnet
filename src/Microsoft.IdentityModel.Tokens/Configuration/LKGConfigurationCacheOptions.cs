@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Tokens.Configuration
 {
@@ -37,5 +38,15 @@ namespace Microsoft.IdentityModel.Tokens.Configuration
             get { return _lastKnownGoodConfigurationSizeLimit; }
             set { _lastKnownGoodConfigurationSizeLimit = (value > 0) ? value : throw new ArgumentOutOfRangeException(nameof(value)); }
         }
+
+        /// <summary>
+        /// The event queue task creation option, default to None instead of LongRunning as LongRunning will always start a task on a new thread instead of a thread from ThreadPool.
+        /// </summary>
+        public TaskCreationOptions TaskCreationOptions { get; set; } = TaskCreationOptions.None;
+
+        /// <summary>
+        /// Whether or not to remove expired items.
+        /// </summary>
+        public bool RemoveExpiredValues { get; set; } = true;
     }
 }
