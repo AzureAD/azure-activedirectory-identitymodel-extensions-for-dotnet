@@ -162,6 +162,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 // Fetch metadata again during refresh interval, the exception should be same from above
                 try
                 {
+                    configManager.RequestRefresh();
                     var configuration = configManager.GetConfigurationAsync().Result;
                 }
                 catch (Exception secondFetchMetadataFailure)
@@ -172,7 +173,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     syncAfter = configManager.GetType().GetField("_syncAfter", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(configManager);
 
                     // Refresh interval is RefreshInterval
-                    if ((DateTimeOffset)syncAfter < DateTime.UtcNow + configManager.BootstrapRefreshInterval &&
+                    if ((DateTimeOffset)syncAfter < DateTime.UtcNow + configManager.BootstrapRefreshInterval ||
                         (DateTimeOffset)syncAfter > DateTime.UtcNow + configManager.RefreshInterval)
                         context.AddDiff($"Expected the refresh interval is not 5 minutes.");
 
@@ -188,7 +189,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             TestUtilities.WriteHeader($"{this}.GetSets", "GetSets", true);
 
-            int ExpectedPropertyCount = 8;
+            int ExpectedPropertyCount = 9;
             var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), new FileDocumentRetriever());
             Type type = typeof(ConfigurationManager<OpenIdConnectConfiguration>);
             PropertyInfo[] properties = type.GetProperties();
