@@ -14,12 +14,12 @@ namespace Microsoft.IdentityModel.Tokens.Configuration
     public class LKGConfigurationCacheOptions
     {
         private IEqualityComparer<BaseConfiguration> _baseConfigurationComparer = new BaseConfigurationComparer();
-        private int _lastKnownGoodConfigurationSizeLimit = DefaultLastKnownGoodConfigurationSizeLimit;
+        private int _lastKnownGoodConfigurationSizeLimit = DefaultLKGConfigurationSizeLimit;
 
         /// <summary>
         /// 10 is the default size limit of the cache (in number of items) for last known good configuration.
         /// </summary>
-        public static readonly int DefaultLastKnownGoodConfigurationSizeLimit = 10;
+        public static readonly int DefaultLKGConfigurationSizeLimit = 10;
 
         /// <summary>
         /// Gets or sets the BaseConfgiurationComparer that to compare <see cref="BaseConfiguration"/>.

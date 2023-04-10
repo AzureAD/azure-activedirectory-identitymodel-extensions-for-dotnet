@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Tokens
         public BaseConfigurationManager()
         {
             _lastKnownGoodConfigurationCache = new EventBasedLRUCache<BaseConfiguration, DateTime>(
-                LKGConfigurationCacheOptions.DefaultLastKnownGoodConfigurationSizeLimit,
+                LKGConfigurationCacheOptions.DefaultLKGConfigurationSizeLimit,
                 TaskCreationOptions.None,
                 new BaseConfigurationComparer(),
                 true);

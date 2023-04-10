@@ -12,5 +12,9 @@ namespace Microsoft.IdentityModel.Protocols.Configuration
     /// 
     /// All fields/properties are now defined in the Microsoft.IdentityModel.Tokens.Configuration.LKGConfigurationCacheOptions class so they are more accessible from other assemblies/classes.
     /// </summary>
-    public class LastKnownGoodConfigurationCacheOptions : LKGConfigurationCacheOptions { }
+    public class LastKnownGoodConfigurationCacheOptions : LKGConfigurationCacheOptions
+    {
+        /// <inheritdoc/>
+        public static readonly int DefaultLastKnownGoodConfigurationSizeLimit = LKGConfigurationCacheOptions.DefaultLKGConfigurationSizeLimit;
+    }
 }
