@@ -58,13 +58,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// The default constructor.
         /// </summary>
-        public BaseConfigurationManager()
+        public BaseConfigurationManager() : this(new LKGConfigurationCacheOptions())
         {
-            _lastKnownGoodConfigurationCache = new EventBasedLRUCache<BaseConfiguration, DateTime>(
-                LKGConfigurationCacheOptions.DefaultLKGConfigurationSizeLimit,
-                TaskCreationOptions.None,
-                new BaseConfigurationComparer(),
-                true);
         }
 
         /// <summary>
