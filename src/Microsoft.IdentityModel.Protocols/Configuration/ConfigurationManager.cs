@@ -84,6 +84,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <exception cref="ArgumentNullException">If 'docRetriever' is null.</exception>
         /// <exception cref="ArgumentNullException">If 'lkgCacheOptions' is null.</exception>
         public ConfigurationManager(string metadataAddress, IConfigurationRetriever<T> configRetriever, IDocumentRetriever docRetriever, LastKnownGoodConfigurationCacheOptions lkgCacheOptions)
+            : base(lkgCacheOptions)
         {
             if (string.IsNullOrWhiteSpace(metadataAddress))
                 throw LogHelper.LogArgumentNullException(nameof(metadataAddress));
@@ -94,23 +95,14 @@ namespace Microsoft.IdentityModel.Protocols
             if (docRetriever == null)
                 throw LogHelper.LogArgumentNullException(nameof(docRetriever));
 
-            if (lkgCacheOptions == null)
-                throw LogHelper.LogArgumentNullException(nameof(lkgCacheOptions));
-
             MetadataAddress = metadataAddress;
             _docRetriever = docRetriever;
             _configRetriever = configRetriever;
             _refreshLock = new SemaphoreSlim(1);
-
-            _lastKnownGoodConfigurationCache = new EventBasedLRUCache<BaseConfiguration, DateTime>(
-                lkgCacheOptions.LastKnownGoodConfigurationSizeLimit,
-                TaskCreationOptions.None,
-                lkgCacheOptions.BaseConfigurationComparer,
-                true);
         }
 
         /// <summary>
-        /// Instantiates a new <see cref="ConfigurationManager{T}"/> with cinfiguration validator that manages automatic and controls refreshing on configuration data.
+        /// Instantiates a new <see cref="ConfigurationManager{T}"/> with configuration validator that manages automatic and controls refreshing on configuration data.
         /// </summary>
         /// <param name="metadataAddress">The address to obtain configuration.</param>
         /// <param name="configRetriever">The <see cref="IConfigurationRetriever{T}"/></param>
@@ -123,7 +115,7 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
-        /// Instantiates a new <see cref="ConfigurationManager{T}"/> with cinfiguration validator that manages automatic and controls refreshing on configuration data.
+        /// Instantiates a new <see cref="ConfigurationManager{T}"/> with configuration validator that manages automatic and controls refreshing on configuration data.
         /// </summary>
         /// <param name="metadataAddress">The address to obtain configuration.</param>
         /// <param name="configRetriever">The <see cref="IConfigurationRetriever{T}"/></param>
