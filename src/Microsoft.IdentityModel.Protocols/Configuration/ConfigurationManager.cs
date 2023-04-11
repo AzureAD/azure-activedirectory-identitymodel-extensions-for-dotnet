@@ -29,12 +29,12 @@ namespace Microsoft.IdentityModel.Protocols
         private readonly IConfigurationValidator<T> _configValidator;
         private T _currentConfiguration;
         private Exception _fetchMetadataFailure;
-        private int _bootstrapRefreshRetryCount = 0;
+        private TimeSpan _bootstrapRefreshInterval = TimeSpan.FromSeconds(1);
 
-        /// <summary>
-        /// Static initializer for a new object. Static initializers run before the first instance of the type is created.
-        /// </summary>
-        static ConfigurationManager()
+    /// <summary>
+    /// Static initializer for a new object. Static initializers run before the first instance of the type is created.
+    /// </summary>
+    static ConfigurationManager()
         {               
         }
 
@@ -191,21 +191,32 @@ namespace Microsoft.IdentityModel.Protocols
                     catch (Exception ex)
                     {
                         _fetchMetadataFailure = ex;
-                        _bootstrapRefreshRetryCount = (_bootstrapRefreshRetryCount < int.MaxValue) ? _bootstrapRefreshRetryCount + 1 : int.MaxValue;
-
-                        if (_bootstrapRefreshRetryCount <= BootstrapRefreshMaxAttempt)
-                            _syncAfter = DateTimeUtil.Add(now.UtcDateTime, BootstrapRefreshInterval);
-                        else
-                            _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
 
                         if (_currentConfiguration == null) // Throw an exception if there's no configuration to return.
+                        {
+                            if (_bootstrapRefreshInterval < DefaultRefreshInterval)
+                            {
+                                // Adopt exponential backoff for bootstrap refresh interval if it is not longer than 5 minutes.
+                                _bootstrapRefreshInterval += _bootstrapRefreshInterval;
+                                _syncAfter = DateTimeUtil.Add(now.UtcDateTime, _bootstrapRefreshInterval);
+                            }
+                            else
+                            {
+                                _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
+                            }
+
                             throw LogHelper.LogExceptionMessage(
                                 new InvalidOperationException(
                                     LogHelper.FormatInvariant(LogMessages.IDX20803, LogHelper.MarkAsNonPII(MetadataAddress ?? "null"), LogHelper.MarkAsNonPII(ex)), ex));
+                        } 
                         else
+                        {
+                            _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
+
                             LogHelper.LogExceptionMessage(
                                 new InvalidOperationException(
                                     LogHelper.FormatInvariant(LogMessages.IDX20806, LogHelper.MarkAsNonPII(MetadataAddress ?? "null"), LogHelper.MarkAsNonPII(ex)), ex));
+                        }
                     }
                 }
 

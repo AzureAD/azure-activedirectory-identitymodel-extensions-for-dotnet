@@ -45,16 +45,6 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// 30 seconds is the time interval that must pass for <see cref="RequestRefresh"/> before obtain the first configuration.
-        /// </summary>
-        public TimeSpan BootstrapRefreshInterval { get; } = new TimeSpan(0, 0, 30);
-
-        /// <summary>
-        /// 4 is maximum number of attempts to refresh metadata with the<see cref="BootstrapRefreshInterval"/>.
-        /// </summary>
-        public int BootstrapRefreshMaxAttempt { get; internal set; } = 4;
-
-        /// <summary>
         /// 12 hours is the default time interval that afterwards will obtain new configuration.
         /// </summary>
         public static readonly TimeSpan DefaultAutomaticRefreshInterval = new TimeSpan(0, 12, 0, 0);

@@ -142,7 +142,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var context = new CompareContext($"{this}.BootstrapRefreshIntervalTest");
 
             var documentRetriever = new HttpDocumentRetriever(HttpResponseMessageUtils.SetupHttpClientThatReturns("OpenIdConnectMetadata.json", HttpStatusCode.NotFound));
-            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), documentRetriever) { BootstrapRefreshMaxAttempt = 1 };
+            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), documentRetriever);
 
             // First time to fetch metadata
             try
@@ -153,8 +153,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             {
                 // Refresh interval is BootstrapRefreshInterval
                 var syncAfter = configManager.GetType().GetField("_syncAfter", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(configManager);
-                if ((DateTimeOffset)syncAfter > DateTime.UtcNow + configManager.BootstrapRefreshInterval)
-                    context.AddDiff($"Expected the refresh interval is not 30 seconds.");
+                if ((DateTimeOffset)syncAfter > DateTime.UtcNow + TimeSpan.FromSeconds(2))
+                    context.AddDiff($"Expected the refresh interval is not 2 seconds.");
 
                 if (firstFetchMetadataFailure.InnerException == null)
                     context.AddDiff($"Expected exception to contain inner exception for fetch metadata failure.");
@@ -173,7 +173,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     syncAfter = configManager.GetType().GetField("_syncAfter", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(configManager);
 
                     // Refresh interval is RefreshInterval
-                    if ((DateTimeOffset)syncAfter < DateTime.UtcNow + configManager.BootstrapRefreshInterval ||
+                    if ((DateTimeOffset)syncAfter < DateTime.UtcNow + TimeSpan.FromSeconds(2) ||
                         (DateTimeOffset)syncAfter > DateTime.UtcNow + configManager.RefreshInterval)
                         context.AddDiff($"Expected the refresh interval is not 5 minutes.");
 
@@ -189,7 +189,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             TestUtilities.WriteHeader($"{this}.GetSets", "GetSets", true);
 
-            int ExpectedPropertyCount = 9;
+            int ExpectedPropertyCount = 7;
             var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), new FileDocumentRetriever());
             Type type = typeof(ConfigurationManager<OpenIdConnectConfiguration>);
             PropertyInfo[] properties = type.GetProperties();
