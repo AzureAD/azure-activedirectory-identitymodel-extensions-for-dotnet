@@ -196,9 +196,9 @@ namespace Microsoft.IdentityModel.Protocols
                         {
                             if (_bootstrapRefreshInterval < DefaultRefreshInterval)
                             {
-                                // Adopt exponential backoff for bootstrap refresh interval if it is not longer than 5 minutes.
+                                // Adopt exponential backoff for bootstrap refresh interval with a jitter if it is not longer than 5 minutes.
                                 _bootstrapRefreshInterval += _bootstrapRefreshInterval;
-                                _syncAfter = DateTimeUtil.Add(now.UtcDateTime, _bootstrapRefreshInterval);
+                                _syncAfter = DateTimeUtil.Add(now.UtcDateTime, _bootstrapRefreshInterval + TimeSpan.FromMilliseconds(new Random().Next((int)(_bootstrapRefreshInterval.TotalMilliseconds / 2))));
                             }
                             else
                             {
@@ -207,7 +207,7 @@ namespace Microsoft.IdentityModel.Protocols
 
                             throw LogHelper.LogExceptionMessage(
                                 new InvalidOperationException(
-                                    LogHelper.FormatInvariant(LogMessages.IDX20803, LogHelper.MarkAsNonPII(MetadataAddress ?? "null"), LogHelper.MarkAsNonPII(ex)), ex));
+                                    LogHelper.FormatInvariant(LogMessages.IDX20803, LogHelper.MarkAsNonPII(MetadataAddress ?? "null"), LogHelper.MarkAsNonPII(_syncAfter), LogHelper.MarkAsNonPII(ex)), ex));
                         } 
                         else
                         {
