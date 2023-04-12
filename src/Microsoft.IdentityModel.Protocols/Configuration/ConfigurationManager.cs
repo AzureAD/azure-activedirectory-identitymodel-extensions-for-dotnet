@@ -194,11 +194,12 @@ namespace Microsoft.IdentityModel.Protocols
 
                         if (_currentConfiguration == null) // Throw an exception if there's no configuration to return.
                         {
-                            if (_bootstrapRefreshInterval < DefaultRefreshInterval)
+                            if (_bootstrapRefreshInterval < RefreshInterval)
                             {
-                                // Adopt exponential backoff for bootstrap refresh interval with a jitter if it is not longer than 5 minutes.
+                                // Adopt exponential backoff for bootstrap refresh interval with a decorrelated jitter if it is not longer than the refresh interval.
+                                TimeSpan _bootstrapRefreshIntervalWithJitter = TimeSpan.FromSeconds(new Random().Next((int)_bootstrapRefreshInterval.TotalSeconds));
                                 _bootstrapRefreshInterval += _bootstrapRefreshInterval;
-                                _syncAfter = DateTimeUtil.Add(now.UtcDateTime, _bootstrapRefreshInterval + TimeSpan.FromMilliseconds(new Random().Next((int)(_bootstrapRefreshInterval.TotalMilliseconds / 2))));
+                                _syncAfter = DateTimeUtil.Add(now.UtcDateTime, _bootstrapRefreshIntervalWithJitter);
                             }
                             else
                             {

@@ -142,9 +142,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var context = new CompareContext($"{this}.BootstrapRefreshIntervalTest");
 
             var documentRetriever = new HttpDocumentRetriever(HttpResponseMessageUtils.SetupHttpClientThatReturns("OpenIdConnectMetadata.json", HttpStatusCode.NotFound));
-            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), documentRetriever);
+            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), documentRetriever) { RefreshInterval = TimeSpan.FromSeconds(2) };
 
-            // First time to fetch metadata
+            // First time to fetch metadata.
             try
             {
                 var configuration = configManager.GetConfigurationAsync().Result;
@@ -153,13 +153,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             {
                 // Refresh interval is BootstrapRefreshInterval
                 var syncAfter = configManager.GetType().GetField("_syncAfter", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(configManager);
-                if ((DateTimeOffset)syncAfter > DateTime.UtcNow + TimeSpan.FromSeconds(3))
-                    context.AddDiff($"Expected the refresh interval is longer than 3 seconds.");
+                if ((DateTimeOffset)syncAfter > DateTime.UtcNow + TimeSpan.FromSeconds(2))
+                    context.AddDiff($"Expected the refresh interval is longer than 2 seconds.");
 
                 if (firstFetchMetadataFailure.InnerException == null)
                     context.AddDiff($"Expected exception to contain inner exception for fetch metadata failure.");
 
-                // Fetch metadata again during refresh interval, the exception should be same from above
+                // Fetch metadata again during refresh interval, the exception should be same from above.
                 try
                 {
                     configManager.RequestRefresh();
