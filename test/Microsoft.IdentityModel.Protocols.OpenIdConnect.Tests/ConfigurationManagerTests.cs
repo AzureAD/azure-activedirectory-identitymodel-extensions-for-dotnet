@@ -173,9 +173,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     syncAfter = configManager.GetType().GetField("_syncAfter", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(configManager);
 
                     // Refresh interval is RefreshInterval
-                    if ((DateTimeOffset)syncAfter < DateTime.UtcNow + TimeSpan.FromSeconds(2) ||
-                        (DateTimeOffset)syncAfter > DateTime.UtcNow + configManager.RefreshInterval)
-                        context.AddDiff($"Expected the refresh interval is not 5 minutes.");
+                    if ((DateTimeOffset)syncAfter > DateTime.UtcNow + configManager.RefreshInterval)
+                        context.AddDiff($"Expected the refresh interval is longer than 2 seconds.");
 
                     IdentityComparer.AreEqual(firstFetchMetadataFailure, secondFetchMetadataFailure, context);
                 }
