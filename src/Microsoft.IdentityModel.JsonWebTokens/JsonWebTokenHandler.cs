@@ -233,10 +233,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Creates a JWS(Json Web Signature).
+        /// Creates a JWS (Json Web Signature) or a JWE (Json Web Encryption).
         /// </summary>
         /// <param name="tokenDescriptor">A <see cref="SecurityTokenDescriptor"/> that contains details of contents of the token.</param>
-        /// <returns>A JWS in Compact Serialization Format.</returns>
+        /// <returns>A JWS in Compact Serialization Format or a JWE if <see cref="SecurityTokenDescriptor.EncryptingCredentials"/> is specified.</returns>
         public virtual string CreateToken(SecurityTokenDescriptor tokenDescriptor)
         {
             if (tokenDescriptor == null)
