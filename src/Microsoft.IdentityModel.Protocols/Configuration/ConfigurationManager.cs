@@ -118,8 +118,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
         public async Task<T> GetConfigurationAsync(CancellationToken cancel)
         {
-            DateTimeOffset now = DateTimeOffset.UtcNow;
-            if (_currentConfiguration != null && _syncAfter > now)
+            if (_currentConfiguration != null && _syncAfter > DateTimeOffset.UtcNow)
             {
                 return _currentConfiguration;
             }
