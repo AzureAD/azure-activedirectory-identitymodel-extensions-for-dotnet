@@ -2,9 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Text;
-using Microsoft.IdentityModel.Logging;
-using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
+using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -14,128 +12,19 @@ namespace Microsoft.IdentityModel.Tokens
     internal static class InternalValidators
     {
         /// <summary>
-        /// Called after signature validation has failed. Will always throw an exception.
+        /// Called after signature validation has failed to avoid a metadata refresh
         /// </summary>
-        /// <exception cref="SecurityTokenSignatureKeyNotFoundException">
-        /// If the lifetime and issuer are valid
-        /// </exception>
-        /// <exception cref="SecurityTokenUnableToValidateException">
-        /// If the lifetime or issuer are invalid
-        /// </exception>
-        internal static void ValidateLifetimeAndIssuerAfterSignatureNotValidatedJwt(
+        internal static void ValidateAfterSignatureFailed(
             SecurityToken securityToken,
             DateTime? notBefore,
             DateTime? expires,
-            string kid,
+            IEnumerable<string> audiences,
             TokenValidationParameters validationParameters,
-            BaseConfiguration configuration,
-            StringBuilder exceptionStrings,
-            int numKeysInConfiguration,
-            int numKeysInTokenValidationParameters)
+            BaseConfiguration configuration)
         {
-            bool validIssuer = false;
-            bool validLifetime = false;
-
-            try
-            {
-                Validators.ValidateLifetime(notBefore, expires, securityToken, validationParameters);
-                validLifetime = true;
-            }
-            catch (Exception)
-            {
-                // validLifetime will remain false
-            }
-
-            try
-            {
-                Validators.ValidateIssuer(securityToken.Issuer, securityToken, validationParameters, configuration);
-                validIssuer = true;
-            }
-            catch (Exception)
-            {
-                // validIssuer will remain false
-            }
-
-            if (validLifetime && validIssuer)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(TokenLogMessages.IDX10501,
-                    LogHelper.MarkAsNonPII(kid),
-                    LogHelper.MarkAsNonPII(numKeysInTokenValidationParameters),
-                    LogHelper.MarkAsNonPII(numKeysInConfiguration),
-                    exceptionStrings,
-                    securityToken)));
-            else
-            {
-                var validationFailure = ValidationFailure.None;
-
-                if (!validLifetime)
-                    validationFailure |= ValidationFailure.InvalidLifetime;
-
-                if (!validIssuer)
-                    validationFailure |= ValidationFailure.InvalidIssuer;
-
-                throw LogHelper.LogExceptionMessage(new SecurityTokenUnableToValidateException(
-                    validationFailure,
-                    LogHelper.FormatInvariant(TokenLogMessages.IDX10516,
-                    LogHelper.MarkAsNonPII(kid),
-                    LogHelper.MarkAsNonPII(numKeysInTokenValidationParameters),
-                    LogHelper.MarkAsNonPII(numKeysInConfiguration),
-                    exceptionStrings,
-                    securityToken,
-                    LogHelper.MarkAsNonPII(validLifetime),
-                    LogHelper.MarkAsNonPII(validIssuer))));
-            }
-        }
-
-        /// <summary>
-        /// Called after signature validation has failed. Will always throw an exception.
-        /// </summary>
-        /// <exception cref="SecurityTokenSignatureKeyNotFoundException">
-        /// If the lifetime and issuer are valid
-        /// </exception>
-        /// <exception cref="SecurityTokenUnableToValidateException">
-        /// If the lifetime or issuer are invalid
-        /// </exception>
-        internal static void ValidateLifetimeAndIssuerAfterSignatureNotValidatedSaml(SecurityToken securityToken, DateTime? notBefore, DateTime? expires, string keyInfo, TokenValidationParameters validationParameters, StringBuilder exceptionStrings)
-        {
-            bool validIssuer = false;
-            bool validLifetime = false;
-
-            try
-            {
-                Validators.ValidateLifetime(notBefore, expires, securityToken, validationParameters);
-                validLifetime = true;
-            }
-            catch (Exception)
-            {
-                // validLifetime will remain false
-            }
-
-            try
-            {
-                Validators.ValidateIssuer(securityToken.Issuer, securityToken, validationParameters);
-                validIssuer = true;
-            }
-            catch (Exception)
-            {
-                // validIssuer will remain false
-            }
-
-            if (validLifetime && validIssuer)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(TokenLogMessages.IDX10513, keyInfo, exceptionStrings, securityToken)));
-            else
-            {
-                var validationFailure = ValidationFailure.None;
-
-                if (!validLifetime)
-                    validationFailure |= ValidationFailure.InvalidLifetime;
-
-                if (!validIssuer)
-                    validationFailure |= ValidationFailure.InvalidIssuer;
-
-                throw LogHelper.LogExceptionMessage(new SecurityTokenUnableToValidateException(
-                    validationFailure,
-                    LogHelper.FormatInvariant(TokenLogMessages.IDX10515, keyInfo, exceptionStrings, securityToken, LogHelper.MarkAsNonPII(validLifetime), LogHelper.MarkAsNonPII(validIssuer))));
-            }
+            Validators.ValidateLifetime(notBefore, expires, securityToken, validationParameters);
+            Validators.ValidateIssuer(securityToken.Issuer, securityToken, validationParameters, configuration);
+            Validators.ValidateAudience(audiences, securityToken, validationParameters);
         }
     }
 }

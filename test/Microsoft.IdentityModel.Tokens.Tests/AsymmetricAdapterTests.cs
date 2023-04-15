@@ -24,7 +24,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             try
             {
-#if NET461 || NET472 || NETCOREAPP2_1 || NET6_0
+#if NET461 || NET462 || NET472 || NETCOREAPP2_1 || NET6_0
                 AsymmetricAdapter asymmetricdapter = new AsymmetricAdapter(theoryData.SecurityKey, theoryData.Algorithm, hashAlgorithm, SupportedAlgorithms.GetHashAlgorithmName(theoryData.Algorithm), true);
 #else
                 AsymmetricAdapter asymmetricdapter = new AsymmetricAdapter(theoryData.SecurityKey, theoryData.Algorithm, hashAlgorithm, true);
@@ -59,7 +59,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
                 // RSA
                 // RSACertificateExtensions.GetRSAPrivateKey - this results in 
-                #if NET461 || NET472 || NETCOREAPP2_1 || NET6_0
+                #if NET461 || NET462 || NET472 || NETCOREAPP2_1 || NET6_0
                 new AsymmetricAdapterTheoryData
                 {
                     Algorithm = SecurityAlgorithms.RsaSha256,

@@ -3,9 +3,12 @@
 
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens.Configuration;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -19,6 +22,8 @@ namespace Microsoft.IdentityModel.Tokens
         private TimeSpan _lastKnownGoodLifetime = DefaultLastKnownGoodConfigurationLifetime;
         private BaseConfiguration _lastKnownGoodConfiguration;
         private DateTime? _lastKnownGoodConfigFirstUse = null;
+
+        internal EventBasedLRUCache<BaseConfiguration, DateTime> _lastKnownGoodConfigurationCache;
 
         /// <summary>
         /// Gets or sets the <see cref="TimeSpan"/> that controls how often an automatic metadata refresh should occur.
@@ -51,6 +56,29 @@ namespace Microsoft.IdentityModel.Tokens
         public static readonly TimeSpan DefaultRefreshInterval = new TimeSpan(0, 0, 5, 0);
 
         /// <summary>
+        /// The default constructor.
+        /// </summary>
+        public BaseConfigurationManager() : this(new LKGConfigurationCacheOptions())
+        {
+        }
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="options">The event queue task creation option.</param>
+        public BaseConfigurationManager(LKGConfigurationCacheOptions options)
+        {
+            if (options == null)
+                throw LogHelper.LogArgumentNullException(nameof(options));
+
+            _lastKnownGoodConfigurationCache = new EventBasedLRUCache<BaseConfiguration, DateTime>(
+                options.LastKnownGoodConfigurationSizeLimit,
+                options.TaskCreationOptions,
+                options.BaseConfigurationComparer,
+                options.RemoveExpiredValues);
+        }
+
+        /// <summary>
         /// Obtains an updated version of <see cref="BaseConfiguration"/> if the appropriate refresh interval has passed.
         /// This method may return a cached version of the configuration.
         /// </summary>
@@ -61,6 +89,15 @@ namespace Microsoft.IdentityModel.Tokens
         public virtual Task<BaseConfiguration> GetBaseConfigurationAsync(CancellationToken cancel)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets all valid last known good configurations.
+        /// </summary>
+        /// <returns>A collection of all valid last known good configurations.</returns>
+        internal ICollection<BaseConfiguration> GetValidLkgConfigurations()
+        {
+            return _lastKnownGoodConfigurationCache.ToArray().Where(x => x.Value.Value > DateTime.UtcNow).Select(x => x.Key).ToArray();
         }
 
         /// <summary>
@@ -76,6 +113,9 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 _lastKnownGoodConfiguration = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
                 _lastKnownGoodConfigFirstUse = DateTime.UtcNow;
+
+                // LRU cache will remove the expired configuration
+                _lastKnownGoodConfigurationCache.SetValue(_lastKnownGoodConfiguration, DateTime.UtcNow + LastKnownGoodLifetime, DateTime.UtcNow + LastKnownGoodLifetime);
             }
         }
 

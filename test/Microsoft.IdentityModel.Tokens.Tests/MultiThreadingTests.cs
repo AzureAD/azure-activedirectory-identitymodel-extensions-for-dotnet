@@ -152,7 +152,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
                 var jwtEncryptedDir = jwtSecurityTokenHandler.CreateEncodedJwt(securityTokenDescriptorEncryptedDir);
 
-#if NET452 || NET461 || NET472
+#if NET452 || NET461 || NET462 || NET472
                 // RSACng 
                 var securityTokenDescriptorRsaCng = new SecurityTokenDescriptor
                 {
@@ -235,7 +235,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         TokenDescriptor = securityTokenDescriptorEncryptedDir,
                         ValidationParameters = tokenValidationParametersEncryptedDir
                     },
-#if NET452 || NET461 || NET472
+#if NET452 || NET461 || NET462 || NET472
                     new MultiThreadingTheoryData
                     {
                         JwtSecurityTokenHandler = jwtSecurityTokenHandler,

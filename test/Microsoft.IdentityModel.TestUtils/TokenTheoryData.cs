@@ -12,7 +12,10 @@ namespace Microsoft.IdentityModel.TestUtils
     {
         public TokenTheoryData()
         {
+        }
 
+        public TokenTheoryData(string testId) : base(testId)
+        {
         }
 
         public TokenTheoryData(TokenTheoryData other)

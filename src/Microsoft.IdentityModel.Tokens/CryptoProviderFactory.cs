@@ -318,7 +318,7 @@ namespace Microsoft.IdentityModel.Tokens
             return CreateSignatureProvider(key, algorithm, false, cacheProvider);
         }
 
-#if NET461 || NET472 || NETSTANDARD2_0 || NET6_0
+#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0
         /// <summary>
         /// Creates a <see cref="HashAlgorithm"/> for a specific algorithm.
         /// </summary>

@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var expectedException = ExpectedException.NotSupportedException();
 #endif
 
-#if NET461 || NET472 || NET_CORE
+#if NET461 || NET462 || NET472 || NET_CORE
             var expectedException = ExpectedException.NoExceptionExpected;
 #endif
             try
@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             expectedException = ExpectedException.NotSupportedException("IDX10687:");
 #endif
 
-#if NET461 || NET472 || NET_CORE
+#if NET461 || NET462 || NET472 || NET_CORE
             expectedException = ExpectedException.NoExceptionExpected;
 #endif
 
@@ -117,7 +117,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     },
                     theoryData);
 
-#if NET461 || NET472 || NET_CORE
+#if NET461 || NET462 || NET472 || NET_CORE
                 theoryData.Add(new SignatureProviderTheoryData()
                 {
                     SigningAlgorithm = SecurityAlgorithms.RsaSsaPssSha512,
@@ -161,7 +161,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         SigningKey = new RsaSecurityKey(certTuple.Item1.PrivateKey as RSA),
                         TestId = "CapiCapi" + certTuple.Item3,
                         VerifyKey = new RsaSecurityKey(certTuple.Item2.PublicKey.Key as RSA),
-#if NET461 || NET472
+#if NET461 || NET462 || NET472
                         ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
 #elif NET_CORE
                         ExpectedException = ExpectedException.NoExceptionExpected,
@@ -175,7 +175,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         SigningKey = new RsaSecurityKey(certTuple.Item1.PrivateKey as RSA),
                         TestId = "CapiCng" + certTuple.Item3,
                         VerifyKey = new RsaSecurityKey(certTuple.Item2.GetRSAPublicKey()),
-#if NET461 || NET472
+#if NET461 || NET462 || NET472
                         ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
 #elif NET_CORE
                         ExpectedException = ExpectedException.NoExceptionExpected,
@@ -189,7 +189,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         SigningKey = new RsaSecurityKey(certTuple.Item1.GetRSAPrivateKey()),
                         TestId = "CngCapi" + certTuple.Item3,
                         VerifyKey = new RsaSecurityKey(certTuple.Item2.PublicKey.Key as RSA),
-#if NET461 || NET472
+#if NET461 || NET462 || NET472
                         ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
 #elif NET_CORE
                         ExpectedException = ExpectedException.NoExceptionExpected,

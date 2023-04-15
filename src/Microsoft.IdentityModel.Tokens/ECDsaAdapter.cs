@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.Tokens
             return CreateECDsaFunction(jsonWebKey, usePrivateKey);
         }
 
-#if NET45 || NET461 || NETSTANDARD2_0
+#if NET45 || NET461 || NET462 || NETSTANDARD2_0
         /// <summary>
         /// Creates an ECDsa object using the <paramref name="jsonWebKey"/> and <paramref name="usePrivateKey"/>.
         /// 'ECParameters' structure is available in .NET Framework 4.7+, .NET Standard 1.6+, and .NET Core 1.0+.
