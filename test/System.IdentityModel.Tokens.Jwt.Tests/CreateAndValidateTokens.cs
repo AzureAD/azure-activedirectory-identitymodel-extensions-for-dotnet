@@ -615,7 +615,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters
             });
 
-#if NET461 || NET_CORE
+#if NET461 || NET462 || NET_CORE
             // RsaPss is not supported on .NET < 4.6
             var rsaPssSigningCredentials = new SigningCredentials(Default.AsymmetricSigningKey, SecurityAlgorithms.RsaSsaPssSha256);
             theoryData.Add(new JwtTheoryData
@@ -836,7 +836,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     IssuerSigningKey = NotDefault.SymmetricSigningKey256,
                     TokenDecryptionKey = Default.SymmetricEncryptionKey256,
                 },
-                ExpectedException.SecurityTokenUnableToValidateException("IDX10516:")
+                ExpectedException.SecurityTokenInvalidIssuerException("IDX10204:")
             );
 
             // encryption key not found
@@ -956,7 +956,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     ValidateLifetime = false
                 },
                 expectedPayload,
-                ExpectedException.SecurityTokenUnableToValidateException("IDX10516:")
+                ExpectedException.SecurityTokenInvalidIssuerException("IDX10204:")
             );
 
             theoryData.Add(

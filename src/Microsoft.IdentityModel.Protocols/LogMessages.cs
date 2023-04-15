@@ -21,7 +21,7 @@ namespace Microsoft.IdentityModel.Protocols
         internal const string IDX20108 = "IDX20108: The address specified '{0}' is not valid as per HTTPS scheme. Please specify an https address for security reasons. If you want to test with http address, set the RequireHttps property  on IDocumentRetriever to false.";
 
         // configuration retrieval errors
-        internal const string IDX20803 = "IDX20803: Unable to obtain configuration from: '{0}'. Exception: '{1}.";
+        internal const string IDX20803 = "IDX20803: Unable to obtain configuration from: '{0}'. Will retry at '{1}'. Exception: '{2}'.";
         internal const string IDX20804 = "IDX20804: Unable to retrieve document from: '{0}'.";
         internal const string IDX20805 = "IDX20805: Obtaining information from metadata endpoint: '{0}'.";
         internal const string IDX20806 = "IDX20806: Unable to obtain an updated configuration from: '{0}'. Returning the current configuration. Exception: '{1}.";

@@ -8,6 +8,10 @@ IdentityModel Extensions for .NET provide assemblies that are interesting for we
 
 You can find the release notes for each version [here](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases). Older versions can be found [here](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki/Release-Notes).
 
+## Note about 6.28.0
+We delisted 6.28.0 as we found an edge case where a null reference could occur.
+Please use 6.28.1.
+
 ## Note about 6.x
 
 If you noticed, we bumped the release from 5.x to 6.x\
@@ -53,7 +57,7 @@ The scenarios supported by IdentityModel extensions for .NET are described in [S
 - [Developing ASP.NET Apps with Azure Active Directory](https://docs.microsoft.com/en-us/aspnet/identity/overview/getting-started/developing-aspnet-apps-with-windows-azure-active-directory)
 - [Validating tokens](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki/ValidatingTokens)
 - more generally, the library's [Wiki](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki)
-- the [reference documentation](https://docs.microsoft.com/en-us/dotnet/api/overview/azure/activedirectory/client?view=azure-dotnet)
+- the [reference documentation](https://learn.microsoft.com/dotnet/api/microsoft.identitymodel.jsonwebtokens.jsonwebtokenhandler?view=msal-web-dotnet-latest)
 
 ## Community Help and Support
 

@@ -224,6 +224,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 #elif NET461
             if (!message.SkuTelemetryValue.Equals("ID_NET461"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET461");
+#elif NET462
+            if (!message.SkuTelemetryValue.Equals("ID_NET462"))
+                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET462");
 #elif NET472
             if (!message.SkuTelemetryValue.Equals("ID_NET472"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET472");
