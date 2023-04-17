@@ -8,9 +8,11 @@ using System.IdentityModel.Tokens.Jwt;
 using System.IdentityModel.Tokens.Jwt.Tests;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.Protocols;
@@ -2573,6 +2575,37 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        [Theory, MemberData(nameof(ValidateJweTestCases))]
+        public async Task ValidateJWEAsync(JwtTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ValidateJWEAsync", theoryData);
+
+            try
+            {
+                var handler = new JsonWebTokenHandler();
+                var jwt = handler.ReadJsonWebToken(theoryData.Token);
+                var validationResult = await handler.ValidateTokenAsync(jwt, theoryData.ValidationParameters).ConfigureAwait(false);
+                var rawTokenValidationResult = await handler.ValidateTokenAsync(theoryData.Token, theoryData.ValidationParameters).ConfigureAwait(false);
+                IdentityComparer.AreEqual(validationResult, rawTokenValidationResult, context);
+
+                if (validationResult.Exception != null)
+                {
+                    if (validationResult.IsValid)
+                        context.AddDiff("validationResult.IsValid, validationResult.Exception != null");
+
+                    throw validationResult.Exception;
+                }
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
         public static TheoryData<JwtTheoryData> ValidateJweTestCases
         {
             get
@@ -2669,6 +2702,36 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     },
                 };
             }
+        }
+
+        [Theory, MemberData(nameof(ValidateJwsTestCases))]
+        public void ValidateJWSAsync(JwtTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ValidateJWSAsync", theoryData);
+
+            try
+            {
+                var handler = new JsonWebTokenHandler();
+                var validationResult = handler.ValidateToken(theoryData.Token, theoryData.ValidationParameters);
+                var rawTokenValidationResult = handler.ValidateToken(theoryData.Token, theoryData.ValidationParameters);
+                IdentityComparer.AreEqual(validationResult, rawTokenValidationResult, context);
+
+                if (validationResult.Exception != null)
+                {
+                    if (validationResult.IsValid)
+                        context.AddDiff("validationResult.IsValid, validationResult.Exception != null");
+
+                    throw validationResult.Exception;
+                }
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         [Theory, MemberData(nameof(ValidateJwsTestCases))]
@@ -2909,6 +2972,42 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 var handler = new JsonWebTokenHandler();
                 AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).ConfigurationManagerV1 = theoryData.ValidationParameters.ConfigurationManager;
                 var validationResult = handler.ValidateToken(theoryData.Token, theoryData.ValidationParameters);
+                if (validationResult.IsValid)
+                {
+                    if (theoryData.ShouldSetLastKnownConfiguration && theoryData.ValidationParameters.ConfigurationManager.LastKnownGoodConfiguration == null)
+                        context.AddDiff("validationResult.IsValid, but the configuration was not set as the LastKnownGoodConfiguration");
+                }
+                if (validationResult.Exception != null)
+                {
+                    if (validationResult.IsValid)
+                        context.AddDiff("validationResult.IsValid, validationResult.Exception != null");
+
+                    throw validationResult.Exception;
+                }
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Theory, MemberData(nameof(ValidateJwsWithConfigTheoryData))]
+        public async Task ValidateJWSWithConfigAsync(JwtTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ValidateJWSWithConfigAsync", theoryData);
+            try
+            {
+                var handler = new JsonWebTokenHandler();
+                var jwt = handler.ReadJsonWebToken(theoryData.Token);
+                AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).ConfigurationManagerV1 = theoryData.ValidationParameters.ConfigurationManager;
+                var validationResult = await handler.ValidateTokenAsync(jwt, theoryData.ValidationParameters).ConfigureAwait(false);
+                var rawTokenValidationResult = await handler.ValidateTokenAsync(theoryData.Token, theoryData.ValidationParameters).ConfigureAwait(false);
+                IdentityComparer.AreEqual(validationResult, rawTokenValidationResult, context);
+
                 if (validationResult.IsValid)
                 {
                     if (theoryData.ShouldSetLastKnownConfiguration && theoryData.ValidationParameters.ConfigurationManager.LastKnownGoodConfiguration == null)
