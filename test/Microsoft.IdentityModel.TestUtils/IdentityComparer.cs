@@ -145,6 +145,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 { typeof(Uri).ToString(), AreUrisEqual },
                 { typeof(X509Data).ToString(), CompareAllPublicProperties },
                 { typeof(X509SigningCredentials).ToString(), CompareAllPublicProperties },
+                { typeof(TokenValidationResult).ToString(), CompareAllPublicProperties },
             };
 
         public static bool AreBoolsEqual(object object1, object object2, CompareContext context)
@@ -970,8 +971,8 @@ namespace Microsoft.IdentityModel.TestUtils
             Type type = obj1.GetType();
             var localContext = new CompareContext(context);
 
-            // public instance properties
-            var propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            // exclude all public instance properties that have index parameter(s), for example, an indexer
+            var propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(p => !p.GetIndexParameters().Any());
 
             // Touch each public property
             foreach (var propertyInfo in propertyInfos)
