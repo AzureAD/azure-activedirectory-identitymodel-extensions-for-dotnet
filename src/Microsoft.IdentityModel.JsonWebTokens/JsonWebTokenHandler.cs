@@ -1547,7 +1547,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
             }
 
-            if (keys == null && validationParameters.TryAllIssuerSigningKeys)
+            if (validationParameters.TryAllIssuerSigningKeys && keys.IsNullOrEmpty())
             {
                 // control gets here if:
                 // 1. User specified delegate: IssuerSigningKeyResolver returned null
