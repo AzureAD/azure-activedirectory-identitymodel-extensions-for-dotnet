@@ -3,9 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -235,10 +233,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Creates a JWS(Json Web Signature).
+        /// Creates a JWS (Json Web Signature) or a JWE (Json Web Encryption).
         /// </summary>
         /// <param name="tokenDescriptor">A <see cref="SecurityTokenDescriptor"/> that contains details of contents of the token.</param>
-        /// <returns>A JWS in Compact Serialization Format.</returns>
+        /// <returns>A JWS in Compact Serialization Format or a JWE if <see cref="SecurityTokenDescriptor.EncryptingCredentials"/> is specified.</returns>
         public virtual string CreateToken(SecurityTokenDescriptor tokenDescriptor)
         {
             if (tokenDescriptor == null)
@@ -1194,9 +1192,36 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 TokenValidationResult result = ReadToken(token, validationParameters);
                 if (result.IsValid)
-                    return await ValidateTokenAsync(result.SecurityToken as JsonWebToken, validationParameters).ConfigureAwait(false);
+                    return await ValidateTokenAsync(result.SecurityToken, validationParameters).ConfigureAwait(false);
 
                 return result;
+            }
+            catch (Exception ex)
+            {
+                return new TokenValidationResult
+                {
+                    Exception = ex,
+                    IsValid = false
+                };
+            }
+        }
+
+        /// <inheritdoc/>
+        public override async Task<TokenValidationResult> ValidateTokenAsync(SecurityToken token, TokenValidationParameters validationParameters)
+        {
+            if (token == null)
+                throw LogHelper.LogArgumentNullException(nameof(token));
+
+            if (validationParameters == null)
+                return new TokenValidationResult { Exception = LogHelper.LogArgumentNullException(nameof(validationParameters)), IsValid = false };
+
+            var jwt = token as JsonWebToken;
+            if (jwt == null)
+                return new TokenValidationResult { Exception = LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14100, token))), IsValid = false };
+
+            try
+            {
+                return await ValidateTokenAsync(jwt, validationParameters).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -1232,7 +1257,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     return new TokenValidationResult
                     {
-                        Exception = LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14100, token, ex))),
+                        Exception = LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14100, token), ex)),
                         IsValid = false
                     };
                 }

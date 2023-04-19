@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         internal const string IDX21321 = "IDX21321: The 'nonce' found in the jwt token did not match the expected nonce.\nexpected: '{0}'\nfound in jwt: '{1}'.\njwt: '{2}'.";
         internal const string IDX21322 = "IDX21322: RequireNonce is false, validationContext.Nonce is null and there is no 'nonce' in the OpenIdConnect Response to validate.";
         internal const string IDX21323 = "IDX21323: RequireNonce is '{0}'. OpenIdConnectProtocolValidationContext.Nonce was null, OpenIdConnectProtocol.ValidatedIdToken.Payload.Nonce was not null. The nonce cannot be validated. If you don't need to check the nonce, set OpenIdConnectProtocolValidator.RequireNonce to 'false'. Note if a 'nonce' is found it will be evaluated.";
-        internal const string IDX21324 = "IDX21324: The 'nonce' has expired: '{0}'. Time from 'nonce': '{1}', Current Time: '{2}'. NonceLifetime is: '{3}'.";
+        internal const string IDX21324 = "IDX21324: The 'nonce' has expired: '{0}'. Time from 'nonce' (UTC): '{1}', Current Time (UTC): '{2}'. NonceLifetime is: '{3}'.";
         internal const string IDX21325 = "IDX21325: The 'nonce' did not contain a timestamp: '{0}'.\nFormat expected is: <epochtime>.<noncedata>.";
         internal const string IDX21326 = "IDX21326: The 'nonce' timestamp could not be converted to a positive integer (greater than 0).\ntimestamp: '{0}'\nnonce: '{1}'.";
         internal const string IDX21327 = "IDX21327: The 'nonce' timestamp: '{0}', could not be converted to a DateTime using DateTime.FromBinary({0}).\nThe value must be between: '{1}' and '{2}'.";
