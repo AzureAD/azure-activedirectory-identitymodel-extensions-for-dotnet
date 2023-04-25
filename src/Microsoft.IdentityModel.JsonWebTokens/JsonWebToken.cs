@@ -583,6 +583,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             EncodedToken = encodedJson;
         }
 
+        /// <summary>
+        /// Serializes the <see cref="JsonWebToken"/>.
+        /// </summary>
+        /// <returns>A string containing the header and payload in JSON format.</returns>
+        public override string ToString()
+        {
+            if (!IsEncrypted)
+                return Header.ToString() + "." + Payload.ToString();
+            else
+                return Header.ToString()  + "." + EncryptedKey + "." + InitializationVector + "." + Ciphertext;
+        }
+
 #if NET45
         /// <summary>
         ///
@@ -590,7 +602,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal byte[] SignatureBytes { get; set; }
 #endif
 
-#region Claims
+        #region Claims
         /// <summary>
         /// Gets the 'value' of the 'actort' claim the payload.
         /// </summary>

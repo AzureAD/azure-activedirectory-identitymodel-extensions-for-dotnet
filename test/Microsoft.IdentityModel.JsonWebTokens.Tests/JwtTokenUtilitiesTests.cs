@@ -3,8 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
@@ -14,6 +17,52 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
     public class JwtTokenUtilitiesTests
     {
+        // Used for formatting a message for testing with one parameter.
+        private const string TestMessageOneParam = "This is the parameter: '{0}'.";
+
+        [Fact]
+        public void LogExceptionsWithStringJwe_JsonWebTokenHandler()
+        {
+            SampleListener listener = new SampleListener();
+            IdentityModelEventSource.ShowPII = true;
+            IdentityModelEventSource.Logger.LogLevel = EventLevel.Error;
+            listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Error);
+
+            var jweTokenDescriptor = new SecurityTokenDescriptor
+            {
+                SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes256_Sha512_512,
+                Claims = Default.PayloadDictionary
+            };
+
+            string jwe = new JsonWebTokenHandler().CreateToken(jweTokenDescriptor);
+            var exception = LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TestMessageOneParam, JwtTokenUtilities.PrepareSecurityArtifact(jwe))));
+
+            Assert.Contains(jwe.Substring(0, jwe.LastIndexOf(".")), listener.TraceBuffer);
+            Assert.DoesNotContain(jwe.Substring(jwe.LastIndexOf(".")), listener.TraceBuffer);
+        }
+
+        [Fact]
+        public void LogExceptionsWithStringJws_JsonWebTokenHandler()
+        {
+            SampleListener listener = new SampleListener();
+            IdentityModelEventSource.ShowPII = true;
+            IdentityModelEventSource.Logger.LogLevel = EventLevel.Error;
+            listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Error);
+
+            var jwsTokenDescriptor = new SecurityTokenDescriptor
+            {
+                SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                Subject = new ClaimsIdentity(Default.PayloadClaims)
+            };
+
+            string jws = new JsonWebTokenHandler().CreateToken(jwsTokenDescriptor);
+            var exception = LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TestMessageOneParam, JwtTokenUtilities.PrepareSecurityArtifact(jws))));
+
+            Assert.Contains(jws.Substring(0, jws.LastIndexOf(".")), listener.TraceBuffer);
+            Assert.DoesNotContain(jws.Substring(jws.LastIndexOf(".")), listener.TraceBuffer);
+        }
+
         [Fact]
         public void ClaimTypeMappingIsIndependent()
         {

@@ -68,7 +68,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters.AudienceValidator != null)
             {
                 if (!validationParameters.AudienceValidator(audiences, securityToken, validationParameters))
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException(LogHelper.FormatInvariant(LogMessages.IDX10231, securityToken))
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException(LogHelper.FormatInvariant(LogMessages.IDX10231, securityToken.ToString()))
                     {
                         InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences)
                     });
@@ -413,7 +413,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters.LifetimeValidator != null)
             {
                 if (!validationParameters.LifetimeValidator(notBefore, expires, securityToken, validationParameters))
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidLifetimeException(LogHelper.FormatInvariant(LogMessages.IDX10230, securityToken))
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidLifetimeException(LogHelper.FormatInvariant(LogMessages.IDX10230, securityToken.ToString()))
                         { NotBefore = notBefore, Expires = expires });
 
                 return;
@@ -467,7 +467,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters.TokenReplayValidator != null)
             {
                 if (!validationParameters.TokenReplayValidator(expirationTime, securityToken, validationParameters))
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenReplayDetectedException(LogHelper.FormatInvariant(LogMessages.IDX10228, securityToken)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenReplayDetectedException(LogHelper.FormatInvariant(LogMessages.IDX10228, securityToken.ToString())));
                 return;
             }
 
@@ -481,13 +481,13 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters.TokenReplayCache != null)
             {
                 if (!expirationTime.HasValue)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenNoExpirationException(LogHelper.FormatInvariant(LogMessages.IDX10227, securityToken)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenNoExpirationException(LogHelper.FormatInvariant(LogMessages.IDX10227, securityToken.ToString())));
 
                 if (validationParameters.TokenReplayCache.TryFind(securityToken))
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenReplayDetectedException(LogHelper.FormatInvariant(LogMessages.IDX10228, securityToken)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenReplayDetectedException(LogHelper.FormatInvariant(LogMessages.IDX10228, securityToken.ToString())));
 
                 if (!validationParameters.TokenReplayCache.TryAdd(securityToken, expirationTime.Value))
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenReplayAddFailedException(LogHelper.FormatInvariant(LogMessages.IDX10229, securityToken)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenReplayAddFailedException(LogHelper.FormatInvariant(LogMessages.IDX10229, securityToken.ToString())));
             }
 
             // if it reaches here, that means no token replay is detected.
