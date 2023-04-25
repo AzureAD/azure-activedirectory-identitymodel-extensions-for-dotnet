@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -441,29 +442,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <remarks>If key fails to resolve, then null is returned</remarks>
         internal static SecurityKey ResolveTokenSigningKey(string kid, string x5t, TokenValidationParameters validationParameters, BaseConfiguration configuration)
         {
-            if (configuration?.SigningKeys != null)
-            {
+            return ResolveTokenSigningKeyUsingConfiguration(kid, x5t, configuration) ?? ResolveTokenSigningKeyUsingValidationParameters(kid, x5t, validationParameters);
+        }
 
-                if (!string.IsNullOrEmpty(kid))
-                {
-                    foreach (SecurityKey signingKey in configuration.SigningKeys)
-                    {
-                        if (signingKey != null && string.Equals(signingKey.KeyId, kid, signingKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
-                            return signingKey;
-                    }
-                }
-
-                if (!string.IsNullOrEmpty(x5t))
-                {
-                    foreach (SecurityKey signingKey in configuration.SigningKeys)
-                    {
-                        if (signingKey != null && string.Equals(signingKey.KeyId, x5t))
-                            return signingKey;
-                    }
-                }
-            }
-
-            return ResolveTokenSigningKey(kid, x5t, validationParameters);
+        /// <summary>
+        /// Returns a <see cref="SecurityKey"/> to use when validating the signature of a token.
+        /// </summary>
+        /// <param name="kid">The <see cref="string"/> kid field of the token being validated</param>
+        /// <param name="x5t">The <see cref="string"/> x5t field of the token being validated</param>
+        /// <param name="configuration">The <see cref="BaseConfiguration"/> that will be used along with the <see cref="TokenValidationParameters"/> to resolve the signing key</param>
+        /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
+        /// <remarks>If key fails to resolve, then null is returned</remarks>
+        internal static SecurityKey ResolveTokenSigningKeyUsingConfiguration(string kid, string x5t, BaseConfiguration configuration)
+        {
+            return ResolveTokenSigningKey(kid, x5t, configuration?.SigningKeys);
         }
 
         /// <summary>
@@ -474,19 +466,38 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/>  required for validation.</param>
         /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
         /// <remarks>If key fails to resolve, then null is returned</remarks>
-        internal static SecurityKey ResolveTokenSigningKey(string kid, string x5t, TokenValidationParameters validationParameters)
+        internal static SecurityKey ResolveTokenSigningKeyUsingValidationParameters(string kid, string x5t, TokenValidationParameters validationParameters)
         {
-            if (!string.IsNullOrEmpty(kid))
-            {
-                if (validationParameters.IssuerSigningKey != null
-                    && string.Equals(validationParameters.IssuerSigningKey.KeyId, kid, validationParameters.IssuerSigningKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
-                    return validationParameters.IssuerSigningKey;
+            return ResolveTokenSigningKey(kid, x5t, ConcatSigningKeys(validationParameters));
+        }
 
-                if (validationParameters.IssuerSigningKeys != null)
+        /// <summary>
+        /// Returns a <see cref="SecurityKey"/> to use when validating the signature of a token.
+        /// </summary>
+        /// <param name="kid">The <see cref="string"/> kid field of the token being validated</param>
+        /// <param name="x5t">The <see cref="string"/> x5t field of the token being validated</param>
+        /// <param name="signingKeys">A collection of <see cref="SecurityKey"/> a signing key to be resolved from.</param>
+        /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
+        /// <remarks>If key fails to resolve, then null is returned</remarks>
+        internal static SecurityKey ResolveTokenSigningKey(string kid, string x5t, IEnumerable<SecurityKey> signingKeys)
+        {
+            if (signingKeys == null)
+                return null;
+
+            foreach (SecurityKey signingKey in signingKeys)
+            {
+                if (signingKey != null)
                 {
-                    foreach (SecurityKey signingKey in validationParameters.IssuerSigningKeys)
+                    if (signingKey is X509SecurityKey x509Key)
                     {
-                        if (signingKey != null && string.Equals(signingKey.KeyId, kid, signingKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+                        if (string.Equals(signingKey.KeyId, kid, StringComparison.OrdinalIgnoreCase) || string.Equals(x509Key.X5t, x5t, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return signingKey;
+                        }
+                    }
+                    else
+                    {
+                        if (string.Equals(signingKey.KeyId, kid) || string.Equals(signingKey.KeyId, x5t))
                         {
                             return signingKey;
                         }
@@ -494,23 +505,40 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
             }
 
-            if (!string.IsNullOrEmpty(x5t))
+            return null;
+        }
+
+        internal static IEnumerable<SecurityKey> ConcatSigningKeys(TokenValidationParameters tvp)
+        {
+            if (tvp == null)
+                yield break;
+
+            yield return tvp.IssuerSigningKey;
+            if (tvp.IssuerSigningKeys != null)
             {
-                if (validationParameters.IssuerSigningKey != null)
+                foreach (var key in tvp.IssuerSigningKeys)
                 {
-                    if (string.Equals(validationParameters.IssuerSigningKey.KeyId, x5t, validationParameters.IssuerSigningKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
-                        return validationParameters.IssuerSigningKey;
-
-                    X509SecurityKey x509Key = validationParameters.IssuerSigningKey as X509SecurityKey;
-                    if (x509Key != null && string.Equals(x509Key.X5t, x5t, StringComparison.OrdinalIgnoreCase))
-                        return validationParameters.IssuerSigningKey;
+                    yield return key;
                 }
+            }
+        }
 
-                if (validationParameters.IssuerSigningKeys != null)
+        internal static SecurityKey ResolveSigningKeyUsingKeyId(string kid, string x5t, TokenValidationParameters validationParameters)
+        {
+            foreach (SecurityKey signingKey in ConcatSigningKeys(validationParameters))
+            {
+                if (signingKey != null)
                 {
-                    foreach (SecurityKey signingKey in validationParameters.IssuerSigningKeys)
+                    if (signingKey is X509SecurityKey x509Key)
                     {
-                        if (signingKey != null && string.Equals(signingKey.KeyId, x5t))
+                        if (string.Equals(signingKey.KeyId, kid, StringComparison.OrdinalIgnoreCase) || string.Equals(x509Key.X5t, x5t, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return signingKey;
+                        }
+                    }
+                    else
+                    {
+                        if (string.Equals(signingKey.KeyId, kid) || string.Equals(signingKey.KeyId, x5t))
                         {
                             return signingKey;
                         }
