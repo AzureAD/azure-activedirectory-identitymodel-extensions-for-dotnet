@@ -439,36 +439,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
         /// <param name="configuration">The <see cref="BaseConfiguration"/> that will be used along with the <see cref="TokenValidationParameters"/> to resolve the signing key</param>
         /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
-        /// <remarks>If key fails to resolve, then null is returned</remarks>
+        /// <remarks>Resolve the signing key using configuration then the validationParameters until a key is resolved. If key fails to resolve, then null is returned.</remarks>
         internal static SecurityKey ResolveTokenSigningKey(string kid, string x5t, TokenValidationParameters validationParameters, BaseConfiguration configuration)
         {
-            return ResolveTokenSigningKeyUsingConfiguration(kid, x5t, configuration) ?? ResolveTokenSigningKeyUsingValidationParameters(kid, x5t, validationParameters);
-        }
-
-        /// <summary>
-        /// Returns a <see cref="SecurityKey"/> to use when validating the signature of a token.
-        /// </summary>
-        /// <param name="kid">The <see cref="string"/> kid field of the token being validated</param>
-        /// <param name="x5t">The <see cref="string"/> x5t field of the token being validated</param>
-        /// <param name="configuration">The <see cref="BaseConfiguration"/> that will be used along with the <see cref="TokenValidationParameters"/> to resolve the signing key</param>
-        /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
-        /// <remarks>If key fails to resolve, then null is returned</remarks>
-        internal static SecurityKey ResolveTokenSigningKeyUsingConfiguration(string kid, string x5t, BaseConfiguration configuration)
-        {
-            return ResolveTokenSigningKey(kid, x5t, configuration?.SigningKeys);
-        }
-
-        /// <summary>
-        /// Returns a <see cref="SecurityKey"/> to use when validating the signature of a token.
-        /// </summary>
-        /// <param name="kid">The <see cref="string"/> kid field of the token being validated</param>
-        /// <param name="x5t">The <see cref="string"/> x5t field of the token being validated</param>
-        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/>  required for validation.</param>
-        /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
-        /// <remarks>If key fails to resolve, then null is returned</remarks>
-        internal static SecurityKey ResolveTokenSigningKeyUsingValidationParameters(string kid, string x5t, TokenValidationParameters validationParameters)
-        {
-            return ResolveTokenSigningKey(kid, x5t, ConcatSigningKeys(validationParameters));
+            return ResolveTokenSigningKey(kid, x5t, configuration?.SigningKeys) ?? ResolveTokenSigningKey(kid, x5t, ConcatSigningKeys(validationParameters));
         }
 
         /// <summary>
@@ -490,12 +464,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     if (signingKey is X509SecurityKey x509Key)
                     {
-                        if (string.Equals(signingKey.KeyId, kid, StringComparison.OrdinalIgnoreCase) || string.Equals(x509Key.X5t, x5t, StringComparison.OrdinalIgnoreCase))
+                        if ((!string.IsNullOrEmpty(kid) && string.Equals(signingKey.KeyId, kid, StringComparison.OrdinalIgnoreCase)) ||
+                            (!string.IsNullOrEmpty(x5t) && string.Equals(x509Key.X5t, x5t, StringComparison.OrdinalIgnoreCase)))
                         {
                             return signingKey;
                         }
                     }
-                    else
+                    else if (!string.IsNullOrEmpty(signingKey.KeyId))
                     {
                         if (string.Equals(signingKey.KeyId, kid) || string.Equals(signingKey.KeyId, x5t))
                         {
@@ -521,32 +496,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     yield return key;
                 }
             }
-        }
-
-        internal static SecurityKey ResolveSigningKeyUsingKeyId(string kid, string x5t, TokenValidationParameters validationParameters)
-        {
-            foreach (SecurityKey signingKey in ConcatSigningKeys(validationParameters))
-            {
-                if (signingKey != null)
-                {
-                    if (signingKey is X509SecurityKey x509Key)
-                    {
-                        if (string.Equals(signingKey.KeyId, kid, StringComparison.OrdinalIgnoreCase) || string.Equals(x509Key.X5t, x5t, StringComparison.OrdinalIgnoreCase))
-                        {
-                            return signingKey;
-                        }
-                    }
-                    else
-                    {
-                        if (string.Equals(signingKey.KeyId, kid) || string.Equals(signingKey.KeyId, x5t))
-                        {
-                            return signingKey;
-                        }
-                    }
-                }
-            }
-
-            return null;
         }
 
 #if !NET45

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
@@ -31,8 +32,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             tvp.IssuerSigningKey = signingKey;
 
             #region KeyId
+
             // signingKey.KeyId matches TVP.IssuerSigningKey
-            resolvedKey = JwtTokenUtilities.ResolveTokenSigningKeyUsingValidationParameters(testKeyId, null, tvp);
+            resolvedKey = JwtTokenUtilities.ResolveTokenSigningKey(testKeyId, null, tvp, null);
             Assert.NotNull(resolvedKey);
             Assert.Same(resolvedKey, tvp.IssuerSigningKey);
 
@@ -40,40 +42,81 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             tvp.IssuerSigningKey = null;
             tvp.IssuerSigningKeys = new List<SecurityKey>() { signingKey };
 
-            resolvedKey = JwtTokenUtilities.ResolveTokenSigningKeyUsingValidationParameters(testKeyId, Base64UrlEncoder.Encode(testKeyId), tvp);
+            resolvedKey = JwtTokenUtilities.ResolveTokenSigningKey(testKeyId, Base64UrlEncoder.Encode(testKeyId), tvp, null);
             Assert.NotNull(resolvedKey);
             Assert.Same(resolvedKey, tvp.IssuerSigningKeys.First());
+
+            // signingKey.KeyId matches configuration.SigningKeys.First()
+            tvp.IssuerSigningKey = null;
+            tvp.IssuerSigningKeys = null;
+            var configuration = GetConfigurationMock();
+            var testSigningKey = configuration.SigningKeys.First();
+
+            resolvedKey = JwtTokenUtilities.ResolveTokenSigningKey(testSigningKey.KeyId, string.Empty, tvp, configuration);
+            Assert.Same(resolvedKey, testSigningKey);
 
             #endregion
 
             #region X5t
 
-            // x5t matches TVP.IssuerSigningKey as X509SecurityKey.X5t
+            // signingKey.X5t matches TVP.IssuerSigningKey
             signingKey.KeyId = Guid.NewGuid().ToString();
             tvp.IssuerSigningKey = signingKey;
             tvp.IssuerSigningKeys = null;
 
-            resolvedKey = JwtTokenUtilities.ResolveSigningKeyUsingKeyId(testKeyId, signingKey.X5t, tvp);
-            Assert.NotNull(resolvedKey);
+            resolvedKey = JwtTokenUtilities.ResolveTokenSigningKey(testKeyId, signingKey.X5t, tvp, null);
             Assert.Same(resolvedKey, tvp.IssuerSigningKey);
 
-            // x5t matches TVP.IssuerSigningKeys.First() as X509SecurityKey.X5t
+            // signingKey.X5t matches tvp.IssuerSigningKey since X509SecurityKey comparison is case-insensitive
+            resolvedKey = JwtTokenUtilities.ResolveTokenSigningKey(testKeyId, signingKey.X5t.ToUpper(), tvp, null);
+            Assert.Same(resolvedKey, tvp.IssuerSigningKey);
+
+            // signingKey.X5t matches TVP.IssuerSigningKeys.First()
             signingKey.KeyId = Guid.NewGuid().ToString();
             tvp.IssuerSigningKey = null;
             tvp.IssuerSigningKeys = new List<SecurityKey>() { signingKey };
 
-            resolvedKey = JwtTokenUtilities.ResolveSigningKeyUsingKeyId(testKeyId, signingKey.X5t, tvp);
-            Assert.NotNull(resolvedKey);
+            resolvedKey = JwtTokenUtilities.ResolveTokenSigningKey(testKeyId, signingKey.X5t, tvp, null);
             Assert.Same(resolvedKey, tvp.IssuerSigningKeys.First());
+
+            // signingKey.X5t matches configuration.SigningKeys.First()
+            signingKey.KeyId = Guid.NewGuid().ToString();
+            tvp.IssuerSigningKey = null;
+            tvp.IssuerSigningKeys = null;
+            configuration = GetConfigurationMock();
+
+            resolvedKey = JwtTokenUtilities.ResolveTokenSigningKey(testKeyId, signingKey.X5t, tvp, configuration);
+            Assert.Same(resolvedKey, configuration.SigningKeys.First());
 
             #endregion
 
-            // no match
-            resolvedKey = JwtTokenUtilities.ResolveSigningKeyUsingKeyId(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), tvp);
+            // no signing key resolved
+            resolvedKey = JwtTokenUtilities.ResolveTokenSigningKey(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), tvp, null);
             Assert.Null(resolvedKey);
 
-            resolvedKey = JwtTokenUtilities.ResolveSigningKeyUsingKeyId(null, null, tvp);
+            resolvedKey = JwtTokenUtilities.ResolveTokenSigningKey(null, null, tvp, null);
             Assert.Null(resolvedKey);
+
+            resolvedKey = JwtTokenUtilities.ResolveTokenSigningKey(null, null, tvp, GetConfigurationNoMatchingKeyMock());
+            Assert.Null(resolvedKey);
+        }
+
+        private BaseConfiguration GetConfigurationMock()
+        {
+            var config = new OpenIdConnectConfiguration();
+            config.SigningKeys.Add(KeyingMaterial.X509SecurityKeySelfSigned1024_SHA256_Public);
+            config.SigningKeys.Add(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA384_Public);
+
+            return config;
+        }
+
+        private BaseConfiguration GetConfigurationNoMatchingKeyMock()
+        {
+            var config = new OpenIdConnectConfiguration();
+            config.SigningKeys.Add(KeyingMaterial.DefaultRsaSecurityKey1);
+            config.SigningKeys.Add(KeyingMaterial.DefaultRsaSecurityKey2);
+
+            return config;
         }
     }
 }
