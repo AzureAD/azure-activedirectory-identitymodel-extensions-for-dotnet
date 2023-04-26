@@ -1468,7 +1468,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (claimType == ClaimTypes.Actor)
                 {
                     if (identity.Actor != null)
-                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX12710, LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Actort), jwtClaim.Value)));
+                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX12710, LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Actort), JwtTokenUtilities.PrepareSecurityArtifact(jwtClaim.Value))));
 
                     if (CanReadToken(jwtClaim.Value))
                     {
@@ -1507,7 +1507,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (claimType == ClaimTypes.Actor)
                 {
                     if (identity.Actor != null)
-                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX12710, LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Actort), jwtClaim.Value)));
+                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX12710, LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Actort), JwtTokenUtilities.PrepareSecurityArtifact(jwtClaim.Value))));
 
                     if (CanReadToken(jwtClaim.Value))
                     {
