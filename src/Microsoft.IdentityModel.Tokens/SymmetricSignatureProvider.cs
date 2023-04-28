@@ -37,6 +37,22 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public static readonly int DefaultMinimumSymmetricKeySizeInBits = 128;
 
+        /// <summary>
+        /// Mapping from algorithm to minimum <see cref="SymmetricSecurityKey"/>.KeySize when creating and verifying signatures.
+        /// </summary>
+        public static readonly Dictionary<string, int> DefaultMinimumSymmetricKeySizeInBitsMap = new Dictionary<string, int>()
+        {
+            { SecurityAlgorithms.HmacSha256, 32 },
+            { SecurityAlgorithms.HmacSha256Signature, 32 },
+            { SecurityAlgorithms.HmacSha384, 48 },
+            { SecurityAlgorithms.HmacSha384Signature, 48 },
+            { SecurityAlgorithms.HmacSha512, 64 },
+            { SecurityAlgorithms.HmacSha512Signature, 64 },
+            { SecurityAlgorithms.Aes128CbcHmacSha256, 16 },
+            { SecurityAlgorithms.Aes192CbcHmacSha384, 24 },
+            { SecurityAlgorithms.Aes256CbcHmacSha512, 32 }
+        };
+
         private int _minimumSymmetricKeySizeInBits = DefaultMinimumSymmetricKeySizeInBits;
 
         /// <summary>
