@@ -10,20 +10,19 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
-using Xunit.Sdk;
 
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class TokenValidationParametersTests
     {
-        int ExpectedPropertyCount = 58;
+        int ExpectedPropertyCount = 59;
 
         [Fact]
         public void Publics()
         {
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
-            PropertyInfo[] properties = type.GetProperties();
+            PropertyInfo[] properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
             if (properties.Length != ExpectedPropertyCount)
                 Assert.True(false, $"Number of properties has changed from {ExpectedPropertyCount} to: " + properties.Length + ", adjust tests");
 
@@ -158,50 +157,104 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void GetSets()
         {
+            CompareContext compareContext = new CompareContext("GetSets");
+
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
-            PropertyInfo[] properties = type.GetProperties();
+            PropertyInfo[] properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
             if (properties.Length != ExpectedPropertyCount)
-                Assert.True(false, $"Number of public fields has changed from {ExpectedPropertyCount} to: " + properties.Length + ", adjust tests");
+                compareContext.AddDiff($"Number of fields has changed from {ExpectedPropertyCount} to: " + properties.Length + ", adjust tests");
 
-            GetSetContext context =
-                new GetSetContext
+            List<string> delegates = new List<string>();
+
+            // ensure all delegates are null
+            foreach (PropertyInfo property in properties)
+                if (IsPropertyADelegate(property))
                 {
-                    PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
-                    {
-                        new KeyValuePair<string, List<object>>("ActorValidationParameters", new List<object>{(TokenValidationParameters)null, new TokenValidationParameters(), new TokenValidationParameters()}),
-                        new KeyValuePair<string, List<object>>("AuthenticationType", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                        new KeyValuePair<string, List<object>>("ClockSkew", new List<object>{TokenValidationParameters.DefaultClockSkew, TimeSpan.FromHours(2), TimeSpan.FromMinutes(1)}),
-                        new KeyValuePair<string, List<object>>("IgnoreTrailingSlashWhenValidatingAudience",  new List<object>{true, false, true}),
-                        new KeyValuePair<string, List<object>>("IssuerSigningKey", new List<object>{(SecurityKey)null, KeyingMaterial.DefaultX509Key_2048, KeyingMaterial.RsaSecurityKey_2048}),
-                        new KeyValuePair<string, List<object>>("IssuerSigningKeys", new List<object>{(IEnumerable<SecurityKey>)null, new List<SecurityKey>{KeyingMaterial.DefaultX509Key_2048, KeyingMaterial.RsaSecurityKey_1024}, new List<SecurityKey>()}),
-                        new KeyValuePair<string, List<object>>("NameClaimType", new List<object>{ClaimsIdentity.DefaultNameClaimType, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                        new KeyValuePair<string, List<object>>("PropertyBag", new List<object>{(IDictionary<string, Object>)null, new Dictionary<string, Object> {{"CustomKey", "CustomValue"}}, new Dictionary<string, Object>()}),
-                        new KeyValuePair<string, List<object>>("RoleClaimType", new List<object>{ClaimsIdentity.DefaultRoleClaimType, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                        new KeyValuePair<string, List<object>>("RequireExpirationTime", new List<object>{true, false, true}),
-                        new KeyValuePair<string, List<object>>("RequireSignedTokens", new List<object>{true, false, true}),
-                        new KeyValuePair<string, List<object>>("SaveSigninToken", new List<object>{false, true, false}),
-                        new KeyValuePair<string, List<object>>("ValidateActor", new List<object>{false, true, false}),
-                        new KeyValuePair<string, List<object>>("ValidateAudience", new List<object>{true, false, true}),
-                        new KeyValuePair<string, List<object>>("ValidateIssuer", new List<object>{true, false, true}),
-                        new KeyValuePair<string, List<object>>("ValidateLifetime", new List<object>{true, false, true}),
-                        new KeyValuePair<string, List<object>>("ValidateTokenReplay", new List<object>{false, true, false}),
-                        new KeyValuePair<string, List<object>>("ValidIssuer", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                        new KeyValuePair<string, List<object>>("ConfigurationManager", new List<object>{(BaseConfigurationManager)null, new ConfigurationManager<OpenIdConnectConfiguration>("http://someaddress.com", new OpenIdConnectConfigurationRetriever()), new ConfigurationManager<WsFederationConfiguration>("http://someaddress.com", new WsFederationConfigurationRetriever()) }),
-                    },
-                    Object = validationParameters,
-                };
+                    delegates.Add(property.Name);
+                    if (!IsDelegateIsNull(property, validationParameters))
+                        compareContext.AddDiff($"delegate: '{property.Name}' was not null.");
+                }
+
+            // check that CreateTokenValidationParameters set all delegates
+            validationParameters = CreateTokenValidationParameters();
+            foreach (PropertyInfo property in properties)
+                if (IsPropertyADelegate(property))
+                {
+                    if (IsDelegateIsNull(property, validationParameters))
+                        compareContext.AddDiff($"delegate: '{property.Name}' was null.");
+                }
+
+            // The first value in the List<object> checks the default, the following values will be set and then checked.
+            validationParameters = new TokenValidationParameters();
+            GetSetContext context = new GetSetContext
+            {
+                PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
+                {
+                    new KeyValuePair<string, List<object>>("ActorValidationParameters", new List<object>{(TokenValidationParameters)null, new TokenValidationParameters(), new TokenValidationParameters()}),
+                    new KeyValuePair<string, List<object>>("AuthenticationType", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("ClockSkew", new List<object>{TokenValidationParameters.DefaultClockSkew, TimeSpan.FromHours(2), TimeSpan.FromMinutes(1)}),
+                    new KeyValuePair<string, List<object>>("ConfigurationManager", new List<object>{(BaseConfigurationManager)null, new ConfigurationManager<OpenIdConnectConfiguration>("http://someaddress.com", new OpenIdConnectConfigurationRetriever()), new ConfigurationManager<WsFederationConfiguration>("http://someaddress.com", new WsFederationConfigurationRetriever()) }),
+                    new KeyValuePair<string, List<object>>("CryptoProviderFactory", new List<object>{(CryptoProviderFactory)null, new CryptoProviderFactory(), new CryptoProviderFactory() }),
+                    new KeyValuePair<string, List<object>>("DebugId", new List<object>{(string)null, "DebugId", "DebugId" }),
+                    new KeyValuePair<string, List<object>>("IgnoreTrailingSlashWhenValidatingAudience",  new List<object>{true, false, true}),
+                    new KeyValuePair<string, List<object>>("IncludeTokenOnFailedValidation",  new List<object>{false, true, true}),
+                    new KeyValuePair<string, List<object>>("IsClone",  new List<object>{ false, true, true }),
+                    new KeyValuePair<string, List<object>>("InstancePropertyBag",  new List<object>{ new Dictionary<string, object>(), new Dictionary<string, object>(), new Dictionary<string, object>()}),
+                    new KeyValuePair<string, List<object>>("IssuerSigningKey", new List<object>{(SecurityKey)null, KeyingMaterial.DefaultX509Key_2048, KeyingMaterial.RsaSecurityKey_2048}),
+                    new KeyValuePair<string, List<object>>("IssuerSigningKeys", new List<object>{(IEnumerable<SecurityKey>)null, new List<SecurityKey>{KeyingMaterial.DefaultX509Key_2048, KeyingMaterial.RsaSecurityKey_1024}, new List<SecurityKey>()}),
+                    new KeyValuePair<string, List<object>>("LogTokenId", new List<object>{true, false, true}),
+                    new KeyValuePair<string, List<object>>("LogValidationExceptions", new List<object>{true, false, true}),
+                    new KeyValuePair<string, List<object>>("NameClaimType", new List<object>{ClaimsIdentity.DefaultNameClaimType, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("PropertyBag", new List<object>{(IDictionary<string, Object>)null, new Dictionary<string, Object> {{"CustomKey", "CustomValue"}}, new Dictionary<string, Object>()}),
+                    new KeyValuePair<string, List<object>>("RefreshBeforeValidation", new List<object>{false, true, false}),
+                    new KeyValuePair<string, List<object>>("RequireAudience", new List<object>{true, false, true}),
+                    new KeyValuePair<string, List<object>>("RequireExpirationTime", new List<object>{true, false, true}),
+                    new KeyValuePair<string, List<object>>("RequireSignedTokens", new List<object>{true, false, true}),
+                    new KeyValuePair<string, List<object>>("RoleClaimType", new List<object>{ClaimsIdentity.DefaultRoleClaimType, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("SaveSigninToken", new List<object>{false, true, false}),
+                    new KeyValuePair<string, List<object>>("TokenDecryptionKey", new List<object>{(SecurityKey)null, KeyingMaterial.DefaultX509Key_2048, KeyingMaterial.RsaSecurityKey_2048}),
+                    new KeyValuePair<string, List<object>>("TokenDecryptionKeys", new List<object>{(IEnumerable<SecurityKey>)null, new List<SecurityKey>{KeyingMaterial.DefaultX509Key_2048, KeyingMaterial.RsaSecurityKey_1024}, new List<SecurityKey>()}),
+                    new KeyValuePair<string, List<object>>("TokenReplayCache", new List<object>{(ITokenReplayCache)null, new TokenReplayCache(), new TokenReplayCache()}),
+                    new KeyValuePair<string, List<object>>("TryAllIssuerSigningKeys", new List<object>{true, false, true}),
+                    new KeyValuePair<string, List<object>>("ValidateActor", new List<object>{false, true, false}),
+                    new KeyValuePair<string, List<object>>("ValidAlgorithms", new List<object>{(IEnumerable<string>)null, new List<string>{Guid.NewGuid().ToString()}, new List<string>{Guid.NewGuid().ToString()}}),
+                    new KeyValuePair<string, List<object>>("ValidateAudience", new List<object>{true, false, true}),
+                    new KeyValuePair<string, List<object>>("ValidateLifetime", new List<object>{true, false, true}),
+                    new KeyValuePair<string, List<object>>("ValidateIssuer", new List<object>{true, false, true}),
+                    new KeyValuePair<string, List<object>>("ValidateIssuerSigningKey", new List<object>{false, true, false}),
+                    new KeyValuePair<string, List<object>>("ValidateSignatureLast", new List<object>{false, true, false }),
+                    new KeyValuePair<string, List<object>>("ValidateTokenReplay", new List<object>{false, true, false}),
+                    new KeyValuePair<string, List<object>>("ValidateWithLKG", new List<object>{false, true, false}),
+                    new KeyValuePair<string, List<object>>("ValidAudience", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("ValidAudiences", new List<object>{(IEnumerable<string>)null, new List<string>{Guid.NewGuid().ToString()}, new List<string>{Guid.NewGuid().ToString()}}),
+                    new KeyValuePair<string, List<object>>("ValidIssuer", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                    new KeyValuePair<string, List<object>>("ValidIssuers", new List<object>{(IEnumerable<string>)null, new List<string>{Guid.NewGuid().ToString()}, new List<string>{Guid.NewGuid().ToString()}}),
+                    new KeyValuePair<string, List<object>>("ValidTypes", new List<object>{(IEnumerable<string>)null, new List<string>{Guid.NewGuid().ToString()}, new List<string>{Guid.NewGuid().ToString()}}),
+                },
+                Object = validationParameters,
+            };
+
+            // check that we have checked all properties, subract the number of delegates.
+            if (context.PropertyNamesAndSetGetValue.Count != ExpectedPropertyCount - delegates.Count)
+                compareContext.AddDiff($"Number of properties being set is: {context.PropertyNamesAndSetGetValue.Count}, number of properties is: {properties.Length - delegates.Count} (#Properties - #Delegates), adjust tests");
 
             TestUtilities.GetSet(context);
-            TestUtilities.AssertFailIfErrors("TokenValidationParametersTests: GetSets", context.Errors);
-            Assert.Null(validationParameters.AudienceValidator);
-            Assert.Null(validationParameters.LifetimeValidator);
-            Assert.Null(validationParameters.IssuerSigningKeyResolver);
-            Assert.Null(validationParameters.IssuerValidator);
-            Assert.Null(validationParameters.TypeValidator);
-            Assert.Null(validationParameters.ValidAudiences);
-            Assert.Null(validationParameters.ValidIssuers);
-            Assert.Null(validationParameters.SignatureValidator);
+            foreach (string error in context.Errors)
+                compareContext.AddDiff(error);
+
+            TestUtilities.AssertFailIfErrors(compareContext);
+        }
+
+        public static bool IsPropertyADelegate(PropertyInfo property)
+        {
+            return typeof(Delegate).IsAssignableFrom(property.PropertyType);
+        }
+
+        public static bool IsDelegateIsNull(PropertyInfo propertyInfo, object obj)
+        {
+            var propertyValue = propertyInfo.GetValue(obj, null);
+            return propertyValue == null;
         }
 
         [Fact]
@@ -210,10 +263,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             object obj = new object();
             var compareContext = new CompareContext();
 
-            TokenValidationParameters validationParameters = new TokenValidationParameters();
-            validationParameters.PropertyBag = new Dictionary<string, object> { { "object", obj } };
-            validationParameters.InstancePropertyBag["object"] = obj;
-
+            TokenValidationParameters validationParameters = CreateTokenValidationParameters();
+           
             compareContext.PropertiesToIgnoreWhenComparing.Add(typeof(TokenValidationParameters), new List<string> { "InstancePropertyBag", "IsClone" });
             TokenValidationParameters validationParametersClone = validationParameters.Clone();
             IdentityComparer.AreEqual(validationParametersClone, validationParameters, compareContext);
@@ -227,6 +278,73 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 compareContext.AddDiff("validationParametersClone.InstancePropertyBag.Count != 0), should be empty.");
 
             TestUtilities.AssertFailIfErrors(compareContext);
+        }
+
+        private TokenValidationParameters CreateTokenValidationParameters()
+        {
+            TokenValidationParameters validationParameters = new TokenValidationParameters();
+
+            validationParameters.AlgorithmValidator = ValidationDelegates.AlgorithmValidatorBuilder(true);
+            validationParameters.AudienceValidator = ValidationDelegates.AudienceValidatorReturnsTrue;
+            validationParameters.IssuerSigningKeyResolver = ValidationDelegates.IssuerSigningKeyResolver;
+            validationParameters.IssuerSigningKeyResolverUsingConfiguration = ValidationDelegates.IssuerSigningKeyResolverUsingConfiguration;
+            validationParameters.IssuerSigningKeyValidator = ValidationDelegates.IssuerSigningKeyValidator;
+            validationParameters.IssuerSigningKeyValidatorUsingConfiguration = ValidationDelegates.IssuerSigningKeyValidatorUsingConfiguration;
+            validationParameters.IssuerValidator = ValidationDelegates.IssuerValidatorEcho;
+            validationParameters.IssuerValidatorAsync = ValidationDelegates.IssuerValidatorAsync;
+            validationParameters.IssuerValidatorUsingConfiguration = ValidationDelegates.IssuerValidatorUsingConfigEcho;
+            validationParameters.LifetimeValidator = ValidationDelegates.LifetimeValidatorReturnsTrue;
+            validationParameters.NameClaimTypeRetriever = ValidationDelegates.NameClaimTypeRetriever;
+            validationParameters.RoleClaimTypeRetriever = ValidationDelegates.RoleClaimTypeRetriever;
+            validationParameters.SignatureValidator = ValidationDelegates.SignatureValidatorReturnsJsonWebToken;
+            validationParameters.SignatureValidatorUsingConfiguration = ValidationDelegates.SignatureValidatorUsingConfigReturnsJsonWebToken;
+            validationParameters.TokenDecryptionKeyResolver = ValidationDelegates.TokenDecryptionKeyResolver;
+            validationParameters.TokenReader = ValidationDelegates.TokenReaderReturnsJsonWebToken;
+            validationParameters.TokenReplayValidator = ValidationDelegates.TokenReplayValidatorReturnsTrue;
+            validationParameters.TransformBeforeSignatureValidation = ValidationDelegates.TransformBeforeSignatureValidation;
+            validationParameters.TypeValidator = ValidationDelegates.TypeValidator;
+
+            validationParameters.ActorValidationParameters = new TokenValidationParameters();
+            validationParameters.ClockSkew = TimeSpan.FromSeconds(42);
+            validationParameters.DebugId = Guid.NewGuid().ToString();
+            validationParameters.InstancePropertyBag["object"] = new object();
+            validationParameters.IssuerSigningKey = KeyingMaterial.DefaultX509Key_2048_Public;
+            validationParameters.IssuerSigningKeys =
+                new List<SecurityKey>
+                {
+                    KeyingMaterial.DefaultX509Key_2048_Public,
+                    KeyingMaterial.RsaSecurityKey_2048
+                };
+
+            validationParameters.PropertyBag =
+                new Dictionary<string, Object>
+                {
+                    { "CustomKey", "CustomValue" }
+                };
+
+            validationParameters.ValidAlgorithms = new List<string> { "RSA2048", "RSA1024" };
+            validationParameters.ValidAudience = "ValidAudience";
+            validationParameters.ValidAudiences = new List<string> { "ValidAudience" }; ;
+            validationParameters.ValidIssuer = "ValidIssuer"; ;
+            validationParameters.ValidIssuers = new List<string> { "ValidIssuer" };
+            validationParameters.ValidTypes = new List<string> { "ValidType1", "ValidType2", "ValidType3" };
+
+            // properties - set bools the opposite of the default.
+            TokenValidationParameters validationParametersDefault = new TokenValidationParameters();
+            validationParameters.LogTokenId = !validationParametersDefault.LogTokenId;
+            validationParameters.LogValidationExceptions = !validationParametersDefault.LogValidationExceptions;
+            validationParameters.IncludeTokenOnFailedValidation = !validationParametersDefault.IncludeTokenOnFailedValidation;
+            validationParameters.RefreshBeforeValidation = !validationParametersDefault.RefreshBeforeValidation;
+            validationParameters.SaveSigninToken = !validationParametersDefault.SaveSigninToken;
+            validationParameters.ValidateAudience = !validationParametersDefault.ValidateAudience;
+            validationParameters.ValidateIssuer = !validationParametersDefault.ValidateIssuer;
+            validationParameters.ValidateIssuerSigningKey = !validationParametersDefault.ValidateIssuerSigningKey;
+            validationParameters.ValidateLifetime = !validationParametersDefault.ValidateLifetime;
+            validationParameters.ValidateSignatureLast = !validationParametersDefault.ValidateSignatureLast;
+            validationParameters.ValidateWithLKG = !validationParametersDefault.ValidateWithLKG;
+            validationParameters.ValidateTokenReplay = !validationParametersDefault.ValidateTokenReplay;
+
+            return validationParameters;
         }
 
         class DerivedTokenValidationParameters : TokenValidationParameters

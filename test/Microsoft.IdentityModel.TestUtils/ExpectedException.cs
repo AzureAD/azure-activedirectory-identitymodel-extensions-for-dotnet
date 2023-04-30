@@ -208,7 +208,9 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static ExpectedException SecurityTokenUnableToValidateException(string substringExpected = null, Type innerTypeExpected = null)
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             return new ExpectedException(typeof(SecurityTokenUnableToValidateException), substringExpected, innerTypeExpected);
+#pragma warning restore CS0618 // Type or member is obsolete
         }
 
         public static ExpectedException SecurityTokenEncryptionFailedException(string substringExpected = null, Type innerTypeExpected = null)
