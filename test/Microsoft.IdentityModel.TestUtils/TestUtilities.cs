@@ -134,7 +134,7 @@ namespace Microsoft.IdentityModel.TestUtils
                         {
                             context.Errors.Add(propertyKV.Key + ": initial value != null && expected == null, initial value: " + initialValue.ToString());
                         }
-                        else if (initialValue != null && !initialValue.Equals(propertyKV.Value[0]))
+                        else if (initialValue != null && !IdentityComparer.AreEqual(initialValue, propertyKV.Value[0]))
                         {
                             context.Errors.Add(propertyKV.Key + ", initial value != expected. expected: " + propertyKV.Value[0].ToString() + ", was: " + initialValue.ToString());
                         }
