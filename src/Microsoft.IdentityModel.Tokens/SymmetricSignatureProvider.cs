@@ -42,15 +42,19 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public static readonly Dictionary<string, int> DefaultMinimumSymmetricKeySizeInBitsMap = new Dictionary<string, int>()
         {
-            { SecurityAlgorithms.HmacSha256, 32 },
-            { SecurityAlgorithms.HmacSha256Signature, 32 },
-            { SecurityAlgorithms.HmacSha384, 48 },
-            { SecurityAlgorithms.HmacSha384Signature, 48 },
-            { SecurityAlgorithms.HmacSha512, 64 },
-            { SecurityAlgorithms.HmacSha512Signature, 64 },
-            { SecurityAlgorithms.Aes128CbcHmacSha256, 16 },
-            { SecurityAlgorithms.Aes192CbcHmacSha384, 24 },
-            { SecurityAlgorithms.Aes256CbcHmacSha512, 32 }
+            { SecurityAlgorithms.Aes128Gcm, 128},
+            { SecurityAlgorithms.Aes192Gcm, 192},
+            { SecurityAlgorithms.Aes256Gcm, 256},
+            { SecurityAlgorithms.HmacSha512Signature, 512 },
+            { SecurityAlgorithms.Aes128CbcHmacSha256, 256 },
+            { SecurityAlgorithms.Aes192CbcHmacSha384, 384 },
+            { SecurityAlgorithms.Aes256CbcHmacSha512, 512 },
+            { SecurityAlgorithms.HmacSha256, 256 },
+            { SecurityAlgorithms.HmacSha256Signature, 356 },
+            { SecurityAlgorithms.HmacSha384, 384 },
+            { SecurityAlgorithms.HmacSha384Signature, 384 },
+            { SecurityAlgorithms.HmacSha512, 512 }
+                                 
         };
 
         private int _minimumSymmetricKeySizeInBits = DefaultMinimumSymmetricKeySizeInBits;
@@ -85,8 +89,16 @@ namespace Microsoft.IdentityModel.Tokens
             if (!key.CryptoProviderFactory.IsSupportedAlgorithm(algorithm, key))
                 throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10634, LogHelper.MarkAsNonPII((algorithm)), key)));
 
-            if (key.KeySize < MinimumSymmetricKeySizeInBits)
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10653, LogHelper.MarkAsNonPII((algorithm)), LogHelper.MarkAsNonPII(MinimumSymmetricKeySizeInBits), key, LogHelper.MarkAsNonPII(key.KeySize))));
+            if (DefaultMinimumSymmetricKeySizeInBitsMap.TryGetValue(algorithm, out int expectedKeyLength))
+            {
+                if (key.KeySize < expectedKeyLength)
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10653, LogHelper.MarkAsNonPII((algorithm)), LogHelper.MarkAsNonPII(expectedKeyLength), key, LogHelper.MarkAsNonPII(key.KeySize))));
+            }
+            else
+            {
+                if (key.KeySize < MinimumSymmetricKeySizeInBits)
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(key), LogHelper.FormatInvariant(LogMessages.IDX10653, LogHelper.MarkAsNonPII((algorithm)), LogHelper.MarkAsNonPII(MinimumSymmetricKeySizeInBits), key, LogHelper.MarkAsNonPII(key.KeySize))));
+            }
 
             WillCreateSignatures = willCreateSignatures;
             _keyedHashObjectPool = new DisposableObjectPool<KeyedHashAlgorithm>(CreateKeyedHashAlgorithm, key.CryptoProviderFactory.SignatureProviderObjectPoolCacheSize);
