@@ -109,17 +109,17 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             // Symmetric - Key - 256
             theoryData.Add(BuildTestCase("Hmac256_Key256", KeyingMaterial.SymmetricSecurityKey2_256, SecurityAlgorithms.HmacSha256, securityTokenDescriptor, jsonWebTokenHandler));
-            theoryData.Add(BuildTestCase("Hmac384_Key256", KeyingMaterial.SymmetricSecurityKey2_256, SecurityAlgorithms.HmacSha384, securityTokenDescriptor, jsonWebTokenHandler));
-            theoryData.Add(BuildTestCase("Hmac512_Key256", KeyingMaterial.SymmetricSecurityKey2_256, SecurityAlgorithms.HmacSha512, securityTokenDescriptor, jsonWebTokenHandler));
+            theoryData.Add(BuildTestCase("Hmac384_Key256", KeyingMaterial.SymmetricSecurityKey2_384, SecurityAlgorithms.HmacSha384, securityTokenDescriptor, jsonWebTokenHandler));
+            theoryData.Add(BuildTestCase("Hmac512_Key256", KeyingMaterial.SymmetricSecurityKey2_512, SecurityAlgorithms.HmacSha512, securityTokenDescriptor, jsonWebTokenHandler));
 
             // Symmetric - Key - 384
-            theoryData.Add(BuildTestCase("Hmac256_Key384", KeyingMaterial.SymmetricSecurityKey2_384, SecurityAlgorithms.HmacSha256, securityTokenDescriptor, jsonWebTokenHandler));
+            theoryData.Add(BuildTestCase("Hmac256_Key384", KeyingMaterial.SymmetricSecurityKey2_256, SecurityAlgorithms.HmacSha256, securityTokenDescriptor, jsonWebTokenHandler));
             theoryData.Add(BuildTestCase("Hmac384_Key384", KeyingMaterial.SymmetricSecurityKey2_384, SecurityAlgorithms.HmacSha384, securityTokenDescriptor, jsonWebTokenHandler));
-            theoryData.Add(BuildTestCase("Hmac512_Key384", KeyingMaterial.SymmetricSecurityKey2_384, SecurityAlgorithms.HmacSha512, securityTokenDescriptor, jsonWebTokenHandler));
+            theoryData.Add(BuildTestCase("Hmac512_Key384", KeyingMaterial.SymmetricSecurityKey2_512, SecurityAlgorithms.HmacSha512, securityTokenDescriptor, jsonWebTokenHandler));
 
             // Symmetric - Key - 512
-            theoryData.Add(BuildTestCase("Hmac256_Key512", KeyingMaterial.SymmetricSecurityKey2_512, SecurityAlgorithms.HmacSha256, securityTokenDescriptor, jsonWebTokenHandler));
-            theoryData.Add(BuildTestCase("Hmac384_Key512", KeyingMaterial.SymmetricSecurityKey2_512, SecurityAlgorithms.HmacSha384, securityTokenDescriptor, jsonWebTokenHandler));
+            theoryData.Add(BuildTestCase("Hmac256_Key512", KeyingMaterial.SymmetricSecurityKey2_256, SecurityAlgorithms.HmacSha256, securityTokenDescriptor, jsonWebTokenHandler));
+            theoryData.Add(BuildTestCase("Hmac384_Key512", KeyingMaterial.SymmetricSecurityKey2_384, SecurityAlgorithms.HmacSha384, securityTokenDescriptor, jsonWebTokenHandler));
             theoryData.Add(BuildTestCase("Hmac512_Key512", KeyingMaterial.SymmetricSecurityKey2_512, SecurityAlgorithms.HmacSha512, securityTokenDescriptor, jsonWebTokenHandler));
 
             return theoryData;
