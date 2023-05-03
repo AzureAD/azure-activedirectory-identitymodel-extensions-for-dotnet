@@ -428,24 +428,101 @@ namespace Microsoft.IdentityModel.Tokens
             if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, keyBytes))
             {
                 if (!(CustomCryptoProvider.Create(algorithm, keyBytes) is KeyedHashAlgorithm keyedHashAlgorithm))
-                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10647, LogHelper.MarkAsNonPII(algorithm), LogHelper.MarkAsNonPII(typeof(KeyedHashAlgorithm)))));
+                    throw LogHelper.LogExceptionMessage(
+                        new InvalidOperationException(
+                            LogHelper.FormatInvariant(
+                                LogMessages.IDX10647,
+                                LogHelper.MarkAsNonPII(algorithm),
+                                LogHelper.MarkAsNonPII(typeof(KeyedHashAlgorithm)))));
 
                 return keyedHashAlgorithm;
             }
 
+            // In the case of Aes128CbcHmacSha256, Aes192CbcHmacSha384, Aes256CbcHmacSha512 which are Authenticated Encryption algorithms
+            // SymmetricSignatureProvider will get passed a key with 1/2 the minimum keysize expected size for the HashAlgorithm. 16 bytes for SHA256, instead of 32 bytes.
+            // see: https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.2.1
             switch (algorithm)
             {
+                case SecurityAlgorithms.Aes128CbcHmacSha256:
+                {
+                        if (keyBytes.Length < 16)
+                            throw LogHelper.LogExceptionMessage(
+                                new InvalidOperationException(
+                                    LogHelper.FormatInvariant(LogMessages.IDX10720,
+                                    LogHelper.MarkAsNonPII(algorithm),
+                                    LogHelper.MarkAsNonPII("128"),
+                                    LogHelper.MarkAsNonPII(keyBytes.Length * 8))));
+
+                        return new HMACSHA256(keyBytes);
+                }
+
+                case SecurityAlgorithms.Aes192CbcHmacSha384:
+                {
+                    if (keyBytes.Length < 24)
+                        throw LogHelper.LogExceptionMessage(
+                            new InvalidOperationException(
+                                LogHelper.FormatInvariant(LogMessages.IDX10720,
+                                LogHelper.MarkAsNonPII(algorithm),
+                                LogHelper.MarkAsNonPII("192"),
+                                LogHelper.MarkAsNonPII(keyBytes.Length * 8))));
+
+                    return new HMACSHA384(keyBytes);
+                }
+
+                case SecurityAlgorithms.Aes256CbcHmacSha512:
+                {
+                    if (keyBytes.Length < 32)
+                        throw LogHelper.LogExceptionMessage(
+                            new InvalidOperationException(
+                                LogHelper.FormatInvariant(LogMessages.IDX10720,
+                                LogHelper.MarkAsNonPII(algorithm),
+                                LogHelper.MarkAsNonPII("256"),
+                                LogHelper.MarkAsNonPII(keyBytes.Length * 8))));
+
+                    return new HMACSHA512(keyBytes);
+                }
+
                 case SecurityAlgorithms.HmacSha256Signature:
                 case SecurityAlgorithms.HmacSha256:
+                {
+                        if (keyBytes.Length < 32)
+                        throw LogHelper.LogExceptionMessage(
+                            new InvalidOperationException(
+                                LogHelper.FormatInvariant(LogMessages.IDX10720,
+                                LogHelper.MarkAsNonPII(algorithm),
+                                LogHelper.MarkAsNonPII("256"),
+                                LogHelper.MarkAsNonPII(keyBytes.Length * 8))));
+
                     return new HMACSHA256(keyBytes);
+                }
 
                 case SecurityAlgorithms.HmacSha384Signature:
                 case SecurityAlgorithms.HmacSha384:
+                {
+                    if (keyBytes.Length < 48)
+                        throw LogHelper.LogExceptionMessage(
+                            new InvalidOperationException(
+                                LogHelper.FormatInvariant(LogMessages.IDX10720,
+                                LogHelper.MarkAsNonPII(algorithm),
+                                LogHelper.MarkAsNonPII("384"),
+                                LogHelper.MarkAsNonPII(keyBytes.Length * 8))));
+
                     return new HMACSHA384(keyBytes);
+                }
 
                 case SecurityAlgorithms.HmacSha512Signature:
                 case SecurityAlgorithms.HmacSha512:
+                {
+                    if (keyBytes.Length < 64)
+                        throw LogHelper.LogExceptionMessage(
+                            new InvalidOperationException(
+                                LogHelper.FormatInvariant(LogMessages.IDX10720,
+                                LogHelper.MarkAsNonPII(algorithm),
+                                LogHelper.MarkAsNonPII("512"),
+                                LogHelper.MarkAsNonPII(keyBytes.Length * 8))));
+
                     return new HMACSHA512(keyBytes);
+                }
 
                 default:
                     throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10666, LogHelper.MarkAsNonPII(algorithm))));
