@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <summary>
         /// Returns a string that represents the <see cref="Argument"/>.
         /// </summary>
-        /// <returns><c>Null</c> if the <see cref="Argument"/> is <c>null</c>, otherwise calls <see cref="System.ValueType.ToString()"/> method of the <see cref="Argument"/>.</returns>
+        /// <returns><c>Null</c> if the <see cref="Argument"/> is <see langword="null"/>, otherwise calls <see cref="System.ValueType.ToString()"/> method of the <see cref="Argument"/>.</returns>
         public override string ToString()
         {
             return Argument?.ToString() ?? "Null";

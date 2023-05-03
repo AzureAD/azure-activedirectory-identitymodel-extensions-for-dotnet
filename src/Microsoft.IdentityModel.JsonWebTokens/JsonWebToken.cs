@@ -119,6 +119,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14302, payload), ex));
             }
+
+            _encodedHeader = header;
+            _encodedPayload = payload;
         }
 
         internal string ActualIssuer { get; set; }
@@ -401,9 +404,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         public bool IsSigned { get; internal set; }
 
-        /// <summary>
-        ///
-        /// </summary>
         internal JsonClaimSet Payload { get; set; }
 
         /// <summary>
@@ -583,17 +583,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             EncodedToken = encodedJson;
         }
 
-        /// <summary>
-        /// Serializes the <see cref="JsonWebToken"/>.
-        /// </summary>
-        /// <returns>A string containing the header and payload in JSON format.</returns>
-        public override string ToString()
-        {
-            if (!IsEncrypted)
-                return Header.ToString() + "." + Payload.ToString();
-            else
-                return Header.ToString()  + "." + EncryptedKey + "." + InitializationVector + "." + Ciphertext;
-        }
+        /// <inheritdoc/>
+        public override string UnsafeToString() => EncodedToken;
 
 #if NET45
         /// <summary>
@@ -905,6 +896,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 return _sub;
             }
+        }
+
+        /// <summary>
+        /// Returns the encoded token without signature or authentication tag.
+        /// </summary>
+        /// <returns>Encoded token string  without signature or authentication tag.</returns>
+        public override string ToString()
+        {
+            return EncodedToken.Substring(0, EncodedToken.LastIndexOf("."));
         }
 
         /// <summary>

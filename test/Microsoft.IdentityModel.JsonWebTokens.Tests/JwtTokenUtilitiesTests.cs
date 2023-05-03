@@ -24,7 +24,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public void LogExceptionsWithStringJwe_JsonWebTokenHandler()
         {
             SampleListener listener = new SampleListener();
-            IdentityModelEventSource.ShowPII = true;
+            IdentityModelEventSource.ShowPII = false;
             IdentityModelEventSource.Logger.LogLevel = EventLevel.Error;
             listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Error);
 
@@ -36,17 +36,61 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
 
             string jwe = new JsonWebTokenHandler().CreateToken(jweTokenDescriptor);
-            var exception = LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TestMessageOneParam, JwtTokenUtilities.PrepareSecurityArtifact(jwe))));
 
+            // LogExceptionMessage should not log the jwe since ShowPII is false.
+            LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TestMessageOneParam, LogHelper.MarkAsSecurityArtifact(jwe, JwtTokenUtilities.SafeLogJwtToken))));
+            Assert.DoesNotContain(jwe, listener.TraceBuffer);
+
+            // LogExceptionMessage should log the disarmed jwe since ShowPII is true.
+            IdentityModelEventSource.ShowPII = true;
+            LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TestMessageOneParam, LogHelper.MarkAsSecurityArtifact(jwe, JwtTokenUtilities.SafeLogJwtToken))));
             Assert.Contains(jwe.Substring(0, jwe.LastIndexOf(".")), listener.TraceBuffer);
             Assert.DoesNotContain(jwe.Substring(jwe.LastIndexOf(".")), listener.TraceBuffer);
+
+            // LogExceptionMessage should log the jwe since CompleteSecurityArtifact is true.
+            IdentityModelEventSource.LogCompleteSecurityArtifact = true;
+            LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TestMessageOneParam, LogHelper.MarkAsSecurityArtifact(jwe, JwtTokenUtilities.SafeLogJwtToken))));
+            Assert.Contains(jwe, listener.TraceBuffer);
+        }
+
+        [Fact]
+        public void LogExceptionsWithJwe_JsonWebTokenHandler()
+        {
+            SampleListener listener = new SampleListener();
+            IdentityModelEventSource.ShowPII = false;
+            IdentityModelEventSource.Logger.LogLevel = EventLevel.Error;
+            listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Error);
+
+            var jweTokenDescriptor = new SecurityTokenDescriptor
+            {
+                SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes256_Sha512_512,
+                Claims = Default.PayloadDictionary
+            };
+
+            JsonWebToken jwe = new JsonWebToken(new JsonWebTokenHandler().CreateToken(jweTokenDescriptor));
+
+            // LogExceptionMessage should not log the jwe since ShowPII is false.
+            LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TestMessageOneParam, jwe)));
+            Assert.DoesNotContain(jwe.EncodedToken, listener.TraceBuffer);
+
+            // LogExceptionMessage should log the disarmed jwe since ShowPII is true.
+            IdentityModelEventSource.ShowPII = true;
+            LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TestMessageOneParam, jwe)));
+            Assert.Contains(jwe.EncodedToken.Substring(0, jwe.EncodedToken.LastIndexOf(".")), listener.TraceBuffer);
+            Assert.DoesNotContain(jwe.AuthenticationTag, listener.TraceBuffer);
+
+            // LogExceptionMessage should log the jwe since CompleteSecurityArtifact is true.
+            IdentityModelEventSource.LogCompleteSecurityArtifact = true;
+            LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TestMessageOneParam, jwe)));
+            Assert.Contains(jwe.EncodedToken, listener.TraceBuffer);
         }
 
         [Fact]
         public void LogExceptionsWithStringJws_JsonWebTokenHandler()
         {
             SampleListener listener = new SampleListener();
-            IdentityModelEventSource.ShowPII = true;
+            IdentityModelEventSource.ShowPII = false;
             IdentityModelEventSource.Logger.LogLevel = EventLevel.Error;
             listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Error);
 
@@ -57,10 +101,53 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
 
             string jws = new JsonWebTokenHandler().CreateToken(jwsTokenDescriptor);
-            var exception = LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TestMessageOneParam, JwtTokenUtilities.PrepareSecurityArtifact(jws))));
 
+            // LogExceptionMessage should not log the jws since ShowPII is false.
+            LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TestMessageOneParam, LogHelper.MarkAsSecurityArtifact(jws, JwtTokenUtilities.SafeLogJwtToken))));
+            Assert.DoesNotContain(jws, listener.TraceBuffer);
+
+            // LogExceptionMessage should log the disarmed jws since ShowPII is true.
+            IdentityModelEventSource.ShowPII = true;
+            LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TestMessageOneParam, LogHelper.MarkAsSecurityArtifact(jws, JwtTokenUtilities.SafeLogJwtToken))));
             Assert.Contains(jws.Substring(0, jws.LastIndexOf(".")), listener.TraceBuffer);
             Assert.DoesNotContain(jws.Substring(jws.LastIndexOf(".")), listener.TraceBuffer);
+
+            // LogExceptionMessage should log the jws since CompleteSecurityArtifact is true.
+            IdentityModelEventSource.LogCompleteSecurityArtifact = true;
+            LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TestMessageOneParam, LogHelper.MarkAsSecurityArtifact(jws, JwtTokenUtilities.SafeLogJwtToken))));
+            Assert.Contains(jws, listener.TraceBuffer);
+        }
+
+        [Fact]
+        public void LogExceptionsWithJws_JsonWebTokenHandler()
+        {
+            SampleListener listener = new SampleListener();
+            IdentityModelEventSource.ShowPII = false;
+            IdentityModelEventSource.Logger.LogLevel = EventLevel.Error;
+            listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Error);
+
+            var jwsTokenDescriptor = new SecurityTokenDescriptor
+            {
+                SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                Subject = new ClaimsIdentity(Default.PayloadClaims)
+            };
+
+            JsonWebToken jws = new JsonWebToken(new JsonWebTokenHandler().CreateToken(jwsTokenDescriptor));
+
+            // LogExceptionMessage should not log the jws since ShowPII is false.
+            LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TestMessageOneParam, jws)));
+            Assert.DoesNotContain(jws.EncodedToken, listener.TraceBuffer);
+
+            // LogExceptionMessage should log the disarmed jws since ShowPII is true.
+            IdentityModelEventSource.ShowPII = true;
+            LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TestMessageOneParam, jws)));
+            Assert.Contains(jws.EncodedToken.Substring(0, jws.EncodedToken.LastIndexOf(".")), listener.TraceBuffer);
+            Assert.DoesNotContain(jws.EncodedSignature, listener.TraceBuffer);
+
+            // LogExceptionMessage should log the jws since CompleteSecurityArtifact is true.
+            IdentityModelEventSource.LogCompleteSecurityArtifact = true;
+            LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TestMessageOneParam,jws)));
+            Assert.Contains(jws.EncodedToken, listener.TraceBuffer);
         }
 
         [Fact]

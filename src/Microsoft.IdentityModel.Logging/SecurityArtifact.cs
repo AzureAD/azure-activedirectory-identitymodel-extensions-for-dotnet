@@ -1,35 +1,53 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
+
 namespace Microsoft.IdentityModel.Logging
 {
     /// <summary>
-    /// An internal structure that is used to mark an argument as NonPII.
-    /// Arguments wrapped with a NonPII structure will be considered as NonPII in the message logging process.
+    /// An internal structure that is used to mark an argument as SecurityArtifact.
+    /// Arguments wrapped with a SecurityArtifact structure will be considered as SecurityArtifact in the message logging process.
     /// </summary>
-    internal struct SecurityArtifact
+    internal struct SecurityArtifact : ISafeLogSecurityArtifact
     {
         /// <summary>
-        /// Argument wrapped with a <see cref="NonPII"/> structure is considered as NonPII in the message logging process.
+        /// Argument wrapped with a <see cref="SecurityArtifact"/> structure is considered as SecurityArtifact in the message logging process.
         /// </summary>
-        public object Argument { get; set; }
+        private object Argument { get; set; }
 
         /// <summary>
-        /// Creates an instance of <see cref="NonPII"/> that wraps the <paramref name="argument"/>.
+        /// The ToString callback delegate that return a disarmed SecurityArtifact.
         /// </summary>
-        /// <param name="argument">An argument that is considered as NonPII.</param>
-        public SecurityArtifact(object argument)
+        private Func<object, string> _callback;
+
+        /// <summary>
+        /// Creates an instance of <see cref="SecurityArtifact"/> that wraps the <paramref name="argument"/>.
+        /// </summary>
+        /// <param name="argument">An argument that is considered as SecurityArtifact.</param>
+        /// <param name="toStringCallback">A ToString callback.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="argument"/> is null.</exception>
+        public SecurityArtifact(object argument, Func<object, string> toStringCallback)
         {
             Argument = argument;
+            _callback = toStringCallback;
         }
 
         /// <summary>
         /// Returns a string that represents the <see cref="Argument"/>.
         /// </summary>
-        /// <returns><c>Null</c> if the <see cref="Argument"/> is <c>null</c>, otherwise calls <see cref="System.ValueType.ToString()"/> method of the <see cref="Argument"/>.</returns>
+        /// <returns><c>Null</c> if the <see cref="Argument"/> is <see langword="null"/>, otherwise calls <see cref="System.ValueType.ToString()"/> method of the <see cref="Argument"/>.</returns>
         public override string ToString()
         {
-            return Argument?.ToString() ?? "Null";
+            if (_callback != null && Argument != null)
+                return _callback(Argument);
+
+            return Argument?.ToString() ?? "null";
+        }
+
+        public string UnsafeToString()
+        {
+            return Argument?.ToString() ?? "null";
         }
     }
 }

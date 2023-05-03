@@ -421,7 +421,7 @@ namespace Microsoft.IdentityModel.Tokens
                 roleClaimType = RoleClaimType;
             }
 
-            LogHelper.LogInformation(LogMessages.IDX10245, securityToken.ToString());
+            LogHelper.LogInformation(LogMessages.IDX10245, securityToken);
             return new ClaimsIdentity(authenticationType: AuthenticationType ?? DefaultAuthenticationType, nameType: nameClaimType ?? ClaimsIdentity.DefaultNameClaimType, roleType: roleClaimType ?? ClaimsIdentity.DefaultRoleClaimType);
         }
 
