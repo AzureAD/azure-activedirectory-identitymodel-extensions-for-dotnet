@@ -19,9 +19,10 @@ namespace Microsoft.IdentityModel.Tokens
         private int _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
 
         /// <summary>
-        /// Default lifetime of tokens created. When creating tokens, if 'expires' and 'notbefore' are both null, 
-        /// then a default will be set to: expires = DateTime.UtcNow, notbefore = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes).
+        /// Default lifetime of tokens created. When creating tokens, if 'expires', 'notbefore' or 'issuedat' are null, 
+        /// then a default will be set to: issuedat = DateTime.UtcNow, notbefore = DateTime.UtcNow, expires = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes).
         /// </summary>
+        /// <remarks>See: <see cref="SetDefaultTimesOnTokenCreation"/> for configuration.</remarks>
         public static readonly int DefaultTokenLifetimeInMinutes = 60;
 
         /// <summary>
@@ -63,6 +64,16 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
         /// <returns>A <see cref="TokenValidationResult"/></returns>
         public virtual Task<TokenValidationResult> ValidateTokenAsync(string token, TokenValidationParameters validationParameters) => throw new NotImplementedException();
+
+        /// <summary>
+        /// Validates a token.
+        /// On a validation failure, no exception will be thrown; instead, the exception will be set in the returned TokenValidationResult.Exception property.
+        /// Callers should always check the TokenValidationResult.IsValid property to verify the validity of the result.
+        /// </summary>
+        /// <param name="token">The <see cref="SecurityToken"/> to be validated.</param>
+        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <returns>A <see cref="TokenValidationResult"/></returns>
+        public virtual Task<TokenValidationResult> ValidateTokenAsync(SecurityToken token, TokenValidationParameters validationParameters) => throw new NotImplementedException();
 
         /// <summary>
         /// Converts a string into an instance of <see cref="SecurityToken"/>.

@@ -1,11 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Protocols.Configuration;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -22,7 +23,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// Initializes an new instance of <see cref="StaticConfigurationManager{T}"/> with a Configuration instance.
         /// </summary>
         /// <param name="configuration">Configuration of type OpenIdConnectConfiguration or OpenIdConnectConfiguration.</param>
-        public StaticConfigurationManager(T configuration)
+        public StaticConfigurationManager(T configuration) : base()
         {
             if (configuration == null)
                 throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(configuration), LogHelper.FormatInvariant(LogMessages.IDX20000, LogHelper.MarkAsNonPII(nameof(configuration)))));

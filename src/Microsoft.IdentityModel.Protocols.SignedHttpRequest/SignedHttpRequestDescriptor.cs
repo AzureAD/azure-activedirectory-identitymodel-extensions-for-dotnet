@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </summary>
         /// <remarks>
         /// <paramref name="accessToken"/> has to contain the 'cnf' claim so that PoP key can be resolved on the validation side.
-        /// https://datatracker.ietf.org/doc/html/rfc7800#section-3.1
+        /// https://datatracker.ietf.org/doc/html/rfc7800#section-3-1
         /// Default <see cref="SignedHttpRequestCreationParameters"/> and <see cref="CallContext"/> will be created.
         /// </remarks>
         /// <param name="accessToken">An access token that contains the 'cnf' claim.</param>
@@ -56,7 +56,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </summary>
         /// <remarks>
         /// <paramref name="accessToken"/> has to contain the 'cnf' claim so that PoP key can be resolved on the validation side.
-        /// https://datatracker.ietf.org/doc/html/rfc7800#section-3.1
+        /// https://datatracker.ietf.org/doc/html/rfc7800#section-3-1
         /// </remarks> 
         /// <param name="accessToken">An access token that contains the 'cnf' claim.</param>
         /// <param name="httpRequestData">A structure that represents an outgoing http request.</param>

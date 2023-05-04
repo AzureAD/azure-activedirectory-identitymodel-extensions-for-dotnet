@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.SampleTests
             TestWithGeneratedToken(
                 () => "InvalidToken",
                 typeof(ArgumentException),
-                "IDX14111");
+                "IDX14100");
         }
 
         /// <summary>

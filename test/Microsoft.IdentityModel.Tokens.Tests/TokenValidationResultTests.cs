@@ -21,8 +21,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TokenValidationResult tokenValidationResult = new TokenValidationResult();
             Type type = typeof(TokenValidationResult);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 9)
-                Assert.True(false, "Number of public fields has changed from 9 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 10)
+                Assert.True(false, "Number of public fields has changed from 10 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext

@@ -640,7 +640,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     notBefore = now;
             }
 
-            LogHelper.LogVerbose(LogMessages.IDX12721, LogHelper.MarkAsNonPII(audience ?? "null"), LogHelper.MarkAsNonPII(issuer ?? "null"));
+            LogHelper.LogVerbose(LogMessages.IDX12721, LogHelper.MarkAsNonPII(issuer ?? "null"), LogHelper.MarkAsNonPII(audience ?? "null"));
             JwtPayload payload = new JwtPayload(issuer, audience, (subject == null ? null : OutboundClaimTypeTransform(subject.Claims)), (claimCollection == null ? null : OutboundClaimTypeTransform(claimCollection)), notBefore, expires, issuedAt);
             JwtHeader header = new JwtHeader(signingCredentials, OutboundAlgorithmMap, tokenType, additionalInnerHeaderClaims);
 
@@ -901,24 +901,14 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (claimsPrincipal != null)
                 {
-                    // Set current configuration as LKG if it exists and has not already been set as the LKG.
-                    if (currentConfiguration != null && !ReferenceEquals(currentConfiguration, validationParameters.ConfigurationManager.LastKnownGoodConfiguration))
+                    // Set current configuration as LKG if it exists.
+                    if (currentConfiguration != null)
                         validationParameters.ConfigurationManager.LastKnownGoodConfiguration = currentConfiguration;
 
                     return claimsPrincipal;
                 }
                 else if (TokenUtilities.IsRecoverableException(exceptionThrown.SourceException))
                 {
-                    if (TokenUtilities.IsRecoverableConfiguration(validationParameters, currentConfiguration, out currentConfiguration))
-                    {
-                        validationParameters.ValidateWithLKG = true;
-                        claimsPrincipal = outerToken != null ? ValidateJWE(token, outerToken, validationParameters, currentConfiguration, out signatureValidatedToken, out exceptionThrown) :
-                            ValidateJWS(token, validationParameters, currentConfiguration, out signatureValidatedToken, out exceptionThrown);
-
-                        if (claimsPrincipal != null)
-                            return claimsPrincipal;
-                    }
-
                     // If we were still unable to validate, attempt to refresh the configuration and validate using it
                     // but ONLY if the currentConfiguration is not null. We want to avoid refreshing the configuration on
                     // retrieval error as this case should have already been hit before. This refresh handles the case
@@ -933,9 +923,35 @@ namespace System.IdentityModel.Tokens.Jwt
                         // Only try to re-validate using the newly obtained config if it doesn't reference equal the previously used configuration.
                         if (lastConfig != currentConfiguration)
                         {
-                            validationParameters.ValidateWithLKG = false;
                             claimsPrincipal = outerToken != null ? ValidateJWE(token, outerToken, validationParameters, currentConfiguration, out signatureValidatedToken, out exceptionThrown) :
                                 ValidateJWS(token, validationParameters, currentConfiguration, out signatureValidatedToken, out exceptionThrown);
+
+                            if (claimsPrincipal != null)
+                            {
+                                validationParameters.ConfigurationManager.LastKnownGoodConfiguration = currentConfiguration;
+                                return claimsPrincipal;
+                            }
+                        }
+                    }
+
+                    if (validationParameters.ConfigurationManager.UseLastKnownGoodConfiguration)
+                    {
+                        validationParameters.RefreshBeforeValidation = false;
+                        validationParameters.ValidateWithLKG = true;
+                        var recoverableException = exceptionThrown.SourceException;
+                        string kid = outerToken != null ? outerToken.Header.Kid :
+                            (ValidateSignatureUsingDelegates(token, validationParameters, null) ?? GetJwtSecurityTokenFromToken(token, validationParameters)).Header.Kid;
+
+                        foreach (BaseConfiguration lkgConfiguration in validationParameters.ConfigurationManager.GetValidLkgConfigurations())
+                        {
+                            if (!lkgConfiguration.Equals(currentConfiguration) && TokenUtilities.IsRecoverableConfiguration(kid, currentConfiguration, lkgConfiguration, recoverableException))
+                            {
+                                claimsPrincipal = outerToken != null ? ValidateJWE(token, outerToken, validationParameters, lkgConfiguration, out signatureValidatedToken, out exceptionThrown) :
+                                    ValidateJWS(token, validationParameters, lkgConfiguration, out signatureValidatedToken, out exceptionThrown);
+
+                                if (claimsPrincipal != null)
+                                    return claimsPrincipal;
+                            }
                         }
                     }
                 }
@@ -1260,10 +1276,6 @@ namespace System.IdentityModel.Tokens.Jwt
         /// If the <paramref name="token"/> has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature.
         /// This can indicate that a key refresh is required.
         /// </exception>
-        /// <exception cref="SecurityTokenUnableToValidateException">
-        /// If the <paramref name="token"/> has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature as well as the token
-        /// had validation errors or lifetime or issuer. This is not intended to be a signal to refresh keys.
-        /// </exception>
         /// <exception cref="SecurityTokenInvalidSignatureException">If after trying all the <see cref="SecurityKey"/>(s), none result in a validated signature AND the <paramref name="token"/> does not have a key identifier.</exception>
         /// <returns>A <see cref="JwtSecurityToken"/> that has the signature validated if token was signed.</returns>
         /// <remarks><para>If the <paramref name="token"/> is signed, the signature is validated even if <see cref="TokenValidationParameters.RequireSignedTokens"/> is false.</para>
@@ -1387,16 +1399,13 @@ namespace System.IdentityModel.Tokens.Jwt
 
                 if (!validationParameters.ValidateSignatureLast)
                 {
-                    InternalValidators.ValidateLifetimeAndIssuerAfterSignatureNotValidatedJwt(
+                    InternalValidators.ValidateAfterSignatureFailed(
                         jwtToken,
                         notBefore,
                         expires,
-                        jwtToken.Header.Kid,
+                        jwtToken.Audiences,
                         validationParameters,
-                        configuration,
-                        exceptionStrings,
-                        numKeysInConfiguration,
-                        numKeysInTokenValidationParameters);
+                        configuration);
                 }
             }
 
@@ -1641,7 +1650,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (jwtToken == null)
                 throw LogHelper.LogArgumentNullException(nameof(jwtToken));
 
-            return JwtTokenUtilities.ResolveTokenSigningKey(jwtToken.Header.Kid, jwtToken.Header.X5t, validationParameters);
+            return JwtTokenUtilities.ResolveTokenSigningKey(jwtToken.Header.Kid, jwtToken.Header.X5t, validationParameters, null);
         }
 
         /// <summary>

@@ -44,14 +44,5 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             get;
         } = new List<KeyInfo>();
-
-        /// <summary>
-        /// Gets or sets token endpoint.
-        /// </summary>
-        public string TokenEndpoint
-        {
-            get;
-            set;
-        }
     }
 }

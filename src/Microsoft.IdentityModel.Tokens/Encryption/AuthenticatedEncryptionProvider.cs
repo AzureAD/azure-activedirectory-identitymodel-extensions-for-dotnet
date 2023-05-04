@@ -59,9 +59,12 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (SupportedAlgorithms.IsAesGcm(algorithm))
                 {
-#if NETSTANDARD2_0 || NET6_0
-                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                    throw LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10713, LogHelper.MarkAsNonPII(algorithm))));
+#if NETSTANDARD2_0
+                    if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                        throw LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10713, LogHelper.MarkAsNonPII(algorithm))));
+#elif NET6_0_OR_GREATER
+                    if(!System.Security.Cryptography.AesGcm.IsSupported)
+                        throw LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10713, LogHelper.MarkAsNonPII(algorithm))));
 #endif
                     InitializeUsingAesGcm();
                 }
@@ -170,7 +173,7 @@ namespace Microsoft.IdentityModel.Tokens
             Array.Copy(iv, 0, macBytes, authenticatedData.Length, iv.Length);
             Array.Copy(ciphertext, 0, macBytes, authenticatedData.Length + iv.Length, ciphertext.Length);
             Array.Copy(al, 0, macBytes, authenticatedData.Length + iv.Length + ciphertext.Length, al.Length);
-            if (!_symmetricSignatureProvider.Value.Verify(macBytes, authenticationTag, _authenticatedkeys.Value.HmacKey.Key.Length))
+            if (!_symmetricSignatureProvider.Value.Verify(macBytes, 0, macBytes.Length, authenticationTag, 0, _authenticatedkeys.Value.HmacKey.Key.Length, Algorithm))
                 throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(LogMessages.IDX10650, Base64UrlEncoder.Encode(authenticatedData), Base64UrlEncoder.Encode(iv), Base64UrlEncoder.Encode(authenticationTag))));
 
             using Aes aes = Aes.Create();
@@ -383,13 +386,13 @@ namespace Microsoft.IdentityModel.Tokens
         private static string GetHmacAlgorithm(string algorithm)
         {
             if (SecurityAlgorithms.Aes128CbcHmacSha256.Equals(algorithm))
-                    return SecurityAlgorithms.HmacSha256;
+                return SecurityAlgorithms.HmacSha256;
 
             if (SecurityAlgorithms.Aes192CbcHmacSha384.Equals(algorithm))
                 return SecurityAlgorithms.HmacSha384;
 
             if (SecurityAlgorithms.Aes256CbcHmacSha512.Equals(algorithm))
-                    return SecurityAlgorithms.HmacSha512;
+                return SecurityAlgorithms.HmacSha512;
 
             throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10652, LogHelper.MarkAsNonPII(algorithm)), nameof(algorithm)));
         }

@@ -3,9 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Security.Claims;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -235,10 +233,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Creates a JWS(Json Web Signature).
+        /// Creates a JWS (Json Web Signature) or a JWE (Json Web Encryption).
         /// </summary>
         /// <param name="tokenDescriptor">A <see cref="SecurityTokenDescriptor"/> that contains details of contents of the token.</param>
-        /// <returns>A JWS in Compact Serialization Format.</returns>
+        /// <returns>A JWS in Compact Serialization Format or a JWE if <see cref="SecurityTokenDescriptor.EncryptingCredentials"/> is specified.</returns>
         public virtual string CreateToken(SecurityTokenDescriptor tokenDescriptor)
         {
             if (tokenDescriptor == null)
@@ -754,6 +752,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <exception cref="SecurityTokenDecryptionFailedException">if the JWE was not able to be decrypted.</exception>
         public string DecryptToken(JsonWebToken jwtToken, TokenValidationParameters validationParameters)
         {
+            return DecryptToken(jwtToken, validationParameters, null);
+        }
+
+        private string DecryptToken(JsonWebToken jwtToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+        {
             if (jwtToken == null)
                 throw LogHelper.LogArgumentNullException(nameof(jwtToken));
 
@@ -763,7 +766,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (string.IsNullOrEmpty(jwtToken.Enc))
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TokenLogMessages.IDX10612)));
 
-            var keys = GetContentEncryptionKeys(jwtToken, validationParameters);
+            var keys = GetContentEncryptionKeys(jwtToken, validationParameters, configuration);
             return JwtTokenUtilities.DecryptJwtToken(
                 jwtToken,
                 validationParameters,
@@ -939,10 +942,43 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
 
-        internal IEnumerable<SecurityKey> GetContentEncryptionKeys(JsonWebToken jwtToken, TokenValidationParameters validationParameters)
+        private static SecurityKey ResolveTokenDecryptionKeyFromConfig(JsonWebToken jwtToken, BaseConfiguration configuration)
+        {
+            if (jwtToken == null)
+                throw LogHelper.LogArgumentNullException(nameof(jwtToken));
+
+            if (!string.IsNullOrEmpty(jwtToken.Kid) && configuration.TokenDecryptionKeys != null)
+            {
+                foreach (var key in configuration.TokenDecryptionKeys)
+                {
+                    if (key != null && string.Equals(key.KeyId, jwtToken.Kid, GetStringComparisonRuleIf509OrECDsa(key)))
+                        return key;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(jwtToken.X5t) && configuration.TokenDecryptionKeys != null)
+            {
+                foreach (var key in configuration.TokenDecryptionKeys)
+                {
+                    if (key != null && string.Equals(key.KeyId, jwtToken.X5t, GetStringComparisonRuleIf509(key)))
+                        return key;
+
+                    var x509Key = key as X509SecurityKey;
+                    if (x509Key != null && string.Equals(x509Key.X5t, jwtToken.X5t, StringComparison.OrdinalIgnoreCase))
+                        return key;
+                }
+            }
+
+            return null;
+        }
+
+        internal IEnumerable<SecurityKey> GetContentEncryptionKeys(JsonWebToken jwtToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
         {
             IEnumerable<SecurityKey> keys = null;
 
+            // First we check to see if the caller has set a custom decryption resolver on TVP for the call, if so any keys set on TVP and keys in Configuration are ignored.
+            // If no custom decryption resolver set, we'll check to see if they've set some static decryption keys on TVP. If a key found, we ignore configuration.
+            // If no key found in TVP, we'll check the configuration.
             if (validationParameters.TokenDecryptionKeyResolver != null)
             {
                 keys = validationParameters.TokenDecryptionKeyResolver(jwtToken.EncodedToken, jwtToken, jwtToken.Kid, validationParameters);
@@ -951,7 +987,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 var key = ResolveTokenDecryptionKey(jwtToken.EncodedToken, jwtToken, validationParameters);
                 if (key != null)
-                    keys = new List<SecurityKey> { key };
+                {
+                    LogHelper.LogInformation(TokenLogMessages.IDX10904, key);
+                } 
+                else if (configuration != null)
+                {
+                    key = ResolveTokenDecryptionKeyFromConfig(jwtToken, configuration);
+                    if ( key != null )
+                        LogHelper.LogInformation(TokenLogMessages.IDX10905, key);
+                }
+                    
+                if (key != null)
+                    keys = new List<SecurityKey> { key };                   
             }
 
             // on decryption for ECDH-ES, we get the public key from the EPK value see: https://datatracker.ietf.org/doc/html/rfc7518#appendix-C
@@ -960,9 +1007,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // control gets here if:
             // 1. User specified delegate: TokenDecryptionKeyResolver returned null
             // 2. ResolveTokenDecryptionKey returned null
+            // 3. ResolveTokenDecryptionKeyFromConfig returned null
             // Try all the keys. This is the degenerate case, not concerned about perf.
             if (keys == null)
+            {
                 keys = JwtTokenUtilities.GetAllDecryptionKeys(validationParameters);
+                if (configuration != null)
+                    keys = keys == null ? configuration.TokenDecryptionKeys : keys.Concat(configuration.TokenDecryptionKeys);
+            }
 
             if (jwtToken.Alg.Equals(JwtConstants.DirectKeyUseAlg, StringComparison.Ordinal)
                 || jwtToken.Alg.Equals(SecurityAlgorithms.EcdhEs, StringComparison.Ordinal))
@@ -1140,9 +1192,36 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 TokenValidationResult result = ReadToken(token, validationParameters);
                 if (result.IsValid)
-                    return await ValidateTokenAsync(result.SecurityToken as JsonWebToken, validationParameters).ConfigureAwait(false);
+                    return await ValidateTokenAsync(result.SecurityToken, validationParameters).ConfigureAwait(false);
 
                 return result;
+            }
+            catch (Exception ex)
+            {
+                return new TokenValidationResult
+                {
+                    Exception = ex,
+                    IsValid = false
+                };
+            }
+        }
+
+        /// <inheritdoc/>
+        public override async Task<TokenValidationResult> ValidateTokenAsync(SecurityToken token, TokenValidationParameters validationParameters)
+        {
+            if (token == null)
+                throw LogHelper.LogArgumentNullException(nameof(token));
+
+            if (validationParameters == null)
+                return new TokenValidationResult { Exception = LogHelper.LogArgumentNullException(nameof(validationParameters)), IsValid = false };
+
+            var jwt = token as JsonWebToken;
+            if (jwt == null)
+                return new TokenValidationResult { Exception = LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14100, token))), IsValid = false };
+
+            try
+            {
+                return await ValidateTokenAsync(jwt, validationParameters).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -1174,11 +1253,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     jsonWebToken = new JsonWebToken(token);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     return new TokenValidationResult
                     {
-                        Exception = LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14100, token))),
+                        Exception = LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14100, token), ex)),
                         IsValid = false
                     };
                 }
@@ -1224,25 +1303,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 if (tokenValidationResult.IsValid)
                 {
-                    // Set current configuration as LKG if it exists and has not already been set as the LKG.
-                    if (currentConfiguration != null && !ReferenceEquals(currentConfiguration, validationParameters.ConfigurationManager.LastKnownGoodConfiguration))
+                    // Set current configuration as LKG if it exists.
+                    if (currentConfiguration != null)
                         validationParameters.ConfigurationManager.LastKnownGoodConfiguration = currentConfiguration;
 
                     return tokenValidationResult;
                 }
-                // using 'GetType()' instead of 'is' as SecurityTokenUnableToValidException (and others) extend SecurityTokenInvalidSignatureException
-                // we want to make sure that the clause for SecurityTokenUnableToValidateException is hit so that the ValidationFailure is checked
                 else if (TokenUtilities.IsRecoverableException(tokenValidationResult.Exception))
                 {
-                    if (TokenUtilities.IsRecoverableConfiguration(validationParameters, currentConfiguration, out currentConfiguration))
-                    {
-                        validationParameters.ValidateWithLKG = true;
-                        tokenValidationResult = ValidateToken(jsonWebToken, validationParameters, currentConfiguration);
-
-                        if (tokenValidationResult.IsValid)
-                            return tokenValidationResult;
-                    }
-
                     // If we were still unable to validate, attempt to refresh the configuration and validate using it
                     // but ONLY if the currentConfiguration is not null. We want to avoid refreshing the configuration on
                     // retrieval error as this case should have already been hit before. This refresh handles the case
@@ -1257,8 +1325,31 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         // Only try to re-validate using the newly obtained config if it doesn't reference equal the previously used configuration.
                         if (lastConfig != currentConfiguration)
                         {
-                            validationParameters.ValidateWithLKG = false;
-                            return ValidateToken(jsonWebToken, validationParameters, currentConfiguration);
+                            tokenValidationResult = ValidateToken(jsonWebToken, validationParameters, currentConfiguration);
+
+                            if (tokenValidationResult.IsValid)
+                            {
+                                validationParameters.ConfigurationManager.LastKnownGoodConfiguration = currentConfiguration;
+                                return tokenValidationResult;
+                            }
+                        }
+                    }
+
+                    if (validationParameters.ConfigurationManager.UseLastKnownGoodConfiguration)
+                    {
+                        validationParameters.RefreshBeforeValidation = false;
+                        validationParameters.ValidateWithLKG = true;
+                        var recoverableException = tokenValidationResult.Exception;
+
+                        foreach (BaseConfiguration lkgConfiguration in validationParameters.ConfigurationManager.GetValidLkgConfigurations())
+                        {
+                            if (!lkgConfiguration.Equals(currentConfiguration) && TokenUtilities.IsRecoverableConfiguration(jsonWebToken.Kid, currentConfiguration, lkgConfiguration, recoverableException))
+                            {
+                                tokenValidationResult = ValidateToken(jsonWebToken, validationParameters, lkgConfiguration);
+
+                                if (tokenValidationResult.IsValid)
+                                    return tokenValidationResult;
+                            }
                         }
                     }
                 }
@@ -1313,7 +1404,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return new TokenValidationResult
                 {
                     Exception = ex,
-                    IsValid = false
+                    IsValid = false,
+                    TokenOnFailedValidation = validationParameters.IncludeTokenOnFailedValidation ? jsonWebToken : null
                 };
             }
         }
@@ -1322,7 +1414,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             try
             {
-                string jws = DecryptToken(jwtToken, validationParameters);
+                string jws = DecryptToken(jwtToken, validationParameters, configuration);
                 TokenValidationResult readTokenResult = ReadToken(jws, validationParameters);
                 if (!readTokenResult.IsValid)
                     return readTokenResult;
@@ -1348,7 +1440,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return new TokenValidationResult
                 {
                     Exception = ex,
-                    IsValid = false
+                    IsValid = false,
+                    TokenOnFailedValidation = validationParameters.IncludeTokenOnFailedValidation ? jwtToken : null
                 };
             }
         }
@@ -1407,7 +1500,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 // and (since issuer validation occurs first) came from a trusted authority.
                 // NOTE: More than one nested actor token should not be considered a valid token, but if we somehow encounter one,
                 // this code will still work properly.
-                ValidateToken(jsonWebToken.Actor, validationParameters.ActorValidationParameters ?? validationParameters);
+                TokenValidationResult tokenValidationResult = ValidateToken(jsonWebToken.Actor, validationParameters.ActorValidationParameters ?? validationParameters);
+                if (!tokenValidationResult.IsValid)
+                    return tokenValidationResult;
             }
 
             string tokenType = Validators.ValidateTokenType(jsonWebToken.Typ, jsonWebToken, validationParameters);
@@ -1452,7 +1547,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
             }
 
-            if (keys == null && validationParameters.TryAllIssuerSigningKeys)
+            if (validationParameters.TryAllIssuerSigningKeys && keys.IsNullOrEmpty())
             {
                 // control gets here if:
                 // 1. User specified delegate: IssuerSigningKeyResolver returned null
@@ -1524,16 +1619,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 if (!validationParameters.ValidateSignatureLast)
                 {
-                    InternalValidators.ValidateLifetimeAndIssuerAfterSignatureNotValidatedJwt(
+                    InternalValidators.ValidateAfterSignatureFailed(
                         jwtToken,
                         notBefore,
                         expires,
-                        jwtToken.Kid,
+                        jwtToken.Audiences,
                         validationParameters,
-                        configuration,
-                        exceptionStrings,
-                        numKeysInTokenValidationParameters,
-                        numKeysInConfiguration);
+                        configuration);
                 }
             }
 

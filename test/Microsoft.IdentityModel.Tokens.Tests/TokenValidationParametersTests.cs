@@ -16,14 +16,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class TokenValidationParametersTests
     {
+        int ExpectedPropertyCount = 58;
+
         [Fact]
         public void Publics()
         {
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 56)
-                Assert.True(false, "Number of properties has changed from 56 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != ExpectedPropertyCount)
+                Assert.True(false, $"Number of properties has changed from {ExpectedPropertyCount} to: " + properties.Length + ", adjust tests");
 
             TokenValidationParameters actorValidationParameters = new TokenValidationParameters();
             SecurityKey issuerSigningKey = KeyingMaterial.DefaultX509Key_2048_Public;
@@ -72,6 +74,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 IssuerSigningKeys = issuerSigningKeys,
                 IssuerValidator = ValidationDelegates.IssuerValidatorEcho,
                 LifetimeValidator = ValidationDelegates.LifetimeValidatorReturnsTrue,
+                LogTokenId = true,
                 LogValidationExceptions = true,
                 PropertyBag = propertyBag,
                 SignatureValidator = ValidationDelegates.SignatureValidatorReturnsJwtTokenAsIs,
@@ -110,6 +113,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParametersSets.IssuerSigningKeys = issuerSigningKeysDup;
             validationParametersSets.IssuerValidator = ValidationDelegates.IssuerValidatorEcho;
             validationParametersSets.LifetimeValidator = ValidationDelegates.LifetimeValidatorReturnsTrue;
+            validationParametersSets.LogTokenId = true;
             validationParametersSets.LogValidationExceptions = true;
             validationParametersSets.PropertyBag = propertyBag;
             validationParametersSets.SignatureValidator = ValidationDelegates.SignatureValidatorReturnsJwtTokenAsIs;
@@ -123,7 +127,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParametersSets.ValidIssuer = validIssuer;
             validationParametersSets.ValidIssuers = validIssuers;
             validationParametersSets.ValidTypes = validTypes;
-            
+
             var compareContext = new CompareContext();
             IdentityComparer.AreEqual(validationParametersInline, validationParametersSets, compareContext);
 
@@ -157,8 +161,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TokenValidationParameters validationParameters = new TokenValidationParameters();
             Type type = typeof(TokenValidationParameters);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 56)
-                Assert.True(false, "Number of public fields has changed from 56 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != ExpectedPropertyCount)
+                Assert.True(false, $"Number of public fields has changed from {ExpectedPropertyCount} to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext

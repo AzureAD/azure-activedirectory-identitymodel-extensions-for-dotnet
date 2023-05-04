@@ -211,6 +211,7 @@ namespace Microsoft.IdentityModel.Tokens
             ConfigurationManager = other.ConfigurationManager;
             CryptoProviderFactory = other.CryptoProviderFactory;
             DebugId = other.DebugId;
+            IncludeTokenOnFailedValidation = other.IncludeTokenOnFailedValidation;
             IgnoreTrailingSlashWhenValidatingAudience = other.IgnoreTrailingSlashWhenValidatingAudience;
             IssuerSigningKey = other.IssuerSigningKey;
             IssuerSigningKeyResolver = other.IssuerSigningKeyResolver;
@@ -219,6 +220,7 @@ namespace Microsoft.IdentityModel.Tokens
             IssuerSigningKeyValidator = other.IssuerSigningKeyValidator;
             IssuerValidator = other.IssuerValidator;
             LifetimeValidator = other.LifetimeValidator;
+            LogTokenId = other.LogTokenId;
             LogValidationExceptions = other.LogValidationExceptions;
             NameClaimType = other.NameClaimType;
             NameClaimTypeRetriever = other.NameClaimTypeRetriever;
@@ -261,6 +263,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>        
         public TokenValidationParameters()
         {
+            LogTokenId = true;
             LogValidationExceptions = true;
             RequireExpirationTime = true;
             RequireSignedTokens = true;
@@ -427,6 +430,10 @@ namespace Microsoft.IdentityModel.Tokens
         [DefaultValue(true)]
         public bool IgnoreTrailingSlashWhenValidatingAudience { get; set; } = true;
 
+        /// <summary>
+        /// Gets or sets the flag that indicates whether to include the <see cref="SecurityToken"/> when the validation fails.
+        /// </summary>
+        public bool IncludeTokenOnFailedValidation { get; set; } = false;
 
         /// <summary>
         /// Gets or sets a delegate for validating the <see cref="SecurityKey"/> that signed the token.
@@ -540,6 +547,13 @@ namespace Microsoft.IdentityModel.Tokens
         public LifetimeValidator LifetimeValidator { get; set; }
 
         /// <summary>
+        /// Gets or sets a <see cref="bool"/> that will decide if the token identifier claim needs to be logged.
+        /// Default value is <c>true</c>.
+        /// </summary>
+        [DefaultValue(true)]
+        public bool LogTokenId { get; set; }
+
+        /// <summary>
         /// Gets or sets a <see cref="bool"/> that will decide if validation failure needs to be logged as an error.
         /// Default value is <c>true</c> for backward compatibility of the behavior.
         /// If set to false, validation failures are logged as Information and then thrown.
@@ -571,9 +585,14 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or sets a delegate that will be called to obtain the NameClaimType to use when creating a ClaimsIdentity
-        /// after validating a token.
+        /// Gets or sets a delegate that will be called to set the property <see cref="ClaimsIdentity.NameClaimType"/> after validating a token.
         /// </summary>
+        /// <remarks>
+        /// The function will be passed:
+        /// <para>The <see cref="SecurityToken"/> that is being validated.</para>
+        /// <para>The issuer associated with the token.</para>
+        /// <para>Returns the value that will set the property <see cref="ClaimsIdentity.NameClaimType"/>.</para>
+        /// </remarks>
         public Func<SecurityToken, string, string> NameClaimTypeRetriever { get; set; }
 
         /// <summary>
@@ -636,9 +655,14 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or sets a delegate that will be called to obtain the RoleClaimType to use when creating a ClaimsIdentity
-        /// after validating a token.
+        /// Gets or sets a delegate that will be called to set the property <see cref="ClaimsIdentity.RoleClaimType"/> after validating a token.
         /// </summary>
+        /// <remarks>
+        /// The function will be passed:
+        /// <para>The <see cref="SecurityToken"/> that is being validated.</para>
+        /// <para>The issuer associated with the token.</para>
+        /// <para>Returns the value that will set the property <see cref="ClaimsIdentity.RoleClaimType"/>.</para>
+        /// </remarks>
         public Func<SecurityToken, string, string> RoleClaimTypeRetriever { get; set; }
 
         /// <summary>
@@ -796,7 +820,7 @@ namespace Microsoft.IdentityModel.Tokens
         public bool ValidateLifetime { get; set; }
 
         /// <summary>
-        /// Gets or sets a boolean that controls if the the vaidation order of the payload and signature during token validation.
+        /// Gets or sets a boolean that controls the validation order of the payload and signature during token validation.
         /// </summary>
         /// <remarks>If <see cref= "ValidateSignatureLast" /> is set to ture, it will validate payload ahead of signature .
         /// The default is <c>false</c>.

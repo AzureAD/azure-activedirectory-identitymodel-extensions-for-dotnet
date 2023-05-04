@@ -98,7 +98,7 @@ namespace Microsoft.IdentityModel.Tokens
             foreach (var webKey in Keys)
             {
                 // skip if "use" (Public Key Use) parameter is not empty or "sig".
-                // https://datatracker.ietf.org/doc/html/rfc7517#section-4.2
+                // https://datatracker.ietf.org/doc/html/rfc7517#section-4-2
                 if (!string.IsNullOrEmpty(webKey.Use) && !webKey.Use.Equals(JsonWebKeyUseNames.Sig))
                 {
                     string convertKeyInfo = LogHelper.FormatInvariant(LogMessages.IDX10808, webKey, webKey.Use);

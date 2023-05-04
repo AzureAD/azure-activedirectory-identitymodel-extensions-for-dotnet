@@ -5,7 +5,7 @@ namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
     /// Constants for JsonWebKeyUse (sec 4.2)
-    /// https://datatracker.ietf.org/doc/html/rfc7517#section-4.2
+    /// https://datatracker.ietf.org/doc/html/rfc7517#section-4-2
     /// </summary>
     public static class JsonWebKeyUseNames
     {

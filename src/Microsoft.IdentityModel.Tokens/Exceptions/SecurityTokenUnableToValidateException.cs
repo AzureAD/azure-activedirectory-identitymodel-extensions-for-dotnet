@@ -11,7 +11,15 @@ namespace Microsoft.IdentityModel.Tokens
     /// and when validation errors exist over the security token. This exception is not intended to be used as a signal
     /// to refresh keys.
     /// </summary>
+    /// <remarks>
+    /// This exception type is now considered obsolete and will be removed in the next major version (7.0.0).
+    /// </remarks>
     [Serializable]
+    [Obsolete(
+        "This expception is no longer being thrown by Microsoft.IdentityModel and will be removed in the next major " +
+        "version see: https://aka.ms/SecurityTokenUnableToValidateException",
+        false)]
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     public class SecurityTokenUnableToValidateException : SecurityTokenInvalidSignatureException
     {
         [NonSerialized]

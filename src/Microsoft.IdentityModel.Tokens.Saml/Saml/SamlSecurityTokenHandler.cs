@@ -1084,14 +1084,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 if (keyMatched)
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10514, keysAttempted, samlToken.Assertion.Signature.KeyInfo, exceptionStrings, samlToken)));
 
-                if (samlToken.Assertion.Conditions != null)
-                    InternalValidators.ValidateLifetimeAndIssuerAfterSignatureNotValidatedSaml(
-                        samlToken,
-                        samlToken.Assertion.Conditions.NotBefore,
-                        samlToken.Assertion.Conditions.NotOnOrAfter,
-                        samlToken.Assertion.Signature.KeyInfo.ToString(),
-                        validationParameters,
-                        exceptionStrings);
+                ValidateIssuer(samlToken.Issuer, samlToken, validationParameters);
+                ValidateConditions(samlToken, validationParameters);
             }
 
             if (keysAttempted.Length > 0)

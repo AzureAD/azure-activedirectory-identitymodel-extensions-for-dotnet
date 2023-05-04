@@ -453,7 +453,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     new JwtTheoryData
                     {
                         TestId = "ActorValidationUsingActorTVP - ExceptionExpected",
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501"),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10503"),
                         Token = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, claimsIdentity, null, null, null, Default.AsymmetricSigningCredentials),
                         TokenHandler = handler,
                         ValidationParameters = validationParameters
@@ -472,7 +472,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     new JwtTheoryData
                     {
                         TestId = "ActorValidationUsingTVP - ExceptionExpected",
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501"),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10503"),
                         Token = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, claimsIdentity, null, null, null, Default.AsymmetricSigningCredentials),
                         TokenHandler = handler,
                         ValidationParameters = validationParameters
@@ -493,7 +493,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     new JwtTheoryData
                     {
                         TestId = "ActorValidationUsingTVP - NotTryingAllIssuerSigningKeys - ExceptionExpected",
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501"),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10500"),
                         Token = handler.CreateEncodedJwt(Default.Issuer, Default.Audience, claimsIdentity, null, null, null, Default.AsymmetricSigningCredentials),
                         TokenHandler = handler,
                         ValidationParameters = validationParameters
@@ -2228,7 +2228,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:"),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10500:"),
                         TestId = nameof(Default.SymmetricJws) + "_" + "RequireSignedTokensNullSigningKey",
                         Token = Default.SymmetricJws,
                         ValidationParameters = new TokenValidationParameters
@@ -2794,7 +2794,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         IssuerSigningKey = Default.SymmetricSigningKey,
                         ValidIssuer = Default.Issuer
                     },
-                    ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10516:")
+                    ExpectedException = ExpectedException.SecurityTokenExpiredException("IDX10223:")
                 },
                 new CreateTokenTheoryData
                 {
@@ -2808,7 +2808,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     {
                         IssuerSigningKey = Default.SymmetricSigningKey,
                     },
-                    ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10516:")
+                    ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10204:")
                 },
                 new CreateTokenTheoryData
                 {
@@ -2825,7 +2825,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     {
                         IssuerSigningKey = Default.SymmetricSigningKey,
                     },
-                    ExpectedException = ExpectedException.SecurityTokenUnableToValidateException("IDX10516:")
+                    ExpectedException = ExpectedException.SecurityTokenExpiredException("IDX10223:")
                 },
                 new CreateTokenTheoryData
                 {
@@ -2840,7 +2840,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         IssuerSigningKey = Default.SymmetricSigningKey,
                         ValidIssuer = Default.Issuer,
                     },
-                    ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10501:")
+                    ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10208:")
                 },
             };
         }
