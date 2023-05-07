@@ -549,7 +549,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(SymmetricVerifySingatureSizeTheoryData))]
+        [Theory, MemberData(nameof(SymmetricVerifySignatureSizeTheoryData))]
         public void SymmetricVerify1Tests(SignatureProviderTheoryData theoryData)
         {
             // verifies: public bool Verify(byte[] input, byte[] signature)
@@ -567,7 +567,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Theory, MemberData(nameof(SymmetricVerifySingatureSizeTheoryData))]
+        [Theory, MemberData(nameof(SymmetricVerifySignatureSizeTheoryData))]
         public void SymmetricVerify2Tests(SignatureProviderTheoryData theoryData)
         {
             // verifies: public bool Verify(byte[] input, byte[] signature, int length)
@@ -585,7 +585,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Theory, MemberData(nameof(SymmetricVerifySingatureSizeTheoryData))]
+        [Theory, MemberData(nameof(SymmetricVerifySignatureSizeTheoryData))]
         public void SymmetricVerify3Tests(SignatureProviderTheoryData theoryData)
         {
             // verifies: public override bool Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength)
@@ -603,7 +603,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<SignatureProviderTheoryData> SymmetricVerifySingatureSizeTheoryData
+        public static TheoryData<SignatureProviderTheoryData> SymmetricVerifySignatureSizeTheoryData
         {
             get
             {
@@ -634,7 +634,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(SymmetricVerifySingatureSizeInternalTheoryData))]
+        [Theory, MemberData(nameof(SymmetricVerifySignatureSizeInternalTheoryData))]
         public void SymmetricVerify4Tests(SignatureProviderTheoryData theoryData)
         {
             // verifies: internal bool Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength, string algorithm)
@@ -652,7 +652,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
         
-        public static TheoryData<SignatureProviderTheoryData> SymmetricVerifySingatureSizeInternalTheoryData
+        public static TheoryData<SignatureProviderTheoryData> SymmetricVerifySignatureSizeInternalTheoryData
         {
             get
             {
@@ -767,14 +767,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 SecurityKey = new SymmetricSecurityKey(new byte[16]),
                 Algorithm = ALG.HmacSha256Signature,
-                ExpectedException = EE.InvalidOperationException("IDX10720:")
+                ExpectedException = EE.ArgumentOutOfRangeException("IDX10720:")
             });
 
             theoryData.Add(new SymmetricSignatureProviderTheoryData("HmacSha256")
             {
                 SecurityKey = new SymmetricSecurityKey(new byte[16]),
                 Algorithm = ALG.HmacSha256,
-                ExpectedException = EE.InvalidOperationException("IDX10720:")
+                ExpectedException = EE.ArgumentOutOfRangeException("IDX10720:")
             });
 
             theoryData.Add(new SymmetricSignatureProviderTheoryData("HmacSha256_32")
@@ -787,14 +787,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 SecurityKey = new SymmetricSecurityKey(new byte[32]),
                 Algorithm = ALG.HmacSha384Signature,
-                ExpectedException = EE.InvalidOperationException("IDX10720:")
+                ExpectedException = EE.ArgumentOutOfRangeException("IDX10720:")
             });
 
             theoryData.Add(new SymmetricSignatureProviderTheoryData("HmacSha384")
             {
                 SecurityKey = new SymmetricSecurityKey(new byte[32]),
                 Algorithm = ALG.HmacSha384,
-                ExpectedException = EE.InvalidOperationException("IDX10720:")
+                ExpectedException = EE.ArgumentOutOfRangeException("IDX10720:")
             });
 
             theoryData.Add(new SymmetricSignatureProviderTheoryData("HmacSha384_48")
@@ -807,14 +807,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 SecurityKey = new SymmetricSecurityKey(new byte[48]),
                 Algorithm = ALG.HmacSha512Signature,
-                ExpectedException = EE.InvalidOperationException("IDX10720:")
+                ExpectedException = EE.ArgumentOutOfRangeException("IDX10720:")
             });
 
             theoryData.Add(new SymmetricSignatureProviderTheoryData("HmacSha512")
             {
                 SecurityKey = new SymmetricSecurityKey(new byte[48]),
                 Algorithm = ALG.HmacSha512,
-                ExpectedException = EE.InvalidOperationException("IDX10720:")
+                ExpectedException = EE.ArgumentOutOfRangeException("IDX10720:")
             });
 
             theoryData.Add(new SymmetricSignatureProviderTheoryData("HmacSha512_64")
