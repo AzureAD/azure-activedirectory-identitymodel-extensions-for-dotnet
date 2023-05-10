@@ -173,7 +173,7 @@ namespace Microsoft.IdentityModel.Protocols
                         {
                             ConfigurationValidationResult result = _configValidator.Validate(configuration);
                             if (!result.Succeeded)
-                                throw LogHelper.LogExceptionMessage(new ConfigurationValidationException(LogHelper.FormatInvariant(LogMessages.IDX20810, result.ErrorMessage)));
+                                throw LogHelper.LogExceptionMessage(new ConfigurationInvalidException(LogHelper.FormatInvariant(LogMessages.IDX20810, result.ErrorMessage)));
                         }
 
                         _currentConfiguration = configuration;

@@ -510,7 +510,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ConfigurationValidator = openIdConnectConfigurationValidator2,
                     DocumentRetriever = new FileDocumentRetriever(),
                     //ExpectedErrorMessage = "IDX21818: ",
-                    ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX21818:", typeof(ConfigurationValidationException)),
+                    ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX21818:", typeof(ConfigurationInvalidException)),
                     MetadataAddress = "OpenIdConnectMetadata.json",
                     TestId = "ValidConfiguration_NotEnoughKey"
                 });
@@ -520,7 +520,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ConfigurationRetreiver = new OpenIdConnectConfigurationRetriever(),
                     ConfigurationValidator = openIdConnectConfigurationValidator2,
                     DocumentRetriever = new FileDocumentRetriever(),
-                    ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX10810:", typeof(ConfigurationValidationException)),
+                    ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX10810:", typeof(ConfigurationInvalidException)),
                     MetadataAddress = "OpenIdConnectMetadataUnrecognizedKty.json",
                     TestId = "InvalidConfiguration_UnrecognizedKty"
                 });
@@ -530,7 +530,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ConfigurationRetreiver = new OpenIdConnectConfigurationRetriever(),
                     ConfigurationValidator = openIdConnectConfigurationValidator2,
                     DocumentRetriever = new FileDocumentRetriever(),
-                    ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX21817:", typeof(ConfigurationValidationException)),
+                    ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX21817:", typeof(ConfigurationInvalidException)),
                     MetadataAddress = "JsonWebKeySetUnrecognizedKty.json",
                     TestId = "InvalidConfiguration_EmptyJsonWenKeySet"
                 });
@@ -540,7 +540,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ConfigurationRetreiver = new OpenIdConnectConfigurationRetriever(),
                     ConfigurationValidator = openIdConnectConfigurationValidator2,
                     DocumentRetriever = new FileDocumentRetriever(),
-                    ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX10814:", typeof(ConfigurationValidationException)),
+                    ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX10814:", typeof(ConfigurationInvalidException)),
                     MetadataAddress = "OpenIdConnectMetadataBadRsaDataMissingComponent.json",
                     TestId = "InvalidConfiguration_RsaKeyMissingComponent"
                 });
