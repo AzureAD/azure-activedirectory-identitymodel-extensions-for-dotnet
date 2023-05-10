@@ -173,11 +173,10 @@ namespace Microsoft.IdentityModel.Protocols
                         {
                             ConfigurationValidationResult result = _configValidator.Validate(configuration);
                             if (!result.Succeeded)
-                                LogHelper.LogWarning(LogMessages.IDX20810, result.ErrorMessage);
+                                throw LogHelper.LogExceptionMessage(new ConfigurationValidationException(LogHelper.FormatInvariant(LogMessages.IDX20810, result.ErrorMessage)));
                         }
 
                         _currentConfiguration = configuration;
-
                     }
                     catch (Exception ex)
                     {
@@ -218,7 +217,12 @@ namespace Microsoft.IdentityModel.Protocols
                 else
                     throw LogHelper.LogExceptionMessage(
                         new InvalidOperationException(
-                            LogHelper.FormatInvariant(LogMessages.IDX20803, LogHelper.MarkAsNonPII(MetadataAddress ?? "null"), LogHelper.MarkAsNonPII(_fetchMetadataFailure)), _fetchMetadataFailure));
+                            LogHelper.FormatInvariant(
+                                LogMessages.IDX20803,
+                                LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
+                                LogHelper.MarkAsNonPII(_syncAfter),
+                                LogHelper.MarkAsNonPII(_fetchMetadataFailure)),
+                            _fetchMetadataFailure));
             }
             finally
             {
@@ -269,7 +273,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         public new static readonly TimeSpan DefaultRefreshInterval = BaseConfigurationManager.DefaultRefreshInterval;
 
-        /// <summary>
+        /// <summary>/
         /// 5 minutes is the minimum value for automatic refresh. <see cref="MinimumAutomaticRefreshInterval"/> can not be set less than this value.
         /// </summary>
         public new static readonly TimeSpan MinimumAutomaticRefreshInterval = BaseConfigurationManager.MinimumAutomaticRefreshInterval;
