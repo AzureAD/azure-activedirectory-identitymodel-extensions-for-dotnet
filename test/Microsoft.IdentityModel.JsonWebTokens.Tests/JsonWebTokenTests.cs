@@ -546,7 +546,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
                 theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.JWEEmptyAuthenticationTag))
                 {
-                    ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX14310:"),
+                    ExpectedException = ExpectedException.SecurityTokenMalformedTokenException(substringExpected: "IDX14310:"),
                     Token = EncodedJwts.JWEEmptyAuthenticationTag,
                 });
 

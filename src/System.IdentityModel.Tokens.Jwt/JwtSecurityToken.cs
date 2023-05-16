@@ -43,10 +43,10 @@ namespace System.IdentityModel.Tokens.Jwt
             else if (tokenParts.Length == JwtConstants.JweSegmentCount)
             {
                 if (!JwtTokenUtilities.RegexJwe.IsMatch(jwtEncodedString))
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12740, jwtEncodedString)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedTokenException(LogHelper.FormatInvariant(LogMessages.IDX12740, jwtEncodedString)));
             }
             else
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12741, jwtEncodedString)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedTokenException(LogHelper.FormatInvariant(LogMessages.IDX12741, jwtEncodedString)));
 
             Decode(tokenParts, jwtEncodedString);
         }

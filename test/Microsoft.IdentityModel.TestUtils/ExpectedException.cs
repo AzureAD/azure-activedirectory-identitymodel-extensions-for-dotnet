@@ -52,6 +52,11 @@ namespace Microsoft.IdentityModel.TestUtils
             return new ExpectedException(typeof(SecurityTokenDecryptionFailedException), substringExpected, innerTypeExpected);
         }
 
+        public static ExpectedException SecurityTokenMalformedTokenException(string substringExpected = null, Type innerTypeExpected = null)
+        {
+            return new ExpectedException(typeof(SecurityTokenMalformedTokenException), substringExpected, innerTypeExpected);
+        }
+
         public static ExpectedException InvalidOperationException(string substringExpected = null, Type inner = null, string contains = null)
         {
             return new ExpectedException(typeof(InvalidOperationException), substringExpected, inner);
