@@ -166,9 +166,6 @@ namespace Microsoft.IdentityModel.Protocols
                         // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
                         // The transport should have it's own timeouts, etc..
                         var configuration = await _configRetriever.GetConfigurationAsync(MetadataAddress, _docRetriever, CancellationToken.None).ConfigureAwait(false);
-                        _lastRefresh = DateTimeOffset.UtcNow;
-                        // Add 1 hour jitter to avoid spike traffic to IdentityProvider.
-                        _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval + TimeSpan.FromMinutes(new Random().Next(60)));
                         if (_configValidator != null)
                         {
                             ConfigurationValidationResult result = _configValidator.Validate(configuration);
@@ -176,6 +173,9 @@ namespace Microsoft.IdentityModel.Protocols
                                 throw LogHelper.LogExceptionMessage(new ConfigurationInvalidException(LogHelper.FormatInvariant(LogMessages.IDX20810, result.ErrorMessage)));
                         }
 
+                        _lastRefresh = DateTimeOffset.UtcNow;
+                        // Add 1 hour jitter to avoid spike traffic to IdentityProvider.
+                        _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval + TimeSpan.FromMinutes(new Random().Next(60)));
                         _currentConfiguration = configuration;
                     }
                     catch (Exception ex)
@@ -273,7 +273,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         public new static readonly TimeSpan DefaultRefreshInterval = BaseConfigurationManager.DefaultRefreshInterval;
 
-        /// <summary>/
+        /// <summary>
         /// 5 minutes is the minimum value for automatic refresh. <see cref="MinimumAutomaticRefreshInterval"/> can not be set less than this value.
         /// </summary>
         public new static readonly TimeSpan MinimumAutomaticRefreshInterval = BaseConfigurationManager.MinimumAutomaticRefreshInterval;

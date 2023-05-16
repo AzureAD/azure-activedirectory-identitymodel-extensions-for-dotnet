@@ -509,7 +509,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ConfigurationRetreiver = new OpenIdConnectConfigurationRetriever(),
                     ConfigurationValidator = openIdConnectConfigurationValidator2,
                     DocumentRetriever = new FileDocumentRetriever(),
-                    //ExpectedErrorMessage = "IDX21818: ",
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX21818:", typeof(ConfigurationInvalidException)),
                     MetadataAddress = "OpenIdConnectMetadata.json",
                     TestId = "ValidConfiguration_NotEnoughKey"
