@@ -31,10 +31,10 @@ namespace Microsoft.IdentityModel.Protocols
         private Exception _fetchMetadataFailure;
         private TimeSpan _bootstrapRefreshInterval = TimeSpan.FromSeconds(1);
 
-    /// <summary>
-    /// Static initializer for a new object. Static initializers run before the first instance of the type is created.
-    /// </summary>
-    static ConfigurationManager()
+        /// <summary>
+        /// Static initializer for a new object. Static initializers run before the first instance of the type is created.
+        /// </summary>
+        static ConfigurationManager()
         {               
         }
 
@@ -170,7 +170,7 @@ namespace Microsoft.IdentityModel.Protocols
                         {
                             ConfigurationValidationResult result = _configValidator.Validate(configuration);
                             if (!result.Succeeded)
-                                throw LogHelper.LogExceptionMessage(new ConfigurationInvalidException(LogHelper.FormatInvariant(LogMessages.IDX20810, result.ErrorMessage)));
+                                throw LogHelper.LogExceptionMessage(new InvalidConfigurationException(LogHelper.FormatInvariant(LogMessages.IDX20810, result.ErrorMessage)));
                         }
 
                         _lastRefresh = DateTimeOffset.UtcNow;
