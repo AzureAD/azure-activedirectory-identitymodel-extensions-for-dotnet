@@ -11,6 +11,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Json;
@@ -2570,6 +2571,114 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             catch (Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        // Test creates a JWT with every mapped claim and then checks that the result of validation from the
+        // JwtSecurityTokenHandler and JsonWebTokenHandler are the same, both in the mapped and unmapped case.
+        [Fact]
+        public async Task ValidateJsonWebTokenClaimMapping()
+        {
+            var jsonWebTokenHandler = new JsonWebTokenHandler() { MapInboundClaims = false };
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(Default.PayloadAllShortClaims),
+                SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
+                EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
+            };
+
+            var accessToken = jsonWebTokenHandler.CreateToken(tokenDescriptor);
+
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidAudience = Default.Audience,
+                ValidIssuer = Default.Issuer,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
+                TokenDecryptionKey = KeyingMaterial.DefaultX509Key_2048,
+                AlgorithmValidator = ValidationDelegates.AlgorithmValidatorBuilder(true),
+                RequireExpirationTime = false,
+            };
+
+            JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler() { MapInboundClaims = false };
+
+            TokenValidationResult jsonValidationResult = await jsonWebTokenHandler.ValidateTokenAsync(accessToken, validationParameters);
+            TokenValidationResult jwtValidationResult = await jwtSecurityTokenHandler.ValidateTokenAsync(accessToken, validationParameters);
+
+            var context = new CompareContext
+            {
+                PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+                {
+                    { typeof(TokenValidationResult),  new List<string> { "SecurityToken", "TokenType" } }
+                }
+            };
+
+            if(jsonValidationResult.IsValid && jwtValidationResult.IsValid)
+            {
+                if(!IdentityComparer.AreEqual(jsonValidationResult, jwtValidationResult, context))
+                {
+                    context.AddDiff("jsonValidationResult.IsValid && jwtValidationResult.IsValid, Validation results are not equal");
+                }
+            }
+
+            jsonWebTokenHandler.MapInboundClaims = true;
+            jwtSecurityTokenHandler.MapInboundClaims = true;
+
+            jsonValidationResult = await jsonWebTokenHandler.ValidateTokenAsync(accessToken, validationParameters);
+            jwtValidationResult = await jwtSecurityTokenHandler.ValidateTokenAsync(accessToken, validationParameters);
+
+            if (jsonValidationResult.IsValid && jwtValidationResult.IsValid)
+            {
+                if (!IdentityComparer.AreEqual(jsonValidationResult, jwtValidationResult, context))
+                {
+                    context.AddDiff("jsonValidationResult.IsValid && jwtValidationResult.IsValid, Validation results are not equal");
+                }
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        // Test shows if the JwtSecurityTokenHandler has mapping OFF and 
+        // the JsonWebTokenHandler has mapping ON,the claims are different.
+        [Fact]
+        public async Task ValidateDifferentClaimsBetweenHandlers()
+        {
+            var jsonWebTokenHandler = new JsonWebTokenHandler() { MapInboundClaims = true };
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(Default.PayloadAllShortClaims),
+                SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
+                EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
+            };
+
+            var accessToken = jsonWebTokenHandler.CreateToken(tokenDescriptor);
+
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidAudience = Default.Audience,
+                ValidIssuer = Default.Issuer,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
+                TokenDecryptionKey = KeyingMaterial.DefaultX509Key_2048,
+                AlgorithmValidator = ValidationDelegates.AlgorithmValidatorBuilder(true),
+                RequireExpirationTime = false,
+            };
+
+            JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler() { MapInboundClaims = false };
+
+            TokenValidationResult jsonValidationResult = await jsonWebTokenHandler.ValidateTokenAsync(accessToken, validationParameters);
+            TokenValidationResult jwtValidationResult = await jwtSecurityTokenHandler.ValidateTokenAsync(accessToken, validationParameters);
+
+            var context = new CompareContext();
+
+            if (jsonValidationResult.IsValid && jwtValidationResult.IsValid)
+            {
+                if (IdentityComparer.AreEqual(jsonValidationResult.Claims, jwtValidationResult.Claims, CompareContext.Default))
+                {
+                    context.AddDiff("jsonValidationResult.IsValid && jwtValidationResult.IsValid, Claims between validation results are equal");
+                }
             }
 
             TestUtilities.AssertFailIfErrors(context);

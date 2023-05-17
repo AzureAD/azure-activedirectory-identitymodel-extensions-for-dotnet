@@ -23,6 +23,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// </summary>
     public class JsonWebTokenHandler : TokenHandler
     {
+        private IDictionary<string, string> _inboundClaimTypeMap;
+        private const string _namespace = "http://schemas.xmlsoap.org/ws/2005/05/identity/claimproperties";
+        private static string _shortClaimType = _namespace + "/ShortTypeName";
+        private bool _mapInboundClaims = DefaultMapInboundClaims;
+
+        /// <summary>
+        /// Default claim type mapping for inbound claims.
+        /// </summary>
+        public static IDictionary<string, string> DefaultInboundClaimTypeMap = new Dictionary<string, string>(ClaimTypeMapping.InboundClaimTypeMap);
+
+        /// <summary>
+        /// Default value for the flag that determines whether or not the InboundClaimTypeMap is used.
+        /// </summary>
+        public static bool DefaultMapInboundClaims = false;
+
         /// <summary>
         /// Gets the Base64Url encoded string representation of the following JWT header: 
         /// { <see cref="JwtHeaderParameterNames.Alg"/>, <see cref="SecurityAlgorithms.None"/> }.
@@ -31,12 +46,81 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public const string Base64UrlEncodedUnsignedJWSHeader = "eyJhbGciOiJub25lIn0";
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="JsonWebTokenHandler"/> class.
+        /// </summary>
+        public JsonWebTokenHandler()
+        {
+            if (_mapInboundClaims)
+                _inboundClaimTypeMap = new Dictionary<string, string>(DefaultInboundClaimTypeMap);
+            else
+                _inboundClaimTypeMap = new Dictionary<string, string>();
+        }
+
+        /// <summary>
         /// Gets the type of the <see cref="JsonWebToken"/>.
         /// </summary>
         /// <return>The type of <see cref="JsonWebToken"/></return>
         public Type TokenType
         {
             get { return typeof(JsonWebToken); }
+        }
+
+        /// <summary>
+        /// Gets or sets the property name of <see cref="Claim.Properties"/> the will contain the original JSON claim 'name' if a mapping occurred when the <see cref="Claim"/>(s) were created.
+        /// </summary>
+        /// <exception cref="ArgumentException">If <see cref="string"/>.IsNullOrWhiteSpace('value') is true.</exception>
+        public static string ShortClaimTypeProperty
+        {
+            get
+            {
+                return _shortClaimType;
+            }
+
+            set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    throw LogHelper.LogArgumentNullException(nameof(value));
+
+                _shortClaimType = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the <see cref="MapInboundClaims"/> property which is used when determining whether or not to map claim types that are extracted when validating a <see cref="JsonWebToken"/>. 
+        /// <para>If this is set to true, the <see cref="Claim.Type"/> is set to the JSON claim 'name' after translating using this mapping. Otherwise, no mapping occurs.</para>
+        /// <para>The default value is false.</para>
+        /// </summary>
+        public bool MapInboundClaims
+        {
+            get
+            {
+                return _mapInboundClaims;
+            }
+            set
+            {
+                if(!_mapInboundClaims && value && _inboundClaimTypeMap.Count == 0)
+                    _inboundClaimTypeMap = new Dictionary<string, string>(DefaultInboundClaimTypeMap);
+                _mapInboundClaims = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the <see cref="InboundClaimTypeMap"/> which is used when setting the <see cref="Claim.Type"/> for claims in the <see cref="ClaimsPrincipal"/> extracted when validating a <see cref="JsonWebToken"/>. 
+        /// <para>The <see cref="Claim.Type"/> is set to the JSON claim 'name' after translating using this mapping.</para>
+        /// <para>The default value is ClaimTypeMapping.InboundClaimTypeMap.</para>
+        /// </summary>
+        /// <exception cref="ArgumentNullException">'value' is null.</exception>
+        public IDictionary<string, string> InboundClaimTypeMap
+        {
+            get
+            {
+                return _inboundClaimTypeMap;
+            }
+
+            set
+            {
+                _inboundClaimTypeMap = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
+            }
         }
 
         internal static IDictionary<string, object> AddCtyClaimDefaultValue(IDictionary<string, object> additionalClaims, bool setDefaultCtyClaim)
@@ -680,7 +764,60 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (string.IsNullOrWhiteSpace(issuer))
                 issuer = GetActualIssuer(jwtToken);
 
+            if (MapInboundClaims)
+                return CreateClaimsIdentityWithMapping(jwtToken, validationParameters, issuer);
+
             return CreateClaimsIdentityPrivate(jwtToken, validationParameters, issuer);
+        }
+
+        private ClaimsIdentity CreateClaimsIdentityWithMapping(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer)
+        {
+            _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+
+            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, issuer);
+            foreach (Claim jwtClaim in jwtToken.Claims)
+            {
+                bool wasMapped = _inboundClaimTypeMap.TryGetValue(jwtClaim.Type, out string claimType);
+
+                if (!wasMapped)
+                    claimType = jwtClaim.Type;
+
+                if (claimType == ClaimTypes.Actor)
+                {
+                    if (identity.Actor != null)
+                        throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(
+                                    LogMessages.IDX14112,
+                                    LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Actort),
+                                    jwtClaim.Value)));
+
+                    if (CanReadToken(jwtClaim.Value))
+                    {
+                        JsonWebToken actor = ReadToken(jwtClaim.Value) as JsonWebToken;
+                        identity.Actor = CreateClaimsIdentity(actor, validationParameters);
+                    }
+                }
+
+                if (wasMapped)
+                {
+                    Claim claim = new Claim(claimType, jwtClaim.Value, jwtClaim.ValueType, issuer, issuer, identity);
+                    if (jwtClaim.Properties.Count > 0)
+                    {
+                        foreach (var kv in jwtClaim.Properties)
+                        {
+                            claim.Properties[kv.Key] = kv.Value;
+                        }
+                    }
+
+                    claim.Properties[ShortClaimTypeProperty] = jwtClaim.Type;
+                    identity.AddClaim(claim);
+                }
+                else
+                {
+                    identity.AddClaim(jwtClaim);
+                }
+            }
+
+            return identity;
         }
 
         internal override ClaimsIdentity CreateClaimsIdentityInternal(SecurityToken securityToken, TokenValidationParameters tokenValidationParameters, string issuer)
