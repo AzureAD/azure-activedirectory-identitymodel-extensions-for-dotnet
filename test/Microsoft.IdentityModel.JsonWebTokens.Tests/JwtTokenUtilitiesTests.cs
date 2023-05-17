@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
@@ -13,6 +14,26 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
     public class JwtTokenUtilitiesTests
     {
+        [Fact]
+        public void ClaimTypeMappingIsIndependent()
+        {
+            // Each handler should have its own instance of the ClaimTypeMap
+            var jwtClaimsMapping = JwtSecurityTokenHandler.DefaultInboundClaimTypeMap;
+            var jsonClaimsMapping = JsonWebTokenHandler.DefaultInboundClaimTypeMap;
+
+            Assert.NotEmpty(jwtClaimsMapping);
+            Assert.NotEmpty(jsonClaimsMapping);
+
+            Assert.Equal(jwtClaimsMapping, jsonClaimsMapping);
+
+            // Clearing one should not affect the other
+            jwtClaimsMapping.Clear();
+
+            Assert.Empty(jwtClaimsMapping);
+            Assert.NotEmpty(jsonClaimsMapping);
+
+        }
+
         [Fact]
         public void ResolveTokenSigningKey()
         {

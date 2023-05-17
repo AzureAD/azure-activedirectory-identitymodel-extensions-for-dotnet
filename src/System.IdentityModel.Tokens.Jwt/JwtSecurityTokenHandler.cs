@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Security.Claims;
@@ -39,7 +38,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Default claim type mapping for inbound claims.
         /// </summary>
-        public static IDictionary<string, string> DefaultInboundClaimTypeMap = ClaimTypeMapping.InboundClaimTypeMap;
+        public static IDictionary<string, string> DefaultInboundClaimTypeMap = new Dictionary<string, string>(ClaimTypeMapping.InboundClaimTypeMap);
 
         /// <summary>
         /// Default value for the flag that determines whether or not the InboundClaimTypeMap is used.
@@ -49,7 +48,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Default claim type mapping for outbound claims.
         /// </summary>
-        public static IDictionary<string, string> DefaultOutboundClaimTypeMap = ClaimTypeMapping.OutboundClaimTypeMap;
+        public static IDictionary<string, string> DefaultOutboundClaimTypeMap = new Dictionary<string, string>(ClaimTypeMapping.OutboundClaimTypeMap);
 
         /// <summary>
         /// Default claim type filter list.
