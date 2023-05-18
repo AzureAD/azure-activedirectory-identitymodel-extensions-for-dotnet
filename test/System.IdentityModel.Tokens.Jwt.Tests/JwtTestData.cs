@@ -169,28 +169,28 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 CanRead = false,
                 TestId = "'invalidRegEx: first position (dir, Cipher text missing)'",
                 Token = invalidRegEx + "." + validRegEx + "." + validRegEx,
-                ExpectedException = ExpectedException.ArgumentException("IDX12739:")
+                ExpectedException = ExpectedException.SecurityTokenMalformedTokenException("IDX12739:")
             });
             theoryData.Add(new JwtTheoryData
             {
                 CanRead = false,
                 TestId = "'invalidRegEx: third position (dir, Cipher text missing)'",
                 Token = validRegEx + "." + invalidRegEx + "." + validRegEx,
-                ExpectedException = ExpectedException.ArgumentException("IDX12739:")
+                ExpectedException = ExpectedException.SecurityTokenMalformedTokenException("IDX12739:")
             });
             theoryData.Add(new JwtTheoryData
             {
                 CanRead = false,
                 TestId = "'invalidRegEx: third position (four parts)'",
                 Token = validRegEx + "." + invalidRegEx + ".",
-                ExpectedException = ExpectedException.ArgumentException("IDX12739:")
+                ExpectedException = ExpectedException.SecurityTokenMalformedTokenException("IDX12739:")
             });
             theoryData.Add(new JwtTheoryData
             {
                 CanRead = false,
                 TestId = "'invalidRegEx: fifth position (dir, Cipher text missing)'",
                 Token = validRegEx + "." + validRegEx + "." + invalidRegEx,
-                ExpectedException = ExpectedException.ArgumentException("IDX12739:")
+                ExpectedException = ExpectedException.SecurityTokenMalformedTokenException("IDX12739:")
             });
             theoryData.Add(new JwtTheoryData
             {

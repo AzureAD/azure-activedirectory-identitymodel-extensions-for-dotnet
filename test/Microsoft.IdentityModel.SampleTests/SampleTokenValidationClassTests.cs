@@ -241,7 +241,7 @@ namespace Microsoft.IdentityModel.SampleTests
         {
             TestWithGeneratedToken_Deprecated(
                 () => "InvalidToken",
-                typeof(SecurityTokenMalformedTokenException),
+                typeof(SecurityTokenMalformedException),
                 "IDX12741");
         }
 

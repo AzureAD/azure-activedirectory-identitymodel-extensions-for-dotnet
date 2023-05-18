@@ -20,9 +20,10 @@ namespace System.IdentityModel.Tokens.Jwt
         /// Initializes a new instance of <see cref="JwtSecurityToken"/> from a string in JWS Compact serialized format.
         /// </summary>
         /// <param name="jwtEncodedString">A JSON Web Token that has been serialized in JWS Compact serialized format.</param>
-        /// <exception cref="ArgumentNullException">'jwtEncodedString' is null.</exception>
-        /// <exception cref="ArgumentException">'jwtEncodedString' contains only whitespace.</exception>
-        /// <exception cref="ArgumentException">'jwtEncodedString' is not in JWS Compact serialized format.</exception>
+        /// <exception cref="ArgumentNullException">'jwtEncodedString' is null or contains only whitespace.</exception>
+        /// <exception cref="SecurityTokenMalformedException">'jwtEncodedString' contains only whitespace.</exception>
+        /// <exception cref="SecurityTokenMalformedException">'jwtEncodedString' is not in JWE format.</exception>
+        /// <exception cref="SecurityTokenMalformedException">'jwtEncodedString' is not in JWS or JWE format.</exception>
         /// <remarks>
         /// The contents of this <see cref="JwtSecurityToken"/> have not been validated, the JSON Web Token is simply decoded. Validation can be accomplished using <see cref="JwtSecurityTokenHandler.ValidateToken(String, TokenValidationParameters, out SecurityToken)"/>
         /// </remarks>
@@ -38,15 +39,15 @@ namespace System.IdentityModel.Tokens.Jwt
             if (tokenParts.Length == JwtConstants.JwsSegmentCount)
             {
                 if (!JwtTokenUtilities.RegexJws.IsMatch(jwtEncodedString))
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12739, jwtEncodedString)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX12739, jwtEncodedString)));
             }
             else if (tokenParts.Length == JwtConstants.JweSegmentCount)
             {
                 if (!JwtTokenUtilities.RegexJwe.IsMatch(jwtEncodedString))
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedTokenException(LogHelper.FormatInvariant(LogMessages.IDX12740, jwtEncodedString)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX12740, jwtEncodedString)));
             }
             else
-                throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedTokenException(LogHelper.FormatInvariant(LogMessages.IDX12741, jwtEncodedString)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX12741, jwtEncodedString)));
 
             Decode(tokenParts, jwtEncodedString);
         }

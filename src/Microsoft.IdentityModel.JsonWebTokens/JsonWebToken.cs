@@ -428,11 +428,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // JWT must have 2 dots
             Dot1 = encodedJson.IndexOf('.');
             if (Dot1 == -1 || Dot1 == encodedJson.Length - 1)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedTokenException(LogHelper.FormatInvariant(LogMessages.IDX14100, encodedJson)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX14100, encodedJson)));
 
             Dot2 = encodedJson.IndexOf('.', Dot1 + 1);
             if (Dot2 == -1)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedTokenException(LogHelper.FormatInvariant(LogMessages.IDX14120, encodedJson)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX14120, encodedJson)));
 
             if (Dot2 == encodedJson.Length - 1)
                 Dot3 = -1;
@@ -494,15 +494,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 // JWE needs to have 4 dots
                 if (Dot4 == -1)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedTokenException(LogHelper.FormatInvariant(LogMessages.IDX14121, encodedJson)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX14121, encodedJson)));
 
                 // too many dots...
                 if (encodedJson.IndexOf('.', Dot4 + 1) != -1)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedTokenException(LogHelper.FormatInvariant(LogMessages.IDX14122, encodedJson)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX14122, encodedJson)));
 
                 // must have something after 4th dot
                 if (Dot4 == encodedJson.Length - 1)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedTokenException(LogHelper.FormatInvariant(LogMessages.IDX14310, encodedJson)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX14310, encodedJson)));
 
                 // right number of dots for JWE
                 _hChars = encodedJson.ToCharArray(0, Dot1);
