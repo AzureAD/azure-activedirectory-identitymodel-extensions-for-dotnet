@@ -754,7 +754,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <returns>A <see cref="JwtSecurityToken"/></returns>
         /// <exception cref="ArgumentNullException"><paramref name="token"/> is null or empty.</exception>
         /// <exception cref="ArgumentException">'token.Length' is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
-        /// <exception cref="ArgumentException"><see cref="CanReadToken(string)"/></exception>
+        /// <exception cref="SecurityTokenMalformedException"><see cref="CanReadToken(string)"/></exception>
         /// <remarks><para>If the <paramref name="token"/> is in JWE Compact Serialization format, only the protected header will be deserialized.
         /// This method is unable to decrypt the payload. Use <see cref="ValidateToken(string, TokenValidationParameters, out SecurityToken)"/>to obtain the payload.</para>
         /// <para>The token is NOT validated and no security decisions should be made about the contents.
