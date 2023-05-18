@@ -1176,7 +1176,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return ValidateTokenAsync(token, validationParameters).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Validates a token.
+        /// On a validation failure, no exception will be thrown; instead, the exception will be set in the returned TokenValidationResult.Exception property.
+        /// Callers should always check the TokenValidationResult.IsValid property to verify the validity of the result.
+        /// </summary>
+        /// <param name="token">The token to be validated.</param>
+        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <returns>A <see cref="TokenValidationResult"/></returns>
+        /// <remarks>
+        /// <para>TokenValidationResult.Exception will be set to one of the following exceptions if the  <paramref name="token"/> is invalid.</para>
+        /// <para><exception cref="ArgumentNullException">if <paramref name="token"/> is null or empty.</exception></para>
+        /// <para><exception cref="ArgumentNullException">if <paramref name="validationParameters"/> is null.</exception></para>
+        /// <para><exception cref="ArgumentException">'token.Length' is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception></para>
+        /// <para><exception cref="SecurityTokenMalformedException">if <paramref name="token"/> is not a valid <see cref="JsonWebToken"/>, <see cref="ReadToken(string, TokenValidationParameters)"/></exception></para>
+        /// <para><exception cref="SecurityTokenMalformedException">if the validationParameters.TokenReader delegate is not able to parse/read the token as a valid <see cref="JsonWebToken"/>, <see cref="ReadToken(string, TokenValidationParameters)"/></exception></para>
+        /// </remarks>
         public override async Task<TokenValidationResult> ValidateTokenAsync(string token, TokenValidationParameters validationParameters)
         {
             if (string.IsNullOrEmpty(token))
@@ -1217,7 +1232,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             var jwt = token as JsonWebToken;
             if (jwt == null)
-                return new TokenValidationResult { Exception = LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14100, token))), IsValid = false };
+                return new TokenValidationResult { Exception = LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX14100, token))), IsValid = false };
 
             try
             {
@@ -1233,6 +1248,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
 
+        /// <summary>
+        /// Converts a string into an instance of <see cref="JsonWebToken"/>.
+        /// </summary>
+        /// <param name="token">A 'JSON Web Token' (JWT) in JWS or JWE Compact Serialization Format.</param>
+        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> whose TokenReader, if set, will be used to read a JWT.</param>
+        /// <returns>A <see cref="TokenValidationResult"/></returns>
+        /// <exception cref="SecurityTokenMalformedException">if the validationParameters.TokenReader delegate is not able to parse/read the token as a valid <see cref="JsonWebToken"/>.</exception>
+        /// <exception cref="SecurityTokenMalformedException">if <paramref name="token"/> is not a valid JWT, <see cref="JsonWebToken"/>.</exception>
         private static TokenValidationResult ReadToken(string token, TokenValidationParameters validationParameters)
         {
             JsonWebToken jsonWebToken = null;
@@ -1240,11 +1263,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 var securityToken = validationParameters.TokenReader(token, validationParameters);
                 if (securityToken == null)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10510, token)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10510, token)));
 
                 jsonWebToken = securityToken as JsonWebToken;
                 if (jsonWebToken == null)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10509, typeof(JsonWebToken), securityToken.GetType(), token)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10509, typeof(JsonWebToken), securityToken.GetType(), token)));
             }
             else
             {
@@ -1257,7 +1280,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     return new TokenValidationResult
                     {
-                        Exception = LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14100, token), ex)),
+                        Exception = LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX14100, token), ex)),
                         IsValid = false
                     };
                 }

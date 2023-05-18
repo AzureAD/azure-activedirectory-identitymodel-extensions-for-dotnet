@@ -423,6 +423,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal int NumberOfDots { get; set; }
 
+        /// <summary>
+        /// Converts a string into an instance of <see cref="JsonWebToken"/>.
+        /// </summary>
+        /// <param name="encodedJson">A 'JSON Web Token' (JWT) in JWS or JWE Compact Serialization Format.</param>
+        /// <exception cref="SecurityTokenMalformedException">if <paramref name="encodedJson"/> is malformed, a valid JWT should have either 2 dots (JWS) or 4 dots (JWE).</exception>
+        /// <exception cref="SecurityTokenMalformedException">if <paramref name="encodedJson"/> does not have an non-empty authentication tag after the 4th dot for a JWE.</exception>
+        /// <exception cref="SecurityTokenMalformedException">if <paramref name="encodedJson"/> has more than 4 dots.</exception>
         private void ReadToken(string encodedJson)
         {
             // JWT must have 2 dots
