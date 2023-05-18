@@ -226,11 +226,19 @@ namespace Microsoft.IdentityModel.TestUtils
         public static byte[] DefaultSymmetricKeyBytes_128 = Convert.FromBase64String(DefaultSymmetricKeyEncoded_128);
         public static SymmetricSecurityKey DefaultSymmetricSecurityKey_128 = new SymmetricSecurityKey(DefaultSymmetricKeyBytes_128) { KeyId = "DefaultSymmetricSecurityKey_128" };
         public static EncryptingCredentials DefaultSymmetricEncryptingCreds_AesGcm128 = new EncryptingCredentials(DefaultSymmetricSecurityKey_128, "dir", SecurityAlgorithms.Aes128Gcm);
+        public static EncryptingCredentials DefaultSymmetricEncryptingCreds_AesGcm128_Aes128KW = new EncryptingCredentials(DefaultSymmetricSecurityKey_128, SecurityAlgorithms.Aes128KW, SecurityAlgorithms.Aes128Gcm);
+
+        public static string DefaultSymmetricKeyEncoded_192 = "06P7WdwAEybptADtJis9n0oWnG5imp8G";
+        public static byte[] DefaultSymmetricKeyBytes_192 = Convert.FromBase64String(DefaultSymmetricKeyEncoded_192);
+        public static SymmetricSecurityKey DefaultSymmetricSecurityKey_192 = new SymmetricSecurityKey(DefaultSymmetricKeyBytes_192) { KeyId = "DefaultSymmetricSecurityKey_192" };
+        public static EncryptingCredentials DefaultSymmetricEncryptingCreds_AesGcm192 = new EncryptingCredentials(DefaultSymmetricSecurityKey_192, "dir", SecurityAlgorithms.Aes192Gcm);
+        public static EncryptingCredentials DefaultSymmetricEncryptingCreds_AesGcm192_Aes192KW = new EncryptingCredentials(DefaultSymmetricSecurityKey_192, SecurityAlgorithms.Aes192KW, SecurityAlgorithms.Aes192Gcm);
 
         public static string DefaultSymmetricKeyEncoded_256 = "Vbxq2mlbGJw8XH+ZoYBnUHmHga8/o/IduvU/Tht70iE=";
         public static byte[] DefaultSymmetricKeyBytes_256 = Convert.FromBase64String(DefaultSymmetricKeyEncoded_256);
         public static SymmetricSecurityKey DefaultSymmetricSecurityKey_256 = new SymmetricSecurityKey(DefaultSymmetricKeyBytes_256) { KeyId = "DefaultSymmetricSecurityKey_256" };
         public static EncryptingCredentials DefaultSymmetricEncryptingCreds_AesGcm256 = new EncryptingCredentials(DefaultSymmetricSecurityKey_256, "dir", SecurityAlgorithms.Aes256Gcm);
+        public static EncryptingCredentials DefaultSymmetricEncryptingCreds_AesGcm256_Aes256KW = new EncryptingCredentials(DefaultSymmetricSecurityKey_256, SecurityAlgorithms.Aes256KW, SecurityAlgorithms.Aes256Gcm);
         public static SigningCredentials DefaultSymmetricSigningCreds_256_Sha2 = new SigningCredentials(DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256Signature, SecurityAlgorithms.Sha256);
         public static EncryptingCredentials DefaultSymmetricEncryptingCreds_Aes128_Sha2 = new EncryptingCredentials(DefaultSymmetricSecurityKey_256, "dir", SecurityAlgorithms.Aes128CbcHmacSha256);
         public static SymmetricSecurityKey DefaultSymmetricSecurityKey_256_NoKeyId = new SymmetricSecurityKey(DefaultSymmetricKeyBytes_256);
