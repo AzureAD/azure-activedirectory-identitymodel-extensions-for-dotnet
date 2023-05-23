@@ -698,7 +698,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </remarks>
         /// <exception cref="SecurityTokenException">If an overflow exception is thrown by the runtime.</exception>
         /// <returns>The DateTime representation of a claim.</returns>
-        private DateTime GetDateTime(string key)
+        internal DateTime GetDateTime(string key)
         {
             object dateValue;
             if (!TryGetValue(key, out dateValue))
