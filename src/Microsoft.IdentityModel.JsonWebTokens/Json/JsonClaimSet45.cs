@@ -301,7 +301,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             throw LogHelper.LogExceptionMessage(new FormatException(LogHelper.FormatInvariant(LogMessages.IDX14300, claimName, jToken.ToString(), typeof(long))));
         }
 
-        private JObject RootElement { get; }
+        internal JObject RootElement { get; }
 
         internal bool TryGetValue(string claimName, out JToken json)
         {

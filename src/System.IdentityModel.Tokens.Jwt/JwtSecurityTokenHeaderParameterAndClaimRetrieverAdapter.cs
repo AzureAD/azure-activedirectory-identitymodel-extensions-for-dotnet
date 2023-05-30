@@ -17,8 +17,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="jwtSecurityToken">The <see cref="JwtSecurityToken"/> to create a <see cref="JwtSecurityTokenHeaderParameterAndClaimRetrieverAdapter"/> from.</param>
         public JwtSecurityTokenHeaderParameterAndClaimRetrieverAdapter(JwtSecurityToken jwtSecurityToken)
         {
-            if (jwtSecurityToken == null)
-                throw LogHelper.LogArgumentNullException(nameof(jwtSecurityToken));
+            _jwtSecurityToken = jwtSecurityToken ?? throw LogHelper.LogArgumentNullException(nameof(jwtSecurityToken));
 
             HeaderParameters = new JwtSecurityTokenHeaderParameterRetriever(jwtSecurityToken.Header);
             PayloadClaims = new JwtSecurityTokenPayloadClaimsRetriever(jwtSecurityToken.Payload);
@@ -26,6 +25,8 @@ namespace System.IdentityModel.Tokens.Jwt
             if (jwtSecurityToken.InnerToken != null)
                 InnerHeaderParameterAndClaimRetriever = new JwtSecurityTokenHeaderParameterAndClaimRetrieverAdapter(jwtSecurityToken.InnerToken);
         }
+
+        private readonly JwtSecurityToken _jwtSecurityToken;
 
         /// <inheritdoc/>
         public IHeaderParameterRetriever HeaderParameters { get; }
@@ -36,5 +37,10 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <inheritdoc/>
         public IHeaderParameterAndPayloadClaimRetriever InnerHeaderParameterAndClaimRetriever { get; }
 
+        /// <inheritdoc/>
+        public string GetStringRepresentation() => _jwtSecurityToken.RawData;
+
+        /// <inheritdoc/>
+        public override string ToString() => _jwtSecurityToken.ToString();
     }
 }

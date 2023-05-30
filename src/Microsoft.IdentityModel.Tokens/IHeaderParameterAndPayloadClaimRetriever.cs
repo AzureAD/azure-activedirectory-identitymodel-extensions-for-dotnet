@@ -22,5 +22,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets the inner header and payload claims retriever.
         /// </summary>
         public IHeaderParameterAndPayloadClaimRetriever InnerHeaderParameterAndClaimRetriever { get; }
+
+        /// <summary>
+        /// Gets the string representation
+        /// </summary>
+        /// <returns>A string representation of the original object.</returns>
+        public string GetStringRepresentation();
     }
 }

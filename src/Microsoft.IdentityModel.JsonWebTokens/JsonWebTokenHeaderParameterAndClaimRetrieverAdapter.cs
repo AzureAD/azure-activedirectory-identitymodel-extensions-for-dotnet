@@ -17,8 +17,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="jsonWebToken">The <see cref="JsonWebToken"/> to create the <see cref="IHeaderParameterAndPayloadClaimRetriever"/> from.</param>
         public JsonWebTokenHeaderParameterAndClaimRetrieverAdapter(JsonWebToken jsonWebToken)
         {
-            if (jsonWebToken == null)
-                throw LogHelper.LogArgumentNullException(nameof(jsonWebToken));
+            _jsonWebToken = jsonWebToken ?? throw LogHelper.LogArgumentNullException(nameof(jsonWebToken));
 
             HeaderParameters = new JsonClaimSetHeaderAdapter(jsonWebToken.Header);
             PayloadClaims = new JsonClaimSetPayloadAdapter(jsonWebToken.Payload);
@@ -26,6 +25,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (jsonWebToken.InnerToken != null)
                 InnerHeaderParameterAndClaimRetriever = new JsonWebTokenHeaderParameterAndClaimRetrieverAdapter(jsonWebToken.InnerToken);
         }
+
+        private readonly JsonWebToken _jsonWebToken;
 
         /// <inheritdoc/>
         public IHeaderParameterRetriever HeaderParameters { get; }
@@ -35,5 +36,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         /// <inheritdoc/>
         public IHeaderParameterAndPayloadClaimRetriever InnerHeaderParameterAndClaimRetriever { get; }
+
+        /// <inheritdoc/>
+        public string GetStringRepresentation() => _jsonWebToken.EncodedToken;
+
+        /// <inheritdoc/>
+        /// <remarks>
+        /// Format is inheritted from JwtSecurityToken.ToString()
+        /// </remarks>
+        public override string ToString()
+        {
+            if (_jsonWebToken.Payload != null)
+                return _jsonWebToken.Header.RootElement.ToString() + "." + _jsonWebToken.Payload.RootElement.ToString();
+            else
+                return _jsonWebToken.Header.RootElement.ToString() + ".";
+        }
     }
 }

@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
@@ -42,8 +43,33 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public string UserInfoEndpointResponse { get; set; }
 
         /// <summary>
+        /// Gets or sets the header parameter and payload claims retriever.
+        /// </summary>
+        public IHeaderParameterAndPayloadClaimRetriever HeaderParameterAndPayloadClaimRetriever { get; set; }
+
+        private JwtSecurityToken _jwtSecurityToken;
+
+        /// <summary>
         /// This id_token is assumed to have audience, issuer, lifetime and signature validated.
         /// </summary>
-        public IHeaderParameterAndPayloadClaimRetriever ValidatedIdToken { get; set; }
+        public JwtSecurityToken ValidatedIdToken
+        {
+            get
+            {
+                if (_jwtSecurityToken == null)
+                {
+                    if (HeaderParameterAndPayloadClaimRetriever == null)
+                        return null;
+
+                    _jwtSecurityToken = new JwtSecurityToken(HeaderParameterAndPayloadClaimRetriever.GetStringRepresentation());
+                }
+
+                return _jwtSecurityToken;
+            }
+            set
+            {
+                _jwtSecurityToken = value;
+            }
+        }
     }
 }
