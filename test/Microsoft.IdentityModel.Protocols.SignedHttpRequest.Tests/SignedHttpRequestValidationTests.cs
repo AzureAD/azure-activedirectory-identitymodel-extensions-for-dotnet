@@ -1429,7 +1429,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new ValidateSignedHttpRequestTheoryData
                     {
                         SignedHttpRequestToken = null,
-                        ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14100"),
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenMalformedException), "IDX14100"),
                         TestId = "InvalidToken",
                     },
                     new ValidateSignedHttpRequestTheoryData

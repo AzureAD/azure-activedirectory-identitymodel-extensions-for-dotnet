@@ -423,21 +423,25 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal int NumberOfDots { get; set; }
 
+        /// <summary>
+        /// Converts a string into an instance of <see cref="JsonWebToken"/>.
+        /// </summary>
+        /// <param name="encodedJson">A 'JSON Web Token' (JWT) in JWS or JWE Compact Serialization Format.</param>
+        /// <exception cref="SecurityTokenMalformedException">if <paramref name="encodedJson"/> is malformed, a valid JWT should have either 2 dots (JWS) or 4 dots (JWE).</exception>
+        /// <exception cref="SecurityTokenMalformedException">if <paramref name="encodedJson"/> does not have an non-empty authentication tag after the 4th dot for a JWE.</exception>
+        /// <exception cref="SecurityTokenMalformedException">if <paramref name="encodedJson"/> has more than 4 dots.</exception>
         private void ReadToken(string encodedJson)
         {
             // JWT must have 2 dots
             Dot1 = encodedJson.IndexOf('.');
-            if (Dot1 == -1)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14100, encodedJson)));
-
-            if (Dot1 == encodedJson.Length)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14100, encodedJson)));
+            if (Dot1 == -1 || Dot1 == encodedJson.Length - 1)
+                throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX14100, encodedJson)));
 
             Dot2 = encodedJson.IndexOf('.', Dot1 + 1);
             if (Dot2 == -1)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14120, encodedJson)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX14120, encodedJson)));
 
-            if (Dot2 == encodedJson.Length)
+            if (Dot2 == encodedJson.Length - 1)
                 Dot3 = -1;
             else
                 Dot3 = encodedJson.IndexOf('.', Dot2 + 1);
@@ -497,15 +501,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 // JWE needs to have 4 dots
                 if (Dot4 == -1)
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14121, encodedJson)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX14121, encodedJson)));
 
                 // too many dots...
                 if (encodedJson.IndexOf('.', Dot4 + 1) != -1)
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14122, encodedJson)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX14122, encodedJson)));
 
                 // must have something after 4th dot
                 if (Dot4 == encodedJson.Length - 1)
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14310, encodedJson)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX14310, encodedJson)));
 
                 // right number of dots for JWE
                 _hChars = encodedJson.ToCharArray(0, Dot1);
