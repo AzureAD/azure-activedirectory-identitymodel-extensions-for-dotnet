@@ -9,6 +9,9 @@ namespace Microsoft.IdentityModel.Logging
     /// An internal structure that is used to mark an argument as SecurityArtifact.
     /// Arguments wrapped with a SecurityArtifact structure will be considered as a SecurityArtifact in the message logging process.
     /// </summary>
+    /// <remarks>
+    /// This structure is used to mark an argument, not implement <see cref="ISafeLogSecurityArtifact"/>, as SecurityArtifact.
+    /// </remarks>
     internal struct SecurityArtifact : ISafeLogSecurityArtifact
     {
         /// <summary>
