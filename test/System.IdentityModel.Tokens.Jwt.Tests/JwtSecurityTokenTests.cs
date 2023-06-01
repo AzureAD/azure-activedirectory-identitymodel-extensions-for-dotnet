@@ -256,12 +256,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             dataSet.Add("ValidJwe2- Construct by string", outerValidJwe2, null, EncodedJwts.ValidJwe2, ExpectedException.NoExceptionExpected);
 
             // Hand in a valid variation. We should fail before the variation is used.
-            dataSet.Add("Invalid outer token 1- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe, ExpectedException.ArgumentException(substringExpected: "IDX12741"));
-            dataSet.Add("Invalid outer token 2- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe2, ExpectedException.ArgumentException(substringExpected: "IDX12741"));
-            dataSet.Add("Invalid outer token 3- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe3, ExpectedException.ArgumentException(substringExpected: "IDX12740"));
-            dataSet.Add("Invalid outer token 4- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe4, ExpectedException.ArgumentException(substringExpected: "IDX12741"));
-            dataSet.Add("Invalid outer token 5- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe5, ExpectedException.ArgumentException(substringExpected: "IDX12740"));
-            dataSet.Add("Invalid outer token 6- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe6, ExpectedException.ArgumentException(substringExpected: "IDX12740"));
+            dataSet.Add("Invalid outer token 1- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe, ExpectedException.SecurityTokenMalformedTokenException(substringExpected: "IDX12741"));
+            dataSet.Add("Invalid outer token 2- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe2, ExpectedException.SecurityTokenMalformedTokenException(substringExpected: "IDX12741"));
+            dataSet.Add("Invalid outer token 3- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe3, ExpectedException.SecurityTokenMalformedTokenException(substringExpected: "IDX12740"));
+            dataSet.Add("Invalid outer token 4- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe4, ExpectedException.SecurityTokenMalformedTokenException(substringExpected: "IDX12741"));
+            dataSet.Add("Invalid outer token 5- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe5, ExpectedException.SecurityTokenMalformedTokenException(substringExpected: "IDX12740"));
+            dataSet.Add("Invalid outer token 6- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe6, ExpectedException.SecurityTokenMalformedTokenException(substringExpected: "IDX12740"));
 
             return dataSet;
         }
