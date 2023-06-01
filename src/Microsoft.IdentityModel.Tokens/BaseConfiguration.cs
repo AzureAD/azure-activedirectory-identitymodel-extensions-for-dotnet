@@ -27,10 +27,16 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Gets or sets the token endpoint specified via the metadata endpoint.
-        /// This can be the fed:SecurityTokenServiceType in WS-Federation, http://docs.oasis-open.org/wsfed/federation/v1.2/os/ws-federation-1.2-spec-os.html#:~:text=fed%3ASecurityTokenSerivceEndpoint
+        /// This can be the fed:PassiveRequestorEndpoint in WS-Federation, https://docs.oasis-open.org/wsfed/federation/v1.2/os/ws-federation-1.2-spec-os.html#:~:text=fed%3ASecurityTokenServiceType/fed%3APassiveRequestorEndpoint
         /// Or the token_endpoint in the OIDC metadata.
         /// </summary>
         public virtual string TokenEndpoint { get; set; }
+
+        /// <summary>
+        /// Gets or sets the token endpoint specified via the metadata endpoint.
+        /// This can is the fed:SecurityTokenServiceType in WS-Federation, http://docs.oasis-open.org/wsfed/federation/v1.2/os/ws-federation-1.2-spec-os.html#:~:text=fed%3ASecurityTokenSerivceEndpoint
+        /// </summary>
+        public virtual string ActiveTokenEndpoint { get; set; }
 
         /// <summary>
         /// Gets the <see cref="ICollection{SecurityKey}"/> that the IdentityProvider indicates are to be used in order to decrypt tokens.
