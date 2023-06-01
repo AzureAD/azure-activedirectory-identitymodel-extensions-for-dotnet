@@ -56,6 +56,10 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             get => new X509Certificate2(Convert.FromBase64String(X509CertificateData3));
         }
+        public static X509Certificate2 X509Certificate4
+        {
+            get => new X509Certificate2(Convert.FromBase64String(X509CertificateData4));
+        }
 
         public static X509Certificate2 X509CertificateAdfsV2
         {
@@ -141,7 +145,8 @@ namespace Microsoft.IdentityModel.TestUtils
                         SignatureValue = AADCommonMetadataSignatureValue,
                         SignedInfo = AADCommonSignedInfo
                     },
-                    TokenEndpoint = TokenEndpointForCommon
+                    TokenEndpoint = TokenEndpointForCommon,
+                    ActiveTokenEndpoint = ActiveTokenEndpointForCommon
                 };
 
                 configuration.KeyInfos.Add(keyInfo1);
@@ -181,7 +186,8 @@ namespace Microsoft.IdentityModel.TestUtils
                         KeyInfo = keyInfo1,
                         SignatureValue = AADCommonMetadataSignatureValue,
                     },
-                    TokenEndpoint = "https://login.microsoftonline.com/268da1a1-9db4-48b9-b1fe-683250ba90cc/wsfed"
+                    TokenEndpoint = "https://login.microsoftonline.com/268da1a1-9db4-48b9-b1fe-683250ba90cc/wsfed",
+                    ActiveTokenEndpoint = "https://login.microsoftonline.com/268da1a1-9db4-48b9-b1fe-683250ba90cc/wsfed"
                 };
 
                 configuration.KeyInfos.Add(keyInfo1);
@@ -227,6 +233,16 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
+        public static WsFederationConfiguration AADCommonFormatedNoActiveTokenEndpoint
+        {
+            get
+            {
+                var configuration = AADCommonFormated;
+                configuration.ActiveTokenEndpoint = null;
+                return configuration;
+            }
+        }
+
         public static WsFederationConfiguration AdfsV2Endpoint
         {
             get
@@ -243,7 +259,8 @@ namespace Microsoft.IdentityModel.TestUtils
                         KeyInfo = keyInfo,
                         SignatureValue = AdfsV2SignatureValue,
                     },
-                    TokenEndpoint = "https://fs.msidlab7.com/adfs/ls/"
+                    TokenEndpoint = "https://fs.msidlab7.com/adfs/ls/",
+                    ActiveTokenEndpoint = "https://fs.msidlab7.com/adfs/services/trust/2005/certificatemixed"
                 };
 
                 configuration.KeyInfos.Add(keyInfo);
@@ -271,7 +288,8 @@ namespace Microsoft.IdentityModel.TestUtils
                         Prefix = "ds",
                         SignatureValue = AdfsV3SignatureValue,
                     },
-                    TokenEndpoint = "https://fs.msidlab2.com/adfs/ls/"
+                    TokenEndpoint = "https://fs.msidlab2.com/adfs/ls/",
+                    ActiveTokenEndpoint = "https://fs.msidlab2.com/adfs/services/trust/2005/certificatemixed"
                 };
 
                 configuration.KeyInfos.Add(keyInfo);
@@ -299,7 +317,8 @@ namespace Microsoft.IdentityModel.TestUtils
                         Prefix = "ds",
                         SignatureValue = AdfsV4SignatureValue,
                     },
-                    TokenEndpoint = "https://fs.msidlab11.com/adfs/ls/"
+                    TokenEndpoint = "https://fs.msidlab11.com/adfs/ls/",
+                    ActiveTokenEndpoint = "https://fs.msidlab11.com/adfs/services/trust/2005/certificatemixed"
                 };
 
                 configuration.KeyInfos.Add(keyInfo);
@@ -424,6 +443,8 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static string X509CertificateData3 { get => "MIIDKDCCAhCgAwIBAgIQBHJvVNxP1oZO4HYKh+rypDANBgkqhkiG9w0BAQsFADAjMSEwHwYDVQQDExhsb2dpbi5taWNyb3NvZnRvbmxpbmUudXMwHhcNMTYxMTE2MDgwMDAwWhcNMTgxMTE2MDgwMDAwWjAjMSEwHwYDVQQDExhsb2dpbi5taWNyb3NvZnRvbmxpbmUudXMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQChn5BCs24Hh6L0BNitPrV5s+2/DBhaeytOmnghJKnqeJlhv3ZczShRM2Cp38LW8Y3wn7L3AJtolaSkF/joKN1l6GupzM+HOEdq7xZxFehxIHW7+25mG/WigBnhsBzLv1SR4uIbrQeS5M0kkLwJ9pOnVH3uzMGG6TRXPnK3ivlKl97AiUEKdlRjCQNLXvYf1ZqlC77c/ZCOHSX4kvIKR2uG+LNlSTRq2rn8AgMpFT4DSlEZz4RmFQvQupQzPpzozaz/gadBpJy/jgDmJlQMPXkHp7wClvbIBGiGRaY6eZFxNV96zwSR/GPNkTObdw2S8/SiAgvIhIcqWTPLY6aVTqJfAgMBAAGjWDBWMFQGA1UdAQRNMEuAEDUj0BrjP0RTbmoRPTRMY3WhJTAjMSEwHwYDVQQDExhsb2dpbi5taWNyb3NvZnRvbmxpbmUudXOCEARyb1TcT9aGTuB2Cofq8qQwDQYJKoZIhvcNAQELBQADggEBAGnLhDHVz2gLDiu9L34V3ro/6xZDiSWhGyHcGqky7UlzQH3pT5so8iF5P0WzYqVtogPsyC2LPJYSTt2vmQugD4xlu/wbvMFLcV0hmNoTKCF1QTVtEQiAiy0Aq+eoF7Al5fV1S3Sune0uQHimuUFHCmUuF190MLcHcdWnPAmzIc8fv7quRUUsExXmxSX2ktUYQXzqFyIOSnDCuWFm6tpfK5JXS8fW5bpqTlrysXXz/OW/8NFGq/alfjrya4ojrOYLpunGriEtNPwK7hxj1AlCYEWaRHRXaUIW1ByoSff/6Y6+ZhXPUe0cDlNRt/qIz5aflwO7+W8baTS4O8m/icu7ItE="; }
 
+        public static string X509CertificateData4 { get => "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"; }
+
         public static string X509CertificateDataAdfsV2 { get => @"MIIC2jCCAcKgAwIBAgIQFuP8MbE4ipBGdYQ2Wmg6FDANBgkqhkiG9w0BAQsFADApMScwJQYDVQQDEx5BREZTIFNpZ25pbmcgLSBmcy5tc2lkbGFiNy5jb20wHhcNMTYxMjAzMDIzNjEwWhcNMTcxMjAzMDIzNjEwWjApMScwJQYDVQQDEx5BREZTIFNpZ25pbmcgLSBmcy5tc2lkbGFiNy5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCQXc06bWagsWphlP+yFdK/6YPZNvYC5BSzV2bmbYp76YCzpDAaYTBL6toAgjMBoTWHeeO/K8GpKxjK5RzBCWJL0j6Ao+GLGiX430VEvWCxCVbi4H3GY7T2MUangLIBEbutFbgcKxSdLIG9KEUKZXZSnKxx4W6b/m56dswPwpPJ536KWgjovNKy+/XfAONFkg4Rj6HvFN7ylNSBwWfcFdw+C8aZn4swW8msLMm4ridHxR0jnHgqrJ8RQjBQfcWaCuS18EaJxVrCN13OnDNa1SnQqKdePcczeeL6NRK4luxCTNJ6pJ8GLSxNA5rxbv3uMZ0VcaANLFp0KZDJ7xr3oTEdAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAE3plOFUXZ/O/9pEF4ZiBvjttxXz/ntaKlC9WDZQaysjwAvwwQf6lCWBYrOn9muQrDeAriYOZHxRXxzwdqUgHRUQ6NZxNQUgc+ElH1v+E25ns8vP8yS8U9FhQUU8IfkLYcOt3bY0PcGCJhKsHSJoHrsKqQqWWQN4f48ocrLOdAhS0VLTxpa84i8mGNO9Iaavdd6g0vfC0dgBaBRyWDO0MAywiqx1LsxOXBidxn/Z4bm/2+lcAnRXALowifDPkDvIkx+zjU2YvcYWDiNl3sei3NfS68sYycGMaCmwXUyjQy13FMrOuEo2KqMmWHPMyZbbEyVBsytq5+W1Rx+2ElWAzJg="; }
 
         public static string X509CertificateDataAdfsV3 { get => @"MIIC2jCCAcKgAwIBAgIQE4Ec5zS+mZ1CjdwUbnFNejANBgkqhkiG9w0BAQsFADApMScwJQYDVQQDEx5BREZTIFNpZ25pbmcgLSBmcy5tc2lkbGFiMi5jb20wHhcNMTcwMzEzMTgxMTM0WhcNMTgwMzEzMTgxMTM0WjApMScwJQYDVQQDEx5BREZTIFNpZ25pbmcgLSBmcy5tc2lkbGFiMi5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCYh9E/B76B0jUBedTJCBXYkXd3NVav5GFOI43Cu3mcnQvT82112PY7TSW/GTOJL1oVhAyLR6nNjPKD0f7J+3gkrXYpvDK8g69GWI5Gy3ObA95VhzpWKwqnRJrblJfYvQtiA+dQTGH+x5tSbHieGni71lqanCwGMP4PnLKTAGtRXEm1Yz/l0k57PTiKBybIlhW5YUm/Nl8d1qlp+eQdM/bhkj9imnANghSAcXU//6zeioG63ad0COltc5Eh4bMUNBGdx15gMyu40T2TDojeYIS+3rkYoRmQHJ9LoHt43DgqPBp8K+bdT/5gVUnRcRv0hpTi5JhPyqWm3h4CAJb2NNr7AgMBAAEwDQYJKoZIhvcNAQELBQADggEBAAcvWybsF8Tt/FRahhgWlONayLorboAD3qxUOfzaBQS32Q6AUPWatQCJX6pRC9tLtQr2PdJ4hDWfcGmMuFUzArFqBfAFFvb5CTlplNKQw53iZhEdvKEhY77d+j4BPpHmIvHDq9dshl0oPWV5ywiWJfBmf/6I7DRffXtBkj3IpuVQWrtOycZHsW1ymsURCQEr/YlqPlOCtoMCfl6wvOR/zLF2/sheVBgrwJTVCljBP4DENwK6he3dioyNM9k9ITa0Z2SpXu2+pHJopRc94H+KJG/LTX0y+Fq6bh54/U5ULE/OzDzKRLqJETqOvWNWaMw/tGUTo6gGr4KAbhel/PTIztQ="; }
@@ -437,6 +458,8 @@ namespace Microsoft.IdentityModel.TestUtils
         public static string TokenEndpoint { get => @"https://login.microsoftonline.com/268da1a1-9db4-48b9-b1fe-683250ba90cc/wsfed"; }
 
         public static string TokenEndpointForCommon { get => @"https://login.microsoftonline.com/common/wsfed"; }
+
+        public static string ActiveTokenEndpointForCommon { get => @"https://login.microsoftonline.com/common/wsfed"; }
 
         public static string KeyDescriptorNoKeyUse
         {
@@ -731,7 +754,20 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
-        public static string MetadataEmptyEndpointReference
+        public static string MetadataEmptySecurityTokenServiceEndpoint
+        {
+            get
+            {
+                return
+                @"<EntityDescriptor xmlns=""urn:oasis:names:tc:SAML:2.0:metadata"" ID=""_6c4f3672-45c2-47a6-9515-afda95224009"" entityID=""https://sts.windows.net/268da1a1-9db4-48b9-b1fe-683250ba90cc/"">
+                  <RoleDescriptor xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:fed=""http://docs.oasis-open.org/wsfed/federation/200706"" xsi:type=""fed:SecurityTokenServiceType"" protocolSupportEnumeration=""http://docs.oasis-open.org/wsfed/federation/200706"">
+                    <fed:SecurityTokenServiceEndpoint />
+                  </RoleDescriptor>
+                </EntityDescriptor>";
+            }
+        }
+
+        public static string MetadataEmptyPassiveRequestorEndpointReference
         {
             get
             {
@@ -746,7 +782,22 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
-        public static string MetadataEmptyEndpointAddress
+        public static string MetadataEmptySecurityTokenServiceEndpointReference
+        {
+            get
+            {
+                return
+                @"<EntityDescriptor xmlns=""urn:oasis:names:tc:SAML:2.0:metadata"" ID=""_6c4f3672-45c2-47a6-9515-afda95224009"" entityID=""https://sts.windows.net/268da1a1-9db4-48b9-b1fe-683250ba90cc/"">
+                  <RoleDescriptor xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:fed=""http://docs.oasis-open.org/wsfed/federation/200706"" xsi:type=""fed:SecurityTokenServiceType"" protocolSupportEnumeration=""http://docs.oasis-open.org/wsfed/federation/200706"">
+                    <fed:PassiveRequestorEndpoint>
+                      <wsa:EndpointReference xmlns:wsa=""http://www.w3.org/2005/08/addressing"" />
+                    </fed:PassiveRequestorEndpoint>
+                  </_RoleDescriptor>
+                </EntityDescriptor>";
+            }
+        }
+
+        public static string MetadataEmptyPassiveRequestorEndpointAddress
         {
             get
             {
@@ -758,6 +809,23 @@ namespace Microsoft.IdentityModel.TestUtils
                         <wsa:Address />
                       </wsa:EndpointReference>
                     </fed:PassiveRequestorEndpoint>
+                  </RoleDescriptor>
+                </EntityDescriptor>";
+            }
+        }
+
+        public static string MetadataEmptySecurityTokenServiceEndpointAddress
+        {
+            get
+            {
+                return
+                @"<EntityDescriptor xmlns=""urn:oasis:names:tc:SAML:2.0:metadata"" ID=""_6c4f3672-45c2-47a6-9515-afda95224009"" entityID=""https://sts.windows.net/268da1a1-9db4-48b9-b1fe-683250ba90cc/"">
+                  <RoleDescriptor xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:fed=""http://docs.oasis-open.org/wsfed/federation/200706"" xsi:type=""fed:SecurityTokenServiceType"" protocolSupportEnumeration=""http://docs.oasis-open.org/wsfed/federation/200706"">
+                    <fed:SecurityTokenServiceEndpoint>
+                      <wsa:EndpointReference xmlns:wsa=""http://www.w3.org/2005/08/addressing"">
+                        <wsa:Address />
+                      </wsa:EndpointReference>
+                    </fed:SecurityTokenServiceEndpoint>
                   </RoleDescriptor>
                 </EntityDescriptor>";
             }
@@ -1043,7 +1111,7 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
-        public static string MetadataNoTokenUri
+        public static string MetadataNoPassiveRequestorEndpointUri
         {
             get
             {
@@ -1086,6 +1154,49 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
+        public static string MetadataNoSecurityTokenServiceEndpointUri
+        {
+            get
+            {
+                return
+                @"<EntityDescriptor xmlns=""urn:oasis:names:tc:SAML:2.0:metadata"" ID=""_6c4f3672-45c2-47a6-9515-afda95224009"" entityID=""https://sts.windows.net/268da1a1-9db4-48b9-b1fe-683250ba90cc/"">
+                  <Signature xmlns=""http://www.w3.org/2000/09/xmldsig#"">
+                    <SignedInfo>
+                      <CanonicalizationMethod Algorithm=""http://www.w3.org/2001/10/xml-exc-c14n#""/>
+                      <SignatureMethod Algorithm=""http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"" />
+                      <Reference URI=""#_6c4f3672-45c2-47a6-9515-afda95224009"">
+                        <Transforms>
+                          <Transform Algorithm=""http://www.w3.org/2000/09/xmldsig#enveloped-signature"" />
+                          <Transform Algorithm=""http://www.w3.org/2001/10/xml-exc-c14n#""/>
+                        </Transforms>
+                        <DigestMethod Algorithm=""http://www.w3.org/2001/04/xmlenc#sha256"" />
+                        <DigestValue> i6nrvd1p0+HbCCrFBN5z3jrCe/56R3DlWYQanX6cygM=</DigestValue>
+                      </Reference>
+                    </SignedInfo>
+                    <SignatureValue>
+                      gdmviHtNhy8FQ6gSbyovhzMBxioMs6hoHYYzoyjS4DxHqhLgaPrRe948NKfXRYe4o1syVp+cZaGTcRzlPmCFOxH1zjY9qPUT2tCsJ1aCUCoiepu0uYGkWKV9CifHt7+aixQEufxM06iwZcMdfXPF3lqqdOoC7pRTcPlBJo6m6odXmjIcHPpsBGtkJuS7W6JULFhzBC9ytS0asrVaEZhVijP95QM0SZRL/pnJp1gOtKYKsQV246lV8tHFfFIddtklVYTvhlagjVUHsUtUhfwrt/5i/Rnr40qMNx/H10ZClTAQXthQH3GnzObAmhfoMNS1hAMpnX4BEhBOAqHHv2jyPA==
+                    </SignatureValue>
+                    <KeyInfo>
+                      <X509Data>
+                        <X509Certificate>
+                          MIIDBTCCAe2gAwIBAgIQY4RNIR0dX6dBZggnkhCRoDANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE3MDIxMzAwMDAwMFoXDTE5MDIxNDAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMBEizU1OJms31S/ry7iav/IICYVtQ2MRPhHhYknHImtU03sgVk1Xxub4GD7R15i9UWIGbzYSGKaUtGU9lP55wrfLpDjQjEgaXi4fE6mcZBwa9qc22is23B6R67KMcVyxyDWei+IP3sKmCcMX7Ibsg+ubZUpvKGxXZ27YgqFTPqCT2znD7K81YKfy+SVg3uW6epW114yZzClTQlarptYuE2mujxjZtx7ZUlwc9AhVi8CeiLwGO1wzTmpd/uctpner6oc335rvdJikNmc1cFKCK+2irew1bgUJHuN+LJA0y5iVXKvojiKZ2Ii7QKXn19Ssg1FoJ3x2NWA06wc0CnruLsCAwEAAaMhMB8wHQYDVR0OBBYEFDAr/HCMaGqmcDJa5oualVdWAEBEMA0GCSqGSIb3DQEBCwUAA4IBAQAiUke5mA86R/X4visjceUlv5jVzCn/SIq6Gm9/wCqtSxYvifRXxwNpQTOyvHhrY/IJLRUp2g9/fDELYd65t9Dp+N8SznhfB6/Cl7P7FRo99rIlj/q7JXa8UB/vLJPDlr+NREvAkMwUs1sDhL3kSuNBoxrbLC5Jo4es+juQLXd9HcRraE4U3UZVhUS2xqjFOfaGsCbJEqqkjihssruofaxdKT1CPzPMANfREFJznNzkpJt4H0aMDgVzq69NxZ7t1JiIuc43xRjeiixQMRGMi1mAB75fTyfFJ/rWQ5J/9kh0HMZVtHsqICBF1tHMTMIK5rwoweY0cuCIpN7A/zMOQtoD
+                        </X509Certificate>
+                      </X509Data>
+                    </KeyInfo>
+                  </Signature>
+                  <RoleDescriptor xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:fed=""http://docs.oasis-open.org/wsfed/federation/200706"" xsi:type=""fed:SecurityTokenServiceType"" protocolSupportEnumeration=""http://docs.oasis-open.org/wsfed/federation/200706"">
+                    <fed:SecurityTokenServiceEndpoint>
+                      <wsa:EndpointReference xmlns:wsa=""http://www.w3.org/2005/08/addressing"">
+                        <wsa:Address>
+                          
+                        </wsa:Address>
+                      </wsa:EndpointReference>
+                    </fed:SecurityTokenServiceEndpoint>
+                  </RoleDescriptor>
+                </EntityDescriptor>";
+            }
+        }
+
         public static string MetadataWithBlanks
         {
             get
@@ -1093,8 +1204,8 @@ namespace Microsoft.IdentityModel.TestUtils
                 return
                 @"<EntityDescriptor xmlns=""urn:oasis:names:tc:SAML:2.0:metadata"" ID=""_6c4f3672-45c2-47a6-9515-afda95224009"" entityID=""https://sts.windows.net/268da1a1-9db4-48b9-b1fe-683250ba90cc/"">
 
-                  <Signature xmlns=""http://www.w3.org/2000/09/xmldsig#"">
-                    <SignedInfo>
+                  <Signature                             xmlns=""http://www.w3.org/2000/09/xmldsig#"">
+                    <SignedInfo>                            
                       <CanonicalizationMethod Algorithm=""http://www.w3.org/2001/10/xml-exc-c14n#""/>
                       <SignatureMethod Algorithm=""http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"" />
                       <Reference URI=""#_0ded55d8-a72f-4e13-ab9e-f40be80b1476"">
@@ -1108,17 +1219,17 @@ namespace Microsoft.IdentityModel.TestUtils
                     </SignedInfo>
                     <SignatureValue>
                       KD9uWOD/9pvF1NlNCpYoXymUPS1l9uIBgBDe0uOQgQv+tUI/1jJX4UpjADDHCOx6HCl5ZgZSXNmOC2lLSJEwmv21BZzI+PAOxF5hdH99cS/lMC/hxgyWdLVeGnr1I4WbPxGqVmjFNuBdBMaourO4z/5f3D2JZQmgnlu8H+4gv2SpjeZz/YhIN6ZrNfmHwsKZashMGtSmE5uHro+uO5yO17Gr9YfUbtokLRIq5Dk9kqnxG8YZF1C1nC9O0PMdlHb4ubwgO20Cvz5sU2iswn9m68btS5TLF5OVhETzyKir1QA+H1tCgGRqIWd4Geyoucdct1r4zAJGCNIekdKnY3NXwg==
-                    </SignatureValue>
+                    </SignatureValue>                            
                     <KeyInfo>
                       <X509Data>
-                        <X509Certificate>MIIDBTCCAe2gAwIBAgIQY4RNIR0dX6dBZggnkhCRoDANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE3MDIxMzAwMDAwMFoXDTE5MDIxNDAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMBEizU1OJms31S/ry7iav/IICYVtQ2MRPhHhYknHImtU03sgVk1Xxub4GD7R15i9UWIGbzYSGKaUtGU9lP55wrfLpDjQjEgaXi4fE6mcZBwa9qc22is23B6R67KMcVyxyDWei+IP3sKmCcMX7Ibsg+ubZUpvKGxXZ27YgqFTPqCT2znD7K81YKfy+SVg3uW6epW114yZzClTQlarptYuE2mujxjZtx7ZUlwc9AhVi8CeiLwGO1wzTmpd/uctpner6oc335rvdJikNmc1cFKCK+2irew1bgUJHuN+LJA0y5iVXKvojiKZ2Ii7QKXn19Ssg1FoJ3x2NWA06wc0CnruLsCAwEAAaMhMB8wHQYDVR0OBBYEFDAr/HCMaGqmcDJa5oualVdWAEBEMA0GCSqGSIb3DQEBCwUAA4IBAQAiUke5mA86R/X4visjceUlv5jVzCn/SIq6Gm9/wCqtSxYvifRXxwNpQTOyvHhrY/IJLRUp2g9/fDELYd65t9Dp+N8SznhfB6/Cl7P7FRo99rIlj/q7JXa8UB/vLJPDlr+NREvAkMwUs1sDhL3kSuNBoxrbLC5Jo4es+juQLXd9HcRraE4U3UZVhUS2xqjFOfaGsCbJEqqkjihssruofaxdKT1CPzPMANfREFJznNzkpJt4H0aMDgVzq69NxZ7t1JiIuc43xRjeiixQMRGMi1mAB75fTyfFJ/rWQ5J/9kh0HMZVtHsqICBF1tHMTMIK5rwoweY0cuCIpN7A/zMOQtoD</X509Certificate>
+                        <X509Certificate                            >MIIDBTCCAe2gAwIBAgIQY4RNIR0dX6dBZggnkhCRoDANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE3MDIxMzAwMDAwMFoXDTE5MDIxNDAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMBEizU1OJms31S/ry7iav/IICYVtQ2MRPhHhYknHImtU03sgVk1Xxub4GD7R15i9UWIGbzYSGKaUtGU9lP55wrfLpDjQjEgaXi4fE6mcZBwa9qc22is23B6R67KMcVyxyDWei+IP3sKmCcMX7Ibsg+ubZUpvKGxXZ27YgqFTPqCT2znD7K81YKfy+SVg3uW6epW114yZzClTQlarptYuE2mujxjZtx7ZUlwc9AhVi8CeiLwGO1wzTmpd/uctpner6oc335rvdJikNmc1cFKCK+2irew1bgUJHuN+LJA0y5iVXKvojiKZ2Ii7QKXn19Ssg1FoJ3x2NWA06wc0CnruLsCAwEAAaMhMB8wHQYDVR0OBBYEFDAr/HCMaGqmcDJa5oualVdWAEBEMA0GCSqGSIb3DQEBCwUAA4IBAQAiUke5mA86R/X4visjceUlv5jVzCn/SIq6Gm9/wCqtSxYvifRXxwNpQTOyvHhrY/IJLRUp2g9/fDELYd65t9Dp+N8SznhfB6/Cl7P7FRo99rIlj/q7JXa8UB/vLJPDlr+NREvAkMwUs1sDhL3kSuNBoxrbLC5Jo4es+juQLXd9HcRraE4U3UZVhUS2xqjFOfaGsCbJEqqkjihssruofaxdKT1CPzPMANfREFJznNzkpJt4H0aMDgVzq69NxZ7t1JiIuc43xRjeiixQMRGMi1mAB75fTyfFJ/rWQ5J/9kh0HMZVtHsqICBF1tHMTMIK5rwoweY0cuCIpN7A/zMOQtoD</X509Certificate>
                       </X509Data>
                     </KeyInfo>
                   </Signature>
 
                   <RoleDescriptor xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:fed=""http://docs.oasis-open.org/wsfed/federation/200706"" xsi:type=""fed:SecurityTokenServiceType"" protocolSupportEnumeration=""http://docs.oasis-open.org/wsfed/federation/200706"">
                     
-                    <KeyDescriptor use=""signing"">
+                    <KeyDescriptor                             use=""signing"">
 
                       <KeyInfo xmlns=""http://www.w3.org/2000/09/xmldsig#"">
                         <X509Data>
@@ -1128,34 +1239,39 @@ namespace Microsoft.IdentityModel.TestUtils
 
                     </KeyDescriptor>
 
-                    <KeyDescriptor use=""signing"">
+                    <KeyDescriptor use=""signing""                            >
 
                       <KeyInfo xmlns=""http://www.w3.org/2000/09/xmldsig#"">
                         <X509Data>
                           <X509Certificate>MIIDBTCCAe2gAwIBAgIQXxLnqm1cOoVGe62j7W7wZzANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE3MDMyNjAwMDAwMFoXDTE5MDMyNzAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKJGarCm4IF0/Gz5Xx/zyZwD2rdJJZtO2Ukk1Oz+Br1sLVY8I5vj5esB+lotmLEblA9N/w188vmTvykaEzUl49NA4s86x44SW6WtdQbGJ0IjpQJUalUMyy91vIBkK/7K3nBXeVBsRk7tm528leoQ05/aZ+1ycJBIU+1oGYThv8MOjyHAlXJmCaGXwXTisZ+hHjcwlMk/+ZEutHflKLIpPUNEi7j4Xw+zp9UKo5pzWIr/iJ4HjvCkFofW90AMF2xp8dMhpbVcfJGS/Ii3J66LuNLCH/HtSZ42FO+tnRL/nNzzFWUhGT92Q5VFVngfWJ3PAg1zz8I1wowLD2fiB2udGXcCAwEAAaMhMB8wHQYDVR0OBBYEFFXPbFXjmMR3BluF+2MeSXd1NQ3rMA0GCSqGSIb3DQEBCwUAA4IBAQAsd3wGVilJxDtbY1K2oAsWLdNJgmCaYdrtdlAsjGlarSQSzBH0Ybf78fcPX//DYaLXlvaEGKVKp0jPq+RnJ17oP/RJpJTwVXPGRIlZopLIgnKpWlS/PS0uKAdNvLmz1zbGSILdcF+Qf41OozD4QNsS1c9YbDO4vpC9v8x3PVjfJvJwPonzNoOsLXA+8IONSXwCApsnmrwepKu8sifsFYSwgrwxRPGTEAjkdzRJ0yMqiY/VoJ7lqJ/FBJqqAjGPGq/yI9rVoG+mbO1amrIDWHHTKgfbKk0bXGtVUbsayyHR5jSgadmkLBh5AaN/HcgDK/jINrnpiQ+/2ewH/8qLaQ3B</X509Certificate>
-                        </X509Data>
-                      </KeyInfo>
+                        </X509Data>                            
+                      </KeyInfo>     
 
-                    </KeyDescriptor>
+                    </KeyDescriptor>                            
 
-                    <KeyDescriptor use=""signing"">
+                    <KeyDescriptor use=""signing""                            >
 
                       <KeyInfo xmlns=""http://www.w3.org/2000/09/xmldsig#"">
-                        <X509Data>
-                          <X509Certificate>MIIDKDCCAhCgAwIBAgIQBHJvVNxP1oZO4HYKh+rypDANBgkqhkiG9w0BAQsFADAjMSEwHwYDVQQDExhsb2dpbi5taWNyb3NvZnRvbmxpbmUudXMwHhcNMTYxMTE2MDgwMDAwWhcNMTgxMTE2MDgwMDAwWjAjMSEwHwYDVQQDExhsb2dpbi5taWNyb3NvZnRvbmxpbmUudXMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQChn5BCs24Hh6L0BNitPrV5s+2/DBhaeytOmnghJKnqeJlhv3ZczShRM2Cp38LW8Y3wn7L3AJtolaSkF/joKN1l6GupzM+HOEdq7xZxFehxIHW7+25mG/WigBnhsBzLv1SR4uIbrQeS5M0kkLwJ9pOnVH3uzMGG6TRXPnK3ivlKl97AiUEKdlRjCQNLXvYf1ZqlC77c/ZCOHSX4kvIKR2uG+LNlSTRq2rn8AgMpFT4DSlEZz4RmFQvQupQzPpzozaz/gadBpJy/jgDmJlQMPXkHp7wClvbIBGiGRaY6eZFxNV96zwSR/GPNkTObdw2S8/SiAgvIhIcqWTPLY6aVTqJfAgMBAAGjWDBWMFQGA1UdAQRNMEuAEDUj0BrjP0RTbmoRPTRMY3WhJTAjMSEwHwYDVQQDExhsb2dpbi5taWNyb3NvZnRvbmxpbmUudXOCEARyb1TcT9aGTuB2Cofq8qQwDQYJKoZIhvcNAQELBQADggEBAGnLhDHVz2gLDiu9L34V3ro/6xZDiSWhGyHcGqky7UlzQH3pT5so8iF5P0WzYqVtogPsyC2LPJYSTt2vmQugD4xlu/wbvMFLcV0hmNoTKCF1QTVtEQiAiy0Aq+eoF7Al5fV1S3Sune0uQHimuUFHCmUuF190MLcHcdWnPAmzIc8fv7quRUUsExXmxSX2ktUYQXzqFyIOSnDCuWFm6tpfK5JXS8fW5bpqTlrysXXz/OW/8NFGq/alfjrya4ojrOYLpunGriEtNPwK7hxj1AlCYEWaRHRXaUIW1ByoSff/6Y6+ZhXPUe0cDlNRt/qIz5aflwO7+W8baTS4O8m/icu7ItE=</X509Certificate>
-                        </X509Data>
-                      </KeyInfo>
+                        <X509Data>       
+                          <X509Certificate                            >MIIDKDCCAhCgAwIBAgIQBHJvVNxP1oZO4HYKh+rypDANBgkqhkiG9w0BAQsFADAjMSEwHwYDVQQDExhsb2dpbi5taWNyb3NvZnRvbmxpbmUudXMwHhcNMTYxMTE2MDgwMDAwWhcNMTgxMTE2MDgwMDAwWjAjMSEwHwYDVQQDExhsb2dpbi5taWNyb3NvZnRvbmxpbmUudXMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQChn5BCs24Hh6L0BNitPrV5s+2/DBhaeytOmnghJKnqeJlhv3ZczShRM2Cp38LW8Y3wn7L3AJtolaSkF/joKN1l6GupzM+HOEdq7xZxFehxIHW7+25mG/WigBnhsBzLv1SR4uIbrQeS5M0kkLwJ9pOnVH3uzMGG6TRXPnK3ivlKl97AiUEKdlRjCQNLXvYf1ZqlC77c/ZCOHSX4kvIKR2uG+LNlSTRq2rn8AgMpFT4DSlEZz4RmFQvQupQzPpzozaz/gadBpJy/jgDmJlQMPXkHp7wClvbIBGiGRaY6eZFxNV96zwSR/GPNkTObdw2S8/SiAgvIhIcqWTPLY6aVTqJfAgMBAAGjWDBWMFQGA1UdAQRNMEuAEDUj0BrjP0RTbmoRPTRMY3WhJTAjMSEwHwYDVQQDExhsb2dpbi5taWNyb3NvZnRvbmxpbmUudXOCEARyb1TcT9aGTuB2Cofq8qQwDQYJKoZIhvcNAQELBQADggEBAGnLhDHVz2gLDiu9L34V3ro/6xZDiSWhGyHcGqky7UlzQH3pT5so8iF5P0WzYqVtogPsyC2LPJYSTt2vmQugD4xlu/wbvMFLcV0hmNoTKCF1QTVtEQiAiy0Aq+eoF7Al5fV1S3Sune0uQHimuUFHCmUuF190MLcHcdWnPAmzIc8fv7quRUUsExXmxSX2ktUYQXzqFyIOSnDCuWFm6tpfK5JXS8fW5bpqTlrysXXz/OW/8NFGq/alfjrya4ojrOYLpunGriEtNPwK7hxj1AlCYEWaRHRXaUIW1ByoSff/6Y6+ZhXPUe0cDlNRt/qIz5aflwO7+W8baTS4O8m/icu7ItE=</X509Certificate>
+                        </X509Data>                            
+                      </KeyInfo>     
 
                     </KeyDescriptor>
+                     <fed:SecurityTokenServiceEndpoint>         
+                                <wsa:EndpointReference xmlns:wsa=""http://www.w3.org/2005/08/addressing"">                                        <wsa:Address>https://login.microsoftonline.com/268da1a1-9db4-48b9-b1fe-683250ba90cc/wsfed
+</wsa:Address>
+    </wsa:EndpointReference>
+                            </fed:SecurityTokenServiceEndpoint>
 
                     <fed:PassiveRequestorEndpoint>
 
                       <wsa:EndpointReference xmlns:wsa=""http://www.w3.org/2005/08/addressing"">
 
                         <wsa:Address>https://login.microsoftonline.com/268da1a1-9db4-48b9-b1fe-683250ba90cc/wsfed</wsa:Address>
-
-                      </wsa:EndpointReference>
-
+                            
+                      </wsa:EndpointReference                            >
+     
                     </fed:PassiveRequestorEndpoint>
 
                   </RoleDescriptor>
