@@ -21,13 +21,21 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         } = new List<KeyInfo>();
 
         /// <summary>
-        /// Token endpoint
+        /// Passive Requestor Token endpoint
         /// </summary>
         public string TokenEndpoint
         {
             get;
             set;
         }
+
+        /// <summary>
+        /// Active Requestor Token Endpoint
+        /// </summary>
+        public string ActiveTokenEndpoint
+        {
+            get;
+            set;
+        }
     }
 }
-

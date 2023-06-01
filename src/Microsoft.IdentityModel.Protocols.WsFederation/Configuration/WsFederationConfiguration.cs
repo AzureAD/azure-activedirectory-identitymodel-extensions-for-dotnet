@@ -44,5 +44,11 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         {
             get;
         } = new List<KeyInfo>();
+
+        /// <summary>
+        /// Gets or sets the token endpoint specified via the metadata endpoint.
+        /// This can is the fed:SecurityTokenServiceType in WS-Federation, http://docs.oasis-open.org/wsfed/federation/v1.2/os/ws-federation-1.2-spec-os.html#:~:text=fed%3ASecurityTokenSerivceEndpoint
+        /// </summary>
+        public virtual string ActiveTokenEndpoint { get; set; }
     }
 }
