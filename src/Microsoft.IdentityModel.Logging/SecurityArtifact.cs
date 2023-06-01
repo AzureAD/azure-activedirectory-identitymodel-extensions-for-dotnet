@@ -7,7 +7,7 @@ namespace Microsoft.IdentityModel.Logging
 {
     /// <summary>
     /// An internal structure that is used to mark an argument as SecurityArtifact.
-    /// Arguments wrapped with a SecurityArtifact structure will be considered as SecurityArtifact in the message logging process.
+    /// Arguments wrapped with a SecurityArtifact structure will be considered as a SecurityArtifact in the message logging process.
     /// </summary>
     internal struct SecurityArtifact : ISafeLogSecurityArtifact
     {
@@ -45,6 +45,7 @@ namespace Microsoft.IdentityModel.Logging
             return Argument?.ToString() ?? "null";
         }
 
+        // <inheritdoc/>
         public string UnsafeToString()
         {
             return Argument?.ToString() ?? "null";

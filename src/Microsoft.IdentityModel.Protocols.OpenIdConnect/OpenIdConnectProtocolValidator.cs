@@ -511,13 +511,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             object cHashClaim;
             if (!validationContext.ValidatedIdToken.Payload.TryGetValue(JwtRegisteredClaimNames.CHash, out cHashClaim))
             {
-                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidCHashException(LogHelper.FormatInvariant(LogMessages.IDX21307, validationContext.ValidatedIdToken.ToString())));
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidCHashException(LogHelper.FormatInvariant(LogMessages.IDX21307, validationContext.ValidatedIdToken)));
             }
 
             var chash = cHashClaim as string;
             if (chash == null)
             {
-                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidCHashException(LogHelper.FormatInvariant(LogMessages.IDX21306, validationContext.ValidatedIdToken.ToString())));
+                throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidCHashException(LogHelper.FormatInvariant(LogMessages.IDX21306, validationContext.ValidatedIdToken)));
             }
 
             var idToken = validationContext.ValidatedIdToken;

@@ -901,7 +901,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Returns the encoded token without signature or authentication tag.
         /// </summary>
-        /// <returns>Encoded token string  without signature or authentication tag.</returns>
+        /// <returns>Encoded token string without signature or authentication tag.</returns>
         public override string ToString()
         {
             return EncodedToken.Substring(0, EncodedToken.LastIndexOf("."));
