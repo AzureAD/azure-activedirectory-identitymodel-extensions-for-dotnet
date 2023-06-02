@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.SampleTests
         {
             TestWithGeneratedToken(
                 () => "InvalidToken",
-                typeof(ArgumentException),
+                typeof(SecurityTokenMalformedException),
                 "IDX14100");
         }
 
