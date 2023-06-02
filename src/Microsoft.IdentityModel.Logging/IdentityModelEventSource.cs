@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Logging
         public static bool ShowPII { get; set; } = false;
 
         /// <summary>
-        /// Flag which indicates whether or not armed security artifact is shown in logs when <see cref="ShowPII"/> is set to true. False by default.
+        /// Flag which indicates whether or not complete <see cref="SecurityArtifact"/> is shown in logs when <see cref="ShowPII"/> is set to true. False by default.
         /// </summary>
         public static bool LogCompleteSecurityArtifact { get; set; } = false;
 
