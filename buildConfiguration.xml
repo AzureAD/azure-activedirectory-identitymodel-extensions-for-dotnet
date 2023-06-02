@@ -1,8 +1,8 @@
 <root>
   <dotnetArchitecture>x64</dotnetArchitecture>
   <nugetVersion>3.5.0-rc-1285</nugetVersion>
-  <runtimes>net45,net461,netstandard2.0</runtimes>
-  <assemblyVersion>6.32.4</assemblyVersion>
+  <runtimes>net461,netstandard2.0</runtimes>
+  <assemblyVersion>6.30.2</assemblyVersion>
   <nugetSuffix>preview</nugetSuffix>
   <projects>
     <src>
@@ -27,7 +27,6 @@
       <project name="CrossVersionTokenValidation.Tests" test="yes"/>
       <project name="Microsoft.IdentityModel.Logging.Tests" test="yes"/>
       <project name="Microsoft.IdentityModel.TestUtils" test="no" />
-      <project name="Microsoft.IdentityModel.Net45.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.JsonWebTokens.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.Tokens.Tests" test="yes" />
       <project name="System.IdentityModel.Tokens.Jwt.Tests" test="yes" />
