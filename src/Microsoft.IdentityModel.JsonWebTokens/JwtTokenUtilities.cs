@@ -316,7 +316,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 securityKey = encryptingCredentials.Key;
             }
-#if NET472 || NET6_0
+#if NET472 || NET6_0_OR_GREATER
             else if (SupportedAlgorithms.EcdsaWrapAlgorithms.Contains(encryptingCredentials.Alg))
             {
                 // on decryption we get the public key from the EPK value see: https://datatracker.ietf.org/doc/html/rfc7518#appendix-C
