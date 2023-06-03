@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Xml;
 using static Microsoft.IdentityModel.Logging.LogHelper;
@@ -123,13 +125,51 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 };
             }
 
+            // Get the thumbprint of the cert used to sign the metadata
+            string signingKeyId = string.Empty;
+            var signatureX509Data = configuration.Signature.KeyInfo.X509Data.GetEnumerator();
+
+            if (signatureX509Data.MoveNext())
+            {
+                var signatureCertData = signatureX509Data.Current.Certificates.GetEnumerator();
+                if (signatureCertData.MoveNext())
+                {
+                    X509Certificate2 cert = null;
+
+                    try
+                    {
+                        cert = new X509Certificate2(Convert.FromBase64String(signatureCertData.Current));
+                        signingKeyId = cert.Thumbprint;
+                    }
+                    catch (CryptographicException)
+                    {
+                        return new ConfigurationValidationResult
+                        {
+                            ErrorMessage = LogMessages.IDX22711,
+                            Succeeded = false
+                        };
+                    }
+                    finally
+                    {
+                        if (cert != null)
+                        {
+                            ((IDisposable)cert).Dispose();
+                        }
+                    }
+                }
+            }
+
             // We know the key used to sign the doc is part of the token signing keys as per the spec.
             // http://docs.oasis-open.org/wsfed/federation/v1.2/os/ws-federation-1.2-spec-os.html#_Toc223174958:~:text=%3C/fed%3ATargetScopes%20%3E-,3.1.15%20%5BSignature%5D%20Property,-The%20OPTIONAL%20%5BSignature
             // If the metadata is for a token issuer then the key used to sign issued tokens SHOULD
             // be used to sign this document.  This means that if a <fed:TokenSigningKey> is specified,
             // it SHOULD be used to sign this document.
+
             foreach (SecurityKey key in configuration.SigningKeys)
             {
+                if (signingKeyId != key.KeyId)
+                    continue;
+
                 try
                 {
                     configuration.Signature.Verify(key, key.CryptoProviderFactory);
@@ -141,10 +181,10 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 }
                 catch (XmlValidationException)
                 {
-                    // Ignore
+                    break;
                 }
             }
-            
+
             return new ConfigurationValidationResult
             {
                 ErrorMessage = LogMessages.IDX22711,
