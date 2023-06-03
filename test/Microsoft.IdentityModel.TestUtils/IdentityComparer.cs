@@ -997,6 +997,15 @@ namespace Microsoft.IdentityModel.TestUtils
             return context.Merge(localContext);
         }
 
+        public static bool AreConfigurationValidationResultEqual(ConfigurationValidationResult result1, ConfigurationValidationResult result2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (ContinueCheckingEquality(result1, result2, localContext))
+                CompareAllPublicProperties(result1, result2, localContext);
+
+            return context.Merge(localContext);
+        }
+
         public static string BuildStringDiff(string label, object str1, object str2)
         {
             return (label ?? "label") + ": '" + GetString(str1) + "', '" + GetString(str2) + "'";

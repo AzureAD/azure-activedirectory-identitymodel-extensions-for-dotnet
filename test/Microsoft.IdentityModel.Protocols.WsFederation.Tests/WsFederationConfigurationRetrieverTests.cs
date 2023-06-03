@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                     var reader = XmlReader.Create(theoryData.MetadataPath);
                     configuration = theoryData.Serializer.ReadMetadata(reader);
                 }
-
+               
                 if (theoryData.SigningKey != null)
                     configuration.Signature.Verify(theoryData.SigningKey, theoryData.SigningKey.CryptoProviderFactory);
 
@@ -635,7 +635,13 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         // The active token endpoint is optional at this point and should not throw an exception if missing.
                         Configuration = ReferenceMetadata.AADCommonFormatedNoActiveTokenEndpoint,
                         TestId = nameof(ReferenceMetadata.AADCommonFormatedNoActiveTokenEndpoint)
-                    }
+                    },
+                    new WsFederationMetadataTheoryData
+                    {
+                        // All data is present including signature and SigningCredentials (required for signature validation)
+                        Configuration = ReferenceMetadata.AADCommonFormated,
+                        TestId = nameof(ReferenceMetadata.AADCommonFormated)
+                    },
                 };
             }
         }

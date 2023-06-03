@@ -37,6 +37,20 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         internal const string IDX22813 = "IDX22813: 'ActiveTokenEndpoint' is missing in 'SecurityTokenServiceTypeRoleDescriptor'.";
         internal const string IDX22814 = "IDX22814: Token reference address is missing in SecurityTokenServiceEndpoint in metadata.";
 
+        // WsFederationConfigurationValidator messages
+        internal const string IDX22700 = "IDX22700: The Issuer property is null or empty.";
+        internal const string IDX22701 = "IDX22701: The Signature property is null.";
+        internal const string IDX22702 = "IDX22702: The Signature's KeyInfo property is null.";
+        internal const string IDX22703 = "IDX22703: The Signature's SignatureValue property is null or empty.";
+        internal const string IDX22704 = "IDX22704: The Signature.SignedInfo.SignatureMethod property is null or empty.";
+        internal const string IDX22705 = "IDX22705: The Signature.SignedInfo.References property is null or an empty collection.";
+        internal const string IDX22706 = "IDX22706: The ActiveTokenEndpoint property is not defined.";
+        internal const string IDX22707 = "IDX22707: The ActiveTokenEndpoint property is not a valid URI.";
+        internal const string IDX22708 = "IDX22708: The TokenEndpoint property is not defined.";
+        internal const string IDX22709 = "IDX22709: The TokenEndpoint property is not a valid URI.";
+        internal const string IDX22710 = "IDX22710: The SigningKeys is null or an empty collection.";
+        internal const string IDX22711 = "IDX22711: Metadata signature validation failed.";
+
 #pragma warning restore 1591
     }
 }
