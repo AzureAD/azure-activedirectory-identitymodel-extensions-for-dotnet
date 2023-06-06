@@ -25,6 +25,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// </summary>
     public class JwtTokenUtilities
     {
+        private string _unrecognizedEncodedToken = "UnrecognizedEncodedToken";
+
         /// <summary>
         /// Regex that is used to figure out if a token is in JWS format.
         /// </summary>
@@ -434,15 +436,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (obj == null)
                 return string.Empty;
 
-            // not a string
+            // not a string, we do not know how to sanitize so we return a String which represents the object instance
             if (!(obj is string token))
                 return obj.ToString();
 
             int lastDot = token.LastIndexOf(".");
 
-            // no dots, maybe not a JWT
+            // no dots, not a JWT, we do not know how to sanitize so we return UnrecognizedEncodedToken
             if (lastDot == -1)
-                return typeof(string).ToString();
+                return _unrecognizedEncodedToken;
 
             return token.Substring(0, lastDot);
         }
