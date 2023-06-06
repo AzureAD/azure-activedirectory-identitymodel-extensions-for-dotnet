@@ -25,7 +25,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// </summary>
     public class JwtTokenUtilities
     {
-        private string _unrecognizedEncodedToken = "UnrecognizedEncodedToken";
+        private const string _unrecognizedEncodedToken = "UnrecognizedEncodedToken";
 
         /// <summary>
         /// Regex that is used to figure out if a token is in JWS format.
