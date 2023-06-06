@@ -438,8 +438,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             // not a string, we do not know how to sanitize so we return a String which represents the object instance
             if (!(obj is string token))
-                return obj.ToString();
-
+                return obj.GetType().ToString();
+ 
             int lastDot = token.LastIndexOf(".");
 
             // no dots, not a JWT, we do not know how to sanitize so we return UnrecognizedEncodedToken
