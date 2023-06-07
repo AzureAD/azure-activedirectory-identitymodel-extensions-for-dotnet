@@ -167,9 +167,9 @@ namespace Microsoft.IdentityModel.Protocols
                         }
 
                         _lastRefresh = DateTimeOffset.UtcNow;
-                        // Add up to 1 hour jitter to avoid spike traffic to IdentityProvider.
+                        // Add a random amount between 0 and 5% of AutomaticRefreshInterval jitter to avoid spike traffic to IdentityProvider.
                         _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval +
-                            TimeSpan.FromSeconds(new Random().Next((int)Math.Min(AutomaticRefreshInterval.TotalSeconds / 10, TimeSpan.FromSeconds(600).TotalSeconds))));
+                            TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 5)));
                         _currentConfiguration = configuration;
                     }
                     catch (Exception ex)
