@@ -31,13 +31,6 @@ namespace Microsoft.IdentityModel.Protocols
         private Exception _fetchMetadataFailure;
         private TimeSpan _bootstrapRefreshInterval = TimeSpan.FromSeconds(1);
 
-    /// <summary>
-    /// Static initializer for a new object. Static initializers run before the first instance of the type is created.
-    /// </summary>
-    static ConfigurationManager()
-        {               
-        }
-
         /// <summary>
         /// Instantiates a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
         /// </summary>
@@ -166,18 +159,18 @@ namespace Microsoft.IdentityModel.Protocols
                         // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
                         // The transport should have it's own timeouts, etc..
                         var configuration = await _configRetriever.GetConfigurationAsync(MetadataAddress, _docRetriever, CancellationToken.None).ConfigureAwait(false);
-                        _lastRefresh = DateTimeOffset.UtcNow;
-                        // Add 1 hour jitter to avoid spike traffic to IdentityProvider.
-                        _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval + TimeSpan.FromMinutes(new Random().Next(60)));
                         if (_configValidator != null)
                         {
                             ConfigurationValidationResult result = _configValidator.Validate(configuration);
                             if (!result.Succeeded)
-                                LogHelper.LogWarning(LogMessages.IDX20810, result.ErrorMessage);
+                                throw LogHelper.LogExceptionMessage(new InvalidConfigurationException(LogHelper.FormatInvariant(LogMessages.IDX20810, result.ErrorMessage)));
                         }
 
+                        _lastRefresh = DateTimeOffset.UtcNow;
+                        // Add a random amount between 0 and 5% of AutomaticRefreshInterval jitter to avoid spike traffic to IdentityProvider.
+                        _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval +
+                            TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 20)));
                         _currentConfiguration = configuration;
-
                     }
                     catch (Exception ex)
                     {
@@ -218,7 +211,12 @@ namespace Microsoft.IdentityModel.Protocols
                 else
                     throw LogHelper.LogExceptionMessage(
                         new InvalidOperationException(
-                            LogHelper.FormatInvariant(LogMessages.IDX20803, LogHelper.MarkAsNonPII(MetadataAddress ?? "null"), LogHelper.MarkAsNonPII(_fetchMetadataFailure)), _fetchMetadataFailure));
+                            LogHelper.FormatInvariant(
+                                LogMessages.IDX20803,
+                                LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
+                                LogHelper.MarkAsNonPII(_syncAfter),
+                                LogHelper.MarkAsNonPII(_fetchMetadataFailure)),
+                            _fetchMetadataFailure));
             }
             finally
             {
