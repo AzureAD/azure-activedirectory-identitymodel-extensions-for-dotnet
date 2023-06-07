@@ -32,13 +32,6 @@ namespace Microsoft.IdentityModel.Protocols
         private TimeSpan _bootstrapRefreshInterval = TimeSpan.FromSeconds(1);
 
         /// <summary>
-        /// Static initializer for a new object. Static initializers run before the first instance of the type is created.
-        /// </summary>
-        static ConfigurationManager()
-        {               
-        }
-
-        /// <summary>
         /// Instantiates a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
         /// </summary>
         /// <param name="metadataAddress">The address to obtain configuration.</param>
@@ -174,8 +167,9 @@ namespace Microsoft.IdentityModel.Protocols
                         }
 
                         _lastRefresh = DateTimeOffset.UtcNow;
-                        // Add 1 hour jitter to avoid spike traffic to IdentityProvider.
-                        _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval + TimeSpan.FromMinutes(new Random().Next(60)));
+                        // Add up to 1 hour jitter to avoid spike traffic to IdentityProvider.
+                        _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval +
+                            TimeSpan.FromSeconds(new Random().Next((int)Math.Min(AutomaticRefreshInterval.TotalSeconds / 10, TimeSpan.FromSeconds(600).TotalSeconds))));
                         _currentConfiguration = configuration;
                     }
                     catch (Exception ex)
