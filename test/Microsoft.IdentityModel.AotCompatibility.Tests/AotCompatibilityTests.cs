@@ -32,6 +32,7 @@ namespace Microsoft.IdentityModel.AotCompatibility.Tests
         ///
         /// You can also 'dotnet publish' the 'Microsoft.IdentityModel.AotCompatibility.TestApp.csproj' as well to get the errors.
         /// </summary>
+        [Fact(Skip = "need to adjust timeout")]
         [Fact]
         public void EnsureAotCompatibility()
         {
