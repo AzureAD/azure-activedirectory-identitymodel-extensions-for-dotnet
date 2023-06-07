@@ -169,7 +169,7 @@ namespace Microsoft.IdentityModel.Protocols
                         _lastRefresh = DateTimeOffset.UtcNow;
                         // Add a random amount between 0 and 5% of AutomaticRefreshInterval jitter to avoid spike traffic to IdentityProvider.
                         _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval +
-                            TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 5)));
+                            TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 20)));
                         _currentConfiguration = configuration;
                     }
                     catch (Exception ex)
