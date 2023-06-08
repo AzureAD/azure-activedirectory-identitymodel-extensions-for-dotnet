@@ -21,7 +21,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// <summary>
     /// A <see cref="SecurityToken"/> designed for representing a JSON Web Token (JWT). 
     /// </summary>
-    public class JsonWebToken : SecurityToken
+    public class JsonWebToken : SecurityToken, IJsonWebToken
     {
         // _hChars is used for JWE for NET45+
         private char[] _hChars;
@@ -390,6 +390,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </para>
         /// </remarks>
         public JsonWebToken InnerToken { get; internal set; }
+
+        /// <inheritdoc/>
+        IJsonWebToken IJsonWebToken.InnerToken => InnerToken;
 
         /// <summary>
         /// Returns true if this JsonWebToken was encrypted a JWE.
@@ -1078,7 +1081,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return _zip;
             }
         }
-
-#endregion
+        #endregion
     }
 }
