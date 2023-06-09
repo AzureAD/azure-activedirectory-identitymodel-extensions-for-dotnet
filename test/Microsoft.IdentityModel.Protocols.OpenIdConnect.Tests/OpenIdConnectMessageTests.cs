@@ -233,6 +233,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 #elif NET6_0
             if (!message.SkuTelemetryValue.Equals("ID_NET6_0"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET6_0");
+#elif NET8_0
+            if (!message.SkuTelemetryValue.Equals("ID_NET8_0"))
+                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET8_0");
 #elif NET_CORE
             if (!message.SkuTelemetryValue.Equals("ID_NETSTANDARD2_0"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NETSTANDARD2_0");
@@ -506,6 +509,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 #elif NET6_0
             if (!message.SkuTelemetryValue.Equals("ID_NET6_0"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NETCOREAPP3_1");
+#elif NET8_0
+            if (!message.SkuTelemetryValue.Equals("ID_NET8_0"))
+                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET8_0");
 #elif NET_CORE
             if (!message.SkuTelemetryValue.Equals("ID_NETSTANDARD2_0"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NETSTANDARD2_0");

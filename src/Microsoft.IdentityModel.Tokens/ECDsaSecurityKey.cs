@@ -92,7 +92,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>https://datatracker.ietf.org/doc/html/rfc7638</remarks>
         public override bool CanComputeJwkThumbprint()
         {
-#if NET472 || NETSTANDARD2_0 || NET6_0
+#if NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
             if (ECDsaAdapter.SupportsECParameters())
                 return true;
 #endif
@@ -106,7 +106,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>https://datatracker.ietf.org/doc/html/rfc7638</remarks>
         public override byte[] ComputeJwkThumbprint()
         {
-#if NET472 || NETSTANDARD2_0 || NET6_0
+#if NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
             if (ECDsaAdapter.SupportsECParameters())
             {
                 ECParameters parameters = ECDsa.ExportParameters(false);
