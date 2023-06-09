@@ -52,6 +52,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
         /// <param name="context">The contextual information about the source or destination.</param>
+#if NET8_0_OR_GREATER
+        [Obsolete("Formatter-based serialization is obsolete", DiagnosticId = "SYSLIB0051")]
+#endif
         protected SecurityTokenExpiredException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -72,6 +75,9 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <inheritdoc/>
+#if NET8_0_OR_GREATER
+        [Obsolete("Formatter-based serialization is obsolete", DiagnosticId = "SYSLIB0051")]
+#endif
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
