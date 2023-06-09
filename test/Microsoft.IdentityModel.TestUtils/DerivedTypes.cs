@@ -226,11 +226,17 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public override string KeyExchangeAlgorithm => throw new NotImplementedException();
 
+#if NET8_0_OR_GREATER
+        [Obsolete("Formatter-based serialization is obsolete", DiagnosticId = "SYSLIB0051")]
+#endif
         public override byte[] DecryptValue(byte[] rgb)
         {
             throw new NotImplementedException();
         }
 
+#if NET8_0_OR_GREATER
+        [Obsolete("Formatter-based serialization is obsolete", DiagnosticId = "SYSLIB0051")]
+#endif
         public override byte[] EncryptValue(byte[] rgb)
         {
             throw new NotImplementedException();
