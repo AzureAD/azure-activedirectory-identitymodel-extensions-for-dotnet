@@ -775,10 +775,10 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         /// <summary>
-        /// Converts a string into an instance of <see cref="JwtSecurityToken"/>.
+        /// Converts a string into an instance of <see cref="SecurityToken"/>.
         /// </summary>
         /// <param name="token">A 'JSON Web Token' (JWT) in JWS or JWE Compact Serialization Format.</param>
-        /// <returns>A <see cref="JwtSecurityToken"/></returns>
+        /// <returns>A <see cref="SecurityToken"/></returns>
         /// <exception cref="ArgumentNullException"><paramref name="token"/> is null or empty.</exception>
         /// <exception cref="ArgumentException">'token.Length' is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         /// <exception cref="ArgumentException"><see cref="CanReadToken(string)"/></exception>
