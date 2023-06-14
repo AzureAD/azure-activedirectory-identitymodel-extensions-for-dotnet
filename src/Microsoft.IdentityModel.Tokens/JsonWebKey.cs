@@ -410,7 +410,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Creates a JsonWebKey representation of an asymmetric public key.
         /// </summary>
         /// <returns>JsonWebKey representation of an asymmetric public key.</returns>
-        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7800#section-3-2</remarks>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7800#section-3.2</remarks>
         internal string RepresentAsAsymmetricPublicJwk()
         {
             JObject jwk = new JObject();
