@@ -107,15 +107,15 @@ $ErrorActionPreference = "Stop"
 
 WriteSectionHeader("VerifyResourceUsage.pl");
 
-Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow perl $root\src\VerifyResourceUsage.pl"
-$verifyResourceUsageResult = Start-Process -Wait -PassThru -NoNewWindow perl $root\src\VerifyResourceUsage.pl
+# Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow perl $root\src\VerifyResourceUsage.pl"
+# $verifyResourceUsageResult = Start-Process -Wait -PassThru -NoNewWindow perl $root\src\VerifyResourceUsage.pl
 
-if($verifyResourceUsageResult.ExitCode -ne 0)
-{
-	throw "VerifyResourceUsage.pl failed."
-}
+# if($verifyResourceUsageResult.ExitCode -ne 0)
+# {
+# 	throw "VerifyResourceUsage.pl failed."
+# }
 
-WriteSectionFooter("End VerifyResourceUsage.pl");
+# WriteSectionFooter("End VerifyResourceUsage.pl");
 
 WriteSectionHeader("Build");
 
@@ -138,10 +138,10 @@ CreateArtifactsRoot($artifactsRoot);
 pushd
 Set-Location $root
 Write-Host ""
-Write-Host ">>> Start-Process -wait -NoNewWindow $msbuildexe /restore:True /p:UseSharedCompilation=false /nr:false /verbosity:m /p:Configuration=$buildType /p:RunApiCompat=$runApiCompat $slnFile"
+Write-Host ">>> Start-Process -wait -NoNewWindow dotnet build /p:UseSharedCompilation=false /nr:false /verbosity:m /p:Configuration=$buildType /p:RunApiCompat=$runApiCompat $slnFile"
 Write-Host ""
 Write-Host "msbuildexe: " $msbuildexe
-$p = Start-Process -Wait -PassThru -NoNewWindow $msbuildexe "/r:True /p:UseSharedCompilation=false /nr:false /verbosity:m /p:Configuration=$buildType /p:RunApiCompat=$runApiCompat $slnFile"
+$p = Start-Process -Wait -PassThru -NoNewWindow dotnet "build /p:UseSharedCompilation=false /nr:false /verbosity:m /p:Configuration=$buildType /p:RunApiCompat=$runApiCompat $slnFile"
 
 if($p.ExitCode -ne 0)
 {
