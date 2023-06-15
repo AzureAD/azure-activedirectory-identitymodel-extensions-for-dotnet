@@ -320,7 +320,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             reader.MoveToContent();
             reader.ReadEndElement();
 
-            // </PassiveRequestorEndpoint>
+            // </SecurityTokenServiceEndpoint>
             reader.MoveToContent();
             reader.ReadEndElement();
 

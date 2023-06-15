@@ -127,7 +127,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         ExpectedResult = new ConfigurationValidationResult
                         {
                             Succeeded = false,
-                            ErrorMessage = LogMessages.IDX22704
+                            ErrorMessage = LogMessages.IDX22705
                         },
                         TestId = "EmptySignatureMethod"
                     },
@@ -141,7 +141,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         ExpectedResult = new ConfigurationValidationResult
                         {
                             Succeeded = false,
-                            ErrorMessage = LogMessages.IDX22705
+                            ErrorMessage = LogMessages.IDX22706
                         },
                         TestId = "NoSignatureReferences"
                     },
@@ -155,7 +155,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         ExpectedResult = new ConfigurationValidationResult
                         {
                             Succeeded = false,
-                            ErrorMessage = LogMessages.IDX22706
+                            ErrorMessage = LogMessages.IDX22707
                         },
                         TestId = "EmptyActiveTokenEndpoint"
                     },
@@ -169,7 +169,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         ExpectedResult = new ConfigurationValidationResult
                         {
                             Succeeded = false,
-                            ErrorMessage = LogMessages.IDX22707
+                            ErrorMessage = LogMessages.IDX22708
                         },
                         TestId = "InvalidActiveTokenEndpointUri"
                     },
@@ -183,7 +183,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         ExpectedResult = new ConfigurationValidationResult
                         {
                             Succeeded = false,
-                            ErrorMessage = LogMessages.IDX22708
+                            ErrorMessage = LogMessages.IDX22709
                         },
                         TestId = "EmptyTokenEndpoint"
                     },
@@ -197,7 +197,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         ExpectedResult = new ConfigurationValidationResult
                         {
                             Succeeded = false,
-                            ErrorMessage = LogMessages.IDX22709
+                            ErrorMessage = LogMessages.IDX22710
                         },
                         TestId = "InvalidTokenEndpointUri"
                     },
@@ -211,7 +211,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         ExpectedResult = new ConfigurationValidationResult
                         {
                             Succeeded = false,
-                            ErrorMessage = LogMessages.IDX22710
+                            ErrorMessage = LogMessages.IDX22711
                         },
                         TestId = "NoSigningKeys"
                     },
@@ -222,7 +222,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         ExpectedResult = new ConfigurationValidationResult
                         {
                             Succeeded = false,
-                            ErrorMessage = LogMessages.IDX22711
+                            ErrorMessage = LogMessages.IDX22713
                         },
                         TestId = "TamperedMetadata-TokenEndpoints-PassiveRequestor"
                     },
@@ -233,7 +233,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         ExpectedResult = new ConfigurationValidationResult
                         {
                             Succeeded = false,
-                            ErrorMessage = LogMessages.IDX22711
+                            ErrorMessage = LogMessages.IDX22713
                         },
                         TestId = "TamperedMetadata-TokenEndpoints-ActiveRequestor"
                     },
@@ -244,7 +244,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         ExpectedResult = new ConfigurationValidationResult
                         {
                             Succeeded = false,
-                            ErrorMessage = LogMessages.IDX22711
+                            ErrorMessage = LogMessages.IDX22713
                         },
                         TestId = "TamperedMetadata-ExtraMaliciousKey"
                     }

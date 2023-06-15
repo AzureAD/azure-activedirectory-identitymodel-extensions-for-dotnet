@@ -5,7 +5,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 {
     /// <summary>
     /// Constants for WsFederation.
-    /// As defined on the http://docs.oasis-open.org/wsfed/federation/v1.2/os/ws-federation-1.2-spec-os.html
+    /// As defined in the http://docs.oasis-open.org/wsfed/federation/v1.2/os/ws-federation-1.2-spec-os.html
     /// </summary>
     public static class WsFederationConstants
     {

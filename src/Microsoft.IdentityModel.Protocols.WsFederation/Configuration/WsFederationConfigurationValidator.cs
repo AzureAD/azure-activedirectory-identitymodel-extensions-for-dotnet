@@ -19,7 +19,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// Validates a WsFederationConfiguration.
         /// </summary>
         /// <param name="configuration">WsFederationConfiguration to validate</param>
-        /// <returns>A <see cref="ConfigurationValidationResult"/> that contains validation result.</returns>
+        /// <returns>A <see cref="ConfigurationValidationResult"/> containing the validation result.</returns>
         /// <exception cref="ArgumentNullException">If the provided configuration is null</exception>
         public ConfigurationValidationResult Validate(WsFederationConfiguration configuration)
         {
@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 };
             }
 
-            if (string.IsNullOrWhiteSpace(configuration.Signature.SignedInfo.SignatureMethod))
+            if (configuration.Signature.SignedInfo == null)
             {
                 return new ConfigurationValidationResult
                 {
@@ -71,7 +71,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 };
             }
 
-            if (configuration.Signature.SignedInfo.References == null || configuration.Signature.SignedInfo.References.Count == 0)
+            if (string.IsNullOrWhiteSpace(configuration.Signature.SignedInfo.SignatureMethod))
             {
                 return new ConfigurationValidationResult
                 {
@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 };
             }
 
-            if (string.IsNullOrWhiteSpace(configuration.ActiveTokenEndpoint))
+            if (configuration.Signature.SignedInfo.References == null || configuration.Signature.SignedInfo.References.Count == 0)
             {
                 return new ConfigurationValidationResult
                 {
@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 };
             }
 
-            if (!Uri.IsWellFormedUriString(configuration.ActiveTokenEndpoint, UriKind.Absolute))
+            if (string.IsNullOrWhiteSpace(configuration.ActiveTokenEndpoint))
             {
                 return new ConfigurationValidationResult
                 {
@@ -98,7 +98,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 };
             }
 
-            if (string.IsNullOrWhiteSpace(configuration.TokenEndpoint))
+            if (!Uri.IsWellFormedUriString(configuration.ActiveTokenEndpoint, UriKind.Absolute))
             {
                 return new ConfigurationValidationResult
                 {
@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 };
             }
 
-            if (!Uri.IsWellFormedUriString(configuration.TokenEndpoint, UriKind.Absolute))
+            if (string.IsNullOrWhiteSpace(configuration.TokenEndpoint))
             {
                 return new ConfigurationValidationResult
                 {
@@ -116,11 +116,20 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 };
             }
 
-            if (configuration.SigningKeys == null || configuration.SigningKeys.Count == 0)
+            if (!Uri.IsWellFormedUriString(configuration.TokenEndpoint, UriKind.Absolute))
             {
                 return new ConfigurationValidationResult
                 {
                     ErrorMessage = LogMessages.IDX22710,
+                    Succeeded = false
+                };
+            }
+
+            if (configuration.SigningKeys == null || configuration.SigningKeys.Count == 0)
+            {
+                return new ConfigurationValidationResult
+                {
+                    ErrorMessage = LogMessages.IDX22711,
                     Succeeded = false
                 };
             }
@@ -145,7 +154,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                     {
                         return new ConfigurationValidationResult
                         {
-                            ErrorMessage = LogMessages.IDX22711,
+                            ErrorMessage = LogMessages.IDX22712,
                             Succeeded = false
                         };
                     }
@@ -167,7 +176,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 
             foreach (SecurityKey key in configuration.SigningKeys)
             {
-                if (signingKeyId != key.KeyId)
+                if (key == null || key.CryptoProviderFactory == null || signingKeyId != key.KeyId)
                     continue;
 
                 try
@@ -181,13 +190,14 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 }
                 catch (XmlValidationException)
                 {
+                    // We know the signature is invalid at this point
                     break;
                 }
             }
 
             return new ConfigurationValidationResult
             {
-                ErrorMessage = LogMessages.IDX22711,
+                ErrorMessage = LogMessages.IDX22713,
                 Succeeded = false
             };
         }
