@@ -102,23 +102,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (string.IsNullOrEmpty(payload))
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
-            try
-            {
-                Header = new JsonClaimSet(header);
-            }
-            catch (Exception ex)
-            {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14301, header), ex));
-            }
+            var encodedHeader = Base64UrlEncoder.Encode(header);
+            var encodedPayload = Base64UrlEncoder.Encode(payload);
+            var encodedToken = encodedHeader + "." + encodedPayload + ".";
 
-            try
-            {
-                Payload = new JsonClaimSet(payload);
-            }
-            catch (Exception ex)
-            {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14302, payload), ex));
-            }
+            ReadToken(encodedToken);
         }
 
         internal string ActualIssuer { get; set; }
