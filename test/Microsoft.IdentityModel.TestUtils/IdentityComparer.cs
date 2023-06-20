@@ -997,7 +997,7 @@ namespace Microsoft.IdentityModel.TestUtils
             return context.Merge(localContext);
         }
 
-        #if !CrossVersionTokenValidation
+#if !CrossVersionTokenValidation
         public static bool AreConfigurationValidationResultEqual(ConfigurationValidationResult result1, ConfigurationValidationResult result2, CompareContext context)
         {
             var localContext = new CompareContext(context);
@@ -1006,7 +1006,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
             return context.Merge(localContext);
         }
-        #endif
+#endif
 
         public static string BuildStringDiff(string label, object str1, object str2)
         {

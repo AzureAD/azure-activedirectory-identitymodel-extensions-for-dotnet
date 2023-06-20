@@ -141,7 +141,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             if (signatureX509Data.MoveNext())
             {
                 var signatureCertData = signatureX509Data.Current.Certificates.GetEnumerator();
-                if (signatureCertData.MoveNext())
+                if (signatureCertData.MoveNext() && !string.IsNullOrWhiteSpace(signatureCertData.Current))
                 {
                     X509Certificate2 cert = null;
 
