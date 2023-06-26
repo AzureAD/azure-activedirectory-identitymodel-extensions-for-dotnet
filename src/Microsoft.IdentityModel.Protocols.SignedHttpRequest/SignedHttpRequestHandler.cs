@@ -371,7 +371,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             var httpRequestBody = signedHttpRequestDescriptor.HttpRequestData.Body;
 
             if (httpRequestBody == null)
-                httpRequestBody = new byte[0];
+                httpRequestBody = Array.Empty<byte>();
 
             try
             {
@@ -633,9 +633,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                         if (signatureProvider == null)
                             throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(Tokens.LogMessages.IDX10636, popKey.ToString(), LogHelper.MarkAsNonPII(signedHttpRequest.Alg))));
 
-#if NET45
-                        if (signatureProvider.Verify(signedHttpRequest.MessageBytes, signedHttpRequest.SignatureBytes))
-#else
                         if(EncodingUtils.PerformEncodingDependentOperation<bool, string, int, SignatureProvider>(
                             signedHttpRequest.EncodedToken,
                             0,
@@ -645,7 +642,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                             signedHttpRequest.Dot2,
                             signatureProvider,
                             JsonWebTokenHandler.ValidateSignature))
-#endif
+
                         return popKey;
                     }
                     finally
@@ -955,7 +952,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             var httpRequestBody = signedHttpRequestValidationContext.HttpRequestData.Body;
 
             if (httpRequestBody == null)
-                httpRequestBody = new byte[0];
+                httpRequestBody = Array.Empty<byte>();
 
             if (!signedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.B, out string bClaim) || bClaim == null)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidBClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.B))));
