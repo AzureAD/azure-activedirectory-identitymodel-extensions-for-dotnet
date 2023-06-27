@@ -1728,11 +1728,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     try
                     {
-#if NET45
-                        if (ValidateSignature(jwtToken.MessageBytes, jwtToken.SignatureBytes, key, jwtToken.Alg, jwtToken, validationParameters))
-#else
                         if (ValidateSignature(jwtToken, key, validationParameters))
-#endif
                         {
                             LogHelper.LogInformation(TokenLogMessages.IDX10242, jwtToken.EncodedToken);
                             jwtToken.SigningKey = key;
@@ -1836,7 +1832,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
 
-#if !NET45
         internal static bool IsSignatureValid(byte[] signatureBytes, int signatureBytesLength, SignatureProvider signatureProvider, byte[] dataToVerify, int dataToVerifyLength)
         {
             if (signatureProvider is SymmetricSignatureProvider)
@@ -1901,6 +1896,5 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 cryptoProviderFactory.ReleaseSignatureProvider(signatureProvider);
             }
         }
-#endif
     }
 }
