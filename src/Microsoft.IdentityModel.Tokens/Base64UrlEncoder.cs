@@ -13,9 +13,6 @@ namespace Microsoft.IdentityModel.Tokens
     public static class Base64UrlEncoder
     {
         private const char base64PadCharacter = '=';
-#if NET45
-        private const string doubleBase64PadCharacter = "==";
-#endif
         private const char base64Character62 = '+';
         private const char base64Character63 = '/';
         private const char base64UrlCharacter62 = '-';
@@ -171,35 +168,7 @@ namespace Microsoft.IdentityModel.Tokens
         public static byte[] DecodeBytes(string str)
         {
             _ = str ?? throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(str)));
-#if NET45
-            // 62nd char of encoding
-            str = str.Replace(base64UrlCharacter62, base64Character62);
-            
-            // 63rd char of encoding
-            str = str.Replace(base64UrlCharacter63, base64Character63);
-
-            // check for padding
-            switch (str.Length % 4)
-            {
-                case 0:
-                    // No pad chars in this case
-                    break;
-                case 2:
-                    // Two pad chars
-                    str += doubleBase64PadCharacter;
-                    break;
-                case 3:
-                    // One pad char
-                    str += base64PadCharacter;
-                    break;
-                default:
-                    throw LogHelper.LogExceptionMessage(new FormatException(LogHelper.FormatInvariant(LogMessages.IDX10400, str)));
-            }
-
-            return Convert.FromBase64String(str);
-#else
             return UnsafeDecode(str);
-#endif
         }
 
         internal static unsafe byte[] UnsafeDecode(string str)
@@ -254,12 +223,8 @@ namespace Microsoft.IdentityModel.Tokens
                     fixed (char* src = str)
                     fixed (char* dest = decodedString)
                     {
-#if NET45
-                        for (int index = 0; index < str.Length; index++)
-                            dest[index] = src[index];
-#else
                         Buffer.MemoryCopy(src, dest, str.Length * 2, str.Length * 2);
-#endif
+
                         dest[str.Length] = base64PadCharacter;
                         if (str.Length + 2 == decodedLength)
                             dest[str.Length + 1] = base64PadCharacter;
@@ -323,12 +288,7 @@ namespace Microsoft.IdentityModel.Tokens
                     fixed (char* src = str)
                     fixed (char* dest = decodedString)
                     {
-#if NET45
-                        for (int index = 0; index < str.Length; index++)
-                            dest[index] = src[index];
-#else
                         Buffer.MemoryCopy(src, dest, str.Length * 2, str.Length * 2);
-#endif
 
                         dest[str.Length] = base64PadCharacter;
                         if (str.Length + 2 == decodedLength)

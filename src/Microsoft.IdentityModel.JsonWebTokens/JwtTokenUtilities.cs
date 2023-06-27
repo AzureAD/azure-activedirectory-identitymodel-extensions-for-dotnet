@@ -5,18 +5,15 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
-
-#if !NET45
-using System.IO;
-using System.Text.Json;
-#endif
 
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
@@ -516,7 +513,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
 
-#if !NET45
         internal static JsonDocument ParseDocument(byte[] bytes, int length)
         {
             using (MemoryStream memoryStream = new MemoryStream(bytes, 0, length))
@@ -536,8 +532,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             return Base64UrlEncoding.Decode<JsonDocument>(rawString, startIndex, length, ParseDocument);
         }
-#endif
-
     }
 }
 

@@ -96,9 +96,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 using (var sr = new StringReader(token))
                 {
                     var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit };
-#if NET45
-                    settings.XmlResolver = null;
-#endif                 
                     using (var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr, settings)))
                     {
                         return CanReadToken(reader);

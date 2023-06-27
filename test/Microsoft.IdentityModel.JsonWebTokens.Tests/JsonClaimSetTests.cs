@@ -10,11 +10,6 @@ using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
-#if NET452
-using Microsoft.IdentityModel.Json.Linq;
-using JsonClaimSet = Microsoft.IdentityModel.JsonWebTokens.JsonClaimSet45;
-#endif
-
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.JsonWebTokens.Tests
@@ -247,12 +242,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             IdentityComparer.AreEqual(new object[] { 1L, "2", 3L }, array, context);
             IdentityComparer.AreEqual(true, success, context);
 
-#if NET452
-            // only possible internally within the library since we're using Microsoft.IdentityModel.Json.Linq.JObject
-            success = token.TryGetPayloadValue("jobject", out JObject jobject);
-            IdentityComparer.AreEqual(JObject.Parse(@"{ ""string1"":""string1value"", ""string2"":""string2value"" }"), jobject, context);
-            IdentityComparer.AreEqual(true, success, context);
-#endif
             success = token.TryGetPayloadValue("string", out string name);
             IdentityComparer.AreEqual("bob", name, context);
             IdentityComparer.AreEqual(true, success, context);
