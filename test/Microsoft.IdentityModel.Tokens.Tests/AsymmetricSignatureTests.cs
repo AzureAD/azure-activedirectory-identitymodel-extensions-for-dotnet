@@ -15,16 +15,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class AsymmetricSignatureTests
     {
-        // Throw for NET45 target for derived RSA types.
         [Fact]
         public void UnsupportedRSATypes()
         {
             var context = new CompareContext("UnsupportedRSATypes");
             TestUtilities.WriteHeader($"{this}.UnsupportedRSATypes");
-
-#if NET452
-            var expectedException = ExpectedException.NotSupportedException();
-#endif
 
 #if NET461 || NET462 || NET472 || NET_CORE
             var expectedException = ExpectedException.NoExceptionExpected;
@@ -38,11 +33,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 expectedException.ProcessException(ex, context);
             }
-
-#if NET452
-            // RSA-PSS is not available on .NET 4.5.2
-            expectedException = ExpectedException.NotSupportedException("IDX10687:");
-#endif
 
 #if NET461 || NET462 || NET472 || NET_CORE
             expectedException = ExpectedException.NoExceptionExpected;
@@ -279,18 +269,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     },
                     theoryData);
 
-#if NET452
-                // RSA-PSS is not available on .NET 4.5.2
-                foreach (var certTuple in AsymmetricSignatureTestData.Certificates)
-                    AsymmetricSignatureTestData.AddRsaPssAlgorithmVariations(new SignatureProviderTheoryData
-                    {
-                        SigningKey = new RsaSecurityKey(certTuple.Item1.PrivateKey as RSA),
-                        TestId = "CapiCapi" + certTuple.Item3,
-                        VerifyKey = new RsaSecurityKey(certTuple.Item2.PublicKey.Key as RSA),
-                        ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
-                    },
-                    theoryData);
-#endif
                 return theoryData;
             }
         }

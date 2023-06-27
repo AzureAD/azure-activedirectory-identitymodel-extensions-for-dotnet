@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if !NET45
-
 using System;
 using System.Buffers;
 using System.Text;
@@ -178,4 +176,3 @@ namespace Microsoft.IdentityModel.Tokens
         }
     }
 }
-#endif

@@ -26,15 +26,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             // testing constructor that takes Rsa instance
             RsaSecurityKeyConstructorWithRsa(null, ExpectedException.ArgumentNullException("rsa"));
-#if NET452
-            RSA rsaCsp_2048 = new RSACryptoServiceProvider();
-            rsaCsp_2048.ImportParameters(KeyingMaterial.RsaParameters_2048);
-            RSA rsaCsp_2048_Public = new RSACryptoServiceProvider();
-            rsaCsp_2048_Public.ImportParameters(KeyingMaterial.RsaParameters_2048_Public);
-
-            RsaSecurityKeyConstructorWithRsa(rsaCsp_2048, ExpectedException.NoExceptionExpected);
-            RsaSecurityKeyConstructorWithRsa(rsaCsp_2048_Public, ExpectedException.NoExceptionExpected);
-#endif
         }
 
         private void RsaSecurityKeyConstructor(RSAParameters parameters, ExpectedException ee)
@@ -75,7 +66,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public static TheoryData<string, SecurityKey, bool> HasPrivateKeyTheoryData()
         {
             var theoryData = new TheoryData<string, SecurityKey, bool>();
-#if NET452 || NET461 || NET462
+#if NET461 || NET462
             theoryData.Add(
                 "KeyingMaterial.RsaSecurityKeyWithCspProvider_2048",
                 KeyingMaterial.RsaSecurityKeyWithCspProvider_2048,
@@ -134,10 +125,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void KeySize()
         {
-#if NET452
-            Assert.True(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.KeySize == 2048, string.Format(CultureInfo.InvariantCulture, "Keysize '{0}' != 2048", KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.KeySize));
-            Assert.True(KeyingMaterial.RsaSecurityKeyWithCspProvider_2048_Public.KeySize == 2048, string.Format(CultureInfo.InvariantCulture, "Keysize '{0}' != 2048", KeyingMaterial.RsaSecurityKeyWithCspProvider_2048.KeySize));
-#endif
             Assert.True(KeyingMaterial.RsaSecurityKey_2048.KeySize == 2048, string.Format(CultureInfo.InvariantCulture, "Keysize '{0}' != 2048", KeyingMaterial.RsaSecurityKey_2048.KeySize));
             Assert.True(KeyingMaterial.RsaSecurityKey_4096.KeySize == 4096, string.Format(CultureInfo.InvariantCulture, "Keysize '{0}' != 4096", KeyingMaterial.RsaSecurityKey_4096.KeySize));
         }

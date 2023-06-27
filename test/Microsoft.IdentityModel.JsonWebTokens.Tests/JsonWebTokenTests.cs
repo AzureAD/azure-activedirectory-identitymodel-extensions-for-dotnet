@@ -14,12 +14,7 @@ using Xunit;
 using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Json.Linq;
 
-#if NET452
-using JsonReaderException = Microsoft.IdentityModel.Json.JsonReaderException;
-#else
-using System.Text.Json;
 using JsonReaderException = System.Text.Json.JsonException;
-#endif
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
@@ -228,12 +223,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             IdentityComparer.AreEqual(new object[] { 1L, "2", 3L }, array, context);
             IdentityComparer.AreEqual(true, success, context);
 
-#if NET452
-            // only possible internally within the library since we're using Microsoft.IdentityModel.Json.Linq.JObject
-            success = token.TryGetHeaderValue("jobject", out JObject jobject);
-            IdentityComparer.AreEqual(JObject.Parse(@"{ ""string1"":""string1value"", ""string2"":""string2value"" }"), jobject, context);
-            IdentityComparer.AreEqual(true, success, context);
-#endif
             success = token.TryGetHeaderValue("string", out string name);
             IdentityComparer.AreEqual("bob", name, context);
             IdentityComparer.AreEqual(true, success, context);
@@ -292,11 +281,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
             catch (Exception ex)
             {
-#if NET452
-                ExpectedException.ArgumentException("IDX14305:", typeof(System.FormatException)).ProcessException(ex, context);
-#else
                 ExpectedException.ArgumentException("IDX14305:", typeof(System.Text.Json.JsonException)).ProcessException(ex, context);
-#endif
             }
 
             TestUtilities.AssertFailIfErrors(context);
@@ -319,12 +304,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             IdentityComparer.AreEqual(new object[] { 1L, "2", 3L }, array, context);
             IdentityComparer.AreEqual(true, success, context);
 
-#if NET452
-            // only possible internally within the library since we're using Microsoft.IdentityModel.Json.Linq.JObject
-            success = token.TryGetPayloadValue("jobject", out JObject jobject);
-            IdentityComparer.AreEqual(JObject.Parse(@"{ ""string1"":""string1value"", ""string2"":""string2value"" }"), jobject, context);
-            IdentityComparer.AreEqual(true, success, context);
-#endif
             success = token.TryGetPayloadValue("string", out string name);
             IdentityComparer.AreEqual("bob", name, context);
             IdentityComparer.AreEqual(true, success, context);
@@ -484,41 +463,25 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.InvalidHeader))
                 {
                     Token = EncodedJwts.InvalidHeader,
-#if NET452
-                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14102:", typeof(JsonReaderException), false ),
-#else
                     ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14102:", typeof(JsonReaderException), true),
-#endif
                 });
 
                 theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.InvalidPayload))
                 {
                     Token = EncodedJwts.InvalidPayload,
-#if NET452
-                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14101:", typeof(JsonReaderException), false ),
-#else
                     ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14101:", typeof(JsonReaderException), true),
-#endif
                 });
 
                 theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.JWSEmptyHeader))
                 {
                     Token = EncodedJwts.JWSEmptyHeader,
-#if NET452
-                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14102:", typeof(JsonReaderException), false ),
-#else
                     ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14102:", typeof(JsonReaderException), true),
-#endif
                 });
 
                 theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.JWSEmptyPayload))
                 {
                     Token = EncodedJwts.JWSEmptyPayload,
-#if NET452
-                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14101:", typeof(JsonReaderException), false ),
-#else
                     ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14101:", typeof(JsonReaderException), true),
-#endif
                 });
 
                 theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.JWEEmptyHeader))

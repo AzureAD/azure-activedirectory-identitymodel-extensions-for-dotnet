@@ -188,7 +188,6 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10684 = "IDX10684: Unable to convert the JsonWebKey to an AsymmetricSecurityKey. Algorithm: '{0}', Key: '{1}'.";
         public const string IDX10685 = "IDX10685: Unable to Sign, Internal SignFunction is not available.";
         public const string IDX10686 = "IDX10686: Unable to Verify, Internal VerifyFunction is not available.";
-        public const string IDX10687 = "IDX10687: Unable to create a AsymmetricAdapter. For NET45 only types: '{0}' or '{1}' are supported. RSA is of type: '{2}'..";
         //public const string IDX10688 = "IDX10688:"
         public const string IDX10689 = "IDX10689: Unable to create an ECDsa object. See inner exception for more details.";
         public const string IDX10690 = "IDX10690: ECDsa creation is not supported by the current platform. For more details, see https://aka.ms/IdentityModel/create-ecdsa";

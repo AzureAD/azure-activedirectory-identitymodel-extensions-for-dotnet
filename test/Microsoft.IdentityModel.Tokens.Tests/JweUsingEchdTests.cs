@@ -306,4 +306,4 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 }
 
 #pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
-#endif // !NET45
+#endif 
