@@ -408,12 +408,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         }
 
-        //private static bool IsRunningOn462OrGreaterOrCore()
-        //{
-        //    // test for Core
-        //    return true;
-        //}
-
         [Theory, MemberData(nameof(AsymmetricSignatureProviderVerifyParameterChecksTheoryData))]
         public void AsymmetricSignatureProviderVerifyParameterChecks(SignatureProviderTheoryData theoryData)
         {
