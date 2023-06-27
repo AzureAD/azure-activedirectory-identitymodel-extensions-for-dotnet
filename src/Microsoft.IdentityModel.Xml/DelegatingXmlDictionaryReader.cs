@@ -216,16 +216,6 @@ namespace Microsoft.IdentityModel.Xml
             get => UseInnerReader.Prefix;
         }
 
-#if NET45
-        /// <summary>
-        /// Gets the quotation mark character used to enclose the attribute node. (" or ')
-        /// </summary>
-        public override char QuoteChar
-        {
-            get => UseInnerReader.QuoteChar;
-        }
-#endif
-
         /// <summary>
         /// Gets the InnerReader's ReadState. 
         /// </summary>
@@ -265,17 +255,6 @@ namespace Microsoft.IdentityModel.Xml
         {
             get => UseInnerReader.XmlSpace;
         }
-
-#if NET45
-        /// <summary>
-        /// Closes the reader and changes the System.Xml.XmlReader.ReadState
-        /// to Closed.
-        /// </summary>
-        public override void Close()
-        {
-            UseInnerReader.Close();
-        }
-#endif
 
         /// <summary>
         /// Gets the value of the InnerReader's attribute at the given index.

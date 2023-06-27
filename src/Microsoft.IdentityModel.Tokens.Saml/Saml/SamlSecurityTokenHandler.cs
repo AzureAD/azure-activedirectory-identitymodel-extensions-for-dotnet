@@ -130,9 +130,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 using (var sr = new StringReader(securityToken))
                 {
                     var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit };
-#if NET45
-                    settings.XmlResolver = null;
-#endif
                     using (var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr, settings))) 
                     {
                         return CanReadToken(reader);

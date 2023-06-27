@@ -5,16 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
-#if NET45
-using Microsoft.IdentityModel.Json;
-using Microsoft.IdentityModel.Json.Linq;
-using JsonClaimSet = Microsoft.IdentityModel.JsonWebTokens.JsonClaimSet45;
-#else
-using System.Text.Json;
-#endif
 
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
@@ -23,12 +17,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// </summary>
     public class JsonWebToken : SecurityToken
     {
-        // _hChars is used for JWE for NET45+
         private char[] _hChars;
-#if NET45
-        private char[] _pChars;
-        private char[] _sChars;
-#endif
         private ClaimsIdentity _claimsIdentity;
         private bool _wasClaimsIdentitySet;
 
@@ -456,14 +445,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 IsSigned = !(Dot2 + 1 == encodedJson.Length);
                 try
                 {
-#if NET45
-                    _sChars = IsSigned ? encodedJson.ToCharArray(Dot2 + 1, encodedJson.Length - Dot2 - 1) : string.Empty.ToCharArray();
-                    SignatureBytes = Base64UrlEncoder.UnsafeDecode(_sChars);
-                    _hChars = encodedJson.ToCharArray(0, Dot1);
-                    Header = new JsonClaimSet(Base64UrlEncoder.UnsafeDecode(_hChars));
-#else
                     Header = new JsonClaimSet(JwtTokenUtilities.GetJsonDocumentFromBase64UrlEncodedString(encodedJson, 0, Dot1));
-#endif
                 }
                 catch (Exception ex)
                 {
@@ -472,13 +454,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 try
                 {
-#if NET45
-                    MessageBytes = Encoding.UTF8.GetBytes(encodedJson.ToCharArray(0, Dot2));
-                    _pChars = encodedJson.ToCharArray(Dot1 + 1, Dot2 - Dot1 - 1);
-                    Payload = new JsonClaimSet(Base64UrlEncoder.UnsafeDecode(_pChars));
-#else
                     Payload = new JsonClaimSet(JwtTokenUtilities.GetJsonDocumentFromBase64UrlEncodedString(encodedJson, Dot1 + 1, Dot2 - Dot1 - 1));
-#endif
                 }
                 catch (Exception ex)
                 {
@@ -490,11 +466,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 // JWE: https://www.rfc-editor.org/rfc/rfc7516
                 // Format: https://www.rfc-editor.org/rfc/rfc7516#page-8
                 // empty payload for JWE's {encrypted tokens}.
-#if NET45
-                Payload = new JsonClaimSet("{}");
-#else
                 Payload = new JsonClaimSet(JsonDocument.Parse("{}"));
-#endif
+
                 if (Dot3 == encodedJson.Length)
                     throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14121, encodedJson)));
 
@@ -584,17 +557,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             EncodedToken = encodedJson;
         }
 
-        /// <inheritdoc/>
-        public override string UnsafeToString() => EncodedToken;
-
-#if NET45
-        /// <summary>
-        ///
-        /// </summary>
-        internal byte[] SignatureBytes { get; set; }
-#endif
-
-        #region Claims
+#region Claims
         /// <summary>
         /// Gets the 'value' of the 'actort' claim the payload.
         /// </summary>
@@ -651,15 +614,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (_audiences == null)
                 {
                     _audiences = new List<string>();
-#if NET45
-                    if (Payload.TryGetValue(JwtRegisteredClaimNames.Aud, out JToken value))
-                    {
-                        if (value.Type is JTokenType.String)
-                            _audiences = new List<string> { value.ToObject<string>() };
-                        else if (value.Type is JTokenType.Array)
-                            _audiences = value.ToObject<List<string>>();
-                    }
-#else
+
                     if (Payload.TryGetValue(JwtRegisteredClaimNames.Aud, out JsonElement audiences))
                     {
                         if (audiences.ValueKind == JsonValueKind.String)
@@ -671,7 +626,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                                 _audiences.Add(jsonElement.ToString());
                         }
                     }
-#endif
                 }
 
                 return _audiences;

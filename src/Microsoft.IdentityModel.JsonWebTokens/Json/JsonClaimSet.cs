@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if !NET45
-
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -417,5 +415,3 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
     }
 }
-
-#endif
