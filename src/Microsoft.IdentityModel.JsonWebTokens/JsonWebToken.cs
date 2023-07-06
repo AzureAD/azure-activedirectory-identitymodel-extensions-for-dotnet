@@ -542,7 +542,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             EncodedToken = encodedJson;
         }
 
-#region Claims
+        /// <inheritdoc/>
+        public override string UnsafeToString() => EncodedToken;
+
+        #region Claims
         /// <summary>
         /// Gets the 'value' of the 'actort' claim the payload.
         /// </summary>
@@ -848,12 +851,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <returns>Encoded token string without signature or authentication tag.</returns>
         public override string ToString()
         {
-            int lastDot = EncodedToken.LastIndexOf('.');
-
-            if (lastDot >= 0)
-                return EncodedToken.Substring(0, lastDot);
-            else
-                return EncodedToken;
+            return EncodedToken.Substring(0, EncodedToken.LastIndexOf("."));
         }
 
         /// <summary>
