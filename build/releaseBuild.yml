@@ -70,6 +70,12 @@ jobs:
       filePath: ./updateAssemblyInfo.ps1
       arguments: '-packageType $(BuildConfiguration)'
 
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifacts before Build'
+    inputs:
+      PathtoPublish: '$(Build.SourcesDirectory)'
+      ArtifactName: '1.1.s-src-before-build-$(Build.BuildNumber)'
+
   - task: PowerShell@2
     displayName: 'Prepare contract assemblies'
     inputs:
