@@ -77,12 +77,6 @@ jobs:
       filePath: ./updateAssemblyInfo.ps1
       arguments: '-packageType $(BuildConfiguration)'
 
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifacts before Build'
-    inputs:
-      PathtoPublish: '$(Build.SourcesDirectory)'
-      ArtifactName: '1.1.s-src-before-build-$(Build.BuildNumber)'
-
   - task: PowerShell@2
     displayName: 'Prepare contract assemblies'
     inputs:
@@ -98,13 +92,13 @@ jobs:
         -apiCompatRoot: $(ApiCompatRootWilson)
         -nugetPackageProviderVersion: "2.8.5.208"
 
-  - task: MSBuild@1
+  - task: DotNetCoreCLI@2
     displayName: Build
     inputs:
-      solution: wilson.sln
-      msbuildVersion: '17.0.0'
-      msbuildArchitecture: x64
-      msbuildArguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true /p:RunApiCompat=true'
+      command: 'custom'
+      projects: 'wilson.sln'
+      custom: 'msbuild'
+      arguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true /p:RunApiCompat=true'
 
   - task: PowerShell@2
     displayName: 'Run Tests'
