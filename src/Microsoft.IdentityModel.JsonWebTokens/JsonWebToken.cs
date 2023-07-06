@@ -378,9 +378,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         public bool IsSigned { get; internal set; }
 
-        /// <summary>
-        ///
-        /// </summary>
         internal JsonClaimSet Payload { get; set; }
 
         /// <summary>
@@ -544,7 +541,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             EncodedToken = encodedJson;
         }
 
-#region Claims
+        /// <inheritdoc/>
+        public override string UnsafeToString() => EncodedToken;
+
+        #region Claims
         /// <summary>
         /// Gets the 'value' of the 'actort' claim the payload.
         /// </summary>
@@ -644,8 +644,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <remarks>
         /// Used by JWS applications to declare the media type[IANA.MediaTypes] of the secured content (the payload).
-        /// see: https://datatracker.ietf.org/doc/html/rfc7516#section-4-1-12 (JWE)
-        /// see: https://datatracker.ietf.org/doc/html/rfc7515#section-4-1-10 (JWS)
+        /// see: https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.12 (JWE)
+        /// see: https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.10 (JWS)
         /// <para>
         /// If the 'cty' claim is not found, an empty string is returned.
         /// </para>
@@ -667,7 +667,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <remarks>
         /// Identifies the content encryption algorithm used to perform authenticated encryption
         /// on the plaintext to produce the ciphertext and the Authentication Tag.
-        /// see: https://datatracker.ietf.org/doc/html/rfc7516#section-4-1-2
+        /// see: https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.2
         /// </remarks>
         public string Enc
         {
@@ -739,7 +739,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <remarks>
         /// Provides a unique identifier for the JWT.
-        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4-1-7
+        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.7
         /// <para>
         /// If the 'jti' claim is not found, an empty string is returned.
         /// </para>
@@ -760,7 +760,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <remarks>
         /// Identifies the time at which the JWT was issued.
-        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4-1-6
+        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.6
         /// <para>
         /// If the 'iat' claim is not found, then <see cref="DateTime.MinValue"/> is returned.
         /// </para>
@@ -781,7 +781,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <remarks>
         /// Identifies the principal that issued the JWT.
-        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4-1-1
+        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.1
         /// <para>
         /// If the 'iss' claim is not found, an empty string is returned.
         /// </para>
@@ -802,8 +802,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <remarks>
         /// 'kid'is a hint indicating which key was used to secure the JWS.
-        /// see: https://datatracker.ietf.org/doc/html/rfc7515#section-4-1-4 (JWS)
-        /// see: https://datatracker.ietf.org/doc/html/rfc7516#section-4-1-6 (JWE)
+        /// see: https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.4 (JWS)
+        /// see: https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.6 (JWE)
         /// <para>
         /// If the 'kid' claim is not found, an empty string is returned.
         /// </para>
@@ -823,7 +823,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Gets the 'value' of the 'sub' claim from the payload.
         /// </summary>
         /// <remarks>
-        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4-1-2
+        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.2
         /// Identifies the principal that is the subject of the JWT.
         /// <para>
         /// If the 'sub' claim is not found, an empty string is returned.
@@ -838,6 +838,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 return _sub;
             }
+        }
+
+        /// <summary>
+        /// Returns the encoded token without signature or authentication tag.
+        /// </summary>
+        /// <returns>Encoded token string without signature or authentication tag.</returns>
+        public override string ToString()
+        {
+            return EncodedToken.Substring(0, EncodedToken.LastIndexOf("."));
         }
 
         /// <summary>
@@ -924,7 +933,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <remarks>
         /// Is used by JWT applications to declare the media type.
-        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-5-1
+        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-5.1
         /// <para>
         /// If the 'typ' claim is not found, an empty string is returned.
         /// </para>
@@ -945,7 +954,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <remarks>
         /// Is the base64url-encoded SHA-1 thumbprint(a.k.a.digest) of the DER encoding of the X.509 certificate used to sign this token.
-        /// see : https://datatracker.ietf.org/doc/html/rfc7515#section-4-1-7
+        /// see: https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.7
         /// <para>
         /// If the 'x5t' claim is not found, an empty string is returned.
         /// </para>
@@ -966,7 +975,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <remarks>
         /// Identifies the time before which the JWT MUST NOT be accepted for processing.
-        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4-1-5
+        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.5
         /// <para>
         /// If the 'nbf' claim is not found, then <see cref="DateTime.MinValue"/> is returned.
         /// </para>
@@ -987,7 +996,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <remarks>
         /// Identifies the expiration time on or after which the JWT MUST NOT be accepted for processing.
-        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4-1-4
+        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.4
         /// <para>
         /// If the 'exp' claim is not found, then <see cref="DateTime.MinValue"/> is returned.
         /// </para>
@@ -1008,7 +1017,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <remarks>
         /// The "zip" (compression algorithm) applied to the plaintext before encryption, if any.
-        /// see: https://datatracker.ietf.org/doc/html/rfc7516#section-4-1-3
+        /// see: https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.3
         /// <para>
         /// If the 'zip' claim is not found, an empty string is returned.
         /// </para>

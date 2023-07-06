@@ -4,18 +4,22 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
     /// Base class for security token.
     /// </summary>
-    public abstract class SecurityToken
+    public abstract class SecurityToken : ISafeLogSecurityArtifact
     {
         internal virtual IEnumerable<Claim> CreateClaims(string issuer)
         {
             return new List<Claim>();
         }
+
+        /// <inheritdoc/>
+        public virtual string UnsafeToString() => ToString();
 
         /// <summary>
         /// This must be overridden to get the Id of this <see cref="SecurityToken"/>.
