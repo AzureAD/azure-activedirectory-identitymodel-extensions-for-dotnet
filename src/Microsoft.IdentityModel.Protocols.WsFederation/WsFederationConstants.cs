@@ -5,6 +5,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 {
     /// <summary>
     /// Constants for WsFederation.
+    /// As defined in the http://docs.oasis-open.org/wsfed/federation/v1.2/os/ws-federation-1.2-spec-os.html
     /// </summary>
     public static class WsFederationConstants
     {
@@ -93,6 +94,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             public const string KeyDescriptor = "KeyDescriptor";
             public const string RoleDescriptor = "RoleDescriptor";
             public const string PassiveRequestorEndpoint = "PassiveRequestorEndpoint";
+            public const string SecurityTokenServiceEndpoint = "SecurityTokenServiceEndpoint";
             public const string SpssoDescriptor = "SPSSODescriptor";
         }
 

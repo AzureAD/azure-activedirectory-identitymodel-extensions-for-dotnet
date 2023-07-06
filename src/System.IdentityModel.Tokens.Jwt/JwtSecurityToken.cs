@@ -470,6 +470,9 @@ namespace System.IdentityModel.Tokens.Jwt
                 return Header.SerializeToJson() + ".";
         }
 
+        /// <inheritdoc/>
+        public override string UnsafeToString() => RawData;
+
         /// <summary>
         /// Decodes the string into the header, payload and signature.
         /// </summary>
