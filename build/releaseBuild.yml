@@ -165,9 +165,9 @@ jobs:
     inputs:
       command: pack
       projects: 'Wilson.sln'
-    nobuild: 'true'
-    IncludeSymbols: true
-    verbosityPack: normal
+      nobuild: 'true'
+      IncludeSymbols: true
+      verbosityPack: normal
 
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
     displayName: 'Sign Nuget Packages'
