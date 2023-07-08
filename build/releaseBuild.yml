@@ -160,14 +160,40 @@ jobs:
   #Sign Wilson 6x task group
   - template: template-sign-wilson-6x.yaml
 
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Src Artifacts before Pack'
+    inputs:
+      PathtoPublish: '$(Build.SourcesDirectory)'
+      ArtifactName: '1.1.s-src-before-pack-$(Build.BuildNumber)'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish staging Artifacts before Pack'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: '1.2.a-before-pack-$(Build.BuildNumber)'
+
+
   - task: DotNetCoreCLI@2
     displayName: Pack
     inputs:
       command: pack
-      projects: 'Wilson.sln'
+      projects: '$(Agent.BuildDirectory)\s\src\**\*\csproj'
       nobuild: 'true'
       IncludeSymbols: true
       verbosityPack: normal
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Src Artifacts after Pack'
+    inputs:
+      PathtoPublish: '$(Build.SourcesDirectory)'
+      ArtifactName: '1.1.s-src-after-pack-$(Build.BuildNumber)'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish staging Artifacts after Pack'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: '1.2.a-after-pack-$(Build.BuildNumber)'
+
 
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
     displayName: 'Sign Nuget Packages'
