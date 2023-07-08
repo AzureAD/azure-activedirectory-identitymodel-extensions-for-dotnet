@@ -365,7 +365,7 @@ namespace Microsoft.IdentityModel.Logging
                 return string.Format(CultureInfo.InvariantCulture, format, args.Select(SanitizeSecurityArtifact).ToArray());
         }
 
-        private static string SanitizeSecurityArtifact(object arg)
+        private static object SanitizeSecurityArtifact(object arg)
         {
             if (arg == null)
                 return "null";
@@ -373,7 +373,7 @@ namespace Microsoft.IdentityModel.Logging
             if (arg is ISafeLogSecurityArtifact && IdentityModelEventSource.LogCompleteSecurityArtifact)
                 return (arg as ISafeLogSecurityArtifact).UnsafeToString();
 
-            return arg.ToString();
+            return arg;
         }
 
         private static string RemovePII(object arg)
