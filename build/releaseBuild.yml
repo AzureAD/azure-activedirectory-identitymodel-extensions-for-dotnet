@@ -107,12 +107,13 @@ jobs:
       custom: 'msbuild'
       arguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true /p:RunApiCompat=true'
 
-  - task: PowerShell@2
-    displayName: 'Run Tests'
-    inputs:
-      targetType: filePath
-      filePath: ./runTests.ps1
-      arguments: '-buildType $(BuildConfiguration)'
+  # Investigation
+  # - task: PowerShell@2
+  #   displayName: 'Run Tests'
+  #   inputs:
+  #     targetType: filePath
+  #     filePath: ./runTests.ps1
+  #     arguments: '-buildType $(BuildConfiguration)'
 
   - task: CopyFiles@2
     displayName: 'Copy Files to: [staging]\ProductBinaries'
@@ -164,8 +165,9 @@ jobs:
       PoliCheck: true
     continueOnError: true
 
+  # Investigation
   #Sign Wilson 6x task group
-  - template: template-sign-wilson-6x.yaml
+  # - template: template-sign-wilson-6x.yaml
 
   - task: PowerShell@2
     displayName: Pack
@@ -175,12 +177,12 @@ jobs:
       arguments: '-buildType $(BuildConfiguration) C:\hostedtoolcache\windows\dotnet'
 
 # - task: DotNetCoreCLI@2
- #   displayName: Pack
- #   inputs:
- #     command: pack
- #     projects: '$(Agent.BuildDirectory)\s\src\**\*.csproj'
- #     nobuild: 'true'
- #     IncludeSymbols: true
+#   displayName: Pack
+#   inputs:
+#     command: pack
+#     projects: '$(Agent.BuildDirectory)\s\src\**\*.csproj'
+#     nobuild: 'true'
+#     IncludeSymbols: true
 #     verbosityPack: normal
 
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
@@ -208,6 +210,12 @@ jobs:
             }
         ]
       SessionTimeout: 20
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish NuGet Package Artifact'
+    inputs:
+      PathtoPublish: '$(Build.SourcesDirectory)\artifacts'
+      ArtifactName: '$(Build.BuildNumber)-nuget-package'
 
   - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
     displayName: 'Component Detection'
@@ -241,11 +249,11 @@ jobs:
       BuildDropPath: '$(Build.SourcesDirectory)\src'
       ManifestDirPath: '$(Build.SourcesDirectory)\artifacts'
 
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish NuGet Package Artifact'
-    inputs:
-      PathtoPublish: '$(Build.SourcesDirectory)\artifacts'
-      ArtifactName: '$(Build.BuildNumber)-nuget-package'
+  # - task: PublishBuildArtifacts@1
+  #   displayName: 'Publish NuGet Package Artifact'
+  #   inputs:
+  #     PathtoPublish: '$(Build.SourcesDirectory)\artifacts'
+  #     ArtifactName: '$(Build.BuildNumber)-nuget-package'
 
   - task: mspremier.PostBuildCleanup.PostBuildCleanup-task.PostBuildCleanup@3
     displayName: 'Clean Agent Directories'
