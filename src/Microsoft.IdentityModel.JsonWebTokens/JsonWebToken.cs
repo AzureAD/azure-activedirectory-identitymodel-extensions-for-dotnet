@@ -120,8 +120,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14302, payload), ex));
             }
 
-            _encodedHeader = header;
-            _encodedPayload = payload;
+            // Commenting this out, as header and payload are not encoded.
+            // The right fix will be to Base64Encode the header and payload to set these members
+            // _encodedHeader = header;
+            // _encodedPayload = payload;
         }
 
         internal string ActualIssuer { get; set; }
@@ -904,7 +906,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <returns>Encoded token string without signature or authentication tag.</returns>
         public override string ToString()
         {
-            return EncodedToken.Substring(0, EncodedToken.LastIndexOf("."));
+            int lastDot = EncodedToken.LastIndexOf('.');
+            if (lastDot >= 0)
+                return EncodedToken.Substring(0, lastDot)+".signature";
+            else
+                return EncodedToken;
         }
 
         /// <summary>
