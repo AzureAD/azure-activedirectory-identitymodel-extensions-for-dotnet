@@ -92,13 +92,20 @@ jobs:
         -apiCompatRoot: $(ApiCompatRootWilson)
         -nugetPackageProviderVersion: "2.8.5.208"
 
-  - task: DotNetCoreCLI@2
+  - task: MSBuild@1
     displayName: Build
     inputs:
-      command: 'custom'
-      projects: 'wilson.sln'
-      custom: 'msbuild'
-      arguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true /p:RunApiCompat=true'
+      solution: wilson.sln
+      msbuildArchitecture: x64
+      msbuildArguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true /p:RunApiCompat=true'
+
+  # - task: DotNetCoreCLI@2
+  #   displayName: Build
+  #   inputs:
+  #     command: 'custom'
+  #     projects: 'wilson.sln'
+  #     custom: 'msbuild'
+  #     arguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true /p:RunApiCompat=true'
 
   - task: PowerShell@2
     displayName: 'Run Tests'
@@ -172,15 +179,35 @@ jobs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)'
       ArtifactName: '1.2.a-before-pack-$(Build.BuildNumber)'
 
-
-  - task: DotNetCoreCLI@2
+ - task: PowerShell@2
     displayName: Pack
     inputs:
-      command: pack
-      projects: '$(Agent.BuildDirectory)\s\src\**\*.csproj'
-      nobuild: 'true'
-      IncludeSymbols: true
-      verbosityPack: normal
+      targetType: filePath
+      filePath: ./pack.ps1
+      arguments: '-buildType $(BuildConfiguration)'
+
+  # - task: DotNetCoreCLI@2
+  #   displayName: Pack
+  #   inputs:
+  #     command: pack
+  #     projects: '$(Agent.BuildDirectory)\s\src\**\*.csproj'
+  #     nobuild: 'true'
+  #     IncludeSymbols: true
+  #     verbosityPack: normal
+
+ - task: PublishBuildArtifacts@1
+    displayName: 'Publish Src Artifacts after Pack'
+    inputs:
+      PathtoPublish: '$(Build.SourcesDirectory)'
+      ArtifactName: '2.1.s-src-after-pack-$(Build.BuildNumber)'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish staging Artifacts after Pack'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: '2.2.a-after-pack-$(Build.BuildNumber)'
+
+
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Src Artifacts after Pack'
