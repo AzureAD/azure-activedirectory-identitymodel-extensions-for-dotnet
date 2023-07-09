@@ -184,7 +184,7 @@ jobs:
     inputs:
       targetType: filePath
       filePath: ./pack.ps1
-      arguments: '-buildType $(BuildConfiguration) C:\hostedtoolcache\windows\dotnet\dotnet.exe'
+      arguments: '-buildType $(BuildConfiguration) C:\hostedtoolcache\windows\dotnet'
 
 # - task: DotNetCoreCLI@2
  #   displayName: Pack
