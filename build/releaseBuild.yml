@@ -186,16 +186,16 @@ jobs:
       filePath: ./pack.ps1
       arguments: '-buildType $(BuildConfiguration)'
 
-  # - task: DotNetCoreCLI@2
-  #   displayName: Pack
-  #   inputs:
-  #     command: pack
-  #     projects: '$(Agent.BuildDirectory)\s\src\**\*.csproj'
-  #     nobuild: 'true'
-  #     IncludeSymbols: true
-  #     verbosityPack: normal
+# - task: DotNetCoreCLI@2
+ #   displayName: Pack
+ #   inputs:
+ #     command: pack
+ #     projects: '$(Agent.BuildDirectory)\s\src\**\*.csproj'
+ #     nobuild: 'true'
+ #     IncludeSymbols: true
+#     verbosityPack: normal
 
- - task: PublishBuildArtifacts@1
+  - task: PublishBuildArtifacts@1
     displayName: 'Publish Src Artifacts after Pack'
     inputs:
       PathtoPublish: '$(Build.SourcesDirectory)'
