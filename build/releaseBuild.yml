@@ -179,7 +179,7 @@ jobs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)'
       ArtifactName: '1.2.a-before-pack-$(Build.BuildNumber)'
 
- - task: PowerShell@2
+  - task: PowerShell@2
     displayName: Pack
     inputs:
       targetType: filePath
