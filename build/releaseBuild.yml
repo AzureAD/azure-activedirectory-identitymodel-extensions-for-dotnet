@@ -92,20 +92,20 @@ jobs:
         -apiCompatRoot: $(ApiCompatRootWilson)
         -nugetPackageProviderVersion: "2.8.5.208"
 
-  - task: MSBuild@1
-    displayName: Build
-    inputs:
-      solution: wilson.sln
-      msbuildArchitecture: x64
-      msbuildArguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true /p:RunApiCompat=true'
-
-  # - task: DotNetCoreCLI@2
+  # - task: MSBuild@1
   #   displayName: Build
   #   inputs:
-  #     command: 'custom'
-  #     projects: 'wilson.sln'
-  #     custom: 'msbuild'
-  #     arguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true /p:RunApiCompat=true'
+  #     solution: wilson.sln
+  #     msbuildArchitecture: x64
+  #     msbuildArguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true /p:RunApiCompat=true'
+
+  - task: DotNetCoreCLI@2
+    displayName: Build
+    inputs:
+      command: 'custom'
+      projects: 'wilson.sln'
+      custom: 'msbuild'
+      arguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true /p:RunApiCompat=true'
 
   - task: PowerShell@2
     displayName: 'Run Tests'
