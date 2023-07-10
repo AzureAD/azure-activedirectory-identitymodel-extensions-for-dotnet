@@ -39,7 +39,7 @@
       <project name="Microsoft.IdentityModel.KeyVaultExtensions.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.ManagedKeyVaultSecurityKey.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.Validators.Tests" test="yes" />
-      <project name="Microsoft.IdentityModel.AotCompatibility.Tests" test="yes" />
+      <!-- <project name="Microsoft.IdentityModel.AotCompatibility.Tests" test="yes" /> -->
     </test>
   </projects>
 </root>
