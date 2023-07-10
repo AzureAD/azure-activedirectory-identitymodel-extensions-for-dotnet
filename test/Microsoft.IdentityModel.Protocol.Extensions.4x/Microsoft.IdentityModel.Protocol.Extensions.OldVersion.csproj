@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net462</TargetFramework>
+     <IsPackable>false</IsPackable>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>2.0</OldToolsVersion>
