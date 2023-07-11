@@ -56,7 +56,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         private DateTime? _validTo;
         private string _x5t;
         private string _zip;
-        private int _lastDot = -1;
+        private int _lastDot = -2;
 
         /// <summary>
         /// Initializes a new instance of <see cref="JsonWebToken"/> from a string in JWS or JWE Compact serialized format.
@@ -906,7 +906,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <returns>Encoded token string without signature or authentication tag.</returns>
         public override string ToString()
         {
-            if (_lastDot < 0)
+            if (_lastDot == -2)
             {
                 _lastDot = EncodedToken.LastIndexOf('.');
             }
