@@ -73,12 +73,21 @@ namespace Microsoft.IdentityModel.Validators
 
                 var tokenIssuer = securityToken.Issuer;
 
+#if NET6_0_OR_GREATER
+                if (!string.IsNullOrEmpty(tokenIssuer) && !tokenIssuer.Contains(tenantIdFromToken, StringComparison.Ordinal))
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40004, LogHelper.MarkAsNonPII(tokenIssuer), LogHelper.MarkAsNonPII(tenantIdFromToken))));
+
+                // creating an effectiveSigningKeyIssuer is required as signingKeyIssuer might contain {tenantid}
+                var effectiveSigningKeyIssuer = signingKeyIssuer.Replace(AadIssuerValidator.TenantIdTemplate, tenantIdFromToken, StringComparison.Ordinal);
+                var v2TokenIssuer = openIdConnectConfiguration.Issuer?.Replace(AadIssuerValidator.TenantIdTemplate, tenantIdFromToken, StringComparison.Ordinal);
+#else
                 if (!string.IsNullOrEmpty(tokenIssuer) && !tokenIssuer.Contains(tenantIdFromToken))
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40004, LogHelper.MarkAsNonPII(tokenIssuer), LogHelper.MarkAsNonPII(tenantIdFromToken))));
 
                 // creating an effectiveSigningKeyIssuer is required as signingKeyIssuer might contain {tenantid}
                 var effectiveSigningKeyIssuer = signingKeyIssuer.Replace(AadIssuerValidator.TenantIdTemplate, tenantIdFromToken);
                 var v2TokenIssuer = openIdConnectConfiguration.Issuer?.Replace(AadIssuerValidator.TenantIdTemplate, tenantIdFromToken);
+#endif
 
                 // comparing effectiveSigningKeyIssuer with v2TokenIssuer is required as well because of the following scenario:
                 // 1. service trusts /common/v2.0 endpoint 
