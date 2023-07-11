@@ -20,5 +20,8 @@ namespace Microsoft.IdentityModel.Validators
 
         // Protocol
         public const string IDX40003 = "IDX40003: Neither `tid` nor `tenantId` claim is present in the token obtained from Microsoft identity platform. ";
+        public const string IDX40004 = "IDX40004: Token issuer: '{0}', does not contain the `tid` or `tenantId` claim present in the token: '{1}'.";
+        public const string IDX40005 = "IDX40005: Token issuer: '{0}', does not match the signing key issuer: '{1}'.";
+        public const string IDX40007 = "IDX40007: RequireSignedTokens property on ValidationParameters is set to true, but the issuer signing key is null.";
     }
 }
