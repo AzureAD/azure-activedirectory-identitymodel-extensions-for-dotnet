@@ -120,8 +120,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14302, payload), ex));
             }
 
-            _encodedHeader = header;
-            _encodedPayload = payload;
+            _encodedHeader = Base64UrlEncoder.Encode(header);
+            _encodedPayload = Base64UrlEncoder.Encode(payload);
+            EncodedToken = _encodedHeader + "." + _encodedPayload + ".";
         }
 
         internal string ActualIssuer { get; set; }
@@ -904,7 +905,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <returns>Encoded token string without signature or authentication tag.</returns>
         public override string ToString()
         {
-            return EncodedToken.Substring(0, EncodedToken.LastIndexOf("."));
+            int lastDot = EncodedToken.LastIndexOf('.');
+
+            if (lastDot >= 0)
+                return EncodedToken.Substring(0, lastDot);
+            else
+                return EncodedToken;
         }
 
         /// <summary>
