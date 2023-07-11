@@ -27,7 +27,7 @@
     <ProjectReference Include="..\Microsoft.IdentityModel.Abstractions\Microsoft.IdentityModel.Abstractions.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+  <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(AspNetCoreMinSupportedVersion)" />
   </ItemGroup>
 
