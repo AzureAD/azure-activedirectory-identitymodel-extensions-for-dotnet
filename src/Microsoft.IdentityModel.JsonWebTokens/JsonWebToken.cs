@@ -908,7 +908,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             int lastDot = EncodedToken.LastIndexOf('.');
             if (lastDot >= 0)
-                return EncodedToken.Substring(0, lastDot)+".signature";
+                return EncodedToken.Substring(0, lastDot);
             else
                 return EncodedToken;
         }
