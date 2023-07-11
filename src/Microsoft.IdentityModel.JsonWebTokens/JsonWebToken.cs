@@ -56,6 +56,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         private DateTime? _validTo;
         private string _x5t;
         private string _zip;
+        private int _lastDot = -1;
 
         /// <summary>
         /// Initializes a new instance of <see cref="JsonWebToken"/> from a string in JWS or JWE Compact serialized format.
@@ -120,10 +121,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14302, payload), ex));
             }
 
-            // Commenting this out, as header and payload are not encoded.
-            // The right fix will be to Base64Encode the header and payload to set these members
-            // _encodedHeader = header;
-            // _encodedPayload = payload;
+            _encodedHeader = Base64UrlEncoder.Encode(header);
+            _encodedPayload = Base64UrlEncoder.Encode(payload);
+            EncodedToken = _encodedHeader + "." + _encodedPayload + ".";
         }
 
         internal string ActualIssuer { get; set; }
@@ -906,9 +906,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <returns>Encoded token string without signature or authentication tag.</returns>
         public override string ToString()
         {
-            int lastDot = EncodedToken.LastIndexOf('.');
-            if (lastDot >= 0)
-                return EncodedToken.Substring(0, lastDot);
+            if (_lastDot < 0)
+            {
+                _lastDot = EncodedToken.LastIndexOf('.');
+            }
+            if (_lastDot >= 0)
+                return EncodedToken.Substring(0, _lastDot);
             else
                 return EncodedToken;
         }
