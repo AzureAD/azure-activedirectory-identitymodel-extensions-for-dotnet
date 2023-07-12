@@ -373,6 +373,16 @@ namespace Microsoft.IdentityModel.Tokens
             if (securityToken == null)
                 throw LogHelper.LogArgumentNullException(nameof(securityToken));
 
+            ValidateIssuerSigningKeyLifeTime(securityKey, validationParameters);
+        }
+
+        /// <summary>
+        /// Given a signing key, when it's derived from a certificate, validates that the certificate is already active and non-expired
+        /// </summary>
+        /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> that are used to validate the token.</param>
+        internal static void ValidateIssuerSigningKeyLifeTime(SecurityKey securityKey, TokenValidationParameters validationParameters)
+        {
             X509SecurityKey x509SecurityKey = securityKey as X509SecurityKey;
             if (x509SecurityKey?.Certificate is X509Certificate2 cert)
             {
