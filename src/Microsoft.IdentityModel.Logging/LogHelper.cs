@@ -365,15 +365,15 @@ namespace Microsoft.IdentityModel.Logging
                 return string.Format(CultureInfo.InvariantCulture, format, args.Select(SanitizeSecurityArtifact).ToArray());
         }
 
-        private static string SanitizeSecurityArtifact(object arg)
+        private static object SanitizeSecurityArtifact(object arg)
         {
             if (arg == null)
                 return "null";
 
-            if (arg is ISafeLogSecurityArtifact && IdentityModelEventSource.LogCompleteSecurityArtifact)
+            if (IdentityModelEventSource.LogCompleteSecurityArtifact && arg is ISafeLogSecurityArtifact)
                 return (arg as ISafeLogSecurityArtifact).UnsafeToString();
 
-            return arg.ToString();
+            return arg;
         }
 
         private static string RemovePII(object arg)
