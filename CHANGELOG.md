@@ -2,11 +2,6 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 
 7.0.0-preview
 =======
-Wilson 7x brings:
-- a 30% performance improvement in ASP.NET Core 8 by switching from JwtSecurityTokenHandler to JsonWebTokenHandler without causing breaking changes to ASP.NET Core.
-- a fully trimmable M.IdentityModel SDK for native AOT (coming in later versions of 7.x-preview).
-- Async token validation, returning a TokenValidationResult rather than throwing.
-
 Join the 7x [discussion](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/discussions/2092) and provide your feedback!
 
 Relevant PRs for supporting .NET 8:
