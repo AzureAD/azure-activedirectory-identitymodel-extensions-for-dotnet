@@ -1,5 +1,18 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+7.0.0-preview
+=======
+Join the 7x [discussion](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/discussions/2092) and provide your feedback!
+
+Relevant PRs for supporting .NET 8:
+[#2108](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2108)
+[#2121](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2121)
+[#2122](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2122)
+
+Remove net45, see [#2123](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2123)
+
+JwtSecurityTokenConverter, see [#2117](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2117)
+
 6.32.3
 =======
 ## Bug fixes:
