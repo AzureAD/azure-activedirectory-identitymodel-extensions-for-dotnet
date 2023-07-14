@@ -19,6 +19,12 @@ namespace Microsoft.IdentityModel.TestUtils
             Title = title;
         }
 
+        public CompareContext(TheoryDataBase theoryData)
+        {
+            PropertiesToIgnoreWhenComparing = theoryData.PropertiesToIgnoreWhenComparing;
+            Title = theoryData.TestId;
+        }
+
         public CompareContext(string testName, TheoryDataBase theoryData)
         {
             Title = testName;
