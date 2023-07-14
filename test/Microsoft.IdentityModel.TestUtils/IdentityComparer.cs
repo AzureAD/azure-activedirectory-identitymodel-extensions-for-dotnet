@@ -23,6 +23,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Tokens.Saml2;
 using Microsoft.IdentityModel.Xml;
+#if NET8
+using System.Text.Json;
+#endif
 #if !CrossVersionTokenValidation
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -74,6 +77,10 @@ namespace Microsoft.IdentityModel.TestUtils
                 { typeof(IssuerSerial).ToString(), CompareAllPublicProperties },
                 { typeof(JArray).ToString(), AreJArraysEqual },
                 { typeof(JObject).ToString(), AreJObjectsEqual },
+#if NET8
+                { typeof(JsonWebKeyNet8).ToString(), AreJsonWebKeyNet8Equal },
+                { typeof(JsonElement).ToString(), AreJsonElementsEqual },
+#endif
 #if !CrossVersionTokenValidation
                 { typeof(JsonWebKey).ToString(), CompareAllPublicProperties },
                 { typeof(JsonWebKeySet).ToString(), CompareAllPublicProperties },
@@ -521,6 +528,14 @@ namespace Microsoft.IdentityModel.TestUtils
 #endif
                 _equalityDict[inter](object1, object2, localContext);
             }
+            else
+            {
+                CompareAllPublicProperties(object1, object2, localContext);
+#if CheckIfCompared
+                wasCompared = true;
+#endif
+
+            }
 
 #if CheckIfCompared
             if (!wasCompared)
@@ -679,8 +694,16 @@ namespace Microsoft.IdentityModel.TestUtils
                     var obj2 = dictionary2[key];
                     if (obj1.GetType().BaseType == typeof(System.ValueType))
                     {
-                        if (!obj1.Equals(obj2))
-                            localContext.Diffs.Add(BuildStringDiff(key, obj1, obj2));
+                        if (_equalityDict.TryGetValue(obj1.GetType().ToString(), out var func))
+                        {
+                            if (!func(obj1, obj2, context))
+                                localContext.Diffs.Add(BuildStringDiff(key, obj1, obj2));
+                        }
+                        else
+                        {
+                            if (!obj1.Equals(obj2))
+                                localContext.Diffs.Add(BuildStringDiff(key, obj1, obj2));
+                        }
                     }
                     else
                     {
@@ -1013,6 +1036,108 @@ namespace Microsoft.IdentityModel.TestUtils
             return (label ?? "label") + ": '" + GetString(str1) + "', '" + GetString(str2) + "'";
         }
 
+#if NET8
+        public static bool AreJsonElementsEqual(object obj1, object obj2, CompareContext context)
+        {
+            var localContext = new CompareContext(context) { IgnoreType = true };
+            if (!ContinueCheckingEquality(obj1, obj2, localContext))
+                return context.Merge(localContext);
+
+            JsonElement jsonElement1 = (JsonElement)obj1;
+            JsonElement jsonElement2 = (JsonElement)obj2;
+
+            if (jsonElement1.ValueKind != jsonElement2.ValueKind)
+            {
+                localContext.Diffs.Add($"jsonElement1.ValueKind != jsonElement2.ValueKind. '{jsonElement1.ValueKind}' != '{jsonElement2.ValueKind}'.");
+                return context.Merge(localContext);
+            }
+
+            string str1 = jsonElement1.GetRawText();
+            string str2 = jsonElement2.GetRawText();
+
+            if (str1 != str2)
+            {
+                localContext.Diffs.Add($"jsonElement1.GetRawText() != jsonElement2.GetRawText(). '{jsonElement1.GetRawText()}' != '{jsonElement2.GetRawText()}'.");
+                return context.Merge(localContext);
+            }
+
+            return context.Merge(localContext);
+        }
+
+        public static bool AreJsonWebKeyNet8Equal(object obj1, object obj2, CompareContext context)
+        {
+            var localContext = new CompareContext(context) { IgnoreType = true };
+            if (!ContinueCheckingEquality(obj1, obj2, localContext))
+                return context.Merge(localContext);
+
+            Type jsonWebKeyType = obj2.GetType();
+            var jsonWebKeyPopertyInfos = jsonWebKeyType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            Type jsonWebKeyNet8Type = obj1.GetType();
+            var jsonWebKeyNet8PropertyInfos = jsonWebKeyNet8Type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            foreach (PropertyInfo jsonWebKeyPropertyInfo in jsonWebKeyPopertyInfos)
+            {
+                bool skipProperty = false;
+                if (context.PropertiesToIgnoreWhenComparing != null && context.PropertiesToIgnoreWhenComparing.TryGetValue(jsonWebKeyNet8Type, out List<string> propertiesToIgnore))
+                {
+                    foreach (var val in propertiesToIgnore)
+                        if (string.Equals(val, jsonWebKeyPropertyInfo.Name, StringComparison.OrdinalIgnoreCase))
+                        {
+                            skipProperty = true;
+                            break;
+                        }
+                }
+
+                if (skipProperty)
+                    continue;
+
+                PropertyInfo propertyInfoFound = null;
+                foreach (PropertyInfo jsonWebKeyNet8PropertyInfo in jsonWebKeyNet8PropertyInfos)
+                {
+                    if (jsonWebKeyNet8PropertyInfo.Name == jsonWebKeyPropertyInfo.Name)
+                        propertyInfoFound = jsonWebKeyNet8PropertyInfo;
+                }
+
+                if (propertyInfoFound == null)
+                {
+                    localContext.AddDiff($"jsonWebKeyNet8 property not found: {jsonWebKeyPropertyInfo.Name}");
+                    continue;
+                }
+
+                if (jsonWebKeyPropertyInfo.GetMethod != null)
+                {
+                    var propertyContext = new CompareContext(context);
+
+                    object val1 = jsonWebKeyPropertyInfo.GetValue(obj2, null);
+                    object val2 = propertyInfoFound.GetValue(obj1, null);
+                    if ((val1 == null) && (val2 == null))
+                        continue;
+
+                    if ((val1 == null) || (val2 == null))
+                    {
+                        propertyContext.Diffs.Add($"{jsonWebKeyPropertyInfo.Name}:");
+                        propertyContext.Diffs.Add(BuildStringDiff(propertyInfoFound.Name, val1, val2));
+                    }
+                    else if (val1.GetType().BaseType == typeof(System.ValueType) && !_equalityDict.Keys.Contains(val1.GetType().ToString()))
+                    {
+                        if (!val1.Equals(val2))
+                        {
+                            propertyContext.Diffs.Add($"{jsonWebKeyPropertyInfo.Name}:");
+                            propertyContext.Diffs.Add(BuildStringDiff(propertyInfoFound.Name, val1, val2));
+                        }
+                    }
+                    else
+                    {
+                        AreEqual(val1, val2, propertyContext);
+                        localContext.Merge($"{propertyInfoFound.Name}:", propertyContext);
+                    }
+                }
+            }
+
+            return context.Merge(localContext);
+        }
+#endif
         public static bool CompareAllPublicProperties(object obj1, object obj2, CompareContext context)
         {
             Type type = obj1.GetType();
