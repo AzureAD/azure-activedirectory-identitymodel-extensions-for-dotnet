@@ -528,14 +528,14 @@ namespace Microsoft.IdentityModel.TestUtils
 #endif
                 _equalityDict[inter](object1, object2, localContext);
             }
-            else
-            {
-                CompareAllPublicProperties(object1, object2, localContext);
-#if CheckIfCompared
-                wasCompared = true;
-#endif
+//            else
+//            {
+//                CompareAllPublicProperties(object1, object2, localContext);
+//#if CheckIfCompared
+//                wasCompared = true;
+//#endif
 
-            }
+//            }
 
 #if CheckIfCompared
             if (!wasCompared)
