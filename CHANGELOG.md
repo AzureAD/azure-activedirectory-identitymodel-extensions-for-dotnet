@@ -1,4 +1,8 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
+7.1.0-preview
+=======
+Include IdentityModel 6.32.0 release updates, including AAD specific signing key issuer validator and fix perf regression.
+
 
 7.0.0-preview
 =======
