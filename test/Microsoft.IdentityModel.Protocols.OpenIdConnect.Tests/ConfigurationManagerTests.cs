@@ -108,8 +108,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         public void FetchMetadataFailureTest()
         {
             var context = new CompareContext($"{this}.FetchMetadataFailureTest");
-
-            var documentRetriever = new HttpDocumentRetriever(HttpResponseMessageUtils.SetupHttpClientThatReturns("OpenIdConnectMetadata.json", HttpStatusCode.NotFound));
+            var documentRetriever = new FileDocumentRetriever();
             var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), documentRetriever);
 
             // First time to fetch metadata
@@ -144,7 +143,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             var context = new CompareContext($"{this}.BootstrapRefreshIntervalTest");
 
-            var documentRetriever = new HttpDocumentRetriever(HttpResponseMessageUtils.SetupHttpClientThatReturns("OpenIdConnectMetadata.json", HttpStatusCode.NotFound));
+            var documentRetriever = new FileDocumentRetriever();
             var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), documentRetriever) { RefreshInterval = TimeSpan.FromSeconds(2) };
 
             // First time to fetch metadata.

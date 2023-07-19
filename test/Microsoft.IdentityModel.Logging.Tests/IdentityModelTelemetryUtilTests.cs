@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.IdentityModel.TestUtils;
@@ -24,7 +25,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
             {
                 IdentityModelTelemetryUtil.SetTelemetryData(theoryData.HttpRequestMessage, theoryData.AdditionalHeaders);
                 // check if the resulting headers are as expected
-                if (!IdentityComparer.AreEqual(theoryData.ExpectedHeaders, theoryData.HttpRequestMessage?.Headers))
+                if (!IdentityComparer.AreEqual(theoryData.ExpectedHeaders?.OrderBy(h => h.Key), theoryData.HttpRequestMessage?.Headers.OrderBy(h => h.Key)))
                     throw new ArgumentException("resulting headers do not match the expected headers.");
 
                 theoryData.ExpectedException.ProcessNoException(testContext);
