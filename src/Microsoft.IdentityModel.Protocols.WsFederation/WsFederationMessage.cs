@@ -137,7 +137,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// </summary>
         /// <returns>the 'SecurityToken'.</returns>
         /// <exception cref="WsFederationException">if exception occurs while reading security token.</exception>
-        public virtual string GetToken()
+        public virtual string? GetToken()
         {
             return GetTokenUsingXmlReader();
         }
@@ -149,7 +149,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// This is only called after it is determined the Wresult is well formed xml. A successful call the GetTokenUsingXmlReader should be made first.
         /// </summary>
         /// <returns>the string version of the security token.</returns>
-        internal static string GetToken(string wresult)
+        internal static string? GetToken(string wresult)
         {
             if (string.IsNullOrEmpty(wresult))
             {
@@ -217,7 +217,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// </summary>
         /// <returns>the 'SecurityToken'.</returns>
         /// <exception cref="WsFederationException">if exception occurs while reading security token.</exception>
-        public virtual string GetTokenUsingXmlReader()
+        public virtual string? GetTokenUsingXmlReader()
         {
             if (Wresult == null)
             {
@@ -225,7 +225,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 return null;
             }
 
-            string token = null;
+            string? token = null;
             using (var sr = new StringReader(Wresult))
             using (var xmlReader = new XmlTextReader(sr) { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null })
             {
