@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
-using Microsoft.IdentityModel.Json.Linq;
+using Newtonsoft.Json.Linq;
 using Microsoft.IdentityModel.Logging;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
