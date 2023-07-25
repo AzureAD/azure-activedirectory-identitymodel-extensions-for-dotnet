@@ -5,9 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Tests;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Json.Tests
@@ -16,7 +16,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
     {
         /// <summary>
         /// This test is designed to ensure that JsonDeserialize and Utf8Reader are consistent and
-        /// that we understand the differences between our internal newtonsoft.
+        /// that we understand the differences with newtonsoft.
         /// </summary>
         /// <param name="theoryData"></param>
         [Theory, MemberData(nameof(DeserializeTheoryData))]
@@ -169,7 +169,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
         {
             var context = new CompareContext(theoryData);
             string jsonIdentityModel = JsonConvert.SerializeObject(theoryData.JsonTestClass);
-            string jsonNewtonsoft = Newtonsoft.Json.JsonConvert.SerializeObject(theoryData.JsonTestClass);
+            string jsonNewtonsoft = JsonConvert.SerializeObject(theoryData.JsonTestClass);
 
             // without using the JavaScriptEncoder.UnsafeRelaxedJsonEscaping, System.Text.Json will escape all characters
             // we will need to have some way for the user to specify the encoder to use.

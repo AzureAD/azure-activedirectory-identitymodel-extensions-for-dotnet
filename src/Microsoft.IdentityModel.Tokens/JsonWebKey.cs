@@ -4,9 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
-using Microsoft.IdentityModel.Json;
-using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.IdentityModel.Tokens
 {

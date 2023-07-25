@@ -19,13 +19,13 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
         /// </summary>
         /// <param name="theoryData">place to add the test case.</param>
         /// <param name="propertyName">property name that matches <see cref="JsonTestClass/></param>
-        /// <param name="identityModelExpectedException">expected exception for IdentityModel internal Newtonsoft.</param>
+        /// <param name="newtonsoftExpectedException">expected exception for Newtonsoft.</param>
         /// <param name="jsonReaderExpectedException">expected exception for Utf8JsonReader.</param>
         /// <param name="jsonSerializerExpectedException">expected exception for JsonSerializer.</param>
         public static void AddSerializationTestCases(
             TheoryData<JsonSerializerTheoryData> theoryData,
             string propertyName,
-            ExpectedException identityModelExpectedException,
+            ExpectedException newtonsoftExpectedException,
             ExpectedException jsonReaderExpectedException,
             ExpectedException jsonSerializerExpectedException)
         {
@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                 IdentityModelSerializerExpectedException =
                     (propertyName == "ListObject" || propertyName == "ListString") ?
                         ExpectedException.NoExceptionExpected :
-                        identityModelExpectedException
+                        newtonsoftExpectedException
             });
 
             theoryData.Add(new JsonSerializerTheoryData($"{propertyName}_ListString")
@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                 IdentityModelSerializerExpectedException =
                     (propertyName == "ListObject" || propertyName == "ListString") ?
                         ExpectedException.NoExceptionExpected :
-                        identityModelExpectedException
+                        newtonsoftExpectedException
             });
 
             theoryData.Add(new JsonSerializerTheoryData($"{propertyName}_Double")
@@ -104,7 +104,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                 IdentityModelSerializerExpectedException =
                     (propertyName == "Boolean" || propertyName == "Double" || propertyName == "String") ?
                         ExpectedException.NoExceptionExpected :
-                        identityModelExpectedException
+                        newtonsoftExpectedException
             });
 
             theoryData.Add(new JsonSerializerTheoryData($"{propertyName}_Int")
@@ -129,7 +129,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                 IdentityModelSerializerExpectedException =
                     (propertyName == "Boolean" || propertyName == "Double" || propertyName == "Int" || propertyName == "String") ?
                         ExpectedException.NoExceptionExpected :
-                        identityModelExpectedException
+                        newtonsoftExpectedException
             });
 
             theoryData.Add(new JsonSerializerTheoryData($"{propertyName}_Object")
@@ -148,7 +148,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                 IdentityModelSerializerExpectedException =
                     (propertyName == "Object") ?
                         ExpectedException.NoExceptionExpected :
-                        identityModelExpectedException
+                        newtonsoftExpectedException
             });
 
             theoryData.Add(new JsonSerializerTheoryData($"{propertyName}_String")
@@ -168,7 +168,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                 IdentityModelSerializerExpectedException =
                     (propertyName == "String") ?
                         ExpectedException.NoExceptionExpected :
-                        identityModelExpectedException
+                        newtonsoftExpectedException
             });
 
             theoryData.Add(new JsonSerializerTheoryData($"{propertyName}_true")
@@ -193,7 +193,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                 IdentityModelSerializerExpectedException =
                     (propertyName == "Boolean" || propertyName == "String") ?
                         ExpectedException.NoExceptionExpected :
-                        identityModelExpectedException
+                        newtonsoftExpectedException
             });
         }
     }

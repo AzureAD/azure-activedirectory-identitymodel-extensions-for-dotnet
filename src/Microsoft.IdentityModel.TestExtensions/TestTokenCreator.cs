@@ -5,10 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using Microsoft.IdentityModel.Json;
-using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.IdentityModel.TestExtensions
 {
@@ -421,7 +421,7 @@ namespace Microsoft.IdentityModel.TestExtensions
             if (claims == null)
                 throw new ArgumentNullException(nameof(claims));
 
-            var jobj = new Microsoft.IdentityModel.Json.Linq.JObject();
+            var jobj = new JObject();
             foreach (var claim in claims)
                 jobj.Add(claim.Key, JToken.FromObject(claim.Value));
 

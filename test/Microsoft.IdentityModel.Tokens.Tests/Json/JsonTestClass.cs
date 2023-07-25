@@ -15,7 +15,6 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
         /// <summary>
         /// When deserializing from JSON any properties that are not defined will be placed here.
         /// </summary>
-        [Microsoft.IdentityModel.Json.JsonExtensionData(ReadData = true, WriteData = true)]
         [Newtonsoft.Json.JsonExtensionData(ReadData = true, WriteData = true)]
         [System.Text.Json.Serialization.JsonExtensionData]
         public virtual IDictionary<string, object> AdditionalData { get; set; } = new Dictionary<string, object>();

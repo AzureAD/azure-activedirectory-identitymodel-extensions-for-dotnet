@@ -1,4 +1,5 @@
 <Project>
+
   <Import Project="apiCompat.props" />
   <Import Project="dependencies.props" />
   <Import Project="targets.props" />
@@ -45,6 +46,10 @@
   
   <ItemGroup Condition="'$(TargetFramework)' != 'net8.0'">
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="$(MicrosoftSourceLinkGitHubVersion)" PrivateAssets="All"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftVersion)" />
   </ItemGroup>
 
 </Project>

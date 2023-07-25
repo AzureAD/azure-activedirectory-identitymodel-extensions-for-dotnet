@@ -10,10 +10,9 @@ using System.Linq;
 using System.Security.Claims;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Xunit;
-using Microsoft.IdentityModel.Json;
-using Microsoft.IdentityModel.Json.Linq;
-
 using JsonReaderException = System.Text.Json.JsonException;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant

@@ -3,7 +3,7 @@
 
 using System;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Json;
+using Newtonsoft.Json;
 
 namespace Microsoft.IdentityModel.Tokens
 {

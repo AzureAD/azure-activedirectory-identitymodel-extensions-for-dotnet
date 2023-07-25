@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Reflection;
-using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.Logging;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
