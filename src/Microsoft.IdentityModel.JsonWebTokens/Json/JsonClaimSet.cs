@@ -6,9 +6,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Security.Claims;
 using System.Text.Json;
-using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.IdentityModel.JsonWebTokens
 {

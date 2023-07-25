@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Json;
+using Newtonsoft.Json;
 
 namespace Microsoft.IdentityModel.Tokens
 {

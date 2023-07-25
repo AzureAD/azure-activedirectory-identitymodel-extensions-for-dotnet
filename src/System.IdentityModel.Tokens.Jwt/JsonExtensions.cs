@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Logging;
+using Newtonsoft.Json;
 
 namespace System.IdentityModel.Tokens.Jwt
 {
