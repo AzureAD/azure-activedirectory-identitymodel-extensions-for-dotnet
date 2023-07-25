@@ -166,10 +166,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // Set the maximum number of segments to MaxJwtSegmentCount + 1. This controls the number of splits and allows detecting the number of segments is too large.
             // For example: "a.b.c.d.e.f.g.h" => [a], [b], [c], [d], [e], [f.g.h]. 6 segments.
             // If just MaxJwtSegmentCount was used, then [a], [b], [c], [d], [e.f.g.h] would be returned. 5 segments.
-            string[] tokenParts = token.Split(new char[] { '.' }, JwtConstants.MaxJwtSegmentCount + 1);
-            if (tokenParts.Length == JwtConstants.JwsSegmentCount)
+            int tokenPartCount = JwtTokenUtilities.CountJwtTokenPart(token, JwtConstants.MaxJwtSegmentCount + 1);
+            if (tokenPartCount == JwtConstants.JwsSegmentCount)
                 return JwtTokenUtilities.RegexJws.IsMatch(token);
-            else if (tokenParts.Length == JwtConstants.JweSegmentCount)
+            else if (tokenPartCount == JwtConstants.JweSegmentCount)
                 return JwtTokenUtilities.RegexJwe.IsMatch(token);
 
             LogHelper.LogInformation(LogMessages.IDX14107);
