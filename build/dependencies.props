@@ -7,10 +7,11 @@
     <MicrosoftCSharpVersion>4.5.0</MicrosoftCSharpVersion>
     <MicrosoftSourceLinkGitHubVersion>1.0.0</MicrosoftSourceLinkGitHubVersion>
     <NetStandardVersion>2.0.3</NetStandardVersion>
-    <SystemSecurityCryptographyCngVersion>4.5.0</SystemSecurityCryptographyCngVersion>
-    <SystemTextJson>4.7.2</SystemTextJson>
-    <SystemTextEncodingsWeb>4.7.2</SystemTextEncodingsWeb>
+    <NewtonsoftVersion>13.0.3</NewtonsoftVersion>
     <SystemMemoryVersion>4.5.5</SystemMemoryVersion>
+    <SystemSecurityCryptographyCngVersion>4.5.0</SystemSecurityCryptographyCngVersion>
+    <SystemTextEncodingsWeb>4.7.2</SystemTextEncodingsWeb>
+    <SystemTextJson>4.7.2</SystemTextJson>
   </PropertyGroup>
 
 </Project>
