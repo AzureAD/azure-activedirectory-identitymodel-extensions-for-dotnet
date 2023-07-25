@@ -6,6 +6,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
@@ -16,7 +17,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     /// <summary>
     /// Tests for references in specs
-    /// https://datatracker.ietf.org/doc/html/rfc7518#appendix-A-3
+    /// https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3
     /// </summary>
     public class ReferenceTests
     {
@@ -72,7 +73,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Theory, MemberData(nameof(AuthenticatedEncryptionTheoryData))]
         public void AuthenticatedEncryptionReferenceTest(AuthenticationEncryptionTestParams testParams)
         {
-            var context = new CompareContext();
+            var context = TestUtilities.WriteHeader("AuthenticatedEncryptionReferenceTest", testParams);
+
             var providerForEncryption = CryptoProviderFactory.Default.CreateAuthenticatedEncryptionProvider(testParams.EncryptionKey, testParams.Algorithm);
             var providerForDecryption = CryptoProviderFactory.Default.CreateAuthenticatedEncryptionProvider(testParams.DecryptionKey, testParams.Algorithm);
             var plaintext = providerForDecryption.Decrypt(testParams.Ciphertext, testParams.AuthenticationData, testParams.IV, testParams.AuthenticationTag);
@@ -99,7 +101,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 var theoryData = new TheoryData<AuthenticationEncryptionTestParams>();
 
-                theoryData.Add(new AuthenticationEncryptionTestParams
+                theoryData.Add(new AuthenticationEncryptionTestParams("AES_128_CBC_HMAC_SHA_256")
                 {
                     Algorithm = AES_128_CBC_HMAC_SHA_256.Algorithm,
                     AuthenticationData = AES_128_CBC_HMAC_SHA_256.A,
@@ -108,11 +110,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     DecryptionKey = new SymmetricSecurityKey(AES_128_CBC_HMAC_SHA_256.K) { KeyId = "DecryptionKey.AES_128_CBC_HMAC_SHA_256.K" },
                     EncryptionKey = new SymmetricSecurityKey(AES_128_CBC_HMAC_SHA_256.K) { KeyId = "EncryptionKey.AES_128_CBC_HMAC_SHA_256.K" },
                     IV = AES_128_CBC_HMAC_SHA_256.IV,
-                    Plaintext = AES_128_CBC_HMAC_SHA_256.P,
-                    TestId = "AES_128_CBC_HMAC_SHA_256"
+                    Plaintext = AES_128_CBC_HMAC_SHA_256.P
                 });
 
-                theoryData.Add(new AuthenticationEncryptionTestParams
+                theoryData.Add(new AuthenticationEncryptionTestParams("AES_192_CBC_HMAC_SHA_384")
                 {
                     Algorithm = AES_192_CBC_HMAC_SHA_384.Algorithm,
                     AuthenticationData = AES_192_CBC_HMAC_SHA_384.A,
@@ -121,11 +122,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     DecryptionKey = new SymmetricSecurityKey(AES_192_CBC_HMAC_SHA_384.K) { KeyId = "DecryptionKey.AES_192_CBC_HMAC_SHA_384.K" },
                     EncryptionKey = new SymmetricSecurityKey(AES_192_CBC_HMAC_SHA_384.K) { KeyId = "EncryptionKey.AES_192_CBC_HMAC_SHA_384.K" },
                     IV = AES_192_CBC_HMAC_SHA_384.IV,
-                    Plaintext = AES_192_CBC_HMAC_SHA_384.P,
-                    TestId = "AES_192_CBC_HMAC_SHA_384"
+                    Plaintext = AES_192_CBC_HMAC_SHA_384.P
                 });
 
-                theoryData.Add(new AuthenticationEncryptionTestParams
+                theoryData.Add(new AuthenticationEncryptionTestParams("AES_256_CBC_HMAC_SHA_512")
                 {
                     Algorithm = AES_256_CBC_HMAC_SHA_512.Algorithm,
                     AuthenticationData = AES_256_CBC_HMAC_SHA_512.A,
@@ -134,16 +134,19 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     DecryptionKey = new SymmetricSecurityKey(AES_256_CBC_HMAC_SHA_512.K) { KeyId = "DecryptionKey.AES_256_CBC_HMAC_SHA_512.K" },
                     EncryptionKey = new SymmetricSecurityKey(AES_256_CBC_HMAC_SHA_512.K) { KeyId = "EncryptionKey.AES_256_CBC_HMAC_SHA_512.K" },
                     IV = AES_256_CBC_HMAC_SHA_512.IV,
-                    Plaintext = AES_256_CBC_HMAC_SHA_512.P,
-                    TestId = "AES_256_CBC_HMAC_SHA_512"
+                    Plaintext = AES_256_CBC_HMAC_SHA_512.P
                 });
 
                 return theoryData;
             }
         }
 
-        public class AuthenticationEncryptionTestParams
+        public class AuthenticationEncryptionTestParams : TheoryDataBase
         {
+            public AuthenticationEncryptionTestParams() { }
+
+            public AuthenticationEncryptionTestParams(string testId) : base(testId) { }
+
             public string Algorithm { get; set; }
             public byte[] AuthenticationData { get; set; }
             public byte[] AuthenticationTag { get; set; }
@@ -152,7 +155,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             public SecurityKey EncryptionKey { get; set; }
             public byte[] IV { get; set; }
             public byte[] Plaintext { get; set; }
-            public string TestId { get; set; }
 
             public override string ToString()
             {

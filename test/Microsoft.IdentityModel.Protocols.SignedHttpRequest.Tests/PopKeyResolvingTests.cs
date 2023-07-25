@@ -308,7 +308,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new ResolvePopKeyTheoryData
                     {
                         PopKeyString = "dummy",
-                        ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14100", null, true),
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenMalformedException), "IDX14100", null, true),
                         TestId = "InvalidPopKeyNotAJWK",
                     },
                     new ResolvePopKeyTheoryData

@@ -2,10 +2,12 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.IdentityModel.Logging
@@ -358,9 +360,20 @@ namespace Microsoft.IdentityModel.Logging
                 return format;
 
             if (!IdentityModelEventSource.ShowPII)
-                return string.Format(CultureInfo.InvariantCulture, format, args.Select(RemovePII).ToArray()); 
+                return string.Format(CultureInfo.InvariantCulture, format, args.Select(RemovePII).ToArray());
+            else
+                return string.Format(CultureInfo.InvariantCulture, format, args.Select(SanitizeSecurityArtifact).ToArray());
+        }
 
-            return string.Format(CultureInfo.InvariantCulture, format, args);
+        private static object SanitizeSecurityArtifact(object arg)
+        {
+            if (arg == null)
+                return "null";
+
+            if (IdentityModelEventSource.LogCompleteSecurityArtifact && arg is ISafeLogSecurityArtifact)
+                return (arg as ISafeLogSecurityArtifact).UnsafeToString();
+
+            return arg;
         }
 
         private static string RemovePII(object arg)
@@ -391,6 +404,17 @@ namespace Microsoft.IdentityModel.Logging
         public static object MarkAsNonPII(object arg)
         {
             return new NonPII(arg);
+        }
+
+        /// <summary>
+        /// Marks a log message argument (<paramref name="arg"/>) as SecurityArtifact.
+        /// </summary>
+        /// <param name="arg">A log message argument to be marked as SecurityArtifact.</param>
+        /// <param name="callback">A callback function to log the security artifact safely.</param>
+        /// <returns>An argument marked as SecurityArtifact.</returns>
+        public static object MarkAsSecurityArtifact(object arg, Func<object, string> callback)
+        {
+            return new SecurityArtifact(arg, callback);
         }
 
         /// <summary>

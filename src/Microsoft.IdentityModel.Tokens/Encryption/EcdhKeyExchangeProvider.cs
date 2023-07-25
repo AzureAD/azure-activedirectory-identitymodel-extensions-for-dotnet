@@ -59,7 +59,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>Returns <see cref="SecurityKey"/> that represents the key generated</returns>
         public SecurityKey GenerateKdf(string apu = null, string apv = null)
         {
-            //The "apu" and "apv" values MUST be distinct when used (per rfc7518 section 4.6.2) https://datatracker.ietf.org/doc/html/rfc7518#section-4-6-2
+            //The "apu" and "apv" values MUST be distinct when used (per rfc7518 section 4.6.2) https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2
             if (!string.IsNullOrEmpty(apu) && !string.IsNullOrEmpty(apv) && apu.Equals(apv))
                 throw LogHelper.LogArgumentException<ArgumentException>(
                     nameof(apu),
@@ -73,13 +73,13 @@ namespace Microsoft.IdentityModel.Tokens
 
             int kdfLength = KeyDataLen / 8; // number of octets
             // prepend bytes that represent n = ceiling of (keydatalen / hashlen), see section 5.8.1.1: https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar2.pdf
-            // hashlen is always 256 for ecdh-es, see: https://datatracker.ietf.org/doc/html/rfc7518#section-4-6-2
+            // hashlen is always 256 for ecdh-es, see: https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2
             // for supported algorithms it is always '1', for saml might be different
             byte[] prepend = new byte[4] { 0, 0, 0, 1 };
             SetAppendBytes(apu, apv, out byte[] append);
             byte[] kdf = new byte[kdfLength];
 
-            // JWA's spec https://datatracker.ietf.org/doc/html/rfc7518#section-4-6-2 specifies SHA256, saml might be different
+            // JWA's spec https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2 specifies SHA256, saml might be different
             byte[] derivedKey = _ecdhPrivate.DeriveKeyFromHash(_ecdhPublic.PublicKey, HashAlgorithmName.SHA256, prepend, append);
             Array.Copy(derivedKey, kdf, kdfLength);
 

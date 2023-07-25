@@ -28,7 +28,6 @@ namespace Microsoft.IdentityModel.Tokens
         private CryptoProviderFactory _cryptoProviderFactory;
         private bool _disposed;
         private Lazy<bool> _keySizeIsValid;
-        private string _hmacAlgorithm;
         private Lazy<SymmetricSignatureProvider> _symmetricSignatureProvider;
         private DecryptionDelegate DecryptFunction;
         private EncryptionDelegate EncryptFunction;
@@ -86,7 +85,6 @@ namespace Microsoft.IdentityModel.Tokens
         private void InitializeUsingAesCbc()
         {
             _authenticatedkeys = new Lazy<AuthenticatedKeys>(CreateAuthenticatedKeys);
-            _hmacAlgorithm = GetHmacAlgorithm(Algorithm);
             _symmetricSignatureProvider = new Lazy<SymmetricSignatureProvider>(CreateSymmetricSignatureProvider);
             EncryptFunction = EncryptWithAesCbc;
             DecryptFunction = DecryptWithAesCbc;
@@ -208,9 +206,9 @@ namespace Microsoft.IdentityModel.Tokens
             SymmetricSignatureProvider symmetricSignatureProvider;
 
             if (Key.CryptoProviderFactory.GetType() == typeof(CryptoProviderFactory))
-                symmetricSignatureProvider = Key.CryptoProviderFactory.CreateForSigning(_authenticatedkeys.Value.HmacKey, _hmacAlgorithm, false) as SymmetricSignatureProvider;
+                symmetricSignatureProvider = Key.CryptoProviderFactory.CreateForSigning(_authenticatedkeys.Value.HmacKey, Algorithm, false) as SymmetricSignatureProvider;
             else
-                symmetricSignatureProvider = Key.CryptoProviderFactory.CreateForSigning(_authenticatedkeys.Value.HmacKey, _hmacAlgorithm) as SymmetricSignatureProvider;
+                symmetricSignatureProvider = Key.CryptoProviderFactory.CreateForSigning(_authenticatedkeys.Value.HmacKey, Algorithm) as SymmetricSignatureProvider;
 
             if (symmetricSignatureProvider == null)
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10649, LogHelper.MarkAsNonPII(Algorithm))));

@@ -671,9 +671,15 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     break;
 
                 case SecurityAlgorithms.HmacSha256Signature:
-                case SecurityAlgorithms.HmacSha384Signature:
-                case SecurityAlgorithms.HmacSha512Signature:
                     jwt = handler.CreateJwtSecurityToken(new SecurityTokenDescriptor { SigningCredentials = new SigningCredentials(KeyingMaterial.SymmetricSecurityKey2_256, outboundAlgorithm) });
+                    break;
+
+                case SecurityAlgorithms.HmacSha384Signature:
+                    jwt = handler.CreateJwtSecurityToken(new SecurityTokenDescriptor { SigningCredentials = new SigningCredentials(KeyingMaterial.SymmetricSecurityKey2_384, outboundAlgorithm) });
+                    break;
+
+                case SecurityAlgorithms.HmacSha512Signature:
+                    jwt = handler.CreateJwtSecurityToken(new SecurityTokenDescriptor { SigningCredentials = new SigningCredentials(KeyingMaterial.SymmetricSecurityKey2_512, outboundAlgorithm) });
                     break;
             }
 
@@ -2175,7 +2181,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new JwtTheoryData
                     {
-                        ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX12741:"),
+                        ExpectedException = ExpectedException.SecurityTokenMalformedTokenException(substringExpected: "IDX12741:"),
                         TestId = "Token = Guid().NewGuid().ToString()",
                         Token = Guid.NewGuid().ToString(),
                         ValidationParameters = new TokenValidationParameters()

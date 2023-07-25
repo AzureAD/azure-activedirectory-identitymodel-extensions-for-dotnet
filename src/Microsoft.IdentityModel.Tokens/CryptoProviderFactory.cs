@@ -428,28 +428,75 @@ namespace Microsoft.IdentityModel.Tokens
             if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, keyBytes))
             {
                 if (!(CustomCryptoProvider.Create(algorithm, keyBytes) is KeyedHashAlgorithm keyedHashAlgorithm))
-                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10647, LogHelper.MarkAsNonPII(algorithm), LogHelper.MarkAsNonPII(typeof(KeyedHashAlgorithm)))));
+                    throw LogHelper.LogExceptionMessage(
+                        new InvalidOperationException(
+                            LogHelper.FormatInvariant(
+                                LogMessages.IDX10647,
+                                LogHelper.MarkAsNonPII(algorithm),
+                                LogHelper.MarkAsNonPII(typeof(KeyedHashAlgorithm)))));
 
                 return keyedHashAlgorithm;
             }
 
+            // In the case of Aes128CbcHmacSha256, Aes192CbcHmacSha384, Aes256CbcHmacSha512 which are Authenticated Encryption algorithms
+            // SymmetricSignatureProvider will get passed a key with 1/2 the minimum keysize expected size for the HashAlgorithm. 16 bytes for SHA256, instead of 32 bytes.
+            // see: https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.2.1
             switch (algorithm)
             {
+                case SecurityAlgorithms.Aes128CbcHmacSha256:
+                {
+                    ValidateKeySize(keyBytes, algorithm, 16);
+                    return new HMACSHA256(keyBytes);
+                }
+
+                case SecurityAlgorithms.Aes192CbcHmacSha384:
+                {
+                    ValidateKeySize(keyBytes, algorithm, 24);
+                    return new HMACSHA384(keyBytes);
+                }
+
+                case SecurityAlgorithms.Aes256CbcHmacSha512:
+                {
+                    ValidateKeySize(keyBytes, algorithm, 32);
+                    return new HMACSHA512(keyBytes);
+                }
+
                 case SecurityAlgorithms.HmacSha256Signature:
                 case SecurityAlgorithms.HmacSha256:
+                {
+                    ValidateKeySize(keyBytes, algorithm, 32);
                     return new HMACSHA256(keyBytes);
+                }
 
                 case SecurityAlgorithms.HmacSha384Signature:
                 case SecurityAlgorithms.HmacSha384:
+                {
+                    ValidateKeySize(keyBytes, algorithm, 48);
                     return new HMACSHA384(keyBytes);
+                }
 
                 case SecurityAlgorithms.HmacSha512Signature:
                 case SecurityAlgorithms.HmacSha512:
+                {
+                    ValidateKeySize(keyBytes, algorithm, 64);
                     return new HMACSHA512(keyBytes);
+                }
 
                 default:
                     throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10666, LogHelper.MarkAsNonPII(algorithm))));
             }
+        }
+
+        private static void ValidateKeySize(byte[] keyBytes, string algorithm, int expectedNumberOfBytes)
+        {
+            if (keyBytes.Length < expectedNumberOfBytes)
+                throw LogHelper.LogExceptionMessage(
+                    new ArgumentOutOfRangeException(
+                        nameof(keyBytes),
+                        LogHelper.FormatInvariant(LogMessages.IDX10720,
+                            LogHelper.MarkAsNonPII(algorithm),
+                            LogHelper.MarkAsNonPII(expectedNumberOfBytes * 8),
+                            LogHelper.MarkAsNonPII(keyBytes.Length * 8))));
         }
 
         private SignatureProvider CreateSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures, bool cacheProvider)

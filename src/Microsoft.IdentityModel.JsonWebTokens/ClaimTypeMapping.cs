@@ -1,19 +1,16 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
 using System.Security.Claims;
 
-namespace System.IdentityModel.Tokens.Jwt
+namespace Microsoft.IdentityModel.JsonWebTokens
 {
-    /// <summary>
-    /// Defines the inbound and outbound mapping for claim claim types from jwt to .net claim 
-    /// </summary>
     internal static class ClaimTypeMapping
     {
         // This is the short to long mapping.
-        // key      is the long  claim type
-        // value    is the short claim type
+        // key is the long claim type
+        // value is the short claim type
         private static Dictionary<string, string> shortToLongClaimTypeMapping = new Dictionary<string, string>
         {
             { JwtRegisteredClaimNames.Actort, ClaimTypes.Actor },

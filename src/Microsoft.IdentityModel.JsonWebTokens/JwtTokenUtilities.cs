@@ -5,11 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -27,6 +25,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// </summary>
     public class JwtTokenUtilities
     {
+        private const string _unrecognizedEncodedToken = "UnrecognizedEncodedToken";
+
         /// <summary>
         /// Regex that is used to figure out if a token is in JWS format.
         /// </summary>
@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <param name="input">String to be signed</param>
         /// <param name="signingCredentials">The <see cref="SigningCredentials"/> that contain crypto specs used to sign the token.</param>
-        /// <returns>The bse64urlendcoded signature over the bytes obtained from UTF8Encoding.GetBytes( 'input' ).</returns>
+        /// <returns>The base 64 url encoded signature over the bytes obtained from UTF8Encoding.GetBytes( 'input' ).</returns>
         /// <exception cref="ArgumentNullException">'input' or 'signingCredentials' is null.</exception>
         public static string CreateEncodedSignature(string input, SigningCredentials signingCredentials)
         {
@@ -83,7 +83,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="input">String to be signed</param>
         /// <param name="signingCredentials">The <see cref="SigningCredentials"/> that contain crypto specs used to sign the token.</param>
         /// <param name="cacheProvider">should the <see cref="SignatureProvider"/> be cached.</param>
-        /// <returns>The bse64urlendcoded signature over the bytes obtained from UTF8Encoding.GetBytes( 'input' ).</returns>
+        /// <returns>The base 64 url encoded signature over the bytes obtained from UTF8Encoding.GetBytes( 'input' ).</returns>
         /// <exception cref="ArgumentNullException"><paramref name="input"/> or <paramref name="signingCredentials"/> is null.</exception>
         public static string CreateEncodedSignature(string input, SigningCredentials signingCredentials, bool cacheProvider)
         {
@@ -252,13 +252,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         private static void ValidateDecryption(JwtTokenDecryptionParameters decryptionParameters, bool decryptionSucceeded, bool algorithmNotSupportedByCryptoProvider, StringBuilder exceptionStrings, StringBuilder keysAttempted)
         {
             if (!decryptionSucceeded && keysAttempted.Length > 0)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10603, keysAttempted, exceptionStrings, decryptionParameters.EncodedToken)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10603, keysAttempted, exceptionStrings, LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken))));
 
             if (!decryptionSucceeded && algorithmNotSupportedByCryptoProvider)
                 throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10619, LogHelper.MarkAsNonPII(decryptionParameters.Alg), LogHelper.MarkAsNonPII(decryptionParameters.Enc))));
 
             if (!decryptionSucceeded)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10609, decryptionParameters.EncodedToken)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10609, LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken))));
         }
 
         private static byte[] DecryptToken(CryptoProviderFactory cryptoProviderFactory, SecurityKey key, string encAlg, byte[] ciphertext, byte[] headerAscii, byte[] initializationVector, byte[] authenticationTag)
@@ -429,6 +429,24 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             throw LogHelper.LogExceptionMessage(new FormatException(LogHelper.FormatInvariant(LogMessages.IDX14300, LogHelper.MarkAsNonPII(claimName), jToken.ToString(), LogHelper.MarkAsNonPII(typeof(long)))));
+        }
+
+        internal static string SafeLogJwtToken(object obj)
+        {
+            if (obj == null)
+                return string.Empty;
+
+            // not a string, we do not know how to sanitize so we return a String which represents the object instance
+            if (!(obj is string token))
+                return obj.GetType().ToString();
+ 
+            int lastDot = token.LastIndexOf(".");
+
+            // no dots, not a JWT, we do not know how to sanitize so we return UnrecognizedEncodedToken
+            if (lastDot == -1)
+                return _unrecognizedEncodedToken;
+
+            return token.Substring(0, lastDot);
         }
 
         /// <summary>
