@@ -41,10 +41,10 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
         public object Create(string algorithm, params object[] args)
         {
             if (string.IsNullOrEmpty(algorithm))
-                throw LogHelper.LogArgumentNullException(nameof(algorithm));
+                throw LogHelper.LogArgumentNullException(nameof(algorithm))!;
 
             if (args == null)
-                throw LogHelper.LogArgumentNullException(nameof(args));
+                throw LogHelper.LogArgumentNullException(nameof(args))!;
 
             if (args.FirstOrDefault() is KeyVaultSecurityKey key)
             {
@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
                 }
             }
 
-            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10652, LogHelper.MarkAsNonPII(algorithm))));
+            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10652, LogHelper.MarkAsNonPII(algorithm))))!;
         }
 
         /// <summary>
@@ -77,10 +77,10 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
         public bool IsSupportedAlgorithm(string algorithm, params object[] args)
         {
             if (string.IsNullOrEmpty(algorithm))
-                throw LogHelper.LogArgumentNullException(nameof(algorithm));
+                throw LogHelper.LogArgumentNullException(nameof(algorithm))!;
 
             if (args == null)
-                throw LogHelper.LogArgumentNullException(nameof(args));
+                throw LogHelper.LogArgumentNullException(nameof(args))!;
 
             return args.FirstOrDefault() is KeyVaultSecurityKey
                 && (JsonWebKeyEncryptionAlgorithm.AllAlgorithms.Contains(algorithm, StringComparer.Ordinal) || JsonWebKeySignatureAlgorithm.AllAlgorithms.Contains(algorithm, StringComparer.Ordinal));

@@ -18,6 +18,6 @@ namespace Microsoft.IdentityModel.Abstractions
         /// Writes a log entry.
         /// </summary>
         /// <param name="entry">Defines a structured message to be logged at the provided <see cref="LogEntry.EventLogLevel"/>.</param>
-        void Log(LogEntry entry);
+        void Log(LogEntry? entry);
     }
 }

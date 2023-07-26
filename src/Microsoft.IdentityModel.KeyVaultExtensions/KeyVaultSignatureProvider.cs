@@ -41,11 +41,11 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
         /// <param name="algorithm">The signature algorithm to apply.</param>
         /// <param name="willCreateSignatures">Whether this <see cref="KeyVaultSignatureProvider"/> is required to create signatures then set this to true.</param>
         /// <param name="client">A mock <see cref="IKeyVaultClient"/> used for testing purposes.</param>
-        internal KeyVaultSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures, IKeyVaultClient client)
+        internal KeyVaultSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures, IKeyVaultClient? client)
             : base(key, algorithm)
         {
-            _key = key as KeyVaultSecurityKey ?? throw LogHelper.LogArgumentNullException(nameof(key));
-            _client = client ?? new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(_key.Callback));
+            _key = key as KeyVaultSecurityKey ?? throw LogHelper.LogArgumentNullException(nameof(key))!;
+            _client = client ?? new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(_key.Callback!));
             WillCreateSignatures = willCreateSignatures;
 
             switch (algorithm)
@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
                     _hash = SHA512.Create();
                     break;
                 default:
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10652, LogHelper.MarkAsNonPII(algorithm)), nameof(algorithm)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10652, LogHelper.MarkAsNonPII(algorithm)), nameof(algorithm)))!;
             }
         }
 
@@ -122,10 +122,10 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
         private async Task<byte[]> SignAsync(byte[] input, CancellationToken cancellation)
         {
             if (input == null || input.Length == 0)
-                throw LogHelper.LogArgumentNullException(nameof(input));
+                throw LogHelper.LogArgumentNullException(nameof(input))!;
 
             if (_disposed)
-                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()))!;
 
             return (await _client.SignAsync(_key.KeyId, Algorithm, _hash.ComputeHash(input), cancellation).ConfigureAwait(false)).Result;
         }
@@ -143,13 +143,13 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
         private async Task<bool> VerifyAsync(byte[] input, byte[] signature, CancellationToken cancellation)
         {
             if (input == null || input.Length == 0)
-                throw LogHelper.LogArgumentNullException(nameof(input));
+                throw LogHelper.LogArgumentNullException(nameof(input))!;
 
             if (signature == null || signature.Length == 0)
-                throw LogHelper.LogArgumentNullException(nameof(signature));
+                throw LogHelper.LogArgumentNullException(nameof(signature))!;
 
             if (_disposed)
-                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()))!;
 
             return await _client.VerifyAsync(_key.KeyId, Algorithm, _hash.ComputeHash(input), signature, cancellation).ConfigureAwait(false);
         }

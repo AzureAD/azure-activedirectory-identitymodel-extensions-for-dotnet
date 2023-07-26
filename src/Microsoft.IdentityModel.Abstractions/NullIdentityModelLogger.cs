@@ -19,7 +19,7 @@ namespace Microsoft.IdentityModel.Abstractions
         public bool IsEnabled(EventLogLevel eventLogLevel) => false;
 
         /// <inheritdoc/>
-        public void Log(LogEntry entry)
+        public void Log(LogEntry? entry)
         {
             // no-op
         }

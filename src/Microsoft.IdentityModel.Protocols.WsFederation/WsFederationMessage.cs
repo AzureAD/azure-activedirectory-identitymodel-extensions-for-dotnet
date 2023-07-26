@@ -287,7 +287,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                 }
 
                 if (token == null)
-                    throw LogExceptionMessage(new WsFederationException(LogMessages.IDX22902));
+                    throw LogExceptionMessage(new WsFederationException(LogMessages.IDX22902))!;
 
                 return token;
             }

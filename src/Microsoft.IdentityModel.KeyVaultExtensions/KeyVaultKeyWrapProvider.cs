@@ -39,26 +39,26 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for key wrap operations.</param>
         /// <param name="algorithm">The key wrap algorithm to apply.</param>
         /// <param name="client">A mock <see cref="IKeyVaultClient"/> used for testing purposes.</param>
-        internal KeyVaultKeyWrapProvider(SecurityKey key, string algorithm, IKeyVaultClient client)
+        internal KeyVaultKeyWrapProvider(SecurityKey key, string algorithm, IKeyVaultClient? client)
         {
-            _algorithm = string.IsNullOrEmpty(algorithm) ? throw LogHelper.LogArgumentNullException(nameof(algorithm)) : algorithm;
+            _algorithm = string.IsNullOrEmpty(algorithm) ? throw LogHelper.LogArgumentNullException(nameof(algorithm))! : algorithm;
             if (key == null)
-                throw LogHelper.LogArgumentNullException(nameof(key));
+                throw LogHelper.LogArgumentNullException(nameof(key))!;
 
-            _key = key as KeyVaultSecurityKey ?? throw LogHelper.LogExceptionMessage(new NotSupportedException(key.GetType().ToString()));
-            _client = client ?? new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(_key.Callback));
+            _key = key as KeyVaultSecurityKey ?? throw LogHelper.LogExceptionMessage(new NotSupportedException(key.GetType().ToString()))!;
+            _client = client ?? new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(_key.Callback!));
         }
 
         /// <summary>
         /// Gets the KeyWrap algorithm that is being used.
         /// </summary>
-        public override string Algorithm => _algorithm;
+        public override string? Algorithm => _algorithm;
 
         /// <summary>
         /// Gets or sets a user context for a <see cref="KeyWrapProvider"/>.
         /// </summary>
         /// <remarks>This is null by default. This can be used by runtimes or for extensibility scenarios.</remarks>
-        public override string Context { get; set; }
+        public override string? Context { get; set; }
 
         /// <summary>
         /// Gets the <see cref="SecurityKey"/> that is being used.
@@ -116,7 +116,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
         private async Task<byte[]> UnwrapKeyAsync(byte[] keyBytes, CancellationToken cancellation)
         {
             if (keyBytes == null || keyBytes.Length == 0)
-                throw LogHelper.LogArgumentNullException(nameof(keyBytes));
+                throw LogHelper.LogArgumentNullException(nameof(keyBytes))!;
 
             return (await _client.UnwrapKeyAsync(_key.KeyId, Algorithm, keyBytes, cancellation).ConfigureAwait(false)).Result;
         }
@@ -132,7 +132,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
         private async Task<byte[]> WrapKeyAsync(byte[] keyBytes, CancellationToken cancellation)
         {
             if (keyBytes == null || keyBytes.Length == 0)
-                throw LogHelper.LogArgumentNullException(nameof(keyBytes));
+                throw LogHelper.LogArgumentNullException(nameof(keyBytes))!;
 
             return (await _client.WrapKeyAsync(_key.KeyId, Algorithm, keyBytes, cancellation).ConfigureAwait(false)).Result;
         }

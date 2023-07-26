@@ -24,7 +24,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         public ConfigurationValidationResult Validate(WsFederationConfiguration configuration)
         {
             if (configuration == null)
-                throw LogArgumentNullException(nameof(configuration));
+                throw LogArgumentNullException(nameof(configuration))!;
 
             if (string.IsNullOrWhiteSpace(configuration.Issuer))
             {

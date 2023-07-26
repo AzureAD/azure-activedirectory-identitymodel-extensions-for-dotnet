@@ -31,7 +31,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         public string PreferredPrefix
         {
             get => _preferredPrefix;
-            set => _preferredPrefix = string.IsNullOrEmpty(value) ? throw LogExceptionMessage(new ArgumentNullException(nameof(value))) : value;
+            set => _preferredPrefix = string.IsNullOrEmpty(value) ? throw LogExceptionMessage(new ArgumentNullException(nameof(value)))! : value;
         }
 
         #region Read Metadata
@@ -370,10 +370,10 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         public void WriteMetadata(XmlWriter writer, WsFederationConfiguration configuration)
         {
             if (writer == null)
-                throw LogArgumentNullException(nameof(writer));
+                throw LogArgumentNullException(nameof(writer))!;
 
             if (configuration == null)
-                throw LogArgumentNullException(nameof(configuration));
+                throw LogArgumentNullException(nameof(configuration))!;
 
             if (string.IsNullOrEmpty(configuration.Issuer))
                 throw XmlUtil.LogWriteException(LogMessages.IDX22810);

@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         public static Task<WsFederationConfiguration> GetAsync(string address, CancellationToken cancel)
         {
             if (string.IsNullOrEmpty(address))
-                throw LogArgumentNullException(nameof(address));
+                throw LogArgumentNullException(nameof(address))!;
 
             return GetAsync(address, new HttpDocumentRetriever(), cancel);
         }
@@ -45,10 +45,10 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         public static Task<WsFederationConfiguration> GetAsync(string address, HttpClient httpClient, CancellationToken cancel)
         {
             if (string.IsNullOrEmpty(address))
-                throw LogArgumentNullException(nameof(address));
+                throw LogArgumentNullException(nameof(address))!;
 
             if (httpClient == null)
-                throw LogArgumentNullException(nameof(httpClient));
+                throw LogArgumentNullException(nameof(httpClient))!;
 
             return GetAsync(address, new HttpDocumentRetriever(httpClient), cancel);
         }
@@ -71,10 +71,10 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         public static async Task<WsFederationConfiguration> GetAsync(string address, IDocumentRetriever retriever, CancellationToken cancel)
         {
             if (string.IsNullOrEmpty(address))
-                throw LogArgumentNullException(nameof(address));
+                throw LogArgumentNullException(nameof(address))!;
 
             if (retriever == null)
-                throw LogArgumentNullException(nameof(retriever));
+                throw LogArgumentNullException(nameof(retriever))!;
 
             string document = await retriever.GetDocumentAsync(address, cancel).ConfigureAwait(false);
 
