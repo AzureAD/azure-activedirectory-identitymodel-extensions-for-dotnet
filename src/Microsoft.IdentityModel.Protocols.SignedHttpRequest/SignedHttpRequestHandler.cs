@@ -1213,11 +1213,18 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
         private static string CalculateBase64UrlEncodedHash(byte[] bytes)
         {
+            byte[] hashedBytes;
+
+#if NET6_0_OR_GREATER
+            hashedBytes = SHA256.HashData(bytes);
+#else
             using (var hash = SHA256.Create())
             {
-                var hashedBytes = hash.ComputeHash(bytes);
-                return Base64UrlEncoder.Encode(hashedBytes);
+                hashedBytes = hash.ComputeHash(bytes);
             }
+#endif
+
+            return Base64UrlEncoder.Encode(hashedBytes);
         }
 
         /// <summary>
