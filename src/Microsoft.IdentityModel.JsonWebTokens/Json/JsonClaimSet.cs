@@ -22,17 +22,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal JsonClaimSet(JsonDocument jsonDocument)
         {
-            RootElement = jsonDocument.RootElement;
+            RootElement = jsonDocument.RootElement.Clone();
+            jsonDocument.Dispose();
         }
 
-        internal JsonClaimSet(byte[] jsonBytes)
+        internal JsonClaimSet(byte[] jsonBytes) : this(JsonDocument.Parse(jsonBytes))
         {
-            RootElement = JsonDocument.Parse(jsonBytes).RootElement;
         }
 
-        internal JsonClaimSet(string json)
+        internal JsonClaimSet(string json) : this(JsonDocument.Parse(json))
         {
-            RootElement = JsonDocument.Parse(json).RootElement;
         }
 
         internal JsonElement RootElement { get; }
