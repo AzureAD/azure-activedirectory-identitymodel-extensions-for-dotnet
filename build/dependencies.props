@@ -10,6 +10,7 @@
     <SystemSecurityCryptographyCngVersion>4.5.0</SystemSecurityCryptographyCngVersion>
     <SystemTextJson>4.7.2</SystemTextJson>
     <SystemTextEncodingsWeb>4.7.2</SystemTextEncodingsWeb>
+    <SystemMemoryVersion>4.5.5</SystemMemoryVersion>
   </PropertyGroup>
 
 </Project>
