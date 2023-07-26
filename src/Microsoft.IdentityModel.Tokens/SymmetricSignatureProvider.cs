@@ -392,7 +392,7 @@ namespace Microsoft.IdentityModel.Tokens
                 hash = keyedHashAlgorithm.ComputeHash(input, inputOffset, inputLength).AsSpan();
 #endif
 
-                return signature.AsSpan().StartsWith(hash.Slice(0, signatureLength));
+                return Utility.AreEqual(signature, hash, signatureLength);
             }
             catch
             {
