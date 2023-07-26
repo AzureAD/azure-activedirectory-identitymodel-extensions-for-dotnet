@@ -319,8 +319,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         private static T? LogExceptionImpl<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(EventLevel eventLevel, string? argumentName, Exception? innerException, string format, params object[]? args) where T : Exception 
         {
-            string? message = null;
-
+            string message;
             if (args != null)
                 message = string.Format(CultureInfo.InvariantCulture, format, args);
             else
