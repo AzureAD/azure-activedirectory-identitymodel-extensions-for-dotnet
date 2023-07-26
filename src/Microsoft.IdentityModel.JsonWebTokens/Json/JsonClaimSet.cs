@@ -23,6 +23,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal JsonClaimSet(JsonDocument jsonDocument)
         {
+            // This method is assuming ownership of the JsonDocument, which is backed by one or more ArrayPool arrays.
+            // We need to dispose of it to avoid leaking arrays from the pool.  To achieve that, we clone the root element,
+            // which will result in a new JsonElement being created that's not tied to the original and that's not backed by
+            // ArrayPool memory, after which point we can dispose of the original to return the array(s) to the pool.
             RootElement = jsonDocument.RootElement.Clone();
             jsonDocument.Dispose();
         }
