@@ -162,17 +162,28 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return false;
             }
 
-            // Set the maximum number of segments to MaxJwtSegmentCount + 1. This controls the number of splits and allows detecting the number of segments is too large.
-            // For example: "a.b.c.d.e.f.g.h" => [a], [b], [c], [d], [e], [f.g.h]. 6 segments.
-            // If just MaxJwtSegmentCount was used, then [a], [b], [c], [d], [e.f.g.h] would be returned. 5 segments.
-            int tokenPartCount = JwtTokenUtilities.CountJwtTokenPart(token, JwtConstants.MaxJwtSegmentCount + 1);
-            if (tokenPartCount == JwtConstants.JwsSegmentCount)
-                return JwtTokenUtilities.RegexJws.IsMatch(token);
-            else if (tokenPartCount == JwtConstants.JweSegmentCount)
-                return JwtTokenUtilities.RegexJwe.IsMatch(token);
+            // Count the number of segments, which is the number of periods + 1. We can stop when we've encountered
+            // more segments than the maximum we know how to handle.
+            int pos = 0;
+            int segmentCount = 1; // TODO: Use MemoryExtensions.Count in .NET 8
+            while (segmentCount <= JwtConstants.MaxJwtSegmentCount && ((pos = token.IndexOf('.', pos)) >= 0))
+            {
+                pos++;
+                segmentCount++;
+            }
 
-            LogHelper.LogInformation(LogMessages.IDX14107);
-            return false;
+            switch (segmentCount)
+            {
+                case JwtConstants.JwsSegmentCount:
+                    return JwtTokenUtilities.RegexJws.IsMatch(token);
+
+                case JwtConstants.JweSegmentCount:
+                    return JwtTokenUtilities.RegexJwe.IsMatch(token);
+
+                default:
+                    LogHelper.LogInformation(LogMessages.IDX14107);
+                    return false;
+            }
         }
 
         /// <summary>
