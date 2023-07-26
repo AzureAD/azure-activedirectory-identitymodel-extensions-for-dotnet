@@ -1160,8 +1160,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             var unwrappedKeys = new List<SecurityKey>();
             // keep track of exceptions thrown, keys that were tried
-            var exceptionStrings = new StringBuilder();
-            var keysAttempted = new StringBuilder();
+            StringBuilder exceptionStrings = null;
+            StringBuilder keysAttempted = null;
             foreach (var key in keys)
             {
                 try
@@ -1193,16 +1193,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
                 catch (Exception ex)
                 {
-                    exceptionStrings.AppendLine(ex.ToString());
+                    (exceptionStrings ??= new StringBuilder()).AppendLine(ex.ToString());
                 }
 
-                keysAttempted.AppendLine(key.ToString());
+                (keysAttempted ??= new StringBuilder()).AppendLine(key.ToString());
             }
 
-            if (unwrappedKeys.Count > 0 && exceptionStrings.Length == 0)
+            if (unwrappedKeys.Count > 0 && exceptionStrings is null)
                 return unwrappedKeys;
             else
-                throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(LogHelper.FormatInvariant(TokenLogMessages.IDX10618, keysAttempted, exceptionStrings, jwtToken)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(LogHelper.FormatInvariant(TokenLogMessages.IDX10618, (object)keysAttempted ?? "", exceptionStrings, jwtToken)));
         }
 
         /// <summary>
@@ -1719,8 +1719,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             // keep track of exceptions thrown, keys that were tried
-            var exceptionStrings = new StringBuilder();
-            var keysAttempted = new StringBuilder();
+            StringBuilder exceptionStrings = null;
+            StringBuilder keysAttempted = null;
             var kidExists = !string.IsNullOrEmpty(jwtToken.Kid);
 
             if (keys != null)
@@ -1738,12 +1738,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     }
                     catch (Exception ex)
                     {
-                        exceptionStrings.AppendLine(ex.ToString());
+                        (exceptionStrings ??= new StringBuilder()).AppendLine(ex.ToString());
                     }
 
                     if (key != null)
                     {
-                        keysAttempted.Append(key.ToString()).Append(" , KeyId: ").AppendLine(key.KeyId);
+                        (keysAttempted ??= new StringBuilder()).Append(key.ToString()).Append(" , KeyId: ").AppendLine(key.KeyId);
                         if (kidExists && !kidMatched && key.KeyId != null)
                             kidMatched = jwtToken.Kid.Equals(key.KeyId, key is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
                     }
@@ -1763,12 +1763,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     var isKidInTVP = keysInTokenValidationParameters.Any(x => x.KeyId.Equals(jwtToken.Kid));
                     var keyLocation = isKidInTVP ? "TokenValidationParameters" : "Configuration";
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10511,
-                        keysAttempted,
+                        (object)keysAttempted ?? "",
                         LogHelper.MarkAsNonPII(numKeysInTokenValidationParameters),
                         LogHelper.MarkAsNonPII(numKeysInConfiguration),
                         LogHelper.MarkAsNonPII(keyLocation),
                         LogHelper.MarkAsNonPII(jwtToken.Kid),
-                        exceptionStrings,
+                        (object)exceptionStrings ?? "",
                         jwtToken)));
                 }
 
@@ -1787,12 +1787,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
             }
 
-            if (keysAttempted.Length > 0)
+            if (keysAttempted is not null)
                 throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(TokenLogMessages.IDX10503,
                     keysAttempted,
                     LogHelper.MarkAsNonPII(numKeysInTokenValidationParameters),
                     LogHelper.MarkAsNonPII(numKeysInConfiguration),
-                    exceptionStrings,
+                    (object)exceptionStrings ?? "",
                     jwtToken)));
 
             throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(TokenLogMessages.IDX10500));
