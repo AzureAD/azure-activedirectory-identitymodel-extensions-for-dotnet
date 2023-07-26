@@ -133,27 +133,25 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>
         /// true if the bytes are equal, false otherwise.
         /// </returns>
-        [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static bool AreEqual(byte[] a, byte[] b)
         {
-            byte[] s_bytesA = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
-            byte[] s_bytesB = new byte[] { 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
-
-            int result = 0;
-            byte[] a1, a2;
+            ReadOnlySpan<byte> a1, a2;
 
             if (((a == null) || (b == null))
             || (a.Length != b.Length))
             {
-                a1 = s_bytesA;
-                a2 = s_bytesB;
+                // Non-allocating. The direct assignment into a ReadOnlySpan<byte> causes the C# compiler to emit these as pointers into the assembly's data section.
+                a1 = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
+                a2 = new byte[] { 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
             }
             else
             {
-                a1 = a;
-                a2 = b;
+                a1 = a.AsSpan();
+                a2 = b.AsSpan();
             }
 
+            int result = 0;
             for (int i = 0; i < a1.Length; i++)
             {
                 result |= a1[i] ^ a2[i];
@@ -176,31 +174,26 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>
         /// true if the bytes are equal, false otherwise.
         /// </returns>
-        [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
+        [MethodImpl(MethodImplOptions.NoInlining)]
         internal static bool AreEqual(byte[] a, byte[] b, int length)
         {
-            byte[] s_bytesA = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
-            byte[] s_bytesB = new byte[] { 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
-
-            int result = 0;
-            int lenToUse = 0;
-            byte[] a1, a2;
+            ReadOnlySpan<byte> a1, a2;
 
             if (((a == null) || (b == null))
             || (a.Length < length || b.Length < length))
             {
-                a1 = s_bytesA;
-                a2 = s_bytesB;
-                lenToUse = a1.Length;
+                // Non-allocating. The direct assignment into a ReadOnlySpan<byte> causes the C# compiler to emit these as pointers into the assembly's data section.
+                a1 = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
+                a2 = new byte[] { 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
             }
             else
             {
-                a1 = a;
-                a2 = b;
-                lenToUse = length;
+                a1 = a.AsSpan(0, length);
+                a2 = b.AsSpan(0, length);
             }
 
-            for (int i = 0; i < lenToUse; i++)
+            int result = 0;
+            for (int i = 0; i < a1.Length; i++)
             {
                 result |= a1[i] ^ a2[i];
             }
