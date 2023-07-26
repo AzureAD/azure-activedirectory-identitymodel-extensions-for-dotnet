@@ -2,12 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.IdentityModel.Logging
@@ -260,9 +258,9 @@ namespace Microsoft.IdentityModel.Logging
             if (IdentityModelEventSource.Logger.IsEnabled() && IdentityModelEventSource.Logger.LogLevel >= eventLevel)
                 IdentityModelEventSource.Logger.Write(eventLevel, exception.InnerException, exception.Message);
 
-            EventLogLevel eventLogLevel = Enum.IsDefined(typeof(EventLogLevel), (int)eventLevel) ? (EventLogLevel)eventLevel : EventLogLevel.Error;
+            EventLogLevel eventLogLevel = EventLevelToEventLogLevel(eventLevel);
             if (Logger.IsEnabled(eventLogLevel))
-                Logger.Log(WriteEntry((EventLogLevel)eventLevel, exception.InnerException, exception.Message, null));
+                Logger.Log(WriteEntry(eventLogLevel, exception.InnerException, exception.Message, null));
 
             return exception;
         }
@@ -277,8 +275,8 @@ namespace Microsoft.IdentityModel.Logging
             if (IdentityModelEventSource.Logger.IsEnabled() && IdentityModelEventSource.Logger.LogLevel >= EventLevel.Informational)
                 IdentityModelEventSource.Logger.WriteInformation(message, args);
 
-            if (Enum.IsDefined(typeof(EventLogLevel), (int)EventLevel.Informational) && Logger.IsEnabled((EventLogLevel)EventLevel.Informational))
-                Logger.Log(WriteEntry((EventLogLevel)EventLevel.Informational, null, message, args));
+            if (Logger.IsEnabled(EventLogLevel.Informational))
+                Logger.Log(WriteEntry(EventLogLevel.Informational, null, message, args));
         }
 
         /// <summary>
@@ -291,8 +289,8 @@ namespace Microsoft.IdentityModel.Logging
             if (IdentityModelEventSource.Logger.IsEnabled())
                 IdentityModelEventSource.Logger.WriteVerbose(message, args);
 
-            if (Enum.IsDefined(typeof(EventLogLevel), (int)EventLevel.Verbose) && Logger.IsEnabled((EventLogLevel)EventLevel.Verbose))
-                Logger.Log(WriteEntry((EventLogLevel)EventLevel.Verbose, null, message, args));
+            if (Logger.IsEnabled(EventLogLevel.Verbose))
+                Logger.Log(WriteEntry(EventLogLevel.Verbose, null, message, args));
         }
 
         /// <summary>
@@ -305,8 +303,8 @@ namespace Microsoft.IdentityModel.Logging
             if (IdentityModelEventSource.Logger.IsEnabled())
                 IdentityModelEventSource.Logger.WriteWarning(message, args);
 
-            if (Enum.IsDefined(typeof(EventLogLevel), (int)EventLevel.Warning) && Logger.IsEnabled((EventLogLevel)EventLevel.Warning))
-                Logger.Log(WriteEntry((EventLogLevel)EventLevel.Warning, null, message, args));
+            if (Logger.IsEnabled(EventLogLevel.Warning))
+                Logger.Log(WriteEntry(EventLogLevel.Warning, null, message, args));
         }
 
         /// <summary>
@@ -319,8 +317,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         private static T LogExceptionImpl<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(EventLevel eventLevel, string argumentName, Exception innerException, string format, params object[] args) where T : Exception 
         {
-            string message = null;
-
+            string message;
             if (args != null)
                 message = string.Format(CultureInfo.InvariantCulture, format, args);
             else
@@ -329,9 +326,9 @@ namespace Microsoft.IdentityModel.Logging
             if (IdentityModelEventSource.Logger.IsEnabled() && IdentityModelEventSource.Logger.LogLevel >= eventLevel)
                 IdentityModelEventSource.Logger.Write(eventLevel, innerException, message);
 
-            EventLogLevel eventLogLevel = Enum.IsDefined(typeof(EventLogLevel), (int)eventLevel) ? (EventLogLevel)eventLevel : EventLogLevel.Error;
+            EventLogLevel eventLogLevel = EventLevelToEventLogLevel(eventLevel);
             if (Logger.IsEnabled(eventLogLevel))
-                Logger.Log(WriteEntry((EventLogLevel)eventLevel, innerException, message, null));
+                Logger.Log(WriteEntry(eventLogLevel, innerException, message, null));
 
             if (innerException != null) 
                 if (string.IsNullOrEmpty(argumentName))
@@ -344,6 +341,9 @@ namespace Microsoft.IdentityModel.Logging
                 else
                     return (T)Activator.CreateInstance(typeof(T), argumentName, message);
         }
+
+        private static EventLogLevel EventLevelToEventLogLevel(EventLevel eventLevel) =>
+            (uint)(int)eventLevel <= 5 ? (EventLogLevel)eventLevel : EventLogLevel.Error;
 
         /// <summary>
         /// Formats the string using InvariantCulture
