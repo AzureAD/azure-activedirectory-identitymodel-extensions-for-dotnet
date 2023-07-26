@@ -423,7 +423,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 // 1. User specified delegate: IssuerSigningKeyResolver returned null
                 // 2. ResolveIssuerSigningKey returned null
                 // Try all the keys. This is the degenerate case, not concerned about perf.
-                keys = TokenUtilities.GetAllSigningKeys(validationParameters);
+                keys = TokenUtilities.GetAllSigningKeys(validationParameters: validationParameters);
             }
 
             // keep track of exceptions thrown, keys that were tried
