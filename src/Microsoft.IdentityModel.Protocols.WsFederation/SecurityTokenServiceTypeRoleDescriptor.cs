@@ -24,17 +24,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// Passive Requestor Token endpoint
         /// fed:PassiveRequestorEndpoint, https://docs.oasis-open.org/wsfed/federation/v1.2/os/ws-federation-1.2-spec-os.html#:~:text=fed%3ASecurityTokenServiceType/fed%3APassiveRequestorEndpoint
         /// </summary>
-        public string? TokenEndpoint
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Active Requestor Token Endpoint
-        /// fed:SecurityTokenServiceType, http://docs.oasis-open.org/wsfed/federation/v1.2/os/ws-federation-1.2-spec-os.html#:~:text=fed%3ASecurityTokenSerivceEndpoint
-        /// </summary>
-        public string? ActiveTokenEndpoint
+        public string TokenEndpoint
         {
             get;
             set;
