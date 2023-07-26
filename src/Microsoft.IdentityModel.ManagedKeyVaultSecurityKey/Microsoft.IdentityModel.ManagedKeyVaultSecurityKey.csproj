@@ -11,7 +11,6 @@
     <PackageId>Microsoft.IdentityModel.ManagedKeyVaultSecurityKey</PackageId>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <PackageTags>.NET;Windows;Authentication;Identity;Azure;Key;Vault;Extensions</PackageTags>
-    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
