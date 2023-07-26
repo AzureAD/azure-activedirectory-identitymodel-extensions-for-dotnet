@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 
@@ -289,6 +291,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="signatureLength">how many bytes to verfiy.</param>
         /// <param name="algorithm">algorithm passed by AuthenticatedEncryptionProvider.</param>
         /// <returns>true if computed signature matches the signature parameter, false otherwise.</returns>
+#if NET6_0_OR_GREATER
+        [SkipLocalsInit]
+#endif
         internal bool Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength, string algorithm)
         {
             if (input == null || input.Length == 0)
@@ -377,7 +382,17 @@ namespace Microsoft.IdentityModel.Tokens
             try
             {
                 keyedHashAlgorithm = GetKeyedHashAlgorithm(GetKeyBytes(Key), Algorithm);
-                return Utility.AreEqual(signature, keyedHashAlgorithm.ComputeHash(input, inputOffset, inputLength), signatureLength);
+
+                scoped Span<byte> hash;
+#if NET6_0_OR_GREATER
+                hash = stackalloc byte[keyedHashAlgorithm.HashSize / 8]; // only known algorithms are used, all of which have a small enough hash size to stackalloc
+                keyedHashAlgorithm.TryComputeHash(input.AsSpan(inputOffset, inputLength), hash, out int bytesWritten);
+                Debug.Assert(bytesWritten == hash.Length);
+#else
+                hash = keyedHashAlgorithm.ComputeHash(input, inputOffset, inputLength).AsSpan();
+#endif
+
+                return Utility.AreEqual(signature, hash, signatureLength);
             }
             catch
             {
