@@ -290,7 +290,7 @@ namespace Microsoft.IdentityModel.Logging
                 IdentityModelEventSource.Logger.WriteVerbose(message, args);
 
             if (Logger.IsEnabled(EventLogLevel.Verbose))
-                Logger.Log(WriteEntry((EventLogLevel)EventLevel.Verbose, null, message, args));
+                Logger.Log(WriteEntry(EventLogLevel.Verbose, null, message, args));
         }
 
         /// <summary>
