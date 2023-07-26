@@ -49,13 +49,13 @@ namespace Microsoft.IdentityModel.ManagedKeyVaultSecurityKey
         public ManagedKeyVaultSecurityKey(string keyIdentifier, string clientId, string clientSecret)
         {
             if (string.IsNullOrEmpty(keyIdentifier))
-                throw LogHelper.LogArgumentNullException(nameof(keyIdentifier));
+                throw LogHelper.LogArgumentNullException(nameof(keyIdentifier))!;
 
             if (string.IsNullOrEmpty(clientId))
-                throw LogHelper.LogArgumentNullException(nameof(clientId));
+                throw LogHelper.LogArgumentNullException(nameof(clientId))!;
 
             if (string.IsNullOrEmpty(clientSecret))
-                throw LogHelper.LogArgumentNullException(nameof(clientSecret));
+                throw LogHelper.LogArgumentNullException(nameof(clientSecret))!;
 
             KeyId = keyIdentifier;
             Callback = new AuthenticationCallback(async (string authority, string resource, string scope) =>

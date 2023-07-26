@@ -136,7 +136,7 @@ namespace Microsoft.IdentityModel.TestExtensions
         /// <summary>
         /// Gets or sets the SigningCredentials used to sign the tokens created.
         /// </summary>
-        public SigningCredentials SigningCredentials { get; set; }
+        public SigningCredentials? SigningCredentials { get; set; }
 
         #region Create Test Token Methods
         /// <summary>

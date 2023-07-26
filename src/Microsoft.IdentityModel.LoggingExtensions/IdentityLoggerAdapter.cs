@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.LoggingExtensions
         }
 
         /// <inheritdoc/>
-        public void Log(LogEntry entry)
+        public void Log(LogEntry? entry)
         {
             if (entry != null)
             {
