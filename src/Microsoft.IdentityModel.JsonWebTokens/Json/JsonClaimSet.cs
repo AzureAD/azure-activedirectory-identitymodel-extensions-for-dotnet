@@ -230,7 +230,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (!RootElement.TryGetProperty(key, out JsonElement jsonElement))
                 return DateTime.MinValue;
 
-            return EpochTime.DateTime(Convert.ToInt64(Math.Truncate(Convert.ToDouble(ParseTimeValue(key, jsonElement), CultureInfo.InvariantCulture))));
+            return EpochTime.DateTime(Convert.ToInt64(Math.Truncate((double)ParseTimeValue(key, jsonElement))));
         }
 
         internal T GetValue<T>(string key)
