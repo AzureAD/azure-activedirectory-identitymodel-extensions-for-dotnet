@@ -1440,7 +1440,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="jsonWebToken">The JWT token</param>
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validation.</param>
         /// <returns></returns>
-        private async Task<TokenValidationResult> ValidateTokenAsync(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters)
+        private async ValueTask<TokenValidationResult> ValidateTokenAsync(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters)
         {
             BaseConfiguration currentConfiguration = null;
             if (validationParameters.ConfigurationManager != null)
@@ -1519,15 +1519,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return tokenValidationResult;
         }
 
-        private async Task<TokenValidationResult> ValidateTokenAsync(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+        private ValueTask<TokenValidationResult> ValidateTokenAsync(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
         {
-            if (jsonWebToken.IsEncrypted)
-                return await ValidateJWEAsync(jsonWebToken, validationParameters, configuration).ConfigureAwait(false);
-
-            return await ValidateJWSAsync(jsonWebToken, validationParameters, configuration).ConfigureAwait(false);
+            return jsonWebToken.IsEncrypted ?
+                ValidateJWEAsync(jsonWebToken, validationParameters, configuration) :
+                ValidateJWSAsync(jsonWebToken, validationParameters, configuration);
         }
 
-        private async Task<TokenValidationResult> ValidateJWSAsync(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+        private async ValueTask<TokenValidationResult> ValidateJWSAsync(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
         {
             try
             {
@@ -1571,7 +1570,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
 
-        private async Task<TokenValidationResult> ValidateJWEAsync(JsonWebToken jwtToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+        private async ValueTask<TokenValidationResult> ValidateJWEAsync(JsonWebToken jwtToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
         {
             try
             {
@@ -1642,7 +1641,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return validatedToken;
         }
 
-        private async Task<TokenValidationResult> ValidateTokenPayloadAsync(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+        private async ValueTask<TokenValidationResult> ValidateTokenPayloadAsync(JsonWebToken jsonWebToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
         {
             var expires = jsonWebToken.HasPayloadClaim(JwtRegisteredClaimNames.Exp) ? (DateTime?)jsonWebToken.ValidTo : null;
             var notBefore = jsonWebToken.HasPayloadClaim(JwtRegisteredClaimNames.Nbf) ? (DateTime?)jsonWebToken.ValidFrom : null;
