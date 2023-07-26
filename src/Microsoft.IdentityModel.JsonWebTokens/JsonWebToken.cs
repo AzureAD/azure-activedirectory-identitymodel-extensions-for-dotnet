@@ -605,9 +605,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     if (Payload.TryGetValue(JwtRegisteredClaimNames.Aud, out JsonElement audiences))
                     {
                         if (audiences.ValueKind == JsonValueKind.String)
-                            _audiences = new List<string> { audiences.GetString() };
-
-                        if (audiences.ValueKind == JsonValueKind.Array)
+                        {
+                            _audiences.Add(audiences.GetString());
+                        }
+                        else if (audiences.ValueKind == JsonValueKind.Array)
                         {
                             foreach (JsonElement jsonElement in audiences.EnumerateArray())
                                 _audiences.Add(jsonElement.ToString());
