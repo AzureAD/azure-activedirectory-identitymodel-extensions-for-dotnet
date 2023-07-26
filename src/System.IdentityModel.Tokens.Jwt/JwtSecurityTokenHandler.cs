@@ -1343,7 +1343,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 // 1. User specified delegate: IssuerSigningKeyResolver returned null
                 // 2. ResolveIssuerSigningKey returned null
                 // Try all the keys. This is the degenerate case, not concerned about perf.
-                keys = TokenUtilities.GetAllSigningKeys(validationParameters, configuration);
+                keys = TokenUtilities.GetAllSigningKeys(configuration, validationParameters);
             }
 
             // keep track of exceptions thrown, keys that were tried
@@ -1390,7 +1390,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
 
             // Get information on where keys used during token validation came from for debugging purposes.
-            var keysInTokenValidationParameters = TokenUtilities.GetAllSigningKeys(validationParameters);
+            var keysInTokenValidationParameters = TokenUtilities.GetAllSigningKeys(validationParameters: validationParameters);
             var keysInConfiguration = TokenUtilities.GetAllSigningKeys(configuration);
             var numKeysInTokenValidationParameters = keysInTokenValidationParameters.Count();
             var numKeysInConfiguration = keysInConfiguration.Count();

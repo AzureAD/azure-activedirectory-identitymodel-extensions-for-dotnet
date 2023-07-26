@@ -112,47 +112,38 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Returns all <see cref="SecurityKey"/> provided in validationParameters.
-        /// </summary>
-        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
-        /// <returns>Returns all <see cref="SecurityKey"/> provided in validationParameters.</returns>
-        internal static IEnumerable<SecurityKey> GetAllSigningKeys(TokenValidationParameters validationParameters)
-        {
-            LogHelper.LogInformation(TokenLogMessages.IDX10243);
-            if (validationParameters.IssuerSigningKey != null)
-                yield return validationParameters.IssuerSigningKey;
-
-            if (validationParameters.IssuerSigningKeys != null)
-                foreach (SecurityKey key in validationParameters.IssuerSigningKeys)
-                    yield return key;
-        }
-
-
-        /// <summary>
-        /// Returns all <see cref="SecurityKey"/> provided in <paramref name="configuration"/>.
-        /// </summary>
-        /// <param name="configuration">The <see cref="BaseConfiguration"/> that contains signing keys used for validation.</param>
-        /// <returns>Returns all <see cref="SecurityKey"/> provided in provided in <paramref name="configuration"/>.</returns>
-        internal static IEnumerable<SecurityKey> GetAllSigningKeys(BaseConfiguration configuration)
-        {
-            LogHelper.LogInformation(TokenLogMessages.IDX10265);
-
-            if (configuration?.SigningKeys != null)
-                foreach (SecurityKey key in configuration.SigningKeys)
-                    yield return key;
-        }
-
-        /// <summary>
         /// Returns all <see cref="SecurityKey"/> provided in <paramref name="configuration"/> and <paramref name="validationParameters"/>.
         /// </summary>
         /// <param name="configuration">The <see cref="BaseConfiguration"/> that contains signing keys used for validation.</param>
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
         /// <returns>Returns all <see cref="SecurityKey"/> provided in provided in <paramref name="configuration"/> and <paramref name="validationParameters"/>.</returns>
-        internal static IEnumerable<SecurityKey> GetAllSigningKeys(TokenValidationParameters validationParameters, BaseConfiguration configuration)
+        internal static IEnumerable<SecurityKey> GetAllSigningKeys(BaseConfiguration configuration = null, TokenValidationParameters validationParameters = null)
         {
-            LogHelper.LogInformation(TokenLogMessages.IDX10264);
+            if (configuration is not null)
+            {
+                if (validationParameters is not null)
+                {
+                    LogHelper.LogInformation(TokenLogMessages.IDX10264);
+                }
 
-            return GetAllSigningKeys(configuration).Concat(GetAllSigningKeys(validationParameters));
+                LogHelper.LogInformation(TokenLogMessages.IDX10265);
+
+                if (configuration?.SigningKeys != null)
+                    foreach (SecurityKey key in configuration.SigningKeys)
+                        yield return key;
+            }
+
+            if (validationParameters is not null)
+            {
+                LogHelper.LogInformation(TokenLogMessages.IDX10243);
+
+                if (validationParameters.IssuerSigningKey != null)
+                    yield return validationParameters.IssuerSigningKey;
+
+                if (validationParameters.IssuerSigningKeys != null)
+                    foreach (SecurityKey key in validationParameters.IssuerSigningKeys)
+                        yield return key;
+            }
         }
 
         /// <summary>
