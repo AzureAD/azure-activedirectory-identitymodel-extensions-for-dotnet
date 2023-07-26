@@ -604,19 +604,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     lock (_audiencesLock)
                     {
                         if (_audiences == null)
-
-                            _audiences = new List<string>();
-
                         if (Payload.TryGetValue(JwtRegisteredClaimNames.Aud, out JsonElement audiences))
                         {
-                            if (audiences.ValueKind == JsonValueKind.String)
-                                _audiences = new List<string> { audiences.GetString() };
-
-                            if (audiences.ValueKind == JsonValueKind.Array)
-                            {
-                                foreach (JsonElement jsonElement in audiences.EnumerateArray())
-                                    _audiences.Add(jsonElement.ToString());
-                            }
+                                if (audiences.ValueKind == JsonValueKind.String)
+                                {
+                                    _audiences = new List<string> { audiences.GetString() };
+                                }
+                                else if (audiences.ValueKind == JsonValueKind.Array)
+                                {
+                                    foreach (JsonElement jsonElement in audiences.EnumerateArray())
+                                        _audiences.Add(jsonElement.ToString());
+                                }
                         }
                     }
                 }
