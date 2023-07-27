@@ -300,7 +300,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     if (!firstQueryParam)
                         stringBuffer.Append("&");
 
-                    stringBuffer.Append($"{queryParam.Key}={queryParam.Value}");
+                    stringBuffer.Append(queryParam.Key).Append('=').Append(queryParam.Value);
 
                     queryParamNameList.Add(queryParam.Key);
                     firstQueryParam = false;
@@ -342,7 +342,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     if (!firstHeader)
                         stringBuffer.Append(_newlineSeparator);
 
-                    stringBuffer.Append($"{headerName}: {header.Value}");
+                    stringBuffer.Append(headerName).Append(": ").Append(header.Value);
                     firstHeader = false;
                 }
 
@@ -847,7 +847,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                         if (!firstQueryParam)
                             stringBuffer.Append("&");
 
-                        stringBuffer.Append($"{queryParamName}={queryParamsValue}");
+                        stringBuffer.Append(queryParamName).Append('=').Append(queryParamsValue);
                         firstQueryParam = false;
 
                         // remove the query param from the dictionary to mark it as covered.
@@ -915,7 +915,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                         if (!firstHeader)
                             stringBuffer.Append(_newlineSeparator);
 
-                        stringBuffer.Append($"{headerName}: {headerValue}");
+                        stringBuffer.Append(headerName).Append(": ").Append(headerValue);
                         firstHeader = false;
 
                         // remove the header from the dictionary to mark it as covered.

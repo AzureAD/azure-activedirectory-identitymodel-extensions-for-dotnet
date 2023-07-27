@@ -32,7 +32,7 @@
     <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(SrcTargets)</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">$(SrcStandardTargets)</TargetFrameworks>
     <NetStandardImplicitPackageVersion>$(NetStandardVersion)</NetStandardImplicitPackageVersion>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>11</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
