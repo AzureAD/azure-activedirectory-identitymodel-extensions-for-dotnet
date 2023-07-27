@@ -37,6 +37,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         private string _act;
         private string _alg;
         private IList<string> _audiences;
+        private readonly object _audiencesLock = new object();
         private string _authenticationTag;
         private string _ciphertext;
         private string _cty;
@@ -650,28 +651,35 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 if (_audiences == null)
                 {
-                    _audiences = new List<string>();
-#if NET45
-                    if (Payload.TryGetValue(JwtRegisteredClaimNames.Aud, out JToken value))
+                    lock (_audiencesLock)
                     {
-                        if (value.Type is JTokenType.String)
-                            _audiences = new List<string> { value.ToObject<string>() };
-                        else if (value.Type is JTokenType.Array)
-                            _audiences = value.ToObject<List<string>>();
-                    }
-#else
-                    if (Payload.TryGetValue(JwtRegisteredClaimNames.Aud, out JsonElement audiences))
-                    {
-                        if (audiences.ValueKind == JsonValueKind.String)
-                            _audiences = new List<string> { audiences.GetString() };
-
-                        if (audiences.ValueKind == JsonValueKind.Array)
+                        if (_audiences == null)
                         {
-                            foreach (JsonElement jsonElement in audiences.EnumerateArray())
-                                _audiences.Add(jsonElement.ToString());
+                            var aud = new List<string>();
+#if NET45
+                            if (Payload.TryGetValue(JwtRegisteredClaimNames.Aud, out JToken value))
+                            {
+                                if (value.Type is JTokenType.String)
+                                    aud = new List<string> { value.ToObject<string>() };
+                                else if (value.Type is JTokenType.Array)
+                                    aud = value.ToObject<List<string>>();
+                            }
+#else
+                            if (Payload.TryGetValue(JwtRegisteredClaimNames.Aud, out JsonElement audiences))
+                            {
+                                if (audiences.ValueKind == JsonValueKind.String)
+                                    aud = new List<string> { audiences.GetString() };
+
+                                if (audiences.ValueKind == JsonValueKind.Array)
+                                {
+                                    foreach (JsonElement jsonElement in audiences.EnumerateArray())
+                                        aud.Add(jsonElement.ToString());
+                                }
+                            }
+#endif
+                            _audiences = aud;
                         }
                     }
-#endif
                 }
 
                 return _audiences;
