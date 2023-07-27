@@ -29,8 +29,8 @@ jobs:
       with:
         dotnet-version: 8.0.100-preview.6.23330.14
   
-    # Build and test
-#    - name: Restore packages
-#      run: dotnet restore Wilson.sln
+    # Restore the NuGet pacakges (needed for the moment) and test
+    - name: Restore packages
+      run: dotnet restore Wilson.sln
     - name: Run the tests
       run: dotnet test Wilson.sln
