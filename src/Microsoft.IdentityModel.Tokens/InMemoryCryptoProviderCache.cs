@@ -102,12 +102,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         private static string GetCacheKeyPrivate(SecurityKey securityKey, string algorithm, string typeofProvider)
         {
-            return string.Format(CultureInfo.InvariantCulture,
-                                 "{0}-{1}-{2}-{3}",
-                                 securityKey.GetType(),
-                                 securityKey.InternalId,
-                                 algorithm,
-                                 typeofProvider);
+            return $"{securityKey.GetType()}-{securityKey.InternalId}-{algorithm}-{typeofProvider}";
         }
 
         /// <summary>
