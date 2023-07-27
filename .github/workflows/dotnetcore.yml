@@ -1,18 +1,14 @@
 name: .NET Core
 
 on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches:
+      - dev7x
   push:
     branches:
       - dev7x
-  pull_request:
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - ready_for_review
-    branches:
-      - dev7x
-
+  
 env:
   TargetNet8: True
 
