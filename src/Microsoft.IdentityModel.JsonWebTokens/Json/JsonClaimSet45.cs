@@ -21,6 +21,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     internal class JsonClaimSet45
     {
         IList<Claim> _claims;
+        private readonly object _claimsLock = new object();
 
         internal JsonClaimSet45()
         {
@@ -122,35 +123,46 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal IList<Claim> Claims(string issuer)
         {
-            if (_claims != null)
-                return _claims;
-
-            _claims = new List<Claim>();
-
-            if (!RootElement.HasValues)
-                return _claims;
-
-            // there is some code redundancy here that was not factored as this is a high use method. Each identity received from the host will pass through here.
-            foreach (var entry in RootElement)
+            if (_claims == null)
             {
-                if (entry.Value == null)
+                lock (_claimsLock)
                 {
-                    _claims.Add(new Claim(entry.Key, string.Empty, JsonClaimValueTypes.JsonNull, issuer, issuer));
-                    continue;
-                }
+                    if (_claims == null)
+                    {
+                        var claims = new List<Claim>();
 
-                if (entry.Value.Type is JTokenType.String)
-                {
-                    var claimValue = entry.Value.ToObject<string>();
-                    _claims.Add(new Claim(entry.Key, claimValue, ClaimValueTypes.String, issuer, issuer));
-                    continue;
-                }
+                        if (!RootElement.HasValues)
+                        {
+                            _claims = claims;
+                            return _claims;
+                        }
 
-                var jtoken = entry.Value;
-                if (jtoken != null)
-                {
-                    AddClaimsFromJToken(_claims, entry.Key, jtoken, issuer);
-                    continue;
+                        // there is some code redundancy here that was not factored as this is a high use method. Each identity received from the host will pass through here.
+                        foreach (var entry in RootElement)
+                        {
+                            if (entry.Value == null)
+                            {
+                                claims.Add(new Claim(entry.Key, string.Empty, JsonClaimValueTypes.JsonNull, issuer, issuer));
+                                continue;
+                            }
+
+                            if (entry.Value.Type is JTokenType.String)
+                            {
+                                var claimValue = entry.Value.ToObject<string>();
+                                claims.Add(new Claim(entry.Key, claimValue, ClaimValueTypes.String, issuer, issuer));
+                                continue;
+                            }
+
+                            var jtoken = entry.Value;
+                            if (jtoken != null)
+                            {
+                                AddClaimsFromJToken(claims, entry.Key, jtoken, issuer);
+                                continue;
+                            }
+                        }
+
+                        _claims = claims;
+                    }
                 }
             }
 
