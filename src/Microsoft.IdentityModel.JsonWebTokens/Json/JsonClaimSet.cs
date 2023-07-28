@@ -18,6 +18,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// </summary>
     internal class JsonClaimSet
     {
+        internal static JsonClaimSet Empty { get; } = new JsonClaimSet("{}"u8.ToArray());
+
         private IList<Claim> _claims;
         private readonly object _claimsLock = new object();
 
