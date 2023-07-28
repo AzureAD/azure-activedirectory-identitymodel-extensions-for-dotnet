@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -505,7 +506,7 @@ namespace System.IdentityModel.Tokens.Jwt
         private void DecodeJws(string[] tokenParts)
         {
             // Log if CTY is set, assume compact JWS
-            if (Header.Cty != null)
+            if (Header.Cty != null && LogHelper.IsEnabled(EventLogLevel.Verbose))
                 LogHelper.LogVerbose(LogHelper.FormatInvariant(LogMessages.IDX12738, Header.Cty));
 
             try

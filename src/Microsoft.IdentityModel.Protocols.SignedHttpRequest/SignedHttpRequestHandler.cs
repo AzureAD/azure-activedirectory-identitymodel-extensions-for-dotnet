@@ -32,6 +32,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -1286,7 +1287,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
             if (repeatedQueryParams.Any())
             {
-                LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX23004, LogHelper.MarkAsNonPII(string.Join(", ", repeatedQueryParams))));
+                if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                    LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX23004, LogHelper.MarkAsNonPII(string.Join(", ", repeatedQueryParams))));
 
                 foreach (var repeatedQueryParam in repeatedQueryParams)
                 {
@@ -1340,7 +1342,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
             if (repeatedHeaders.Any())
             {
-                LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX23005, LogHelper.MarkAsNonPII(string.Join(", ", repeatedHeaders))));
+                if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                    LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX23005, LogHelper.MarkAsNonPII(string.Join(", ", repeatedHeaders))));
 
                 foreach (var repeatedHeaderName in repeatedHeaders)
                 {
