@@ -17,7 +17,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// </summary>
     public class JsonWebToken : SecurityToken
     {
-        private char[] _hChars;
         private ClaimsIdentity _claimsIdentity;
         private bool _wasClaimsIdentitySet;
 
@@ -471,16 +470,30 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX14310));
 
                 // right number of dots for JWE
-                _hChars = encodedJson.ToCharArray(0, Dot1);
+                ReadOnlyMemory<char> hChars = encodedJson.AsMemory(0, Dot1);
 
                 // header cannot be empty
-                if (_hChars.Length == 0)
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14307));
+                if (hChars.IsEmpty)
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14307, encodedJson)));
 
-                HeaderAsciiBytes = Encoding.ASCII.GetBytes(_hChars);
+                byte[] headerAsciiBytes = new byte[hChars.Length];
+#if NET6_0_OR_GREATER
+                Encoding.ASCII.GetBytes(hChars.Span, headerAsciiBytes);
+#else
+                unsafe
+                {
+                    fixed (char* hCharsPtr = hChars.Span)
+                    fixed (byte* headerAsciiBytesPtr = headerAsciiBytes)
+                    {
+                        Encoding.ASCII.GetBytes(hCharsPtr, hChars.Length, headerAsciiBytesPtr, headerAsciiBytes.Length);
+                    }
+                }
+#endif
+                HeaderAsciiBytes = headerAsciiBytes;
+
                 try
                 {
-                    Header = new JsonClaimSet(Base64UrlEncoder.UnsafeDecode(_hChars));
+                    Header = new JsonClaimSet(Base64UrlEncoder.UnsafeDecode(hChars));
                 }
                 catch (Exception ex)
                 {
@@ -488,8 +501,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
 
                 // dir does not have any key bytes
-                char[] encryptedKeyBytes = encodedJson.ToCharArray(Dot1 + 1, Dot2 - Dot1 - 1);
-                if (encryptedKeyBytes.Length != 0)
+                ReadOnlyMemory<char> encryptedKeyBytes = encodedJson.AsMemory(Dot1 + 1, Dot2 - Dot1 - 1);
+                if (!encryptedKeyBytes.IsEmpty)
                 {
                     EncryptedKeyBytes = Base64UrlEncoder.UnsafeDecode(encryptedKeyBytes);
                     _encryptedKey = encodedJson.Substring(Dot1 + 1, Dot2 - Dot1 - 1);
@@ -499,9 +512,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     _encryptedKey = string.Empty;
                 }
 
-                char[] initializationVectorChars = encodedJson.ToCharArray(Dot2 + 1, Dot3 - Dot2 - 1);
-                if (initializationVectorChars.Length == 0)
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14308));
+                ReadOnlyMemory<char> initializationVectorChars = encodedJson.AsMemory(Dot2 + 1, Dot3 - Dot2 - 1);
+                if (initializationVectorChars.IsEmpty)
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14308, encodedJson)));
 
                 try
                 {
@@ -512,9 +525,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14309, ex));
                 }
 
-                char[] authTagChars = encodedJson.ToCharArray(Dot4 + 1, encodedJson.Length - Dot4 - 1);
-                if (authTagChars.Length == 0)
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14310));
+                ReadOnlyMemory<char> authTagChars = encodedJson.AsMemory(Dot4 + 1);
+                if (authTagChars.IsEmpty)
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14310, encodedJson)));
 
                 try
                 {
@@ -525,13 +538,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14311, ex));
                 }
 
-                char[] cipherTextBytes = encodedJson.ToCharArray(Dot3 + 1, Dot4 - Dot3 - 1);
-                if (cipherTextBytes.Length == 0)
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14306));
+                ReadOnlyMemory<char> cipherTextBytes = encodedJson.AsMemory(Dot3 + 1, Dot4 - Dot3 - 1);
+                if (cipherTextBytes.IsEmpty)
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14306, encodedJson)));
 
                 try
                 {
-                    CipherTextBytes = Base64UrlEncoder.UnsafeDecode(encodedJson.ToCharArray(Dot3 + 1, Dot4 - Dot3 - 1));
+                    CipherTextBytes = Base64UrlEncoder.UnsafeDecode(cipherTextBytes);
                 }
                 catch (Exception ex)
                 {
