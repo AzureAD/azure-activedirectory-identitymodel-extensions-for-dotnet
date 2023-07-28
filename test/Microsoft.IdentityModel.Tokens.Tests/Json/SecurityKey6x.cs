@@ -3,20 +3,22 @@
 
 using System;
 using Microsoft.IdentityModel.Logging;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
     /// Base class for Security Key.
     /// </summary>
-    public abstract class SecurityKey
+    /// This is the original SecurityKey in the 6x branch.
+    /// Used for ensuring backcompat.
+    public abstract class SecurityKey6x
     {
         private CryptoProviderFactory _cryptoProviderFactory;
         private object _internalIdLock = new object();
         private string _internalId;
 
-        internal SecurityKey(SecurityKey key)
+        internal SecurityKey6x(SecurityKey6x key)
         {
             _cryptoProviderFactory = key._cryptoProviderFactory;
             KeyId = key.KeyId;
@@ -25,7 +27,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Default constructor
         /// </summary>
-        public SecurityKey()
+        public SecurityKey6x()
         {
             _cryptoProviderFactory = CryptoProviderFactory.Default;
         }
@@ -39,13 +41,10 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     lock (_internalIdLock)
                     {
-                        if (_internalId == null)
-                        {
-                            if (CanComputeJwkThumbprint())
-                                _internalId = Base64UrlEncoder.Encode(ComputeJwkThumbprint());
-                            else
-                                _internalId = string.Empty;
-                        }
+                        if (CanComputeJwkThumbprint())
+                            _internalId = Base64UrlEncoder.Encode(ComputeJwkThumbprint());
+                        else
+                            _internalId = string.Empty;
                     }
                 }
 
@@ -117,7 +116,11 @@ namespace Microsoft.IdentityModel.Tokens
         public virtual bool IsSupportedAlgorithm(string algorithm)
         {
             // do not throw if algorithm is null or empty to stay in sync with CryptoProviderFactory.IsSupportedAlgorithm.
-            return CryptoProviderFactory.IsSupportedAlgorithm(algorithm, this);
+
+            // will not compile as SecurityKey is expected
+            // return CryptoProviderFactory.IsSupportedAlgorithm(algorithm, this);
+
+            return true;
         }
     }
 }
