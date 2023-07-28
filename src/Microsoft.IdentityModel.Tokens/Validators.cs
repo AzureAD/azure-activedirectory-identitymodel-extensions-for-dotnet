@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -133,7 +134,9 @@ namespace Microsoft.IdentityModel.Tokens
 
                     if (AudiencesMatch(validationParameters, tokenAudience, validAudience))
                     {
-                        LogHelper.LogInformation(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
+                        if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                            LogHelper.LogInformation(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
+
                         return true;
                     }
                 }
@@ -170,7 +173,9 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (string.CompareOrdinal(validAudience, 0, tokenAudience, 0, length) == 0)
             {
-                LogHelper.LogInformation(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
+                if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                    LogHelper.LogInformation(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
+
                 return true;
             }
 
@@ -266,14 +271,18 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (string.Equals(configuration.Issuer, issuer))
                 {
-                    LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer));
+                    if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                        LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer));
+
                     return issuer;
                 }
             }
 
             if (string.Equals(validationParameters.ValidIssuer, issuer))
             {
-                LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer));
+                if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                    LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer));
+
                 return issuer;
             }
 
@@ -289,7 +298,9 @@ namespace Microsoft.IdentityModel.Tokens
 
                     if (string.Equals(str, issuer))
                     {
-                        LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer));
+                        if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                            LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer));
+
                         return issuer;
                     }
                 }
@@ -393,12 +404,14 @@ namespace Microsoft.IdentityModel.Tokens
                 if (notBeforeUtc > DateTimeUtil.Add(utcNow, validationParameters.ClockSkew))
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(LogHelper.FormatInvariant(LogMessages.IDX10248, LogHelper.MarkAsNonPII(notBeforeUtc), LogHelper.MarkAsNonPII(utcNow))));
 
-                LogHelper.LogInformation(LogMessages.IDX10250, LogHelper.MarkAsNonPII(notBeforeUtc), LogHelper.MarkAsNonPII(utcNow));
+                if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                    LogHelper.LogInformation(LogMessages.IDX10250, LogHelper.MarkAsNonPII(notBeforeUtc), LogHelper.MarkAsNonPII(utcNow));
 
                 if (notAfterUtc < DateTimeUtil.Add(utcNow, validationParameters.ClockSkew.Negate()))
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(LogHelper.FormatInvariant(LogMessages.IDX10249, LogHelper.MarkAsNonPII(notAfterUtc), LogHelper.MarkAsNonPII(utcNow))));
 
-                LogHelper.LogInformation(LogMessages.IDX10251, LogHelper.MarkAsNonPII(notAfterUtc), LogHelper.MarkAsNonPII(utcNow));
+                if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                    LogHelper.LogInformation(LogMessages.IDX10251, LogHelper.MarkAsNonPII(notAfterUtc), LogHelper.MarkAsNonPII(utcNow));
             }
         }
 
@@ -562,7 +575,9 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             // if it reaches here, token type was succcessfully validated.
-            LogHelper.LogInformation(LogMessages.IDX10258, LogHelper.MarkAsNonPII(type));
+            if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                LogHelper.LogInformation(LogMessages.IDX10258, LogHelper.MarkAsNonPII(type));
+
             return type;
         }
     }
