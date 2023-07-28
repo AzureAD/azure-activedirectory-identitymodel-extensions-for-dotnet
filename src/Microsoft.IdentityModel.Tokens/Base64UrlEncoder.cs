@@ -207,10 +207,12 @@ namespace Microsoft.IdentityModel.Tokens
 
                 if (needReplace)
                 {
+                    Span<char> remaining = charsSpan;
                     int pos;
-                    while ((pos = charsSpan.IndexOfAny(base64UrlCharacter62, base64UrlCharacter63)) >= 0)
+                    while ((pos = remaining.IndexOfAny(base64UrlCharacter62, base64UrlCharacter63)) >= 0)
                     {
-                        charsSpan[pos] = charsSpan[pos] == base64UrlCharacter62 ? base64Character62 : base64Character63;
+                        remaining[pos] = (remaining[pos] == base64UrlCharacter62) ? base64Character62 : base64Character63;
+                        remaining = remaining.Slice(pos + 1);
                     }
                 }
 
