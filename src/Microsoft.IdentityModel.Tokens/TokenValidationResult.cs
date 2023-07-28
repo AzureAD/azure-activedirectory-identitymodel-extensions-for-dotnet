@@ -70,14 +70,12 @@ namespace Microsoft.IdentityModel.Tokens
                 if (!_hasIsValidOrExceptionBeenRead)
                     LogHelper.LogWarning(LogMessages.IDX10109);
 
-                IDictionary<string, object> claims = _claims;
-                if (claims is null && ClaimsIdentity is { } ci)
+                if (_claims is null && ClaimsIdentity is { } ci)
                 {
                     Interlocked.CompareExchange(ref _claims, TokenUtilities.CreateDictionaryFromClaims(ci.Claims), null);
-                    claims = _claims;
                 }
 
-                return claims;
+                return _claims;
             }
         }
 
