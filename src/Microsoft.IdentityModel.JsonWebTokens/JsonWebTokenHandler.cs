@@ -1608,7 +1608,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return new TokenValidationResult
                 {
                     SecurityToken = jwtToken,
-                    ClaimsIdentity = tokenValidationResult.ClaimsIdentity,
+                    ClaimsIdentityNoLocking = tokenValidationResult.ClaimsIdentityNoLocking,
                     IsValid = true,
                     TokenType = tokenValidationResult.TokenType
                 };
