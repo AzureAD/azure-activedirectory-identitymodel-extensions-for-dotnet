@@ -4,6 +4,7 @@
 using System;
 using System.Globalization;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -198,7 +199,9 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (Exception ex)
             {
-                LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10699, cacheKey, ex));
+                if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                    LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10699, cacheKey, ex));
+
                 return false;
             }
         }

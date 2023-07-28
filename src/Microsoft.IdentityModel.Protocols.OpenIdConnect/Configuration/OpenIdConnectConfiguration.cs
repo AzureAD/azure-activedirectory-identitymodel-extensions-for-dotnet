@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -31,7 +32,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             if (string.IsNullOrEmpty(json))
                 throw LogHelper.LogArgumentNullException(nameof(json));
 
-            LogHelper.LogVerbose(LogMessages.IDX21808, json);
+            if (LogHelper.IsEnabled(EventLogLevel.Verbose))
+                LogHelper.LogVerbose(LogMessages.IDX21808, json);
+
             return new OpenIdConnectConfiguration(json);
         }
 
@@ -69,7 +72,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             try
             {
-                LogHelper.LogVerbose(LogMessages.IDX21806, json, LogHelper.MarkAsNonPII(_className));
+                if (LogHelper.IsEnabled(EventLogLevel.Verbose))
+                    LogHelper.LogVerbose(LogMessages.IDX21806, json, LogHelper.MarkAsNonPII(_className));
+
                 JsonConvert.PopulateObject(json, this);
             }
             catch (Exception ex)

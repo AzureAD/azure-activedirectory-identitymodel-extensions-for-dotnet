@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -227,7 +228,8 @@ namespace Microsoft.IdentityModel.Tokens
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10900, ex));
+                    if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                        LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10900, ex));
                 }
             }
 
@@ -261,7 +263,8 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (ObjectDisposedException ex)
             {
-                LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10902, LogHelper.MarkAsNonPII(nameof(RemoveExpiredValuesLRU)), ex));
+                if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                    LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10902, LogHelper.MarkAsNonPII(nameof(RemoveExpiredValuesLRU)), ex));
             }
 
             return numItemsRemoved;
@@ -290,7 +293,8 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (ObjectDisposedException ex)
             {
-                LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10902, LogHelper.MarkAsNonPII(nameof(RemoveExpiredValues)), ex));
+                if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                    LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10902, LogHelper.MarkAsNonPII(nameof(RemoveExpiredValues)), ex));
             }
 
             return numItemsRemoved;

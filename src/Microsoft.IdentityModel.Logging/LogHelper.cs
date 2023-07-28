@@ -43,6 +43,15 @@ namespace Microsoft.IdentityModel.Logging
         }
 
         /// <summary>
+        /// Gets whether logging is enabled at the specified <see cref="EventLogLevel"/>."/>
+        /// </summary>
+        /// <param name="level">The log level</param>
+        /// <returns><see langword="true"/> if logging is enabled at the specified level; otherwise, <see langword="false"/>.</returns>
+        public static bool IsEnabled(EventLogLevel level) =>
+            Logger.IsEnabled(level) ||
+            IdentityModelEventSource.Logger.IsEnabled(EventLogLevelToEventLevel(level), EventKeywords.All);
+
+        /// <summary>
         /// Logs an exception using the event source logger and returns new <see cref="ArgumentNullException"/> exception.
         /// </summary>
         /// <param name="argument">argument that is null or empty.</param>
@@ -255,7 +264,7 @@ namespace Microsoft.IdentityModel.Logging
             if (exception == null)
                 return null;
 
-            if (IdentityModelEventSource.Logger.IsEnabled() && IdentityModelEventSource.Logger.LogLevel >= eventLevel)
+            if (IdentityModelEventSource.Logger.IsEnabled(eventLevel, EventKeywords.All))
                 IdentityModelEventSource.Logger.Write(eventLevel, exception.InnerException, exception.Message);
 
             EventLogLevel eventLogLevel = EventLevelToEventLogLevel(eventLevel);
@@ -272,7 +281,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         public static void LogInformation(string message, params object[] args)
         {
-            if (IdentityModelEventSource.Logger.IsEnabled() && IdentityModelEventSource.Logger.LogLevel >= EventLevel.Informational)
+            if (IdentityModelEventSource.Logger.IsEnabled(EventLevel.Informational, EventKeywords.All))
                 IdentityModelEventSource.Logger.WriteInformation(message, args);
 
             if (Logger.IsEnabled(EventLogLevel.Informational))
@@ -286,8 +295,8 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         public static void LogVerbose(string message, params object[] args)
         {
-            if (IdentityModelEventSource.Logger.IsEnabled())
-                IdentityModelEventSource.Logger.WriteVerbose(message, args);
+            if (IdentityModelEventSource.Logger.IsEnabled(EventLevel.Verbose, EventKeywords.All))
+                    IdentityModelEventSource.Logger.WriteVerbose(message, args);
 
             if (Logger.IsEnabled(EventLogLevel.Verbose))
                 Logger.Log(WriteEntry(EventLogLevel.Verbose, null, message, args));
@@ -300,8 +309,8 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         public static void LogWarning(string message, params object[] args)
         {
-            if (IdentityModelEventSource.Logger.IsEnabled())
-                IdentityModelEventSource.Logger.WriteWarning(message, args);
+            if (IdentityModelEventSource.Logger.IsEnabled(EventLevel.Warning, EventKeywords.All))
+                    IdentityModelEventSource.Logger.WriteWarning(message, args);
 
             if (Logger.IsEnabled(EventLogLevel.Warning))
                 Logger.Log(WriteEntry(EventLogLevel.Warning, null, message, args));
@@ -323,7 +332,7 @@ namespace Microsoft.IdentityModel.Logging
             else
                 message = format;
 
-            if (IdentityModelEventSource.Logger.IsEnabled() && IdentityModelEventSource.Logger.LogLevel >= eventLevel)
+            if (IdentityModelEventSource.Logger.IsEnabled(eventLevel, EventKeywords.All))
                 IdentityModelEventSource.Logger.Write(eventLevel, innerException, message);
 
             EventLogLevel eventLogLevel = EventLevelToEventLogLevel(eventLevel);
@@ -344,6 +353,9 @@ namespace Microsoft.IdentityModel.Logging
 
         private static EventLogLevel EventLevelToEventLogLevel(EventLevel eventLevel) =>
             (uint)(int)eventLevel <= 5 ? (EventLogLevel)eventLevel : EventLogLevel.Error;
+
+        private static EventLevel EventLogLevelToEventLevel(EventLogLevel eventLevel) =>
+            (uint)(int)eventLevel <= 5 ? (EventLevel)eventLevel : EventLevel.Error;
 
         /// <summary>
         /// Formats the string using InvariantCulture

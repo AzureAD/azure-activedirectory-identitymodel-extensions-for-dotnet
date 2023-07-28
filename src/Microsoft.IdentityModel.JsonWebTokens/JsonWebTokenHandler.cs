@@ -9,6 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -158,7 +159,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (token.Length > MaximumTokenSizeInBytes)
             {
-                LogHelper.LogInformation(TokenLogMessages.IDX10209, LogHelper.MarkAsNonPII(token.Length), LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes));
+                if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                    LogHelper.LogInformation(TokenLogMessages.IDX10209, LogHelper.MarkAsNonPII(token.Length), LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes));
+
                 return false;
             }
 
@@ -337,9 +340,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (tokenDescriptor == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
 
-            if ((tokenDescriptor.Subject == null || !tokenDescriptor.Subject.Claims.Any())
-                && (tokenDescriptor.Claims == null || !tokenDescriptor.Claims.Any()))
-                LogHelper.LogWarning(LogMessages.IDX14114, LogHelper.MarkAsNonPII(nameof(SecurityTokenDescriptor)), LogHelper.MarkAsNonPII(nameof(SecurityTokenDescriptor.Subject)), LogHelper.MarkAsNonPII(nameof(SecurityTokenDescriptor.Claims)));
+            if (LogHelper.IsEnabled(EventLogLevel.Warning))
+            {
+                if ((tokenDescriptor.Subject == null || !tokenDescriptor.Subject.Claims.Any())
+                    && (tokenDescriptor.Claims == null || !tokenDescriptor.Claims.Any()))
+                    LogHelper.LogWarning(LogMessages.IDX14114, LogHelper.MarkAsNonPII(nameof(SecurityTokenDescriptor)), LogHelper.MarkAsNonPII(nameof(SecurityTokenDescriptor.Subject)), LogHelper.MarkAsNonPII(nameof(SecurityTokenDescriptor.Claims)));
+            }
 
             JObject payload;
             if (tokenDescriptor.Subject != null)
@@ -354,7 +360,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (tokenDescriptor.Audience != null)
             {
-                if (payload.ContainsKey(JwtRegisteredClaimNames.Aud))
+                if (LogHelper.IsEnabled(EventLogLevel.Informational) && payload.ContainsKey(JwtRegisteredClaimNames.Aud))
                     LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, LogHelper.MarkAsNonPII(nameof(tokenDescriptor.Audience))));
 
                 payload[JwtRegisteredClaimNames.Aud] = tokenDescriptor.Audience;
@@ -362,7 +368,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (tokenDescriptor.Expires.HasValue)
             {
-                if (payload.ContainsKey(JwtRegisteredClaimNames.Exp))
+                if (LogHelper.IsEnabled(EventLogLevel.Informational) && payload.ContainsKey(JwtRegisteredClaimNames.Exp))
                     LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, LogHelper.MarkAsNonPII(nameof(tokenDescriptor.Expires))));
 
                 payload[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(tokenDescriptor.Expires.Value);
@@ -370,7 +376,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (tokenDescriptor.Issuer != null)
             {
-                if (payload.ContainsKey(JwtRegisteredClaimNames.Iss))
+                if (LogHelper.IsEnabled(EventLogLevel.Informational) && payload.ContainsKey(JwtRegisteredClaimNames.Iss))
                     LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, LogHelper.MarkAsNonPII(nameof(tokenDescriptor.Issuer))));
 
                 payload[JwtRegisteredClaimNames.Iss] = tokenDescriptor.Issuer;
@@ -378,7 +384,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (tokenDescriptor.IssuedAt.HasValue)
             {
-                if (payload.ContainsKey(JwtRegisteredClaimNames.Iat))
+                if (LogHelper.IsEnabled(EventLogLevel.Informational) && payload.ContainsKey(JwtRegisteredClaimNames.Iat))
                     LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, LogHelper.MarkAsNonPII(nameof(tokenDescriptor.IssuedAt))));
 
                 payload[JwtRegisteredClaimNames.Iat] = EpochTime.GetIntDate(tokenDescriptor.IssuedAt.Value);
@@ -386,7 +392,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (tokenDescriptor.NotBefore.HasValue)
             {
-                if (payload.ContainsKey(JwtRegisteredClaimNames.Nbf))
+                if (LogHelper.IsEnabled(EventLogLevel.Informational) && payload.ContainsKey(JwtRegisteredClaimNames.Nbf))
                     LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, LogHelper.MarkAsNonPII(nameof(tokenDescriptor.NotBefore))));
 
                 payload[JwtRegisteredClaimNames.Nbf] = EpochTime.GetIntDate(tokenDescriptor.NotBefore.Value);
@@ -698,7 +704,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
             catch(Exception ex)
             {
-                LogHelper.LogExceptionMessage(new SecurityTokenException(LogMessages.IDX14307, ex));
+                if (LogHelper.IsEnabled(EventLogLevel.Error))
+                    LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(LogMessages.IDX14307, ex, payload)));
             }
 
             payload = jsonPayload != null ? jsonPayload.ToString(Formatting.None) : payload;
@@ -841,7 +848,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             string actualIssuer = jwtToken.Issuer;
             if (string.IsNullOrWhiteSpace(actualIssuer))
             {
-                LogHelper.LogVerbose(TokenLogMessages.IDX10244, ClaimsIdentity.DefaultIssuer);
+                if (LogHelper.IsEnabled(EventLogLevel.Verbose))
+                    LogHelper.LogVerbose(TokenLogMessages.IDX10244, ClaimsIdentity.DefaultIssuer);
+
                 actualIssuer = ClaimsIdentity.DefaultIssuer;
             }
 
@@ -1136,12 +1145,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 var key = ResolveTokenDecryptionKey(jwtToken.EncodedToken, jwtToken, validationParameters);
                 if (key != null)
                 {
-                    LogHelper.LogInformation(TokenLogMessages.IDX10904, key);
+                    if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                        LogHelper.LogInformation(TokenLogMessages.IDX10904, key);
                 } 
                 else if (configuration != null)
                 {
                     key = ResolveTokenDecryptionKeyFromConfig(jwtToken, configuration);
-                    if ( key != null )
+                    if (key != null && LogHelper.IsEnabled(EventLogLevel.Informational))
                         LogHelper.LogInformation(TokenLogMessages.IDX10905, key);
                 }
                     
@@ -1465,7 +1475,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     // The exception is not re-thrown as the TokenValidationParameters may have the issuer and signing key set
                     // directly on them, allowing the library to continue with token validation.
-                    LogHelper.LogWarning(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParameters.ConfigurationManager.MetadataAddress, ex.ToString()));
+                    if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                        LogHelper.LogWarning(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParameters.ConfigurationManager.MetadataAddress, ex.ToString()));
                 }
             }
 
@@ -1740,7 +1751,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     {
                         if (ValidateSignature(jwtToken, key, validationParameters))
                         {
-                            LogHelper.LogInformation(TokenLogMessages.IDX10242, jwtToken);
+                            if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                                LogHelper.LogInformation(TokenLogMessages.IDX10242, jwtToken);
+
                             jwtToken.SigningKey = key;
                             return jwtToken;
                         }
@@ -1823,7 +1836,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
             if (!cryptoProviderFactory.IsSupportedAlgorithm(algorithm, key))
             {
-                LogHelper.LogInformation(LogMessages.IDX14000, LogHelper.MarkAsNonPII(algorithm), key);
+                if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                    LogHelper.LogInformation(LogMessages.IDX14000, LogHelper.MarkAsNonPII(algorithm), key);
+
                 return false;
             }
 
@@ -1881,7 +1896,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
             if (!cryptoProviderFactory.IsSupportedAlgorithm(jsonWebToken.Alg, key))
             {
-                LogHelper.LogInformation(LogMessages.IDX14000, LogHelper.MarkAsNonPII(jsonWebToken.Alg), key);
+                if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                    LogHelper.LogInformation(LogMessages.IDX14000, LogHelper.MarkAsNonPII(jsonWebToken.Alg), key);
+
                 return false;
             }
 

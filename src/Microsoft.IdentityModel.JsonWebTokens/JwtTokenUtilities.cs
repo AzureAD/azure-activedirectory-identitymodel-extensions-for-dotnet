@@ -10,6 +10,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
@@ -97,7 +98,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             try
             {
-                LogHelper.LogVerbose(LogHelper.FormatInvariant(LogMessages.IDX14201, LogHelper.MarkAsNonPII(cacheProvider)));
+                if (LogHelper.IsEnabled(EventLogLevel.Verbose))
+                    LogHelper.LogVerbose(LogHelper.FormatInvariant(LogMessages.IDX14201, LogHelper.MarkAsNonPII(cacheProvider)));
+
                 return Base64UrlEncoder.Encode(signatureProvider.Sign(Encoding.UTF8.GetBytes(input)));
             }
             finally
@@ -165,7 +168,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
                 if (cryptoProviderFactory == null)
                 {
-                    LogHelper.LogWarning(TokenLogMessages.IDX10607, key);
+                    if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                        LogHelper.LogWarning(TokenLogMessages.IDX10607, key);
+
                     continue;
                 }
 
@@ -179,8 +184,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     {
                         if (!cryptoProviderFactory.IsSupportedAlgorithm(jsonWebToken.Enc, key))
                         {
+                            if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                                LogHelper.LogWarning(TokenLogMessages.IDX10611, LogHelper.MarkAsNonPII(decryptionParameters.Enc), key);
+
                             algorithmNotSupportedByCryptoProvider = true;
-                            LogHelper.LogWarning(TokenLogMessages.IDX10611, LogHelper.MarkAsNonPII(decryptionParameters.Enc), key);
                             continue;
                         }
 
@@ -203,8 +210,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     {
                         if (!cryptoProviderFactory.IsSupportedAlgorithm(decryptionParameters.Enc, key))
                         {
+                            if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                                LogHelper.LogWarning(TokenLogMessages.IDX10611, LogHelper.MarkAsNonPII(decryptionParameters.Enc), key);
+
                             algorithmNotSupportedByCryptoProvider = true;
-                            LogHelper.LogWarning(TokenLogMessages.IDX10611, LogHelper.MarkAsNonPII(decryptionParameters.Enc), key);
                             continue;
                         }
 
