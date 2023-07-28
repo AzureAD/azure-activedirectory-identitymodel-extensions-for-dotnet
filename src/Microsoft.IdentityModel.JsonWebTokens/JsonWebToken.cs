@@ -449,7 +449,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 // JWE: https://www.rfc-editor.org/rfc/rfc7516
                 // Format: https://www.rfc-editor.org/rfc/rfc7516#page-8
                 // empty payload for JWE's {encrypted tokens}.
-                Payload = new JsonClaimSet(JsonDocument.Parse("{}"));
+                Payload = JsonClaimSet.Empty;
 
                 if (Dot3 == encodedJson.Length)
                     throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14121, encodedJson)));
