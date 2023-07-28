@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -180,7 +181,9 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
             }
 
-            LogHelper.LogInformation(LogMessages.IDX10642, input);
+            if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                LogHelper.LogInformation(LogMessages.IDX10642, input);
+
             KeyedHashAlgorithm keyedHashAlgorithm = GetKeyedHashAlgorithm(GetKeyBytes(Key), Algorithm);
 
             try
@@ -231,7 +234,9 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
             }
 
-            LogHelper.LogInformation(LogMessages.IDX10643, input);
+            if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                LogHelper.LogInformation(LogMessages.IDX10643, input);
+
             KeyedHashAlgorithm keyedHashAlgorithm = GetKeyedHashAlgorithm(GetKeyBytes(Key), Algorithm);
             try
             {
@@ -377,7 +382,9 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
             }
 
-            LogHelper.LogInformation(LogMessages.IDX10643, input);
+            if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                LogHelper.LogInformation(LogMessages.IDX10643, input);
+
             KeyedHashAlgorithm keyedHashAlgorithm = null;
             try
             {

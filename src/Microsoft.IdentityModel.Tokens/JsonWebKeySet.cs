@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Newtonsoft.Json;
 
@@ -53,7 +54,9 @@ namespace Microsoft.IdentityModel.Tokens
 
             try
             {
-                LogHelper.LogVerbose(LogMessages.IDX10806, json, LogHelper.MarkAsNonPII(_className));
+                if (LogHelper.IsEnabled(EventLogLevel.Verbose))
+                    LogHelper.LogVerbose(LogMessages.IDX10806, json, LogHelper.MarkAsNonPII(_className));
+
                 JsonConvert.PopulateObject(json, this);
             }
             catch (Exception ex)
