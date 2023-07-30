@@ -1,6 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+//#define CheckIfCompared
+
+// Uncomment 'CheckIfCompared' to find out if any of your types are not being compared.
+// The default behavior is to compare all public properties, if there is a type that is not being compared you will get an exception.
+// _equalityDict contains all the types that are being compared and how they are compared.
+// Add the string representing the type "typeof(YourType)" and matching delegate for comparing to the dictionary.
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -138,6 +145,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 { typeof(SigningCredentials).ToString(), CompareAllPublicProperties },
                 { typeof(string).ToString(), AreStringsEqual },
                 { typeof(SymmetricSecurityKey).ToString(), CompareAllPublicProperties },
+                { typeof(TimeSpan).ToString(), AreTimeSpansEqual },
                 { typeof(TokenValidationParameters).ToString(), CompareAllPublicProperties },
                 { typeof(Transform).ToString(), CompareAllPublicProperties },
                 { typeof(WsFederationConfiguration).ToString(), CompareAllPublicProperties },
@@ -145,6 +153,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 { typeof(Uri).ToString(), AreUrisEqual },
                 { typeof(X509Data).ToString(), CompareAllPublicProperties },
                 { typeof(X509SigningCredentials).ToString(), CompareAllPublicProperties },
+                { typeof(TokenValidationResult).ToString(), CompareAllPublicProperties },
             };
 
         public static bool AreBoolsEqual(object object1, object object2, CompareContext context)
@@ -492,18 +501,31 @@ namespace Microsoft.IdentityModel.TestUtils
             // Check if either t1 or t2 are null or references of each other to see if we can terminate early.
             if (!ContinueCheckingEquality(object1, object2, localContext))
                 return context.Merge(localContext);
-
+#if CheckIfCompared
+            bool wasCompared = false;
+#endif
             string inter;
             // Use a special function for comparison if required by the specific class of the object.
             if (_equalityDict.TryGetValue(object1.GetType().ToString(), out Func<Object, object, CompareContext, bool> areEqual))
             {
+#if CheckIfCompared
+                wasCompared = true;
+#endif
                 areEqual(object1, object2, localContext);
-            } 
+            }
             // Check if any of the interfaces that the class uses require a special function.
             else if ((inter = object1.GetType().GetInterfaces().Select(t => t.ToString()).Intersect(_equalityDict.Keys).FirstOrDefault()) != null)
             {
+#if CheckIfCompared
+                wasCompared = true;
+#endif
                 _equalityDict[inter](object1, object2, localContext);
             }
+
+#if CheckIfCompared
+            if (!wasCompared)
+                localContext.Diffs.Add($"Objects were not handled: '{object1.GetType().ToString()}'.");
+#endif
 
             return context.Merge(localContext);
         }
@@ -913,6 +935,21 @@ namespace Microsoft.IdentityModel.TestUtils
             return context.Merge(localContext);
         }
 
+        public static bool AreTimeSpansEqual(object object1, object object2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, localContext))
+                return context.Merge(localContext);
+
+            TimeSpan timeSpan1 = (TimeSpan)object1;
+            TimeSpan timeSpan2 = (TimeSpan)object2;
+
+            if (timeSpan1 != timeSpan2)
+                localContext.Diffs.Add($"timeSpan1 != timeSpan2. '{timeSpan1}' != '{timeSpan2}'.");
+
+            return context.Merge(localContext);
+        }
+
         public static bool AreWsFederationConfigurationsEqual(WsFederationConfiguration configuration1, WsFederationConfiguration configuration2, CompareContext context)
         {
             var localContext = new CompareContext(context);
@@ -960,6 +997,17 @@ namespace Microsoft.IdentityModel.TestUtils
             return context.Merge(localContext);
         }
 
+#if !CrossVersionTokenValidation
+        public static bool AreConfigurationValidationResultEqual(ConfigurationValidationResult result1, ConfigurationValidationResult result2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (ContinueCheckingEquality(result1, result2, localContext))
+                CompareAllPublicProperties(result1, result2, localContext);
+
+            return context.Merge(localContext);
+        }
+#endif
+
         public static string BuildStringDiff(string label, object str1, object str2)
         {
             return (label ?? "label") + ": '" + GetString(str1) + "', '" + GetString(str2) + "'";
@@ -970,8 +1018,8 @@ namespace Microsoft.IdentityModel.TestUtils
             Type type = obj1.GetType();
             var localContext = new CompareContext(context);
 
-            // public instance properties
-            var propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            // exclude all public instance properties that have index parameter(s), for example, an indexer
+            var propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(p => !p.GetIndexParameters().Any());
 
             // Touch each public property
             foreach (var propertyInfo in propertyInfos)

@@ -31,6 +31,8 @@ namespace Microsoft.IdentityModel.Logging
             "ID_NET45";
 #elif NET461
             "ID_NET461";
+#elif NET462
+            "ID_NET462";
 #elif NET472
             "ID_NET472";
 #elif NETSTANDARD2_0

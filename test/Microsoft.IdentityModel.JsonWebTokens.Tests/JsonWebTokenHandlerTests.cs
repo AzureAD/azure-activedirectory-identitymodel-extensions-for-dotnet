@@ -8,9 +8,12 @@ using System.IdentityModel.Tokens.Jwt;
 using System.IdentityModel.Tokens.Jwt.Tests;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Security.Policy;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.Json;
 using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.Protocols;
@@ -2029,7 +2032,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         },
                         ExpectedException = ExpectedException.SecurityTokenException("IDX14116:")
                     },
- #if NET461 || NET472 || NET_CORE
+ #if NET461 || NET462 || NET472 || NET_CORE
                     // RsaPss is not supported on .NET < 4.6
                     new CreateTokenTheoryData
                     {
@@ -2573,6 +2576,145 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        // Test creates a JWT with every mapped claim and then checks that the result of validation from the
+        // JwtSecurityTokenHandler and JsonWebTokenHandler are the same, both in the mapped and unmapped case.
+        [Fact]
+        public async Task ValidateJsonWebTokenClaimMapping()
+        {
+            var jsonWebTokenHandler = new JsonWebTokenHandler() { MapInboundClaims = false };
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(Default.PayloadAllShortClaims),
+                SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
+                EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
+            };
+
+            var accessToken = jsonWebTokenHandler.CreateToken(tokenDescriptor);
+
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidAudience = Default.Audience,
+                ValidIssuer = Default.Issuer,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
+                TokenDecryptionKey = KeyingMaterial.DefaultX509Key_2048,
+                AlgorithmValidator = ValidationDelegates.AlgorithmValidatorBuilder(true),
+                RequireExpirationTime = false,
+            };
+
+            JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler() { MapInboundClaims = false };
+
+            TokenValidationResult jsonValidationResult = await jsonWebTokenHandler.ValidateTokenAsync(accessToken, validationParameters);
+            TokenValidationResult jwtValidationResult = await jwtSecurityTokenHandler.ValidateTokenAsync(accessToken, validationParameters);
+
+            var context = new CompareContext
+            {
+                PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+                {
+                    { typeof(TokenValidationResult),  new List<string> { "SecurityToken", "TokenType" } }
+                }
+            };
+
+            if(jsonValidationResult.IsValid && jwtValidationResult.IsValid)
+            {
+                if(!IdentityComparer.AreEqual(jsonValidationResult, jwtValidationResult, context))
+                {
+                    context.AddDiff("jsonValidationResult.IsValid && jwtValidationResult.IsValid, Validation results are not equal");
+                }
+            }
+
+            jsonWebTokenHandler.MapInboundClaims = true;
+            jwtSecurityTokenHandler.MapInboundClaims = true;
+
+            jsonValidationResult = await jsonWebTokenHandler.ValidateTokenAsync(accessToken, validationParameters);
+            jwtValidationResult = await jwtSecurityTokenHandler.ValidateTokenAsync(accessToken, validationParameters);
+
+            if (jsonValidationResult.IsValid && jwtValidationResult.IsValid)
+            {
+                if (!IdentityComparer.AreEqual(jsonValidationResult, jwtValidationResult, context))
+                {
+                    context.AddDiff("jsonValidationResult.IsValid && jwtValidationResult.IsValid, Validation results are not equal");
+                }
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        // Test shows if the JwtSecurityTokenHandler has mapping OFF and 
+        // the JsonWebTokenHandler has mapping ON,the claims are different.
+        [Fact]
+        public async Task ValidateDifferentClaimsBetweenHandlers()
+        {
+            var jsonWebTokenHandler = new JsonWebTokenHandler() { MapInboundClaims = true };
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(Default.PayloadAllShortClaims),
+                SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
+                EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
+            };
+
+            var accessToken = jsonWebTokenHandler.CreateToken(tokenDescriptor);
+
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidAudience = Default.Audience,
+                ValidIssuer = Default.Issuer,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
+                TokenDecryptionKey = KeyingMaterial.DefaultX509Key_2048,
+                AlgorithmValidator = ValidationDelegates.AlgorithmValidatorBuilder(true),
+                RequireExpirationTime = false,
+            };
+
+            JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler() { MapInboundClaims = false };
+
+            TokenValidationResult jsonValidationResult = await jsonWebTokenHandler.ValidateTokenAsync(accessToken, validationParameters);
+            TokenValidationResult jwtValidationResult = await jwtSecurityTokenHandler.ValidateTokenAsync(accessToken, validationParameters);
+
+            var context = new CompareContext();
+
+            if (jsonValidationResult.IsValid && jwtValidationResult.IsValid)
+            {
+                if (IdentityComparer.AreEqual(jsonValidationResult.Claims, jwtValidationResult.Claims, CompareContext.Default))
+                {
+                    context.AddDiff("jsonValidationResult.IsValid && jwtValidationResult.IsValid, Claims between validation results are equal");
+                }
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Theory, MemberData(nameof(ValidateJweTestCases))]
+        public async Task ValidateJWEAsync(JwtTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ValidateJWEAsync", theoryData);
+
+            try
+            {
+                var handler = new JsonWebTokenHandler();
+                var jwt = handler.ReadJsonWebToken(theoryData.Token);
+                var validationResult = await handler.ValidateTokenAsync(jwt, theoryData.ValidationParameters).ConfigureAwait(false);
+                var rawTokenValidationResult = await handler.ValidateTokenAsync(theoryData.Token, theoryData.ValidationParameters).ConfigureAwait(false);
+                IdentityComparer.AreEqual(validationResult, rawTokenValidationResult, context);
+
+                if (validationResult.Exception != null)
+                {
+                    if (validationResult.IsValid)
+                        context.AddDiff("validationResult.IsValid, validationResult.Exception != null");
+
+                    throw validationResult.Exception;
+                }
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
         public static TheoryData<JwtTheoryData> ValidateJweTestCases
         {
             get
@@ -2669,6 +2811,36 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     },
                 };
             }
+        }
+
+        [Theory, MemberData(nameof(ValidateJwsTestCases))]
+        public void ValidateJWSAsync(JwtTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ValidateJWSAsync", theoryData);
+
+            try
+            {
+                var handler = new JsonWebTokenHandler();
+                var validationResult = handler.ValidateToken(theoryData.Token, theoryData.ValidationParameters);
+                var rawTokenValidationResult = handler.ValidateToken(theoryData.Token, theoryData.ValidationParameters);
+                IdentityComparer.AreEqual(validationResult, rawTokenValidationResult, context);
+
+                if (validationResult.Exception != null)
+                {
+                    if (validationResult.IsValid)
+                        context.AddDiff("validationResult.IsValid, validationResult.Exception != null");
+
+                    throw validationResult.Exception;
+                }
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         [Theory, MemberData(nameof(ValidateJwsTestCases))]
@@ -2909,6 +3081,42 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 var handler = new JsonWebTokenHandler();
                 AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).ConfigurationManagerV1 = theoryData.ValidationParameters.ConfigurationManager;
                 var validationResult = handler.ValidateToken(theoryData.Token, theoryData.ValidationParameters);
+                if (validationResult.IsValid)
+                {
+                    if (theoryData.ShouldSetLastKnownConfiguration && theoryData.ValidationParameters.ConfigurationManager.LastKnownGoodConfiguration == null)
+                        context.AddDiff("validationResult.IsValid, but the configuration was not set as the LastKnownGoodConfiguration");
+                }
+                if (validationResult.Exception != null)
+                {
+                    if (validationResult.IsValid)
+                        context.AddDiff("validationResult.IsValid, validationResult.Exception != null");
+
+                    throw validationResult.Exception;
+                }
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Theory, MemberData(nameof(ValidateJwsWithConfigTheoryData))]
+        public async Task ValidateJWSWithConfigAsync(JwtTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ValidateJWSWithConfigAsync", theoryData);
+            try
+            {
+                var handler = new JsonWebTokenHandler();
+                var jwt = handler.ReadJsonWebToken(theoryData.Token);
+                AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).ConfigurationManagerV1 = theoryData.ValidationParameters.ConfigurationManager;
+                var validationResult = await handler.ValidateTokenAsync(jwt, theoryData.ValidationParameters).ConfigureAwait(false);
+                var rawTokenValidationResult = await handler.ValidateTokenAsync(theoryData.Token, theoryData.ValidationParameters).ConfigureAwait(false);
+                IdentityComparer.AreEqual(validationResult, rawTokenValidationResult, context);
+
                 if (validationResult.IsValid)
                 {
                     if (theoryData.ShouldSetLastKnownConfiguration && theoryData.ValidationParameters.ConfigurationManager.LastKnownGoodConfiguration == null)

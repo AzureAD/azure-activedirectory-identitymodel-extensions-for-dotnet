@@ -8,7 +8,6 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -26,6 +25,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// </summary>
     public class JwtTokenUtilities
     {
+        private const string _unrecognizedEncodedToken = "UnrecognizedEncodedToken";
+
         /// <summary>
         /// Regex that is used to figure out if a token is in JWS format.
         /// </summary>
@@ -50,7 +51,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <param name="input">String to be signed</param>
         /// <param name="signingCredentials">The <see cref="SigningCredentials"/> that contain crypto specs used to sign the token.</param>
-        /// <returns>The bse64urlendcoded signature over the bytes obtained from UTF8Encoding.GetBytes( 'input' ).</returns>
+        /// <returns>The base 64 url encoded signature over the bytes obtained from UTF8Encoding.GetBytes( 'input' ).</returns>
         /// <exception cref="ArgumentNullException">'input' or 'signingCredentials' is null.</exception>
         public static string CreateEncodedSignature(string input, SigningCredentials signingCredentials)
         {
@@ -82,7 +83,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="input">String to be signed</param>
         /// <param name="signingCredentials">The <see cref="SigningCredentials"/> that contain crypto specs used to sign the token.</param>
         /// <param name="cacheProvider">should the <see cref="SignatureProvider"/> be cached.</param>
-        /// <returns>The bse64urlendcoded signature over the bytes obtained from UTF8Encoding.GetBytes( 'input' ).</returns>
+        /// <returns>The base 64 url encoded signature over the bytes obtained from UTF8Encoding.GetBytes( 'input' ).</returns>
         /// <exception cref="ArgumentNullException"><paramref name="input"/> or <paramref name="signingCredentials"/> is null.</exception>
         public static string CreateEncodedSignature(string input, SigningCredentials signingCredentials, bool cacheProvider)
         {
@@ -251,13 +252,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         private static void ValidateDecryption(JwtTokenDecryptionParameters decryptionParameters, bool decryptionSucceeded, bool algorithmNotSupportedByCryptoProvider, StringBuilder exceptionStrings, StringBuilder keysAttempted)
         {
             if (!decryptionSucceeded && keysAttempted.Length > 0)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10603, keysAttempted, exceptionStrings, decryptionParameters.EncodedToken)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10603, keysAttempted, exceptionStrings, LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken))));
 
             if (!decryptionSucceeded && algorithmNotSupportedByCryptoProvider)
                 throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10619, LogHelper.MarkAsNonPII(decryptionParameters.Alg), LogHelper.MarkAsNonPII(decryptionParameters.Enc))));
 
             if (!decryptionSucceeded)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10609, decryptionParameters.EncodedToken)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10609, LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken))));
         }
 
         private static byte[] DecryptToken(CryptoProviderFactory cryptoProviderFactory, SecurityKey key, string encAlg, byte[] ciphertext, byte[] headerAscii, byte[] initializationVector, byte[] authenticationTag)
@@ -430,6 +431,24 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             throw LogHelper.LogExceptionMessage(new FormatException(LogHelper.FormatInvariant(LogMessages.IDX14300, LogHelper.MarkAsNonPII(claimName), jToken.ToString(), LogHelper.MarkAsNonPII(typeof(long)))));
         }
 
+        internal static string SafeLogJwtToken(object obj)
+        {
+            if (obj == null)
+                return string.Empty;
+
+            // not a string, we do not know how to sanitize so we return a String which represents the object instance
+            if (!(obj is string token))
+                return obj.GetType().ToString();
+ 
+            int lastDot = token.LastIndexOf(".");
+
+            // no dots, not a JWT, we do not know how to sanitize so we return UnrecognizedEncodedToken
+            if (lastDot == -1)
+                return _unrecognizedEncodedToken;
+
+            return token.Substring(0, lastDot);
+        }
+
         /// <summary>
         /// Returns a <see cref="SecurityKey"/> to use when validating the signature of a token.
         /// </summary>
@@ -438,32 +457,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
         /// <param name="configuration">The <see cref="BaseConfiguration"/> that will be used along with the <see cref="TokenValidationParameters"/> to resolve the signing key</param>
         /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
-        /// <remarks>If key fails to resolve, then null is returned</remarks>
+        /// <remarks>Resolve the signing key using configuration then the validationParameters until a key is resolved. If key fails to resolve, then null is returned.</remarks>
         internal static SecurityKey ResolveTokenSigningKey(string kid, string x5t, TokenValidationParameters validationParameters, BaseConfiguration configuration)
         {
-            if (configuration?.SigningKeys != null)
-            {
-
-                if (!string.IsNullOrEmpty(kid))
-                {
-                    foreach (SecurityKey signingKey in configuration.SigningKeys)
-                    {
-                        if (signingKey != null && string.Equals(signingKey.KeyId, kid, signingKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
-                            return signingKey;
-                    }
-                }
-
-                if (!string.IsNullOrEmpty(x5t))
-                {
-                    foreach (SecurityKey signingKey in configuration.SigningKeys)
-                    {
-                        if (signingKey != null && string.Equals(signingKey.KeyId, x5t))
-                            return signingKey;
-                    }
-                }
-            }
-
-            return ResolveTokenSigningKey(kid, x5t, validationParameters);
+            return ResolveTokenSigningKey(kid, x5t, configuration?.SigningKeys) ?? ResolveTokenSigningKey(kid, x5t, ConcatSigningKeys(validationParameters));
         }
 
         /// <summary>
@@ -471,46 +468,29 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <param name="kid">The <see cref="string"/> kid field of the token being validated</param>
         /// <param name="x5t">The <see cref="string"/> x5t field of the token being validated</param>
-        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/>  required for validation.</param>
+        /// <param name="signingKeys">A collection of <see cref="SecurityKey"/> a signing key to be resolved from.</param>
         /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
         /// <remarks>If key fails to resolve, then null is returned</remarks>
-        internal static SecurityKey ResolveTokenSigningKey(string kid, string x5t, TokenValidationParameters validationParameters)
+        internal static SecurityKey ResolveTokenSigningKey(string kid, string x5t, IEnumerable<SecurityKey> signingKeys)
         {
-            if (!string.IsNullOrEmpty(kid))
-            {
-                if (validationParameters.IssuerSigningKey != null
-                    && string.Equals(validationParameters.IssuerSigningKey.KeyId, kid, validationParameters.IssuerSigningKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
-                    return validationParameters.IssuerSigningKey;
+            if (signingKeys == null)
+                return null;
 
-                if (validationParameters.IssuerSigningKeys != null)
+            foreach (SecurityKey signingKey in signingKeys)
+            {
+                if (signingKey != null)
                 {
-                    foreach (SecurityKey signingKey in validationParameters.IssuerSigningKeys)
+                    if (signingKey is X509SecurityKey x509Key)
                     {
-                        if (signingKey != null && string.Equals(signingKey.KeyId, kid, signingKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+                        if ((!string.IsNullOrEmpty(kid) && string.Equals(signingKey.KeyId, kid, StringComparison.OrdinalIgnoreCase)) ||
+                            (!string.IsNullOrEmpty(x5t) && string.Equals(x509Key.X5t, x5t, StringComparison.OrdinalIgnoreCase)))
                         {
                             return signingKey;
                         }
                     }
-                }
-            }
-
-            if (!string.IsNullOrEmpty(x5t))
-            {
-                if (validationParameters.IssuerSigningKey != null)
-                {
-                    if (string.Equals(validationParameters.IssuerSigningKey.KeyId, x5t, validationParameters.IssuerSigningKey is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
-                        return validationParameters.IssuerSigningKey;
-
-                    X509SecurityKey x509Key = validationParameters.IssuerSigningKey as X509SecurityKey;
-                    if (x509Key != null && string.Equals(x509Key.X5t, x5t, StringComparison.OrdinalIgnoreCase))
-                        return validationParameters.IssuerSigningKey;
-                }
-
-                if (validationParameters.IssuerSigningKeys != null)
-                {
-                    foreach (SecurityKey signingKey in validationParameters.IssuerSigningKeys)
+                    else if (!string.IsNullOrEmpty(signingKey.KeyId))
                     {
-                        if (signingKey != null && string.Equals(signingKey.KeyId, x5t))
+                        if (string.Equals(signingKey.KeyId, kid) || string.Equals(signingKey.KeyId, x5t))
                         {
                             return signingKey;
                         }
@@ -519,6 +499,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             return null;
+        }
+
+        internal static IEnumerable<SecurityKey> ConcatSigningKeys(TokenValidationParameters tvp)
+        {
+            if (tvp == null)
+                yield break;
+
+            yield return tvp.IssuerSigningKey;
+            if (tvp.IssuerSigningKeys != null)
+            {
+                foreach (var key in tvp.IssuerSigningKeys)
+                {
+                    yield return key;
+                }
+            }
         }
 
 #if !NET45

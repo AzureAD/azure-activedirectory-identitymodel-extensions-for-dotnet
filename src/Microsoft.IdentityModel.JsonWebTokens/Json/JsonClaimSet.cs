@@ -21,6 +21,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     internal class JsonClaimSet
     {
         private IList<Claim> _claims;
+        private readonly object _claimsLock = new object();
 
         internal JsonClaimSet(JsonDocument jsonDocument)
         {
@@ -41,10 +42,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal IList<Claim> Claims(string issuer)
         {
-            if (_claims != null)
-                return _claims;
-
-            _claims = CreateClaims(issuer);
+            if (_claims == null)
+            {
+                lock (_claimsLock)
+                {
+                    if (_claims == null)
+                    {
+                        _claims = CreateClaims(issuer);
+                    }
+                }
+            }
+            
             return _claims;
         }
 

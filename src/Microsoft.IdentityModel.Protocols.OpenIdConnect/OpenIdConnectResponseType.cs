@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
         /// <summary>
         /// Defined in OAuth 2.0 spec, included for completion.
-        /// See: https://datatracker.ietf.org/doc/html/rfc6749#section-11-3-2.
+        /// See: https://datatracker.ietf.org/doc/html/rfc6749#section-11.3.2.
         /// </summary>
         public const string Token = "token";
     }

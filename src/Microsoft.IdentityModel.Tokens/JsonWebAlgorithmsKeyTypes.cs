@@ -5,7 +5,7 @@ namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
     /// Constants for JsonWebAlgorithms  "kty" Key Type (sec 6.1)
-    /// https://datatracker.ietf.org/doc/html/rfc7518#section-6-1
+    /// https://datatracker.ietf.org/doc/html/rfc7518#section-6.1
     /// </summary>
     public static class JsonWebAlgorithmsKeyTypes
     {

@@ -318,6 +318,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public override string TokenEndpoint { get; set; }
 
         /// <summary>
+        /// This base class property is not used in OpenIdConnect. 
+        /// </summary>
+        [JsonIgnore]
+        public override string ActiveTokenEndpoint { get; set; }
+
+        /// <summary>
         /// Gets the collection of 'token_endpoint_auth_methods_supported'.
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = OpenIdProviderMetadataNames.TokenEndpointAuthMethodsSupported, Required = Required.Default)]

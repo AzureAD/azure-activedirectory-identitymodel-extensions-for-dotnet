@@ -36,6 +36,11 @@ namespace Microsoft.IdentityModel.Logging
         public static bool ShowPII { get; set; } = false;
 
         /// <summary>
+        /// Flag which indicates whether or not complete <see cref="SecurityArtifact"/> is shown in logs when <see cref="ShowPII"/> is set to true. False by default.
+        /// </summary>
+        public static bool LogCompleteSecurityArtifact { get; set; } = false;
+
+        /// <summary>
         /// String that is used in place of any arguments to log messages if the 'ShowPII' flag is set to false.
         /// </summary>
         public static string HiddenPIIString { get; } = "[PII of type '{0}' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]";

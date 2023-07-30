@@ -276,7 +276,7 @@ namespace Microsoft.IdentityModel.Tokens
             try
             {
                 // only the first certificate should be used to perform signing operations
-                // https://datatracker.ietf.org/doc/html/rfc7517#section-4-7
+                // https://datatracker.ietf.org/doc/html/rfc7517#section-4.7
                 key = new X509SecurityKey(webKey);
                 return true;
             }

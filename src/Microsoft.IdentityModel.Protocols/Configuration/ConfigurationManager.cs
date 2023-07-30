@@ -29,13 +29,7 @@ namespace Microsoft.IdentityModel.Protocols
         private readonly IConfigurationValidator<T> _configValidator;
         private T _currentConfiguration;
         private Exception _fetchMetadataFailure;
-
-        /// <summary>
-        /// Static initializer for a new object. Static initializers run before the first instance of the type is created.
-        /// </summary>
-        static ConfigurationManager()
-        {               
-        }
+        private TimeSpan _bootstrapRefreshInterval = TimeSpan.FromSeconds(1);
 
         /// <summary>
         /// Instantiates a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
@@ -84,6 +78,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <exception cref="ArgumentNullException">If 'docRetriever' is null.</exception>
         /// <exception cref="ArgumentNullException">If 'lkgCacheOptions' is null.</exception>
         public ConfigurationManager(string metadataAddress, IConfigurationRetriever<T> configRetriever, IDocumentRetriever docRetriever, LastKnownGoodConfigurationCacheOptions lkgCacheOptions)
+            : base(lkgCacheOptions)
         {
             if (string.IsNullOrWhiteSpace(metadataAddress))
                 throw LogHelper.LogArgumentNullException(nameof(metadataAddress));
@@ -94,23 +89,14 @@ namespace Microsoft.IdentityModel.Protocols
             if (docRetriever == null)
                 throw LogHelper.LogArgumentNullException(nameof(docRetriever));
 
-            if (lkgCacheOptions == null)
-                throw LogHelper.LogArgumentNullException(nameof(lkgCacheOptions));
-
             MetadataAddress = metadataAddress;
             _docRetriever = docRetriever;
             _configRetriever = configRetriever;
             _refreshLock = new SemaphoreSlim(1);
-
-            _lastKnownGoodConfigurationCache = new EventBasedLRUCache<BaseConfiguration, DateTime>(
-                lkgCacheOptions.LastKnownGoodConfigurationSizeLimit,
-                TaskCreationOptions.None,
-                lkgCacheOptions.BaseConfigurationComparer,
-                true);
         }
 
         /// <summary>
-        /// Instantiates a new <see cref="ConfigurationManager{T}"/> with cinfiguration validator that manages automatic and controls refreshing on configuration data.
+        /// Instantiates a new <see cref="ConfigurationManager{T}"/> with configuration validator that manages automatic and controls refreshing on configuration data.
         /// </summary>
         /// <param name="metadataAddress">The address to obtain configuration.</param>
         /// <param name="configRetriever">The <see cref="IConfigurationRetriever{T}"/></param>
@@ -123,7 +109,7 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
-        /// Instantiates a new <see cref="ConfigurationManager{T}"/> with cinfiguration validator that manages automatic and controls refreshing on configuration data.
+        /// Instantiates a new <see cref="ConfigurationManager{T}"/> with configuration validator that manages automatic and controls refreshing on configuration data.
         /// </summary>
         /// <param name="metadataAddress">The address to obtain configuration.</param>
         /// <param name="configRetriever">The <see cref="IConfigurationRetriever{T}"/></param>
@@ -158,8 +144,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
         public async Task<T> GetConfigurationAsync(CancellationToken cancel)
         {
-            DateTimeOffset now = DateTimeOffset.UtcNow;
-            if (_currentConfiguration != null && _syncAfter > now)
+            if (_currentConfiguration != null && _syncAfter > DateTimeOffset.UtcNow)
             {
                 return _currentConfiguration;
             }
@@ -167,38 +152,56 @@ namespace Microsoft.IdentityModel.Protocols
             await _refreshLock.WaitAsync(cancel).ConfigureAwait(false);
             try
             {
-                if (_syncAfter <= now)
+                if (_syncAfter <= DateTimeOffset.UtcNow)
                 {
                     try
                     {
                         // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
                         // The transport should have it's own timeouts, etc..
                         var configuration = await _configRetriever.GetConfigurationAsync(MetadataAddress, _docRetriever, CancellationToken.None).ConfigureAwait(false);
-                        _lastRefresh = now;
-                        // Add 1 hour jitter to avoid spike traffic to IdentityProvider.
-                        _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval + TimeSpan.FromMinutes(new Random().Next(60)));
                         if (_configValidator != null)
                         {
                             ConfigurationValidationResult result = _configValidator.Validate(configuration);
                             if (!result.Succeeded)
-                                LogHelper.LogWarning(LogMessages.IDX20810, result.ErrorMessage);
+                                throw LogHelper.LogExceptionMessage(new InvalidConfigurationException(LogHelper.FormatInvariant(LogMessages.IDX20810, result.ErrorMessage)));
                         }
 
+                        _lastRefresh = DateTimeOffset.UtcNow;
+                        // Add a random amount between 0 and 5% of AutomaticRefreshInterval jitter to avoid spike traffic to IdentityProvider.
+                        _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval +
+                            TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 20)));
                         _currentConfiguration = configuration;
-
                     }
                     catch (Exception ex)
                     {
                         _fetchMetadataFailure = ex;
-                        _syncAfter = DateTimeUtil.Add(now.UtcDateTime, AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
+
                         if (_currentConfiguration == null) // Throw an exception if there's no configuration to return.
+                        {
+                            if (_bootstrapRefreshInterval < RefreshInterval)
+                            {
+                                // Adopt exponential backoff for bootstrap refresh interval with a decorrelated jitter if it is not longer than the refresh interval.
+                                TimeSpan _bootstrapRefreshIntervalWithJitter = TimeSpan.FromSeconds(new Random().Next((int)_bootstrapRefreshInterval.TotalSeconds));
+                                _bootstrapRefreshInterval += _bootstrapRefreshInterval;
+                                _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, _bootstrapRefreshIntervalWithJitter);
+                            }
+                            else
+                            {
+                                _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
+                            }
+
                             throw LogHelper.LogExceptionMessage(
                                 new InvalidOperationException(
-                                    LogHelper.FormatInvariant(LogMessages.IDX20803, LogHelper.MarkAsNonPII(MetadataAddress ?? "null"), LogHelper.MarkAsNonPII(ex)), ex));
+                                    LogHelper.FormatInvariant(LogMessages.IDX20803, LogHelper.MarkAsNonPII(MetadataAddress ?? "null"), LogHelper.MarkAsNonPII(_syncAfter), LogHelper.MarkAsNonPII(ex)), ex));
+                        } 
                         else
+                        {
+                            _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
+
                             LogHelper.LogExceptionMessage(
                                 new InvalidOperationException(
                                     LogHelper.FormatInvariant(LogMessages.IDX20806, LogHelper.MarkAsNonPII(MetadataAddress ?? "null"), LogHelper.MarkAsNonPII(ex)), ex));
+                        }
                     }
                 }
 
@@ -208,7 +211,12 @@ namespace Microsoft.IdentityModel.Protocols
                 else
                     throw LogHelper.LogExceptionMessage(
                         new InvalidOperationException(
-                            LogHelper.FormatInvariant(LogMessages.IDX20803, LogHelper.MarkAsNonPII(MetadataAddress ?? "null"), LogHelper.MarkAsNonPII(_fetchMetadataFailure)), _fetchMetadataFailure));
+                            LogHelper.FormatInvariant(
+                                LogMessages.IDX20803,
+                                LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
+                                LogHelper.MarkAsNonPII(_syncAfter),
+                                LogHelper.MarkAsNonPII(_fetchMetadataFailure)),
+                            _fetchMetadataFailure));
             }
             finally
             {

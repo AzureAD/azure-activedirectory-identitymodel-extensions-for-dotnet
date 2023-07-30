@@ -52,6 +52,11 @@ namespace Microsoft.IdentityModel.TestUtils
             return new ExpectedException(typeof(SecurityTokenDecryptionFailedException), substringExpected, innerTypeExpected);
         }
 
+        public static ExpectedException SecurityTokenMalformedTokenException(string substringExpected = null, Type innerTypeExpected = null)
+        {
+            return new ExpectedException(typeof(SecurityTokenMalformedException), substringExpected, innerTypeExpected);
+        }
+
         public static ExpectedException InvalidOperationException(string substringExpected = null, Type inner = null, string contains = null)
         {
             return new ExpectedException(typeof(InvalidOperationException), substringExpected, inner);
@@ -208,7 +213,9 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static ExpectedException SecurityTokenUnableToValidateException(string substringExpected = null, Type innerTypeExpected = null)
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             return new ExpectedException(typeof(SecurityTokenUnableToValidateException), substringExpected, innerTypeExpected);
+#pragma warning restore CS0618 // Type or member is obsolete
         }
 
         public static ExpectedException SecurityTokenEncryptionFailedException(string substringExpected = null, Type innerTypeExpected = null)

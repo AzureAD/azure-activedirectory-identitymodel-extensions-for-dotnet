@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens.Configuration;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -53,6 +53,29 @@ namespace Microsoft.IdentityModel.Tokens
         /// 5 minutes is the default time interval that must pass for <see cref="RequestRefresh"/> to obtain a new configuration.
         /// </summary>
         public static readonly TimeSpan DefaultRefreshInterval = new TimeSpan(0, 0, 5, 0);
+
+        /// <summary>
+        /// The default constructor.
+        /// </summary>
+        public BaseConfigurationManager() : this(new LKGConfigurationCacheOptions())
+        {
+        }
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="options">The event queue task creation option.</param>
+        public BaseConfigurationManager(LKGConfigurationCacheOptions options)
+        {
+            if (options == null)
+                throw LogHelper.LogArgumentNullException(nameof(options));
+
+            _lastKnownGoodConfigurationCache = new EventBasedLRUCache<BaseConfiguration, DateTime>(
+                options.LastKnownGoodConfigurationSizeLimit,
+                options.TaskCreationOptions,
+                options.BaseConfigurationComparer,
+                options.RemoveExpiredValues);
+        }
 
         /// <summary>
         /// Obtains an updated version of <see cref="BaseConfiguration"/> if the appropriate refresh interval has passed.

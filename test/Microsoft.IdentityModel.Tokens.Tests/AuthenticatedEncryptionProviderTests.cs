@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     ///     - parameter validation for Encrypt
     /// Decrypt
     ///     - negative tests for tampering of (ciphertest, iv, authenticationtag, authenticateddata)
-    ///     - parameter validataion for Decrypt
+    ///     - parameter validation for Decrypt
     /// DecryptMismatch
     ///     - negative tests for switching (keys, algorithms)
     /// EncryptVirtual

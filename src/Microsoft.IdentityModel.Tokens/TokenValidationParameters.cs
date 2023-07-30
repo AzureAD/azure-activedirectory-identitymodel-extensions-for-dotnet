@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -101,6 +102,18 @@ namespace Microsoft.IdentityModel.Tokens
     public delegate string IssuerValidatorUsingConfiguration(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters, BaseConfiguration configuration);
 
     /// <summary>
+    /// Definition for IssuerValidatorAsync. Left internal for now while we work out the details of async validation for all delegates.
+    /// </summary>
+    /// <param name="issuer">The issuer to validate.</param>
+    /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
+    /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+    /// <returns>The issuer to use when creating the "Claim"(s) in a "ClaimsIdentity".</returns>
+    /// <remarks>The delegate should return a non null string that represents the 'issuer'. If null a default value will be used.
+    /// <see cref="IssuerValidatorAsync"/> if set, will be called before <see cref="IssuerSigningKeyValidatorUsingConfiguration"/> or <see cref="IssuerSigningKeyValidator"/>
+    /// </remarks>
+    internal delegate Task<string> IssuerValidatorAsync(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters);
+
+    /// <summary>
     /// Definition for LifetimeValidator.
     /// </summary>
     /// <param name="notBefore">The 'notBefore' time found in the <see cref="SecurityToken"/>.</param>
@@ -178,8 +191,9 @@ namespace Microsoft.IdentityModel.Tokens
         private string _roleClaimType = ClaimsIdentity.DefaultRoleClaimType;
 
         /// <summary>
-        /// This is the fallback authenticationtype that a <see cref="ISecurityTokenValidator"/> will use if nothing is set.
+        /// This is the default value of <see cref="ClaimsIdentity.AuthenticationType"/> when creating a <see cref="ClaimsIdentity"/>.
         /// The value is <c>"AuthenticationTypes.Federation"</c>.
+        /// To change the value, set <see cref="AuthenticationType"/> to a different value.
         /// </summary>
         public static readonly string DefaultAuthenticationType = "AuthenticationTypes.Federation"; // Note: The change was because 5.x removed the dependency on System.IdentityModel and we used a different string which was a mistake.
 
@@ -190,7 +204,7 @@ namespace Microsoft.IdentityModel.Tokens
         public static readonly TimeSpan DefaultClockSkew = TimeSpan.FromSeconds(300); // 5 min.
 
         /// <summary>
-        /// Default for the maximm token size.
+        /// Default for the maximum token size.
         /// </summary>
         /// <remarks>250 KB (kilobytes).</remarks>
         public const Int32 DefaultMaximumTokenSizeInBytes = 1024 * 250;
@@ -218,7 +232,10 @@ namespace Microsoft.IdentityModel.Tokens
             IssuerSigningKeyResolverUsingConfiguration = other.IssuerSigningKeyResolverUsingConfiguration;
             IssuerSigningKeys = other.IssuerSigningKeys;
             IssuerSigningKeyValidator = other.IssuerSigningKeyValidator;
+            IssuerSigningKeyValidatorUsingConfiguration = other.IssuerSigningKeyValidatorUsingConfiguration;
             IssuerValidator = other.IssuerValidator;
+            IssuerValidatorAsync = other.IssuerValidatorAsync;
+            IssuerValidatorUsingConfiguration = other.IssuerValidatorUsingConfiguration;
             LifetimeValidator = other.LifetimeValidator;
             LogTokenId = other.LogTokenId;
             LogValidationExceptions = other.LogValidationExceptions;
@@ -233,6 +250,7 @@ namespace Microsoft.IdentityModel.Tokens
             RoleClaimTypeRetriever = other.RoleClaimTypeRetriever;
             SaveSigninToken = other.SaveSigninToken;
             SignatureValidator = other.SignatureValidator;
+            SignatureValidatorUsingConfiguration = other.SignatureValidatorUsingConfiguration;
             TokenDecryptionKey = other.TokenDecryptionKey;
             TokenDecryptionKeyResolver = other.TokenDecryptionKeyResolver;
             TokenDecryptionKeys = other.TokenDecryptionKeys;
@@ -260,7 +278,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TokenValidationParameters"/> class.
-        /// </summary>        
+        /// </summary>
         public TokenValidationParameters()
         {
             LogTokenId = true;
@@ -517,6 +535,17 @@ namespace Microsoft.IdentityModel.Tokens
         /// </remarks>
         public IssuerValidator IssuerValidator { get; set; }
 
+
+        /// <summary>
+        /// Gets or sets a delegate that will be used to validate the issuer of the token.
+        /// </summary>
+        /// <remarks>
+        /// If set, this delegate will be called to validate the 'issuer' of the token, instead of default processing.
+        /// This means that no default 'issuer' validation will occur.
+        /// Even if <see cref="ValidateIssuer"/> is false, this delegate will still be called.
+        /// IssuerValidatorAsync takes precedence over <see cref="IssuerValidatorUsingConfiguration"/> and <see cref="IssuerValidator"/>.
+        /// </remarks>
+        internal IssuerValidatorAsync IssuerValidatorAsync { get; set; }
 
         /// <summary>
         /// Gets or sets a delegate that will be used to validate the issuer of the token.
