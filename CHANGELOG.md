@@ -1,7 +1,27 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+7.0.0-preview2
+=======
+## Performance improvements:
+- Series of perf improvements in collaboration with ASP .NET Core DevDiv team, results in improvements from 280K Request per second (RPS) in `7.0.0-preview` to 370K RPS in `7.0.0-preview2`, with more improvements to come in later versions: [#2195](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2195), [#2194](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2194), [#2193](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2193), [#2192](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2192), [#2190](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2190),[#2188](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2188), [#2184](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2184), [#2181](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2181), [#2180](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2180), [#2178](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2178), [#2175](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2175), [#2172](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2172), [#2171](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2171), [#2170](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2170), [#2169](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2169), [#2168](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2168), [#2167](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2167), [#2166](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2166), [#2164](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2164), [#2162](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2162), [#2161](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2161), [#2160](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2160), [#2159](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2159), [#2158](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2158)
+
+- First increment in replacing newtonsoft with System.Text.Json, see [#2174](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2174)
+
+
+## Engineering excellence:
+
+- Fix casing Properties directory in `updateAssemblyInfo.ps1` script see,
+[#2189](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2189)
+
+- Add code coverage in ADO, see [#2176](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2176)
+
+- Add codeQL scanning for compliance, see [#2151](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2151)
+
+- Start adding support for Nullables, see [#2139](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2139)
+
 7.1.0-preview
 =======
+_Delisted from NuGet due to versioning inconsistency_
 Include IdentityModel 6.32.0 release updates, including AAD specific signing key issuer validator and fix perf regression.
 
 
