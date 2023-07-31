@@ -14,12 +14,14 @@ namespace Microsoft.IdentityModel.Tokens
     {
         private CryptoProviderFactory _cryptoProviderFactory;
         private Lazy<string> _internalId;
+        
 
         internal SecurityKey(SecurityKey key)
         {
             _cryptoProviderFactory = key._cryptoProviderFactory;
             KeyId = key.KeyId;
             SetInternalId();
+            OriginalKey = key;
         }
 
         /// <summary>
@@ -114,5 +116,11 @@ namespace Microsoft.IdentityModel.Tokens
                     return string.Empty;
             });
         }
+
+        /// <summary>
+        /// Original Key (usually a JSonWebKey)
+        /// </summary>
+        [JsonIgnore]
+        internal SecurityKey OriginalKey { get; private set; }
     }
 }

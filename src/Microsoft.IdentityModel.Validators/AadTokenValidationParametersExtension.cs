@@ -60,7 +60,8 @@ namespace Microsoft.IdentityModel.Validators
             if (openIdConnectConfiguration == null)
                 return true;
 
-            var matchedKeyFromConfig = openIdConnectConfiguration.JsonWebKeySet?.Keys.FirstOrDefault(x => x != null && x.Kid == securityKey.KeyId);
+            JsonWebKey matchedKeyFromConfig = securityKey.OriginalKey as JsonWebKey ??
+              openIdConnectConfiguration.JsonWebKeySet?.Keys.FirstOrDefault(x => x != null && x.Kid == securityKey.KeyId);
             if (matchedKeyFromConfig != null && matchedKeyFromConfig.AdditionalData.TryGetValue(OpenIdProviderMetadataNames.Issuer, out object value))
             {
                 var signingKeyIssuer = value as string;
