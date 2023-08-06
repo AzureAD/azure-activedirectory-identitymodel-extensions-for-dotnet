@@ -102,6 +102,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     WrapAlgorithm = SecurityAlgorithms.RsaOAEP,
                     WrapKey = KeyingMaterial.RsaSecurityKey_1024
                 },
+#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
+                new KeyWrapTheoryData
+                {
+                    ExpectedException =  ExpectedException.SecurityTokenKeyWrapException("IDX10661:"),
+                    TestId = "KeyTooSmall1024",
+                    WillUnwrap = false,
+                    WrapAlgorithm = SecurityAlgorithms.RsaOAEP256,
+                    WrapKey = KeyingMaterial.RsaSecurityKey_1024
+                },
+#endif
                 new KeyWrapTheoryData
                 {
                     ExpectedException = ExpectedException.SecurityTokenKeyWrapException("IDX10661:"),
@@ -205,12 +215,41 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 new KeyWrapTheoryData
                 {
                     ExpectedException = ExpectedException.KeyWrapException("IDX10659:"),
-                    TestId = "AlgorithmAndKeyMismatchRsaPKCS1Bits4096RsaOAEKey2048",
+                    TestId = "AlgorithmAndKeyMismatchRsaPKCS1Bits4096RsaOAEPKey2048",
                     UnwrapAlgorithm = SecurityAlgorithms.RsaOAEP,
                     UnwrapKey = KeyingMaterial.RsaSecurityKey_2048,
                     WrapAlgorithm = SecurityAlgorithms.RsaPKCS1,
                     WrapKey = KeyingMaterial.RsaSecurityKey_4096_Public,
+                },
+#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
+                new KeyWrapTheoryData
+                {
+                    ExpectedException = ExpectedException.KeyWrapException("IDX10659:"),
+                    TestId = "AlgorithmMismatchRsaPKCS1RsaOAEP256",
+                    UnwrapAlgorithm = SecurityAlgorithms.RsaOAEP256,
+                    UnwrapKey = KeyingMaterial.RsaSecurityKey_2048,
+                    WrapAlgorithm = SecurityAlgorithms.RsaPKCS1,
+                    WrapKey = KeyingMaterial.RsaSecurityKey_2048_Public
+                },
+                new KeyWrapTheoryData
+                {
+                    ExpectedException = ExpectedException.KeyWrapException("IDX10659:"),
+                    TestId = "KeyMismatchRsa4096Rsa2048",
+                    UnwrapAlgorithm = SecurityAlgorithms.RsaOAEP256,
+                    UnwrapKey = KeyingMaterial.RsaSecurityKey_2048,
+                    WrapAlgorithm = SecurityAlgorithms.RsaOAEP,
+                    WrapKey = KeyingMaterial.RsaSecurityKey_4096_Public,
+                },
+                new KeyWrapTheoryData
+                {
+                    ExpectedException = ExpectedException.KeyWrapException("IDX10659:"),
+                    TestId = "AlgorithmAndKeyMismatchRsaPKCS1Bits4096RsaOAEP256Key2048",
+                    UnwrapAlgorithm = SecurityAlgorithms.RsaOAEP256,
+                    UnwrapKey = KeyingMaterial.RsaSecurityKey_2048,
+                    WrapAlgorithm = SecurityAlgorithms.RsaPKCS1,
+                    WrapKey = KeyingMaterial.RsaSecurityKey_4096_Public,
                 }
+#endif
             };
         }
 
@@ -367,6 +406,15 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 null,
                 ExpectedException.ArgumentNullException(),
                 theoryData);
+
+#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
+            AddWrapUnwrapTheoryData(
+                "Test4",
+                SecurityAlgorithms.RsaOAEP256,
+                KeyingMaterial.RsaSecurityKey_2048_Public,
+                KeyingMaterial.RsaSecurityKey_2048,
+                theoryData);
+#endif
 
             return theoryData;
         }
