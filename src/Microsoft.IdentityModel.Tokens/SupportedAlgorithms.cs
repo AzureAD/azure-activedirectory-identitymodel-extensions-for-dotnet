@@ -40,6 +40,7 @@ namespace Microsoft.IdentityModel.Tokens
         internal static readonly ICollection<string> RsaEncryptionAlgorithms = new Collection<string>
         {
             SecurityAlgorithms.RsaOAEP,
+            SecurityAlgorithms.RsaOAEP256,
             SecurityAlgorithms.RsaPKCS1,
             SecurityAlgorithms.RsaOaepKeyWrap
         };
