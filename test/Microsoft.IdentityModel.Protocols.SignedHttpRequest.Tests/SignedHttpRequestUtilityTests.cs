@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 };
 
                 httpRequestData.AppendHeaders(theoryData.HttpHeaders);
-                IdentityComparer.AreStingEnumDictionariesEqual(httpRequestData.Headers, theoryData.ExpectedHttpRequestHeaders, context);
+                IdentityComparer.AreStringEnumDictionariesEqual(httpRequestData.Headers, theoryData.ExpectedHttpRequestHeaders, context);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -259,7 +259,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 IdentityComparer.AreStringsEqual(httpRequestData.Method, theoryData.ExpectedHttpRequestData.Method, context);
                 IdentityComparer.AreUrisEqual(httpRequestData.Uri, theoryData.ExpectedHttpRequestData.Uri, context);
                 IdentityComparer.AreBytesEqual(httpRequestData.Body, theoryData.ExpectedHttpRequestData.Body, context);
-                IdentityComparer.AreStingEnumDictionariesEqual(httpRequestData.Headers, theoryData.ExpectedHttpRequestData.Headers, context);
+                IdentityComparer.AreStringEnumDictionariesEqual(httpRequestData.Headers, theoryData.ExpectedHttpRequestData.Headers, context);
 
                 theoryData.ExpectedException.ProcessNoException(context);
             }

@@ -256,6 +256,7 @@ namespace Microsoft.IdentityModel.Tokens
         // Json parsing errors
         public const string IDX11020 = "IDX11020: The JSON value of type: '{0}', could not be converted to '{1}'. Reading: '{2}.{3}', Position: '{4}', CurrentDepth: '{5}', BytesConsumed: '{6}'.";
         public const string IDX11022 = "IDX11022: Expecting json reader to be positioned on '{0}', reader was positioned at: '{1}', Reading: '{2}.{3}', Position: '{4}', CurrentDepth: '{5}', BytesConsumed: '{6}'.";
+        public const string IDX11023 = "IDX11023: Expecting json reader to be positioned on '{0}', reader was positioned at: '{1}', Reading: '{2}', Position: '{3}', CurrentDepth: '{4}', BytesConsumed: '{5}'.";
 #pragma warning restore 1591
     }
 }
