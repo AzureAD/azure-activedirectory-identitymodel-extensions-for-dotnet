@@ -16,61 +16,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
     /// </summary>
     public class SignedHttpRequestHandlerPublic : SignedHttpRequestHandler
     {
-        public string CreateHttpRequestPayloadPublic(SignedHttpRequestDescriptor signedHttpRequestDescriptor, CallContext callContext)
-        {
-            return CreateHttpRequestPayload(signedHttpRequestDescriptor, callContext);
-        }
-
-        public void AddAtClaimPublic(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
-        {
-            AddAtClaim(payload, signedHttpRequestDescriptor);
-        }
-   
-        public void AddTsClaimPublic(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
-        {
-            AddTsClaim(payload, signedHttpRequestDescriptor);
-        }
-
-        public void AddMClaimPublic(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
-        {
-            AddMClaim(payload, signedHttpRequestDescriptor);
-        }
-
-        public void AddUClaimPublic(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
-        {
-            AddUClaim(payload, signedHttpRequestDescriptor);
-        }
-
-        public void AddPClaimPublic(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
-        {
-            AddPClaim(payload, signedHttpRequestDescriptor);
-        }
-
-        public void AddQClaimPublic(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
-        {
-            AddQClaim(payload, signedHttpRequestDescriptor);
-        }
- 
-        public void AddHClaimPublic(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
-        {
-            AddHClaim(payload, signedHttpRequestDescriptor);
-        }
-
-        public void AddBClaimPublic(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
-        {
-            AddBClaim(payload, signedHttpRequestDescriptor);
-        }
-
-        public void AddNonceClaimPublic(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
-        {
-            AddNonceClaim(payload, signedHttpRequestDescriptor);
-        }
-
-        public void AddCnfClaimPublic(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
-        {
-            AddCnfClaim(payload, signedHttpRequestDescriptor);
-        }
-
         public async Task<SecurityToken> ValidateSignedHttpRequestPayloadPublicAsync(SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
             return await ValidateSignedHttpRequestPayloadAsync(signedHttpRequest, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);

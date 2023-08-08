@@ -8,25 +8,27 @@ using System.Text;
 using Microsoft.IdentityModel.Logging;
 using static System.Net.WebUtility;
 
-namespace Microsoft.IdentityModel.Protocols
+namespace Microsoft.IdentityModel.Protocols.Json.Tests
 {
     /// <summary>
     /// base class for authentication protocol messages.
+    /// This is the original AuthenticationProtocolMessage in the 6x branch.
+    /// Used for ensuring backcompat.
     /// </summary>
-    public abstract class AuthenticationProtocolMessage
+    public abstract class AuthenticationProtocolMessage6x
     {
         private string _postTitle = "Working...";
         private string _script = "<script language=\"javascript\">window.setTimeout(function() {document.forms[0].submit();}, 0);</script>"; 
         private string _scriptButtonText = "Submit";
         private string _scriptDisabledText = "Script is disabled. Click Submit to continue.";
 
-        private IDictionary<string, string> _parameters = new Dictionary<string, string>();
+        private Dictionary<string, string> _parameters = new Dictionary<string, string>();
         private string _issuerAddress = string.Empty;
 
         /// <summary>
         /// Initializes a default instance of the <see cref="AuthenticationProtocolMessage"/> class.
         /// </summary>
-        protected AuthenticationProtocolMessage()
+        protected AuthenticationProtocolMessage6x()
         {
         }
 

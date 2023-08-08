@@ -14,6 +14,13 @@ namespace Microsoft.IdentityModel.Tokens.Json
 {
     internal static class JsonWebKeySerializer
     {
+        // This is used to perform performant case-insensitive property names.
+        // 6x used Newtonsoft and was case-insensitive w.r.t. property names.
+        // The serializer is written to use Utf8JsonReader.ValueTextEquals(...), to match property names.
+        // When we do not have a match, we check the uppercase name of the property against this table.
+        // If not found, then we assume we should put the value into AdditionalData.
+        // If we didn't do that, we would pay a performance penalty for those cases where there is AdditionalData
+        // but otherwise the JSON properties are all lower case.
         public static HashSet<string> JsonWebKeyParameterNamesUpperCase = new HashSet<string>
         {
             "ALG",
