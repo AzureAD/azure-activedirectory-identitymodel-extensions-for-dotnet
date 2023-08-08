@@ -52,6 +52,6 @@ namespace Microsoft.IdentityModel.Logging
         /// <summary>
         /// Gets or sets an <see cref="IDictionary{String, Object}"/> that enables custom extensibility scenarios.
         /// </summary>
-        public IDictionary<string, object> PropertyBag { get; set; }
+        public IDictionary<string, object>? PropertyBag { get; set; }
     }
 }

@@ -9,6 +9,7 @@
     <PackageId>Microsoft.IdentityModel.Logging</PackageId>
     <PackageTags>.NET;Windows;Authentication;Identity;Logging</PackageTags>
     <IsTrimmable>true</IsTrimmable>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
