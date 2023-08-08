@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
         {
             JsonTestClass jsonTestClass = new JsonTestClass();
 
-            if (!JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, true))
+            if (!JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, false))
                 throw LogHelper.LogExceptionMessage(
                     new JsonException(
                         LogHelper.FormatInvariant(
@@ -65,9 +65,9 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                         LogHelper.MarkAsNonPII(reader.CurrentDepth),
                         LogHelper.MarkAsNonPII(reader.BytesConsumed))));
 
-            do
+            while (JsonSerializerPrimitives.ReaderRead(ref reader))
             {
-                while (reader.TokenType == JsonTokenType.PropertyName)
+                if (reader.TokenType == JsonTokenType.PropertyName)
                 {
                     string propertyName = JsonSerializerPrimitives.GetPropertyName(ref reader, JsonTestClass.ClassName, true);
                     switch (propertyName)
@@ -75,18 +75,18 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                         // optional
                         // https://datatracker.ietf.org/doc/html/rfc7517#section-4.4
                         case "Boolean":
-                            jsonTestClass.Boolean = JsonSerializerPrimitives.ReadBoolean(ref reader, "Boolean",_className, true);
+                            jsonTestClass.Boolean = JsonSerializerPrimitives.ReadBoolean(ref reader, "Boolean",_className);
                             break;
                         case "Double":
-                            jsonTestClass.Double = JsonSerializerPrimitives.ReadDouble(ref reader, "Double", _className, true);
+                            jsonTestClass.Double = JsonSerializerPrimitives.ReadDouble(ref reader, "Double", _className);
                             break;
                         case "Int":
-                            jsonTestClass.Int = JsonSerializerPrimitives.ReadInt(ref reader, "Int", _className, true);
+                            jsonTestClass.Int = JsonSerializerPrimitives.ReadInt(ref reader, "Int", _className);
                             break;
                         case "ListObject":
                             List<object> objects = new List<object>();
 
-                            if (JsonSerializerPrimitives.ReadObjects(ref reader, objects, "ListObject", _className, true) == null)
+                            if (JsonSerializerPrimitives.ReadObjects(ref reader, objects, "ListObject", _className) == null)
                             {
                                 throw LogHelper.LogExceptionMessage(
                                     new ArgumentNullException(
@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                         case "ListString":
                              List<string> strings = new List<string>();
 
-                            if (JsonSerializerPrimitives.ReadStrings(ref reader, strings, "ListString", _className, true) == null)
+                            if (JsonSerializerPrimitives.ReadStrings(ref reader, strings, "ListString", _className) == null)
                             {
                                 throw LogHelper.LogExceptionMessage(
                                     new ArgumentNullException(
@@ -126,21 +126,20 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                             jsonTestClass.ListString = strings;
                             break;
                         case "String":
-                            jsonTestClass.String = JsonSerializerPrimitives.ReadString(ref reader, "String", _className, true);
+                            jsonTestClass.String = JsonSerializerPrimitives.ReadString(ref reader, "String", _className);
                             break;
                         default:
                             using (JsonDocument jsonDocument = JsonDocument.ParseValue(ref reader))
                                 jsonTestClass.AdditionalData[propertyName] = jsonDocument.RootElement.Clone();
 
-                            reader.Read();
+                            JsonSerializerPrimitives.ReaderRead(ref reader);
                             break;
                     }
                 }
 
                 if (JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, true))
                     break;
-
-            } while (reader.Read());
+            }
 
             return jsonTestClass;
         }
