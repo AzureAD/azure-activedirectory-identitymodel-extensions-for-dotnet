@@ -19,7 +19,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets a user context for a <see cref="KeyWrapProvider"/>.
         /// </summary>
         /// <remarks>This is null by default. This can be used by runtimes or for extensibility scenarios.</remarks>
-        public abstract string Context { get; set; }
+        public abstract string? Context { get; set; }
 
         /// <summary>
         /// Gets the <see cref="SecurityKey"/> that is being used.

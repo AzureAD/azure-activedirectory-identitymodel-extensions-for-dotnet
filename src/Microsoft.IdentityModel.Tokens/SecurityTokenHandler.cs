@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="reader"><see cref="XmlReader"/>.</param>
         /// <remarks>SecurityToken instance which represents the serialized token.</remarks>
-        public virtual SecurityToken ReadToken(XmlReader reader)
+        public virtual SecurityToken? ReadToken(XmlReader reader)
         {
             return null;
         }
@@ -105,7 +105,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="token">A token of type TokenType.</param>
         /// <returns>The serialized token.</returns>
-        public virtual string WriteToken(SecurityToken token)
+        public virtual string? WriteToken(SecurityToken token)
         {
             return null;
         }

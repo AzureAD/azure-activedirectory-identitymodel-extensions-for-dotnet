@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the SigningKey that was found invalid.
         /// </summary>
-        public SecurityKey SigningKey { get; set; }
+        public SecurityKey? SigningKey { get; set; }
 
         /// <summary>
         /// Initializes a new instance of  <see cref="SecurityTokenInvalidSigningKeyException"/>

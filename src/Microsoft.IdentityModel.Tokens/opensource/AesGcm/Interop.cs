@@ -102,17 +102,17 @@ namespace Microsoft.IdentityModel.Tokens
 
 #region FOR TESTING ONLY
             [DllImport(Libraries.BCrypt, CharSet = CharSet.Unicode)]
-            public static extern unsafe NTSTATUS BCryptEncrypt(SafeKeyHandle hKey, byte* pbInput, int cbInput, IntPtr paddingInfo, [In, Out] byte[] pbIV, int cbIV, byte* pbOutput, int cbOutput, out int cbResult, int dwFlags);
+            public static extern unsafe NTSTATUS BCryptEncrypt(SafeKeyHandle? hKey, byte* pbInput, int cbInput, IntPtr paddingInfo, [In, Out] byte[]? pbIV, int cbIV, byte* pbOutput, int cbOutput, out int cbResult, int dwFlags);
 #endregion
 
             [DllImport(Libraries.BCrypt, CharSet = CharSet.Unicode)]
-            public static extern unsafe NTSTATUS BCryptDecrypt(SafeKeyHandle hKey, byte* pbInput, int cbInput, IntPtr paddingInfo, [In, Out] byte[] pbIV, int cbIV, byte* pbOutput, int cbOutput, out int cbResult, int dwFlags);
+            public static extern unsafe NTSTATUS BCryptDecrypt(SafeKeyHandle? hKey, byte* pbInput, int cbInput, IntPtr paddingInfo, [In, Out] byte[]? pbIV, int cbIV, byte* pbOutput, int cbOutput, out int cbResult, int dwFlags);
 
             [DllImport(Libraries.BCrypt, CharSet = CharSet.Unicode)]
             private static extern NTSTATUS BCryptImportKey(SafeAlgorithmHandle hAlgorithm, IntPtr hImportKey, string pszBlobType, out SafeKeyHandle hKey, IntPtr pbKeyObject, int cbKeyObject, byte[] pbInput, int cbInput, int dwFlags);
 
             [DllImport(Libraries.BCrypt, CharSet = CharSet.Unicode)]
-            public static extern NTSTATUS BCryptOpenAlgorithmProvider(out SafeAlgorithmHandle phAlgorithm, string pszAlgId, string pszImplementation, int dwFlags);
+            public static extern NTSTATUS BCryptOpenAlgorithmProvider(out SafeAlgorithmHandle phAlgorithm, string pszAlgId, string? pszImplementation, int dwFlags);
 
             [DllImport(Libraries.BCrypt, CharSet = CharSet.Unicode)]
             public static extern NTSTATUS BCryptSetProperty(SafeAlgorithmHandle hObject, string pszProperty, string pbInput, int cbInput, int dwFlags);
@@ -176,7 +176,7 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         int length = FormatMessage(flags | FORMAT_MESSAGE_ALLOCATE_BUFFER, moduleHandle, unchecked((uint)errorCode), 0, &nativeMsgPtr, 0, IntPtr.Zero);
                         if (length > 0)
-                            return GetAndTrimString(Marshal.PtrToStringAnsi(nativeMsgPtr).ToCharArray(), length);
+                            return GetAndTrimString(Marshal.PtrToStringAnsi(nativeMsgPtr)!.ToCharArray(), length);
                     }
                     finally
                     {

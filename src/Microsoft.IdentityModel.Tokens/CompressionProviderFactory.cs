@@ -11,7 +11,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class CompressionProviderFactory
     {
-        private static CompressionProviderFactory _default;
+        private static CompressionProviderFactory? _default;
 
         /// <summary>
         /// Static constructor that initializes the default <see cref="CompressionProviderFactory"/>.
@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Returns the default <see cref="CompressionProviderFactory"/> instance.
         /// </summary>
-        public static CompressionProviderFactory Default
+        public static CompressionProviderFactory? Default
         {
             get => _default;
             set => _default = value ?? throw LogHelper.LogArgumentNullException(nameof(Default));
@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Extensibility point for custom compression support application wide.
         /// </summary>
-        public ICompressionProvider CustomCompressionProvider { get; set; }
+        public ICompressionProvider? CustomCompressionProvider { get; set; }
 
         /// <summary>
         /// Answers if an algorithm is supported.

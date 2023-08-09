@@ -15,17 +15,17 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the value of the 'audience' claim.
         /// </summary>
-        public string Audience { get; set; }
+        public string? Audience { get; set; }
 
         /// <summary>
         /// Defines the compression algorithm that will be used to compress the JWT token payload.
         /// </summary>
-        public string CompressionAlgorithm { get; set; }
+        public string? CompressionAlgorithm { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="EncryptingCredentials"/> used to create a encrypted security token.
         /// </summary>
-        public EncryptingCredentials EncryptingCredentials { get; set; }
+        public EncryptingCredentials? EncryptingCredentials { get; set; }
 
         /// <summary>
         /// Gets or sets the value of the 'expiration' claim. This value should be in UTC.
@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the issuer of this <see cref="SecurityTokenDescriptor"/>.
         /// </summary>
-        public string Issuer { get; set; }
+        public string? Issuer { get; set; }
 
         /// <summary>
         /// Gets or sets the time the security token was issued. This value should be in UTC.
@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// If <see cref="AdditionalHeaderClaims"/> also contains 'typ' header claim value, it will override the TokenType provided here.
         /// This value is used only for JWT tokens and not for SAML/SAML2 tokens</remarks>
         /// </summary>
-        public string TokenType { get; set; }
+        public string? TokenType { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="Dictionary{TKey, TValue}"/> which represents the claims that will be used when creating a security token.
@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// in Claims. The values found in Claims take precedence over those found in Subject, so any duplicate
         /// values will be overridden.
         /// </summary>
-        public IDictionary<string, object> Claims { get; set; }
+        public IDictionary<string, object>? Claims { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="Dictionary{TKey, TValue}"/> which contains any custom header claims that need to be added to the JWT token header.
@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// will result in an exception being thrown. 
         /// <remarks> These claims are only added to the outer header (in case of a JWE).</remarks>
         /// </summary>
-        public IDictionary<string, object> AdditionalHeaderClaims { get; set; }
+        public IDictionary<string, object>? AdditionalHeaderClaims { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="Dictionary{TKey, TValue}"/> which contains any custom header claims that need to be added to the inner JWT token header.
@@ -81,12 +81,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// For JsonWebTokenHandler, these claims are merged with <see cref="AdditionalHeaderClaims"/> while adding to the inner JWT header.
         /// </remarks>
         /// </summary>
-        public IDictionary<string, object> AdditionalInnerHeaderClaims { get; set; }
+        public IDictionary<string, object>? AdditionalInnerHeaderClaims { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="SigningCredentials"/> used to create a security token.
         /// </summary>
-        public SigningCredentials SigningCredentials { get; set; }
+        public SigningCredentials? SigningCredentials { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="ClaimsIdentity"/>.
@@ -94,6 +94,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// in Claims. The values found in Claims take precedence over those found in Subject, so any duplicate
         /// values will be overridden.
         /// </summary>
-        public ClaimsIdentity Subject { get; set; }
+        public ClaimsIdentity? Subject { get; set; }
     }
 }

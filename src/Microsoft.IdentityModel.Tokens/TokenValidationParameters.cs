@@ -186,18 +186,18 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class TokenValidationParameters
     {
-        private string _authenticationType;
+        private string? _authenticationType;
         private TimeSpan _clockSkew = DefaultClockSkew;
         private string _nameClaimType = ClaimsIdentity.DefaultNameClaimType;
         private string _roleClaimType = ClaimsIdentity.DefaultRoleClaimType;
-        private Dictionary<string, object> _instancePropertyBag;
+        private Dictionary<string, object>? _instancePropertyBag;
 
         /// <summary>
         /// This is the default value of <see cref="ClaimsIdentity.AuthenticationType"/> when creating a <see cref="ClaimsIdentity"/>.
         /// The value is <c>"AuthenticationTypes.Federation"</c>.
         /// To change the value, set <see cref="AuthenticationType"/> to a different value.
         /// </summary>
-        public static readonly string DefaultAuthenticationType = "AuthenticationTypes.Federation"; // Note: The change was because 5.x removed the dependency on System.IdentityModel and we used a different string which was a mistake.
+        public static readonly string? DefaultAuthenticationType = "AuthenticationTypes.Federation"; // Note: The change was because 5.x removed the dependency on System.IdentityModel and we used a different string which was a mistake.
 
         /// <summary>
         /// Default for the clock skew.
@@ -220,7 +220,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(other)));
 
             AlgorithmValidator = other.AlgorithmValidator;
-            ActorValidationParameters = other.ActorValidationParameters?.Clone();
+            ActorValidationParameters = other.ActorValidationParameters?.Clone()!;
             AudienceValidator = other.AudienceValidator;
             _authenticationType = other._authenticationType;
             ClockSkew = other.ClockSkew;
@@ -281,7 +281,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Initializes a new instance of the <see cref="TokenValidationParameters"/> class.
         /// </summary>
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public TokenValidationParameters()
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {
             LogTokenId = true;
             LogValidationExceptions = true;
@@ -326,7 +328,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets the AuthenticationType when creating a <see cref="ClaimsIdentity"/>.
         /// </summary>
         /// <exception cref="ArgumentNullException">If 'value' is null or whitespace.</exception>
-        public string AuthenticationType
+        public string? AuthenticationType
         {
             get
             {
@@ -403,7 +405,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>A <see cref="ClaimsIdentity"/> with Authentication, NameClaimType and RoleClaimType set.</returns>
         public virtual ClaimsIdentity CreateClaimsIdentity(SecurityToken securityToken, string issuer)
         {
-            string nameClaimType = null;
+            string? nameClaimType = null;
             if (NameClaimTypeRetriever != null)
             {
                 nameClaimType = NameClaimTypeRetriever(securityToken, issuer);
@@ -413,7 +415,7 @@ namespace Microsoft.IdentityModel.Tokens
                 nameClaimType = NameClaimType;
             }
 
-            string roleClaimType = null;
+            string? roleClaimType = null;
             if (RoleClaimTypeRetriever != null)
             {
                 roleClaimType = RoleClaimTypeRetriever(securityToken, issuer);
@@ -481,7 +483,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// If both <see cref="IssuerSigningKeyValidatorUsingConfiguration"/> and <see cref="IssuerSigningKeyValidator"/> are set, IssuerSigningKeyValidatorUsingConfiguration takes
         /// priority.
         /// </remarks>
-        public IssuerSigningKeyValidatorUsingConfiguration IssuerSigningKeyValidatorUsingConfiguration { get; set; }
+        public IssuerSigningKeyValidatorUsingConfiguration? IssuerSigningKeyValidatorUsingConfiguration { get; set; }
 
         /// <summary>
         /// Gets a <see cref="IDictionary{String, Object}"/> that is unique to this instance.

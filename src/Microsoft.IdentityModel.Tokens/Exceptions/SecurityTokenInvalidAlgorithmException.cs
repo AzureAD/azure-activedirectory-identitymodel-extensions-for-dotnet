@@ -21,7 +21,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the invalid algorithm that created the validation exception.
         /// </summary>
-        public string InvalidAlgorithm { get; set; }
+        public string? InvalidAlgorithm { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SecurityTokenInvalidAlgorithmException"/> class.

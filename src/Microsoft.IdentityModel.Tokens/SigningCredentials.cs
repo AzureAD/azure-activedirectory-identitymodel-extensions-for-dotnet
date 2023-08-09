@@ -12,9 +12,9 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class SigningCredentials
     {
-        private string _algorithm;
-        private string _digest;
-        private SecurityKey _key;
+        private string? _algorithm;
+        private string? _digest;
+        private SecurityKey? _key;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SigningCredentials"/> class.
@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets the signature algorithm.
         /// </summary>
         /// <exception cref="ArgumentNullException">if 'value' is null or empty.</exception>
-        public string Algorithm
+        public string? Algorithm
         {
             get => _algorithm;
             private set => _algorithm = string.IsNullOrEmpty(value) ? throw LogHelper.LogArgumentNullException("algorithm") : value;
@@ -94,7 +94,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the digest algorithm.
         /// </summary>
-        public string Digest
+        public string? Digest
         {
             get => _digest;
             private set => _digest = string.IsNullOrEmpty(value) ? throw LogHelper.LogArgumentNullException("digest") : value;
@@ -104,12 +104,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// Users can override the default <see cref="CryptoProviderFactory"/> with this property. This factory will be used for creating signature providers.
         /// </summary>
         /// <remarks>This will have precedence over <see cref="SecurityKey.CryptoProviderFactory"/></remarks>
-        public CryptoProviderFactory CryptoProviderFactory { get; set; }
+        public CryptoProviderFactory? CryptoProviderFactory { get; set; }
 
         /// <summary>
         /// Gets the <see cref="SecurityKey"/> used for signature creation or validation.
         /// </summary>
-        public SecurityKey Key
+        public SecurityKey? Key
         {
             get => _key;
             private set => _key = value ?? throw LogHelper.LogArgumentNullException("key");
@@ -118,9 +118,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the key id associated with <see cref="SecurityKey"/>.
         /// </summary>
-        public string Kid
+        public string? Kid
         {
-            get => Key.KeyId;
+            get => Key!.KeyId;
         }
     }
 }

@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.Tokens
                 switch (enumerator.Name)
                 {
                     case _NotBeforeKey:
-                        NotBefore = (DateTime)info.GetValue(_NotBeforeKey, typeof(DateTime));
+                        NotBefore = (DateTime)info.GetValue(_NotBeforeKey, typeof(DateTime))!;
                         break;
 
                     default:

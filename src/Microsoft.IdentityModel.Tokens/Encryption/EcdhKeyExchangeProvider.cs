@@ -23,7 +23,7 @@ namespace Microsoft.IdentityModel.Tokens
         private ECDiffieHellman _ecdhPrivate;
         private ECParameters _ecParamsPublic;
         private ECParameters _ecParamsPrivate;
-        private string _algorithmId;
+        private string? _algorithmId;
 
         /// <summary>
         /// Initializes a new instance of <see cref="EcdhKeyExchangeProvider"/> used for CEKs
@@ -57,10 +57,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="apv">Agreement PartyVInfo (optional). When used, the PartyUInfo value contains information about the recipient,
         /// represented as a base64url-encoded string.</param>
         /// <returns>Returns <see cref="SecurityKey"/> that represents the key generated</returns>
-        public SecurityKey GenerateKdf(string apu = null, string apv = null)
+        public SecurityKey GenerateKdf(string? apu = null, string? apv = null)
         {
             //The "apu" and "apv" values MUST be distinct when used (per rfc7518 section 4.6.2) https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2
-            if (!string.IsNullOrEmpty(apu) && !string.IsNullOrEmpty(apv) && apu.Equals(apv))
+            if (!string.IsNullOrEmpty(apu!) && !string.IsNullOrEmpty(apv!) && apu!.Equals(apv!))
                 throw LogHelper.LogArgumentException<ArgumentException>(
                     nameof(apu),
                     LogHelper.FormatInvariant(
@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Tokens
             // hashlen is always 256 for ecdh-es, see: https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2
             // for supported algorithms it is always '1', for saml might be different
             byte[] prepend = new byte[4] { 0, 0, 0, 1 };
-            SetAppendBytes(apu, apv, out byte[] append);
+            SetAppendBytes(apu!, apv!, out byte[] append);
             byte[] kdf = new byte[kdfLength];
 
             // JWA's spec https://datatracker.ietf.org/doc/html/rfc7518#section-4.6.2 specifies SHA256, saml might be different
@@ -88,7 +88,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         private void SetAppendBytes(string apu, string apv, out byte[] append)
         {
-            byte[] encBytes = Encoding.ASCII.GetBytes(_algorithmId);
+            byte[] encBytes = Encoding.ASCII.GetBytes(_algorithmId!);
             byte[] apuBytes = Base64UrlEncoder.DecodeBytes(string.IsNullOrEmpty(apu) ? string.Empty : apu);
             byte[] apvBytes = Base64UrlEncoder.DecodeBytes(string.IsNullOrEmpty(apv) ? string.Empty : apv);
             byte[] numOctetsEnc = BitConverter.GetBytes(encBytes.Length);
@@ -108,7 +108,7 @@ namespace Microsoft.IdentityModel.Tokens
             append = Concat(numOctetsEnc, encBytes, numOctetsApu, apuBytes, numOctetsApv, apvBytes, keyDataLengthBytes);
         }
 
-        private void SetKeyDataLenAndEncryptionAlgorithm(string alg, string enc = null)
+        private void SetKeyDataLenAndEncryptionAlgorithm(string alg, string? enc = null)
         {
             if (SecurityAlgorithms.EcdhEs.Equals(alg, StringComparison.InvariantCulture))
             {
@@ -176,9 +176,9 @@ namespace Microsoft.IdentityModel.Tokens
                 return ecdsaKey.ECDsa.ExportParameters(isPrivate);
             }
             else if (key is JsonWebKey jwk
-                && JsonWebKeyConverter.TryConvertToECDsaSecurityKey(jwk, out SecurityKey securityKey))
+                && JsonWebKeyConverter.TryConvertToECDsaSecurityKey(jwk, out SecurityKey? securityKey))
             {
-                return ((ECDsaSecurityKey)securityKey).ECDsa.ExportParameters(isPrivate);
+                return ((ECDsaSecurityKey)securityKey!).ECDsa.ExportParameters(isPrivate);
             }
             else
             {
@@ -207,7 +207,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         internal string GetEncryptionAlgorithm()
         {
-            if (_algorithmId.Equals(SecurityAlgorithms.EcdhEsA128kw, StringComparison.Ordinal))
+            if (_algorithmId!.Equals(SecurityAlgorithms.EcdhEsA128kw, StringComparison.Ordinal))
                 return SecurityAlgorithms.Aes128KW;
             if (_algorithmId.Equals(SecurityAlgorithms.EcdhEsA192kw, StringComparison.Ordinal))
                 return SecurityAlgorithms.Aes192KW;

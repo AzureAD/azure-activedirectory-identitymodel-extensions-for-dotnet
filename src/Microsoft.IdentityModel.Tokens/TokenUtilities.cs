@@ -54,13 +54,13 @@ namespace Microsoft.IdentityModel.Tokens
 
                 string jsonClaimType = claim.Type;
                 object jsonClaimValue = claim.ValueType.Equals(ClaimValueTypes.String) ? claim.Value : GetClaimValueUsingValueType(claim);
-                object existingValue;
+                object? existingValue;
 
                 // If there is an existing value, append to it.
                 // What to do if the 'ClaimValueType' is not the same.
                 if (payload.TryGetValue(jsonClaimType, out existingValue))
                 {
-                    IList<object> claimValues = existingValue as IList<object>;
+                    IList<object>? claimValues = existingValue as IList<object>;
                     if (claimValues == null)
                     {
                         claimValues = new List<object>();
@@ -117,7 +117,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="configuration">The <see cref="BaseConfiguration"/> that contains signing keys used for validation.</param>
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
         /// <returns>Returns all <see cref="SecurityKey"/> provided in provided in <paramref name="configuration"/> and <paramref name="validationParameters"/>.</returns>
-        internal static IEnumerable<SecurityKey> GetAllSigningKeys(BaseConfiguration configuration = null, TokenValidationParameters validationParameters = null)
+        internal static IEnumerable<SecurityKey> GetAllSigningKeys(BaseConfiguration? configuration = null, TokenValidationParameters? validationParameters = null)
         {
             if (configuration is not null)
             {
@@ -205,11 +205,11 @@ namespace Microsoft.IdentityModel.Tokens
             }
             else if (currentException is SecurityTokenInvalidSignatureException)
             {
-                SecurityKey currentSigningKey = currentConfiguration.SigningKeys.FirstOrDefault(x => x.KeyId == kid);
+                SecurityKey? currentSigningKey = currentConfiguration.SigningKeys.FirstOrDefault(x => x.KeyId == kid);
                 if (currentSigningKey == null)
                     return isRecoverableSigningKey.Value;
 
-                SecurityKey lkgSigningKey = lkgConfiguration.SigningKeys.FirstOrDefault(signingKey => signingKey.KeyId == kid);
+                SecurityKey? lkgSigningKey = lkgConfiguration.SigningKeys.FirstOrDefault(signingKey => signingKey.KeyId == kid);
                 return lkgSigningKey != null && currentSigningKey.InternalId != lkgSigningKey.InternalId;
             }
 

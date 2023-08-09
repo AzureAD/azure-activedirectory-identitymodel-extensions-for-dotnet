@@ -184,7 +184,7 @@ namespace Microsoft.IdentityModel.Tokens
             // Convert.TryFromBase64Chars.
 
             const int StackAllocThreshold = 512;
-            char[] arrayPoolChars = null;
+            char[]? arrayPoolChars = null;
             scoped Span<char> charsSpan = default;
             scoped ReadOnlySpan<char> source = str.Span;
 
@@ -219,7 +219,7 @@ namespace Microsoft.IdentityModel.Tokens
                 source = charsSpan;
             }
 
-            byte[] arrayPoolBytes = null;
+            byte[]? arrayPoolBytes = null;
             Span<byte> bytesSpan = decodedLength <= StackAllocThreshold ?
                 stackalloc byte[StackAllocThreshold] :
                 arrayPoolBytes = ArrayPool<byte>.Shared.Rent(decodedLength);

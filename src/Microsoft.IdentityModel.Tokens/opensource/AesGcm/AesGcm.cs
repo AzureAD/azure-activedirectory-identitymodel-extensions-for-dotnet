@@ -11,7 +11,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const int TagSize = 16;
 
         private static readonly SafeAlgorithmHandle s_aesGcm = AesBCryptModes.OpenAesAlgorithm(Cng.BCRYPT_CHAIN_MODE_GCM).Value;
-        private SafeKeyHandle _keyHandle;
+        private SafeKeyHandle? _keyHandle;
         private bool _disposed = false;
 
         public AesGcm(byte[] key)
@@ -38,18 +38,18 @@ namespace Microsoft.IdentityModel.Tokens
             if (!_disposed && disposing)
             {
                 _disposed = true;
-                _keyHandle.Dispose();
+                _keyHandle!.Dispose();
             }
         }
 
-        public void Decrypt(byte[] nonce, byte[] ciphertext, byte[] tag, byte[] plaintext, byte[] associatedData = null)
+        public void Decrypt(byte[] nonce, byte[] ciphertext, byte[] tag, byte[] plaintext, byte[]? associatedData = null)
         {
             AesAead.CheckArgumentsForNull(nonce, plaintext, ciphertext, tag);
             AesAead.Decrypt(_keyHandle, nonce, associatedData, ciphertext, tag, plaintext, clearPlaintextOnFailure: true);
         }
 
 #region FOR TESTING ONLY
-        internal void Encrypt(byte[] nonce, byte[] plaintext, byte[] ciphertext, byte[] tag, byte[] associatedData = null)
+        internal void Encrypt(byte[] nonce, byte[] plaintext, byte[] ciphertext, byte[] tag, byte[]? associatedData = null)
         {
             AesAead.CheckArgumentsForNull(nonce, plaintext, ciphertext, tag);
             AesAead.Encrypt(_keyHandle, nonce, associatedData, plaintext, ciphertext, tag);

@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets a user context for a <see cref="KeyWrapProvider"/>.
         /// </summary>
         /// <remarks>This is null by default. This is for use by the application and not used by this SDK.</remarks>
-        public override string Context { get; set; }
+        public override string? Context { get; set; }
 
         /// <summary>
         /// Gets the <see cref="SecurityKey"/> that is being used.

@@ -19,7 +19,7 @@ namespace Microsoft.IdentityModel.Tokens
         private TimeSpan _automaticRefreshInterval = DefaultAutomaticRefreshInterval;
         private TimeSpan _refreshInterval = DefaultRefreshInterval;
         private TimeSpan _lastKnownGoodLifetime = DefaultLastKnownGoodConfigurationLifetime;
-        private BaseConfiguration _lastKnownGoodConfiguration;
+        private BaseConfiguration? _lastKnownGoodConfiguration;
         private DateTime? _lastKnownGoodConfigFirstUse = null;
 
         internal EventBasedLRUCache<BaseConfiguration, DateTime> _lastKnownGoodConfigurationCache;
@@ -102,7 +102,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// The last known good configuration or LKG (a configuration retrieved in the past that we were able to successfully validate a token against).
         /// </summary>
-        public BaseConfiguration LastKnownGoodConfiguration
+        public BaseConfiguration? LastKnownGoodConfiguration
         {
             get
             {
@@ -136,7 +136,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// The metadata address to retrieve the configuration from.
         /// </summary>
-        public string MetadataAddress { get; set; }
+        public string? MetadataAddress { get; set; }
 
         /// <summary>
         /// 5 minutes is the minimum value for automatic refresh. <see cref="AutomaticRefreshInterval"/> can not be set less than this value.

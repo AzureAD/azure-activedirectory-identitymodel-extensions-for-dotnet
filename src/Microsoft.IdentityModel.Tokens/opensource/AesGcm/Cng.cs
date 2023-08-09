@@ -32,9 +32,9 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         public static unsafe void Decrypt(
-            SafeKeyHandle keyHandle,
+            SafeKeyHandle? keyHandle,
             byte[] nonce,
-            byte[] associatedData,
+            byte[]? associatedData,
             byte[] ciphertext,
             byte[] tag,
             byte[] plaintext,
@@ -88,9 +88,9 @@ namespace Microsoft.IdentityModel.Tokens
 
 #region FOR TESTING ONLY
         internal static unsafe void Encrypt(
-            SafeKeyHandle keyHandle,
+            SafeKeyHandle? keyHandle,
             byte[] nonce,
-            byte[] associatedData,
+            byte[]? associatedData,
             byte[] plaintext,
             byte[] ciphertext,
             byte[] tag)
@@ -165,7 +165,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         public const string BCRYPT_CHAIN_MODE_GCM = "ChainingModeGCM";
 
-        public static SafeAlgorithmHandle BCryptOpenAlgorithmProvider(string pszAlgId, string pszImplementation, OpenAlgorithmProviderFlags dwFlags)
+        public static SafeAlgorithmHandle BCryptOpenAlgorithmProvider(string pszAlgId, string? pszImplementation, OpenAlgorithmProviderFlags dwFlags)
         {
             SafeAlgorithmHandle hAlgorithm;
             NTSTATUS ntStatus = Interop.BCrypt.BCryptOpenAlgorithmProvider(out hAlgorithm, pszAlgId, pszImplementation, (int)dwFlags);

@@ -77,7 +77,7 @@ namespace Microsoft.IdentityModel.Tokens
                         // imitate signing
                         byte[] hash = new byte[20];
 #if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
-                        Rsa.SignData(hash, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                        Rsa!.SignData(hash, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
 #else
                         if (Rsa is RSACryptoServiceProvider rsaCryptoServiceProvider)
                             rsaCryptoServiceProvider.SignData(hash, SecurityAlgorithms.Sha256);
@@ -162,7 +162,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// <see cref="RSA"/> instance used to initialize the key.
         /// </summary>
-        public RSA Rsa { get; private set; }
+        public RSA? Rsa { get; private set; }
 
         /// <summary>
         /// Determines whether the <see cref="RsaSecurityKey"/> can compute a JWK thumbprint.
@@ -184,9 +184,9 @@ namespace Microsoft.IdentityModel.Tokens
             var rsaParameters = Parameters;
 
             if (rsaParameters.Exponent == null || rsaParameters.Modulus == null)
-                rsaParameters = Rsa.ExportParameters(false);
+                rsaParameters = Rsa!.ExportParameters(false);
 
-            var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.E}"":""{Base64UrlEncoder.Encode(rsaParameters.Exponent)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.N}"":""{Base64UrlEncoder.Encode(rsaParameters.Modulus)}""}}";
+            var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.E}"":""{Base64UrlEncoder.Encode(rsaParameters.Exponent!)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.N}"":""{Base64UrlEncoder.Encode(rsaParameters.Modulus!)}""}}";
             return Utility.GenerateSha256Hash(canonicalJwk);
         }
     }

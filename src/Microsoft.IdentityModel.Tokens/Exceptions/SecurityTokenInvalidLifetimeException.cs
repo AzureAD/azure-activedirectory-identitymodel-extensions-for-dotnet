@@ -72,11 +72,11 @@ namespace Microsoft.IdentityModel.Tokens
                 switch (enumerator.Name)
                 {
                     case _NotBeforeKey:
-                        NotBefore = (DateTime)info.GetValue(_NotBeforeKey, typeof(DateTime));
+                        NotBefore = (DateTime)info.GetValue(_NotBeforeKey, typeof(DateTime))!;
                         break;
 
                     case _ExpiresKey:
-                        Expires = (DateTime)info.GetValue(_ExpiresKey, typeof(DateTime));
+                        Expires = (DateTime)info.GetValue(_ExpiresKey, typeof(DateTime))!;
                         break;
 
                     default:

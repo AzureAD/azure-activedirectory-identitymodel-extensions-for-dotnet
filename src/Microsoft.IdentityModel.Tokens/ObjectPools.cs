@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Tokens
                 inst = items[i].Value;
                 if (inst != null)
                 {
-                    if (inst == Interlocked.CompareExchange(ref items[i].Value, null, inst))
+                    if (inst == Interlocked.CompareExchange(ref items[i].Value!, null, inst))
                     {
                         goto gotInstance;
                     }

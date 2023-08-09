@@ -20,7 +20,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(webKey.K))
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10703, LogHelper.MarkAsNonPII(typeof(SymmetricSecurityKey)))));
 
-            _key = Base64UrlEncoder.DecodeBytes(webKey.K);
+            _key = Base64UrlEncoder.DecodeBytes(webKey.K!);
             _keySize = _key.Length * 8;
             webKey.ConvertedSecurityKey = this;
         }

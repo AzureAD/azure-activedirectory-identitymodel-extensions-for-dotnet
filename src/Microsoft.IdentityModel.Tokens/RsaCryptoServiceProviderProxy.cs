@@ -246,7 +246,7 @@ namespace Microsoft.IdentityModel.Tokens
                         LogHelper.MarkAsNonPII(input.Length))));
 
             return _rsa.VerifyHash(
-                (hash as HashAlgorithm).ComputeHash(input, offset, length),
+                (hash as HashAlgorithm)!.ComputeHash(input, offset, length),
                 signature,
                 hashAlgorithmName,
                 RSASignaturePadding.Pkcs1);

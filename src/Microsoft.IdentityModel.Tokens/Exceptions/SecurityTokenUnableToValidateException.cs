@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Tokens
                 switch (enumerator.Name)
                 {
                     case _ValidationFailureKey:
-                        ValidationFailure = (ValidationFailure)info.GetValue(_ValidationFailureKey, typeof(ValidationFailure));
+                        ValidationFailure = (ValidationFailure)info.GetValue(_ValidationFailureKey, typeof(ValidationFailure))!;
                         break;
 
                     default:

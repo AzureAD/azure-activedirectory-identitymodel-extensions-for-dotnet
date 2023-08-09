@@ -110,7 +110,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (ECDsaAdapter.SupportsECParameters())
             {
                 ECParameters parameters = ECDsa.ExportParameters(false);
-                var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.Crv}"":""{ECDsaAdapter.GetCrvParameterValue(parameters.Curve)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.EllipticCurve}"",""{JsonWebKeyParameterNames.X}"":""{Base64UrlEncoder.Encode(parameters.Q.X)}"",""{JsonWebKeyParameterNames.Y}"":""{Base64UrlEncoder.Encode(parameters.Q.Y)}""}}";
+                var canonicalJwk = $@"{{""{JsonWebKeyParameterNames.Crv}"":""{ECDsaAdapter.GetCrvParameterValue(parameters.Curve)}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.EllipticCurve}"",""{JsonWebKeyParameterNames.X}"":""{Base64UrlEncoder.Encode(parameters!.Q!.X!)}"",""{JsonWebKeyParameterNames.Y}"":""{Base64UrlEncoder.Encode(parameters!.Q!.Y!)}""}}";
                 return Utility.GenerateSha256Hash(canonicalJwk);
             }
 #endif

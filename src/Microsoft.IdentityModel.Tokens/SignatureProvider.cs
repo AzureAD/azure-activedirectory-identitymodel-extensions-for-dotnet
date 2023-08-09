@@ -46,12 +46,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets a user context for a <see cref="SignatureProvider"/>.
         /// </summary>
         /// <remarks>This is null by default. This is for use by the application and not used by this SDK.</remarks>
-        public string Context { get; set; }
+        public string? Context { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="CryptoProviderCache"/> that is associated with this <see cref="SignatureProvider"/>
         /// </summary>
-        public CryptoProviderCache CryptoProviderCache { get; set; }
+        public CryptoProviderCache? CryptoProviderCache { get; set; }
 
         /// <summary>
         /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>

@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
         }
 
-        internal CryptoProviderFactory CryptoProviderFactory { get; set; }
+        internal CryptoProviderFactory? CryptoProviderFactory { get; set; }
 
         /// <summary>
         /// Creates a new instance of <see cref="InMemoryCryptoProviderCache"/> using the specified <paramref name="cryptoProviderCacheOptions"/>.

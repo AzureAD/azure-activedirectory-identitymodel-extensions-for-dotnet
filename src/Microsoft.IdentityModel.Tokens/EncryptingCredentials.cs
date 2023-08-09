@@ -12,9 +12,9 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class EncryptingCredentials
     {
-        private string _alg;
-        private string _enc;
-        private SecurityKey _key;
+        private string? _alg;
+        private string? _enc;
+        private SecurityKey? _key;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EncryptingCredentials"/> class.
@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the key wrap algorithm used for session key encryption.
         /// </summary>
-        public string Alg
+        public string? Alg
         {
             get => _alg;
             private set => _alg = string.IsNullOrEmpty(value) ? throw LogHelper.LogArgumentNullException("alg") : value;
@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the data encryption algorithm.
         /// </summary>
-        public string Enc
+        public string? Enc
         {
             get => _enc;
             private set => _enc = string.IsNullOrEmpty(value) ? throw LogHelper.LogArgumentNullException("enc") : value;
@@ -88,12 +88,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Public key used in Key Agreement Algorithms
         /// </summary>
-        public SecurityKey KeyExchangePublicKey { get; set; }
+        public SecurityKey? KeyExchangePublicKey { get; set; }
 
         /// <summary>
         /// Users can override the default <see cref="CryptoProviderFactory"/> with this property. This factory will be used for creating encryption providers.
         /// </summary>
-        public CryptoProviderFactory CryptoProviderFactory { get; set; }
+        public CryptoProviderFactory? CryptoProviderFactory { get; set; }
 
         /// <summary>
         /// Gets or sets a bool that controls if the encrypted token creation will set default 'cty' if not specified.
@@ -106,7 +106,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the <see cref="SecurityKey"/> used for encryption.
         /// </summary>
-        public SecurityKey Key
+        public SecurityKey? Key
         {
             get => _key;
             private set => _key = value ?? throw LogHelper.LogArgumentNullException("key");

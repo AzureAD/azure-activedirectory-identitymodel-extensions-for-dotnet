@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
         /// <summary>
         /// The uniform resource identifier of the security key.
         /// </summary>
-        public override string KeyId
+        public override string? KeyId
         {
             get => _keyId!;
             set

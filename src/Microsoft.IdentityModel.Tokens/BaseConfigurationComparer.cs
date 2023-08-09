@@ -11,7 +11,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     internal class BaseConfigurationComparer : IEqualityComparer<BaseConfiguration>
     {
-        public bool Equals(BaseConfiguration config1, BaseConfiguration config2)
+        public bool Equals(BaseConfiguration? config1, BaseConfiguration? config2)
         {
             if (config1 == null && config2 == null)
                 return true;
@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             int defaultHash = string.Empty.GetHashCode();
             int hashCode = defaultHash;
-            hashCode ^= string.IsNullOrEmpty(config.Issuer) ? defaultHash : config.Issuer.GetHashCode();
+            hashCode ^= string.IsNullOrEmpty(config.Issuer) ? defaultHash : config.Issuer!.GetHashCode();
             foreach(string internalId in config.SigningKeys.Select(x => x.InternalId))
             {
                 hashCode ^= internalId.GetHashCode();

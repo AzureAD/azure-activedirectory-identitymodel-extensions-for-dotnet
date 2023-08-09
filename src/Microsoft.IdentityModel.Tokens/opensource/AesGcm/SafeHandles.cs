@@ -40,13 +40,13 @@ namespace Microsoft.IdentityModel.Tokens
 
     internal sealed class SafeKeyHandle : SafeBCryptHandle
     {
-        private SafeAlgorithmHandle _parentHandle;
+        private SafeAlgorithmHandle? _parentHandle;
 
         public void SetParentHandle(SafeAlgorithmHandle parentHandle)
         {
             Debug.Assert(_parentHandle == null);
             Debug.Assert(parentHandle != null);
-            Debug.Assert(!parentHandle.IsInvalid);
+            Debug.Assert(!parentHandle!.IsInvalid);
 
             bool ignore = false;
             parentHandle.DangerousAddRef(ref ignore);

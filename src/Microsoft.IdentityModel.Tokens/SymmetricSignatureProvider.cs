@@ -69,7 +69,7 @@ namespace Microsoft.IdentityModel.Tokens
         public SymmetricSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures)
             : base(key, algorithm)
         {
-            if (!key.CryptoProviderFactory.IsSupportedAlgorithm(algorithm, key))
+            if (!key.CryptoProviderFactory!.IsSupportedAlgorithm(algorithm, key))
                 throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10634, LogHelper.MarkAsNonPII((algorithm)), key)));
 
             if (key.KeySize < MinimumSymmetricKeySizeInBits)
@@ -140,7 +140,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         private KeyedHashAlgorithm CreateKeyedHashAlgorithm()
         {
-            return Key.CryptoProviderFactory.CreateKeyedHashAlgorithm(GetKeyBytes(Key), Algorithm);
+            return Key.CryptoProviderFactory!.CreateKeyedHashAlgorithm(GetKeyBytes(Key), Algorithm);
         }
 
         /// <summary>
@@ -299,7 +299,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET6_0_OR_GREATER
         [SkipLocalsInit]
 #endif
-        internal bool Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength, string algorithm)
+        internal bool Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength, string? algorithm)
         {
             if (input == null || input.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(input));
@@ -385,7 +385,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (LogHelper.IsEnabled(EventLogLevel.Informational))
                 LogHelper.LogInformation(LogMessages.IDX10643, input);
 
-            KeyedHashAlgorithm keyedHashAlgorithm = null;
+            KeyedHashAlgorithm? keyedHashAlgorithm = null;
             try
             {
                 keyedHashAlgorithm = GetKeyedHashAlgorithm(GetKeyBytes(Key), Algorithm);
@@ -409,7 +409,7 @@ namespace Microsoft.IdentityModel.Tokens
             finally
             {
                 if (!_disposed)
-                    ReleaseKeyedHashAlgorithm(keyedHashAlgorithm);
+                    ReleaseKeyedHashAlgorithm(keyedHashAlgorithm!);
             }
         }
 

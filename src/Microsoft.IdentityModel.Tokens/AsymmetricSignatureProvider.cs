@@ -116,13 +116,13 @@ namespace Microsoft.IdentityModel.Tokens
         public AsymmetricSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures)
             : base(key, algorithm)
         {
-            _cryptoProviderFactory = key.CryptoProviderFactory;
+            _cryptoProviderFactory = key.CryptoProviderFactory!;
             _minimumAsymmetricKeySizeInBitsForSigningMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForSigningMap);
             _minimumAsymmetricKeySizeInBitsForVerifyingMap = new Dictionary<string, int>(DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap);
 
             var jsonWebKey = key as JsonWebKey;
             if (jsonWebKey != null)
-                JsonWebKeyConverter.TryConvertToSecurityKey(jsonWebKey, out SecurityKey _);
+                JsonWebKeyConverter.TryConvertToSecurityKey(jsonWebKey, out SecurityKey? _);
 
             if (willCreateSignatures && FoundPrivateKey(key) == PrivateKeyStatus.DoesNotExist)
                 throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10638, key)));
@@ -216,7 +216,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
             }
 
-            AsymmetricAdapter asym = null;
+            AsymmetricAdapter? asym = null;
             try
             {
                 asym = _asymmetricAdapterObjectPool.Allocate();
@@ -231,7 +231,7 @@ namespace Microsoft.IdentityModel.Tokens
             finally
             {
                 if (!_disposed)
-                    _asymmetricAdapterObjectPool.Free(asym);
+                    _asymmetricAdapterObjectPool.Free(asym!);
             }
         }
 
@@ -264,7 +264,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             else if (key is JsonWebKey jsonWebKey)
             {
-                JsonWebKeyConverter.TryConvertToSecurityKey(jsonWebKey, out SecurityKey convertedSecurityKey);
+                JsonWebKeyConverter.TryConvertToSecurityKey(jsonWebKey, out SecurityKey? convertedSecurityKey);
                 if (convertedSecurityKey is AsymmetricSecurityKey convertedAsymmetricKey)
                     keySize = convertedAsymmetricKey.KeySize;
                 else if (convertedSecurityKey is SymmetricSecurityKey)
@@ -318,7 +318,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
             }
 
-            AsymmetricAdapter asym = null;
+            AsymmetricAdapter? asym = null;
             try
             {
                 asym = _asymmetricAdapterObjectPool.Allocate();
@@ -333,7 +333,7 @@ namespace Microsoft.IdentityModel.Tokens
             finally
             {
                 if (!_disposed)
-                    _asymmetricAdapterObjectPool.Free(asym);
+                    _asymmetricAdapterObjectPool.Free(asym!);
             }
         }
 
@@ -402,7 +402,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
             }
 
-            AsymmetricAdapter asym = null;
+            AsymmetricAdapter? asym = null;
             try
             {
                 asym = _asymmetricAdapterObjectPool.Allocate();
@@ -427,7 +427,7 @@ namespace Microsoft.IdentityModel.Tokens
             finally
             {
                 if (!_disposed)
-                    _asymmetricAdapterObjectPool.Free(asym);
+                    _asymmetricAdapterObjectPool.Free(asym!);
             }
 
         }

@@ -12,8 +12,8 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public abstract class SecurityKey
     {
-        private CryptoProviderFactory _cryptoProviderFactory;
-        private Lazy<string> _internalId;
+        private CryptoProviderFactory? _cryptoProviderFactory;
+        private Lazy<string>? _internalId;
 
         internal SecurityKey(SecurityKey key)
         {
@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         [JsonIgnore]
-        internal virtual string InternalId { get => _internalId.Value; }
+        internal virtual string InternalId { get => _internalId!.Value; }
 
         /// <summary>
         /// This must be overridden to get the size of this <see cref="SecurityKey"/>.
@@ -43,13 +43,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets the key id of this <see cref="SecurityKey"/>.
         /// </summary>
         [JsonIgnore]
-        public virtual string KeyId { get; set; }
+        public virtual string? KeyId { get; set; }
 
         /// <summary>
         /// Gets or sets <see cref="Microsoft.IdentityModel.Tokens.CryptoProviderFactory"/>.
         /// </summary>
         [JsonIgnore]
-        public CryptoProviderFactory CryptoProviderFactory
+        public CryptoProviderFactory? CryptoProviderFactory
         {
             get
             {
@@ -98,7 +98,7 @@ namespace Microsoft.IdentityModel.Tokens
         public virtual bool IsSupportedAlgorithm(string algorithm)
         {
             // do not throw if algorithm is null or empty to stay in sync with CryptoProviderFactory.IsSupportedAlgorithm.
-            return CryptoProviderFactory.IsSupportedAlgorithm(algorithm, this);
+            return CryptoProviderFactory!.IsSupportedAlgorithm(algorithm, this);
         }
 
         /// <summary>

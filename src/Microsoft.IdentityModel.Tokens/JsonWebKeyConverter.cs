@@ -129,13 +129,13 @@ namespace Microsoft.IdentityModel.Tokens
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
-            RSA rsaKey;
+            RSA? rsaKey;
             if (key.PrivateKeyStatus == PrivateKeyStatus.Exists)
                 rsaKey = key.PrivateKey as RSA;
             else
                 rsaKey = key.PublicKey as RSA;
 
-            return ConvertFromRSASecurityKey(new RsaSecurityKey(rsaKey) { KeyId = key.KeyId });
+            return ConvertFromRSASecurityKey(new RsaSecurityKey(rsaKey!) { KeyId = key.KeyId });
         }
 
         /// <summary>
@@ -199,7 +199,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 #endif
 
-        internal static bool TryConvertToSecurityKey(JsonWebKey webKey, out SecurityKey key)
+        internal static bool TryConvertToSecurityKey(JsonWebKey webKey, out SecurityKey? key)
         {
             if (webKey.ConvertedSecurityKey != null)
             {
@@ -239,7 +239,7 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
 
-        internal static bool TryConvertToSymmetricSecurityKey(JsonWebKey webKey, out SecurityKey key)
+        internal static bool TryConvertToSymmetricSecurityKey(JsonWebKey webKey, out SecurityKey? key)
         {
             if (webKey.ConvertedSecurityKey is SymmetricSecurityKey)
             {
@@ -265,7 +265,7 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
 
-        internal static bool TryConvertToX509SecurityKey(JsonWebKey webKey, out SecurityKey key)
+        internal static bool TryConvertToX509SecurityKey(JsonWebKey webKey, out SecurityKey? key)
         {
             if (webKey.ConvertedSecurityKey is X509SecurityKey)
             {
@@ -295,7 +295,7 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
 
-        internal static bool TryCreateToRsaSecurityKey(JsonWebKey webKey, out SecurityKey key)
+        internal static bool TryCreateToRsaSecurityKey(JsonWebKey webKey, out SecurityKey? key)
         {
             if (webKey.ConvertedSecurityKey is RsaSecurityKey)
             {
@@ -323,7 +323,7 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
 
-        internal static bool TryConvertToECDsaSecurityKey(JsonWebKey webKey, out SecurityKey key)
+        internal static bool TryConvertToECDsaSecurityKey(JsonWebKey webKey, out SecurityKey? key)
         {
             if (webKey.ConvertedSecurityKey is ECDsaSecurityKey)
             {

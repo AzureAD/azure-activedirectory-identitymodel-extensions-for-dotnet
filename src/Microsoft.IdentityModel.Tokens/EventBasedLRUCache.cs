@@ -37,7 +37,9 @@ namespace Microsoft.IdentityModel.Tokens
         private readonly double _compactionPercentage = .20;
         private LinkedList<LRUCacheItem<TKey, TValue>> _doubleLinkedList = new LinkedList<LRUCacheItem<TKey, TValue>>();
         private ConcurrentQueue<Action> _eventQueue = new ConcurrentQueue<Action>();
+#pragma warning disable CS8714 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'notnull' constraint.
         private ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>> _map;
+#pragma warning restore CS8714 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'notnull' constraint.
 
         // When the current cache size gets to this percentage of _capacity, _compactionPercentage% of the cache will be removed.
         private readonly double _maxCapacityPercentage = .95;
@@ -80,7 +82,7 @@ namespace Microsoft.IdentityModel.Tokens
         // set to true when the AppDomain is to be unloaded or the default AppDomain process is ready to exit
         private bool _shouldStopImmediately = false;
 
-        internal ItemRemoved OnItemRemoved
+        internal ItemRemoved? OnItemRemoved
         {
             get;
             set;
@@ -124,14 +126,16 @@ namespace Microsoft.IdentityModel.Tokens
         internal EventBasedLRUCache(
             int capacity,
             TaskCreationOptions options = TaskCreationOptions.None,
-            IEqualityComparer<TKey> comparer = null,
+            IEqualityComparer<TKey>? comparer = null,
             bool removeExpiredValues = false,
             int removeExpiredValuesIntervalInSeconds = 300,
             bool maintainLRU = false)
         {
             _capacity = capacity > 0 ? capacity : throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(capacity)));
             _options = options;
+#pragma warning disable CS8714 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'notnull' constraint.
             _map = new ConcurrentDictionary<TKey, LRUCacheItem<TKey, TValue>>(comparer ?? EqualityComparer<TKey>.Default);
+#pragma warning restore CS8714 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'notnull' constraint.
             _removeExpiredValuesIntervalInSeconds = removeExpiredValuesIntervalInSeconds;
             _removeExpiredValues = removeExpiredValues;
             _eventQueueTaskStopTime = DateTime.UtcNow;
@@ -310,7 +314,7 @@ namespace Microsoft.IdentityModel.Tokens
             while (_map.Count > newCacheSize && _doubleLinkedList.Count > 0)
             {
                 var lru = _doubleLinkedList.Last;
-                if (_map.TryRemove(lru.Value.Key, out var cacheItem))
+                if (_map.TryRemove(lru!.Value.Key, out var cacheItem))
                     OnItemRemoved?.Invoke(cacheItem.Value);
 
                 _doubleLinkedList.RemoveLast();
@@ -493,7 +497,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (!_map.TryGetValue(key, out var cacheItem))
             {
-                value = default;
+                value = default!;
                 return false;
             }
 
@@ -509,7 +513,7 @@ namespace Microsoft.IdentityModel.Tokens
                 });
             }
 
-            value = cacheItem != null ? cacheItem.Value : default;
+            value = cacheItem != null ? cacheItem.Value : default!;
             return cacheItem != null;
         }
 
@@ -521,7 +525,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (!_map.TryRemove(key, out var cacheItem))
             {
-                value = default;
+                value = default!;
                 return false;
             }
 
@@ -603,13 +607,13 @@ namespace Microsoft.IdentityModel.Tokens
             ExpirationTime = expirationTime;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            LRUCacheItem<TKey, TValue> item = obj as LRUCacheItem<TKey, TValue>;
-            return item != null && Key.Equals(item.Key);
+            LRUCacheItem<TKey, TValue>? item = obj as LRUCacheItem<TKey, TValue>;
+            return item != null && Key!.Equals(item.Key);
         }
 
-        public override int GetHashCode() => 990326508 + EqualityComparer<TKey>.Default.GetHashCode(Key);
+        public override int GetHashCode() => 990326508 + EqualityComparer<TKey>.Default.GetHashCode(Key!);
     }
 }
 

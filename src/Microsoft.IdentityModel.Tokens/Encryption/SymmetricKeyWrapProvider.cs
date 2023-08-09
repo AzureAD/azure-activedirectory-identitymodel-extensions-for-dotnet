@@ -18,9 +18,9 @@ namespace Microsoft.IdentityModel.Tokens
         private static object _encryptorLock = new object();
         private static object _decryptorLock = new object();
 
-        private Lazy<SymmetricAlgorithm> _symmetricAlgorithm;
-        private ICryptoTransform _symmetricAlgorithmEncryptor;
-        private ICryptoTransform _symmetricAlgorithmDecryptor;
+        private Lazy<SymmetricAlgorithm>? _symmetricAlgorithm;
+        private ICryptoTransform? _symmetricAlgorithmEncryptor;
+        private ICryptoTransform? _symmetricAlgorithmDecryptor;
         private bool _disposed;
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets a user context for a <see cref="KeyWrapProvider"/>.
         /// </summary>
         /// <remarks>This is null by default. This can be used by runtimes or for extensibility scenarios.</remarks>
-        public override string Context { get; set; }
+        public override string? Context { get; set; }
 
         /// <summary>
         /// Gets the <see cref="SecurityKey"/> that is being used.
@@ -137,14 +137,14 @@ namespace Microsoft.IdentityModel.Tokens
             if (!IsSupportedAlgorithm(key, algorithm))
                 throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, LogHelper.MarkAsNonPII(algorithm), key)));
 
-            byte[] keyBytes = null;
+            byte[]? keyBytes = null;
 
             if (key is SymmetricSecurityKey symmetricSecurityKey)
                 keyBytes = symmetricSecurityKey.Key;
             else if (key is JsonWebKey jsonWebKey)
             {
-                if (JsonWebKeyConverter.TryConvertToSymmetricSecurityKey(jsonWebKey, out SecurityKey securityKey))
-                    keyBytes = (securityKey as SymmetricSecurityKey).Key;
+                if (JsonWebKeyConverter.TryConvertToSymmetricSecurityKey(jsonWebKey, out SecurityKey? securityKey))
+                    keyBytes = (securityKey as SymmetricSecurityKey)!.Key;
             }
 
             if (keyBytes == null)
@@ -260,7 +260,7 @@ namespace Microsoft.IdentityModel.Tokens
                 lock (_decryptorLock)
                 {
                     if (_symmetricAlgorithmDecryptor == null)
-                        _symmetricAlgorithmDecryptor = _symmetricAlgorithm.Value.CreateDecryptor();
+                        _symmetricAlgorithmDecryptor = _symmetricAlgorithm!.Value.CreateDecryptor();
                 }
             }
 
@@ -395,7 +395,7 @@ namespace Microsoft.IdentityModel.Tokens
             */
 
             // The default initialization vector from RFC3394
-            byte[] a = _defaultIV.Clone() as byte[];
+            byte[]? a = _defaultIV.Clone() as byte[];
 
             // The number of input blocks
             var n = inputCount >> 3;
@@ -410,7 +410,7 @@ namespace Microsoft.IdentityModel.Tokens
                 lock (_encryptorLock)
                 {
                     if (_symmetricAlgorithmEncryptor == null)
-                        _symmetricAlgorithmEncryptor = _symmetricAlgorithm.Value.CreateEncryptor();
+                        _symmetricAlgorithmEncryptor = _symmetricAlgorithm!.Value.CreateEncryptor();
                 }
             }
 
@@ -427,7 +427,7 @@ namespace Microsoft.IdentityModel.Tokens
                     // B = AES( K, A | R[i] )
 
                     // First, block = A | R[i]
-                    Array.Copy(a, block, a.Length);
+                    Array.Copy(a!, block, a!.Length);
                     Array.Copy(r, i << 3, block, 64 >> 3, 64 >> 3);
 
                     // Second, AES( K, block )
@@ -446,7 +446,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             var keyBytes = new byte[(n + 1) << 3];
 
-            Array.Copy(a, keyBytes, a.Length);
+            Array.Copy(a!, keyBytes, a!.Length);
 
             for (var i = 0; i < n; i++)
             {

@@ -21,7 +21,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the invalid type that created the validation exception.
         /// </summary>
-        public string InvalidType { get; set; }
+        public string? InvalidType { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SecurityTokenInvalidTypeException"/> class.

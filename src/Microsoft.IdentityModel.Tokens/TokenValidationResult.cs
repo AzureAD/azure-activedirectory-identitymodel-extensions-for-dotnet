@@ -16,10 +16,10 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class TokenValidationResult
     {
-        private readonly TokenValidationParameters _validationParameters;
-        private readonly TokenHandler _tokenHandler;
+        private readonly TokenValidationParameters? _validationParameters;
+        private readonly TokenHandler? _tokenHandler;
 
-        private Exception _exception;
+        private Exception? _exception;
         private bool _hasIsValidOrExceptionBeenRead = false;
         private bool _isValid = false;
 
@@ -33,10 +33,10 @@ namespace Microsoft.IdentityModel.Tokens
         // reordered relative to the other operations. The rest of the objects are not because the .NET memory model
         // guarantees object writes are store releases and that reads won't be introduced.
         private volatile bool _claimsIdentityInitialized;
-        private object _claimsIdentitySyncObj;
-        private ClaimsIdentity _claimsIdentity;
-        private IDictionary<string, object> _claims;
-        private IDictionary<string, object> _propertyBag;
+        private object? _claimsIdentitySyncObj;
+        private ClaimsIdentity? _claimsIdentity;
+        private IDictionary<string, object>? _claims;
+        private IDictionary<string, object>? _propertyBag;
 
         /// <summary>
         /// Creates an instance of <see cref="TokenValidationResult"/>
@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// The <see cref="Dictionary{String, Object}"/> created from the validated security token.
         /// </summary>
-        public IDictionary<string, object> Claims
+        public IDictionary<string, object>? Claims
         {
             get
             {
@@ -82,7 +82,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// The <see cref="ClaimsIdentity"/> created from the validated security token.
         /// </summary>
-        public ClaimsIdentity ClaimsIdentity
+        public ClaimsIdentity? ClaimsIdentity
         {
             get
             {
@@ -112,7 +112,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets the <see cref="_claimsIdentity"/> without synchronization. All accesses must either
         /// be protected or used when the caller knows access is serialized.
         /// </summary>
-        internal ClaimsIdentity ClaimsIdentityNoLocking
+        internal ClaimsIdentity? ClaimsIdentityNoLocking
         {
             get
             {
@@ -144,7 +144,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             get
             {
-                object syncObj = _claimsIdentitySyncObj;
+                object? syncObj = _claimsIdentitySyncObj;
                 if (syncObj is null)
                 {
                     Interlocked.CompareExchange(ref _claimsIdentitySyncObj, new object(), null);
@@ -158,7 +158,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the <see cref="Exception"/> that occurred during validation.
         /// </summary>
-        public Exception Exception
+        public Exception? Exception
         {
             get
             {
@@ -174,7 +174,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the issuer that was found in the token.
         /// </summary>
-        public string Issuer { get; set; }
+        public string? Issuer { get; set; }
 
         /// <summary>
         /// True if the token was successfully validated, false otherwise.
@@ -208,17 +208,17 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the <see cref="SecurityToken"/> that was validated.
         /// </summary>
-        public SecurityToken SecurityToken { get; set; }
+        public SecurityToken? SecurityToken { get; set; }
 
         /// <summary>
         /// The <see cref="SecurityToken"/> to be returned when validation fails.
         /// </summary>
-        public SecurityToken TokenOnFailedValidation { get; internal set; }
+        public SecurityToken? TokenOnFailedValidation { get; internal set; }
 
         /// <summary>
         /// Gets or sets the <see cref="CallContext"/> that contains call information.
         /// </summary>
-        public CallContext TokenContext { get; set; }
+        public CallContext? TokenContext { get; set; }
 
         /// <summary>
         /// Gets or sets the token type of the <see cref="SecurityToken"/> that was validated.
@@ -227,6 +227,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// Otherwise, the type is resolved from the token itself, if available
         /// (e.g for a JSON Web Token, from the "typ" header). 
         /// </summary>
-        public string TokenType { get; set; }
+        public string? TokenType { get; set; }
     }
 }

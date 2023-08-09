@@ -13,9 +13,9 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class X509SecurityKey : AsymmetricSecurityKey
     {
-        AsymmetricAlgorithm _privateKey;
+        AsymmetricAlgorithm? _privateKey;
         bool _privateKeyAvailabilityDetermined;
-        AsymmetricAlgorithm _publicKey;
+        AsymmetricAlgorithm? _publicKey;
         object _thisLock = new Object();
 
         internal X509SecurityKey(JsonWebKey webKey)
@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public override int KeySize
         {
-            get => PublicKey.KeySize;
+            get => PublicKey!.KeySize;
         }
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Returns the private key from the <see cref="X509SecurityKey"/>.
         /// </summary>
-        public AsymmetricAlgorithm PrivateKey
+        public AsymmetricAlgorithm? PrivateKey
         {
             get
             {
@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the public key from the <see cref="X509SecurityKey"/>.
         /// </summary>
-        public AsymmetricAlgorithm PublicKey
+        public AsymmetricAlgorithm? PublicKey
         {
             get
             {
@@ -173,14 +173,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>https://datatracker.ietf.org/doc/html/rfc7638</remarks>
         public override byte[] ComputeJwkThumbprint()
         {
-            return new RsaSecurityKey(PublicKey as RSA).ComputeJwkThumbprint();
+            return new RsaSecurityKey((RSA)PublicKey!).ComputeJwkThumbprint();
         }
 
         /// <summary>
         /// Returns a bool indicating if this key is equivalent to another key.
         /// </summary>
         /// <return>true if the keys are equal; otherwise, false.</return>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (!(obj is X509SecurityKey other))
                 return false;

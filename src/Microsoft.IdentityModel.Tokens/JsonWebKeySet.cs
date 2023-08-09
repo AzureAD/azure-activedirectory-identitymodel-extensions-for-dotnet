@@ -102,7 +102,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 // skip if "use" (Public Key Use) parameter is not empty or "sig".
                 // https://datatracker.ietf.org/doc/html/rfc7517#section-4-2
-                if (!string.IsNullOrEmpty(webKey.Use) && !webKey.Use.Equals(JsonWebKeyUseNames.Sig))
+                if (!string.IsNullOrEmpty(webKey.Use!) && !webKey.Use!.Equals(JsonWebKeyUseNames.Sig))
                 {
                     string convertKeyInfo = LogHelper.FormatInvariant(LogMessages.IDX10808, webKey, webKey.Use);
                     webKey.ConvertKeyInfo = convertKeyInfo;
@@ -130,15 +130,15 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         // in this case X509SecurityKey should be resolved.
                         if (IsValidX509SecurityKey(webKey))
-                            if (JsonWebKeyConverter.TryConvertToX509SecurityKey(webKey, out SecurityKey securityKey))
-                                signingKeys.Add(securityKey);
+                            if (JsonWebKeyConverter.TryConvertToX509SecurityKey(webKey, out SecurityKey? securityKey))
+                                signingKeys.Add(securityKey!);
                             else
                                 rsaKeyResolved = false;
 
                         // in this case RsaSecurityKey should be resolved.
                         if (IsValidRsaSecurityKey(webKey))
-                            if (JsonWebKeyConverter.TryCreateToRsaSecurityKey(webKey, out SecurityKey securityKey))
-                                signingKeys.Add(securityKey);
+                            if (JsonWebKeyConverter.TryCreateToRsaSecurityKey(webKey, out SecurityKey? securityKey))
+                                signingKeys.Add(securityKey!);
                             else
                                 rsaKeyResolved = false;
                     }
@@ -148,8 +148,8 @@ namespace Microsoft.IdentityModel.Tokens
                 }
                 else if (JsonWebAlgorithmsKeyTypes.EllipticCurve.Equals(webKey.Kty))
                 {
-                    if (JsonWebKeyConverter.TryConvertToECDsaSecurityKey(webKey, out SecurityKey securityKey))
-                        signingKeys.Add(securityKey);
+                    if (JsonWebKeyConverter.TryConvertToECDsaSecurityKey(webKey, out SecurityKey? securityKey))
+                        signingKeys.Add(securityKey!);
                     else if (!SkipUnresolvedJsonWebKeys)
                         signingKeys.Add(webKey);
                 }

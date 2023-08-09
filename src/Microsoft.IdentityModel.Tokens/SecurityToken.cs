@@ -19,7 +19,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <inheritdoc/>
-        public virtual string UnsafeToString() => ToString();
+        public virtual string? UnsafeToString() => ToString();
 
         /// <summary>
         /// This must be overridden to get the Id of this <see cref="SecurityToken"/>.

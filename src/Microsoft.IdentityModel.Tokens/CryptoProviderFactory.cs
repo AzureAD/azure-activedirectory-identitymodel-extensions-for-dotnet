@@ -14,7 +14,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class CryptoProviderFactory
     {
-        private static CryptoProviderFactory _default;
+        private static CryptoProviderFactory? _default;
         private static ConcurrentDictionary<string, string> _typeToAlgorithmMap = new ConcurrentDictionary<string, string>();
         private static object _cacheLock = new object();
         private static int _defaultSignatureProviderObjectPoolCacheSize = Environment.ProcessorCount * 4;
@@ -23,7 +23,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Returns the default <see cref="CryptoProviderFactory"/> instance.
         /// </summary>
-        public static CryptoProviderFactory Default
+        public static CryptoProviderFactory? Default
         {
             get { return _default; }
             set
@@ -100,7 +100,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>By default, if set, <see cref="ICryptoProvider.IsSupportedAlgorithm(string, object[])"/> will be called before creating cryptographic operators.
         /// If true is returned, then <see cref="ICryptoProvider.Create(string, object[])"/> will be called. The <see cref="CryptoProviderFactory"/> will throw if the
         /// Cryptographic operator returned is not of the correct type.</remarks>
-        public ICryptoProvider CustomCryptoProvider { get; set; }
+        public ICryptoProvider? CustomCryptoProvider { get; set; }
 
         /// <summary>
         /// Gets or sets a bool controlling if <see cref="SignatureProvider"/> should be cached.
@@ -334,12 +334,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>A <see cref="HashAlgorithm"/>.</returns>
         public virtual HashAlgorithm CreateHashAlgorithm(HashAlgorithmName algorithm)
         {
-            if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm.Name))
+            if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm.Name!))
             {
-                if (!(CustomCryptoProvider.Create(algorithm.Name) is HashAlgorithm hashAlgorithm))
+                if (!(CustomCryptoProvider.Create(algorithm.Name!) is HashAlgorithm hashAlgorithm))
                     throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10647, LogHelper.MarkAsNonPII(algorithm), LogHelper.MarkAsNonPII(typeof(HashAlgorithm)))));
 
-                _typeToAlgorithmMap[hashAlgorithm.GetType().ToString()] = algorithm.Name;
+                _typeToAlgorithmMap[hashAlgorithm.GetType().ToString()] = algorithm.Name!;
                 return hashAlgorithm;
             }
 
@@ -507,7 +507,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
-            SignatureProvider signatureProvider;
+            SignatureProvider? signatureProvider;
             if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key, willCreateSignatures))
             {
                 signatureProvider = CustomCryptoProvider.Create(algorithm, key, willCreateSignatures) as SignatureProvider;
@@ -518,7 +518,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             // types are checked in order of expected occurrence
-            string typeofSignatureProvider = null;
+            string? typeofSignatureProvider = null;
             bool createAsymmetric = true;
             if (key is AsymmetricSecurityKey)
             {
@@ -528,7 +528,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 try
                 {
-                    if (JsonWebKeyConverter.TryConvertToSecurityKey(jsonWebKey, out SecurityKey convertedSecurityKey))
+                    if (JsonWebKeyConverter.TryConvertToSecurityKey(jsonWebKey, out var convertedSecurityKey))
                     {
                         if (convertedSecurityKey is AsymmetricSecurityKey)
                         {

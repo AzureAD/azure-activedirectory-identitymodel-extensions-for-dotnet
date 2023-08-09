@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.Tokens
     [JsonObject]
     public class JsonWebKey : SecurityKey
     {
-        private string _kid;
+        private string? _kid;
         private const string _className = "Microsoft.IdentityModel.Tokens.JsonWebKey";
 
         /// <summary>
@@ -70,13 +70,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// If this was converted to or from a SecurityKey, this field will be set.
         /// </summary>
         [JsonIgnore]
-        internal SecurityKey ConvertedSecurityKey { get; set; }
+        internal SecurityKey? ConvertedSecurityKey { get; set; }
 
         /// <summary>
         /// If this was failed converted to a SecurityKey, this field will be set.
         /// </summary>
         [JsonIgnore]
-        internal string ConvertKeyInfo { get; set; }
+        internal string? ConvertKeyInfo { get; set; }
 
         /// <summary>
         /// When deserializing from JSON any properties that are not defined will be placed here.
@@ -88,53 +88,53 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets the 'alg' (KeyType)..
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.Alg, Required = Required.Default)]
-        public string Alg { get; set; }
+        public string? Alg { get; set; }
 
         /// <summary>
         /// Gets or sets the 'crv' (ECC - Curve)..
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.Crv, Required = Required.Default)]
-        public string Crv { get; set; }
+        public string? Crv { get; set; }
 
         /// <summary>
         /// Gets or sets the 'd' (ECC - Private Key OR RSA - Private Exponent)..
         /// </summary>
         /// <remarks>Value is formated as: Base64urlUInt</remarks>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.D, Required = Required.Default)]
-        public string D { get; set; }
+        public string? D { get; set; }
 
         /// <summary>
         /// Gets or sets the 'dp' (RSA - First Factor CRT Exponent)..
         /// </summary>
         /// <remarks>Value is formated as: Base64urlUInt</remarks>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.DP, Required = Required.Default)]
-        public string DP { get; set; }
+        public string? DP { get; set; }
 
         /// <summary>
         /// Gets or sets the 'dq' (RSA - Second Factor CRT Exponent)..
         /// </summary>
         /// <remarks>Value is formated as: Base64urlUInt</remarks>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.DQ, Required = Required.Default)]
-        public string DQ { get; set; }
+        public string? DQ { get; set; }
 
         /// <summary>
         /// Gets or sets the 'e' (RSA - Exponent)..
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.E, Required = Required.Default)]
-        public string E { get; set; }
+        public string? E { get; set; }
 
         /// <summary>
         /// Gets or sets the 'k' (Symmetric - Key Value)..
         /// </summary>
         /// Base64urlEncoding
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.K, Required = Required.Default)]
-        public string K { get; set; }
+        public string? K { get; set; }
 
         /// <summary>
         /// Gets the key id of this <see cref="JsonWebKey"/>.
         /// </summary>
         [JsonIgnore]
-        public override string KeyId
+        public override string? KeyId
         {
             get { return _kid; }
             set { _kid = value; }
@@ -150,7 +150,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets the 'kid' (Key ID)..
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.Kid, Required = Required.Default)]
-        public string Kid
+        public string? Kid
         {
             get { return _kid; }
             set { _kid = value; }
@@ -160,54 +160,54 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets the 'kty' (Key Type)..
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.Kty, Required = Required.Default)]
-        public string Kty { get; set; }
+        public string? Kty { get; set; }
 
         /// <summary>
         /// Gets or sets the 'n' (RSA - Modulus)..
         /// </summary>
         /// <remarks>Value is formated as: Base64urlEncoding</remarks>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.N, Required = Required.Default)]
-        public string N { get; set; }
+        public string? N { get; set; }
 
         /// <summary>
         /// Gets or sets the 'oth' (RSA - Other Primes Info)..
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.Oth, Required = Required.Default)]
-        public IList<string> Oth { get; set; }
+        public IList<string>? Oth { get; set; }
 
         /// <summary>
         /// Gets or sets the 'p' (RSA - First Prime Factor)..
         /// </summary>
         /// <remarks>Value is formated as: Base64urlUInt</remarks>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.P, Required = Required.Default)]
-        public string P { get; set; }
+        public string? P { get; set; }
 
         /// <summary>
         /// Gets or sets the 'q' (RSA - Second  Prime Factor)..
         /// </summary>
         /// <remarks>Value is formated as: Base64urlUInt</remarks>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.Q, Required = Required.Default)]
-        public string Q { get; set; }
+        public string? Q { get; set; }
 
         /// <summary>
         /// Gets or sets the 'qi' (RSA - First CRT Coefficient)..
         /// </summary>
         /// <remarks>Value is formated as: Base64urlUInt</remarks>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.QI, Required = Required.Default)]
-        public string QI { get; set; }
+        public string? QI { get; set; }
 
         /// <summary>
         /// Gets or sets the 'use' (Public Key Use)..
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.Use, Required = Required.Default)]
-        public string Use { get; set; }
+        public string? Use { get; set; }
 
         /// <summary>
         /// Gets or sets the 'x' (ECC - X Coordinate)..
         /// </summary>
         /// <remarks>Value is formated as: Base64urlEncoding</remarks>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.X, Required = Required.Default)]
-        public string X { get; set; }
+        public string? X { get; set; }
 
         /// <summary>
         /// Gets the 'x5c' collection (X.509 Certificate Chain)..
@@ -219,26 +219,26 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets the 'x5t' (X.509 Certificate SHA-1 thumbprint)..
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.X5t, Required = Required.Default)]
-        public string X5t { get; set; }
+        public string? X5t { get; set; }
 
         /// <summary>
         /// Gets or sets the 'x5t#S256' (X.509 Certificate SHA-1 thumbprint)..
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.X5tS256, Required = Required.Default)]
-        public string X5tS256 { get; set; }
+        public string? X5tS256 { get; set; }
 
         /// <summary>
         /// Gets or sets the 'x5u' (X.509 URL)..
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.X5u, Required = Required.Default)]
-        public string X5u { get; set; }
+        public string? X5u { get; set; }
 
         /// <summary>
         /// Gets or sets the 'y' (ECC - Y Coordinate)..
         /// </summary>
         /// <remarks>Value is formated as: Base64urlEncoding</remarks>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.Y, Required = Required.Default)]
-        public string Y { get; set; }
+        public string? Y { get; set; }
 
         /// <summary>
         /// Gets the key size of <see cref="JsonWebKey"/>.
@@ -249,11 +249,11 @@ namespace Microsoft.IdentityModel.Tokens
             get
             {
                 if (Kty == JsonWebAlgorithmsKeyTypes.RSA && !string.IsNullOrEmpty(N))
-                    return Base64UrlEncoder.DecodeBytes(N).Length * 8;
+                    return Base64UrlEncoder.DecodeBytes(N!).Length * 8;
                 else if (Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve && !string.IsNullOrEmpty(X))
-                    return Base64UrlEncoder.DecodeBytes(X).Length * 8;
+                    return Base64UrlEncoder.DecodeBytes(X!).Length * 8;
                 else if (Kty == JsonWebAlgorithmsKeyTypes.Octet && !string.IsNullOrEmpty(K))
-                    return Base64UrlEncoder.DecodeBytes(K).Length * 8;
+                    return Base64UrlEncoder.DecodeBytes(K!).Length * 8;
                 else
                     return 0;
             }
@@ -307,14 +307,14 @@ namespace Microsoft.IdentityModel.Tokens
 
             return new RSAParameters
             {
-                Modulus = Base64UrlEncoder.DecodeBytes(N),
-                Exponent = Base64UrlEncoder.DecodeBytes(E),
-                D = string.IsNullOrEmpty(D) ? null : Base64UrlEncoder.DecodeBytes(D),
-                P = string.IsNullOrEmpty(P) ? null : Base64UrlEncoder.DecodeBytes(P),
-                Q = string.IsNullOrEmpty(Q) ? null : Base64UrlEncoder.DecodeBytes(Q),
-                DP = string.IsNullOrEmpty(DP) ? null : Base64UrlEncoder.DecodeBytes(DP),
-                DQ = string.IsNullOrEmpty(DQ) ? null : Base64UrlEncoder.DecodeBytes(DQ),
-                InverseQ = string.IsNullOrEmpty(QI) ? null : Base64UrlEncoder.DecodeBytes(QI)
+                Modulus = Base64UrlEncoder.DecodeBytes(N!),
+                Exponent = Base64UrlEncoder.DecodeBytes(E!),
+                D = string.IsNullOrEmpty(D) ? null : Base64UrlEncoder.DecodeBytes(D!),
+                P = string.IsNullOrEmpty(P) ? null : Base64UrlEncoder.DecodeBytes(P!),
+                Q = string.IsNullOrEmpty(Q) ? null : Base64UrlEncoder.DecodeBytes(Q!),
+                DP = string.IsNullOrEmpty(DP) ? null : Base64UrlEncoder.DecodeBytes(DP!),
+                DQ = string.IsNullOrEmpty(DQ) ? null : Base64UrlEncoder.DecodeBytes(DQ!),
+                InverseQ = string.IsNullOrEmpty(QI) ? null : Base64UrlEncoder.DecodeBytes(QI!)
             };
         }
 

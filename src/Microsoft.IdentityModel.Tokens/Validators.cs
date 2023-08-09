@@ -111,7 +111,7 @@ namespace Microsoft.IdentityModel.Tokens
                 LogHelper.FormatInvariant(LogMessages.IDX10214,
                     LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(audiences)),
                     LogHelper.MarkAsNonPII(validationParameters.ValidAudience ?? "null"),
-                    LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences))))
+                    LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences!))))
             { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences) };
 
             if (!validationParameters.LogValidationExceptions)
@@ -213,7 +213,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="SecurityTokenInvalidIssuerException">If <see cref="TokenValidationParameters.ValidIssuer"/> is null or whitespace and <see cref="TokenValidationParameters.ValidIssuers"/> is null and <see cref="BaseConfiguration.Issuer"/> is null.</exception>
         /// <exception cref="SecurityTokenInvalidIssuerException">If 'issuer' failed to matched either <see cref="TokenValidationParameters.ValidIssuer"/> or one of <see cref="TokenValidationParameters.ValidIssuers"/> or <see cref="BaseConfiguration.Issuer"/>.</exception>
         /// <remarks>An EXACT match is required.</remarks>
-        internal static string ValidateIssuer(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+        internal static string ValidateIssuer(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters, BaseConfiguration? configuration)
         {
             return ValidateIssuerAsync(issuer, securityToken, validationParameters, configuration).GetAwaiter().GetResult();
         }
@@ -236,7 +236,7 @@ namespace Microsoft.IdentityModel.Tokens
             string issuer,
             SecurityToken securityToken,
             TokenValidationParameters validationParameters,
-            BaseConfiguration configuration)
+            BaseConfiguration? configuration)
         {
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
@@ -245,7 +245,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return await validationParameters.IssuerValidatorAsync(issuer, securityToken, validationParameters).ConfigureAwait(false);
 
             if (validationParameters.IssuerValidatorUsingConfiguration != null)
-                return validationParameters.IssuerValidatorUsingConfiguration(issuer, securityToken, validationParameters, configuration);
+                return validationParameters.IssuerValidatorUsingConfiguration(issuer, securityToken, validationParameters, configuration!);
 
             if (validationParameters.IssuerValidator != null)
                 return validationParameters.IssuerValidator(issuer, securityToken, validationParameters);
@@ -310,7 +310,7 @@ namespace Microsoft.IdentityModel.Tokens
                 LogHelper.FormatInvariant(LogMessages.IDX10205,
                     LogHelper.MarkAsNonPII(issuer),
                     LogHelper.MarkAsNonPII(validationParameters.ValidIssuer ?? "null"),
-                    LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers)),
+                    LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers!)),
                     LogHelper.MarkAsNonPII(configuration?.Issuer)))
                 { InvalidIssuer = issuer };
 
@@ -344,14 +344,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException"> if 'securityKey' is null and ValidateIssuerSigningKey is true.</exception>
         /// <exception cref="ArgumentNullException"> if 'securityToken' is null and ValidateIssuerSigningKey is true.</exception>
         /// <exception cref="ArgumentNullException"> if 'validationParameters' is null.</exception>
-        internal static void ValidateIssuerSecurityKey(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+        internal static void ValidateIssuerSecurityKey(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters, BaseConfiguration? configuration)
         {
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             if (validationParameters.IssuerSigningKeyValidatorUsingConfiguration != null)
             {
-                if (!validationParameters.IssuerSigningKeyValidatorUsingConfiguration(securityKey, securityToken, validationParameters, configuration))
+                if (!validationParameters.IssuerSigningKeyValidatorUsingConfiguration(securityKey, securityToken, validationParameters, configuration!))
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(LogHelper.FormatInvariant(LogMessages.IDX10232, securityKey)) { SigningKey = securityKey });
 
                 return;
@@ -394,7 +394,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> that are used to validate the token.</param>
         internal static void ValidateIssuerSigningKeyLifeTime(SecurityKey securityKey, TokenValidationParameters validationParameters)
         {
-            X509SecurityKey x509SecurityKey = securityKey as X509SecurityKey;
+            X509SecurityKey? x509SecurityKey = securityKey as X509SecurityKey;
             if (x509SecurityKey?.Certificate is X509Certificate2 cert)
             {
                 DateTime utcNow = DateTime.UtcNow;

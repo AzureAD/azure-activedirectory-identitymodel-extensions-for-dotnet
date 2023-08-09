@@ -35,9 +35,9 @@ namespace Microsoft.IdentityModel.Tokens
         {
         }
 
-        internal AsymmetricAdapter(SecurityKey key, string algorithm, HashAlgorithm hashAlgorithm, bool requirePrivateKey)
+        internal AsymmetricAdapter(SecurityKey key, string algorithm, HashAlgorithm? hashAlgorithm, bool requirePrivateKey)
         {
-            HashAlgorithm = hashAlgorithm;
+            HashAlgorithm = hashAlgorithm!;
 
             // RsaSecurityKey has either Rsa OR RsaParameters.
             // If we use the RsaParameters, we create a new RSA object and will need to dispose.
@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             else if (key is JsonWebKey jsonWebKey)
             {
-                if (JsonWebKeyConverter.TryConvertToSecurityKey(jsonWebKey, out SecurityKey securityKey))
+                if (JsonWebKeyConverter.TryConvertToSecurityKey(jsonWebKey, out var securityKey))
                 {
                     if (securityKey is RsaSecurityKey rsaSecurityKeyFromJsonWebKey)
                         InitializeUsingRsaSecurityKey(rsaSecurityKeyFromJsonWebKey, algorithm);
@@ -113,7 +113,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        private ECDsa ECDsa { get; set; }
+        private ECDsa? ECDsa { get; set; }
 
         internal byte[] Encrypt(byte[] data)
         {
@@ -210,12 +210,12 @@ namespace Microsoft.IdentityModel.Tokens
         private void InitializeUsingX509SecurityKey(X509SecurityKey x509SecurityKey, string algorithm, bool requirePrivateKey)
         {
             if (requirePrivateKey)
-                InitializeUsingRsa(x509SecurityKey.PrivateKey as RSA, algorithm);
+                InitializeUsingRsa((RSA)x509SecurityKey.PrivateKey!, algorithm);
             else
-                InitializeUsingRsa(x509SecurityKey.PublicKey as RSA, algorithm);
+                InitializeUsingRsa((RSA)x509SecurityKey.PublicKey!, algorithm);
         }
 
-        private RSA RSA { get; set; }
+        private RSA? RSA { get; set; }
 
         internal byte[] Sign(byte[] bytes)
         {
@@ -230,7 +230,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         private byte[] SignWithECDsa(byte[] bytes)
         {
-            return ECDsa.SignHash(HashAlgorithm.ComputeHash(bytes));
+            return ECDsa!.SignHash(HashAlgorithm.ComputeHash(bytes));
         }
 
         internal bool Verify(byte[] bytes, byte[] signature)
@@ -257,12 +257,12 @@ namespace Microsoft.IdentityModel.Tokens
 
         private bool VerifyWithECDsa(byte[] bytes, byte[] signature)
         {
-            return ECDsa.VerifyHash(HashAlgorithm.ComputeHash(bytes), signature);
+            return ECDsa!.VerifyHash(HashAlgorithm.ComputeHash(bytes), signature);
         }
 
         private bool VerifyWithECDsaWithLength(byte[] bytes, int start, int length, byte[] signature)
         {
-            return ECDsa.VerifyHash(HashAlgorithm.ComputeHash(bytes, start, length), signature);
+            return ECDsa!.VerifyHash(HashAlgorithm.ComputeHash(bytes, start, length), signature);
         }
 
 #region NET61+ related code
@@ -277,33 +277,33 @@ namespace Microsoft.IdentityModel.Tokens
 
         private byte[] DecryptWithRsa(byte[] bytes)
         {
-            return RSA.Decrypt(bytes, RSAEncryptionPadding);
+            return RSA!.Decrypt(bytes, RSAEncryptionPadding!);
         }
 
         private byte[] EncryptWithRsa(byte[] bytes)
         {
-            return RSA.Encrypt(bytes, RSAEncryptionPadding);
+            return RSA!.Encrypt(bytes, RSAEncryptionPadding!);
         }
 
-        private HashAlgorithmName HashAlgorithmName { get; set; }
+        private HashAlgorithmName? HashAlgorithmName { get; set; }
 
-        private RSAEncryptionPadding RSAEncryptionPadding { get; set; }
+        private RSAEncryptionPadding? RSAEncryptionPadding { get; set; }
 
-        private RSASignaturePadding RSASignaturePadding { get; set; }
+        private RSASignaturePadding? RSASignaturePadding { get; set; }
 
         private byte[] SignWithRsa(byte[] bytes)
         {
-            return RSA.SignHash(HashAlgorithm.ComputeHash(bytes), HashAlgorithmName, RSASignaturePadding);
+            return RSA!.SignHash(HashAlgorithm.ComputeHash(bytes), (HashAlgorithmName)HashAlgorithmName!, RSASignaturePadding!);
         }
 
         private bool VerifyWithRsa(byte[] bytes, byte[] signature)
         {
-            return RSA.VerifyHash(HashAlgorithm.ComputeHash(bytes), signature, HashAlgorithmName, RSASignaturePadding);
+            return RSA!.VerifyHash(HashAlgorithm.ComputeHash(bytes), signature, (HashAlgorithmName)HashAlgorithmName!, RSASignaturePadding!);
         }
 
         private bool VerifyWithRsaWithLength(byte[] bytes, int start, int length, byte[] signature)
         {
-            return RSA.VerifyHash(HashAlgorithm.ComputeHash(bytes, start, length), signature, HashAlgorithmName, RSASignaturePadding);
+            return RSA!.VerifyHash(HashAlgorithm.ComputeHash(bytes, start, length), signature, (HashAlgorithmName)HashAlgorithmName!, RSASignaturePadding!);
         }
 #endif
 #endregion
@@ -312,30 +312,30 @@ namespace Microsoft.IdentityModel.Tokens
 #if DESKTOP
         internal byte[] DecryptWithRsaCryptoServiceProviderProxy(byte[] bytes)
         {
-            return RsaCryptoServiceProviderProxy.Decrypt(bytes, _useRSAOeapPadding);
+            return RsaCryptoServiceProviderProxy!.Decrypt(bytes, _useRSAOeapPadding);
         }
 
         internal byte[] EncryptWithRsaCryptoServiceProviderProxy(byte[] bytes)
         {
-            return RsaCryptoServiceProviderProxy.Encrypt(bytes, _useRSAOeapPadding);
+            return RsaCryptoServiceProviderProxy!.Encrypt(bytes, _useRSAOeapPadding);
         }
 
-        private RSACryptoServiceProviderProxy RsaCryptoServiceProviderProxy { get; set; }
+        private RSACryptoServiceProviderProxy? RsaCryptoServiceProviderProxy { get; set; }
 
         internal byte[] SignWithRsaCryptoServiceProviderProxy(byte[] bytes)
         {
-            return RsaCryptoServiceProviderProxy.SignData(bytes, HashAlgorithm);
+            return RsaCryptoServiceProviderProxy!.SignData(bytes, HashAlgorithm);
         }
 
         private bool VerifyWithRsaCryptoServiceProviderProxy(byte[] bytes, byte[] signature)
         {
-            return RsaCryptoServiceProviderProxy.VerifyData(bytes, HashAlgorithm, signature);
+            return RsaCryptoServiceProviderProxy!.VerifyData(bytes, HashAlgorithm, signature);
         }
 
     #if NET461_OR_GREATER
         private bool VerifyWithRsaCryptoServiceProviderProxyWithLength(byte[] bytes, int offset, int length, byte[] signature)
         {
-            return RsaCryptoServiceProviderProxy.VerifyDataWithLength(bytes, offset, length, HashAlgorithm, HashAlgorithmName, signature);
+            return RsaCryptoServiceProviderProxy!.VerifyDataWithLength(bytes, offset, length, HashAlgorithm, (HashAlgorithmName)HashAlgorithmName!, signature);
         }
     #endif
 

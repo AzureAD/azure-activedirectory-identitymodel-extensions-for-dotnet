@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.Tokens
                 switch (enumerator.Name)
                 {
                     case _ExpiresKey:
-                        Expires = (DateTime)info.GetValue(_ExpiresKey, typeof(DateTime));
+                        Expires = (DateTime)info.GetValue(_ExpiresKey, typeof(DateTime))!;
                         break;
 
                     default:
