@@ -9,10 +9,9 @@ date=$(date '+%y%m%d%H%M%S')
 # Formats the date by replacing the 4-digit year with a 2-digit value and then subtract 19
 dateTimeStamp=$(echo $((10#${date:0:2}-19)))${date:2}
 
-buildConfiguration=$(cat $PWD/buildConfiguration.xml)
 commitSha=$(git rev-parse HEAD)
 
-assemblyVersion=$(echo $buildConfiguration | xmllint --xpath 'string(/root/assemblyVersion)' -)
+assemblyVersion=$(grep -oP '(?<=<assemblyVersion>)[^<]+' $PWD/buildConfiguration.xml)
 assemblyFileVersion="$assemblyVersion.${dateTimeStamp::-6}" # Trim minutes/seconds
 assemblyInformationalVersion="$assemblyVersion.$dateTimeStamp.$commitSha"
 
@@ -20,7 +19,7 @@ echo "assemblyVersion: $assemblyVersion"
 echo "assemblyFileVersion: $assemblyFileVersion"
 echo "assemblyInformationalVersion: $assemblyInformationalVersion"
 
-nugetSuffix=$(xmllint --xpath "string(/root/nugetSuffix)" buildConfiguration.xml)
+nugetSuffix=$(grep -oP '(?<=<nugetSuffix>)[^<]+' $PWD/buildConfiguration.xml)
 if [ "$packageType" = "release" ]
 then
     versionSuffix=""
@@ -36,7 +35,7 @@ version=$(echo "$version" | sed "s|<VersionPrefix>.*</VersionPrefix>|<VersionPre
 version=$(echo "$version" | sed "s|<VersionSuffix>.*</VersionSuffix>|<VersionSuffix>$versionSuffix</VersionSuffix>|")
 echo "$version" > $versionPath
 
-projects=$(xmllint --xpath "/root/projects/src/project/@name" buildConfiguration.xml | sed 's/^[^"]*"\([^"]*\)".*/\1/')
+projects=$(grep -zoP '(?<=<src>)(.|[\s])*?(?=<\/src>)' $PWD/buildConfiguration.xml | grep -aoP 'name="\K[^"]+')
 
 for project in $projects; do
     name="$project"
