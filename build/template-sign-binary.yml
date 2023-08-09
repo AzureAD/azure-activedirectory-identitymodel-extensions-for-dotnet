@@ -35,11 +35,11 @@ steps:
          "parameters": [
          {
            "parameterName": "OpusName",
-           "parameterValue": "TestSign"
+           "parameterValue": "Microsoft.IdentityModel"
          },
          {
            "parameterName": "OpusInfo",
-           "parameterValue": "http://test"
+           "parameterValue": "http://www.microsoft.com"
          },
          {
            "parameterName": "PageHash",
