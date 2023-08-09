@@ -2,20 +2,19 @@
 components:
     jwt:
         script: |
-            call dotnet build -c release --framework net8.0 .\Microsoft.IdentityModel.JsonWebTokens\Microsoft.IdentityModel.JsonWebTokens.csproj
-            del .\artifacts\bin\Microsoft.IdentityModel.JsonWebTokens\release\net8.0\*.xml
+            call dotnet build -c release --framework net8.0 .\src\Microsoft.IdentityModel.JsonWebTokens\Microsoft.IdentityModel.JsonWebTokens.csproj
 
         arguments:
-            --application.options.outputFiles .\artifacts\bin\Microsoft.IdentityModel.JsonWebTokens\release\net8.0\
+            --application.options.outputFiles .\src\Microsoft.IdentityModel.JsonWebTokens\bin\release\net8.0\
 
 # default arguments that are always used on crank commands
-defaults: --config https://github.com/aspnet/Benchmarks/blob/main/build/azure.profile.yml?raw=true --application.framework net8.0 --relay AZURE_RELAY 
+defaults: --config https://github.com/aspnet/Benchmarks/blob/main/build/azure.profile.yml?raw=true --application.framework net7.0  
 
 # the first vaule is the defualt if none is specified
 profiles:
-    aspnet-citrine-win:
+    windows:
         description: INTEL/Windows 28 Cores
-        arguments: --profile aspnet-citrine-win-relay
+        arguments: --profile aspnet-citrine-win
 
 benchmarks:
     NoMvcAuth:
