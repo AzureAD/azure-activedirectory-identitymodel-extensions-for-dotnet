@@ -53,11 +53,11 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     }
                     else
                     {
-                        string propertyName = JsonSerializerPrimitives.GetPropertyName(ref reader, JsonWebKey.ClassName, true);
-                        if (propertyName.Equals(JsonWebKeyParameterNames.Keys, StringComparison.OrdinalIgnoreCase))
+                        string? propertyName = JsonSerializerPrimitives.GetPropertyName(ref reader, JsonWebKey.ClassName, true);
+                        if (propertyName!.Equals(JsonWebKeyParameterNames.Keys, StringComparison.OrdinalIgnoreCase))
                             ReadKeys(ref reader, jsonWebKeySet);
                         else
-                            jsonWebKeySet.AdditionalData[propertyName] = JsonSerializerPrimitives.GetUnknownProperty(ref reader);
+                            jsonWebKeySet.AdditionalData[propertyName] = JsonSerializerPrimitives.GetUnknownProperty(ref reader)!;
                     }
                 }
                 else if (JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, true))
@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
         {
             using (MemoryStream memoryStream = new MemoryStream())
             {
-                Utf8JsonWriter writer = null;
+                Utf8JsonWriter? writer = null;
                 try
                 {
                     // writing strings without escaping is as we know this is a utf8 encoding

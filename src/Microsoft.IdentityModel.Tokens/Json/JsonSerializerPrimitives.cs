@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
             string expectedType,
             string className,
             string propertyName,
-            Exception innerException = null)
+            Exception? innerException = null)
         {
             if (innerException == null)
                 return new JsonException(
@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     LogHelper.MarkAsNonPII(reader.BytesConsumed)));
         }
 
-        internal static string GetPropertyName(ref Utf8JsonReader reader, string className, bool advanceReader)
+        internal static string? GetPropertyName(ref Utf8JsonReader reader, string className, bool advanceReader)
         {
             if (reader.TokenType == JsonTokenType.None)
                 ReaderRead(ref reader);
@@ -68,7 +68,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
 
             if (advanceReader)
             {
-                string propertyName = reader.GetString();
+                string? propertyName = reader.GetString();
                 ReaderRead(ref reader);
                 return propertyName;
             }
@@ -82,7 +82,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
         /// </summary>
         /// <param name="reader"></param>
         /// <returns></returns>
-        internal static object GetUnknownProperty(ref Utf8JsonReader reader)
+        internal static object? GetUnknownProperty(ref Utf8JsonReader reader)
         {
             switch (reader.TokenType)
             {
@@ -186,7 +186,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
             JsonElement? jsonElement;
             bool ret = JsonElement.TryParseValue(ref reader, out jsonElement);
             if (ret)
-                return jsonElement.Value;
+                return jsonElement!.Value;
 
             return default;
 #else
@@ -203,7 +203,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
         /// <param name="propertyName"></param>
         /// <param name="className"></param>
         /// <returns></returns>
-        internal static IList<object> ReadObjects(ref Utf8JsonReader reader, IList<object> objects, string propertyName, string className)
+        internal static IList<object>? ReadObjects(ref Utf8JsonReader reader, IList<object> objects, string propertyName, string className)
         {
             _ = objects ?? throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(objects)));
 
@@ -226,7 +226,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
             return objects;
         }
 
-        internal static string ReadString(ref Utf8JsonReader reader, string propertyName, string className)
+        internal static string? ReadString(ref Utf8JsonReader reader, string propertyName, string className)
         {
             // returning null keeps the same logic as JsonSerialization.ReadObject
             if (reader.TokenType == JsonTokenType.Null)
@@ -239,7 +239,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
             return reader.GetString();
         }
 
-        internal static IList<string> ReadStrings(ref Utf8JsonReader reader, IList<string> strings, string propertyName, string className)
+        internal static IList<string>? ReadStrings(ref Utf8JsonReader reader, IList<string> strings, string propertyName, string className)
         {
             // returning null keeps the same logic as JsonSerialization.ReadObject
             if (reader.TokenType == JsonTokenType.Null)
@@ -254,7 +254,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 if (IsReaderAtTokenType(ref reader, JsonTokenType.EndArray, false))
                     break;
 
-                strings.Add(ReadString(ref reader, propertyName, className));
+                strings.Add(ReadString(ref reader, propertyName, className)!);
             }
 
             return strings;

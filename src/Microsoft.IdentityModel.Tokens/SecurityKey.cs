@@ -12,9 +12,9 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public abstract class SecurityKey
     {
-        private CryptoProviderFactory _cryptoProviderFactory;
+        private CryptoProviderFactory? _cryptoProviderFactory;
         private object _internalIdLock = new object();
-        private string _internalId;
+        private string? _internalId;
 
         internal SecurityKey(SecurityKey key)
         {
@@ -62,13 +62,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets the key id of this <see cref="SecurityKey"/>.
         /// </summary>
         [JsonIgnore]
-        public virtual string KeyId { get; set; }
+        public virtual string? KeyId { get; set; }
 
         /// <summary>
         /// Gets or sets <see cref="Microsoft.IdentityModel.Tokens.CryptoProviderFactory"/>.
         /// </summary>
         [JsonIgnore]
-        public CryptoProviderFactory CryptoProviderFactory
+        public CryptoProviderFactory? CryptoProviderFactory
         {
             get
             {
@@ -117,7 +117,7 @@ namespace Microsoft.IdentityModel.Tokens
         public virtual bool IsSupportedAlgorithm(string algorithm)
         {
             // do not throw if algorithm is null or empty to stay in sync with CryptoProviderFactory.IsSupportedAlgorithm.
-            return CryptoProviderFactory.IsSupportedAlgorithm(algorithm, this);
+            return CryptoProviderFactory!.IsSupportedAlgorithm(algorithm, this);
         }
     }
 }

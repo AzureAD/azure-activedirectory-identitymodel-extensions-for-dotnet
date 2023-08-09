@@ -18,11 +18,11 @@ namespace Microsoft.IdentityModel.Tokens
     public class JsonWebKey : SecurityKey
     {
         internal const string ClassName = "Microsoft.IdentityModel.Tokens.JsonWebKey";
-        private Dictionary<string, object> _additionalData;
-        private IList<string> _keyOps;
-        private IList<string> _oth;
-        private IList<string> _x5c;
-        private string _kid;
+        private Dictionary<string, object>? _additionalData;
+        private IList<string>? _keyOps;
+        private IList<string>? _oth;
+        private IList<string>? _x5c;
+        private string? _kid;
 
         /// <summary>
         /// Initializes an new instance of <see cref="JsonWebKey"/>.
@@ -74,13 +74,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// If this was converted to or from a SecurityKey, this field will be set.
         /// </summary>
         [JsonIgnore]
-        internal SecurityKey ConvertedSecurityKey { get; set; }
+        internal SecurityKey? ConvertedSecurityKey { get; set; }
 
         /// <summary>
         /// If this was failed converted to a SecurityKey, this field will be set.
         /// </summary>
         [JsonIgnore]
-        internal string ConvertKeyInfo { get; set; }
+        internal string? ConvertKeyInfo { get; set; }
 
         /// <summary>
         /// When deserializing from JSON any properties that are not defined will be placed here.
@@ -97,7 +97,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET6_0_OR_GREATER
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 #endif
-        public string Alg { get; set; }
+        public string? Alg { get; set; }
 
         /// <summary>
         /// Gets or sets the 'crv' (ECC - Curve).
@@ -106,7 +106,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET6_0_OR_GREATER
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 #endif
-        public string Crv { get; set; }
+        public string? Crv { get; set; }
 
         /// <summary>
         /// Gets or sets the 'd' (ECC - Private Key OR RSA - Private Exponent).
@@ -116,7 +116,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET6_0_OR_GREATER
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 #endif
-        public string D { get; set; }
+        public string? D { get; set; }
 
         /// <summary>
         /// Gets or sets the 'dp' (RSA - First Factor CRT Exponent).
@@ -126,7 +126,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET6_0_OR_GREATER
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 #endif
-        public string DP { get; set; }
+        public string? DP { get; set; }
 
         /// <summary>
         /// Gets or sets the 'dq' (RSA - Second Factor CRT Exponent).
@@ -136,7 +136,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET6_0_OR_GREATER
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 #endif
-        public string DQ { get; set; }
+        public string? DQ { get; set; }
 
         /// <summary>
         /// Gets or sets the 'e' (RSA - Exponent).
@@ -145,7 +145,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET6_0_OR_GREATER
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 #endif
-        public string E { get; set; }
+        public string? E { get; set; }
 
         /// <summary>
         /// Gets or sets the 'k' (Symmetric - Key Value).
@@ -155,13 +155,13 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET6_0_OR_GREATER
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 #endif
-        public string K { get; set; }
+        public string? K { get; set; }
 
         /// <summary>
         /// Gets the key id of this <see cref="JsonWebKey"/>.
         /// </summary>
         [JsonIgnore]
-        public override string KeyId
+        public override string? KeyId
         {
             get { return _kid; }
             set { _kid = value; }
@@ -185,7 +185,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET6_0_OR_GREATER
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 #endif
-        public string Kid
+        public string? Kid
         {
             get { return _kid; }
             set { _kid = value; }
@@ -198,7 +198,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET6_0_OR_GREATER
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 #endif
-        public string Kty { get; set; }
+        public string? Kty { get; set; }
 
         /// <summary>
         /// Gets or sets the 'n' (RSA - Modulus).
@@ -208,7 +208,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET6_0_OR_GREATER
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 #endif
-        public string N { get; set; }
+        public string? N { get; set; }
 
         /// <summary>
         /// Gets or sets the 'oth' (RSA - Other Primes Info).
@@ -229,7 +229,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET6_0_OR_GREATER
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 #endif
-        public string P { get; set; }
+        public string? P { get; set; }
 
         /// <summary>
         /// Gets or sets the 'q' (RSA - Second  Prime Factor)..
@@ -239,7 +239,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET6_0_OR_GREATER
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 #endif
-        public string Q { get; set; }
+        public string? Q { get; set; }
 
         /// <summary>
         /// Gets or sets the 'qi' (RSA - First CRT Coefficient)..
@@ -249,7 +249,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET6_0_OR_GREATER
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 #endif
-        public string QI { get; set; }
+        public string? QI { get; set; }
 
         /// <summary>
         /// Gets or sets the 'use' (Public Key Use)..
@@ -258,7 +258,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET6_0_OR_GREATER
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 #endif
-        public string Use { get; set; }
+        public string? Use { get; set; }
 
         /// <summary>
         /// Gets or sets the 'x' (ECC - X Coordinate)..
@@ -268,7 +268,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET6_0_OR_GREATER
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 #endif
-        public string X { get; set; }
+        public string? X { get; set; }
 
         /// <summary>
         /// Gets the 'x5c' collection (X.509 Certificate Chain)..
@@ -288,7 +288,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET6_0_OR_GREATER
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 #endif
-        public string X5t { get; set; }
+        public string? X5t { get; set; }
 
         /// <summary>
         /// Gets or sets the 'x5t#S256' (X.509 Certificate SHA-1 thumbprint)..
@@ -297,7 +297,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET6_0_OR_GREATER
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 #endif
-        public string X5tS256 { get; set; }
+        public string? X5tS256 { get; set; }
 
         /// <summary>
         /// Gets or sets the 'x5u' (X.509 URL)..
@@ -306,7 +306,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET6_0_OR_GREATER
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 #endif
-        public string X5u { get; set; }
+        public string? X5u { get; set; }
 
         /// <summary>
         /// Gets or sets the 'y' (ECC - Y Coordinate)..
@@ -316,7 +316,7 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET6_0_OR_GREATER
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
 #endif
-        public string Y { get; set; }
+        public string? Y { get; set; }
 
         /// <summary>
         /// Gets the key size of <see cref="JsonWebKey"/>.
@@ -327,11 +327,11 @@ namespace Microsoft.IdentityModel.Tokens
             get
             {
                 if (Kty == JsonWebAlgorithmsKeyTypes.RSA && !string.IsNullOrEmpty(N))
-                    return Base64UrlEncoder.DecodeBytes(N).Length * 8;
+                    return Base64UrlEncoder.DecodeBytes(N!).Length * 8;
                 else if (Kty == JsonWebAlgorithmsKeyTypes.EllipticCurve && !string.IsNullOrEmpty(X))
-                    return Base64UrlEncoder.DecodeBytes(X).Length * 8;
+                    return Base64UrlEncoder.DecodeBytes(X!).Length * 8;
                 else if (Kty == JsonWebAlgorithmsKeyTypes.Octet && !string.IsNullOrEmpty(K))
-                    return Base64UrlEncoder.DecodeBytes(K).Length * 8;
+                    return Base64UrlEncoder.DecodeBytes(K!).Length * 8;
                 else
                     return 0;
             }
@@ -365,14 +365,14 @@ namespace Microsoft.IdentityModel.Tokens
 
             return new RSAParameters
             {
-                Modulus = Base64UrlEncoder.DecodeBytes(N),
-                Exponent = Base64UrlEncoder.DecodeBytes(E),
-                D = string.IsNullOrEmpty(D) ? null : Base64UrlEncoder.DecodeBytes(D),
-                P = string.IsNullOrEmpty(P) ? null : Base64UrlEncoder.DecodeBytes(P),
-                Q = string.IsNullOrEmpty(Q) ? null : Base64UrlEncoder.DecodeBytes(Q),
-                DP = string.IsNullOrEmpty(DP) ? null : Base64UrlEncoder.DecodeBytes(DP),
-                DQ = string.IsNullOrEmpty(DQ) ? null : Base64UrlEncoder.DecodeBytes(DQ),
-                InverseQ = string.IsNullOrEmpty(QI) ? null : Base64UrlEncoder.DecodeBytes(QI)
+                Modulus = Base64UrlEncoder.DecodeBytes(N!),
+                Exponent = Base64UrlEncoder.DecodeBytes(E!),
+                D = string.IsNullOrEmpty(D) ? null : Base64UrlEncoder.DecodeBytes(D!),
+                P = string.IsNullOrEmpty(P) ? null : Base64UrlEncoder.DecodeBytes(P!),
+                Q = string.IsNullOrEmpty(Q) ? null : Base64UrlEncoder.DecodeBytes(Q!),
+                DP = string.IsNullOrEmpty(DP) ? null : Base64UrlEncoder.DecodeBytes(DP!),
+                DQ = string.IsNullOrEmpty(DQ) ? null : Base64UrlEncoder.DecodeBytes(DQ!),
+                InverseQ = string.IsNullOrEmpty(QI) ? null : Base64UrlEncoder.DecodeBytes(QI!)
             };
         }
 

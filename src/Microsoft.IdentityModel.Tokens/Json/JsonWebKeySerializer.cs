@@ -214,10 +214,10 @@ namespace Microsoft.IdentityModel.Tokens.Json
                         #region case-insensitive
                         // fallback to checking property names as case insensitive
                         // first check to see if the upper case property value is a valid property name if not add to AdditionalData, to avoid unnecessary string compares.
-                        string propertyName = JsonSerializerPrimitives.GetPropertyName(ref reader, JsonWebKey.ClassName, true);
-                        if (!JsonWebKeyParameterNamesUpperCase.Contains(propertyName.ToUpperInvariant()))
+                        string? propertyName = JsonSerializerPrimitives.GetPropertyName(ref reader, JsonWebKey.ClassName, true);
+                        if (!JsonWebKeyParameterNamesUpperCase.Contains(propertyName!.ToUpperInvariant()))
                         {
-                            jsonWebKey.AdditionalData[propertyName] = JsonSerializerPrimitives.GetUnknownProperty(ref reader);
+                            jsonWebKey.AdditionalData[propertyName] = JsonSerializerPrimitives.GetUnknownProperty(ref reader)!;
                         }
                         else
                         {
@@ -342,7 +342,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
         {
             using (MemoryStream memoryStream = new MemoryStream())
             {
-                Utf8JsonWriter writer = null;
+                Utf8JsonWriter? writer = null;
                 try
                 {
                     writer = new Utf8JsonWriter(memoryStream, new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
