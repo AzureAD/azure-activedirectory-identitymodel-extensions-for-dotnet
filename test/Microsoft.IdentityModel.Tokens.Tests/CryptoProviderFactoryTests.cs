@@ -26,6 +26,21 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     /// </summary>
     public class CryptoProviderFactoryTests
     {
+        [Fact]
+        public void CryptoProviderFactoryDisposeTest()
+        {
+            var cryptoProviderFactory = new CryptoProviderFactory();
+
+            // need to add an item to the cache to start the event queue.
+            _ = cryptoProviderFactory.CreateForSigning(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
+
+            cryptoProviderFactory.Dispose();
+
+            var cache = (InMemoryCryptoProviderCache)cryptoProviderFactory.CryptoProviderCache;
+
+            Assert.Equal(0, cache.TaskCount);
+        }
+
         /// <summary>
         /// This test checks that SignatureProviders are properly created and released when CryptoProviderFactory.CacheSignatureProviders = false.
         /// </summary>

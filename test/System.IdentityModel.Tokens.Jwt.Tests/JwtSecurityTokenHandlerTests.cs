@@ -21,6 +21,24 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 {
     public class JwtSecurityTokenHandlerTests
     {
+        [Fact]
+        public void JwtSecurityTokenHandler_DisposeCryptoProviderFactoryOnSigningCredential()
+        {
+            var credentials = new SigningCredentials(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
+            var cryptoProviderFactory = new CryptoProviderFactory();
+            credentials.CryptoProviderFactory = cryptoProviderFactory;
+
+            var token = new JwtSecurityToken(
+                claims: Default.PayloadClaims,
+                signingCredentials: credentials);
+
+            _ = new JwtSecurityTokenHandler().WriteToken(token);
+
+            cryptoProviderFactory.Dispose();
+            var cache = (InMemoryCryptoProviderCache)cryptoProviderFactory.CryptoProviderCache;
+
+            Assert.Equal(0, cache.TaskCount);
+        }
 
         [Theory, MemberData(nameof(CreateJWEWithPayloadStringTheoryData))]
         public void CreateJWEWithAdditionalHeaderClaims(CreateTokenTheoryData theoryData)

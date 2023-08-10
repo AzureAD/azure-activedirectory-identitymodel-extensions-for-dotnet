@@ -24,7 +24,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     /// <see cref="OpenIdConnectProtocolValidator"/> is used to ensure that an <see cref="OpenIdConnectMessage"/>
     ///  obtained using OpenIdConnect is compliant with  http://openid.net/specs/openid-connect-core-1_0.html .
     /// </summary>
-    public class OpenIdConnectProtocolValidator
+    public class OpenIdConnectProtocolValidator : IDisposable
     {
         private IDictionary<string, string> _hashAlgorithmMap =
             new Dictionary<string, string>
@@ -51,6 +51,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
         private TimeSpan _nonceLifetime = DefaultNonceLifetime;
         private CryptoProviderFactory _cryptoProviderFactory;
+        private bool _disposedValue;
 
         /// <summary>
         /// Default for the how long the nonce is valid.
@@ -703,6 +704,29 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             {
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidStateException(LogHelper.FormatInvariant(LogMessages.IDX21331, validationContext.State, validationContext.ProtocolMessage.State)));
             }
+        }
+
+        /// <inheritdoc/>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    // This is safe to dispose. What get's disposed on it is the cache,
+                    // and the cache is a new object created in the copy constructor.
+                    _cryptoProviderFactory?.Dispose();
+                }
+
+                _disposedValue = true;
+            }
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

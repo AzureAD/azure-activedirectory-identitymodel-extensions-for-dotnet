@@ -12,13 +12,14 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// Creates cryptographic operators by specifying a <see cref="SecurityKey"/>'s and algorithms.
     /// </summary>
-    public class CryptoProviderFactory
+    public class CryptoProviderFactory : IDisposable
     {
         private static CryptoProviderFactory _default;
         private static ConcurrentDictionary<string, string> _typeToAlgorithmMap = new ConcurrentDictionary<string, string>();
         private static object _cacheLock = new object();
         private static int _defaultSignatureProviderObjectPoolCacheSize = Environment.ProcessorCount * 4;
         private int _signatureProviderObjectPoolCacheSize = _defaultSignatureProviderObjectPoolCacheSize;
+        private bool _disposedValue;
 
         /// <summary>
         /// Returns the default <see cref="CryptoProviderFactory"/> instance.
@@ -727,6 +728,28 @@ namespace Microsoft.IdentityModel.Tokens
                 CustomCryptoProvider.Release(signatureProvider);
             else if (signatureProvider.CryptoProviderCache == null && signatureProvider.RefCount == 0)
                 signatureProvider.Dispose();
+        }
+
+        /// <inheritdoc/>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    if (CryptoProviderCache != null && CryptoProviderCache is IDisposable disposable)
+                        disposable.Dispose();
+                }
+
+                _disposedValue = true;
+            }
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

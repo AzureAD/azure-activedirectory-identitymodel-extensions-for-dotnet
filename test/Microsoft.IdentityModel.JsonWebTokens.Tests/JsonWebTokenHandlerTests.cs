@@ -29,6 +29,24 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
     public class JsonWebTokenHandlerTests
     {
+        [Fact]
+        public void JsonWebTokenHandler_DisposeCryptoProviderFactoryOnSigningCredential()
+        {
+            var credentials = new SigningCredentials(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm);
+            var cryptoProviderFactory = new CryptoProviderFactory();
+            credentials.CryptoProviderFactory = cryptoProviderFactory;
+
+            _ = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
+            {
+                SigningCredentials = credentials,
+                Claims = Default.PayloadDictionary,
+            });
+
+            cryptoProviderFactory.Dispose();
+            var cache = (InMemoryCryptoProviderCache)cryptoProviderFactory.CryptoProviderCache;
+
+            Assert.Equal(0, cache.TaskCount);
+        }
 
         // This test checks to make sure that the value of JsonWebTokenHandler.Base64UrlEncodedUnsignedJWSHeader has remained unchanged.
         [Fact]
