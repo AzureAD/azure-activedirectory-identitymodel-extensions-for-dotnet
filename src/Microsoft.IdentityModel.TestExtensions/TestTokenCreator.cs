@@ -258,9 +258,9 @@ namespace Microsoft.IdentityModel.TestExtensions
             var tokenDescriptor = CreateTokenDescriptorWithInstanceOverrides();
 
             // Remove the default value and null out any class specific override.
-            tokenDescriptor?.Subject?.RemoveClaim(
+            tokenDescriptor.Subject?.RemoveClaim(
                 tokenDescriptor.Subject.FindFirst(JwtRegisteredClaimNames.Iss));
-            tokenDescriptor!.Issuer = null;
+            tokenDescriptor.Issuer = null;
             return CreateToken(tokenDescriptor);
         }
 
@@ -273,9 +273,9 @@ namespace Microsoft.IdentityModel.TestExtensions
             var tokenDescriptor = CreateTokenDescriptorWithInstanceOverrides();
 
             // Remove the default value and null out any class specific override.
-            tokenDescriptor?.Subject?.RemoveClaim(
+            tokenDescriptor.Subject?.RemoveClaim(
                 tokenDescriptor.Subject.FindFirst(JwtRegisteredClaimNames.Aud));
-            tokenDescriptor!.Audience = null;
+            tokenDescriptor.Audience = null;
             return CreateToken(tokenDescriptor);
         }
 
@@ -288,9 +288,9 @@ namespace Microsoft.IdentityModel.TestExtensions
             var tokenDescriptor = CreateTokenDescriptorWithInstanceOverrides();
 
             // Remove the default value.
-            tokenDescriptor?.Subject?.RemoveClaim(
+            tokenDescriptor.Subject?.RemoveClaim(
                 tokenDescriptor.Subject.FindFirst(JwtRegisteredClaimNames.Iat));
-            return CreateToken(tokenDescriptor!);
+            return CreateToken(tokenDescriptor);
         }
 
         /// <summary>
@@ -302,9 +302,9 @@ namespace Microsoft.IdentityModel.TestExtensions
             var tokenDescriptor = CreateTokenDescriptorWithInstanceOverrides();
 
             // Remove the default value.
-            tokenDescriptor?.Subject?.RemoveClaim(
+            tokenDescriptor.Subject?.RemoveClaim(
                 tokenDescriptor.Subject.FindFirst(JwtRegisteredClaimNames.Nbf));
-            return CreateToken(tokenDescriptor!);
+            return CreateToken(tokenDescriptor);
         }
 
         /// <summary>

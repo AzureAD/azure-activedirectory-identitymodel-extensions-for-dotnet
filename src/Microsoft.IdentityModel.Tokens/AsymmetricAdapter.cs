@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         internal AsymmetricAdapter(SecurityKey key, string algorithm, HashAlgorithm? hashAlgorithm, bool requirePrivateKey)
         {
-            HashAlgorithm = hashAlgorithm!;
+            HashAlgorithm = hashAlgorithm;
 
             // RsaSecurityKey has either Rsa OR RsaParameters.
             // If we use the RsaParameters, we create a new RSA object and will need to dispose.
@@ -126,7 +126,7 @@ namespace Microsoft.IdentityModel.Tokens
             throw LogHelper.LogExceptionMessage(new NotSupportedException(LogMessages.IDX10712));
         }
 
-        private HashAlgorithm HashAlgorithm { get; set; }
+        private HashAlgorithm? HashAlgorithm { get; set; }
 
         private void InitializeUsingEcdsaSecurityKey(ECDsaSecurityKey ecdsaSecurityKey)
         {
@@ -230,7 +230,9 @@ namespace Microsoft.IdentityModel.Tokens
 
         private byte[] SignWithECDsa(byte[] bytes)
         {
-            return ECDsa!.SignHash(HashAlgorithm.ComputeHash(bytes));
+            if (HashAlgorithm != null)
+                return ECDsa!.SignHash(HashAlgorithm.ComputeHash(bytes));
+            throw new InvalidOperationException(LogMessages.IDX10685);
         }
 
         internal bool Verify(byte[] bytes, byte[] signature)
@@ -257,12 +259,16 @@ namespace Microsoft.IdentityModel.Tokens
 
         private bool VerifyWithECDsa(byte[] bytes, byte[] signature)
         {
-            return ECDsa!.VerifyHash(HashAlgorithm.ComputeHash(bytes), signature);
+            if (HashAlgorithm != null)
+                return ECDsa!.VerifyHash(HashAlgorithm.ComputeHash(bytes), signature);
+            throw new InvalidOperationException(LogMessages.IDX10686);
         }
 
         private bool VerifyWithECDsaWithLength(byte[] bytes, int start, int length, byte[] signature)
         {
-            return ECDsa!.VerifyHash(HashAlgorithm.ComputeHash(bytes, start, length), signature);
+            if (HashAlgorithm != null)
+                return ECDsa!.VerifyHash(HashAlgorithm.ComputeHash(bytes, start, length), signature);
+            throw new InvalidOperationException(LogMessages.IDX10686);
         }
 
 #region NET61+ related code
@@ -293,17 +299,23 @@ namespace Microsoft.IdentityModel.Tokens
 
         private byte[] SignWithRsa(byte[] bytes)
         {
-            return RSA!.SignHash(HashAlgorithm.ComputeHash(bytes), (HashAlgorithmName)HashAlgorithmName!, RSASignaturePadding!);
+            if (HashAlgorithm != null)
+                return RSA!.SignHash(HashAlgorithm.ComputeHash(bytes), (HashAlgorithmName)HashAlgorithmName!, RSASignaturePadding!);
+            throw new InvalidOperationException(LogMessages.IDX10685);
         }
 
         private bool VerifyWithRsa(byte[] bytes, byte[] signature)
         {
-            return RSA!.VerifyHash(HashAlgorithm.ComputeHash(bytes), signature, (HashAlgorithmName)HashAlgorithmName!, RSASignaturePadding!);
+            if (HashAlgorithm != null)
+                return RSA!.VerifyHash(HashAlgorithm.ComputeHash(bytes), signature, (HashAlgorithmName)HashAlgorithmName!, RSASignaturePadding!);
+            throw new InvalidOperationException(LogMessages.IDX10686);
         }
 
         private bool VerifyWithRsaWithLength(byte[] bytes, int start, int length, byte[] signature)
         {
-            return RSA!.VerifyHash(HashAlgorithm.ComputeHash(bytes, start, length), signature, (HashAlgorithmName)HashAlgorithmName!, RSASignaturePadding!);
+            if (HashAlgorithm != null)
+                return RSA!.VerifyHash(HashAlgorithm.ComputeHash(bytes, start, length), signature, (HashAlgorithmName)HashAlgorithmName!, RSASignaturePadding!);
+            throw new InvalidOperationException(LogMessages.IDX10686);
         }
 #endif
 #endregion
@@ -324,18 +336,24 @@ namespace Microsoft.IdentityModel.Tokens
 
         internal byte[] SignWithRsaCryptoServiceProviderProxy(byte[] bytes)
         {
-            return RsaCryptoServiceProviderProxy!.SignData(bytes, HashAlgorithm);
+            if (HashAlgorithm != null)
+                return RsaCryptoServiceProviderProxy!.SignData(bytes, HashAlgorithm);
+            throw new InvalidOperationException(LogMessages.IDX10685);
         }
 
         private bool VerifyWithRsaCryptoServiceProviderProxy(byte[] bytes, byte[] signature)
         {
-            return RsaCryptoServiceProviderProxy!.VerifyData(bytes, HashAlgorithm, signature);
+            if (HashAlgorithm != null)
+                return RsaCryptoServiceProviderProxy!.VerifyData(bytes, HashAlgorithm, signature);
+            throw new InvalidOperationException(LogMessages.IDX10686);
         }
 
     #if NET461_OR_GREATER
         private bool VerifyWithRsaCryptoServiceProviderProxyWithLength(byte[] bytes, int offset, int length, byte[] signature)
         {
-            return RsaCryptoServiceProviderProxy!.VerifyDataWithLength(bytes, offset, length, HashAlgorithm, (HashAlgorithmName)HashAlgorithmName!, signature);
+            if (HashAlgorithm != null)
+                return RsaCryptoServiceProviderProxy!.VerifyDataWithLength(bytes, offset, length, HashAlgorithm, (HashAlgorithmName)HashAlgorithmName!, signature);
+            throw new InvalidOperationException(LogMessages.IDX10686);
         }
     #endif
 
