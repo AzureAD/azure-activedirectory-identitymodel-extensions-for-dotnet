@@ -713,7 +713,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             {
                 if (disposing)
                 {
-                    // This is safe to dispose. What get's disposed on it is the cache,
+                    // This is safe to dispose. What gets disposed on it is the cache,
                     // and the cache is a new object created in the copy constructor.
                     _cryptoProviderFactory?.Dispose();
                 }
