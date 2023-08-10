@@ -93,7 +93,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="message">The log message.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         [NonEvent]
-        public void WriteAlways(string message, params object[] args)
+        public void WriteAlways(string message, params object[]? args)
         {
             if (IsEnabled())
             {
@@ -124,7 +124,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="message">The log message.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         [NonEvent]
-        public void WriteVerbose(string message, params object[] args)
+        public void WriteVerbose(string message, params object[]? args)
         {
             if (IsEnabled() && LogLevel >= EventLevel.Verbose)
             {
@@ -155,7 +155,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="message">The log message.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         [NonEvent]
-        public void WriteInformation(string message, params object[] args)
+        public void WriteInformation(string message, params object[]? args)
         {
             if (IsEnabled() && LogLevel >= EventLevel.Informational)
             {
@@ -186,7 +186,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="message">The log message.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         [NonEvent]
-        public void WriteWarning(string message, params object[] args)
+        public void WriteWarning(string message, params object[]? args)
         {
             if (args != null)
                 WriteWarning(FormatInvariant(message, args));
@@ -214,7 +214,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="message">The log message.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         [NonEvent]
-        public void WriteError(string message, params object[] args)
+        public void WriteError(string message, params object[]? args)
         {
             if (IsEnabled() && LogLevel >= EventLevel.Error)
             {
@@ -245,7 +245,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="message">The log message.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         [NonEvent]
-        public void WriteCritical(string message, params object[] args)
+        public void WriteCritical(string message, params object[]? args)
         {
             if (IsEnabled() && LogLevel >= EventLevel.Critical)
             {
@@ -263,9 +263,9 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="innerException"><see cref="Exception"/></param>
         /// <param name="message">The log message.</param>
         [NonEvent]
-        public void Write(EventLevel level, Exception innerException, string message)
+        public void Write(EventLevel level, Exception? innerException, string message)
         {
-            Write(level, innerException, message, null!);
+            Write(level, innerException, message, null);
         }
 
         /// <summary>
@@ -276,7 +276,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="message">The log message.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         [NonEvent]
-        public void Write(EventLevel level, Exception innerException, string message, params object[] args)
+        public void Write(EventLevel level, Exception? innerException, string message, params object[]? args)
         {
             if (innerException != null)
             {

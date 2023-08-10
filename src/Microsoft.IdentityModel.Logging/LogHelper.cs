@@ -265,7 +265,7 @@ namespace Microsoft.IdentityModel.Logging
                 return null!;
 
             if (IdentityModelEventSource.Logger.IsEnabled(eventLevel, EventKeywords.All))
-                IdentityModelEventSource.Logger.Write(eventLevel, exception.InnerException!, exception.Message);
+                IdentityModelEventSource.Logger.Write(eventLevel, exception.InnerException, exception.Message);
 
             EventLogLevel eventLogLevel = EventLevelToEventLogLevel(eventLevel);
             if (Logger.IsEnabled(eventLogLevel))
@@ -333,7 +333,7 @@ namespace Microsoft.IdentityModel.Logging
                 message = format;
 
             if (IdentityModelEventSource.Logger.IsEnabled(eventLevel, EventKeywords.All))
-                IdentityModelEventSource.Logger.Write(eventLevel, innerException!, message);
+                IdentityModelEventSource.Logger.Write(eventLevel, innerException, message);
 
             EventLogLevel eventLogLevel = EventLevelToEventLogLevel(eventLevel);
             if (Logger.IsEnabled(eventLogLevel))
@@ -458,7 +458,7 @@ namespace Microsoft.IdentityModel.Logging
             // Prefix header (library version, DateTime, whether PII is ON/OFF) to the first message logged by Wilson.
             if (!_isHeaderWritten)
             {
-                string headerMessage = string.Format(CultureInfo.InvariantCulture!, "Microsoft.IdentityModel Version: {0}. Date {1}. {2}",
+                string headerMessage = string.Format(CultureInfo.InvariantCulture, "Microsoft.IdentityModel Version: {0}. Date {1}. {2}",
                     typeof(IdentityModelEventSource).Assembly!.GetName().Version!.ToString(),
                     DateTime.UtcNow,
                     IdentityModelEventSource.ShowPII ? _piiOnLogMessage : _piiOffLogMessage);
