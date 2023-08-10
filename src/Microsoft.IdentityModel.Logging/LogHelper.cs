@@ -2,12 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.IdentityModel.Logging
@@ -334,14 +332,14 @@ namespace Microsoft.IdentityModel.Logging
 
             if (innerException != null) 
                 if (string.IsNullOrEmpty(argumentName))
-                    return (T)Activator.CreateInstance(typeof(T), message, innerException)!;
+                    return (T?)Activator.CreateInstance(typeof(T), message, innerException);
                 else
-                    return (T)Activator.CreateInstance(typeof(T), argumentName, message, innerException)!;
+                    return (T?)Activator.CreateInstance(typeof(T), argumentName, message, innerException);
             else
                 if (string.IsNullOrEmpty(argumentName))
-                    return (T)Activator.CreateInstance(typeof(T), message)!;
+                    return (T?)Activator.CreateInstance(typeof(T), message);
                 else
-                    return (T)Activator.CreateInstance(typeof(T), argumentName, message)!;
+                    return (T?)Activator.CreateInstance(typeof(T), argumentName, message);
         }
 
         /// <summary>
@@ -375,20 +373,22 @@ namespace Microsoft.IdentityModel.Logging
             return arg;
         }
 
-        private static string? RemovePII(object arg)
+        private static string RemovePII(object arg)
         {
             if (arg is Exception ex && IsCustomException(ex))
                 return ex.ToString();
 
             if (arg is NonPII)
-                return arg!.ToString();
+                return arg.ToString()!; // the null check is done in FormatInvariant
 
-            return string.Format(CultureInfo.InvariantCulture, IdentityModelEventSource.HiddenPIIString, arg?.GetType().ToString() ?? "Null");
+            return string.Format(CultureInfo.InvariantCulture, IdentityModelEventSource.HiddenPIIString, arg.GetType().ToString() ?? "Null");
         }
 
         internal static bool IsCustomException(Exception ex)
         {
-            return ex!.GetType().FullName!.StartsWith("Microsoft.IdentityModel.", StringComparison.Ordinal);
+            var fullName = ex.GetType().FullName;
+
+            return fullName != null && fullName.StartsWith("Microsoft.IdentityModel.", StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -446,7 +446,7 @@ namespace Microsoft.IdentityModel.Logging
             if (!_isHeaderWritten)
             {
                 string headerMessage = string.Format(CultureInfo.InvariantCulture, "Microsoft.IdentityModel Version: {0}. Date {1}. {2}",
-                    typeof(IdentityModelEventSource).Assembly!.GetName().Version!.ToString(),
+                    typeof(IdentityModelEventSource).Assembly.GetName().Version?.ToString(),
                     DateTime.UtcNow,
                     IdentityModelEventSource.ShowPII ? _piiOnLogMessage : _piiOffLogMessage);
 
