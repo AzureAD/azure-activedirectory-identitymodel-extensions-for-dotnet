@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.IdentityModel.TestUtils;
 using Newtonsoft.Json;
+using System.Text.Json;
 using Xunit;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
@@ -316,8 +317,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 CanRead = true,
                 TestId = nameof(EncodedJwts.InvalidPayload),
                 Token = EncodedJwts.InvalidPayload,
-                ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX12723:", inner: typeof(JsonReaderException))
-            });
+                ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX12723:", null, true)
+            }); ;
 
             return theoryData;
         }

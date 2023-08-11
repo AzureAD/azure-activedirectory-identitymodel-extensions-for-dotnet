@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -16,7 +17,6 @@ using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
 using JsonPrimitives = Microsoft.IdentityModel.Tokens.Json.JsonSerializerPrimitives;
 
 namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
@@ -71,7 +71,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             string encodedPayload;
             using (MemoryStream memoryStream = new MemoryStream())
             {
-
                 Utf8JsonWriter payloadWriter = null;
                 try
                 {
@@ -200,7 +199,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 AddCnfClaim(ref writer, signedHttpRequestDescriptor);
 
             if (signedHttpRequestDescriptor.AdditionalPayloadClaims != null && signedHttpRequestDescriptor.AdditionalPayloadClaims.Any())
-                JsonPrimitives.WriteAdditionalData(ref writer, signedHttpRequestDescriptor.AdditionalPayloadClaims);
+                JsonPrimitives.WriteObjects(ref writer, signedHttpRequestDescriptor.AdditionalPayloadClaims);
         }
 
         /// <summary>
@@ -831,20 +830,21 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (httpRequestUri == null)
                 throw LogHelper.LogArgumentNullException(nameof(httpRequestUri));
 
-            if (!signedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.Q, out JArray qClaim) || qClaim == null)
+            if (!signedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.Q, out IList<object> qClaim) || qClaim == null)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.Q))));
 
             httpRequestUri = EnsureAbsoluteUri(httpRequestUri);
             var sanitizedQueryParams = SanitizeQueryParams(httpRequestUri);
-
             string qClaimBase64UrlEncodedHash = string.Empty;
-            string expectedBase64UrlEncodedHash = string.Empty;
-            List<string> qClaimQueryParamNames;
+            string calculatedBase64UrlEncodedHash = string.Empty;
+            IList<object> qClaimQueryParamNames;
+
             try
             {
                 // "q": [["queryParamName1", "queryParamName2",... "queryParamNameN"], "base64UrlEncodedHashValue"]]
-                qClaimQueryParamNames = qClaim[0].ToObject<List<string>>();
-                qClaimBase64UrlEncodedHash = qClaim[1].ToString();
+                // deserialzed as IList<object> with q[0] is an IList<obj>, q[1] an object
+                qClaimBase64UrlEncodedHash = (string)qClaim[1];
+                qClaimQueryParamNames = qClaim[0] as IList<object>;
             }
             catch (Exception e)
             {
@@ -857,7 +857,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 var firstQueryParam = true;
                 foreach (var queryParamName in qClaimQueryParamNames)
                 {
-                    if (!sanitizedQueryParams.TryGetValue(queryParamName, out var queryParamsValue))
+                    if (!sanitizedQueryParams.TryGetValue((string)queryParamName, out string queryParamsValue))
                     {
                         throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23028, LogHelper.MarkAsNonPII(queryParamName), LogHelper.MarkAsNonPII(string.Join(", ", sanitizedQueryParams.Select(x => x.Key))))));
                     }
@@ -866,15 +866,15 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                         if (!firstQueryParam)
                             stringBuffer.Append("&");
 
-                        stringBuffer.Append(queryParamName).Append('=').Append(queryParamsValue);
+                        stringBuffer.Append((string)queryParamName).Append('=').Append(queryParamsValue);
                         firstQueryParam = false;
 
                         // remove the query param from the dictionary to mark it as covered.
-                        sanitizedQueryParams.Remove(queryParamName);
+                        sanitizedQueryParams.Remove((string)queryParamName);
                     }
                 }
 
-                expectedBase64UrlEncodedHash = CalculateBase64UrlEncodedHash(stringBuffer.ToString());
+                calculatedBase64UrlEncodedHash = CalculateBase64UrlEncodedHash(stringBuffer.ToString());
             }
             catch (Exception e)
             {
@@ -884,8 +884,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (!signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AcceptUnsignedQueryParameters && sanitizedQueryParams.Any())
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23029, LogHelper.MarkAsNonPII(string.Join(", ", sanitizedQueryParams.Select(x => x.Key))))));
 
-            if (!string.Equals(expectedBase64UrlEncodedHash, qClaimBase64UrlEncodedHash))
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.Q), expectedBase64UrlEncodedHash, qClaimBase64UrlEncodedHash)));
+            if (!string.Equals(calculatedBase64UrlEncodedHash, qClaimBase64UrlEncodedHash))
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidQClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.Q), calculatedBase64UrlEncodedHash, qClaimBase64UrlEncodedHash)));
         }
 
         /// <summary>
@@ -900,19 +900,20 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </remarks>
         internal virtual void ValidateHClaim(JsonWebToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
         {
-            if (!signedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.H, out JArray hClaim) || hClaim == null)
+            if (!signedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.H, out IList<object> hClaim) || hClaim == null)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.H))));
 
             var sanitizedHeaders = SanitizeHeaders(signedHttpRequestValidationContext.HttpRequestData.Headers);
 
             string hClaimBase64UrlEncodedHash = string.Empty;
-            string expectedBase64UrlEncodedHash = string.Empty;
-            List<string> hClaimHeaderNames;
+            string calculatedBase64UrlEncodedHash = string.Empty;
+            IList<object> hClaimHeaderNames;
             try
             {
                 // "h": [["headerName1", "headerName2",... "headerNameN"], "base64UrlEncodedHashValue"]]
-                hClaimHeaderNames = hClaim[0].ToObject<List<string>>();
-                hClaimBase64UrlEncodedHash = hClaim[1].ToString();
+                // deserialzed as IList<object> with h[0] is an IList<obj>, h[1] an object
+                hClaimBase64UrlEncodedHash = (string)hClaim[1];
+                hClaimHeaderNames = hClaim[0] as IList<object>;
             }
             catch (Exception e)
             {
@@ -925,7 +926,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 var firstHeader = true;
                 foreach (var headerName in hClaimHeaderNames)
                 {
-                    if (!sanitizedHeaders.TryGetValue(headerName, out var headerValue))
+                    if (!sanitizedHeaders.TryGetValue((string)headerName, out var headerValue))
                     {
                         throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23027, LogHelper.MarkAsNonPII(headerName), LogHelper.MarkAsNonPII(string.Join(", ", sanitizedHeaders.Select(x => x.Key))))));
                     }
@@ -938,11 +939,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                         firstHeader = false;
 
                         // remove the header from the dictionary to mark it as covered.
-                        sanitizedHeaders.Remove(headerName);
+                        sanitizedHeaders.Remove((string)headerName);
                     }
                 }
 
-                expectedBase64UrlEncodedHash = CalculateBase64UrlEncodedHash(stringBuffer.ToString());
+                calculatedBase64UrlEncodedHash = CalculateBase64UrlEncodedHash(stringBuffer.ToString());
             }
             catch (Exception e)
             {
@@ -952,8 +953,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (!signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AcceptUnsignedHeaders && sanitizedHeaders.Any())
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23026, LogHelper.MarkAsNonPII(string.Join(", ", sanitizedHeaders.Select(x => x.Key))))));
 
-            if (!string.Equals(expectedBase64UrlEncodedHash, hClaimBase64UrlEncodedHash))
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.H), expectedBase64UrlEncodedHash, hClaimBase64UrlEncodedHash)));
+            if (!string.Equals(calculatedBase64UrlEncodedHash, hClaimBase64UrlEncodedHash))
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidHClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.H), calculatedBase64UrlEncodedHash, hClaimBase64UrlEncodedHash)));
         }
 
         /// <summary>
@@ -1020,7 +1021,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="validatedAccessToken">An access token ("at") that was already validated during the SignedHttpRequest validation process.</param>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <returns>JSON representation of the 'cnf' claim.</returns>
-        internal virtual JObject GetCnfClaimValue(JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
+        internal virtual Cnf GetCnfClaimValue(JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
         {
             if (validatedAccessToken == null)
                 throw LogHelper.LogArgumentNullException(nameof(validatedAccessToken));
@@ -1028,13 +1029,18 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             // use the decrypted jwt if the jwtValidatedAccessToken is encrypted.
             if (validatedAccessToken.InnerToken != null)
                 validatedAccessToken = validatedAccessToken.InnerToken;
-            
-            if (validatedAccessToken.TryGetPayloadValue(ConfirmationClaimTypes.Cnf, out JObject cnf) && cnf != null)
-                return cnf;
-            else if (validatedAccessToken.TryGetPayloadValue(ConfirmationClaimTypes.Cnf, out string cnfString) && !string.IsNullOrEmpty(cnfString))
-                return JObject.Parse(cnfString);
-            else
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidCnfClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(ConfirmationClaimTypes.Cnf))));
+
+            try
+            {
+                if (validatedAccessToken.TryGetPayloadValue(ConfirmationClaimTypes.Cnf, out string cnf) && cnf != null)
+                    return new Cnf(cnf);
+            }
+            catch(JsonException ex)
+            {
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidCnfClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(ConfirmationClaimTypes.Cnf)), ex));
+            }
+
+            throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidCnfClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(ConfirmationClaimTypes.Cnf))));
         }
 
         /// <summary>
@@ -1047,19 +1053,19 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
         /// <remarks>https://datatracker.ietf.org/doc/html/rfc7800#section-3.1</remarks>
-        internal virtual async Task<SecurityKey> ResolvePopKeyFromCnfClaimAsync(JObject cnf, JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
+        internal virtual async Task<SecurityKey> ResolvePopKeyFromCnfClaimAsync(Cnf cnf, JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
             if (cnf == null)
                 throw LogHelper.LogArgumentNullException(nameof(cnf));
 
-            if (cnf.TryGetValue(ConfirmationClaimTypes.Jwk, StringComparison.Ordinal, out var jwk))
-                return ResolvePopKeyFromJwk(jwk.ToString(), signedHttpRequestValidationContext);
-            else if (cnf.TryGetValue(ConfirmationClaimTypes.Jwe, StringComparison.Ordinal, out var jwe))
-                return await ResolvePopKeyFromJweAsync(jwe.ToString(), signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
-            else if (cnf.TryGetValue(ConfirmationClaimTypes.Jku, StringComparison.Ordinal, out var jku))
-                return await ResolvePopKeyFromJkuAsync(jku.ToString(), cnf, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
-            else if (cnf.TryGetValue(ConfirmationClaimTypes.Kid, StringComparison.Ordinal, out var kid))
-                return await ResolvePopKeyFromKeyIdentifierAsync(kid.ToString(), signedHttpRequest, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+            if (cnf.JsonWebKey != null)
+                return ResolvePopKeyFromJwk(cnf.JsonWebKey, signedHttpRequestValidationContext);
+            else if (!string.IsNullOrEmpty(cnf.Jwe))
+                return await ResolvePopKeyFromJweAsync(cnf.Jwe, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+            else if (!string.IsNullOrEmpty(cnf.Jku))
+                return await ResolvePopKeyFromJkuAsync(cnf.Jku, cnf, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+            else if (!string.IsNullOrEmpty(cnf.Kid))
+                return await ResolvePopKeyFromKeyIdentifierAsync(cnf.Kid, signedHttpRequest, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
             else
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidCnfClaimException(LogHelper.FormatInvariant(LogMessages.IDX23014, cnf.ToString())));
         }
@@ -1067,15 +1073,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <summary>
         /// Resolves a PoP <see cref="SecurityKey"/> from the asymmetric representation of a PoP key. 
         /// </summary>
-        /// <param name="jwk">An asymmetric representation of a PoP key (JSON).</param>
+        /// <param name="jsonWebKey">The JsonWebKey to resolve.</param>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
-        internal virtual SecurityKey ResolvePopKeyFromJwk(string jwk, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
+        internal virtual SecurityKey ResolvePopKeyFromJwk(JsonWebKey jsonWebKey, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
         {
-            if (string.IsNullOrEmpty(jwk))
-                throw LogHelper.LogArgumentNullException(nameof(jwk));
-
-            var jsonWebKey = new JsonWebKey(jwk);
+            _ = jsonWebKey ?? throw LogHelper.LogArgumentNullException(nameof(jsonWebKey));
 
             if (JsonWebKeyConverter.TryConvertToSecurityKey(jsonWebKey, out var key))
             {
@@ -1112,7 +1115,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
-        internal virtual async Task<SecurityKey> ResolvePopKeyFromJkuAsync(string jkuSetUrl, JObject cnf, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
+        internal virtual async Task<SecurityKey> ResolvePopKeyFromJkuAsync(string jkuSetUrl, Cnf cnf, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
             var popKeys = await GetPopKeysFromJkuAsync(jkuSetUrl, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
 
@@ -1127,15 +1130,19 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             // If there are multiple keys in the referenced JWK Set document, a "kid" member MUST also be included
             // with the referenced key's JWK also containing the same "kid" value.
             // https://datatracker.ietf.org/doc/html/rfc7800#section-3.5
-            else if (cnf.TryGetValue(ConfirmationClaimTypes.Kid, StringComparison.Ordinal, out var kid))
+            else if (!string.IsNullOrEmpty(cnf.Kid))
             {
                 foreach (var key in popKeys)
                 {
-                    if (string.Equals(key.KeyId, kid.ToString()))
+                    if (string.Equals(key.KeyId, cnf.Kid))
                         return key;
                 }
 
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23021, LogHelper.MarkAsNonPII(kid), string.Join(", ", popKeys.Select(x => x.KeyId ?? "Null")))));
+                throw LogHelper.LogExceptionMessage(
+                    new SignedHttpRequestInvalidPopKeyException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX23021,
+                            LogHelper.MarkAsNonPII(cnf.Kid), string.Join(", ", popKeys.Select(x => x.KeyId ?? "Null")))));
             }
             else
             {
@@ -1189,8 +1196,10 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         {
             if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.PopKeyResolverFromKeyIdAsync != null)
                 return await signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.PopKeyResolverFromKeyIdAsync(kid, validatedAccessToken, signedHttpRequest, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
-            else if (signedHttpRequest != null && signedHttpRequest.TryGetPayloadValue(ConfirmationClaimTypes.Cnf, out JObject signedHttpRequestCnf) && signedHttpRequestCnf != null)
-                return await ResolvePopKeyFromCnfReferenceAsync(kid, signedHttpRequestCnf, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+            else if (signedHttpRequest != null && signedHttpRequest.TryGetPayloadValue(ConfirmationClaimTypes.Cnf, out string signedHttpRequestCnf) && signedHttpRequestCnf != null)
+            {
+                return await ResolvePopKeyFromCnfReferenceAsync(kid, new Cnf(signedHttpRequestCnf), validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+            }
             else
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23023)));
         }
@@ -1205,7 +1214,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
         /// <remarks><paramref name="cnfReferenceId"/> MUST match the base64url-encoded thumbprint of a JWK resolved from the <paramref name="confirmationClaim"/>.</remarks>
-        internal virtual async Task<SecurityKey> ResolvePopKeyFromCnfReferenceAsync(string cnfReferenceId, JObject confirmationClaim, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
+        internal virtual async Task<SecurityKey> ResolvePopKeyFromCnfReferenceAsync(string cnfReferenceId, Cnf confirmationClaim, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
             // resolve PoP key from the confirmation claim, but set signedHttpRequest to null to prevent recursion.
             var popKey = await ResolvePopKeyFromCnfClaimAsync(confirmationClaim, null, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
