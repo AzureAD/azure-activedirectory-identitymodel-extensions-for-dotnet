@@ -5,36 +5,36 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Reflection;
-using System.Text;
-using System.Text.Json;
 using Microsoft.IdentityModel.Logging;
-using JsonPrimitives = Microsoft.IdentityModel.Tokens.Json.JsonSerializerPrimitives;
+using Microsoft.IdentityModel.Protocols.Json.Tests;
+using Newtonsoft.Json.Linq;
 
-namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
+namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Json.Tests
 {
     /// <summary>
     /// Provides access to common OpenIdConnect parameters.
+    /// base class for authentication protocol messages.
+    /// This is the original OpenIdConnectMessage in the 6x branch.
+    /// Used for ensuring backcompat.
     /// </summary>
-    public class OpenIdConnectMessage : AuthenticationProtocolMessage
+    public class OpenIdConnectMessage6x : AuthenticationProtocolMessage6x
     {
-        internal const string ClassName = "Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectMessage";
-
         /// <summary>
         /// Initializes a new instance of the <see cref="OpenIdConnectMessage"/> class.
         /// </summary>
-        public OpenIdConnectMessage() { }
+        public OpenIdConnectMessage6x() { }
 
         /// <summary>
         /// Initializes an instance of <see cref="OpenIdConnectMessage"/> class with a json string.
         /// </summary>
-        public OpenIdConnectMessage(string json)
+        public OpenIdConnectMessage6x(string json)
         {
             if (string.IsNullOrEmpty(json))
                 throw LogHelper.LogArgumentNullException("json");
 
             try
             {
-                SetJsonParameters(json);
+                SetJsonParameters(JObject.Parse(json));
             }
             catch
             {
@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// </summary>
         /// <param name="other"> an <see cref="OpenIdConnectMessage"/> to copy.</param>
         /// <exception cref="ArgumentNullException">If 'other' is null.</exception>
-        protected OpenIdConnectMessage(OpenIdConnectMessage other)
+        protected OpenIdConnectMessage6x(OpenIdConnectMessage other)
         {
             if (other == null)
                 throw LogHelper.LogArgumentNullException("other");
@@ -69,7 +69,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Initializes a new instance of the <see cref="OpenIdConnectMessage"/> class.
         /// </summary>
         /// <param name="nameValueCollection">Collection of key value pairs.</param>
-        public OpenIdConnectMessage(NameValueCollection nameValueCollection)
+        public OpenIdConnectMessage6x(NameValueCollection nameValueCollection)
         {
             if (nameValueCollection == null)
                 throw LogHelper.LogArgumentNullException("nameValueCollection");
@@ -87,7 +87,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Initializes a new instance of the <see cref="OpenIdConnectMessage"/> class.
         /// </summary>
         /// <param name="parameters">Enumeration of key value pairs.</param>
-        public OpenIdConnectMessage(IEnumerable<KeyValuePair<string, string[]>> parameters)
+        public OpenIdConnectMessage6x(IEnumerable<KeyValuePair<string, string[]>> parameters)
         {
             if (parameters == null)
                 throw LogHelper.LogArgumentNullException("parameters");
@@ -108,53 +108,66 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
         }
 
-        private void SetJsonParameters(string json)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OpenIdConnectMessage"/> class.
+        /// </summary>
+        /// <param name="json">The JSON object from which the instance is created.</param>
+        [Obsolete("The 'OpenIdConnectMessage(object json)' constructor is obsolete. Please use 'OpenIdConnectMessage(string json)' instead.")]
+
+        public OpenIdConnectMessage6x(object json)
         {
-            Utf8JsonReader reader = new(Encoding.UTF8.GetBytes(json).AsSpan());
+            if (json == null)
+                throw LogHelper.LogArgumentNullException(nameof(json));
 
-            while (JsonPrimitives.ReaderRead(ref reader))
+            var jObject = JObject.Parse(json.ToString());
+            SetJsonParameters(jObject);
+        }
+
+        private void SetJsonParameters(JObject json)
+        {
+            if (json == null)
+                throw LogHelper.LogArgumentNullException("json");
+
+            foreach (var pair in json)
             {
-                if (reader.TokenType == JsonTokenType.PropertyName)
+                if (json.TryGetValue(pair.Key, out JToken value))
                 {
-                    string propertyName = JsonPrimitives.GetPropertyName(ref reader, ClassName, true);
-                    string propertyValue = null;
-                    if (reader.TokenType == JsonTokenType.String)
-                        propertyValue = JsonPrimitives.ReadString(ref reader, propertyName, ClassName);
-
-                    SetParameter(propertyName, propertyValue);
+                    SetParameter(pair.Key, value.ToString());
                 }
             }
         }
 
         /// <summary>
-        /// Returns a new instance of <see cref="OpenIdConnectMessage"/> with values copied from this object.
+        /// Returns a new instance of <see cref="OpenIdConnectMessage6x"/> with values copied from this object.
         /// </summary>
         /// <returns>A new <see cref="OpenIdConnectMessage"/> object copied from this object</returns>
         /// <remarks>This is a shallow Clone.</remarks>
-        public virtual OpenIdConnectMessage Clone()
+        public virtual OpenIdConnectMessage6x Clone()
         {
-            return new OpenIdConnectMessage(this);
+#pragma warning disable CS0618 // Type or member is obsolete
+            return new OpenIdConnectMessage6x(this);
+#pragma warning restore CS0618 // Type or member is obsolete
         }
 
         /// <summary>
-        /// Creates an OpenIdConnect message using the current contents of this <see cref="OpenIdConnectMessage"/>.
+        /// Creates an OpenIdConnect message using the current contents of this <see cref="OpenIdConnectMessage6x"/>.
         /// </summary>
         /// <returns>The uri to use for a redirect.</returns>
         public virtual string CreateAuthenticationRequestUrl()
         {
-            OpenIdConnectMessage openIdConnectMessage = Clone();
+            OpenIdConnectMessage6x openIdConnectMessage = Clone();
             openIdConnectMessage.RequestType = OpenIdConnectRequestType.Authentication;
             EnsureTelemetryValues(openIdConnectMessage);
             return openIdConnectMessage.BuildRedirectUrl();
         }
 
         /// <summary>
-        /// Creates a query string using the current contents of this <see cref="OpenIdConnectMessage"/>.
+        /// Creates a query string using the current contents of this <see cref="OpenIdConnectMessage6x"/>.
         /// </summary>
         /// <returns>The uri to use for a redirect.</returns>
         public virtual string CreateLogoutRequestUrl()
         {
-            OpenIdConnectMessage openIdConnectMessage = Clone();
+            OpenIdConnectMessage6x openIdConnectMessage = Clone();
             openIdConnectMessage.RequestType = OpenIdConnectRequestType.Logout;
             EnsureTelemetryValues(openIdConnectMessage);
             return openIdConnectMessage.BuildRedirectUrl();
@@ -163,7 +176,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <summary>
         /// Adds telemetry values to the message parameters.
         /// </summary>
-        private void EnsureTelemetryValues(OpenIdConnectMessage clonedMessage)
+        private void EnsureTelemetryValues(OpenIdConnectMessage6x clonedMessage)
         {
             if (this.EnableTelemetryParameters)
             {

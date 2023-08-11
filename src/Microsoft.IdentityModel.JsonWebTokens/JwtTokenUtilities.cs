@@ -85,6 +85,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <exception cref="ArgumentNullException"><paramref name="input"/> or <paramref name="signingCredentials"/> is null.</exception>
         public static string CreateEncodedSignature(string input, SigningCredentials signingCredentials, bool cacheProvider)
         {
+            // TODO create overload that takes a Span<byte> for the input
             if (input == null)
                 throw LogHelper.LogArgumentNullException(nameof(input));
 

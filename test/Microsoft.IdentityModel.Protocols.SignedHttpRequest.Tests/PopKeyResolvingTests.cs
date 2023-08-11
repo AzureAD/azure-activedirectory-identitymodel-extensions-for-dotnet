@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             {
                 var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
                 var handler = new SignedHttpRequestHandlerPublic();
-                _ = await handler.ResolvePopKeyFromCnfClaimPublicAsync(theoryData.ConfirmationClaim, theoryData.SignedHttpRequestToken, theoryData.ValidatedAccessToken, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
+                _ = await handler.ResolvePopKeyFromCnfClaimAsync(theoryData.ConfirmationClaim, theoryData.SignedHttpRequestToken, theoryData.ValidatedAccessToken, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
 
                 if ((bool)signedHttpRequestValidationContext.CallContext.PropertyBag[theoryData.MethodToCall] == false)
                     context.AddDiff($"{theoryData.MethodToCall} was not called.");
@@ -144,8 +144,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             try
             {
                 var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
-                var handler = new SignedHttpRequestHandlerPublic();
-                _ = await handler.ResolvePopKeyPublicAsync(theoryData.SignedHttpRequestToken, theoryData.ValidatedAccessToken, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
+                var handler = new SignedHttpRequestHandler();
+                _ = await handler.ResolvePopKeyAsync(theoryData.SignedHttpRequestToken, theoryData.ValidatedAccessToken, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
 
                 if ((bool)signedHttpRequestValidationContext.CallContext.PropertyBag[theoryData.MethodToCall] == false)
                     context.AddDiff($"{theoryData.MethodToCall} was not called.");
@@ -200,8 +200,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             try
             {
                 var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
-                var handler = new SignedHttpRequestHandlerPublic();
-                _ = handler.ResolvePopKeyFromJwkPublic(theoryData.PopKeyString, null, null, signedHttpRequestValidationContext);
+                var handler = new SignedHttpRequestHandler();
+                _ = handler.ResolvePopKeyFromJwk(theoryData.PopKeyString, signedHttpRequestValidationContext);
 
                 theoryData.ExpectedException.ProcessNoException(context);
             }
@@ -271,8 +271,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             try
             {
                 var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
-                var handler = new SignedHttpRequestHandlerPublic();
-                _ = await handler.ResolvePopKeyFromJwePublicAsync(theoryData.PopKeyString, null, null, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
+                var handler = new SignedHttpRequestHandler();
+                _ = await handler.ResolvePopKeyFromJweAsync(theoryData.PopKeyString, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
 
                 theoryData.ExpectedException.ProcessNoException(context);
             }
@@ -396,7 +396,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             {
                 var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
                 var handler = new SignedHttpRequestHandlerPublic();
-                var popKey = await handler.ResolvePopKeyFromJkuPublicAsync(string.Empty, null, null, null, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
+                var popKey = await handler.ResolvePopKeyFromJkuAsync(string.Empty, null, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
 
                 if (popKey == null)
                     context.AddDiff("Resolved Pop key is null.");
@@ -463,8 +463,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             var context = TestUtilities.WriteHeader($"{this}.GetCnfClaimValue", theoryData);
             try
             {
-                var handler = new SignedHttpRequestHandlerPublic();
-                _ = handler.GetCnfClaimValuePublic(null, theoryData.ValidatedAccessToken, null);
+                var handler = new SignedHttpRequestHandler();
+                _ = handler.GetCnfClaimValue(null, theoryData.ValidatedAccessToken, null);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -528,7 +528,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             {
                 var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
                 var handler = new SignedHttpRequestHandlerPublic();
-                var popKey = await handler.ResolvePopKeyFromJkuPublicAsync(string.Empty, JObject.Parse($@"{{""kid"": ""{theoryData.Kid}""}}"), null, null, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
+                var popKey = await handler.ResolvePopKeyFromJkuAsync(string.Empty, JObject.Parse($@"{{""kid"": ""{theoryData.Kid}""}}"), signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
 
                 if (popKey == null)
                     context.AddDiff("Resolved Pop key is null.");
@@ -624,8 +624,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             try
             {
                 var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
-                var handler = new SignedHttpRequestHandlerPublic();
-                var popKeys = await handler.GetPopKeysFromJkuPublicAsync(theoryData.JkuSetUrl, null, null, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
+                var handler = new SignedHttpRequestHandler();
+                var popKeys = await handler.GetPopKeysFromJkuAsync(theoryData.JkuSetUrl, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
 
                 if (popKeys.Count != theoryData.ExpectedNumberOfPopKeysReturned)
                     context.AddDiff($"Number of returned pop keys {popKeys.Count} is not the same as the expected: {theoryData.ExpectedNumberOfPopKeysReturned}.");
@@ -739,7 +739,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             {
                 var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
                 var handler = new SignedHttpRequestHandlerPublic();
-                var popKeys = await handler.ResolvePopKeyFromKeyIdentifierPublicAsync(theoryData.Kid, theoryData.SignedHttpRequestToken, theoryData.ValidatedAccessToken, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
+                var popKeys = await handler.ResolvePopKeyFromKeyIdentifierAsync(theoryData.Kid, theoryData.SignedHttpRequestToken, theoryData.ValidatedAccessToken, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)

@@ -14,6 +14,13 @@ namespace Microsoft.IdentityModel.Tokens.Json
 {
     internal static class JsonWebKeySerializer
     {
+        // This is used to perform performant case-insensitive property names.
+        // 6x used Newtonsoft and was case-insensitive w.r.t. property names.
+        // The serializer is written to use Utf8JsonReader.ValueTextEquals(...), to match property names.
+        // When we do not have a match, we check the uppercase name of the property against this table.
+        // If not found, then we assume we should put the value into AdditionalData.
+        // If we didn't do that, we would pay a performance penalty for those cases where there is AdditionalData
+        // but otherwise the JSON properties are all lower case.
         public static HashSet<string> JsonWebKeyParameterNamesUpperCase = new HashSet<string>
         {
             "ALG",
@@ -365,70 +372,70 @@ namespace Microsoft.IdentityModel.Tokens.Json
             writer.WriteStartObject();
 
             if (!string.IsNullOrEmpty(jsonWebKey.Alg))
-                writer.WriteString(EncodedJsonWebKeyParameterNames.Alg, jsonWebKey.Alg);
+                writer.WriteString(JsonWebKeyParameterUtf8Bytes.Alg, jsonWebKey.Alg);
 
             if (!string.IsNullOrEmpty(jsonWebKey.Crv))
-                writer.WriteString(EncodedJsonWebKeyParameterNames.Crv, jsonWebKey.Crv);
+                writer.WriteString(JsonWebKeyParameterUtf8Bytes.Crv, jsonWebKey.Crv);
 
             if (!string.IsNullOrEmpty(jsonWebKey.D))
-                writer.WriteString(EncodedJsonWebKeyParameterNames.D, jsonWebKey.D);
+                writer.WriteString(JsonWebKeyParameterUtf8Bytes.D, jsonWebKey.D);
 
             if (!string.IsNullOrEmpty(jsonWebKey.DP))
-                writer.WriteString(EncodedJsonWebKeyParameterNames.DP, jsonWebKey.DP);
+                writer.WriteString(JsonWebKeyParameterUtf8Bytes.DP, jsonWebKey.DP);
 
             if (!string.IsNullOrEmpty(jsonWebKey.DQ))
-                writer.WriteString(EncodedJsonWebKeyParameterNames.DQ, jsonWebKey.DQ);
+                writer.WriteString(JsonWebKeyParameterUtf8Bytes.DQ, jsonWebKey.DQ);
 
             if (!string.IsNullOrEmpty(jsonWebKey.E))
-                writer.WriteString(EncodedJsonWebKeyParameterNames.E, jsonWebKey.E);
+                writer.WriteString(JsonWebKeyParameterUtf8Bytes.E, jsonWebKey.E);
 
             if (!string.IsNullOrEmpty(jsonWebKey.K))
-                writer.WriteString(EncodedJsonWebKeyParameterNames.K, jsonWebKey.K);
+                writer.WriteString(JsonWebKeyParameterUtf8Bytes.K, jsonWebKey.K);
 
             if (jsonWebKey.KeyOps.Count > 0)
-                JsonSerializerPrimitives.WriteStrings(ref writer, EncodedJsonWebKeyParameterNames.KeyOps, jsonWebKey.KeyOps);
+                JsonSerializerPrimitives.WriteStrings(ref writer, JsonWebKeyParameterUtf8Bytes.KeyOps, jsonWebKey.KeyOps);
 
             if (!string.IsNullOrEmpty(jsonWebKey.Kid))
-                writer.WriteString(EncodedJsonWebKeyParameterNames.Kid, jsonWebKey.Kid);
+                writer.WriteString(JsonWebKeyParameterUtf8Bytes.Kid, jsonWebKey.Kid);
 
             if (!string.IsNullOrEmpty(jsonWebKey.Kty))
-                writer.WriteString(EncodedJsonWebKeyParameterNames.Kty, jsonWebKey.Kty);
+                writer.WriteString(JsonWebKeyParameterUtf8Bytes.Kty, jsonWebKey.Kty);
 
             if (!string.IsNullOrEmpty(jsonWebKey.N))
-                writer.WriteString(EncodedJsonWebKeyParameterNames.N, jsonWebKey.N);
+                writer.WriteString(JsonWebKeyParameterUtf8Bytes.N, jsonWebKey.N);
 
             if (jsonWebKey.Oth.Count > 0)
-                JsonSerializerPrimitives.WriteStrings(ref writer, EncodedJsonWebKeyParameterNames.Oth, jsonWebKey.Oth);
+                JsonSerializerPrimitives.WriteStrings(ref writer, JsonWebKeyParameterUtf8Bytes.Oth, jsonWebKey.Oth);
 
             if (!string.IsNullOrEmpty(jsonWebKey.P))
-                writer.WriteString(EncodedJsonWebKeyParameterNames.P, jsonWebKey.P);
+                writer.WriteString(JsonWebKeyParameterUtf8Bytes.P, jsonWebKey.P);
 
             if (!string.IsNullOrEmpty(jsonWebKey.Q))
-                writer.WriteString(EncodedJsonWebKeyParameterNames.Q, jsonWebKey.Q);
+                writer.WriteString(JsonWebKeyParameterUtf8Bytes.Q, jsonWebKey.Q);
 
             if (!string.IsNullOrEmpty(jsonWebKey.QI))
-                writer.WriteString(EncodedJsonWebKeyParameterNames.QI, jsonWebKey.QI);
+                writer.WriteString(JsonWebKeyParameterUtf8Bytes.QI, jsonWebKey.QI);
 
             if (!string.IsNullOrEmpty(jsonWebKey.Use))
-                writer.WriteString(EncodedJsonWebKeyParameterNames.Use, jsonWebKey.Use);
+                writer.WriteString(JsonWebKeyParameterUtf8Bytes.Use, jsonWebKey.Use);
 
             if (!string.IsNullOrEmpty(jsonWebKey.X))
-                writer.WriteString(EncodedJsonWebKeyParameterNames.X, jsonWebKey.X);
+                writer.WriteString(JsonWebKeyParameterUtf8Bytes.X, jsonWebKey.X);
 
             if (jsonWebKey.X5c.Count > 0)
-                JsonSerializerPrimitives.WriteStrings(ref writer, EncodedJsonWebKeyParameterNames.X5c, jsonWebKey.X5c);
+                JsonSerializerPrimitives.WriteStrings(ref writer, JsonWebKeyParameterUtf8Bytes.X5c, jsonWebKey.X5c);
 
             if (!string.IsNullOrEmpty(jsonWebKey.X5t))
-                writer.WriteString(EncodedJsonWebKeyParameterNames.X5t, jsonWebKey.X5t);
+                writer.WriteString(JsonWebKeyParameterUtf8Bytes.X5t, jsonWebKey.X5t);
 
             if (!string.IsNullOrEmpty(jsonWebKey.X5tS256))
-                writer.WriteString(EncodedJsonWebKeyParameterNames.X5tS256, jsonWebKey.X5tS256);
+                writer.WriteString(JsonWebKeyParameterUtf8Bytes.X5tS256, jsonWebKey.X5tS256);
 
             if (!string.IsNullOrEmpty(jsonWebKey.X5u))
-                writer.WriteString(EncodedJsonWebKeyParameterNames.X5u, jsonWebKey.X5u);
+                writer.WriteString(JsonWebKeyParameterUtf8Bytes.X5u, jsonWebKey.X5u);
 
             if (!string.IsNullOrEmpty(jsonWebKey.Y))
-                writer.WriteString(EncodedJsonWebKeyParameterNames.Y, jsonWebKey.Y);
+                writer.WriteString(JsonWebKeyParameterUtf8Bytes.Y, jsonWebKey.Y);
 
             JsonSerializerPrimitives.WriteAdditionalData(ref writer, jsonWebKey.AdditionalData);
 

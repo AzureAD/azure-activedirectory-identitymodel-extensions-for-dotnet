@@ -5,6 +5,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using Microsoft.IdentityModel.Logging;
 
@@ -56,6 +59,32 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     LogHelper.MarkAsNonPII(reader.TokenStartIndex),
                     LogHelper.MarkAsNonPII(reader.CurrentDepth),
                     LogHelper.MarkAsNonPII(reader.BytesConsumed)));
+        }
+
+        public static JsonElement CreateJsonElement(string json)
+        {
+            Utf8JsonReader reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(json).AsSpan());
+
+#if NET6_0_OR_GREATER
+            bool ret = JsonElement.TryParseValue(ref reader, out JsonElement? jsonElement);
+            return jsonElement.Value;
+#else
+            using (JsonDocument jsonDocument = JsonDocument.ParseValue(ref reader))
+                return jsonDocument.RootElement.Clone();
+#endif
+        }
+
+        public static void WriteAsJsonElement(ref Utf8JsonWriter writer, string json)
+        {
+            Utf8JsonReader reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(json).AsSpan());
+
+#if NET6_0_OR_GREATER
+            if (JsonElement.TryParseValue(ref reader, out JsonElement? jsonElement))
+                jsonElement.Value.WriteTo(writer);
+#else
+            using (JsonDocument jsonDocument = JsonDocument.ParseValue(ref reader))
+                jsonDocument.RootElement.WriteTo(writer);
+#endif
         }
 
         internal static string GetPropertyName(ref Utf8JsonReader reader, string className, bool advanceReader)
@@ -133,8 +162,11 @@ namespace Microsoft.IdentityModel.Tokens.Json
             }
         }
 
-        internal static bool ReadBoolean(ref Utf8JsonReader reader, string propertyName, string className)
+        internal static bool ReadBoolean(ref Utf8JsonReader reader, string propertyName, string className, bool read = false)
         {
+            if (read)
+                ReaderRead(ref reader);
+
             if (reader.TokenType == JsonTokenType.True || reader.TokenType == JsonTokenType.False)
                 return reader.GetBoolean();
 
@@ -142,8 +174,59 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 CreateJsonReaderException(ref reader, "JsonTokenType.False or JsonTokenType.True", className, propertyName));
         }
 
-        internal static double ReadDouble(ref Utf8JsonReader reader, string propertyName, string className)
+        internal static IList<string> ReadStrings(ref Utf8JsonReader reader, IList<string> strings, string propertyName, string className, bool read = false)
         {
+            if (read)
+                ReaderRead(ref reader);
+
+            // returning null keeps the same logic as JsonSerialization.ReadObject
+            if (reader.TokenType == JsonTokenType.Null)
+                return null;
+
+            if (!IsReaderAtTokenType(ref reader, JsonTokenType.StartArray, false))
+                throw LogHelper.LogExceptionMessage(
+                    CreateJsonReaderExceptionInvalidType(ref reader, "JsonTokenType.StartArray", className, propertyName));
+
+            while (ReaderRead(ref reader))
+            {
+                if (IsReaderAtTokenType(ref reader, JsonTokenType.EndArray, false))
+                    break;
+
+                strings.Add(ReadString(ref reader, propertyName, className));
+            }
+
+            return strings;
+        }
+
+        internal static ICollection<string> ReadStrings(ref Utf8JsonReader reader, ICollection<string> strings, string propertyName, string className, bool read = false)
+        {
+            if (read)
+                ReaderRead(ref reader);
+
+            // returning null keeps the same logic as JsonSerialization.ReadObject
+            if (reader.TokenType == JsonTokenType.Null)
+                return null;
+
+            if (!IsReaderAtTokenType(ref reader, JsonTokenType.StartArray, false))
+                throw LogHelper.LogExceptionMessage(
+                    CreateJsonReaderExceptionInvalidType(ref reader, "JsonTokenType.StartArray", className, propertyName));
+
+            while (ReaderRead(ref reader))
+            {
+                if (IsReaderAtTokenType(ref reader, JsonTokenType.EndArray, false))
+                    break;
+
+                strings.Add(ReadString(ref reader, propertyName, className));
+            }
+
+            return strings;
+        }
+
+        internal static double ReadDouble(ref Utf8JsonReader reader, string propertyName, string className, bool read = false)
+        {
+            if (read)
+                ReaderRead(ref reader);
+
             if (reader.TokenType == JsonTokenType.Number)
             {
                 try
@@ -161,8 +244,11 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 CreateJsonReaderException(ref reader, "JsonTokenType.Number", className, propertyName));
         }
 
-        internal static int ReadInt(ref Utf8JsonReader reader, string propertyName, string className)
+        internal static int ReadInt(ref Utf8JsonReader reader, string propertyName, string className, bool read = false)
         {
+            if (read)
+                ReaderRead(ref reader);
+
             if (reader.TokenType == JsonTokenType.Number)
             {
                 try
@@ -226,8 +312,11 @@ namespace Microsoft.IdentityModel.Tokens.Json
             return objects;
         }
 
-        internal static string ReadString(ref Utf8JsonReader reader, string propertyName, string className)
+        internal static string ReadString(ref Utf8JsonReader reader, string propertyName, string className, bool read = false)
         {
+            if (read)
+                ReaderRead(ref reader);
+
             // returning null keeps the same logic as JsonSerialization.ReadObject
             if (reader.TokenType == JsonTokenType.Null)
                 return null;
@@ -237,27 +326,6 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     CreateJsonReaderException(ref reader, "JsonTokenType.String", className, propertyName));
 
             return reader.GetString();
-        }
-
-        internal static IList<string> ReadStrings(ref Utf8JsonReader reader, IList<string> strings, string propertyName, string className)
-        {
-            // returning null keeps the same logic as JsonSerialization.ReadObject
-            if (reader.TokenType == JsonTokenType.Null)
-                return null;
-
-            if (!IsReaderAtTokenType(ref reader, JsonTokenType.StartArray, false))
-                throw LogHelper.LogExceptionMessage(
-                    CreateJsonReaderExceptionInvalidType(ref reader, "JsonTokenType.StartArray", className, propertyName));
-
-            while (ReaderRead(ref reader))
-            {
-                if (IsReaderAtTokenType(ref reader, JsonTokenType.EndArray, false))
-                    break;
-
-                strings.Add(ReadString(ref reader, propertyName, className));
-            }
-
-            return strings;
         }
 
         /// <summary>
@@ -322,7 +390,46 @@ namespace Microsoft.IdentityModel.Tokens.Json
             }
         }
 
-        internal static void WriteStrings(ref Utf8JsonWriter writer, string propertyName, IList<string> strings)
+        internal static void WriteObject(ref Utf8JsonWriter writer, string key, object obj)
+        {
+            if (obj is string)
+                writer.WriteString(key, obj as string);
+            else if (obj is int)
+                writer.WriteNumber(key, (int)obj);
+            else if (obj is bool)
+                writer.WriteBoolean(key, (bool)obj);
+            else if (obj is decimal)
+                writer.WriteNumber(key, (decimal)obj);
+            else if (obj is double)
+                writer.WriteNumber(key, (double)obj);
+            else if (obj is float)
+                writer.WriteNumber(key, (float)obj);
+            else if (obj is long)
+                writer.WriteNumber(key, (long)obj);
+            else if (obj is null)
+                writer.WriteNull(key);
+            else if (obj is JsonElement)
+            {
+                writer.WritePropertyName(key);
+                ((JsonElement)obj).WriteTo(writer);
+            }
+            else
+            {
+                writer.WriteString(key, obj.ToString());
+            }
+        }
+
+        internal static void WriteStrings(ref Utf8JsonWriter writer, ReadOnlySpan<byte> propertyName, IList<string> strings)
+        {
+            writer.WritePropertyName(propertyName);
+            writer.WriteStartArray();
+            foreach (string str in strings)
+                writer.WriteStringValue(str);
+
+            writer.WriteEndArray();
+        }
+
+        internal static void WriteStrings(ref Utf8JsonWriter writer, ReadOnlySpan<byte> propertyName, ICollection<string> strings)
         {
             writer.WritePropertyName(propertyName);
             writer.WriteStartArray();
