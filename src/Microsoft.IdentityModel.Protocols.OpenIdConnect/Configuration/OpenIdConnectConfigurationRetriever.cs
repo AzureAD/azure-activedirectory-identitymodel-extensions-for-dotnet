@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
@@ -68,7 +67,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             if (LogHelper.IsEnabled(EventLogLevel.Verbose))
                 LogHelper.LogVerbose(LogMessages.IDX21811, doc);
 
-            OpenIdConnectConfiguration openIdConnectConfiguration = JsonConvert.DeserializeObject<OpenIdConnectConfiguration>(doc);
+            OpenIdConnectConfiguration openIdConnectConfiguration = OpenIdConnectConfigurationSerializer.Read(doc);
             if (!string.IsNullOrEmpty(openIdConnectConfiguration.JwksUri))
             {
                 if (LogHelper.IsEnabled(EventLogLevel.Verbose))

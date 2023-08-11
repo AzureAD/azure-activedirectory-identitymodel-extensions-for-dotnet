@@ -120,7 +120,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
         {
             writer.WriteStartObject();
 
-            writer.WritePropertyName(EncodedJsonWebKeyParameterNames.Keys);
+            writer.WritePropertyName(JsonWebKeyParameterUtf8Bytes.Keys);
             writer.WriteStartArray();
 
             foreach (JsonWebKey jsonWebKey in jsonWebKeySet.Keys)

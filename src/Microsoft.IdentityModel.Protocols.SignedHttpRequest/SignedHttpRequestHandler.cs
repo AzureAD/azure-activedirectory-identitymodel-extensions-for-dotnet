@@ -1,43 +1,23 @@
-﻿//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using JsonPrimitives = Microsoft.IdentityModel.Tokens.Json.JsonSerializerPrimitives;
 
 namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 {
@@ -79,30 +59,78 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <returns>A signed http request as a JWS in Compact Serialization Format.</returns>
         public string CreateSignedHttpRequest(SignedHttpRequestDescriptor signedHttpRequestDescriptor, CallContext callContext)
         {
+            if (callContext != null)
+                LogHelper.LogVerbose(callContext.ActivityId.ToString());
+
             if (signedHttpRequestDescriptor == null)
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor));
 
             if (signedHttpRequestDescriptor.SigningCredentials == null)
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor.SigningCredentials));
 
-            var payload = CreateHttpRequestPayload(signedHttpRequestDescriptor, callContext);
-            var header = new JObject();
-            if (signedHttpRequestDescriptor.AdditionalHeaderClaims != null && signedHttpRequestDescriptor.AdditionalHeaderClaims.Count != 0)
+            string encodedPayload;
+            using (MemoryStream memoryStream = new MemoryStream())
             {
-                if (signedHttpRequestDescriptor.AdditionalHeaderClaims.Keys.Intersect(JwtTokenUtilities.DefaultHeaderParameters, StringComparer.OrdinalIgnoreCase).Any())
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(JsonWebTokens.LogMessages.IDX14116, LogHelper.MarkAsNonPII(nameof(signedHttpRequestDescriptor.AdditionalHeaderClaims)), LogHelper.MarkAsNonPII(string.Join(", ", JwtTokenUtilities.DefaultHeaderParameters)))));
 
-                header.Merge(JObject.FromObject(signedHttpRequestDescriptor.AdditionalHeaderClaims));
+                Utf8JsonWriter payloadWriter = null;
+                try
+                {
+                    payloadWriter = new Utf8JsonWriter(memoryStream, new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
+                    payloadWriter.WriteStartObject();
+
+                    CreateHttpRequestPayload(ref payloadWriter, signedHttpRequestDescriptor);
+
+                    payloadWriter.WriteEndObject();
+                    payloadWriter.Flush();
+                    encodedPayload = Base64UrlEncoder.Encode(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
+                }
+                finally
+                {
+                    payloadWriter?.Dispose();
+                }
             }
 
-            // set the "typ" header claim to "pop"
-            // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-6.2
-            header[JwtHeaderParameterNames.Alg] = signedHttpRequestDescriptor.SigningCredentials.Algorithm;
-            header[JwtHeaderParameterNames.Typ] = SignedHttpRequestConstants.TokenType;
+            string encodedHeader;
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                Utf8JsonWriter headerWriter = null;
+                try
+                {
+                    headerWriter = new Utf8JsonWriter(memoryStream, new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
+                    headerWriter.WriteStartObject();
 
-            var message = Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(header.ToString(Formatting.None))) + "." + Base64UrlEncoder.Encode(Encoding.UTF8.GetBytes(payload));
+                    if (signedHttpRequestDescriptor.AdditionalHeaderClaims != null && signedHttpRequestDescriptor.AdditionalHeaderClaims.Count != 0)
+                    {
+                        if (signedHttpRequestDescriptor.AdditionalHeaderClaims.Keys.Intersect(JwtTokenUtilities.DefaultHeaderParameters, StringComparer.OrdinalIgnoreCase).Any())
+                            throw LogHelper.LogExceptionMessage(
+                                new SecurityTokenException(
+                                    LogHelper.FormatInvariant(
+                                        JsonWebTokens.LogMessages.IDX14116,
+                                        LogHelper.MarkAsNonPII(nameof(signedHttpRequestDescriptor.AdditionalHeaderClaims)),
+                                        LogHelper.MarkAsNonPII(string.Join(", ", JwtTokenUtilities.DefaultHeaderParameters)))));
+                    }
 
-            return message + "." + JwtTokenUtilities.CreateEncodedSignature(message, signedHttpRequestDescriptor.SigningCredentials, false);
+                    // set the "typ" header claim to "pop"
+                    // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-6.2
+                    headerWriter.WriteString(JwtHeaderParameterNames.Alg, signedHttpRequestDescriptor.SigningCredentials.Algorithm);
+                    headerWriter.WriteString(JwtHeaderParameterNames.Typ, SignedHttpRequestConstants.TokenType);
+                    if (signedHttpRequestDescriptor.AdditionalHeaderClaims != null)
+                        foreach (string key in signedHttpRequestDescriptor.AdditionalHeaderClaims.Keys)
+                            headerWriter.WriteString(key, signedHttpRequestDescriptor.AdditionalHeaderClaims[key].ToString());
+
+                    headerWriter.WriteEndObject();
+                    headerWriter.Flush();
+                    encodedHeader = Base64UrlEncoder.Encode(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
+
+                }
+                finally
+                {
+                    headerWriter?.Dispose();
+                }
+
+                string  message = encodedHeader + "." + encodedPayload;
+                return message + "." + JwtTokenUtilities.CreateEncodedSignature(message, signedHttpRequestDescriptor.SigningCredentials, false);
+            }
         }
 
         /// <summary>
@@ -114,187 +142,179 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <remarks>
         /// Users can utilize <see cref="SignedHttpRequestDescriptor.AdditionalPayloadClaims"/> to create additional claim(s) and add them to the signed http request.
         /// </remarks>
-        protected virtual string CreateHttpRequestPayload(SignedHttpRequestDescriptor signedHttpRequestDescriptor, CallContext callContext)
+        protected internal virtual string CreateHttpRequestPayload(SignedHttpRequestDescriptor signedHttpRequestDescriptor, CallContext callContext)
         {
             if (signedHttpRequestDescriptor == null)
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor));
 
-            Dictionary<string, object> payload = new Dictionary<string, object>();
-
-            AddAtClaim(payload, signedHttpRequestDescriptor);
-
-            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateTs)
-                AddTsClaim(payload, signedHttpRequestDescriptor);
-
-            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateM)
-                AddMClaim(payload, signedHttpRequestDescriptor);
-
-            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateU)
-                AddUClaim(payload, signedHttpRequestDescriptor);
-
-            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateP)
-                AddPClaim(payload, signedHttpRequestDescriptor);
-
-            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateQ)
-                AddQClaim(payload, signedHttpRequestDescriptor);
-
-            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateH)
-                AddHClaim(payload, signedHttpRequestDescriptor);
-
-            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateB)
-                AddBClaim(payload, signedHttpRequestDescriptor);
-
-            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateNonce)
-                AddNonceClaim(payload, signedHttpRequestDescriptor);
-
-            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateCnf)
-                AddCnfClaim(payload, signedHttpRequestDescriptor);
-
-            if (signedHttpRequestDescriptor.AdditionalPayloadClaims != null && signedHttpRequestDescriptor.AdditionalPayloadClaims.Any())
+            Utf8JsonWriter writer = null;
+            using (MemoryStream memoryStream = new MemoryStream())
             {
-                foreach (var additionalPayloadClaim in signedHttpRequestDescriptor.AdditionalPayloadClaims)
+                try
                 {
-                    if (!payload.ContainsKey(additionalPayloadClaim.Key))
-                        payload.Add(additionalPayloadClaim.Key, additionalPayloadClaim.Value);
+                    writer = new Utf8JsonWriter(memoryStream, new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
+                    writer.WriteStartObject();
+
+                    CreateHttpRequestPayload(ref writer, signedHttpRequestDescriptor);
+
+                    writer.WriteEndObject();
+                    writer.Flush();
+                    return Encoding.UTF8.GetString(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
+                }
+                finally
+                {
+                    writer?.Dispose();
                 }
             }
-
-            return JObject.FromObject(payload).ToString(Formatting.None);
         }
 
-        /// <summary>
-        /// Adds the 'at' claim to the <paramref name="payload"/>.
-        /// </summary>
-        /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
-        /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
-        internal virtual void AddAtClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
+        internal void CreateHttpRequestPayload(ref Utf8JsonWriter writer, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
-            if (payload == null)
-                throw LogHelper.LogArgumentNullException(nameof(payload));
+            AddAtClaim(ref writer, signedHttpRequestDescriptor);
 
-            payload.Add(SignedHttpRequestClaimTypes.At, signedHttpRequestDescriptor.AccessToken);
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateTs)
+                AddTsClaim(ref writer, signedHttpRequestDescriptor);
+
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateM)
+                AddMClaim(ref writer, signedHttpRequestDescriptor);
+
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateU)
+                AddUClaim(ref writer, signedHttpRequestDescriptor);
+
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateP)
+                AddPClaim(ref writer, signedHttpRequestDescriptor);
+
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateQ)
+                AddQClaim(ref writer, signedHttpRequestDescriptor);
+
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateH)
+                AddHClaim(ref writer, signedHttpRequestDescriptor);
+
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateB)
+                AddBClaim(ref writer, signedHttpRequestDescriptor);
+
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateNonce)
+                AddNonceClaim(ref writer, signedHttpRequestDescriptor);
+
+            if (signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.CreateCnf)
+                AddCnfClaim(ref writer, signedHttpRequestDescriptor);
+
+            if (signedHttpRequestDescriptor.AdditionalPayloadClaims != null && signedHttpRequestDescriptor.AdditionalPayloadClaims.Any())
+                JsonPrimitives.WriteAdditionalData(ref writer, signedHttpRequestDescriptor.AdditionalPayloadClaims);
         }
 
         /// <summary>
-        /// Adds the 'ts' claim to the <paramref name="payload"/>.
+        /// Adds the 'at' claim to the <paramref name="writer"/>.
         /// </summary>
-        /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
+        /// <param name="writer"><see cref="Utf8JsonWriter"/></param>
+        /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
+        internal virtual void AddAtClaim(ref Utf8JsonWriter writer, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
+        {
+            // TODO - use JsonEncodedText for property names
+            writer.WriteString(SignedHttpRequestClaimTypes.At, signedHttpRequestDescriptor.AccessToken);
+        }
+
+        /// <summary>
+        /// Adds the 'ts' claim to the <paramref name="writer"/>.
+        /// </summary>
+        /// <param name="writer"><see cref="Utf8JsonWriter"/></param>
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
         /// This method will be executed only if <see cref="SignedHttpRequestCreationParameters.CreateTs"/> is set to <c>true</c>.
         /// </remarks>    
-        internal virtual void AddTsClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
+        internal virtual void AddTsClaim(ref Utf8JsonWriter writer, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
-            if (payload == null)
-                throw LogHelper.LogArgumentNullException(nameof(payload));
-
-            var signedHttpRequestCreationTime = DateTime.UtcNow.Add(signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.TimeAdjustment);
-            payload.Add(SignedHttpRequestClaimTypes.Ts, EpochTime.GetIntDate(signedHttpRequestCreationTime));
+            writer.WriteNumber(
+                SignedHttpRequestClaimTypes.Ts,
+                EpochTime.GetIntDate(
+                    DateTime.UtcNow.Add(signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.TimeAdjustment)));
         }
 
         /// <summary>
-        /// Adds the 'm' claim to the <paramref name="payload"/>.
+        /// Adds the 'm' claim using the Utf8JsonWriter
         /// </summary>
-        /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
+        /// <param name="writer"><see cref="Utf8JsonWriter"/></param>
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
         /// This method will be executed only if <see cref="SignedHttpRequestCreationParameters.CreateM"/> is set to <c>true</c>.
         /// </remarks>   
-        internal virtual void AddMClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
+        internal virtual void AddMClaim(ref Utf8JsonWriter writer, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
-            if (payload == null)
-                throw LogHelper.LogArgumentNullException(nameof(payload));
-
-            var httpMethod = signedHttpRequestDescriptor.HttpRequestData.Method;
-
-            if (string.IsNullOrEmpty(httpMethod))
+            if (string.IsNullOrEmpty(signedHttpRequestDescriptor.HttpRequestData.Method))
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor.HttpRequestData.Method));
 
+            var httpMethod = signedHttpRequestDescriptor.HttpRequestData.Method;
             if (!httpMethod.ToUpperInvariant().Equals(httpMethod))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23002, LogHelper.MarkAsNonPII(httpMethod))));
 
-            payload.Add(SignedHttpRequestClaimTypes.M, httpMethod);
+            writer.WriteString(SignedHttpRequestClaimTypes.M, httpMethod);
         }
 
         /// <summary>
-        /// Adds the 'u' claim to the <paramref name="payload"/>.
+        /// Adds the 'u' claim to the <paramref name="writer"/>.
         /// </summary>
-        /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
+        /// <param name="writer"><see cref="Utf8JsonWriter"/></param>
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
         /// This method will be executed only if <see cref="SignedHttpRequestCreationParameters.CreateU"/> is set to <c>true</c>.
         /// </remarks>  
-        internal virtual void AddUClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
+        internal virtual void AddUClaim(ref Utf8JsonWriter writer, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
-            if (payload == null)
-                throw LogHelper.LogArgumentNullException(nameof(payload));
-
-            var httpRequestUri = signedHttpRequestDescriptor.HttpRequestData.Uri;
-
-            if (httpRequestUri == null)
+            if (signedHttpRequestDescriptor.HttpRequestData.Uri == null)
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor.HttpRequestData.Uri));
 
-            if (!httpRequestUri.IsAbsoluteUri)
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23001, httpRequestUri.OriginalString)));
+            if (!signedHttpRequestDescriptor.HttpRequestData.Uri.IsAbsoluteUri)
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23001, signedHttpRequestDescriptor.HttpRequestData.Uri.OriginalString)));
 
             // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3
             // u claim: The HTTP URL host component as a JSON string. This MAY include the port separated from the host by a colon in host:port format.
             // Including the port if it not the default port for the httpRequestUri scheme.
-            var httpUrlHostComponent = httpRequestUri.Host;
-            if (!httpRequestUri.IsDefaultPort)
-                httpUrlHostComponent = $"{httpUrlHostComponent}:{httpRequestUri.Port}";
+            string httpUrlHostComponent = signedHttpRequestDescriptor.HttpRequestData.Uri.Host;
+            if (!signedHttpRequestDescriptor.HttpRequestData.Uri.IsDefaultPort)
+                httpUrlHostComponent = $"{httpUrlHostComponent}:{signedHttpRequestDescriptor.HttpRequestData.Uri.Port}";
 
-            payload.Add(SignedHttpRequestClaimTypes.U, httpUrlHostComponent);
+            writer.WriteString(SignedHttpRequestClaimTypes.U, httpUrlHostComponent);
         }
 
         /// <summary>
-        /// Adds the 'm' claim to the <paramref name="payload"/>.
+        /// Adds the 'p' claim to the <paramref name="writer"/>.
         /// </summary>
-        /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
+        /// <param name="writer"><see cref="Utf8JsonWriter"/></param>
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
         /// This method will be executed only if <see cref="SignedHttpRequestCreationParameters.CreateP"/> is set to <c>true</c>.
         /// </remarks>  
-        internal virtual void AddPClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
+        internal virtual void AddPClaim(ref Utf8JsonWriter writer, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
-            if (payload == null)
-                throw LogHelper.LogArgumentNullException(nameof(payload));
-
-            var httpRequestUri = signedHttpRequestDescriptor.HttpRequestData.Uri;
-
-            if (httpRequestUri == null)
+            if (signedHttpRequestDescriptor.HttpRequestData.Uri == null)
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor.HttpRequestData.Uri));
 
-            httpRequestUri = EnsureAbsoluteUri(httpRequestUri);
+            Uri httpRequestUri = EnsureAbsoluteUri(signedHttpRequestDescriptor.HttpRequestData.Uri);
 
-            payload.Add(SignedHttpRequestClaimTypes.P, httpRequestUri.AbsolutePath);
+            writer.WriteString(SignedHttpRequestClaimTypes.P, httpRequestUri.AbsolutePath);
         }
 
         /// <summary>
-        /// Adds the 'q' claim to the <paramref name="payload"/>.
+        /// Adds the 'q' claim to the <paramref name="writer"/>.
         /// </summary>
-        /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
+        /// <param name="writer"><see cref="Utf8JsonWriter"/></param>
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
         /// This method will be executed only if <see cref="SignedHttpRequestCreationParameters.CreateQ"/> is set to <c>true</c>.
-        /// </remarks>  
-        internal virtual void AddQClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
+        /// </remarks>
+        internal virtual void AddQClaim(ref Utf8JsonWriter writer, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
-            if (payload == null)
-                throw LogHelper.LogArgumentNullException(nameof(payload));
-
-            var httpRequestUri = signedHttpRequestDescriptor.HttpRequestData.Uri;
-
-            if (httpRequestUri == null)
+            if (signedHttpRequestDescriptor.HttpRequestData.Uri == null)
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor.HttpRequestData.Uri));
 
-            httpRequestUri = EnsureAbsoluteUri(httpRequestUri);
-            var sanitizedQueryParams = SanitizeQueryParams(httpRequestUri);
+            Uri httpRequestUri = EnsureAbsoluteUri(signedHttpRequestDescriptor.HttpRequestData.Uri);
+            IDictionary<string,string> sanitizedQueryParams = SanitizeQueryParams(httpRequestUri);
 
             StringBuilder stringBuffer = new StringBuilder();
-            List<string> queryParamNameList = new List<string>();
             try
             {
+                writer.WriteStartArray(SignedHttpRequestClaimTypes.Q);
+                writer.WriteStartArray();
                 var firstQueryParam = true;
                 foreach (var queryParam in sanitizedQueryParams)
                 {
@@ -302,13 +322,15 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                         stringBuffer.Append("&");
 
                     stringBuffer.Append(queryParam.Key).Append('=').Append(queryParam.Value);
-
-                    queryParamNameList.Add(queryParam.Key);
                     firstQueryParam = false;
+
+                    writer.WriteStringValue(queryParam.Key);
                 }
+                writer.WriteEndArray();
 
                 var base64UrlEncodedHash = CalculateBase64UrlEncodedHash(stringBuffer.ToString());
-                payload.Add(SignedHttpRequestClaimTypes.Q, new List<object>() { queryParamNameList, base64UrlEncodedHash });
+                writer.WriteStringValue(base64UrlEncodedHash);
+                writer.WriteEndArray();
             }
             catch (Exception e)
             {
@@ -317,38 +339,36 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         }
 
         /// <summary>
-        /// Adds the 'h' claim to the <paramref name="payload"/>.
+        /// Adds the 'h' claim to the <paramref name="writer"/>.
         /// </summary>
-        /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
+        /// <param name="writer"><see cref="Utf8JsonWriter"/></param>
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
         /// This method will be executed only if <see cref="SignedHttpRequestCreationParameters.CreateH"/> is set to <c>true</c>.
         /// </remarks>  
-        internal virtual void AddHClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
+        internal void AddHClaim(ref Utf8JsonWriter writer, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
-            if (payload == null)
-                throw LogHelper.LogArgumentNullException(nameof(payload));
-
-            var sanitizedHeaders = SanitizeHeaders(signedHttpRequestDescriptor.HttpRequestData.Headers);
+            IDictionary<string,string> sanitizedHeaders = SanitizeHeaders(signedHttpRequestDescriptor.HttpRequestData.Headers);
             StringBuilder stringBuffer = new StringBuilder();
-            List<string> headerNameList = new List<string>();
             try
             {
+                writer.WriteStartArray(SignedHttpRequestClaimTypes.H);
+                writer.WriteStartArray();
                 var firstHeader = true;
                 foreach (var header in sanitizedHeaders)
                 {
                     var headerName = header.Key.ToLowerInvariant();
-                    headerNameList.Add(headerName);
-
                     if (!firstHeader)
                         stringBuffer.Append(_newlineSeparator);
 
                     stringBuffer.Append(headerName).Append(": ").Append(header.Value);
                     firstHeader = false;
+                    writer.WriteStringValue(headerName);
                 }
 
-                var base64UrlEncodedHash = CalculateBase64UrlEncodedHash(stringBuffer.ToString());
-                payload.Add(SignedHttpRequestClaimTypes.H, new List<object>() { headerNameList, base64UrlEncodedHash });
+                writer.WriteEndArray();
+                writer.WriteStringValue(CalculateBase64UrlEncodedHash(stringBuffer.ToString()));
+                writer.WriteEndArray();
             }
             catch (Exception e)
             {
@@ -357,27 +377,18 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         }
 
         /// <summary>
-        /// Adds the 'b' claim to the <paramref name="payload"/>.
+        /// Adds the 'b' claim to the <paramref name="writer"/>.
         /// </summary>
-        /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
+        /// <param name="writer"><see cref="Utf8JsonWriter"/></param>
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
         /// This method will be executed only if <see cref="SignedHttpRequestCreationParameters.CreateB"/> is set to <c>true</c>.
         /// </remarks> 
-        internal virtual void AddBClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
+        internal virtual void AddBClaim(ref Utf8JsonWriter writer, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
-            if (payload == null)
-                throw LogHelper.LogArgumentNullException(nameof(payload));
-
-            var httpRequestBody = signedHttpRequestDescriptor.HttpRequestData.Body;
-
-            if (httpRequestBody == null)
-                httpRequestBody = Array.Empty<byte>();
-
             try
             {
-                var base64UrlEncodedHash = CalculateBase64UrlEncodedHash(httpRequestBody);
-                payload.Add(SignedHttpRequestClaimTypes.B, base64UrlEncodedHash);
+                writer.WriteString(SignedHttpRequestClaimTypes.B, CalculateBase64UrlEncodedHash(signedHttpRequestDescriptor.HttpRequestData.Body ?? Array.Empty<byte>()));
             }
             catch (Exception e)
             {
@@ -386,69 +397,76 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         }
 
         /// <summary>
-        /// Adds the 'nonce' claim to the <paramref name="payload"/>.
+        /// Adds the 'nonce' claim to the <paramref name="writer"/>.
         /// </summary>
-        /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
+        /// <param name="writer"><see cref="Utf8JsonWriter"/></param>
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
         /// This method will be executed only if <see cref="SignedHttpRequestCreationParameters.CreateNonce"/> is set to <c>true</c>.
         /// Users can utilize <see cref="SignedHttpRequestDescriptor.CustomNonceValue"/> to provide a custom nonce value.
         /// </remarks>
-        internal virtual void AddNonceClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
+        internal virtual void AddNonceClaim(ref Utf8JsonWriter writer, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
-            if (payload == null)
-                throw LogHelper.LogArgumentNullException(nameof(payload));
-
             if (!string.IsNullOrEmpty(signedHttpRequestDescriptor.CustomNonceValue))
-                payload.Add(SignedHttpRequestClaimTypes.Nonce, signedHttpRequestDescriptor.CustomNonceValue);
+                writer.WriteString(SignedHttpRequestClaimTypes.Nonce, signedHttpRequestDescriptor.CustomNonceValue);
             else
-                payload.Add(SignedHttpRequestClaimTypes.Nonce, Guid.NewGuid().ToString("N"));
+                writer.WriteString(SignedHttpRequestClaimTypes.Nonce, Guid.NewGuid().ToString("N"));
         }
 
         /// <summary>
-        /// Adds the 'cnf' claim to the <paramref name="payload"/>.
+        /// Adds the 'cnf' claim to the <paramref name="writer"/>.
         /// </summary>
-        /// <param name="payload">HttpRequest payload represented as a <see cref="Dictionary{TKey, TValue}"/>.</param>
+        /// <param name="writer"><see cref="Utf8JsonWriter"/></param>
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
         /// If <see cref="SignedHttpRequestDescriptor.CnfClaimValue"/> is not null or empty, its value will be used as a "cnf" claim value.
         /// Otherwise, a "cnf" claim value will be derived from the <see cref="SigningCredentials"/>.<see cref="SecurityKey"/> member of <paramref name="signedHttpRequestDescriptor"/>.
         /// </remarks>
-        internal virtual void AddCnfClaim(Dictionary<string, object> payload, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
+        internal virtual void AddCnfClaim(ref Utf8JsonWriter writer, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
-            if (payload == null)
-                throw LogHelper.LogArgumentNullException(nameof(payload));
             try
             {
+                string cnfClaim = null;
                 if (!string.IsNullOrEmpty(signedHttpRequestDescriptor.CnfClaimValue))
                 {
-                    payload.Add(ConfirmationClaimTypes.Cnf, JObject.Parse(signedHttpRequestDescriptor.CnfClaimValue));
+                    cnfClaim = signedHttpRequestDescriptor.CnfClaimValue;
                 }
                 else
                 {
-                    var signedHttpRequestSigningKey = signedHttpRequestDescriptor.SigningCredentials.Key;
                     JsonWebKey jsonWebKey;
-                    if (signedHttpRequestSigningKey is JsonWebKey jwk)
+                    if (signedHttpRequestDescriptor.SigningCredentials.Key is JsonWebKey jwk)
                         jsonWebKey = jwk;
                     // create a JsonWebKey from an X509SecurityKey, represented as an RsaSecurityKey. 
-                    else if (signedHttpRequestSigningKey is X509SecurityKey x509SecurityKey)
+                    else if (signedHttpRequestDescriptor.SigningCredentials.Key is X509SecurityKey x509SecurityKey)
                         jsonWebKey = JsonWebKeyConverter.ConvertFromX509SecurityKey(x509SecurityKey, true);
-                    else if (signedHttpRequestSigningKey is AsymmetricSecurityKey asymmetricSecurityKey)
+                    else if (signedHttpRequestDescriptor.SigningCredentials.Key is AsymmetricSecurityKey asymmetricSecurityKey)
                         jsonWebKey = JsonWebKeyConverter.ConvertFromSecurityKey(asymmetricSecurityKey);
                     else
-                        throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23032, LogHelper.MarkAsNonPII(signedHttpRequestSigningKey != null ? signedHttpRequestSigningKey.GetType().ToString() : "null"))));
+                        throw LogHelper.LogExceptionMessage(
+                            new SignedHttpRequestCreationException(
+                                LogHelper.FormatInvariant(
+                                    LogMessages.IDX23032,
+                                    LogHelper.MarkAsNonPII(signedHttpRequestDescriptor.SigningCredentials.Key != null ? signedHttpRequestDescriptor.SigningCredentials.Key.GetType().ToString() : "null"))));
 
                     // set the jwk thumbprint as the Kid
                     jsonWebKey.Kid = Base64UrlEncoder.Encode(jsonWebKey.ComputeJwkThumbprint());
-                    payload.Add(ConfirmationClaimTypes.Cnf, JObject.Parse(SignedHttpRequestUtilities.CreateJwkClaim(jsonWebKey)));
+                    cnfClaim = SignedHttpRequestUtilities.CreateJwkClaim(jsonWebKey);
                 }
+
+                // need to write out cnfClaim as raw value, otherwise it will be treated as a string and not parsed correctly
+                writer.WritePropertyName(ConfirmationClaimTypes.Cnf);
+#if NET6_0_OR_GREATER
+                writer.WriteRawValue(cnfClaim);
+#else
+                JsonPrimitives.WriteAsJsonElement(ref writer, cnfClaim);
+#endif
             }
             catch (Exception e)
             {
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, LogHelper.MarkAsNonPII(ConfirmationClaimTypes.Cnf), e), e));
             }
         }
-        #endregion
+#endregion
 
         #region SignedHttpRequest validation
         /// <summary>
@@ -544,7 +562,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// The library doesn't provide any caching logic for replay validation purposes.
         /// <see cref="SignedHttpRequestValidationParameters.ReplayValidatorAsync"/> delegate can be utilized for replay validation
         /// </remarks>
-        protected virtual async Task<SecurityToken> ValidateSignedHttpRequestPayloadAsync(SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
+        protected internal virtual async Task<SecurityToken> ValidateSignedHttpRequestPayloadAsync(SecurityToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
             if (signedHttpRequest == null)
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequest));
@@ -1105,6 +1123,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             {
                 return popKeys[0];
             }
+
             // If there are multiple keys in the referenced JWK Set document, a "kid" member MUST also be included
             // with the referenced key's JWK also containing the same "kid" value.
             // https://datatracker.ietf.org/doc/html/rfc7800#section-3.5
@@ -1307,7 +1326,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-4.1
         /// https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-7.5
         /// </remarks>
-        private static Dictionary<string, string> SanitizeHeaders(IDictionary<string, IEnumerable<string>> headers)
+        private static IDictionary<string, string> SanitizeHeaders(IDictionary<string, IEnumerable<string>> headers)
         {
             // Remove repeated headers according to the spec: https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-7.5
             // "If a header or query parameter is repeated on either the outgoing request from the client or the
