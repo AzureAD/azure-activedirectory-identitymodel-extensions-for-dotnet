@@ -45,7 +45,7 @@
     <PackageReference Include="System.Memory" Version="$(SystemMemoryVersion)" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != 'NETCoreApp'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'">
     <PackageReference Include="System.Text.Encodings.Web" Version="$(SystemTextEncodingsWeb)" />
     <PackageReference Include="System.Text.Json" Version="$(SystemTextJson)" />
   </ItemGroup>
