@@ -102,7 +102,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     writer = new Utf8JsonWriter(memoryStream, new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
                     Write(ref writer, jsonWebKeySet);
                     writer.Flush();
-                    return Encoding.UTF8.GetString(memoryStream.ToArray());
+                    return Encoding.UTF8.GetString(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
                 }
                 finally
                 {
