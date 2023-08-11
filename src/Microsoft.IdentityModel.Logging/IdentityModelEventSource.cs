@@ -291,7 +291,7 @@ namespace Microsoft.IdentityModel.Logging
             if (!HeaderWritten)
             {
                 // Obtain the current library version dynamically.
-                WriteAlways(string.Format(CultureInfo.InvariantCulture, _versionLogMessage, typeof(IdentityModelEventSource).GetTypeInfo().Assembly!.GetName().Version!.ToString()));
+                WriteAlways(string.Format(CultureInfo.InvariantCulture, _versionLogMessage, typeof(IdentityModelEventSource).GetTypeInfo().Assembly.GetName().Version?.ToString()));
                 WriteAlways(string.Format(CultureInfo.InvariantCulture, _dateLogMessage, DateTime.UtcNow));
                 if (ShowPII) 
                     WriteAlways(_piiOnLogMessage);
