@@ -66,17 +66,17 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             return await ResolvePopKeyAsync(signedHttpRequest, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
         }
 
-        internal JObject GetCnfClaimValuePublic(JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
+        internal Cnf GetCnfClaimValuePublic(JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
         {
             return GetCnfClaimValue(signedHttpRequest, validatedAccessToken, signedHttpRequestValidationContext);
         }
 
-        internal async Task<SecurityKey> ResolvePopKeyFromCnfClaimPublicAsync(JObject confirmationClaim, JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
+        internal async Task<SecurityKey> ResolvePopKeyFromCnfClaimPublicAsync(Cnf confirmationClaim, JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
             return await ResolvePopKeyFromCnfClaimAsync(confirmationClaim, signedHttpRequest, validatedAccessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
         }
 
-        public SecurityKey ResolvePopKeyFromJwkPublic(string jwk, JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
+        public SecurityKey ResolvePopKeyFromJwkPublic(JsonWebKey jwk, JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
         {
             return ResolvePopKeyFromJwk(jwk, signedHttpRequestValidationContext);
         }
@@ -86,7 +86,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             return await ResolvePopKeyFromJweAsync(jwe, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
         }
       
-        internal async Task<SecurityKey> ResolvePopKeyFromJkuPublicAsync(string jkuSetUrl, JObject cnf, JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
+        internal async Task<SecurityKey> ResolvePopKeyFromJkuPublicAsync(string jkuSetUrl, Cnf cnf, JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
             return await ResolvePopKeyFromJkuAsync(jkuSetUrl, cnf, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
         }
@@ -202,31 +202,31 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        internal override JObject GetCnfClaimValue(JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
+        internal override Cnf GetCnfClaimValue(JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
         {
             if (signedHttpRequestValidationContext?.CallContext.PropertyBag != null && signedHttpRequestValidationContext.CallContext.PropertyBag.ContainsKey("mockGetCnfClaimValue_returnJwk"))
             {
-                return SignedHttpRequestTestUtils.DefaultCnfJwk;
+                return new Cnf(SignedHttpRequestTestUtils.DefaultCnfJwk.ToString(Newtonsoft.Json.Formatting.None));
             }
             else if (signedHttpRequestValidationContext?.CallContext.PropertyBag != null && signedHttpRequestValidationContext.CallContext.PropertyBag.ContainsKey("mockGetCnfClaimValue_returnJwe"))
             {
-                return SignedHttpRequestTestUtils.DefaultCnfJwe;
+                return new Cnf(SignedHttpRequestTestUtils.DefaultCnfJwe.ToString(Newtonsoft.Json.Formatting.None));
             }
             else if (signedHttpRequestValidationContext?.CallContext.PropertyBag != null && signedHttpRequestValidationContext.CallContext.PropertyBag.ContainsKey("mockGetCnfClaimValue_returnJku"))
             {
-                return SignedHttpRequestTestUtils.DefaultJku;
+                return new Cnf(SignedHttpRequestTestUtils.DefaultJku.ToString(Newtonsoft.Json.Formatting.None));
             }
             else if (signedHttpRequestValidationContext?.CallContext.PropertyBag != null && signedHttpRequestValidationContext.CallContext.PropertyBag.ContainsKey("mockGetCnfClaimValue_returnJkuKid"))
             {
-                return SignedHttpRequestTestUtils.DefaultJkuKid;
+                return new Cnf(SignedHttpRequestTestUtils.DefaultJkuKid.ToString(Newtonsoft.Json.Formatting.None));
             }
             else if (signedHttpRequestValidationContext?.CallContext.PropertyBag != null && signedHttpRequestValidationContext.CallContext.PropertyBag.ContainsKey("mockGetCnfClaimValue_returnKid"))
             {
-                return SignedHttpRequestTestUtils.DefaultKid;
+                return new Cnf(SignedHttpRequestTestUtils.DefaultKid.ToString(Newtonsoft.Json.Formatting.None));
             }
             else if (signedHttpRequestValidationContext?.CallContext.PropertyBag != null && signedHttpRequestValidationContext.CallContext.PropertyBag.ContainsKey("mockGetCnfClaimValue_returnCustom"))
             {
-                return JObject.Parse("{\"custom\": 1}");
+                return new Cnf("{\"custom\": 1}");
             }
             else
             {
@@ -234,7 +234,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        internal override async Task<SecurityKey> ResolvePopKeyFromCnfClaimAsync(JObject confirmationClaim, JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
+        internal override async Task<SecurityKey> ResolvePopKeyFromCnfClaimAsync(Cnf confirmationClaim, JsonWebToken signedHttpRequest, JsonWebToken validatedAccessToken, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
             if (signedHttpRequestValidationContext?.CallContext.PropertyBag != null && signedHttpRequestValidationContext.CallContext.PropertyBag.ContainsKey("mockResolvePopKeyFromCnfClaimAsync_returnRsa"))
             {
@@ -246,7 +246,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        internal override SecurityKey ResolvePopKeyFromJwk(string jwk, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
+        internal override SecurityKey ResolvePopKeyFromJwk(JsonWebKey jwk, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
         {
             if (signedHttpRequestValidationContext.CallContext.PropertyBag != null && signedHttpRequestValidationContext.CallContext.PropertyBag.ContainsKey("trackResolvePopKeyFromJwk"))
             {
@@ -268,7 +268,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             return await base.ResolvePopKeyFromJweAsync(jwe, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
         }
 
-        internal override async Task<SecurityKey> ResolvePopKeyFromJkuAsync(string jkuSetUrl, JObject cnf, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
+        internal override async Task<SecurityKey> ResolvePopKeyFromJkuAsync(string jkuSetUrl, Cnf cnf, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
             if (signedHttpRequestValidationContext.CallContext.PropertyBag != null && signedHttpRequestValidationContext.CallContext.PropertyBag.ContainsKey("trackResolvePopKeyFromJku"))
             {

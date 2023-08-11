@@ -6,8 +6,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
-using Newtonsoft.Json.Linq;
 using Microsoft.IdentityModel.Logging;
+
+using JsonPrimitives = Microsoft.IdentityModel.Tokens.Json.JsonSerializerPrimitives;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -63,8 +64,11 @@ namespace Microsoft.IdentityModel.Tokens
                     IList<object> claimValues = existingValue as IList<object>;
                     if (claimValues == null)
                     {
-                        claimValues = new List<object>();
-                        claimValues.Add(existingValue);
+                        claimValues = new List<object>
+                        {
+                            existingValue
+                        };
+
                         payload[jsonClaimType] = claimValues;
                     }
 
@@ -73,6 +77,69 @@ namespace Microsoft.IdentityModel.Tokens
                 else
                 {
                     payload[jsonClaimType] = jsonClaimValue;
+                }
+            }
+
+            return payload;
+        }
+
+        internal static IDictionary<string, object> CreateDictionaryFromClaims(
+            IEnumerable<Claim> claims,
+            SecurityTokenDescriptor tokenDescriptor,
+            bool audienceSet,
+            bool issuerSet)
+        {
+            var payload = new Dictionary<string, object>();
+
+            if (claims == null)
+                return payload;
+
+            bool checkClaims = tokenDescriptor.Claims != null && tokenDescriptor.Claims.Count > 0;
+
+            foreach (Claim claim in claims)
+            {
+                if (claim == null)
+                    continue;
+
+                // skipping these as they will be added once by the caller
+                // why add them if we are going to replace them later
+                if (checkClaims && tokenDescriptor.Claims.ContainsKey(claim.Type))
+                    continue;
+
+                if (audienceSet && claim.Type.Equals("aud", StringComparison.Ordinal))
+                    continue;
+
+                if (issuerSet && claim.Type.Equals("iss", StringComparison.Ordinal))
+                    continue;
+
+                if (tokenDescriptor.Expires.HasValue && claim.Type.Equals("exp", StringComparison.Ordinal))
+                    continue;
+
+                if (tokenDescriptor.IssuedAt.HasValue && claim.Type.Equals("iat", StringComparison.Ordinal))
+                    continue;
+
+                if (tokenDescriptor.NotBefore.HasValue && claim.Type.Equals("nbf", StringComparison.Ordinal))
+                    continue;
+
+                object jsonClaimValue = claim.ValueType.Equals(ClaimValueTypes.String) ? claim.Value : GetClaimValueUsingValueType(claim);
+
+                // The enumeration is from ClaimsIdentity.Claims, there can be duplicates.
+                // When a duplicate is detected, we create a List and add both to a list.
+                // When the creating the JWT and a list is found, a JsonArray will be created.
+                if (payload.TryGetValue(claim.Type, out object existingValue))
+                {
+                    if (existingValue is not IList<object>)
+                    {
+                        payload[claim.Type] = new List<object>
+                        {
+                            existingValue,
+                            jsonClaimValue
+                        }; 
+                    }
+                }
+                else
+                {
+                    payload[claim.Type] = jsonClaimValue;
                 }
             }
 
@@ -97,13 +164,13 @@ namespace Microsoft.IdentityModel.Tokens
                 return longValue;
 
             if (claim.ValueType == ClaimValueTypes.DateTime && DateTime.TryParse(claim.Value, out DateTime dateTimeValue))
-                return dateTimeValue;
+                return dateTimeValue.ToUniversalTime();
 
             if (claim.ValueType == Json)
-                return JObject.Parse(claim.Value);
+                return JsonPrimitives.CreateJsonElement(claim.Value);
 
             if (claim.ValueType == JsonArray)
-                return JArray.Parse(claim.Value);
+                return JsonPrimitives.CreateJsonElement(claim.Value);
 
             if (claim.ValueType == JsonNull)
                 return string.Empty;
@@ -133,6 +200,7 @@ namespace Microsoft.IdentityModel.Tokens
                         yield return key;
             }
 
+            // TODO - do not use yield
             if (validationParameters is not null)
             {
                 LogHelper.LogInformation(TokenLogMessages.IDX10243);

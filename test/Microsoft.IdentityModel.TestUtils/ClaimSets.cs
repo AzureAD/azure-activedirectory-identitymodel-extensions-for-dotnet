@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
+using System.Text.Json;
 using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames;
 
 namespace Microsoft.IdentityModel.TestUtils
@@ -404,7 +405,7 @@ namespace Microsoft.IdentityModel.TestUtils
             return new List<Claim> {
                 new Claim(
                     typeof(Entity).ToString(),
-                    JsonExtensions.SerializeToJson(Entity.Default),
+                    JsonSerializer.Serialize(Entity.Default),
                     JsonClaimValueTypes.Json,
                     issuer ?? Default.Issuer,
                     originalIssuer) };

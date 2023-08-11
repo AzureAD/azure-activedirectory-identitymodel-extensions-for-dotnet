@@ -19,6 +19,10 @@
     <ProjectReference Include="..\System.IdentityModel.Tokens.Jwt\System.IdentityModel.Tokens.Jwt.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftVersion)" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>

@@ -7,6 +7,7 @@ namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
     /// JsonWebKey parameter names
+    /// see: https://datatracker.ietf.org/doc/html/rfc7517
     /// </summary>
     public static class JsonWebKeyParameterNames
     {
@@ -37,7 +38,11 @@ namespace Microsoft.IdentityModel.Tokens
 #pragma warning restore 1591
     }
 
-    internal static class JsonWebKeyParameterUtf8Bytes
+    /// <summary>
+    /// JsonWebKey parameter names as UTF8 bytes
+    /// Used by UTF8JsonReader/Writer for performance gains.
+    /// </summary>
+    internal readonly struct JsonWebKeyParameterUtf8Bytes
     {
         public static ReadOnlySpan<byte> Alg => "alg"u8;
         public static ReadOnlySpan<byte> Crv => "crv"u8;
