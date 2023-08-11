@@ -14,7 +14,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
 {
     internal static class JsonWebKeySerializer
     {
-        public static HashSet<string> JsonWebKeyParameterNamesUpperCase = new HashSet<string>
+        public static HashSet<string> JsonWebKeyParameterNamesSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "ALG",
             "CRV",
@@ -215,7 +215,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                         // fallback to checking property names as case insensitive
                         // first check to see if the upper case property value is a valid property name if not add to AdditionalData, to avoid unnecessary string compares.
                         string propertyName = JsonSerializerPrimitives.GetPropertyName(ref reader, JsonWebKey.ClassName, true);
-                        if (!JsonWebKeyParameterNamesUpperCase.Contains(propertyName.ToUpperInvariant()))
+                        if (!JsonWebKeyParameterNamesSet.Contains(propertyName))
                         {
                             jsonWebKey.AdditionalData[propertyName] = JsonSerializerPrimitives.GetUnknownProperty(ref reader);
                         }
