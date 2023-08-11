@@ -419,7 +419,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
             }
         }
 
-        internal static void WriteStrings(ref Utf8JsonWriter writer, string propertyName, IList<string> strings)
+        internal static void WriteStrings(ref Utf8JsonWriter writer, ReadOnlySpan<byte> propertyName, IList<string> strings)
         {
             writer.WritePropertyName(propertyName);
             writer.WriteStartArray();
@@ -429,7 +429,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
             writer.WriteEndArray();
         }
 
-        internal static void WriteStrings(ref Utf8JsonWriter writer, Span<byte> propertyName, ICollection<string> strings)
+        internal static void WriteStrings(ref Utf8JsonWriter writer, ReadOnlySpan<byte> propertyName, ICollection<string> strings)
         {
             writer.WritePropertyName(propertyName);
             writer.WriteStartArray();

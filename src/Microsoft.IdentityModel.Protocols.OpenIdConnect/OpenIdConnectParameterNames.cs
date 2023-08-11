@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System.Text;
+using System;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
@@ -53,56 +53,55 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public const string UserId = "user_id";
         public const string Username = "username";
         public const string VersionTelemetry = "x-client-ver";
+#pragma warning restore 1591
     }
 
     /// <summary>
     /// Parameter names for OpenIdConnect UTF8 bytes.
     /// </summary>
-    public static class OpenIdConnectParameterUtf8Bytes
+    internal static class OpenIdConnectParameterUtf8Bytes
     {
-        public static readonly byte[] AccessToken = Encoding.UTF8.GetBytes("access_token");
-        public static readonly byte[] AcrValues = Encoding.UTF8.GetBytes("acr_values");
-        public static readonly byte[] ClaimsLocales = Encoding.UTF8.GetBytes("claims_locales");
-        public static readonly byte[] ClientAssertion = Encoding.UTF8.GetBytes("client_assertion");
-        public static readonly byte[] ClientAssertionType = Encoding.UTF8.GetBytes("client_assertion_type");
-        public static readonly byte[] ClientId = Encoding.UTF8.GetBytes("client_id");
-        public static readonly byte[] ClientSecret = Encoding.UTF8.GetBytes("client_secret");
-        public static readonly byte[] Code = Encoding.UTF8.GetBytes("code");
-        public static readonly byte[] Display = Encoding.UTF8.GetBytes("display");
-        public static readonly byte[] DomainHint = Encoding.UTF8.GetBytes("domain_hint");
-        public static readonly byte[] Error = Encoding.UTF8.GetBytes("error");
-        public static readonly byte[] ErrorDescription = Encoding.UTF8.GetBytes("error_description");
-        public static readonly byte[] ErrorUri = Encoding.UTF8.GetBytes("error_uri");
-        public static readonly byte[] ExpiresIn = Encoding.UTF8.GetBytes("expires_in");
-        public static readonly byte[] GrantType = Encoding.UTF8.GetBytes("grant_type");
-        public static readonly byte[] Iss = Encoding.UTF8.GetBytes("iss");
-        public static readonly byte[] IdToken = Encoding.UTF8.GetBytes("id_token");
-        public static readonly byte[] IdTokenHint = Encoding.UTF8.GetBytes("id_token_hint");
-        public static readonly byte[] IdentityProvider = Encoding.UTF8.GetBytes("identity_provider");
-        public static readonly byte[] LoginHint = Encoding.UTF8.GetBytes("login_hint");
-        public static readonly byte[] MaxAge = Encoding.UTF8.GetBytes("max_age");
-        public static readonly byte[] Nonce = Encoding.UTF8.GetBytes("nonce");
-        public static readonly byte[] Password = Encoding.UTF8.GetBytes("password");
-        public static readonly byte[] PostLogoutRedirectUri = Encoding.UTF8.GetBytes("post_logout_redirect_uri");
-        public static readonly byte[] Prompt = Encoding.UTF8.GetBytes("prompt");
-        public static readonly byte[] RedirectUri = Encoding.UTF8.GetBytes("redirect_uri");
-        public static readonly byte[] RefreshToken = Encoding.UTF8.GetBytes("refresh_token");
-        public static readonly byte[] RequestUri = Encoding.UTF8.GetBytes("request_uri");
-        public static readonly byte[] Resource = Encoding.UTF8.GetBytes("resource");
-        public static readonly byte[] ResponseMode = Encoding.UTF8.GetBytes("response_mode");
-        public static readonly byte[] ResponseType = Encoding.UTF8.GetBytes("response_type");
-        public static readonly byte[] Scope = Encoding.UTF8.GetBytes("scope");
-        public static readonly byte[] SkuTelemetry = Encoding.UTF8.GetBytes("x-client-SKU");
-        public static readonly byte[] SessionState = Encoding.UTF8.GetBytes("session_state");
-        public static readonly byte[] Sid = Encoding.UTF8.GetBytes("sid");
-        public static readonly byte[] State = Encoding.UTF8.GetBytes("state");
-        public static readonly byte[] TargetLinkUri = Encoding.UTF8.GetBytes("target_link_uri");
-        public static readonly byte[] TokenType = Encoding.UTF8.GetBytes("token_type");
-        public static readonly byte[] UiLocales = Encoding.UTF8.GetBytes("ui_locales");
-        public static readonly byte[] UserId = Encoding.UTF8.GetBytes("user_id");
-        public static readonly byte[] Username = Encoding.UTF8.GetBytes("username");
-        public static readonly byte[] VersionTelemetry = Encoding.UTF8.GetBytes("x-client-ver");
+        public static ReadOnlySpan<byte> AccessToken => "access_token"u8;
+        public static ReadOnlySpan<byte> AcrValues => "acr_values"u8;
+        public static ReadOnlySpan<byte> ClaimsLocales => "claims_locales"u8;
+        public static ReadOnlySpan<byte> ClientAssertion => "client_assertion"u8;
+        public static ReadOnlySpan<byte> ClientAssertionType => "client_assertion_type"u8;
+        public static ReadOnlySpan<byte> ClientId => "client_id"u8;
+        public static ReadOnlySpan<byte> ClientSecret => "client_secret"u8;
+        public static ReadOnlySpan<byte> Code => "code"u8;
+        public static ReadOnlySpan<byte> Display => "display"u8;
+        public static ReadOnlySpan<byte> DomainHint => "domain_hint"u8;
+        public static ReadOnlySpan<byte> Error => "error"u8;
+        public static ReadOnlySpan<byte> ErrorDescription => "error_description"u8;
+        public static ReadOnlySpan<byte> ErrorUri => "error_uri"u8;
+        public static ReadOnlySpan<byte> ExpiresIn => "expires_in"u8;
+        public static ReadOnlySpan<byte> GrantType => "grant_type"u8;
+        public static ReadOnlySpan<byte> Iss => "iss"u8;
+        public static ReadOnlySpan<byte> IdToken => "id_token"u8;
+        public static ReadOnlySpan<byte> IdTokenHint => "id_token_hint"u8;
+        public static ReadOnlySpan<byte> IdentityProvider => "identity_provider"u8;
+        public static ReadOnlySpan<byte> LoginHint => "login_hint"u8;
+        public static ReadOnlySpan<byte> MaxAge => "max_age"u8;
+        public static ReadOnlySpan<byte> Nonce => "nonce"u8;
+        public static ReadOnlySpan<byte> Password => "password"u8;
+        public static ReadOnlySpan<byte> PostLogoutRedirectUri => "post_logout_redirect_uri"u8;
+        public static ReadOnlySpan<byte> Prompt => "prompt"u8;
+        public static ReadOnlySpan<byte> RedirectUri => "redirect_uri"u8;
+        public static ReadOnlySpan<byte> RefreshToken => "refresh_token"u8;
+        public static ReadOnlySpan<byte> RequestUri => "request_uri"u8;
+        public static ReadOnlySpan<byte> Resource => "resource"u8;
+        public static ReadOnlySpan<byte> ResponseMode => "response_mode"u8;
+        public static ReadOnlySpan<byte> ResponseType => "response_type"u8;
+        public static ReadOnlySpan<byte> Scope => "scope"u8;
+        public static ReadOnlySpan<byte> SkuTelemetry => "x-client-SKU"u8;
+        public static ReadOnlySpan<byte> SessionState => "session_state"u8;
+        public static ReadOnlySpan<byte> Sid => "sid"u8;
+        public static ReadOnlySpan<byte> State => "state"u8;
+        public static ReadOnlySpan<byte> TargetLinkUri => "target_link_uri"u8;
+        public static ReadOnlySpan<byte> TokenType => "token_type"u8;
+        public static ReadOnlySpan<byte> UiLocales => "ui_locales"u8;
+        public static ReadOnlySpan<byte> UserId => "user_id"u8;
+        public static ReadOnlySpan<byte> Username => "username"u8;
+        public static ReadOnlySpan<byte> VersionTelemetry => "x-client-ver"u8;
     }
-#pragma warning restore 1591
-
 }

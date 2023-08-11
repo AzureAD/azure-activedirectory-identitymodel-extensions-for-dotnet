@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System.Text;
+using System;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
@@ -58,8 +58,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public const string UserInfoEncryptionAlgValuesSupported = "userinfo_encryption_alg_values_supported";
         public const string UserInfoEncryptionEncValuesSupported = "userinfo_encryption_enc_values_supported";
         public const string UserInfoSigningAlgValuesSupported = "userinfo_signing_alg_values_supported";
-    }
 #pragma warning restore 1591
+    }
 
     /// <summary>
     /// OpenIdProviderConfiguration MetadataName - UTF8Bytes
@@ -67,51 +67,51 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     /// </summary>
     internal static class OpenIdProviderMetadataUtf8Bytes
     {
-        public static readonly byte[] AcrValuesSupported = Encoding.UTF8.GetBytes("acr_values_supported");
-        public static readonly byte[] AuthorizationEndpoint = Encoding.UTF8.GetBytes("authorization_endpoint");
-        public static readonly byte[] CheckSessionIframe = Encoding.UTF8.GetBytes("check_session_iframe");
-        public static readonly byte[] ClaimsLocalesSupported = Encoding.UTF8.GetBytes("claims_locales_supported");
-        public static readonly byte[] ClaimsParameterSupported = Encoding.UTF8.GetBytes("claims_parameter_supported");
-        public static readonly byte[] ClaimsSupported = Encoding.UTF8.GetBytes("claims_supported");
-        public static readonly byte[] ClaimTypesSupported = Encoding.UTF8.GetBytes("claim_types_supported");
-        public static readonly byte[] Discovery = Encoding.UTF8.GetBytes(".well-known/openid-configuration");
-        public static readonly byte[] DisplayValuesSupported = Encoding.UTF8.GetBytes("display_values_supported");
-        public static readonly byte[] EndSessionEndpoint = Encoding.UTF8.GetBytes("end_session_endpoint");
-        public static readonly byte[] FrontchannelLogoutSessionSupported = Encoding.UTF8.GetBytes("frontchannel_logout_session_supported");
-        public static readonly byte[] FrontchannelLogoutSupported = Encoding.UTF8.GetBytes("frontchannel_logout_supported");
-        public static readonly byte[] HttpLogoutSupported = Encoding.UTF8.GetBytes("http_logout_supported");
-        public static readonly byte[] GrantTypesSupported = Encoding.UTF8.GetBytes("grant_types_supported");
-        public static readonly byte[] IdTokenEncryptionAlgValuesSupported = Encoding.UTF8.GetBytes("id_token_encryption_alg_values_supported");
-        public static readonly byte[] IdTokenEncryptionEncValuesSupported = Encoding.UTF8.GetBytes("id_token_encryption_enc_values_supported");
-        public static readonly byte[] IdTokenSigningAlgValuesSupported = Encoding.UTF8.GetBytes("id_token_signing_alg_values_supported");
-        public static readonly byte[] IntrospectionEndpoint = Encoding.UTF8.GetBytes("introspection_endpoint");
-        public static readonly byte[] IntrospectionEndpointAuthMethodsSupported = Encoding.UTF8.GetBytes("introspection_endpoint_auth_methods_supported");
-        public static readonly byte[] IntrospectionEndpointAuthSigningAlgValuesSupported = Encoding.UTF8.GetBytes("introspection_endpoint_auth_signing_alg_values_supported");
-        public static readonly byte[] JwksUri = Encoding.UTF8.GetBytes("jwks_uri");
-        public static readonly byte[] Issuer = Encoding.UTF8.GetBytes("issuer");
-        public static readonly byte[] LogoutSessionSupported = Encoding.UTF8.GetBytes("logout_session_supported");
-        public static readonly byte[] MicrosoftMultiRefreshToken = Encoding.UTF8.GetBytes("microsoft_multi_refresh_token");
-        public static readonly byte[] OpPolicyUri = Encoding.UTF8.GetBytes("op_policy_uri");
-        public static readonly byte[] OpTosUri = Encoding.UTF8.GetBytes("op_tos_uri");
-        public static readonly byte[] RegistrationEndpoint = Encoding.UTF8.GetBytes("registration_endpoint");
-        public static readonly byte[] RequestObjectEncryptionAlgValuesSupported = Encoding.UTF8.GetBytes("request_object_encryption_alg_values_supported");
-        public static readonly byte[] RequestObjectEncryptionEncValuesSupported = Encoding.UTF8.GetBytes("request_object_encryption_enc_values_supported");
-        public static readonly byte[] RequestObjectSigningAlgValuesSupported = Encoding.UTF8.GetBytes("request_object_signing_alg_values_supported");
-        public static readonly byte[] RequestParameterSupported = Encoding.UTF8.GetBytes("request_parameter_supported");
-        public static readonly byte[] RequestUriParameterSupported = Encoding.UTF8.GetBytes("request_uri_parameter_supported");
-        public static readonly byte[] RequireRequestUriRegistration = Encoding.UTF8.GetBytes("require_request_uri_registration");
-        public static readonly byte[] ResponseModesSupported = Encoding.UTF8.GetBytes("response_modes_supported");
-        public static readonly byte[] ResponseTypesSupported = Encoding.UTF8.GetBytes("response_types_supported");
-        public static readonly byte[] ServiceDocumentation = Encoding.UTF8.GetBytes("service_documentation");
-        public static readonly byte[] ScopesSupported = Encoding.UTF8.GetBytes("scopes_supported");
-        public static readonly byte[] SubjectTypesSupported = Encoding.UTF8.GetBytes("subject_types_supported");
-        public static readonly byte[] TokenEndpoint = Encoding.UTF8.GetBytes("token_endpoint");
-        public static readonly byte[] TokenEndpointAuthMethodsSupported = Encoding.UTF8.GetBytes("token_endpoint_auth_methods_supported");
-        public static readonly byte[] TokenEndpointAuthSigningAlgValuesSupported = Encoding.UTF8.GetBytes("token_endpoint_auth_signing_alg_values_supported");
-        public static readonly byte[] UILocalesSupported = Encoding.UTF8.GetBytes("ui_locales_supported");
-        public static readonly byte[] UserInfoEndpoint = Encoding.UTF8.GetBytes("userinfo_endpoint");
-        public static readonly byte[] UserInfoEncryptionAlgValuesSupported = Encoding.UTF8.GetBytes("userinfo_encryption_alg_values_supported");
-        public static readonly byte[] UserInfoEncryptionEncValuesSupported = Encoding.UTF8.GetBytes("userinfo_encryption_enc_values_supported");
-        public static readonly byte[] UserInfoSigningAlgValuesSupported = Encoding.UTF8.GetBytes("userinfo_signing_alg_values_supported");
+        public static ReadOnlySpan<byte> AcrValuesSupported => "acr_values_supported"u8;
+        public static ReadOnlySpan<byte> AuthorizationEndpoint => "authorization_endpoint"u8;
+        public static ReadOnlySpan<byte> CheckSessionIframe => "check_session_iframe"u8;
+        public static ReadOnlySpan<byte> ClaimsLocalesSupported => "claims_locales_supported"u8;
+        public static ReadOnlySpan<byte> ClaimsParameterSupported => "claims_parameter_supported"u8;
+        public static ReadOnlySpan<byte> ClaimsSupported => "claims_supported"u8;
+        public static ReadOnlySpan<byte> ClaimTypesSupported => "claim_types_supported"u8;
+        public static ReadOnlySpan<byte> Discovery => ".well-known/openid-configuration"u8;
+        public static ReadOnlySpan<byte> DisplayValuesSupported => "display_values_supported"u8;
+        public static ReadOnlySpan<byte> EndSessionEndpoint => "end_session_endpoint"u8;
+        public static ReadOnlySpan<byte> FrontchannelLogoutSessionSupported => "frontchannel_logout_session_supported"u8;
+        public static ReadOnlySpan<byte> FrontchannelLogoutSupported => "frontchannel_logout_supported"u8;
+        public static ReadOnlySpan<byte> HttpLogoutSupported => "http_logout_supported"u8;
+        public static ReadOnlySpan<byte> GrantTypesSupported => "grant_types_supported"u8;
+        public static ReadOnlySpan<byte> IdTokenEncryptionAlgValuesSupported => "id_token_encryption_alg_values_supported"u8;
+        public static ReadOnlySpan<byte> IdTokenEncryptionEncValuesSupported => "id_token_encryption_enc_values_supported"u8;
+        public static ReadOnlySpan<byte> IdTokenSigningAlgValuesSupported => "id_token_signing_alg_values_supported"u8;
+        public static ReadOnlySpan<byte> IntrospectionEndpoint => "introspection_endpoint"u8;
+        public static ReadOnlySpan<byte> IntrospectionEndpointAuthMethodsSupported => "introspection_endpoint_auth_methods_supported"u8;
+        public static ReadOnlySpan<byte> IntrospectionEndpointAuthSigningAlgValuesSupported => "introspection_endpoint_auth_signing_alg_values_supported"u8;
+        public static ReadOnlySpan<byte> JwksUri => "jwks_uri"u8;
+        public static ReadOnlySpan<byte> Issuer => "issuer"u8;
+        public static ReadOnlySpan<byte> LogoutSessionSupported => "logout_session_supported"u8;
+        public static ReadOnlySpan<byte> MicrosoftMultiRefreshToken => "microsoft_multi_refresh_token"u8;
+        public static ReadOnlySpan<byte> OpPolicyUri => "op_policy_uri"u8;
+        public static ReadOnlySpan<byte> OpTosUri => "op_tos_uri"u8;
+        public static ReadOnlySpan<byte> RegistrationEndpoint => "registration_endpoint"u8;
+        public static ReadOnlySpan<byte> RequestObjectEncryptionAlgValuesSupported => "request_object_encryption_alg_values_supported"u8;
+        public static ReadOnlySpan<byte> RequestObjectEncryptionEncValuesSupported => "request_object_encryption_enc_values_supported"u8;
+        public static ReadOnlySpan<byte> RequestObjectSigningAlgValuesSupported => "request_object_signing_alg_values_supported"u8;
+        public static ReadOnlySpan<byte> RequestParameterSupported => "request_parameter_supported"u8;
+        public static ReadOnlySpan<byte> RequestUriParameterSupported => "request_uri_parameter_supported"u8;
+        public static ReadOnlySpan<byte> RequireRequestUriRegistration => "require_request_uri_registration"u8;
+        public static ReadOnlySpan<byte> ResponseModesSupported => "response_modes_supported"u8;
+        public static ReadOnlySpan<byte> ResponseTypesSupported => "response_types_supported"u8;
+        public static ReadOnlySpan<byte> ServiceDocumentation => "service_documentation"u8;
+        public static ReadOnlySpan<byte> ScopesSupported => "scopes_supported"u8;
+        public static ReadOnlySpan<byte> SubjectTypesSupported => "subject_types_supported"u8;
+        public static ReadOnlySpan<byte> TokenEndpoint => "token_endpoint"u8;
+        public static ReadOnlySpan<byte> TokenEndpointAuthMethodsSupported => "token_endpoint_auth_methods_supported"u8;
+        public static ReadOnlySpan<byte> TokenEndpointAuthSigningAlgValuesSupported => "token_endpoint_auth_signing_alg_values_supported"u8;
+        public static ReadOnlySpan<byte> UILocalesSupported => "ui_locales_supported"u8;
+        public static ReadOnlySpan<byte> UserInfoEndpoint => "userinfo_endpoint"u8;
+        public static ReadOnlySpan<byte> UserInfoEncryptionAlgValuesSupported => "userinfo_encryption_alg_values_supported"u8;
+        public static ReadOnlySpan<byte> UserInfoEncryptionEncValuesSupported => "userinfo_encryption_enc_values_supported"u8;
+        public static ReadOnlySpan<byte> UserInfoSigningAlgValuesSupported => "userinfo_signing_alg_values_supported"u8;
     }
 }

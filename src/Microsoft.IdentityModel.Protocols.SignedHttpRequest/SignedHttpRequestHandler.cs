@@ -1,28 +1,5 @@
-﻿//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
@@ -92,20 +69,20 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor.SigningCredentials));
 
             string encodedPayload;
-            using (MemoryStream payloadUtf8Bytes = new MemoryStream())
+            using (MemoryStream memoryStream = new MemoryStream())
             {
 
                 Utf8JsonWriter payloadWriter = null;
                 try
                 {
-                    payloadWriter = new Utf8JsonWriter(payloadUtf8Bytes, new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
+                    payloadWriter = new Utf8JsonWriter(memoryStream, new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
                     payloadWriter.WriteStartObject();
 
                     CreateHttpRequestPayload(ref payloadWriter, signedHttpRequestDescriptor);
 
                     payloadWriter.WriteEndObject();
                     payloadWriter.Flush();
-                    encodedPayload = Base64UrlEncoder.Encode(payloadUtf8Bytes.ToArray());
+                    encodedPayload = Base64UrlEncoder.Encode(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
                 }
                 finally
                 {
@@ -114,12 +91,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             }
 
             string encodedHeader;
-            using (MemoryStream headerUtf8Bytes = new MemoryStream())
+            using (MemoryStream memoryStream = new MemoryStream())
             {
                 Utf8JsonWriter headerWriter = null;
                 try
                 {
-                    headerWriter = new Utf8JsonWriter(headerUtf8Bytes, new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
+                    headerWriter = new Utf8JsonWriter(memoryStream, new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
                     headerWriter.WriteStartObject();
 
                     if (signedHttpRequestDescriptor.AdditionalHeaderClaims != null && signedHttpRequestDescriptor.AdditionalHeaderClaims.Count != 0)
@@ -143,7 +120,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
                     headerWriter.WriteEndObject();
                     headerWriter.Flush();
-                    encodedHeader = Base64UrlEncoder.Encode(headerUtf8Bytes.ToArray());
+                    encodedHeader = Base64UrlEncoder.Encode(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
 
                 }
                 finally
@@ -182,7 +159,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
                     writer.WriteEndObject();
                     writer.Flush();
-                    return Encoding.UTF8.GetString(memoryStream.ToArray());
+                    return Encoding.UTF8.GetString(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
                 }
                 finally
                 {
@@ -300,7 +277,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         }
 
         /// <summary>
-        /// Adds the 'm' claim to the <paramref name="writer"/>.
+        /// Adds the 'p' claim to the <paramref name="writer"/>.
         /// </summary>
         /// <param name="writer"><see cref="Utf8JsonWriter"/></param>
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>

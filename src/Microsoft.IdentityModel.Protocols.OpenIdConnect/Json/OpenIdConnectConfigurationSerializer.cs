@@ -51,8 +51,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             "JWKS_URI",
             "ISSUER",
             "LOGOUT_SESSION_SUPPORTED",
-            // TODO - should this be a first class property?
-            //"MICROSOFT_MULTI_REFRESH_TOKEN",
             "OP_POLICY_URI",
             "OP_TOS_URI",
             "REGISTRATION_ENDPOINT",
@@ -408,9 +406,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                             else if (propertyName.Equals(MetadataName. SubjectTypesSupported, StringComparison.OrdinalIgnoreCase))
                                 JsonPrimitives.ReadStrings(ref reader, config.SubjectTypesSupported, MetadataName.SubjectTypesSupported, ClassName, true);
 
-                            else if (propertyName.Equals(MetadataName. SubjectTypesSupported, StringComparison.OrdinalIgnoreCase))
-                                JsonPrimitives.ReadStrings(ref reader, config.SubjectTypesSupported, MetadataName.SubjectTypesSupported, ClassName, true);
-
                             else if (propertyName.Equals(MetadataName. TokenEndpoint, StringComparison.OrdinalIgnoreCase))
                                 config.TokenEndpoint = JsonPrimitives.ReadString(ref reader, MetadataName.TokenEndpoint, ClassName, true);
 
@@ -459,7 +454,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                     writer = new Utf8JsonWriter(memoryStream, new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
                     Write(ref writer, OpenIdConnectConfiguration);
                     writer.Flush();
-                    return Encoding.UTF8.GetString(memoryStream.ToArray());
+                    return Encoding.UTF8.GetString(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
                 }
                 finally
                 {
