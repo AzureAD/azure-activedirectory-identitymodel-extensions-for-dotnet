@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                         LogHelper.MarkAsNonPII(reader.CurrentDepth),
                         LogHelper.MarkAsNonPII(reader.BytesConsumed))));
 
-            while(JsonSerializerPrimitives.ReaderRead(ref reader))
+            while(reader.Read())
             {
                 #region Check property name using ValueTextEquals
                 // common names are tried first
@@ -90,65 +90,30 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
                     if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.K))
-                    {
-                        JsonSerializerPrimitives.ReaderRead(ref reader);
-                        jsonWebKey.K = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.K, JsonWebKey.ClassName);
-                    }
+                        jsonWebKey.K = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.K, JsonWebKey.ClassName, true);
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.E))
-                    {
-                        JsonSerializerPrimitives.ReaderRead(ref reader);
-                        jsonWebKey.E = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.E, JsonWebKey.ClassName);
-                    }
+                        jsonWebKey.E = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.E, JsonWebKey.ClassName, true);
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.Kid))
-                    {
-                        JsonSerializerPrimitives.ReaderRead(ref reader);
-                        jsonWebKey.Kid = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.Kid, JsonWebKey.ClassName);
-                    }
+                        jsonWebKey.Kid = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.Kid, JsonWebKey.ClassName, true);
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.Kty))
-                    {
-                        JsonSerializerPrimitives.ReaderRead(ref reader);
-                        jsonWebKey.Kty = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.Kty, JsonWebKey.ClassName);
-                    }
+                        jsonWebKey.Kty = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.Kty, JsonWebKey.ClassName, true);
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.N))
-                    {
-                        JsonSerializerPrimitives.ReaderRead(ref reader);
-                        jsonWebKey.N = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.N, JsonWebKey.ClassName);
-                    }
+                        jsonWebKey.N = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.N, JsonWebKey.ClassName, true);
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.X5c))
-                    {
-                        JsonSerializerPrimitives.ReaderRead(ref reader);
-                        JsonSerializerPrimitives.ReadStrings(ref reader, jsonWebKey.X5c, JsonWebKeyParameterNames.X5c, JsonWebKey.ClassName);
-                    }
+                        JsonSerializerPrimitives.ReadStrings(ref reader, jsonWebKey.X5c, JsonWebKeyParameterNames.X5c, JsonWebKey.ClassName, true);
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.Alg))
-                    {
-                        JsonSerializerPrimitives.ReaderRead(ref reader);
-                        jsonWebKey.Alg = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.Alg, JsonWebKey.ClassName);
-                    }
+                        jsonWebKey.Alg = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.Alg, JsonWebKey.ClassName, true);
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.Crv))
-                    {
-                        JsonSerializerPrimitives.ReaderRead(ref reader);
-                        jsonWebKey.Crv = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.Crv, JsonWebKey.ClassName);
-                    }
+                        jsonWebKey.Crv = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.Crv, JsonWebKey.ClassName, true);
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.D))
-                    {
-                        JsonSerializerPrimitives.ReaderRead(ref reader);
-                        jsonWebKey.D = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.D, JsonWebKey.ClassName);
-                    }
+                        jsonWebKey.D = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.D, JsonWebKey.ClassName, true);
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.DP))
-                    {
-                        JsonSerializerPrimitives.ReaderRead(ref reader);
-                        jsonWebKey.DP = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.DP, JsonWebKey.ClassName);
-                    }
+                        jsonWebKey.DP = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.DP, JsonWebKey.ClassName, true);
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.DQ))
-                    {
-                        JsonSerializerPrimitives.ReaderRead(ref reader);
-                        jsonWebKey.DQ = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.DQ, JsonWebKey.ClassName);
-                    }
+                        jsonWebKey.DQ = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.DQ, JsonWebKey.ClassName, true);
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.KeyOps))
-                    {
-                        JsonSerializerPrimitives.ReaderRead(ref reader);
                         // the value can be null if the value is 'nill'
-                        if (JsonSerializerPrimitives.ReadStrings(ref reader, jsonWebKey.KeyOps, JsonWebKeyParameterNames.KeyOps, JsonWebKey.ClassName) == null)
+                        if (JsonSerializerPrimitives.ReadStrings(ref reader, jsonWebKey.KeyOps, JsonWebKeyParameterNames.KeyOps, JsonWebKey.ClassName, true) == null)
                         {
                             throw LogHelper.LogExceptionMessage(
                                 new ArgumentNullException(
@@ -164,67 +129,36 @@ namespace Microsoft.IdentityModel.Tokens.Json
                                         LogHelper.MarkAsNonPII(reader.CurrentDepth),
                                         LogHelper.MarkAsNonPII(reader.BytesConsumed)))));
                         }
-                    }
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.Oth))
-                    {
-                        JsonSerializerPrimitives.ReaderRead(ref reader);
-                        JsonSerializerPrimitives.ReadStrings(ref reader, jsonWebKey.Oth, JsonWebKeyParameterNames.Oth, JsonWebKey.ClassName);
-                    }
+                        JsonSerializerPrimitives.ReadStrings(ref reader, jsonWebKey.Oth, JsonWebKeyParameterNames.Oth, JsonWebKey.ClassName, true);
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.P))
-                    {
-                        JsonSerializerPrimitives.ReaderRead(ref reader);
-                        jsonWebKey.P = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.P, JsonWebKey.ClassName);
-                    }
+                        jsonWebKey.P = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.P, JsonWebKey.ClassName, true);
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.Q))
-                    {
-                        JsonSerializerPrimitives.ReaderRead(ref reader);
-                        jsonWebKey.Q = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.Q, JsonWebKey.ClassName);
-                    }
+                        jsonWebKey.Q = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.Q, JsonWebKey.ClassName, true);
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.QI))
-                    {
-                        JsonSerializerPrimitives.ReaderRead(ref reader);
-                        jsonWebKey.QI = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.QI, JsonWebKey.ClassName);
-                    }
+                        jsonWebKey.QI = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.QI, JsonWebKey.ClassName, true);
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.Use))
-                    {
-                        JsonSerializerPrimitives.ReaderRead(ref reader);
-                        jsonWebKey.Use = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.Use, JsonWebKey.ClassName);
-                    }
+                        jsonWebKey.Use = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.Use, JsonWebKey.ClassName, true);
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.X))
-                    {
-                        JsonSerializerPrimitives.ReaderRead(ref reader);
-                        jsonWebKey.X = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.X, JsonWebKey.ClassName);
-                    }
+                        jsonWebKey.X = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.X, JsonWebKey.ClassName, true);
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.X5t))
-                    {
-                        JsonSerializerPrimitives.ReaderRead(ref reader);
-                        jsonWebKey.X5t = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.X5t, JsonWebKey.ClassName);
-                    }
+                        jsonWebKey.X5t = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.X5t, JsonWebKey.ClassName, true);
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.X5tS256))
-                    {
-                        JsonSerializerPrimitives.ReaderRead(ref reader);
-                        jsonWebKey.X5tS256 = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.X5tS256, JsonWebKey.ClassName);
-                    }
+                        jsonWebKey.X5tS256 = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.X5tS256, JsonWebKey.ClassName, true);
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.X5u))
-                    {
-                        JsonSerializerPrimitives.ReaderRead(ref reader);
-                        jsonWebKey.X5u = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.X5u, JsonWebKey.ClassName);
-                    }
+                        jsonWebKey.X5u = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.X5u, JsonWebKey.ClassName, true);
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.Y))
-                    {
-                        JsonSerializerPrimitives.ReaderRead(ref reader);
-                        jsonWebKey.Y = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.Y, JsonWebKey.ClassName);
-                    }
+                        jsonWebKey.Y = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.Y, JsonWebKey.ClassName, true);
                     #endregion
                     else
                     {
                         #region case-insensitive
                         // fallback to checking property names as case insensitive
                         // first check to see if the upper case property value is a valid property name if not add to AdditionalData, to avoid unnecessary string compares.
-                        string propertyName = JsonSerializerPrimitives.GetPropertyName(ref reader, JsonWebKey.ClassName, true);
+                        string propertyName = JsonSerializerPrimitives.ReadPropertyName(ref reader, JsonWebKey.ClassName, true);
                         if (!JsonWebKeyParameterNamesUpperCase.Contains(propertyName.ToUpperInvariant()))
                         {
-                            jsonWebKey.AdditionalData[propertyName] = JsonSerializerPrimitives.GetUnknownProperty(ref reader);
+                            jsonWebKey.AdditionalData[propertyName] = JsonSerializerPrimitives.ReadPropertyValueAsObject(ref reader, propertyName, JsonWebKey.ClassName);
                         }
                         else
                         {
@@ -355,7 +289,8 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     writer = new Utf8JsonWriter(memoryStream, new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
                     Write(ref writer, jsonWebKey);
                     writer.Flush();
-                    return Encoding.UTF8.GetString(memoryStream.ToArray());
+
+                    return Encoding.UTF8.GetString(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
                 }
                 finally
                 {
@@ -437,7 +372,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
             if (!string.IsNullOrEmpty(jsonWebKey.Y))
                 writer.WriteString(JsonWebKeyParameterUtf8Bytes.Y, jsonWebKey.Y);
 
-            JsonSerializerPrimitives.WriteAdditionalData(ref writer, jsonWebKey.AdditionalData);
+            JsonSerializerPrimitives.WriteObjects(ref writer, jsonWebKey.AdditionalData);
 
             writer.WriteEndObject();
         }

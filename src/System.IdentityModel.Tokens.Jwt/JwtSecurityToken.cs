@@ -197,7 +197,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (Payload != null)
                     return Payload.Actort;
-                return String.Empty;
+                return string.Empty;
             }
         }
 
@@ -207,7 +207,8 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks>If the 'audience' claim is not found, enumeration will be empty.</remarks>
         public IEnumerable<string> Audiences
         {
-            get {
+            get
+            {
                 if (Payload != null)
                     return Payload.Aud;
                 return new List<string>();
@@ -222,7 +223,8 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <remarks><para><see cref="Claim"/>(s) returned will NOT have the <see cref="Claim.Type"/> translated according to <see cref="JwtSecurityTokenHandler.InboundClaimTypeMap"/></para></remarks>
         public IEnumerable<Claim> Claims
         {
-            get {
+            get
+            {
                 if (Payload != null)
                     return Payload.Claims;
                 return new List<Claim>();
@@ -246,7 +248,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (Payload != null)
                     return Payload.Base64UrlEncode();
-                return String.Empty;
+                return string.Empty;
             }
         }
 
@@ -265,7 +267,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (Payload != null)
                     return Payload.Jti;
-                return String.Empty;
+                return string.Empty;
 
             }
         }
@@ -280,7 +282,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (Payload != null)
                     return Payload.Iss;
-                return String.Empty;
+                return string.Empty;
             }
         }
 
@@ -413,7 +415,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (Payload != null)
                     return Payload.Sub;
-                return String.Empty;
+                return string.Empty;
             }
         }
 

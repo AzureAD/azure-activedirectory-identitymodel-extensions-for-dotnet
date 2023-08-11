@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                         LogHelper.MarkAsNonPII(reader.CurrentDepth),
                         LogHelper.MarkAsNonPII(reader.BytesConsumed))));
 
-            while(JsonPrimitives.ReaderRead(ref reader))
+            while(reader.Read())
             {
                 #region Check property name using ValueTextEquals
                 // the config spec, https://datatracker.ietf.org/doc/html/rfc7517#section-4, does not require that we reject JSON with
@@ -271,13 +271,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                     else
                     {
                         #region case-insensitive
-                        string propertyName = JsonPrimitives.GetPropertyName(ref reader, OpenIdConnectConfiguration.ClassName, true);
+                        string propertyName = JsonPrimitives.ReadPropertyName(ref reader, OpenIdConnectConfiguration.ClassName, true);
 
                         // fallback to checking property names as case insensitive
                         // first check to see if the upper case property value is a valid property name if not add to AdditionalData, to avoid unnecessary string compares.
                         if (!OpenIdProviderMetadataNamesUpperCase.Contains(propertyName.ToUpperInvariant()))
                         {
-                            config.AdditionalData[propertyName] = JsonPrimitives.GetUnknownProperty(ref reader);
+                            config.AdditionalData[propertyName] = JsonPrimitives.ReadPropertyValueAsObject(ref reader, propertyName, OpenIdConnectConfiguration.ClassName);
                         }
                         else
                         {
@@ -600,7 +600,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.UserInfoSigningAlgValuesSupported, config.UserInfoEndpointSigningAlgValuesSupported);
 
             if (config.AdditionalData.Count > 0)
-                JsonPrimitives.WriteAdditionalData(ref writer, config.AdditionalData);
+                JsonPrimitives.WriteObjects(ref writer, config.AdditionalData);
 
             writer.WriteEndObject();
         }
