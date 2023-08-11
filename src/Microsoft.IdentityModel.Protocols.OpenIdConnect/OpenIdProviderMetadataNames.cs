@@ -6,7 +6,7 @@ using System;
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
     /// <summary>
-    /// OpenIdProviderConfiguration MetadataName
+    /// OpenId Provider Metadata parameter names
     /// http://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata 
     /// </summary>
     public static class OpenIdProviderMetadataNames
@@ -62,7 +62,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     }
 
     /// <summary>
-    /// OpenIdProviderConfiguration MetadataName - UTF8Bytes
+    /// OpenId Provider Metadata parameter names as UTF8Bytes
+    /// Used by UTF8JsonReader/Writer for performance gains.
     /// http://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata
     /// </summary>
     internal static class OpenIdProviderMetadataUtf8Bytes

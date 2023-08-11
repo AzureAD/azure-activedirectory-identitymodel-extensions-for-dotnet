@@ -423,7 +423,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                     new OidcProtocolValidatorTheoryData
                     {
-                        ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21343:", typeof(JsonReaderException)),
+                        ExpectedException = new ExpectedException(typeof(OpenIdConnectProtocolException), "IDX21343:", typeof(System.Text.Json.JsonException)),
                         ProtocolValidator = new PublicOpenIdConnectProtocolValidator(),
                         TestId = "UserInfoEndpointResponse is not valid JSON",
                         ValidationContext = new OpenIdConnectProtocolValidationContext

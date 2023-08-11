@@ -42,22 +42,22 @@ namespace Microsoft.IdentityModel.Tokens.Json
                         LogHelper.MarkAsNonPII(reader.CurrentDepth),
                         LogHelper.MarkAsNonPII(reader.BytesConsumed))));
 
-            while (JsonSerializerPrimitives.ReaderRead(ref reader))
+            while (reader.Read())
             {
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
                     if (reader.ValueTextEquals(_keysUtf8))
                     {
-                        JsonSerializerPrimitives.ReaderRead(ref reader);
+                        reader.Read();
                         ReadKeys(ref reader, jsonWebKeySet);
                     }
                     else
                     {
-                        string propertyName = JsonSerializerPrimitives.GetPropertyName(ref reader, JsonWebKey.ClassName, true);
+                        string propertyName = JsonSerializerPrimitives.ReadPropertyName(ref reader, JsonWebKeySet.ClassName, true);
                         if (propertyName.Equals(JsonWebKeyParameterNames.Keys, StringComparison.OrdinalIgnoreCase))
                             ReadKeys(ref reader, jsonWebKeySet);
                         else
-                            jsonWebKeySet.AdditionalData[propertyName] = JsonSerializerPrimitives.GetUnknownProperty(ref reader);
+                            jsonWebKeySet.AdditionalData[propertyName] = JsonSerializerPrimitives.ReadPropertyValueAsObject(ref reader,JsonWebKeyParameterNames.Keys, JsonWebKeySet.ClassName);
                     }
                 }
                 else if (JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, true))
@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                         JsonWebKeyParameterNames.KeyOps,
                         JsonWebKeySet.ClassName));
 
-            while (JsonSerializerPrimitives.ReaderRead(ref reader))
+            while (reader.Read())
             {
                 if (reader.TokenType == JsonTokenType.StartObject)
                     jsonWebKeySet.Keys.Add(JsonWebKeySerializer.Read(ref reader, new JsonWebKey()));
@@ -98,11 +98,11 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 Utf8JsonWriter writer = null;
                 try
                 {
-                    // writing strings without escaping is as we know this is a utf8 encoding
                     writer = new Utf8JsonWriter(memoryStream, new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
                     Write(ref writer, jsonWebKeySet);
                     writer.Flush();
-                    return Encoding.UTF8.GetString(memoryStream.ToArray());
+
+                    return Encoding.UTF8.GetString(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
                 }
                 finally
                 {
@@ -129,7 +129,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
             writer.WriteEndArray();
 
             if (jsonWebKeySet.AdditionalData.Count > 0)
-                JsonSerializerPrimitives.WriteAdditionalData(ref writer, jsonWebKeySet.AdditionalData);
+                JsonSerializerPrimitives.WriteObjects(ref writer, jsonWebKeySet.AdditionalData);
 
             writer.WriteEndObject();
         }

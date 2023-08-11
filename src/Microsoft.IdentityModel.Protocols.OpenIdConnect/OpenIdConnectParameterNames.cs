@@ -6,7 +6,7 @@ using System;
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
     /// <summary>
-    /// Parameter names for OpenIdConnect.
+    /// Parameter names for OpenIdConnect Request/Response messages.
     /// </summary>
     public static class OpenIdConnectParameterNames
     {
@@ -57,7 +57,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     }
 
     /// <summary>
-    /// Parameter names for OpenIdConnect UTF8 bytes.
+    /// Parameter names for OpenIdConnect Request/Response messages as UTF8 bytes.
+    /// Used by UTF8JsonReader/Writer for performance gains.
     /// </summary>
     internal static class OpenIdConnectParameterUtf8Bytes
     {

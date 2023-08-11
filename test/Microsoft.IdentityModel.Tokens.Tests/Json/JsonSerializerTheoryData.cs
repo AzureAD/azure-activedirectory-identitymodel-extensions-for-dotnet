@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Json.Tests;
@@ -27,6 +26,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public ExpectedException JsonSerializerExpectedException { get; set; } = ExpectedException.NoExceptionExpected;
 
         public JsonTestClass JsonTestClass { get; set; }
+
+        public string PropertyName { get;  set; }
+
+        public object Object { get; set; }
 
         public IDictionary<Type, IJsonSerializer> Serializers { get; set; } = new Dictionary<Type, IJsonSerializer>();
     }

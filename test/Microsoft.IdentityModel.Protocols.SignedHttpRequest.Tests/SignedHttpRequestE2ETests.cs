@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 using System.Security.Cryptography;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
@@ -304,10 +305,10 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         TokenValidationParameters = SignedHttpRequestTestUtils.DefaultTokenValidationParameters,
                         HttpRequestData = httpRequestData,
                         AccessToken = SignedHttpRequestTestUtils.CreateAt(x509KeyCnfKeyId, false),
-                        CnfClaimValue = new JObject
-                        {
-                            { ConfirmationClaimTypes.Jwk, $@"{{""{JsonWebKeyParameterNames.Kid}"":""{KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256.KeyId}"",""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}"",""{JsonWebKeyParameterNames.X5c}"":[""{Convert.ToBase64String(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256.Certificate.RawData)}""]}}" },
-                        }.ToString(Formatting.None),
+                        CnfClaimValue = $@"{{""{ConfirmationClaimTypes.Jwk}"":" +
+                                        $@"{{""{JsonWebKeyParameterNames.Kid}"":""{KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256.KeyId}""," +
+                                        $@"""{JsonWebKeyParameterNames.Kty}"":""{JsonWebAlgorithmsKeyTypes.RSA}""," +
+                                        $@"""{JsonWebKeyParameterNames.X5c}"":[""{Convert.ToBase64String(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256.Certificate.RawData)}""]}}}}",
                         SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256){CryptoProviderFactory = CreateCryptoProviderFactory() },
                         TestId = "ValidX5cThumbprint",
                     },

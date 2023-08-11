@@ -112,11 +112,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             Utf8JsonReader reader = new(Encoding.UTF8.GetBytes(json).AsSpan());
 
-            while (JsonPrimitives.ReaderRead(ref reader))
+            while (reader.Read())
             {
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
-                    string propertyName = JsonPrimitives.GetPropertyName(ref reader, ClassName, true);
+                    string propertyName = JsonPrimitives.ReadPropertyName(ref reader, ClassName, true);
                     string propertyValue = null;
                     if (reader.TokenType == JsonTokenType.String)
                         propertyValue = JsonPrimitives.ReadString(ref reader, propertyName, ClassName);

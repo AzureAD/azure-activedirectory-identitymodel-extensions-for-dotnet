@@ -11,6 +11,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
 {
     public class JsonUtilities
     {
+        static IList<object> _arrayDataAsObjectList = new List<object> { "value1", "value2" };
         static string _arrayData = @"[""value1"",""value2""]";
         static string _objectData = @"{""Object"":""string""}";
         static string DP = "ErP3OpudePAY3uGFSoF16Sde69PnOra62jDEZGnPx_v3nPNpA5sr-tNc8bQP074yQl5kzSFRjRlstyW0TpBVMP0ocbD8RsN4EKsgJ1jvaSIEoP87OxduGkim49wFA0Qxf_NyrcYUnz6XSidY3lC_pF4JDJXg5bP_x0MUkQCTtQE";
@@ -136,7 +137,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             SetAdditionalDataNumbers(dictionary);
             SetAdditionalDataValues(dictionary);
             dictionary["Object"] = CreateJsonElement(_objectData);
-            dictionary["Array"] = CreateJsonElement(_arrayData);
+            dictionary["Array"] = _arrayDataAsObjectList;
             if (key != null)
                 dictionary[key] = obj;
         }

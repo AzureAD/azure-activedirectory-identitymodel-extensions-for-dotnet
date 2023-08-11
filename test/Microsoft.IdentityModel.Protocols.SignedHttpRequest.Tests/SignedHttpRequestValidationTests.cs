@@ -666,7 +666,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     {
                         HttpRequestHeaders = new Dictionary<string, IEnumerable<string>>(),
                         SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.H, "notAnArray")),
-                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidHClaimException), "IDX23003"),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidHClaimException), "IDX23024", innerTypeExpected: typeof(ArgumentOutOfRangeException)),
                         TestId = "InvalidClaimType",
                     },
                     new ValidateSignedHttpRequestTheoryData
@@ -841,7 +841,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     {
                         HttpRequestUri = new Uri("https://www.contoso.com"),
                         SignedHttpRequestToken = SignedHttpRequestTestUtils.ReplaceOrAddPropertyAndCreateDefaultSignedHttpRequest(new JProperty(SignedHttpRequestClaimTypes.Q,  "notAnArray")),
-                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidQClaimException), "IDX23003"),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidQClaimException), "IDX23024", innerTypeExpected: typeof(ArgumentOutOfRangeException)),
                         TestId = "InvalidClaimType",
                     },
                     new ValidateSignedHttpRequestTheoryData

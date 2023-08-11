@@ -36,8 +36,6 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                     context.Diffs.Add("=========================================");
                 }
 
-                // TODO - when a 8.0 target introduced we will need to adjust as JsonSerializer will be able to set collections without setters
-
                 // compare our utf8Reader with expected value
                 if (!IdentityComparer.AreEqual(jsonWebKeySetUtf8Reader, theoryData.JsonWebKeySet, context))
                 {

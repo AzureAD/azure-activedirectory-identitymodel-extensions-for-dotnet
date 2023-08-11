@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using Microsoft.IdentityModel.TestUtils;
@@ -14,6 +16,127 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
 {
     public class JsonSerializerPrimitivesTests
     {
+        /// <summary>
+        /// This test is designed to ensure that JsonSerializationPrimitives maximize depth of arrays of arrays to two.
+        /// </summary>
+        /// <param name="theoryData"></param>
+        [Theory, MemberData(nameof(CheckMaximumDepthTheoryData))]
+        public void CheckMaximumDepth(JsonSerializerTheoryData theoryData)
+        {
+            CompareContext context = new CompareContext(theoryData);
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                Utf8JsonWriter writer = null;
+                try
+                {
+                    writer = new Utf8JsonWriter(memoryStream, new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
+                    writer.WriteStartObject();
+
+                    JsonSerializerPrimitives.WriteObject(ref writer, theoryData.PropertyName, theoryData.Object);
+
+                    writer.WriteEndObject();
+                    writer.Flush();
+
+                    string json = Encoding.UTF8.GetString(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
+                    IdentityComparer.AreEqual(json, theoryData.Json, context);
+                }
+                finally
+                {
+                    writer?.Dispose();
+                }
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<JsonSerializerTheoryData> CheckMaximumDepthTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<JsonSerializerTheoryData>();
+
+                theoryData.Add(
+                    new JsonSerializerTheoryData("ObjectWithDictionary<string,string>")
+                    {
+                        Json = $@"{{""_claim_sources"":{{"+
+                                    $@"""src1"":{{"+
+                                    $@"""endpoint"":""https://graph.windows.net/5803816d-c4ab-4601-a128-e2576e5d6910/users/0c9545d0-a670-4628-8c1f-e90618a3b940/getMemberObjects"","+
+                                    $@"""access_token"":""ksj3n283dke"""+
+                                    $@"}},"+
+                                    $@"""src2"":{{"+
+                                    $@"""endpoint2"":""https://graph.windows.net/5803816d-c4ab-4601-a128-e2576e5d6910/users/0c9545d0-a670-4628-8c1f-e90618a3b940/getMemberObjects"","+
+                                    $@"""access_token2"":""ksj3n283dke"""+
+                               $@"}}}}}}",
+                        PropertyName = "_claim_sources",
+                        Object = new Dictionary<string, object>
+                        {
+                            {
+                                "src1",
+                                new Dictionary<string,string>
+                                {
+                                    { "endpoint", "https://graph.windows.net/5803816d-c4ab-4601-a128-e2576e5d6910/users/0c9545d0-a670-4628-8c1f-e90618a3b940/getMemberObjects"},
+                                    { "access_token", "ksj3n283dke"}
+                                }
+                            },
+                            {
+                                "src2",
+                                new Dictionary<string,string>
+                                {
+                                    { "endpoint2", "https://graph.windows.net/5803816d-c4ab-4601-a128-e2576e5d6910/users/0c9545d0-a670-4628-8c1f-e90618a3b940/getMemberObjects"},
+                                    { "access_token2", "ksj3n283dke"}
+                                }
+                            }
+                        }
+                    });
+
+                theoryData.Add(
+                    new JsonSerializerTheoryData("Dictionary<string,object>Level3")
+                    {
+                        Json = $@"{{""key"":{{""l1_1"":1,""l1_2"":""level1"",""l2_dict"":{{""l2_1"":1,""l2_2"":""level2"",""l3_dict"":""System.Collections.Generic.Dictionary`2[System.String,System.Object]""}}}}}}",
+                        PropertyName = "key",
+                        Object = new Dictionary<string, object> { { "l1_1", 1 }, { "l1_2", "level1" },
+                                        { "l2_dict", new Dictionary<string, object> { { "l2_1", 1 }, { "l2_2", "level2" },
+                                            { "l3_dict", new Dictionary<string, object> { { "l3_1", 1 }, { "l3_2", "level3" } } } } } }
+                    });
+
+                theoryData.Add(
+                    new JsonSerializerTheoryData("Dictionary<string,object>Level1")
+                    {
+                        Json = $@"{{""key"":{{""l1_1"":1,""l1_2"":""level1""}}}}",
+                        PropertyName = "key",
+                        Object = new Dictionary<string, object> { { "l1_1", 1 }, { "l1_2", "level1" } },
+                    });
+
+                theoryData.Add(
+                    new JsonSerializerTheoryData("List<object>Level3")
+                    {
+                        Json = $@"{{""key"":[1,""string"",1.23,[3,""stringLevel2"",6.52,""System.Collections.Generic.List`1[System.Object]""]]}}",
+                        PropertyName = "key",
+                        Object = new List<object> { 1, "string", 1.23,
+                                    new List<object> { 3, "stringLevel2", 6.52,
+                                        new List<object> { 3, "stringLevel2", 6.52 } } }
+                    });
+
+                theoryData.Add(
+                    new JsonSerializerTheoryData("List<object>Level2")
+                    {
+                        Json = @$"{{""key"":[1,""string"",1.23,[3,""stringLevel2"",6.52]]}}",
+                        PropertyName = "key",
+                        Object = new List<object> { 1, "string", 1.23, new List<object> { 3, "stringLevel2", 6.52 } },
+                    });
+
+                theoryData.Add(
+                    new JsonSerializerTheoryData("List<object>Level1")
+                    {
+                        Json = @$"{{""key"":[1,""string"",1.23]}}",
+                        PropertyName = "key",
+                        Object = new List<object> { 1, "string", 1.23 },
+                    });
+
+                return theoryData;
+            }
+        }
+
         /// <summary>
         /// This test is designed to ensure that JsonDeserialize and Utf8Reader are consistent and
         /// that we understand the differences with newtonsoft.
@@ -178,9 +301,9 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                 new JsonSerializerOptions
                 {
                     Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-                #if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER
                     DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
-                #endif
+#endif
                 });
 
             string serialize = JsonTestClassSerializer.Serialize(

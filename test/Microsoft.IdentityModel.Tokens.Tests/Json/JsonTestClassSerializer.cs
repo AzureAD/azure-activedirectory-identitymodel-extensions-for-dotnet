@@ -65,11 +65,11 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                         LogHelper.MarkAsNonPII(reader.CurrentDepth),
                         LogHelper.MarkAsNonPII(reader.BytesConsumed))));
 
-            while (JsonSerializerPrimitives.ReaderRead(ref reader))
+            while (reader.Read())
             {
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
-                    string propertyName = JsonSerializerPrimitives.GetPropertyName(ref reader, JsonTestClass.ClassName, true);
+                    string propertyName = JsonSerializerPrimitives.ReadPropertyName(ref reader, JsonTestClass.ClassName, true);
                     switch (propertyName)
                     {
                         // optional
@@ -86,7 +86,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                         case "ListObject":
                             List<object> objects = new List<object>();
 
-                            if (JsonSerializerPrimitives.ReadObjects(ref reader, objects, "ListObject", _className) == null)
+                            if (ReadObjects(ref reader, objects, "ListObject", _className) == null)
                             {
                                 throw LogHelper.LogExceptionMessage(
                                     new ArgumentNullException(
@@ -132,7 +132,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                             using (JsonDocument jsonDocument = JsonDocument.ParseValue(ref reader))
                                 jsonTestClass.AdditionalData[propertyName] = jsonDocument.RootElement.Clone();
 
-                            JsonSerializerPrimitives.ReaderRead(ref reader);
+                            reader.Read();
                             break;
                     }
                 }
@@ -299,5 +299,28 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             writer.WriteEndObject();
         }
         #endregion
+
+        internal static IList<object> ReadObjects(ref Utf8JsonReader reader, IList<object> objects, string propertyName, string className)
+        {
+            _ = objects ?? throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(objects)));
+
+            // returning null keeps the same logic as JsonSerialization.ReadObject
+            if (reader.TokenType == JsonTokenType.Null)
+                return null;
+
+            if (!JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartArray, false))
+                throw LogHelper.LogExceptionMessage(
+                    JsonSerializerPrimitives.CreateJsonReaderExceptionInvalidType(ref reader, "JsonTokenType.StartArray", className, propertyName));
+
+            while (reader.Read())
+            {
+                if (JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndArray, true))
+                    break;
+
+                objects.Add(JsonSerializerPrimitives.ReadJsonElement(ref reader));
+            }
+
+            return objects;
+        }
     }
 }

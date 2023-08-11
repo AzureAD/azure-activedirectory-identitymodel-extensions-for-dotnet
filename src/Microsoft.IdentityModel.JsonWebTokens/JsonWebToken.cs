@@ -5,10 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text;
-using System.Text.Json;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-
 
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
@@ -17,6 +15,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// </summary>
     public class JsonWebToken : SecurityToken
     {
+        internal object _audienceLock = new();
         private ClaimsIdentity _claimsIdentity;
         private bool _wasClaimsIdentitySet;
 
@@ -429,7 +428,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 IsSigned = !(Dot2 + 1 == encodedJson.Length);
                 try
                 {
-                    Header = new JsonClaimSet(JwtTokenUtilities.GetJsonDocumentFromBase64UrlEncodedString(encodedJson, 0, Dot1));
+                    Header = new JsonClaimSet(JwtTokenUtilities.ParseJsonBytes(encodedJson, 0, Dot1));
                 }
                 catch (Exception ex)
                 {
@@ -438,7 +437,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 try
                 {
-                    Payload = new JsonClaimSet(JwtTokenUtilities.GetJsonDocumentFromBase64UrlEncodedString(encodedJson, Dot1 + 1, Dot2 - Dot1 - 1));
+                    Payload = new JsonClaimSet(JwtTokenUtilities.ParseJsonBytes(encodedJson, Dot1 + 1, Dot2 - Dot1 - 1));
                 }
                 catch (Exception ex)
                 {
@@ -614,30 +613,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 if (_audiences == null)
                 {
-                    lock (_audiencesLock)
+                    lock (_audiences)
                     {
                         if (_audiences == null)
-                        if (Payload.TryGetValue(JwtRegisteredClaimNames.Aud, out JsonElement audiences))
                         {
-                                if (audiences.ValueKind == JsonValueKind.String)
-                                {
-                                    _audiences = new List<string> { audiences.GetString() };
-                                }
-                                else if (audiences.ValueKind == JsonValueKind.Array)
-                                {
-                                    foreach (JsonElement jsonElement in audiences.EnumerateArray())
-                                        _audiences.Add(jsonElement.ToString());
-                                }
+                            _audiences = new List<string>();
+                            if (Payload.TryGetValue(JwtRegisteredClaimNames.Aud, out IList<string> audiences))
+                            {
+                                foreach (string str in audiences)
+                                    _audiences.Add(str);
+                            }
                         }
                     }
                 }
+
                 return _audiences;
             }
-        }
-
-        internal override IEnumerable<Claim> CreateClaims(string issuer)
-        {
-            return Payload.CreateClaims(issuer);
         }
 
         /// <summary>
