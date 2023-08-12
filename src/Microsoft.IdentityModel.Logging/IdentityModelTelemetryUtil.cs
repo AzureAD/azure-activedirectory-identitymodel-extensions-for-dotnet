@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <summary>
         /// Get the string that represents the client version.
         /// </summary>
-        public static string ClientVer => typeof(IdentityModelTelemetryUtil).GetTypeInfo().Assembly!.GetName().Version!.ToString();
+        public static string ClientVer => typeof(IdentityModelTelemetryUtil).GetTypeInfo().Assembly.GetName().Version?.ToString() ?? "Version Unavailable";
 
         /// <summary>
         /// Adds a key and its value to the collection of telemetry data.

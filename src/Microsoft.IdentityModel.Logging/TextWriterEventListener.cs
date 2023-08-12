@@ -91,6 +91,8 @@ namespace Microsoft.IdentityModel.Logging
 
             for (int i = 0; i < eventData.Payload.Count; i++)
             {
+                if (eventData.Payload[i] == null)
+                    continue;
                 _streamWriter.WriteLine(eventData.Payload[i]!.ToString());
             }
         }
