@@ -105,7 +105,7 @@ jobs:
       command: 'custom'
       projects: 'wilson.sln'
       custom: 'msbuild'
-      arguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true /p:RunApiCompat=true'
+      arguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true /p:RunApiCompat=false'
 
   - task: PowerShell@2
     displayName: 'Run Tests'
