@@ -416,6 +416,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             if (string.IsNullOrEmpty(algorithm))
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolException(LogMessages.IDX21350));
 
+            EnsureNotDisposed();
+
             try
             {
                 if (!HashAlgorithmMap.TryGetValue(algorithm, out string hashAlgorithm))
@@ -458,6 +460,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <exception cref="OpenIdConnectProtocolException">If expected value does not equal the hashed value.</exception>
         private void ValidateHash(string expectedValue, string hashItem, string algorithm)
         {
+            EnsureNotDisposed();
+
             LogHelper.LogInformation(LogMessages.IDX21303, expectedValue);
             HashAlgorithm hashAlgorithm = null;
             try
@@ -704,6 +708,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             {
                 throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidStateException(LogHelper.FormatInvariant(LogMessages.IDX21331, validationContext.State, validationContext.ProtocolMessage.State)));
             }
+        }
+
+        private void EnsureNotDisposed()
+        {
+            if (_disposedValue)
+                throw new ObjectDisposedException(GetType().FullName);
         }
 
         /// <inheritdoc/>

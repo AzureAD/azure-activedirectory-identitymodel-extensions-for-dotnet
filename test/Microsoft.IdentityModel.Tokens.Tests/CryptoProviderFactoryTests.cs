@@ -41,6 +41,24 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Equal(0, cache.TaskCount);
         }
 
+        [Fact]
+        public void CryptoProviderFactoryDispose_CreateForSigning()
+        {
+            var cryptoProviderFactory = new CryptoProviderFactory();
+            cryptoProviderFactory.Dispose();
+
+            Assert.Throws<ObjectDisposedException>(() => cryptoProviderFactory.CreateForSigning(Default.AsymmetricSigningKey, Default.AsymmetricSigningAlgorithm));
+        }
+
+        [Fact]
+        public void CryptoProviderFactoryDispose_CreateForVerifying()
+        {
+            var cryptoProviderFactory = new CryptoProviderFactory();
+            cryptoProviderFactory.Dispose();
+
+            Assert.Throws<ObjectDisposedException>(() => cryptoProviderFactory.CreateForVerifying(KM.RsaSecurityKey_1024_Public, ALG.RsaSha512));
+        }
+
         /// <summary>
         /// This test checks that SignatureProviders are properly created and released when CryptoProviderFactory.CacheSignatureProviders = false.
         /// </summary>

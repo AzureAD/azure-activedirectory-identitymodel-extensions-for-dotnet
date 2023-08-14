@@ -508,6 +508,8 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
+            EnsureNotDisposed();
+
             SignatureProvider signatureProvider;
             if (CustomCryptoProvider != null && CustomCryptoProvider.IsSupportedAlgorithm(algorithm, key, willCreateSignatures))
             {
@@ -743,6 +745,12 @@ namespace Microsoft.IdentityModel.Tokens
 
                 _disposedValue = true;
             }
+        }
+
+        private void EnsureNotDisposed()
+        {
+            if (_disposedValue)
+                throw new ObjectDisposedException(GetType().FullName);
         }
 
         /// <inheritdoc/>

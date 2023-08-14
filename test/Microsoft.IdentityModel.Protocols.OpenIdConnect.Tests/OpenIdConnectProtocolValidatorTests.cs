@@ -726,6 +726,20 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
+        [Fact]
+        public void ValidateCHash_ProtocolValidatorDisposed()
+        {
+            var protocolValidator = new PublicOpenIdConnectProtocolValidator();
+            protocolValidator.Dispose();
+            string code = Guid.NewGuid().ToString();
+            string chash256 = IdentityUtilities.CreateHashClaim(code, "SHA256");
+            Assert.Throws<ObjectDisposedException>(() => protocolValidator.PublicValidateCHash(new OpenIdConnectProtocolValidationContext
+            {
+                ProtocolMessage = new OpenIdConnectMessage { Code = code },
+                ValidatedIdToken = CreateValidatedIdToken(JwtRegisteredClaimNames.CHash, chash256, SecurityAlgorithms.RsaSha256)
+            }));
+        }
+
         [Theory, MemberData(nameof(ValidateCHashTheoryData))]
         private void ValidateCHash(OidcProtocolValidatorTheoryData theoryData)
         {
@@ -1317,6 +1331,20 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
         }
 
+        [Fact]
+        public void ValidateAtHash_ProtocolValidatorDisposed()
+        {
+            var protocolValidator = new PublicOpenIdConnectProtocolValidator();
+            protocolValidator.Dispose();
+            var token = Guid.NewGuid().ToString();
+            var hashClaimValue256 = IdentityUtilities.CreateHashClaim(token, "SHA256");
+            Assert.Throws<ObjectDisposedException>(() => protocolValidator.PublicValidateAtHash(new OpenIdConnectProtocolValidationContext()
+            {
+                ProtocolMessage = new OpenIdConnectMessage { AccessToken = token },
+                ValidatedIdToken = new JwtSecurityToken(claims: new List<Claim> { new Claim("at_hash", hashClaimValue256) }, signingCredentials: Default.AsymmetricSigningCredentials)
+            }));
+        }
+
         [Theory, MemberData(nameof(ValidateAtHashTheoryData))]
         public void ValidateAtHash(OidcProtocolValidatorTheoryData theoryData)
         {
@@ -1627,6 +1655,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.True(protocolValidator.HashAlgorithmMap.TryGetValue(algorithm, out hashFound) == shouldFind);
             if (shouldFind)
                 Assert.Equal(hashFound, expectedHash);
+        }
+
+        [Fact]
+        public void GetHashAlgorithm_ObjectDisposed()
+        {
+            OpenIdConnectProtocolValidator protocolValidator = new OpenIdConnectProtocolValidator();
+            protocolValidator.Dispose();
+            Assert.Throws<ObjectDisposedException>(() => protocolValidator.GetHashAlgorithm(SecurityAlgorithms.RsaSha256));
         }
 
         [Theory, MemberData(nameof(HashAlgorithmExtensibilityTheoryData))]
