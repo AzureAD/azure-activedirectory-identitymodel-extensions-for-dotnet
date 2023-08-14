@@ -459,7 +459,7 @@ namespace Microsoft.IdentityModel.Logging
             if (!_isHeaderWritten)
             {
                 string headerMessage = string.Format(CultureInfo.InvariantCulture, "Microsoft.IdentityModel Version: {0}. Date {1}. {2}",
-                    typeof(IdentityModelEventSource).Assembly!.GetName().Version!.ToString(),
+                    typeof(IdentityModelEventSource).Assembly.GetName().Version?.ToString(),
                     DateTime.UtcNow,
                     IdentityModelEventSource.ShowPII ? _piiOnLogMessage : _piiOffLogMessage);
 
