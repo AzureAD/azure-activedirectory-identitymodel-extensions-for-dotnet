@@ -20,7 +20,7 @@ namespace Microsoft.IdentityModel.Logging
         internal static readonly ConcurrentDictionary<string, string> telemetryData = new ConcurrentDictionary<string, string>()
         {
             [skuTelemetry] = ClientSku,
-            [versionTelemetry] = ClientVer
+            [versionTelemetry] = ClientVer ?? String.Empty
         };
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <summary>
         /// Get the string that represents the client version.
         /// </summary>
-        public static string ClientVer => typeof(IdentityModelTelemetryUtil).GetTypeInfo().Assembly.GetName().Version?.ToString() ?? "Version Unavailable";
+        public static string? ClientVer => typeof(IdentityModelTelemetryUtil).GetTypeInfo().Assembly.GetName().Version?.ToString();
 
         /// <summary>
         /// Adds a key and its value to the collection of telemetry data.
