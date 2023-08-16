@@ -1,8 +1,9 @@
 jobs:
   benchmarks:
     source:
-      localFolder: .
-      project: Microsoft.IdentityModel.Benchmarks.csproj
+      repository: https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet
+      branchOrCommit: westinm/crankPR
+      project: benchmark\Microsoft.IdentityModel.Benchmarks\Microsoft.IdentityModel.Benchmarks.csproj
     variables:
       filterArg: "*"
       jobArg: short
