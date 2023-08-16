@@ -1,0 +1,24 @@
+jobs:
+  benchmarks:
+    source:
+      localFolder: .
+      project: Microsoft.IdentityModel.Benchmarks.csproj
+    variables:
+      filterArg: "*"
+      jobArg: short
+    arguments: --job {{jobArg}} --filter {{filterArg}} --memory
+    options:
+      benchmarkDotNet: true
+    
+scenarios:
+  JsonWebTokenTests:
+    application:
+      job: benchmarks
+
+profiles:
+  local:
+    jobs: 
+      application:
+        endpoints: 
+          - http://localhost:5010
+
