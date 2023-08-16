@@ -388,13 +388,13 @@ namespace Microsoft.IdentityModel.Logging
             return arg;
         }
 
-        private static string? RemovePII(object arg)
+        private static string RemovePII(object arg)
         {
             if (arg is Exception ex && IsCustomException(ex))
                 return ex.ToString();
 
             if (arg is NonPII)
-                return arg.ToString();
+                return arg.ToString()!; // the null check is done in FormatInvariant
 
             return string.Format(CultureInfo.InvariantCulture, IdentityModelEventSource.HiddenPIIString, arg?.GetType().ToString() ?? "Null");
         }
