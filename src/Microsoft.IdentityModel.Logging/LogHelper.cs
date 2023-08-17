@@ -262,7 +262,7 @@ namespace Microsoft.IdentityModel.Logging
         public static Exception LogExceptionMessage(EventLevel eventLevel, Exception exception)
         {
             if (exception == null)
-                return null!;
+                throw new ArgumentNullException(nameof(exception));
 
             if (IdentityModelEventSource.Logger.IsEnabled(eventLevel, EventKeywords.All))
                 IdentityModelEventSource.Logger.Write(eventLevel, exception.InnerException, exception.Message);
@@ -339,16 +339,26 @@ namespace Microsoft.IdentityModel.Logging
             if (Logger.IsEnabled(eventLogLevel))
                 Logger.Log(WriteEntry(eventLogLevel, innerException, message, null));
 
-            if (innerException != null) 
+            T? value;
+            if (innerException != null)
+            {
                 if (string.IsNullOrEmpty(argumentName))
-                    return (T)Activator.CreateInstance(typeof(T), message, innerException)!;
+                    value = Activator.CreateInstance(typeof(T), message, innerException) as T ;
                 else
-                    return (T)Activator.CreateInstance(typeof(T), argumentName, message, innerException)!;
+                    value = Activator.CreateInstance(typeof(T), argumentName, message, innerException) as T;
+            }
             else
+            {
                 if (string.IsNullOrEmpty(argumentName))
-                    return (T)Activator.CreateInstance(typeof(T), message)!;
+                    value = Activator.CreateInstance(typeof(T), message) as T;
                 else
-                    return (T)Activator.CreateInstance(typeof(T), argumentName, message)!;
+                    value = Activator.CreateInstance(typeof(T), argumentName, message) as T;
+            }
+
+            if(value is null)
+                throw new ArgumentException(nameof(value));
+
+            return value;
         }
 
         private static EventLogLevel EventLevelToEventLogLevel(EventLevel eventLevel) =>
@@ -439,7 +449,7 @@ namespace Microsoft.IdentityModel.Logging
         private static LogEntry WriteEntry(EventLogLevel eventLogLevel, Exception? innerException, string message, params object[]? args)
         {
             if (string.IsNullOrEmpty(message))
-                return null!;
+                throw new ArgumentNullException(nameof(message));
 
             if (innerException != null)
             {
