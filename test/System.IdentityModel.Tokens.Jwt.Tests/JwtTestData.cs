@@ -318,7 +318,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 TestId = nameof(EncodedJwts.InvalidPayload),
                 Token = EncodedJwts.InvalidPayload,
                 ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX12723:", null, true)
-            }); ;
+            });
 
             return theoryData;
         }
