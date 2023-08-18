@@ -84,7 +84,22 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public static OpenIdConnectConfiguration Read(string json, OpenIdConnectConfiguration config)
         {
             Utf8JsonReader reader = new(Encoding.UTF8.GetBytes(json).AsSpan());
-            return Read(ref reader, config);
+            try
+            {
+                return Read(ref reader, config);
+            }
+            catch(JsonException ex)
+            {
+                if (ex.GetType() == typeof(JsonException))
+                    throw;
+
+                throw LogHelper.LogExceptionMessage(
+                    new JsonException(
+                        LogHelper.FormatInvariant(
+                            Tokens.LogMessages.IDX10805,
+                            LogHelper.MarkAsNonPII(json),
+                            LogHelper.MarkAsNonPII(ClassName))));
+            }
         }
 
         /// <summary>

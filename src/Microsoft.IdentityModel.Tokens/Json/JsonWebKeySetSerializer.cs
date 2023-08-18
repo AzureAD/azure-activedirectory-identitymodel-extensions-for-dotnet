@@ -19,7 +19,23 @@ namespace Microsoft.IdentityModel.Tokens.Json
         public static JsonWebKeySet Read(string json, JsonWebKeySet jsonWebKeySet)
         {
             Utf8JsonReader reader = new(Encoding.UTF8.GetBytes(json).AsSpan());
-            return Read(ref reader, jsonWebKeySet);
+
+            try
+            {
+                return Read(ref reader, jsonWebKeySet);
+            }
+            catch (JsonException ex)
+            {
+                if (ex.GetType() == typeof(JsonException))
+                    throw;
+
+                throw LogHelper.LogExceptionMessage(
+                    new JsonException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX10805,
+                            LogHelper.MarkAsNonPII(json),
+                            LogHelper.MarkAsNonPII(JsonWebKey.ClassName))));
+            }
         }
 
         /// <summary>

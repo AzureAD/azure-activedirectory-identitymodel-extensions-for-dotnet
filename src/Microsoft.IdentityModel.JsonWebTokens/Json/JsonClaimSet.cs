@@ -36,10 +36,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             _jsonClaims = JwtTokenUtilities.CreateClaimsDictionary(jsonUtf8Bytes, jsonUtf8Bytes.Length);
         }
 
-        internal JsonClaimSet(string json) : this(Encoding.UTF8.GetBytes(json))
-        {
-        }
-
         internal IList<Claim> Claims(string issuer)
         {
             if (_claims == null)

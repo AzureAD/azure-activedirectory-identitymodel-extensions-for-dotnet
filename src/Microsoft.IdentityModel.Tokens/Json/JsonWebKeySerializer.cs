@@ -57,7 +57,22 @@ namespace Microsoft.IdentityModel.Tokens.Json
         public static JsonWebKey Read(string json, JsonWebKey jsonWebKey)
         {
             Utf8JsonReader reader = new(Encoding.UTF8.GetBytes(json).AsSpan());
-            return Read(ref reader, jsonWebKey);
+            try
+            {
+                return Read(ref reader, jsonWebKey);
+            }
+            catch (JsonException ex)
+            {
+                if (ex.GetType() == typeof(JsonException))
+                    throw;
+
+                throw LogHelper.LogExceptionMessage(
+                    new JsonException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX10805,
+                            LogHelper.MarkAsNonPII(json),
+                            LogHelper.MarkAsNonPII(JsonWebKey.ClassName))));
+            }
         }
 
         /// <summary>
@@ -112,6 +127,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.DQ))
                         jsonWebKey.DQ = JsonSerializerPrimitives.ReadString(ref reader, JsonWebKeyParameterNames.DQ, JsonWebKey.ClassName, true);
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.KeyOps))
+                    {
                         // the value can be null if the value is 'nill'
                         if (JsonSerializerPrimitives.ReadStrings(ref reader, jsonWebKey.KeyOps, JsonWebKeyParameterNames.KeyOps, JsonWebKey.ClassName, true) == null)
                         {
@@ -129,6 +145,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                                         LogHelper.MarkAsNonPII(reader.CurrentDepth),
                                         LogHelper.MarkAsNonPII(reader.BytesConsumed)))));
                         }
+                    }
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.Oth))
                         JsonSerializerPrimitives.ReadStrings(ref reader, jsonWebKey.Oth, JsonWebKeyParameterNames.Oth, JsonWebKey.ClassName, true);
                     else if (reader.ValueTextEquals(JsonWebKeyParameterUtf8Bytes.P))

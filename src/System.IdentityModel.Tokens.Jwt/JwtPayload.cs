@@ -23,7 +23,7 @@ namespace System.IdentityModel.Tokens.Jwt
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2237:MarkISerializableTypesWithSerializable"), System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Serialize not really supported.")]
     public class JwtPayload : Dictionary<string, object>
     {
-        internal string ClassName = "System.IdentityModel.Tokens.Jwt.JwtPayload";
+        internal const string ClassName = "System.IdentityModel.Tokens.Jwt.JwtPayload";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JwtPayload"/> class with no claims. Default string comparer <see cref="StringComparer.Ordinal"/>. 
@@ -38,56 +38,71 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             Utf8JsonReader reader = new(Encoding.UTF8.GetBytes(json));
 
-            if (!JsonPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, false))
-                throw LogHelper.LogExceptionMessage(
-                    new JsonException(
-                        LogHelper.FormatInvariant(
-                        Microsoft.IdentityModel.Tokens.LogMessages.IDX11023,
-                        LogHelper.MarkAsNonPII("JsonTokenType.StartObject"),
-                        LogHelper.MarkAsNonPII(reader.TokenType),
-                        LogHelper.MarkAsNonPII(ClassName),
-                        LogHelper.MarkAsNonPII(reader.TokenStartIndex),
-                        LogHelper.MarkAsNonPII(reader.CurrentDepth),
-                        LogHelper.MarkAsNonPII(reader.BytesConsumed))));
-
-            while (reader.Read())
+            try
             {
-                if (reader.TokenType == JsonTokenType.PropertyName)
-                {
-                    string propertyName = JsonPrimitives.ReadPropertyName(ref reader, ClassName, true);
-                    object obj;
-                    if (reader.TokenType == JsonTokenType.StartArray)
-                        obj = JsonPrimitives.ReadArrayOfObjects(ref reader, propertyName, ClassName);
-                    else
-                        obj = JsonPrimitives.ReadPropertyValueAsObject(ref reader, propertyName, ClassName);
+                if (!JsonPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, false))
+                    throw LogHelper.LogExceptionMessage(
+                        new JsonException(
+                            LogHelper.FormatInvariant(
+                            Microsoft.IdentityModel.Tokens.LogMessages.IDX11023,
+                            LogHelper.MarkAsNonPII("JsonTokenType.StartObject"),
+                            LogHelper.MarkAsNonPII(reader.TokenType),
+                            LogHelper.MarkAsNonPII(ClassName),
+                            LogHelper.MarkAsNonPII(reader.TokenStartIndex),
+                            LogHelper.MarkAsNonPII(reader.CurrentDepth),
+                            LogHelper.MarkAsNonPII(reader.BytesConsumed))));
 
-                    if (TryGetValue(propertyName, out object existingValue))
+                while (reader.Read())
+                {
+                    if (reader.TokenType == JsonTokenType.PropertyName)
                     {
-                        if (existingValue is not IList<object> claimValues)
+                        string propertyName = JsonPrimitives.ReadPropertyName(ref reader, ClassName, true);
+                        object obj;
+                        if (reader.TokenType == JsonTokenType.StartArray)
+                            obj = JsonPrimitives.ReadArrayOfObjects(ref reader, propertyName, ClassName);
+                        else
+                            obj = JsonPrimitives.ReadPropertyValueAsObject(ref reader, propertyName, ClassName);
+
+                        if (TryGetValue(propertyName, out object existingValue))
                         {
-                            claimValues = new List<object>
+                            if (existingValue is not IList<object> claimValues)
+                            {
+                                claimValues = new List<object>
                             {
                                 existingValue
                             };
 
-                            this[propertyName] = claimValues;
-                        }
+                                this[propertyName] = claimValues;
+                            }
 
-                        if (obj is IList<object> objectList)
-                        {
-                            foreach (object item in objectList)
-                                claimValues.Add(item);
+                            if (obj is IList<object> objectList)
+                            {
+                                foreach (object item in objectList)
+                                    claimValues.Add(item);
+                            }
+                            else
+                            {
+                                claimValues.Add(obj);
+                            }
                         }
                         else
                         {
-                            claimValues.Add(obj);
+                            this[propertyName] = obj;
                         }
                     }
-                    else
-                    {
-                        this[propertyName] = obj;
-                    }
                 }
+            }
+            catch (JsonException ex)
+            {
+                if (ex.GetType() == typeof(JsonException))
+                    throw;
+
+                throw LogHelper.LogExceptionMessage(
+                    new JsonException(
+                        LogHelper.FormatInvariant(
+                            Microsoft.IdentityModel.Tokens.LogMessages.IDX10805,
+                            LogHelper.MarkAsNonPII(json),
+                            LogHelper.MarkAsNonPII(ClassName))));
             }
         }
 
