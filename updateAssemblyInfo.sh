@@ -11,7 +11,7 @@ dateTimeStamp=$(echo $((10#${date:0:2}-19)))${date:2}
 
 commitSha=$(git rev-parse HEAD)
 
-assemblyVersion=$(grep -oP '(?<=<assemblyVersion>)[^<]+' $PWD/buildConfiguration.xml)
+assemblyVersion=$(sed -n 's/.*<assemblyVersion>\([^<]*\)<.*/\1/p' $PWD/buildConfiguration.xml)
 assemblyFileVersion="$assemblyVersion.${dateTimeStamp::-6}" # Trim minutes/seconds
 assemblyInformationalVersion="$assemblyVersion.$dateTimeStamp.$commitSha"
 
@@ -19,7 +19,7 @@ echo "assemblyVersion: $assemblyVersion"
 echo "assemblyFileVersion: $assemblyFileVersion"
 echo "assemblyInformationalVersion: $assemblyInformationalVersion"
 
-nugetSuffix=$(grep -oP '(?<=<nugetSuffix>)[^<]+' $PWD/buildConfiguration.xml)
+nugetSuffix=$(sed -n 's/.*<nugetSuffix>\([^<]*\)<.*/\1/p' $PWD/buildConfiguration.xml)
 if [ "$packageType" = "release" ]
 then
     versionSuffix=""
@@ -35,7 +35,7 @@ version=$(echo "$version" | sed "s|<VersionPrefix>.*</VersionPrefix>|<VersionPre
 version=$(echo "$version" | sed "s|<VersionSuffix>.*</VersionSuffix>|<VersionSuffix>$versionSuffix</VersionSuffix>|")
 echo "$version" > $versionPath
 
-projects=$(grep -zoP '(?<=<src>)(.|[\s])*?(?=<\/src>)' $PWD/buildConfiguration.xml | grep -aoP 'name="\K[^"]+')
+projects=$(sed -n '/<src>/,/<\/src>/p' $PWD/buildConfiguration.xml | sed -n 's/.*name="\([^"]*\)".*/\1/p')
 
 for project in $projects; do
     name="$project"
