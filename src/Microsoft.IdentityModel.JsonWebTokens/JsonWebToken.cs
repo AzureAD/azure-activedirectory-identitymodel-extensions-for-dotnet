@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// </summary>
     public class JsonWebToken : SecurityToken
     {
-        internal object _audienceLock = new();
+        internal object _audiencesLock = new();
         private ClaimsIdentity _claimsIdentity;
         private bool _wasClaimsIdentitySet;
 
@@ -612,16 +612,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 if (_audiences == null)
                 {
-                    lock (_audiences)
+                    lock (_audiencesLock)
                     {
                         if (_audiences == null)
                         {
-                            _audiences = new List<string>();
+                            List<string> tmp = new List<string>();
                             if (Payload.TryGetValue(JwtRegisteredClaimNames.Aud, out IList<string> audiences))
                             {
                                 foreach (string str in audiences)
-                                    _audiences.Add(str);
+                                    tmp.Add(str);
                             }
+
+                            _audiences = tmp;
                         }
                     }
                 }
