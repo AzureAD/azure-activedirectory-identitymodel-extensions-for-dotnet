@@ -529,13 +529,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         // In a System.Security.Claims.Claim, JsonObjects and JsonArrays will need to be serialized as Json, and the ClaimValueType set to JsonArray or Json.
         // A C# type can also be returned, we will return a List<objects> representing the JsonArray or an object representing the JsonObject.
         // This will allow for constant time lookup for both scenarios if we store the results in dictionaries.
-
+        // We need to have the JwtPayload, JwtHeader, JsonClaimSet all share the same call graph for consistency.
         // We need a shared model for adding claims from object for JsonWebToken and JwtSecurityToken
         // From getting ClaimValueTypes to setting object types
 
         internal static IDictionary<string, object> CreateClaimsDictionary(byte[] bytes, int length)
         {
-            string utf8 = Encoding.UTF8.GetString(bytes);
             Dictionary<string, object> claims = new();
             Span<byte> utf8Span = bytes;
             Utf8JsonReader reader = new(utf8Span.Slice(0,length));
