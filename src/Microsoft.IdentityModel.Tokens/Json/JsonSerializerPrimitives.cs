@@ -525,7 +525,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
         /// <param name="writer"></param>
         /// <param name="obj"></param>
         /// <param name="depth">The current depth of recursive call for objects.
-        /// Maximum is 3.</param>
+        /// Maximum is 2.</param>
         public static void WriteObjectValue(ref Utf8JsonWriter writer, object obj, int depth = 0)
         {
             if (obj is string str)

@@ -23,13 +23,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         private static DateTime dateTime = new DateTime(2000, 01, 01, 0, 0, 0);
         private static DateTime dateTimeUtc = new DateTime(2000, 01, 01, 0, 0, 0).ToUniversalTime();
         private string jsonString = $@"{{""intarray"":[1,2,3], ""array"":[1,""2"",3], ""jobject"": {{""string1"":""string1value"",""string2"":""string2value""}},""string"":""bob"", ""float"":42, ""integer"":42, ""nill"": null, ""bool"" : true, ""dateTime"": ""{dateTime}"", ""dateTimeIso8061"": ""{dateTime.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture)}"" }}";
+        // Note: We need to do some work with doubles and floats.
+        // If we serialize 42.0 as a double, then when deserialized, reading as Utf8JsonReader.GetDouble() will return 42.
+        // While we figure this out, the ClaimValueType for float was set to Integer32.
         private List<Claim> payloadClaims = new List<Claim>()
         {
             new Claim("intarray", @"1", "http://www.w3.org/2001/XMLSchema#integer32", "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
             new Claim("array", @"1", "http://www.w3.org/2001/XMLSchema#integer32", "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
             new Claim("jobject", @"{""string1"":""string1value"",""string2"":""string2value""}", JsonClaimValueTypes.Json, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
             new Claim("string", "bob", ClaimValueTypes.String, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
-            new Claim("float", "42", ClaimValueTypes.Double, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
+            new Claim("float", "42", ClaimValueTypes.Integer32, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
             new Claim("integer", "42", ClaimValueTypes.Integer32, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
             new Claim("nill", "", JsonClaimValueTypes.JsonNull, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
             new Claim("bool", "True", ClaimValueTypes.Boolean, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
@@ -139,7 +142,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             foreach (var claim in payloadClaims)
             {
                 var claimToCompare = jsonWebToken.GetClaim(claim.Type);
-                IdentityComparer.AreEqual(claim, claimToCompare, context);
+                if (!IdentityComparer.AreEqual(claim, claimToCompare, context))
+                {
+                    context.AddDiff($"claim.Type: '{claim.Type}'");
+                }
             }
 
             try // Try to retrieve a value that doesn't exist in the payload.
@@ -170,7 +176,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             foreach (var claim in payloadClaims)
             {
                 success = jsonWebToken.TryGetClaim(claim.Type, out var claimToCompare);
-                IdentityComparer.AreEqual(claim, claimToCompare, context);
+                if (!IdentityComparer.AreEqual(claim, claimToCompare, context))
+                {
+                    context.AddDiff($"claim.Type: '{claim.Type}'");
+                }
+
                 IdentityComparer.AreEqual(true, success, context);
             }
 

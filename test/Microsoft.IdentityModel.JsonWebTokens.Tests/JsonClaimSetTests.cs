@@ -10,8 +10,6 @@ using System.Text;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-
 namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
     public class JsonClaimSetTests
@@ -34,7 +32,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         };
 
         [Theory, MemberData(nameof(ClaimSetTestCases))]
-
         public void ClaimSetGetValueTests(JsonClaimSetTheoryData theoryData)
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.ClaimSetTests", theoryData);
