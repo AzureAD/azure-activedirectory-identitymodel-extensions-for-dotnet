@@ -1,8 +1,10 @@
-﻿jobs:
+﻿imports:
+  - https://github.com/aspnet/Benchmarks/blob/main/scenarios/aspnet.profiles.standard.yml?raw=true
+
+jobs:
   benchmarks:
     source:
       repository: https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet
-      branchOrCommit: westinm/benchmark
       project: benchmark\Microsoft.IdentityModel.Benchmarks\Microsoft.IdentityModel.Benchmarks.csproj
     variables:
       filterArg: "*"
@@ -12,13 +14,11 @@
       benchmarkDotNet: true
     
 scenarios:
-  JsonWebTokenTests:
+  ValidateTokenAsyncTests:
     application:
       job: benchmarks
 
-profiles:
-  local:
-    jobs: 
-      application:
-        endpoints: 
-          - http://localhost:5010
+  CreateTokenTests:
+    application:
+      job: benchmarks
+

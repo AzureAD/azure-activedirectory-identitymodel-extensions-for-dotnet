@@ -8,13 +8,13 @@ components:
             --application.options.outputFiles .\src\Microsoft.IdentityModel.JsonWebTokens\bin\release\net8.0\
 
 # default arguments that are always used on crank commands
-defaults: --config https://github.com/aspnet/Benchmarks/blob/main/build/azure.profile.yml?raw=true --application.framework net7.0  
+defaults: --config https://raw.githubusercontent.com/aspnet/Benchmarks/main/scenarios/aspnet.profiles.standard.yml --application.framework net8.0  
 
-# the first vaule is the defualt if none is specified
+# the first vaule is the default if none is specified
 profiles:
     windows:
         description: INTEL/Windows 28 Cores
-        arguments: --profile aspnet-citrine-win
+        arguments: --profile aspnet-citrine-win     
 
 benchmarks:
     NoMvcAuth:
