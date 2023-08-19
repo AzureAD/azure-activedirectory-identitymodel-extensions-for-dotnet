@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     writer.WriteEndArray();
                     writer.Flush();
 
-                    Utf8JsonReader reader = new(memoryStream.ToArray());
+                    Utf8JsonReader reader = new(memoryStream.GetBuffer().AsSpan(0, (int)memoryStream.Length));
 
 #if NET6_0_OR_GREATER
                     bool ret = JsonElement.TryParseValue(ref reader, out JsonElement? jsonElement);
