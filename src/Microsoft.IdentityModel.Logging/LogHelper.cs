@@ -262,7 +262,7 @@ namespace Microsoft.IdentityModel.Logging
         public static Exception LogExceptionMessage(EventLevel eventLevel, Exception exception)
         {
             if (exception == null)
-                throw new ArgumentNullException(nameof(exception), "null exception was passed to logger");
+                throw new ArgumentNullException(nameof(exception));
 
             if (IdentityModelEventSource.Logger.IsEnabled(eventLevel, EventKeywords.All))
                 IdentityModelEventSource.Logger.Write(eventLevel, exception.InnerException, exception.Message);
@@ -392,8 +392,8 @@ namespace Microsoft.IdentityModel.Logging
             if (arg == null)
                 return "null";
 
-            if (IdentityModelEventSource.LogCompleteSecurityArtifact && arg is ISafeLogSecurityArtifact)
-                return ((ISafeLogSecurityArtifact)arg).UnsafeToString();
+            if (IdentityModelEventSource.LogCompleteSecurityArtifact && arg is ISafeLogSecurityArtifact artifact)
+                return artifact.UnsafeToString();
 
             return arg;
         }
@@ -449,7 +449,7 @@ namespace Microsoft.IdentityModel.Logging
         private static LogEntry WriteEntry(EventLogLevel eventLogLevel, Exception? innerException, string message, params object[]? args)
         {
             if (string.IsNullOrEmpty(message))
-                throw new ArgumentNullException(nameof(message), "null message was passed to new entry");
+                throw new ArgumentNullException(nameof(message));
 
             if (innerException != null)
             {
