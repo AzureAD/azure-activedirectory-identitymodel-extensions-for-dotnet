@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Logging;
@@ -23,8 +25,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         // Some of the common values are cached in local variables.
         private string _act;
         private string _alg;
-        private IList<string> _audiences;
-        private readonly object _audiencesLock = new object();
+        private string[] _audiences;
         private string _authenticationTag;
         private string _ciphertext;
         private string _cty;
@@ -615,17 +616,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     lock (_audiencesLock)
                     {
-                        if (_audiences == null)
-                        {
-                            List<string> tmp = new List<string>();
-                            if (Payload.TryGetValue(JwtRegisteredClaimNames.Aud, out IList<string> audiences))
-                            {
-                                foreach (string str in audiences)
-                                    tmp.Add(str);
-                            }
-
-                            _audiences = tmp;
-                        }
+                        _audiences ??= Payload.TryGetValue(JwtRegisteredClaimNames.Aud, out IList<string> audiences) ?
+                            (audiences is string[] audiencesArray ? audiencesArray : audiences.ToArray()) :
+                            Array.Empty<string>();
                     }
                 }
 

@@ -6,7 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Security.Claims;
-using System.Text;
 using System.Text.Json;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -272,19 +271,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (typeof(T) == typeof(IList<string>))
             {
-                List<string> list = new();
                 if (obj is IList iList)
                 {
-                    foreach (object item in iList)
-                        list.Add(item?.ToString());
+                    string[] arr = new string[iList.Count];
+                    for (int arri = 0; arri < arr.Length; arri++)
+                    {
+                        arr[arri] = iList[arri]?.ToString();
+                    }
 
-                    return (T)((object)list);
+                    return (T)(object)arr;
                 }
                 else
                 {
-                    list.Add(obj.ToString());
+                    return (T)(object)new string[1] { obj.ToString() };
                 }
-                return (T)(object)list;
             }
 
             if (typeof(T) == typeof(int) && int.TryParse(obj.ToString(), out int i))
@@ -310,17 +310,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (typeof(T) == typeof(IList<object>))
             {
-                List<object> list = new();
                 if (obj is IList items)
                 {
-                    foreach (object item in items)
-                        list.Add(item);
+                    object[] arr = new object[items.Count];
+                    for (int arri = 0; arri < arr.Length; arri++)
+                    {
+                        arr[arri] = items[arri];
+                    }
+
+                    return (T)(object)arr;
                 }
                 else
                 {
-                    list.Add(obj);
+                    return (T)(object)new object[1] { obj };
                 }
-                return (T)((object)list);
             }
 
             if (typeof(T) == typeof(int[]))
