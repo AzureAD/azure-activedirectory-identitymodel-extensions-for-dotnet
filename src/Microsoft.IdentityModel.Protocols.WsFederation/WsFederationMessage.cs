@@ -376,7 +376,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// Gets or sets 'wctx'.
         /// </summary>
         [property: SuppressMessage("Microsoft.Naming", "CA1704")]
-        public string Wctx
+        public string? Wctx
         {
             get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wctx); }
             set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wctx, value); }
