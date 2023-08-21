@@ -366,7 +366,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// Gets or sets 'wct'.
         /// </summary>
         [property: SuppressMessage("Microsoft.Naming", "CA1704")]
-        public string Wct
+        public string? Wct
         {
             get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wct); }
             set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wct, value); }
@@ -457,7 +457,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// Gets or sets 'wreply'.
         /// </summary>
         [property: SuppressMessage("Microsoft.Naming", "CA1704")]
-        public string Wreply
+        public string? Wreply
         {
             get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wreply); }
             set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wreply, value); }
@@ -506,7 +506,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// Gets or sets 'wresultptr'.
         /// </summary>
         [property: SuppressMessage("Microsoft.Naming", "CA1704")]
-        public string Wresultptr
+        public string? Wresultptr
         {
             get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wresultptr); }
             set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wresultptr, value); }
