@@ -3,7 +3,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 7.0.0-preview3
 =======
 ## Performance improvements:
-- Replace newtonsoft with System.Text.Json, see [#2233](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2233), and as a result, ASP.NET's JwtBearer auth handler will now be fully AOT compatible.
+- Replace Newtonsoft.Json with System.Text.Json, see [#2233](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2233), and as a result, ASP.NET's JwtBearer auth handler will now be fully AOT compatible.
 
 7.0.0-preview2
 =======
