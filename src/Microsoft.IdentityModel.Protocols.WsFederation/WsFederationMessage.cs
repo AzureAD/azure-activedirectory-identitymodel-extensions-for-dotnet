@@ -326,7 +326,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// </summary>
         [property: SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "Wa")]
         [property: SuppressMessage("Microsoft.Naming", "CA1704")]
-        public string Wa 
+        public string? Wa 
         { 
             get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wa); }
             set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wa, value); }
@@ -496,7 +496,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <summary>
         /// Gets or sets 'wresult'.
         /// </summary>
-        public string Wresult
+        public string? Wresult
         {
             get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wresult); }
             set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wresult, value); }
@@ -516,7 +516,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// Gets or sets 'wtrealm'.
         /// </summary>
         [property: SuppressMessage("Microsoft.Naming", "CA1704")]
-        public string Wtrealm
+        public string? Wtrealm
         {
             get { return GetParameter(WsFederationConstants.WsFederationParameterNames.Wtrealm); }
             set { SetParameter(WsFederationConstants.WsFederationParameterNames.Wtrealm, value); }
