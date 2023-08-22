@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="claims"> A list of claims.</param>
         /// <returns> A Dictionary representing claims.</returns>
-        internal static IDictionary<string, object> CreateDictionaryFromClaims(IEnumerable<Claim> claims)
+        internal static Dictionary<string, object> CreateDictionaryFromClaims(IEnumerable<Claim> claims)
         {
             var payload = new Dictionary<string, object>();
 

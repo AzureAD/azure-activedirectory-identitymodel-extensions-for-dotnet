@@ -663,7 +663,7 @@ namespace System.IdentityModel.Tokens.Jwt
 #pragma warning restore CS0162 // Unreachable code detected
         }
 
-        internal IList<string> GetIListClaims(string claimType)
+        internal List<string> GetIListClaims(string claimType)
         {
             List<string> claimValues = new List<string>();
 
