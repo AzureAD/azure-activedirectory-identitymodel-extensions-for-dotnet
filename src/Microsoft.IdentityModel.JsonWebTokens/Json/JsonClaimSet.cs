@@ -22,11 +22,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal static JsonClaimSet Empty { get; } = new JsonClaimSet("{}"u8.ToArray());
         internal object _claimsLock = new();
-        internal IDictionary<string, object> _jsonClaims;
-        private IList<Claim> _claims;
-        private readonly object _claimsLock = new object();
+        internal readonly Dictionary<string, object> _jsonClaims;
+        private List<Claim> _claims;
 
-        internal JsonClaimSet(IDictionary<string, object> jsonClaims)
+        internal JsonClaimSet(Dictionary<string, object> jsonClaims)
         {
             _jsonClaims = jsonClaims;
         }
@@ -35,7 +34,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             _jsonClaims = JwtTokenUtilities.CreateClaimsDictionary(jsonUtf8Bytes, jsonUtf8Bytes.Length);
         }
 
-        internal IList<Claim> Claims(string issuer)
+        internal List<Claim> Claims(string issuer)
         {
             if (_claims == null)
                 lock (_claimsLock)
@@ -44,16 +43,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return _claims;
         }
 
-        internal IList<Claim> CreateClaims(string issuer)
+        internal List<Claim> CreateClaims(string issuer)
         {
-            IList<Claim> claims = new List<Claim>();
+            var claims = new List<Claim>();
             foreach (KeyValuePair<string, object> kvp in _jsonClaims)
                 CreateClaimFromObject(claims, kvp.Key, kvp.Value, issuer);
 
             return claims;
         }
 
-        internal static void CreateClaimFromObject(IList<Claim> claims, string claimType, object value, string issuer)
+        internal static void CreateClaimFromObject(List<Claim> claims, string claimType, object value, string issuer)
         {
             // Json.net recognized DateTime by default.
             if (value is string str)
