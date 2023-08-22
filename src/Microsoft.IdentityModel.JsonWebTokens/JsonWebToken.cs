@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Threading;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
@@ -17,7 +18,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// </summary>
     public class JsonWebToken : SecurityToken
     {
-        internal object _audiencesLock = new();
         private ClaimsIdentity _claimsIdentity;
         private bool _wasClaimsIdentitySet;
 
@@ -614,12 +614,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 if (_audiences == null)
                 {
-                    lock (_audiencesLock)
-                    {
-                        _audiences ??= Payload.TryGetValue(JwtRegisteredClaimNames.Aud, out IList<string> audiences) ?
-                            (audiences is string[] audiencesArray ? audiencesArray : audiences.ToArray()) :
-                            Array.Empty<string>();
-                    }
+                    var tmp = Payload.TryGetValue(JwtRegisteredClaimNames.Aud, out IList<string> audiences) ?
+                        (audiences is string[] audiencesArray ? audiencesArray : audiences.ToArray()) :
+                        Array.Empty<string>();
+
+                    Interlocked.CompareExchange(ref _audiences, tmp, null);
                 }
 
                 return _audiences;
