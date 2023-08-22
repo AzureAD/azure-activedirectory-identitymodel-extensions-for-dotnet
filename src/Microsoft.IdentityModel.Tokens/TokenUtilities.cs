@@ -136,6 +136,10 @@ namespace Microsoft.IdentityModel.Tokens
                             jsonClaimValue
                         }; 
                     }
+                    else if (existingValue is IList<object> existingList)
+                    {
+                        existingList.Add(jsonClaimValue);
+                    }
                 }
                 else
                 {
