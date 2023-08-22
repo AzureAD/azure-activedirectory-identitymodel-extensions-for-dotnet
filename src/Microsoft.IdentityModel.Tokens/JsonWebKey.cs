@@ -19,9 +19,9 @@ namespace Microsoft.IdentityModel.Tokens
     {
         internal const string ClassName = "Microsoft.IdentityModel.Tokens.JsonWebKey";
         private Dictionary<string, object> _additionalData;
-        private IList<string> _keyOps;
-        private IList<string> _oth;
-        private IList<string> _x5c;
+        private List<string> _keyOps;
+        private List<string> _oth;
+        private List<string> _x5c;
         private string _kid;
 
         /// <summary>

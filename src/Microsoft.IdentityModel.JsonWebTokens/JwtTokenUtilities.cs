@@ -533,7 +533,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         // We need a shared model for adding claims from object for JsonWebToken and JwtSecurityToken
         // From getting ClaimValueTypes to setting object types
 
-        internal static IDictionary<string, object> CreateClaimsDictionary(byte[] bytes, int length)
+        internal static Dictionary<string, object> CreateClaimsDictionary(byte[] bytes, int length)
         {
             Dictionary<string, object> claims = new();
             Span<byte> utf8Span = bytes;
@@ -575,9 +575,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="startIndex"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        internal static IDictionary<string,object> ParseJsonBytes(string rawString, int startIndex, int length)
+        internal static Dictionary<string,object> ParseJsonBytes(string rawString, int startIndex, int length)
         {
-            return Base64UrlEncoding.Decode<IDictionary<string,object>>(rawString, startIndex, length, CreateClaimsDictionary);
+            return Base64UrlEncoding.Decode(rawString, startIndex, length, CreateClaimsDictionary);
         }
     }
 }
