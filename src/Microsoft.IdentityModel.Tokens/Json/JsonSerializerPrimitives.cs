@@ -481,6 +481,15 @@ namespace Microsoft.IdentityModel.Tokens.Json
 
                 writer.WriteEndArray();
             }
+            else if (depth < MaxDepth && obj is System.Collections.IList ilist)
+            {
+                depth++;
+                writer.WriteStartArray(key);
+                foreach (object item in ilist)
+                    WriteObjectValue(ref writer, item, depth);
+
+                writer.WriteEndArray();
+            }
             else if (obj is IDictionary<string, string> idics)
             {
                 writer.WriteStartObject(key);
@@ -504,6 +513,15 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 writer.WriteStartObject(key);
                 foreach (KeyValuePair<string, object> kvp in dic)
                     WriteObject(ref writer, kvp.Key, kvp.Value, depth);
+
+                writer.WriteEndObject();
+            }
+            else if (depth < MaxDepth && obj is System.Collections.IDictionary idictionary)
+            {
+                depth++;
+                writer.WriteStartObject(key);
+                foreach (System.Collections.DictionaryEntry kvp in idictionary)
+                    WriteObject(ref writer, kvp.Key.ToString(), kvp.Value, depth);
 
                 writer.WriteEndObject();
             }
