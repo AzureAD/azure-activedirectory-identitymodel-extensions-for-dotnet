@@ -291,7 +291,7 @@ namespace Microsoft.IdentityModel.Tokens
         public string X5t { get; set; }
 
         /// <summary>
-        /// Gets or sets the 'x5t#S256' (X.509 Certificate SHA-1 thumbprint)..
+        /// Gets or sets the 'x5t#S256' (X.509 Certificate SHA-256 thumbprint)..
         /// </summary>
         [JsonPropertyName(JsonWebKeyParameterNames.X5tS256)]
 #if NET6_0_OR_GREATER
