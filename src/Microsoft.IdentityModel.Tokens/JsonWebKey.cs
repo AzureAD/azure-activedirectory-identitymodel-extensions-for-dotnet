@@ -219,7 +219,7 @@ namespace Microsoft.IdentityModel.Tokens
         public string X5t { get; set; }
 
         /// <summary>
-        /// Gets or sets the 'x5t#S256' (X.509 Certificate SHA-1 thumbprint)..
+        /// Gets or sets the 'x5t#S256' (X.509 Certificate SHA-256 thumbprint)..
         /// </summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore, PropertyName = JsonWebKeyParameterNames.X5tS256, Required = Required.Default)]
         public string X5tS256 { get; set; }
