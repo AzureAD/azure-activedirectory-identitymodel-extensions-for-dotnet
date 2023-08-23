@@ -6,7 +6,6 @@ using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.TestUtils;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Benchmarks
@@ -25,7 +24,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         {
             tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(Default.PayloadClaims),
+                Claims = BenchmarkUtils.SimpleClaims,
                 SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
             };
             jsonWebToken = jsonWebTokenHandler.CreateToken(tokenDescriptor);
@@ -42,6 +41,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         public void JsonWebTokenSetup()
         {
             jsonWebTokenHandler = new JsonWebTokenHandler();
+            jsonWebTokenHandler.SetDefaultTimesOnTokenCreation = false;
         }
 
         [Benchmark]
@@ -51,6 +51,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         public void JwtSecurityTokenSetup()
         {
             jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+            jwtSecurityTokenHandler.SetDefaultTimesOnTokenCreation = false;
         }
 
         [Benchmark]
