@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         }
 
         [Benchmark]
-        public string CreateToken() => jsonWebTokenHandler.CreateToken(tokenDescriptor);
+        public string JsonWebTokenHandler_CreateToken() => jsonWebTokenHandler.CreateToken(tokenDescriptor);
 
     }
 }

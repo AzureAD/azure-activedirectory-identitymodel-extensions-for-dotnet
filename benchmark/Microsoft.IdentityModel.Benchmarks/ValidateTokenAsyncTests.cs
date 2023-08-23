@@ -38,23 +38,23 @@ namespace Microsoft.IdentityModel.Benchmarks
             };
         }
 
-        [GlobalSetup(Targets = new[] { nameof(JsonWebTokenHandler) })]
+        [GlobalSetup(Targets = new[] { nameof(JsonWebTokenHandler_ValidateTokenAsync) })]
         public void JsonWebTokenSetup()
         {
             jsonWebTokenHandler = new JsonWebTokenHandler();
         }
 
         [Benchmark]
-        public async Task<TokenValidationResult> JsonWebTokenHandler() => await jsonWebTokenHandler.ValidateTokenAsync(jsonWebToken, validationParameters).ConfigureAwait(false);
+        public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsync() => await jsonWebTokenHandler.ValidateTokenAsync(jsonWebToken, validationParameters).ConfigureAwait(false);
 
-        [GlobalSetup(Targets = new[] { nameof(JwtSecurityTokenHandler) })]
+        [GlobalSetup(Targets = new[] { nameof(JwtSecurityTokenHandler_ValidateTokenAsync) })]
         public void JwtSecurityTokenSetup()
         {
             jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
         }
 
         [Benchmark]
-        public async Task<TokenValidationResult> JwtSecurityTokenHandler() => await jwtSecurityTokenHandler.ValidateTokenAsync(jsonWebToken, validationParameters).ConfigureAwait(false);
+        public async Task<TokenValidationResult> JwtSecurityTokenHandler_ValidateTokenAsync() => await jwtSecurityTokenHandler.ValidateTokenAsync(jsonWebToken, validationParameters).ConfigureAwait(false);
 
     }
 }
