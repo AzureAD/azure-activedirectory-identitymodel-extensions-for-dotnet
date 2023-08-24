@@ -63,6 +63,148 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 Assert.NotNull(aTypeClaims.SingleOrDefault(c => c.Value == value));
         }
 
+        [Theory, MemberData(nameof(ComplexTypesTheoryData))]
+        public void JsonWebTokenHandler_CreateToken_ComplexTypes(ComplexTypeSerializationTheoryData theoryData)
+        {
+            var descriptor = new SecurityTokenDescriptor
+            {
+                Claims = new Dictionary<string, object>
+                {
+                    [theoryData.ClaimEntry.Key] = theoryData.ClaimEntry.Value
+                },
+                SigningCredentials = new SigningCredentials(Default.AsymmetricSigningKey, SecurityAlgorithms.RsaSsaPssSha256)
+            };
+
+            var handler = new JsonWebTokenHandler();
+            var token = handler.CreateToken(descriptor);
+            var jwt = new JsonWebToken(token);
+
+            var result = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(Base64UrlEncoder.Decode(jwt.EncodedPayload));
+
+            Assert.Equal(theoryData.ClaimEntry.Value, theoryData.DeserializeJsonFunc(result[theoryData.ClaimEntry.Key].ToString()));
+        }
+
+        public static TheoryData<ComplexTypeSerializationTheoryData> ComplexTypesTheoryData()
+        {
+            return new TheoryData<ComplexTypeSerializationTheoryData>
+            {
+                new ComplexTypeSerializationTheoryData
+                {
+                    ClaimEntry = new KeyValuePair<string, object>(
+                        "keyA",
+                        new Dictionary<string, List<string>>
+                        {
+                            ["prop1"] = new List<string> { "value1", "value2" }
+                        }
+                    ),
+                    DeserializeJsonFunc = new Func<string, object>(json => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, List<string>>>(json))
+                },
+                new ComplexTypeSerializationTheoryData
+                {
+                    ClaimEntry =new KeyValuePair<string, object>(
+                        "keyB",
+                        new Dictionary<string, IList<string>>
+                        {
+                            ["prop2"] = new List<string> { "value3", "value4" }
+                        }
+                    ),
+                    DeserializeJsonFunc = new Func<string, object>(json => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, List<string>>>(json))
+                },
+                new ComplexTypeSerializationTheoryData
+                {
+                    ClaimEntry =new KeyValuePair<string, object>(
+                        "keyC",
+                        new Dictionary<string, string[]>
+                        {
+                            ["prop3"] = new string[] { "value5", "value6" }
+                        }
+                    ),
+                    DeserializeJsonFunc = new Func<string, object>(json => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string[]>>(json))
+                },
+                new ComplexTypeSerializationTheoryData
+                {
+                    ClaimEntry =new KeyValuePair<string, object>(
+                        "keyD",
+                        new Dictionary<string, string>
+                        {
+                            ["prop4"] = "value7"
+                        }
+                    ),
+                    DeserializeJsonFunc = new Func<string, object>(json => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(json))
+                },
+                new ComplexTypeSerializationTheoryData
+                {
+                    ClaimEntry =new KeyValuePair<string, object>(
+                        "keyE",
+                        new Dictionary<string, object>()
+                        {
+                            ["prop5"] = new Dictionary<string, string>
+                            {
+                                ["prop6"] = "value8"
+                            }
+                        }
+                    ),
+                    DeserializeJsonFunc = new Func<string, object>(json => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(json))
+                },
+                new ComplexTypeSerializationTheoryData
+                {
+                    ClaimEntry =new KeyValuePair<string, object>(
+                        "keyF",
+                        new Dictionary<string, object>
+                        {
+                            ["prop7"] = new Dictionary<string, object>
+                            {
+                                ["prop8"] = new List<string> { "value9", "value10" }
+                            }
+                        }
+                    ),
+                    DeserializeJsonFunc = new Func<string, object>(json => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, List<string>>>>(json))
+                },
+                new ComplexTypeSerializationTheoryData
+                {
+                    ClaimEntry =new KeyValuePair<string, object>(
+                        "keyG",
+                        new Dictionary<string, int[]>
+                        {
+                            ["prop9"] = new int[] { 12, 13 }
+                        }
+                    ),
+                    DeserializeJsonFunc = new Func<string, object>(json => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, int[]>>(json))
+                },
+                new ComplexTypeSerializationTheoryData
+                {
+                    ClaimEntry =new KeyValuePair<string, object>(
+                        "keyH",
+                        new Dictionary<string, object>
+                        {
+                            ["prop10"] = new Dictionary<string, bool>
+                            {
+                                ["prop12"] = true,
+                                ["prop13"] = false,
+                            }
+                        }
+                    ),
+                    DeserializeJsonFunc = new Func<string, object>(json => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, bool>>>(json))
+                },
+                new ComplexTypeSerializationTheoryData
+                {
+                    ClaimEntry =new KeyValuePair<string, object>(
+                        "keyI",
+                        new Dictionary<string, Dictionary<string, string>>
+                        {
+                            ["prop14"] = new Dictionary<string, string>
+                            {
+                                ["prop15"] = "value14"
+                            }
+                        }
+                    ),
+                    DeserializeJsonFunc = new Func<string, object>(json => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(json))
+                },
+            };
+        }
+
+>>>>>>> 1159d7df (Tests for Creating tokens with compelx types)
+
         // This test checks to make sure that the value of JsonWebTokenHandler.Base64UrlEncodedUnsignedJWSHeader has remained unchanged.
         [Fact]
         public void Base64UrlEncodedUnsignedJwtHeader()
@@ -3950,6 +4092,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             return new AuthenticatedEncryptionResult(Key, ciphertext, iv, authenticationTag); 
         }
+    }
+
+    public class ComplexTypeSerializationTheoryData : TheoryDataBase
+    {
+        public KeyValuePair<string, object> ClaimEntry { get; set; }
+
+        public Func<string, object> DeserializeJsonFunc { get; set; }
     }
 
     public class DerivedJsonWebTokenHandler : JsonWebTokenHandler
