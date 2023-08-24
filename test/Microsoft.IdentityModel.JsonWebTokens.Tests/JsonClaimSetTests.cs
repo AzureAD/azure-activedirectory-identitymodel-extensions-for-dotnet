@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.TestUtils;
+using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
 namespace Microsoft.IdentityModel.JsonWebTokens.Tests
@@ -208,6 +209,47 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 ShouldFind = true
             });
             #endregion
+
+            return theoryData;
+        }
+
+        [Theory, MemberData(nameof(GetClaimAsTypeTheoryData))]
+        public void GetClaimAsType(JsonClaimSetTheoryData theoryData)
+        {
+            CompareContext context = TestUtilities.WriteHeader($"{this}.GetClaimAsType", theoryData);
+            try
+            {
+                JsonWebToken token = new JsonWebToken(theoryData.Json);
+
+                var methods = typeof(JsonWebToken).GetMethods(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+                var method = typeof(JsonWebToken).GetMethod("GetPayloadValue", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Standard, new Type[] { typeof(string) }, null);
+                var retval = method.MakeGenericMethod(theoryData.PropertyType).Invoke(token, new object[] { theoryData.PropertyName });
+                theoryData.ExpectedException.ProcessNoException(context);
+                IdentityComparer.AreEqual(retval, theoryData.PropertyValue, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<JsonClaimSetTheoryData> GetClaimAsTypeTheoryData()
+        {
+            var theoryData = new TheoryData<JsonClaimSetTheoryData>();
+
+            string header = Base64UrlEncoder.Encode("{}");
+            string payload = Base64UrlEncoder.Encode(@"{""a"":{""prop1"":""value1""},""exp"": 1692706803,""iat"": 1692703203,""nbf"": 1692703203}");
+
+            theoryData.Add(
+                new JsonClaimSetTheoryData("DictionaryOfStrings")
+                {
+                    Json = header + "." + payload + ".",
+                    PropertyName = "a",
+                    PropertyType = typeof(Dictionary<string, string>),
+                    PropertyValue = new Dictionary<string, string> {{"prop1","value1"}}
+                });
 
             return theoryData;
         }

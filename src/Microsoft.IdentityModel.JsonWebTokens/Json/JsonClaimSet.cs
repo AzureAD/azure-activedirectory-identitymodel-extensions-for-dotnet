@@ -9,6 +9,7 @@ using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Json;
 
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
@@ -135,57 +136,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return null;
         }
 
-        internal static object CreateObjectFromJsonElement(JsonElement jsonElement)
-        {
-            if (jsonElement.ValueKind == JsonValueKind.Array)
-            {
-                int numberOfElements = 0;
-                // is this an array of properties
-                foreach (JsonElement element in jsonElement.EnumerateArray())
-                    numberOfElements++;
-
-                object[] objects = new object[numberOfElements];
-
-                int index = 0;
-                foreach (JsonElement element in jsonElement.EnumerateArray())
-                    objects[index++] = CreateObjectFromJsonElement(element);
-
-                return (object)objects;
-            }
-            else if (jsonElement.ValueKind == JsonValueKind.String)
-            {
-                if (DateTime.TryParse(jsonElement.GetString(), CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime dateTime))
-                    return (object)dateTime;
-
-                return jsonElement.GetString();
-            }
-            else if (jsonElement.ValueKind == JsonValueKind.Null)
-                return (object)null;
-            else if (jsonElement.ValueKind == JsonValueKind.Object)
-                return jsonElement.ToString();
-            else if (jsonElement.ValueKind == JsonValueKind.False)
-                return (object)false;
-            else if (jsonElement.ValueKind == JsonValueKind.True)
-                return (object)true;
-            else if (jsonElement.ValueKind == JsonValueKind.Number)
-            {
-                if (jsonElement.TryGetInt64(out long longValue))
-                    return longValue;
-                else if (jsonElement.TryGetInt32(out int intValue))
-                    return intValue;
-                else if (jsonElement.TryGetDecimal(out decimal decimalValue))
-                    return decimalValue;
-                else if (jsonElement.TryGetDouble(out double doubleValue))
-                    return doubleValue;
-                else if (jsonElement.TryGetUInt32(out uint uintValue))
-                    return uintValue;
-                else if (jsonElement.TryGetUInt64(out ulong ulongValue))
-                    return ulongValue;
-            }
-
-            return jsonElement.GetString();
-        }
-
         internal Claim GetClaim(string key, string issuer)
         {
             if (key == null)
@@ -256,6 +206,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     found = false;
                     return default;
                 }
+
+            // JsonElement will be a JsonArray or JsonObject
+            if (obj is JsonElement jsonElement)
+            {
+                return (T)JsonSerializerPrimitives.CreateTypeFromJsonElement<T>(jsonElement);
+            }
 
             Type objType = obj.GetType();
 
@@ -366,7 +322,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 return (T)(object)(object[])objects;
             }
-
 
             found = false;
             if (throwEx)

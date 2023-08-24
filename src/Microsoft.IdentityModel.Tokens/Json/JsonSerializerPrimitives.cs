@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -17,6 +18,12 @@ namespace Microsoft.IdentityModel.Tokens.Json
     internal static class JsonSerializerPrimitives
     {
         internal const int MaxDepth = 2;
+        internal static Type typeofDictionary = typeof(IDictionary);
+        internal static Type typeofDictionaryString = typeof(Dictionary<string, string>);
+        internal static Type typeofDictionaryStrings = typeof(Dictionary<string, string[]>);
+        internal static Type typeofList = typeof(IList);
+        internal static Type typeofListString = typeof(List<string>);
+        internal static Type typeofArray = typeof(Array[]);
 
         /// <summary>
         /// Creates a JsonException that provides information on what went wrong
@@ -118,6 +125,136 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 return jsonDocument.RootElement.Clone();
 #endif
         }
+
+        internal static object CreateObjectFromJsonElement(JsonElement jsonElement)
+        {
+            if (jsonElement.ValueKind == JsonValueKind.Array)
+            {
+                int numberOfElements = 0;
+                // is this an array of properties
+                foreach (JsonElement element in jsonElement.EnumerateArray())
+                    numberOfElements++;
+
+                object[] objects = new object[numberOfElements];
+
+                int index = 0;
+                foreach (JsonElement element in jsonElement.EnumerateArray())
+                    objects[index++] = CreateObjectFromJsonElement(element);
+
+                return (object)objects;
+            }
+            else if (jsonElement.ValueKind == JsonValueKind.String)
+            {
+                if (DateTime.TryParse(jsonElement.GetString(), CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime dateTime))
+                    return (object)dateTime;
+
+                return jsonElement.GetString();
+            }
+            else if (jsonElement.ValueKind == JsonValueKind.Null)
+                return (object)null;
+            else if (jsonElement.ValueKind == JsonValueKind.Object)
+                return jsonElement.ToString();
+            else if (jsonElement.ValueKind == JsonValueKind.False)
+                return (object)false;
+            else if (jsonElement.ValueKind == JsonValueKind.True)
+                return (object)true;
+            else if (jsonElement.ValueKind == JsonValueKind.Number)
+            {
+                if (jsonElement.TryGetInt64(out long longValue))
+                    return longValue;
+                else if (jsonElement.TryGetInt32(out int intValue))
+                    return intValue;
+                else if (jsonElement.TryGetDecimal(out decimal decimalValue))
+                    return decimalValue;
+                else if (jsonElement.TryGetDouble(out double doubleValue))
+                    return doubleValue;
+                else if (jsonElement.TryGetUInt32(out uint uintValue))
+                    return uintValue;
+                else if (jsonElement.TryGetUInt64(out ulong ulongValue))
+                    return ulongValue;
+            }
+
+            return jsonElement.GetString();
+        }
+
+        public static T CreateTypeFromJsonElement<T>(JsonElement jsonElement)
+        {
+            Type typeOfT = typeof(T);
+            if (typeofDictionary.IsAssignableFrom(typeOfT))
+            {
+                // jsonElement must be JsonValueKind.Object
+                if (jsonElement.ValueKind != JsonValueKind.Object)
+                {
+                }
+
+                if (typeOfT == typeofDictionaryString)
+                {
+                    Dictionary<string, string> dictionary = new();
+                    foreach (JsonProperty property in jsonElement.EnumerateObject())
+                        if (property.Value.ValueKind == JsonValueKind.String)
+                            dictionary[property.Name] = property.Value.GetString();
+                        else
+                            dictionary[property.Name] = property.Value.GetRawText();
+
+                    return (T)(object)dictionary;
+                }
+
+                if (typeOfT == typeofDictionaryStrings)
+                {
+                    Dictionary<string, string[]> dictionary = new();
+                    foreach (JsonProperty property in jsonElement.EnumerateObject())
+                    {
+                        if (property.Value.ValueKind != JsonValueKind.Array)
+                            dictionary[property.Name] = new string[]{ property.Value.GetRawText()};
+
+                        int numberOfStrings = 0;
+                        // is this an array of properties
+                        foreach (JsonElement j in property.Value.EnumerateArray())
+                            numberOfStrings++;
+
+                        string[] strings = new string[numberOfStrings];
+                        numberOfStrings = 0;
+                        foreach (JsonElement j in property.Value.EnumerateArray())
+                            strings[numberOfStrings++] = property.Value.GetRawText();
+
+                        dictionary[property.Name] = strings;
+                    }
+
+                    return (T)(object)dictionary;
+                }
+
+                if (typeof(T) is IDictionary<string, string> idic)
+                {
+                }
+
+            }
+            if (typeof(T) is IDictionary<string, string[]> idicto)
+            {
+                // jsonElement must be JsonValueKind.Object
+                if (jsonElement.ValueKind != JsonValueKind.Object)
+                {
+                    // throw
+                }
+            }
+            else if (typeof(T) is IList ilist)
+            {
+                // jsonElement must be a JsonValueKind.Array
+                if (jsonElement.ValueKind != JsonValueKind.Array)
+                {
+                    // throw
+                }
+            }
+            else if (typeof(T) is ICollection icollection)
+            {
+                // jsonElement must be a JsonValueKind.Array
+                if (jsonElement.ValueKind != JsonValueKind.Array)
+                {
+                    // throw
+                }
+            }
+                return (T)(object)null;
+        }
+
 
         #region Read
         internal static bool IsReaderAtTokenType(ref Utf8JsonReader reader, JsonTokenType tokenType, bool advanceReader)
@@ -402,7 +539,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 case JsonTokenType.StartObject:
                     return ReadJsonElement(ref reader);
                 case JsonTokenType.StartArray:
-                    return ReadArrayOfObjects(ref reader, propertyName, className);
+                    return ReadJsonElement(ref reader);
                 default:
                     // There is something broken here as this was called when the reader is pointing at a property.
                     // It must be a known Json type.
