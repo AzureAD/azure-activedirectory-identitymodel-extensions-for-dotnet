@@ -28,6 +28,40 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
     public class JsonWebTokenHandlerTests
     {
+        [Fact]
+        public void JsonWebTokenHandler_CreateToken_SameTypeMultipleValues()
+        {
+            var identity = new ClaimsIdentity("Test");
+
+            var claimValues = new List<string> { "value1", "value2", "value3", "value4" };
+
+            foreach (var value in claimValues)
+                identity.AddClaim(new Claim("a", value));
+
+            var descriptor = new SecurityTokenDescriptor
+            {
+                SigningCredentials = new SigningCredentials(Default.AsymmetricSigningKey, SecurityAlgorithms.RsaSsaPssSha256),
+                Subject = identity
+            };
+
+            var handler = new JsonWebTokenHandler();
+
+            var token = handler.CreateToken(descriptor);
+
+            var jwt = new JsonWebToken(token);
+            var claims = jwt.Claims.ToList();
+
+            int defaultClaimsCount = 3;
+
+            Assert.Equal(defaultClaimsCount + claimValues.Count, claims.Count);
+
+            var aTypeClaims = claims.Where(c => c.Type == "a").ToList();
+
+            Assert.Equal(4, aTypeClaims.Count);
+
+            foreach (var value in claimValues)
+                Assert.NotNull(aTypeClaims.SingleOrDefault(c => c.Value == value));
+        }
 
         // This test checks to make sure that the value of JsonWebTokenHandler.Base64UrlEncodedUnsignedJWSHeader has remained unchanged.
         [Fact]
