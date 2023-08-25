@@ -81,11 +81,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             var result = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(Base64UrlEncoder.Decode(jwt.EncodedPayload));
 
-            Assert.Equal(theoryData.ClaimEntry.Value, theoryData.DeserializeJsonFunc(result[theoryData.ClaimEntry.Key].ToString()));
+            if (theoryData.CustomComparer != null)
+                Assert.True(IdentityComparer.AreEqual(theoryData.ClaimEntry.Value, theoryData.DeserializeJsonFunc(result[theoryData.ClaimEntry.Key].ToString())));
+            else
+                Assert.Equal(theoryData.ClaimEntry.Value, theoryData.DeserializeJsonFunc(result[theoryData.ClaimEntry.Key].ToString()));
         }
 
         public static TheoryData<ComplexTypeSerializationTheoryData> ComplexTypesTheoryData()
         {
+            var jsonElement = System.Text.Json.JsonDocument.Parse(@"{""a"":""b"",""c"":[""d"",""e""]}");
+
             return new TheoryData<ComplexTypeSerializationTheoryData>
             {
                 new ComplexTypeSerializationTheoryData
@@ -200,10 +205,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     ),
                     DeserializeJsonFunc = new Func<string, object>(json => System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(json))
                 },
+                new ComplexTypeSerializationTheoryData
+                {
+                    ClaimEntry =new KeyValuePair<string, object>(
+                        "keyJ",
+                        jsonElement.RootElement
+                    ),
+                    DeserializeJsonFunc = new Func<string, object>(json => System.Text.Json.JsonDocument.Parse(json).RootElement),
+                    CustomComparer = IdentityComparer.AreEqual
+                },
             };
         }
-
->>>>>>> 1159d7df (Tests for Creating tokens with compelx types)
 
         // This test checks to make sure that the value of JsonWebTokenHandler.Base64UrlEncodedUnsignedJWSHeader has remained unchanged.
         [Fact]
@@ -4099,6 +4111,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public KeyValuePair<string, object> ClaimEntry { get; set; }
 
         public Func<string, object> DeserializeJsonFunc { get; set; }
+
+        public Func<object, object, bool> CustomComparer { get; set; }
     }
 
     public class DerivedJsonWebTokenHandler : JsonWebTokenHandler
