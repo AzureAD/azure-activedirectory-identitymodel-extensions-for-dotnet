@@ -614,10 +614,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 if (_audiences == null)
                 {
-                    var tmp = Payload.TryGetValue(JwtRegisteredClaimNames.Aud, out IList<string> audiences) ?
-                        (audiences is string[] audiencesArray ? audiencesArray : audiences.ToArray()) :
-                        Array.Empty<string>();
-
+                    string[] tmp = Payload.TryGetValue(JwtRegisteredClaimNames.Aud, out string[] audiences) ? audiences : Array.Empty<string>();
                     Interlocked.CompareExchange(ref _audiences, tmp, null);
                 }
 
