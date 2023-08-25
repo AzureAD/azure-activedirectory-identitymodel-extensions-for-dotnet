@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -19,6 +20,99 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 {
     public class JwtSecurityTokenHandlerTests
     {
+        [Fact]
+        public void JwtExpDateTimeY2038()
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(new string('a', 128)));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[] { new Claim(ClaimTypes.NameIdentifier, "Bob") };
+
+            var exp = new DateTime(2038, 1, 20);
+
+            var token = new JwtSecurityToken(
+                issuer: "issuer.contoso.com",
+                audience: "audience.contoso.com",
+                claims: claims,
+                expires: exp,
+                signingCredentials: creds);
+
+            Assert.Equal(token.ValidTo.ToUniversalTime(), exp.ToUniversalTime());
+
+            var expClaim = token.Claims.First(x => x.Type == "exp");
+
+            Assert.Equal(long.Parse(expClaim.Value), EpochTime.GetIntDate(exp));
+        }
+
+        [Fact]
+        public void JwtRoundTripExpDateTimeY2038()
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(new string('a', 128)));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[] { new Claim(ClaimTypes.NameIdentifier, "Bob") };
+
+            var exp = new DateTime(2038, 1, 20);
+
+            var token = new JwtSecurityToken(
+                issuer: "issuer.contoso.com",
+                audience: "audience.contoso.com",
+                claims: claims,
+                expires: exp,
+                signingCredentials: creds);
+
+            var handler = new JwtSecurityTokenHandler();
+
+            var jwt = handler.WriteToken(token);
+
+            var result = handler.ValidateTokenAsync(jwt, new TokenValidationParameters
+            {
+                IssuerSigningKey = key,
+                ValidateLifetime = false,
+                ValidAudience = "audience.contoso.com",
+                ValidIssuer = "issuer.contoso.com"
+            }).GetAwaiter().GetResult();
+
+            Assert.True(result.IsValid);
+
+            IdentityComparer.AreEqual(token, result.SecurityToken);
+        }
+
+        [Fact]
+        public void JwtRoundTripExpDateTimePriorToY2038()
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(new string('a', 128)));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[] { new Claim(ClaimTypes.NameIdentifier, "Bob") };
+
+            // an exp that can be represented in an int32
+            var exp = new DateTime(2030, 1, 20);
+
+            var token = new JwtSecurityToken(
+                issuer: "issuer.contoso.com",
+                audience: "audience.contoso.com",
+                claims: claims,
+                expires: exp,
+                signingCredentials: creds);
+
+            var handler = new JwtSecurityTokenHandler();
+
+            var jwt = handler.WriteToken(token);
+
+            var result = handler.ValidateTokenAsync(jwt, new TokenValidationParameters
+            {
+                IssuerSigningKey = key,
+                ValidateLifetime = false,
+                ValidAudience = "audience.contoso.com",
+                ValidIssuer = "issuer.contoso.com"
+            }).GetAwaiter().GetResult();
+
+            Assert.True(result.IsValid);
+
+            IdentityComparer.AreEqual(token, result.SecurityToken);
+        }
+
 
         [Fact]
         public void JwtSecurityTokenHandler_CreateToken_SameTypeMultipleValues()

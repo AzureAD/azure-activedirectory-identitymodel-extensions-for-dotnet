@@ -194,14 +194,14 @@ namespace System.IdentityModel.Tokens.Jwt
                         throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12401, LogHelper.MarkAsNonPII(expires.Value), LogHelper.MarkAsNonPII(notBefore.Value))));
                     }
 
-                    this[JwtRegisteredClaimNames.Nbf] = (int)EpochTime.GetIntDate(notBefore.Value.ToUniversalTime());
+                    this[JwtRegisteredClaimNames.Nbf] = EpochTime.GetIntDate(notBefore.Value.ToUniversalTime());
                 }
 
-                this[JwtRegisteredClaimNames.Exp] = (int)EpochTime.GetIntDate(expires.Value.ToUniversalTime());
+                this[JwtRegisteredClaimNames.Exp] = EpochTime.GetIntDate(expires.Value.ToUniversalTime());
             }
 
             if (issuedAt.HasValue)
-                this[JwtRegisteredClaimNames.Iat] = (int)EpochTime.GetIntDate(issuedAt.Value.ToUniversalTime());
+                this[JwtRegisteredClaimNames.Iat] = EpochTime.GetIntDate(issuedAt.Value.ToUniversalTime());
 
             if (!string.IsNullOrEmpty(issuer))
                 this[JwtRegisteredClaimNames.Iss] = issuer;
