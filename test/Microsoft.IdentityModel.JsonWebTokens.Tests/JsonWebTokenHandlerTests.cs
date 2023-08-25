@@ -184,8 +184,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             ["prop10"] = new Dictionary<string, bool>
                             {
-                                ["prop12"] = true,
-                                ["prop13"] = false,
+                                ["prop11"] = true,
+                                ["prop12"] = false,
                             }
                         }
                     ),
@@ -197,9 +197,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         "keyI",
                         new Dictionary<string, Dictionary<string, string>>
                         {
-                            ["prop14"] = new Dictionary<string, string>
+                            ["prop13"] = new Dictionary<string, string>
                             {
-                                ["prop15"] = "value14"
+                                ["prop14"] = "value14"
                             }
                         }
                     ),
