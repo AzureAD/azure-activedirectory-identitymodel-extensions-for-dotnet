@@ -44,8 +44,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 string jsonJwe = jsonWebTokenHandler.CreateToken(securityTokenDescriptor);
                 string jwtJwe = jwtSecurityTokenHandler.CreateEncodedJwt(securityTokenDescriptor);
 
-                TokenValidationResult tokenValidationResult1 = jsonWebTokenHandler.ValidateToken(jsonJwe, theoryData.TokenValidationParameters);
-                TokenValidationResult tokenValidationResult2 = jsonWebTokenHandler.ValidateToken(jwtJwe, theoryData.TokenValidationParameters);
+                TokenValidationResult tokenValidationResult1 = jsonWebTokenHandler.ValidateTokenAsync(jsonJwe, theoryData.TokenValidationParameters).Result;
+                TokenValidationResult tokenValidationResult2 = jsonWebTokenHandler.ValidateTokenAsync(jwtJwe, theoryData.TokenValidationParameters).Result;
                 TokenValidationResult tokenValidationResult3 = jwtSecurityTokenHandler.ValidateTokenAsync(jsonJwe, theoryData.TokenValidationParameters).GetAwaiter().GetResult();
                 TokenValidationResult tokenValidationResult4 = jwtSecurityTokenHandler.ValidateTokenAsync(jwtJwe, theoryData.TokenValidationParameters).GetAwaiter().GetResult();
 

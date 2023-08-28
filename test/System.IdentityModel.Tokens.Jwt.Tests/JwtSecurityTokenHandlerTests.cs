@@ -271,7 +271,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 string jweFromJsonHandler = theoryData.JsonWebTokenHandler.CreateToken(theoryData.TokenDescriptor);
 
                 var claimsPrincipalJwt = theoryData.JwtSecurityTokenHandler.ValidateToken(tokenFromTokenDescriptor, theoryData.ValidationParameters, out SecurityToken validatedTokenFromJwtHandler);
-                var validationResultJson = theoryData.JsonWebTokenHandler.ValidateToken(jweFromJsonHandler, theoryData.ValidationParameters);
+                var validationResultJson = theoryData.JsonWebTokenHandler.ValidateTokenAsync(jweFromJsonHandler, theoryData.ValidationParameters).Result;
 
                 if (validationResultJson.Exception != null && validationResultJson.IsValid)
                     context.Diffs.Add("validationResultJson.IsValid, validationResultJson.Exception != null");
@@ -279,7 +279,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 IdentityComparer.AreEqual(validationResultJson.IsValid, theoryData.IsValid, context);
 
                 var validatedTokenFromJsonHandler = validationResultJson.SecurityToken;
-                var validationResult2 = theoryData.JsonWebTokenHandler.ValidateToken(tokenFromTokenDescriptor, theoryData.ValidationParameters);
+                var validationResult2 = theoryData.JsonWebTokenHandler.ValidateTokenAsync(tokenFromTokenDescriptor, theoryData.ValidationParameters).Result;
 
                 if (validationResult2.Exception != null && validationResult2.IsValid)
                 {
