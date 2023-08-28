@@ -408,9 +408,9 @@ namespace Microsoft.IdentityModel.TestUtils
                 new Claim(JwtRegisteredClaimNames.GivenName, "Bob", ClaimValueTypes.String, Issuer, Issuer),
                 new Claim(JwtRegisteredClaimNames.Iss, Issuer, ClaimValueTypes.String, Issuer, Issuer),
                 new Claim(JwtRegisteredClaimNames.Aud, Audience, ClaimValueTypes.String, Issuer, Issuer),
-                new Claim(JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(IssueInstant).ToString(), ClaimValueTypes.String, Issuer, Issuer),
-                new Claim(JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(NotBefore).ToString(), ClaimValueTypes.String, Issuer, Issuer),
-                new Claim(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Expires).ToString(), ClaimValueTypes.String, Issuer, Issuer),
+                new Claim(JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(IssueInstant).ToString(), ClaimValueTypes.Integer64, Issuer, Issuer),
+                new Claim(JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(NotBefore).ToString(), ClaimValueTypes.Integer64, Issuer, Issuer),
+                new Claim(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Expires).ToString(), ClaimValueTypes.Integer64, Issuer, Issuer),
             };
         }
 

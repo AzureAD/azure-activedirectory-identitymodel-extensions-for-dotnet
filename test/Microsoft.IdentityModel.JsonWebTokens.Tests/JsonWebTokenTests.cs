@@ -3,10 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.IdentityModel.Tokens.Jwt.Tests;
 using System.Linq;
+using System.Reflection;
 using System.Security.Claims;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
@@ -229,7 +231,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             IdentityComparer.AreEqual(true, success, context);
 
             success = token.TryGetHeaderValue("array", out object[] array);
-            IdentityComparer.AreEqual(new object[] { 1L, "2", 3L }, array, context);
+            IdentityComparer.AreEqual(new object[] { 1, "2", 3 }, array, context);
             IdentityComparer.AreEqual(true, success, context);
 
             success = token.TryGetHeaderValue("string", out string name);
@@ -237,7 +239,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             IdentityComparer.AreEqual(true, success, context);
 
             success = token.TryGetHeaderValue("float", out float floatingPoint);
-            IdentityComparer.AreEqual(42.0, floatingPoint, context);
+            IdentityComparer.AreEqual((float)42, floatingPoint, context);
             IdentityComparer.AreEqual(true, success, context);
 
             success = token.TryGetHeaderValue("integer", out int integer);
@@ -307,7 +309,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             IdentityComparer.AreEqual(true, success, context);
 
             success = token.TryGetPayloadValue("array", out object[] array);
-            IdentityComparer.AreEqual(new object[] { 1L, "2", 3L }, array, context);
+            IdentityComparer.AreEqual(new object[] { 1, "2", 3 }, array, context);
             IdentityComparer.AreEqual(true, success, context);
 
             success = token.TryGetPayloadValue("string", out string name);
@@ -315,7 +317,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             IdentityComparer.AreEqual(true, success, context);
 
             success = token.TryGetPayloadValue("float", out float floatingPoint);
-            IdentityComparer.AreEqual(42.0, floatingPoint, context);
+            IdentityComparer.AreEqual((float)42, floatingPoint, context);
             IdentityComparer.AreEqual(true, success, context);
 
             success = token.TryGetPayloadValue("integer", out int integer);
@@ -347,6 +349,217 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             IdentityComparer.AreEqual(false, success, context);
 
             TestUtilities.AssertFailIfErrors(context);
+        }
+
+        // Time values can be floats, ints, or strings.
+        // This test checks to make sure that parsing does not fault in any of the above cases.
+        [Theory, MemberData(nameof(GetPayloadValueTheoryData))]
+        public void GetPayloadValue(GetPayloadValueTheoryData theoryData)
+        {
+            CompareContext context = TestUtilities.WriteHeader($"{this}.GetPayloadValue", theoryData);
+            try
+            {
+                JsonWebTokenHandler jsonWebTokenHandler = new JsonWebTokenHandler { SetDefaultTimesOnTokenCreation = false };
+                string jwt = jsonWebTokenHandler.CreateToken(theoryData.SecurityTokenDescriptor);
+                JsonWebToken jsonWebToken = new JsonWebToken(jwt);
+                string payload = Base64UrlEncoder.Decode(jsonWebToken.EncodedPayload);
+
+                var methods = typeof(JsonWebToken).GetMethods(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+                var method = typeof(JsonWebToken).GetMethod("GetPayloadValue", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, null, CallingConventions.Standard, new Type[] { typeof(string) }, null);
+                var retval = method.MakeGenericMethod(theoryData.PropertyType).Invoke(jsonWebToken, new object[] { theoryData.PropertyName });
+                theoryData.ExpectedException.ProcessNoException(context);
+                IdentityComparer.AreEqual(retval, theoryData.PropertyValue, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<GetPayloadValueTheoryData> GetPayloadValueTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<GetPayloadValueTheoryData>();
+
+                List<string> listStrings = new List<string> { "list1", "list1" };
+                Collection<string> collectionStrings = new Collection<string> { "collections1", "collections2" };
+                string[] arrayStrings = new string[] { "array1", "arrray2" };
+                int[] arrayInts = new int[] { 1,2,3 };
+                object[] arrayMixed = new object[] { 1, "2", 3 };
+                //Dictionary<string, string[]> dictionaryWithArrayOfStrings = new Dictionary<string, string[]>
+                //{
+                //    ["prop1"] = arrayStrings
+                //};
+
+                //Dictionary<string,  Dictionary<string, string[]>> dictionaryWithDictionary = new Dictionary<string, Dictionary<string, string[]>>
+                //{
+                //    ["prop1"] = dictionaryWithArrayOfStrings
+                //};
+
+                // Disable test for Preview4
+                //theoryData.Add(new GetPayloadValueTheoryData("DictionaryWithDictionary")
+                //{
+                //    PropertyName = "a",
+                //    PropertyType = typeof(Dictionary<string, Dictionary<string, string[]>>),
+                //    PropertyValue = dictionaryWithDictionary,
+                //    SecurityTokenDescriptor = new SecurityTokenDescriptor
+                //    {
+                //        Claims = new Dictionary<string, object>
+                //        {
+                //            ["a"] = dictionaryWithDictionary
+                //        }
+                //    }
+                //});
+
+                theoryData.Add(new GetPayloadValueTheoryData("DictionaryWithArrayOfStrings")
+                {
+                    PropertyName = "a",
+                    PropertyType = typeof(Dictionary<string, string[]>),
+                    PropertyValue = new Dictionary<string, string[]>
+                    {
+                        ["prop1"] = arrayStrings
+                    },
+                    SecurityTokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Claims = new Dictionary<string, object>
+                        {
+                            ["a"] = new Dictionary<string, string[]>
+                            {
+                                ["prop1"] = arrayStrings
+                            }
+                        }
+                    }
+                });
+
+                theoryData.Add(new GetPayloadValueTheoryData("DictionaryWithListOfStrings")
+                {
+                    PropertyName = "a",
+                    PropertyType = typeof(Dictionary<string, List<string>>),
+                    PropertyValue = new Dictionary<string, List<string>>
+                    {
+                        ["prop1"] = listStrings
+                    },
+                    SecurityTokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Claims = new Dictionary<string, object>
+                        {
+                            ["a"] = new Dictionary<string, List<string>>
+                            {
+                                ["prop1"] = listStrings
+                            }
+                        }
+                    }
+                });
+
+                theoryData.Add(new GetPayloadValueTheoryData("DictionaryWithCollectionOfStrings")
+                {
+                    PropertyName = "a",
+                    PropertyType = typeof(Dictionary<string, Collection<string>>),
+                    PropertyValue = new Dictionary<string, Collection<string>>
+                    {
+                        ["prop1"] = collectionStrings
+                    },
+                    SecurityTokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Claims = new Dictionary<string, object>
+                        {
+                            ["a"] = new Dictionary<string, Collection<string>>
+                            {
+                                ["prop1"] = collectionStrings
+                            }
+                        }
+                    }
+                });
+
+                theoryData.Add(new GetPayloadValueTheoryData("ArrayOfStrings")
+                {
+                    PropertyName = "c",
+                    PropertyType = typeof(string[]),
+                    PropertyValue = arrayStrings,
+                    SecurityTokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Claims = new Dictionary<string, object>
+                        {
+                            ["c"] = arrayStrings
+                        }
+                    }
+                });
+
+                theoryData.Add(new GetPayloadValueTheoryData("ListOfStrings")
+                {
+                    PropertyName = "c",
+                    PropertyType = typeof(List<string>),
+                    PropertyValue = listStrings,
+                    SecurityTokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Claims = new Dictionary<string, object>
+                        {
+                            ["c"] = listStrings
+                        }
+                    }
+                });
+
+                theoryData.Add(new GetPayloadValueTheoryData("CollectionOfStrings")
+                {
+                    PropertyName = "c",
+                    PropertyType = typeof(Collection<string>),
+                    PropertyValue = collectionStrings,
+                    SecurityTokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Claims = new Dictionary<string, object>
+                        {
+                            ["c"] = collectionStrings
+                        }
+                    }
+                });
+
+                theoryData.Add(new GetPayloadValueTheoryData("ArrayOfMixedTypesAsObject")
+                {
+                    PropertyName = "c",
+                    PropertyType = typeof(object[]),
+                    PropertyValue = new object[] { 1, "2", 3 },
+                    SecurityTokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Claims = new Dictionary<string, object>
+                        {
+                            ["c"] = arrayMixed
+                        }
+                    }
+                });
+
+                theoryData.Add(new GetPayloadValueTheoryData("ArrayOfIntAsObject")
+                {
+                    PropertyName = "c",
+                    PropertyType = typeof(object[]),
+                    PropertyValue = new object[] { 1, 2, 3 },
+                    SecurityTokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Claims = new Dictionary<string, object>
+                        {
+                            ["c"] = arrayInts
+                        }
+                    }
+                });
+
+                theoryData.Add(new GetPayloadValueTheoryData("ArrayOfIntAsStrings")
+                {
+                    PropertyName = "c",
+                    PropertyType = typeof(string[]),
+                    PropertyValue = new string[] { "1", "2", "3" },
+                    SecurityTokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Claims = new Dictionary<string, object>
+                        {
+                            ["c"] = arrayInts
+                        }
+                    }
+                });
+
+                return theoryData;
+            }
         }
 
         // Time values can be floats, ints, or strings.
