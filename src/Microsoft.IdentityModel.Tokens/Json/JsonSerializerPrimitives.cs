@@ -535,48 +535,6 @@ namespace Microsoft.IdentityModel.Tokens.Json
 #endif
         }
 
-        //internal static int GetInt(JsonElement jsonElement)
-        //{
-        //    if (jsonElement.ValueKind == JsonValueKind.Number)
-        //    {
-        //        if (jsonElement.TryGetInt32(out int i))
-        //            return i;
-        //    }
-        //    else if (jsonElement.ValueKind == JsonValueKind.String)
-        //    {
-        //        if (int.TryParse(jsonElement.GetRawText(), out int value))
-        //            return value;
-        //    }
-
-        //    throw LogHelper.LogExceptionMessage(
-        //        new JsonException(
-        //            LogHelper.FormatInvariant(
-        //                LogMessages.IDX11028,
-        //                jsonElement.GetRawText(),
-        //                "Integer32")));
-        //}
-
-        //internal static double GetDouble(JsonElement jsonElement)
-        //{
-        //    if (jsonElement.ValueKind == JsonValueKind.Number)
-        //    {
-        //        if (jsonElement.TryGetDouble(out double d))
-        //            return d;
-        //    }
-        //    else if (jsonElement.ValueKind == JsonValueKind.String)
-        //    {
-        //        if (double.TryParse(jsonElement.GetRawText(), out double value))
-        //            return value;
-        //    }
-
-        //    throw LogHelper.LogExceptionMessage(
-        //        new JsonException(
-        //            LogHelper.FormatInvariant(
-        //                LogMessages.IDX11028,
-        //                jsonElement.GetRawText(),
-        //                "Double")));
-        //}
-
         internal static List<object> ReadArrayOfObjects(ref Utf8JsonReader reader, string propertyName, string className)
         {
             // returning null keeps the same logic as JsonSerialization.ReadObject
