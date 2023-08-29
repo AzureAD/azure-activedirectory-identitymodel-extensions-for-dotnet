@@ -959,7 +959,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             { JwtRegisteredClaimNames.Aud, Default.Audience },
                             { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires) },
                             { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant) },
-                            { JwtRegisteredClaimNames.Jti, Default.Jti },
                             { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore) },
                         }.ToString(Formatting.None),
                         TokenDescriptor =  new SecurityTokenDescriptor
@@ -970,7 +969,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             Expires = Default.Expires,
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
                             EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes256_Sha512_512,
-                            Claims = new Dictionary<string, object>{ { JwtRegisteredClaimNames.Jti, Default.Jti } }
+                            Claims = new Dictionary<string, object>()
                         },
                         JsonWebTokenHandler = new JsonWebTokenHandler(),
                         ValidationParameters = new TokenValidationParameters

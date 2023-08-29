@@ -379,17 +379,18 @@ namespace Microsoft.IdentityModel.TestUtils
         public static string UnsignedJWSWithSingleAdditionalHeaderClaim = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIiwiaW50IjoxMjN9.eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwiaWF0IjoiMTQ4OTc3NTYxNyIsIm5iZiI6IjE0ODk3NzU2MTciLCJleHAiOiIyNTM0MDIzMDA3OTkifQ.";
 
         // the following values are separate from the one in Default.cs, so we can change the Defaults
+        // Do not change any of these values either adding new values or order or the tests will break.
         public static Dictionary<string, object> PayloadDictionary
         {
             get => new Dictionary<string, object>()
             {
-                { JwtRegisteredClaimNames.Aud, Audience },
                 { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
-                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Expires).ToString() },
                 { JwtRegisteredClaimNames.GivenName, "Bob" },
-                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(IssueInstant).ToString() },
                 { JwtRegisteredClaimNames.Iss, Issuer },
+                { JwtRegisteredClaimNames.Aud, Audience },
+                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(IssueInstant).ToString() },
                 { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(NotBefore).ToString()},
+                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Expires).ToString() }
             };
         }
 
@@ -397,13 +398,13 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             get => new JObject()
             {
-                { JwtRegisteredClaimNames.Aud, Audience },
                 { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
-                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Expires).ToString() },
                 { JwtRegisteredClaimNames.GivenName, "Bob" },
-                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(IssueInstant).ToString() },
                 { JwtRegisteredClaimNames.Iss, Issuer },
+                { JwtRegisteredClaimNames.Aud, Audience },
+                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(IssueInstant).ToString() },
                 { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(NotBefore).ToString()},
+                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Expires).ToString() },
             }.ToString(Formatting.None);
         }
 
