@@ -490,7 +490,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 { JwtRegisteredClaimNames.Aud, Audience },
                 { JwtRegisteredClaimNames.Azp, Azp },
                 { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
-                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Expires).ToString() }
+                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Expires).ToString() },
                 { JwtRegisteredClaimNames.GivenName, "Bob" },
                 { JwtRegisteredClaimNames.Iss, Issuer },
                 { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(IssueInstant).ToString() },
