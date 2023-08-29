@@ -959,6 +959,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             { JwtRegisteredClaimNames.Aud, Default.Audience },
                             { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires) },
                             { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant) },
+                            { JwtRegisteredClaimNames.Jti, Default.Jti },
                             { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore) },
                         }.ToString(Formatting.None),
                         TokenDescriptor =  new SecurityTokenDescriptor
@@ -969,7 +970,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             Expires = Default.Expires,
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
                             EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes256_Sha512_512,
-                            Claims = new Dictionary<string, object>()
+                            Claims = new Dictionary<string, object>{ { JwtRegisteredClaimNames.Jti, Default.Jti } }
                         },
                         JsonWebTokenHandler = new JsonWebTokenHandler(),
                         ValidationParameters = new TokenValidationParameters
@@ -1026,13 +1027,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         TestId = "UseSecurityTokenDescriptorProperties",
                         Payload = new JObject()
                         {
-                            { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
-                            { JwtRegisteredClaimNames.GivenName, "Bob" },
-                            { JwtRegisteredClaimNames.Iss, "Issuer" },
+                            { JwtRegisteredClaimNames.Azp, Default.Azp },
                             { JwtRegisteredClaimNames.Aud, "Audience" },
-                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.Parse("2018-03-17T18:33:37.080Z")) },
-                            { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(DateTime.Parse("2018-03-17T18:33:37.080Z")) },
+                            { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
                             { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.Parse("2023-03-17T18:33:37.080Z")) },
+                            { JwtRegisteredClaimNames.GivenName, "Bob" },
+                            { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.Parse("2038-03-17T18:33:37.080Z")) },
+                            { JwtRegisteredClaimNames.Iss, "Issuer" },
+                            { JwtRegisteredClaimNames.Jti, Default.Jti },
+                            { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(DateTime.Parse("2018-03-17T18:33:37.080Z")) },
                         }.ToString(Formatting.None),
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
@@ -1041,7 +1044,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             Claims = Default.PayloadDictionary,
                             Issuer = "Issuer",
                             Audience = "Audience",
-                            IssuedAt = DateTime.Parse("2018-03-17T18:33:37.080Z"),
+                            IssuedAt = DateTime.Parse("2038-03-17T18:33:37.080Z"),
                             NotBefore = DateTime.Parse("2018-03-17T18:33:37.080Z"),
                             Expires = DateTime.Parse("2023-03-17T18:33:37.080Z")
                         },
@@ -1310,7 +1313,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                        TokenDescriptor =  new SecurityTokenDescriptor
                        {
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
-                            Claims = Default.PayloadDictionary,
+                            Claims = ReferenceTokens.PayloadDictionary,
                             AdditionalHeaderClaims = new Dictionary<string, object> () { { JwtHeaderParameterNames.Typ, "TEST" } }
                        },
                        JwtToken = ReferenceTokens.JWSWithDifferentTyp
@@ -1321,7 +1324,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         TestId = "MultipleAdditionalHeaderClaims",
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
-                            Claims = Default.PayloadDictionary,
+                            Claims = ReferenceTokens.PayloadDictionary,
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
                             AdditionalHeaderClaims = new Dictionary<string, object>() { { "int", 123 }, { "string", "string" } }
                         },
@@ -1333,7 +1336,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                        TokenDescriptor =  new SecurityTokenDescriptor
                        {
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
-                            Claims = Default.PayloadDictionary,
+                            Claims = ReferenceTokens.PayloadDictionary,
                             AdditionalHeaderClaims = new Dictionary<string, object> () { { "int", 123 } }
                        },
                        JwtToken = ReferenceTokens.JWSWithSingleAdditionalHeaderClaim
@@ -1344,17 +1347,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                        TokenDescriptor =  new SecurityTokenDescriptor
                        {
                             SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
-                            Claims = Default.PayloadDictionary,
+                            Claims = ReferenceTokens.PayloadDictionary,
                             AdditionalHeaderClaims = new Dictionary<string, object>()
                        },
-                       JwtToken = new JsonWebTokenHandler().CreateToken(Default.PayloadString, KeyingMaterial.JsonWebKeyRsa256SigningCredentials)
+                       JwtToken = new JsonWebTokenHandler().CreateToken(ReferenceTokens.PayloadString, KeyingMaterial.JsonWebKeyRsa256SigningCredentials)
                     },
                     new CreateTokenTheoryData
                     {
                        TestId = "UnsignedJWS",
                        TokenDescriptor =  new SecurityTokenDescriptor
                        {
-                            Claims = Default.PayloadDictionary,
+                            Claims = ReferenceTokens.PayloadDictionary,
                             AdditionalHeaderClaims = new Dictionary<string, object> () { { "int", 123 } }
                        },
                        JwtToken = ReferenceTokens.UnsignedJWSWithSingleAdditionalHeaderClaim
@@ -1588,10 +1591,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         First = true,
                         TestId = "JWEDirectEncryption",
-                        Payload = Default.PayloadString,
+                        Payload = ReferenceTokens.PayloadString,
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
-                            Claims = Default.PayloadDictionary,
+                            Claims = ReferenceTokens.PayloadDictionary,
                             SigningCredentials = Default.SymmetricSigningCredentials,
                             EncryptingCredentials = Default.SymmetricEncryptingCredentials,
                             AdditionalHeaderClaims = new Dictionary<string, object>() { { "int", 123 }, { "string", "string" } }
@@ -1600,18 +1603,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             IssuerSigningKey = Default.SymmetricSigningCredentials.Key,
                             TokenDecryptionKey = Default.SymmetricEncryptingCredentials.Key,
-                            ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidAudience = ReferenceTokens.Audience,
+                            ValidIssuer = ReferenceTokens.Issuer
                         },
                         JwtToken = ReferenceTokens.JWEDirectEcryptionWithAdditionalHeaderClaims
                     },
                     new CreateTokenTheoryData
                     {
                         TestId = "JWEDirectEncryptionWithCty",
-                        Payload = Default.PayloadString,
+                        Payload = ReferenceTokens.PayloadString,
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
-                            Claims = Default.PayloadDictionary,
+                            Claims = ReferenceTokens.PayloadDictionary,
                             SigningCredentials = Default.SymmetricSigningCredentials,
                             EncryptingCredentials = Default.SymmetricEncryptingCredentials,
                             AdditionalHeaderClaims = new Dictionary<string, object>() { { JwtHeaderParameterNames.Cty, JwtConstants.HeaderType} }
@@ -1620,18 +1623,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             IssuerSigningKey = Default.SymmetricSigningCredentials.Key,
                             TokenDecryptionKey = Default.SymmetricEncryptingCredentials.Key,
-                            ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidAudience = ReferenceTokens.Audience,
+                            ValidIssuer = ReferenceTokens.Issuer
                         },
                         JwtToken = ReferenceTokens.JWEDirectEcryptionWithCtyInAdditionalHeaderClaims
                     },
                     new CreateTokenTheoryData
                     {
                         TestId = "JWEDirectEncryptionWithDifferentTyp",
-                        Payload = Default.PayloadString,
+                        Payload = ReferenceTokens.PayloadString,
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
-                            Claims = Default.PayloadDictionary,
+                            Claims = ReferenceTokens.PayloadDictionary,
                             SigningCredentials = Default.SymmetricSigningCredentials,
                             EncryptingCredentials = Default.SymmetricEncryptingCredentials,
                             AdditionalHeaderClaims = new Dictionary<string, object>() { { JwtHeaderParameterNames.Typ, "TEST" } }
@@ -1640,66 +1643,66 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             IssuerSigningKey = Default.SymmetricSigningCredentials.Key,
                             TokenDecryptionKey = Default.SymmetricEncryptingCredentials.Key,
-                            ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidAudience = ReferenceTokens.Audience,
+                            ValidIssuer = ReferenceTokens.Issuer
                         },
                         JwtToken = ReferenceTokens.JWEDirectEcryptionWithDifferentTyp
                     },
                     new CreateTokenTheoryData
                     {
                        TestId = "JWEKeyWrapping",
-                       Payload = Default.PayloadString,
+                       Payload = ReferenceTokens.PayloadString,
                        TokenDescriptor =  new SecurityTokenDescriptor
                        {
                             SigningCredentials = Default.SymmetricSigningCredentials,
                             EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
-                            Claims = Default.PayloadDictionary,
+                            Claims = ReferenceTokens.PayloadDictionary,
                             AdditionalHeaderClaims = new Dictionary<string, object>() { { "int", 123 }, { "string", "string" } }
                        },
                        ValidationParameters = new TokenValidationParameters
                        {
                             IssuerSigningKey = Default.SymmetricSigningCredentials.Key,
                             TokenDecryptionKey = KeyingMaterial.RsaSecurityKey_2048,
-                            ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidAudience = ReferenceTokens.Audience,
+                            ValidIssuer = ReferenceTokens.Issuer
                        },
                        JwtToken = ReferenceTokens.JWEKeyWrappingWithAdditionalHeaderClaims
                     },
                     new CreateTokenTheoryData
                     {
                        TestId = "JWEKeyWrappingDifferentTyp",
-                       Payload = Default.PayloadString,
+                       Payload = ReferenceTokens.PayloadString,
                        TokenDescriptor =  new SecurityTokenDescriptor
                        {
                             SigningCredentials = Default.SymmetricSigningCredentials,
                             EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
-                            Claims = Default.PayloadDictionary,
+                            Claims = ReferenceTokens.PayloadDictionary,
                             AdditionalHeaderClaims = new Dictionary<string, object>() { { JwtHeaderParameterNames.Typ, "TEST" } }
                        },
                        ValidationParameters = new TokenValidationParameters
                        {
                             IssuerSigningKey = Default.SymmetricSigningCredentials.Key,
                             TokenDecryptionKey = KeyingMaterial.RsaSecurityKey_2048,
-                            ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer
+                            ValidAudience = ReferenceTokens.Audience,
+                            ValidIssuer = ReferenceTokens.Issuer
                        },
                        JwtToken = ReferenceTokens.JWEKeyWrappingWithDifferentTyp
                     },
                     new CreateTokenTheoryData
                     {
                        TestId = "JWEKeyWrappingUnsignedInnerJwt",
-                       Payload = Default.PayloadString,
+                       Payload = ReferenceTokens.PayloadString,
                        TokenDescriptor =  new SecurityTokenDescriptor
                        {
                             EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
-                            Claims = Default.PayloadDictionary,
+                            Claims = ReferenceTokens.PayloadDictionary,
                             AdditionalHeaderClaims = new Dictionary<string, object>() { { "int", 123 }, { "string", "string" } }
                        },
                        ValidationParameters = new TokenValidationParameters
                        {
                             TokenDecryptionKey = KeyingMaterial.RsaSecurityKey_2048,
-                            ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer,
+                            ValidAudience = ReferenceTokens.Audience,
+                            ValidIssuer = ReferenceTokens.Issuer,
                             RequireSignedTokens = false
                        },
                        JwtToken = ReferenceTokens.JWEKeyWrappingUnsignedInnerJWTWithAdditionalHeaderClaims
@@ -1707,18 +1710,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new CreateTokenTheoryData
                     {
                         TestId = "JWEDirectEncryptionUnsignedInnerJWT",
-                        Payload = Default.PayloadString,
+                        Payload = ReferenceTokens.PayloadString,
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
-                            Claims = Default.PayloadDictionary,
+                            Claims = ReferenceTokens.PayloadDictionary,
                             EncryptingCredentials = Default.SymmetricEncryptingCredentials,
                             AdditionalHeaderClaims = new Dictionary<string, object>() { { "int", 123 }, { "string", "string" } }
                         },
                         ValidationParameters = new TokenValidationParameters
                         {
                             TokenDecryptionKey = Default.SymmetricEncryptingCredentials.Key,
-                            ValidAudience = Default.Audience,
-                            ValidIssuer = Default.Issuer,
+                            ValidAudience = ReferenceTokens.Audience,
+                            ValidIssuer = ReferenceTokens.Issuer,
                             RequireSignedTokens = false
                         },
                         JwtToken = ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims
@@ -2082,13 +2085,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         Payload = new JObject()
                         {
+                            { JwtRegisteredClaimNames.Aud, "Audience" },
+                            { JwtRegisteredClaimNames.Azp, Default.Azp },
                             { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
+                            { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.Parse("2023-03-17T18:33:37.080Z")) },
                             { JwtRegisteredClaimNames.GivenName, "Bob" },
                             { JwtRegisteredClaimNames.Iss, "Issuer" },
-                            { JwtRegisteredClaimNames.Aud, "Audience" },
                             { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.Parse("2018-03-17T18:33:37.080Z")) },
-                            { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(DateTime.Parse("2018-03-17T18:33:37.080Z")) },
-                            { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.Parse("2023-03-17T18:33:37.080Z")) },
+                            { JwtRegisteredClaimNames.Jti, Default.Jti },
+                            { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(DateTime.Parse("2038-03-17T18:33:37.080Z")) },
                         }.ToString(Formatting.None),
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
@@ -2097,7 +2102,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             Issuer = "Issuer",
                             Audience = "Audience",
                             IssuedAt = DateTime.Parse("2018-03-17T18:33:37.080Z"),
-                            NotBefore = DateTime.Parse("2018-03-17T18:33:37.080Z"),
+                            NotBefore = DateTime.Parse("2038-03-17T18:33:37.080Z"),
                             Expires = DateTime.Parse("2023-03-17T18:33:37.080Z")
                         },
                         JsonWebTokenHandler = new JsonWebTokenHandler(),

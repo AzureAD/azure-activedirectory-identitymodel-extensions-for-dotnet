@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using System.Security.Claims;
+using System.Text;
+using System.Text.Json;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
@@ -30,6 +32,50 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             new Claim("dateTime", _dateTime.ToString(), ClaimValueTypes.String, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
             new Claim("dateTimeIso8061", _dateTime.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
         };
+
+        [Theory, MemberData(nameof(DirectClaimSetTestCases))]
+        public void DirectClaimSetTests(JsonClaimSetTheoryData theoryData)
+        {
+            CompareContext context = TestUtilities.WriteHeader($"{this}.ClaimSetTests", theoryData);
+            context.IgnoreType = false;
+
+            try
+            {
+                JsonWebToken jwt = new JsonWebToken("{}", $@"{{""true"":true}}");
+                JsonClaimSet claimSet = jwt.CreatePayloadClaimSet(theoryData.Utf8Bytes, theoryData.Utf8Bytes.Length);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (JsonException ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<JsonClaimSetTheoryData> DirectClaimSetTestCases()
+        {
+            var theoryData = new TheoryData<JsonClaimSetTheoryData>();
+            theoryData.Add(new JsonClaimSetTheoryData("NotOnStartObject")
+            {
+                ExpectedException = new ExpectedException(typeof(JsonException)),
+                Utf8Bytes = Encoding.UTF8.GetBytes($@"[""a""]")
+            });
+
+            // ignore exception as a System.Text.Json.JsonReaderException is thrown
+            // which is internal to System.Text.Json so we can't define it.
+            theoryData.Add(new JsonClaimSetTheoryData("badJson")
+            {
+                ExpectedException = new ExpectedException(typeof(JsonException)) { IgnoreExceptionType = true },
+                Utf8Bytes = Encoding.UTF8.GetBytes("badJson")
+            });
+
+            return theoryData;
+        }
 
         [Theory, MemberData(nameof(ClaimSetTestCases))]
         public void ClaimSetGetValueTests(JsonClaimSetTheoryData theoryData)
@@ -58,6 +104,24 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public static TheoryData<JsonClaimSetTheoryData> ClaimSetTestCases()
         {
             var theoryData = new TheoryData<JsonClaimSetTheoryData>();
+
+            theoryData.Add(new JsonClaimSetTheoryData("uint")
+            {
+                Json = $@"{{""uint"":1}}",
+                PropertyName = "uint",
+                PropertyType = typeof(uint),
+                PropertyValue = (uint)1,
+                ShouldFind = true
+            });
+
+            theoryData.Add(new JsonClaimSetTheoryData("decimal")
+            {
+                Json = $@"{{""decimal"":1}}",
+                PropertyName = "decimal",
+                PropertyType = typeof(decimal),
+                PropertyValue = (decimal)1,
+                ShouldFind = true
+            });
 
             #region bool
             theoryData.Add(new JsonClaimSetTheoryData("true")
@@ -146,6 +210,26 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 ShouldFind = true
             });
 
+            #endregion
+
+            #region long
+            theoryData.Add(new JsonClaimSetTheoryData("long")
+            {
+                Json = $@"{{""long"":1}}",
+                PropertyName = "long",
+                PropertyType = typeof(long),
+                PropertyValue = (long)1,
+                ShouldFind = true
+            });
+
+            theoryData.Add(new JsonClaimSetTheoryData("long[]")
+            {
+                Json = $@"{{""long[]"":1}}",
+                PropertyName = "long[]",
+                PropertyType = typeof(long[]),
+                PropertyValue = new long[] { 1 },
+                ShouldFind = true
+            });
             #endregion
 
             #region mixed arrays

@@ -179,26 +179,12 @@ namespace Microsoft.IdentityModel.Tokens.Json
             return jsonElement.GetString();
         }
 
-        public static T CreateTypeFromJsonElement<T>(JsonElement jsonElement)
+        public static bool TryCreateTypeFromJsonElement<T>(JsonElement jsonElement, out T t)
         {
             if (typeof(T) == typeof(string))
-                return (T)(object)jsonElement.ToString();
-            else if (jsonElement.ValueKind == JsonValueKind.Number)
             {
-                if(typeof(T) == typeof(string))
-                    return (T)(object)jsonElement.ToString();
-                else if (typeof(T) == typeof(int))
-                    return (T)(object)jsonElement.GetInt32();
-                else if (typeof(T) == typeof(long))
-                    return (T)(object)jsonElement.GetInt64();
-                else if (typeof(T) == typeof(decimal))
-                    return (T)(object)jsonElement.GetDecimal();
-                else if (typeof(T) == typeof(double))
-                    return (T)(object)jsonElement.GetDouble();
-                else if (typeof(T) == typeof(uint))
-                    return (T)(object)jsonElement.GetUInt32();
-                else if (typeof(T) == typeof(ulong))
-                    return (T)(object)jsonElement.GetUInt64();
+                t = (T)(object)jsonElement.ToString();
+                return true;
             }
             else if (jsonElement.ValueKind == JsonValueKind.Object)
             {
@@ -211,7 +197,8 @@ namespace Microsoft.IdentityModel.Tokens.Json
                         else
                             dictionary[property.Name] = property.Value.GetRawText();
 
-                    return (T)(object)dictionary;
+                    t = (T)(object)dictionary;
+                    return true;
                 }
                 else if (typeof(T) == typeof(Dictionary<string, string[]>))
                 {
@@ -236,7 +223,8 @@ namespace Microsoft.IdentityModel.Tokens.Json
                         dictionary[property.Name] = items;
                     }
 
-                    return (T)(object)dictionary;
+                    t = (T)(object)dictionary;
+                    return true;
                 }
                 else if (typeof(T) == typeof(Dictionary<string, List<string>>))
                 {
@@ -256,7 +244,8 @@ namespace Microsoft.IdentityModel.Tokens.Json
                         dictionary[property.Name] = items;
                     }
 
-                    return (T)(object)dictionary;
+                    t = (T)(object)dictionary;
+                    return true;
                 }
                 else if (typeof(T) == typeof(Dictionary<string, Collection<string>>))
                 {
@@ -276,7 +265,8 @@ namespace Microsoft.IdentityModel.Tokens.Json
                         dictionary[property.Name] = items;
                     }
 
-                    return (T)(object)dictionary;
+                    t = (T)(object)dictionary;
+                    return true;
                 }
                 else if (typeof(T) == typeof(Dictionary<string, object>))
                 {
@@ -284,7 +274,8 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     foreach (JsonProperty property in jsonElement.EnumerateObject())
                         dictionary[property.Name] = CreateObjectFromJsonElement(property.Value);
 
-                    return (T)(object)dictionary;
+                    t = (T)(object)dictionary;
+                    return true;
                 }
             }
             else if (jsonElement.ValueKind == JsonValueKind.Array)
@@ -304,7 +295,8 @@ namespace Microsoft.IdentityModel.Tokens.Json
                         else
                             items[numItems++] = j.GetRawText();
 
-                    return (T)(object)items;
+                    t = (T)(object)items;
+                    return true;
                 }
                 else if (typeof(T) == typeof(List<string>))
                 {
@@ -315,7 +307,8 @@ namespace Microsoft.IdentityModel.Tokens.Json
                         else
                             items.Add(j.GetRawText());
 
-                    return (T)(object)items;
+                    t = (T)(object)items;
+                    return true;
                 }
                 else if (typeof(T) == typeof(Collection<string>))
                 {
@@ -326,7 +319,8 @@ namespace Microsoft.IdentityModel.Tokens.Json
                         else
                             items.Add(j.GetRawText());
 
-                    return (T)(object)items;
+                    t = (T)(object)items;
+                    return true;
                 }
                 else if (typeof(T) == typeof(object[]))
                 {
@@ -340,7 +334,8 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     foreach (JsonElement j in jsonElement.EnumerateArray())
                         items[numItems++] = CreateObjectFromJsonElement(j);
 
-                    return (T)(object)items;
+                    t = (T)(object)items;
+                    return true;
                 }
                 else if (typeof(T) == typeof(List<object>))
                 {
@@ -348,7 +343,8 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     foreach (JsonElement j in jsonElement.EnumerateArray())
                         items.Add(CreateObjectFromJsonElement(j));
 
-                    return (T)(object)items;
+                    t = (T)(object)items;
+                    return true;
                 }
                 else if (typeof(T) == typeof(Collection<object>))
                 {
@@ -356,7 +352,8 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     foreach (JsonElement j in jsonElement.EnumerateArray())
                         items.Add(CreateObjectFromJsonElement(j));
 
-                    return (T)(object)items;
+                    t = (T)(object)items;
+                    return true;
                 }
                 else if (typeof(T) == typeof(int[]))
                 {
@@ -374,14 +371,13 @@ namespace Microsoft.IdentityModel.Tokens.Json
                         else if (int.TryParse(j.GetRawText(), out int value))
                             items[numItems++] = value;
                         else
-                            throw LogHelper.LogExceptionMessage(
-                                new JsonException(
-                                    LogHelper.FormatInvariant(
-                                        LogMessages.IDX11028,
-                                        jsonElement.GetRawText(),
-                                        "Integer32")));
+                        {
+                            t = default;
+                            return false;
+                        }
 
-                    return (T)(object)items;
+                    t = (T)(object)items;
+                    return true;
                 }
                 else if (typeof(T) == typeof(long[]))
                 {
@@ -398,31 +394,28 @@ namespace Microsoft.IdentityModel.Tokens.Json
                         else if (long.TryParse(j.GetRawText(), out long value))
                             items[numItems++] = value;
                         else
-                            throw LogHelper.LogExceptionMessage(
-                                new JsonException(
-                                    LogHelper.FormatInvariant(
-                                        LogMessages.IDX11028,
-                                        jsonElement.GetRawText(),
-                                        "Integer64")));
+                        {
+                            t = default;
+                            return false;
+                        }
                     }
 
-                    return (T)(object)items;
+                    t = (T)(object)items;
+                    return true;
                 }
             }
             else if (typeof(T) == typeof(string))
             {
                 if (jsonElement.ValueKind == JsonValueKind.String)
-                    return (T)(object)jsonElement.GetString();
+                    t = (T)(object)jsonElement.GetString();
+                else
+                    t = (T)(object)jsonElement.GetRawText();
 
-                return (T)(object)jsonElement.GetRawText();
+                return true;
             }
 
-            throw LogHelper.LogExceptionMessage(
-                new JsonException(
-                    LogHelper.FormatInvariant(
-                        LogMessages.IDX11027,
-                        typeof(T).ToString(),
-                        jsonElement.ValueKind.ToString())));
+            t = default;
+            return false;
         }
 
         #region Read
@@ -542,47 +535,47 @@ namespace Microsoft.IdentityModel.Tokens.Json
 #endif
         }
 
-        internal static int GetInt(JsonElement jsonElement)
-        {
-            if (jsonElement.ValueKind == JsonValueKind.Number)
-            {
-                if (jsonElement.TryGetInt32(out int i))
-                    return i;
-            }
-            else if (jsonElement.ValueKind == JsonValueKind.String)
-            {
-                if (int.TryParse(jsonElement.GetRawText(), out int value))
-                    return value;
-            }
+        //internal static int GetInt(JsonElement jsonElement)
+        //{
+        //    if (jsonElement.ValueKind == JsonValueKind.Number)
+        //    {
+        //        if (jsonElement.TryGetInt32(out int i))
+        //            return i;
+        //    }
+        //    else if (jsonElement.ValueKind == JsonValueKind.String)
+        //    {
+        //        if (int.TryParse(jsonElement.GetRawText(), out int value))
+        //            return value;
+        //    }
 
-            throw LogHelper.LogExceptionMessage(
-                new JsonException(
-                    LogHelper.FormatInvariant(
-                        LogMessages.IDX11028,
-                        jsonElement.GetRawText(),
-                        "Integer32")));
-        }
+        //    throw LogHelper.LogExceptionMessage(
+        //        new JsonException(
+        //            LogHelper.FormatInvariant(
+        //                LogMessages.IDX11028,
+        //                jsonElement.GetRawText(),
+        //                "Integer32")));
+        //}
 
-        internal static double GetDouble(JsonElement jsonElement)
-        {
-            if (jsonElement.ValueKind == JsonValueKind.Number)
-            {
-                if (jsonElement.TryGetDouble(out double d))
-                    return d;
-            }
-            else if (jsonElement.ValueKind == JsonValueKind.String)
-            {
-                if (double.TryParse(jsonElement.GetRawText(), out double value))
-                    return value;
-            }
+        //internal static double GetDouble(JsonElement jsonElement)
+        //{
+        //    if (jsonElement.ValueKind == JsonValueKind.Number)
+        //    {
+        //        if (jsonElement.TryGetDouble(out double d))
+        //            return d;
+        //    }
+        //    else if (jsonElement.ValueKind == JsonValueKind.String)
+        //    {
+        //        if (double.TryParse(jsonElement.GetRawText(), out double value))
+        //            return value;
+        //    }
 
-            throw LogHelper.LogExceptionMessage(
-                new JsonException(
-                    LogHelper.FormatInvariant(
-                        LogMessages.IDX11028,
-                        jsonElement.GetRawText(),
-                        "Double")));
-        }
+        //    throw LogHelper.LogExceptionMessage(
+        //        new JsonException(
+        //            LogHelper.FormatInvariant(
+        //                LogMessages.IDX11028,
+        //                jsonElement.GetRawText(),
+        //                "Double")));
+        //}
 
         internal static List<object> ReadArrayOfObjects(ref Utf8JsonReader reader, string propertyName, string className)
         {
@@ -738,7 +731,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
         /// Normally we put the object into a Dictionary[string, object].
         /// </summary>
         /// <param name="reader">the <see cref="Utf8JsonReader"/></param>
-        /// <param name="propertyName">the propertyr name that is being read</param>
+        /// <param name="propertyName">the property name that is being read</param>
         /// <param name="className">the type that is being deserialized</param>
         /// <param name="read">if true reader.Read() will be called.</param>
         /// <returns></returns>

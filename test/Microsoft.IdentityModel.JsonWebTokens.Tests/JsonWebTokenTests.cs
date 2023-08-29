@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -10,6 +11,7 @@ using System.IdentityModel.Tokens.Jwt.Tests;
 using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
+using System.Text;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -42,6 +44,26 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             new Claim("dateTimeIso8061", dateTime.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
         };
 
+        [Fact]
+        public void DateTime2038Issue()
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(new string('a', 128)));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[] { new Claim(ClaimTypes.NameIdentifier, "Bob") };
+            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
+            {
+                SigningCredentials = creds,
+                Subject = new ClaimsIdentity(claims),
+                Expires = (new DateTime(2038, 1, 20)).ToUniversalTime(),
+            };
+
+            JsonWebTokenHandler handler = new();
+            string jwt = handler.CreateToken(tokenDescriptor);
+            JsonWebToken jsonWebToken = new JsonWebToken(jwt);
+
+            Assert.Equal(jsonWebToken.ValidTo, (new DateTime(2038, 1, 20)).ToUniversalTime());
+        }
 
         // This test is designed to test that all properties of a JWE can be accessed.
         // Some properties rely on an inner token and the Payload can be null.
@@ -372,7 +394,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
             catch (Exception ex)
             {
-                theoryData.ExpectedException.ProcessException(ex, context);
+                theoryData.ExpectedException.ProcessException(ex.InnerException, context);
             }
 
             TestUtilities.AssertFailIfErrors(context);
@@ -385,34 +407,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 var theoryData = new TheoryData<GetPayloadValueTheoryData>();
 
                 List<string> listStrings = new List<string> { "list1", "list1" };
+                List<object> listObjects = new List<object> { "list1", "list1" };
                 Collection<string> collectionStrings = new Collection<string> { "collections1", "collections2" };
+                Collection<object> collectionObjects = new Collection<object> { "collections1", "collections2" };
                 string[] arrayStrings = new string[] { "array1", "arrray2" };
+                object[] arrayObjects = new object[] { "array1", "arrray2" };
                 int[] arrayInts = new int[] { 1,2,3 };
                 object[] arrayMixed = new object[] { 1, "2", 3 };
-                //Dictionary<string, string[]> dictionaryWithArrayOfStrings = new Dictionary<string, string[]>
-                //{
-                //    ["prop1"] = arrayStrings
-                //};
-
-                //Dictionary<string,  Dictionary<string, string[]>> dictionaryWithDictionary = new Dictionary<string, Dictionary<string, string[]>>
-                //{
-                //    ["prop1"] = dictionaryWithArrayOfStrings
-                //};
-
-                // Disable test for Preview4
-                //theoryData.Add(new GetPayloadValueTheoryData("DictionaryWithDictionary")
-                //{
-                //    PropertyName = "a",
-                //    PropertyType = typeof(Dictionary<string, Dictionary<string, string[]>>),
-                //    PropertyValue = dictionaryWithDictionary,
-                //    SecurityTokenDescriptor = new SecurityTokenDescriptor
-                //    {
-                //        Claims = new Dictionary<string, object>
-                //        {
-                //            ["a"] = dictionaryWithDictionary
-                //        }
-                //    }
-                //});
 
                 theoryData.Add(new GetPayloadValueTheoryData("DictionaryWithArrayOfStrings")
                 {
@@ -488,6 +489,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     }
                 });
 
+                theoryData.Add(new GetPayloadValueTheoryData("ArrayOfObjects")
+                {
+                    PropertyName = "c",
+                    PropertyType = typeof(object[]),
+                    PropertyValue = arrayObjects,
+                    SecurityTokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Claims = new Dictionary<string, object>
+                        {
+                            ["c"] = arrayObjects
+                        }
+                    }
+                });
+
                 theoryData.Add(new GetPayloadValueTheoryData("ListOfStrings")
                 {
                     PropertyName = "c",
@@ -502,11 +517,39 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     }
                 });
 
+                theoryData.Add(new GetPayloadValueTheoryData("ListOfObjects")
+                {
+                    PropertyName = "c",
+                    PropertyType = typeof(List<object>),
+                    PropertyValue = listObjects,
+                    SecurityTokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Claims = new Dictionary<string, object>
+                        {
+                            ["c"] = listObjects
+                        }
+                    }
+                });
+
                 theoryData.Add(new GetPayloadValueTheoryData("CollectionOfStrings")
                 {
                     PropertyName = "c",
                     PropertyType = typeof(Collection<string>),
                     PropertyValue = collectionStrings,
+                    SecurityTokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Claims = new Dictionary<string, object>
+                        {
+                            ["c"] = collectionStrings
+                        }
+                    }
+                });
+
+                theoryData.Add(new GetPayloadValueTheoryData("CollectionOfObjects")
+                {
+                    PropertyName = "c",
+                    PropertyType = typeof(Collection<object>),
+                    PropertyValue = collectionObjects,
                     SecurityTokenDescriptor = new SecurityTokenDescriptor
                     {
                         Claims = new Dictionary<string, object>
@@ -558,6 +601,80 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     }
                 });
 
+                theoryData.Add(new GetPayloadValueTheoryData("NotSupportedArray")
+                {
+                    ExpectedException = ExpectedException.ArgumentException("IDX14305:"),
+                    PropertyName = "c",
+                    PropertyType = typeof(Array),
+                    PropertyValue = new string[] { "1", "2", "3" },
+                    SecurityTokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Claims = new Dictionary<string, object>
+                        {
+                            ["c"] = arrayInts
+                        }
+                    }
+                });
+
+                theoryData.Add(new GetPayloadValueTheoryData("NotSupportedIList")
+                {
+                    ExpectedException = ExpectedException.ArgumentException("IDX14305:"),
+                    PropertyName = "c",
+                    PropertyType = typeof(IList),
+                    PropertyValue = new string[] { "1", "2", "3" },
+                    SecurityTokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Claims = new Dictionary<string, object>
+                        {
+                            ["c"] = arrayInts
+                        }
+                    }
+                });
+
+                theoryData.Add(new GetPayloadValueTheoryData("NotSupportedICollection")
+                {
+                    ExpectedException = ExpectedException.ArgumentException("IDX14305:"),
+                    PropertyName = "c",
+                    PropertyType = typeof(ICollection),
+                    PropertyValue = new string[] { "1", "2", "3" },
+                    SecurityTokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Claims = new Dictionary<string, object>
+                        {
+                            ["c"] = arrayInts
+                        }
+                    }
+                });
+
+                theoryData.Add(new GetPayloadValueTheoryData("NotAbleToConvert")
+                {
+                    ExpectedException = ExpectedException.ArgumentException("IDX14305:"),
+                    PropertyName = "dic",
+                    PropertyType = typeof(Dictionary<string, string[]>),
+                    PropertyValue = new string[] { "1", "2", "3" },
+                    SecurityTokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Claims = new Dictionary<string, object>
+                        {
+                            ["dic"] = arrayInts
+                        }
+                    }
+                });
+
+                theoryData.Add(new GetPayloadValueTheoryData("NotAbleToConvertToInt")
+                {
+                    ExpectedException = ExpectedException.ArgumentException("IDX14305:"),
+                    PropertyName = "int",
+                    PropertyType = typeof(int),
+                    PropertyValue = "string",
+                    SecurityTokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Claims = new Dictionary<string, object>
+                        {
+                            ["int"] = "string"
+                        }
+                    }
+                });
                 return theoryData;
             }
         }

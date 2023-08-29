@@ -722,12 +722,6 @@ namespace System.IdentityModel.Tokens.Jwt
                         return true;
                     }
 
-                if (value is JsonElement jsonElement)
-                {
-                    outVal = JsonSerializerPrimitives.GetInt(jsonElement);
-                    return true;
-                }
-
                 outVal = Convert.ToInt32(Math.Truncate(Convert.ToDouble(value, CultureInfo.InvariantCulture)));
                 return true;
             }
@@ -767,12 +761,6 @@ namespace System.IdentityModel.Tokens.Jwt
                         return true;
                     }
 
-                if (value is JsonElement jsonElement)
-                {
-                    outVal = Convert.ToInt64(Math.Truncate(JsonSerializerPrimitives.GetDouble(jsonElement)));
-                    return true;
-                }
-
                 outVal = Convert.ToInt64(Math.Truncate(Convert.ToDouble(value, CultureInfo.InvariantCulture)));
 
                 return true;
@@ -789,10 +777,6 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 return false;
             }
-
-#pragma warning disable CS0162 // Unreachable code detected
-            return false;
-#pragma warning restore CS0162 // Unreachable code detected
         }
 
         internal List<string> GetListOfClaims(string claimType)
@@ -801,11 +785,13 @@ namespace System.IdentityModel.Tokens.Jwt
             if (!TryGetValue(claimType, out object value))
                 return claimValues;
 
-            // JsonArray and JsonObject are storred in the dictionary as JsonElement
+            // JsonArray and JsonObject are stored in the dictionary as JsonElement
             if (value is JsonElement jsonElement)
-                return JsonSerializerPrimitives.CreateTypeFromJsonElement<List<string>>(jsonElement);
-
-            if (value is string str)
+            {
+                if (JsonSerializerPrimitives.TryCreateTypeFromJsonElement(jsonElement, out List<string> list))
+                    return list;
+            }
+            else if (value is string str)
                 claimValues.Add(str);
 
             // value may not be a string, use ToString();

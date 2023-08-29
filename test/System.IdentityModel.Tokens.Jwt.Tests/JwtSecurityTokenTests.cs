@@ -28,8 +28,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 signingCredentials: creds);
 
             Assert.Equal(token.ValidTo, (new DateTime(2038,1,20)).ToUniversalTime());
-            foreach (var claim in token.Claims)
-                Console.WriteLine($"{claim}");
         }
 
         [Fact]

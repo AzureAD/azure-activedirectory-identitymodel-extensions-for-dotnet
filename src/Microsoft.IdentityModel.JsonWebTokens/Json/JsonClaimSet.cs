@@ -197,23 +197,25 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 else
                     return default;
 
-            // When the JsonClaimSet is created JsonArray and JsonObject are stored as JsonElement's
-            if (obj is JsonElement jsonElement)
-                return (T)JsonSerializerPrimitives.CreateTypeFromJsonElement<T>(jsonElement);
-
-            // the below here should only be simple types, string, int, ...
             Type objType = obj.GetType();
-
             if (typeof(T) == objType)
                 return (T)(obj);
 
             if (typeof(T) == typeof(object))
                 return (T)obj;
 
-            if (typeof(T) == typeof(string))
+            // When the JsonClaimSet is created JsonArray and JsonObject are stored as JsonElement's
+            if (obj is JsonElement jsonElement)
+            {
+                if (JsonSerializerPrimitives.TryCreateTypeFromJsonElement<T>(jsonElement, out T t))
+                    return t;
+            }
+            // the below here should only be simple types, string, int, ...
+            else if (typeof(T) == typeof(string))
+            {
                 return (T)((object)obj.ToString());
-
-            if (typeof(T) == typeof(int))
+            }
+            else if (typeof(T) == typeof(int))
             {
                 if (objType == typeof(int))
                     return (T)obj;
@@ -232,24 +234,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (long.TryParse(obj.ToString(), out long value))
                     return (T)(object)value;
             }
-
-            if (typeof(T) == typeof(string[]))
+            else if (typeof(T) == typeof(string[]))
             {
                 if (objType == typeof(string))
                     return (T)(object)new string[] { (string)obj };
 
                 return (T)(object)new string[] { obj.ToString() };
             }
-
-            if (typeof(T) == typeof(List<string>))
+            else if (typeof(T) == typeof(List<string>))
             {
                 if (objType == typeof(string))
                     return (T)(object)new List<string> { (string)obj };
 
                 return (T)(object)new List<string> { obj.ToString() };
             }
-
-            if (typeof(T) == typeof(Collection<string>))
+            else if (typeof(T) == typeof(Collection<string>))
             {
                 if (objType == typeof(string))
                     return (T)(object)new Collection<string> { (string)obj };
@@ -257,16 +256,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return (T)(object)new Collection<string> { obj.ToString() };
             }
 
-            if (typeof(T) == typeof(object[]))
+            else if (typeof(T) == typeof(object[]))
                 return (T)(object)new object[] { obj };
 
-            if (typeof(T) == typeof(List<object>))
+            else if (typeof(T) == typeof(List<object>))
                 return (T)(object)new List<object> { obj };
 
-            if (typeof(T) == typeof(Collection<object>))
+            else if (typeof(T) == typeof(Collection<object>))
                 return (T)(object)new Collection<object> { obj };
 
-            if (typeof(T) == typeof(DateTime))
+            else if (typeof(T) == typeof(DateTime))
             {
                 if (objType == typeof(DateTime))
                     return (T)obj;
@@ -328,9 +327,23 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             found = false;
             if (throwEx)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14305, key, typeof(T), objType, obj.ToString())));
+                throw LogHelper.LogExceptionMessage(
+                    new ArgumentException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX14305,
+                            LogHelper.MarkAsNonPII(key),
+                            LogHelper.MarkAsNonPII(typeof(T)),
+                            LogHelper.MarkAsNonPII(objType),
+                            obj.ToString())));
             else
-                LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14305, key, typeof(T), objType, obj.ToString())));
+                LogHelper.LogExceptionMessage(
+                    new ArgumentException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX14305,
+                            LogHelper.MarkAsNonPII(key),
+                            LogHelper.MarkAsNonPII(typeof(T)),
+                            LogHelper.MarkAsNonPII(objType),
+                            obj.ToString())));
 
             return default;
         }
