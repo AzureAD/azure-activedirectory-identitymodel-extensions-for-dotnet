@@ -18,7 +18,6 @@
     <SystemSecurityCryptographyCngVersion>4.5.0</SystemSecurityCryptographyCngVersion>
     <SystemTextEncoding>4.3.0</SystemTextEncoding>
     <SystemTextJson>4.7.2</SystemTextJson>
-    <SystemTextEncodingsWeb>4.7.2</SystemTextEncodingsWeb>
     <SystemXmlXmlDocumentVersion>4.3.0</SystemXmlXmlDocumentVersion>
   </PropertyGroup>
 </Project>
