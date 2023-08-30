@@ -7,6 +7,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 - Fix regression where `JsonWebToken.TryGetPayloadValue()` was not compatible with dictionary types. See issue [#2246](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2246) for details.
 - Fix regression where dictionary claims added to `SecurityTokenDescriptor.Claims` are no longer correctly serialized. See issue [#2245](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2245) for details.
 - Fix regression with a Y2038 bug. See issue [#2261](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2261) for details.
+- Fix a regression where claims with multiple values are incorrectly serialized. See [#2244](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2244) for details.
 
 ## Performance improvements:
 - Remove sync-over-async pattern with `JsonWebTokens.ValidateToken`, which when in the hot path can lead to threadpool starvation. See issue [#2253](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2253) for details.
