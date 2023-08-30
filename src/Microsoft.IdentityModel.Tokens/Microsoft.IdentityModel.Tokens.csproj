@@ -43,6 +43,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != 'NETCoreApp'">
     <PackageReference Include="System.Text.Json" Version="$(SystemTextJson)" />
   </ItemGroup>
 
