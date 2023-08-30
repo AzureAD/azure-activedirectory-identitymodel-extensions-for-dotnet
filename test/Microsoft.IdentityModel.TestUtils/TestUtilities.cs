@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
+using System.Xml;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
