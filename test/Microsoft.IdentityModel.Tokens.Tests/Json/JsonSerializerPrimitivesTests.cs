@@ -18,7 +18,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
     public class JsonSerializerPrimitivesTests
     {
         [Fact]
-        public void ChechMaxDepthReading()
+        public void CheckMaxDepthReading()
         {
             var document = JsonDocument.Parse(@"{""key"":" + new string('[', 62) +  @"""value""" + new string(']', 62) + "}");
 
@@ -66,6 +66,47 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             var doc = JsonDocument.Parse(mergedJson);
 
             JsonSerializerPrimitives.TryCreateTypeFromJsonElement(doc.RootElement, out value);
+            Assert.NotNull(value);
+        }
+
+        [Fact]
+        public void CheckNumberOfProperties()
+        {
+            var json = new StringBuilder();
+
+            json.Append('{');
+
+            foreach(var i in Enumerable.Range(0, 100))
+            {
+                json.Append($@"""key-{i}"":""value-{i}""");
+                if (i != 99)
+                    json.Append(',');
+            }
+
+            json.Append('}');
+
+            var document = JsonDocument.Parse(json.ToString());
+
+            Dictionary<string, object> value;
+            JsonSerializerPrimitives.TryCreateTypeFromJsonElement(document.RootElement, out value);
+            Assert.NotNull(value);
+
+            json = new StringBuilder();
+
+            json.Append('{');
+
+            foreach (var i in Enumerable.Range(0, 100))
+            {
+                json.Append($@"""key-{i}"":{{""inner-key-{i}"":""value-{i}""}}");
+                if (i != 99)
+                    json.Append(',');
+            }
+
+            json.Append('}');
+
+            document = JsonDocument.Parse(json.ToString());
+
+            JsonSerializerPrimitives.TryCreateTypeFromJsonElement(document.RootElement, out value);
             Assert.NotNull(value);
         }
 
@@ -226,6 +267,29 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                     Json = mergedJson,
                     PropertyName = "key",
                     Object = mergedObjects,
+                });
+
+                var jsonBuilder = new StringBuilder();
+
+                var innerObject = new Dictionary<string, object>();
+
+                jsonBuilder.Append(@"{""key"":{");
+
+                foreach (var i in Enumerable.Range(0, 100))
+                {
+                    innerObject.Add($"key-{i}", new Dictionary<string, string> { [$"inner-key-{i}"] = $"value-{i}" });
+                    jsonBuilder.Append($@"""key-{i}"":{{""inner-key-{i}"":""value-{i}""}}");
+                    if (i != 99)
+                        jsonBuilder.Append(',');
+                }
+
+                jsonBuilder.Append("}}");
+
+                theoryData.Add(new JsonSerializerTheoryData("MultipleProperties")
+                {
+                    PropertyName = "key",
+                    Json = jsonBuilder.ToString(),
+                    Object = innerObject,
                 });
 
                 return theoryData;
