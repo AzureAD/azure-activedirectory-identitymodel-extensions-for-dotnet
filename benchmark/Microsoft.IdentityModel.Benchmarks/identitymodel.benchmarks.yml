@@ -15,11 +15,12 @@ jobs:
       benchmarkDotNet: true
     
 scenarios:
-  ValidateTokenAsyncTests:
-    application:
-      job: benchmarks
 
-  CreateTokenTests:
+  ValidateToken:
     application:
-      job: benchmarks
+      job: "*ValidateTokenAsyncTests*"
+
+  CreateToken:
+    application:
+      job: "*CreateTokenTests*"
 
