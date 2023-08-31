@@ -173,9 +173,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 int index = 0;
                 foreach (JsonElement j in jsonElement.EnumerateArray())
                 {
-                    currentDepth++;
-                    items[index++] = CreateObjectFromJsonElement(j, currentDepth);
-                    currentDepth--;
+                    items[index++] = CreateObjectFromJsonElement(j, currentDepth + 1);
                 }
 
                 return items;
@@ -190,9 +188,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 KeyValuePair<string, object>[] kvps = new KeyValuePair<string, object>[numItems];
                 foreach (JsonProperty property in jsonElement.EnumerateObject())
                 {
-                    currentDepth++;
-                    kvps[index++] = new KeyValuePair<string, object>(property.Name, CreateObjectFromJsonElement(property.Value, currentDepth));
-                    currentDepth--;
+                    kvps[index++] = new KeyValuePair<string, object>(property.Name, CreateObjectFromJsonElement(property.Value, currentDepth + 1));
                 }
 
                 return kvps;
@@ -297,9 +293,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     Dictionary<string, object> dictionary = new();
                     foreach (JsonProperty property in jsonElement.EnumerateObject())
                     {
-                        currentDepth++;
-                        dictionary[property.Name] = CreateObjectFromJsonElement(property.Value, currentDepth);
-                        currentDepth--;
+                        dictionary[property.Name] = CreateObjectFromJsonElement(property.Value, currentDepth + 1);
                     }
 
                     t = (T)(object)dictionary;
@@ -361,9 +355,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     numItems = 0;
                     foreach (JsonElement j in jsonElement.EnumerateArray())
                     {
-                        currentDepth++;
-                        items[numItems++] = CreateObjectFromJsonElement(j, currentDepth);
-                        currentDepth--;
+                        items[numItems++] = CreateObjectFromJsonElement(j, currentDepth + 1);
                     }
 
                     t = (T)(object)items;
@@ -374,9 +366,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     List<object> items = new();
                     foreach (JsonElement j in jsonElement.EnumerateArray())
                     {
-                        currentDepth++;
-                        items.Add(CreateObjectFromJsonElement(j, currentDepth));
-                        currentDepth--;
+                        items.Add(CreateObjectFromJsonElement(j, currentDepth + 1));
                     }
 
                     t = (T)(object)items;
@@ -387,9 +377,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     Collection<object> items = new();
                     foreach (JsonElement j in jsonElement.EnumerateArray())
                     {
-                        currentDepth++;
-                        items.Add(CreateObjectFromJsonElement(j, currentDepth));
-                        currentDepth--;
+                        items.Add(CreateObjectFromJsonElement(j, currentDepth + 1));
                     }
 
                     t = (T)(object)items;
