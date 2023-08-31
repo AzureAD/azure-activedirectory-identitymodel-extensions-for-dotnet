@@ -825,7 +825,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
             else if (obj is bool b)
                 writer.WriteBoolean(key, b);
             else if (obj is DateTime dt)
-                writer.WriteString(key, dt.ToUniversalTime());
+                writer.WriteString(key, dt.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture));
             else if (typeof(IDictionary).IsAssignableFrom(objType))
             {
                 IDictionary dictionary = (IDictionary)obj;
