@@ -95,6 +95,17 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>signed bytes</returns>
         public abstract byte[] Sign(byte[] input);
 
+        internal virtual byte[] Sign(byte[] input, int offset, int count)
+        {
+            throw LogHelper.LogExceptionMessage(new NotImplementedException());
+        }
+
+#if NET6_0_OR_GREATER
+        internal virtual bool Sign(ReadOnlySpan<byte> data, Span<byte> destination, out int bytesWritten)
+        {
+            throw LogHelper.LogExceptionMessage(new NotImplementedException());
+        }
+#endif
         /// Verifies that the <paramref name="signature"/> over <paramref name="input"/> using the
         /// <see cref="SecurityKey"/> and <see cref="SignatureProvider.Algorithm"/> specified by this
         /// <see cref="SignatureProvider"/> are consistent.
