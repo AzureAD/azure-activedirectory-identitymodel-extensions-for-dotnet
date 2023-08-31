@@ -1283,6 +1283,154 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
         }
 
+        // This test checks to make sure that SecurityTokenDescriptor.Audience, Expires, IssuedAt, NotBefore, Issuer have priority over SecurityTokenDescriptor.Claims.
+        [Theory, MemberData(nameof(CreateJWSWithSecurityTokenDescriptorClaimsTheoryData))]
+        public void CreateJWSWithSecurityTokenDescriptorClaims(CreateTokenTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.CreateJWSWithSecurityTokenDescriptorClaims", theoryData);
+
+            var jwtToken = new JsonWebTokenHandler().CreateToken(theoryData.TokenDescriptor);
+            JsonWebToken jsonWebToken = new JsonWebToken(jwtToken);
+
+            jsonWebToken.TryGetPayloadValue("iss", out string issuer);
+            IdentityComparer.AreEqual(theoryData.ExpectedClaims["iss"], issuer, context);
+
+            jsonWebToken.TryGetPayloadValue("aud", out string audience);
+            IdentityComparer.AreEqual(theoryData.ExpectedClaims["aud"], audience, context);
+
+            jsonWebToken.TryGetPayloadValue("exp", out long exp);
+            IdentityComparer.AreEqual(theoryData.ExpectedClaims["exp"], exp, context);
+
+            jsonWebToken.TryGetPayloadValue("iat", out long iat);
+            IdentityComparer.AreEqual(theoryData.ExpectedClaims["iat"], iat, context);
+
+            jsonWebToken.TryGetPayloadValue("nbf", out long nbf);
+            IdentityComparer.AreEqual(theoryData.ExpectedClaims["nbf"], nbf, context);
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<CreateTokenTheoryData> CreateJWSWithSecurityTokenDescriptorClaimsTheoryData
+        {
+            get
+            {
+                TheoryData<CreateTokenTheoryData> theoryData = new TheoryData<CreateTokenTheoryData>();
+
+                SigningCredentials signingCredentials = new SigningCredentials(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.HmacSha256, SecurityAlgorithms.Sha256);
+
+                DateTime iat = DateTime.UtcNow;
+                DateTime exp = iat + TimeSpan.FromDays(1);
+                DateTime nbf = iat + TimeSpan.FromMinutes(1);
+                string iss = Guid.NewGuid().ToString();
+                string aud = Guid.NewGuid().ToString();
+
+                Dictionary<string, object> claims = new Dictionary<string, object>()
+                {
+                    { JwtRegisteredClaimNames.Aud, aud },
+                    { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(exp) },
+                    { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(iat) },
+                    { JwtRegisteredClaimNames.Iss, iss},
+                    { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(nbf) }
+                };
+
+                // These values will be set on the SecurityTokenDescriptor
+                DateTime iatSTD = DateTime.UtcNow + TimeSpan.FromHours(1);
+                DateTime expSTD = iat + TimeSpan.FromDays(1);
+                DateTime nbfSTD = iat + TimeSpan.FromMinutes(1);
+                string issSTD = Guid.NewGuid().ToString();
+                string audSTD = Guid.NewGuid().ToString();
+
+                theoryData.Add(new CreateTokenTheoryData("ValuesFromClaims")
+                {
+                    TokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        SigningCredentials = signingCredentials,
+                        Claims = claims
+                    },
+                    ExpectedClaims = claims
+                });
+
+                theoryData.Add(new CreateTokenTheoryData("AllValuesFromSTD")
+                {
+                    TokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        SigningCredentials = signingCredentials,
+                        Claims = claims,
+                        IssuedAt = iatSTD,
+                        Expires = expSTD,
+                        NotBefore = nbfSTD,
+                        Audience = audSTD,
+                        Issuer = issSTD
+                    },
+                    ExpectedClaims = new Dictionary<string, object>()
+                    {
+                        { JwtRegisteredClaimNames.Aud, audSTD },
+                        { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(expSTD) },
+                        { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(iatSTD) },
+                        { JwtRegisteredClaimNames.Iss, issSTD},
+                        { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(nbfSTD) }
+                    }
+                });
+
+                theoryData.Add(new CreateTokenTheoryData("ExpFromSTD")
+                {
+                    TokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        SigningCredentials = signingCredentials,
+                        Claims = claims,
+                        Expires = expSTD
+                    },
+                    ExpectedClaims = new Dictionary<string, object>()
+                    {
+                        { JwtRegisteredClaimNames.Aud, aud },
+                        { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(expSTD) },
+                        { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(iat) },
+                        { JwtRegisteredClaimNames.Iss, iss},
+                        { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(nbf) }
+                    }
+                });
+
+                theoryData.Add(new CreateTokenTheoryData("IatFromSTD")
+                {
+                    TokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        SigningCredentials = signingCredentials,
+                        Claims = claims,
+                        IssuedAt = iatSTD
+                    },
+                    ExpectedClaims = new Dictionary<string, object>()
+                    {
+                        { JwtRegisteredClaimNames.Aud, aud },
+                        { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(exp) },
+                        { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(iatSTD) },
+                        { JwtRegisteredClaimNames.Iss, iss},
+                        { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(nbf) }
+                    }
+                });
+
+                theoryData.Add(new CreateTokenTheoryData("NbfFromSTD")
+                {
+                    TokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        SigningCredentials = signingCredentials,
+                        Claims = claims,
+                        NotBefore = nbfSTD
+                    },
+                    ExpectedClaims = new Dictionary<string, object>()
+                    {
+                        { JwtRegisteredClaimNames.Aud, aud },
+                        { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(exp) },
+                        { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(iat) },
+                        { JwtRegisteredClaimNames.Iss, iss},
+                        { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(nbfSTD) }
+                    }
+                });
+
+                return theoryData;
+            }
+        }
+
+
         // This test checks to make sure that additional header claims are added as expected to the JWT token header.
         [Theory, MemberData(nameof(CreateJWSWithAdditionalHeaderClaimsTheoryData))]
         public void CreateJWSWithAdditionalHeaderClaims(CreateTokenTheoryData theoryData)
@@ -3880,9 +4028,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
         }
 
-        public CreateTokenTheoryData(string testId)
+        public CreateTokenTheoryData(string testId) : base(testId)
         {
-            TestId = testId;
         }
 
         public Dictionary<string, object> AdditionalHeaderClaims { get; set; }
@@ -3916,6 +4063,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public string Algorithm { get; set; }
 
         public IEnumerable<SecurityKey> ExpectedDecryptionKeys { get; set; }
+
+        public Dictionary<string, object> ExpectedClaims { get; set; }
     }
 
     // Overrides CryptoProviderFactory.CreateAuthenticatedEncryptionProvider to create AuthenticatedEncryptionProviderMock that provides AesGcm encryption.

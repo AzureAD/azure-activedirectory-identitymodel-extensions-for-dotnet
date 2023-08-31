@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using BenchmarkDotNet.Attributes;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Benchmarks
 {
-    [HideColumns("Type", "Job", "WarmupCount", "LaunchCount")]
     [MemoryDiagnoser]
     public class CreateTokenTests
     {
@@ -17,6 +17,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         [GlobalSetup]
         public void Setup()
         {
+            DateTime now = DateTime.UtcNow;
             _jsonWebTokenHandler = new JsonWebTokenHandler();
             _tokenDescriptor = new SecurityTokenDescriptor
             {
