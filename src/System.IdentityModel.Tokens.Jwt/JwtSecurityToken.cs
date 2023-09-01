@@ -39,15 +39,15 @@ namespace System.IdentityModel.Tokens.Jwt
             if (tokenParts.Length == JwtConstants.JwsSegmentCount)
             {
                 if (!JwtTokenUtilities.RegexJws.IsMatch(jwtEncodedString))
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX12739, jwtEncodedString)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX12739));
             }
             else if (tokenParts.Length == JwtConstants.JweSegmentCount)
             {
                 if (!JwtTokenUtilities.RegexJwe.IsMatch(jwtEncodedString))
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX12740, jwtEncodedString)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX12740));
             }
             else
-                throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX12741, jwtEncodedString)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX12741));
 
             Decode(tokenParts, jwtEncodedString);
         }
@@ -486,7 +486,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12729, tokenParts[0], rawData), ex));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12729, tokenParts[0]), ex));
             }
 
             if (tokenParts.Length == JwtConstants.JweSegmentCount)
@@ -514,7 +514,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12723, tokenParts[1], RawData), ex));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12723, tokenParts[1]), ex));
             }
 
             RawHeader = tokenParts[0];

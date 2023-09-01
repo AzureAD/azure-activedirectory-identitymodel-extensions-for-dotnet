@@ -688,7 +688,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
             catch(Exception ex)
             {
-                LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(LogMessages.IDX14307, ex, payload)));
+                LogHelper.LogExceptionMessage(new SecurityTokenException(LogMessages.IDX14307, ex));
             }
 
             payload = jsonPayload != null ? jsonPayload.ToString(Formatting.None) : payload;
@@ -1370,7 +1370,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             var jwt = token as JsonWebToken;
             if (jwt == null)
-                return new TokenValidationResult { Exception = LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX14100, token))), IsValid = false };
+                return new TokenValidationResult { Exception = LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX14100)), IsValid = false };
 
             try
             {
@@ -1418,7 +1418,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     return new TokenValidationResult
                     {
-                        Exception = LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX14100, LogHelper.MarkAsSecurityArtifact(token, JwtTokenUtilities.SafeLogJwtToken), ex))),
+                        Exception = LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX14100, ex)),
                         IsValid = false
                     };
                 }
