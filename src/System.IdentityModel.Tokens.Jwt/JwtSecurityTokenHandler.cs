@@ -651,7 +651,7 @@ namespace System.IdentityModel.Tokens.Jwt
             string message = string.Concat(header.Base64UrlEncode(), ".", payload.Base64UrlEncode());
             string rawSignature = signingCredentials == null ? string.Empty : JwtTokenUtilities.CreateEncodedSignature(message, signingCredentials);
 
-            LogHelper.LogInformation(LogMessages.IDX12722, rawHeader, rawPayload, rawSignature);
+            LogHelper.LogInformation(LogMessages.IDX12722, rawHeader, rawPayload);
 
             if (encryptingCredentials != null)
             {
@@ -767,7 +767,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, LogHelper.MarkAsNonPII(token.Length), LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes))));
 
             if (!CanReadToken(token))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX12709, token)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX12709));
 
             var jwtToken = new JwtSecurityToken();
             jwtToken.Decode(token.Split('.'), token);
@@ -845,7 +845,7 @@ namespace System.IdentityModel.Tokens.Jwt
             var tokenParts = token.Split(new char[] { '.' }, JwtConstants.MaxJwtSegmentCount + 1);
 
             if (tokenParts.Length != JwtConstants.JwsSegmentCount && tokenParts.Length != JwtConstants.JweSegmentCount)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX12741, token)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX12741));
 
             if (tokenParts.Length == JwtConstants.JweSegmentCount)
             {

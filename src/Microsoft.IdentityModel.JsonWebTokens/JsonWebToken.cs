@@ -437,11 +437,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // JWT must have 2 dots
             Dot1 = encodedJson.IndexOf('.');
             if (Dot1 == -1 || Dot1 == encodedJson.Length - 1)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX14100, encodedJson)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX14100));
 
             Dot2 = encodedJson.IndexOf('.', Dot1 + 1);
             if (Dot2 == -1)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX14120, encodedJson)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX14120));
 
             if (Dot2 == encodedJson.Length - 1)
                 Dot3 = -1;
@@ -468,7 +468,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
                 catch (Exception ex)
                 {
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14102, encodedJson.Substring(0, Dot1), encodedJson), ex));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14102, encodedJson.Substring(0, Dot1)), ex));
                 }
 
                 try
@@ -483,7 +483,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
                 catch (Exception ex)
                 {
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14101, encodedJson.Substring(Dot2, Dot2 - Dot1), encodedJson), ex));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14101, encodedJson.Substring(Dot2, Dot2 - Dot1)), ex));
                 }
             }
             else
@@ -497,28 +497,28 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 Payload = new JsonClaimSet(JsonDocument.Parse("{}"));
 #endif
                 if (Dot3 == encodedJson.Length)
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14121, encodedJson)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14121));
 
                 Dot4 = encodedJson.IndexOf('.', Dot3 + 1);
 
                 // JWE needs to have 4 dots
                 if (Dot4 == -1)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX14121, encodedJson)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX14121));
 
                 // too many dots...
                 if (encodedJson.IndexOf('.', Dot4 + 1) != -1)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX14122, encodedJson)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX14122));
 
                 // must have something after 4th dot
                 if (Dot4 == encodedJson.Length - 1)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX14310, encodedJson)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX14310));
 
                 // right number of dots for JWE
                 _hChars = encodedJson.ToCharArray(0, Dot1);
 
                 // header cannot be empty
                 if (_hChars.Length == 0)
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14307, encodedJson)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14307));
 
                 HeaderAsciiBytes = Encoding.ASCII.GetBytes(_hChars);
                 try
@@ -527,7 +527,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
                 catch (Exception ex)
                 {
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14102, encodedJson.Substring(0, Dot1), encodedJson), ex));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14102, encodedJson.Substring(0, Dot1)), ex));
                 }
 
                 // dir does not have any key bytes
@@ -544,7 +544,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 char[] initializationVectorChars = encodedJson.ToCharArray(Dot2 + 1, Dot3 - Dot2 - 1);
                 if (initializationVectorChars.Length == 0)
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14308, encodedJson)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14308));
 
                 try
                 {
@@ -552,12 +552,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
                 catch (Exception ex)
                 {
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14309, encodedJson, encodedJson), ex));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14309, ex));
                 }
 
                 char[] authTagChars = encodedJson.ToCharArray(Dot4 + 1, encodedJson.Length - Dot4 - 1);
                 if (authTagChars.Length == 0)
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14310, encodedJson)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14310));
 
                 try
                 {
@@ -565,12 +565,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
                 catch (Exception ex)
                 {
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14311, encodedJson, encodedJson), ex));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14311, ex));
                 }
 
                 char[] cipherTextBytes = encodedJson.ToCharArray(Dot3 + 1, Dot4 - Dot3 - 1);
                 if (cipherTextBytes.Length == 0)
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14306, encodedJson)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14306));
 
                 try
                 {
@@ -578,7 +578,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
                 catch (Exception ex)
                 {
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14312, encodedJson, encodedJson), ex));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14312, ex));
                 }
             }
 
