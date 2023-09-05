@@ -1148,8 +1148,8 @@ namespace System.IdentityModel.Tokens.Jwt
             if (validationParameters is null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            DateTime? expires = (jwtToken.Payload.Exp == null) ? null : new DateTime?(jwtToken.ValidTo);
-            DateTime? notBefore = (jwtToken.Payload.Nbf == null) ? null : new DateTime?(jwtToken.ValidFrom);
+            DateTime? expires = (jwtToken.Payload.Expiration == null) ? null : new DateTime?(jwtToken.ValidTo);
+            DateTime? notBefore = (jwtToken.Payload.NotBefore == null) ? null : new DateTime?(jwtToken.ValidFrom);
 
             ValidateLifetime(notBefore, expires, jwtToken, validationParameters);
             ValidateAudience(jwtToken.Audiences, jwtToken, validationParameters);
@@ -1424,8 +1424,8 @@ namespace System.IdentityModel.Tokens.Jwt
                         jwtToken)));
                 }
 
-                DateTime? expires = (jwtToken.Payload.Exp == null) ? null : new DateTime?(jwtToken.ValidTo);
-                DateTime? notBefore = (jwtToken.Payload.Nbf == null) ? null : new DateTime?(jwtToken.ValidFrom);
+                DateTime? expires = (jwtToken.Payload.Expiration == null) ? null : new DateTime?(jwtToken.ValidTo);
+                DateTime? notBefore = (jwtToken.Payload.NotBefore == null) ? null : new DateTime?(jwtToken.ValidFrom);
 
                 if (!validationParameters.ValidateSignatureLast)
                 {
