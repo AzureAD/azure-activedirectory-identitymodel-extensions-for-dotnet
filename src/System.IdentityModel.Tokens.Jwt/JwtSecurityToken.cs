@@ -521,7 +521,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12723, payload, RawData), ex));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX12723, payload), ex));
             }
 
         }

@@ -661,7 +661,7 @@ namespace System.IdentityModel.Tokens.Jwt
             }
 
             if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                LogHelper.LogInformation(LogMessages.IDX12722, rawHeader, rawPayload, rawSignature);
+                LogHelper.LogInformation(LogMessages.IDX12722, rawHeader, rawPayload);
 
             if (encryptingCredentials != null)
             {
@@ -856,7 +856,7 @@ namespace System.IdentityModel.Tokens.Jwt
             int tokenPartCount = JwtTokenUtilities.CountJwtTokenPart(token, JwtConstants.MaxJwtSegmentCount + 1);
 
             if (tokenPartCount != JwtConstants.JwsSegmentCount && tokenPartCount != JwtConstants.JweSegmentCount)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(LogMessages.IDX12741, token)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX12741));
 
             if (tokenPartCount == JwtConstants.JweSegmentCount)
             {
