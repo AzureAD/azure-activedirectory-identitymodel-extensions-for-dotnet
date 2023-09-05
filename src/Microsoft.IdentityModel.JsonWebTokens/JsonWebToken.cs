@@ -423,7 +423,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 // header cannot be empty
                 if (hChars.IsEmpty)
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14307, encodedJson)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14307));
 
                 byte[] headerAsciiBytes = new byte[hChars.Length];
 #if NET6_0_OR_GREATER
@@ -463,7 +463,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 ReadOnlyMemory<char> initializationVectorChars = encodedJson.AsMemory(Dot2 + 1, Dot3 - Dot2 - 1);
                 if (initializationVectorChars.IsEmpty)
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14308, encodedJson)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14308));
 
                 try
                 {
@@ -476,7 +476,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 ReadOnlyMemory<char> authTagChars = encodedJson.AsMemory(Dot4 + 1);
                 if (authTagChars.IsEmpty)
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14310, encodedJson)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14310));
 
                 try
                 {
@@ -489,7 +489,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 ReadOnlyMemory<char> cipherTextBytes = encodedJson.AsMemory(Dot3 + 1, Dot4 - Dot3 - 1);
                 if (cipherTextBytes.IsEmpty)
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14306, encodedJson)));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14306));
 
                 try
                 {
