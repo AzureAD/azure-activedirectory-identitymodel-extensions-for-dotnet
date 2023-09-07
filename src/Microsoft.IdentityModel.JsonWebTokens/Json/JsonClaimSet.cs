@@ -241,6 +241,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (objType == typeof(string))
                     return (T)(object)new string[] { (string)obj };
 
+                if (objType == typeof(DateTime))
+                    return (T)(object)new string[] { ((DateTime)obj).ToString("o", CultureInfo.InvariantCulture) };
+
                 return (T)(object)new string[] { obj.ToString() };
             }
             else if (typeof(T) == typeof(List<string>))
@@ -248,12 +251,43 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (objType == typeof(string))
                     return (T)(object)new List<string> { (string)obj };
 
+                if (objType == typeof(DateTime))
+                    return (T)(object)new List<string> { ((DateTime)obj).ToString("o", CultureInfo.InvariantCulture) };
+
                 return (T)(object)new List<string> { obj.ToString() };
             }
             else if (typeof(T) == typeof(Collection<string>))
             {
                 if (objType == typeof(string))
                     return (T)(object)new Collection<string> { (string)obj };
+
+                if (objType == typeof(DateTime))
+                    return (T)(object)new Collection<string> { ((DateTime)obj).ToString("o", CultureInfo.InvariantCulture) };
+
+                return (T)(object)new Collection<string> { obj.ToString() };
+            }
+            // we could have added an OR condition to List<string>
+            // but we have set an order of preference for the return types: Collection<string> is preferred over IList<string>
+            else if (typeof(T) == typeof(IList<string>))
+            {
+                if (objType == typeof(string))
+                    return (T)(object)new List<string> { (string)obj };
+
+                if (objType == typeof(DateTime))
+                    return (T)(object)new List<string> { ((DateTime)obj).ToString("o", CultureInfo.InvariantCulture) };
+
+                return (T)(object)new List<string> { obj.ToString() };
+            }
+            // we could have added an OR condition to Collection<string>
+            // but we have set an order of preference for the return types:
+            // string[], List<string>, Collection<string>, IList<string>, ICollection<string>
+            else if (typeof(T) == typeof(ICollection<string>))
+            {
+                if (objType == typeof(string))
+                    return (T)(object)new Collection<string> { (string)obj };
+
+                if (objType == typeof(DateTime))
+                    return (T)(object)new Collection<string> { ((DateTime)obj).ToString("o", CultureInfo.InvariantCulture) };
 
                 return (T)(object)new Collection<string> { obj.ToString() };
             }
