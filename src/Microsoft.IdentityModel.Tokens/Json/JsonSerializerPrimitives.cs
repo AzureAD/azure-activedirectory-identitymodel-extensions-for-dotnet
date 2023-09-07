@@ -344,6 +344,35 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     t = (T)(object)items;
                     return true;
                 }
+                // we could have added an OR condition to List<string>
+                // but we have set an order of preference for the return types: Collection<string> is preferred over IList<string>
+                else if (typeof(T) == typeof(IList<string>))
+                {
+                    List<string> items = new();
+                    foreach (JsonElement j in jsonElement.EnumerateArray())
+                        if (j.ValueKind == JsonValueKind.String)
+                            items.Add(j.GetString());
+                        else
+                            items.Add(j.GetRawText());
+
+                    t = (T)(object)items;
+                    return true;
+                }
+                // we could have added an OR condition to Collection<string>
+                // but we have set an order of preference for the return types:
+                // string[], List<string>, Collection<string>, IList<string>, ICollection<string>
+                else if (typeof(T) == typeof(ICollection<string>))
+                {
+                    Collection<string> items = new();
+                    foreach (JsonElement j in jsonElement.EnumerateArray())
+                        if (j.ValueKind == JsonValueKind.String)
+                            items.Add(j.GetString());
+                        else
+                            items.Add(j.GetRawText());
+
+                    t = (T)(object)items;
+                    return true;
+                }
                 else if (typeof(T) == typeof(object[]))
                 {
                     int numItems = 0;
