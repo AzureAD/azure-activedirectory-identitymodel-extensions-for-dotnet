@@ -216,7 +216,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (objType == typeof(DateTime))
                     return (T)((object)((DateTime)obj).ToString("o", CultureInfo.InvariantCulture));
 
-               return (T)((object)obj.ToString());
+                if (obj is List<string> list)
+                {
+                    if (list.Count == 1)
+                        return (T)((object)(list[0]));
+                }
+                else
+                    return (T)((object)obj.ToString());
             }
             else if (typeof(T) == typeof(bool))
             {

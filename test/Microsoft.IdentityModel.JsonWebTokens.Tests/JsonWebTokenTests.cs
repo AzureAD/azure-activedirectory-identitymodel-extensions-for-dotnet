@@ -247,7 +247,19 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             try
             {
                 JsonWebToken jsonWebToken = new JsonWebToken(theoryData.Json);
-                IdentityComparer.AreEqual(jsonWebToken.Audiences, theoryData.PropertyValue, context);
+                MethodInfo method = typeof(JsonWebToken).GetMethod("GetPayloadValue");
+                MethodInfo generic = method.MakeGenericMethod(theoryData.PropertyType);
+                object[] parameters = new object[] { theoryData.PropertyName };
+                var audiences = generic.Invoke(jsonWebToken, parameters);
+
+                if (!IdentityComparer.AreEqual(jsonWebToken.Audiences, theoryData.PropertyValue, context))
+                    context.AddDiff($"jsonWebToken.Audiences != theoryData.PropertyValue: '{jsonWebToken.Audiences}' != '{theoryData.PropertyValue}'.");
+
+                if (theoryData.ClaimValue != null)
+                    if (!IdentityComparer.AreEqual(audiences, theoryData.ClaimValue, context))
+                        context.AddDiff($"audiences != theoryData.ClaimValue: '{audiences}' != '{theoryData.ClaimValue}'.");
+
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
@@ -263,31 +275,76 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 var theoryData = new TheoryData<GetPayloadValueTheoryData>();
 
+                theoryData.Add(new GetPayloadValueTheoryData("stringFromSingleInList")
+                {
+                    ClaimValue = "audience",
+                    PropertyName = "aud",
+                    PropertyType = typeof(string),
+                    PropertyValue = new List<string> { "audience" },
+                    Json = JsonUtilities.CreateUnsignedToken("aud", new List<string> { "audience" })
+                });
+
+                theoryData.Add(new GetPayloadValueTheoryData("stringFromMultipeInList")
+                {
+                    ClaimValue = "audience",
+                    ExpectedException = ExpectedException.ArgumentException("IDX14305:"),
+                    PropertyName = "aud",
+                    PropertyValue = new List<string> { "audience", "audience2" },
+                    PropertyType = typeof(string),
+                    Json = JsonUtilities.CreateUnsignedToken("aud", new List<string> { "audience", "audience2" })
+                });
+
+                theoryData.Add(new GetPayloadValueTheoryData("stringTwoNulloneNonNull")
+                {
+                    ClaimValue = "audience1",
+                    PropertyName = "aud",
+                    PropertyValue = new List<string> { "audience1" },
+                    PropertyType = typeof(string),
+                    Json = JsonUtilities.CreateUnsignedToken("aud", new List<string> { null, "audience1", null })
+                });
+
+                theoryData.Add(new GetPayloadValueTheoryData("stringFromCollection")
+                {
+                    ClaimValue = "audience",
+                    PropertyName = "aud",
+                    PropertyType = typeof(string),
+                    PropertyValue = new Collection<string> { "audience" },
+                    Json = JsonUtilities.CreateUnsignedToken("aud", new Collection<string> { "audience" })
+                });
+
                 theoryData.Add(new GetPayloadValueTheoryData("singleNull")
                 {
+                    ClaimValue = new List<string>(),
                     PropertyName = "aud",
                     PropertyValue = new List<string>(),
+                    PropertyType = typeof(List<string>),
                     Json = JsonUtilities.CreateUnsignedToken("aud", null)
                 });
 
                 theoryData.Add(new GetPayloadValueTheoryData("twoNull")
                 {
+                    ClaimValue = new List<string>(),
                     PropertyName = "aud",
                     PropertyValue = new List<string>(),
+                    PropertyType = typeof(List<string>),
                     Json = JsonUtilities.CreateUnsignedToken("aud", new List<string>{ null, null })
                 });
 
                 theoryData.Add(new GetPayloadValueTheoryData("singleNonNull")
                 {
+                    ClaimValue = new List<string> { "audience" },
                     PropertyName = "aud",
                     PropertyValue = new List<string> { "audience"},
+                    PropertyType = typeof(List<string>),
                     Json = JsonUtilities.CreateUnsignedToken("aud", "audience")
                 });
 
                 theoryData.Add(new GetPayloadValueTheoryData("twoNulloneNonNull")
                 {
+                    ClaimValue = new List<string> { "audience1" },
                     PropertyName = "aud",
                     PropertyValue = new List<string> { "audience1"},
+                    PropertyType = typeof(List<string>),
                     Json = JsonUtilities.CreateUnsignedToken("aud", new List<string> { null, "audience1", null })
                 });
 
@@ -540,7 +597,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 });
                 #endregion
 
-                #region collection of strings form simple types
+                #region collection of strings from simple types
 
                 #region string[]
                 theoryData.Add(new GetPayloadValueTheoryData("string[]dateTime")
