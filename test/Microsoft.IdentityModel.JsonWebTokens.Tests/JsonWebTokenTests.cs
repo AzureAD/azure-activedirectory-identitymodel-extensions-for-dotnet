@@ -239,6 +239,62 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        // This test ensures audience values are skipping nulls as expected.
+        [Theory, MemberData(nameof(CheckAudienceValuesTheoryData), DisableDiscoveryEnumeration = true)]
+        public void CheckAudienceValues(GetPayloadValueTheoryData theoryData)
+        {
+            CompareContext context = TestUtilities.WriteHeader($"{this}.CheckAudienceValues", theoryData);
+            try
+            {
+                JsonWebToken jsonWebToken = new JsonWebToken(theoryData.Json);
+                IdentityComparer.AreEqual(jsonWebToken.Audiences, theoryData.PropertyValue, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex.InnerException, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<GetPayloadValueTheoryData> CheckAudienceValuesTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<GetPayloadValueTheoryData>();
+
+                theoryData.Add(new GetPayloadValueTheoryData("singleNull")
+                {
+                    PropertyName = "aud",
+                    PropertyValue = new List<string>(),
+                    Json = JsonUtilities.CreateUnsignedToken("aud", null)
+                });
+
+                theoryData.Add(new GetPayloadValueTheoryData("twoNull")
+                {
+                    PropertyName = "aud",
+                    PropertyValue = new List<string>(),
+                    Json = JsonUtilities.CreateUnsignedToken("aud", new List<string>{ null, null })
+                });
+
+                theoryData.Add(new GetPayloadValueTheoryData("singleNonNull")
+                {
+                    PropertyName = "aud",
+                    PropertyValue = new List<string> { "audience"},
+                    Json = JsonUtilities.CreateUnsignedToken("aud", "audience")
+                });
+
+                theoryData.Add(new GetPayloadValueTheoryData("twoNulloneNonNull")
+                {
+                    PropertyName = "aud",
+                    PropertyValue = new List<string> { "audience1"},
+                    Json = JsonUtilities.CreateUnsignedToken("aud", new List<string> { null, "audience1", null })
+                });
+
+                return theoryData;
+            }
+        }
+
         // This test ensures that TryGetPayloadValue does not throw
         // No need to check for equal as GetPayloadValue does that
         [Theory, MemberData(nameof(GetPayloadValueTheoryData), DisableDiscoveryEnumeration = true)]

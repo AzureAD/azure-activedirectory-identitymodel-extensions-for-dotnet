@@ -741,6 +741,34 @@ namespace Microsoft.IdentityModel.Tokens.Json
             return strings;
         }
 
+        // This is a special case for reading audiences where in 6x, we didn't add null strings to the list.
+        internal static void ReadStringsSkipNulls(
+            ref Utf8JsonReader reader,
+            List<string> strings,
+            string propertyName,
+            string className)
+        {
+            if (reader.TokenType == JsonTokenType.Null)
+                return;
+
+            if (!IsReaderAtTokenType(ref reader, JsonTokenType.StartArray, false))
+                throw LogHelper.LogExceptionMessage(
+                    CreateJsonReaderExceptionInvalidType(ref reader, "JsonTokenType.StartArray", className, propertyName));
+
+            while (reader.Read())
+            {
+                if (IsReaderAtTokenType(ref reader, JsonTokenType.EndArray, false))
+                    break;
+
+                if (reader.TokenType == JsonTokenType.Null)
+                    continue;
+
+                strings.Add(ReadString(ref reader, propertyName, className));
+            }
+
+            return;
+        }
+
         /// <summary>
         /// This method is called when deserializing a property value as an object.
         /// Normally we put the object into a Dictionary[string, object].
@@ -908,6 +936,12 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     LogMessages.IDX10815,
                     LogHelper.MarkAsNonPII(writer.CurrentDepth),
                     LogHelper.MarkAsNonPII(MaxDepth)));
+
+            if (obj is null)
+            {
+                writer.WriteNullValue();
+                return;
+            }
 
             Type objType = obj.GetType();
 
