@@ -2,7 +2,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 
 7.0.0
 ======
-See [IdentityModel7x](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki/IdentityModel-7x-breaking-changes) for the updates on this much anticipated release.
+See [IdentityModel7x](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki/IdentityModel-7x) for the updates on this much anticipated release.
 
 7.0.0-preview5
 =======
