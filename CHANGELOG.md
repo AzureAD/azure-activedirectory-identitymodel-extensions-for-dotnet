@@ -5,7 +5,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 ### Bug fixes:
 - Improve log messages. See PR [#2289](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2289) for details.
 - In `AadIssuerValidator` return a `ValueTask<string>` instead of a `Task<string>`. See Issue [#2286](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2286) and PR [https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2287] for details.
-- Deprecate `int? JwtPayload.Exp`, `.Iat`, and `.Nbf`. See issue [#2266](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2266) for details.
+- Deprecate `int? JwtPayload.Exp`, `.Iat`, and `.Nbf`. See issue [#2266](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2266) for details, [#92](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/92), and [#1525](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/1525).
 - General clean-up. See PR [#2285](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2285).
 
 7.0.0-preview4
