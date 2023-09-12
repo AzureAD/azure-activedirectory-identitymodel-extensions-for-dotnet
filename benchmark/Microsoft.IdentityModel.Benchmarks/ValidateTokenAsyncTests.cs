@@ -12,6 +12,7 @@ namespace Microsoft.IdentityModel.Benchmarks
 {
     [Config(typeof(AntiVirusFriendlyConfig))]
     [HideColumns("Type", "Job", "WarmupCount", "LaunchCount")]
+    [MemoryDiagnoser]
     public class ValidateTokenAsyncTests
     {
         JsonWebTokenHandler jsonWebTokenHandler;
@@ -31,9 +32,9 @@ namespace Microsoft.IdentityModel.Benchmarks
             jsonWebToken = jsonWebTokenHandler.CreateToken(tokenDescriptor);
             validationParameters = new TokenValidationParameters()
             {
-                ValidAudience = "http://Default.Audience.com",
+                ValidAudience = Default.Audience,
                 ValidateLifetime = true,
-                ValidIssuer = "http://Default.Issuer.com",
+                ValidIssuer = Default.Issuer,
                 IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
             };
         }
