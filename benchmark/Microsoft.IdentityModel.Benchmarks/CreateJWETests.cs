@@ -15,16 +15,16 @@ namespace Microsoft.IdentityModel.Benchmarks
     [MemoryDiagnoser]
     public class CreateJWETests
     {
-        JsonWebTokenHandler jsonWebTokenHandler;
-        JwtSecurityTokenHandler jwtSecurityTokenHandler;
-        SecurityTokenDescriptor tokenDescriptor;
+        private JsonWebTokenHandler _jsonWebTokenHandler;
+        private JwtSecurityTokenHandler _jwtSecurityTokenHandler;
+        private SecurityTokenDescriptor _tokenDescriptor;
 
         [GlobalSetup]
         public void Setup()
         {
-            jsonWebTokenHandler = new JsonWebTokenHandler();
-            jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
-            tokenDescriptor = new SecurityTokenDescriptor
+            _jsonWebTokenHandler = new JsonWebTokenHandler();
+            _jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+            _tokenDescriptor = new SecurityTokenDescriptor
             {
                 SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
                 EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes256_Sha512_512,
@@ -34,9 +34,9 @@ namespace Microsoft.IdentityModel.Benchmarks
         }
 
         [Benchmark]
-        public string JsonWebTokenHandler_CreateJWE() => jsonWebTokenHandler.CreateToken(tokenDescriptor);
+        public string JsonWebTokenHandler_CreateJWE() => _jsonWebTokenHandler.CreateToken(_tokenDescriptor);
 
         [Benchmark]
-        public string JwtSecurityTokenHandler_CreateJWE() => jwtSecurityTokenHandler.CreateEncodedJwt(tokenDescriptor);
+        public string JwtSecurityTokenHandler_CreateJWE() => _jwtSecurityTokenHandler.CreateEncodedJwt(_tokenDescriptor);
     }
 }

@@ -12,14 +12,14 @@ namespace Microsoft.IdentityModel.Benchmarks
     [MemoryDiagnoser]
     public class CreateSignedHttpRequestTests
     {
-        SignedHttpRequestHandler signedHttpRequestHandler;
-        SignedHttpRequestDescriptor signedHttpRequestDescriptor;
+        private SignedHttpRequestHandler _signedHttpRequestHandler;
+        private SignedHttpRequestDescriptor _signedHttpRequestDescriptor;
 
         [GlobalSetup]
         public void Setup()
         {
-            signedHttpRequestHandler = new SignedHttpRequestHandler();
-            signedHttpRequestDescriptor = new SignedHttpRequestDescriptor(
+            _signedHttpRequestHandler = new SignedHttpRequestHandler();
+            _signedHttpRequestDescriptor = new SignedHttpRequestDescriptor(
                     SignedHttpRequestTestUtils.DefaultEncodedAccessToken,
                     new HttpRequestData(),
                     SignedHttpRequestTestUtils.DefaultSigningCredentials,
@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         }
 
         [Benchmark]
-        public string SHRHandler_CreateSignedHttpRequest() => signedHttpRequestHandler.CreateSignedHttpRequest(signedHttpRequestDescriptor);
+        public string SHRHandler_CreateSignedHttpRequest() => _signedHttpRequestHandler.CreateSignedHttpRequest(_signedHttpRequestDescriptor);
 
     }
 }

@@ -13,14 +13,14 @@ namespace Microsoft.IdentityModel.Benchmarks
     [MemoryDiagnoser]
     public class CreateTokenTests
     {
-        JsonWebTokenHandler jsonWebTokenHandler;
-        SecurityTokenDescriptor tokenDescriptor;
+        private JsonWebTokenHandler _jsonWebTokenHandler;
+        private SecurityTokenDescriptor _tokenDescriptor;
 
         [GlobalSetup]
         public void Setup()
         {
-            jsonWebTokenHandler = new JsonWebTokenHandler();
-            tokenDescriptor = new SecurityTokenDescriptor
+            _jsonWebTokenHandler = new JsonWebTokenHandler();
+            _tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(Default.PayloadClaims),
                 SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         }
 
         [Benchmark]
-        public string JsonWebTokenHandler_CreateToken() => jsonWebTokenHandler.CreateToken(tokenDescriptor);
+        public string JsonWebTokenHandler_CreateToken() => _jsonWebTokenHandler.CreateToken(_tokenDescriptor);
 
     }
 }

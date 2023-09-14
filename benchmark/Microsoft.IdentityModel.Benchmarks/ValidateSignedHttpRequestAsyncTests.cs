@@ -14,17 +14,17 @@ namespace Microsoft.IdentityModel.Benchmarks
     [MemoryDiagnoser]
     public class ValidateSignedHttpRequestAsyncTests
     {
-        SignedHttpRequestHandler signedHttpRequestHandler;
-        SignedHttpRequestDescriptor signedHttpRequestDescriptor;
-        SignedHttpRequestValidationContext validationContext;
-        string signedHttpRequest;
+        private SignedHttpRequestHandler _signedHttpRequestHandler;
+        private SignedHttpRequestDescriptor _signedHttpRequestDescriptor;
+        private SignedHttpRequestValidationContext _validationContext;
+        private string _signedHttpRequest;
 
         [GlobalSetup]
         public void Setup()
         {
             var requestData = new HttpRequestData();
-            signedHttpRequestHandler = new SignedHttpRequestHandler();
-            signedHttpRequestDescriptor = new SignedHttpRequestDescriptor(
+            _signedHttpRequestHandler = new SignedHttpRequestHandler();
+            _signedHttpRequestDescriptor = new SignedHttpRequestDescriptor(
                     SignedHttpRequestTestUtils.DefaultEncodedAccessToken,
                     requestData,
                     SignedHttpRequestTestUtils.DefaultSigningCredentials,
@@ -34,14 +34,14 @@ namespace Microsoft.IdentityModel.Benchmarks
                         CreateP = false,
                         CreateU = false
                     });
-            signedHttpRequest = signedHttpRequestHandler.CreateSignedHttpRequest(signedHttpRequestDescriptor);
-            validationContext = new SignedHttpRequestValidationContext(
-                signedHttpRequest,
+            _signedHttpRequest = _signedHttpRequestHandler.CreateSignedHttpRequest(_signedHttpRequestDescriptor);
+            _validationContext = new SignedHttpRequestValidationContext(
+                _signedHttpRequest,
                 requestData,
                 SignedHttpRequestTestUtils.DefaultTokenValidationParameters);
         }
 
         [Benchmark]
-        public async Task<SignedHttpRequestValidationResult> SHRHandler_ValidateSignedHttpRequestAsync() => await signedHttpRequestHandler.ValidateSignedHttpRequestAsync(validationContext, CancellationToken.None);
+        public async Task<SignedHttpRequestValidationResult> SHRHandler_ValidateSignedHttpRequestAsync() => await _signedHttpRequestHandler.ValidateSignedHttpRequestAsync(_validationContext, CancellationToken.None);
     }
 }

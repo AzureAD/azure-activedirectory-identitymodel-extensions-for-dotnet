@@ -16,28 +16,28 @@ namespace Microsoft.IdentityModel.Benchmarks
     [MemoryDiagnoser]
     public class ValidateJWEAsyncTests
     {
-        JsonWebTokenHandler jsonWebTokenHandler;
-        JwtSecurityTokenHandler jwtSecurityTokenHandler;
-        SecurityTokenDescriptor tokenDescriptor;
-        string jweFromJsonHandler;
-        string jweFromJwtHandler;
-        TokenValidationParameters validationParameters;
+        private JsonWebTokenHandler _jsonWebTokenHandler;
+        private JwtSecurityTokenHandler _jwtSecurityTokenHandler;
+        private SecurityTokenDescriptor _tokenDescriptor;
+        private string _jweFromJsonHandler;
+        private string _jweFromJwtHandler;
+        private TokenValidationParameters _validationParameters;
 
         [GlobalSetup]
         public void Setup()
         {
-            jsonWebTokenHandler = new JsonWebTokenHandler();
-            jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
-            tokenDescriptor = new SecurityTokenDescriptor
+            _jsonWebTokenHandler = new JsonWebTokenHandler();
+            _jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+            _tokenDescriptor = new SecurityTokenDescriptor
             {
                 SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
                 EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes256_Sha512_512,
                 Subject = new ClaimsIdentity(Default.PayloadClaims),
                 TokenType = "TokenType"
             };
-            jweFromJsonHandler = jsonWebTokenHandler.CreateToken(tokenDescriptor);
-            jweFromJwtHandler = jwtSecurityTokenHandler.CreateEncodedJwt(tokenDescriptor);
-            validationParameters = new TokenValidationParameters
+            _jweFromJsonHandler = _jsonWebTokenHandler.CreateToken(_tokenDescriptor);
+            _jweFromJwtHandler = _jwtSecurityTokenHandler.CreateEncodedJwt(_tokenDescriptor);
+            _validationParameters = new TokenValidationParameters
             {
                 IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                 TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
@@ -47,9 +47,9 @@ namespace Microsoft.IdentityModel.Benchmarks
         }
 
         [Benchmark]
-        public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateJWEAsync() => await jsonWebTokenHandler.ValidateTokenAsync(jweFromJsonHandler, validationParameters);
+        public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateJWEAsync() => await _jsonWebTokenHandler.ValidateTokenAsync(_jweFromJsonHandler, _validationParameters);
 
         [Benchmark]
-        public ClaimsPrincipal JwtSecurityTokenHandler_ValidateJWEAsync() => jwtSecurityTokenHandler.ValidateToken(jweFromJwtHandler, validationParameters, out _);
+        public ClaimsPrincipal JwtSecurityTokenHandler_ValidateJWEAsync() => _jwtSecurityTokenHandler.ValidateToken(_jweFromJwtHandler, _validationParameters, out _);
     }
 }
