@@ -279,11 +279,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 theoryData.Add(new SignatureProviderTheoryData
                 {
                     First = true,
-#if NET452
-                    ExpectedException = EE.CryptographicException(),
-#else
                     ExpectedException = new EE(typeof(Exception)){IgnoreExceptionType = true},
-#endif
                     CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { ALG.RsaSha256 })
                     {
                         SigningSignatureProvider = signingSignatureProvider

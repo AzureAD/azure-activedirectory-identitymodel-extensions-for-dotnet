@@ -10,6 +10,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
@@ -130,9 +131,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 using (var sr = new StringReader(securityToken))
                 {
                     var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit };
-#if NET45
-                    settings.XmlResolver = null;
-#endif
                     using (var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr, settings))) 
                     {
                         return CanReadToken(reader);
@@ -338,7 +336,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             var actualIssuer = issuer;
             if (string.IsNullOrWhiteSpace(issuer))
             {
-                LogHelper.LogVerbose(TokenLogMessages.IDX10244, LogHelper.MarkAsNonPII(ClaimsIdentity.DefaultIssuer));
+                if (LogHelper.IsEnabled(EventLogLevel.Verbose))
+                    LogHelper.LogVerbose(TokenLogMessages.IDX10244, LogHelper.MarkAsNonPII(ClaimsIdentity.DefaultIssuer));
+
                 actualIssuer = ClaimsIdentity.DefaultIssuer;
             }
 
@@ -619,7 +619,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (statement == null)
                 throw LogArgumentNullException(nameof(statement));
 
-            LogHelper.LogWarning(LogMessages.IDX11516, LogHelper.MarkAsNonPII(statement.GetType()));
+            if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                LogHelper.LogWarning(LogMessages.IDX11516, LogHelper.MarkAsNonPII(statement.GetType()));
         }
 
         /// <summary>
@@ -1045,7 +1046,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 // 1. User specified delegate: IssuerSigningKeyResolver returned null
                 // 2. ResolveIssuerSigningKey returned null
                 // Try all the keys. This is the degenerate case, not concerned about perf.
-                keys = TokenUtilities.GetAllSigningKeys(validationParameters);
+                keys = TokenUtilities.GetAllSigningKeys(validationParameters: validationParameters);
             }
 
             // keep track of exceptions thrown, keys that were tried
@@ -1061,7 +1062,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                         Validators.ValidateAlgorithm(samlToken.Assertion.Signature.SignedInfo.SignatureMethod, key, samlToken, validationParameters);
 
                         samlToken.Assertion.Signature.Verify(key, validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory);
-                        LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
+
+                        if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                            LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
+
                         samlToken.SigningKey = key;
                         return samlToken;
                     }
@@ -1213,7 +1217,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 identities.ElementAt(0).BootstrapContext = samlToken.Assertion.CanonicalString;
             }
 
-            LogHelper.LogInformation(TokenLogMessages.IDX10241, token);
+            if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                LogHelper.LogInformation(TokenLogMessages.IDX10241, token);
 
             return new ClaimsPrincipal(identities);
         }

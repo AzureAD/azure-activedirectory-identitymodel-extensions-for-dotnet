@@ -5,8 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
-using Newtonsoft.Json.Linq;
 using Microsoft.IdentityModel.TestUtils;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect.Json.Tests;
+using Newtonsoft.Json.Linq;
 using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -25,15 +26,17 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.WriteHeader($"{this}.Constructors", theoryData);
             var context = new CompareContext($"{this}.ReadMetadata, {theoryData.TestId}");
             OpenIdConnectMessage messageFromJson;
-            OpenIdConnectMessage messageFromJsonObj;
+            // TODO - these local variable has been left commented out as
+            // we will need this to check a 6x -> 7x compatibility test that needs to be written.
+            //OpenIdConnectMessage messageFromJsonObj;
             var diffs = new List<string>();
             try
             {
                 messageFromJson = new OpenIdConnectMessage(theoryData.Json);
-#pragma warning disable CS0618 // Type or member is obsolete
-                messageFromJsonObj = new OpenIdConnectMessage(theoryData.JObject);
-#pragma warning restore CS0618 // Type or member is obsolete
-                IdentityComparer.AreEqual(messageFromJson, messageFromJsonObj, context);
+//#pragma warning disable CS0618 // Type or member is obsolete
+//                messageFromJsonObj = new OpenIdConnectMessage6x(theoryData.JObject);
+//#pragma warning restore CS0618 // Type or member is obsolete
+                //IdentityComparer.AreEqual(messageFromJson, messageFromJsonObj, context);
                 IdentityComparer.AreEqual(messageFromJson, theoryData.Message, context);
                 theoryData.ExpectedException.ProcessNoException();
             }
@@ -49,38 +52,27 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             return new TheoryData<OpenIdConnectMessageTheoryData>
             {
-                new OpenIdConnectMessageTheoryData
-                {
-                    First = true,
-                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
-                    Json = "",
-                    TestId = "empty string"
-                },
-                new OpenIdConnectMessageTheoryData
+                new OpenIdConnectMessageTheoryData("EmptyString")
                 {
                     ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
-                    TestId = "null string"
+                    Json = ""
                 },
-                new OpenIdConnectMessageTheoryData
+                new OpenIdConnectMessageTheoryData("NullString")
                 {
-                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
-                    Json = @"{""response_mode"":""responseMode"", ""response_type"":""responseType"", ""refresh_token"":""refreshToken""}",
-                    TestId = "null jobject"
+                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:")
                 },
-                new OpenIdConnectMessageTheoryData
+                new OpenIdConnectMessageTheoryData("ResponseModeDuplicated")
                 {
                     ExpectedException = ExpectedException.ArgumentException("IDX21106"),
-                    Json =  @"{""response_mode"":""responseMode"";""respone_mode"":""duplicateResponeMode""}",
-                    TestId = "ResponseMode duplicated"
+                    Json =  @"{""response_mode"":""responseMode"";""respone_mode"":""duplicateResponeMode""}"
                 },
-                new OpenIdConnectMessageTheoryData
+                new OpenIdConnectMessageTheoryData("EmptyJsonStringEmptyJobj")
                 {
                     JObject = new JObject(),
                     Json = "{}",
-                    Message = new OpenIdConnectMessage(),
-                    TestId = "empty json string, empty jobj"
+                    Message = new OpenIdConnectMessage()
                 },
-                new OpenIdConnectMessageTheoryData
+                new OpenIdConnectMessageTheoryData("ValidJson")
                 {
                     JObject = JObject.Parse(@"{""response_mode"":""responseMode"", ""response_type"":""responseType"", ""refresh_token"":""refreshToken""}"),
                     Json = @"{""response_mode"":""responseMode"", ""response_type"":""responseType"", ""refresh_token"":""refreshToken""}",
@@ -89,8 +81,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         RefreshToken = "refreshToken",
                         ResponseMode = "responseMode",
                         ResponseType = "responseType"
-                    },
-                    TestId = "ValidJson"
+                    }
                 }
             };
         }
@@ -99,7 +90,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         public void Defaults()
         {
             List<string> errors = new List<string>();
-            var message = new OpenIdConnectMessage();
+            var message = new OpenIdConnectMessage6x();
             
             if (message.AcrValues != null)
                 errors.Add("message.ArcValues != null");
@@ -217,11 +208,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             TestUtilities.WriteHeader(testId, "OidcCreateAuthenticationRequestUrl", true);
             var context = new CompareContext();
-// there is no net452 target, we bind to net45
-#if NET452
-            if(!message.SkuTelemetryValue.Equals("ID_NET45"))
-                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET45");
-#elif NET461
+#if NET461
             if (!message.SkuTelemetryValue.Equals("ID_NET461"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET461");
 #elif NET462
@@ -233,6 +220,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 #elif NET6_0
             if (!message.SkuTelemetryValue.Equals("ID_NET6_0"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET6_0");
+#elif NET8_0
+            if (!message.SkuTelemetryValue.Equals("ID_NET8_0"))
+                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET8_0");
 #elif NET_CORE
             if (!message.SkuTelemetryValue.Equals("ID_NETSTANDARD2_0"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NETSTANDARD2_0");
@@ -493,11 +483,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.WriteHeader("OidcCreateLogoutRequestUrl - " + testId, true);
 
             var context = new CompareContext();
-// there is no net452 target, we bind to net45
-#if NET452
-            if (!message.SkuTelemetryValue.Equals("ID_NET45"))
-                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET45");
-#elif NET461
+#if NET461
             if (!message.SkuTelemetryValue.Equals("ID_NET461"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET461");
 #elif NET472
@@ -506,6 +492,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 #elif NET6_0
             if (!message.SkuTelemetryValue.Equals("ID_NET6_0"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NETCOREAPP3_1");
+#elif NET8_0
+            if (!message.SkuTelemetryValue.Equals("ID_NET8_0"))
+                context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NET8_0");
 #elif NET_CORE
             if (!message.SkuTelemetryValue.Equals("ID_NETSTANDARD2_0"))
                 context.Diffs.Add($"{message.SkuTelemetryValue} != ID_NETSTANDARD2_0");
@@ -624,6 +613,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
         public class OpenIdConnectMessageTheoryData : TheoryDataBase
         {
+            public OpenIdConnectMessageTheoryData() { }
+
+            public OpenIdConnectMessageTheoryData(string testId) : base(testId) { }
+
             public OpenIdConnectMessage Message { get; set; }
             
             public string Json { get; set; }

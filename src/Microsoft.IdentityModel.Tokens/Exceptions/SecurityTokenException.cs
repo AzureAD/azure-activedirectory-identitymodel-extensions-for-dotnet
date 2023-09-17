@@ -47,12 +47,15 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
         /// <param name="context">The contextual information about the source or destination.</param>
+#if NET8_0_OR_GREATER
+        [Obsolete("Formatter-based serialization is obsolete", DiagnosticId = "SYSLIB0051")] 
+#endif
         protected SecurityTokenException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
         }
 
-#if NET472 || NETSTANDARD2_0 || NET6_0
+#if NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
         /// <summary>
         /// When overridden in a derived class, sets the System.Runtime.Serialization.SerializationInfo
         /// with information about the exception.
@@ -60,6 +63,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="info">The <see cref="SerializationInfo"/> that holds the serialized object data about the exception being thrown.</param>
         /// <param name="context">The <see cref="StreamingContext"/> that contains contextual information about the source or destination.</param>
         /// <exception cref="ArgumentNullException">thrown if <paramref name="info"/> is null.</exception>
+#if NET8_0_OR_GREATER
+        [Obsolete("Formatter-based serialization is obsolete", DiagnosticId = "SYSLIB0051")]
+#endif
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             if (info == null)

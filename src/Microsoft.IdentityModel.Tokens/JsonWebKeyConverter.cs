@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -33,7 +34,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return ConvertFromSymmetricSecurityKey(symmetricKey);
             else if (key is X509SecurityKey x509Key)
                 return ConvertFromX509SecurityKey(x509Key);
-#if NET472 || NETSTANDARD2_0 || NET6_0
+#if NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
             else if (key is ECDsaSecurityKey ecdsaSecurityKey)
                 return ConvertFromECDsaSecurityKey(ecdsaSecurityKey);
 #endif
@@ -157,7 +158,7 @@ namespace Microsoft.IdentityModel.Tokens
             };
         }
 
-#if NET472 || NETSTANDARD2_0 || NET6_0
+#if NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
         /// <summary>
         /// Converts a <see cref="ECDsaSecurityKey"/> into a <see cref="JsonWebKey"/>
         /// </summary>
@@ -228,10 +229,12 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (Exception ex)
             {
-                LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(SecurityKey)), webKey, ex));
+                if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                    LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(SecurityKey)), webKey, ex));
             }
 
-            LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10812, LogHelper.MarkAsNonPII(typeof(SecurityKey)), webKey));
+            if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10812, LogHelper.MarkAsNonPII(typeof(SecurityKey)), webKey));
 
             return false;
         }
@@ -255,7 +258,8 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch(Exception ex)
             {
-                LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(SymmetricSecurityKey)), webKey, ex), ex));
+                if (LogHelper.IsEnabled(EventLogLevel.Error))
+                    LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(SymmetricSecurityKey)), webKey, ex), ex));
             }
 
             return false;
@@ -284,7 +288,8 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 string convertKeyInfo = LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(X509SecurityKey)), webKey, ex);
                 webKey.ConvertKeyInfo = convertKeyInfo;
-                LogHelper.LogExceptionMessage(new InvalidOperationException(convertKeyInfo, ex));
+                if (LogHelper.IsEnabled(EventLogLevel.Error))
+                    LogHelper.LogExceptionMessage(new InvalidOperationException(convertKeyInfo, ex));
             }
 
             return false;
@@ -311,7 +316,8 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 string convertKeyInfo = LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(RsaSecurityKey)), webKey, ex);
                 webKey.ConvertKeyInfo = convertKeyInfo;
-                LogHelper.LogExceptionMessage(new InvalidOperationException(convertKeyInfo, ex));
+                if (LogHelper.IsEnabled(EventLogLevel.Error))
+                    LogHelper.LogExceptionMessage(new InvalidOperationException(convertKeyInfo, ex));
             }
 
             return false;
@@ -351,7 +357,8 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 string convertKeyInfo = LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(ECDsaSecurityKey)), webKey, ex);
                 webKey.ConvertKeyInfo = convertKeyInfo;
-                LogHelper.LogExceptionMessage(new InvalidOperationException(convertKeyInfo, ex));
+                if (LogHelper.IsEnabled(EventLogLevel.Error))
+                    LogHelper.LogExceptionMessage(new InvalidOperationException(convertKeyInfo, ex));
             }
 
             return false;

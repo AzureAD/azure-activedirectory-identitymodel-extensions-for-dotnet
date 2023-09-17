@@ -27,9 +27,7 @@ namespace Microsoft.IdentityModel.Logging
         /// Get the string that represents the client SKU.
         /// </summary>
         public static string ClientSku =>
-#if NET45
-            "ID_NET45";
-#elif NET461
+#if NET461
             "ID_NET461";
 #elif NET462
             "ID_NET462";
@@ -39,6 +37,8 @@ namespace Microsoft.IdentityModel.Logging
             "ID_NETSTANDARD2_0";
 #elif NET6_0
             "ID_NET6_0";
+#elif NET8_0
+            "ID_NET8_0";
 #endif
 
         /// <summary>

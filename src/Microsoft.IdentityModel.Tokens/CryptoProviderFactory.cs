@@ -15,8 +15,8 @@ namespace Microsoft.IdentityModel.Tokens
     public class CryptoProviderFactory
     {
         private static CryptoProviderFactory _default;
-        private static ConcurrentDictionary<string, string> _typeToAlgorithmMap = new ConcurrentDictionary<string, string>();
-        private static object _cacheLock = new object();
+        private static readonly ConcurrentDictionary<string, string> _typeToAlgorithmMap = new ConcurrentDictionary<string, string>();
+        private static readonly object _cacheLock = new object();
         private static int _defaultSignatureProviderObjectPoolCacheSize = Environment.ProcessorCount * 4;
         private int _signatureProviderObjectPoolCacheSize = _defaultSignatureProviderObjectPoolCacheSize;
 
@@ -318,7 +318,7 @@ namespace Microsoft.IdentityModel.Tokens
             return CreateSignatureProvider(key, algorithm, false, cacheProvider);
         }
 
-#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0
+#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
         /// <summary>
         /// Creates a <see cref="HashAlgorithm"/> for a specific algorithm.
         /// </summary>

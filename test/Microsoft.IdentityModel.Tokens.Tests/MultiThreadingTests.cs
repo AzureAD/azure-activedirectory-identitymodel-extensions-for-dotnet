@@ -25,7 +25,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     var jwt = theoryData.JwtSecurityTokenHandler.CreateEncodedJwt(theoryData.TokenDescriptor);
                     var claimsPrincipal = theoryData.JwtSecurityTokenHandler.ValidateToken(theoryData.Jwt, theoryData.ValidationParameters, out SecurityToken _);
-                    var tokenValidationResult = theoryData.JsonWebTokenHandler.ValidateToken(theoryData.Jwt, theoryData.ValidationParameters);
+                    var tokenValidationResult = theoryData.JsonWebTokenHandler.ValidateTokenAsync(theoryData.Jwt, theoryData.ValidationParameters).Result;
 
                     if (tokenValidationResult.Exception != null && tokenValidationResult.IsValid)
                         context.Diffs.Add("tokenValidationResult.IsValid, tokenValidationResult.Exception != null");
@@ -152,7 +152,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
                 var jwtEncryptedDir = jwtSecurityTokenHandler.CreateEncodedJwt(securityTokenDescriptorEncryptedDir);
 
-#if NET452 || NET461 || NET462 || NET472
+#if NET461 || NET462 || NET472
                 // RSACng 
                 var securityTokenDescriptorRsaCng = new SecurityTokenDescriptor
                 {
@@ -235,7 +235,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         TokenDescriptor = securityTokenDescriptorEncryptedDir,
                         ValidationParameters = tokenValidationParametersEncryptedDir
                     },
-#if NET452 || NET461 || NET462 || NET472
+#if NET461 || NET462 || NET472
                     new MultiThreadingTheoryData
                     {
                         JwtSecurityTokenHandler = jwtSecurityTokenHandler,

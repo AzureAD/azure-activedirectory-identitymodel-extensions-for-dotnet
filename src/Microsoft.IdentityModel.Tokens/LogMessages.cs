@@ -188,12 +188,11 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10684 = "IDX10684: Unable to convert the JsonWebKey to an AsymmetricSecurityKey. Algorithm: '{0}', Key: '{1}'.";
         public const string IDX10685 = "IDX10685: Unable to Sign, Internal SignFunction is not available.";
         public const string IDX10686 = "IDX10686: Unable to Verify, Internal VerifyFunction is not available.";
-        public const string IDX10687 = "IDX10687: Unable to create a AsymmetricAdapter. For NET45 only types: '{0}' or '{1}' are supported. RSA is of type: '{2}'..";
         //public const string IDX10688 = "IDX10688:"
         public const string IDX10689 = "IDX10689: Unable to create an ECDsa object. See inner exception for more details.";
         public const string IDX10690 = "IDX10690: ECDsa creation is not supported by the current platform. For more details, see https://aka.ms/IdentityModel/create-ecdsa";
         //public const string IDX10691 = "IDX10691:"
-        public const string IDX10692 = "IDX10692: The RSASS-PSS signature algorithm is not available on the .NET 4.5 target. The list of supported algorithms is available here: https://aka.ms/IdentityModel/supported-algorithms";
+        //public const string IDX10692 = "IDX10692: The RSASS-PSS signature algorithm is not available on the .NET 4.5 target. The list of supported algorithms is available here: https://aka.ms/IdentityModel/supported-algorithms";
         public const string IDX10693 = "IDX10693: RSACryptoServiceProvider doesn't support the RSASSA-PSS signature algorithm. The list of supported algorithms is available here: https://aka.ms/IdentityModel/supported-algorithms";
         public const string IDX10694 = "IDX10694: JsonWebKeyConverter threw attempting to convert JsonWebKey: '{0}'. Exception: '{1}'.";
         public const string IDX10695 = "IDX10695: Unable to create a JsonWebKey from an ECDsa object. Required ECParameters structure is not supported by .NET Framework < 4.7.";
@@ -239,6 +238,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10812 = "IDX10812: Unable to create a {0} from the properties found in the JsonWebKey: '{1}'.";
         public const string IDX10813 = "IDX10813: Unable to create a {0} from the properties found in the JsonWebKey: '{1}', Exception '{2}'.";
         public const string IDX10814 = "IDX10814: Unable to create a {0} from the properties found in the JsonWebKey: '{1}'. Missing: '{2}'.";
+        public const string IDX10815 = "IDX10815: Depth of JSON: '{0}' exceeds max depth of '{1}'.";
 
         // Base64UrlEncoding
         public const string IDX10820 = "IDX10820: Invalid character found in Base64UrlEncoding. Character: '{0}', Encoding: '{1}'.";
@@ -253,6 +253,13 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX11000 = "IDX11000: Cannot create EcdhKeyExchangeProvider. '{0}'\'s Curve '{1}' does not match with '{2}'\'s curve '{3}'.";
         public const string IDX11001 = "IDX11001: Cannot generate KDF. '{0}':'{1}' and '{2}':'{3}' must be different.";
         public const string IDX11002 = "IDX11002: Cannot create the EcdhKeyExchangeProvider. Unable to obtain ECParameters from {0}. Verify the SecurityKey is an ECDsaSecurityKey or JsonWebKey and that properties Crv, X, Y, and D (if used for a private key) are contained in the provided SecurityKey.";
+
+        // Json parsing errors
+        public const string IDX11020 = "IDX11020: The JSON value of type: '{0}', could not be converted to '{1}'. Reading: '{2}.{3}', Position: '{4}', CurrentDepth: '{5}', BytesConsumed: '{6}'.";
+        public const string IDX11022 = "IDX11022: Expecting json reader to be positioned on '{0}', reader was positioned at: '{1}', Reading: '{2}.{3}', Position: '{4}', CurrentDepth: '{5}', BytesConsumed: '{6}'.";
+        public const string IDX11023 = "IDX11023: Expecting json reader to be positioned on '{0}', reader was positioned at: '{1}', Reading: '{2}', Position: '{3}', CurrentDepth: '{4}', BytesConsumed: '{5}'.";
+        public const string IDX11025 = "IDX11025: Cannot serialize object of type: '{0}' into property: '{1}'.";
+
 #pragma warning restore 1591
     }
 }

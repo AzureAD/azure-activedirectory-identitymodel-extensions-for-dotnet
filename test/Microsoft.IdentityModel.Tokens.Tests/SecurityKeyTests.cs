@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var exception = Assert.Throws<NotSupportedException>(() => new ManagedKeyVaultSecurityKey.ManagedKeyVaultSecurityKey("keyid").ComputeJwkThumbprint());
             Assert.Contains("IDX10710", exception.Message);
 
-#if NET452 || NET461 || NET462
+#if NET461 || NET462
             exception = Assert.Throws<PlatformNotSupportedException>(() => new ECDsaSecurityKey(KeyingMaterial.JsonWebKeyP256, false).ComputeJwkThumbprint());
             Assert.Contains("IDX10695", exception.Message);
 #else
@@ -189,7 +189,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         TestId = nameof(KeyingMaterial.Ecdsa256Key)
                     },
 #else
-                    // EcdsaSecurityKey should have InternalId set to an empty string on NET452 and NET461.
+                    // EcdsaSecurityKey should have InternalId set to an empty string on NET461.
                     new SecurityKeyTheoryData
                     {
                         SecurityKey = KeyingMaterial.Ecdsa256Key_Public,
