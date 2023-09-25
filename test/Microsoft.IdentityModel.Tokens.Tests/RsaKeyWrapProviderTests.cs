@@ -102,7 +102,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     WrapAlgorithm = SecurityAlgorithms.RsaOAEP,
                     WrapKey = KeyingMaterial.RsaSecurityKey_1024
                 },
-#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
                 new KeyWrapTheoryData
                 {
                     ExpectedException =  ExpectedException.SecurityTokenKeyWrapException("IDX10661:"),
@@ -111,7 +110,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     WrapAlgorithm = SecurityAlgorithms.RsaOAEP256,
                     WrapKey = KeyingMaterial.RsaSecurityKey_1024
                 },
-#endif
                 new KeyWrapTheoryData
                 {
                     ExpectedException = ExpectedException.SecurityTokenKeyWrapException("IDX10661:"),
@@ -221,7 +219,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     WrapAlgorithm = SecurityAlgorithms.RsaPKCS1,
                     WrapKey = KeyingMaterial.RsaSecurityKey_4096_Public,
                 },
-#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
                 new KeyWrapTheoryData
                 {
                     ExpectedException = ExpectedException.KeyWrapException("IDX10659:"),
@@ -249,7 +246,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     WrapAlgorithm = SecurityAlgorithms.RsaPKCS1,
                     WrapKey = KeyingMaterial.RsaSecurityKey_4096_Public,
                 }
-#endif
             };
         }
 
@@ -407,14 +403,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 ExpectedException.ArgumentNullException(),
                 theoryData);
 
-#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
             AddWrapUnwrapTheoryData(
                 "Test4",
                 SecurityAlgorithms.RsaOAEP256,
                 KeyingMaterial.RsaSecurityKey_2048_Public,
                 KeyingMaterial.RsaSecurityKey_2048,
                 theoryData);
-#endif
 
             return theoryData;
         }

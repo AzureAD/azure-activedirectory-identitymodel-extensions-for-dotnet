@@ -2711,7 +2711,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.Aes128CbcHmacSha256)
                     },
-#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
                     new CreateTokenTheoryData
                     {
                         TestId = "RsaOAEP256_Aes128CbcHmacSha256",
@@ -2736,7 +2735,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP256, SecurityAlgorithms.Aes256CbcHmacSha512)
                     },
-#endif
                     new CreateTokenTheoryData
                     {
                         TestId = "RsaOAEP_Aes192CbcHmacSha384",

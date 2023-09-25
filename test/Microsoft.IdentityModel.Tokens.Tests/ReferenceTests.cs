@@ -183,9 +183,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
             else if (testParams.Algorithm.Equals(SecurityAlgorithms.RsaOAEP, StringComparison.OrdinalIgnoreCase)
                     || testParams.Algorithm.Equals(SecurityAlgorithms.RsaPKCS1, StringComparison.OrdinalIgnoreCase)
-#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
                     || testParams.Algorithm.Equals(SecurityAlgorithms.RsaOAEP256, StringComparison.OrdinalIgnoreCase)
-#endif
                     )
             {
                 var rsaKeyWrapProvider = CryptoProviderFactory.Default.CreateKeyWrapProvider(testParams.Key, testParams.Algorithm);

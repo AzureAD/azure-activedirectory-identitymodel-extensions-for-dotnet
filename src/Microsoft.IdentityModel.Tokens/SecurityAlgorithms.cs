@@ -31,9 +31,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string Aes256KW = "A256KW";
         public const string RsaPKCS1 = "RSA1_5";
         public const string RsaOAEP = "RSA-OAEP";
-#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
         public const string RsaOAEP256 = "RSA-OAEP-256";
-#endif
 
         // See: https://www.w3.org/TR/xmlenc-core1/#sec-Exclusive-Canonicalization
         public const string ExclusiveC14n = "http://www.w3.org/2001/10/xml-exc-c14n#";

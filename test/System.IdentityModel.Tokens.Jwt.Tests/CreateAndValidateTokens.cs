@@ -802,7 +802,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ExpectedException.NoExceptionExpected
             );
 
-#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
             encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP256, SecurityAlgorithms.Aes128CbcHmacSha256);
             theoryData.Add(
                 "RsaOAEP256-Aes128CbcHmacSha256",
@@ -826,7 +825,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
                 ExpectedException.NoExceptionExpected
             );
-#endif
 
             encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes128CbcHmacSha256);
             theoryData.Add(
