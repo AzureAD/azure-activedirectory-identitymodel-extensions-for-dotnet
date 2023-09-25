@@ -89,10 +89,17 @@ namespace Microsoft.IdentityModel.Xml
                 reader.ReadStartElement();
                 while (reader.IsStartElement())
                 {
+                    // Skip the element since it is not one of elements handled by TryReadKeyInfoType
                     if (!TryReadKeyInfoType(reader, ref keyInfo))
                     {
-                        // Skip the element since it is not one of elements handled by TryReadKeyInfoType
-                        LogHelper.LogWarning(LogMessages.IDX30300, reader.ReadOuterXml());
+                        if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                        {
+                            LogHelper.LogWarning(LogMessages.IDX30300, reader.ReadOuterXml());
+                        }
+                        else
+                        {
+                            reader.Skip();
+                        }
                     }
                 }
 
