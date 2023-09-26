@@ -275,6 +275,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 var theoryData = new TheoryData<GetPayloadValueTheoryData>();
 
+                theoryData.Add(new GetPayloadValueTheoryData("stringFromSingleAsObject")
+                {
+                    ClaimValue = "audience",
+                    PropertyName = "aud",
+                    PropertyType = typeof(object),
+                    PropertyValue = new List<string> { "audience" },
+                    Json = JsonUtilities.CreateUnsignedToken("aud", "audience")
+                });
+
                 theoryData.Add(new GetPayloadValueTheoryData("stringFromSingleInList")
                 {
                     ClaimValue = "audience",
