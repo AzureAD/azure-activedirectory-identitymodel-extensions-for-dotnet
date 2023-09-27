@@ -163,7 +163,10 @@ namespace Microsoft.IdentityModel.Xml
             {
                 using (var writer = XmlWriter.Create(stream, new XmlWriterSettings { CloseOutput = false }))
                 using (var dictionaryWriter = XmlDictionaryWriter.CreateDictionaryWriter(writer))
+                {
                     tokenStream.WriteTo(dictionaryWriter);
+                    dictionaryWriter.Flush();
+                }
 
                 stream.Position = 0;
                 return hash.ComputeHash(stream);
