@@ -391,7 +391,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
                 catch (Exception ex)
                 {
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14101, encodedJson.Substring(Dot2, Dot2 - Dot1)), ex));
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14101, encodedJson.Substring(Dot1 + 1, Dot2 - Dot1 - 1)), ex));
                 }
             }
             else

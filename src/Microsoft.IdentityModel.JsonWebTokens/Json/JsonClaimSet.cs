@@ -154,7 +154,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal string GetStringValue(string key)
         {
             if (_jsonClaims.TryGetValue(key, out object obj))
+            {
+                if (obj == null)
+                    return null;
+
                 return obj.ToString();
+            }
 
             return string.Empty;
         }
