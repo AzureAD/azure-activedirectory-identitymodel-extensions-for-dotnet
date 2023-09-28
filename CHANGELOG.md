@@ -3,7 +3,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 7.0.1
 ======
 ### Bug Fixes:
-- GetPayloadClaim("aud") returns a string when a single audience is specified, aligning with the behavior in 6.x.
+- GetPayloadClaim("aud") returns a string when a single audience is specified, aligning with the behavior in 6.x. See PR[#2331](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2331) for details.
 
 7.0.0
 ======
