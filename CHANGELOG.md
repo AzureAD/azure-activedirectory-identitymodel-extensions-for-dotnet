@@ -1,5 +1,10 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+7.0.2
+======
+### Bug Fixes:
+- Resolved an issue where JsonWebToken properties would throw exceptions when the input string was 'null'. See PR[#2335](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2335) for details.
+
 7.0.1
 ======
 ### Bug Fixes:
