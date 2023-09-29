@@ -18,6 +18,7 @@ using Microsoft.IdentityModel.Json.Linq;
 using JsonReaderException = Microsoft.IdentityModel.Json.JsonReaderException;
 #else
 using System.Text.Json;
+using System.Threading.Tasks;
 using JsonReaderException = System.Text.Json.JsonException;
 #endif
 
@@ -43,6 +44,117 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             new Claim("dateTimeIso8061", dateTime.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
         };
 
+#if !NET452
+        static string app_displayname = "sdtest-AllAccess";
+        static string appid = "C9977FDF-DBB9-4E26-921B-639552F0F810";
+        static string aud = "https://graph.microsoft.com";
+        static string iss = "https://sts.windows.net/80165B57-9098-4710-B4AC-98E5D08DF51D/";
+        static string given_name = "given_name";
+        static string scp = "Calendars.Read Calendars.ReadWrite Contacts.Read Contacts.ReadWrite Directory.AccessAsUser.All Directory.Read.All Directory.ReadWrite.All email Files.Read Files.Read.All Files.Read.Selected Files.ReadWrite Files.ReadWrite.All Files.ReadWrite.AppFolder Files.ReadWrite.Selected Group.Read.All Group.ReadWrite.All IdentityRiskEvent.Read.All Mail.Read Mail.ReadWrite Mail.Send MailboxSettings.ReadWrite Notes.Create Notes.Read Notes.Read.All Notes.ReadWrite Notes.ReadWrite.All Notes.ReadWrite.CreatedByApp offline_access openid People.Read People.ReadWrite profile recipient.manage Sites.Read.All Tasks.ReadWrite User.Read User.Read.All User.ReadBasic.All User.ReadWrite User.ReadWrite.All";
+
+        [Fact]
+        public async Task JsonClaimSetThreading()
+        {
+            var document = JsonDocument.Parse(Payload, new JsonDocumentOptions { AllowTrailingCommas = true });
+            JsonClaimSet jsonClaimSet = new JsonClaimSet(document);
+
+            var taskList = new List<Task>();
+            for (var i = 0; i < 1000000; i++)
+            {
+                var task = new Task(() =>
+                {
+                    CheckElement(jsonClaimSet, "app_displayname", app_displayname);
+                    CheckElement(jsonClaimSet, "appid", appid);
+                    CheckElement(jsonClaimSet, "aud", aud);
+                    CheckElement(jsonClaimSet, "iss", iss);
+                    CheckElement(jsonClaimSet, "scp", scp);
+                });
+
+                task.Start();
+                taskList.Add(task);
+            }
+
+            await Task.WhenAll(taskList).ConfigureAwait(false);
+            document.Dispose();
+        }
+
+        [Fact]
+        public async Task JsonWebTokenThreading()
+        {
+            JsonWebToken jwt = new JsonWebToken("{}", Payload);
+
+            var taskList = new List<Task>();
+            for (var i = 0; i < 1000000; i++)
+            {
+                var task = new Task(() =>
+                {
+                    CheckClaimValue(jwt, "app_displayname", app_displayname);
+                    CheckClaimValue(jwt, "appid", appid);
+                    CheckClaimValue(jwt, "aud", aud);
+                    CheckClaimValue(jwt, "iss", iss);
+                    CheckClaimValue(jwt, "scp", scp);
+                });
+
+                task.Start();
+                taskList.Add(task);
+            }
+
+            await Task.WhenAll(taskList).ConfigureAwait(false);
+        }
+
+        internal void CheckClaimValue(JsonWebToken jwt, string claim, string expectedClaim)
+        {
+            bool success = jwt.TryGetPayloadValue(claim, out string strValue);
+
+            Assert.True(success);
+            Assert.Equal(strValue, expectedClaim);
+            Assert.NotEqual(given_name, strValue);
+        }
+
+        internal void CheckElement(JsonClaimSet jsonClaimSet, string claim, string expectedValue)
+        {
+            bool success = jsonClaimSet.TryGetValue(claim, out JsonElement jsonElement);
+
+            Assert.True(success);
+            Assert.Equal(JsonValueKind.String, jsonElement.ValueKind);
+            Assert.Equal(expectedValue, jsonElement.GetString());
+            Assert.NotEqual(given_name, jsonElement.GetString());
+        }
+
+        public static string Payload =>
+            $@"{{
+              ""aud"": ""{aud}"",
+              ""iss"": ""{iss}"",
+              ""iat"": 1506034341,
+              ""nbf"": 1506034341,
+              ""exp"": 1506038241,
+              ""acr"": ""1"",
+              ""aio"": ""80165B57-9098-4710-B4AC-98E5D08DF51D="",
+              ""amr"": [
+                ""pwd""
+              ],
+              ""app_displayname"": ""{app_displayname}"",
+              ""appid"": ""{appid}"",
+              ""appidacr"": ""1"",
+              ""family_name"": ""Doe"",
+              ""given_name"": ""{given_name}"",
+              ""ipaddr"": ""0.0.0.127"",
+              ""name"": ""TEST_TEST_NAME"",
+              ""oid"": ""462AAB4E-E470-4331-9B9F-2507319916A5"",
+              ""platf"": ""14"",
+              ""puid"": ""123456789ABC"",
+              ""scp"": ""{scp}"",
+              ""sub"": ""CA3F3BA1-14DA-4040-9408-FCDC5E4F714C"",
+              ""tid"": ""55C25696-89F7-42A6-8B31-6294BFDB377C"",
+              ""unique_name"": ""admin@A49052AB-06C5-4BC4-8263-67865A8267CB.net"",
+              ""upn"": ""A49052AB-06C5-4BC4-8263-67865A8267CB.net"",
+              ""uti"": ""80165B57-9098-4710-B4AC-98E5D08DF51D"",
+              ""ver"": ""1.0"",
+              ""wids"": [
+                ""80165B57-9098-4710-B4AC-98E5D08DF51D""
+              ]
+            }}";
+#endif
 
         // This test is designed to test that all properties of a JWE can be accessed.
         // Some properties rely on an inner token and the Payload can be null.

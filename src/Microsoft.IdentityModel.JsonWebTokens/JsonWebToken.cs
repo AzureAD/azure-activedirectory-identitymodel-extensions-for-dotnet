@@ -455,6 +455,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 // Format: https://www.rfc-editor.org/rfc/rfc7515#page-7
 
                 IsSigned = !(Dot2 + 1 == encodedJson.Length);
+#if !NET45
+                JsonDocument jsonHeaderDocument = null;
+#endif
                 try
                 {
 #if NET45
@@ -463,14 +466,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     _hChars = encodedJson.ToCharArray(0, Dot1);
                     Header = new JsonClaimSet(Base64UrlEncoder.UnsafeDecode(_hChars));
 #else
-                    Header = new JsonClaimSet(JwtTokenUtilities.GetJsonDocumentFromBase64UrlEncodedString(encodedJson, 0, Dot1));
+                    jsonHeaderDocument = JwtTokenUtilities.GetJsonDocumentFromBase64UrlEncodedString(encodedJson, 0, Dot1);
+                    Header = new JsonClaimSet(jsonHeaderDocument);
 #endif
                 }
                 catch (Exception ex)
                 {
                     throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14102, encodedJson.Substring(0, Dot1)), ex));
                 }
+#if !NET45
+                finally
+                {
+                    jsonHeaderDocument?.Dispose();
+                }
 
+                JsonDocument jsonPayloadDocument = null;
+#endif
                 try
                 {
 #if NET45
@@ -478,13 +489,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     _pChars = encodedJson.ToCharArray(Dot1 + 1, Dot2 - Dot1 - 1);
                     Payload = new JsonClaimSet(Base64UrlEncoder.UnsafeDecode(_pChars));
 #else
-                    Payload = new JsonClaimSet(JwtTokenUtilities.GetJsonDocumentFromBase64UrlEncodedString(encodedJson, Dot1 + 1, Dot2 - Dot1 - 1));
+                    jsonPayloadDocument = JwtTokenUtilities.GetJsonDocumentFromBase64UrlEncodedString(encodedJson, Dot1 + 1, Dot2 - Dot1 - 1);
+                    Payload = new JsonClaimSet(jsonPayloadDocument);
 #endif
                 }
                 catch (Exception ex)
                 {
                     throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14101, encodedJson.Substring(Dot2, Dot2 - Dot1)), ex));
                 }
+#if !NET45
+                finally
+                {
+                    jsonPayloadDocument?.Dispose();
+                }
+#endif
             }
             else
             {

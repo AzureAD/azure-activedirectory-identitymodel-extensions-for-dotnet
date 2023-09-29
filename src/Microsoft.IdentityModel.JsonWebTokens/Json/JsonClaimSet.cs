@@ -25,8 +25,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal JsonClaimSet(JsonDocument jsonDocument)
         {
-            RootElement = jsonDocument.RootElement.Clone();
-            jsonDocument.Dispose();
+            foreach (JsonProperty jsonProperty in jsonDocument.RootElement.EnumerateObject())
+                Elements[jsonProperty.Name] = jsonProperty.Value.Clone();
         }
 
         internal JsonClaimSet(byte[] jsonBytes) : this(JsonDocument.Parse(jsonBytes))
@@ -36,8 +36,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal JsonClaimSet(string json) : this(JsonDocument.Parse(json))
         {
         }
-
-        internal JsonElement RootElement { get; }
 
         internal IList<Claim> Claims(string issuer)
         {
@@ -58,20 +56,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal IList<Claim> CreateClaims(string issuer)
         {
             IList<Claim> claims = new List<Claim>();
-            foreach (JsonProperty property in RootElement.EnumerateObject())
+            foreach (KeyValuePair<string, JsonElement> kvp in Elements)
             {
-                if (property.Value.ValueKind == JsonValueKind.Array)
+                if (kvp.Value.ValueKind == JsonValueKind.Array)
                 {
-                    foreach (JsonElement jsonElement in property.Value.EnumerateArray())
+                    foreach (JsonElement jsonElement in kvp.Value.EnumerateArray())
                     {
-                        Claim claim = CreateClaimFromJsonElement(property.Name, issuer, jsonElement);
+                        Claim claim = CreateClaimFromJsonElement(kvp.Key, issuer, jsonElement);
                         if (claim != null)
                             claims.Add(claim);
                     }
                 }
                 else
                 {
-                    Claim claim = CreateClaimFromJsonElement(property.Name, issuer, property.Value);
+                    Claim claim = CreateClaimFromJsonElement(kvp.Key, issuer, kvp.Value);
                     if (claim != null)
                         claims.Add(claim);
                 }
@@ -181,12 +179,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return jsonElement.GetString();
         }
 
+        internal Dictionary<string, JsonElement> Elements { get; } = new Dictionary<string, JsonElement>();
+
         internal Claim GetClaim(string key, string issuer)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            if (!RootElement.TryGetProperty(key, out JsonElement jsonElement))
+            if (!Elements.TryGetValue(key, out JsonElement jsonElement))
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX14304, key)));
 
             return CreateClaimFromJsonElement(key, issuer, jsonElement);
@@ -228,7 +228,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal string GetStringValue(string key)
         {
-            if (RootElement.TryGetProperty(key, out JsonElement jsonElement) && jsonElement.ValueKind == JsonValueKind.String)
+            if (Elements.TryGetValue(key, out JsonElement jsonElement) && jsonElement.ValueKind == JsonValueKind.String)
                 return jsonElement.GetString();
 
             return string.Empty;
@@ -236,7 +236,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal DateTime GetDateTime(string key)
         {
-            if (!RootElement.TryGetProperty(key, out JsonElement jsonElement))
+            if (!Elements.TryGetValue(key, out JsonElement jsonElement))
                 return DateTime.MinValue;
 
             return EpochTime.DateTime(Convert.ToInt64(Math.Truncate(Convert.ToDouble(ParseTimeValue(key, jsonElement), CultureInfo.InvariantCulture))));
@@ -260,7 +260,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <returns></returns>
         internal T GetValue<T>(string key, bool throwEx, out bool found)
         {
-            found = RootElement.TryGetProperty(key, out JsonElement jsonElement);
+            found = Elements.TryGetValue(key, out JsonElement jsonElement);
             if (!found)
             {
                 if (throwEx)
@@ -359,7 +359,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal bool TryGetClaim(string key, string issuer, out Claim claim)
         {
-            if (!RootElement.TryGetProperty(key, out JsonElement jsonElement))
+            if (!Elements.TryGetValue(key, out JsonElement jsonElement))
             {
                 claim = null;
                 return false;
@@ -387,7 +387,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal bool HasClaim(string claimName)
         {
-            return RootElement.TryGetProperty(claimName, out _);
+            return Elements.TryGetValue(claimName, out _);
         }
 
         private static long ParseTimeValue(string claimName, JsonElement jsonElement)
