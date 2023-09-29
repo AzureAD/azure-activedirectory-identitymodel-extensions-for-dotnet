@@ -4,12 +4,14 @@
 namespace Microsoft.IdentityModel.Logging.Tests
 {
     using System;
-    using Microsoft.IdentityModel.JsonWebTokens;
     using Microsoft.IdentityModel.Logging;
     using Microsoft.IdentityModel.Tokens;
     using Xunit;
 
-    [Collection("Relying on ShowPII and LogLogCompleteSecurityArtifact")]
+    // Leveraging Xunit collections: https://xunit.net/docs/running-tests-in-parallel#parallelism-in-test-frameworks
+    // Currently this does nothing but if we face issues with tests colliding trying to access ShowPII and LogCompleteSecurityArtifact
+    // this collection can be used to prevent race conditions.
+    [Collection("Relying on ShowPII and LogCompleteSecurityArtifact")]
     public class LogHelperTests
     {
         private const string SafeFormat = "Safe {0}";
