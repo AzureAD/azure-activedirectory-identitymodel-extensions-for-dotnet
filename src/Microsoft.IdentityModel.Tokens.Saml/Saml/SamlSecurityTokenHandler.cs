@@ -1213,7 +1213,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 identities.ElementAt(0).BootstrapContext = samlToken.Assertion.CanonicalString;
             }
 
-            LogHelper.LogInformation(TokenLogMessages.IDX10241, token);
+            if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                LogHelper.LogInformation(
+                    TokenLogMessages.IDX10241,
+                    LogHelper.MarkAsUnsafeSecurityArtifact(token, t => t.ToString()));
 
             return new ClaimsPrincipal(identities);
         }
