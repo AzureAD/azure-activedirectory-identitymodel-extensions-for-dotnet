@@ -46,6 +46,7 @@ namespace Microsoft.IdentityModel.Logging
         {
             Argument = argument;
             _disarmCallback = toStringCallback;
+            _callbackUnsafe = null;
         }
 
         /// <summary>
