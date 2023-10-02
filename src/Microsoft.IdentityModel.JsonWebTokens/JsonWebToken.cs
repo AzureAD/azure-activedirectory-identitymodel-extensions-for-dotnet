@@ -384,7 +384,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(
                         LogMessages.IDX14102,
-                        LogHelper.MarkAsUnsafeOnlySecurityArtifact(encodedJson.Substring(0, Dot1), t => t.ToString())),
+                        LogHelper.MarkAsUnsafeSecurityArtifact(encodedJson.Substring(0, Dot1), t => t.ToString())),
                         ex));
                 }
 
@@ -396,7 +396,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(
                         LogMessages.IDX14101,
-                        LogHelper.MarkAsUnsafeOnlySecurityArtifact(encodedJson.Substring(Dot1 + 1, Dot2 - Dot1 - 1), t => t.ToString())),
+                        LogHelper.MarkAsUnsafeSecurityArtifact(encodedJson.Substring(Dot1 + 1, Dot2 - Dot1 - 1), t => t.ToString())),
                         ex));
                 }
             }
@@ -454,7 +454,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(
                         LogMessages.IDX14102,
-                        LogHelper.MarkAsUnsafeOnlySecurityArtifact(encodedJson.Substring(0, Dot1), t => t.ToString())),
+                        LogHelper.MarkAsUnsafeSecurityArtifact(encodedJson.Substring(0, Dot1), t => t.ToString())),
                         ex));
                 }
 

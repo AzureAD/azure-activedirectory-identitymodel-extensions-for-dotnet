@@ -679,7 +679,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 new SignedHttpRequestInvalidSignatureException(
                     LogHelper.FormatInvariant(
                         LogMessages.IDX23034,
-                        LogHelper.MarkAsUnsafeOnlySecurityArtifact(signedHttpRequest.EncodedToken, t => t.ToString()))));
+                        LogHelper.MarkAsUnsafeSecurityArtifact(signedHttpRequest.EncodedToken, t => t.ToString()))));
         }
 
         /// <summary>

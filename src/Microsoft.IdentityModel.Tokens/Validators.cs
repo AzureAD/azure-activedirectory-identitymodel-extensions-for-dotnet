@@ -73,7 +73,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new SecurityTokenInvalidAudienceException(
                             LogHelper.FormatInvariant(
                                 LogMessages.IDX10231,
-                                LogHelper.MarkAsUnsafeOnlySecurityArtifact(securityToken, t => t.ToString())))
+                                LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())))
                     {
                         InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences)
                     });
@@ -500,7 +500,7 @@ namespace Microsoft.IdentityModel.Tokens
                     throw LogHelper.LogExceptionMessage(new SecurityTokenReplayDetectedException(
                         LogHelper.FormatInvariant(
                             LogMessages.IDX10228,
-                            LogHelper.MarkAsUnsafeOnlySecurityArtifact(securityToken, t => t.ToString()))));
+                            LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString()))));
                 return;
             }
 

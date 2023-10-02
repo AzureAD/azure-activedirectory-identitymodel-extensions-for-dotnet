@@ -271,7 +271,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (LogHelper.IsEnabled(EventLogLevel.Informational))
                 LogHelper.LogInformation(
                     TokenLogMessages.IDX10241,
-                    LogHelper.MarkAsUnsafeOnlySecurityArtifact(token, t => t.ToString()));
+                    LogHelper.MarkAsUnsafeSecurityArtifact(token, t => t.ToString()));
 
             return new ClaimsPrincipal(identity);
         }

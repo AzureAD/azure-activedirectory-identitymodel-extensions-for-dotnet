@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
         public void MarkAsUnsafeOnlySecurityArtifact_ReturnsSecurityArtifactInstance()
         {
             object arg = "argument";
-            var result = LogHelper.MarkAsUnsafeOnlySecurityArtifact(arg,
+            var result = LogHelper.MarkAsUnsafeSecurityArtifact(arg,
                 obj => string.Format(UnsafeFormat, obj));
 
             Assert.IsType<SecurityArtifact>(result);
@@ -68,7 +68,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
         [Fact]
         public void MarkAsUnsafeOnlySecurityArtifact_ArgumentIsNull_NoException()
         {
-            LogHelper.MarkAsUnsafeOnlySecurityArtifact(
+            LogHelper.MarkAsUnsafeSecurityArtifact(
                 null,
                 obj => string.Format(UnsafeFormat, obj));
         }
@@ -77,7 +77,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
         public void MarkAsUnsafeOnlySecurityArtifactUnsafeCallbackIsNull_NoException()
         {
             object arg = "argument";
-            LogHelper.MarkAsUnsafeOnlySecurityArtifact(arg, null);
+            LogHelper.MarkAsUnsafeSecurityArtifact(arg, null);
         }
 
         [Fact]
@@ -302,7 +302,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
         {
             // Arrange
             string format = "PII Data: {0} and Token Data: {1}.";
-            object[] args = new object[] { LogHelper.MarkAsNonPII("data"), LogHelper.MarkAsUnsafeOnlySecurityArtifact("token", null) };
+            object[] args = new object[] { LogHelper.MarkAsNonPII("data"), LogHelper.MarkAsUnsafeSecurityArtifact("token", null) };
             IdentityModelEventSource.ShowPII = true;
             IdentityModelEventSource.LogCompleteSecurityArtifact = true;
 
@@ -354,7 +354,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
         {
             // Arrange
             string format = "PII Data: {0} and Token Data: {1}.";
-            object[] args = new object[] { LogHelper.MarkAsNonPII("data"), LogHelper.MarkAsUnsafeOnlySecurityArtifact("token", t => t.ToString()) };
+            object[] args = new object[] { LogHelper.MarkAsNonPII("data"), LogHelper.MarkAsUnsafeSecurityArtifact("token", t => t.ToString()) };
             IdentityModelEventSource.ShowPII = true;
             IdentityModelEventSource.LogCompleteSecurityArtifact = true;
 

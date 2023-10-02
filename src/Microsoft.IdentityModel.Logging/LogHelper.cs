@@ -471,7 +471,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="callbackUnsafe">A callback function to log the security artifact without scrubbing.</param>
         /// <returns>An argument marked as SecurityArtifact.</returns>
         /// <exception cref="ArgumentNullException">if <paramref name="callbackUnsafe"/> is null.</exception>
-        public static object MarkAsUnsafeOnlySecurityArtifact(object arg, Func<object, string> callbackUnsafe)
+        public static object MarkAsUnsafeSecurityArtifact(object arg, Func<object, string> callbackUnsafe)
         {
             return new SecurityArtifact(arg, SecurityArtifact.UnknownSafeTokenCallback, callbackUnsafe);
         }
