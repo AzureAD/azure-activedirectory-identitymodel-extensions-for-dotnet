@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.DoesNotContain(jwe.EncodedToken.Substring(0, jwe.EncodedToken.LastIndexOf(".")), listener.TraceBuffer);
             Assert.DoesNotContain(jwe.AuthenticationTag, listener.TraceBuffer);
             Assert.Contains(
-                string.Format(IdentityModelEventSource.HiddenArtifactString, jwe.GetType().ToString()),
+                string.Format(IdentityModelEventSource.HiddenSecurityArtifactString, jwe.GetType().ToString()),
                 listener.TraceBuffer);
             listener.TraceBuffer = string.Empty;
 
@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.DoesNotContain(jws.EncodedToken.Substring(0, jws.EncodedToken.LastIndexOf(".")), listener.TraceBuffer);
             Assert.DoesNotContain(jws.EncodedSignature, listener.TraceBuffer);
             Assert.Contains(
-                string.Format(IdentityModelEventSource.HiddenArtifactString, jws.GetType().ToString()),
+                string.Format(IdentityModelEventSource.HiddenSecurityArtifactString, jws.GetType().ToString()),
                 listener.TraceBuffer);
             listener.TraceBuffer = string.Empty;
 
@@ -83,7 +83,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.DoesNotContain(stringJwe.Substring(0, stringJwe.LastIndexOf(".")), listener.TraceBuffer);
             Assert.DoesNotContain(stringJwe.Substring(stringJwe.LastIndexOf(".")), listener.TraceBuffer);
             Assert.Contains(
-                string.Format(IdentityModelEventSource.HiddenArtifactString, sa.GetType().ToString()),
+                string.Format(IdentityModelEventSource.HiddenSecurityArtifactString, sa.GetType().ToString()),
                 listener.TraceBuffer);
             listener.TraceBuffer = string.Empty;
 
@@ -92,7 +92,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.DoesNotContain(stringJws.Substring(0, stringJws.LastIndexOf(".")), listener.TraceBuffer);
             Assert.DoesNotContain(stringJws.Substring(stringJws.LastIndexOf(".")), listener.TraceBuffer);
             Assert.Contains(
-                string.Format(IdentityModelEventSource.HiddenArtifactString, sa.GetType().ToString()),
+                string.Format(IdentityModelEventSource.HiddenSecurityArtifactString, sa.GetType().ToString()),
                 listener.TraceBuffer);
             listener.TraceBuffer = string.Empty;
 

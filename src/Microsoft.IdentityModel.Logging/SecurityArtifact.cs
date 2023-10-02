@@ -24,12 +24,12 @@ namespace Microsoft.IdentityModel.Logging
         /// <summary>
         /// The ToString callback delegate that returns a disarmed SecurityArtifact.
         /// </summary>
-        private Func<object, string> _disarmCallback;
+        private readonly Func<object, string> _disarmCallback;
 
         /// <summary>
         /// The ToString callback delegate that returns an unscrubbed SecurityArtifact.
         /// </summary>
-        private Func<object, string> _callbackUnsafe;
+        private readonly Func<object, string> _callbackUnsafe;
 
         /// <summary>
         /// Creates an instance of <see cref="SecurityArtifact"/> that wraps the <paramref name="argument"/>.
@@ -37,8 +37,8 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="argument">An argument that is considered as SecurityArtifact.</param>
         /// <param name="toStringCallback">A callback used to disarm the token.</param>
         /// <remarks>
-        /// Since even the payload may sometimes contain security artifacts, naïve disarm algorithms such as removing signatures
-        /// will not work. For now the <paramref name="toStringCallback"/> will only be leveraged if
+        /// Since even the payload may sometimes contain security artifacts, naïve disarm algorithms (such as removing signatures
+        /// in the case of JWTs) will not work. For now the <paramref name="toStringCallback"/> will only be leveraged if
         /// <see cref="IdentityModelEventSource.LogCompleteSecurityArtifact"/> is set and no unsafe callback is provided. Future changes
         /// may introduce a support for best effort disarm logging.
         /// </remarks>
@@ -54,21 +54,13 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="argument">An argument that is considered as SecurityArtifact.</param>
         /// <param name="toStringCallback">A ToString callback.</param>
         /// <param name="toStringCallbackUnsafe">A ToString callback which will return the unscrubbed artifact.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="toStringCallback"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="toStringCallbackUnsafe"/> is null.</exception>
         /// <remarks>
-        /// Since even the payload may sometimes contain security artifacts, naïve disarm algorithms such as removing signatures
-        /// will not work. For now the <paramref name="toStringCallback"/> is currently unused. Future changes
+        /// Since even the payload may sometimes contain security artifacts, naïve disarm algorithms (such as removing signatures
+        /// in the case of JWTs) will not work. For now the <paramref name="toStringCallback"/> is currently unused. Future changes
         /// may introduce a support for best effort disarm logging which will leverage <paramref name="toStringCallback"/>.
         /// </remarks>
         public SecurityArtifact(object argument, Func<object, string> toStringCallback, Func<object, string> toStringCallbackUnsafe)
         {
-            if (toStringCallback == null)
-                throw new ArgumentNullException(nameof(toStringCallback));
-
-            if (toStringCallbackUnsafe == null)
-                throw new ArgumentNullException(nameof (toStringCallbackUnsafe));
-
             Argument = argument;
             _disarmCallback = toStringCallback;
             _callbackUnsafe = toStringCallbackUnsafe;
@@ -90,7 +82,8 @@ namespace Microsoft.IdentityModel.Logging
         /// <returns><c>Null</c> if the <see cref="Argument"/> is <see langword="null"/>, otherwise calls the provided safe callback on <see cref="Argument"/>.</returns>
         public override string ToString()
         {
-            // Defense in depth, callers should never provide a null callback but publicly exposed method in LogHelper referencing this didn't check.
+            // Defense in depth, ideally callers will set a callback which actually provides information but, since not initially required in a publicly facing API we
+            // don't explicitly check and so it's possible we can instrument without a callback in which case we'll return a generic _scrubbedArtifact string.
             if (_disarmCallback == null)
                 return _scrubbedArtifact;
             if (Argument == null)
@@ -102,10 +95,8 @@ namespace Microsoft.IdentityModel.Logging
         // <inheritdoc/>
         public string UnsafeToString()
         {
-            if (_callbackUnsafe == null)
+            if (_callbackUnsafe == null || Argument == null)
                 return ToString();
-            if (Argument == null)
-                return "null";
             else
                 return _callbackUnsafe(Argument);
         }

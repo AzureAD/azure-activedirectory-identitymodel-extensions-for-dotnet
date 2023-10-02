@@ -389,7 +389,7 @@ namespace Microsoft.IdentityModel.Logging
                 // We may later add a further flag which would log a best effort scrubbing of an artifact. E.g. JsonWebToken tries to remove the signature
                 // in the current implementation. Another flag may be added in the future to allow this middle path but for now, LogCompleteSecurityArtifact
                 // must be logged to emit any token part (other than specific claim values).
-                return string.Format(CultureInfo.InvariantCulture, IdentityModelEventSource.HiddenArtifactString, arg?.GetType().ToString() ?? "Null");
+                return string.Format(CultureInfo.InvariantCulture, IdentityModelEventSource.HiddenSecurityArtifactString, arg?.GetType().ToString() ?? "Null");
             }
 
             // If it's not a ISafeLogSecurityArtifact then just return the object which will be converted to string.

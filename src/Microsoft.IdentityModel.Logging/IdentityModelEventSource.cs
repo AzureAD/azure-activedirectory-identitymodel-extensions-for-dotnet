@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <summary>
         /// String that is used in place of any arguments to log messages if the 'LogCompleteSecurityArtifact' flag is set to false.
         /// </summary>
-        public static string HiddenArtifactString { get; } = "[Security Artifact of type '{0}' is hidden. For more details, see https://aka.ms/IdentityModel/SecurityArtifactLogging.]";
+        public static string HiddenSecurityArtifactString { get; } = "[Security Artifact of type '{0}' is hidden. For more details, see https://aka.ms/IdentityModel/SecurityArtifactLogging.]";
 
         /// <summary>
         /// Indicates whether or the log message header (contains library version, date/time, and PII debugging information) has been written.

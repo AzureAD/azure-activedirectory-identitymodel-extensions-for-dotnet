@@ -48,21 +48,21 @@ namespace Microsoft.IdentityModel.Logging.Tests
         }
 
         [Fact]
-        public void MarkAsSecurityArtifactSafeCallbackIsNull_ThrowsArgumentNullException()
+        public void MarkAsSecurityArtifactSafeCallbackIsNull_NoException()
         {
             object arg = "argument";
-            Assert.Throws<ArgumentNullException>(() => LogHelper.MarkAsSecurityArtifact(arg,
+            LogHelper.MarkAsSecurityArtifact(arg,
                 null,
-                obj => string.Format(UnsafeFormat, obj)));
+                obj => string.Format(UnsafeFormat, obj));
         }
 
         [Fact]
-        public void MarkAsSecurityArtifactUnsafeCallbackIsNull_ThrowsArgumentNullException()
+        public void MarkAsSecurityArtifactUnsafeCallbackIsNull_NoException()
         {
             object arg = "argument";
-            Assert.Throws<ArgumentNullException>(() => LogHelper.MarkAsSecurityArtifact(arg,
+            LogHelper.MarkAsSecurityArtifact(arg,
                 obj => string.Format(SafeFormat, obj),
-                null));
+                null);
         }
 
         [Fact]
@@ -74,10 +74,10 @@ namespace Microsoft.IdentityModel.Logging.Tests
         }
 
         [Fact]
-        public void MarkAsUnsafeOnlySecurityArtifactUnsafeCallbackIsNull_ThrowsArgumentNullException()
+        public void MarkAsUnsafeOnlySecurityArtifactUnsafeCallbackIsNull_NoException()
         {
             object arg = "argument";
-            Assert.Throws<ArgumentNullException>(() => LogHelper.MarkAsUnsafeOnlySecurityArtifact(arg, null));
+            LogHelper.MarkAsUnsafeOnlySecurityArtifact(arg, null);
         }
 
         [Fact]
@@ -246,6 +246,31 @@ namespace Microsoft.IdentityModel.Logging.Tests
         }
 
         [Fact]
+        public void FormatInvariant_ArtifactEnabled_ShowPIIEnabled_ExplicitlyMarkedProperty_NullArgument()
+        {
+            // Arrange
+            string format = "PII Data: {0} and Token Data: {1}.";
+            object[] args = new object[] { LogHelper.MarkAsNonPII("data"), LogHelper.MarkAsSecurityArtifact(null, t => "safe token") };
+            IdentityModelEventSource.ShowPII = true;
+            IdentityModelEventSource.LogCompleteSecurityArtifact = true;
+
+            // Act
+            var result = LogHelper.FormatInvariant(format, args);
+
+            // Assert
+            Assert.Equal(
+                string.Format(
+                    format,
+                    "data",
+                    "null"),
+                result);
+
+            // Reset for other tests
+            IdentityModelEventSource.ShowPII = false;
+            IdentityModelEventSource.LogCompleteSecurityArtifact = false;
+        }
+
+        [Fact]
         public void FormatInvariant_ArtifactEnabled_ShowPIIEnabled_ExplicitlyMarkedPropertyNullCallback_ReturnsDefaultScrub()
         {
             // Arrange
@@ -259,6 +284,33 @@ namespace Microsoft.IdentityModel.Logging.Tests
 
             // Assert
             // NOTE: here the security artifact logs the disarmed token EVEN THOUGH LogCompleteSecurityArtifact is true. This is because no
+            // callback was provided to return an unsafe string so we default to the safe string.
+            Assert.Equal(
+                string.Format(
+                    format,
+                    "data",
+                    "#ScrubbedArtifact#"),
+                result);
+
+            // Reset for other tests
+            IdentityModelEventSource.ShowPII = false;
+            IdentityModelEventSource.LogCompleteSecurityArtifact = false;
+        }
+
+        [Fact]
+        public void FormatInvariant_ArtifactEnabled_ShowPIIEnabled_ExplicitlyMarkedUnsafePropertyNullCallback_ReturnsDefaultScrub()
+        {
+            // Arrange
+            string format = "PII Data: {0} and Token Data: {1}.";
+            object[] args = new object[] { LogHelper.MarkAsNonPII("data"), LogHelper.MarkAsUnsafeOnlySecurityArtifact("token", null) };
+            IdentityModelEventSource.ShowPII = true;
+            IdentityModelEventSource.LogCompleteSecurityArtifact = true;
+
+            // Act
+            var result = LogHelper.FormatInvariant(format, args);
+
+            // Assert
+            // NOTE: here it logs a generic scrubbed string EVEN THOUGH LogCompleteSecurityArtifact is true. This is because no
             // callback was provided to return an unsafe string so we default to the safe string.
             Assert.Equal(
                 string.Format(
