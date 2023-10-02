@@ -44,6 +44,17 @@ namespace Microsoft.IdentityModel.Logging
             set { _isHeaderWritten = value; }
         }
 
+#if !NET45
+        /// <summary>
+        /// Gets whether logging is enabled at the specified <see cref="EventLogLevel"/>."/>
+        /// </summary>
+        /// <param name="level">The log level</param>
+        /// <returns><see langword="true"/> if logging is enabled at the specified level; otherwise, <see langword="false"/>.</returns>
+        public static bool IsEnabled(EventLogLevel level) =>
+            Logger.IsEnabled(level) ||
+            IdentityModelEventSource.Logger.IsEnabled(EventLogLevelToEventLevel(level), EventKeywords.All);
+#endif
+
         /// <summary>
         /// Logs an exception using the event source logger and returns new <see cref="ArgumentNullException"/> exception.
         /// </summary>
@@ -344,6 +355,12 @@ namespace Microsoft.IdentityModel.Logging
                 else
                     return (T)Activator.CreateInstance(typeof(T), argumentName, message);
         }
+
+        private static EventLogLevel EventLevelToEventLogLevel(EventLevel eventLevel) =>
+            (uint)(int)eventLevel <= 5 ? (EventLogLevel)eventLevel : EventLogLevel.Error;
+
+        private static EventLevel EventLogLevelToEventLevel(EventLogLevel eventLevel) =>
+            (uint)(int)eventLevel <= 5 ? (EventLevel)eventLevel : EventLevel.Error;
 
         /// <summary>
         /// Formats the string using InvariantCulture
