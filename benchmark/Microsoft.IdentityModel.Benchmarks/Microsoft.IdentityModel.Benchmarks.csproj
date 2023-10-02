@@ -10,6 +10,8 @@
     <DelaySign>True</DelaySign>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
     <ErrorOnDuplicatePublishOutputFiles>False</ErrorOnDuplicatePublishOutputFiles>
+    <LangVersion Condition="'$(TargetNet8)' == 'True'">11</LangVersion>
+    <LangVersion Condition="'$(TargetNet8)' != 'True'">10</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
