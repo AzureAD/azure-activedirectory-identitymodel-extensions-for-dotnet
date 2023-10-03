@@ -78,7 +78,7 @@ jobs:
       arguments: >
         -feedLocation "NuGet" 
         -packageNames $(Wilson6xPackageList)
-        -packageVersion: "latest"
+        -packageVersion: "6.32.3"
         -adoFeedSource: $(AdoFeedSource)
         -adoFeedName: $(AdoFeedName)
         -adoAllowPrerelease: "false"

@@ -1,7 +1,7 @@
 param(
   [string]$feedLocation = "ADO", # or 'ADO' or 'NuGet'
   [string]$packageNames="", # comma-separated list of packages
-  [string]$packageVersion="latest", # or the exact version e.g. "5.4.0-preview"
+  [string]$packageVersion="6.0.0", # or the exact version e.g. "5.4.0-preview"
   [string]$adoFeedSource="", # required only for ADO feeds
   [string]$adoFeedName="", # required only for ADO feeds
   [string]$adoFeedUsername="VssSessionToken", # required only for ADO feeds
