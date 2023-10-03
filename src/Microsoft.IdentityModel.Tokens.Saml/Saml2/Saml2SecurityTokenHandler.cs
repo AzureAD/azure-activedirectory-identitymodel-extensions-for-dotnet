@@ -270,7 +270,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (validationParameters.SaveSigninToken)
                 identity.BootstrapContext = samlToken.Assertion.CanonicalString;
 
-            LogHelper.LogInformation(TokenLogMessages.IDX10241, token);
+#if !NET45
+            if (LogHelper.IsEnabled(Abstractions.EventLogLevel.Informational))
+#endif
+                LogHelper.LogInformation(
+                    TokenLogMessages.IDX10241,
+                    LogHelper.MarkAsUnsafeSecurityArtifact(token, t => t.ToString()));
 
             return new ClaimsPrincipal(identity);
         }
