@@ -1,5 +1,10 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+6.33.0
+=======
+## Bug Fixes:
+- Clean up log messages. See [#2339](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2339) for details.
+
 6.32.3
 =======
 ## Bug fixes:
