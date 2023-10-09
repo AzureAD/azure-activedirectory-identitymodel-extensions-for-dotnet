@@ -53,18 +53,6 @@ namespace Microsoft.IdentityModel.Xml
             set => _internalWriter = value ?? throw LogArgumentNullException(nameof(value));
         }
 
-#if NET45
-        /// <summary>
-        /// Closes the underlying stream.
-        /// </summary>
-        public override void Close()
-        {
-            UseInnerWriter.Close();
-            TracingWriter?.Close();
-            InternalWriter?.Close();
-        }
-#endif
-
         /// <summary>
         /// Flushes the underlying stream.
         /// </summary>

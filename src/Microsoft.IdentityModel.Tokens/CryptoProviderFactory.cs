@@ -15,8 +15,8 @@ namespace Microsoft.IdentityModel.Tokens
     public class CryptoProviderFactory
     {
         private static CryptoProviderFactory _default;
-        private static ConcurrentDictionary<string, string> _typeToAlgorithmMap = new ConcurrentDictionary<string, string>();
-        private static object _cacheLock = new object();
+        private static readonly ConcurrentDictionary<string, string> _typeToAlgorithmMap = new ConcurrentDictionary<string, string>();
+        private static readonly object _cacheLock = new object();
         private static int _defaultSignatureProviderObjectPoolCacheSize = Environment.ProcessorCount * 4;
         private int _signatureProviderObjectPoolCacheSize = _defaultSignatureProviderObjectPoolCacheSize;
 
@@ -318,7 +318,7 @@ namespace Microsoft.IdentityModel.Tokens
             return CreateSignatureProvider(key, algorithm, false, cacheProvider);
         }
 
-#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0
+#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
         /// <summary>
         /// Creates a <see cref="HashAlgorithm"/> for a specific algorithm.
         /// </summary>
@@ -566,9 +566,6 @@ namespace Microsoft.IdentityModel.Tokens
             if (typeofSignatureProvider == null)
                 throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10621, LogHelper.MarkAsNonPII(typeof(SymmetricSignatureProvider)), LogHelper.MarkAsNonPII(typeof(SecurityKey)), LogHelper.MarkAsNonPII(typeof(AsymmetricSecurityKey)), LogHelper.MarkAsNonPII(typeof(SymmetricSecurityKey)), LogHelper.MarkAsNonPII(key.GetType()))));
 
-            if (!IsSupportedAlgorithm(algorithm, key))
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10634, LogHelper.MarkAsNonPII(algorithm), key)));
-
             if (CacheSignatureProviders && cacheProvider)
             {
                 if (CryptoProviderCache.TryGetSignatureProvider(key, algorithm, typeofSignatureProvider, willCreateSignatures, out signatureProvider))
@@ -585,6 +582,9 @@ namespace Microsoft.IdentityModel.Tokens
                         return signatureProvider;
                     }
 
+                    if (!IsSupportedAlgorithm(algorithm, key))
+                        throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10634, LogHelper.MarkAsNonPII(algorithm), key)));
+
                     if (createAsymmetric)
                         signatureProvider = new AsymmetricSignatureProvider(key, algorithm, willCreateSignatures, this);
                     else
@@ -594,13 +594,19 @@ namespace Microsoft.IdentityModel.Tokens
                         CryptoProviderCache.TryAdd(signatureProvider);
                 }
             }
-            else if (createAsymmetric)
-            {
-                signatureProvider = new AsymmetricSignatureProvider(key, algorithm, willCreateSignatures);
-            }
             else
-            { 
-                signatureProvider = new SymmetricSignatureProvider(key, algorithm, willCreateSignatures);
+            {
+                if (!IsSupportedAlgorithm(algorithm, key))
+                    throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10634, LogHelper.MarkAsNonPII(algorithm), key)));
+
+                if (createAsymmetric)
+                {
+                    signatureProvider = new AsymmetricSignatureProvider(key, algorithm, willCreateSignatures);
+                }
+                else
+                {
+                    signatureProvider = new SymmetricSignatureProvider(key, algorithm, willCreateSignatures);
+                }
             }
 
             return signatureProvider;

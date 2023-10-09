@@ -75,6 +75,9 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <inheritdoc/>
+#if NET8_0_OR_GREATER
+        [Obsolete("Formatter-based serialization is obsolete", DiagnosticId = "SYSLIB0051")]
+#endif
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);

@@ -43,7 +43,7 @@ Write-Host "assemblyInformationalVersion: "  $assemblyInformationalVersion
 $nugetSuffix = [string]$buildConfiguration.SelectSingleNode("root/nugetSuffix").InnerText
 if ( $packageType -eq "release")
 {
-    $versionSuffix = ""
+    $versionSuffix = $nugetSuffix
 }
 else
 {
@@ -62,7 +62,7 @@ Set-Content $versionPath $version
 foreach($project in $buildConfiguration.SelectNodes("root/projects/src/project"))
 {
     $name = $project.name
-    $assemblyInfoPath = "$root\src\$name\properties\AssemblyInfo.cs"
+    $assemblyInfoPath = "$root\src\$name\Properties\AssemblyInfo.cs"
     Write-Host "assemblyInfoPath: " $assemblyInfoPath
 
     $assemblyInfo = Get-Content $assemblyInfoPath

@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Validators
                 var signingKeyIssuer = value as string;
                 if (string.IsNullOrWhiteSpace(signingKeyIssuer))
                     return true;
-                
+
                 var tenantIdFromToken = AadIssuerValidator.GetTenantIdFromToken(securityToken);
                 if (string.IsNullOrEmpty(tenantIdFromToken))
                     return true;

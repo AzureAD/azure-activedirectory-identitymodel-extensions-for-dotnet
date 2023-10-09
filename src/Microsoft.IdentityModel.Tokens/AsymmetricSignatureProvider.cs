@@ -16,9 +16,8 @@ namespace Microsoft.IdentityModel.Tokens
         private DisposableObjectPool<AsymmetricAdapter> _asymmetricAdapterObjectPool;
         private CryptoProviderFactory _cryptoProviderFactory;
         private bool _disposed;
-        private Lazy<bool> _keySizeIsValid;
-        private IReadOnlyDictionary<string, int> _minimumAsymmetricKeySizeInBitsForSigningMap;
-        private IReadOnlyDictionary<string, int> _minimumAsymmetricKeySizeInBitsForVerifyingMap;
+        private Dictionary<string, int> _minimumAsymmetricKeySizeInBitsForSigningMap;
+        private Dictionary<string, int> _minimumAsymmetricKeySizeInBitsForVerifyingMap;
 
         /// <summary>
         /// Mapping from algorithm to minimum <see cref="AsymmetricSecurityKey"/>.KeySize when creating signatures.
@@ -131,7 +130,6 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10634, LogHelper.MarkAsNonPII((algorithm)), key)));
 
             WillCreateSignatures = willCreateSignatures;
-            _keySizeIsValid = new Lazy<bool>(ValidKeySize);
             _asymmetricAdapterObjectPool = new DisposableObjectPool<AsymmetricAdapter>(CreateAsymmetricAdapter, _cryptoProviderFactory.SignatureProviderObjectPoolCacheSize);
         }
 
@@ -162,7 +160,6 @@ namespace Microsoft.IdentityModel.Tokens
             return PrivateKeyStatus.Unknown;
         }
 
-#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0
         /// <summary>
         /// Creating a Signature requires the use of a <see cref="HashAlgorithm"/>.
         /// This method returns the <see cref="HashAlgorithmName"/>
@@ -185,32 +182,6 @@ namespace Microsoft.IdentityModel.Tokens
             var hashAlgoritmName = GetHashAlgorithmName(Algorithm);
             return new AsymmetricAdapter(Key, Algorithm, _cryptoProviderFactory.CreateHashAlgorithm(hashAlgoritmName), hashAlgoritmName, WillCreateSignatures);
         }
-#endif
-
-#if NET45
-        /// <summary>
-        /// Creating a Signature requires the use of a <see cref="HashAlgorithm"/>.
-        /// This method returns the type of the HashAlgorithm (as a string)
-        /// that describes the <see cref="HashAlgorithm"/>to use when generating a Signature.
-        /// </summary>
-        /// <param name="algorithm">The SignatureAlgorithm in use.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="algorithm"/>is null or whitespace.</exception>
-        /// <exception cref="ArgumentException">if <paramref name="algorithm"/> is not supported.</exception>
-        protected virtual string GetHashAlgorithmString(string algorithm)
-        {
-            if (string.IsNullOrWhiteSpace(algorithm))
-                throw LogHelper.LogArgumentNullException(nameof(algorithm));
-
-            return SupportedAlgorithms.GetDigestFromSignatureAlgorithm(algorithm);
-        }
-
-        private AsymmetricAdapter CreateAsymmetricAdapter()
-        {
-            // Lazy object to ensure that validation is only called once.
-            _ = _keySizeIsValid.Value;
-            return new AsymmetricAdapter(Key, Algorithm, _cryptoProviderFactory.CreateHashAlgorithm(GetHashAlgorithmString(Algorithm)), WillCreateSignatures);
-        }
-#endif
 
         internal bool ValidKeySize()
         {

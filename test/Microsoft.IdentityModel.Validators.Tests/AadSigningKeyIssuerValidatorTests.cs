@@ -106,7 +106,6 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 theoryData.ExpectedException.ProcessNoException(context);
                 Assert.True(result);
             }
-            catch(Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex, context);
             }
@@ -320,7 +319,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
                     OpenIdConnectConfiguration = mockConfiguration,
                     ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX40004")
                 });
-                
+
                 return theoryData;
             }
         }

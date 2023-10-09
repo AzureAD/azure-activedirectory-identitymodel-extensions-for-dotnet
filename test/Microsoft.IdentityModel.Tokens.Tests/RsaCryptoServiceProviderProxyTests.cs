@@ -5,7 +5,7 @@
 using System.Security.Cryptography.X509Certificates;
 #endif
 
-#if NET452 || NET461 || NET462 || NET472
+#if NET461 || NET462 || NET472
 
 using System;
 using System.Security.Cryptography;

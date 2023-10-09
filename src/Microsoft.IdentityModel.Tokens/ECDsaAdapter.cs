@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </exception>
         internal ECDsaAdapter()
         {
-#if NET472 || NET6_0
+#if NET472 || NET6_0_OR_GREATER
             CreateECDsaFunction = CreateECDsaUsingECParams;
 #elif NETSTANDARD2_0
             // Although NETSTANDARD2_0 specifies that ECParameters are supported, we still need to call SupportsECParameters()
@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.Tokens
             return CreateECDsaFunction(jsonWebKey, usePrivateKey);
         }
 
-#if NET45 || NET461 || NET462 || NETSTANDARD2_0
+#if NET461 || NET462 || NETSTANDARD2_0
         /// <summary>
         /// Creates an ECDsa object using the <paramref name="jsonWebKey"/> and <paramref name="usePrivateKey"/>.
         /// 'ECParameters' structure is available in .NET Framework 4.7+, .NET Standard 1.6+, and .NET Core 1.0+.
@@ -77,17 +77,11 @@ namespace Microsoft.IdentityModel.Tokens
                 uint dwMagic = GetMagicValue(jsonWebKey.Crv, usePrivateKey);
                 uint cbKey = GetKeyByteCount(jsonWebKey.Crv);
                 byte[] keyBlob;
-#if NET45
-                if (usePrivateKey)
-                    keyBlob = new byte[3 * cbKey + 2 * Marshal.SizeOf(typeof(uint))];
-                else
-                    keyBlob = new byte[2 * cbKey + 2 * Marshal.SizeOf(typeof(uint))];
-#else
+
                 if (usePrivateKey)
                     keyBlob = new byte[3 * cbKey + 2 * Marshal.SizeOf<uint>()];
                 else
                     keyBlob = new byte[2 * cbKey + 2 * Marshal.SizeOf<uint>()];
-#endif
 
                 keyBlobHandle = GCHandle.Alloc(keyBlob, GCHandleType.Pinned);
                 IntPtr keyBlobPtr = keyBlobHandle.AddrOfPinnedObject();
@@ -256,7 +250,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-#if NET472 || NETSTANDARD2_0 || NET6_0
+#if NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
         /// <summary>
         /// Creates an ECDsa object using the <paramref name="jsonWebKey"/> and <paramref name="usePrivateKey"/>.
         /// 'ECParameters' structure is available in .NET Framework 4.7+, .NET Standard 1.6+, and .NET Core 1.0+.
@@ -344,7 +338,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>True if <see cref="ECParameters"/> structure is supported, false otherwise.</returns>
         internal static bool SupportsECParameters()
         {
-#if NET472 || NET6_0
+#if NET472 || NET6_0_OR_GREATER
             return true;
 #else
             try

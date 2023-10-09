@@ -216,16 +216,6 @@ namespace Microsoft.IdentityModel.Xml
             get => UseInnerReader.Prefix;
         }
 
-#if NET45
-        /// <summary>
-        /// Gets the quotation mark character used to enclose the attribute node. (" or ')
-        /// </summary>
-        public override char QuoteChar
-        {
-            get => UseInnerReader.QuoteChar;
-        }
-#endif
-
         /// <summary>
         /// Gets the InnerReader's ReadState. 
         /// </summary>
@@ -266,7 +256,6 @@ namespace Microsoft.IdentityModel.Xml
             get => UseInnerReader.XmlSpace;
         }
 
-#if NET45
         /// <summary>
         /// Closes the reader and changes the System.Xml.XmlReader.ReadState
         /// to Closed.
@@ -275,7 +264,6 @@ namespace Microsoft.IdentityModel.Xml
         {
             UseInnerReader.Close();
         }
-#endif
 
         /// <summary>
         /// Gets the value of the InnerReader's attribute at the given index.
@@ -438,6 +426,14 @@ namespace Microsoft.IdentityModel.Xml
         public override int ReadContentAsBinHex(byte[] buffer, int index, int count)
         {
             return UseInnerReader.ReadContentAsBinHex(buffer, index, count);
+        }
+
+        /// <summary>
+        /// Reads the content and returns the contained string.
+        /// </summary>
+        public override UniqueId ReadContentAsUniqueId()
+        {
+            return UseInnerReader.ReadContentAsUniqueId();
         }
 
         /// <summary>

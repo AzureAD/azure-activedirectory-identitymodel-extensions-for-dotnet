@@ -192,10 +192,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 new SignatureProviderTheoryData("X509SecurityKey6", ALG.RsaSha512Signature, ALG.RsaSha512Signature, KEY.X509SecurityKeySelfSigned2048_SHA256, KEY.X509SecurityKeySelfSigned2048_SHA256_Public),
                 new SignatureProviderTheoryData("X509SecurityKey7", ALG.Aes128Encryption, ALG.RsaSha512Signature, KEY.X509SecurityKeySelfSigned2048_SHA256, KEY.X509SecurityKeySelfSigned2048_SHA256_Public, EE.NotSupportedException("IDX10634:")),
                 new SignatureProviderTheoryData("X509SecurityKey8", ALG.RsaSha256Signature, ALG.RsaSha512Signature, KEY.DefaultX509Key_2048, KEY.DefaultX509Key_2048_Public, null, false),
-#if NET452
-                new SignatureProviderTheoryData("RsaSecurityKeyWithCspProvider1", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.RsaSecurityKeyWithCspProvider_2048, KEY.RsaSecurityKeyWithCspProvider_2048_Public),
-                new SignatureProviderTheoryData("RsaSecurityKeyWithCspProvider2", ALG.RsaSha384Signature, ALG.RsaSha384Signature, KEY.RsaSecurityKeyWithCspProvider_2048, KEY.RsaSecurityKey_2048_Public),
-#endif
                 new SignatureProviderTheoryData("UnknownKeyType1", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.RsaSecurityKey_2048, NotAsymmetricOrSymmetricSecurityKey.New, EE.NotSupportedException("IDX10621:")),
                 new SignatureProviderTheoryData("UnKnownKeyType2", ALG.RsaSha256Signature, ALG.RsaSha256Signature, NotAsymmetricOrSymmetricSecurityKey.New, KEY.RsaSecurityKey_2048, EE.NotSupportedException("IDX10621:")),
 
@@ -204,12 +200,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 new SignatureProviderTheoryData("PrivateKeyMissing2", ALG.RsaSha256, ALG.RsaSha256, KEY.JsonWebKeyRsa_2048_Public, KEY.JsonWebKeyRsa_2048_Public, EE.InvalidOperationException("IDX10638:")),
                 new SignatureProviderTheoryData("PrivateKeyMissing3", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.RsaSecurityKey_2048_Public,KEY.RsaSecurityKey_2048_Public, EE.InvalidOperationException("IDX10638:")),
                 new SignatureProviderTheoryData("PrivateKeyMissing4", ALG.RsaSha256, ALG.RsaSha256, KEY.X509SecurityKeySelfSigned2048_SHA256_Public, KEY.X509SecurityKeySelfSigned2048_SHA256_Public, EE.InvalidOperationException("IDX10638:")),
-#if NET452
-                new SignatureProviderTheoryData("PrivateKeyMissing5", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.Ecdsa521Key_Public, KEY.Ecdsa521Key_Public, EE.CryptographicException()),
-#else
+
                 // .Net Core throws some funky inner exception that GetType() reports as: Internal.Cryptography.CryptoThrowHelper+WindowsCryptographicException
                 new SignatureProviderTheoryData("PrivateKeyMissing5", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.Ecdsa521Key_Public, KEY.Ecdsa521Key_Public, new EE(typeof(Exception)){IgnoreExceptionType = true}),
-#endif
+
                 // Invalid JsonWebKeyComponents
                 new SignatureProviderTheoryData("JsonWebKeyP521_Public_Invalid_X", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.JsonWebKeyP521_Public_Invalid_X, KEY.JsonWebKeyP521, EE.InvalidOperationException()),
                 new SignatureProviderTheoryData("JsonWebKeyP521_Public_Invalid_Y", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.JsonWebKeyP521_Public_Invalid_Y, KEY.JsonWebKeyP521, EE.InvalidOperationException()),
@@ -412,21 +406,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
             TestUtilities.AssertFailIfErrors("AsymmetricSignatureProvider_SupportedAlgorithms", errors);
 
-        }
-
-        private static bool IsRunningOn462OrGreaterOrCore()
-        {
-#if NET452
-            // test for >=4.6.2
-            // AesCng was added to System.Core in 4.6.2. It doesn't exist in .NET Core.
-            Module systemCoreModule = typeof(System.Security.Cryptography.AesCryptoServiceProvider).GetTypeInfo().Assembly.GetModules()[0];
-            if (systemCoreModule != null && systemCoreModule.GetType("System.Security.Cryptography.AesCng") != null)
-                return true;
-            return false;
-#else
-            // test for Core
-            return true;
-#endif
         }
 
         [Theory, MemberData(nameof(AsymmetricSignatureProviderVerifyParameterChecksTheoryData))]
@@ -926,14 +905,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             var theoryData = new TheoryData<string, SecurityKey, string, EE>
             {
-#if NET452
-                {
-                    "Test1",
-                    new RsaSecurityKey(new RSACryptoServiceProvider(2048)),
-                    ALG.RsaSha256,
-                    EE.NoExceptionExpected
-                },
-#endif
                 {
                     "Test2",
                     new RsaSecurityKey(KEY.RsaParameters_2048),

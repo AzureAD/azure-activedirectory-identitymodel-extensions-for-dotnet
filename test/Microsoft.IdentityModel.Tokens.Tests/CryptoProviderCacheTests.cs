@@ -277,7 +277,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         TestId = nameof(KeyingMaterial.Ecdsa256Key_Public)
                     },
 #else
-                    // ecdsa signature provider should NOT be added to the cache on NET452 and NET461.
+                    // ecdsa signature provider should NOT be added to the cache on NET461.
                     new CryptoProviderCacheTheoryData
                     {
                         Added = false,
@@ -602,7 +602,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
 #if NETCOREAPP
         public CryptoProviderCache CryptoProviderCache { get; set; }
-#elif NET452 || NET461 || NET462 || NET472
+#elif NET461 || NET462 || NET472
         public CryptoProviderCache CryptoProviderCache { get; set; }
 #endif
 

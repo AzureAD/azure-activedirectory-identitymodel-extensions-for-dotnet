@@ -4,20 +4,18 @@
 // Ignore Spelling: Metadata Validator Retreiver
 
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.IO;
 using System.Net;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 {
@@ -26,11 +24,74 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     /// </summary>
     public class ConfigurationManagerTests
     {
+        [Theory, MemberData(nameof(GetPublicMetadataTheoryData), DisableDiscoveryEnumeration = true)]
+        public async Task GetPublicMetadata(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData)
+        {
+            CompareContext context = TestUtilities.WriteHeader($"{this}.GetPublicMetadata", theoryData);
+            try
+            {
+                var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+                    theoryData.MetadataAddress,
+                    theoryData.ConfigurationRetreiver,
+                    theoryData.DocumentRetriever,
+                    theoryData.ConfigurationValidator);
 
-        [Theory, MemberData(nameof(ConstructorTheoryData))]
+                var configuration = await configurationManager.GetConfigurationAsync(CancellationToken.None);
+
+                Assert.NotNull(configuration);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<ConfigurationManagerTheoryData<OpenIdConnectConfiguration>> GetPublicMetadataTheoryData()
+        {
+            var theoryData = new TheoryData<ConfigurationManagerTheoryData<OpenIdConnectConfiguration>>();
+
+            theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>("AccountsGoogleCom")
+            {
+                ConfigurationRetreiver = new OpenIdConnectConfigurationRetriever(),
+                ConfigurationValidator = new OpenIdConnectConfigurationValidator(),
+                DocumentRetriever = new HttpDocumentRetriever(),
+                MetadataAddress = OpenIdConfigData.AccountsGoogle
+            });
+
+            theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>("AADCommonUrl")
+            {
+                ConfigurationRetreiver = new OpenIdConnectConfigurationRetriever(),
+                ConfigurationValidator = new OpenIdConnectConfigurationValidator(),
+                DocumentRetriever = new HttpDocumentRetriever(),
+                MetadataAddress = OpenIdConfigData.AADCommonUrl
+            });
+
+            theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>("AADCommonUrlV1")
+            {
+                ConfigurationRetreiver = new OpenIdConnectConfigurationRetriever(),
+                ConfigurationValidator = new OpenIdConnectConfigurationValidator(),
+                DocumentRetriever = new HttpDocumentRetriever(),
+                MetadataAddress = OpenIdConfigData.AADCommonUrlV1
+            });
+
+            theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>("AADCommonUrlV2")
+            {
+                ConfigurationRetreiver = new OpenIdConnectConfigurationRetriever(),
+                ConfigurationValidator = new OpenIdConnectConfigurationValidator(),
+                DocumentRetriever = new HttpDocumentRetriever(),
+                MetadataAddress = OpenIdConfigData.AADCommonUrlV2
+            });
+
+            return theoryData;
+        }
+
+        [Theory, MemberData(nameof(ConstructorTheoryData), DisableDiscoveryEnumeration = true)]
         public void OpenIdConnectConstructor(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.OpenIdConnectConstructor", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.OpenIdConnectConstructor", theoryData);
             try
             {
                 var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(theoryData.MetadataAddress, theoryData.ConfigurationRetreiver, theoryData.DocumentRetriever, theoryData.ConfigurationValidator);
@@ -40,6 +101,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             {
                 theoryData.ExpectedException.ProcessException(ex);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<ConfigurationManagerTheoryData<OpenIdConnectConfiguration>> ConstructorTheoryData
@@ -443,19 +506,19 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             configWithSameKidDiffKeyMaterial.SigningKeys.Add(new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_128.Key) { KeyId = KeyingMaterial.DefaultSymmetricSecurityKey_256.KeyId });
 
             var configurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(config, config);
-            IdentityComparer.AreEqual(configurationManager.GetValidLkgConfigurations().Count, 1, context);
+            IdentityComparer.AreEqual(configurationManager.GetValidLkgConfigurations().Length, 1, context);
 
             configurationManager.LastKnownGoodConfiguration = configWithSameKeysDiffOrder;
-            IdentityComparer.AreEqual(configurationManager.GetValidLkgConfigurations().Count, 1, context);
+            IdentityComparer.AreEqual(configurationManager.GetValidLkgConfigurations().Length, 1, context);
 
             configurationManager.LastKnownGoodConfiguration = configWithOverlappingKey;
-            IdentityComparer.AreEqual(configurationManager.GetValidLkgConfigurations().Count, 2, context);
+            IdentityComparer.AreEqual(configurationManager.GetValidLkgConfigurations().Length, 2, context);
 
             configurationManager.LastKnownGoodConfiguration = configWithOverlappingKeyDiffissuer;
-            IdentityComparer.AreEqual(configurationManager.GetValidLkgConfigurations().Count, 3, context);
+            IdentityComparer.AreEqual(configurationManager.GetValidLkgConfigurations().Length, 3, context);
 
             configurationManager.LastKnownGoodConfiguration = configWithSameKidDiffKeyMaterial;
-            IdentityComparer.AreEqual(configurationManager.GetValidLkgConfigurations().Count, 4, context);
+            IdentityComparer.AreEqual(configurationManager.GetValidLkgConfigurations().Length, 4, context);
 
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -606,6 +669,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
         public class ConfigurationManagerTheoryData<T> : TheoryDataBase
         {
+            public ConfigurationManagerTheoryData() {}
+
+            public ConfigurationManagerTheoryData(string testId) : base(testId) {}
+
             public TimeSpan AutomaticRefreshInterval { get; set; }
 
             public IConfigurationRetriever<T> ConfigurationRetreiver { get; set; }
@@ -633,5 +700,3 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
     }
 }
-
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

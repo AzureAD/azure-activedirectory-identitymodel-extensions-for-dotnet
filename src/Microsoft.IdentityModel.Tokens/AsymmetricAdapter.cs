@@ -5,14 +5,6 @@ using System;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 
-#if NET45
-using System.Reflection;
-#endif
-
-#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0
-using System.Security.Cryptography.X509Certificates;
-#endif
-
 namespace Microsoft.IdentityModel.Tokens
 {
     delegate byte[] EncryptDelegate(byte[] bytes);
@@ -26,24 +18,6 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     internal class AsymmetricAdapter : IDisposable
     {
-#if NET45
-        // For users that have built targeting 4.5.1, 4.5.2 or 4.6.0 they will bind to our 4.5 target.
-        // It is possible for the application to pass the call to X509Certificate2.GetRSAPublicKey() or X509Certificate2.GetRSAPrivateKey()
-        // which returns RSACng(). Our 4.5 target doesn't know about this type and sees it as RSA, then things start to go bad.
-        // We use reflection to detect that 4.6+ is available and access the appropriate signing or verifying methods.
-        private static Type _hashAlgorithmNameType = typeof(object).Assembly.GetType("System.Security.Cryptography.HashAlgorithmName", false);
-        private static Type _rsaEncryptionPaddingType = typeof(object).Assembly.GetType("System.Security.Cryptography.RSAEncryptionPadding", false);
-        private static Type _rsaSignaturePaddingType = typeof(object).Assembly.GetType("System.Security.Cryptography.RSASignaturePadding", false);
-
-        private Func<RSA, byte[], byte[]> _rsaDecrypt45Method;
-        private Func<RSA, byte[], byte[]> _rsaEncrypt45Method;
-        private Func<RSA, byte[], string, byte[]> _rsaPkcs1SignMethod;
-        private Func<RSA, byte[], byte[], string, bool> _rsaPkcs1VerifyMethod;
-        private string _lightUpHashAlgorithmName = string.Empty;
-        private const string _dsaCngTypeName = "System.Security.Cryptography.DSACng";
-        private const string _rsaCngTypeName = "System.Security.Cryptography.RSACng";
-#endif
-
 #if DESKTOP
         private bool _useRSAOeapPadding = false;
 #endif
@@ -61,7 +35,6 @@ namespace Microsoft.IdentityModel.Tokens
         {
         }
 
-        // This constructor will be used by NET45 for signing and for RSAKeyWrap
         internal AsymmetricAdapter(SecurityKey key, string algorithm, HashAlgorithm hashAlgorithm, bool requirePrivateKey)
         {
             HashAlgorithm = hashAlgorithm;
@@ -189,33 +162,6 @@ namespace Microsoft.IdentityModel.Tokens
             }
 #endif
 
-#if NET45
-            // This case required the user to get a RSA object by calling
-            // X509Certificate2.GetRSAPrivateKey() OR X509Certificate2.GetRSAPublicKey()
-            // This requires 4.6+ to be installed. If a dependent library is targeting 4.5, 4.5.1, 4.5.2 or 4.6
-            // they will bind to our Net45 target, but the type is RSACng.
-            // The 'lightup' code will bind to the correct operators.
-            else if (rsa.GetType().ToString().Equals(_rsaCngTypeName) && IsRsaCngSupported())
-            {
-                _useRSAOeapPadding = algorithm.Equals(SecurityAlgorithms.RsaOAEP)
-                                  || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap);
-
-                _lightUpHashAlgorithmName = GetLightUpHashAlgorithmName();
-                DecryptFunction = DecryptNet45;
-                EncryptFunction = EncryptNet45;
-                SignatureFunction = Pkcs1SignData;
-                VerifyFunction = Pkcs1VerifyData;
-                RSA = rsa;
-                return;
-            }
-            else
-            {
-                // In NET45 we only support RSACryptoServiceProvider or "System.Security.Cryptography.RSACng"
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10687, LogHelper.MarkAsNonPII(typeof(RSACryptoServiceProvider).ToString()), LogHelper.MarkAsNonPII(_rsaCngTypeName), LogHelper.MarkAsNonPII(rsa.GetType().ToString()))));
-            }
-#endif
-
-#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0
             if (algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha256) ||
                 algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha256Signature) ||
                 algorithm.Equals(SecurityAlgorithms.RsaSsaPssSha384) ||
@@ -240,7 +186,6 @@ namespace Microsoft.IdentityModel.Tokens
             SignatureFunction = SignWithRsa;
             VerifyFunction = VerifyWithRsa;
             VerifyFunctionWithLength = VerifyWithRsaWithLength;
-#endif
         }
 
         private void InitializeUsingRsaSecurityKey(RsaSecurityKey rsaSecurityKey, string algorithm)
@@ -251,7 +196,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             else
             {
-#if NET472 || NET6_0
+#if NET472 || NET6_0_OR_GREATER
                 var rsa = RSA.Create(rsaSecurityKey.Parameters);
 #else
                 var rsa = RSA.Create();
@@ -321,7 +266,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
 #region NET61+ related code
-#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0
+#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
 
         // HasAlgorithmName was introduced into Net46
         internal AsymmetricAdapter(SecurityKey key, string algorithm, HashAlgorithm hashAlgorithm, HashAlgorithmName hashAlgorithmName, bool requirePrivateKey)
@@ -394,244 +339,6 @@ namespace Microsoft.IdentityModel.Tokens
         }
     #endif
 
-#endif
-#endregion
-
-#region NET45 'lightup' code
-        // the idea here is if a user has defined their application to target 4.6.1+ but some layer in the stack kicks down below, this code builds delegates
-        // for decrypting, encryption, signing and validating when we detect that the instance of RSA is RSACng and RSACng is supported by the framework.
-#if NET45
-        private byte[] DecryptNet45(byte[] bytes)
-        {
-            if (_rsaDecrypt45Method == null)
-            {
-                // Decrypt(byte[] data, RSAEncryptionPadding padding)
-                Type[] encryptionTypes = { typeof(byte[]), _rsaEncryptionPaddingType };
-                MethodInfo encryptMethod = typeof(RSA).GetMethod(
-                    "Decrypt",
-                    BindingFlags.Public | BindingFlags.Instance,
-                    null,
-                    encryptionTypes,
-                    null);
-
-                Type delegateType = typeof(Func<,,,>).MakeGenericType(
-                            typeof(RSA),
-                            typeof(byte[]),
-                            _rsaEncryptionPaddingType,
-                            typeof(byte[]));
-
-                PropertyInfo prop;
-                if (_useRSAOeapPadding)
-                    prop = _rsaEncryptionPaddingType.GetProperty("OaepSHA1", BindingFlags.Static | BindingFlags.Public);
-                else
-                    prop = _rsaEncryptionPaddingType.GetProperty("Pkcs1", BindingFlags.Static | BindingFlags.Public);
-
-                Delegate openDelegate = Delegate.CreateDelegate(delegateType, encryptMethod);
-                _rsaDecrypt45Method = (rsaArg, bytesArg) =>
-                {
-                    object[] args =
-                    {
-                        rsaArg,
-                        bytesArg,
-                        prop.GetValue(null)
-                    };
-
-                    return (byte[])openDelegate.DynamicInvoke(args);
-                };
-            }
-
-            return _rsaDecrypt45Method(RSA, bytes);
-        }
-
-        private byte[] EncryptNet45(byte[] bytes)
-        {
-            if (_rsaEncrypt45Method == null)
-            {
-                // Encrypt(byte[] data, RSAEncryptionPadding padding)
-                Type[] encryptionTypes = { typeof(byte[]), _rsaEncryptionPaddingType };
-                MethodInfo encryptMethod = typeof(RSA).GetMethod(
-                    "Encrypt",
-                    BindingFlags.Public | BindingFlags.Instance,
-                    null,
-                    encryptionTypes,
-                    null);
-
-                Type delegateType = typeof(Func<,,,>).MakeGenericType(
-                            typeof(RSA),
-                            typeof(byte[]),
-                            _rsaEncryptionPaddingType,
-                            typeof(byte[]));
-
-                PropertyInfo prop;
-                if (_useRSAOeapPadding)
-                    prop = _rsaEncryptionPaddingType.GetProperty("OaepSHA1", BindingFlags.Static | BindingFlags.Public);
-                else
-                    prop = _rsaEncryptionPaddingType.GetProperty("Pkcs1", BindingFlags.Static | BindingFlags.Public);
-
-                Delegate openDelegate = Delegate.CreateDelegate(delegateType, encryptMethod);
-                _rsaEncrypt45Method = (rsaArg, bytesArg) =>
-                {
-                    object[] args =
-                    {
-                        rsaArg,
-                        bytesArg,
-                        prop.GetValue(null)
-                    };
-
-                    return (byte[])openDelegate.DynamicInvoke(args);
-                };
-            }
-
-            return _rsaEncrypt45Method(RSA, bytes);
-        }
-
-        private string GetLightUpHashAlgorithmName()
-        {
-            if (HashAlgorithm == null)
-                return "SHA256";
-
-            if (HashAlgorithm.HashSize == 256)
-                return "SHA256";
-
-            if (HashAlgorithm.HashSize == 384)
-                return "SHA384";
-
-            if (HashAlgorithm.HashSize == 512)
-                return "SHA512";
-
-            return HashAlgorithm.ToString();
-        }
-
-        /// <summary>
-        /// The following code determines if RSACng is available on the .Net framework that is installed.
-        /// </summary>
-        private static Type GetSystemCoreType(string namespaceQualifiedTypeName)
-        {
-            Assembly systemCore = typeof(CngKey).Assembly;
-            return systemCore.GetType(namespaceQualifiedTypeName, false);
-        }
-
-        private static bool IsRsaCngSupported()
-        {
-            Type rsaCng = GetSystemCoreType(_rsaCngTypeName);
-
-            // If the type doesn't exist, there can't be good support for it.
-            // (System.Core < 4.6)
-            if (rsaCng == null)
-                return false;
-
-            Type dsaCng = GetSystemCoreType(_dsaCngTypeName);
-
-            // The original implementation of RSACng returned shared objects in the CAPI fallback
-            // pathway. That behavior is hard to test for, since CNG can load all CAPI software keys.
-            // But, since DSACng was added in 4.6.2, and RSACng better guarantees uniqueness in 4.6.2
-            // use that coincidence as a compatibility test.
-            //
-            // If DSACng is missing, RSACng usage might lead to attempting to use Disposed objects
-            // (System.Core < 4.6.2)
-            if (dsaCng == null)
-                return false;
-
-            // Create an RSACng instance and send it to RSAPKCS1KeyExchangeFormatter. It was adjusted to
-            // be CNG-capable for 4.6.2; and other types in that library also are up-to-date.
-            //
-            // If mscorlib can't handle it properly, then other libraries probably can't, so we'll keep
-            // preferring RSACryptoServiceProvider.
-            try
-            {
-                new RSAPKCS1KeyExchangeFormatter((RSA)Activator.CreateInstance(rsaCng)).CreateKeyExchange(new byte[1]);
-            }
-            catch (Exception)
-            {
-                // (mscorlib < 4.6.2)
-                return false;
-            }
-
-            return true;
-        }
-
-        private byte[] Pkcs1SignData(byte[] input)
-        {
-            if (_rsaPkcs1SignMethod == null)
-            {
-                // [X] SignData(byte[] data, HashAlgorithmName hashAlgorithmName, RSASignaturePadding padding)
-                // [ ] SignData(byte[] data, int offset, int count, HashAlgorithmName hashAlgorithmName, RSASignaturePadding padding)
-                // [ ] SignData(Stream data, HashAlgorithmName hashAlgorithmName, RSASignaturePadding padding)
-                Type[] signatureTypes = { typeof(byte[]), _hashAlgorithmNameType, _rsaSignaturePaddingType };
-
-                MethodInfo signDataMethod = typeof(RSA).GetMethod(
-                    "SignData",
-                    BindingFlags.Public | BindingFlags.Instance,
-                    null,
-                    signatureTypes,
-                    null);
-
-                Type delegateType = typeof(Func<,,,,>).MakeGenericType(
-                            typeof(RSA),
-                            typeof(byte[]),
-                            _hashAlgorithmNameType,
-                            _rsaSignaturePaddingType,
-                            typeof(byte[]));
-
-                Delegate openDelegate = Delegate.CreateDelegate(delegateType, signDataMethod);
-                _rsaPkcs1SignMethod = (rsaArg, dataArg, algorithmArg) =>
-                {
-                    object[] args =
-                    {
-                        rsaArg,
-                        dataArg,
-                        Activator.CreateInstance(_hashAlgorithmNameType, algorithmArg),
-                        _rsaSignaturePaddingType.GetProperty("Pkcs1", BindingFlags.Static | BindingFlags.Public).GetValue(null)
-                    };
-
-                    return (byte[])openDelegate.DynamicInvoke(args);
-                };
-            }
-
-            return _rsaPkcs1SignMethod(RSA, input, _lightUpHashAlgorithmName);
-        }
-
-        private bool Pkcs1VerifyData(byte[] input, byte[] signature)
-        {
-            if (_rsaPkcs1VerifyMethod == null)
-            {
-                // [X] VerifyData(byte[] data, byte[] signature, HashAlgorithmName hashAlgorithmName, RSASignaturePadding padding)
-                // [ ] VerifyData(byte[] data, int offset, int count, byte[] signature, HashAlgorithmName hashAlgorithmName, RSASignaturePadding padding)
-                // [ ] VerifyData(Stream data, byte[] signature, HashAlgorithmName hashAlgorithmName, RSASignaturePadding padding)
-                Type[] signatureTypes = { typeof(byte[]), typeof(byte[]), _hashAlgorithmNameType, _rsaSignaturePaddingType };
-                MethodInfo verifyDataMethod = typeof(RSA).GetMethod(
-                    "VerifyData",
-                    BindingFlags.Public | BindingFlags.Instance,
-                    null,
-                    signatureTypes,
-                    null);
-
-                Type delegateType = typeof(Func<,,,,,>).MakeGenericType(
-                    typeof(RSA),
-                    typeof(byte[]),
-                    typeof(byte[]),
-                    _hashAlgorithmNameType,
-                    _rsaSignaturePaddingType,
-                    typeof(bool));
-
-                Delegate verifyDelegate = Delegate.CreateDelegate(delegateType, verifyDataMethod);
-                _rsaPkcs1VerifyMethod = (rsaArg, dataArg, signatureArg, algorithmArg) =>
-                {
-                    object[] args =
-                    {
-                        rsaArg,
-                        dataArg,
-                        signatureArg,
-                        Activator.CreateInstance(_hashAlgorithmNameType, algorithmArg),
-                        _rsaSignaturePaddingType.GetProperty("Pkcs1", BindingFlags.Static | BindingFlags.Public).GetValue(null)
-                    };
-
-                    return (bool)verifyDelegate.DynamicInvoke(args);
-                };
-            }
-
-            return _rsaPkcs1VerifyMethod(RSA, input, signature, _lightUpHashAlgorithmName);
-        }
 #endif
 #endregion
 
