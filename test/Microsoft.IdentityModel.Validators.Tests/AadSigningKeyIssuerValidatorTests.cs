@@ -106,6 +106,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 theoryData.ExpectedException.ProcessNoException(context);
                 Assert.True(result);
             }
+            catch (Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex, context);
             }
