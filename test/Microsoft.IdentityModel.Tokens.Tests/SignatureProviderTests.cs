@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -939,14 +940,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             return theoryData;
         }
-#if NET_CORE
-        // Excluding OSX as SignatureTampering test is slow on OSX (~6 minutes)
-        // especially tests with IDs RS256 and ES256
-        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.Linux)]
-#endif
+
         [Theory, MemberData(nameof(SignatureTheoryData))]
         public void SignatureTampering(SignatureProviderTheoryData theoryData)
         {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                throw new PlatformNotSupportedException("OSX is excluded as the SignatureTampering test is slow (~6 minutes).");
+
             TestUtilities.WriteHeader($"{this}.SignatureTampering", theoryData);
             var copiedSignature = theoryData.Signature.CloneByteArray();
             for (int i = 0; i < theoryData.Signature.Length; i++)
@@ -969,12 +969,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.True(theoryData.VerifySignatureProvider.Verify(theoryData.RawBytes, copiedSignature), "Final check should have verified");
         }
 
-#if NET_CORE
-        // Excluding OSX as SignatureTruncation test throws an exception only on OSX
-        // This behavior should be fixed with netcore3.0
-        // Exceptions is thrown somewhere in System/Security/Cryptography/DerEncoder.cs class which is removed in netcore3.0
-        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.Linux)]
-#endif
         [Theory, MemberData(nameof(SignatureTheoryData))]
         public void SignatureTruncation(SignatureProviderTheoryData theoryData)
         {
