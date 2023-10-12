@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -1114,6 +1115,67 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.False(identity.HasClaim(c => c.Type == "unwantedClaim"));
             Assert.False(identity.HasClaim(c => c.Type == "jwtClaim"));
             Assert.True(identity.HasClaim("internalClaim", "claimValue"));
+        }
+
+        [Theory, MemberData(nameof(JweDecompressSizeTheoryData))]
+        public async Task JWEDecompressionSizeTest(JWEDecompressionTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.JWEDecompressionTest", theoryData);
+
+            try
+            {
+                var handler = new JwtSecurityTokenHandler();
+                CompressionProviderFactory.Default = theoryData.CompressionProviderFactory;
+                var validationResult = await handler.ValidateTokenAsync(theoryData.JWECompressionString, theoryData.ValidationParameters).ConfigureAwait(false);
+                theoryData.ExpectedException.ProcessException(validationResult.Exception, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<JWEDecompressionTheoryData> JweDecompressSizeTheoryData()
+        {
+            // The character 'U' compresses better because UUU in base 64 is VVVV and repeated characters compress best
+
+            JsonWebTokenHandler jwth = new JsonWebTokenHandler();
+            SecurityKey key = new SymmetricSecurityKey(new byte[256 / 8]);
+            EncryptingCredentials encryptingCredentials = new EncryptingCredentials(key, "dir", "A128CBC-HS256");
+            TokenValidationParameters validationParameters = new TokenValidationParameters { TokenDecryptionKey = key };
+
+            TheoryData<JWEDecompressionTheoryData> theoryData = new TheoryData<JWEDecompressionTheoryData>();
+
+            string payload = System.Text.Json.JsonSerializer.Serialize(new { U = new string('U', 100_000_000), UU = new string('U', 40_000_000) });
+            string token = jwth.CreateToken(payload, encryptingCredentials, "DEF");
+            theoryData.Add(new JWEDecompressionTheoryData
+            {
+                CompressionProviderFactory = new CompressionProviderFactory(),
+                ValidationParameters = validationParameters,
+                JWECompressionString = token,
+                TestId = "DeflateSizeExceeded",
+                ExpectedException = new ExpectedException(
+                    typeof(SecurityTokenDecompressionFailedException),
+                    "IDX10679:",
+                    typeof(SecurityTokenDecompressionFailedException))
+            });
+
+            payload = System.Text.Json.JsonSerializer.Serialize(new { U = new string('U', 100_000_000), UU = new string('U', 50_000_000) });
+            token = jwth.CreateToken(payload, encryptingCredentials, "DEF");
+            theoryData.Add(new JWEDecompressionTheoryData
+            {
+                CompressionProviderFactory = new CompressionProviderFactory(),
+                ValidationParameters = validationParameters,
+                JWECompressionString = token,
+                TestId = "TokenSizeExceeded",
+                ExpectedException = new ExpectedException(
+                    typeof(ArgumentException),
+                    "IDX10209:")
+            });
+
+            return theoryData;
         }
 
         [Theory, MemberData(nameof(JWEDecompressionTheoryData))]
