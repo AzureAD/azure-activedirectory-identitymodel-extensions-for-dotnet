@@ -35,7 +35,6 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageVersion>7.1.0</PackageVersion>
     <EnablePackageValidation>true</EnablePackageValidation>
     <PackageValidationBaselineVersion>7.0.0</PackageValidationBaselineVersion>
   </PropertyGroup>
