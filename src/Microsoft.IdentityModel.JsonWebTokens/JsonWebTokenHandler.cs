@@ -911,7 +911,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 new JwtTokenDecryptionParameters
                 {
                     DecompressionFunction = JwtTokenUtilities.DecompressToken,
-                    Keys = keys
+                    Keys = keys,
+                    MaximumDeflateSize = MaximumTokenSizeInBytes
                 });
         }
 
