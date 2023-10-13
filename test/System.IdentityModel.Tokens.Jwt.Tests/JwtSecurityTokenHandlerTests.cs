@@ -1186,7 +1186,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             try
             {
                 var handler = new JwtSecurityTokenHandler();
-                CompressionProviderFactory.Default = theoryData.CompressionProviderFactory;
+                // We need to have a replacement model for custom compression
+                // https://identitydivision.visualstudio.com/Engineering/_workitems/edit/2719954
+                //CompressionProviderFactory.Default = theoryData.CompressionProviderFactory;
                 var claimsPrincipal = handler.ValidateToken(theoryData.JWECompressionString, theoryData.ValidationParameters, out var validatedToken);
 
                 if (!claimsPrincipal.Claims.Any())
@@ -1238,29 +1240,32 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     TestId = "InvalidToken",
                     ExpectedException = new ExpectedException(typeof(SecurityTokenDecompressionFailedException), "IDX10679:", typeof(InvalidDataException))
                 },
-                new JWEDecompressionTheoryData
-                {
-                    ValidationParameters = Default.JWECompressionTokenValidationParameters,
-                    JWECompressionString = ReferenceTokens.JWECompressionTokenWithDEF,
-                    CompressionProviderFactory = null,
-                    TestId = "NullCompressionProviderFactory",
-                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:")
-                },
-                new JWEDecompressionTheoryData
-                {
-                    ValidationParameters = Default.JWECompressionTokenValidationParameters,
-                    CompressionProviderFactory = compressionProviderFactoryForCustom,
-                    JWECompressionString = ReferenceTokens.JWECompressionTokenWithCustomAlgorithm,
-                    TestId = "CustomCompressionProviderSucceeds"
-                },
-                new JWEDecompressionTheoryData
-                {
-                    ValidationParameters = Default.JWECompressionTokenValidationParameters,
-                    JWECompressionString = ReferenceTokens.JWECompressionTokenWithDEF,
-                    CompressionProviderFactory = compressionProviderFactoryForCustom2,
-                    TestId = "CustomCompressionProviderFails",
-                    ExpectedException = new ExpectedException(typeof(SecurityTokenDecompressionFailedException), "IDX10679:", typeof(SecurityTokenDecompressionFailedException))
-                }
+                // Skip these tests as they set a static
+                // We need to have a replacement model for custom compression
+                // https://identitydivision.visualstudio.com/Engineering/_workitems/edit/2719954
+                //new JWEDecompressionTheoryData
+                //{
+                //    ValidationParameters = Default.JWECompressionTokenValidationParameters,
+                //    JWECompressionString = ReferenceTokens.JWECompressionTokenWithDEF,
+                //    CompressionProviderFactory = null,
+                //    TestId = "NullCompressionProviderFactory",
+                //    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:")
+                //},
+                //new JWEDecompressionTheoryData
+                //{
+                //    ValidationParameters = Default.JWECompressionTokenValidationParameters,
+                //    CompressionProviderFactory = compressionProviderFactoryForCustom,
+                //    JWECompressionString = ReferenceTokens.JWECompressionTokenWithCustomAlgorithm,
+                //    TestId = "CustomCompressionProviderSucceeds"
+                //},
+                //new JWEDecompressionTheoryData
+                //{
+                //    ValidationParameters = Default.JWECompressionTokenValidationParameters,
+                //    JWECompressionString = ReferenceTokens.JWECompressionTokenWithDEF,
+                //    CompressionProviderFactory = compressionProviderFactoryForCustom2,
+                //    TestId = "CustomCompressionProviderFails",
+                //    ExpectedException = new ExpectedException(typeof(SecurityTokenDecompressionFailedException), "IDX10679:", typeof(SecurityTokenDecompressionFailedException))
+                //}
             };
         }
 
