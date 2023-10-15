@@ -3617,7 +3617,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             TheoryData<JWEDecompressionTheoryData> theoryData = new TheoryData<JWEDecompressionTheoryData>();
 
+#if NETCOREAPP2_1
+            string payload = System.Text.Json.JsonSerializer.Serialize(new { U = new string('U', 20_000_000), UU = new string('U', 15_000_000) });
+#else
             string payload = System.Text.Json.JsonSerializer.Serialize(new { U = new string('U', 100_000_000), UU = new string('U', 40_000_000) });
+#endif
             string token = jwth.CreateToken(payload, encryptingCredentials, "DEF");
             theoryData.Add(new JWEDecompressionTheoryData
             {
