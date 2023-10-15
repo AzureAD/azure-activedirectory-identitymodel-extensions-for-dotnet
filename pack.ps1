@@ -69,12 +69,15 @@ foreach ($project in $buildConfiguration.SelectNodes("root/projects/src/project"
     $name = $project.name
     $projectPath = "$root\src\$name\$name.csproj"
 
+    Write-Host ">>> dotnet pack --no-build --no-restore -nodereuse:false -c $buildType -o $artifactsRoot -v q -s $projectPath"
     dotnet pack --no-build --no-restore -nodereuse:false -c $buildType -o $artifactsRoot -v q -s $projectPath
 
     if($LASTEXITCODE -ne 0)
     {
         throw "Error occurred while packaging project '$projectPath'!"
     }
+
+    Write-Host "Packaging for project '$projectPath' completed successfully."
 }
 
 Write-Host "============================"
