@@ -70,20 +70,6 @@ jobs:
       filePath: ./updateAssemblyInfo.ps1
       arguments: '-packageType $(BuildConfiguration)'
 
-  - task: PowerShell@2
-    displayName: 'Prepare contract assemblies'
-    inputs:
-      targetType: 'filePath'
-      filePath: $(Agent.BuildDirectory)\s\build\apiCompat.ps1
-      arguments: >
-        -feedLocation "NuGet" 
-        -packageNames $(Wilson6xPackageList)
-        -packageVersion: "latest"
-        -adoFeedSource: $(AdoFeedSource)
-        -adoFeedName: $(AdoFeedName)
-        -adoAllowPrerelease: "false"
-        -apiCompatRoot: $(ApiCompatRootWilson)
-        -nugetPackageProviderVersion: "2.8.5.208"
 
   - task: MSBuild@1
     displayName: Build
