@@ -67,7 +67,7 @@ CreateArtifactsFolder($artifactsRoot);
 foreach ($project in $buildConfiguration.SelectNodes("root/projects/src/project"))
 {
     $name = $project.name
-    $projectPath = "$root\src\$name\$name.csproj"
+    $projectPath = [System.IO.Path]::Combine($root, "src", $name, "$name.csproj")
 
     Write-Host ">>> dotnet pack --no-build --no-restore -nodereuse:false -c $buildType -o $artifactsRoot -v q -s $projectPath"
     dotnet pack --no-build --no-restore -nodereuse:false -c $buildType -o $artifactsRoot -v q -s $projectPath
