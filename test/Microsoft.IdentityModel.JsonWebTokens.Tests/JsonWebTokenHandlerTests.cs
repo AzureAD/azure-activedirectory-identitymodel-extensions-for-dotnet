@@ -3427,8 +3427,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TokenValidationParameters validationParameters = new TokenValidationParameters { TokenDecryptionKey = key };
 
             TheoryData<JWEDecompressionTheoryData> theoryData = new TheoryData<JWEDecompressionTheoryData>();
+#if NETCOREAPP2_1
+            string strU = new string('U', 20_000_000);
+            string strUU = new string('U', 15_000_000);
+#else
             string strU = new string('U', 100_000_000);
             string strUU = new string('U', 40_000_000);
+#endif
+
             string payload = $@"{{""U"":""{strU}"", ""UU"":""{strUU}""}}";
 
             string token = jwth.CreateToken(payload, encryptingCredentials, "DEF");
