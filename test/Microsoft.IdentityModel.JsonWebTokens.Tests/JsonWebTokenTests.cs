@@ -37,10 +37,38 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             new Claim("float", "42", ClaimValueTypes.Integer32, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
             new Claim("integer", "42", ClaimValueTypes.Integer32, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
             new Claim("nill", "", JsonClaimValueTypes.JsonNull, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
-            new Claim("bool", "True", ClaimValueTypes.Boolean, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
+            new Claim("bool", "true", ClaimValueTypes.Boolean, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
             new Claim("dateTime", dateTime.ToString(), ClaimValueTypes.String, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
             new Claim("dateTimeIso8061", dateTime.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
         };
+
+        [Fact]
+        public void BoolClaimsEncodedAsExpected()
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(new string('a', 128)));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[] { new Claim("testClaim", "true", ClaimValueTypes.Boolean), new Claim("testClaim2", "True", ClaimValueTypes.Boolean) };
+            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
+            {
+                SigningCredentials = creds,
+                Subject = new ClaimsIdentity(claims),
+                Expires = (new DateTime(2038, 1, 20)).ToUniversalTime(),
+            };
+
+            JsonWebTokenHandler handler = new();
+            string jwt = handler.CreateToken(tokenDescriptor);
+            JsonWebToken jsonWebToken = new JsonWebToken(jwt);
+
+            var claimSet = jsonWebToken.Claims;
+
+            // Will throw if can't find.
+            var testClaim = claimSet.First(c => c.Type == "testClaim");
+            Assert.Equal("true", testClaim.Value);
+
+            var testClaim2 = claimSet.First(c => c.Type == "testClaim2");
+            Assert.Equal("true", testClaim2.Value);
+        }
 
         [Fact]
         public void DateTime2038Issue()
