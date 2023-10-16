@@ -8,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.IdentityModel.Tokens.Jwt.Tests;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -402,15 +403,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
         }
 
-#if NET_CORE
-        [PlatformSpecific(TestPlatforms.Windows)]
-#endif
         /// <summary>
         /// Verify the results from ValidateToken() and ValidateTokenAsync() should match.
         /// </summary>
         /// <param name="theoryData">The test data.</param>
         [Theory, MemberData(nameof(CreateJWEWithAesGcmTheoryData))]
         public void TokenValidationResultsShouldMatch(CreateTokenTheoryData theoryData)
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Assert.Throws<PlatformNotSupportedException>(() => new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, theoryData.EncryptingCredentials.Enc));
+            }
+        else
         {
             var context = TestUtilities.WriteHeader($"{this}.TokenValidationResultCompare", theoryData);
             try
@@ -431,6 +435,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
 
             TestUtilities.AssertFailIfErrors(context);
+        }
         }
 
         [Theory, MemberData(nameof(CreateJWEWithAesGcmTheoryData))]
