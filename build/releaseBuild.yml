@@ -16,7 +16,7 @@ variables:
   - name: BuildPlatform
     value: 'any cpu'
   - name: BuildConfiguration
-    value: 'Release'
+    value: 'release'
 
 jobs:
 - job: build
