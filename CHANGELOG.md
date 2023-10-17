@@ -4,7 +4,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 ======
 ### Bug Fixes:
 - Fix errors like the following reported by multiple customers at dotnet/aspnetcore#51005 when they tried to upgrade their app using `AddMicrosoftIdentityWebApp` to .NET 8. See [PR](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2361) for details.
-- Fix complatibility issue with 6x when claims are a bool. See issue [#2354](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2354) for details.
+- Fix compatibility issue with 6x when claims are a bool. See issue [#2354](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2354) for details.
 
 7.0.2
 ======
