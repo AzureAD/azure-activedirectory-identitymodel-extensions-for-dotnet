@@ -43,7 +43,7 @@ Write-Host "assemblyInformationalVersion: "  $assemblyInformationalVersion
 $nugetSuffix = [string]$buildConfiguration.SelectSingleNode("root/nugetSuffix").InnerText
 if ( $packageType -eq "release")
 {
-    $versionSuffix = $nugetSuffix
+    $versionSuffix = ""
 }
 else
 {
