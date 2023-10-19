@@ -70,6 +70,16 @@ A core contributor will review your pull request and provide feedback. To ensure
 
 If you're not sure how to create a pull request, read this article: https://help.github.com/articles/using-pull-requests. Make sure the repository can build and all tests pass. Familiarize yourself with the project workflow and our coding conventions. The coding, style, and general engineering guidelines are published on the Engineering guidelines page.
 
+Your pull request should:
+
+* Include a description of what your change intends to do
+* Be based on a reasonably recent pull in the correct branch
+  * Please rebase and squash all commits into a single one
+* Pass all tests
+* Have clear commit messages
+* Include new tests for new features
+* To avoid line ending issues, set `autocrlf = input` and `whitespace = cr-at-eol` in your git configuration
+
 ### Tests
 
 - Tests need to be provided for every bug/feature that is completed.
@@ -86,18 +96,6 @@ Your pull request will now go through extensive checks by the subject matter exp
 
 When your pull request has had all feedback addressed, it has been signed off by one or more reviewers with commit access, and all checks are green, we will commit it.
 We commit pull requests as a single Squash commit unless there are special circumstances. This creates a simpler history than a Merge or Rebase commit. "Special circumstances" are rare, and typically mean that there are a series of cleanly separated changes that will be too hard to understand if squashed together, or for some reason we want to preserve the ability to dissect them.
-
-## Housekeeping
-
-Your pull request should:
-
-* Include a description of what your change intends to do
-* Be based on a reasonably recent pull in the correct branch
-  * Please rebase and squash all commits into a single one
-* Pass all tests
-* Have clear commit messages
-* Include new tests for new features
-* To avoid line ending issues, set `autocrlf = input` and `whitespace = cr-at-eol` in your git configuration
 
 ## Building and running tests
 
