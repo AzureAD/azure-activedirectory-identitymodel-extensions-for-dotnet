@@ -178,7 +178,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <summary>
         /// Gets the collection of 'claim_types_supported'
         /// </summary>
-        [JsonPropertyName(OpenIdProviderMetadataNames.ClaimsSupported)]
+        [JsonPropertyName(OpenIdProviderMetadataNames.ClaimTypesSupported)]
         public ICollection<string> ClaimTypesSupported =>
             _claimTypesSupported ??
             Interlocked.CompareExchange(ref _claimTypesSupported, new Collection<string>(), null) ??
