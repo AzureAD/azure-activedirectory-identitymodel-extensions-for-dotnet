@@ -253,6 +253,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (long.TryParse(obj.ToString(), out long value))
                     return (T)(object)value;
             }
+            else if(typeof(T).IsEnum)
+            {
+                return (T)Enum.Parse(typeof(T), obj.ToString(), ignoreCase: true);
+            }
             else if (typeof(T) == typeof(string[]))
             {
                 if (objType == typeof(string))
