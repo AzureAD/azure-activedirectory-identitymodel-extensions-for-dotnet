@@ -821,6 +821,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     PropertyValue = "property",
                     Json = JsonUtilities.CreateUnsignedToken("string", "property")
                 });
+
+                theoryData.Add(new GetPayloadValueTheoryData("enum")
+                {
+                    PropertyName = "enum",
+                    PropertyType = typeof(SampleEnum),
+                    PropertyValue = "Option1",
+                    Json = JsonUtilities.CreateUnsignedToken("enum", "option1")
+                });
+
+                theoryData.Add(new GetPayloadValueTheoryData("enum_caseinsensitive")
+                {
+                    PropertyName = "enum",
+                    PropertyType = typeof(SampleEnum),
+                    PropertyValue = "option1",
+                    Json = JsonUtilities.CreateUnsignedToken("enum", "option1")
+                });
                 #endregion
 
                 #region collection of strings from simple types
@@ -1498,5 +1514,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public string Payload { get; set; }
 
         public string Header { get; set; }
+    }
+
+    public enum SampleEnum
+    {
+        Option1,
+        Option2
     }
 }
