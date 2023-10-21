@@ -79,7 +79,8 @@ namespace Microsoft.IdentityModel.Tokens
                         if (!_privateKeyAvailabilityDetermined)
                         {
 #if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
-                            _privateKey = RSACertificateExtensions.GetRSAPrivateKey(Certificate);
+                            var rsaPrivateKey = Certificate.GetRSAPrivateKey();
+                            _privateKey = rsaPrivateKey != null ? rsaPrivateKey : Certificate.GetECDsaPrivateKey();
 #else
                             _privateKey = Certificate.PrivateKey;
 #endif
@@ -106,7 +107,8 @@ namespace Microsoft.IdentityModel.Tokens
                         if (_publicKey == null)
                         {
 #if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
-                            _publicKey = RSACertificateExtensions.GetRSAPublicKey(Certificate);
+                            var rsaPublicKey = Certificate.GetRSAPublicKey();
+                            _publicKey = rsaPublicKey != null ? rsaPublicKey : Certificate.GetECDsaPublicKey();
 #else
                             _publicKey = Certificate.PublicKey.Key;
 #endif
@@ -163,7 +165,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>https://datatracker.ietf.org/doc/html/rfc7638</remarks>
         public override bool CanComputeJwkThumbprint()
         {
-            return (PublicKey as RSA) != null ? true : false;
+            return PublicKey is RSA || PublicKey is ECDsa;
         }
 
         /// <summary>
@@ -173,7 +175,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>https://datatracker.ietf.org/doc/html/rfc7638</remarks>
         public override byte[] ComputeJwkThumbprint()
         {
-            return new RsaSecurityKey(PublicKey as RSA).ComputeJwkThumbprint();
+            return PublicKey is RSA ? new RsaSecurityKey(PublicKey as RSA).ComputeJwkThumbprint() : new ECDsaSecurityKey(PublicKey as ECDsa).ComputeJwkThumbprint();
         }
 
         /// <summary>
