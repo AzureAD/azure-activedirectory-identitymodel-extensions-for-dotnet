@@ -417,6 +417,15 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             }
         }
 
+        [Fact]
+        public void JsonDeserialize()
+        {
+            var json = DataSets.JsonWebKeySetEvoString;
+            var jsonWebKeys = System.Text.Json.JsonSerializer.Deserialize<JsonWebKeySet>(json);
+            Assert.NotNull(jsonWebKeys);
+            Assert.NotEmpty(jsonWebKeys.Keys);
+        }
+
         private static X509SecurityKey CreateX509SecurityKey(JsonWebKeySet webKeySet, int keyIndex)
         {
             var webKey = (webKeySet.Keys as List<JsonWebKey>)[keyIndex];
