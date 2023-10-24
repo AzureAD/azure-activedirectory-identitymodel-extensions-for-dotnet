@@ -171,7 +171,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// </summary>
         [JsonPropertyName(OpenIdProviderMetadataNames.ClaimsParameterSupported)]
 #if NET6_0_OR_GREATER
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
 #endif
         public bool ClaimsParameterSupported { get; set; }
 
@@ -236,7 +236,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// </summary>
         [JsonPropertyName(OpenIdProviderMetadataNames.HttpLogoutSupported)]
 #if NET6_0_OR_GREATER
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
 #endif
         public bool HttpLogoutSupported { get; set; }
 
@@ -383,7 +383,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// </summary>
         [JsonPropertyName(OpenIdProviderMetadataNames.RequestParameterSupported)]
 #if NET6_0_OR_GREATER
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
 #endif
         public bool RequestParameterSupported { get; set; }
 
@@ -392,16 +392,16 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// </summary>
         [JsonPropertyName(OpenIdProviderMetadataNames.RequestUriParameterSupported)]
 #if NET6_0_OR_GREATER
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
 #endif
-        public bool RequestUriParameterSupported { get; set; }
+        public bool RequestUriParameterSupported { get; set; } = true;
 
         /// <summary>
         /// Gets or sets the 'require_request_uri_registration'
         /// </summary>
         [JsonPropertyName(OpenIdProviderMetadataNames.RequireRequestUriRegistration)]
 #if NET6_0_OR_GREATER
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
 #endif
         public bool RequireRequestUriRegistration { get; set; }
 
