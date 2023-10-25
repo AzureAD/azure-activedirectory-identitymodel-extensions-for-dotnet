@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// <summary>
     /// A class which contains useful methods for processing JWT tokens.
     /// </summary>
-    public class JwtTokenUtilities
+    public partial class JwtTokenUtilities
     {
         private const int _regexMatchTimeoutMilliseconds = 100;
         private const string _unrecognizedEncodedToken = "UnrecognizedEncodedToken";
