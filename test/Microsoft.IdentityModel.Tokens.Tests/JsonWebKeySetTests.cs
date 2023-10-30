@@ -417,6 +417,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             }
         }
 
+#if NET8_0_OR_GREATER
         [Fact]
         public void JsonDeserialize()
         {
@@ -425,6 +426,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             Assert.NotNull(jsonWebKeys);
             Assert.NotEmpty(jsonWebKeys.Keys);
         }
+#endif
 
         private static X509SecurityKey CreateX509SecurityKey(JsonWebKeySet webKeySet, int keyIndex)
         {
