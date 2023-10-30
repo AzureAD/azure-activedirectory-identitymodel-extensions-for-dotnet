@@ -93,7 +93,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.False(configuration.RequestParameterSupported);
             Assert.NotNull(configuration.ResponseModesSupported);
             Assert.NotNull(configuration.ResponseTypesSupported);
-            Assert.True(configuration.RequestUriParameterSupported);
+            Assert.False(configuration.RequestUriParameterSupported);
             Assert.False(configuration.RequireRequestUriRegistration);
             Assert.NotNull(configuration.ScopesSupported);
             Assert.NotNull(configuration.SigningKeys);
