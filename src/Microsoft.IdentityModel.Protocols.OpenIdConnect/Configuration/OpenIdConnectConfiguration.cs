@@ -394,7 +394,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 #if NET6_0_OR_GREATER
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
 #endif
-        public bool RequestUriParameterSupported { get; set; } = true;
+        public bool RequestUriParameterSupported { get; set; }
 
         /// <summary>
         /// Gets or sets the 'require_request_uri_registration'
