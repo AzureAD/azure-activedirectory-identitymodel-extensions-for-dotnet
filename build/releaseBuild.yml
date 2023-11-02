@@ -84,7 +84,7 @@ jobs:
       msBuildVersion: '17.8'
       msBuildArchitecture: 'amd64'
       setupCommandlinePicker: 'vs2022'
-      msBuildCommandline: 'C:\hostedtoolcache\windows\dotnet\dotnet.exe msbuild $(Build.SourcesDirectory)/wilson.sln /r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true'
+      msBuildCommandline: 'C:\hostedtoolcache\windows\dotnet\dotnet.exe build $(Build.SourcesDirectory)/wilson.sln /r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true'
 
   - task: PowerShell@2
     displayName: 'Run Tests'
