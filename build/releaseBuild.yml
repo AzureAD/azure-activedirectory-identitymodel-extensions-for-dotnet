@@ -3,7 +3,7 @@ pr: none
 
 name: $(TeamProject)_$(Build.DefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
 
-# Create a daily midnight build for release builds on master to ensure our release builds function
+# Create a daily midnight build for release builds on dev to ensure our release builds function
 schedules:
 - cron: "0 0 * * *"
   displayName: Daily midnight build
@@ -77,13 +77,6 @@ jobs:
       filePath: ./updateAssemblyInfo.ps1
       arguments: '-packageType $(BuildConfiguration)'
 
-  # - task: MSBuild@1
-  #   displayName: Build
-  #   inputs:
-  #     solution: wilson.sln
-  #     msbuildArchitecture: x64
-  #     msbuildArguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true /p:RunApiCompat=true'
-
   - task: DotNetCoreCLI@2
     displayName: Build
     inputs:
@@ -91,7 +84,6 @@ jobs:
       projects: 'wilson.sln'
       custom: 'msbuild'
       arguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true'
-#      arguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true /p:RunApiCompat=true'
 
   - task: PowerShell@2
     displayName: 'Run Tests'
@@ -111,45 +103,43 @@ jobs:
         **\bin\$(BuildConfiguration)\**\System.IdentityModel.Tokens.Jwt.pdb
       TargetFolder: '$(Build.ArtifactStagingDirectory)\ProductBinaries'
 
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@1
-    displayName: 'Run PoliCheck'
+  - task: PoliCheck@2
     inputs:
-      targetType: F
-      optionsFC: 0
-      optionsXS: 0
-      optionsHMENABLE: 0
+      targetType: 'F'
+      optionsFC: '0'
+      optionsXS: '0'
+      targetArgument: '$(Build.SourcesDirectory)'
 
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@2
-    displayName: 'Run CredScan'
+  - task: CredScan@3
     inputs:
       suppressionsFile: 'build/credscan-exclusion.json'
-      debugMode: false
 
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
-    displayName: 'Run Roslyn Analyzers'
-    condition: eq(variables['TargetNet8'], 'False')
-
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-binskim.BinSkim@3
-    displayName: 'Run BinSkim'
+  - task: RoslynAnalyzers@2
     inputs:
-      InputType: Basic
-      AnalyzeTarget: '$(Build.ArtifactStagingDirectory)\*.dll'
-      AnalyzeSymPath: '$(Build.ArtifactStagingDirectory)\ProductBinaries'
-      AnalyzeVerbose: true
+      userProvideBuildInfo: 'auto'
+
+  - task: BinSkim@4
+    inputs:
+      InputType: 'Basic'
+      Function: 'analyze'
+      TargetPattern: 'guardianGlob'
+      AnalyzeTargetGlob: '$(Build.ArtifactStagingDirectory)/**.dll;$(Build.ArtifactStagingDirectory)/**.exe;'
+      AnalyzeSymPath: '$(Build.ArtifactStagingDirectory)/ProductBinaries'
       AnalyzeHashes: true
+
+  #- task: ServicesDevOpsCopyReports@7
 
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@2
     displayName: 'Publish Security Analysis Logs'
     continueOnError: true
 
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
-    displayName: 'Post SDL Analysis'
+  - task: PostAnalysis@2
     inputs:
-      BinSkim: true
-      CredScan: true
-      PoliCheck: true
-    continueOnError: true
-
+      GdnBreakAllTools: false
+      GdnBreakGdnToolBinSkim: true
+      GdnBreakGdnToolCredScan: true
+      GdnBreakGdnToolPoliCheck: true
+      GdnBreakGdnToolRoslynAnalyzers: true
 
   #Sign Wilson 7x task group
   - template: template-sign-wilson-7x.yaml
@@ -161,13 +151,12 @@ jobs:
       filePath: ./pack.ps1
       arguments: '-buildType $(BuildConfiguration) C:\hostedtoolcache\windows\dotnet'
 
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
-    displayName: 'Sign Nuget Packages'
+  - task: EsrpCodeSigning@4
     inputs:
       ConnectedServiceName: 'IDDP Code Signing'
-      FolderPath: artifacts
+      FolderPath: 'artifacts'
       Pattern: '*.nupkg'
-      signConfigType: inlineSignParams
+      signConfigType: 'inlineSignParams'
       inlineOperation: |
         [
             {
@@ -185,10 +174,12 @@ jobs:
                 "toolVersion": "1.0"
             }
         ]
-      SessionTimeout: 20
+      SessionTimeout: '60'
+      MaxConcurrency: '50'
+      MaxRetryAttempts: '5'
+      PendingAnalysisWaitTimeoutMinutes: '5'
 
-  - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
-    displayName: 'Component Detection'
+  - task: ComponentGovernanceComponentDetection@0
     inputs:
       scanType: 'Register'
       verbosity: 'Verbose'
@@ -213,8 +204,7 @@ jobs:
       uploadPREfast: false
       uploadTSLint: false
 
-  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-    displayName: 'Manifest Generator '
+  - task: ManifestGeneratorTask@0
     inputs:
       BuildDropPath: '$(Build.SourcesDirectory)\src'
       ManifestDirPath: '$(Build.SourcesDirectory)\artifacts'
@@ -225,5 +215,4 @@ jobs:
       PathtoPublish: '$(Build.SourcesDirectory)\artifacts'
       ArtifactName: '$(Build.BuildNumber)-nuget-package'
 
-  - task: mspremier.PostBuildCleanup.PostBuildCleanup-task.PostBuildCleanup@3
-    displayName: 'Clean Agent Directories'
+  - task: PostBuildCleanup@3
