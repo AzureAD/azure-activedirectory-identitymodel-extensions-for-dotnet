@@ -77,13 +77,14 @@ jobs:
       filePath: ./updateAssemblyInfo.ps1
       arguments: '-packageType $(BuildConfiguration)'
 
-  - task: DotNetCoreCLI@2
-    displayName: Build
+  - task: RoslynAnalyzers@3
+    displayName: 'dotnet build with RoslynAnalyzers'
     inputs:
-      command: 'custom'
-      projects: 'wilson.sln'
-      custom: 'msbuild'
-      arguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true'
+      userProvideBuildInfo: 'msBuildInfo'
+      msBuildVersion: '17.8'
+      msBuildArchitecture: 'amd64'
+      setupCommandlinePicker: 'vs2022'
+      msBuildCommandline: 'C:\hostedtoolcache\windows\dotnet\dotnet.exe msbuild wilson.sln /r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true'
 
   - task: PowerShell@2
     displayName: 'Run Tests'
@@ -113,14 +114,6 @@ jobs:
   - task: CredScan@3
     inputs:
       suppressionsFile: 'build/credscan-exclusion.json'
-
-  - task: RoslynAnalyzers@3
-    inputs:
-      userProvideBuildInfo: 'msBuildInfo'
-      msBuildVersion: '17.0'
-      msBuildArchitecture: 'x64'
-      setupCommandlinePicker: 'vs2022'
-      msBuildCommandline: 'C:\hostedtoolcache\windows\dotnet\dotnet.exe'
 
   - task: BinSkim@4
     inputs:
