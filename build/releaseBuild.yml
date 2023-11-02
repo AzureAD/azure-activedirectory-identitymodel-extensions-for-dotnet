@@ -118,9 +118,9 @@ jobs:
     inputs:
       userProvideBuildInfo: 'msBuildInfo'
       msBuildVersion: '17.0'
-      msBuildArchitecture: 'amd64'
+      msBuildArchitecture: 'x64'
       setupCommandlinePicker: 'vs2022'
-      msBuildCommandline: 'C:\hostedtoolcache\windows\dotnet.exe'
+      msBuildCommandline: 'C:\hostedtoolcache\windows\dotnet\dotnet.exe'
 
   - task: BinSkim@4
     inputs:
