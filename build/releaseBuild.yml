@@ -114,9 +114,13 @@ jobs:
     inputs:
       suppressionsFile: 'build/credscan-exclusion.json'
 
-  - task: RoslynAnalyzers@2
+  - task: RoslynAnalyzers@3
     inputs:
-      userProvideBuildInfo: 'auto'
+      userProvideBuildInfo: 'msBuildInfo'
+      msBuildVersion: '17.0'
+      msBuildArchitecture: 'amd64'
+      setupCommandlinePicker: 'vs2022'
+      msBuildCommandline: 'dotnet.exe'
 
   - task: BinSkim@4
     inputs:
