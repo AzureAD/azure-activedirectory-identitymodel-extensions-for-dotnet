@@ -180,6 +180,43 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void CheckAuthenticationTagAndCiphertextValues(bool isEncrypted)
+        {
+            var jsonWebTokenHandler = new JsonWebTokenHandler();
+            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
+            {
+                SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                Subject = new ClaimsIdentity(Default.PayloadClaims),
+                TokenType = "TokenType"
+            };
+
+            if (isEncrypted)
+            {
+                tokenDescriptor.EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes256_Sha512_512;
+            }
+
+            string jwt = jsonWebTokenHandler.CreateToken(tokenDescriptor);
+            JsonWebToken jsonWebToken = new JsonWebToken(jwt);
+
+            if (isEncrypted)
+            {
+                Assert.NotNull(jsonWebToken.AuthenticationTag);
+                Assert.NotNull(jsonWebToken.AuthenticationTagBytes);
+                Assert.NotNull(jsonWebToken.Ciphertext);
+                Assert.NotNull(jsonWebToken.CipherTextBytes);
+            }
+            else
+            {
+                Assert.Empty(jsonWebToken.AuthenticationTag);
+                Assert.Null(jsonWebToken.AuthenticationTagBytes);
+                Assert.Null(jsonWebToken.Ciphertext);
+                Assert.Null(jsonWebToken.CipherTextBytes);
+            }
+        }       
+
         // Test checks to make sure that the JsonWebToken.GetClaim() method is able to retrieve every Claim returned by the Claims property (with the exception 
         // of Claims that are JObjects or arrays, as those are converted to strings by the GetClaim() method).
         [Fact]

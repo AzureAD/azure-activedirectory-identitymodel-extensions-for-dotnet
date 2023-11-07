@@ -175,7 +175,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             get
             {
                 if (_ciphertext == null)
-                    _ciphertext = CipherTextBytes == null ? string.Empty : UTF8Encoding.UTF8.GetString(CipherTextBytes);
+                    _ciphertext = CipherTextBytes == null ? null : UTF8Encoding.UTF8.GetString(CipherTextBytes);
 
                 return _ciphertext;
             }
