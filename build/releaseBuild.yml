@@ -77,14 +77,13 @@ jobs:
       filePath: ./updateAssemblyInfo.ps1
       arguments: '-packageType $(BuildConfiguration)'
 
-  - task: RoslynAnalyzers@3
-    displayName: 'dotnet build with RoslynAnalyzers'
+  - task: DotNetCoreCLI@2
+    displayName: Build
     inputs:
-      userProvideBuildInfo: 'msBuildInfo'
-      msBuildVersion: '17.8'
-      msBuildArchitecture: 'amd64'
-      setupCommandlinePicker: 'vs2022'
-      msBuildCommandline: 'C:\hostedtoolcache\windows\dotnet\dotnet.exe build $(Build.SourcesDirectory)/wilson.sln /r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true'
+      command: 'custom'
+      projects: 'wilson.sln'
+      custom: 'msbuild'
+      arguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true'
 
   - task: PowerShell@2
     displayName: 'Run Tests'
@@ -103,6 +102,18 @@ jobs:
         **\bin\$(BuildConfiguration)\**\System.IdentityModel.Tokens.Jwt.dll
         **\bin\$(BuildConfiguration)\**\System.IdentityModel.Tokens.Jwt.pdb
       TargetFolder: '$(Build.ArtifactStagingDirectory)\ProductBinaries'
+
+  # The guidance on this task is to run it after copying the output to staging,
+  # as it will overwrite output of the original build.
+  - task: RoslynAnalyzers@3
+    displayName: 'dotnet build with RoslynAnalyzers'
+    inputs:
+      userProvideBuildInfo: 'msBuildInfo'
+      msBuildVersion: '17.8'
+      msBuildArchitecture: 'amd64'
+      setupCommandlinePicker: 'vs2022'
+      loadRoslynConfiguredAnalyzersOption: Enable
+      msBuildCommandline: 'C:\hostedtoolcache\windows\dotnet\dotnet.exe build $(Build.SourcesDirectory)/wilson.sln /r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m'
 
   - task: PoliCheck@2
     inputs:
