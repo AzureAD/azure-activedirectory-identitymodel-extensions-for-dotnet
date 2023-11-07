@@ -648,6 +648,33 @@ namespace Microsoft.IdentityModel.Tokens.Json
             return reader.GetString();
         }
 
+        /// <summary>
+        /// This method is called to enable the 'sub' claim to deserialize it as a Number then returns it as a string.
+        /// </summary>
+        /// <param name="reader">the <see cref="Utf8JsonReader"/></param>
+        /// <param name="propertyName">the property name that is being read</param>
+        /// <param name="className">the type that is being deserialized</param>
+        /// <param name="read">if true reader.Read() will be called.</param>
+        /// <returns></returns>
+        internal static string ReadAsString(ref Utf8JsonReader reader, string propertyName, string className, bool read = false)
+        {
+            if (read)
+                reader.Read();
+
+            // returning null keeps the same logic as JsonSerialization.ReadObject
+            if (reader.TokenType == JsonTokenType.Null)
+                return null;
+
+            if (reader.TokenType == JsonTokenType.Number)
+                return ReadNumber(ref reader).ToString();
+
+            if (reader.TokenType != JsonTokenType.String || reader.TokenType != JsonTokenType.Number)
+                throw LogHelper.LogExceptionMessage(
+                    CreateJsonReaderException(ref reader, "JsonTokenType.String or JsonTokenType.Number", className, propertyName));
+
+            return reader.GetString();
+        }
+
         internal static object ReadStringAsObject(ref Utf8JsonReader reader, string propertyName, string className, bool read = false)
         {
             if (read)
