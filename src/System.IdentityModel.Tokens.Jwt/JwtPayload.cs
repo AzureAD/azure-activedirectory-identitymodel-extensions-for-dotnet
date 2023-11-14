@@ -114,7 +114,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     }
                     else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Sub))
                     {
-                        payload._sub = JsonSerializerPrimitives.ReadNumberAsString(ref reader, JwtRegisteredClaimNames.Sub, ClassName, true);
+                        payload._sub = JsonSerializerPrimitives.ReadStringOrNumberAsString(ref reader, JwtRegisteredClaimNames.Sub, ClassName, true);
                         payload[JwtRegisteredClaimNames.Sub] = payload._sub;
                     }
                     else

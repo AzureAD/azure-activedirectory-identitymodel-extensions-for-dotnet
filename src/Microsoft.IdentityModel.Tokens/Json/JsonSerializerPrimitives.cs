@@ -655,8 +655,8 @@ namespace Microsoft.IdentityModel.Tokens.Json
         /// <param name="propertyName">The property name that is being read.</param>
         /// <param name="className">The type that is being deserialized.</param>
         /// <param name="read">If true reader.Read() will be called.</param>
-        /// <returns></returns>
-        internal static string ReadNumberAsString(ref Utf8JsonReader reader, string propertyName, string className, bool read = false)
+        /// <returns>Value from reader as string.</returns>
+        internal static string ReadStringOrNumberAsString(ref Utf8JsonReader reader, string propertyName, string className, bool read = false)
         {
             if (read)
                 reader.Read();
@@ -804,7 +804,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
         /// <param name="propertyName">The property name that is being read.</param>
         /// <param name="className">The type that is being deserialized.</param>
         /// <param name="read">If true reader.Read() will be called.</param>
-        /// <returns></returns>
+        /// <returns>Value from reader as an object.</returns>
         internal static object ReadPropertyValueAsObject(ref Utf8JsonReader reader, string propertyName, string className, bool read = false)
         {
             if (read)
