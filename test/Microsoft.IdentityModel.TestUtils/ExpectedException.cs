@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Security.Cryptography;
+using System.Text.Json;
 using System.Xml;
 using Microsoft.IdentityModel.Tokens;
 
@@ -304,6 +305,10 @@ namespace Microsoft.IdentityModel.TestUtils
             return new ExpectedException(typeof(SecurityTokenKeyWrapException), substringExpected, innerTypeExpected);
         }
 
+        public static ExpectedException JsonException(string substringExpected = null, Type innerTypeExpected = null)
+        {
+            return new ExpectedException(typeof(JsonException), substringExpected, innerTypeExpected);
+        }
         public bool IgnoreExceptionType { get; set; } = false;
 
         public bool IgnoreInnerException { get; set; }
