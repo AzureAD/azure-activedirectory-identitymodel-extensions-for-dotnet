@@ -301,5 +301,18 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
             TestUtilities.AssertFailIfErrors(context);
         }
+
+        [Fact]
+        public void VariableCaseNames()
+        {
+            var context = new CompareContext { Title = "VariableCaseNames" };
+
+            var oidcConfigVariableCase = OpenIdConnectConfiguration.Create(OpenIdConfigData.OpenIdConnectMetadataVariableCaseNames);
+            var oidcConfigSnakeCase = OpenIdConnectConfiguration.Create(OpenIdConfigData.OpenIdConnectMetadataSnakeCaseNames);
+
+            IdentityComparer.AreEqual(oidcConfigVariableCase, oidcConfigSnakeCase, context);
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
     }
 }
