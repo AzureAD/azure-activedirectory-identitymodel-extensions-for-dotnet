@@ -1324,7 +1324,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             try
             {
-                return JwtTokenUtilities.DecompressToken(decryptedTokenBytes, jwtToken.Header.Zip);
+                return JwtTokenUtilities.DecompressToken(decryptedTokenBytes, jwtToken.Header.Zip, MaximumTokenSizeInBytes);
             }
             catch (Exception ex)
             {

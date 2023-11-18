@@ -131,12 +131,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <param name="tokenBytes"></param>
         /// <param name="algorithm"></param>
+        /// <param name="maximumDeflateSize">maximum number of chars that will be decompressed.</param>
         /// <exception cref="ArgumentNullException">if <paramref name="tokenBytes"/> is null.</exception>
         /// <exception cref="ArgumentNullException">if <paramref name="algorithm"/> is null.</exception>
         /// <exception cref="NotSupportedException">if the decompression <paramref name="algorithm"/> is not supported.</exception>
         /// <exception cref="SecurityTokenDecompressionFailedException">if decompression using <paramref name="algorithm"/> fails.</exception>
         /// <returns>Decompressed JWT token</returns>
-        internal static string DecompressToken(byte[] tokenBytes, string algorithm)
+        internal static string DecompressToken(byte[] tokenBytes, string algorithm, int maximumDeflateSize)
         {
             if (tokenBytes == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenBytes));
@@ -147,7 +148,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (!CompressionProviderFactory.Default.IsSupportedAlgorithm(algorithm))
                 throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10682, algorithm)));
 
-            var compressionProvider = CompressionProviderFactory.Default.CreateCompressionProvider(algorithm);
+            var compressionProvider = CompressionProviderFactory.Default.CreateCompressionProvider(algorithm, maximumDeflateSize);
 
             var decompressedBytes = compressionProvider.Decompress(tokenBytes);
 

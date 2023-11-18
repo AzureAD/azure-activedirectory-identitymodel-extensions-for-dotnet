@@ -266,10 +266,20 @@ namespace Microsoft.IdentityModel.TestUtils
             get => DateTime.Parse(ExpiresString);
         }
 
+        public static DateTime Expired
+        {
+            get => DateTime.Parse(ExpiredString);
+        }
+
+        public static string ExpiredString
+        {
+            get => "2021-03-17T18:33:37.080Z";
+        }
+
 
         public static string ExpiresString
         {
-            get => "2021-03-17T18:33:37.080Z";
+            get => "2025-03-17T18:33:37.080Z";
         }
 
         public static HashAlgorithm HashAlgorithm
@@ -423,6 +433,20 @@ namespace Microsoft.IdentityModel.TestUtils
                 { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant).ToString() },
                 { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore).ToString()},
                 { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires).ToString() }
+            };
+        }
+
+        public static Dictionary<string, object> ExpiredPayloadDictionary
+        {
+            get => new Dictionary<string, object>()
+            {
+                { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
+                { JwtRegisteredClaimNames.GivenName, "Bob" },
+                { JwtRegisteredClaimNames.Iss, Issuer },
+                { JwtRegisteredClaimNames.Aud, Audience },
+                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant).ToString() },
+                { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore).ToString()},
+                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expired).ToString() }
             };
         }
 #endif

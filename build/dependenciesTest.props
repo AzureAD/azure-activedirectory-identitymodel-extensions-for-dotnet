@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <JsonNetVersion>10.0.1</JsonNetVersion>
+    <JsonNetVersion>13.0.1</JsonNetVersion>
     <NetStandardVersion>2.0.3</NetStandardVersion>
     <MicrosoftAzureKeyVaultCryptographyVersion>2.0.5</MicrosoftAzureKeyVaultCryptographyVersion>
     <MicrosoftDotNetXUnitExtensionsVersion>2.4.0-prerelease-63213-02</MicrosoftDotNetXUnitExtensionsVersion>

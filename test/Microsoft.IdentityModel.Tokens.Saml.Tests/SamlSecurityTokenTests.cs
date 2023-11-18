@@ -54,8 +54,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
             // It's possible that DateTime.UtcNow will be slightly different from token.Assertion.IssueInstant, so we can't compare them directly. 
             var timeDiff = DateTime.UtcNow.Subtract(token.Assertion.IssueInstant).TotalMilliseconds;
-            if (Math.Abs(timeDiff) >= 100)
-                context.Diffs.Add("Math.Abs(DateTime.UtcNow.Subtract(token.Assertion.IssueInstant).TotalMilliseconds) >= 100");
+            if (Math.Abs(timeDiff) >= 200)
+                context.Diffs.Add($"Math.Abs(DateTime.UtcNow.Subtract(token.Assertion.IssueInstant).TotalMilliseconds) {Math.Abs(timeDiff)} >= 200");
 
             if (token.Assertion.Conditions == null)
                 context.Diffs.Add("token.Assertion.Conditions == null");

@@ -38,6 +38,8 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class DeflateCompressionProvider : ICompressionProvider
     {
+        private int _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="DeflateCompressionProvider"/> class used to compress and decompress used the <see cref="CompressionAlgorithms.Deflate"/> algorithm.
         /// </summary>
@@ -60,6 +62,16 @@ namespace Microsoft.IdentityModel.Tokens
         public string Algorithm => CompressionAlgorithms.Deflate;
 
         /// <summary>
+        /// Gets and sets the maximum deflate size in chars that will be processed.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">'value' less than 1.</exception>
+        public int MaximumDeflateSize
+        {
+            get => _maximumTokenSizeInBytes;
+            set => _maximumTokenSizeInBytes = (value < 1) ? throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX10101, value))) : value;
+        }
+
+        /// <summary>
         /// Specifies whether compression should emphasize speed or compression size.
         /// Set to <see cref="CompressionLevel.Optimal"/> by default.
         /// </summary>
@@ -75,13 +87,26 @@ namespace Microsoft.IdentityModel.Tokens
             if (value == null)
                 throw LogHelper.LogArgumentNullException(nameof(value));
 
+            char[] chars = new char[MaximumDeflateSize];
+
             using (var inputStream = new MemoryStream(value))
             {
                 using (var deflateStream = new DeflateStream(inputStream, CompressionMode.Decompress))
                 {
                     using (var reader = new StreamReader(deflateStream, Encoding.UTF8))
                     {
-                        return Encoding.UTF8.GetBytes(reader.ReadToEnd());
+                        // if there is one more char to read, then the token is too large.
+                        int bytesRead = reader.Read(chars, 0, MaximumDeflateSize);
+                        if (reader.Peek() != -1)
+                        {
+                            throw LogHelper.LogExceptionMessage(
+                                new SecurityTokenDecompressionFailedException(
+                                    LogHelper.FormatInvariant(
+                                        LogMessages.IDX10814,
+                                        MaximumDeflateSize)));
+                        }
+
+                        return Encoding.UTF8.GetBytes(chars, 0, bytesRead);
                     }
                 }
             }

@@ -671,7 +671,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             try
             {
-                return JwtTokenUtilities.DecompressToken(decryptedTokenBytes, jwtToken.Zip);
+                return JwtTokenUtilities.DecompressToken(decryptedTokenBytes, jwtToken.Zip, MaximumTokenSizeInBytes);
             }
             catch (Exception ex)
             {
