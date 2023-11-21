@@ -414,28 +414,28 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 Assert.Throws<PlatformNotSupportedException>(() => new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, theoryData.EncryptingCredentials.Enc));
             }
-        else
-        {
-            var context = TestUtilities.WriteHeader($"{this}.TokenValidationResultCompare", theoryData);
-            try
+            else
             {
-                string jweFromJwtHandler = theoryData.JwtSecurityTokenHandler.CreateEncodedJwt(theoryData.TokenDescriptor);
+                var context = TestUtilities.WriteHeader($"{this}.TokenValidationResultCompare", theoryData);
+                try
+                {
+                    string jweFromJwtHandler = theoryData.JwtSecurityTokenHandler.CreateEncodedJwt(theoryData.TokenDescriptor);
 
-                theoryData.ValidationParameters.ValidateLifetime = false;
-                var claimsPrincipal = theoryData.JwtSecurityTokenHandler.ValidateToken(jweFromJwtHandler, theoryData.ValidationParameters, out SecurityToken validatedTokenFromJwtHandler);
-                var validationResult = theoryData.JwtSecurityTokenHandler.ValidateTokenAsync(jweFromJwtHandler, theoryData.ValidationParameters).Result;
+                    theoryData.ValidationParameters.ValidateLifetime = false;
+                    var claimsPrincipal = theoryData.JwtSecurityTokenHandler.ValidateToken(jweFromJwtHandler, theoryData.ValidationParameters, out SecurityToken validatedTokenFromJwtHandler);
+                    var validationResult = theoryData.JwtSecurityTokenHandler.ValidateTokenAsync(jweFromJwtHandler, theoryData.ValidationParameters).Result;
 
-                // verify the results from asynchronous and synchronous are the same
-                IdentityComparer.AreClaimsIdentitiesEqual(claimsPrincipal.Identity as ClaimsIdentity, validationResult.ClaimsIdentity, context);
-                theoryData.ExpectedException.ProcessNoException(context);
+                    // verify the results from asynchronous and synchronous are the same
+                    IdentityComparer.AreClaimsIdentitiesEqual(claimsPrincipal.Identity as ClaimsIdentity, validationResult.ClaimsIdentity, context);
+                    theoryData.ExpectedException.ProcessNoException(context);
+                }
+                catch (Exception ex)
+                {
+                    theoryData.ExpectedException.ProcessException(ex, context);
+                }
+
+                TestUtilities.AssertFailIfErrors(context);
             }
-            catch (Exception ex)
-            {
-                theoryData.ExpectedException.ProcessException(ex, context);
-            }
-
-            TestUtilities.AssertFailIfErrors(context);
-        }
         }
 
         [Theory, MemberData(nameof(CreateJWEWithAesGcmTheoryData))]

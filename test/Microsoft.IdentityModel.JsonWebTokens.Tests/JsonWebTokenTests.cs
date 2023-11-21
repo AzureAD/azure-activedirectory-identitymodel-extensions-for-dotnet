@@ -604,7 +604,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-
         [Theory, MemberData(nameof(GetPayloadSubClaimValueTheoryData), DisableDiscoveryEnumeration = true)]
         public void GetPayloadSubClaimValue(GetPayloadValueTheoryData theoryData)
         {
@@ -727,8 +726,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
                 return theoryData;
             }
-
+            
         }
+
         // This test ensures that accessing claims from the payload works as expected.
         [Theory, MemberData(nameof(GetPayloadValueTheoryData), DisableDiscoveryEnumeration = true)]
         public void GetPayloadValue(GetPayloadValueTheoryData theoryData)
@@ -946,6 +946,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     PropertyType = typeof(string),
                     PropertyValue = "property",
                     Json = JsonUtilities.CreateUnsignedToken("string", "property")
+                });
+
+                theoryData.Add(new GetPayloadValueTheoryData("enum")
+                {
+                    PropertyName = "enum",
+                    PropertyType = typeof(SampleEnum),
+                    PropertyValue = "Option1",
+                    Json = JsonUtilities.CreateUnsignedToken("enum", "option1")
+                });
+
+                theoryData.Add(new GetPayloadValueTheoryData("enum_caseinsensitive")
+                {
+                    PropertyName = "enum",
+                    PropertyType = typeof(SampleEnum),
+                    PropertyValue = "option1",
+                    Json = JsonUtilities.CreateUnsignedToken("enum", "option1")
                 });
                 #endregion
 
@@ -1624,5 +1640,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public string Payload { get; set; }
 
         public string Header { get; set; }
+    }
+
+    public enum SampleEnum
+    {
+        Option1,
+        Option2
     }
 }

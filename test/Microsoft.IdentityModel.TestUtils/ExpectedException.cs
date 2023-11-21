@@ -309,6 +309,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return new ExpectedException(typeof(JsonException), substringExpected, innerTypeExpected);
         }
+
         public bool IgnoreExceptionType { get; set; } = false;
 
         public bool IgnoreInnerException { get; set; }

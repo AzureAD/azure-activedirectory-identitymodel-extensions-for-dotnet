@@ -22,19 +22,30 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// <summary>
     /// A class which contains useful methods for processing JWT tokens.
     /// </summary>
-    public class JwtTokenUtilities
+    public partial class JwtTokenUtilities
     {
+        private const int _regexMatchTimeoutMilliseconds = 100;
         private const string _unrecognizedEncodedToken = "UnrecognizedEncodedToken";
 
         /// <summary>
         /// Regex that is used to figure out if a token is in JWS format.
         /// </summary>
-        public static Regex RegexJws = new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.Compiled | RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(100));
+        public static Regex RegexJws = CreateJwsRegex();
 
         /// <summary>
         /// Regex that is used to figure out if a token is in JWE format.
         /// </summary>
-        public static Regex RegexJwe = new Regex(JwtConstants.JweCompactSerializationRegex, RegexOptions.Compiled | RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(100));
+        public static Regex RegexJwe = CreateJweRegex();
+
+#if NET7_0_OR_GREATER
+        [GeneratedRegex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.CultureInvariant, _regexMatchTimeoutMilliseconds)]
+        private static partial Regex CreateJwsRegex();
+        [GeneratedRegex(JwtConstants.JweCompactSerializationRegex, RegexOptions.CultureInvariant, _regexMatchTimeoutMilliseconds)]
+        private static partial Regex CreateJweRegex();
+#else
+        private static Regex CreateJwsRegex() => new Regex(JwtConstants.JsonCompactSerializationRegex, RegexOptions.Compiled | RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(_regexMatchTimeoutMilliseconds));
+        private static Regex CreateJweRegex() => new Regex(JwtConstants.JweCompactSerializationRegex, RegexOptions.Compiled | RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(_regexMatchTimeoutMilliseconds));
+#endif
 
         internal static IList<string> DefaultHeaderParameters = new List<string>()
         {
