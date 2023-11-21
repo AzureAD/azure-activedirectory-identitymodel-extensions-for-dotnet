@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.IdentityModel.Abstractions;
@@ -70,12 +71,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <summary>
         /// Gets or set the <see cref="SamlSerializer"/> that will be used to read and write a <see cref="SamlSecurityToken"/>.
         /// </summary>
-        /// <exception cref="ArgumentNullException">'value' is null.</exception> 
+        /// <exception cref="ArgumentNullException">'value' is null.</exception>
         public SamlSerializer Serializer
         {
             get { return _serializer; }
             set { _serializer = value ?? throw LogHelper.LogArgumentNullException(nameof(value)); }
-        } 
+        }
 
         /// <summary>
         /// Gets the securityToken type supported by this handler.
@@ -131,7 +132,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 using (var sr = new StringReader(securityToken))
                 {
                     var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit };
-                    using (var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr, settings))) 
+                    using (var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr, settings)))
                     {
                         return CanReadToken(reader);
                     }
@@ -186,7 +187,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
-        /// Override this method to provide a SamlAdvice to place in the Samltoken. 
+        /// Override this method to provide a SamlAdvice to place in the Samltoken.
         /// </summary>
         /// <param name="tokenDescriptor">Contains information about the token.</param>
         /// <returns>SamlAdvice, default is null.</returns>
@@ -286,7 +287,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
-        /// Creates a SamlAuthenticationStatement for each AuthenticationInformation found in AuthenticationInformation. 
+        /// Creates a SamlAuthenticationStatement for each AuthenticationInformation found in AuthenticationInformation.
         /// Override this method to provide a custom implementation.
         /// </summary>
         /// <param name="subject">The SamlSubject of the Statement.</param>
@@ -496,11 +497,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
-        /// Builds an XML formated string from a collection of saml attributes that represent an Actor. 
+        /// Builds an XML formated string from a collection of saml attributes that represent an Actor.
         /// </summary>
         /// <param name="attributes"><see cref="ICollection{SamlAttribute}"/>.</param>
         /// <returns>A well formed XML string.</returns>
-        /// <remarks>The string is of the form "&lt;Actor&gt;&lt;SamlAttribute name, ns&gt;&lt;SamlAttributeValue&gt;...&lt;/SamlAttributeValue&gt;, ...&lt;/SamlAttribute&gt;...&lt;/Actor&gt;"</remarks>        
+        /// <remarks>The string is of the form "&lt;Actor&gt;&lt;SamlAttribute name, ns&gt;&lt;SamlAttributeValue&gt;...&lt;/SamlAttributeValue&gt;, ...&lt;/SamlAttribute&gt;...&lt;/Actor&gt;"</remarks>
         protected virtual string CreateXmlStringFromAttributes(ICollection<SamlAttribute> attributes)
         {
             if (attributes == null)
@@ -766,7 +767,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <summary>
         /// Deserializes from XML a token of the type handled by this instance.
         /// </summary>
-        /// <param name="reader">An XML reader positioned at the token's start 
+        /// <param name="reader">An XML reader positioned at the token's start
         /// element.</param>
         /// <param name="validationParameters"> validation parameters for the <see cref="SamlSecurityToken"/>.</param>
         /// <returns>An instance of <see cref="SamlSecurityToken"/>.</returns>
@@ -801,7 +802,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
-        /// This method gets called when a special type of SamlAttribute is detected. The SamlAttribute passed in wraps a SamlAttribute 
+        /// This method gets called when a special type of SamlAttribute is detected. The SamlAttribute passed in wraps a SamlAttribute
         /// that contains a collection of AttributeValues, each of which are mapped to a claim.  All of the claims will be returned
         /// in an ClaimsIdentity with the specified issuer.
         /// </summary>
@@ -910,7 +911,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             {
                 if (validationParameters.RequireAudience)
                     throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11401));
-               
+
                 return;
             }
 
@@ -979,7 +980,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <exception cref="SecurityTokenValidationException">If <see cref="ReadSamlToken(string)"/> returns null"/>.</exception>
         /// <exception cref="SecurityTokenValidationException">If <see cref="TokenValidationParameters.SignatureValidator"/> returns null OR an object other than a <see cref="SamlSecurityToken"/>.</exception>
         /// <exception cref="SecurityTokenValidationException">If a signature is not found and <see cref="TokenValidationParameters.RequireSignedTokens"/> is true.</exception>
-        /// <exception cref="SecurityTokenSignatureKeyNotFoundException">If the 'token' has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature. 
+        /// <exception cref="SecurityTokenSignatureKeyNotFoundException">If the 'token' has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature.
         /// This can indicate that a key refresh is required.</exception>
         /// <exception cref="SecurityTokenInvalidSignatureException">If after trying all the <see cref="SecurityKey"/>(s), none result in a validated signture AND the 'token' does not have a key identifier.</exception>
         /// <returns>A <see cref="SamlSecurityToken"/> that has had the signature validated if token was signed.</returns>
@@ -1139,6 +1140,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (validationParameters == null)
                 throw LogArgumentNullException(nameof(validationParameters));
 
+            validationParameters = PopulateValidationParametersWithCurrentConfigurationAsync(validationParameters).ConfigureAwait(false).GetAwaiter()
+                .GetResult();
+
             var samlToken = ReadSamlToken(reader);
             if (samlToken == null)
                 throw LogExceptionMessage(
@@ -1150,25 +1154,41 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <inheritdoc/>
-        public override Task<TokenValidationResult> ValidateTokenAsync(string token, TokenValidationParameters validationParameters)
+        public override async Task<TokenValidationResult> ValidateTokenAsync(string token, TokenValidationParameters validationParameters)
         {
             try
             {
-                var claimsPrincipal = ValidateToken(token, validationParameters, out var validatedToken);
-                return Task.FromResult(new TokenValidationResult
+                if (string.IsNullOrWhiteSpace(token))
+                    throw LogArgumentNullException(nameof(token));
+
+                if (validationParameters == null)
+                    throw LogArgumentNullException(nameof(validationParameters));
+
+                if (token.Length > MaximumTokenSizeInBytes)
+                    throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, LogHelper.MarkAsNonPII(token.Length), LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes))));
+
+                validationParameters = await PopulateValidationParametersWithCurrentConfigurationAsync(validationParameters).ConfigureAwait(false);
+
+                var samlToken = ValidateSignature(token, validationParameters);
+                if (samlToken == null)
+                    throw LogExceptionMessage(new SecurityTokenValidationException(
+                        FormatInvariant(TokenLogMessages.IDX10254, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII("ValidateToken"), LogHelper.MarkAsNonPII(GetType()), LogHelper.MarkAsNonPII("ValidateSignature"), LogHelper.MarkAsNonPII(typeof(SamlSecurityToken)))));
+
+                var claimsPrincipal = ValidateToken(samlToken, token, validationParameters, out var validatedToken);
+                return new TokenValidationResult
                 {
                     SecurityToken = validatedToken,
                     ClaimsIdentity = claimsPrincipal?.Identities.First(),
                     IsValid = true,
-                });
+                };
             }
             catch (Exception ex)
             {
-                return Task.FromResult(new TokenValidationResult
+                return new TokenValidationResult
                 {
                     IsValid = false,
                     Exception = ex
-                });
+                };
             }
         }
 
@@ -1192,6 +1212,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             if (token.Length > MaximumTokenSizeInBytes)
                 throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, LogHelper.MarkAsNonPII(token.Length), LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes))));
+
+            validationParameters = PopulateValidationParametersWithCurrentConfigurationAsync(validationParameters).ConfigureAwait(false).GetAwaiter()
+                .GetResult();
 
             var samlToken = ValidateSignature(token, validationParameters);
             if (samlToken == null)
@@ -1223,6 +1246,22 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     LogHelper.MarkAsUnsafeSecurityArtifact(token, t => t.ToString()));
 
             return new ClaimsPrincipal(identities);
+        }
+
+        private static async Task<TokenValidationParameters> PopulateValidationParametersWithCurrentConfigurationAsync(
+            TokenValidationParameters validationParameters)
+        {
+            if (validationParameters.ConfigurationManager != null)
+            {
+                var currentConfiguration = await validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
+                validationParameters = validationParameters.Clone();
+                var issuers = new[] { currentConfiguration.Issuer };
+
+                validationParameters.ValidIssuers = (validationParameters.ValidIssuers == null ? issuers : validationParameters.ValidIssuers.Concat(issuers));
+                validationParameters.IssuerSigningKeys = (validationParameters.IssuerSigningKeys == null ? currentConfiguration.SigningKeys : validationParameters.IssuerSigningKeys.Concat(currentConfiguration.SigningKeys));
+            }
+
+            return validationParameters;
         }
 
         /// <summary>
