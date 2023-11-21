@@ -36,6 +36,30 @@ namespace Microsoft.IdentityModel.Benchmarks
         public string Legend => "50th percentile of latency";
     }
 
+    public class P95Column : IColumn
+    {
+        public string Id => nameof(P99Column);
+        public string ColumnName => "P95";
+        public bool IsDefault(Summary summary, BenchmarkCase benchmarkCase) => false;
+        public string GetValue(Summary summary, BenchmarkCase benchmarkCase) => GetValue(summary, benchmarkCase, SummaryStyle.Default);
+        public string GetValue(Summary summary, BenchmarkCase benchmarkCase, SummaryStyle style)
+        {
+            // Get the statistics for the current benchmark
+            var statistics = summary[benchmarkCase].ResultStatistics;
+            // Calculate the P99 latency using the Percentile method
+            var p95 = statistics.Percentiles.P95 / style.TimeUnit.NanosecondAmount;
+            // Format the value using the style
+            return p95.ToString($"F2") + $" {style.TimeUnit.Name}";
+        }
+        public bool IsAvailable(Summary summary) => true;
+        public bool AlwaysShow => true;
+        public ColumnCategory Category => ColumnCategory.Statistics;
+        public int PriorityInCategory => 0;
+        public bool IsNumeric => true;
+        public UnitType UnitType => UnitType.Time;
+        public string Legend => "95th percentile of latency";
+    }
+
     public class P99Column : IColumn
     {
         public string Id => nameof(P99Column);
@@ -71,9 +95,9 @@ namespace Microsoft.IdentityModel.Benchmarks
             // Get the statistics for the current benchmark
             var statistics = summary[benchmarkCase].ResultStatistics;
             // Calculate the P99 latency using the Percentile method
-            var p99 = statistics.Percentiles.P100 / style.TimeUnit.NanosecondAmount;
+            var p100 = statistics.Percentiles.P100 / style.TimeUnit.NanosecondAmount;
             // Format the value using the style
-            return p99.ToString($"F2")+ $" {style.TimeUnit.Name}";
+            return p100.ToString($"F2")+ $" {style.TimeUnit.Name}";
         }
         public bool IsAvailable(Summary summary) => true;
         public bool AlwaysShow => true;
@@ -91,7 +115,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         {
             AddJob(Job.MediumRun
                 .WithToolchain(InProcessEmitToolchain.Instance));
-            AddColumn(new P50Column(), new P99Column(), new P100Column());
+            AddColumn(new P50Column(), new P95Column(), new P99Column(), new P100Column());
         }
     }
 }
