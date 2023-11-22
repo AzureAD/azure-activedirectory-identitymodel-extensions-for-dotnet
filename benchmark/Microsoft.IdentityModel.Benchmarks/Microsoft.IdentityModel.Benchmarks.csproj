@@ -4,7 +4,7 @@
     <AssemblyName>Microsoft.IdentityModel.Benchmarks</AssemblyName>
     <PackageId>Microsoft.IdentityModel.Benchmarks</PackageId>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks Condition="'$(TargetNet8)' == 'True'">net6.0; net8.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(TargetNet8)' == 'True'">net6.0;net8.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(TargetNet8)' != 'True'">net6.0</TargetFrameworks>
     <SignAssembly>True</SignAssembly>
     <DelaySign>True</DelaySign>
@@ -21,12 +21,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\test\Microsoft.IdentityModel.TestUtils\Microsoft.IdentityModel.TestUtils.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.JsonWebTokens\Microsoft.IdentityModel.JsonWebTokens.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Tokens\Microsoft.IdentityModel.Tokens.csproj" />
     <ProjectReference Include="..\..\src\System.IdentityModel.Tokens.Jwt\System.IdentityModel.Tokens.Jwt.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Protocols.SignedHttpRequest\Microsoft.IdentityModel.Protocols.SignedHttpRequest.csproj" />
-    <ProjectReference Include="..\..\test\Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests\Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests.csproj" />
   </ItemGroup>
 
 </Project>
