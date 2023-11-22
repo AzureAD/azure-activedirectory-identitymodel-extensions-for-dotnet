@@ -297,18 +297,22 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             return new ClaimsPrincipal(identity);
         }
 
-        private static async Task<TokenValidationParameters> PopulateValidationParametersWithCurrentConfigurationAsync(
-            TokenValidationParameters validationParameters)
-        {
-            if(validationParameters.ConfigurationManager != null) {
-                var currentConfiguration = await validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
-                validationParameters = validationParameters.Clone();
-                var issuers = new[] { currentConfiguration.Issuer };
 
-                validationParameters.ValidIssuers = (validationParameters.ValidIssuers == null ? issuers : validationParameters.ValidIssuers.Concat(issuers));
-                validationParameters.IssuerSigningKeys = (validationParameters.IssuerSigningKeys == null ? currentConfiguration.SigningKeys : validationParameters.IssuerSigningKeys.Concat(currentConfiguration.SigningKeys));
+        private static async Task<TokenValidationParameters> PopulateValidationParametersWithCurrentConfigurationAsync(TokenValidationParameters validationParameters)
+        {
+            if (validationParameters.ConfigurationManager == null)
+            {
+                return validationParameters;
             }
-            return validationParameters;
+
+            var currentConfiguration = await validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
+            var validationParametersCloned = validationParameters.Clone();
+            var issuers = new[] { currentConfiguration.Issuer };
+
+            validationParametersCloned.ValidIssuers = (validationParametersCloned.ValidIssuers == null ? issuers : validationParametersCloned.ValidIssuers.Concat(issuers));
+            validationParametersCloned.IssuerSigningKeys = (validationParametersCloned.IssuerSigningKeys == null ? currentConfiguration.SigningKeys : validationParametersCloned.IssuerSigningKeys.Concat(currentConfiguration.SigningKeys));
+            return validationParametersCloned;
+
         }
 
         /// <summary>
