@@ -9,7 +9,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// A class which contains useful methods for processing collections.
     /// </summary>
-    public static class CollectionUtilities
+    static class CollectionUtilities
     {
         /// <summary>
         /// Checks whether <paramref name="enumerable"/> is null or empty.
