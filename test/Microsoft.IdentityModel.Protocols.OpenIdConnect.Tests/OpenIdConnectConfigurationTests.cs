@@ -301,5 +301,16 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
             TestUtilities.AssertFailIfErrors(context);
         }
+        
+        [Fact]
+        public void ReadWithExtraObject()
+        {
+
+            OpenIdConnectConfiguration openIdConnectConfiguration = OpenIdConnectConfiguration.Create(OpenIdConfigData.JsonWithExtraObject);
+
+            Assert.Equal("https://server.example.com", openIdConnectConfiguration.Issuer);
+            Assert.Equal("https://server.example.com/authz", openIdConnectConfiguration.AuthorizationEndpoint);
+            Assert.Equal("https://server.example.com/jwks", openIdConnectConfiguration.JwksUri);
+        }
     }
 }

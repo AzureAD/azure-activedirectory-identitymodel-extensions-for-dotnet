@@ -141,6 +141,17 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                                                 ""SigningKeys"":[""key1"",""key2""]
                                             }";
 
+        public static string JsonWithExtraObject = 
+                                            @"{ ""issuer"": ""https://server.example.com"",
+                                                ""authorization_endpoint"": ""https://server.example.com/authz"",
+                                                ""mtls_endpoint_aliases"":
+                                                {   ""token_endpoint"": ""https://mtls.example.com/token"",
+                                                    ""revocation_endpoint"": ""https://mtls.example.com/revo"",
+                                                    ""introspection_endpoint"": ""https://mtls.example.com/introspect""
+                                                },
+                                                ""jwks_uri"": ""https://server.example.com/jwks""
+                                            }";
+
         public static string OpenIdConnectMetadataBadX509DataString = @"{""jwks_uri"":""JsonWebKeySetBadX509Data.json""}";
         public static string OpenIdConnectMetadataBadBase64DataString = @"{""jwks_uri"":""JsonWebKeySetBadBase64Data.json""}";
         public static string OpenIdConnectMetadataBadUriKeysString = @"{""jwks_uri"":""___NoSuchFile___""}";
