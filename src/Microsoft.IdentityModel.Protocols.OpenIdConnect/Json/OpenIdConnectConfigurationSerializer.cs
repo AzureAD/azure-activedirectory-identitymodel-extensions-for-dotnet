@@ -450,11 +450,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                     }
                 }
 
-                if (JsonPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, true) )
-                {
-                    while(!JsonPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, true))
-                }
-
                 if (JsonPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, false))
                     break;
             }
