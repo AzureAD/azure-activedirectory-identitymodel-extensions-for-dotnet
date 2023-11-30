@@ -223,7 +223,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10717 = "IDX10717: '{0} + {1}' must not be greater than {2}, '{3} + {4} > {5}'.";
         public const string IDX10718 = "IDX10718: AlgorithmToValidate is not supported: '{0}'. Algorithm '{1}'.";
         public const string IDX10719 = "IDX10719: SignatureSize (in bytes) was expected to be '{0}', was '{1}'.";
-        public const string IDX10720 = "IDX10720: Unable to create KeyedHashAlgorithm for algorithm '{0}', the key size must be greater than: '{1}' bits, key has '{2}' bits.";
+        public const string IDX10720 = "IDX10720: Unable to create KeyedHashAlgorithm for algorithm '{0}', the key size must be greater than: '{1}' bits, key has '{2}' bits. See https://aka.ms/IdentityModel/UnsafeRelaxHmacKeySizeValidation";
 
         // Json specific errors
         //public const string IDX10801 = "IDX10801:"
