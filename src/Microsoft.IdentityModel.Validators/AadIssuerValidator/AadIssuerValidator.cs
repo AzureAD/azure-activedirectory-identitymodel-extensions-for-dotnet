@@ -24,7 +24,7 @@ namespace Microsoft.IdentityModel.Validators
         private static readonly TimeSpan LastKnownGoodConfigurationLifetime = new TimeSpan(0, 24, 0, 0);
 
         internal const string V2EndpointSuffix = "/v2.0";
-        internal const string V2EndpointSuffixWithTrailingSlash = $"{V2EndpointSuffix}/";
+        internal const string V2EndpointSuffixWithTrailingSlash = "/v2.0/";
         internal const string TenantIdTemplate = "{tenantid}";
 
         internal AadIssuerValidator(

@@ -25,6 +25,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     /// SymmetricSignatureProvider
     /// AsymmetricSignatureProvider
     /// </summary>
+    [Collection("Sequential")]
     public class SignatureProviderTests
     {
         [Theory, MemberData(nameof(SignatureProviderConstructorParamsTheoryData))]
@@ -740,6 +741,34 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+#if !NET452
+        [Theory, MemberData(nameof(SymmetricSecurityKeySizesVerifyOFFTheoryData))]
+        public void SymmetricSecurityKeySizesVerifyOFF(SymmetricSignatureProviderTheoryData theoryData)
+        {
+            AppContext.SetSwitch(CryptoProviderFactory._skipValidationOfHmacKeySizes, true);
+            var context = TestUtilities.WriteHeader($"{this}.SymmetricSecurityKeySizes", theoryData);
+            try
+            {
+                var provider = new SymmetricSignatureProvider(theoryData.SecurityKey, theoryData.Algorithm);
+                provider.Verify(new byte[32], new byte[32]);
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            AppContext.SetSwitch(CryptoProviderFactory._skipValidationOfHmacKeySizes, false);
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<SymmetricSignatureProviderTheoryData> SymmetricSecurityKeySizesVerifyOFFTheoryData()
+        {
+            return AddSymmetricSecurityKeySizesTheoryData(false);
+        }
+#endif
+
         [Theory, MemberData(nameof(SymmetricSecurityKeySizesTheoryData))]
         public void SymmetricSecurityKeySizesVerify(SymmetricSignatureProviderTheoryData theoryData)
         {
@@ -761,20 +790,25 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public static TheoryData<SymmetricSignatureProviderTheoryData> SymmetricSecurityKeySizesTheoryData()
         {
+            return AddSymmetricSecurityKeySizesTheoryData(true);
+        }
+
+        private static TheoryData<SymmetricSignatureProviderTheoryData> AddSymmetricSecurityKeySizesTheoryData(bool addException)
+        {
             var theoryData = new TheoryData<SymmetricSignatureProviderTheoryData>();
 
             theoryData.Add(new SymmetricSignatureProviderTheoryData("HmacSha256Signature")
             {
                 SecurityKey = new SymmetricSecurityKey(new byte[16]),
                 Algorithm = ALG.HmacSha256Signature,
-                ExpectedException = EE.ArgumentOutOfRangeException("IDX10720:")
+                ExpectedException = addException ? EE.ArgumentOutOfRangeException("IDX10720:") : EE.NoExceptionExpected
             });
 
             theoryData.Add(new SymmetricSignatureProviderTheoryData("HmacSha256")
             {
                 SecurityKey = new SymmetricSecurityKey(new byte[16]),
                 Algorithm = ALG.HmacSha256,
-                ExpectedException = EE.ArgumentOutOfRangeException("IDX10720:")
+                ExpectedException = addException ? EE.ArgumentOutOfRangeException("IDX10720:") : EE.NoExceptionExpected
             });
 
             theoryData.Add(new SymmetricSignatureProviderTheoryData("HmacSha256_32")
@@ -787,14 +821,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 SecurityKey = new SymmetricSecurityKey(new byte[32]),
                 Algorithm = ALG.HmacSha384Signature,
-                ExpectedException = EE.ArgumentOutOfRangeException("IDX10720:")
+                ExpectedException = addException ? EE.ArgumentOutOfRangeException("IDX10720:") : EE.NoExceptionExpected
             });
 
             theoryData.Add(new SymmetricSignatureProviderTheoryData("HmacSha384")
             {
                 SecurityKey = new SymmetricSecurityKey(new byte[32]),
                 Algorithm = ALG.HmacSha384,
-                ExpectedException = EE.ArgumentOutOfRangeException("IDX10720:")
+                ExpectedException = addException ? EE.ArgumentOutOfRangeException("IDX10720:") : EE.NoExceptionExpected
             });
 
             theoryData.Add(new SymmetricSignatureProviderTheoryData("HmacSha384_48")
@@ -807,14 +841,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 SecurityKey = new SymmetricSecurityKey(new byte[48]),
                 Algorithm = ALG.HmacSha512Signature,
-                ExpectedException = EE.ArgumentOutOfRangeException("IDX10720:")
+                ExpectedException = addException ? EE.ArgumentOutOfRangeException("IDX10720:") : EE.NoExceptionExpected
             });
 
             theoryData.Add(new SymmetricSignatureProviderTheoryData("HmacSha512")
             {
                 SecurityKey = new SymmetricSecurityKey(new byte[48]),
                 Algorithm = ALG.HmacSha512,
-                ExpectedException = EE.ArgumentOutOfRangeException("IDX10720:")
+                ExpectedException = addException ? EE.ArgumentOutOfRangeException("IDX10720:") : EE.NoExceptionExpected
             });
 
             theoryData.Add(new SymmetricSignatureProviderTheoryData("HmacSha512_64")
