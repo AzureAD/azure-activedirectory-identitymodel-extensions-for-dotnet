@@ -1,10 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
 using BenchmarkDotNet.Attributes;
-using Microsoft.IdentityModel.Protocols.SignedHttpRequest;
-using Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.SignedHttpRequest;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Benchmarks
 {
@@ -20,19 +22,18 @@ namespace Microsoft.IdentityModel.Benchmarks
         {
             _signedHttpRequestHandler = new SignedHttpRequestHandler();
             _signedHttpRequestDescriptor = new SignedHttpRequestDescriptor(
-                    SignedHttpRequestTestUtils.DefaultEncodedAccessToken,
-                    new HttpRequestData(),
-                    SignedHttpRequestTestUtils.DefaultSigningCredentials,
+                    BenchmarkUtils.CreateAccessTokenWithCnf(),
+                    BenchmarkUtils.HttpRequestData,
+                    BenchmarkUtils.SigningCredentialsRsaSha256,
                     new SignedHttpRequestCreationParameters()
                     {
-                        CreateM = false,
+                        CreateM = true,
                         CreateP = false,
-                        CreateU = false
+                        CreateU = true
                     });
         }
 
         [Benchmark]
         public string SHRHandler_CreateSignedHttpRequest() => _signedHttpRequestHandler.CreateSignedHttpRequest(_signedHttpRequestDescriptor);
-
     }
 }
