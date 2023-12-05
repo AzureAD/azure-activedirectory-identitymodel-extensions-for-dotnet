@@ -682,10 +682,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// A <see cref="SecurityTokenDescriptor"/> can contain claims from multiple locations.
         /// This method consolidates the claims and adds default times {exp, iat, nbf} if needed.
         /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="tokenDescriptor"></param>
-        /// <param name="setDefaultTimesOnTokenCreation"></param>
-        /// <param name="tokenLifetimeInMinutes"></param>
+        /// <param name="writer">The <see cref="Utf8JsonWriter"/> to use.</param>
+        /// <param name="tokenDescriptor">The <see cref="SecurityTokenDescriptor"/> used to create the token.</param>
+        /// <param name="setDefaultTimesOnTokenCreation">A boolean that controls if expiration, notbefore, issuedat should be added if missing.</param>
+        /// <param name="tokenLifetimeInMinutes">The default value for the token lifetime in minutes.</param>
         /// <returns>A dictionary of claims.</returns>
         internal static void WriteJwsPayload(
             ref Utf8JsonWriter writer,
@@ -743,7 +743,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             // Duplicates are resolved according to the following priority:
             // SecurityTokenDescriptor.{Audience, Issuer, Expires, IssuedAt, NotBefore}, SecurityTokenDescriptor.Claims, SecurityTokenDescriptor.Subject.Claims
-            // SecurityTokenDescriptor.Claims are KeyValuePairs<string,object>, whereas SeSecurityTokenDescriptor.Subject.Claims are System.Security.Claims.Claim and are processed differently.
+            // SecurityTokenDescriptor.Claims are KeyValuePairs<string,object>, whereas SecurityTokenDescriptor.Subject.Claims are System.Security.Claims.Claim and are processed differently.
 
             if (tokenDescriptor.Claims != null && tokenDescriptor.Claims.Count > 0)
             {

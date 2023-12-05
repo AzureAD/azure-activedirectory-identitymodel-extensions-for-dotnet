@@ -363,7 +363,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Returns the maximum size in bytes for a supported signature algorithms.
         /// The key size affects the signature size for asymmetric algorithms.
         /// </summary>
-        /// <param name="algorithm"></param>
+        /// <param name="algorithm">The security algorithm to find the maximum size.</param>
         /// <returns>Set size for known algorithms, 2K default.</returns>
         internal static int GetMaxByteCount(string algorithm) => algorithm switch
         {
