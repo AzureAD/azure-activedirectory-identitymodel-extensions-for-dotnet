@@ -5,7 +5,9 @@ using System;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Azure.KeyVault;
+using Azure.Identity;
+using Azure.Security.KeyVault.Keys;
+using Azure.Security.KeyVault.Keys.Cryptography;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
@@ -17,7 +19,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
     public class KeyVaultSignatureProvider : SignatureProvider
     {
         private readonly HashAlgorithm _hash;
-        private readonly IKeyVaultClient _client;
+        private readonly CryptographyClient _client;
         private readonly KeyVaultSecurityKey _key;
         private bool _disposed = false;
 
@@ -40,12 +42,13 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for signature operations.</param>
         /// <param name="algorithm">The signature algorithm to apply.</param>
         /// <param name="willCreateSignatures">Whether this <see cref="KeyVaultSignatureProvider"/> is required to create signatures then set this to true.</param>
-        /// <param name="client">A mock <see cref="IKeyVaultClient"/> used for testing purposes.</param>
-        internal KeyVaultSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures, IKeyVaultClient? client)
+        /// <param name="client">A mock <see cref="KeyClient"/> used for testing purposes.</param>
+        internal KeyVaultSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures, CryptographyClient? client)
             : base(key, algorithm)
         {
             _key = key as KeyVaultSecurityKey ?? throw LogHelper.LogArgumentNullException(nameof(key));
-            _client = client ?? new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(_key.Callback!));
+
+            _client = client ?? new CryptographyClient(new Uri(key.KeyId), new DefaultAzureCredential());
             WillCreateSignatures = willCreateSignatures;
 
             switch (algorithm)
@@ -106,7 +109,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
                 {
                     _disposed = true;
                     _hash.Dispose();
-                    _client.Dispose();
+                    //_client.Dispose();
                 }
             }
         }
@@ -127,7 +130,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
-            return (await _client.SignAsync(_key.KeyId, Algorithm, _hash.ComputeHash(input), cancellation).ConfigureAwait(false)).Result;
+            return (await _client.SignAsync(Algorithm, _hash.ComputeHash(input), cancellation).ConfigureAwait(false)).Signature;
         }
 
         /// <summary>
@@ -151,7 +154,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
             if (_disposed)
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
 
-            return await _client.VerifyAsync(_key.KeyId, Algorithm, _hash.ComputeHash(input), signature, cancellation).ConfigureAwait(false);
+            return (await _client.VerifyAsync(Algorithm, _hash.ComputeHash(input), signature, cancellation).ConfigureAwait(false)).IsValid;
         }
     }
 }

@@ -3,6 +3,10 @@
   <PropertyGroup>
     <AspNetCoreMinSupportedVersion>2.1.1</AspNetCoreMinSupportedVersion>
     <MicrosoftAzureKeyVaultVersion>3.0.5</MicrosoftAzureKeyVaultVersion>
+    <AzureIdentityVersion>1.10.2</AzureIdentityVersion>
+    <AzureSecurityKeyVaultKeysVersion>4.1.0</AzureSecurityKeyVaultKeysVersion>
+    <AzureSecurityKeyVaultSecretsVersion>4.1.0</AzureSecurityKeyVaultSecretsVersion>
+    <AzureSecurityKeyVaultCertificatesVersion>4.1.0</AzureSecurityKeyVaultCertificatesVersion>
     <MicrosoftAzureServicesAppAuthenticationVersion>1.0.3</MicrosoftAzureServicesAppAuthenticationVersion>
     <MicrosoftCSharpVersion>4.5.0</MicrosoftCSharpVersion>
     <MicrosoftSourceLinkGitHubVersion>1.0.0</MicrosoftSourceLinkGitHubVersion>

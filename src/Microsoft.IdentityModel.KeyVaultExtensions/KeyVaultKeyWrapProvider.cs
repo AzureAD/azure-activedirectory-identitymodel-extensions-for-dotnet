@@ -4,7 +4,11 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Azure.KeyVault;
+//using Microsoft.Azure.KeyVault;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
+using Azure.Security.KeyVault.Keys;
+using Azure.Security.KeyVault.Keys.Cryptography;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
@@ -15,7 +19,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
     /// </summary>
     public class KeyVaultKeyWrapProvider : KeyWrapProvider
     {
-        private readonly IKeyVaultClient _client;
+        private readonly CryptographyClient _client;
         private readonly KeyVaultSecurityKey _key;
         private readonly string _algorithm;
         private bool _disposed = false;
@@ -38,15 +42,15 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
         /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for key wrap operations.</param>
         /// <param name="algorithm">The key wrap algorithm to apply.</param>
-        /// <param name="client">A mock <see cref="IKeyVaultClient"/> used for testing purposes.</param>
-        internal KeyVaultKeyWrapProvider(SecurityKey key, string algorithm, IKeyVaultClient? client)
+        /// <param name="client">A mock <see cref="CryptographyClient"/> used for testing purposes.</param>
+        internal KeyVaultKeyWrapProvider(SecurityKey key, string algorithm, CryptographyClient? client)
         {
             _algorithm = string.IsNullOrEmpty(algorithm) ? throw LogHelper.LogArgumentNullException(nameof(algorithm)) : algorithm;
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
             _key = key as KeyVaultSecurityKey ?? throw LogHelper.LogExceptionMessage(new NotSupportedException(key.GetType().ToString()));
-            _client = client ?? new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(_key.Callback!));
+            _client = client ?? new CryptographyClient(new Uri(key.KeyId), new DefaultAzureCredential());
         }
 
         /// <summary>
@@ -100,7 +104,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
                 if (disposing)
                 {
                     _disposed = true;
-                    _client.Dispose();
+                    //_client.Dispose();
                 }
             }
         }
@@ -118,7 +122,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
             if (keyBytes == null || keyBytes.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(keyBytes));
 
-            return (await _client.UnwrapKeyAsync(_key.KeyId, Algorithm, keyBytes, cancellation).ConfigureAwait(false)).Result;
+            return (await _client.UnwrapKeyAsync(Algorithm, keyBytes, cancellation).ConfigureAwait(false)).Key;
         }
 
         /// <summary>
@@ -134,7 +138,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
             if (keyBytes == null || keyBytes.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(keyBytes));
 
-            return (await _client.WrapKeyAsync(_key.KeyId, Algorithm, keyBytes, cancellation).ConfigureAwait(false)).Result;
+            return (await _client.WrapKeyAsync(Algorithm, keyBytes, cancellation).ConfigureAwait(false)).EncryptedKey;
         }
     }
 }

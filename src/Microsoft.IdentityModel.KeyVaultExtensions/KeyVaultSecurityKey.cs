@@ -5,7 +5,9 @@ using System;
 using System.Collections;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Azure.KeyVault;
+using Azure.Identity;
+//using Microsoft.Azure.KeyVault;
+using Azure.Security.KeyVault.Keys;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
@@ -61,6 +63,11 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
         public AuthenticationCallback? Callback { get; protected set; }
 
         /// <summary>
+        /// The url that retrieves an access token for the KeyVault.
+        /// </summary>
+        public string? KeyVaultUrl { get; protected set; }
+
+        /// <summary>
         /// The uniform resource identifier of the security key.
         /// </summary>
         public override string KeyId
@@ -88,7 +95,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
             get
             {
                 if (!_keySize.HasValue)
-                    Initialize();
+                    _ = InitializeAsync();
 
                 return _keySize!.Value;
             }
@@ -97,12 +104,17 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
         /// <summary>
         /// Retrieve the properties from Azure Key Vault.
         /// </summary>
-        private void Initialize()
+        private async Task InitializeAsync()
         {
-            using (var client = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(Callback!)))
+            var client = new KeyClient(new Uri(_keyId ?? ""), new DefaultAzureCredential());
+
+            await foreach (KeyProperties item in client.GetPropertiesOfKeysAsync(CancellationToken.None))
+            {
+                KeyVaultKey key = client.GetKeyAsync(item.Name).ConfigureAwait(false).GetAwaiter().GetResult();
+            }
             {
                 var bundle = client.GetKeyAsync(_keyId, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
-                _keySize = new BitArray(bundle.Key.N).Length;
+                _keySize = new BitArray(bundle.key.N).Length;
             }
         }
     }

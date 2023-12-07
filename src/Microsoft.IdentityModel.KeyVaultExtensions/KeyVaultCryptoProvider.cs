@@ -3,7 +3,8 @@
 
 using System;
 using System.Linq;
-using Microsoft.Azure.KeyVault.WebKey;
+using Azure.Security.KeyVault.Keys;
+using Azure.Security.KeyVault.Keys.Cryptography;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
@@ -48,6 +49,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
 
             if (args.FirstOrDefault() is KeyVaultSecurityKey key)
             {
+                // Do we want support RsaNul, it is missing from the new supported algorithm
                 if (JsonWebKeyEncryptionAlgorithm.AllAlgorithms.Contains(algorithm, StringComparer.Ordinal))
                     return new KeyVaultKeyWrapProvider(key, algorithm);
                 else if (JsonWebKeySignatureAlgorithm.AllAlgorithms.Contains(algorithm, StringComparer.Ordinal))
