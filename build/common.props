@@ -36,7 +36,8 @@
 
   <PropertyGroup>
     <EnablePackageValidation>true</EnablePackageValidation>
-    <PackageValidationBaselineVersion>8.0.0</PackageValidationBaselineVersion>
+    <PackageValidationBaselineVersion>7.0.0</PackageValidationBaselineVersion>
+	<EnableStrictModeForCompatibleFrameworksInPackage>true</EnableStrictModeForCompatibleFrameworksInPackage>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
