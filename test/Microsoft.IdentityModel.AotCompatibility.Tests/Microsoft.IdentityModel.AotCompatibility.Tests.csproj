@@ -4,8 +4,7 @@
 
   <PropertyGroup>
     <!-- This test only needs to run on .NET -->
-    <TargetFramework Condition="'$(TargetNet8)' == 'True'">net8.0</TargetFramework>
-    <TargetFramework Condition="'$(TargetNet8)' != 'True'">net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <langversion>10</langversion>
     <Version>1.0.0-preview</Version>
   </PropertyGroup>
