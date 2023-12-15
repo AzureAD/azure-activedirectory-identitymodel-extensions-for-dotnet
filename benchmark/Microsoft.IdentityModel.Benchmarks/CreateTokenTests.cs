@@ -8,6 +8,10 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Benchmarks
 {
+    // dotnet run -c release -f net8.0 --filter Microsoft.IdentityModel.Benchmarks.CreateTokenTests*
+
+    [Config(typeof(BenchmarkConfig))]
+    [HideColumns("Type", "Job", "WarmupCount", "LaunchCount")]
     [MemoryDiagnoser]
     public class CreateTokenTests
     {
