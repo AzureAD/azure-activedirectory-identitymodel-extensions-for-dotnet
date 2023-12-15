@@ -64,6 +64,16 @@ namespace Microsoft.IdentityModel.Tokens
             SecurityAlgorithms.RsaSsaPssSha512Signature
         };
 
+        internal static readonly ICollection<string> EddsaSigningAlgorithms = new Collection<string>
+        {
+            SecurityAlgorithms.EdDSA,
+            SecurityAlgorithms.EddsaEd25519Signature,
+            SecurityAlgorithms.EddsaEd25519Sha512Signature,
+            SecurityAlgorithms.EddsaEd25519WithContextSignature,
+            SecurityAlgorithms.EddsaEd448Signature,
+            SecurityAlgorithms.EddsaEd25519Shake256Signature
+        };
+
         internal static readonly ICollection<string> SymmetricEncryptionAlgorithms = new Collection<string>
         {
             SecurityAlgorithms.Aes128CbcHmacSha256,
@@ -215,6 +225,10 @@ namespace Microsoft.IdentityModel.Tokens
             if (key as RsaSecurityKey != null)
                 return IsSupportedRsaAlgorithm(algorithm, key);
 
+            if (key as EddsaSecurityKey != null) {
+                return IsSupportedEddsaAlgorithm(algorithm, key);
+            }
+
             if (key is X509SecurityKey x509Key)
             {
                 // only RSA keys are supported
@@ -333,6 +347,10 @@ namespace Microsoft.IdentityModel.Tokens
                 || (RsaPssSigningAlgorithms.Contains(algorithm) && IsSupportedRsaPss(key));
         }
 
+        internal static bool IsSupportedEddsaAlgorithm(string algorithm, EddsaSecurityKey key) {
+            return EddsaSigningAlgorithms.Contains(algorithm);
+        }
+
         private static bool IsSupportedRsaPss(SecurityKey key)
         {
             // RSACryptoServiceProvider doesn't support RSA-PSS
@@ -395,6 +413,14 @@ namespace Microsoft.IdentityModel.Tokens
             SecurityAlgorithms.RsaSsaPssSha512 or
             SecurityAlgorithms.RsaSsaPssSha512Signature or
             SecurityAlgorithms.RsaSha512Signature => 1024,
+
+            SecurityAlgorithms.EdDSA or
+            SecurityAlgorithms.EddsaEd25519Signature or
+            SecurityAlgorithms.EddsaEd25519Sha512Signature or
+            SecurityAlgorithms.EddsaEd25519WithContextSignature => 512,
+
+            SecurityAlgorithms.EddsaEd448Signature or
+            SecurityAlgorithms.EddsaEd25519Shake256Signature => 912,
 
             // if we don't know the algorithm, report 2K twice as big as any known algorithm.
             _ => 2048,
