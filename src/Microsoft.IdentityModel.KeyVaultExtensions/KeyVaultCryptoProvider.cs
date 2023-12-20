@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Azure.Security.KeyVault.Keys;
 using Azure.Security.KeyVault.Keys.Cryptography;
@@ -16,6 +17,9 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
     public class KeyVaultCryptoProvider : ICryptoProvider
     {
         private readonly CryptoProviderCache _cache;
+
+        private static readonly HashSet<string> SupportedEncryptionAlgorithm = new() { "RSA1_5", "RSA-OAEP", "RSA-OAEP-256" };
+        private static readonly HashSet<string> SupportedSignatureAlgorithm = new() { "RS256", "RS384", "RS512", "RSNULL", "PS256", "PS384", "PS512", "ES256", "ES384", "ES512", "ES256K" };
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyVaultCryptoProvider"/> class.
@@ -49,10 +53,9 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
 
             if (args.FirstOrDefault() is KeyVaultSecurityKey key)
             {
-                // Do we want support RsaNul, it is missing from the new supported algorithm
-                if (JsonWebKeyEncryptionAlgorithm.AllAlgorithms.Contains(algorithm, StringComparer.Ordinal))
+                if (SupportedEncryptionAlgorithm.Contains(algorithm, StringComparer.Ordinal))
                     return new KeyVaultKeyWrapProvider(key, algorithm);
-                else if (JsonWebKeySignatureAlgorithm.AllAlgorithms.Contains(algorithm, StringComparer.Ordinal))
+                else if (SupportedSignatureAlgorithm.Contains(algorithm, StringComparer.Ordinal))
                 {
                     var willCreateSignatures = (bool)(args.Skip(1).FirstOrDefault() ?? false);
 
@@ -85,7 +88,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
                 throw LogHelper.LogArgumentNullException(nameof(args));
 
             return args.FirstOrDefault() is KeyVaultSecurityKey
-                && (JsonWebKeyEncryptionAlgorithm.AllAlgorithms.Contains(algorithm, StringComparer.Ordinal) || JsonWebKeySignatureAlgorithm.AllAlgorithms.Contains(algorithm, StringComparer.Ordinal));
+                && (SupportedEncryptionAlgorithm.Contains(algorithm, StringComparer.Ordinal) || SupportedSignatureAlgorithm.Contains(algorithm, StringComparer.Ordinal));
         }
 
         /// <summary>
