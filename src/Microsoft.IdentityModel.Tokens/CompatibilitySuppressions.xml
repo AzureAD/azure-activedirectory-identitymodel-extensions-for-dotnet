@@ -7,4 +7,119 @@
     <Left>lib/netstandard2.0/Microsoft.IdentityModel.Tokens.dll</Left>
     <Right>lib/net461/Microsoft.IdentityModel.Tokens.dll</Right>
   </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Microsoft.IdentityModel.Tokens.PrivateKeyStatus.Exists</Target>
+    <Left>lib/net8.0/Microsoft.IdentityModel.Tokens.dll</Left>
+    <Right>lib/net6.0/Microsoft.IdentityModel.Tokens.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Microsoft.IdentityModel.Tokens.PrivateKeyStatus.DoesNotExist</Target>
+    <Left>lib/net8.0/Microsoft.IdentityModel.Tokens.dll</Left>
+    <Right>lib/net6.0/Microsoft.IdentityModel.Tokens.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Microsoft.IdentityModel.Tokens.PrivateKeyStatus.Unknown</Target>
+    <Left>lib/net8.0/Microsoft.IdentityModel.Tokens.dll</Left>
+    <Right>lib/net6.0/Microsoft.IdentityModel.Tokens.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.IdentityModel.Tokens.DateTimeUtil.ToUniversalTime(System.DateTime)</Target>
+    <Left>lib/net8.0/Microsoft.IdentityModel.Tokens.dll</Left>
+    <Right>lib/net6.0/Microsoft.IdentityModel.Tokens.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.IdentityModel.Tokens.SecurityTokenInvalidLifetimeException.get_NotBefore</Target>
+    <Left>lib/net8.0/Microsoft.IdentityModel.Tokens.dll</Left>
+    <Right>lib/net6.0/Microsoft.IdentityModel.Tokens.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.IdentityModel.Tokens.SecurityTokenInvalidLifetimeException.get_Expires</Target>
+    <Left>lib/net8.0/Microsoft.IdentityModel.Tokens.dll</Left>
+    <Right>lib/net6.0/Microsoft.IdentityModel.Tokens.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Microsoft.IdentityModel.Tokens.ValidationFailure.None</Target>
+    <Left>lib/net8.0/Microsoft.IdentityModel.Tokens.dll</Left>
+    <Right>lib/net6.0/Microsoft.IdentityModel.Tokens.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Microsoft.IdentityModel.Tokens.ValidationFailure.InvalidLifetime</Target>
+    <Left>lib/net8.0/Microsoft.IdentityModel.Tokens.dll</Left>
+    <Right>lib/net6.0/Microsoft.IdentityModel.Tokens.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Microsoft.IdentityModel.Tokens.ValidationFailure.InvalidIssuer</Target>
+    <Left>lib/net8.0/Microsoft.IdentityModel.Tokens.dll</Left>
+    <Right>lib/net6.0/Microsoft.IdentityModel.Tokens.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.get_Expires</Target>
+    <Left>lib/net8.0/Microsoft.IdentityModel.Tokens.dll</Left>
+    <Right>lib/net6.0/Microsoft.IdentityModel.Tokens.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.get_IssuedAt</Target>
+    <Left>lib/net8.0/Microsoft.IdentityModel.Tokens.dll</Left>
+    <Right>lib/net6.0/Microsoft.IdentityModel.Tokens.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.get_NotBefore</Target>
+    <Left>lib/net8.0/Microsoft.IdentityModel.Tokens.dll</Left>
+    <Right>lib/net6.0/Microsoft.IdentityModel.Tokens.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.IdentityModel.Tokens.LifetimeValidator.Invoke(System.DateTime, System.DateTime, Microsoft.IdentityModel.Tokens.SecurityToken, Microsoft.IdentityModel.Tokens.TokenValidationParameters)</Target>
+    <Left>lib/net8.0/Microsoft.IdentityModel.Tokens.dll</Left>
+    <Right>lib/net6.0/Microsoft.IdentityModel.Tokens.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.IdentityModel.Tokens.LifetimeValidator.BeginInvoke(System.DateTime, System.DateTime, Microsoft.IdentityModel.Tokens.SecurityToken, Microsoft.IdentityModel.Tokens.TokenValidationParameters, System.AsyncCallback, object)</Target>
+    <Left>lib/net8.0/Microsoft.IdentityModel.Tokens.dll</Left>
+    <Right>lib/net6.0/Microsoft.IdentityModel.Tokens.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.IdentityModel.Tokens.TokenReplayValidator.Invoke(System.DateTime, string, Microsoft.IdentityModel.Tokens.TokenValidationParameters)</Target>
+    <Left>lib/net8.0/Microsoft.IdentityModel.Tokens.dll</Left>
+    <Right>lib/net6.0/Microsoft.IdentityModel.Tokens.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.IdentityModel.Tokens.TokenReplayValidator.BeginInvoke(System.DateTime, string, Microsoft.IdentityModel.Tokens.TokenValidationParameters, System.AsyncCallback, object)</Target>
+    <Left>lib/net8.0/Microsoft.IdentityModel.Tokens.dll</Left>
+    <Right>lib/net6.0/Microsoft.IdentityModel.Tokens.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>
+      M:Microsoft.IdentityModel.Tokens.Validators.ValidateLifetime(System.DateTime, System.DateTime, Microsoft.IdentityModel.Tokens.SecurityToken, Microsoft.IdentityModel.Tokens.TokenValidationParameters)</Target>
+    <Left>lib/net8.0/Microsoft.IdentityModel.Tokens.dll</Left>
+    <Right>lib/net6.0/Microsoft.IdentityModel.Tokens.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.IdentityModel.Tokens.Validators.ValidateTokenReplay(System.DateTime, string, Microsoft.IdentityModel.Tokens.TokenValidationParameters)</Target>
+    <Left>lib/net8.0/Microsoft.IdentityModel.Tokens.dll</Left>
+    <Right>lib/net6.0/Microsoft.IdentityModel.Tokens.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.IdentityModel.Tokens.Validators.ValidateTokenReplay(string, System.DateTime, Microsoft.IdentityModel.Tokens.TokenValidationParameters)</Target>
+    <Left>lib/net8.0/Microsoft.IdentityModel.Tokens.dll</Left>
+    <Right>lib/net6.0/Microsoft.IdentityModel.Tokens.dll</Right>
+  </Suppression>
 </Suppressions>
