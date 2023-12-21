@@ -5,7 +5,7 @@ parameters:
 
 steps:
 - task: EsrpCodeSigning@4
-  displayName: 'Sign ${{ parameters.LibraryName }}'
+  displayName: 'Sign Microsoft.IdentityModel .dll'
   inputs:
     ConnectedServiceName: 'IDDP Code Signing'
     FolderPath: '$(Build.SourcesDirectory)\src'
