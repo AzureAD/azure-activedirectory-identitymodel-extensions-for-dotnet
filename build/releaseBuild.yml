@@ -157,7 +157,7 @@ jobs:
       filePath: ./pack.ps1
       arguments: '-buildType $(BuildConfiguration) C:\hostedtoolcache\windows\dotnet'
 
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+  - task: EsrpCodeSigning@4
     displayName: 'Sign Nuget Packages'
     inputs:
       ConnectedServiceName: 'IDDP Code Signing'
