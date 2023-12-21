@@ -4,85 +4,67 @@ parameters:
   BuildConfiguration: 'release'
 
 steps:
-- template: template-sign-binary.yml
-  parameters:
-    LibraryName: 'System.IdentityModel.Tokens.Jwt'
-    BuildConfiguration: ${{ parameters.BuildConfiguration }}
-
-- template: template-sign-binary.yml
-  parameters:
-    LibraryName: 'Microsoft.IdentityModel.JsonWebTokens'
-    BuildConfiguration: ${{ parameters.BuildConfiguration }}
-
-- template: template-sign-binary.yml
-  parameters:
-    LibraryName: 'Microsoft.IdentityModel.Logging'
-    BuildConfiguration: ${{ parameters.BuildConfiguration }}
-
-- template: template-sign-binary.yml
-  parameters:
-    LibraryName: 'Microsoft.IdentityModel.Protocols'
-    BuildConfiguration: ${{ parameters.BuildConfiguration }}
-
-- template: template-sign-binary.yml
-  parameters:
-    LibraryName: 'Microsoft.IdentityModel.Protocols.WsFederation'
-    BuildConfiguration: ${{ parameters.BuildConfiguration }}
-
-- template: template-sign-binary.yml
-  parameters:
-    LibraryName: 'Microsoft.IdentityModel.Tokens'
-    BuildConfiguration: ${{ parameters.BuildConfiguration }}
-
-- template: template-sign-binary.yml
-  parameters:
-    LibraryName: 'Microsoft.IdentityModel.Tokens.Saml'
-    BuildConfiguration: ${{ parameters.BuildConfiguration }}
-
-- template: template-sign-binary.yml
-  parameters:
-    LibraryName: 'Microsoft.IdentityModel.Xml'
-    BuildConfiguration: ${{ parameters.BuildConfiguration }}
-
-- template: template-sign-binary.yml
-  parameters:
-    LibraryName: 'Microsoft.IdentityModel.Protocols.OpenIdConnect'
-    BuildConfiguration: ${{ parameters.BuildConfiguration }}
-
-- template: template-sign-binary.yml
-  parameters:
-    LibraryName: 'Microsoft.IdentityModel.Protocols.SignedHttpRequest'
-    BuildConfiguration: ${{ parameters.BuildConfiguration }}
-
-- template: template-sign-binary.yml
-  parameters:
-    LibraryName: 'Microsoft.IdentityModel.KeyVaultExtensions'
-    BuildConfiguration: ${{ parameters.BuildConfiguration }}
-
-- template: template-sign-binary.yml
-  parameters:
-    LibraryName: 'Microsoft.IdentityModel.ManagedKeyVaultSecurityKey'
-    BuildConfiguration: ${{ parameters.BuildConfiguration }}
-
-- template: template-sign-binary.yml
-  parameters:
-    LibraryName: 'Microsoft.IdentityModel.Validators'
-    BuildConfiguration: ${{ parameters.BuildConfiguration }}
-
-- template: template-sign-binary.yml
-  parameters:
-    LibraryName: 'Microsoft.IdentityModel.Abstractions'
-    BuildConfiguration: ${{ parameters.BuildConfiguration }}
-
-- template: template-sign-binary.yml
-  parameters:
-    LibraryName: 'Microsoft.IdentityModel.LoggingExtensions'
-    BuildConfiguration: ${{ parameters.BuildConfiguration }}
-
-- template: template-sign-binary.yml
-  parameters:
-    LibraryName: 'Microsoft.IdentityModel.TestExtensions'
-    BuildConfiguration: ${{ parameters.BuildConfiguration }}
+- task: EsrpCodeSigning@4
+  displayName: 'Sign ${{ parameters.LibraryName }}'
+  inputs:
+    ConnectedServiceName: 'IDDP Code Signing'
+    FolderPath: '$(Build.SourcesDirectory)\src'
+    Pattern: 'Microsoft.IdentityModel*.dll'
+    signConfigType: inlineSignParams
+    inlineOperation: |
+     [
+       {
+         "keyCode": "MSSharedLibSnKey",
+         "operationSetCode": "StrongNameSign",
+         "parameters": null,
+         "toolName": "sn.exe",
+         "toolVersion": "V4.6.1586.0"
+       },
+       {
+         "keyCode": "MSSharedLibSnKey",
+         "operationSetCode": "StrongNameVerify",
+         "parameters": null,
+         "toolName": "sn.exe",
+         "toolVersion": "V4.6.1586.0"
+       },
+       {
+         "keyCode": "CP-230012",
+         "operationSetCode": "SigntoolSign",
+         "parameters": [
+         {
+           "parameterName": "OpusName",
+           "parameterValue": "Microsoft"
+         },
+         {
+           "parameterName": "OpusInfo",
+           "parameterValue": "http://www.microsoft.com"
+         },
+         {
+           "parameterName": "PageHash",
+           "parameterValue": "/NPH"
+         },
+         {
+           "parameterName": "FileDigest",
+           "parameterValue": "/fd sha256"
+         },
+         {
+           "parameterName": "TimeStamp",
+           "parameterValue": "/tr \"http://rfc3161.gtm.corp.microsoft.com/TSS/HttpTspServer\" /td sha256"
+         }
+         ],
+         "toolName": "signtool.exe",
+         "toolVersion": "6.2.9304.0"
+       },
+       {
+         "keyCode": "CP-230012",
+         "operationSetCode": "SigntoolVerify",
+         "parameters": [ ],
+         "toolName": "signtool.exe",
+         "toolVersion": "6.2.9304.0"
+       }
+     ]
+    SessionTimeout: 20
+    VerboseLogin: true
 
 - task: PowerShell@1
   displayName: 'Verify Signing'
