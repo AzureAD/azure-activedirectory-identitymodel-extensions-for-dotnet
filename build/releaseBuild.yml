@@ -6,10 +6,10 @@ name: $(TeamProject)_$(Build.DefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd
 # Create a daily midnight build for release builds on master to ensure our release builds function
 schedules:
 - cron: "0 0 * * *"
-  displayName: Release build for 6.23.0
+  displayName: Release build for dev
   branches:
     include:
-    - rel/6.23.0
+    - dev
 
 variables:
   - group: Middleware
