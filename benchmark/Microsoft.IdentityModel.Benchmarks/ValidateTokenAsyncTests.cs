@@ -9,7 +9,9 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Benchmarks
 {
-    [Config(typeof(AntiVirusFriendlyConfig))]
+    // dotnet run -c release -f net8.0 --filter Microsoft.IdentityModel.Benchmarks.ValidateTokenAsyncTests*
+
+    [Config(typeof(BenchmarkConfig))]
     [HideColumns("Type", "Job", "WarmupCount", "LaunchCount")]
     [MemoryDiagnoser]
     public class ValidateTokenAsyncTests
