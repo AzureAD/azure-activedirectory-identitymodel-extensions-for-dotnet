@@ -4,8 +4,7 @@
     <AssemblyName>Microsoft.IdentityModel.Benchmarks</AssemblyName>
     <PackageId>Microsoft.IdentityModel.Benchmarks</PackageId>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks Condition="'$(TargetNet8)' == 'True'">net6.0;net8.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(TargetNet8)' != 'True'">net6.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
     <SignAssembly>True</SignAssembly>
     <DelaySign>True</DelaySign>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
