@@ -984,7 +984,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (keysAttempted is not null)
                 throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(TokenLogMessages.IDX10503,
-                    keysAttempted,
+                    LogHelper.MarkAsNonPII(keysAttempted),
                     LogHelper.MarkAsNonPII(numKeysInTokenValidationParameters),
                     LogHelper.MarkAsNonPII(numKeysInConfiguration),
                     (object)exceptionStrings ?? "",
