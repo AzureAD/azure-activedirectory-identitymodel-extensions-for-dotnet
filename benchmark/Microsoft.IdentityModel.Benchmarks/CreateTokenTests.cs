@@ -1,14 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System.Security.Claims;
+using System;
 using BenchmarkDotNet.Attributes;
 using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Benchmarks
 {
+    // dotnet run -c release -f net8.0 --filter Microsoft.IdentityModel.Benchmarks.CreateTokenTests*
+
+    [Config(typeof(BenchmarkConfig))]
     [HideColumns("Type", "Job", "WarmupCount", "LaunchCount")]
     [MemoryDiagnoser]
     public class CreateTokenTests
@@ -19,16 +21,16 @@ namespace Microsoft.IdentityModel.Benchmarks
         [GlobalSetup]
         public void Setup()
         {
+            DateTime now = DateTime.UtcNow;
             _jsonWebTokenHandler = new JsonWebTokenHandler();
             _tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(Default.PayloadClaims),
-                SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                Claims = BenchmarkUtils.Claims,
+                SigningCredentials = BenchmarkUtils.SigningCredentialsRsaSha256,
             };
         }
 
         [Benchmark]
         public string JsonWebTokenHandler_CreateToken() => _jsonWebTokenHandler.CreateToken(_tokenDescriptor);
-
     }
 }

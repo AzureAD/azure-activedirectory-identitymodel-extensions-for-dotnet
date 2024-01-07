@@ -30,34 +30,28 @@ jobs:
 
   steps:
   - task: UseDotNet@2
-    displayName: 'Use .NET Core sdk 2.1.818'
+    displayName: 'Use .NET Core sdk 2.x'
     inputs:
-      version: 2.1.818
-      installationPath: 'c:\Program Files\dotnet'
-
-  - task: UseDotNet@2
-    displayName: 'Use .NET Core sdk 2.1.x'
-    inputs:
-      version: 2.1.x
+      version: 2.x
       installationPath: $(Agent.ToolsDirectory)/dotnet
 
   - task: UseDotNet@2
-    displayName: 'Use .Net Core SDK 6'
+    displayName: 'Use .NET Core sdk 6.x'
     inputs:
-      version: 6.0.x
+      version: 6.x
+      installationPath: $(Agent.ToolsDirectory)/dotnet
 
   - task: UseDotNet@2
-    displayName: 'Use .Net Core SDK 8'
+    displayName: 'Use .NET Core sdk 8.x'
     inputs:
-      includePreviewVersions: true
-      version: 8.0.x
-    condition: eq(variables['TargetNet8'], 'True')
+      version: 8.x
+      installationPath: $(Agent.ToolsDirectory)/dotnet
 
   - task: DotNetCoreCLI@2
-    displayName: 'dotnet --list-sdks '
+    displayName: 'dotnet --list-sdks'
     inputs:
       command: custom
-      custom: '--list-sdks '
+      custom: '--list-sdks'
 
   - task: CmdLine@1
     displayName: 'Run VerifyResourceUsage.pl'
@@ -67,7 +61,6 @@ jobs:
 
   - powershell: |
       regedit /s .\build\strongNameBypass.reg
-      regedit /s .\build\strongNameBypass2.reg
     displayName: 'Strong Name Bypass'
 
   - task: PowerShell@2
@@ -77,13 +70,6 @@ jobs:
       filePath: ./updateAssemblyInfo.ps1
       arguments: '-packageType $(BuildConfiguration)'
 
-  # - task: MSBuild@1
-  #   displayName: Build
-  #   inputs:
-  #     solution: wilson.sln
-  #     msbuildArchitecture: x64
-  #     msbuildArguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true /p:RunApiCompat=true'
-
   - task: DotNetCoreCLI@2
     displayName: Build
     inputs:
@@ -91,7 +77,6 @@ jobs:
       projects: 'wilson.sln'
       custom: 'msbuild'
       arguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true'
-#      arguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true /p:RunApiCompat=true'
 
   - task: PowerShell@2
     displayName: 'Run Tests'
@@ -148,7 +133,7 @@ jobs:
 
 
   #Sign Wilson 7x task group
-  - template: template-sign-wilson-7x.yaml
+  - template: template-sign-wilson.yaml
 
   - task: PowerShell@2
     displayName: Pack
@@ -157,7 +142,7 @@ jobs:
       filePath: ./pack.ps1
       arguments: '-buildType $(BuildConfiguration) C:\hostedtoolcache\windows\dotnet'
 
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+  - task: EsrpCodeSigning@4
     displayName: 'Sign Nuget Packages'
     inputs:
       ConnectedServiceName: 'IDDP Code Signing'

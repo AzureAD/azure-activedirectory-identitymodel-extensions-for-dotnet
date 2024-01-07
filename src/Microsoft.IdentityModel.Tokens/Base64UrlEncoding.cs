@@ -286,6 +286,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (length < 0)
                 throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(
+                    nameof(length),
                     LogHelper.FormatInvariant(
                     LogMessages.IDX10716,
                     LogHelper.MarkAsNonPII(nameof(length)),
@@ -293,13 +294,16 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (offset < 0)
                 throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(
+                    nameof(offset),
                     LogHelper.FormatInvariant(
                         LogMessages.IDX10716,
                         LogHelper.MarkAsNonPII(nameof(offset)),
                         LogHelper.MarkAsNonPII(offset))));
 
             if (input.Length < offset + length)
+#pragma warning disable CA2208 // Instantiate argument exceptions correctly
                 throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(
+                    "offset + length",
                     LogHelper.FormatInvariant(
                         LogMessages.IDX10717,
                         LogHelper.MarkAsNonPII(nameof(offset)),
@@ -308,6 +312,7 @@ namespace Microsoft.IdentityModel.Tokens
                         LogHelper.MarkAsNonPII(offset),
                         LogHelper.MarkAsNonPII(length),
                         LogHelper.MarkAsNonPII(input.Length))));
+#pragma warning restore CA2208 // Instantiate argument exceptions correctly
 
             int outputsize = length % 3;
             if (outputsize > 0)

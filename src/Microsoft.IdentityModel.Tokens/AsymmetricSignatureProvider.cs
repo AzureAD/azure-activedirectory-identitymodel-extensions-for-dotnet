@@ -194,6 +194,46 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         internal override int ObjectPoolSize => _asymmetricAdapterObjectPool.Size;
 
+#if NET6_0_OR_GREATER
+        /// <summary>
+        /// This must be overridden to produce a signature over the 'input'.
+        /// </summary>
+        /// <param name="input">bytes to sign.</param>
+        /// <param name="signature">pre allocated span where signature bytes will be placed.</param>
+        /// <param name="bytesWritten">number of bytes written into the signature span.</param>
+        /// <returns>returns true if creation of signature succeeded, false otherwise.</returns>
+        internal override bool Sign(ReadOnlySpan<byte> input, Span<byte> signature, out int bytesWritten)
+        {
+            if (input == null || input.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(input));
+
+            if (_disposed)
+            {
+                CryptoProviderCache?.TryRemove(this);
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
+            }
+
+            AsymmetricAdapter asym = null;
+            try
+            {
+                asym = _asymmetricAdapterObjectPool.Allocate();
+                return asym.SignUsingSpan(input, signature, out bytesWritten);
+            }
+            catch
+            {
+                CryptoProviderCache?.TryRemove(this);
+                Dispose(true);
+                throw;
+            }
+            finally
+            {
+                if (!_disposed)
+                    _asymmetricAdapterObjectPool.Free(asym);
+            }
+
+        }
+#endif
+
         /// <summary>
         /// Produces a signature over the 'input' using the <see cref="AsymmetricSecurityKey"/> and algorithm passed to <see cref="AsymmetricSignatureProvider( SecurityKey, string, bool )"/>.
         /// </summary>
@@ -219,6 +259,36 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 asym = _asymmetricAdapterObjectPool.Allocate();
                 return asym.Sign(input);
+            }
+            catch
+            {
+                CryptoProviderCache?.TryRemove(this);
+                Dispose(true);
+                throw;
+            }
+            finally
+            {
+                if (!_disposed)
+                    _asymmetricAdapterObjectPool.Free(asym);
+            }
+        }
+
+        internal override byte[] Sign(byte[] input, int offset, int count)
+        {
+            if (input == null || input.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(input));
+
+            if (_disposed)
+            {
+                CryptoProviderCache?.TryRemove(this);
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
+            }
+
+            AsymmetricAdapter asym = null;
+            try
+            {
+                asym = _asymmetricAdapterObjectPool.Allocate();
+                return asym.SignUsingOffset(input, offset, count);
             }
             catch
             {
@@ -406,7 +476,7 @@ namespace Microsoft.IdentityModel.Tokens
                 asym = _asymmetricAdapterObjectPool.Allocate();
                 if (signature.Length == signatureLength)
                 {
-                    return asym.Verify(input, inputOffset, inputLength, signature);
+                    return asym.VerifyUsingOffset(input, inputOffset, inputLength, signature);
                 }
                 else
                 {
@@ -414,7 +484,7 @@ namespace Microsoft.IdentityModel.Tokens
                     // Having the logic here, handles EC and RSA. We can revisit when we start using spans in 3.1+.
                     byte[] signatureBytes = new byte[signatureLength];
                     Array.Copy(signature, 0, signatureBytes, 0, signatureLength);
-                    return asym.Verify(input, inputOffset, inputLength, signatureBytes);
+                    return asym.VerifyUsingOffset(input, inputOffset, inputLength, signatureBytes);
                 }
             }
             catch
