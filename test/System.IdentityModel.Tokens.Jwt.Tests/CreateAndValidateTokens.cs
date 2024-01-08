@@ -139,7 +139,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             validateKey = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA384_Public;
             validationParameters.IssuerSigningKey = validateKey;
 
-            ExpectedException expectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10503:");
+            ExpectedException expectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10515:");
             try
             {
                 cp = handler.ValidateToken(jwt, validationParameters, out validatedSecurityToken);
