@@ -97,7 +97,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10514 = "IDX10514: Signature validation failed. Keys tried: '{0}'. \nKeyInfo: '{1}'. \nExceptions caught:\n '{2}'.\ntoken: '{3}'.";
         //public const string IDX10515 = "IDX10515: Signature validation failed. Unable to match key: \nKeyInfo: '{0}'.\nExceptions caught:\n '{1}'. \ntoken: '{2}'. Valid Lifetime: '{3}'. Valid Issuer: '{4}'";
         //public const string IDX10516 = "IDX10516: Signature validation failed. Unable to match key: \nkid: '{0}'. \nNumber of keys in TokenValidationParameters: '{1}'. \nNumber of keys in Configuration: '{2}'. \nExceptions caught:\n '{3}'. \ntoken: '{4}'. Valid Lifetime: '{5}'. Valid Issuer: '{6}'";
-        public const string IDX10515 = "IDX10515: Signature validation failed. The token's kid is missing. Keys tried: '{0}'. Number of keys in TokenValidationParameters: '{1}'. \nNumber of keys in Configuration: '{2}'. \nExceptions caught:\n '{3}'.\ntoken: '{4}'. See https://aka.ms/IDX10503 for details.";
+        public const string IDX10517 = "IDX10517: Signature validation failed. The token's kid is missing. Keys tried: '{0}'. Number of keys in TokenValidationParameters: '{1}'. \nNumber of keys in Configuration: '{2}'. \nExceptions caught:\n '{3}'.\ntoken: '{4}'. See https://aka.ms/IDX10503 for details.";
 
         // encryption / decryption
         // public const string IDX10600 = "IDX10600:";

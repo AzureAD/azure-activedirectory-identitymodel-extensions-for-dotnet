@@ -1454,7 +1454,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
                 else
                 {
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(TokenLogMessages.IDX10515,
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(TokenLogMessages.IDX10517,
                         LogHelper.MarkAsNonPII((object)keysAttempted ?? ""),
                         LogHelper.MarkAsNonPII(numKeysInTokenValidationParameters),
                         LogHelper.MarkAsNonPII(numKeysInConfiguration),
