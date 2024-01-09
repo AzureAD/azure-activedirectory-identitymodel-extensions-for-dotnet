@@ -941,6 +941,8 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 writer.WriteNumber(key, d);
             else if (obj is float f)
                 writer.WriteNumber(key, f);
+            else if (obj is Guid g)
+                writer.WriteString(key, g);
             else
                 throw LogHelper.LogExceptionMessage(
                     new ArgumentException(

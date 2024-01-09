@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using Microsoft.IdentityModel.Logging;
 
@@ -39,6 +40,8 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
 
         public string String { get; set; }
 
+        public Guid? Guid { get; set; }
+
         public bool ShouldSerializeAdditionalData()
         {
             return AdditionalData.Count > 0;
@@ -70,6 +73,11 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
         public bool ShouldSerializeString()
         {
             return String != null;
+        }
+
+        public bool ShouldSerializeGuid()
+        {
+            return Guid.HasValue;
         }
     }
 }

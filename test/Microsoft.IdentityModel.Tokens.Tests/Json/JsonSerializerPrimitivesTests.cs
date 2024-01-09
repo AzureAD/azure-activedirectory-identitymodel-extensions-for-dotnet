@@ -20,7 +20,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
         [Fact]
         public void CheckMaxDepthReading()
         {
-            var document = JsonDocument.Parse(@"{""key"":" + new string('[', 62) +  @"""value""" + new string(']', 62) + "}");
+            var document = JsonDocument.Parse(@"{""key"":" + new string('[', 62) + @"""value""" + new string(']', 62) + "}");
 
             Dictionary<string, object> value;
             JsonSerializerPrimitives.TryCreateTypeFromJsonElement(document.RootElement, out value);
@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
 
             json.Append('{');
 
-            foreach(var i in Enumerable.Range(0, 100))
+            foreach (var i in Enumerable.Range(0, 100))
             {
                 json.Append($@"""key-{i}"":""value-{i}""");
                 if (i != 99)
@@ -135,7 +135,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                     IdentityComparer.AreEqual(json, theoryData.Json, context);
                     theoryData.ExpectedException.ProcessNoException(context);
                 }
-                catch (Exception ex )
+                catch (Exception ex)
                 {
                     theoryData.ExpectedException.ProcessException(ex, context);
                 }
@@ -248,7 +248,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                     Json = json,
                     PropertyName = "key",
                     Object = result,
-                    ExpectedException = new ExpectedException(typeExpected:typeof(InvalidOperationException))
+                    ExpectedException = new ExpectedException(typeExpected: typeof(InvalidOperationException))
                 });
 
                 (json, result) = CreateJsonSerializerTheoryData(50);
@@ -259,7 +259,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                 var mergedObjects = new Dictionary<string, object>
                 {
                     ["key1"] = new Dictionary<string, object> { ["key"] = result },
-                    ["key2"] = new Dictionary<string, object> { ["key"] =  result2 },
+                    ["key2"] = new Dictionary<string, object> { ["key"] = result2 },
                 };
 
                 theoryData.Add(new JsonSerializerTheoryData($"MultipleObjects")
@@ -338,7 +338,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                 jsonIdentityModel = JsonConvert.DeserializeObject<JsonTestClass>(theoryData.Json);
                 theoryData.IdentityModelSerializerExpectedException.ProcessNoException(serializationContext);
             }
-            catch (Exception ex )
+            catch (Exception ex)
             {
                 theoryData.IdentityModelSerializerExpectedException.ProcessException(ex, serializationContext);
             }
@@ -586,6 +586,11 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                     JsonTestClass = CreateJsonTestClass("String")
                 });
 
+                theoryData.Add(new JsonSerializerTheoryData("Guid")
+                {
+                    JsonTestClass = CreateJsonTestClass("Guid")
+                });
+
                 return theoryData;
             }
         }
@@ -617,6 +622,9 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
 
             if (propertiesToSet == "*" || propertiesToSet.Contains("String"))
                 jsonTestClass.String = "string";
+
+            if (propertiesToSet == "*" || propertiesToSet.Contains("Guid"))
+                jsonTestClass.Guid = Guid.NewGuid();
 
             return jsonTestClass;
         }

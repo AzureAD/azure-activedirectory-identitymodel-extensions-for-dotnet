@@ -216,6 +216,9 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             if (!string.IsNullOrEmpty(jsonTestClass.String))
                 writer.WriteString("String", jsonTestClass.String);
 
+            if (jsonTestClass.Guid.HasValue)
+                writer.WriteString("Guid", jsonTestClass.Guid.Value);
+
             if (jsonTestClass.AdditionalData != null && jsonTestClass.AdditionalData.Count > 0)
             {
                 foreach (var item in jsonTestClass.AdditionalData)
