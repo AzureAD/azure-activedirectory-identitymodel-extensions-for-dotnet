@@ -1,5 +1,15 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+7.2.0
+=====
+### Fundamentals
+Improve logging in Wilson for failed token validation when key not found [#2436](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2436)
+
+7.1.2
+=====
+### Security fixes
+See https://aka.ms/IdentityModel/Jan2024/zip and https://aka.ms/IdentityModel/Jan2024/jku for details.
+
 7.0.3
 ======
 ### Bug Fixes:
