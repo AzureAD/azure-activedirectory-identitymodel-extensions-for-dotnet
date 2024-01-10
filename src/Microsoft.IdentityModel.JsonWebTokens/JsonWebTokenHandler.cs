@@ -1795,7 +1795,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
             }
 
-            if (keysAttempted.Length > 0)
+            if (keysAttempted != null)
             {
                 if (kidExists)
                 {
