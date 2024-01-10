@@ -1,13 +1,24 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
 7.2.0
-=====
-### Fundamentals
-Improve logging in Wilson for failed token validation when key not found [#2436](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2436)
+======
+### Performance Improvements:
+Reduce allocations and transformations when creating a token [#2395](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2428).
+Update Esrp Code Signing version to speed up release build [#2429](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2429).
+
+### Engineering Excellence:
+Improve benchmark consistency [#2428](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2428).
+Adding P50, P90 and P100 percentiles to benchmarks [#2411](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2411).
+Decouple benchmark tests from test projects [#2413](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2413).
+Include pack step in PR builds [#2442](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2442).
+
+### Fundamentals:
+Improve logging in Wilson for failed token validation when key not found [#2436](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2436).
+Remove conditional Net8.0 compilation [#2424](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2424).
 
 7.1.2
-=====
-### Security fixes
+======
+### Security fixes:
 See https://aka.ms/IdentityModel/Jan2024/zip and https://aka.ms/IdentityModel/Jan2024/jku for details.
 
 7.0.3
