@@ -5,7 +5,7 @@
   <PropertyGroup>
     <!-- This test only needs to run on .NET -->
     <TargetFramework>net8.0</TargetFramework>
-    <langversion>10</langversion>
+    <langversion>12</langversion>
     <Version>1.0.0-preview</Version>
   </PropertyGroup>
 
