@@ -539,6 +539,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         if ((!string.IsNullOrEmpty(kid) && string.Equals(signingKey.KeyId, kid, StringComparison.OrdinalIgnoreCase)) ||
                             (!string.IsNullOrEmpty(x5t) && string.Equals(x509Key.X5t, x5t, StringComparison.OrdinalIgnoreCase)))
                         {
+                            if (LogHelper.IsEnabled(EventLogLevel.Verbose))
+                                LogHelper.LogVerbose(
+                                    TokenLogMessages.IDX10266,
+                                    LogHelper.MarkAsNonPII(kid ?? "Null"),
+                                    LogHelper.MarkAsNonPII(x5t ?? "Null"),
+                                    LogHelper.MarkAsNonPII(signingKey.KeyId),
+                                    LogHelper.MarkAsNonPII(x509Key.X5t));
+
                             return signingKey;
                         }
                     }
@@ -546,6 +554,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     {
                         if (string.Equals(signingKey.KeyId, kid) || string.Equals(signingKey.KeyId, x5t))
                         {
+                            if (LogHelper.IsEnabled(EventLogLevel.Verbose))
+                                LogHelper.LogVerbose(
+                                    TokenLogMessages.IDX10267,
+                                    LogHelper.MarkAsNonPII(kid ?? "Null"),
+                                    LogHelper.MarkAsNonPII(signingKey.KeyId));
+
                             return signingKey;
                         }
                     }
