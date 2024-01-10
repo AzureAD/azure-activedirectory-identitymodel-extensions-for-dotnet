@@ -2902,7 +2902,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new JwtTheoryData("SymmetricJws_RequireSignedTokens_KeyNotFound")
                     {
                         Token = Default.SymmetricJws,
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10500"),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10503"),
                         ValidationParameters = new TokenValidationParameters
                         {
                             ValidateIssuerSigningKey = true,
@@ -2927,7 +2927,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     },
                     new JwtTheoryData("SymmetricJws_RequireSignedTokensNullSigningKey")
                     {
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10500:"),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10503:"),
                         Token = Default.SymmetricJws,
                         ValidationParameters = new TokenValidationParameters
                         {
