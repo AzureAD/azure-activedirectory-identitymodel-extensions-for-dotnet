@@ -75,7 +75,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>A <see cref="TokenValidationResult"/></returns>
-        public virtual Task<TokenValidationResult> ValidateTokenAsync(string token, TokenValidationParameters validationParameters, CancellationToken cancellationToken) => throw new NotImplementedException();
+        public virtual async Task<TokenValidationResult> ValidateTokenAsync(string token, TokenValidationParameters validationParameters, CancellationToken cancellationToken)
+        {
+            return await ValidateTokenAsync(token, validationParameters).ConfigureAwait(false);
+        }
 
         /// <summary>
         /// Validates a token.
@@ -96,7 +99,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>A <see cref="TokenValidationResult"/></returns>
-        public virtual Task<TokenValidationResult> ValidateTokenAsync(SecurityToken token, TokenValidationParameters validationParameters, CancellationToken cancellationToken) => throw new NotImplementedException();
+        public virtual async Task<TokenValidationResult> ValidateTokenAsync(SecurityToken token, TokenValidationParameters validationParameters, CancellationToken cancellationToken)
+        {
+            return await ValidateTokenAsync(token, validationParameters).ConfigureAwait(false);
+        }
 
         /// <summary>
         /// Converts a string into an instance of <see cref="SecurityToken"/>.
