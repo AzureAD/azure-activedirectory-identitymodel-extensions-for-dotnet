@@ -5,8 +5,8 @@ using System;
 using System.Collections;
 using System.Threading;
 using System.Threading.Tasks;
+using Azure.Core;
 using Azure.Identity;
-//using Microsoft.Azure.KeyVault;
 using Azure.Security.KeyVault.Keys;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -51,6 +51,32 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
             KeyId = keyIdentifier;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KeyVaultSecurityKey"/> class.
+        /// </summary>
+        /// <param name="keyIdentifier">The key identifier that is recognized by KeyVault.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="keyIdentifier"/> is null or empty.</exception>
+        public KeyVaultSecurityKey(string keyIdentifier)
+            : this(keyIdentifier, new DefaultAzureCredential())
+        {
+            KeyId = keyIdentifier;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KeyVaultSecurityKey"/> class.
+        /// </summary>
+        /// <param name="keyIdentifier">The key identifier that is recognized by KeyVault.</param>
+        /// <param name="credential">The token credential that will obtain the access_token for KeyVault.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="keyIdentifier"/> is null or empty.</exception>
+        /// /// <exception cref="ArgumentNullException">if <paramref name="credential"/>is null.</exception>
+#pragma warning disable CS3001 // Argument type is not CLS-compliant
+        public KeyVaultSecurityKey(string keyIdentifier, TokenCredential credential)
+#pragma warning restore CS3001 // Argument type is not CLS-compliant
+        {
+            TokenCredential = credential ?? throw LogHelper.LogArgumentNullException(nameof(credential));
+            KeyId = keyIdentifier;
+        }
+
         internal KeyVaultSecurityKey(string keyIdentifier, int keySize)
         {
             _keyId = keyIdentifier;
@@ -63,9 +89,11 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
         public AuthenticationCallback? Callback { get; protected set; }
 
         /// <summary>
-        /// The url that retrieves an access token for the KeyVault.
+        /// The token credential that retrieves an access token for the KeyVault.
         /// </summary>
-        public string? KeyVaultUrl { get; protected set; }
+#pragma warning disable CS3003 // Type is not CLS-compliant
+        public TokenCredential? TokenCredential { get; set; }
+#pragma warning restore CS3003 // Type is not CLS-compliant
 
         /// <summary>
         /// The uniform resource identifier of the security key.
@@ -111,10 +139,8 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
             await foreach (KeyProperties item in client.GetPropertiesOfKeysAsync(CancellationToken.None))
             {
                 KeyVaultKey key = client.GetKeyAsync(item.Name).ConfigureAwait(false).GetAwaiter().GetResult();
-            }
-            {
-                var bundle = client.GetKeyAsync(_keyId, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
-                _keySize = new BitArray(bundle.key.N).Length;
+                _keySize = new BitArray(key.Key.N).Length;
+
             }
         }
     }

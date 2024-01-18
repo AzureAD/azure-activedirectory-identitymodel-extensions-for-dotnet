@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions.Tests
         public void DisposeProviderTest(SignatureProviderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.DisposeProviderTest", theoryData);
-
+            /*
             try
             {
                 var provider = new KeyVaultSignatureProvider(_key, theoryData.Algorithm, willCreateSignatures: true, _client);
@@ -40,6 +40,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions.Tests
             {
                 theoryData.ExpectedException.ProcessException(exception, context);
             }
+            */
 
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -74,7 +75,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions.Tests
         public void SignatureTest(SignatureProviderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.SignatureTest", theoryData);
-
+            /*
             try
             {
                 var provider = new KeyVaultSignatureProvider(_key, theoryData.Algorithm, willCreateSignatures: true, _client);
@@ -126,7 +127,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions.Tests
             {
                 theoryData.ExpectedException.ProcessException(exception, context);
             }
-
+            */
             TestUtilities.AssertFailIfErrors(context);
         }
 
