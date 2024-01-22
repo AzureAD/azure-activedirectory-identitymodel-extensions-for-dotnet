@@ -5,6 +5,7 @@ using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Toolchains.InProcess.Emit;
+using Perfolizer.Horology;
 
 namespace Microsoft.IdentityModel.Benchmarks
 {
@@ -13,8 +14,12 @@ namespace Microsoft.IdentityModel.Benchmarks
         public BenchmarkConfig()
         {
             AddJob(Job.MediumRun
-                .WithToolchain(InProcessEmitToolchain.Instance))
-            .AddColumn(StatisticColumn.P90, StatisticColumn.P95, StatisticColumn.P100);
+                .WithToolchain(InProcessEmitToolchain.Instance)
+                .WithLaunchCount(4)
+                .WithMaxAbsoluteError(TimeInterval.FromMilliseconds(10)))
+                // uncomment to disable validation to enable debuging through benchmarks
+                //.WithOption(ConfigOptions.DisableOptimizationsValidator, true)
+                .AddColumn(StatisticColumn.P90, StatisticColumn.P95, StatisticColumn.P100);
         }
     }
 }
