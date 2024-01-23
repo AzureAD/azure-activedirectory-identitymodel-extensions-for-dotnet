@@ -12,7 +12,7 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
-using System.Text.Json;
+using System.Threading;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Json.Tests;
@@ -1630,6 +1630,25 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             string jsonEncoded = Base64UrlEncoder.Encode("{}") + "." + Base64UrlEncoder.Encode(json) + ".";
             JsonWebToken encodedToken = new JsonWebToken(jsonEncoded);
             _ = encodedToken.Claims;
+        }
+
+        [Fact]
+        public void DifferentCultureJsonWebToken()
+        {
+            string result = string.Empty;
+
+            var thread = new Thread(() =>
+            {
+                CultureInfo.CurrentCulture = new CultureInfo("fr-FR");
+                var token = new JsonWebToken(JsonUtilities.CreateUnsignedToken("numericClaim", 10.9d));
+                var claim = token.Claims.First(c => c.Type == "numericClaim");
+                result = claim.Value;
+            });
+
+            thread.Start();
+            thread.Join();
+
+            Assert.Equal("10.9", result);
         }
     }
 

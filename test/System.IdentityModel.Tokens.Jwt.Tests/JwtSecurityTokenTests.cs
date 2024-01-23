@@ -2,9 +2,11 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Threading;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
@@ -452,6 +454,35 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 return theoryData;
             }
 
+        }
+
+        [Fact]
+        public void DifferentCultureJwtSecurityToken()
+        {
+            string result = string.Empty;
+
+            var thread = new Thread(() =>
+            {
+                CultureInfo.CurrentCulture = new CultureInfo("fr-FR");
+
+                var handler = new JwtSecurityTokenHandler();
+                var token = handler.CreateJwtSecurityToken(new SecurityTokenDescriptor
+                {
+                    Claims = new Dictionary<string, object>
+                    {
+                        { "numericClaim", 10.9d }
+                    }
+                });
+
+                var claim = token.Claims.First(c => c.Type == "numericClaim");
+                result = claim.Value;
+
+            });
+
+            thread.Start();
+            thread.Join();
+
+            Assert.Equal("10.9", result);
         }
     }
 }
