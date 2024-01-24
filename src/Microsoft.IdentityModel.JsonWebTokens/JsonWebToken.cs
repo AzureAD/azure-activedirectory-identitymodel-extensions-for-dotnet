@@ -81,6 +81,30 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             ReadToken(jwtEncodedString);
         }
 
+#if NET6_0_OR_GREATER
+        /// <summary>
+        /// Initializes a new instance of <see cref="JsonWebToken"/> from a span in JWS or JWE Compact serialized format.
+        /// </summary>
+        /// <param name="jwtEncodedSpan">A span containing the JSON Web Token serialized in JWS or JWE Compact format.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="jwtEncodedSpan"/> is empty.</exception>
+        /// <exception cref="ArgumentException"><paramref name="jwtEncodedSpan"/> does not represent a valid JWS or JWE Compact serialization format.</exception>
+        /// <remarks>
+        /// See: https://datatracker.ietf.org/doc/html/rfc7519 (JWT)
+        /// See: https://datatracker.ietf.org/doc/html/rfc7515 (JWS)
+        /// See: https://datatracker.ietf.org/doc/html/rfc7516 (JWE)
+        /// <para>
+        /// The contents of the returned <see cref="JsonWebToken"/> have not been validated; the JSON Web Token is simply decoded. Validation can be performed using the methods in <see cref="JsonWebTokenHandler"/>.
+        /// </para>
+        /// </remarks>
+        public JsonWebToken(ReadOnlySpan<char> jwtEncodedSpan)
+        {
+            if (jwtEncodedSpan.IsEmpty)
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(jwtEncodedSpan)));
+
+            ReadToken(jwtEncodedSpan);
+        }
+#endif
+
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonWebToken"/> class where the header contains the crypto algorithms applied to the encoded header and payload.
         /// </summary>
@@ -512,6 +536,193 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             EncodedToken = encodedJson;
         }
+
+#if NET6_0_OR_GREATER
+        /// <summary>
+        /// Converts a span into an instance of <see cref="JsonWebToken"/>.
+        /// </summary>
+        /// <param name="encodedJsonSpan">A span representing a 'JSON Web Token' (JWT) in JWS or JWE Compact Serialization Format.</param>
+        /// <exception cref="SecurityTokenMalformedException">if <paramref name="encodedJsonSpan"/> is malformed, a valid JWT should have either 2 dots (JWS) or 4 dots (JWE).</exception>
+        /// <exception cref="SecurityTokenMalformedException">if <paramref name="encodedJsonSpan"/> does not have an non-empty authentication tag after the 4th dot for a JWE.</exception>
+        /// <exception cref="SecurityTokenMalformedException">if <paramref name="encodedJsonSpan"/> has more than 4 dots.</exception>
+        internal void ReadToken(ReadOnlySpan<char> encodedJsonSpan)
+        {
+            // JWT must have 2 dots for JWS or 4 dots for JWE (a.b.c.d.e)
+            ReadOnlySpan<char> encodedJsonSpanCopy = encodedJsonSpan;
+
+            int dotIndex = encodedJsonSpanCopy.IndexOf("."); // first dot
+            if (dotIndex == -1 || dotIndex == encodedJsonSpan.Length - 1)
+                throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX14100));
+
+            // segment before first dot (a)
+            ReadOnlySpan<char> headerSpan = encodedJsonSpanCopy.Slice(0, dotIndex);
+            Dot1 = dotIndex;
+
+            // b.c.d.e
+            encodedJsonSpanCopy = encodedJsonSpanCopy.Slice(dotIndex + 1);
+            dotIndex = encodedJsonSpanCopy.IndexOf("."); // second dot
+            if (dotIndex == -1)
+                throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX14120));
+
+            // segment between first and second dot, can be a payload for JWS or an encrypted key for JWE (b)
+            ReadOnlySpan<char> secondSpan = encodedJsonSpanCopy.Slice(0, dotIndex);
+            Dot2 = Dot1 + dotIndex + 1;
+
+            if (dotIndex == encodedJsonSpanCopy.Length - 1)
+            {
+                dotIndex = -1;
+            }
+            else
+            {
+                // c.d.e
+                encodedJsonSpanCopy = encodedJsonSpanCopy.Slice(dotIndex + 1);
+                dotIndex = encodedJsonSpanCopy.IndexOf('.'); // third dot
+            }
+
+            if (dotIndex == -1)
+            {
+                // JWS has two dots
+                // JWS: https://www.rfc-editor.org/rfc/rfc7515
+                // Format: https://www.rfc-editor.org/rfc/rfc7515#page-7
+
+                // add length of header and second span, plus 2 dots
+                IsSigned = !(headerSpan.Length + secondSpan.Length + 2 == encodedJsonSpan.Length);
+                try
+                {
+                    Header = CreateClaimSet(headerSpan.ToString(), 0, headerSpan.Length, CreateHeaderClaimSet); // CreateClaimSet invokes Base64UrlEncoding.Decode which accepts only a string
+                }
+                catch (Exception ex)
+                {
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(
+                        LogMessages.IDX14102,
+                        LogHelper.MarkAsUnsafeSecurityArtifact(headerSpan.ToString(), t => t.ToString())), // TODO: Add an overload to LogHelper.MarkAsUnsafeSecurityArtifact that accepts span?
+                        ex));
+                }
+
+                try
+                {
+                    Payload = CreateClaimSet(secondSpan.ToString(), 0, secondSpan.Length, CreatePayloadClaimSet);
+                }
+                catch (Exception ex)
+                {
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(
+                        LogMessages.IDX14101,
+                        LogHelper.MarkAsUnsafeSecurityArtifact(secondSpan.ToString(), t => t.ToString())),
+                        ex));
+                }
+            }
+            else
+            {
+                // JWE: https://www.rfc-editor.org/rfc/rfc7516
+                // Format: https://www.rfc-editor.org/rfc/rfc7516#page-8
+                // empty payload for JWE's {encrypted tokens}.
+                Payload = new JsonClaimSet();
+
+                if (dotIndex == encodedJsonSpanCopy.Length) // TODO: Should this be encodedJsonSpanCopy.Length - 1? Using encodedJsonSpanCopy.Length doesn't add up
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14121));
+
+                // segment between second and third dot (c)
+                ReadOnlySpan<char> initializationVectorSpan = encodedJsonSpanCopy.Slice(0, dotIndex);
+                Dot3 = Dot2 + dotIndex + 1;
+
+                // d.e
+                encodedJsonSpanCopy = encodedJsonSpanCopy.Slice(dotIndex + 1);
+                dotIndex = encodedJsonSpanCopy.IndexOf('.'); // fourth dot
+                if (dotIndex == -1)
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX14121));
+
+                // segment between third and fourth dot (d)
+                ReadOnlySpan<char> cipherTextSpan = encodedJsonSpanCopy.Slice(0, dotIndex);
+                Dot4 = Dot3 + dotIndex + 1;
+
+                // must have something after 4th dot
+                if (dotIndex == encodedJsonSpanCopy.Length - 1)
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX14310));
+
+                // segment after fourth dot (e)
+                ReadOnlySpan<char> authenticationTagSpan = encodedJsonSpanCopy.Slice(dotIndex + 1);
+                encodedJsonSpanCopy = encodedJsonSpanCopy.Slice(dotIndex + 1);
+
+                dotIndex = encodedJsonSpanCopy.IndexOf('.'); // fifth dot
+                if (dotIndex != -1)
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX14122));
+                
+                if (headerSpan.IsEmpty)
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14307));
+
+                if (initializationVectorSpan.IsEmpty)
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14308));
+
+                if (authenticationTagSpan.IsEmpty)
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14310));
+
+                if (cipherTextSpan.IsEmpty)
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14306));
+
+                // right number of dots for JWE (4)
+                byte[] headerAsciiBytes = new byte[headerSpan.Length];
+                Encoding.ASCII.GetBytes(headerSpan, headerAsciiBytes);
+
+                HeaderAsciiBytes = headerAsciiBytes;
+
+                try
+                {
+                    // Discuss: Using ReadOnlySpan instead of ReadOnlyMemory
+                    // ReadOnlySpan is recommended for synchronous calls where as ReadOnlyMemory is recommended for async calls.
+                    // ReadOnlySpan performs better than ReadOnlyMemory.
+                    // https://learn.microsoft.com/en-us/dotnet/standard/memory-and-spans/memory-t-usage-guidelines
+                    Header = CreateHeaderClaimSet(Base64UrlEncoder.UnsafeDecode(headerSpan.ToArray()));  // TODO: Looking to update UnsafeDecode to accept ReadOnlySpan
+                }
+                catch (Exception ex)
+                {
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(
+                        LogMessages.IDX14102,
+                        LogHelper.MarkAsUnsafeSecurityArtifact(headerSpan.ToString(), t => t.ToString())),
+                        ex));
+                }
+
+                // dir does not have any key bytes
+                if (!secondSpan.IsEmpty)
+                {
+                    EncryptedKeyBytes = Base64UrlEncoder.UnsafeDecode(secondSpan.ToArray());
+                    _encryptedKey = secondSpan.ToString();
+                }
+                else
+                {
+                    _encryptedKey = string.Empty;
+                }
+
+                try
+                {
+                    InitializationVectorBytes = Base64UrlEncoder.UnsafeDecode(initializationVectorSpan.ToArray());
+                }
+                catch (Exception ex)
+                {
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14309, ex));
+                }
+
+                try
+                {
+                    AuthenticationTagBytes = Base64UrlEncoder.UnsafeDecode(authenticationTagSpan.ToArray());
+                }
+                catch (Exception ex)
+                {
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14311, ex));
+                }
+
+                try
+                {
+                    CipherTextBytes = Base64UrlEncoder.UnsafeDecode(cipherTextSpan.ToArray());
+                }
+                catch (Exception ex)
+                {
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14312, ex));
+                }
+            }
+
+            EncodedToken = encodedJsonSpan.ToString(); // TODO: Should span equivalents be added for the public properties on JsonWebToken (EncodedToken, EncodedSignature, EncodedPayload etc)
+        }
+#endif
 
         internal static JsonClaimSet CreateClaimSet(string rawString, int startIndex, int length, Func<byte[], int, JsonClaimSet> action)
         {
