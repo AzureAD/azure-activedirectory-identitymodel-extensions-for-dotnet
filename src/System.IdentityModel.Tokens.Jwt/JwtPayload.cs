@@ -532,8 +532,8 @@ namespace System.IdentityModel.Tokens.Jwt
                     {
                         var value = keyValuePair.Value;
                         var claimValueType = GetClaimValueType(value);
-                        if (value is IConvertible convertible)
-                            claims.Add(new Claim(keyValuePair.Key, convertible.ToString(CultureInfo.InvariantCulture), claimValueType, issuer, issuer));
+                        if (value is IFormattable formattable)
+                            claims.Add(new Claim(keyValuePair.Key, formattable.ToString(null, CultureInfo.InvariantCulture), claimValueType, issuer, issuer));
                         else
                             claims.Add(new Claim(keyValuePair.Key, value.ToString(), claimValueType, issuer, issuer));
                     }
