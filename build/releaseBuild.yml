@@ -68,7 +68,7 @@ jobs:
     inputs:
       targetType: filePath
       filePath: ./updateAssemblyInfo.ps1
-      arguments: '-packageType $(BuildConfiguration)'
+      arguments: '-packageType $(NugetPackageType)'
 
   - task: DotNetCoreCLI@2
     displayName: Build
@@ -194,6 +194,15 @@ jobs:
     inputs:
       BuildDropPath: '$(Build.SourcesDirectory)\src'
       ManifestDirPath: '$(Build.SourcesDirectory)\artifacts'
+
+  - task: NuGetCommand@2
+    displayName: 'Upload NuGet Package to VSTS NuGet'
+    condition: eq(variables['NugetPackageType'], 'preview')
+    inputs:
+      command: push
+      packagesToPush: '$(Build.Repository.LocalPath)\artifacts\*.nupkg'
+      publishVstsFeed: '46419298-b96c-437f-bd4c-12c8df7f868d'
+      allowPackageConflicts: true
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish NuGet Package Artifact'
