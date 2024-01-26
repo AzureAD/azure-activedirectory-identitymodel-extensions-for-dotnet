@@ -529,7 +529,14 @@ namespace System.IdentityModel.Tokens.Jwt
                             claims.Add(new Claim(keyValuePair.Key, "false", ClaimValueTypes.Boolean, issuer, issuer));
                     }
                     else if (keyValuePair.Value != null)
-                        claims.Add(new Claim(keyValuePair.Key, keyValuePair.Value.ToString(), GetClaimValueType(keyValuePair.Value), issuer, issuer));
+                    {
+                        var value = keyValuePair.Value;
+                        var claimValueType = GetClaimValueType(value);
+                        if (value is IFormattable formattable)
+                            claims.Add(new Claim(keyValuePair.Key, formattable.ToString(null, CultureInfo.InvariantCulture), claimValueType, issuer, issuer));
+                        else
+                            claims.Add(new Claim(keyValuePair.Key, value.ToString(), claimValueType, issuer, issuer));
+                    }
                 }
 
                 return claims;
