@@ -74,8 +74,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 }
             }
 
-            var serializedX5Cs = JsonSerializer.Serialize(x5cs);
-            if (header.X5c != serializedX5Cs)
+            var serializedX5cs = JsonSerializer.Serialize(x5cs);
+            if (header.X5c != serializedX5cs)
             {
                 errors.Add("5: header.X5c != serializedX5Cs");
             }

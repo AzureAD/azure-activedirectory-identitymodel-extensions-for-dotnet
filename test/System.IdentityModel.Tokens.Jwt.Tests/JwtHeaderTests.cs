@@ -167,17 +167,17 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             X509Chain ch = new X509Chain();
             ch.Build(KeyingMaterial.CertSelfSigned1024_SHA256);
 
-            var x5CArray = new List<string>();
+            var x5cArray = new List<string>();
 
             foreach (var element in ch.ChainElements)
-                x5CArray.Add(Convert.ToBase64String(element.Certificate.Export(X509ContentType.Cert)));
+                x5cArray.Add(Convert.ToBase64String(element.Certificate.Export(X509ContentType.Cert)));
 
             JwtHeader header = new JwtHeader
             {
-                { JwtHeaderParameterNames.X5c, x5CArray }
+                { JwtHeaderParameterNames.X5c, x5cArray }
             };
 
-            var expectedX5c = JsonSerializer.Serialize(x5CArray, new JsonSerializerOptions
+            var expectedX5c = JsonSerializer.Serialize(x5cArray, new JsonSerializerOptions
             {
                 Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
             });
@@ -186,24 +186,24 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
 
         [Fact]
-        public void Getx5cDirectlyFromHeader_x5xIsJsonElement()
+        public void Getx5cDirectlyFromHeader_x5cIsJsonElement()
         {
             X509Chain ch = new X509Chain();
             ch.Build(KeyingMaterial.CertSelfSigned1024_SHA256);
 
-            var x5CArray = new List<string>();
+            var x5cArray = new List<string>();
 
             foreach (var element in ch.ChainElements)
-                x5CArray.Add(Convert.ToBase64String(element.Certificate.Export(X509ContentType.Cert)));
+                x5cArray.Add(Convert.ToBase64String(element.Certificate.Export(X509ContentType.Cert)));
 
-            var x5cJsonElement = JsonSerializer.Serialize(x5CArray);
+            var x5cJsonElement = JsonSerializer.Serialize(x5cArray);
 
             JwtHeader header = new JwtHeader
             {
                 { JwtHeaderParameterNames.X5c, x5cJsonElement }
             };
 
-            var expectedX5c = JsonSerializer.Serialize(x5CArray);
+            var expectedX5c = JsonSerializer.Serialize(x5cArray);
             Assert.Equal(expectedX5c, header.X5c);
         }
 
