@@ -391,6 +391,36 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (value is string str)
                     return str;
 
+                if (value is JsonElement jsonElement)
+                    return jsonElement.ToString();
+                else if (value is IList<string> list)
+                {
+                    JsonElement json = JsonPrimitives.CreateJsonElement(list);
+                    return json.ToString();
+                }
+                else if (value is IList<object> objectList)
+                {
+                    var stringList = new List<string>(objectList.Count);
+                    foreach (object item in objectList)
+                    {
+                        if (item is string strItem)
+                            stringList.Add(strItem);
+                        else
+                        {
+                            // It isn't safe to ToString() an arbitrary object, so we throw here.
+                            // We could end up with a string that doesn't represent the object's value, for example a collection type.
+                            throw LogHelper.LogExceptionMessage(
+                                new JsonException(
+                                    LogHelper.FormatInvariant(
+                                    Microsoft.IdentityModel.Tokens.LogMessages.IDX11027,
+                                    LogHelper.MarkAsNonPII(claimType),
+                                    LogHelper.MarkAsNonPII(item.GetType()))));
+                        }
+                    }
+                    JsonElement json = JsonPrimitives.CreateJsonElement(stringList);
+                    return json.ToString();
+                }
+
                 // TODO - review dev
                 return string.Empty;
             }
