@@ -261,8 +261,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX11022 = "IDX11022: Expecting json reader to be positioned on '{0}', reader was positioned at: '{1}', Reading: '{2}.{3}', Position: '{4}', CurrentDepth: '{5}', BytesConsumed: '{6}'.";
         public const string IDX11023 = "IDX11023: Expecting json reader to be positioned on '{0}', reader was positioned at: '{1}', Reading: '{2}', Position: '{3}', CurrentDepth: '{4}', BytesConsumed: '{5}'.";
         public const string IDX11025 = "IDX11025: Cannot serialize object of type: '{0}' into property: '{1}'.";
-        public const string IDX11026 = "IDX11026: Cannot serialize object of type: '{0}' into property: '{1}'.";
-        public const string IDX11027 = "IDX11027: Unable to get claim value as a string from claim type:'{0}', value type was:'{1}'. Acceptable types are String, IList<String>, and System.Text.Json.JsonElement.";
+        public const string IDX11026 = "IDX11026: Unable to get claim value as a string from claim type:'{0}', value type was:'{1}'. Acceptable types are String, IList<String>, and System.Text.Json.JsonElement.";
 
 
 #pragma warning restore 1591

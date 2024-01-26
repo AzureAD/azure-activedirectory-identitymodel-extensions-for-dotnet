@@ -158,7 +158,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             var exception = Assert.Throws<JsonException>(() => header.X5c);
 
-            Assert.Contains("IDX11027", exception.Message);
+            Assert.Contains("IDX11026", exception.Message);
         }
 
         [Fact]

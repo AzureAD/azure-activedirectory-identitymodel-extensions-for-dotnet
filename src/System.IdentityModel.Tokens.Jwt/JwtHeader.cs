@@ -412,7 +412,7 @@ namespace System.IdentityModel.Tokens.Jwt
                             throw LogHelper.LogExceptionMessage(
                                 new JsonException(
                                     LogHelper.FormatInvariant(
-                                    Microsoft.IdentityModel.Tokens.LogMessages.IDX11027,
+                                    Microsoft.IdentityModel.Tokens.LogMessages.IDX11026,
                                     LogHelper.MarkAsNonPII(claimType),
                                     LogHelper.MarkAsNonPII(item.GetType()))));
                         }
