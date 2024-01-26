@@ -459,7 +459,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         [Fact]
         public void DifferentCultureJwtSecurityToken()
         {
-            string result = string.Empty;
+            string numericClaim = string.Empty;
+            List<Claim> numericList = null;
 
             var thread = new Thread(() =>
             {
@@ -470,19 +471,22 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 {
                     Claims = new Dictionary<string, object>
                     {
-                        { "numericClaim", 10.9d }
+                        { "numericClaim", 10.9d },
+                        { "numericList", new List<object> { 12.2, 11.1 } }
                     }
                 });
 
                 var claim = token.Claims.First(c => c.Type == "numericClaim");
-                result = claim.Value;
-
+                numericClaim = claim.Value;
+                numericList = token.Claims.Where(c => c.Type == "numericList").ToList();
             });
 
             thread.Start();
             thread.Join();
 
-            Assert.Equal("10.9", result);
+            Assert.Equal("10.9", numericClaim);
+            Assert.Equal("12.2", numericList[0].Value);
+            Assert.Equal("11.1", numericList[1].Value);
         }
     }
 }

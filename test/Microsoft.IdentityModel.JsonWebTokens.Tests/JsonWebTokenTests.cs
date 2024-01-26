@@ -1635,20 +1635,35 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         [Fact]
         public void DifferentCultureJsonWebToken()
         {
-            string result = string.Empty;
+            string numericClaim = string.Empty;
+            List<Claim> numericList = null;
 
             var thread = new Thread(() =>
             {
                 CultureInfo.CurrentCulture = new CultureInfo("fr-FR");
-                var token = new JsonWebToken(JsonUtilities.CreateUnsignedToken("numericClaim", 10.9d));
+
+                var handler = new JsonWebTokenHandler();
+                var tokenStr = handler.CreateToken(new SecurityTokenDescriptor
+                {
+                    Claims = new Dictionary<string, object>
+                    {
+                        { "numericClaim", 10.9d },
+                        { "numericList", new List<object> { 12.2, 11.1 } }
+                    }
+                });
+
+                var token = new JsonWebToken(tokenStr);
                 var claim = token.Claims.First(c => c.Type == "numericClaim");
-                result = claim.Value;
+                numericClaim = claim.Value;
+                numericList = token.Claims.Where(c => c.Type == "numericList").ToList();
             });
 
             thread.Start();
             thread.Join();
 
-            Assert.Equal("10.9", result);
+            Assert.Equal("10.9", numericClaim);
+            Assert.Equal("12.2", numericList[0].Value);
+            Assert.Equal("11.1", numericList[1].Value);
         }
     }
 

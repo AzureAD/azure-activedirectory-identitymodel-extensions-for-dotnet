@@ -563,7 +563,13 @@ namespace System.IdentityModel.Tokens.Jwt
                 else if (obj is IEnumerable<object> innerObjects)
                     AddListofObjects(key, innerObjects, claims, issuer);
                 else
-                    claims.Add(new Claim(key, obj.ToString(), GetClaimValueType(obj), issuer, issuer));
+                {
+                    var claimValueType = GetClaimValueType(obj);
+                    if (obj is IFormattable formattable)
+                        claims.Add(new Claim(key, formattable.ToString(null, CultureInfo.InvariantCulture), claimValueType, issuer, issuer));
+                    else
+                        claims.Add(new Claim(key, obj.ToString(), claimValueType, issuer, issuer));
+                }
             }
         }
 
