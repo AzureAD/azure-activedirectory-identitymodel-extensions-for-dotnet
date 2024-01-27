@@ -127,6 +127,45 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Decodes a portion of a Base64UrlEncoded string and performs a specified action on the decoded bytes.
+        /// </summary>
+        /// <param name="strSpan">The input string represented as a span to decode.</param>
+        /// <param name="start">The starting index within <paramref name="strSpan"/> to begin the decoding operation.</param>
+        /// <param name="length">The number of characters from the <paramref name="start"/> index to decode.</param>
+        /// <param name="action">The action to perform on the decoded bytes.</param>
+        /// <typeparam name="T">The return type of the operation.</typeparam>
+        /// <returns>An instance of type {T}.</returns>
+        /// <remarks>
+        /// The buffer for the decoding operation uses a shared memory pool to minimize allocations.
+        /// The length of the rented byte array may be larger than the decoded bytes; thus, the action should consider the actual length provided.
+        /// </remarks>
+        public static T Decode<T>(ReadOnlySpan<char> strSpan, int start, int length, Func<byte[], int, T> action)
+        {
+            if (strSpan.IsEmpty)
+                throw LogHelper.LogArgumentNullException(nameof(strSpan));
+
+            if (start < 0 || start >= strSpan.Length)
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(start)));
+
+            if (length < 0 || length > strSpan.Length - start)
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(length)));
+
+            _ = action ?? throw new ArgumentNullException(nameof(action));
+
+            int maxByteLength = (int)Math.Ceiling(length / 4.0) * 3; // TODO: Discuss if this is reasonable or if ValidateAndGetOutputSize(...) should be used instead.
+            byte[] output = ArrayPool<byte>.Shared.Rent(maxByteLength);
+            try
+            {
+                Decode(strSpan, start, length, output);
+                return action(output, maxByteLength);
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(output);
+            }
+        }
+
+        /// <summary>
         /// Decodes a Base64UrlEncoded string and then performs an action.
         /// </summary>
         /// <param name="input">The string to decode.</param>
@@ -255,6 +294,95 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     throw LogHelper.LogExceptionMessage(new ArgumentException(
                         LogHelper.FormatInvariant(LogMessages.IDX10821, input)));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Decodes a Base64UrlEncoded string into a byte array.
+        /// </summary>
+        /// <param name="input">String represented as a span to decode.</param>
+        /// <param name="start">Index of char in <paramref name="input"/> to start decode operation.</param>
+        /// <param name="length">Number of chars beginning from <paramref name="start"/> to decode.</param>
+        /// <param name="output">byte array to place results.</param>
+        /// <remarks>
+        /// Changes from Base64UrlEncoder implementation
+        /// 1. Padding is optional.
+        /// 2. '+' and '-' are treated the same.
+        /// 3. '/' and '_' are treated the same.
+        /// </remarks>
+        private static void Decode(ReadOnlySpan<char> input, int start, int length, byte[] output)
+        {
+            int outputpos = 0;
+            uint curblock = 0x000000FFu;
+            for (int i = start; i < (start + length); i++)
+            {
+                uint cur = input[i];
+                if (cur >= IntA && cur <= IntZ)
+                {
+                    cur -= IntA;
+                }
+                else if (cur >= Inta && cur <= Intz)
+                {
+                    cur = (cur - Inta) + 26u;
+                }
+                else if (cur >= Int0 && cur <= Int9)
+                {
+                    cur = (cur - Int0) + 52u;
+                }
+                else if (cur == IntPlus || cur == IntMinus)
+                {
+                    cur = 62u;
+                }
+                else if (cur == IntSlash || cur == IntUnderscore)
+                {
+                    cur = 63u;
+                }
+                else if (cur == IntEq)
+                {
+                    continue;
+                }
+                else
+                {
+                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX10820,
+                            LogHelper.MarkAsNonPII(cur),
+                            input.ToString())));
+                }
+
+                curblock = (curblock << 6) | cur;
+
+                // check if 4 characters have been read, based on number of shifts.
+                if ((0xFF000000u & curblock) == 0xFF000000u)
+                {
+                    output[outputpos++] = (byte)(curblock >> 16);
+                    output[outputpos++] = (byte)(curblock >> 8);
+                    output[outputpos++] = (byte)curblock;
+                    curblock = 0x000000FFu;
+                }
+            }
+
+            // Handle spill over characters. This accounts for case where padding character is not present.
+            if (curblock != 0x000000FFu)
+            {
+                if ((0x03FC0000u & curblock) == 0x03FC0000u)
+                {
+                    // shifted 3 times, 1 padding character, 2 output characters
+                    curblock <<= 6;
+                    output[outputpos++] = (byte)(curblock >> 16);
+                    output[outputpos++] = (byte)(curblock >> 8);
+                }
+                else if ((0x000FF000u & curblock) == 0x000FF000u)
+                {
+                    // shifted 2 times, 2 padding character, 1 output character
+                    curblock <<= 12;
+                    output[outputpos++] = (byte)(curblock >> 16);
+                }
+                else
+                {
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(
+                        LogHelper.FormatInvariant(LogMessages.IDX10821, input.ToString())));
                 }
             }
         }
