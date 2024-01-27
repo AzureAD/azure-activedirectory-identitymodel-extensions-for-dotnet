@@ -173,20 +173,20 @@ namespace Microsoft.IdentityModel.Tokens
         public static byte[] DecodeBytes(string str)
         {
             _ = str ?? throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(str)));
-            return UnsafeDecode(str.AsMemory());
+            return UnsafeDecode(str.AsSpan());
         }
 
 #if NET6_0_OR_GREATER
         [SkipLocalsInit]
 #endif
-        internal static unsafe byte[] UnsafeDecode(ReadOnlyMemory<char> str)
+        internal static unsafe byte[] UnsafeDecode(ReadOnlySpan<char> strSpan)
         {
-            int mod = str.Length % 4;
+            int mod = strSpan.Length % 4;
             if (mod == 1)
-                throw LogHelper.LogExceptionMessage(new FormatException(LogHelper.FormatInvariant(LogMessages.IDX10400, str.ToString())));
+                throw LogHelper.LogExceptionMessage(new FormatException(LogHelper.FormatInvariant(LogMessages.IDX10400, strSpan.ToString())));
 
-            bool needReplace = str.Span.IndexOfAny(base64UrlCharacter62, base64UrlCharacter63) >= 0;
-            int decodedLength = str.Length + (4 - mod) % 4;
+            bool needReplace = strSpan.IndexOfAny(base64UrlCharacter62, base64UrlCharacter63) >= 0;
+            int decodedLength = strSpan.Length + (4 - mod) % 4;
 
 #if NET6_0_OR_GREATER
             // If the incoming chars don't contain any of the base64url characters that need to be replaced,
@@ -198,7 +198,7 @@ namespace Microsoft.IdentityModel.Tokens
             const int StackAllocThreshold = 512;
             char[] arrayPoolChars = null;
             scoped Span<char> charsSpan = default;
-            scoped ReadOnlySpan<char> source = str.Span;
+            scoped ReadOnlySpan<char> source = strSpan;
 
             if (needReplace || decodedLength != source.Length)
             {
@@ -256,7 +256,6 @@ namespace Microsoft.IdentityModel.Tokens
 #else
             if (needReplace)
             {
-                ReadOnlySpan<char> strSpan = str.Span;
                 string decodedString = new(char.MinValue, decodedLength);
                 fixed (char* dest = decodedString)
                 {
@@ -279,30 +278,21 @@ namespace Microsoft.IdentityModel.Tokens
             }
             else
             {
-                if (decodedLength == str.Length)
+                if (decodedLength == strSpan.Length)
                 {
-                    if (MemoryMarshal.TryGetArray(str, out ArraySegment<char> segment))
-                    {
-                        return Convert.FromBase64CharArray(segment.Array, segment.Offset, segment.Count);
-                    }
-                    else
-                    {
-                        bool gotString = MemoryMarshal.TryGetString(str, out string text, out int start, out int length);
-                        Debug.Assert(gotString, "Expected ReadOnlyMemory to wrap either array or string");
-                        return Convert.FromBase64String(text.Substring(start, length));
-                    }
+                    return Convert.FromBase64CharArray(strSpan.ToArray(), 0, strSpan.Length); // TODO: ToArray results in a heap allocation. Is there a better way?
                 }
                 else
                 {
                     string decodedString = new(char.MinValue, decodedLength);
-                    fixed (char* src = str.Span)
+                    fixed (char* src = strSpan)
                     fixed (char* dest = decodedString)
                     {
-                        Buffer.MemoryCopy(src, dest, str.Length * 2, str.Length * 2);
+                        Buffer.MemoryCopy(src, dest, strSpan.Length * 2, strSpan.Length * 2);
 
-                        dest[str.Length] = base64PadCharacter;
-                        if (str.Length + 2 == decodedLength)
-                            dest[str.Length + 1] = base64PadCharacter;
+                        dest[strSpan.Length] = base64PadCharacter;
+                        if (strSpan.Length + 2 == decodedLength)
+                            dest[strSpan.Length + 1] = base64PadCharacter;
                     }
 
                     return Convert.FromBase64String(decodedString);
