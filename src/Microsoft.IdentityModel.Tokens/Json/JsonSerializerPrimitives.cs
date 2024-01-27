@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     LogHelper.MarkAsNonPII(reader.BytesConsumed)));
         }
 
-        public static JsonElement CreateJsonElement(List<string> strings)
+        public static JsonElement CreateJsonElement(IList<string> strings)
         {
             using (MemoryStream memoryStream = new())
             {
