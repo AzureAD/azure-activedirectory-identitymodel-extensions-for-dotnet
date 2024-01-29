@@ -77,7 +77,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// The buffer for the decode operation uses shared memory pool to avoid allocations.
         /// The length of the rented array of bytes may be larger than the decoded bytes, therefore the action needs to know the actual length to use.
-        /// The result of <see cref="ValidateAndGetOutputSize"/> is passed to the action.
+        /// The result of <see cref="ValidateAndGetOutputSize(string, int, int)"/> is passed to the action.
         /// </remarks>
         public static T Decode<T, TX>(string input, int offset, int length, TX argx, Func<byte[], int, TX, T> action)
         {
@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// The buffer for the decode operation uses shared memory pool to avoid allocations.
         /// The length of the rented array of bytes may be larger than the decoded bytes, therefore the action needs to know the actual length to use.
-        /// The result of <see cref="ValidateAndGetOutputSize"/> is passed to the action.
+        /// The result of <see cref="ValidateAndGetOutputSize(string, int, int)"/> is passed to the action.
         /// </remarks>
         public static T Decode<T>(string input, int offset, int length, Func<byte[], int, T> action)
         {
@@ -130,34 +130,26 @@ namespace Microsoft.IdentityModel.Tokens
         /// Decodes a portion of a Base64UrlEncoded string and performs a specified action on the decoded bytes.
         /// </summary>
         /// <param name="strSpan">The input string represented as a span to decode.</param>
-        /// <param name="start">The starting index within <paramref name="strSpan"/> to begin the decoding operation.</param>
-        /// <param name="length">The number of characters from the <paramref name="start"/> index to decode.</param>
+        /// <param name="offset">The starting index within <paramref name="strSpan"/> to begin the decoding operation.</param>
+        /// <param name="length">The number of characters from the <paramref name="offset"/> index to decode.</param>
         /// <param name="action">The action to perform on the decoded bytes.</param>
         /// <typeparam name="T">The return type of the operation.</typeparam>
         /// <returns>An instance of type {T}.</returns>
         /// <remarks>
         /// The buffer for the decoding operation uses a shared memory pool to minimize allocations.
         /// The length of the rented byte array may be larger than the decoded bytes; thus, the action should consider the actual length provided.
+        /// The result of <see cref="ValidateAndGetOutputSize(ReadOnlySpan{char}, int, int)"/> is passed to the action.
         /// </remarks>
-        public static T Decode<T>(ReadOnlySpan<char> strSpan, int start, int length, Func<byte[], int, T> action)
+        public static T Decode<T>(ReadOnlySpan<char> strSpan, int offset, int length, Func<byte[], int, T> action)
         {
-            if (strSpan.IsEmpty)
-                throw LogHelper.LogArgumentNullException(nameof(strSpan));
-
-            if (start < 0 || start >= strSpan.Length)
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(start)));
-
-            if (length < 0 || length > strSpan.Length - start)
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(length)));
-
             _ = action ?? throw new ArgumentNullException(nameof(action));
 
-            int maxByteLength = (int)Math.Ceiling(length / 4.0) * 3; // TODO: Discuss if this is reasonable or if ValidateAndGetOutputSize(...) should be used instead.
-            byte[] output = ArrayPool<byte>.Shared.Rent(maxByteLength);
+            int outputSize = ValidateAndGetOutputSize(strSpan, offset, length);
+            byte[] output = ArrayPool<byte>.Shared.Rent(outputSize);
             try
             {
-                Decode(strSpan, start, length, output);
-                return action(output, maxByteLength);
+                Decode(strSpan, offset, length, output);
+                return action(output, outputSize);
             }
             finally
             {
@@ -183,7 +175,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// The buffer for the decode operation uses shared memory pool to avoid allocations.
         /// The length of the rented array of bytes may be larger than the decoded bytes, therefore the action needs to know the actual length to use.
-        /// The result of <see cref="ValidateAndGetOutputSize"/> is passed to the action.
+        /// The result of <see cref="ValidateAndGetOutputSize(string, int, int)"/> is passed to the action.
         /// </remarks>
         public static T Decode<T, TX, TY, TZ>(
             string input,
@@ -302,8 +294,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// Decodes a Base64UrlEncoded string into a byte array.
         /// </summary>
         /// <param name="input">String represented as a span to decode.</param>
-        /// <param name="start">Index of char in <paramref name="input"/> to start decode operation.</param>
-        /// <param name="length">Number of chars beginning from <paramref name="start"/> to decode.</param>
+        /// <param name="offset">Index of char in <paramref name="input"/> to start decode operation.</param>
+        /// <param name="length">Number of chars beginning from <paramref name="offset"/> to decode.</param>
         /// <param name="output">byte array to place results.</param>
         /// <remarks>
         /// Changes from Base64UrlEncoder implementation
@@ -311,11 +303,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// 2. '+' and '-' are treated the same.
         /// 3. '/' and '_' are treated the same.
         /// </remarks>
-        private static void Decode(ReadOnlySpan<char> input, int start, int length, byte[] output)
+        private static void Decode(ReadOnlySpan<char> input, int offset, int length, byte[] output)
         {
             int outputpos = 0;
             uint curblock = 0x000000FFu;
-            for (int i = start; i < (start + length); i++)
+            for (int i = offset; i < (offset + length); i++)
             {
                 uint cur = input[i];
                 if (cur >= IntA && cur <= IntZ)
@@ -514,6 +506,68 @@ namespace Microsoft.IdentityModel.Tokens
 
             outputsize += (effectiveLength / 4) * 3;
             return outputsize;
+        }
+
+        /// <summary>
+        /// Validates the input span for decode operation.
+        /// </summary>
+        /// <param name="strSpan">String represented by a span to validate.</param>
+        /// <param name="offset">Index of char in <paramref name="strSpan"/> to start decode operation.</param>
+        /// <param name="length">Number of chars in <paramref name="strSpan"/> to decode, starting from offset.</param>
+        /// <returns>Size of the decoded bytes arrays.</returns>
+        private static int ValidateAndGetOutputSize(ReadOnlySpan<char> strSpan, int offset, int length)
+        {
+            if (strSpan.IsEmpty)
+                throw LogHelper.LogArgumentNullException(nameof(strSpan));
+
+            if (length == 0)
+                return 0;
+
+            if (offset < 0)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10716,
+                        LogHelper.MarkAsNonPII(nameof(offset)),
+                        LogHelper.MarkAsNonPII(offset))));
+
+            if (length < 0)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10716,
+                        LogHelper.MarkAsNonPII(nameof(length)),
+                        LogHelper.MarkAsNonPII(length))));
+
+            if (length + offset > strSpan.Length)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10717,
+                        LogHelper.MarkAsNonPII(nameof(length)),
+                        LogHelper.MarkAsNonPII(nameof(offset)),
+                        LogHelper.MarkAsNonPII(nameof(strSpan)),
+                        LogHelper.MarkAsNonPII(length),
+                        LogHelper.MarkAsNonPII(offset),
+                        LogHelper.MarkAsNonPII(strSpan.Length))));
+
+            if (length % 4 == 1)
+                throw LogHelper.LogExceptionMessage(new FormatException(LogHelper.FormatInvariant(LogMessages.IDX10400, strSpan.ToString())));
+
+            int lastCharPosition = offset + length - 1;
+
+            // Compute useful length (i.e. ignore padding characters)
+            if (strSpan[lastCharPosition] == '=')
+            {
+                lastCharPosition--;
+                if (strSpan[lastCharPosition] == '=')
+                    lastCharPosition--;
+            }
+
+            int effectiveLength = 1 + (lastCharPosition - offset);
+            int outputSize = effectiveLength % 4;
+            if (outputSize > 0)
+                outputSize--;
+
+            outputSize += (effectiveLength / 4) * 3;
+            return outputSize;
         }
 
         private static void WriteEncodedOutput(byte[] inputBytes, int offset, int length, Span<char> output)
