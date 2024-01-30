@@ -326,7 +326,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                             // TODO these two properties are per spec 'boolean', we shipped 6x with them as string, if we change we may break folks.
                             // probably best to mark the property obsolete with the gentle tag, then open up another property and keep them in sync,
                             // remove the obsolete in 8.x
-                            else if (propertyName.Equals(propertyName, StringComparison.OrdinalIgnoreCase))
+                            else if (propertyName.Equals(MetadataName.FrontchannelLogoutSessionSupported, StringComparison.OrdinalIgnoreCase))
                             {
                                 reader.Read();
                                 if (reader.TokenType == JsonTokenType.True)
@@ -336,7 +336,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                                 else
                                     config.FrontchannelLogoutSessionSupported = JsonPrimitives.ReadString(ref reader, MetadataName.FrontchannelLogoutSessionSupported, ClassName, false);
                             }
-                            else if (propertyName.Equals(propertyName, StringComparison.OrdinalIgnoreCase))
+                            else if (propertyName.Equals(MetadataName.FrontchannelLogoutSupported, StringComparison.OrdinalIgnoreCase))
                             {
                                 reader.Read();
                                 if (reader.TokenType == JsonTokenType.True)
