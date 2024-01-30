@@ -15,9 +15,6 @@ namespace Microsoft.IdentityModel.Benchmarks
 {
     // dotnet run -c release -f net8.0 --filter Microsoft.IdentityModel.Benchmarks.AsymmetricAdapterSignatures.*
 
-    [Config(typeof(BenchmarkConfig))]
-    [HideColumns("Type", "Job", "WarmupCount", "LaunchCount")]
-    [MemoryDiagnoser]
     public class AsymmetricAdapterSignatures
     {
         private byte[] _bytesToSign;
@@ -46,7 +43,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         }
 
         /// <summary>
-        /// In this case, dotnet creates a buffer to hold the signature.
+        /// In this case, .NET creates a buffer to hold the signature.
         /// ArrayPool is not used, because the buffer is created by the framework and not the user.
         /// The buffer is not returned to the pool, and must be garbage collected.
         /// </summary>
@@ -57,7 +54,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         }
 
         /// <summary>
-        /// In this case, the user obatins a buffer to hold the signature frm the array pool.
+        /// In this case, the user obtains a buffer to hold the signature from the array pool.
         /// A new api available in .NET 5.0+ is used to provide the buffer to place the signature.
         /// The size of the bytes written is returned in the out parameter, size.
         /// </summary>

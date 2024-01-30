@@ -4,6 +4,7 @@
 using Microsoft.IdentityModel.Protocols.SignedHttpRequest;
 using Microsoft.IdentityModel.Tokens;
 using BenchmarkDotNet.Running;
+using BenchmarkDotNet.Configs;
 
 namespace Microsoft.IdentityModel.Benchmarks
 {
@@ -13,7 +14,13 @@ namespace Microsoft.IdentityModel.Benchmarks
         {
             //DebugThroughTests();
 
-            BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
+#if DEBUG
+            var benchmarkConfig = ManualConfig.Union(DefaultConfig.Instance, new DebugInProcessConfig()); // Allows debugging into benchmarks
+#else
+            var benchmarkConfig = ManualConfig.Union(DefaultConfig.Instance, new BenchmarkConfig());
+#endif
+
+            BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, benchmarkConfig);
         }
         private static void DebugThroughTests()
         {

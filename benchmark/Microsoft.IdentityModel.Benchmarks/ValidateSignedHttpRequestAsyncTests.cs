@@ -11,9 +11,6 @@ namespace Microsoft.IdentityModel.Benchmarks
 {
     // dotnet run -c release -f net8.0 --filter Microsoft.IdentityModel.Benchmarks.ValidateSignedHttpRequestAsyncTests*
 
-    [Config(typeof(BenchmarkConfig))]
-    [HideColumns("Type", "Job", "WarmupCount", "LaunchCount")]
-    [MemoryDiagnoser]
     public class ValidateSignedHttpRequestAsyncTests
     {
         private SignedHttpRequestHandler _signedHttpRequestHandler;

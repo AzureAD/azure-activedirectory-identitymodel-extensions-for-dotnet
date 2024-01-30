@@ -12,9 +12,6 @@ namespace Microsoft.IdentityModel.Benchmarks
 {
     // dotnet run -c release -f net8.0 --filter Microsoft.IdentityModel.Benchmarks.ValidateJWEAsyncTests*
 
-    [Config(typeof(BenchmarkConfig))]
-    [HideColumns("Type", "Job", "WarmupCount", "LaunchCount")]
-    [MemoryDiagnoser]
     public class ValidateJWEAsyncTests
     {
         private JsonWebTokenHandler _jsonWebTokenHandler;
