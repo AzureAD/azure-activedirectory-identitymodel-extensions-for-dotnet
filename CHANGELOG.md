@@ -1,5 +1,21 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+7.3.0
+======
+### New Features:
+Addition of the ClientCertificates property to the HttpRequestData class enables exposure of certificate collection involved in authenticating the client against the server and unlock support of new scenarios within the SDK. See PR [#2462](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2462) for details.
+
+### Bug Fixes:
+Fixed bug where x5c property is empty in JwtHeader after reading a JWT containing x5c in its header, issue [#2447](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2447), see PR [#2460](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2460) for details.
+Fixed bug where JwtPayload.Claim.Value was not culture invariant [#2409](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2409). Fixed by PRs [#2453](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2453) and [#2461](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2461).
+Fixed bug where Guid values in JwtPayload caused an exception, issue [#2439](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2439). Fixed by PR [#2440](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2440).
+
+### Performance Improvements:
+Remove linq from BaseConfigurationComparer, improvement [#2464](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2464), for additional details see PR [#2465](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2465).
+
+### Engineering Excellence:
+New benchmark tests for AsymmetricAdapter signatures. For details see PR [#2449](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2449).
+
 7.2.0
 ======
 ### Performance Improvements:
