@@ -11,8 +11,16 @@
     <ErrorOnDuplicatePublishOutputFiles>False</ErrorOnDuplicatePublishOutputFiles>
   </PropertyGroup>
 
+  <!-- Uncomment only when running EtwProfiler diagnoser on Release-->
+  <!-- https://learn.microsoft.com/en-us/visualstudio/msbuild/common-msbuild-project-properties -->
+  <!--<PropertyGroup>
+    <DebugType>pdbonly</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>-->
+  
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.13.5" />
+    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.5" />
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
