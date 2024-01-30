@@ -679,14 +679,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 // dir does not have any key bytes
                 if (!secondSpan.IsEmpty)
-                {
-                    EncryptedKeyBytes = Base64UrlEncoder.UnsafeDecode(secondSpan);
-                    _encryptedKey = secondSpan.ToString();
-                }
-                else
-                {
-                    _encryptedKey = string.Empty;
-                }
+                   EncryptedKeyBytes = Base64UrlEncoder.UnsafeDecode(secondSpan);
 
                 try
                 {
