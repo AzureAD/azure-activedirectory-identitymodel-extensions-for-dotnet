@@ -216,78 +216,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </remarks>
         private static void Decode(string input, int offset, int length, byte[] output)
         {
-            int outputpos = 0;
-            uint curblock = 0x000000FFu;
-            for (int i = offset; i < (offset + length); i++)
-            {
-                uint cur = input[i];
-                if (cur >= IntA && cur <= IntZ)
-                {
-                    cur -= IntA;
-                }
-                else if (cur >= Inta && cur <= Intz)
-                {
-                    cur = (cur - Inta) + 26u;
-                }
-                else if (cur >= Int0 && cur <= Int9)
-                {
-                    cur = (cur - Int0) + 52u;
-                }
-                else if (cur == IntPlus || cur == IntMinus)
-                {
-                    cur = 62u;
-                }
-                else if (cur == IntSlash || cur == IntUnderscore)
-                {
-                    cur = 63u;
-                }
-                else if (cur == IntEq)
-                {
-                    continue;
-                }
-                else
-                {
-                    throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(
-                        LogHelper.FormatInvariant(
-                            LogMessages.IDX10820,
-                            LogHelper.MarkAsNonPII(cur),
-                            input)));
-                }
-
-                curblock = (curblock << 6) | cur;
-
-                // check if 4 characters have been read, based on number of shifts.
-                if ((0xFF000000u & curblock) == 0xFF000000u)
-                {
-                    output[outputpos++] = (byte)(curblock >> 16);
-                    output[outputpos++] = (byte)(curblock >> 8);
-                    output[outputpos++] = (byte)curblock;
-                    curblock = 0x000000FFu;
-                }
-            }
-
-            // Handle spill over characters. This accounts for case where padding character is not present.
-            if (curblock != 0x000000FFu)
-            {
-                if ((0x03FC0000u & curblock) == 0x03FC0000u)
-                {
-                    // shifted 3 times, 1 padding character, 2 output characters
-                    curblock <<= 6;
-                    output[outputpos++] = (byte)(curblock >> 16);
-                    output[outputpos++] = (byte)(curblock >> 8);
-                }
-                else if ((0x000FF000u & curblock) == 0x000FF000u)
-                {
-                    // shifted 2 times, 2 padding character, 1 output character
-                    curblock <<= 12;
-                    output[outputpos++] = (byte)(curblock >> 16);
-                }
-                else
-                {
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(
-                        LogHelper.FormatInvariant(LogMessages.IDX10821, input)));
-                }
-            }
+           Decode(input.AsSpan(), offset, length, output);  
         }
 
         /// <summary>
@@ -305,8 +234,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// </remarks>
         private static void Decode(ReadOnlySpan<char> input, int offset, int length, byte[] output)
         {
-            int outputpos = 0;
-            uint curblock = 0x000000FFu;
+            int outputPos = 0;
+            uint curBlock = 0x000000FFu;
             for (int i = offset; i < (offset + length); i++)
             {
                 uint cur = input[i];
@@ -343,33 +272,33 @@ namespace Microsoft.IdentityModel.Tokens
                             input.ToString())));
                 }
 
-                curblock = (curblock << 6) | cur;
+                curBlock = (curBlock << 6) | cur;
 
                 // check if 4 characters have been read, based on number of shifts.
-                if ((0xFF000000u & curblock) == 0xFF000000u)
+                if ((0xFF000000u & curBlock) == 0xFF000000u)
                 {
-                    output[outputpos++] = (byte)(curblock >> 16);
-                    output[outputpos++] = (byte)(curblock >> 8);
-                    output[outputpos++] = (byte)curblock;
-                    curblock = 0x000000FFu;
+                    output[outputPos++] = (byte)(curBlock >> 16);
+                    output[outputPos++] = (byte)(curBlock >> 8);
+                    output[outputPos++] = (byte)curBlock;
+                    curBlock = 0x000000FFu;
                 }
             }
 
             // Handle spill over characters. This accounts for case where padding character is not present.
-            if (curblock != 0x000000FFu)
+            if (curBlock != 0x000000FFu)
             {
-                if ((0x03FC0000u & curblock) == 0x03FC0000u)
+                if ((0x03FC0000u & curBlock) == 0x03FC0000u)
                 {
                     // shifted 3 times, 1 padding character, 2 output characters
-                    curblock <<= 6;
-                    output[outputpos++] = (byte)(curblock >> 16);
-                    output[outputpos++] = (byte)(curblock >> 8);
+                    curBlock <<= 6;
+                    output[outputPos++] = (byte)(curBlock >> 16);
+                    output[outputPos++] = (byte)(curBlock >> 8);
                 }
-                else if ((0x000FF000u & curblock) == 0x000FF000u)
+                else if ((0x000FF000u & curBlock) == 0x000FF000u)
                 {
                     // shifted 2 times, 2 padding character, 1 output character
-                    curblock <<= 12;
-                    output[outputpos++] = (byte)(curblock >> 16);
+                    curBlock <<= 12;
+                    output[outputPos++] = (byte)(curBlock >> 16);
                 }
                 else
                 {
