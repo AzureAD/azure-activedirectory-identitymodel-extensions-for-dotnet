@@ -26,5 +26,4 @@ namespace Microsoft.IdentityModel.Benchmarks
                 //.AddDiagnoser(new EtwProfiler()) // Uncomment to generate traces / flame graphs. Doc: https://adamsitnik.com/ETW-Profiler/
         }
     }
-    }
 }
