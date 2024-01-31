@@ -283,7 +283,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (decodedLength == strSpan.Length)
                 {
-                    return Convert.FromBase64CharArray(strSpan.ToArray(), 0, strSpan.Length); // TODO: ToArray results in a heap allocation. Is there a better way?
+                    return Convert.FromBase64CharArray(strSpan.ToArray(), 0, strSpan.Length);
                 }
                 else
                 {
