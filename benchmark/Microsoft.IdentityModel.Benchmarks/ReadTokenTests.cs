@@ -15,31 +15,54 @@ namespace Microsoft.IdentityModel.Benchmarks
     [MemoryDiagnoser]
     public class ReadTokenTests
     {
-        string _encodedToken;
+        string _encodedJWS;
+        string _encryptedJWE;
 
         [GlobalSetup]
         public void Setup()
         {
-            var tokenDescriptor = new SecurityTokenDescriptor
+            var jsonWebTokenHandler = new JsonWebTokenHandler();
+            var jwsTokenDescriptor = new SecurityTokenDescriptor
             {
                 Claims = BenchmarkUtils.Claims,
                 SigningCredentials = BenchmarkUtils.SigningCredentialsRsaSha256,
                 TokenType = JwtHeaderParameterNames.Jwk
             };
 
-            _encodedToken = new JsonWebTokenHandler().CreateToken(tokenDescriptor);
-        }
+            _encodedJWS = jsonWebTokenHandler.CreateToken(jwsTokenDescriptor);
 
-            [Benchmark]
-        public JsonWebToken ReadJWTFromEncodedString()
-        {
-            return new JsonWebToken(_encodedToken);
+            var jweTokenDescriptor = new SecurityTokenDescriptor
+            {
+                SigningCredentials = BenchmarkUtils.SigningCredentialsRsaSha256,
+                EncryptingCredentials = BenchmarkUtils.EncryptingCredentialsAes256Sha512,
+                Claims = BenchmarkUtils.Claims
+            };
+
+            _encryptedJWE = jsonWebTokenHandler.CreateToken(jweTokenDescriptor);
         }
 
         [Benchmark]
-        public JsonWebToken ReadJWTFromEncodedSpan()
+        public JsonWebToken ReadJWS_FromString()
         {
-            return new JsonWebToken(_encodedToken.AsSpan());
+            return new JsonWebToken(_encodedJWS);
+        }
+
+        [Benchmark]
+        public JsonWebToken ReadJWS_FromSpan()
+        {
+            return new JsonWebToken(_encodedJWS.AsSpan());
+        }
+
+        [Benchmark]
+        public JsonWebToken ReadJWE_FromString()
+        {
+            return new JsonWebToken(_encryptedJWE);
+        }
+
+        [Benchmark]
+        public JsonWebToken ReadJWE_FromSpan()
+        {
+            return new JsonWebToken(_encryptedJWE.AsSpan());
         }
     }
 }

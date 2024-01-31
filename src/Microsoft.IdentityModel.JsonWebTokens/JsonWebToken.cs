@@ -558,11 +558,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX14120));
 
             Dot2 = Dot1 + Dot2 + 1;
-
-            if (Dot2 == encodedJsonSpan.Length - 1)
-                Dot3 = -1;
-            else
-                Dot3 = encodedJsonSpan.Slice(Dot2 + 1).IndexOf('.');
+            Dot3 = (Dot2 == encodedJsonSpan.Length - 1) ? -1 : encodedJsonSpan.Slice(Dot2 + 1).IndexOf('.');
 
             if (Dot3 == -1)
             {
@@ -623,8 +619,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 ReadOnlySpan<char> headerSpan = encodedJsonSpan.Slice(0, Dot1);
                 if (headerSpan.IsEmpty)
                     throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14307));
-                
-                // right number of dots for JWE (4)
+
+               // right number of dots for JWE (4)
                 byte[] headerAsciiBytes = new byte[headerSpan.Length];
                 Encoding.ASCII.GetBytes(headerSpan, headerAsciiBytes);
 
@@ -687,7 +683,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
             }
 
-            EncodedToken = encodedJsonSpan.ToString();
+            EncodedToken = encodedJsonSpan.ToString(); // TODO: Discuss: This is expensive. Is there a better way to do this?
         }
 #endif
 
