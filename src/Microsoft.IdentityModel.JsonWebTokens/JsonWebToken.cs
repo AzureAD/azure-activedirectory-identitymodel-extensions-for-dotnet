@@ -647,27 +647,39 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (!encryptedKeyBytes.IsEmpty)
                     EncryptedKeyBytes = Base64UrlEncoder.UnsafeDecode(encryptedKeyBytes);
 
+                ReadOnlySpan<char> initializationVectorSpan = encodedJsonSpan.Slice(Dot2 + 1, Dot3 - Dot2 - 1);
+                if (initializationVectorSpan.IsEmpty)
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14308));
+
                 try
                 {
-                    InitializationVectorBytes = Base64UrlEncoder.UnsafeDecode(encodedJsonSpan.Slice(Dot2 + 1, Dot3 - Dot2 - 1));
+                    InitializationVectorBytes = Base64UrlEncoder.UnsafeDecode(initializationVectorSpan);
                 }
                 catch (Exception ex)
                 {
                     throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14309, ex));
                 }
 
+                ReadOnlySpan<char> authTagSpan = encodedJsonSpan.Slice(Dot4 + 1);
+                if (authTagSpan.IsEmpty)
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14310));
+
                 try
                 {
-                    AuthenticationTagBytes = Base64UrlEncoder.UnsafeDecode(encodedJsonSpan.Slice(Dot4 + 1));
+                    AuthenticationTagBytes = Base64UrlEncoder.UnsafeDecode(authTagSpan);
                 }
                 catch (Exception ex)
                 {
                     throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14311, ex));
                 }
 
+                ReadOnlySpan<char> cipherTextSpan = encodedJsonSpan.Slice(Dot3 + 1, Dot4 - Dot3 - 1);
+                if (cipherTextSpan.IsEmpty)
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14306));
+
                 try
                 {
-                    CipherTextBytes = Base64UrlEncoder.UnsafeDecode(encodedJsonSpan.Slice(Dot3 + 1, Dot4 - Dot3 - 1));
+                    CipherTextBytes = Base64UrlEncoder.UnsafeDecode(cipherTextSpan);
                 }
                 catch (Exception ex)
                 {
