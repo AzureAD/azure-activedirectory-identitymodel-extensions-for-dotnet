@@ -181,6 +181,9 @@ namespace Microsoft.IdentityModel.Tokens
 #endif
         internal static unsafe byte[] UnsafeDecode(ReadOnlySpan<char> strSpan)
         {
+            if (strSpan.IsEmpty)
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(strSpan)));
+
             int mod = strSpan.Length % 4;
             if (mod == 1)
                 throw LogHelper.LogExceptionMessage(new FormatException(LogHelper.FormatInvariant(LogMessages.IDX10400, strSpan.ToString())));
