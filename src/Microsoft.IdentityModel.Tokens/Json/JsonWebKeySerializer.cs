@@ -83,7 +83,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
         /// <returns>A <see cref="JsonWebKey"/>.</returns>
         public static JsonWebKey Read(ref Utf8JsonReader reader, JsonWebKey jsonWebKey)
         {
-            if (!JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, false))
+            if (!JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, true))
                 throw LogHelper.LogExceptionMessage(
                     new JsonException(
                         LogHelper.FormatInvariant(
@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                         LogHelper.MarkAsNonPII(reader.CurrentDepth),
                         LogHelper.MarkAsNonPII(reader.BytesConsumed))));
 
-            while(reader.Read())
+            while(true)
             {
                 #region Check property name using ValueTextEquals
                 // common names are tried first
@@ -287,7 +287,10 @@ namespace Microsoft.IdentityModel.Tokens.Json
                         #endregion case-insensitive
                     }
                 }
-                else if (JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, false))
+                // We read a JsonTokenType.StartObject above, exiting and positioning reader at next token.
+                else if (JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, true))
+                    break;
+                else if (!reader.Read())
                     break;
             }
 

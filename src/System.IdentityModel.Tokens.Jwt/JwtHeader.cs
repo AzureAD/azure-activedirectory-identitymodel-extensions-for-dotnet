@@ -41,7 +41,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             Utf8JsonReader reader = new(Encoding.UTF8.GetBytes(json));
 
-            if (!JsonPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, false))
+            if (!JsonPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, true))
                 throw LogHelper.LogExceptionMessage(
                     new JsonException(
                         LogHelper.FormatInvariant(
@@ -53,7 +53,7 @@ namespace System.IdentityModel.Tokens.Jwt
                         LogHelper.MarkAsNonPII(reader.CurrentDepth),
                         LogHelper.MarkAsNonPII(reader.BytesConsumed))));
 
-            while (reader.Read())
+            while (true)
             {
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
@@ -66,6 +66,11 @@ namespace System.IdentityModel.Tokens.Jwt
 
                      this[propertyName] = obj;
                 }
+                // We read a JsonTokenType.StartObject above, exiting and positioning reader at next token.
+                else if (JsonPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, true))
+                    break;
+                else if (!reader.Read())
+                    break;
             }
         }
 
