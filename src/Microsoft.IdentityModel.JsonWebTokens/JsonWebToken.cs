@@ -709,7 +709,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
             }
 
-            EncodedToken = encodedJsonSpan.ToString(); // TODO: Span equivalents need to be added for the public properties on JsonWebToken (EncodedToken, EncodedSignature, EncodedPayload etc)
+            EncodedToken = encodedJsonSpan.ToString();
         }
 #endif
 
