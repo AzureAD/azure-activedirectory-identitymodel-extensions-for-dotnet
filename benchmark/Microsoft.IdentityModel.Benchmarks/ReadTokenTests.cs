@@ -4,6 +4,7 @@
 using System;
 using BenchmarkDotNet.Attributes;
 using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Benchmarks
 {
@@ -14,16 +15,31 @@ namespace Microsoft.IdentityModel.Benchmarks
     [MemoryDiagnoser]
     public class ReadTokenTests
     {
-        [Benchmark]
+        string _encodedToken;
+
+        [GlobalSetup]
+        public void Setup()
+        {
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Claims = BenchmarkUtils.Claims,
+                SigningCredentials = BenchmarkUtils.SigningCredentialsRsaSha256,
+                TokenType = JwtHeaderParameterNames.Jwk
+            };
+
+            _encodedToken = new JsonWebTokenHandler().CreateToken(tokenDescriptor);
+        }
+
+            [Benchmark]
         public JsonWebToken ReadJWTFromEncodedString()
         {
-            return new JsonWebToken(EncodedJWTs.Asymmetric_LocalSts);
+            return new JsonWebToken(_encodedToken);
         }
 
         [Benchmark]
         public JsonWebToken ReadJWTFromEncodedSpan()
         {
-            return new JsonWebToken(EncodedJWTs.Asymmetric_LocalStsSpan);
+            return new JsonWebToken(_encodedToken.AsSpan());
         }
     }
 }
