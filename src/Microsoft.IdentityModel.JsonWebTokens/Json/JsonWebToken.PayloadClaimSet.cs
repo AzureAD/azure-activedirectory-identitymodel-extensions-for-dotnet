@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal JsonClaimSet CreatePayloadClaimSet(byte[] bytes, int length)
         {
             Utf8JsonReader reader = new(bytes.AsSpan().Slice(0, length));
-            if (!JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, false))
+            if (!JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, true))
                 throw LogHelper.LogExceptionMessage(
                     new JsonException(
                         LogHelper.FormatInvariant(
@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         LogHelper.MarkAsNonPII(reader.BytesConsumed))));
 
             Dictionary<string, object> claims = new();
-            while (reader.Read())
+            while (true)
             {
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
@@ -98,10 +98,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         claims[propertyName] = JsonSerializerPrimitives.ReadPropertyValueAsObject(ref reader, propertyName, JsonClaimSet.ClassName, true);
                     }
                 }
-                else if (reader.TokenType == JsonTokenType.EndObject)
-                {
+                // We read a JsonTokenType.StartObject above, exiting and positioning reader at next token.
+                else if (JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, true))
                     break;
-                }
+                else if (!reader.Read())
+                    break;
             };
 
             return new JsonClaimSet(claims);

@@ -718,7 +718,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static bool AreIntsEqual(object object1, object object2, CompareContext context)
         {
-            return AreIntsEqual((int)object1, (int)object2, "int1", "int2", context);
+            return AreIntsEqual((int)object1, Convert.ToInt32(object2), "int1", "int2", context);
         }
 
         public static bool AreIntsEqual(int int1, int int2, string name1, string name2, CompareContext context)
@@ -761,11 +761,19 @@ namespace Microsoft.IdentityModel.TestUtils
         public static bool AreLongsEqual(object object1, object object2, string name1, string name2, CompareContext context)
         {
             var localContext = new CompareContext(context);
+
             if (!ContinueCheckingEquality(object1, object2, localContext))
                 return context.Merge(localContext);
 
             long long1 = (long)object1;
-            long long2 = Convert.ToInt64(Convert.ToDouble(object2));
+            long long2;
+
+            if (object2 is long || object2 is int)
+                long2 = (long)object2;
+            else if (object2 is string)
+                long2 = Convert.ToInt64(double.Parse((string)object2));
+            else
+                long2 = Convert.ToInt64(object2);
 
             if (long1 == long2)
                 return true;
@@ -808,6 +816,27 @@ namespace Microsoft.IdentityModel.TestUtils
 
                 if (dictionary2.ContainsKey(key))
                 {
+                    if (!dictionary1.ContainsKey(key))
+                    {
+                        localContext.Diffs.Add($"dictionary1.ContainsKey({key}) == false, key is found in dictionary2");
+                        continue;
+                    }
+
+                    if (dictionary1[key] == null && dictionary2[key] == null)
+                        continue;
+
+                    if (dictionary1[key] == null)
+                    {
+                        localContext.Diffs.Add($"dictionary1[{key}] == null, dictionary2[{key}] != null == '{dictionary2[key]}'");
+                        continue;
+                    }
+
+                    if (dictionary2[key] == null)
+                    {
+                        localContext.Diffs.Add($"dictionary2[{key}] == null, dictionary1[{key}] != null == '{dictionary1[key]}'");
+                        continue;
+                    }
+
                     if (dictionary1[key].GetType() != dictionary2[key].GetType() && dictionary1[key].GetType() != typeof(JsonWebKey))
                     {
                         localContext.Diffs.Add($"dictionary1[{key}].GetType() != dictionary2[{key}].GetType(). '{dictionary1[key].GetType()}' : '{dictionary2[key].GetType()}'");
