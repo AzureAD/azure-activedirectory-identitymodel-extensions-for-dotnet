@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         }
 
         [Benchmark]
-        public JsonWebToken ReadJWS_FromSpan()
+        public JsonWebToken ReadJWS_FromMemory()
         {
             return new JsonWebToken(_encodedJWS.AsMemory());
         }
@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         }
 
         [Benchmark]
-        public JsonWebToken ReadJWE_FromSpan()
+        public JsonWebToken ReadJWE_FromMemory()
         {
             return new JsonWebToken(_encryptedJWE.AsMemory());
         }
