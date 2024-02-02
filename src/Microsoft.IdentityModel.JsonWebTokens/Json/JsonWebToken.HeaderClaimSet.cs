@@ -13,7 +13,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     {
         internal JsonClaimSet CreateHeaderClaimSet(byte[] bytes)
         {
-            return CreateHeaderClaimSet(bytes, bytes.Length);
+            return CreateHeaderClaimSet(bytes.AsSpan());
         }
 
         internal JsonClaimSet CreateHeaderClaimSet(byte[] bytes, int length)
