@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         {
             ReadTokenTests readTokenTests = new ReadTokenTests();
             readTokenTests.Setup();
-            readTokenTests.ReadJWE_FromSpan();
+            readTokenTests.ReadJWE_FromMemory();
 
             AsymmetricAdapterSignatures asymmetricAdapter = new AsymmetricAdapterSignatures();
             asymmetricAdapter.Setup();

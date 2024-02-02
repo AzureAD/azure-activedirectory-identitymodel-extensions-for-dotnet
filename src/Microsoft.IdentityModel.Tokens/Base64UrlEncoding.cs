@@ -127,37 +127,6 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Decodes a portion of a Base64UrlEncoded string and performs a specified action on the decoded bytes.
-        /// </summary>
-        /// <param name="strSpan">The input string represented as a span to decode.</param>
-        /// <param name="offset">The starting index within <paramref name="strSpan"/> to begin the decoding operation.</param>
-        /// <param name="length">The number of characters from the <paramref name="offset"/> index to decode.</param>
-        /// <param name="action">The action to perform on the decoded bytes.</param>
-        /// <typeparam name="T">The return type of the operation.</typeparam>
-        /// <returns>An instance of type {T}.</returns>
-        /// <remarks>
-        /// The buffer for the decoding operation uses a shared memory pool to minimize allocations.
-        /// The length of the rented byte array may be larger than the decoded bytes; thus, the action should consider the actual length provided.
-        /// The result of <see cref="ValidateAndGetOutputSize(ReadOnlySpan{char}, int, int)"/> is passed to the action.
-        /// </remarks>
-        public static T Decode<T>(ReadOnlySpan<char> strSpan, int offset, int length, Func<byte[], int, T> action)
-        {
-            _ = action ?? throw new ArgumentNullException(nameof(action));
-
-            int outputSize = ValidateAndGetOutputSize(strSpan, offset, length);
-            byte[] output = ArrayPool<byte>.Shared.Rent(outputSize);
-            try
-            {
-                Decode(strSpan, offset, length, output);
-                return action(output, outputSize);
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(output);
-            }
-        }
-
-        /// <summary>
         /// Decodes a Base64UrlEncoded string and then performs an action.
         /// </summary>
         /// <param name="input">The string to decode.</param>
@@ -232,10 +201,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// 2. '+' and '-' are treated the same.
         /// 3. '/' and '_' are treated the same.
         /// </remarks>
-        private static void Decode(ReadOnlySpan<char> input, int offset, int length, byte[] output)
+        internal static void Decode(ReadOnlySpan<char> input, int offset, int length, byte[] output)
         {
-            int outputPos = 0;
-            uint curBlock = 0x000000FFu;
+            int outputpos = 0;
+            uint curblock = 0x000000FFu;
             for (int i = offset; i < (offset + length); i++)
             {
                 uint cur = input[i];
@@ -272,33 +241,33 @@ namespace Microsoft.IdentityModel.Tokens
                             input.ToString())));
                 }
 
-                curBlock = (curBlock << 6) | cur;
+                curblock = (curblock << 6) | cur;
 
                 // check if 4 characters have been read, based on number of shifts.
-                if ((0xFF000000u & curBlock) == 0xFF000000u)
+                if ((0xFF000000u & curblock) == 0xFF000000u)
                 {
-                    output[outputPos++] = (byte)(curBlock >> 16);
-                    output[outputPos++] = (byte)(curBlock >> 8);
-                    output[outputPos++] = (byte)curBlock;
-                    curBlock = 0x000000FFu;
+                    output[outputpos++] = (byte)(curblock >> 16);
+                    output[outputpos++] = (byte)(curblock >> 8);
+                    output[outputpos++] = (byte)curblock;
+                    curblock = 0x000000FFu;
                 }
             }
 
             // Handle spill over characters. This accounts for case where padding character is not present.
-            if (curBlock != 0x000000FFu)
+            if (curblock != 0x000000FFu)
             {
-                if ((0x03FC0000u & curBlock) == 0x03FC0000u)
+                if ((0x03FC0000u & curblock) == 0x03FC0000u)
                 {
                     // shifted 3 times, 1 padding character, 2 output characters
-                    curBlock <<= 6;
-                    output[outputPos++] = (byte)(curBlock >> 16);
-                    output[outputPos++] = (byte)(curBlock >> 8);
+                    curblock <<= 6;
+                    output[outputpos++] = (byte)(curblock >> 16);
+                    output[outputpos++] = (byte)(curblock >> 8);
                 }
-                else if ((0x000FF000u & curBlock) == 0x000FF000u)
+                else if ((0x000FF000u & curblock) == 0x000FF000u)
                 {
                     // shifted 2 times, 2 padding character, 1 output character
-                    curBlock <<= 12;
-                    output[outputPos++] = (byte)(curBlock >> 16);
+                    curblock <<= 12;
+                    output[outputpos++] = (byte)(curblock >> 16);
                 }
                 else
                 {
@@ -444,7 +413,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="offset">Index of char in <paramref name="strSpan"/> to start decode operation.</param>
         /// <param name="length">Number of chars in <paramref name="strSpan"/> to decode, starting from offset.</param>
         /// <returns>Size of the decoded bytes arrays.</returns>
-        private static int ValidateAndGetOutputSize(ReadOnlySpan<char> strSpan, int offset, int length)
+        internal static int ValidateAndGetOutputSize(ReadOnlySpan<char> strSpan, int offset, int length)
         {
             if (strSpan.IsEmpty)
                 throw LogHelper.LogArgumentNullException(nameof(strSpan));

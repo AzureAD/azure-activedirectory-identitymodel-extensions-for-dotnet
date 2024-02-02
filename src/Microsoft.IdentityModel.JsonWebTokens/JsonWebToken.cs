@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text;
@@ -597,7 +598,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 IsSigned = !(Dot2 + 1 == encodedTokenSpan.Length);
                 try
                 {
-                    Header = CreateClaimSet(encodedTokenSpan, 0, Dot1, CreateHeaderClaimSet);
+                    Header = CreateClaimSet(encodedTokenSpan, 0, Dot1, createHeaderClaimSet: true);
                 }
                 catch (Exception ex)
                 {
@@ -609,7 +610,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 try
                 {
-                    Payload = CreateClaimSet(encodedTokenSpan, Dot1 + 1, Dot2 - Dot1 - 1, CreatePayloadClaimSet);
+                    Payload = CreateClaimSet(encodedTokenSpan, Dot1 + 1, Dot2 - Dot1 - 1, createHeaderClaimSet: false);
                 }
                 catch (Exception ex)
                 {
@@ -656,7 +657,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 try
                 {
-                    Header = CreateHeaderClaimSet(Base64UrlEncoder.UnsafeDecode(headerSpan));
+                    Header = CreateHeaderClaimSet(Base64UrlEncoder.UnsafeDecode(headerSpan).AsSpan());
                 }
                 catch (Exception ex)
                 {
@@ -720,9 +721,19 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return Base64UrlEncoding.Decode(rawString, startIndex, length, action);
         }
 
-        internal static JsonClaimSet CreateClaimSet(ReadOnlySpan<char> strSpan, int startIndex, int length, Func<byte[], int, JsonClaimSet> action)
+        internal JsonClaimSet CreateClaimSet(ReadOnlySpan<char> strSpan, int startIndex, int length, bool createHeaderClaimSet)
         {
-            return Base64UrlEncoding.Decode(strSpan, startIndex, length, action);
+            int outputSize = Base64UrlEncoding.ValidateAndGetOutputSize(strSpan, startIndex, length);
+            byte[] output = ArrayPool<byte>.Shared.Rent(outputSize);
+            try
+            {
+                Base64UrlEncoding.Decode(strSpan, startIndex, length, output);
+                return createHeaderClaimSet ? CreateHeaderClaimSet(output.AsSpan()) : CreatePayloadClaimSet(output.AsSpan());
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(output);
+            }
         }
 
         /// <summary>
