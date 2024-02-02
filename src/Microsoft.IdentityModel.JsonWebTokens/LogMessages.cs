@@ -13,6 +13,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     {
         #pragma warning disable 1591
 
+        // This reuses the ID of TokenLogMessages.IDX10506 to provide a message more specific to JsonWebTokens while allowing people searching the ID to search solutions provided for the old message like those at https://stackoverflow.com/questions/77515249/custom-token-validator-not-working-in-net-8
+        internal const string IDX10506 = "IDX10506: Signature validation failed. The user defined 'Delegate' specified on TokenValidationParameters did not return a '{0}', but returned a '{1}' when validating token: '{2}'. If you are using ASP.NET Core 8 or later, see https://learn.microsoft.com/en-us/dotnet/core/compatibility/aspnet-core/8.0/securitytoken-events for more details.";
+
         // signature creation / validation
         internal const string IDX14000 = "IDX14000: Signature validation of this JWT is not supported for: Algorithm: '{0}', SecurityKey: '{1}'.";
 
