@@ -1,5 +1,17 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+7.3.1
+======
+### Bug Fixes:
+- Replace propertyName with `MetadataName` constant. See issue [#2471](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2471) for details.
+- Fix 6x to 7x regression where mixed cases OIDC json was not correctly process. See [#2404](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2402) and [#2402](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2402) for details.
+
+### Performance Improvements:
+- Update the benchmark configuration. See issue [#2468](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2468).
+
+### Documentation:
+- Update comment for `azp` in `JsonWebToken`. See [#2475](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2475) for details.
+
 7.3.0
 ======
 ### New Features:
