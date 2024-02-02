@@ -27,6 +27,8 @@ namespace Microsoft.IdentityModel.Validators
         internal const string V2EndpointSuffixWithTrailingSlash = $"{V2EndpointSuffix}/";
         internal const string TenantIdTemplate = "{tenantid}";
 
+        private Func<string, CancellationToken, Task<BaseConfigurationManager>> _configurationManagerProvider;
+
         internal AadIssuerValidator(
             HttpClient httpClient,
             string aadAuthority)
@@ -34,6 +36,14 @@ namespace Microsoft.IdentityModel.Validators
             HttpClient = httpClient;
             AadAuthority = aadAuthority.TrimEnd('/');
             IsV2Authority = aadAuthority.Contains(V2EndpointSuffix);
+        }
+
+        internal AadIssuerValidator(
+            string aadAuthority,
+            Func<string, CancellationToken, Task<BaseConfigurationManager>> configurationManagerProvider)
+            : this(null, aadAuthority)
+        {
+            _configurationManagerProvider = configurationManagerProvider;
         }
 
         private HttpClient HttpClient { get; }
@@ -180,18 +190,23 @@ namespace Microsoft.IdentityModel.Validators
 
             try
             {
-                BaseConfigurationManager effectiveConfigurationManager = GetEffectiveConfigurationManager(securityToken);
-                if (validationParameters.RefreshBeforeValidation)
-                    effectiveConfigurationManager.RequestRefresh();
 
-                BaseConfiguration configuration = await effectiveConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
-                string aadIssuer = configuration.Issuer;
+                // replace here
+                var effectiveConfigurationManager = GetEffectiveConfigurationManager(securityToken);
+                var baseConfiguration = await GetBaseConfiguration(effectiveConfigurationManager, validationParameters).ConfigureAwait(false);
+                string aadIssuer = baseConfiguration.Issuer;
 
                 if (!validationParameters.ValidateWithLKG)
                 {
                     if (IsValidIssuer(aadIssuer, tenantId, issuer))
                     {
-                        effectiveConfigurationManager.LastKnownGoodConfiguration = new OpenIdConnectConfiguration() { Issuer = aadIssuer };
+                        // We need to update LKG on the self-managed config manager.
+                        // The LKG of the one coming from provider, should be handled by the provider after successful validation
+                        // unless it is only fetched for the issuer and it's different than the authority.
+                        if (_configurationManagerProvider == null)
+                        {
+                            effectiveConfigurationManager.LastKnownGoodConfiguration = new OpenIdConnectConfiguration() { Issuer = aadIssuer };
+                        }
                         return issuer;
                     }
                 }
@@ -233,17 +248,7 @@ namespace Microsoft.IdentityModel.Validators
         /// <exception cref="ArgumentNullException">if <paramref name="aadAuthority"/> is null or empty.</exception>
         public static AadIssuerValidator GetAadIssuerValidator(string aadAuthority, HttpClient httpClient)
         {
-            if(string.IsNullOrEmpty(aadAuthority))
-                throw LogHelper.LogArgumentNullException(nameof(aadAuthority));
-
-            if (s_issuerValidators.TryGetValue(aadAuthority, out AadIssuerValidator aadIssuerValidator))
-                return aadIssuerValidator;
-
-            s_issuerValidators[aadAuthority] = new AadIssuerValidator(
-                httpClient,
-                aadAuthority);
-
-            return s_issuerValidators[aadAuthority];
+            return GetAadIssuerValidator(aadAuthority, httpClient, null);
         }
 
         /// <summary>
@@ -258,7 +263,41 @@ namespace Microsoft.IdentityModel.Validators
         /// <exception cref="ArgumentNullException">if <paramref name="aadAuthority"/> is null or empty.</exception>
         public static AadIssuerValidator GetAadIssuerValidator(string aadAuthority)
         {
-            return GetAadIssuerValidator(aadAuthority, null);
+            return GetAadIssuerValidator(aadAuthority, null, null);
+        }
+
+        /// <summary>
+        /// Gets an <see cref="AadIssuerValidator"/> for an Azure Active Directory (AAD) authority.
+        /// </summary>
+        /// <param name="aadAuthority">The authority to create the validator for, e.g. https://login.microsoftonline.com/. </param>
+        /// <param name="configurationManagerProvider">Configuration manager provider. Injection point for metadata managed outside of the class.</param>
+        /// <example><code>
+        /// AadIssuerValidator aadIssuerValidator = AadIssuerValidator.GetAadIssuerValidator(authority, configurationManagerProvider);
+        /// TokenValidationParameters.IssuerValidator = aadIssuerValidator.Validate;
+        /// </code></example>
+        /// <returns>A <see cref="AadIssuerValidator"/> for the aadAuthority.</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="aadAuthority"/> is null or empty.</exception>
+        public static AadIssuerValidator GetAadIssuerValidator(string aadAuthority, Func<string, CancellationToken, Task<BaseConfigurationManager>> configurationManagerProvider)
+        {
+            return GetAadIssuerValidator(aadAuthority, null, configurationManagerProvider);
+        }
+
+        private static AadIssuerValidator GetAadIssuerValidator(string aadAuthority, HttpClient httpClient, Func<string, CancellationToken, Task<BaseConfigurationManager>> configurationManagerProvider)
+        {
+            if (string.IsNullOrEmpty(aadAuthority))
+                throw LogHelper.LogArgumentNullException(nameof(aadAuthority));
+
+            if (s_issuerValidators.TryGetValue(aadAuthority, out AadIssuerValidator aadIssuerValidator))
+                return aadIssuerValidator;
+
+            if (configurationManagerProvider != null)
+                s_issuerValidators[aadAuthority] = new AadIssuerValidator(aadAuthority, configurationManagerProvider);
+            else
+                s_issuerValidators[aadAuthority] = new AadIssuerValidator(
+                    httpClient,
+                    aadAuthority);
+
+            return s_issuerValidators[aadAuthority];
         }
 
         private static string CreateV1Authority(string aadV2Authority)
@@ -306,11 +345,31 @@ namespace Microsoft.IdentityModel.Validators
             }
         }
 
+        private static bool IsV2Issuer(SecurityToken securityToken)
+        {
+            return securityToken.Issuer.EndsWith(V2EndpointSuffixWithTrailingSlash, StringComparison.OrdinalIgnoreCase) ||
+                securityToken.Issuer.EndsWith(V2EndpointSuffix, StringComparison.OrdinalIgnoreCase);
+        }
+
         private BaseConfigurationManager GetEffectiveConfigurationManager(SecurityToken securityToken)
         {
-            var isV2 = securityToken.Issuer.EndsWith(V2EndpointSuffixWithTrailingSlash, StringComparison.OrdinalIgnoreCase) ||
-                securityToken.Issuer.EndsWith(V2EndpointSuffix, StringComparison.OrdinalIgnoreCase);
-            return isV2 ? ConfigurationManagerV2 : ConfigurationManagerV1;
+            var isV2Issuer = IsV2Issuer(securityToken);
+
+            if (_configurationManagerProvider != null)
+            {
+                var aadAuthority = isV2Issuer ? AadAuthorityV2 : AadAuthorityV1;
+                return _configurationManagerProvider(aadAuthority, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+            }
+            else
+                return isV2Issuer ? ConfigurationManagerV2 : ConfigurationManagerV1;
+        }
+
+        private static async Task<BaseConfiguration> GetBaseConfiguration(BaseConfigurationManager configurationManager, TokenValidationParameters validationParameters)
+        {
+            if (validationParameters.RefreshBeforeValidation)
+                configurationManager.RequestRefresh();
+
+            return await configurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>Gets the tenant ID from a token.</summary>
