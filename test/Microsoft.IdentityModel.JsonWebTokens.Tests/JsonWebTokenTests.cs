@@ -1674,11 +1674,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var context = TestUtilities.WriteHeader($"{this}.CompareJsonWebToken", theoryData);
             try
             {
-                var tokenFromEncodedSpan = new JsonWebToken(theoryData.Token.AsSpan());
-                var tokenFromEncodedString = new JsonWebToken(theoryData.Token);
+                var tokenFromMemory = new JsonWebToken(theoryData.Token.AsMemory());
+                var tokenFromString = new JsonWebToken(theoryData.Token);
 
                 theoryData.ExpectedException.ProcessNoException(context);
-                IdentityComparer.AreEqual(tokenFromEncodedSpan, tokenFromEncodedString, context);
+                IdentityComparer.AreEqual(tokenFromMemory, tokenFromString, context);
             }
             catch (Exception ex)
             {
