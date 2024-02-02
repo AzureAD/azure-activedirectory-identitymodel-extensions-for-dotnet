@@ -23,13 +23,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         private string _act;
         private string _authenticationTag;
+#pragma warning disable CS0649 // Field 'JsonWebToken._authorizationHeader' is never assigned to, and will always have its default value null
+        private string _authorizationHeader;
+
         private string _ciphertext;
         private string _encodedHeader;
         private string _encodedPayload;
         private string _encodedSignature;
+        private string _encodedToken;
         private string _encryptedKey;
         private string _initializationVector;
         private List<string> _audiences;
+
+        private int _encodedJsonOffset;
+        private int _encodedJsonLength;
+#pragma warning restore CS0649 // Field 'JsonWebToken._authorizationHeader' is never assigned to, and will always have its default value null
 
         #region properties relating to the header
         // when constructing a JWT, these properties, when found, will be set
@@ -85,9 +93,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Initializes a new instance of <see cref="JsonWebToken"/> from a span in JWS or JWE Compact serialized format.
         /// </summary>
-        /// <param name="jwtEncodedSpan">A span containing the JSON Web Token serialized in JWS or JWE Compact format.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="jwtEncodedSpan"/> is empty.</exception>
-        /// <exception cref="ArgumentException"><paramref name="jwtEncodedSpan"/> does not represent a valid JWS or JWE Compact serialization format.</exception>
+        /// <param name="authorizationHeader"></param>
+        /// <param name="offset"></param>
+        /// <param name="length"></param>
+        /// <exception cref="ArgumentNullException"><paramref name="authorizationHeader"/> is empty.</exception>
         /// <remarks>
         /// See: https://datatracker.ietf.org/doc/html/rfc7519 (JWT)
         /// See: https://datatracker.ietf.org/doc/html/rfc7515 (JWS)
@@ -96,12 +105,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// The contents of the returned <see cref="JsonWebToken"/> have not been validated; the JSON Web Token is simply decoded. Validation can be performed using the methods in <see cref="JsonWebTokenHandler"/>.
         /// </para>
         /// </remarks>
-        public JsonWebToken(ReadOnlySpan<char> jwtEncodedSpan)
+        public JsonWebToken(string authorizationHeader, int offset, int length)
         {
-            if (jwtEncodedSpan.IsEmpty)
-                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(jwtEncodedSpan)));
+            if (string.IsNullOrEmpty(authorizationHeader))
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(authorizationHeader)));
 
-            ReadToken(jwtEncodedSpan);
+            if (offset < 0 || offset > length || offset >= authorizationHeader.Length)
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(offset), LogHelper.FormatInvariant(LogMessages.IDX14313, offset, 0, authorizationHeader.Length - 1)));
+
+            if (length < 0 || length > authorizationHeader.Length || length + offset > authorizationHeader.Length)
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(length), LogHelper.FormatInvariant(LogMessages.IDX14313, length, 0, authorizationHeader.Length - offset)));
+
+            ReadToken(authorizationHeader, offset, length);
         }
 #endif
 
@@ -300,7 +315,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <remarks>
         /// The original Base64UrlEncoded of the JWT.
         /// </remarks>
-        public string EncodedToken { get; private set; }
+        public string EncodedToken
+        {
+            get
+            {
+                if (_encodedToken is not null)
+                    return _encodedToken;
+
+                if (_authorizationHeader is not null)
+                    _encodedToken = _authorizationHeader.Substring(_encodedJsonOffset, _encodedJsonLength);
+
+                return _encodedToken;
+            }
+            private set { }
+        }
 
         internal JsonClaimSet Header { get; set; }
 
@@ -534,20 +562,24 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
             }
 
-            EncodedToken = encodedJson;
+            _encodedToken = encodedJson;
         }
 
 #if NET6_0_OR_GREATER
         /// <summary>
         /// Converts a span into an instance of <see cref="JsonWebToken"/>.
         /// </summary>
-        /// <param name="encodedJsonSpan">A span representing a 'JSON Web Token' (JWT) in JWS or JWE Compact Serialization Format.</param>
-        /// <exception cref="SecurityTokenMalformedException">if <paramref name="encodedJsonSpan"/> is malformed, a valid JWT should have either 2 dots (JWS) or 4 dots (JWE).</exception>
-        /// <exception cref="SecurityTokenMalformedException">if <paramref name="encodedJsonSpan"/> does not have an non-empty authentication tag after the 4th dot for a JWE.</exception>
-        /// <exception cref="SecurityTokenMalformedException">if <paramref name="encodedJsonSpan"/> has more than 4 dots.</exception>
-        internal void ReadToken(ReadOnlySpan<char> encodedJsonSpan)
+        /// <param name="authorizationHeader"></param>
+        /// <param name="offset"></param>
+        /// <param name="length"></param>
+        /// <exception cref="SecurityTokenMalformedException">if <paramref name="authorizationHeader"/> is malformed, a valid JWT should have either 2 dots (JWS) or 4 dots (JWE).</exception>
+        /// <exception cref="SecurityTokenMalformedException">if <paramref name="authorizationHeader"/> does not have an non-empty authentication tag after the 4th dot for a JWE.</exception>
+        /// <exception cref="SecurityTokenMalformedException">if <paramref name="authorizationHeader"/> has more than 4 dots.</exception>
+        internal void ReadToken(string authorizationHeader, int offset, int length)
         {
             // JWT must have 2 dots for JWS or 4 dots for JWE (a.b.c.d.e)
+
+            ReadOnlySpan<char> encodedJsonSpan = authorizationHeader.AsSpan(offset, length);
 
             Dot1 = encodedJsonSpan.IndexOf("."); 
             if (Dot1 == -1 || Dot1 == encodedJsonSpan.Length - 1)
@@ -683,7 +715,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
             }
 
-            EncodedToken = encodedJsonSpan.ToString(); // TODO: Discuss: This is expensive. Is there a better way to do this?
+            _authorizationHeader = authorizationHeader;
+            _encodedJsonOffset = offset;
+            _encodedJsonLength = length;
         }
 #endif
 

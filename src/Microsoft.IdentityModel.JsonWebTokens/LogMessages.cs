@@ -54,6 +54,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal const string IDX14310 = "IDX14310: JWE authentication tag is missing.";
         internal const string IDX14311 = "IDX14311: Unable to decode the authentication tag as a Base64Url encoded string.";
         internal const string IDX14312 = "IDX14312: Unable to decode the cipher text as a Base64Url encoded string.";
+        internal const string IDX14313 = "IDX14313: ";
 
         #pragma warning restore 1591
     }
