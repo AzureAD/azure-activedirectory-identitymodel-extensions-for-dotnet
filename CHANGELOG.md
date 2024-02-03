@@ -11,7 +11,8 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 
 ### Documentation:
 - Update comment for `azp` in `JsonWebToken`. See [#2475](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2475) for details.
-
+- Link to breaking change announcement. See [#2478].
+- Fix typo in log message. See [#2479].
 7.3.0
 ======
 ### New Features:
