@@ -27,7 +27,7 @@ namespace Microsoft.IdentityModel.Validators
         internal const string V2EndpointSuffixWithTrailingSlash = $"{V2EndpointSuffix}/";
         internal const string TenantIdTemplate = "{tenantid}";
 
-        private Func<string, CancellationToken, Task<BaseConfigurationManager>> _configurationManagerProvider;
+        private Func<string, BaseConfigurationManager> _configurationManagerProvider;
 
         internal AadIssuerValidator(
             HttpClient httpClient,
@@ -39,9 +39,10 @@ namespace Microsoft.IdentityModel.Validators
         }
 
         internal AadIssuerValidator(
-            string aadAuthority,
-            Func<string, CancellationToken, Task<BaseConfigurationManager>> configurationManagerProvider)
-            : this(null, aadAuthority)
+            HttpClient httpClient,
+            string aadAuthority,            
+            Func<string, BaseConfigurationManager> configurationManagerProvider)
+            : this(httpClient, aadAuthority)
         {
             _configurationManagerProvider = configurationManagerProvider;
         }
@@ -190,8 +191,6 @@ namespace Microsoft.IdentityModel.Validators
 
             try
             {
-
-                // replace here
                 var effectiveConfigurationManager = GetEffectiveConfigurationManager(securityToken);
                 var baseConfiguration = await GetBaseConfiguration(effectiveConfigurationManager, validationParameters).ConfigureAwait(false);
                 string aadIssuer = baseConfiguration.Issuer;
@@ -270,6 +269,7 @@ namespace Microsoft.IdentityModel.Validators
         /// Gets an <see cref="AadIssuerValidator"/> for an Azure Active Directory (AAD) authority.
         /// </summary>
         /// <param name="aadAuthority">The authority to create the validator for, e.g. https://login.microsoftonline.com/. </param>
+        /// <param name="httpClient">Optional HttpClient to use to retrieve the endpoint metadata (can be null).</param>
         /// <param name="configurationManagerProvider">Configuration manager provider. Injection point for metadata managed outside of the class.</param>
         /// <example><code>
         /// AadIssuerValidator aadIssuerValidator = AadIssuerValidator.GetAadIssuerValidator(authority, configurationManagerProvider);
@@ -277,12 +277,7 @@ namespace Microsoft.IdentityModel.Validators
         /// </code></example>
         /// <returns>A <see cref="AadIssuerValidator"/> for the aadAuthority.</returns>
         /// <exception cref="ArgumentNullException">if <paramref name="aadAuthority"/> is null or empty.</exception>
-        public static AadIssuerValidator GetAadIssuerValidator(string aadAuthority, Func<string, CancellationToken, Task<BaseConfigurationManager>> configurationManagerProvider)
-        {
-            return GetAadIssuerValidator(aadAuthority, null, configurationManagerProvider);
-        }
-
-        private static AadIssuerValidator GetAadIssuerValidator(string aadAuthority, HttpClient httpClient, Func<string, CancellationToken, Task<BaseConfigurationManager>> configurationManagerProvider)
+        public static AadIssuerValidator GetAadIssuerValidator(string aadAuthority, HttpClient httpClient, Func<string, BaseConfigurationManager> configurationManagerProvider)
         {
             if (string.IsNullOrEmpty(aadAuthority))
                 throw LogHelper.LogArgumentNullException(nameof(aadAuthority));
@@ -291,7 +286,10 @@ namespace Microsoft.IdentityModel.Validators
                 return aadIssuerValidator;
 
             if (configurationManagerProvider != null)
-                s_issuerValidators[aadAuthority] = new AadIssuerValidator(aadAuthority, configurationManagerProvider);
+                s_issuerValidators[aadAuthority] = new AadIssuerValidator(
+                    httpClient,
+                    aadAuthority,
+                    configurationManagerProvider);
             else
                 s_issuerValidators[aadAuthority] = new AadIssuerValidator(
                     httpClient,
@@ -358,10 +356,14 @@ namespace Microsoft.IdentityModel.Validators
             if (_configurationManagerProvider != null)
             {
                 var aadAuthority = isV2Issuer ? AadAuthorityV2 : AadAuthorityV1;
-                return _configurationManagerProvider(aadAuthority, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+                var configurationManager = _configurationManagerProvider(aadAuthority);
+
+                if (configurationManager != null)
+                    return configurationManager;
             }
-            else
-                return isV2Issuer ? ConfigurationManagerV2 : ConfigurationManagerV1;
+
+            // If no provider or provider returned null, fallback to previous strategy
+            return isV2Issuer ? ConfigurationManagerV2 : ConfigurationManagerV1;
         }
 
         private static async Task<BaseConfiguration> GetBaseConfiguration(BaseConfigurationManager configurationManager, TokenValidationParameters validationParameters)
