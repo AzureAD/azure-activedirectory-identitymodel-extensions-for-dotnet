@@ -11,11 +11,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// </summary>
     internal static class LogMessages
     {
-        #pragma warning disable 1591
-
-        // This reuses the ID of TokenLogMessages.IDX10506 to provide a message more specific to JsonWebTokens while allowing people searching the ID to search solutions provided for the old message like those at https://stackoverflow.com/questions/77515249/custom-token-validator-not-working-in-net-8
-        internal const string IDX10506 = "IDX10506: Signature validation failed. The user defined 'Delegate' specified on TokenValidationParameters did not return a '{0}', but returned a '{1}' when validating token: '{2}'. If you are using ASP.NET Core 8 or later, see https://learn.microsoft.com/en-us/dotnet/core/compatibility/aspnet-core/8.0/securitytoken-events for more details.";
-
         // signature creation / validation
         internal const string IDX14000 = "IDX14000: Signature validation of this JWT is not supported for: Algorithm: '{0}', SecurityKey: '{1}'.";
 
@@ -42,7 +37,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal const string IDX14200 = "IDX14200: Creating raw signature using the signature credentials.";
         internal const string IDX14201 = "IDX14201: Creating raw signature using the signature credentials. Caching SignatureProvider: '{0}'.";
 
-
         // parsing
         //internal const string IDX14300 = "IDX14300: Could not parse '{0}' : '{1}' as a '{2}'.";
         //internal const string IDX14301 = "IDX14301: Unable to parse the header into a JSON object. \nHeader: '{0}'.";
@@ -57,7 +51,5 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal const string IDX14310 = "IDX14310: JWE authentication tag is missing.";
         internal const string IDX14311 = "IDX14311: Unable to decode the authentication tag as a Base64Url encoded string.";
         internal const string IDX14312 = "IDX14312: Unable to decode the cipher text as a Base64Url encoded string.";
-
-        #pragma warning restore 1591
     }
 }
