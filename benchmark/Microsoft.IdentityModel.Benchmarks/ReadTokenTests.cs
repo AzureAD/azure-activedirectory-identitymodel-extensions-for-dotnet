@@ -24,9 +24,9 @@ namespace Microsoft.IdentityModel.Benchmarks
             var jsonWebTokenHandler = new JsonWebTokenHandler();
             var jwsTokenDescriptor = new SecurityTokenDescriptor
             {
-                Claims = BenchmarkUtils.Claims,
                 SigningCredentials = BenchmarkUtils.SigningCredentialsRsaSha256,
-                TokenType = JwtHeaderParameterNames.Jwk
+                TokenType = JwtHeaderParameterNames.Jwk,
+                Claims = BenchmarkUtils.Claims
             };
 
             _encodedJWS = jsonWebTokenHandler.CreateToken(jwsTokenDescriptor);
@@ -35,6 +35,7 @@ namespace Microsoft.IdentityModel.Benchmarks
             {
                 SigningCredentials = BenchmarkUtils.SigningCredentialsRsaSha256,
                 EncryptingCredentials = BenchmarkUtils.EncryptingCredentialsAes256Sha512,
+                TokenType = JwtHeaderParameterNames.Jwk,
                 Claims = BenchmarkUtils.Claims
             };
 
