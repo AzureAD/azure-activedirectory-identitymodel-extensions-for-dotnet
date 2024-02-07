@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         private string _encryptedKey;
         private string _initializationVector;
         private List<string> _audiences;
-        private ReadOnlyMemory<char> _encodedTokenMemory;
+        private readonly ReadOnlyMemory<char> _encodedTokenMemory;
 
         #region properties relating to the header
         // when constructing a JWT, these properties, when found, will be set
@@ -82,6 +82,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(jwtEncodedString)));
 
             ReadToken(jwtEncodedString.AsMemory());
+
+            _encodedToken = jwtEncodedString;
         }
 
         /// <summary>
@@ -104,6 +106,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(encodedTokenMemory)));
 
             ReadToken(encodedTokenMemory);
+
+            _encodedTokenMemory = encodedTokenMemory;
         }
 
         /// <summary>
@@ -134,6 +138,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             var encodedToken = encodedHeader + "." + encodedPayload + ".";
 
             ReadToken(encodedToken.AsMemory());
+
+            _encodedToken = encodedToken;
         }
 
         internal string ActualIssuer { get; set; }
@@ -557,8 +563,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14312, ex));
                 }
             }
-
-            _encodedTokenMemory = encodedTokenMemory;
         }
 
         internal JsonClaimSet CreateClaimSet(ReadOnlySpan<char> strSpan, int startIndex, int length, bool createHeaderClaimSet)
