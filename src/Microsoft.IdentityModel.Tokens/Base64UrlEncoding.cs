@@ -59,7 +59,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             int outputsize = ValidateAndGetOutputSize(input, offset, length);
             byte[] output = new byte[outputsize];
-            Decode(input, offset, length, output);
+            Decode(input.AsSpan(), offset, length, output);
             return output;
         }
 
@@ -86,7 +86,7 @@ namespace Microsoft.IdentityModel.Tokens
             byte[] output = ArrayPool<byte>.Shared.Rent(outputsize);
             try
             {
-                Decode(input, offset, length, output);
+                Decode(input.AsSpan(), offset, length, output);
                 return action(output, outputsize, argx);
             }
             finally
@@ -117,7 +117,7 @@ namespace Microsoft.IdentityModel.Tokens
             byte[] output = ArrayPool<byte>.Shared.Rent(outputsize);
             try
             {
-                Decode(input, offset, length, output);
+                Decode(input.AsSpan(), offset, length, output);
                 return action(output, outputsize);
             }
             finally
@@ -161,31 +161,13 @@ namespace Microsoft.IdentityModel.Tokens
             byte[] output = ArrayPool<byte>.Shared.Rent(outputsize);
             try
             {
-                Decode(input, offset, length, output);
+                Decode(input.AsSpan(), offset, length, output);
                 return action(output, outputsize, argx, argy, argz);
             }
             finally
             {
                 ArrayPool<byte>.Shared.Return(output);
             }
-        }
-
-        /// <summary>
-        /// Decodes a Base64UrlEncoded string into a byte array.
-        /// </summary>
-        /// <param name="input">String to decode.</param>
-        /// <param name="offset">Index of char in <paramref name="input"/> to start decode operation.</param>
-        /// <param name="length">Number of chars in <paramref name="input"/> to decode.</param>
-        /// <param name="output">byte array to place results.</param>
-        /// <remarks>
-        /// Changes from Base64UrlEncoder implementation
-        /// 1. Padding is optional.
-        /// 2. '+' and '-' are treated the same.
-        /// 3. '/' and '_' are treated the same.
-        /// </remarks>
-        private static void Decode(string input, int offset, int length, byte[] output)
-        {
-           Decode(input.AsSpan(), offset, length, output);  
         }
 
         /// <summary>
