@@ -399,7 +399,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <param name="encodedTokenMemory">A span representing a 'JSON Web Token' (JWT) in JWS or JWE Compact Serialization Format.</param>
         /// <exception cref="SecurityTokenMalformedException">if <paramref name="encodedTokenMemory"/> is malformed, a valid JWT should have either 2 dots (JWS) or 4 dots (JWE).</exception>
-        /// <exception cref="SecurityTokenMalformedException">if <paramref name="encodedTokenMemory"/> does not have an non-empty authentication tag after the 4th dot for a JWE.</exception>
+        /// <exception cref="SecurityTokenMalformedException">if <paramref name="encodedTokenMemory"/> does not have a non-empty authentication tag after the 4th dot for a JWE.</exception>
         /// <exception cref="SecurityTokenMalformedException">if <paramref name="encodedTokenMemory"/> has more than 4 dots.</exception>
         internal void ReadToken(ReadOnlyMemory<char> encodedTokenMemory)
         {
