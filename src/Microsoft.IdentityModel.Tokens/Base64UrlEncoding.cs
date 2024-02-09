@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             _ = input ?? throw LogHelper.LogArgumentNullException(nameof(input));
 
-            int outputsize = ValidateAndGetOutputSize(input, offset, length);
+            int outputsize = ValidateAndGetOutputSize(input.AsSpan(), offset, length);
             byte[] output = new byte[outputsize];
             Decode(input.AsSpan(), offset, length, output);
             return output;
@@ -77,12 +77,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// The buffer for the decode operation uses shared memory pool to avoid allocations.
         /// The length of the rented array of bytes may be larger than the decoded bytes, therefore the action needs to know the actual length to use.
-        /// The result of <see cref="ValidateAndGetOutputSize(string, int, int)"/> is passed to the action.
+        /// The result of <see cref="ValidateAndGetOutputSize"/> is passed to the action.
         /// </remarks>
         public static T Decode<T, TX>(string input, int offset, int length, TX argx, Func<byte[], int, TX, T> action)
         {
             _ = action ?? throw new ArgumentNullException(nameof(action));
-            int outputsize = ValidateAndGetOutputSize(input, offset, length);
+            int outputsize = ValidateAndGetOutputSize(input.AsSpan(), offset, length);
             byte[] output = ArrayPool<byte>.Shared.Rent(outputsize);
             try
             {
@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// The buffer for the decode operation uses shared memory pool to avoid allocations.
         /// The length of the rented array of bytes may be larger than the decoded bytes, therefore the action needs to know the actual length to use.
-        /// The result of <see cref="ValidateAndGetOutputSize(string, int, int)"/> is passed to the action.
+        /// The result of <see cref="ValidateAndGetOutputSize"/> is passed to the action.
         /// </remarks>
         public static T Decode<T>(string input, int offset, int length, Func<byte[], int, T> action)
         {
@@ -126,7 +126,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// The decode operation utilizes a shared memory pool to optimize memory allocations.
         /// Note that the length of the rented byte array may be larger than the decoded bytes, so the action must handle the actual length accordingly.
-        /// The result of <see cref="ValidateAndGetOutputSize(string, int, int)"/> is passed to the action.
+        /// The result of <see cref="ValidateAndGetOutputSize"/> is passed to the action.
         /// </remarks>
         public static T Decode<T>(ReadOnlySpan<char> input, int offset, int length, Func<byte[], int, T> action)
         {
@@ -163,7 +163,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// The buffer for the decode operation uses shared memory pool to avoid allocations.
         /// The length of the rented array of bytes may be larger than the decoded bytes, therefore the action needs to know the actual length to use.
-        /// The result of <see cref="ValidateAndGetOutputSize(string, int, int)"/> is passed to the action.
+        /// The result of <see cref="ValidateAndGetOutputSize"/> is passed to the action.
         /// </remarks>
         public static T Decode<T, TX, TY, TZ>(
             string input,
@@ -176,7 +176,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             _ = action ?? throw LogHelper.LogArgumentNullException(nameof(action));
 
-            int outputsize = ValidateAndGetOutputSize(input, offset, length);
+            int outputsize = ValidateAndGetOutputSize(input.AsSpan(), offset, length);
             byte[] output = ArrayPool<byte>.Shared.Rent(outputsize);
             try
             {
@@ -342,69 +342,6 @@ namespace Microsoft.IdentityModel.Tokens
             char[] output = new char[outputsize];
             WriteEncodedOutput(input, offset, length, output);
             return new string(output);
-        }
-
-        /// <summary>
-        /// Validates the input string for decode operation.
-        /// </summary>
-        /// <param name="inputString">String to validate.</param>
-        /// <param name="offset">Index of char in <paramref name="inputString"/> to start decode operation.</param>
-        /// <param name="length">Number of chars in <paramref name="inputString"/> to decode, starting from offset.</param>
-        /// <returns>Size of the decoded bytes arrays.</returns>
-        private static int ValidateAndGetOutputSize(string inputString, int offset, int length)
-        {
-            _ = inputString ?? throw LogHelper.LogArgumentNullException(nameof(inputString));
-            if (inputString.Length == 0)
-                return 0;
-
-            if (length == 0)
-                return 0;
-
-            if (offset < 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(
-                    LogHelper.FormatInvariant(
-                        LogMessages.IDX10716,
-                        LogHelper.MarkAsNonPII(nameof(offset)),
-                        LogHelper.MarkAsNonPII(offset))));
-
-            if (length < 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(
-                    LogHelper.FormatInvariant(
-                        LogMessages.IDX10716,
-                        LogHelper.MarkAsNonPII(nameof(length)),
-                        LogHelper.MarkAsNonPII(length))));
-
-            if (length + offset > inputString.Length)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(
-                    LogHelper.FormatInvariant(
-                        LogMessages.IDX10717,
-                        LogHelper.MarkAsNonPII(nameof(length)),
-                        LogHelper.MarkAsNonPII(nameof(offset)),
-                        LogHelper.MarkAsNonPII(nameof(inputString)),
-                        LogHelper.MarkAsNonPII(length),
-                        LogHelper.MarkAsNonPII(offset),
-                        LogHelper.MarkAsNonPII(inputString.Length))));
-
-            if (length % 4 == 1)
-                throw LogHelper.LogExceptionMessage(new FormatException(LogHelper.FormatInvariant(LogMessages.IDX10400, inputString)));
-
-            int lastCharPosition = offset + length - 1;
-
-            // Compute useful length (i.e. ignore padding characters)
-            if (inputString[lastCharPosition] == '=')
-            {
-                lastCharPosition--;
-                if (inputString[lastCharPosition] == '=')
-                    lastCharPosition--;
-            }
-
-            int effectiveLength = 1 + (lastCharPosition - offset);
-            int outputsize = effectiveLength % 4;
-            if (outputsize > 0)
-                outputsize--;
-
-            outputsize += (effectiveLength / 4) * 3;
-            return outputsize;
         }
 
         /// <summary>
