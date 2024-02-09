@@ -1598,6 +1598,30 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     Token = EncodedJwts.JWEEmptyAuthenticationTag,
                 });
 
+                theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.JWEInvalidHeader))
+                {
+                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14102:", typeof(FormatException), true),
+                    Token = EncodedJwts.JWEInvalidHeader,
+                });
+
+                theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.JWEInvalidIV))
+                {
+                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14309:", typeof(FormatException), true),
+                    Token = EncodedJwts.JWEInvalidIV,
+                });
+
+                theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.JWEInvalidCiphertext))
+                {
+                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14312:", typeof(FormatException), true),
+                    Token = EncodedJwts.JWEInvalidCiphertext,
+                });
+
+                theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.JWEInvalidAuthenticationTag))
+                {
+                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14311:", typeof(FormatException), true),
+                    Token = EncodedJwts.JWEInvalidAuthenticationTag,
+                });
+
                 return theoryData;
             }
         }

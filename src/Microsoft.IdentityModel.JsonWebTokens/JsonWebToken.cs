@@ -432,7 +432,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 IsSigned = !(Dot2 + 1 == encodedTokenSpan.Length);
                 try
                 {
-                    Header = CreateClaimSet(encodedTokenSpan, 0, Dot1, createHeaderClaimSet: true);
+                    Header = Base64UrlEncoding.Decode(encodedTokenSpan, 0, Dot1, CreateHeaderClaimSet);
                 }
                 catch (Exception ex)
                 {
@@ -444,7 +444,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 try
                 {
-                    Payload = CreateClaimSet(encodedTokenSpan, Dot1 + 1, Dot2 - Dot1 - 1, createHeaderClaimSet: false);
+                    Payload = Base64UrlEncoding.Decode(encodedTokenSpan, Dot1 + 1, Dot2 - Dot1 - 1, CreatePayloadClaimSet);
                 }
                 catch (Exception ex)
                 {
@@ -564,22 +564,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
             }
         }
-
-        internal JsonClaimSet CreateClaimSet(ReadOnlySpan<char> strSpan, int startIndex, int length, bool createHeaderClaimSet)
-        {
-            int outputSize = Base64UrlEncoding.ValidateAndGetOutputSize(strSpan, startIndex, length);
-            byte[] output = ArrayPool<byte>.Shared.Rent(outputSize);
-            try
-            {
-                Base64UrlEncoding.Decode(strSpan, startIndex, length, output);
-                return createHeaderClaimSet ? CreateHeaderClaimSet(output.AsSpan()) : CreatePayloadClaimSet(output.AsSpan());
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(output);
-            }
-        }
-
+        
         /// <summary>
         /// Returns the encoded token without signature or authentication tag.
         /// </summary>

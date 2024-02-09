@@ -111,13 +111,32 @@ namespace Microsoft.IdentityModel.Tokens
         /// </remarks>
         public static T Decode<T>(string input, int offset, int length, Func<byte[], int, T> action)
         {
+           return Decode(input, offset, length, action);
+        }
+
+        /// <summary>
+        /// Decodes a Base64UrlEncoded span starting from a specified index in the input string and performs a specified action on the decoded bytes.
+        /// </summary>
+        /// <param name="input">The string to decode.</param>
+        /// <param name="offset">The index of the character in <paramref name="input"/> to start the decode operation from.</param>
+        /// <param name="length">The count of characters in <paramref name="input"/> to decode.</param>
+        /// <param name="action">The action to perform on the decoded bytes, with the result type specified by <typeparamref name="T"/>.</param>
+        /// <typeparam name="T">The return type of operation.</typeparam>
+        /// <returns>An instance of type {T} as a result of the specified action on the decoded bytes.</returns>
+        /// <remarks>
+        /// The decode operation utilizes a shared memory pool to optimize memory allocations.
+        /// Note that the length of the rented byte array may be larger than the decoded bytes, so the action must handle the actual length accordingly.
+        /// The result of <see cref="ValidateAndGetOutputSize(string, int, int)"/> is passed to the action.
+        /// </remarks>
+        public static T Decode<T>(ReadOnlySpan<char> input, int offset, int length, Func<byte[], int, T> action)
+        {
             _ = action ?? throw new ArgumentNullException(nameof(action));
 
             int outputsize = ValidateAndGetOutputSize(input, offset, length);
             byte[] output = ArrayPool<byte>.Shared.Rent(outputsize);
             try
             {
-                Decode(input.AsSpan(), offset, length, output);
+                Decode(input, offset, length, output);
                 return action(output, outputsize);
             }
             finally
