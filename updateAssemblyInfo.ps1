@@ -47,7 +47,7 @@ if ( $packageType -eq "release")
 }
 else
 {
-    $versionSuffix = $nugetSuffix + "-1" 
+    $versionSuffix = $nugetSuffix + "1" 
 }
 
 Write-Host "nugetSuffix: " $nugetSuffix
