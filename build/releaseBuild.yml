@@ -197,7 +197,6 @@ jobs:
 
   - task: NuGetCommand@2
     displayName: 'Upload NuGet Package to VSTS NuGet'
-    condition: eq(variables['NugetPackageType'], 'preview')
     inputs:
       command: push
       packagesToPush: '$(Build.Repository.LocalPath)\artifacts\*.nupkg'
