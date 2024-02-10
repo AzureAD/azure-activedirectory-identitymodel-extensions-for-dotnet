@@ -77,7 +77,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// The buffer for the decode operation uses shared memory pool to avoid allocations.
         /// The length of the rented array of bytes may be larger than the decoded bytes, therefore the action needs to know the actual length to use.
-        /// The result of <see cref="ValidateAndGetOutputSize"/> is passed to the action.
+        /// The result of <see cref="ValidateAndGetOutputSize(ReadOnlySpan{char}, int, int)"/> is passed to the action.
         /// </remarks>
         public static T Decode<T, TX>(string input, int offset, int length, TX argx, Func<byte[], int, TX, T> action)
         {
@@ -107,11 +107,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// The buffer for the decode operation uses shared memory pool to avoid allocations.
         /// The length of the rented array of bytes may be larger than the decoded bytes, therefore the action needs to know the actual length to use.
-        /// The result of <see cref="ValidateAndGetOutputSize"/> is passed to the action.
+        /// The result of <see cref="ValidateAndGetOutputSize(ReadOnlySpan{char}, int, int)"/> is passed to the action.
         /// </remarks>
         public static T Decode<T>(string input, int offset, int length, Func<byte[], int, T> action)
         {
-           return Decode(input, offset, length, action);
+            _ = action ?? throw new ArgumentNullException(nameof(action));
+
+            return Decode(input.AsSpan(), offset, length, action);
         }
 
         /// <summary>
@@ -126,7 +128,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// The decode operation utilizes a shared memory pool to optimize memory allocations.
         /// Note that the length of the rented byte array may be larger than the decoded bytes, so the action must handle the actual length accordingly.
-        /// The result of <see cref="ValidateAndGetOutputSize"/> is passed to the action.
+        /// The result of <see cref="ValidateAndGetOutputSize(ReadOnlySpan{char}, int, int)"/> is passed to the action.
         /// </remarks>
         public static T Decode<T>(ReadOnlySpan<char> input, int offset, int length, Func<byte[], int, T> action)
         {
@@ -163,7 +165,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// The buffer for the decode operation uses shared memory pool to avoid allocations.
         /// The length of the rented array of bytes may be larger than the decoded bytes, therefore the action needs to know the actual length to use.
-        /// The result of <see cref="ValidateAndGetOutputSize"/> is passed to the action.
+        /// The result of <see cref="ValidateAndGetOutputSize(ReadOnlySpan{char}, int, int)"/> is passed to the action.
         /// </remarks>
         public static T Decode<T, TX, TY, TZ>(
             string input,
@@ -342,6 +344,20 @@ namespace Microsoft.IdentityModel.Tokens
             char[] output = new char[outputsize];
             WriteEncodedOutput(input, offset, length, output);
             return new string(output);
+        }
+
+        /// <summary>
+        /// Validates the input string for decode operation.
+        /// </summary>
+        /// <param name="inputString">String to validate.</param>
+        /// <param name="offset">Index of char in <paramref name="inputString"/> to start decode operation.</param>
+        /// <param name="length">Number of chars in <paramref name="inputString"/> to decode, starting from offset.</param>
+        /// <returns>Size of the decoded bytes arrays.</returns>
+        private static int ValidateAndGetOutputSize(string inputString, int offset, int length)
+        {
+            _ = inputString ?? throw LogHelper.LogArgumentNullException(nameof(inputString));
+
+            return ValidateAndGetOutputSize(inputString.AsSpan(), offset, length);
         }
 
         /// <summary>

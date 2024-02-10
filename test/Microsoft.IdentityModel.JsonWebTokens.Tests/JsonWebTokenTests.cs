@@ -1690,7 +1690,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.Equal("11.1", numericList[1].Value);
         }
 
-#if NET6_0_OR_GREATER
         // Test to verify equality between JsonWebTokens created from a string and an equivalent span
         [Theory, MemberData(nameof(ParseTokenTheoryData))]
         public void CompareJsonWebToken(JwtTheoryData theoryData)
@@ -1710,7 +1709,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
             TestUtilities.AssertFailIfErrors(context);
         }
-#endif
     }
 
     public class ParseTimeValuesTheoryData : TheoryDataBase
