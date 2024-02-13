@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         private static string GetCacheKeyPrivate(SecurityKey securityKey, string algorithm, string typeofProvider)
         {
-            return $"{securityKey.GetType()}-{securityKey.InternalId}-{algorithm}-{typeofProvider}";
+            return securityKey.GetCryptoProviderCacheKey(algorithm, typeofProvider);
         }
 
         /// <summary>
