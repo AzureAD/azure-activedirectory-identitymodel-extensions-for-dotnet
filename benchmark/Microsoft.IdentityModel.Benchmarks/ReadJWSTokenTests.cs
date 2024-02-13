@@ -8,15 +8,15 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Benchmarks
 {
-    // dotnet run -c release -f net8.0 --filter Microsoft.IdentityModel.Benchmarks.ReadTokenTests*
+    // dotnet run -c release -f net8.0 --filter Microsoft.IdentityModel.Benchmarks.ReadJWSTokenTests*
 
     [Config(typeof(BenchmarkConfig))]
     [HideColumns("Type", "Job", "WarmupCount", "LaunchCount")]
     [MemoryDiagnoser]
-    public class ReadTokenTests
+    [RankColumn]
+    public class ReadJWSTokenTests
     {
         string _encodedJWS;
-        string _encryptedJWE;
 
         [GlobalSetup]
         public void Setup()
@@ -30,16 +30,6 @@ namespace Microsoft.IdentityModel.Benchmarks
             };
 
             _encodedJWS = jsonWebTokenHandler.CreateToken(jwsTokenDescriptor);
-
-            var jweTokenDescriptor = new SecurityTokenDescriptor
-            {
-                SigningCredentials = BenchmarkUtils.SigningCredentialsRsaSha256,
-                EncryptingCredentials = BenchmarkUtils.EncryptingCredentialsAes256Sha512,
-                TokenType = JwtHeaderParameterNames.Jwk,
-                Claims = BenchmarkUtils.Claims
-            };
-
-            _encryptedJWE = jsonWebTokenHandler.CreateToken(jweTokenDescriptor);
         }
 
         [Benchmark]
@@ -52,18 +42,6 @@ namespace Microsoft.IdentityModel.Benchmarks
         public JsonWebToken ReadJWS_FromMemory()
         {
             return new JsonWebToken(_encodedJWS.AsMemory());
-        }
-
-        [Benchmark]
-        public JsonWebToken ReadJWE_FromString()
-        {
-            return new JsonWebToken(_encryptedJWE);
-        }
-
-        [Benchmark]
-        public JsonWebToken ReadJWE_FromMemory()
-        {
-            return new JsonWebToken(_encryptedJWE.AsMemory());
         }
     }
 }

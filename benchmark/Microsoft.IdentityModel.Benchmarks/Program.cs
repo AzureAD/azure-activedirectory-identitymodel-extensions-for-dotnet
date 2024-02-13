@@ -24,7 +24,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         }
         private static void DebugThroughTests()
         {
-            ReadTokenTests readTokenTests = new ReadTokenTests();
+            ReadJWETokenTests readTokenTests = new ReadJWETokenTests();
             readTokenTests.Setup();
             readTokenTests.ReadJWE_FromMemory();
 
