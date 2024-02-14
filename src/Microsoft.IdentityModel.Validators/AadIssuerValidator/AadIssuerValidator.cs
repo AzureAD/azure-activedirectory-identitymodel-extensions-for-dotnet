@@ -191,7 +191,9 @@ namespace Microsoft.IdentityModel.Validators
 
             try
             {
-                var effectiveConfigurationManager = GetEffectiveConfigurationManager(securityToken);
+                var isV2Issuer = IsV2Issuer(securityToken);
+
+                var effectiveConfigurationManager = GetEffectiveConfigurationManager(isV2Issuer);
                 var baseConfiguration = await GetBaseConfiguration(effectiveConfigurationManager, validationParameters).ConfigureAwait(false);
                 string aadIssuer = baseConfiguration.Issuer;
 
@@ -202,9 +204,10 @@ namespace Microsoft.IdentityModel.Validators
                         // We need to update LKG on the self-managed config manager.
                         // The LKG of the one coming from provider, should be handled by the provider after successful validation
                         // unless it is only fetched for the issuer and it's different than the authority.
-                        if (_configurationManagerProvider == null)
+                        if (_configurationManagerProvider == null ||
+                            (_configurationManagerProvider != null && isV2Issuer != IsV2Authority))
                         {
-                            effectiveConfigurationManager.LastKnownGoodConfiguration = new OpenIdConnectConfiguration() { Issuer = aadIssuer };
+                            effectiveConfigurationManager.LastKnownGoodConfiguration = baseConfiguration;
                         }
                         return issuer;
                     }
@@ -282,18 +285,18 @@ namespace Microsoft.IdentityModel.Validators
             if (string.IsNullOrEmpty(aadAuthority))
                 throw LogHelper.LogArgumentNullException(nameof(aadAuthority));
 
-            if (s_issuerValidators.TryGetValue(aadAuthority, out AadIssuerValidator aadIssuerValidator))
-                return aadIssuerValidator;
-
             if (configurationManagerProvider != null)
-                s_issuerValidators[aadAuthority] = new AadIssuerValidator(
+                return new AadIssuerValidator(
                     httpClient,
                     aadAuthority,
                     configurationManagerProvider);
-            else
-                s_issuerValidators[aadAuthority] = new AadIssuerValidator(
-                    httpClient,
-                    aadAuthority);
+
+            if (s_issuerValidators.TryGetValue(aadAuthority, out AadIssuerValidator aadIssuerValidator))
+                return aadIssuerValidator;
+
+            s_issuerValidators[aadAuthority] = new AadIssuerValidator(
+                httpClient,
+                aadAuthority);
 
             return s_issuerValidators[aadAuthority];
         }
@@ -349,10 +352,8 @@ namespace Microsoft.IdentityModel.Validators
                 securityToken.Issuer.EndsWith(V2EndpointSuffix, StringComparison.OrdinalIgnoreCase);
         }
 
-        private BaseConfigurationManager GetEffectiveConfigurationManager(SecurityToken securityToken)
-        {
-            var isV2Issuer = IsV2Issuer(securityToken);
-
+        private BaseConfigurationManager GetEffectiveConfigurationManager(bool isV2Issuer)
+        {        
             if (_configurationManagerProvider != null)
             {
                 var aadAuthority = isV2Issuer ? AadAuthorityV2 : AadAuthorityV1;
