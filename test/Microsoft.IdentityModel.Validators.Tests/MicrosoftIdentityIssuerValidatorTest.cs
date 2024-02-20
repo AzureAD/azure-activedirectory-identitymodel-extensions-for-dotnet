@@ -34,6 +34,11 @@ namespace Microsoft.IdentityModel.Validators.Tests
             return AadIssuerValidator.GetAadIssuerValidator(authority, _httpClient);
         }
 
+        private AadIssuerValidator CreateIssuerValidatorWithConfigurationProvider(string authority, Func<string, BaseConfigurationManager> configurationProvider)
+        {
+            return AadIssuerValidator.GetAadIssuerValidator(authority, _httpClient, configurationProvider);
+        }
+
         [Fact]
         public void GetIssuerValidator_NullOrEmptyAuthority_ThrowsException()
         {
@@ -176,14 +181,23 @@ namespace Microsoft.IdentityModel.Validators.Tests
         }
 
         [Theory]
-        [InlineData(ValidatorConstants.ClaimNameTid, ValidatorConstants.AuthorityCommonTenant, ValidatorConstants.AadIssuer)]
-        [InlineData(ValidatorConstants.TenantId, ValidatorConstants.AuthorityCommonTenant, ValidatorConstants.AadIssuer)]
-        [InlineData(ValidatorConstants.ClaimNameTid, ValidatorConstants.UsGovTenantId, ValidatorConstants.UsGovIssuer)]
-        [InlineData(ValidatorConstants.TenantId, ValidatorConstants.UsGovTenantId, ValidatorConstants.UsGovIssuer)]
-        public void Validate_IssuerMatchedInValidIssuer_ReturnsIssuer(string tidClaimType, string tenantId, string issuer)
+        [InlineData(ValidatorConstants.ClaimNameTid, ValidatorConstants.AuthorityCommonTenant, ValidatorConstants.AadIssuer, false)]
+        [InlineData(ValidatorConstants.TenantId, ValidatorConstants.AuthorityCommonTenant, ValidatorConstants.AadIssuer, false)]
+        [InlineData(ValidatorConstants.ClaimNameTid, ValidatorConstants.UsGovTenantId, ValidatorConstants.UsGovIssuer, false)]
+        [InlineData(ValidatorConstants.TenantId, ValidatorConstants.UsGovTenantId, ValidatorConstants.UsGovIssuer, false)]
+        [InlineData(ValidatorConstants.ClaimNameTid, ValidatorConstants.AuthorityCommonTenant, ValidatorConstants.AadIssuer, true)]
+        [InlineData(ValidatorConstants.TenantId, ValidatorConstants.AuthorityCommonTenant, ValidatorConstants.AadIssuer, true)]
+        [InlineData(ValidatorConstants.ClaimNameTid, ValidatorConstants.UsGovTenantId, ValidatorConstants.UsGovIssuer, true)]
+        [InlineData(ValidatorConstants.TenantId, ValidatorConstants.UsGovTenantId, ValidatorConstants.UsGovIssuer, true)]
+        public void Validate_IssuerMatchedInValidIssuer_ReturnsIssuer(string tidClaimType, string tenantId, string issuer, bool useConfigurationManagerProvider)
         {
             var context = new CompareContext();
-            var validator = new AadIssuerValidator(_httpClient, issuer);
+            AadIssuerValidator validator = null;
+            if (!useConfigurationManagerProvider)
+                validator = new AadIssuerValidator(_httpClient, issuer);
+            else
+                validator = new AadIssuerValidator(_httpClient, issuer, x => null);
+
             var tidClaim = new Claim(tidClaimType, tenantId);
 
             var issClaim = new Claim(ValidatorConstants.ClaimNameIss, issuer);
@@ -218,12 +232,20 @@ namespace Microsoft.IdentityModel.Validators.Tests
         }
 
         [Theory]
-        [InlineData(ValidatorConstants.ClaimNameTid, ValidatorConstants.TenantIdAsGuid, ValidatorConstants.V1Issuer)]
-        [InlineData(ValidatorConstants.TenantId, ValidatorConstants.TenantIdAsGuid, ValidatorConstants.V1Issuer)]
-        public void Validate_IssuerMatchedInValidV1Issuer_ReturnsIssuer(string tidClaimType, string tenantId, string issuer)
+        [InlineData(ValidatorConstants.ClaimNameTid, ValidatorConstants.TenantIdAsGuid, ValidatorConstants.V1Issuer, false)]
+        [InlineData(ValidatorConstants.TenantId, ValidatorConstants.TenantIdAsGuid, ValidatorConstants.V1Issuer, false)]
+        [InlineData(ValidatorConstants.ClaimNameTid, ValidatorConstants.TenantIdAsGuid, ValidatorConstants.V1Issuer, true)]
+        [InlineData(ValidatorConstants.TenantId, ValidatorConstants.TenantIdAsGuid, ValidatorConstants.V1Issuer, true)]
+        public void Validate_IssuerMatchedInValidV1Issuer_ReturnsIssuer(string tidClaimType, string tenantId, string issuer, bool useConfigurationProvider)
         {
             var context = new CompareContext();
-            var validator = new AadIssuerValidator(_httpClient, issuer);
+
+            AadIssuerValidator validator = null;
+            if (useConfigurationProvider == false)
+                validator = new AadIssuerValidator(_httpClient, issuer);
+            else
+                validator = new AadIssuerValidator(_httpClient, issuer, x => null);
+            
             var tidClaim = new Claim(tidClaimType, tenantId);
 
             var issClaim = new Claim(ValidatorConstants.ClaimNameIss, issuer);
@@ -242,12 +264,20 @@ namespace Microsoft.IdentityModel.Validators.Tests
         }
 
         [Theory]
-        [InlineData(ValidatorConstants.ClaimNameTid)]
-        [InlineData(ValidatorConstants.TenantId)]
-        public void Validate_IssuerMatchedInValidIssuers_ReturnsIssuer(string tidClaimType)
+        [InlineData(ValidatorConstants.ClaimNameTid, false)]
+        [InlineData(ValidatorConstants.TenantId, false)]
+        [InlineData(ValidatorConstants.ClaimNameTid, true)]
+        [InlineData(ValidatorConstants.TenantId, true)]
+        public void Validate_IssuerMatchedInValidIssuers_ReturnsIssuer(string tidClaimType, bool useConfigurationProvider)
         {
             var context = new CompareContext();
-            var validator = new AadIssuerValidator(_httpClient, ValidatorConstants.AadIssuer);
+
+            AadIssuerValidator validator = null;
+            if (useConfigurationProvider == false)
+                validator = new AadIssuerValidator(_httpClient, ValidatorConstants.AadIssuer);
+            else
+                validator = new AadIssuerValidator(_httpClient, ValidatorConstants.AadIssuer, x => null);
+
             var tidClaim = new Claim(tidClaimType, ValidatorConstants.TenantIdAsGuid);
 
             var issClaim = new Claim(ValidatorConstants.ClaimNameIss, ValidatorConstants.AadIssuer);
@@ -264,33 +294,48 @@ namespace Microsoft.IdentityModel.Validators.Tests
         }
 
         [Theory]
-        [InlineData(ValidatorConstants.ClaimNameTid)]
-        [InlineData(ValidatorConstants.TenantId)]
-        public void Validate_IssuerNotInTokenValidationParameters_ReturnsIssuer(string tidClaimType)
+        [InlineData(ValidatorConstants.ClaimNameTid, false)]
+        [InlineData(ValidatorConstants.TenantId, false)]
+        [InlineData(ValidatorConstants.ClaimNameTid, true)]
+        [InlineData(ValidatorConstants.TenantId, true)]
+        public void Validate_IssuerNotInTokenValidationParameters_ReturnsIssuer(string tidClaimType, bool useConfigurationProvider)
         {
             var context = new CompareContext();
-            var validator = new AadIssuerValidator(_httpClient, ValidatorConstants.AadIssuer);
+            AadIssuerValidator validator = null;
+            if (useConfigurationProvider == false)
+                validator = new AadIssuerValidator(_httpClient, ValidatorConstants.AadIssuer);
+            else
+                validator = new AadIssuerValidator(_httpClient, ValidatorConstants.AadIssuer, authority => new MockConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration() { Issuer = ValidatorConstants.AadIssuer }));
+
             var tidClaim = new Claim(tidClaimType, ValidatorConstants.TenantIdAsGuid);
 
             var issClaim = new Claim(ValidatorConstants.ClaimNameIss, ValidatorConstants.AadIssuer);
             var jwtSecurityToken = new JwtSecurityToken(issuer: ValidatorConstants.AadIssuer, claims: new[] { issClaim, tidClaim });
-            var tokenValidationParams = new TokenValidationParameters() { ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration() { Issuer = ValidatorConstants.AadIssuer }) };
-
-            var actualIssuer = validator.Validate(ValidatorConstants.AadIssuer, jwtSecurityToken, tokenValidationParams);
+           
+            var actualIssuer = validator.Validate(ValidatorConstants.AadIssuer, jwtSecurityToken, new TokenValidationParameters());
 
             IdentityComparer.AreEqual(ValidatorConstants.AadIssuer, actualIssuer, context);
             TestUtilities.AssertFailIfErrors(context);
         }
 
         [Theory]
-        [InlineData(ValidatorConstants.ClaimNameTid, ValidatorConstants.AadIssuer)]
-        [InlineData(ValidatorConstants.TenantId, ValidatorConstants.AadIssuer)]
-        [InlineData(ValidatorConstants.ClaimNameTid, ValidatorConstants.V1Issuer)]
-        [InlineData(ValidatorConstants.TenantId, ValidatorConstants.V1Issuer)]
-        public void ValidateJsonWebToken_ReturnsIssuer(string tidClaimType, string issuer)
+        [InlineData(ValidatorConstants.ClaimNameTid, ValidatorConstants.AadIssuer, false)]
+        [InlineData(ValidatorConstants.TenantId, ValidatorConstants.AadIssuer, false)]
+        [InlineData(ValidatorConstants.ClaimNameTid, ValidatorConstants.V1Issuer, false)]
+        [InlineData(ValidatorConstants.TenantId, ValidatorConstants.V1Issuer, false)]
+        [InlineData(ValidatorConstants.ClaimNameTid, ValidatorConstants.AadIssuer, true)]
+        [InlineData(ValidatorConstants.TenantId, ValidatorConstants.AadIssuer, true)]
+        [InlineData(ValidatorConstants.ClaimNameTid, ValidatorConstants.V1Issuer, true)]
+        [InlineData(ValidatorConstants.TenantId, ValidatorConstants.V1Issuer, true)]
+        public void ValidateJsonWebToken_ReturnsIssuer(string tidClaimType, string issuer, bool useConfigurationProvider)
         {
+            AadIssuerValidator validator = null;
+            if (useConfigurationProvider == false)
+                validator = new AadIssuerValidator(_httpClient, issuer);
+            else
+                validator = new AadIssuerValidator(_httpClient, issuer, authority => new MockConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration() { Issuer = issuer }));
+
             var context = new CompareContext();
-            var validator = new AadIssuerValidator(_httpClient, issuer);
             var tidClaim = new Claim(tidClaimType, ValidatorConstants.TenantIdAsGuid);
 
             var issClaim = new Claim(ValidatorConstants.ClaimNameIss, issuer);
@@ -299,29 +344,32 @@ namespace Microsoft.IdentityModel.Validators.Tests
             claims.Add(issClaim);
 
             var jsonWebToken = new JsonWebToken(Default.Jwt(Default.SecurityTokenDescriptor(Default.SymmetricSigningCredentials, claims)));
-            var tokenValidationParams = new TokenValidationParameters() { ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration() { Issuer = issuer }) };
-
-            var actualIssuer = validator.Validate(issuer, jsonWebToken, tokenValidationParams);
+            var actualIssuer = validator.Validate(issuer, jsonWebToken, new TokenValidationParameters());
 
             IdentityComparer.AreEqual(issuer, actualIssuer, context);
             TestUtilities.AssertFailIfErrors(context);
         }
 
         [Theory]
-        [InlineData(ValidatorConstants.ClaimNameTid)]
-        [InlineData(ValidatorConstants.TenantId)]
-        public void Validate_V1IssuerNotInTokenValidationParameters_ReturnsV1Issuer(string tidClaimType)
+        [InlineData(ValidatorConstants.ClaimNameTid, false)]
+        [InlineData(ValidatorConstants.TenantId, false)]
+        [InlineData(ValidatorConstants.ClaimNameTid, true)]
+        [InlineData(ValidatorConstants.TenantId, true)]
+        public void Validate_V1IssuerNotInTokenValidationParameters_ReturnsV1Issuer(string tidClaimType, bool useConfigurationProvider)
         {
+            AadIssuerValidator validator = null;
+            if (useConfigurationProvider == false)
+                validator = new AadIssuerValidator(_httpClient, ValidatorConstants.V1Issuer);
+            else
+                validator = new AadIssuerValidator(_httpClient, ValidatorConstants.V1Issuer, authority => new MockConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration() { Issuer = ValidatorConstants.V1Issuer }));
+
             var context = new CompareContext();
-            var validator = new AadIssuerValidator(_httpClient, ValidatorConstants.V1Issuer);
             var tidClaim = new Claim(tidClaimType, ValidatorConstants.TenantIdAsGuid);
 
             var issClaim = new Claim(ValidatorConstants.ClaimNameIss, ValidatorConstants.V1Issuer);
             var jwtSecurityToken = new JwtSecurityToken(issuer: ValidatorConstants.V1Issuer, claims: new[] { issClaim, tidClaim });
 
-            var tokenValidationParams = new TokenValidationParameters() { ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration() { Issuer = ValidatorConstants.V1Issuer }) };
-
-            var actualIssuer = validator.Validate(ValidatorConstants.V1Issuer, jwtSecurityToken, tokenValidationParams);
+            var actualIssuer = validator.Validate(ValidatorConstants.V1Issuer, jwtSecurityToken, new TokenValidationParameters());
 
             IdentityComparer.AreEqual(ValidatorConstants.V1Issuer, actualIssuer, context);
             TestUtilities.AssertFailIfErrors(context);
@@ -541,6 +589,101 @@ namespace Microsoft.IdentityModel.Validators.Tests
                     }));
 
             IdentityComparer.AreEqual(LogMessages.IDX40002, exception.Message, context);
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Theory]
+        [InlineData(true, true)]
+        [InlineData(true, false)]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        public void Validate_WithAuthorityUsingConfigurationProvider(bool isV2Token, bool isV2Authority)
+        {
+            var configurationManagerProvider = (string authority) =>
+            {
+                var configManagerMap = new Dictionary<string, BaseConfigurationManager>
+                {
+                    {
+                        ValidatorConstants.AuthorityV1,
+                        new MockConfigurationManager<OpenIdConnectConfiguration>(
+                           new OpenIdConnectConfiguration()
+                           {
+                               Issuer = ValidatorConstants.AadIssuerV1CommonAuthority
+                           })
+                    },
+                    {
+                        ValidatorConstants.AuthorityCommonTenantWithV2,
+                        new MockConfigurationManager<OpenIdConnectConfiguration>(
+                           new OpenIdConnectConfiguration()
+                           {
+                               Issuer = ValidatorConstants.AadIssuerV2CommonAuthority
+                           })
+                    }
+                };
+
+                return configManagerMap[authority];
+            };
+
+            var context = new CompareContext();
+            var tidClaim = new Claim(ValidatorConstants.ClaimNameTid, ValidatorConstants.TenantIdAsGuid);
+
+            var tokenIssuer = isV2Token ? ValidatorConstants.AadIssuer : ValidatorConstants.V1Issuer;
+            var issClaim = new Claim(ValidatorConstants.ClaimNameIss, tokenIssuer);
+            var jwtSecurityToken = new JwtSecurityToken(issuer: tokenIssuer, claims: new[] { issClaim, tidClaim });
+
+            var authority = isV2Authority ? ValidatorConstants.AuthorityCommonTenantWithV2 : ValidatorConstants.AuthorityV1;
+            var aadIssuerValidator = AadIssuerValidator.GetAadIssuerValidator(authority, _httpClient, configurationManagerProvider);
+
+            var actualIssuer = aadIssuerValidator.Validate(tokenIssuer, jwtSecurityToken, new TokenValidationParameters());
+
+            IdentityComparer.AreEqual(tokenIssuer, actualIssuer, context);
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
+        public void Validate_SetsLkgWithConfigurationProviderWhenValidationSuccessfulAndAuthorityVerDiffThanIssuer()
+        {
+            var v1ConfigurationMock = new OpenIdConnectConfiguration()
+            {
+                Issuer = ValidatorConstants.AadIssuerV1CommonAuthority
+            };
+
+            var v1ConfigurationManagerMock = new MockConfigurationManager<OpenIdConnectConfiguration>(v1ConfigurationMock);
+            var configurationManagerProvider = (string authority) =>
+            {
+                var configManagerMap = new Dictionary<string, BaseConfigurationManager>
+                {
+                    {
+                        ValidatorConstants.AuthorityV1,
+                        v1ConfigurationManagerMock
+                    },
+                    {
+                        ValidatorConstants.AuthorityCommonTenantWithV2,
+                        new MockConfigurationManager<OpenIdConnectConfiguration>(
+                           new OpenIdConnectConfiguration()
+                           {
+                               Issuer = ValidatorConstants.AadIssuerV2CommonAuthority
+                           })
+                    }
+                };
+
+                return configManagerMap[authority];
+            };
+
+            var context = new CompareContext();
+            var tidClaim = new Claim(ValidatorConstants.ClaimNameTid, ValidatorConstants.TenantIdAsGuid);
+
+            var v1TokenIssuer = ValidatorConstants.V1Issuer;
+            var issClaim = new Claim(ValidatorConstants.ClaimNameIss, v1TokenIssuer);
+            var jwtSecurityToken = new JwtSecurityToken(issuer: v1TokenIssuer, claims: new[] { issClaim, tidClaim });
+
+            var v2Authority = ValidatorConstants.AuthorityCommonTenantWithV2;
+            var aadIssuerValidator = AadIssuerValidator.GetAadIssuerValidator(v2Authority, _httpClient, configurationManagerProvider);
+
+            var actualIssuer = aadIssuerValidator.Validate(v1TokenIssuer, jwtSecurityToken, new TokenValidationParameters());
+
+            IdentityComparer.AreEqual(v1TokenIssuer, actualIssuer, context);
+            IdentityComparer.AreEqual(v1ConfigurationManagerMock.LastKnownGoodConfiguration, v1ConfigurationMock);
             TestUtilities.AssertFailIfErrors(context);
         }
     }
