@@ -214,17 +214,30 @@ namespace System.IdentityModel.Tokens.Jwt
             else
                 Enc = encryptingCredentials.Enc;
 
-            if (!string.IsNullOrEmpty(encryptingCredentials.KeyExchangePublicKey.KeyId))
-                Kid = encryptingCredentials.KeyExchangePublicKey.KeyId;
+            // Since developers may have already worked around this issue, implicitly taking a dependency on the
+            // old behavior, we guard the new behavior behind an AppContext switch. The new/RFC-conforming behavior
+            // is treated as opt-in. When the library is at the point where it is able to make breaking changes
+            // (such as the next major version update) we should consider whether or not this app-compat switch
+            // needs to be maintained.
+            if (AppContext.TryGetSwitch(AppCompatSwitches.UseRfcDefinitionOfEpkAndKid, out bool isEnabled) && isEnabled)
+            {
+                if (!string.IsNullOrEmpty(encryptingCredentials.KeyExchangePublicKey.KeyId))
+                    Kid = encryptingCredentials.KeyExchangePublicKey.KeyId;
+
+                // Parameter MUST be present [...] when [key agreement] algorithms are used: https://www.rfc-editor.org/rfc/rfc7518#section-4.6.1.1
+                if (SupportedAlgorithms.EcdsaWrapAlgorithms.Contains(encryptingCredentials.Alg))
+                    Add(JwtHeaderParameterNames.Epk, JsonWebKeyConverter.ConvertFromSecurityKey(encryptingCredentials.Key).RepresentAsAsymmetricPublicJwk());
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(encryptingCredentials.Key.KeyId))
+                    Kid = encryptingCredentials.Key.KeyId;
+            }
 
             if (string.IsNullOrEmpty(tokenType))
                 Typ = JwtConstants.HeaderType;
             else
                 Typ = tokenType;
-
-            // Parameter MUST be present [...] when [key agreement] algorithms are used: https://www.rfc-editor.org/rfc/rfc7518#section-4.6.1.1
-            if (SupportedAlgorithms.EcdsaWrapAlgorithms.Contains(encryptingCredentials.Alg))
-                Add(JwtHeaderParameterNames.Epk, JsonWebKeyConverter.ConvertFromSecurityKey(encryptingCredentials.Key).RepresentAsAsymmetricPublicJwk());
 
             AddAdditionalClaims(additionalHeaderClaims, encryptingCredentials.SetDefaultCtyClaim);
             EncryptingCredentials = encryptingCredentials;

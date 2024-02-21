@@ -1858,13 +1858,27 @@ namespace System.IdentityModel.Tokens.Jwt
 #if NET472 || NET6_0_OR_GREATER
                     if (SupportedAlgorithms.EcdsaWrapAlgorithms.Contains(jwtToken.Header.Alg))
                     {
-                        //// on decryption we get the public key from the EPK value see: https://datatracker.ietf.org/doc/html/rfc7518#appendix-C
-                        string epk = jwtToken.Header.GetStandardClaim(JwtHeaderParameterNames.Epk);
-                        var ephemeralPublicKey = new ECDsaSecurityKey(new JsonWebKey(epk), true);
+                        ECDsaSecurityKey publicKey;
+
+                        // Since developers may have already worked around this issue, implicitly taking a dependency on the
+                        // old behavior, we guard the new behavior behind an AppContext switch. The new/RFC-conforming behavior
+                        // is treated as opt-in. When the library is at the point where it is able to make breaking changes
+                        // (such as the next major version update) we should consider whether or not this app-compat switch
+                        // needs to be maintained.
+                        if (AppContext.TryGetSwitch(AppCompatSwitches.UseRfcDefinitionOfEpkAndKid, out bool isEnabled) && isEnabled)
+                        {
+                            //// on decryption we get the public key from the EPK value see: https://datatracker.ietf.org/doc/html/rfc7518#appendix-C
+                            string epk = jwtToken.Header.GetStandardClaim(JwtHeaderParameterNames.Epk);
+                            publicKey = new ECDsaSecurityKey(new JsonWebKey(epk), false);
+                        }
+                        else
+                        {
+                            publicKey = validationParameters.TokenDecryptionKey as ECDsaSecurityKey;
+                        }
 
                         var ecdhKeyExchangeProvider = new EcdhKeyExchangeProvider(
                             key as ECDsaSecurityKey,
-                            ephemeralPublicKey,
+                            publicKey,
                             jwtToken.Header.Alg,
                             jwtToken.Header.Enc);
                         string apu = jwtToken.Header.GetStandardClaim(JwtHeaderParameterNames.Apu);
