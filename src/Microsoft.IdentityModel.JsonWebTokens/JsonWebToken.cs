@@ -972,10 +972,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             get
             {
-                _iss ??= Payload.GetStringValue(JwtRegisteredClaimNames.Iss);
+                _iss ??= IssuerUtf8.ToString();
                 return _iss;
             }
         }
+
+        internal ReadOnlySpan<byte> IssuerUtf8 { get; set; }
 
         /// <summary>
         /// Gets the 'value' of the 'jti' claim from the payload.

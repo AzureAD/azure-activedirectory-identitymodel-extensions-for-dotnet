@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
@@ -893,11 +894,23 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public IEnumerable<string> ValidAudiences { get; set; }
 
+        private string _validIssuer;
+
         /// <summary>
         /// Gets or sets a <see cref="string"/> that represents a valid issuer that will be used to check against the token's issuer.
         /// The default is <c>null</c>.
         /// </summary>
-        public string ValidIssuer { get; set; }
+        public string ValidIssuer
+        {
+            get => _validIssuer;
+            set
+            {
+                _validIssuer = value;
+                ValidIssuerUtf8 = value != null ? Encoding.UTF8.GetBytes(value) : null;
+            }
+        }
+
+        internal ReadOnlySpan<byte> ValidIssuerUtf8 { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="IEnumerable{String}"/> that contains valid issuers that will be used to check against the token's issuer.
