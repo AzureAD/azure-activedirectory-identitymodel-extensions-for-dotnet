@@ -15,8 +15,6 @@ variables:
   - group: Middleware
   - name: BuildPlatform
     value: 'any cpu'
-  - name: BuildConfiguration
-    value: 'release'
 
     # The following variables are set in the release build UI:
     # BuildConfiguration: 'debug|release'
