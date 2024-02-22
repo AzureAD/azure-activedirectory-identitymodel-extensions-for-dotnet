@@ -55,6 +55,8 @@ namespace Microsoft.IdentityModel.Validators
         private string _aadAuthorityV2;
         private BaseConfigurationManager _configurationManagerV1;
         private BaseConfigurationManager _configurationManagerV2;
+        private IssuerLastKnownGood _issuerLKGV1;
+        private IssuerLastKnownGood _issuerLKGV2;
 
         internal BaseConfigurationManager ConfigurationManagerV1
         {
@@ -196,27 +198,30 @@ namespace Microsoft.IdentityModel.Validators
             {
                 var isV2Issuer = IsV2Issuer(securityToken);
                 var effectiveConfigurationManager = GetEffectiveConfigurationManager(isV2Issuer);
-                var baseConfiguration = await GetBaseConfiguration(effectiveConfigurationManager, validationParameters).ConfigureAwait(false);
 
-                // Decide whether to take the issuer to validate against from LKG or not.
-                var aadIssuer = baseConfiguration.Issuer;
-                if (validationParameters.ValidateWithLKG && effectiveConfigurationManager.LastKnownGoodConfiguration != null &&
-                    (_configurationManagerProvider == null || isV2Issuer == IsV2Authority))
-                    // If asked to use LKG,
-                    // Use the issuer from LKG if using self-managed state.
-                    // When using configurationManagerProvider, use LKG only if authority and token version matches;
-                    // otherwise, keep using the resolved issuer from baseConfiguration.
-                    aadIssuer = effectiveConfigurationManager.LastKnownGoodConfiguration.Issuer;
+                string aadIssuer = null;
+                if (validationParameters.ValidateWithLKG)
+                {
+                    // returns null if LKG issuer expired
+                    aadIssuer = GetEffectiveLKGIssuer(isV2Issuer);
+                }
+                else
+                {
+                    var baseConfiguration = await GetBaseConfiguration(effectiveConfigurationManager, validationParameters).ConfigureAwait(false);
+                    aadIssuer = baseConfiguration.Issuer;
+                }
 
-                var isIssuerValid = IsValidIssuer(aadIssuer, tenantId, issuer);
+                if (aadIssuer != null)
+                {
+                    var isIssuerValid = IsValidIssuer(aadIssuer, tenantId, issuer);
 
-                // The original LKG assignment behavior for previous self-state management.
-                if (_configurationManagerProvider == null && isIssuerValid && !validationParameters.ValidateWithLKG)
-                    effectiveConfigurationManager.LastKnownGoodConfiguration = baseConfiguration;
+                    // The original LKG assignment behavior for previous self-state management.
+                    if (isIssuerValid && !validationParameters.ValidateWithLKG)
+                        SetEffectiveLKGIssuer(aadIssuer, isV2Issuer, effectiveConfigurationManager.LastKnownGoodLifetime);
 
-                if (isIssuerValid)
-                    return issuer;
-
+                    if (isIssuerValid)
+                        return issuer;
+                }
             }
             catch (Exception ex)
             {
@@ -343,6 +348,31 @@ namespace Microsoft.IdentityModel.Validators
             {
                 return validIssuerTemplate == actualIssuer;
             }
+        }
+
+        private void SetEffectiveLKGIssuer(string aadIssuer, bool isV2Issuer, TimeSpan lastKnownGoodLifetime)
+        {
+            var issuerLKG = new IssuerLastKnownGood
+            {
+                Issuer = aadIssuer,
+                LastKnownGoodLifetime = lastKnownGoodLifetime
+            };
+
+            if (isV2Issuer)
+                _issuerLKGV2 = issuerLKG;
+            else
+                _issuerLKGV1 = issuerLKG;
+        }
+
+        private string GetEffectiveLKGIssuer(bool isV2Issuer)
+        {
+            var effectiveLKGIssuer = isV2Issuer ? _issuerLKGV2 : _issuerLKGV1;
+            if (effectiveLKGIssuer != null && effectiveLKGIssuer.IsValid)
+            {
+                return effectiveLKGIssuer.Issuer;
+            }
+
+            return null;
         }
 
         private static bool IsV2Issuer(SecurityToken securityToken)

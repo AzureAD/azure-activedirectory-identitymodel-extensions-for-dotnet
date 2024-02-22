@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 using System.Security.Claims;
+using System.Threading;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
@@ -666,12 +667,10 @@ namespace Microsoft.IdentityModel.Validators.Tests
             };
 
             aadIssuerValidator.ConfigurationManagerV2 = new MockConfigurationManager<OpenIdConnectConfiguration>(v2Configuration);
-            IdentityComparer.AreEqual(null, aadIssuerValidator.ConfigurationManagerV2.LastKnownGoodConfiguration, context);
-
+            
             // set LKG
             var actualIssuer = aadIssuerValidator.Validate(v2TokenIssuer, jwtSecurityToken, new TokenValidationParameters());
             IdentityComparer.AreEqual(v2TokenIssuer, actualIssuer, context);
-            IdentityComparer.AreEqual(v2Configuration, aadIssuerValidator.ConfigurationManagerV2.LastKnownGoodConfiguration, context);
             TestUtilities.AssertFailIfErrors(context);
 
             // replace config with broken issuer and validate with LKG
@@ -738,19 +737,12 @@ namespace Microsoft.IdentityModel.Validators.Tests
             var aadIssuerValidator = AadIssuerValidator.GetAadIssuerValidator(v2Authority, _httpClient, configurationManagerProvider);
             var v1AadIssuerValidator = AadIssuerValidator.GetAadIssuerValidator(v1Authority, _httpClient, configurationManagerProvider);
 
-            // fetch config to pull before validation and assert on LKG being null
-            IdentityComparer.AreEqual(null, v2ConfigurationManager.LastKnownGoodConfiguration, context);
-            
+            // set LKG
             var actualIssuer = aadIssuerValidator.Validate(v2TokenIssuer, jwtSecurityToken, new TokenValidationParameters());
 
-            // with configurationManager LKG is set outside of the validator
             IdentityComparer.AreEqual(v2TokenIssuer, actualIssuer, context);
-            IdentityComparer.AreEqual(null, v2ConfigurationManager.LastKnownGoodConfiguration, context);
             TestUtilities.AssertFailIfErrors(context);
-
-            // set LKG after entire token is validated
-            v2ConfigurationManager.LastKnownGoodConfiguration = v2Configuration;
-
+                        
             // refresh config to a one with a broken issuer and validate with LKG
             v2ConfigurationManager.RefreshedConfiguration = v2ConfigurationRefreshed;
             v2ConfigurationManager.RequestRefresh();
@@ -759,16 +751,12 @@ namespace Microsoft.IdentityModel.Validators.Tests
             IdentityComparer.AreEqual(v2TokenIssuer, actualIssuer, context);
             TestUtilities.AssertFailIfErrors(context);
 
-            // validating cross versions does not set LKG
             var v1TokenIssuer = ValidatorConstants.V1Issuer;
             issClaim = new Claim(ValidatorConstants.ClaimNameIss, v1TokenIssuer);
             var v1JwtSecurityToken = new JwtSecurityToken(issuer: v1TokenIssuer, claims: new[] { issClaim, tidClaim });
 
-            actualIssuer = aadIssuerValidator.Validate(v1TokenIssuer, v1JwtSecurityToken, new TokenValidationParameters());
-
-            IdentityComparer.AreEqual(v1TokenIssuer, actualIssuer, context);
-            IdentityComparer.AreEqual(null, v1ConfigurationManager.LastKnownGoodConfiguration, context);
-            TestUtilities.AssertFailIfErrors(context);
+            // before testing v1 LKG setup v1 LKG for v2 manager for cross version validation
+            _ = aadIssuerValidator.Validate(v1TokenIssuer, v1JwtSecurityToken, new TokenValidationParameters()); 
 
             // V1 token and authority behaves like v2 token and authority
             actualIssuer = v1AadIssuerValidator.Validate(v1TokenIssuer, v1JwtSecurityToken, new TokenValidationParameters());
@@ -776,19 +764,45 @@ namespace Microsoft.IdentityModel.Validators.Tests
             IdentityComparer.AreEqual(null, v1ConfigurationManager.LastKnownGoodConfiguration, context);
             TestUtilities.AssertFailIfErrors(context);
 
-            v1ConfigurationManager.LastKnownGoodConfiguration = v1Configuration;
-            v2ConfigurationManager.RefreshedConfiguration = v1ConfigurationRefreshed;
-            v2ConfigurationManager.RequestRefresh();
+            //      refresh config to a broken one and validate with LKG
+            v1ConfigurationManager.RefreshedConfiguration = v1ConfigurationRefreshed;
+            v1ConfigurationManager.RequestRefresh();
 
             actualIssuer = v1AadIssuerValidator.Validate(v1TokenIssuer, v1JwtSecurityToken, new TokenValidationParameters { ValidateWithLKG = true });
             IdentityComparer.AreEqual(v1TokenIssuer, actualIssuer, context);
             TestUtilities.AssertFailIfErrors(context);
 
-            // validating cross versions with LKG will always fetch
-            //    set LKG to broken config, so if validation fails you know that LKG was used
-            v1ConfigurationManager.LastKnownGoodConfiguration = v1ConfigurationRefreshed; 
+            // validating cross versions also validates with LKG
             actualIssuer = aadIssuerValidator.Validate(v1TokenIssuer, v1JwtSecurityToken, new TokenValidationParameters { ValidateWithLKG = true });
+
             IdentityComparer.AreEqual(v1TokenIssuer, actualIssuer, context);
+            TestUtilities.AssertFailIfErrors(context);
+
+            // if LKG not valid validation fails
+            //    set confgimanager lkg lifetime to 1ms
+            //    validate successfully to set LKG
+            //    wait 1ms, validate with expired LKG
+            v1ConfigurationManager.RefreshedConfiguration = v1Configuration;
+            v1ConfigurationManager.RequestRefresh();
+
+            v1ConfigurationManager.LastKnownGoodLifetime = TimeSpan.FromMilliseconds(1);
+            actualIssuer = aadIssuerValidator.Validate(v1TokenIssuer, v1JwtSecurityToken, new TokenValidationParameters());
+            Thread.Sleep(TimeSpan.FromMilliseconds(1));
+
+            var securityExceptionThrown = false;
+            var exceptionMessage = string.Empty;
+            try
+            {
+                _ = aadIssuerValidator.Validate(v1TokenIssuer, v1JwtSecurityToken, new TokenValidationParameters { ValidateWithLKG = true });
+            }
+            catch (SecurityTokenInvalidIssuerException securityException)
+            {
+                securityExceptionThrown = true;
+                exceptionMessage = securityException.Message;
+            }
+
+            IdentityComparer.AreEqual(true, securityExceptionThrown, context);
+            IdentityComparer.AreEqual("IDX40001: Issuer: 'https://sts.windows.net/f645ad92-e38d-4d1a-b510-d1b09a74a8ca/', does not match any of the valid issuers provided for this application. ", exceptionMessage, context);
             TestUtilities.AssertFailIfErrors(context);
         }
     }
