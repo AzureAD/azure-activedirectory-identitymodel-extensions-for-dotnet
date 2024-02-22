@@ -40,10 +40,13 @@ namespace Microsoft.IdentityModel.Validators
 
         internal AadIssuerValidator(
             HttpClient httpClient,
-            string aadAuthority,            
+            string aadAuthority,
             Func<string, BaseConfigurationManager> configurationManagerProvider)
             : this(httpClient, aadAuthority)
         {
+            if (configurationManagerProvider == null)
+                throw new ArgumentNullException(nameof(configurationManagerProvider));
+
             _configurationManagerProvider = configurationManagerProvider;
         }
 
@@ -192,32 +195,28 @@ namespace Microsoft.IdentityModel.Validators
             try
             {
                 var isV2Issuer = IsV2Issuer(securityToken);
-
                 var effectiveConfigurationManager = GetEffectiveConfigurationManager(isV2Issuer);
                 var baseConfiguration = await GetBaseConfiguration(effectiveConfigurationManager, validationParameters).ConfigureAwait(false);
-                string aadIssuer = baseConfiguration.Issuer;
 
-                if (!validationParameters.ValidateWithLKG)
-                {
-                    if (IsValidIssuer(aadIssuer, tenantId, issuer))
-                    {
-                        // We need to update LKG on the self-managed config manager.
-                        // The LKG of the one coming from provider, should be handled by the provider after successful validation
-                        // unless it is only fetched for the issuer and it's different than the authority.
-                        if (_configurationManagerProvider == null ||
-                            (_configurationManagerProvider != null && isV2Issuer != IsV2Authority))
-                        {
-                            effectiveConfigurationManager.LastKnownGoodConfiguration = baseConfiguration;
-                        }
-                        return issuer;
-                    }
-                }
-                else
-                {
-                    if (effectiveConfigurationManager.LastKnownGoodConfiguration != null &&
-                        IsValidIssuer(effectiveConfigurationManager.LastKnownGoodConfiguration.Issuer, tenantId, issuer))
-                        return issuer;
-                }
+                // Decide whether to take the issuer to validate against from LKG or not.
+                var aadIssuer = baseConfiguration.Issuer;
+                if (validationParameters.ValidateWithLKG && effectiveConfigurationManager.LastKnownGoodConfiguration != null &&
+                    (_configurationManagerProvider == null || isV2Issuer == IsV2Authority))
+                    // If asked to use LKG,
+                    // Use the issuer from LKG if using self-managed state.
+                    // When using configurationManagerProvider, use LKG only if authority and token version matches;
+                    // otherwise, keep using the resolved issuer from baseConfiguration.
+                    aadIssuer = effectiveConfigurationManager.LastKnownGoodConfiguration.Issuer;
+
+                var isIssuerValid = IsValidIssuer(aadIssuer, tenantId, issuer);
+
+                // The original LKG assignment behavior for previous self-state management.
+                if (_configurationManagerProvider == null && isIssuerValid && !validationParameters.ValidateWithLKG)
+                    effectiveConfigurationManager.LastKnownGoodConfiguration = baseConfiguration;
+
+                if (isIssuerValid)
+                    return issuer;
+
             }
             catch (Exception ex)
             {
