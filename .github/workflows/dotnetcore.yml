@@ -30,9 +30,6 @@ jobs:
       with:
         dotnet-version: 8.0.x
 
-    - name: update versions
-      run: .\updateAssemblyInfo.ps1
-
     # Build and test
     - name: Restore packages
       run: dotnet restore Wilson.sln

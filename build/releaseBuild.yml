@@ -18,6 +18,10 @@ variables:
   - name: BuildConfiguration
     value: 'release'
 
+    # The following variables are set in the release build UI:
+    # BuildConfiguration: 'debug|release'
+    # WilsonVersion: ''. Full version number
+
 jobs:
 - job: build
   pool:
@@ -29,6 +33,12 @@ jobs:
   timeoutInMinutes: 360
 
   steps:
+  - script: echo $(BuildConfiguration)
+    displayName: 'display Build Configuration'
+
+  - script: echo $(WilsonVersion)
+    displayName: 'display WilsonVersion'
+
   - task: UseDotNet@2
     displayName: 'Use .NET Core sdk 2.x'
     inputs:
@@ -63,19 +73,11 @@ jobs:
       regedit /s .\build\strongNameBypass.reg
     displayName: 'Strong Name Bypass'
 
-  - task: PowerShell@2
-    displayName: 'Update Assembly Info'
-    inputs:
-      targetType: filePath
-      filePath: ./updateAssemblyInfo.ps1
-      arguments: '-packageType $(BuildConfiguration)'
-
   - task: DotNetCoreCLI@2
     displayName: Build
     inputs:
-      command: 'custom'
-      projects: 'wilson.sln'
-      custom: 'msbuild'
+      command: 'build'
+      projects: 'Product.proj'
       arguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true'
 
   - task: PowerShell@2
@@ -135,12 +137,19 @@ jobs:
   #Sign Wilson 7x task group
   - template: template-sign-wilson.yaml
 
-  - task: PowerShell@2
-    displayName: Pack
+  - task: DotNetCoreCLI@2
+    displayName: 'Pack libraries'
     inputs:
-      targetType: filePath
-      filePath: ./pack.ps1
-      arguments: '-buildType $(BuildConfiguration) C:\hostedtoolcache\windows\dotnet'
+      command: 'pack'
+      arguments: '--no-restore'
+      packDirectory: '$(Build.SourcesDirectory)\artifacts'
+      nobuild: true
+      verbosityPack: 'Minimal'
+      configuration: $(BuildConfiguration)
+      packagesToPack: 'Product.proj'
+      feedsToUse: 'config'
+      nugetConfigPath: Nuget.config
+      externalFeedCredentials: 'Internal Analyzers'
 
   - task: EsrpCodeSigning@4
     displayName: 'Sign Nuget Packages'
@@ -190,7 +199,7 @@ jobs:
     continueOnError: true
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-    displayName: 'Manifest Generator '
+    displayName: 'Manifest Generator'
     inputs:
       BuildDropPath: '$(Build.SourcesDirectory)\src'
       ManifestDirPath: '$(Build.SourcesDirectory)\artifacts'
