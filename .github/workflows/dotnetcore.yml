@@ -35,4 +35,4 @@ jobs:
 
     # Run baseline package validation
     - name: Pack
-      run: dotnet pack --no-restore --no-build
+      run: dotnet pack Product.proj --no-restore --no-build
