@@ -23,8 +23,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
-using JsonWebTokenHandler6x = Microsoft.IdentityModel.JsonWebTokens.Tests.JsonWebTokenHandler6x;
-
 namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
     public class JsonWebTokenHandlerTests
@@ -2442,6 +2440,40 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             TestUtilities.AssertFailIfErrors(context);
         }
+
+        [Fact]
+        public async Task AdditionalHeaderValues()
+        {
+            CompareContext context = TestUtilities.WriteHeader($"{this}.AdditionalHeaderValues", "AdditionalHeaderValues", false);
+
+            var tokenHandler = new JsonWebTokenHandler();
+            List<string> x5cExpected = new List<string>() { KeyingMaterial.DefaultX509Data_2048_Public, KeyingMaterial.X509Data_AAD_Public };
+            string jwtString = tokenHandler.CreateToken(
+                Default.PayloadString,
+                KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                new Dictionary<string, object>() {
+                    { JwtHeaderParameterNames.X5c, x5cExpected },
+                });
+
+            var tokenValidationParameters = new TokenValidationParameters()
+            {
+                ValidAudience = Default.Audience,
+                ValidateLifetime = false,
+                ValidIssuer = Default.Issuer,
+                IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+            };
+
+            var tokenValidationResult = await tokenHandler.ValidateTokenAsync(jwtString, tokenValidationParameters).ConfigureAwait(false);
+            JsonWebToken validatedToken = tokenValidationResult.SecurityToken as JsonWebToken;
+
+            if (!validatedToken.TryGetHeaderValue(JwtHeaderParameterNames.X5c, out string[] x5cFound))
+                context.Diffs.Add("validatedToken.TryGetHeaderValue(JwtHeaderParameterNames.X5c, out string[] x5c) == false");
+            else
+                IdentityComparer.AreStringEnumsEqual(x5cExpected, x5cFound, context);
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
 
         // Test checks to make sure that the token payload retrieved from ValidateToken is the same as the payload
         // the token was initially created with. 

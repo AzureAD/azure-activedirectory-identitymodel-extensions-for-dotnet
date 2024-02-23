@@ -30,16 +30,9 @@ jobs:
       with:
         dotnet-version: 8.0.x
 
-    - name: update versions
-      run: .\updateAssemblyInfo.ps1
-
-    # Build and test
-    - name: Restore packages
-      run: dotnet restore Wilson.sln
-
     - name: Run the tests
       run: dotnet test Wilson.sln
 
     # Run baseline package validation
     - name: Pack
-      run: .\pack.ps1
+      run: dotnet pack Product.proj --no-restore --no-build

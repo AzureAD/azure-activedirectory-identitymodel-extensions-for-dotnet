@@ -19,8 +19,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
         public string Json { get; set; }
 
-        public string JsonMixedCase { get; set; }
-
         public string OpenIdConnectMetadataFileName { get; set; }
 
         public SigningCredentials SigningCredentials { get; set; }
