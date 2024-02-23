@@ -910,7 +910,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        internal ReadOnlySpan<byte> ValidIssuerUtf8 { get; set; }
+        internal ReadOnlyMemory<byte> ValidIssuerUtf8 { get; private set; }
 
         /// <summary>
         /// Gets or sets the <see cref="IEnumerable{String}"/> that contains valid issuers that will be used to check against the token's issuer.
