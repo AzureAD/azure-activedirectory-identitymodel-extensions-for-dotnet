@@ -284,7 +284,7 @@ namespace Microsoft.IdentityModel.Validators
         /// </code></example>
         /// <returns>A <see cref="AadIssuerValidator"/> for the aadAuthority.</returns>
         /// <exception cref="ArgumentNullException">if <paramref name="aadAuthority"/> is null or empty.</exception>
-        public static AadIssuerValidator GetAadIssuerValidator(string aadAuthority, HttpClient httpClient, Func<string, BaseConfigurationManager> configurationManagerProvider)
+        internal static AadIssuerValidator GetAadIssuerValidator(string aadAuthority, HttpClient httpClient, Func<string, BaseConfigurationManager> configurationManagerProvider)
         {
             if (string.IsNullOrEmpty(aadAuthority))
                 throw LogHelper.LogArgumentNullException(nameof(aadAuthority));
