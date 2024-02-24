@@ -926,6 +926,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <remarks>
         /// Identifies the authorized party for the id_token.
         /// see: https://openid.net/specs/openid-connect-core-1_0.html
+        /// <para>
+        /// If the 'azp' claim is not found, an empty string is returned.
+        /// </para>
         /// </remarks>
         public string Azp
         {

@@ -17,7 +17,7 @@ using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
     /// <summary>
-    /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Json Web Tokens. 
+    /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Json Web Tokens.
     /// See: https://datatracker.ietf.org/doc/html/rfc7519 and http://www.rfc-editor.org/info/rfc7515.
     /// </summary>
     public partial class JsonWebTokenHandler : TokenHandler
@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public static bool DefaultMapInboundClaims = false;
 
         /// <summary>
-        /// Gets the Base64Url encoded string representation of the following JWT header: 
+        /// Gets the Base64Url encoded string representation of the following JWT header:
         /// { <see cref="JwtHeaderParameterNames.Alg"/>, <see cref="SecurityAlgorithms.None"/> }.
         /// </summary>
         /// <return>The Base64Url encoded string representation of the unsigned JWT header.</return>
@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="MapInboundClaims"/> property which is used when determining whether or not to map claim types that are extracted when validating a <see cref="JsonWebToken"/>. 
+        /// Gets or sets the <see cref="MapInboundClaims"/> property which is used when determining whether or not to map claim types that are extracted when validating a <see cref="JsonWebToken"/>.
         /// <para>If this is set to true, the <see cref="Claim.Type"/> is set to the JSON claim 'name' after translating using this mapping. Otherwise, no mapping occurs.</para>
         /// <para>The default value is false.</para>
         /// </summary>
@@ -104,7 +104,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="InboundClaimTypeMap"/> which is used when setting the <see cref="Claim.Type"/> for claims in the <see cref="ClaimsPrincipal"/> extracted when validating a <see cref="JsonWebToken"/>. 
+        /// Gets or sets the <see cref="InboundClaimTypeMap"/> which is used when setting the <see cref="Claim.Type"/> for claims in the <see cref="ClaimsPrincipal"/> extracted when validating a <see cref="JsonWebToken"/>.
         /// <para>The <see cref="Claim.Type"/> is set to the JSON claim 'name' after translating using this mapping.</para>
         /// <para>The default value is ClaimTypeMapping.InboundClaimTypeMap.</para>
         /// </summary>
@@ -331,7 +331,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Decrypts a JWE and returns the clear text 
+        /// Decrypts a JWE and returns the clear text
         /// </summary>
         /// <param name="jwtToken">the JWE that contains the cypher text.</param>
         /// <param name="validationParameters">contains crypto material.</param>
@@ -365,7 +365,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 new JwtTokenDecryptionParameters
                 {
                     DecompressionFunction = JwtTokenUtilities.DecompressToken,
-                    Keys = keys
+                    Keys = keys,
+                    MaximumDeflateSize = MaximumTokenSizeInBytes
                 });
         }
 
@@ -961,7 +962,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     var isKidInTVP = keysInTokenValidationParameters.Any(x => x.KeyId.Equals(localJwtToken.Kid));
                     var keyLocation = isKidInTVP ? "TokenValidationParameters" : "Configuration";
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10511,
-                        (object)keysAttempted ?? "",
+                        LogHelper.MarkAsNonPII((object)keysAttempted ?? ""),
                         LogHelper.MarkAsNonPII(numKeysInTokenValidationParameters),
                         LogHelper.MarkAsNonPII(numKeysInConfiguration),
                         LogHelper.MarkAsNonPII(keyLocation),
@@ -983,12 +984,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             if (keysAttempted is not null)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(TokenLogMessages.IDX10503,
-                    keysAttempted,
-                    LogHelper.MarkAsNonPII(numKeysInTokenValidationParameters),
-                    LogHelper.MarkAsNonPII(numKeysInConfiguration),
-                    (object)exceptionStrings ?? "",
-                    jwtToken)));
+            {
+                if (kidExists)
+                {
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(TokenLogMessages.IDX10503,
+                        LogHelper.MarkAsNonPII(jwtToken.Kid),
+                        LogHelper.MarkAsNonPII((object)keysAttempted ?? ""),
+                        LogHelper.MarkAsNonPII(numKeysInTokenValidationParameters),
+                        LogHelper.MarkAsNonPII(numKeysInConfiguration),
+                        (object)exceptionStrings ?? "",
+                        jwtToken)));
+                }
+                else
+                {
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(LogHelper.FormatInvariant(TokenLogMessages.IDX10517,
+                        LogHelper.MarkAsNonPII((object)keysAttempted ?? ""),
+                        LogHelper.MarkAsNonPII(numKeysInTokenValidationParameters),
+                        LogHelper.MarkAsNonPII(numKeysInConfiguration),
+                        (object)exceptionStrings ?? "",
+                        jwtToken)));
+                }
+            }
 
             throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(TokenLogMessages.IDX10500));
         }

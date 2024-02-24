@@ -8,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.IdentityModel.Tokens.Jwt.Tests;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -22,8 +23,6 @@ using Microsoft.IdentityModel.Validators;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
-
-using JsonWebTokenHandler6x = Microsoft.IdentityModel.JsonWebTokens.Tests.JsonWebTokenHandler6x;
 
 namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
@@ -2443,6 +2442,40 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        [Fact]
+        public async Task AdditionalHeaderValues()
+        {
+            CompareContext context = TestUtilities.WriteHeader($"{this}.AdditionalHeaderValues", "AdditionalHeaderValues", false);
+
+            var tokenHandler = new JsonWebTokenHandler();
+            List<string> x5cExpected = new List<string>() { KeyingMaterial.DefaultX509Data_2048_Public, KeyingMaterial.X509Data_AAD_Public };
+            string jwtString = tokenHandler.CreateToken(
+                Default.PayloadString,
+                KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                new Dictionary<string, object>() {
+                    { JwtHeaderParameterNames.X5c, x5cExpected },
+                });
+
+            var tokenValidationParameters = new TokenValidationParameters()
+            {
+                ValidAudience = Default.Audience,
+                ValidateLifetime = false,
+                ValidIssuer = Default.Issuer,
+                IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+            };
+
+            var tokenValidationResult = await tokenHandler.ValidateTokenAsync(jwtString, tokenValidationParameters).ConfigureAwait(false);
+            JsonWebToken validatedToken = tokenValidationResult.SecurityToken as JsonWebToken;
+
+            if (!validatedToken.TryGetHeaderValue(JwtHeaderParameterNames.X5c, out string[] x5cFound))
+                context.Diffs.Add("validatedToken.TryGetHeaderValue(JwtHeaderParameterNames.X5c, out string[] x5c) == false");
+            else
+                IdentityComparer.AreStringEnumsEqual(x5cExpected, x5cFound, context);
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+
         // Test checks to make sure that the token payload retrieved from ValidateToken is the same as the payload
         // the token was initially created with. 
         [Fact]
@@ -3442,6 +3475,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var context = TestUtilities.WriteHeader($"{this}.ValidateJWSWithConfigAsync", theoryData);
             try
             {
+                // clear up static state.
+                AadIssuerValidator.s_issuerValidators[Default.AadV1Authority] = new AadIssuerValidator(null, Default.AadV1Authority);
+
+                // previous instance is captured in a closure during theorydata set setup.
+                if (theoryData.ValidationParameters.IssuerValidator != null)
+                    theoryData.ValidationParameters.IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate;
+
                 var handler = new JsonWebTokenHandler();
                 var jwt = handler.ReadJsonWebToken(theoryData.Token);
                 AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).ConfigurationManagerV1 = theoryData.ValidationParameters.ConfigurationManager;
@@ -3507,7 +3547,36 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var context = TestUtilities.WriteHeader($"{this}.ValidateJWSWithLastKnownGood", theoryData);
             try
             {
+                // clear up static state.
+                AadIssuerValidator.s_issuerValidators[Default.AadV1Authority] = new AadIssuerValidator(null, Default.AadV1Authority);
+
+                // previous instance is captured in a closure during theorydata set setup.
+                if (theoryData.ValidationParameters.IssuerValidator != null)
+                    theoryData.ValidationParameters.IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate;
+
                 var handler = new JsonWebTokenHandler();
+
+                if (theoryData.SetupIssuerLkg)
+                {
+                    // make a valid pass to initiate issuer LKG.
+                    var issuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority);
+                    issuerValidator.ConfigurationManagerV1 = theoryData.SetupIssuerLkgConfigurationManager;
+
+                    var previousValidateWithLKG = theoryData.ValidationParameters.ValidateWithLKG;
+                    theoryData.ValidationParameters.ValidateWithLKG = false;
+
+                    var setupValidationResult = handler.ValidateTokenAsync(theoryData.Token, theoryData.ValidationParameters).Result;
+
+                    theoryData.ValidationParameters.ValidateWithLKG = previousValidateWithLKG;
+                   
+                    if (setupValidationResult.Exception != null)
+                    {
+                        if (setupValidationResult.IsValid)
+                            context.AddDiff("setupValidationResult.IsValid, setupValidationResult.Exception != null");
+                        throw setupValidationResult.Exception;
+                    }
+                }
+
                 AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).ConfigurationManagerV1 = theoryData.ValidationParameters.ConfigurationManager;
                 var validationResult = handler.ValidateTokenAsync(theoryData.Token, theoryData.ValidationParameters).Result;
                 if (validationResult.Exception != null)
@@ -3536,7 +3605,35 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var context = TestUtilities.WriteHeader($"{this}.ValidateJWEWithLastKnownGood", theoryData);
             try
             {
+                // clear up static state.
+                AadIssuerValidator.s_issuerValidators[Default.AadV1Authority] = new AadIssuerValidator(null, Default.AadV1Authority);
+
+                // previous instance is captured in a closure during theorydata set setup.
+                if (theoryData.ValidationParameters.IssuerValidator != null)
+                    theoryData.ValidationParameters.IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate;
+
                 var handler = new JsonWebTokenHandler();
+                if (theoryData.SetupIssuerLkg)
+                {
+                    // make a valid pass to initiate issuer LKG.
+                    var issuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority);
+                    issuerValidator.ConfigurationManagerV1 = theoryData.SetupIssuerLkgConfigurationManager;
+
+                    var previousValidateWithLKG = theoryData.ValidationParameters.ValidateWithLKG;
+                    theoryData.ValidationParameters.ValidateWithLKG = false;
+
+                    var setupValidationResult = handler.ValidateTokenAsync(theoryData.Token, theoryData.ValidationParameters).Result;
+
+                    theoryData.ValidationParameters.ValidateWithLKG = previousValidateWithLKG;
+
+                    if (setupValidationResult.Exception != null)
+                    {
+                        if (setupValidationResult.IsValid)
+                            context.AddDiff("setupValidationResult.IsValid, setupValidationResult.Exception != null");
+                        throw setupValidationResult.Exception;
+                    }
+                }
+
                 AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).ConfigurationManagerV1 = theoryData.ValidationParameters.ConfigurationManager;
                 var validationResult = handler.ValidateTokenAsync(theoryData.Token, theoryData.ValidationParameters).Result;
                 if (validationResult.Exception != null)
@@ -3599,7 +3696,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             try
             {
                 var handler = new JsonWebTokenHandler();
-                CompressionProviderFactory.Default = theoryData.CompressionProviderFactory;
+                // We need to have a replacement model for custom compression
+                // https://identitydivision.visualstudio.com/Engineering/_workitems/edit/2719954
+                //CompressionProviderFactory.Default = theoryData.CompressionProviderFactory;
                 string jwtToken;
                 if (theoryData.SigningCredentials == null)
                     jwtToken = handler.CreateToken(theoryData.Payload, theoryData.EncryptingCredentials, theoryData.CompressionAlgorithm);
@@ -3677,17 +3776,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
                         ExpectedException = new ExpectedException(typeof(SecurityTokenCompressionFailedException), "IDX10680:", typeof(NotSupportedException))
                     },
-                    new CreateTokenTheoryData()
-                    {
-                        TestId = "NullCompressionProviderFactory",
-                        CompressionAlgorithm = CompressionAlgorithms.Deflate,
-                        CompressionProviderFactory = null,
-                        ValidationParameters = Default.JWECompressionTokenValidationParameters,
-                        Payload = Default.PayloadString,
-                        SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
-                        EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:")
-                    },
+                    // Skip these tests as they set a static
+                    // We need to have a replacement model for custom compression
+                    // https://identitydivision.visualstudio.com/Engineering/_workitems/edit/2719954
+                    //new CreateTokenTheoryData()
+                    //{
+                    //    TestId = "NullCompressionProviderFactory",
+                    //    CompressionAlgorithm = CompressionAlgorithms.Deflate,
+                    //    CompressionProviderFactory = null,
+                    //    ValidationParameters = Default.JWECompressionTokenValidationParameters,
+                    //    Payload = Default.PayloadString,
+                    //    SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
+                    //    EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
+                    //    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:")
+                    //},
                     new CreateTokenTheoryData()
                     {
                         TestId = "NullSigningCredentialsRequireSignedTokensFalse",
@@ -3707,29 +3809,96 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
                         ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10504:")
                     },
-                    new CreateTokenTheoryData()
-                    {
-                        TestId = "CustomCompressProviderSucceeds",
-                        CompressionAlgorithm = CompressionAlgorithms.Deflate,
-                        CompressionProviderFactory = compressionProviderFactoryForCustom,
-                        ValidationParameters = Default.JWECompressionTokenValidationParameters,
-                        Payload = Default.PayloadString,
-                        SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
-                        EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
-                    },
-                    new CreateTokenTheoryData()
-                    {
-                        TestId = "CustomCompressionProviderFails",
-                        CompressionAlgorithm = CompressionAlgorithms.Deflate,
-                        CompressionProviderFactory = compressionProviderFactoryForCustom2,
-                        ValidationParameters = Default.JWECompressionTokenValidationParameters,
-                        Payload = Default.PayloadString,
-                        SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
-                        EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenCompressionFailedException), "IDX10680:", typeof(InvalidOperationException))
-                    },
+                    // Skip these tests as they set a static
+                    // We need to have a replacement model for custom compression
+                    // https://identitydivision.visualstudio.com/Engineering/_workitems/edit/2719954
+                    //new CreateTokenTheoryData()
+                    //{
+                    //    TestId = "CustomCompressProviderSucceeds",
+                    //    CompressionAlgorithm = CompressionAlgorithms.Deflate,
+                    //    CompressionProviderFactory = compressionProviderFactoryForCustom,
+                    //    ValidationParameters = Default.JWECompressionTokenValidationParameters,
+                    //    Payload = Default.PayloadString,
+                    //    SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
+                    //    EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
+                    //},
+                    //new CreateTokenTheoryData()
+                    //{
+                    //    TestId = "CustomCompressionProviderFails",
+                    //    CompressionAlgorithm = CompressionAlgorithms.Deflate,
+                    //    CompressionProviderFactory = compressionProviderFactoryForCustom2,
+                    //    ValidationParameters = Default.JWECompressionTokenValidationParameters,
+                    //    Payload = Default.PayloadString,
+                    //    SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
+                    //    EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
+                    //    ExpectedException = new ExpectedException(typeof(SecurityTokenCompressionFailedException), "IDX10680:", typeof(InvalidOperationException))
+                    //},
                 };
             }
+        }
+
+        [Theory, MemberData(nameof(JweDecompressSizeTheoryData))]
+        public void JWEDecompressionSizeTest(JWEDecompressionTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.JWEDecompressionTest", theoryData);
+
+            try
+            {
+                var handler = new JsonWebTokenHandler();
+                CompressionProviderFactory.Default = theoryData.CompressionProviderFactory;
+                var validationResult = handler.ValidateTokenAsync(theoryData.JWECompressionString, theoryData.ValidationParameters).Result;
+                theoryData.ExpectedException.ProcessException(validationResult.Exception, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<JWEDecompressionTheoryData> JweDecompressSizeTheoryData()
+        {
+            // The character 'U' compresses better because UUU in base 64, repeated characters compress best.
+            JsonWebTokenHandler jwth = new JsonWebTokenHandler();
+            SecurityKey key = new SymmetricSecurityKey(new byte[256 / 8]);
+            EncryptingCredentials encryptingCredentials = new EncryptingCredentials(key, "dir", "A128CBC-HS256");
+            TokenValidationParameters validationParameters = new TokenValidationParameters { TokenDecryptionKey = key };
+
+            TheoryData<JWEDecompressionTheoryData> theoryData = new TheoryData<JWEDecompressionTheoryData>();
+
+#if NETCOREAPP2_1
+            string payload = System.Text.Json.JsonSerializer.Serialize(new { U = new string('U', 20_000_000), UU = new string('U', 15_000_000) });
+#else
+            string payload = System.Text.Json.JsonSerializer.Serialize(new { U = new string('U', 100_000_000), UU = new string('U', 40_000_000) });
+#endif
+            string token = jwth.CreateToken(payload, encryptingCredentials, "DEF");
+            theoryData.Add(new JWEDecompressionTheoryData
+            {
+                CompressionProviderFactory = new CompressionProviderFactory(),
+                ValidationParameters = validationParameters,
+                JWECompressionString = token,
+                TestId = "DeflateSizeExceeded",
+                ExpectedException = new ExpectedException(
+                    typeof(SecurityTokenDecompressionFailedException),
+                    "IDX10679:",
+                    typeof(SecurityTokenDecompressionFailedException))
+            });
+
+            payload = System.Text.Json.JsonSerializer.Serialize(new { U = new string('U', 100_000_000), UU = new string('U', 50_000_000) });
+            token = jwth.CreateToken(payload, encryptingCredentials, "DEF");
+            theoryData.Add(new JWEDecompressionTheoryData
+            {
+                CompressionProviderFactory = new CompressionProviderFactory(),
+                ValidationParameters = validationParameters,
+                JWECompressionString = token,
+                TestId = "TokenSizeExceeded",
+                ExpectedException = new ExpectedException(
+                    typeof(ArgumentException),
+                    "IDX10209:")
+            });
+
+            return theoryData;
         }
 
         [Theory, MemberData(nameof(JWEDecompressionTheoryData))]
