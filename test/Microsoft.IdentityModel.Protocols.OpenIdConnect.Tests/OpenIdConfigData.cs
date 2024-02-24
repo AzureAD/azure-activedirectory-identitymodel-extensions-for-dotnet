@@ -109,7 +109,16 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                                                 ""userinfo_endpoint"" : ""https://login.microsoftonline.com/add29489-7269-41f4-8841-b63c95564420/openid/userinfo"",
                                                 ""userinfo_encryption_alg_values_supported"" : [""ECDH-ES+A128KW"",""ECDH-ES+A192KW""],
                                                 ""userinfo_encryption_enc_values_supported"" : [""A256CBC-HS512"", ""A128CBC-HS256""],
-                                                ""userinfo_signing_alg_values_supported"" : [""ES384"", ""ES512""]
+                                                ""userinfo_signing_alg_values_supported"" : [""ES384"", ""ES512""],
+                                                ""prompt_values_supported"" : [""none"", ""login"", ""consent""],
+                                                ""pushed_authorization_request_endpoint"" : ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/par"",
+                                                ""require_pushed_authorization_requests"" : false,
+                                                ""backchannel_authentication_endpoint"" : ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/bc-authorize"",
+                                                ""backchannel_token_delivery_modes_supported"" : [""poll"", ""ping""],
+                                                ""backchannel_authentication_request_signing_alg_values_supported"" : [""ES384"", ""ES512""],
+                                                ""backchannel_user_code_parameter_supported"" : false,
+                                                ""dpop_signing_alg_values_supported"" : [""ES384"", ""ES512""],
+                                                ""authorization_response_iss_parameter_supported"" : false
                                             }";
 
         public static string OpenIdConnectMetadataSingleX509DataString =
