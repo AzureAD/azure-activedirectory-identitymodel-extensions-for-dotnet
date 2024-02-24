@@ -1,5 +1,5 @@
 <Project>
-  <Import Project="apiCompat.props" />
+
   <Import Project="dependencies.props" />
   <Import Project="targets.props" />
   <Import Project="version.props" />
@@ -34,8 +34,18 @@
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <EnablePackageValidation>true</EnablePackageValidation>
+    <PackageValidationBaselineVersion>6.33.0</PackageValidationBaselineVersion>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);SYSLIB0050</NoWarn>
+    <NoWarn>$(NoWarn);SYSLIB0051</NoWarn>
   </PropertyGroup>
   
   <ItemGroup>

@@ -5,6 +5,7 @@
   <PropertyGroup>
     <!-- This test only needs to run on .NET -->
     <TargetFrameworks>net6.0</TargetFrameworks>
+    <LangVersion>10</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -9,7 +9,7 @@ schedules:
   displayName: Daily midnight build
   branches:
     include:
-    - dev
+    - dev6x
 
 variables:
   - group: Middleware
@@ -30,21 +30,15 @@ jobs:
 
   steps:
   - task: UseDotNet@2
-    displayName: 'Use .NET Core sdk 2.1.818'
+    displayName: 'Use .NET Core sdk 2.x'
     inputs:
-      version: 2.1.818
-      installationPath: 'c:\Program Files\dotnet'
-
-  - task: UseDotNet@2
-    displayName: 'Use .NET Core sdk 2.1.x'
-    inputs:
-      version: 2.1.x
+      version: 2.x
       installationPath: $(Agent.ToolsDirectory)/dotnet
 
   - task: UseDotNet@2
-    displayName: 'Use .Net Core SDK 6'
+    displayName: 'Use .Net Core SDK 6.x'
     inputs:
-      version: 6.0.x
+      version: 6.x
 
   - task: DotNetCoreCLI@2
     displayName: 'dotnet --list-sdks '
@@ -60,7 +54,6 @@ jobs:
 
   - powershell: |
       regedit /s .\build\strongNameBypass.reg
-      regedit /s .\build\strongNameBypass2.reg
     displayName: 'Strong Name Bypass'
 
   - task: PowerShell@2
@@ -70,28 +63,13 @@ jobs:
       filePath: ./updateAssemblyInfo.ps1
       arguments: '-packageType $(BuildConfiguration)'
 
-  - task: PowerShell@2
-    displayName: 'Prepare contract assemblies'
-    inputs:
-      targetType: 'filePath'
-      filePath: $(Agent.BuildDirectory)\s\build\apiCompat.ps1
-      arguments: >
-        -feedLocation "NuGet" 
-        -packageNames $(Wilson6xPackageList)
-        -packageVersion: "latest"
-        -adoFeedSource: $(AdoFeedSource)
-        -adoFeedName: $(AdoFeedName)
-        -adoAllowPrerelease: "false"
-        -apiCompatRoot: $(ApiCompatRootWilson)
-        -nugetPackageProviderVersion: "2.8.5.208"
-
   - task: MSBuild@1
     displayName: Build
     inputs:
       solution: wilson.sln
       msbuildVersion: '17.0.0'
       msbuildArchitecture: x64
-      msbuildArguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true /p:RunApiCompat=true'
+      msbuildArguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true'
 
   - task: PowerShell@2
     displayName: 'Run Tests'

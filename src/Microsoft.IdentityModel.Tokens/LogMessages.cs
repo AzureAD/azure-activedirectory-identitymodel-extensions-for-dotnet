@@ -223,7 +223,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10717 = "IDX10717: '{0} + {1}' must not be greater than {2}, '{3} + {4} > {5}'.";
         public const string IDX10718 = "IDX10718: AlgorithmToValidate is not supported: '{0}'. Algorithm '{1}'.";
         public const string IDX10719 = "IDX10719: SignatureSize (in bytes) was expected to be '{0}', was '{1}'.";
-        public const string IDX10720 = "IDX10720: Unable to create KeyedHashAlgorithm for algorithm '{0}', the key size must be greater than: '{1}' bits, key has '{2}' bits.";
+        public const string IDX10720 = "IDX10720: Unable to create KeyedHashAlgorithm for algorithm '{0}', the key size must be greater than: '{1}' bits, key has '{2}' bits. See https://aka.ms/IdentityModel/UnsafeRelaxHmacKeySizeValidation";
 
         // Json specific errors
         //public const string IDX10801 = "IDX10801:"
@@ -239,6 +239,8 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10812 = "IDX10812: Unable to create a {0} from the properties found in the JsonWebKey: '{1}'.";
         public const string IDX10813 = "IDX10813: Unable to create a {0} from the properties found in the JsonWebKey: '{1}', Exception '{2}'.";
         public const string IDX10814 = "IDX10814: Unable to create a {0} from the properties found in the JsonWebKey: '{1}'. Missing: '{2}'.";
+        //public const string IDX10815 = "IDX10815: Depth of JSON: '{0}' exceeds max depth of '{1}'.";
+        public const string IDX10816 = "IDX10816: Decompressing would result in a token with a size greater than allowed. Maximum size allowed: '{0}'.";
 
         // Base64UrlEncoding
         public const string IDX10820 = "IDX10820: Invalid character found in Base64UrlEncoding. Character: '{0}', Encoding: '{1}'.";
