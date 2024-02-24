@@ -1701,7 +1701,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
         // Test to verify equality between JsonWebTokens created from a string and an equivalent span
         [Theory, MemberData(nameof(ParseTokenTheoryData))]
-        public void CompareJsonWebToken(JwtTheoryData theoryData)
+        public void StringAndMemoryConstructors_CreateEquivalentTokens(JwtTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CompareJsonWebToken", theoryData);
             try
