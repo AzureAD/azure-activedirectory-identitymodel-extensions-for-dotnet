@@ -1,13 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-//#define DEBUG_TESTS
-
-#if DEBUG_TESTS
 using Microsoft.IdentityModel.Protocols.SignedHttpRequest;
 using Microsoft.IdentityModel.Tokens;
-#endif
 using BenchmarkDotNet.Running;
+using BenchmarkDotNet.Configs;
 
 namespace Microsoft.IdentityModel.Benchmarks
 {
@@ -15,15 +12,24 @@ namespace Microsoft.IdentityModel.Benchmarks
     {
         public static void Main(string[] args)
         {
-#if DEBUG_TESTS
-            DebugThroughTests();
-#endif
-            BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
-        }
+            //DebugThroughTests();
 
-#if DEBUG_TESTS
+#if DEBUG
+            var benchmarkConfig = ManualConfig.Union(DefaultConfig.Instance, new DebugInProcessConfig()); // Allows debugging into benchmarks
+#else
+            var benchmarkConfig = ManualConfig.Union(DefaultConfig.Instance, new BenchmarkConfig());
+#endif
+
+            BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, benchmarkConfig);
+        }
         private static void DebugThroughTests()
         {
+            AsymmetricAdapterSignatures asymmetricAdapter = new AsymmetricAdapterSignatures();
+            asymmetricAdapter.Setup();
+            asymmetricAdapter.SignDotnetCreatingBufferRSA();
+            asymmetricAdapter.SignSpanWithArrayPoolRSA();
+            asymmetricAdapter.SignSpanWithFixedBufferRSA();
+
             CreateJWETests createJWETests = new CreateJWETests();
             createJWETests.Setup();
             string jwe = createJWETests.JsonWebTokenHandler_CreateJWE();
@@ -44,6 +50,5 @@ namespace Microsoft.IdentityModel.Benchmarks
             validateSignedHttpRequestAsyncTests.Setup();
             SignedHttpRequestValidationResult signedHttpRequestValidationResult = validateSignedHttpRequestAsyncTests.SHRHandler_ValidateSignedHttpRequestAsync().Result;
         }
-#endif
     }
 }

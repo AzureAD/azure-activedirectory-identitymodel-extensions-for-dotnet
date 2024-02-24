@@ -9,8 +9,19 @@
     <DelaySign>True</DelaySign>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
     <ErrorOnDuplicatePublishOutputFiles>False</ErrorOnDuplicatePublishOutputFiles>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
+  <!-- Uncomment only when running EtwProfiler diagnoser on Release-->
+  <!-- https://learn.microsoft.com/en-us/visualstudio/msbuild/common-msbuild-project-properties -->
+  <!--<PropertyGroup>
+    <DebugType>pdbonly</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.5" />
+  </ItemGroup>-->
+  
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.13.5" />
   </ItemGroup>

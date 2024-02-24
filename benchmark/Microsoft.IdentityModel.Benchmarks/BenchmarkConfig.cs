@@ -3,8 +3,10 @@
 
 using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Jobs;
-using BenchmarkDotNet.Toolchains.InProcess.Emit;
+using BenchmarkDotNet.Order;
+using Perfolizer.Horology;
 
 namespace Microsoft.IdentityModel.Benchmarks
 {
@@ -13,8 +15,15 @@ namespace Microsoft.IdentityModel.Benchmarks
         public BenchmarkConfig()
         {
             AddJob(Job.MediumRun
-                .WithToolchain(InProcessEmitToolchain.Instance))
-            .AddColumn(StatisticColumn.P90, StatisticColumn.P95, StatisticColumn.P100);
+                .WithLaunchCount(4)
+                .WithMaxAbsoluteError(TimeInterval.FromMilliseconds(10)))
+                // uncomment to disable validation to enable debugging through benchmarks
+                //.WithOption(ConfigOptions.DisableOptimizationsValidator, true)
+                .AddColumn(StatisticColumn.P90, StatisticColumn.P95, StatisticColumn.P100)
+                .WithOrderer(new DefaultOrderer(SummaryOrderPolicy.Method))
+                .HideColumns(Column.WarmupCount, Column.Type, Column.Job)
+                .AddDiagnoser(MemoryDiagnoser.Default); // https://benchmarkdotnet.org/articles/configs/diagnosers.html
+                //.AddDiagnoser(new EtwProfiler()) // Uncomment to generate traces / flame graphs. Doc: https://adamsitnik.com/ETW-Profiler/
         }
     }
 }

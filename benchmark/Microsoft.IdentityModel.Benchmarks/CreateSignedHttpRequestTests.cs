@@ -8,9 +8,6 @@ namespace Microsoft.IdentityModel.Benchmarks
 {
     // dotnet run -c release -f net8.0 --filter Microsoft.IdentityModel.Benchmarks.CreateSignedHttpRequestTests*
 
-    [Config(typeof(BenchmarkConfig))]
-    [HideColumns("Type", "Job", "WarmupCount", "LaunchCount")]
-    [MemoryDiagnoser]
     public class CreateSignedHttpRequestTests
     {
         private SignedHttpRequestHandler _signedHttpRequestHandler;
