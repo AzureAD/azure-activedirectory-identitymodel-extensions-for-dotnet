@@ -111,9 +111,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// </remarks>
         public static T Decode<T>(string input, int offset, int length, Func<byte[], int, T> action)
         {
+            _ = input ?? throw LogHelper.LogArgumentNullException(nameof(input));
             _ = action ?? throw new ArgumentNullException(nameof(action));
 
-            int outputsize = ValidateAndGetOutputSize(input, offset, length);
+            int outputsize = ValidateAndGetOutputSize(input.AsSpan(), offset, length);
             byte[] output = ArrayPool<byte>.Shared.Rent(outputsize);
             try
             {
@@ -323,20 +324,6 @@ namespace Microsoft.IdentityModel.Tokens
             char[] output = new char[outputsize];
             WriteEncodedOutput(input, offset, length, output);
             return new string(output);
-        }
-
-        /// <summary>
-        /// Validates the input string for decode operation.
-        /// </summary>
-        /// <param name="inputString">String to validate.</param>
-        /// <param name="offset">Index of char in <paramref name="inputString"/> to start decode operation.</param>
-        /// <param name="length">Number of chars in <paramref name="inputString"/> to decode, starting from offset.</param>
-        /// <returns>Size of the decoded bytes arrays.</returns>
-        private static int ValidateAndGetOutputSize(string inputString, int offset, int length)
-        {
-            _ = inputString ?? throw LogHelper.LogArgumentNullException(nameof(inputString));
-
-            return ValidateAndGetOutputSize(inputString.AsSpan(), offset, length);
         }
 
         /// <summary>
