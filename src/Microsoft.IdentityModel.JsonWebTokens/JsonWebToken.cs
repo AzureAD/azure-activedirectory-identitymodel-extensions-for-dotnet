@@ -517,7 +517,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (!encryptedKeyBytes.IsEmpty)
                 {
                     EncryptedKeyBytes = Base64UrlEncoder.UnsafeDecode(encryptedKeyBytes);
-                    _encryptedKey = encodedTokenSpan.Slice(Dot1 + 1, Dot2 - Dot1 - 1).ToString();
+                    _encryptedKey = encryptedKeyBytes.ToString();
                 }
                 else
                 {
