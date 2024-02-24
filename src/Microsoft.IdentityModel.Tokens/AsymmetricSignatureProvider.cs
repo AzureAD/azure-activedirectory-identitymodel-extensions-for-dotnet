@@ -195,14 +195,8 @@ namespace Microsoft.IdentityModel.Tokens
         internal override int ObjectPoolSize => _asymmetricAdapterObjectPool.Size;
 
 #if NET6_0_OR_GREATER
-        /// <summary>
-        /// This must be overridden to produce a signature over the 'input'.
-        /// </summary>
-        /// <param name="input">bytes to sign.</param>
-        /// <param name="signature">pre allocated span where signature bytes will be placed.</param>
-        /// <param name="bytesWritten">number of bytes written into the signature span.</param>
-        /// <returns>returns true if creation of signature succeeded, false otherwise.</returns>
-        internal override bool Sign(ReadOnlySpan<byte> input, Span<byte> signature, out int bytesWritten)
+        /// <inheritdoc/>
+        public override bool Sign(ReadOnlySpan<byte> input, Span<byte> signature, out int bytesWritten)
         {
             if (input == null || input.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(input));
@@ -273,7 +267,8 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        internal override byte[] Sign(byte[] input, int offset, int count)
+        /// <inheritdoc/>
+        public override byte[] Sign(byte[] input, int offset, int count)
         {
             if (input == null || input.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(input));
