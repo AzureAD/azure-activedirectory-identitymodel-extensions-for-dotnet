@@ -104,6 +104,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.NotNull(configuration.UserInfoEndpointEncryptionAlgValuesSupported);
             Assert.NotNull(configuration.UserInfoEndpointEncryptionEncValuesSupported);
             Assert.NotNull(configuration.UserInfoEndpointSigningAlgValuesSupported);
+            Assert.NotNull(configuration.PromptValuesSupported);
+            Assert.False(configuration.RequirePushedAuthorizationRequests);
+            Assert.NotNull(configuration.BackchannelTokenDeliveryModesSupported);
+            Assert.NotNull(configuration.BackchannelAuthenticationRequestSigningAlgValuesSupported);
+            Assert.False(configuration.BackchannelUserCodeParameterSupported);
+            Assert.NotNull(configuration.DPoPSigningAlgValuesSupported);
+            Assert.False(configuration.AuthorizationResponseIssParameterSupported);
         }
 
         // If the OpenIdConnect metadata has a "SigningKeys" claim, it should NOT be deserialized into the corresponding OpenIdConnectConfiguration.SigningKeys property.
@@ -131,8 +138,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
             Type type = typeof(OpenIdConnectConfiguration);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 49)
-                Assert.True(false, "Number of properties has changed from 49 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 58)
+                Assert.True(false, "Number of properties has changed from 58 to: " + properties.Length + ", adjust tests");
 
             TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(configuration, "OpenIdConnectConfiguration_GetSets");
 
@@ -141,25 +148,31 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 {
                     PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
                         {
-                            new KeyValuePair<string, List<object>>("AuthorizationEndpoint", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                            new KeyValuePair<string, List<object>>("CheckSessionIframe", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                            new KeyValuePair<string, List<object>>("ClaimsParameterSupported", new List<object>{false, true, false}),
-                            new KeyValuePair<string, List<object>>("EndSessionEndpoint", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                            new KeyValuePair<string, List<object>>("HttpLogoutSupported", new List<object>{false, true, true}),
-                            new KeyValuePair<string, List<object>>("IntrospectionEndpoint", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                            new KeyValuePair<string, List<object>>("Issuer",  new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                            new KeyValuePair<string, List<object>>("JwksUri",  new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                            new KeyValuePair<string, List<object>>("JsonWebKeySet",  new List<object>{null, new JsonWebKeySet()}),
-                            new KeyValuePair<string, List<object>>("LogoutSessionSupported", new List<object>{false, true, true}),
-                            new KeyValuePair<string, List<object>>("OpPolicyUri", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                            new KeyValuePair<string, List<object>>("OpTosUri", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                            new KeyValuePair<string, List<object>>("RegistrationEndpoint", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                            new KeyValuePair<string, List<object>>("RequireRequestUriRegistration", new List<object>{false, true, true}),
-                            new KeyValuePair<string, List<object>>("RequestParameterSupported", new List<object>{false, true, false}),
-                            new KeyValuePair<string, List<object>>("RequestUriParameterSupported", new List<object>{false, true, true}),
-                            new KeyValuePair<string, List<object>>("ServiceDocumentation", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                            new KeyValuePair<string, List<object>>("TokenEndpoint", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
-                            new KeyValuePair<string, List<object>>("UserInfoEndpoint", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
+                            new KeyValuePair<string, List<object>>("AuthorizationEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
+                            new KeyValuePair<string, List<object>>("CheckSessionIframe", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
+                            new KeyValuePair<string, List<object>>("ClaimsParameterSupported", new List<object>{ false, true, false }),
+                            new KeyValuePair<string, List<object>>("EndSessionEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
+                            new KeyValuePair<string, List<object>>("HttpLogoutSupported", new List<object>{ false, true, true }),
+                            new KeyValuePair<string, List<object>>("IntrospectionEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
+                            new KeyValuePair<string, List<object>>("Issuer",  new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
+                            new KeyValuePair<string, List<object>>("JwksUri",  new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
+                            new KeyValuePair<string, List<object>>("JsonWebKeySet",  new List<object>{ null, new JsonWebKeySet() }),
+                            new KeyValuePair<string, List<object>>("LogoutSessionSupported", new List<object>{ false, true, true }),
+                            new KeyValuePair<string, List<object>>("OpPolicyUri", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
+                            new KeyValuePair<string, List<object>>("OpTosUri", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
+                            new KeyValuePair<string, List<object>>("RegistrationEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
+                            new KeyValuePair<string, List<object>>("RequireRequestUriRegistration", new List<object>{ false, true, true }),
+                            new KeyValuePair<string, List<object>>("RequestParameterSupported", new List<object>{ false, true, false }),
+                            new KeyValuePair<string, List<object>>("RequestUriParameterSupported", new List<object>{ false, true, true }),
+                            new KeyValuePair<string, List<object>>("ServiceDocumentation", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
+                            new KeyValuePair<string, List<object>>("TokenEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
+                            new KeyValuePair<string, List<object>>("UserInfoEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
+
+                            new KeyValuePair<string, List<object>>("PushedAuthorizationRequestEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
+                            new KeyValuePair<string, List<object>>("RequirePushedAuthorizationRequests", new List<object>{ false, true, true }),
+                            new KeyValuePair<string, List<object>>("BackchannelAuthenticationEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
+                            new KeyValuePair<string, List<object>>("BackchannelUserCodeParameterSupported", new List<object>{ false, true, true }),
+                            new KeyValuePair<string, List<object>>("AuthorizationResponseIssParameterSupported", new List<object>{ false, true, true }),
                         },
 
                     Object = configuration,
@@ -291,7 +304,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 "ui_locales_supported",
                 "userinfo_encryption_alg_values_supported",
                 "userinfo_encryption_enc_values_supported",
-                "userinfo_signing_alg_values_supported"
+                "userinfo_signing_alg_values_supported",                
+                "prompt_values_supported",
+                "backchannel_token_delivery_modes_supported",
+                "backchannel_authentication_request_signing_alg_values_supported",
+                "dpop_signing_alg_values_supported",
             };
 
             foreach (var collection in collectionNames)
