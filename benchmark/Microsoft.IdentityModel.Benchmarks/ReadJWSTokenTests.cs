@@ -10,13 +10,10 @@ namespace Microsoft.IdentityModel.Benchmarks
 {
     // dotnet run -c release -f net8.0 --filter Microsoft.IdentityModel.Benchmarks.ReadJWSTokenTests*
 
-    [Config(typeof(BenchmarkConfig))]
-    [HideColumns("Type", "Job", "WarmupCount", "LaunchCount")]
-    [MemoryDiagnoser]
-    [RankColumn]
     public class ReadJWSTokenTests
     {
         string _encodedJWS;
+        ReadOnlyMemory<char> _encodedJWSAsMemory;
 
         [GlobalSetup]
         public void Setup()
@@ -30,6 +27,7 @@ namespace Microsoft.IdentityModel.Benchmarks
             };
 
             _encodedJWS = jsonWebTokenHandler.CreateToken(jwsTokenDescriptor);
+            _encodedJWSAsMemory = _encodedJWS.AsMemory();
         }
 
         [Benchmark]
@@ -41,7 +39,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         [Benchmark]
         public JsonWebToken ReadJWS_FromMemory()
         {
-            return new JsonWebToken(_encodedJWS.AsMemory());
+            return new JsonWebToken(_encodedJWSAsMemory);
         }
     }
 }
