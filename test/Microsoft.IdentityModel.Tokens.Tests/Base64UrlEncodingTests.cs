@@ -318,14 +318,14 @@ namespace Microsoft.IdentityModel.Tokens.UrlEncoding.Tests
             Assert.Throws<ArgumentException>(() => Base64UrlEncoding.ValidateAndGetOutputSize("abc".AsSpan(), 0, 4));
             Assert.Throws<FormatException>(() => Base64UrlEncoding.ValidateAndGetOutputSize("abcde".AsSpan(), 0, 5));
 
-            int result = Base64UrlEncoding.ValidateAndGetOutputSize("abc".AsSpan(), 0, 0);
-            Assert.Equal(0, result);
+            int actualOutputSize = Base64UrlEncoding.ValidateAndGetOutputSize("abc".AsSpan(), 0, 0);
+            Assert.Equal(0, actualOutputSize);
 
-            result = Base64UrlEncoding.ValidateAndGetOutputSize("abcd".AsSpan(), 0, 4);
-            Assert.Equal(3, result);
+            actualOutputSize = Base64UrlEncoding.ValidateAndGetOutputSize("abcd".AsSpan(), 0, 4);
+            Assert.Equal(3, actualOutputSize);
 
-            result = Base64UrlEncoding.ValidateAndGetOutputSize("abc=".AsSpan(), 0, 4);
-            Assert.Equal(2, result);
+            actualOutputSize = Base64UrlEncoding.ValidateAndGetOutputSize("abc=".AsSpan(), 0, 4);
+            Assert.Equal(2, actualOutputSize);
         }
     }
 }
