@@ -57,9 +57,10 @@ namespace Microsoft.IdentityModel.Tokens
         {
             _ = input ?? throw LogHelper.LogArgumentNullException(nameof(input));
 
-            int outputsize = ValidateAndGetOutputSize(input.AsSpan(), offset, length);
+            ReadOnlySpan<char> inputSpan = input.AsSpan();
+            int outputsize = ValidateAndGetOutputSize(inputSpan, offset, length);
             byte[] output = new byte[outputsize];
-            Decode(input.AsSpan(), offset, length, output);
+            Decode(inputSpan, offset, length, output);
             return output;
         }
 
@@ -82,11 +83,13 @@ namespace Microsoft.IdentityModel.Tokens
         public static T Decode<T, TX>(string input, int offset, int length, TX argx, Func<byte[], int, TX, T> action)
         {
             _ = action ?? throw new ArgumentNullException(nameof(action));
-            int outputsize = ValidateAndGetOutputSize(input.AsSpan(), offset, length);
+
+            ReadOnlySpan<char> inputSpan = input.AsSpan();
+            int outputsize = ValidateAndGetOutputSize(inputSpan, offset, length);
             byte[] output = ArrayPool<byte>.Shared.Rent(outputsize);
             try
             {
-                Decode(input.AsSpan(), offset, length, output);
+                Decode(inputSpan, offset, length, output);
                 return action(output, outputsize, argx);
             }
             finally
@@ -114,11 +117,12 @@ namespace Microsoft.IdentityModel.Tokens
             _ = input ?? throw LogHelper.LogArgumentNullException(nameof(input));
             _ = action ?? throw new ArgumentNullException(nameof(action));
 
-            int outputsize = ValidateAndGetOutputSize(input.AsSpan(), offset, length);
+            ReadOnlySpan<char> inputSpan = input.AsSpan();
+            int outputsize = ValidateAndGetOutputSize(inputSpan, offset, length);
             byte[] output = ArrayPool<byte>.Shared.Rent(outputsize);
             try
             {
-                Decode(input.AsSpan(), offset, length, output);
+                Decode(inputSpan, offset, length, output);
                 return action(output, outputsize);
             }
             finally
@@ -158,11 +162,12 @@ namespace Microsoft.IdentityModel.Tokens
         {
             _ = action ?? throw LogHelper.LogArgumentNullException(nameof(action));
 
-            int outputsize = ValidateAndGetOutputSize(input.AsSpan(), offset, length);
+            ReadOnlySpan<char> inputSpan = input.AsSpan();
+            int outputsize = ValidateAndGetOutputSize(inputSpan, offset, length);
             byte[] output = ArrayPool<byte>.Shared.Rent(outputsize);
             try
             {
-                Decode(input.AsSpan(), offset, length, output);
+                Decode(inputSpan, offset, length, output);
                 return action(output, outputsize, argx, argy, argz);
             }
             finally
