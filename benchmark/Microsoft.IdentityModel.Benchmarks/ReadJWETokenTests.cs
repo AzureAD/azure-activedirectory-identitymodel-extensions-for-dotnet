@@ -13,6 +13,7 @@ namespace Microsoft.IdentityModel.Benchmarks
     public class ReadJWETokenTests
     {
         string _encryptedJWE;
+        ReadOnlyMemory<char> _encryptedJWEAsMemory;
 
         [GlobalSetup]
         public void Setup()
@@ -27,6 +28,7 @@ namespace Microsoft.IdentityModel.Benchmarks
             };
 
             _encryptedJWE = jsonWebTokenHandler.CreateToken(jweTokenDescriptor);
+            _encryptedJWEAsMemory = _encryptedJWE.AsMemory();
         }
 
         [Benchmark]
@@ -38,7 +40,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         [Benchmark]
         public JsonWebToken ReadJWE_FromMemory()
         {
-            return new JsonWebToken(_encryptedJWE.AsMemory());
+            return new JsonWebToken(_encryptedJWEAsMemory);
         }
     }
 }
