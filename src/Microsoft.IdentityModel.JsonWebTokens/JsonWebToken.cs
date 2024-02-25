@@ -416,10 +416,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (Dot1 == -1 || Dot1 == encodedTokenSpan.Length - 1)
                 throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX14100));
 
+            // Dot2 index in the second segment
             Dot2 = encodedTokenSpan.Slice(Dot1 + 1).IndexOf('.');
             if (Dot2 == -1)
                 throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX14120));
 
+            // Dot2 index in the whole token
             Dot2 = Dot1 + Dot2 + 1;
             Dot3 = (Dot2 == encodedTokenSpan.Length - 1) ? -1 : encodedTokenSpan.Slice(Dot2 + 1).IndexOf('.');
 
