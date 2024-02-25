@@ -32,14 +32,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         LogHelper.MarkAsNonPII(reader.CurrentDepth),
                         LogHelper.MarkAsNonPII(reader.BytesConsumed))));
 
-            Dictionary<string, object> claims = new();
+            Dictionary<string, object> claims = [];
             while (true)
             {
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
                     if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Aud))
                     {
-                        _audiences = new List<string>();
+                        _audiences = [];
                         reader.Read();
                         if (reader.TokenType == JsonTokenType.StartArray)
                         {
@@ -104,7 +104,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     }
                 }
                 // We read a JsonTokenType.StartObject above, exiting and positioning reader at next token.
-                else if (JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, true))
+                else if (JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, false))
                     break;
                 else if (!reader.Read())
                     break;

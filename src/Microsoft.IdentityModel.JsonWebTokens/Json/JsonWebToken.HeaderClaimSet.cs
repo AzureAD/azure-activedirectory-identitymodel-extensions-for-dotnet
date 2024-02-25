@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     }
                 }
                 // We read a JsonTokenType.StartObject above, exiting and positioning reader at next token.
-                else if (JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, true))
+                else if (JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, false))
                     break;
                 else if (!reader.Read())
                     break;
