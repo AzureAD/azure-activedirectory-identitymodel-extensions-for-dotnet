@@ -1229,6 +1229,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
         }
 #endif
+
         [Theory, MemberData(nameof(SignUsingOffsetTestCases), DisableDiscoveryEnumeration = true)]
         public void SignUsingOffsetTests(SignTheoryData theoryData)
         {

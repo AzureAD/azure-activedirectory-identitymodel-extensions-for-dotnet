@@ -307,5 +307,25 @@ namespace Microsoft.IdentityModel.Tokens.UrlEncoding.Tests
 
             public bool EncodingOnly { get; set; } = false;
         }
+
+        [Fact]
+        public void ValidateAndGetOutputSizeTests()
+        {
+            string input = string.Empty;
+            Assert.Throws<ArgumentNullException>(() => Base64UrlEncoding.ValidateAndGetOutputSize(input.AsSpan(), 0, 0));
+            Assert.Throws<ArgumentException>(() => Base64UrlEncoding.ValidateAndGetOutputSize("abc".AsSpan(), -1, 3));
+            Assert.Throws<ArgumentException>(() => Base64UrlEncoding.ValidateAndGetOutputSize("abc".AsSpan(), 0, -1));
+            Assert.Throws<ArgumentException>(() => Base64UrlEncoding.ValidateAndGetOutputSize("abc".AsSpan(), 0, 4));
+            Assert.Throws<FormatException>(() => Base64UrlEncoding.ValidateAndGetOutputSize("abcde".AsSpan(), 0, 5));
+
+            int actualOutputSize = Base64UrlEncoding.ValidateAndGetOutputSize("abc".AsSpan(), 0, 0);
+            Assert.Equal(0, actualOutputSize);
+
+            actualOutputSize = Base64UrlEncoding.ValidateAndGetOutputSize("abcd".AsSpan(), 0, 4);
+            Assert.Equal(3, actualOutputSize);
+
+            actualOutputSize = Base64UrlEncoding.ValidateAndGetOutputSize("abc=".AsSpan(), 0, 4);
+            Assert.Equal(2, actualOutputSize);
+        }
     }
 }

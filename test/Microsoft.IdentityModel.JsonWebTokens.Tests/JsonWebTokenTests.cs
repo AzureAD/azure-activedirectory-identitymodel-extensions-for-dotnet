@@ -1607,6 +1607,30 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     Token = EncodedJwts.JWEEmptyAuthenticationTag,
                 });
 
+                theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.JWEInvalidHeader))
+                {
+                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14102:", typeof(FormatException), true),
+                    Token = EncodedJwts.JWEInvalidHeader,
+                });
+
+                theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.JWEInvalidIV))
+                {
+                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14309:", typeof(FormatException), true),
+                    Token = EncodedJwts.JWEInvalidIV,
+                });
+
+                theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.JWEInvalidCiphertext))
+                {
+                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14312:", typeof(FormatException), true),
+                    Token = EncodedJwts.JWEInvalidCiphertext,
+                });
+
+                theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.JWEInvalidAuthenticationTag))
+                {
+                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14311:", typeof(FormatException), true),
+                    Token = EncodedJwts.JWEInvalidAuthenticationTag,
+                });
+
                 return theoryData;
             }
         }
@@ -1673,6 +1697,26 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.Equal("10.9", numericClaim);
             Assert.Equal("12.2", numericList[0].Value);
             Assert.Equal("11.1", numericList[1].Value);
+        }
+
+        // Test to verify equality between JsonWebTokens created from a string and an equivalent span
+        [Theory, MemberData(nameof(ParseTokenTheoryData))]
+        public void StringAndMemoryConstructors_CreateEquivalentTokens(JwtTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.CompareJsonWebToken", theoryData);
+            try
+            {
+                var tokenFromMemory = new JsonWebToken(theoryData.Token.AsMemory());
+                var tokenFromString = new JsonWebToken(theoryData.Token);
+
+                theoryData.ExpectedException.ProcessNoException(context);
+                IdentityComparer.AreEqual(tokenFromMemory, tokenFromString, context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+            TestUtilities.AssertFailIfErrors(context);
         }
     }
 
