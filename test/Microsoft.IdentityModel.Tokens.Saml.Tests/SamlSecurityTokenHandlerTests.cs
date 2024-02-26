@@ -447,6 +447,22 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         Token = ReferenceTokens.SamlToken_NoAttributes,
                         ValidationParameters = new TokenValidationParameters(),
                     },
+                    new SamlTheoryData("ReferenceTokens_SamlToken_Valid_Issuer_ConfigurationManager")
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10500:"),
+                        Token = ReferenceTokens.SamlToken_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new StaticConfigurationManager<BaseConfiguration>(new WsFederationConfiguration()
+                            {
+                                Issuer = "http://Default.Issuer.com",
+                            }),
+                            ValidateIssuerSigningKey = false,
+                            ValidateIssuer = true,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
                     new SamlTheoryData("ReferenceTokens_SamlToken_Valid_IssuerSigningKey_ConfigurationManager")
                     {
                         Token = ReferenceTokens.SamlToken_Valid,
@@ -456,6 +472,33 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                             {
                                 SigningKeys = { KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key },
                             }),
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new SamlTheoryData("ReferenceTokens_SamlToken_Valid_IssuerSigningKey_and_Issuer_ConfigurationManager")
+                    {
+                        Token = ReferenceTokens.SamlToken_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new StaticConfigurationManager<BaseConfiguration>(new WsFederationConfiguration()
+                            {
+                                Issuer = "http://Default.Issuer.com",
+                                SigningKeys = { KeyingMaterial.DefaultX509SigningCreds_2048_RsaSha2_Sha2.Key },
+                            }),
+                            ValidateIssuer = true,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new SamlTheoryData("ReferenceTokens_SamlToken_Valid_NoSigningKey_ConfigurationManager")
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10500:"),
+                        Token = ReferenceTokens.SamlToken_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new StaticConfigurationManager<BaseConfiguration>(new WsFederationConfiguration()),
                             ValidateIssuer = false,
                             ValidateAudience = false,
                             ValidateLifetime = false,

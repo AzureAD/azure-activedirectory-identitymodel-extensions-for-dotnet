@@ -674,6 +674,22 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                         Token = ReferenceTokens.Saml2Token_NoAttributes,
                         ValidationParameters = new TokenValidationParameters(),
                     },
+                    new Saml2TheoryData("ReferenceTokens_Saml2Token_Valid_Issuer_ConfigurationManager")
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10500:"),
+                        Token = ReferenceTokens.Saml2Token_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new StaticConfigurationManager<BaseConfiguration>(new WsFederationConfiguration()
+                            {
+                                Issuer = "https://sts.windows.net/add29489-7269-41f4-8841-b63c95564420/",
+                            }),
+                            ValidateIssuerSigningKey = false,
+                            ValidateIssuer = true,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
                     new Saml2TheoryData("ReferenceTokens_Saml2Token_Valid_IssuerSigningKey_ConfigurationManager")
                     {
                         Token = ReferenceTokens.Saml2Token_Valid,
@@ -683,6 +699,33 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                             {
                                 SigningKeys = { KeyingMaterial.DefaultAADSigningKey },
                             }),
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new Saml2TheoryData("ReferenceTokens_Saml2Token_Valid_IssuerSigningKey_and_Issuer_ConfigurationManager")
+                    {
+                        Token = ReferenceTokens.Saml2Token_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new StaticConfigurationManager<BaseConfiguration>(new WsFederationConfiguration()
+                            {
+                                Issuer = "https://sts.windows.net/add29489-7269-41f4-8841-b63c95564420/",
+                                SigningKeys = { KeyingMaterial.DefaultAADSigningKey },
+                            }),
+                            ValidateIssuer = true,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new Saml2TheoryData("ReferenceTokens_Saml2Token_Valid_NoSigningKey_ConfigurationManager")
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10500:"),
+                        Token = ReferenceTokens.Saml2Token_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new StaticConfigurationManager<BaseConfiguration>(new WsFederationConfiguration()),
                             ValidateIssuer = false,
                             ValidateAudience = false,
                             ValidateLifetime = false,
