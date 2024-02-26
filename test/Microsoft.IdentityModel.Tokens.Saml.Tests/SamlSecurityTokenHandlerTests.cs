@@ -20,7 +20,7 @@ using Xunit;
 namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 {
     /// <summary>
-    ///
+    /// 
     /// </summary>
     public class SamlSecurityTokenHandlerTests
     {
