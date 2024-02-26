@@ -1140,7 +1140,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (validationParameters == null)
                 throw LogArgumentNullException(nameof(validationParameters));
 
-            validationParameters = PopulateValidationParametersWithCurrentConfigurationAsync(validationParameters).ConfigureAwait(false).GetAwaiter()
+            validationParameters = SamlTokenUtilities.PopulateValidationParametersWithCurrentConfigurationAsync(validationParameters).ConfigureAwait(false).GetAwaiter()
                 .GetResult();
 
             var samlToken = ReadSamlToken(reader);
@@ -1167,7 +1167,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 if (token.Length > MaximumTokenSizeInBytes)
                     throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, LogHelper.MarkAsNonPII(token.Length), LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes))));
 
-                validationParameters = await PopulateValidationParametersWithCurrentConfigurationAsync(validationParameters).ConfigureAwait(false);
+                validationParameters = await SamlTokenUtilities.PopulateValidationParametersWithCurrentConfigurationAsync(validationParameters).ConfigureAwait(false);
 
                 var samlToken = ValidateSignature(token, validationParameters);
                 if (samlToken == null)
@@ -1213,7 +1213,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (token.Length > MaximumTokenSizeInBytes)
                 throw LogExceptionMessage(new ArgumentException(FormatInvariant(TokenLogMessages.IDX10209, LogHelper.MarkAsNonPII(token.Length), LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes))));
 
-            validationParameters = PopulateValidationParametersWithCurrentConfigurationAsync(validationParameters).ConfigureAwait(false).GetAwaiter()
+            validationParameters = SamlTokenUtilities.PopulateValidationParametersWithCurrentConfigurationAsync(validationParameters).ConfigureAwait(false).GetAwaiter()
                 .GetResult();
 
             var samlToken = ValidateSignature(token, validationParameters);
@@ -1246,24 +1246,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     LogHelper.MarkAsUnsafeSecurityArtifact(token, t => t.ToString()));
 
             return new ClaimsPrincipal(identities);
-        }
-
-        private static async Task<TokenValidationParameters> PopulateValidationParametersWithCurrentConfigurationAsync(
-            TokenValidationParameters validationParameters)
-        {
-            if (validationParameters.ConfigurationManager == null)
-            {
-                return validationParameters;
-            }
-
-            var currentConfiguration = await validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
-            var validationParametersCloned = validationParameters.Clone();
-            var issuers = new[] { currentConfiguration.Issuer };
-
-            validationParametersCloned.ValidIssuers = (validationParametersCloned.ValidIssuers == null ? issuers : validationParametersCloned.ValidIssuers.Concat(issuers));
-            validationParametersCloned.IssuerSigningKeys = (validationParametersCloned.IssuerSigningKeys == null ? currentConfiguration.SigningKeys : validationParametersCloned.IssuerSigningKeys.Concat(currentConfiguration.SigningKeys));
-            return validationParametersCloned;
-
         }
 
         /// <summary>
