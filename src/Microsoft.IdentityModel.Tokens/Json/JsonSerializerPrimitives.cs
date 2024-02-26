@@ -505,7 +505,9 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 bool retVal = reader.GetBoolean();
 
                 // move to next token.
-                reader.Read();
+                if (read)
+                    reader.Read();
+
                 return retVal;
             }
 
@@ -552,7 +554,9 @@ namespace Microsoft.IdentityModel.Tokens.Json
             }
 
             // move to next token.
-            reader.Read();
+            if (read)
+                reader.Read();
+
             return retVal;
         }
 
@@ -640,7 +644,9 @@ namespace Microsoft.IdentityModel.Tokens.Json
             string retval = reader.GetString();
 
             // move to next token.
-            reader.Read();
+            if (read)
+                reader.Read();
+
             return retval;
         }
 
@@ -660,7 +666,9 @@ namespace Microsoft.IdentityModel.Tokens.Json
             if (bool.TryParse(strValue, out bool boolValue))
             {
                 // move to next token.
-                reader.Read();
+                if (read)
+                    reader.Read();
+
                 return boolValue ? True : False;
             }
 
@@ -691,7 +699,9 @@ namespace Microsoft.IdentityModel.Tokens.Json
             string retVal = reader.GetString();
 
             // move to next token.
-            reader.Read();
+            if (read)
+                reader.Read();
+
             return retVal;
         }
 
@@ -723,7 +733,9 @@ namespace Microsoft.IdentityModel.Tokens.Json
 #pragma warning restore CA1031 // Do not catch general exception types
 
             // move to next token.
-            reader.Read();
+            if (read)
+                reader.Read();
+
             return originalString;
         }
 
@@ -838,17 +850,20 @@ namespace Microsoft.IdentityModel.Tokens.Json
             {
                 case JsonTokenType.False:
                     // move to next token.
-                    reader.Read();
+                    if (read)
+                        reader.Read();
                     return false;
                 case JsonTokenType.Number:
                     return ReadNumber(ref reader);
                 case JsonTokenType.True:
                     // move to next token.
-                    reader.Read();
+                    if (read)
+                        reader.Read();
                     return true;
                 case JsonTokenType.Null:
                     // move to next token.
-                    reader.Read();
+                    if (read)
+                        reader.Read();
                     return null;
                 case JsonTokenType.String:
                     return ReadStringAsObject(ref reader, propertyName, className);
@@ -859,7 +874,8 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 default:
                     // The reader is pointing at a token that we don't know how to handle.
                     // move to next token.
-                    reader.Read();
+                    if (read)
+                        reader.Read();
                     return null;
             }
         }
