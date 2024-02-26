@@ -501,7 +501,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// </summary>
         /// <param name="attributes"><see cref="ICollection{SamlAttribute}"/>.</param>
         /// <returns>A well formed XML string.</returns>
-        /// <remarks>The string is of the form "&lt;Actor&gt;&lt;SamlAttribute name, ns&gt;&lt;SamlAttributeValue&gt;...&lt;/SamlAttributeValue&gt;, ...&lt;/SamlAttribute&gt;...&lt;/Actor&gt;"</remarks>
+        /// <remarks>The string is of the form "&lt;Actor&gt;&lt;SamlAttribute name, ns&gt;&lt;SamlAttributeValue&gt;...&lt;/SamlAttributeValue&gt;, ...&lt;/SamlAttribute&gt;...&lt;/Actor&gt;"</remarks>        
         protected virtual string CreateXmlStringFromAttributes(ICollection<SamlAttribute> attributes)
         {
             if (attributes == null)
