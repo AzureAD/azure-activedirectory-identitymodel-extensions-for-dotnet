@@ -1,5 +1,22 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+7.4.0
+======
+### New Features:
+- Introduced an injection point for external metadata management and adjusted the issuer Last Known Good (LKG) to maintain the state within the issuer validator. See PR [#2480](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2480).
+- Made an internal virtual method public, enabling users to provide signature providers. See PR [#2497](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2497).
+
+### Performance Improvements:
+- Added a new JsonWebToken constructor that accepts Memory<char> for improved performance, along with enhancements to existing constructors. More information can be found in issue [#2487](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2487) and in PR [#2458].
+
+### Fundamentals:
+- Resolved the issue of duplicated log messages in the source code and made IDX10506 log message more specific. For more details, refer to issue [#2481].
+- Enhanced Json serialization by ensuring the complete object is always read. This improvement can be found in issue [#2491].
+
+### Engineering Excellence:
+- Streamlined the build and release process by replacing the dependency on updateAssemblyInfo.ps1 with the Version property. Check out the details in issue [#2494].
+- Excluded the packing of Benchmark and TestApp projects for a more efficient process. Details available in issue [#2496].
+  
 7.3.1
 ======
 ### Bug Fixes:
