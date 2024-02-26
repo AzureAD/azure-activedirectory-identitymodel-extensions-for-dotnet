@@ -648,6 +648,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             AddToCollection(config.UserInfoEndpointEncryptionAlgValuesSupported, "ECDH-ES+A128KW", "ECDH-ES+A192KW");
             AddToCollection(config.UserInfoEndpointEncryptionEncValuesSupported, "A256CBC-HS512", "A128CBC-HS256");
             AddToCollection(config.UserInfoEndpointSigningAlgValuesSupported, "ES384", "ES512");
+            AddToCollection(config.PromptValuesSupported, "none", "login", "consent");
+            config.PushedAuthorizationRequestEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/par";
+            config.RequirePushedAuthorizationRequests = false;
+            config.BackchannelAuthenticationEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/bc-authorize";
+            AddToCollection(config.BackchannelTokenDeliveryModesSupported, "poll", "ping");
+            AddToCollection(config.BackchannelAuthenticationRequestSigningAlgValuesSupported, "ES384", "ES512");
+            config.BackchannelUserCodeParameterSupported = false;
+            AddToCollection(config.DPoPSigningAlgValuesSupported, "ES384", "ES512");
+            config.AuthorizationResponseIssParameterSupported = false;
 
             return config;
         }
