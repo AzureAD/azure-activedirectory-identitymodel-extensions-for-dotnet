@@ -191,9 +191,9 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET6_0_OR_GREATER
             // If the incoming chars don't contain any of the base64url characters that need to be replaced,
             // and if the incoming chars are of the exact right length, then we'll be able to just pass the
-            // incoming chars directly to Convert.TryFromBase64Chars. Otherwise, rent an array, copy all the
+            // incoming chars directly to DecodeFromUtf8InPlace. Otherwise, rent an array, copy all the
             // data into it, and do whatever fixups are necessary on that copy, then pass that copy into
-            // Convert.TryFromBase64Chars.
+            // DecodeFromUtf8InPlace.
 
             const int StackAllocThreshold = 512;
             char[] arrayPoolChars = null;
@@ -237,8 +237,8 @@ namespace Microsoft.IdentityModel.Tokens
                 arrayPoolBytes = ArrayPool<byte>.Shared.Rent(decodedLength);
 
             int length = Encoding.UTF8.GetBytes(source, bytesSpan);
-            var utf8Span = bytesSpan.Slice(0, length);
-            var status = System.Buffers.Text.Base64.DecodeFromUtf8InPlace(utf8Span, out int bytesWritten);
+            Span<byte> utf8Span = bytesSpan.Slice(0, length);
+            OperationStatus status = System.Buffers.Text.Base64.DecodeFromUtf8InPlace(utf8Span, out int bytesWritten);
             Debug.Assert(status == OperationStatus.Done, "Expected DecodeFromUtf8 to be successful");
 
             byte[] result = bytesSpan.Slice(0, bytesWritten).ToArray();
