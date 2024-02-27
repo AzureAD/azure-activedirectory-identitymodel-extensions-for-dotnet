@@ -783,6 +783,67 @@ namespace Microsoft.IdentityModel.Validators.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        [Theory(Skip = "v1.1 needs to be propagated to all DCs")]
+        [InlineData(ProtocolVersion.V1, ProtocolVersion.V1)]
+        [InlineData(ProtocolVersion.V1, ProtocolVersion.V11)]
+        [InlineData(ProtocolVersion.V1, ProtocolVersion.V2)]
+        [InlineData(ProtocolVersion.V11, ProtocolVersion.V1)]
+        [InlineData(ProtocolVersion.V11, ProtocolVersion.V11)]
+        [InlineData(ProtocolVersion.V11, ProtocolVersion.V2)]
+        [InlineData(ProtocolVersion.V2, ProtocolVersion.V1)]
+        [InlineData(ProtocolVersion.V2, ProtocolVersion.V11)]
+        [InlineData(ProtocolVersion.V2, ProtocolVersion.V2)]
+        public void Validate_CanFetchMetadataWithoutConfigurationProvider(ProtocolVersion authorityVersion, ProtocolVersion tokenVersion)
+        {
+            var tokenIssuerProvider = (ProtocolVersion version) =>
+            {
+                if (version == ProtocolVersion.V11)
+                    return ValidatorConstants.AadIssuerV11;
+
+                if (version == ProtocolVersion.V2)
+                    return ValidatorConstants.AadIssuer;
+
+                return ValidatorConstants.V1Issuer;
+            };
+
+            var authorityUrlProvider = (ProtocolVersion version) =>
+            {
+                if (version == ProtocolVersion.V11)
+                    return ValidatorConstants.AuthorityCommonTenantWithV11;
+
+                if (version == ProtocolVersion.V2)
+                    return ValidatorConstants.AuthorityCommonTenantWithV2;
+
+                return ValidatorConstants.AuthorityV1;
+            };
+
+            var goodAuthorityIssuer = (ProtocolVersion version) =>
+            {
+                if (version == ProtocolVersion.V11)
+                    return ValidatorConstants.AadIssuerV11CommonAuthority;
+
+                if (version == ProtocolVersion.V2)
+                    return ValidatorConstants.AadIssuerV2CommonAuthority;
+
+                return ValidatorConstants.AadIssuerV1CommonAuthority;
+            };
+           
+            var context = new CompareContext();
+            var tidClaim = new Claim(ValidatorConstants.ClaimNameTid, ValidatorConstants.TenantIdAsGuid);
+
+            var issuer = tokenIssuerProvider(tokenVersion);
+            var issClaim = new Claim(ValidatorConstants.ClaimNameIss, issuer);
+            var jwtSecurityToken = new JwtSecurityToken(issuer: issuer, claims: new[] { issClaim, tidClaim });
+
+            var authority = authorityUrlProvider(authorityVersion);
+            var aadIssuerValidator = AadIssuerValidator.GetAadIssuerValidator(authority, _httpClient);
+                        
+            // set LKG
+            var actualIssuer = aadIssuerValidator.Validate(issuer, jwtSecurityToken, new TokenValidationParameters());
+            IdentityComparer.AreEqual(issuer, actualIssuer, context);
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
         [Fact]
         public void Validate_UsesLKGWithConfigurationProvider()
         {
