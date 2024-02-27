@@ -783,7 +783,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Theory(Skip = "v1.1 needs to be propagated to all DCs")]
+        [Theory]
         [InlineData(ProtocolVersion.V1, ProtocolVersion.V1)]
         [InlineData(ProtocolVersion.V1, ProtocolVersion.V11)]
         [InlineData(ProtocolVersion.V1, ProtocolVersion.V2)]
@@ -798,34 +798,23 @@ namespace Microsoft.IdentityModel.Validators.Tests
             var tokenIssuerProvider = (ProtocolVersion version) =>
             {
                 if (version == ProtocolVersion.V11)
-                    return ValidatorConstants.AadIssuerV11;
+                    return ValidatorConstants.AadIssuerV11PPE;
 
                 if (version == ProtocolVersion.V2)
-                    return ValidatorConstants.AadIssuer;
+                    return ValidatorConstants.AadIssuerPPE;
 
-                return ValidatorConstants.V1Issuer;
+                return ValidatorConstants.V1IssuerPPE;
             };
 
             var authorityUrlProvider = (ProtocolVersion version) =>
             {
                 if (version == ProtocolVersion.V11)
-                    return ValidatorConstants.AuthorityCommonTenantWithV11;
+                    return ValidatorConstants.AuthorityCommonTenantWithV11PPE;
 
                 if (version == ProtocolVersion.V2)
-                    return ValidatorConstants.AuthorityCommonTenantWithV2;
+                    return ValidatorConstants.AuthorityCommonTenantWithV2PPE;
 
-                return ValidatorConstants.AuthorityV1;
-            };
-
-            var goodAuthorityIssuer = (ProtocolVersion version) =>
-            {
-                if (version == ProtocolVersion.V11)
-                    return ValidatorConstants.AadIssuerV11CommonAuthority;
-
-                if (version == ProtocolVersion.V2)
-                    return ValidatorConstants.AadIssuerV2CommonAuthority;
-
-                return ValidatorConstants.AadIssuerV1CommonAuthority;
+                return ValidatorConstants.AuthorityV1PPE;
             };
            
             var context = new CompareContext();
