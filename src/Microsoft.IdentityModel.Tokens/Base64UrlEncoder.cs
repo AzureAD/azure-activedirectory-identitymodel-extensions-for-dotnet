@@ -236,8 +236,11 @@ namespace Microsoft.IdentityModel.Tokens
                 stackalloc byte[StackAllocThreshold] :
                 arrayPoolBytes = ArrayPool<byte>.Shared.Rent(decodedLength);
 
-            bool converted = Convert.TryFromBase64Chars(source, bytesSpan, out int bytesWritten);
-            Debug.Assert(converted, "Expected TryFromBase64Chars to be successful");
+            int length = Encoding.UTF8.GetBytes(source, bytesSpan);
+            var utf8Span = bytesSpan.Slice(0, length);
+            var status = System.Buffers.Text.Base64.DecodeFromUtf8InPlace(utf8Span, out int bytesWritten);
+            Debug.Assert(status == OperationStatus.Done, "Expected DecodeFromUtf8 to be successful");
+
             byte[] result = bytesSpan.Slice(0, bytesWritten).ToArray();
 
             if (arrayPoolBytes is not null)
