@@ -22,13 +22,6 @@ namespace Microsoft.IdentityModel.Validators
     /// </summary>
     public class AadIssuerValidator
     {
-        internal enum ProtocolVersion
-        {
-            V1,
-            V11,
-            V2
-        }
-
         private static readonly TimeSpan LastKnownGoodConfigurationLifetime = new TimeSpan(0, 24, 0, 0);
 
         internal const string V11EndpointSuffix = "/v1.1";
@@ -138,30 +131,31 @@ namespace Microsoft.IdentityModel.Validators
             private set;
         }
 
-        private string SetupAuthorities(string aadAuthority, ProtocolVersion version)
+        private void SetupAuthorities(string aadAuthority, ProtocolVersion version)
         {
             switch (version)
             {
                 case ProtocolVersion.V1:
                     AadAuthorityV1 = aadAuthority;
-                    AadAuthorityV11 = aadAuthority + V11EndpointSuffix;
-                    AadAuthorityV2 = aadAuthority + V2EndpointSuffix;
+                    AadAuthorityV11 = AadAuthorityV1 + V11EndpointSuffix;
+                    AadAuthorityV2 = AadAuthorityV1 + V2EndpointSuffix;
                     break;
                     
                 case ProtocolVersion.V11:
-                    AadAuthority = CreateV1Authority(AadAuthority, V11EndpointSuffix);
+                    AadAuthorityV1 = CreateV1Authority(AadAuthority, V11EndpointSuffix);
                     AadAuthorityV11 = aadAuthority;
-                    AadAuthorityV2 = AadAuthority + V2EndpointSuffix;
+                    AadAuthorityV2 = AadAuthorityV1 + V2EndpointSuffix;
                     break;
 
                 case ProtocolVersion.V2:
-                    AadAuthority = CreateV1Authority(AadAuthority);
-                    AadAuthorityV11 = AadAuthority + V11EndpointSuffix;
-                    AadAuthorityV2 = AadAuthority + V2EndpointSuffix;
+                    AadAuthorityV1 = CreateV1Authority(AadAuthority);
+                    AadAuthorityV11 = AadAuthorityV1 + V11EndpointSuffix;
+                    AadAuthorityV2 = aadAuthority;
                     break;
-            }
 
-            throw new InvalidOperationException("Unsupported protocol version.");
+                default:
+                    throw new InvalidOperationException("Unsupported protocol version.");
+            }
         }
 
         internal string AadIssuerV1 { get; set; }
