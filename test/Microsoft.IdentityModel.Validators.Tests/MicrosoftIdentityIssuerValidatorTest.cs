@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
             IdentityComparer.AreEqual(ValidatorConstants.AuthorityV1, validator.AadAuthorityV1, context);
             IdentityComparer.AreEqual(ValidatorConstants.AuthorityCommonTenantWithV2, validator.AadAuthorityV2, context);
-            IdentityComparer.AreBoolsEqual(false, validator.IsV2Authority, context);
+            IdentityComparer.AreEqual(AadIssuerValidator.ProtocolVersion.V1, validator.AadAuthorityVersion, context);
             TestUtilities.AssertFailIfErrors(context);
         }
 
@@ -77,12 +77,12 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
             IdentityComparer.AreEqual(ValidatorConstants.AuthorityV1, validator.AadAuthorityV1, context);
             IdentityComparer.AreEqual(ValidatorConstants.AuthorityCommonTenantWithV2, validator.AadAuthorityV2, context);
-            IdentityComparer.AreBoolsEqual(false, validator.IsV2Authority, context);
+            IdentityComparer.AreEqual(AadIssuerValidator.ProtocolVersion.V1, validator.AadAuthorityVersion, context);
 
             validator = CreateIssuerValidator(ValidatorConstants.AuthorityWithTenantSpecified);
             IdentityComparer.AreEqual(ValidatorConstants.AuthorityWithTenantSpecified, validator.AadAuthorityV1, context);
             IdentityComparer.AreEqual(ValidatorConstants.AuthorityWithTenantSpecifiedWithV2, validator.AadAuthorityV2, context);
-            IdentityComparer.AreBoolsEqual(false, validator.IsV2Authority, context);
+            IdentityComparer.AreEqual(AadIssuerValidator.ProtocolVersion.V1, validator.AadAuthorityVersion, context);
 
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -97,7 +97,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
             IdentityComparer.AreEqual(ValidatorConstants.AuthorityV1, validator.AadAuthorityV1, context);
             IdentityComparer.AreEqual(ValidatorConstants.AuthorityCommonTenantWithV2, validator.AadAuthorityV2, context);
-            IdentityComparer.AreBoolsEqual(true, validator.IsV2Authority, context);
+            IdentityComparer.AreEqual(AadIssuerValidator.ProtocolVersion.V2, validator.AadAuthorityVersion, context);
             TestUtilities.AssertFailIfErrors(context);
         }
 
@@ -111,7 +111,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
             IdentityComparer.AreEqual(ValidatorConstants.AuthorityV1, validator.AadAuthorityV1, context);
             IdentityComparer.AreEqual(ValidatorConstants.AuthorityOrganizationsWithV2, validator.AadAuthorityV2, context);
-            IdentityComparer.AreBoolsEqual(true, validator.IsV2Authority, context);
+            IdentityComparer.AreEqual(AadIssuerValidator.ProtocolVersion.V2, validator.AadAuthorityVersion, context);
             TestUtilities.AssertFailIfErrors(context);
         }
 
@@ -124,7 +124,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             var validator = CreateIssuerValidator(authorityNotInAliases);
             IdentityComparer.AreEqual(ValidatorConstants.B2CAuthority, validator.AadAuthorityV1, context);
             IdentityComparer.AreEqual(ValidatorConstants.B2CAuthorityWithV2, validator.AadAuthorityV2, context);
-            IdentityComparer.AreBoolsEqual(true, validator.IsV2Authority, context);
+            IdentityComparer.AreEqual(AadIssuerValidator.ProtocolVersion.V2, validator.AadAuthorityVersion, context);
             TestUtilities.AssertFailIfErrors(context);
         }
 
@@ -452,7 +452,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 });
             IdentityComparer.AreEqual(ValidatorConstants.B2CAuthority, validator.AadAuthorityV1, context);
             IdentityComparer.AreEqual(ValidatorConstants.B2CAuthorityWithV2, validator.AadAuthorityV2, context);
-            IdentityComparer.AreBoolsEqual(true, validator.IsV2Authority, context);
+            IdentityComparer.AreEqual(AadIssuerValidator.ProtocolVersion.V2, validator.AadAuthorityVersion, context);
             TestUtilities.AssertFailIfErrors(context);
         }
 
@@ -498,7 +498,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 });
             IdentityComparer.AreEqual(ValidatorConstants.B2CAuthority, validator.AadAuthorityV1, context);
             IdentityComparer.AreEqual(ValidatorConstants.B2CAuthorityWithV2, validator.AadAuthorityV2, context);
-            IdentityComparer.AreBoolsEqual(true, validator.IsV2Authority, context);
+            IdentityComparer.AreEqual(AadIssuerValidator.ProtocolVersion.V2, validator.AadAuthorityVersion, context);
             TestUtilities.AssertFailIfErrors(context);
         }
 
@@ -568,7 +568,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
             IdentityComparer.AreEqual(ValidatorConstants.B2CCustomDomainAuthority, validator.AadAuthorityV1, context);
             IdentityComparer.AreEqual(ValidatorConstants.B2CCustomDomainAuthorityWithV2, validator.AadAuthorityV2, context);
-            IdentityComparer.AreBoolsEqual(true, validator.IsV2Authority, context);
+            IdentityComparer.AreEqual(AadIssuerValidator.ProtocolVersion.V2, validator.AadAuthorityVersion, context);
             TestUtilities.AssertFailIfErrors(context);
         }
 
