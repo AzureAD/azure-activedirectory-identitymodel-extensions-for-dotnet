@@ -201,5 +201,24 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                 }
             }
         }
+
+        public static string SetPropertiesToUpperCase(string json)
+        {
+            Utf8JsonReader reader = new Utf8JsonReader(System.Text.Encoding.UTF8.GetBytes(json));
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonTokenType.PropertyName)
+                {
+                    string propertyName = reader.GetString();
+                    if (propertyName != null)
+                    {
+                        json = json.Replace(propertyName + ":", propertyName.ToUpperInvariant() + ":");
+                    }
+                }
+            }
+
+            return json;
+        }
+
     }
 }

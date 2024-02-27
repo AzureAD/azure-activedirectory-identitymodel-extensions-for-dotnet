@@ -110,7 +110,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <returns>A <see cref="OpenIdConnectConfiguration"/>.</returns>
         public static OpenIdConnectConfiguration Read(ref Utf8JsonReader reader, OpenIdConnectConfiguration config)
         {
-            if (!JsonPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, false))
+            if (!JsonPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, true))
                 throw LogHelper.LogExceptionMessage(
                     new JsonException(
                         LogHelper.FormatInvariant(
@@ -122,15 +122,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                         LogHelper.MarkAsNonPII(reader.CurrentDepth),
                         LogHelper.MarkAsNonPII(reader.BytesConsumed))));
 
-            while(reader.Read())
+            while(true)
             {
                 #region Check property name using ValueTextEquals
-                // the config spec, https://datatracker.ietf.org/doc/html/rfc7517#section-4, does not require that we reject JSON with
-                // duplicate member names, in strict mode, we could add logic to try a property once and throw if a duplicate shows up.
-                // 6x uses the last value.
-                // TODO - With collections, make sure two properties are not additive
+                // https://datatracker.ietf.org/doc/html/rfc7517#section-4, does not require that we reject JSON with duplicate member names.
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
+                    // JsonPrimitives.Read(...) passes 'true' to advance reader to next token.
                     if (reader.ValueTextEquals(Utf8Bytes.AcrValuesSupported))
                         JsonPrimitives.ReadStrings(ref reader, config.AcrValuesSupported, MetadataName.AcrValuesSupported, ClassName, true);
 
@@ -158,28 +156,27 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                     else if (reader.ValueTextEquals(Utf8Bytes.EndSessionEndpoint))
                         config.EndSessionEndpoint = JsonPrimitives.ReadString(ref reader, MetadataName.EndSessionEndpoint, ClassName, true);
 
-                    // TODO these two properties are per spec 'boolean', we shipped 6x with them as string, if we change we may break folks.
-                    // probably best to mark the property obsolete with the gentle tag, then open up another property and keep them in sync,
-                    // remove the obsolete in 8.x
+                    // FrontchannelLogoutSessionSupported and FrontchannelLogoutSupported are per spec 'boolean'.
+                    // We shipped pervious versions accepting a string and transforming to a boolean.
                     else if (reader.ValueTextEquals(Utf8Bytes.FrontchannelLogoutSessionSupported))
                     {
                         reader.Read();
                         if (reader.TokenType == JsonTokenType.True)
-                            config.FrontchannelLogoutSessionSupported = "True";
+                            config.FrontchannelLogoutSessionSupported = JsonPrimitives.True;
                         else if (reader.TokenType == JsonTokenType.False)
-                            config.FrontchannelLogoutSessionSupported = "False";
+                            config.FrontchannelLogoutSessionSupported = JsonPrimitives.False;
                         else
-                            config.FrontchannelLogoutSessionSupported = JsonPrimitives.ReadString(ref reader, MetadataName.FrontchannelLogoutSessionSupported, ClassName, false);
+                            config.FrontchannelLogoutSessionSupported = JsonPrimitives.ReadStringAsBool(ref reader, MetadataName.FrontchannelLogoutSessionSupported, ClassName, false);
                     }
                     else if (reader.ValueTextEquals(Utf8Bytes.FrontchannelLogoutSupported))
                     {
                         reader.Read();
                         if (reader.TokenType == JsonTokenType.True)
-                            config.FrontchannelLogoutSupported = "True";
+                            config.FrontchannelLogoutSupported = JsonPrimitives.True;
                         else if (reader.TokenType == JsonTokenType.False)
-                            config.FrontchannelLogoutSupported = "False";
+                            config.FrontchannelLogoutSupported = JsonPrimitives.False;
                         else
-                            config.FrontchannelLogoutSupported = JsonPrimitives.ReadString(ref reader, MetadataName.FrontchannelLogoutSupported, ClassName, false);
+                            config.FrontchannelLogoutSupported = JsonPrimitives.ReadStringAsBool(ref reader, MetadataName.FrontchannelLogoutSupported, ClassName, false);
                     }
                     else if (reader.ValueTextEquals(Utf8Bytes.GrantTypesSupported))
                         JsonPrimitives.ReadStrings(ref reader, config.GrantTypesSupported, MetadataName.GrantTypesSupported, ClassName, true);
@@ -286,10 +283,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                     else
                     {
                         #region case-insensitive
+                        // Falling back to checking property names as case insensitive.
+                        // JsonPrimitives.Read(...) passes 'true' to advance reader to next token.
                         string propertyName = JsonPrimitives.ReadPropertyName(ref reader, OpenIdConnectConfiguration.ClassName, true);
 
-                        // fallback to checking property names as case insensitive
-                        // first check to see if the upper case property value is a valid property name if not add to AdditionalData, to avoid unnecessary string compares.
+                        // If the property name is not known add to AdditionalData avoiding unnecessary string compares.
                         if (!OpenIdProviderMetadataNamesUpperCase.Contains(propertyName.ToUpperInvariant()))
                         {
                             config.AdditionalData[propertyName] = JsonPrimitives.ReadPropertyValueAsObject(ref reader, propertyName, OpenIdConnectConfiguration.ClassName);
@@ -323,26 +321,25 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                             else if (propertyName.Equals(MetadataName.EndSessionEndpoint, StringComparison.OrdinalIgnoreCase))
                                 config.EndSessionEndpoint = JsonPrimitives.ReadString(ref reader, propertyName, ClassName);
 
-                            // TODO these two properties are per spec 'boolean', we shipped 6x with them as string, if we change we may break folks.
-                            // probably best to mark the property obsolete with the gentle tag, then open up another property and keep them in sync,
-                            // remove the obsolete in 8.x
+                            // FrontchannelLogoutSessionSupported and FrontchannelLogoutSupported are per spec 'boolean'.
+                            // We shipped previous versions accepting a string and transforming to a boolean.
                             else if (propertyName.Equals(MetadataName.FrontchannelLogoutSessionSupported, StringComparison.OrdinalIgnoreCase))
                             {
                                 if (reader.TokenType == JsonTokenType.True)
-                                    config.FrontchannelLogoutSessionSupported = "True";
+                                    config.FrontchannelLogoutSessionSupported = JsonPrimitives.True;
                                 else if (reader.TokenType == JsonTokenType.False)
-                                    config.FrontchannelLogoutSessionSupported = "False";
+                                    config.FrontchannelLogoutSessionSupported = JsonPrimitives.False;
                                 else
-                                    config.FrontchannelLogoutSessionSupported = JsonPrimitives.ReadString(ref reader, MetadataName.FrontchannelLogoutSessionSupported, ClassName);
+                                    config.FrontchannelLogoutSessionSupported = JsonPrimitives.ReadStringAsBool(ref reader, MetadataName.FrontchannelLogoutSessionSupported, ClassName);
                             }
                             else if (propertyName.Equals(MetadataName.FrontchannelLogoutSupported, StringComparison.OrdinalIgnoreCase))
                             {
                                 if (reader.TokenType == JsonTokenType.True)
-                                    config.FrontchannelLogoutSupported = "True";
+                                    config.FrontchannelLogoutSupported = JsonPrimitives.True;
                                 else if (reader.TokenType == JsonTokenType.False)
-                                    config.FrontchannelLogoutSupported = "False";
+                                    config.FrontchannelLogoutSupported = JsonPrimitives.False;
                                 else
-                                    config.FrontchannelLogoutSupported = JsonPrimitives.ReadString(ref reader, propertyName, ClassName);
+                                    config.FrontchannelLogoutSupported = JsonPrimitives.ReadStringAsBool(ref reader, propertyName, ClassName);
                             }
                             else if (propertyName.Equals(MetadataName.GrantTypesSupported, StringComparison.OrdinalIgnoreCase))
                                 JsonPrimitives.ReadStrings(ref reader, config.GrantTypesSupported, propertyName, ClassName);
@@ -447,8 +444,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                         #endregion case-insensitive
                     }
                 }
-
-                if (JsonPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, false))
+                // We read a JsonTokenType.StartObject above, exiting and positioning reader at next token.
+                else if (JsonPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, true))
+                    break;
+                else if (!reader.Read())
                     break;
             }
 

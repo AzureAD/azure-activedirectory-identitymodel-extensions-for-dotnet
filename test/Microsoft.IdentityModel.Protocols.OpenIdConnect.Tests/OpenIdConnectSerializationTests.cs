@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.IdentityModel.TestUtils;
+using Microsoft.IdentityModel.Tokens.Json.Tests;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
@@ -12,18 +13,19 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     /// </summary>
     public class OpenIdConnectSerializationTests
     {
-        [Theory, MemberData(nameof(SerializationMixedCaseTheoryData))]
-        public void SerializationMixedCase(OpenIdConnectTheoryData theoryData)
+        [Theory, MemberData(nameof(DesrializeTheoryData), DisableDiscoveryEnumeration = true)]
+        public void Deserialize(OpenIdConnectTheoryData theoryData)
         {
-            var context = TestUtilities.WriteHeader($"{this}.SerializationMixedCase", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.Deserialize", theoryData);
 
             try
             {
                 OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration(theoryData.Json);
-                OpenIdConnectConfiguration configurationMixedCase = new OpenIdConnectConfiguration(theoryData.JsonMixedCase);
-
+                OpenIdConnectConfiguration configurationUpperCase = new OpenIdConnectConfiguration(JsonUtilities.SetPropertiesToUpperCase(theoryData.Json));
                 theoryData.ExpectedException.ProcessNoException(context);
-                IdentityComparer.AreEqual(configuration, configurationMixedCase, context);
+
+                IdentityComparer.AreEqual(configuration, theoryData.CompareTo, context);
+                IdentityComparer.AreEqual(configurationUpperCase, theoryData.CompareTo, context);
             }
             catch (Exception ex)
             {
@@ -33,28 +35,107 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<OpenIdConnectTheoryData> SerializationMixedCaseTheoryData
+        public static TheoryData<OpenIdConnectTheoryData> DesrializeTheoryData
         {
             get
             {
                 TheoryData<OpenIdConnectTheoryData> theoryData = new TheoryData<OpenIdConnectTheoryData>();
-                theoryData.Add(new OpenIdConnectTheoryData("MixedCaseNames")
+
+                theoryData.Add(new OpenIdConnectTheoryData("AADCommonV1Config")
                 {
-                    Json = OpenIdConfigData.LowerCaseNames,
-                    JsonMixedCase = OpenIdConfigData.MixedCaseNames
+                    CompareTo = OpenIdConfigData.AADCommonV1Config,
+                    Json = OpenIdConfigData.AADCommonV1
                 });
 
-                theoryData.Add(new OpenIdConnectTheoryData("MixedCaseFrontChannelStringFalse")
+                theoryData.Add(new OpenIdConnectTheoryData("AADCommonV2Config")
                 {
-                    Json = OpenIdConfigData.LowerCaseFrontChannelStringFalse,
-                    JsonMixedCase = OpenIdConfigData.MixedCaseFrontChannelStringFalse
-                }); 
+                    CompareTo = OpenIdConfigData.AADCommonV2Config,
+                    Json = OpenIdConfigData.AADCommonV2
+                });
 
-                theoryData.Add(new OpenIdConnectTheoryData("MixedCaseFrontChannelStringTrue")
+                theoryData.Add(new OpenIdConnectTheoryData("AccountsGoogleCom")
                 {
-                    Json = OpenIdConfigData.LowerCaseFrontChannelStringTrue,
-                    JsonMixedCase = OpenIdConfigData.MixedCaseFrontChannelStringTrue
-                }); 
+                    CompareTo = OpenIdConfigData.AccountsGoogleComConfig,
+                    Json = OpenIdConfigData.AccountsGoogleCom
+                });
+
+                theoryData.Add(new OpenIdConnectTheoryData("FrontChannelFalse")
+                {
+                    CompareTo = OpenIdConfigData.FrontChannelFalseConfig,
+                    Json = OpenIdConfigData.FrontChannelFalse
+                });
+
+                theoryData.Add(new OpenIdConnectTheoryData("FrontChannelTrue")
+                {
+                    CompareTo = OpenIdConfigData.FrontChannelTrueConfig,
+                    Json = OpenIdConfigData.FrontChannelTrue
+                });
+
+                theoryData.Add(new OpenIdConnectTheoryData("ArrayFirst")
+                {
+                    CompareTo = OpenIdConfigData.ArraysConfig,
+                    Json = OpenIdConfigData.ArrayFirstObject
+                });
+
+                theoryData.Add(new OpenIdConnectTheoryData("ArrayMiddle")
+                {
+                    CompareTo = OpenIdConfigData.ArraysConfig,
+                    Json = OpenIdConfigData.ArrayMiddleObject
+                });
+
+                theoryData.Add(new OpenIdConnectTheoryData("ArrayLast")
+                {
+                    CompareTo = OpenIdConfigData.ArraysConfig,
+                    Json = OpenIdConfigData.ArrayLastObject
+                });
+
+                theoryData.Add(new OpenIdConnectTheoryData("ObjectFirst")
+                {
+                    CompareTo = OpenIdConfigData.ObjectConfig,
+                    Json = OpenIdConfigData.ObjectFirstObject
+                });
+
+                theoryData.Add(new OpenIdConnectTheoryData("ObjectMiddle")
+                {
+                    CompareTo = OpenIdConfigData.ObjectConfig,
+                    Json = OpenIdConfigData.ObjectMiddleObject
+                });
+
+                theoryData.Add(new OpenIdConnectTheoryData("ObjectLast")
+                {
+                    CompareTo = OpenIdConfigData.ObjectConfig,
+                    Json = OpenIdConfigData.ObjectLastObject
+                });
+
+                theoryData.Add(new OpenIdConnectTheoryData("Duplicates")
+                {
+                    CompareTo = OpenIdConfigData.DuplicatesConfig,
+                    Json = OpenIdConfigData.Duplicates
+                });
+
+                theoryData.Add(new OpenIdConnectTheoryData("String")
+                {
+                    CompareTo = OpenIdConfigData.StringConfig,
+                    Json = JsonData.StringObject
+                });
+
+                theoryData.Add(new OpenIdConnectTheoryData("BoolFalse")
+                {
+                    CompareTo = OpenIdConfigData.BoolFalseConfig,
+                    Json = JsonData.FalseObject
+                });
+
+                theoryData.Add(new OpenIdConnectTheoryData("BoolTrue")
+                {
+                    CompareTo = OpenIdConfigData.BoolTrueConfig,
+                    Json = JsonData.TrueObject
+                });
+
+                theoryData.Add(new OpenIdConnectTheoryData("Null")
+                {
+                    CompareTo = OpenIdConfigData.NullConfig,
+                    Json = JsonData.NullObject
+                });
 
                 return theoryData;
             }

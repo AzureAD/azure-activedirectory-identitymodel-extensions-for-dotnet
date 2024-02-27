@@ -8,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.IdentityModel.Tokens.Jwt.Tests;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -22,8 +23,6 @@ using Microsoft.IdentityModel.Validators;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
-
-using JsonWebTokenHandler6x = Microsoft.IdentityModel.JsonWebTokens.Tests.JsonWebTokenHandler6x;
 
 namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
@@ -2443,6 +2442,40 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        [Fact]
+        public async Task AdditionalHeaderValues()
+        {
+            CompareContext context = TestUtilities.WriteHeader($"{this}.AdditionalHeaderValues", "AdditionalHeaderValues", false);
+
+            var tokenHandler = new JsonWebTokenHandler();
+            List<string> x5cExpected = new List<string>() { KeyingMaterial.DefaultX509Data_2048_Public, KeyingMaterial.X509Data_AAD_Public };
+            string jwtString = tokenHandler.CreateToken(
+                Default.PayloadString,
+                KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                new Dictionary<string, object>() {
+                    { JwtHeaderParameterNames.X5c, x5cExpected },
+                });
+
+            var tokenValidationParameters = new TokenValidationParameters()
+            {
+                ValidAudience = Default.Audience,
+                ValidateLifetime = false,
+                ValidIssuer = Default.Issuer,
+                IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+            };
+
+            var tokenValidationResult = await tokenHandler.ValidateTokenAsync(jwtString, tokenValidationParameters).ConfigureAwait(false);
+            JsonWebToken validatedToken = tokenValidationResult.SecurityToken as JsonWebToken;
+
+            if (!validatedToken.TryGetHeaderValue(JwtHeaderParameterNames.X5c, out string[] x5cFound))
+                context.Diffs.Add("validatedToken.TryGetHeaderValue(JwtHeaderParameterNames.X5c, out string[] x5c) == false");
+            else
+                IdentityComparer.AreStringEnumsEqual(x5cExpected, x5cFound, context);
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+
         // Test checks to make sure that the token payload retrieved from ValidateToken is the same as the payload
         // the token was initially created with. 
         [Fact]
@@ -3442,6 +3475,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var context = TestUtilities.WriteHeader($"{this}.ValidateJWSWithConfigAsync", theoryData);
             try
             {
+                // clear up static state.
+                AadIssuerValidator.s_issuerValidators[Default.AadV1Authority] = new AadIssuerValidator(null, Default.AadV1Authority);
+
+                // previous instance is captured in a closure during theorydata set setup.
+                if (theoryData.ValidationParameters.IssuerValidator != null)
+                    theoryData.ValidationParameters.IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate;
+
                 var handler = new JsonWebTokenHandler();
                 var jwt = handler.ReadJsonWebToken(theoryData.Token);
                 AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).ConfigurationManagerV1 = theoryData.ValidationParameters.ConfigurationManager;
@@ -3507,7 +3547,36 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var context = TestUtilities.WriteHeader($"{this}.ValidateJWSWithLastKnownGood", theoryData);
             try
             {
+                // clear up static state.
+                AadIssuerValidator.s_issuerValidators[Default.AadV1Authority] = new AadIssuerValidator(null, Default.AadV1Authority);
+
+                // previous instance is captured in a closure during theorydata set setup.
+                if (theoryData.ValidationParameters.IssuerValidator != null)
+                    theoryData.ValidationParameters.IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate;
+
                 var handler = new JsonWebTokenHandler();
+
+                if (theoryData.SetupIssuerLkg)
+                {
+                    // make a valid pass to initiate issuer LKG.
+                    var issuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority);
+                    issuerValidator.ConfigurationManagerV1 = theoryData.SetupIssuerLkgConfigurationManager;
+
+                    var previousValidateWithLKG = theoryData.ValidationParameters.ValidateWithLKG;
+                    theoryData.ValidationParameters.ValidateWithLKG = false;
+
+                    var setupValidationResult = handler.ValidateTokenAsync(theoryData.Token, theoryData.ValidationParameters).Result;
+
+                    theoryData.ValidationParameters.ValidateWithLKG = previousValidateWithLKG;
+                   
+                    if (setupValidationResult.Exception != null)
+                    {
+                        if (setupValidationResult.IsValid)
+                            context.AddDiff("setupValidationResult.IsValid, setupValidationResult.Exception != null");
+                        throw setupValidationResult.Exception;
+                    }
+                }
+
                 AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).ConfigurationManagerV1 = theoryData.ValidationParameters.ConfigurationManager;
                 var validationResult = handler.ValidateTokenAsync(theoryData.Token, theoryData.ValidationParameters).Result;
                 if (validationResult.Exception != null)
@@ -3536,7 +3605,35 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var context = TestUtilities.WriteHeader($"{this}.ValidateJWEWithLastKnownGood", theoryData);
             try
             {
+                // clear up static state.
+                AadIssuerValidator.s_issuerValidators[Default.AadV1Authority] = new AadIssuerValidator(null, Default.AadV1Authority);
+
+                // previous instance is captured in a closure during theorydata set setup.
+                if (theoryData.ValidationParameters.IssuerValidator != null)
+                    theoryData.ValidationParameters.IssuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).Validate;
+
                 var handler = new JsonWebTokenHandler();
+                if (theoryData.SetupIssuerLkg)
+                {
+                    // make a valid pass to initiate issuer LKG.
+                    var issuerValidator = AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority);
+                    issuerValidator.ConfigurationManagerV1 = theoryData.SetupIssuerLkgConfigurationManager;
+
+                    var previousValidateWithLKG = theoryData.ValidationParameters.ValidateWithLKG;
+                    theoryData.ValidationParameters.ValidateWithLKG = false;
+
+                    var setupValidationResult = handler.ValidateTokenAsync(theoryData.Token, theoryData.ValidationParameters).Result;
+
+                    theoryData.ValidationParameters.ValidateWithLKG = previousValidateWithLKG;
+
+                    if (setupValidationResult.Exception != null)
+                    {
+                        if (setupValidationResult.IsValid)
+                            context.AddDiff("setupValidationResult.IsValid, setupValidationResult.Exception != null");
+                        throw setupValidationResult.Exception;
+                    }
+                }
+
                 AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).ConfigurationManagerV1 = theoryData.ValidationParameters.ConfigurationManager;
                 var validationResult = handler.ValidateTokenAsync(theoryData.Token, theoryData.ValidationParameters).Result;
                 if (validationResult.Exception != null)
