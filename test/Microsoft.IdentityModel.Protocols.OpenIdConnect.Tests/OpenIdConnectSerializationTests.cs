@@ -41,22 +41,24 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             {
                 TheoryData<OpenIdConnectTheoryData> theoryData = new TheoryData<OpenIdConnectTheoryData>();
 
-                theoryData.Add(new OpenIdConnectTheoryData("AADCommonV1Config")
+                // the reason to replace AdditionalData with upper case is because the test deserializes uppercase and lowercase.
+                // we wanted to leave the data sets in original form from discovery to be used in other tests.
+                theoryData.Add(new OpenIdConnectTheoryData("AADCommonV1")
                 {
-                    CompareTo = OpenIdConfigData.AADCommonV1Config,
-                    Json = OpenIdConfigData.AADCommonV1
+                    CompareTo = JsonUtilities.SetAdditionalDataKeysToUpperCase(OpenIdConfigData.AADCommonV1Config),
+                    Json = JsonUtilities.SetAdditionalDataKeysToUpperCase(OpenIdConfigData.AADCommonV1Json, OpenIdConfigData.AADCommonV1Config)
                 });
 
-                theoryData.Add(new OpenIdConnectTheoryData("AADCommonV2Config")
+                theoryData.Add(new OpenIdConnectTheoryData("AADCommonV2")
                 {
-                    CompareTo = OpenIdConfigData.AADCommonV2Config,
-                    Json = OpenIdConfigData.AADCommonV2
+                    CompareTo = JsonUtilities.SetAdditionalDataKeysToUpperCase(OpenIdConfigData.AADCommonV2Config),
+                    Json = JsonUtilities.SetAdditionalDataKeysToUpperCase(OpenIdConfigData.AADCommonV2Json, OpenIdConfigData.AADCommonV2Config)
                 });
 
                 theoryData.Add(new OpenIdConnectTheoryData("AccountsGoogleCom")
                 {
-                    CompareTo = OpenIdConfigData.AccountsGoogleComConfig,
-                    Json = OpenIdConfigData.AccountsGoogleCom
+                    CompareTo = JsonUtilities.SetAdditionalDataKeysToUpperCase(OpenIdConfigData.AccountsGoogleComConfig),
+                    Json = JsonUtilities.SetAdditionalDataKeysToUpperCase(OpenIdConfigData.AccountsGoogleComJson, OpenIdConfigData.AccountsGoogleComConfig)
                 });
 
                 theoryData.Add(new OpenIdConnectTheoryData("FrontChannelFalse")

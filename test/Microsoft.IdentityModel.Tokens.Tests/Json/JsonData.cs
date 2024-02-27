@@ -11,13 +11,14 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
     public static class JsonData
     {
         // Create a unique string for each property, to avoid collisions
-        public static string ArrayProperty = Guid.NewGuid().ToString();
-        public static string ObjectProperty = Guid.NewGuid().ToString();
-        public static string FalseProperty = Guid.NewGuid().ToString();
-        public static string TrueProperty = Guid.NewGuid().ToString();
-        public static string StringProperty = Guid.NewGuid().ToString();
-        public static string StringValue = Guid.NewGuid().ToString();
-        public static string NullProperty = Guid.NewGuid().ToString();
+        // Moved these to UpperInvariant so test that perform uppercase to lowercase will work.
+        public static string ArrayProperty = Guid.NewGuid().ToString().ToUpperInvariant();
+        public static string ObjectProperty = Guid.NewGuid().ToString().ToUpperInvariant();
+        public static string FalseProperty = Guid.NewGuid().ToString().ToUpperInvariant();
+        public static string TrueProperty = Guid.NewGuid().ToString().ToUpperInvariant();
+        public static string StringProperty = Guid.NewGuid().ToString().ToUpperInvariant();
+        public static string StringValue = Guid.NewGuid().ToString().ToUpperInvariant();
+        public static string NullProperty = Guid.NewGuid().ToString().ToUpperInvariant();
 
         // Json strings are name:value (claim) pairs inside an object
         // The naming here is:
@@ -47,7 +48,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
 
         public static string ObjectValue =
             $$"""
-            {"object":["ObjectValue1","ObjectValue2"]}
+            {"OBJECT":["ObjectValue1","ObjectValue2"]}
             """;
 
         public static string ObjectClaim =
