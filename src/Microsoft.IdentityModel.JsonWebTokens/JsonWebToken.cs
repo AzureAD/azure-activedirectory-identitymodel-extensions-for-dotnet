@@ -463,11 +463,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 // empty payload for JWE's {encrypted tokens}.
                 Payload = new JsonClaimSet();
 
-                if (Dot3 == encodedTokenSpan.Length) // TODO: Should this be encodedJsonSpan.Length - 1? 
-                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogMessages.IDX14121));
-
                 Dot3 = Dot2 + Dot3 + 1;
-
+                if (Dot3 == encodedTokenSpan.Length - 1)
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX14121));
+                
                 Dot4 = encodedTokenSpan.Slice(Dot3 + 1).IndexOf('.');
                 if (Dot4 == -1)
                     throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX14121));
