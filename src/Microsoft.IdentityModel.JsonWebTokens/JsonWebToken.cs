@@ -571,10 +571,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             int outputSize = Base64UrlEncoding.ValidateAndGetOutputSize(strSpan, startIndex, length);
 
-            var slice = strSpan.Slice(startIndex, length);
-            var output = Base64UrlEncoder.UnsafeDecode(slice);
-
-            return createHeaderClaimSet ? CreateHeaderClaimSet(output.AsSpan()) : CreatePayloadClaimSet(output.AsSpan());
+            byte[] output = ArrayPool<byte>.Shared.Rent(outputSize);
+            try
+            {
+                ReadOnlySpan<char> slice = strSpan.Slice(startIndex, length);
+                Base64UrlEncoder.UnsafeDecode(slice, output);
+                return createHeaderClaimSet ? CreateHeaderClaimSet(output.AsSpan()) : CreatePayloadClaimSet(output.AsSpan());
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(output, true);
+            }
         }
 
         /// <summary>
