@@ -246,8 +246,10 @@ namespace Microsoft.IdentityModel.Tokens
 
             int length = Encoding.UTF8.GetBytes(source, bytesSpan);
             Span<byte> utf8Span = bytesSpan.Slice(0, length);
+
             OperationStatus status = System.Buffers.Text.Base64.DecodeFromUtf8InPlace(utf8Span, out int bytesWritten);
-            Debug.Assert(status == OperationStatus.Done, "Expected DecodeFromUtf8 to be successful");
+            if (status != OperationStatus.Done)
+                throw LogHelper.LogExceptionMessage(new FormatException(LogHelper.FormatInvariant(LogMessages.IDX10400, strSpan.ToString())));
 
             byte[] result = bytesSpan.Slice(0, bytesWritten).ToArray();
 
@@ -296,8 +298,10 @@ namespace Microsoft.IdentityModel.Tokens
 
             int length = Encoding.UTF8.GetBytes(source, bytesSpan);
             Span<byte> utf8Span = bytesSpan.Slice(0, length);
+
             OperationStatus status = System.Buffers.Text.Base64.DecodeFromUtf8InPlace(utf8Span, out int bytesWritten);
-            Debug.Assert(status == OperationStatus.Done, "Expected DecodeFromUtf8 to be successful");
+            if (status != OperationStatus.Done)
+                throw LogHelper.LogExceptionMessage(new FormatException(LogHelper.FormatInvariant(LogMessages.IDX10400, strSpan.ToString())));
 
             utf8Span.Slice(0, bytesWritten).CopyTo(output);
 
