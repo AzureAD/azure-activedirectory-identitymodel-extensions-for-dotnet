@@ -98,15 +98,16 @@ namespace Microsoft.IdentityModel.Tokens
                     new SecurityTokenInvalidAudienceException(LogHelper.FormatInvariant(LogMessages.IDX10206))
                     { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences) });
 
-            // create enumeration of all valid audiences from validationParameters
-            IEnumerable<string> validationParametersAudiences;
+            // create list of all valid audiences from validationParameters
+            List<string> validationParametersAudiences;
 
             if (validationParameters.ValidAudiences == null)
-                validationParametersAudiences = new[] { validationParameters.ValidAudience };
+                validationParametersAudiences = new List<string> { validationParameters.ValidAudience };
             else if (string.IsNullOrWhiteSpace(validationParameters.ValidAudience))
-                validationParametersAudiences = validationParameters.ValidAudiences;
+                validationParametersAudiences = validationParameters.ValidAudiences.ToList();
             else
-                validationParametersAudiences = validationParameters.ValidAudiences.Concat(new[] { validationParameters.ValidAudience });
+                validationParametersAudiences = validationParameters.ValidAudiences.ToList();
+                validationParametersAudiences.Add(validationParameters.ValidAudience);
 
             if (AudienceIsValid(audiences, validationParameters, validationParametersAudiences))
                 return;
@@ -124,15 +125,16 @@ namespace Microsoft.IdentityModel.Tokens
             throw LogHelper.LogExceptionMessage(ex);
         }
 
-        private static bool AudienceIsValid(IEnumerable<string> audiences, TokenValidationParameters validationParameters, IEnumerable<string> validationParametersAudiences)
+        private static bool AudienceIsValid(IEnumerable<string> audiences, TokenValidationParameters validationParameters, List<string> validationParametersAudiences)
         {
             foreach (string tokenAudience in audiences)
             {
                 if (string.IsNullOrWhiteSpace(tokenAudience))
                     continue;
 
-                foreach (string validAudience in validationParametersAudiences)
+                for (int i = 0; i < validationParametersAudiences.Count; i++)
                 {
+                    string validAudience = validationParametersAudiences[i];
                     if (string.IsNullOrWhiteSpace(validAudience))
                         continue;
 

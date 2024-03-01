@@ -24,7 +24,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         }
         private static void DebugThroughTests()
         {
-            ReadJWETokenTests readTokenTests = new ReadJWETokenTests();
+            /*ReadJWETokenTests readTokenTests = new ReadJWETokenTests();
             readTokenTests.Setup();
             readTokenTests.ReadJWE_FromMemory();
 
@@ -44,15 +44,19 @@ namespace Microsoft.IdentityModel.Benchmarks
 
             CreateTokenTests createTokenTests = new CreateTokenTests();
             createTokenTests.Setup();
-            string jws = createTokenTests.JsonWebTokenHandler_CreateToken();
+            string jws = createTokenTests.JsonWebTokenHandler_CreateToken();*/
 
             ValidateTokenAsyncTests validateTokenAsyncTests = new ValidateTokenAsyncTests();
             validateTokenAsyncTests.Setup();
-            TokenValidationResult tokenValidationResult = validateTokenAsyncTests.JsonWebTokenHandler_ValidateTokenAsync().Result;
 
-            ValidateSignedHttpRequestAsyncTests validateSignedHttpRequestAsyncTests = new ValidateSignedHttpRequestAsyncTests();
+            for (int i = 0; i<1000; i++)
+            {
+                TokenValidationResult tokenValidationResult = validateTokenAsyncTests.JsonWebTokenHandler_ValidateTokenAsync().Result;
+            }
+
+            /*ValidateSignedHttpRequestAsyncTests validateSignedHttpRequestAsyncTests = new ValidateSignedHttpRequestAsyncTests();
             validateSignedHttpRequestAsyncTests.Setup();
-            SignedHttpRequestValidationResult signedHttpRequestValidationResult = validateSignedHttpRequestAsyncTests.SHRHandler_ValidateSignedHttpRequestAsync().Result;
+            SignedHttpRequestValidationResult signedHttpRequestValidationResult = validateSignedHttpRequestAsyncTests.SHRHandler_ValidateSignedHttpRequestAsync().Result;*/
         }
     }
 }
