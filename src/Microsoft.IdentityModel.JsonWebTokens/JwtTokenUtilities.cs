@@ -393,6 +393,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return key;
         }
 
+        /// <summary>
+        /// Generates key bytes.
+        /// </summary>
+        public static byte[] GenerateAesGcmKeyBytes(int sizeInBits)
+        {
+            byte[] key = null;
+            if (sizeInBits != 128 && sizeInBits != 192 && sizeInBits != 256)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(TokenLogMessages.IDX10402, nameof(sizeInBits)));
+
+            using (var aes = Aes.Create())
+            { 
+                int sizeInBytes = sizeInBits >> 3;
+                key = new byte[sizeInBytes];
+                aes.KeySize = sizeInBits;
+                aes.GenerateKey();
+                Array.Copy(aes.Key, key, sizeInBytes);
+            }
+
+            return key;
+        }
+
         internal static SecurityKey GetSecurityKey(
             EncryptingCredentials encryptingCredentials,
             CryptoProviderFactory cryptoProviderFactory,
@@ -455,9 +476,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     securityKey = new SymmetricSecurityKey(GenerateKeyBytes(384));
                 else if (SecurityAlgorithms.Aes256CbcHmacSha512.Equals(encryptingCredentials.Enc))
                     securityKey = new SymmetricSecurityKey(GenerateKeyBytes(512));
+
+                // only 128, 192 and 256 AesGcm for CEK algorithm
+                else if(SecurityAlgorithms.Aes128Gcm.Equals(encryptingCredentials.Enc))
+                    securityKey = new SymmetricSecurityKey(GenerateAesGcmKeyBytes(128));
+                else if (SecurityAlgorithms.Aes192Gcm.Equals(encryptingCredentials.Enc))
+                    securityKey = new SymmetricSecurityKey(GenerateAesGcmKeyBytes(192));
+                else if (SecurityAlgorithms.Aes256Gcm.Equals(encryptingCredentials.Enc))
+                    securityKey = new SymmetricSecurityKey(GenerateAesGcmKeyBytes(256));
                 else
                     throw LogHelper.LogExceptionMessage(
-                        new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10617, LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes128CbcHmacSha256), LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes192CbcHmacSha384), LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes256CbcHmacSha512), LogHelper.MarkAsNonPII(encryptingCredentials.Enc))));
+                        new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10617, LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes128CbcHmacSha256), LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes192CbcHmacSha384), LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes256CbcHmacSha512), LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes128Gcm), LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes192Gcm), LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes256Gcm), LogHelper.MarkAsNonPII(encryptingCredentials.Enc))));
 
                 kwProvider = cryptoProviderFactory.CreateKeyWrapProvider(encryptingCredentials.Key, encryptingCredentials.Alg);
                 wrappedKey = kwProvider.WrapKey(((SymmetricSecurityKey)securityKey).Key);
