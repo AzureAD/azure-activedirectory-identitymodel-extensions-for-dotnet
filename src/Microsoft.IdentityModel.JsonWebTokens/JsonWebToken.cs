@@ -53,7 +53,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal long? _iat;
         internal DateTime? _iatDateTime;
         internal string _id;
-        internal string _iss;
         internal string _jti;
         internal string _sub;
         internal long? _nbf;
@@ -1032,16 +1031,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// If the 'iss' claim is not found, an empty string is returned.
         /// </para>
         /// </remarks>
-        public override string Issuer
-        {
-            get
-            {
-                _iss ??= IssuerUtf8.ToString();
-                return _iss;
-            }
-        }
+        public override string Issuer => IssuerUtf8.ToString();
 
-        internal ReadOnlySpan<byte> IssuerUtf8 { get; set; }
+        internal ReadOnlyMemory<byte> IssuerUtf8 { get; set; }
 
         /// <summary>
         /// Gets the 'value' of the 'jti' claim from the payload.

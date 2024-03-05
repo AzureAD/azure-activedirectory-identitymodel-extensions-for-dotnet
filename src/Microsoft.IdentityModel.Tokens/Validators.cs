@@ -240,7 +240,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="SecurityTokenInvalidIssuerException">If 'issuer' failed to matched either <see cref="TokenValidationParameters.ValidIssuer"/> or one of <see cref="TokenValidationParameters.ValidIssuers"/> or <see cref="BaseConfiguration.Issuer"/>.</exception>
         /// <remarks>An EXACT match is required.</remarks>
         internal static async ValueTask<string> ValidateIssuerAsync(
-            string issuer,
+            ReadOnlyMemory<byte> issuerUtf8,
             SecurityToken securityToken,
             TokenValidationParameters validationParameters,
             BaseConfiguration configuration)
@@ -249,7 +249,9 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             if (validationParameters.IssuerValidatorAsync != null)
-                return await validationParameters.IssuerValidatorAsync(issuer, securityToken, validationParameters).ConfigureAwait(false);
+                return await validationParameters.IssuerValidatorAsync(issuerUtf8.Span, securityToken, validationParameters).ConfigureAwait(false);
+
+            string issuer = issuerUtf8.ToString();
 
             if (validationParameters.IssuerValidatorUsingConfiguration != null)
                 return validationParameters.IssuerValidatorUsingConfiguration(issuer, securityToken, validationParameters, configuration);
@@ -285,7 +287,7 @@ namespace Microsoft.IdentityModel.Tokens
                 }
             }
 
-            if (string.Equals(validationParameters.ValidIssuer, issuer))
+            if (validationParameters.ValidIssuerUtf8.Equals(issuerUtf8))
             {
                 if (LogHelper.IsEnabled(EventLogLevel.Informational))
                     LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer));

@@ -79,15 +79,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     }
                     else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Iss))
                     {
-                        IssuerUtf8 = Encoding.UTF8.GetBytes(JsonSerializerPrimitives.ReadString(ref reader, JwtRegisteredClaimNames.Iss, ClassName, true));
-
-                        //if (!reader.ValueTextEquals(tokenValidationParameters.ValidIssuerUtf8))
-                        //{
-                        //    throw new InvalidOperationException();
-                        //}
-
-                        // Validate
-                        // await Validators.ValidateIssuerAsync
+                        reader.Read();
+                        IssuerUtf8 = reader.ValueSpan.ToArray();
+                        claims[JwtRegisteredClaimNames.Iss] = IssuerUtf8.ToString();
                     }
                     else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Jti))
                     {
