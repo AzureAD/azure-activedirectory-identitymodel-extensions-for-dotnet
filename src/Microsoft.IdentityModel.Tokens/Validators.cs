@@ -228,7 +228,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Determines if an issuer found in a <see cref="SecurityToken"/> is valid.
         /// </summary>
-        /// <param name="issuer">The issuer to validate</param>
+        /// <param name="issuerUtf8">The issuer to validate</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
         /// <param name="configuration">The <see cref="BaseConfiguration"/> required for issuer and signing key validation.</param>
@@ -249,7 +249,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             if (validationParameters.IssuerValidatorAsync != null)
-                return await validationParameters.IssuerValidatorAsync(issuerUtf8.Span, securityToken, validationParameters).ConfigureAwait(false);
+                return await validationParameters.IssuerValidatorAsync(issuerUtf8, securityToken, validationParameters).ConfigureAwait(false);
 
             string issuer = issuerUtf8.ToString();
 

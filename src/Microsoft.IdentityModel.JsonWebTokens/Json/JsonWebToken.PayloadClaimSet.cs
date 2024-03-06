@@ -79,9 +79,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     }
                     else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Iss))
                     {
-                        reader.Read();
-                        IssuerUtf8 = reader.ValueSpan.ToArray();
+                        
+                        IssuerUtf8 = JsonSerializerPrimitives.ReadStringUtf8(ref reader, JwtRegisteredClaimNames.Jti, ClassName, true).ToArray();
                         claims[JwtRegisteredClaimNames.Iss] = IssuerUtf8.ToString();
+                        reader.Read();
                     }
                     else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Jti))
                     {

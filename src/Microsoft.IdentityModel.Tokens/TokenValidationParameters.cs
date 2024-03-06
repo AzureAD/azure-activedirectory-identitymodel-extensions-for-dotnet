@@ -113,7 +113,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <remarks>The delegate should return a non null string that represents the 'issuer'. If null a default value will be used.
     /// <see cref="IssuerValidatorAsync"/> if set, will be called before <see cref="IssuerSigningKeyValidatorUsingConfiguration"/> or <see cref="IssuerSigningKeyValidator"/>
     /// </remarks>
-    internal delegate ValueTask<string> IssuerValidatorAsync(ReadOnlySpan<byte> issuer, SecurityToken securityToken, TokenValidationParameters validationParameters);
+    internal delegate ValueTask<string> IssuerValidatorAsync(ReadOnlyMemory<byte> issuer, SecurityToken securityToken, TokenValidationParameters validationParameters);
 
     /// <summary>
     /// Definition for LifetimeValidator.
