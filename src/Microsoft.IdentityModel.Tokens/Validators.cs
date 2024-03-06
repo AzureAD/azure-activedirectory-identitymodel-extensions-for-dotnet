@@ -279,7 +279,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (configuration != null)
             {
-                if (string.Equals(configuration.Issuer, issuer))
+                if (string.Equals(configuration.IssuerUtf8, issuerUtf8))
                 {
                     if (LogHelper.IsEnabled(EventLogLevel.Informational))
                         LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer));
