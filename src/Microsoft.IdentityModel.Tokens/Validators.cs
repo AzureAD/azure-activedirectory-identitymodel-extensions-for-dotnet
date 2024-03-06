@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
@@ -219,7 +220,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>An EXACT match is required.</remarks>
         internal static string ValidateIssuer(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
         {
-            ValueTask<string> vt = ValidateIssuerAsync(issuer, securityToken, validationParameters, configuration);
+            ValueTask<string> vt = ValidateIssuerAsync(Encoding.UTF8.GetBytes(issuer), securityToken, validationParameters, configuration);
             return vt.IsCompletedSuccessfully ?
                 vt.Result :
                 vt.AsTask().GetAwaiter().GetResult();
