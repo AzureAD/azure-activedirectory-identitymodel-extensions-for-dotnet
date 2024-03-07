@@ -249,10 +249,11 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            if (validationParameters.IssuerValidatorAsync != null)
-                return await validationParameters.IssuerValidatorAsync(issuerUtf8, securityToken, validationParameters).ConfigureAwait(false);
+            string issuer = Encoding.UTF8.GetString(issuerUtf8.ToArray());
 
-            string issuer = issuerUtf8.ToString();
+            if (validationParameters.IssuerValidatorAsync != null)
+                return await validationParameters.IssuerValidatorAsync(issuer, securityToken, validationParameters).ConfigureAwait(false);
+
 
             if (validationParameters.IssuerValidatorUsingConfiguration != null)
                 return validationParameters.IssuerValidatorUsingConfiguration(issuer, securityToken, validationParameters, configuration);
