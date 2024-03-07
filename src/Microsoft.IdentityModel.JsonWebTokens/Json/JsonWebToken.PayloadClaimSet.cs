@@ -81,7 +81,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     {
                         
                         IssuerUtf8 = JsonSerializerPrimitives.ReadStringUtf8(ref reader, JwtRegisteredClaimNames.Jti, ClassName, true).ToArray();
-                        claims[JwtRegisteredClaimNames.Iss] = IssuerUtf8.ToString();
+                        claims[JwtRegisteredClaimNames.Iss] = Encoding.UTF8.GetString(IssuerUtf8.ToArray());
                         reader.Read();
                     }
                     else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Jti))
