@@ -1030,7 +1030,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// If the 'iss' claim is not found, an empty string is returned.
         /// </para>
         /// </remarks>
-        public override string Issuer => IssuerUtf8.ToString();
+        public override string Issuer => Encoding.UTF8.GetString(IssuerUtf8.ToArray());
 
         internal ReadOnlyMemory<byte> IssuerUtf8 { get; set; }
 
