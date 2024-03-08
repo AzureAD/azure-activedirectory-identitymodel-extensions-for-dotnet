@@ -635,7 +635,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
 
             if (!IsReaderAtTokenType(ref reader, JsonTokenType.String, false))
                 throw LogHelper.LogExceptionMessage(
-                    CreateJsonReaderExceptionInvalidType(ref reader, "JsonTokenType.StartArray", className, propertyName));
+                    CreateJsonReaderExceptionInvalidType(ref reader, "JsonTokenType.String", className, propertyName));
 
             string retval = reader.GetString();
 
