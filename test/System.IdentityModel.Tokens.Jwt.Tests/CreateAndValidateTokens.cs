@@ -1,40 +1,14 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System.Collections.Generic;
 using System.Globalization;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Json.Linq;
+using System.Text.Json;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
@@ -67,8 +41,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     ValidateLifetime = false,
                 };
 
-            SecurityToken validatedSecurityToken = null;
-            var cp = handler.ValidateToken(jwt, validationParameters, out validatedSecurityToken);
+            handler.ValidateToken(jwt, validationParameters, out var validatedSecurityToken);
 
             JwtSecurityToken validatedJwt = validatedSecurityToken as JwtSecurityToken;
             object x5csInHeader = validatedJwt.Header[JwtHeaderParameterNames.X5c];
@@ -87,16 +60,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 int num = 0;
                 foreach (var str in list)
                 {
-                    var value = str as JValue;
-                    if (value != null)
-                    {
-                        string aud = value.Value as string;
-                        if (aud != null)
-                        {
-
-                        }
-                    }
-                    else if (!(str is string))
+                    if (!(str is string))
                     {
                         errors.Add("3: str is not string, is: " + str.GetType());
                         errors.Add("token : " + validatedJwt.ToString());
@@ -110,20 +74,28 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 }
             }
 
+            var serializedX5cs = JsonSerializer.Serialize(x5cs);
+            if (header.X5c != serializedX5cs)
+            {
+                errors.Add("5: header.X5c != serializedX5Cs");
+            }
+
             X509SecurityKey signingKey = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256;
             X509SecurityKey validateKey = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256_Public;
 
             // make sure we can still validate with existing logic.
             var signingCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.RsaSha256Signature);
-            header = new JwtHeader(signingCredentials);
-            header.Add(JwtHeaderParameterNames.X5c, x5cs);
+            header = new JwtHeader(signingCredentials)
+            {
+                { JwtHeaderParameterNames.X5c, x5cs }
+            };
+
             jwtToken = new JwtSecurityToken(header, payload);
             jwt = handler.WriteToken(jwtToken);
 
             validationParameters.IssuerSigningKey = validateKey;
             validationParameters.RequireSignedTokens = true;
-            validatedSecurityToken = null;
-            cp = handler.ValidateToken(jwt, validationParameters, out validatedSecurityToken);
+            handler.ValidateToken(jwt, validationParameters, out _);
 
             TestUtilities.AssertFailIfErrors("CreateAndValidateTokens_MultipleX5C", errors);
         }
@@ -164,7 +136,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             validateKey = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA384_Public;
             validationParameters.IssuerSigningKey = validateKey;
 
-            ExpectedException expectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10503:");
+            ExpectedException expectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10517:");
             try
             {
                 cp = handler.ValidateToken(jwt, validationParameters, out validatedSecurityToken);
@@ -639,7 +611,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters
             });
 
-#if NET461 || NET_CORE
+#if NET461 || NET462 || NET_CORE
             // RsaPss is not supported on .NET < 4.6
             var rsaPssSigningCredentials = new SigningCredentials(Default.AsymmetricSigningKey, SecurityAlgorithms.RsaSsaPssSha256);
             theoryData.Add(new JwtTheoryData
@@ -860,7 +832,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     IssuerSigningKey = NotDefault.SymmetricSigningKey256,
                     TokenDecryptionKey = Default.SymmetricEncryptionKey256,
                 },
-                ExpectedException.SecurityTokenUnableToValidateException("IDX10516:")
+                ExpectedException.SecurityTokenInvalidIssuerException("IDX10204:")
             );
 
             // encryption key not found
@@ -980,7 +952,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     ValidateLifetime = false
                 },
                 expectedPayload,
-                ExpectedException.SecurityTokenUnableToValidateException("IDX10516:")
+                ExpectedException.SecurityTokenInvalidIssuerException("IDX10204:")
             );
 
             theoryData.Add(
@@ -1073,6 +1045,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             payload.Add(claimNames, JsonClaims.ClaimNamesAsDictionary);
             payload.Add("iss", Default.Issuer);
 
+            string payloadString = payload.SerializeToJson();
             JwtSecurityToken jwtToken = new JwtSecurityToken(new JwtHeader(), payload);
             JwtSecurityTokenHandler jwtHandler = new JwtSecurityTokenHandler();
             string encodedJwt = jwtHandler.WriteToken(new JwtSecurityToken(new JwtHeader(), payload));
@@ -1099,7 +1072,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var cp = jwtHandler.ValidateToken(encodedJwt, validationParameters, out validatedToken);
             IdentityComparer.AreEqual(
                 cp.FindFirst(typeof(Entity).ToString()),
-                new Claim(typeof(Entity).ToString(), JsonExtensions.SerializeToJson(Entity.Default), JsonClaimValueTypes.Json, Default.Issuer, Default.Issuer, cp.Identity as ClaimsIdentity ),
+                new Claim(typeof(Entity).ToString(), JsonSerializer.Serialize(Entity.Default), JsonClaimValueTypes.Json, Default.Issuer, Default.Issuer, cp.Identity as ClaimsIdentity ),
                 context);
             TestUtilities.AssertFailIfErrors(context.Diffs);
         }
@@ -1131,9 +1104,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             expectedIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Iss, Default.Issuer, ClaimValueTypes.String, Default.Issuer));
             expectedIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Aud, Default.Audience, ClaimValueTypes.String, Default.Issuer));
-            expectedIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(expire).ToString(), ClaimValueTypes.Integer, Default.Issuer));
-            expectedIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(utcNow).ToString(), ClaimValueTypes.Integer, Default.Issuer));
-            expectedIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(utcNow).ToString(), ClaimValueTypes.Integer, Default.Issuer));
+            expectedIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(expire).ToString(), ClaimValueTypes.Integer64, Default.Issuer));
+            expectedIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(utcNow).ToString(), ClaimValueTypes.Integer64, Default.Issuer));
+            expectedIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(utcNow).ToString(), ClaimValueTypes.Integer64, Default.Issuer));
 
             CompareContext context = new CompareContext { IgnoreType = true };
             IdentityComparer.AreEqual(principal.Claims, expectedIdentity.Claims, context);
@@ -1288,5 +1261,3 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
     }
 }
-
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

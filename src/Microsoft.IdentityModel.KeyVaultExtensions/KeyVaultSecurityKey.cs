@@ -1,29 +1,5 @@
-﻿//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections;
@@ -41,7 +17,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
     public class KeyVaultSecurityKey : SecurityKey
     {
         private int? _keySize;
-        private string _keyId;
+        private string? _keyId;
 
         /// <summary>
         /// The authentication callback delegate which is to be implemented by the client code.
@@ -82,14 +58,14 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
         /// <summary>
         /// The authentication callback delegate that retrieves an access token for the KeyVault.
         /// </summary>
-        public AuthenticationCallback Callback { get; protected set; }
+        public AuthenticationCallback? Callback { get; protected set; }
 
         /// <summary>
         /// The uniform resource identifier of the security key.
         /// </summary>
         public override string KeyId
         {
-            get => _keyId;
+            get => _keyId!;
             set
             {
                 if (string.IsNullOrEmpty(value))
@@ -114,7 +90,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
                 if (!_keySize.HasValue)
                     Initialize();
 
-                return _keySize.Value;
+                return _keySize!.Value;
             }
         }
 
@@ -123,7 +99,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions
         /// </summary>
         private void Initialize()
         {
-            using (var client = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(Callback)))
+            using (var client = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(Callback!)))
             {
                 var bundle = client.GetKeyAsync(_keyId, CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
                 _keySize = new BitArray(bundle.Key.N).Length;

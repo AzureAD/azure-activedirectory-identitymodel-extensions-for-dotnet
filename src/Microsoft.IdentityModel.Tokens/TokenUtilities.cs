@@ -1,37 +1,14 @@
-﻿//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
-using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.Logging;
+
+using JsonPrimitives = Microsoft.IdentityModel.Tokens.Json.JsonSerializerPrimitives;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -41,7 +18,6 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     internal class TokenUtilities
     {
-
         /// <summary>
         /// A URI that represents the JSON XML data type.
         /// </summary>
@@ -65,7 +41,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="claims"> A list of claims.</param>
         /// <returns> A Dictionary representing claims.</returns>
-        internal static IDictionary<string, object> CreateDictionaryFromClaims(IEnumerable<Claim> claims)
+        internal static Dictionary<string, object> CreateDictionaryFromClaims(IEnumerable<Claim> claims)
         {
             var payload = new Dictionary<string, object>();
 
@@ -78,7 +54,7 @@ namespace Microsoft.IdentityModel.Tokens
                     continue;
 
                 string jsonClaimType = claim.Type;
-                object jsonClaimValue = claim.ValueType.Equals(ClaimValueTypes.String, StringComparison.Ordinal) ? claim.Value : GetClaimValueUsingValueType(claim);
+                object jsonClaimValue = claim.ValueType.Equals(ClaimValueTypes.String) ? claim.Value : GetClaimValueUsingValueType(claim);
                 object existingValue;
 
                 // If there is an existing value, append to it.
@@ -88,8 +64,11 @@ namespace Microsoft.IdentityModel.Tokens
                     IList<object> claimValues = existingValue as IList<object>;
                     if (claimValues == null)
                     {
-                        claimValues = new List<object>();
-                        claimValues.Add(existingValue);
+                        claimValues = new List<object>
+                        {
+                            existingValue
+                        };
+
                         payload[jsonClaimType] = claimValues;
                     }
 
@@ -98,6 +77,73 @@ namespace Microsoft.IdentityModel.Tokens
                 else
                 {
                     payload[jsonClaimType] = jsonClaimValue;
+                }
+            }
+
+            return payload;
+        }
+
+        internal static Dictionary<string, object> CreateDictionaryFromClaims(
+            IEnumerable<Claim> claims,
+            SecurityTokenDescriptor tokenDescriptor,
+            bool audienceSet,
+            bool issuerSet)
+        {
+            var payload = new Dictionary<string, object>();
+
+            if (claims == null)
+                return payload;
+
+            bool checkClaims = tokenDescriptor.Claims != null && tokenDescriptor.Claims.Count > 0;
+
+            foreach (Claim claim in claims)
+            {
+                if (claim == null)
+                    continue;
+
+                // skipping these as they will be added once by the caller
+                // why add them if we are going to replace them later
+                if (checkClaims && tokenDescriptor.Claims.ContainsKey(claim.Type))
+                    continue;
+
+                if (audienceSet && claim.Type.Equals("aud", StringComparison.Ordinal))
+                    continue;
+
+                if (issuerSet && claim.Type.Equals("iss", StringComparison.Ordinal))
+                    continue;
+
+                if (tokenDescriptor.Expires.HasValue && claim.Type.Equals("exp", StringComparison.Ordinal))
+                    continue;
+
+                if (tokenDescriptor.IssuedAt.HasValue && claim.Type.Equals("iat", StringComparison.Ordinal))
+                    continue;
+
+                if (tokenDescriptor.NotBefore.HasValue && claim.Type.Equals("nbf", StringComparison.Ordinal))
+                    continue;
+
+                object jsonClaimValue = claim.ValueType.Equals(ClaimValueTypes.String) ? claim.Value : GetClaimValueUsingValueType(claim);
+
+                // The enumeration is from ClaimsIdentity.Claims, there can be duplicates.
+                // When a duplicate is detected, we create a List and add both to a list.
+                // When the creating the JWT and a list is found, a JsonArray will be created.
+                if (payload.TryGetValue(claim.Type, out object existingValue))
+                {
+                    if (existingValue is IList<object> existingList)
+                    {
+                        existingList.Add(jsonClaimValue);
+                    }
+                    else
+                    {
+                        payload[claim.Type] = new List<object>
+                        {
+                            existingValue,
+                            jsonClaimValue
+                        };
+                    }
+                }
+                else
+                {
+                    payload[claim.Type] = jsonClaimValue;
                 }
             }
 
@@ -122,13 +168,13 @@ namespace Microsoft.IdentityModel.Tokens
                 return longValue;
 
             if (claim.ValueType == ClaimValueTypes.DateTime && DateTime.TryParse(claim.Value, out DateTime dateTimeValue))
-                return dateTimeValue;
+                return dateTimeValue.ToUniversalTime();
 
             if (claim.ValueType == Json)
-                return JObject.Parse(claim.Value);
+                return JsonPrimitives.CreateJsonElement(claim.Value);
 
             if (claim.ValueType == JsonArray)
-                return JArray.Parse(claim.Value);
+                return JsonPrimitives.CreateJsonElement(claim.Value);
 
             if (claim.ValueType == JsonNull)
                 return string.Empty;
@@ -137,47 +183,39 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Returns all <see cref="SecurityKey"/> provided in validationParameters.
-        /// </summary>
-        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
-        /// <returns>Returns all <see cref="SecurityKey"/> provided in validationParameters.</returns>
-        internal static IEnumerable<SecurityKey> GetAllSigningKeys(TokenValidationParameters validationParameters)
-        {
-            LogHelper.LogInformation(TokenLogMessages.IDX10243);
-            if (validationParameters.IssuerSigningKey != null)
-                yield return validationParameters.IssuerSigningKey;
-
-            if (validationParameters.IssuerSigningKeys != null)
-                foreach (SecurityKey key in validationParameters.IssuerSigningKeys)
-                    yield return key;
-        }
-
-
-        /// <summary>
-        /// Returns all <see cref="SecurityKey"/> provided in <paramref name="configuration"/>.
-        /// </summary>
-        /// <param name="configuration">The <see cref="BaseConfiguration"/> that contains signing keys used for validation.</param>
-        /// <returns>Returns all <see cref="SecurityKey"/> provided in provided in <paramref name="configuration"/>.</returns>
-        internal static IEnumerable<SecurityKey> GetAllSigningKeys(BaseConfiguration configuration)
-        {
-            LogHelper.LogInformation(TokenLogMessages.IDX10265);
-
-            if (configuration?.SigningKeys != null)
-                foreach (SecurityKey key in configuration.SigningKeys)
-                    yield return key;
-        }
-
-        /// <summary>
         /// Returns all <see cref="SecurityKey"/> provided in <paramref name="configuration"/> and <paramref name="validationParameters"/>.
         /// </summary>
         /// <param name="configuration">The <see cref="BaseConfiguration"/> that contains signing keys used for validation.</param>
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
         /// <returns>Returns all <see cref="SecurityKey"/> provided in provided in <paramref name="configuration"/> and <paramref name="validationParameters"/>.</returns>
-        internal static IEnumerable<SecurityKey> GetAllSigningKeys(TokenValidationParameters validationParameters, BaseConfiguration configuration)
+        internal static IEnumerable<SecurityKey> GetAllSigningKeys(BaseConfiguration configuration = null, TokenValidationParameters validationParameters = null)
         {
-            LogHelper.LogInformation(TokenLogMessages.IDX10264);
+            if (configuration is not null)
+            {
+                if (validationParameters is not null)
+                {
+                    LogHelper.LogInformation(TokenLogMessages.IDX10264);
+                }
 
-            return GetAllSigningKeys(configuration).Concat(GetAllSigningKeys(validationParameters));
+                LogHelper.LogInformation(TokenLogMessages.IDX10265);
+
+                if (configuration?.SigningKeys != null)
+                    foreach (SecurityKey key in configuration.SigningKeys)
+                        yield return key;
+            }
+
+            // TODO - do not use yield
+            if (validationParameters is not null)
+            {
+                LogHelper.LogInformation(TokenLogMessages.IDX10243);
+
+                if (validationParameters.IssuerSigningKey != null)
+                    yield return validationParameters.IssuerSigningKey;
+
+                if (validationParameters.IssuerSigningKeys != null)
+                    foreach (SecurityKey key in validationParameters.IssuerSigningKeys)
+                        yield return key;
+            }
         }
 
         /// <summary>
@@ -212,40 +250,42 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns><c>true</c> if the exception is certain types of exceptions otherwise, <c>false</c>.</returns>
         internal static bool IsRecoverableException(Exception exception)
         {
-            // using 'GetType()' instead of 'is' as SecurityTokenUnableToValidException (and others) extend SecurityTokenInvalidSignatureException
-            // we want to make sure that the clause for SecurityTokenUnableToValidateException is hit so that the ValidationFailure is checked
-            return exception.GetType().Equals(typeof(SecurityTokenInvalidSignatureException))
-                   || exception is SecurityTokenInvalidSigningKeyException
-                   || exception is SecurityTokenInvalidIssuerException
-                   // we should not try to revalidate with the LKG or request a refresh if the token has an invalid lifetime
-                   || (exception as SecurityTokenUnableToValidateException)?.ValidationFailure != ValidationFailure.InvalidLifetime
-                   || exception is SecurityTokenSignatureKeyNotFoundException;
+            return   exception is SecurityTokenInvalidSignatureException
+                  || exception is SecurityTokenInvalidIssuerException
+                  || exception is SecurityTokenSignatureKeyNotFoundException;
         }
 
         /// <summary>
         /// Check whether the given configuration is recoverable by LKG.
         /// </summary>
-        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validation.</param>
-        /// <param name="configuration">The <see cref="BaseConfiguration"/> to check.</param>
-        /// <param name="currentConfiguration">The updated <see cref="BaseConfiguration"/>.</param>
+        /// <param name="kid">The kid from token."/></param>
+        /// <param name="currentConfiguration">The <see cref="BaseConfiguration"/> to check.</param>
+        /// <param name="lkgConfiguration">The LKG exception to check.</param>
+        /// <param name="currentException">The exception to check.</param>
         /// <returns><c>true</c> if the configuration is recoverable otherwise, <c>false</c>.</returns>
-        internal static bool IsRecoverableConfiguration(TokenValidationParameters validationParameters, BaseConfiguration configuration, out BaseConfiguration currentConfiguration)
+        internal static bool IsRecoverableConfiguration(string kid, BaseConfiguration currentConfiguration, BaseConfiguration lkgConfiguration, Exception currentException)
         {
-            bool isRecoverableConfiguration = (validationParameters.ConfigurationManager.UseLastKnownGoodConfiguration
-                && validationParameters.ConfigurationManager.LastKnownGoodConfiguration != null
-                && !ReferenceEquals(configuration, validationParameters.ConfigurationManager.LastKnownGoodConfiguration));
+            Lazy<bool> isRecoverableSigningKey = new Lazy<bool>(() => lkgConfiguration.SigningKeys.Any(signingKey => signingKey.KeyId == kid));
 
-            currentConfiguration = configuration;
-            if (isRecoverableConfiguration)
+            if (currentException is SecurityTokenInvalidIssuerException)
             {
-                // Inform the user that the LKG is expired.
-                if (!validationParameters.ConfigurationManager.IsLastKnownGoodValid)
-                    LogHelper.LogInformation(TokenLogMessages.IDX10263);
-                else                
-                    currentConfiguration = validationParameters.ConfigurationManager.LastKnownGoodConfiguration;
+                return currentConfiguration.Issuer != lkgConfiguration.Issuer;
+            }
+            else if (currentException is SecurityTokenSignatureKeyNotFoundException)
+            {
+                return isRecoverableSigningKey.Value;
+            }
+            else if (currentException is SecurityTokenInvalidSignatureException)
+            {
+                SecurityKey currentSigningKey = currentConfiguration.SigningKeys.FirstOrDefault(x => x.KeyId == kid);
+                if (currentSigningKey == null)
+                    return isRecoverableSigningKey.Value;
+
+                SecurityKey lkgSigningKey = lkgConfiguration.SigningKeys.FirstOrDefault(signingKey => signingKey.KeyId == kid);
+                return lkgSigningKey != null && currentSigningKey.InternalId != lkgSigningKey.InternalId;
             }
 
-            return isRecoverableConfiguration;
+            return false;
         }
     }
 }

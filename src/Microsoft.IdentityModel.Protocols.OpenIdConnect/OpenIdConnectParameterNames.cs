@@ -1,34 +1,12 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
     /// <summary>
-    /// Parameter names for OpenIdConnect.
+    /// Parameter names for OpenIdConnect Request/Response messages.
     /// </summary>
     public static class OpenIdConnectParameterNames
     {
@@ -76,5 +54,55 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public const string Username = "username";
         public const string VersionTelemetry = "x-client-ver";
 #pragma warning restore 1591
+    }
+
+    /// <summary>
+    /// Parameter names for OpenIdConnect Request/Response messages as UTF8 bytes.
+    /// Used by UTF8JsonReader/Writer for performance gains.
+    /// </summary>
+    internal static class OpenIdConnectParameterUtf8Bytes
+    {
+        public static ReadOnlySpan<byte> AccessToken => "access_token"u8;
+        public static ReadOnlySpan<byte> AcrValues => "acr_values"u8;
+        public static ReadOnlySpan<byte> ClaimsLocales => "claims_locales"u8;
+        public static ReadOnlySpan<byte> ClientAssertion => "client_assertion"u8;
+        public static ReadOnlySpan<byte> ClientAssertionType => "client_assertion_type"u8;
+        public static ReadOnlySpan<byte> ClientId => "client_id"u8;
+        public static ReadOnlySpan<byte> ClientSecret => "client_secret"u8;
+        public static ReadOnlySpan<byte> Code => "code"u8;
+        public static ReadOnlySpan<byte> Display => "display"u8;
+        public static ReadOnlySpan<byte> DomainHint => "domain_hint"u8;
+        public static ReadOnlySpan<byte> Error => "error"u8;
+        public static ReadOnlySpan<byte> ErrorDescription => "error_description"u8;
+        public static ReadOnlySpan<byte> ErrorUri => "error_uri"u8;
+        public static ReadOnlySpan<byte> ExpiresIn => "expires_in"u8;
+        public static ReadOnlySpan<byte> GrantType => "grant_type"u8;
+        public static ReadOnlySpan<byte> Iss => "iss"u8;
+        public static ReadOnlySpan<byte> IdToken => "id_token"u8;
+        public static ReadOnlySpan<byte> IdTokenHint => "id_token_hint"u8;
+        public static ReadOnlySpan<byte> IdentityProvider => "identity_provider"u8;
+        public static ReadOnlySpan<byte> LoginHint => "login_hint"u8;
+        public static ReadOnlySpan<byte> MaxAge => "max_age"u8;
+        public static ReadOnlySpan<byte> Nonce => "nonce"u8;
+        public static ReadOnlySpan<byte> Password => "password"u8;
+        public static ReadOnlySpan<byte> PostLogoutRedirectUri => "post_logout_redirect_uri"u8;
+        public static ReadOnlySpan<byte> Prompt => "prompt"u8;
+        public static ReadOnlySpan<byte> RedirectUri => "redirect_uri"u8;
+        public static ReadOnlySpan<byte> RefreshToken => "refresh_token"u8;
+        public static ReadOnlySpan<byte> RequestUri => "request_uri"u8;
+        public static ReadOnlySpan<byte> Resource => "resource"u8;
+        public static ReadOnlySpan<byte> ResponseMode => "response_mode"u8;
+        public static ReadOnlySpan<byte> ResponseType => "response_type"u8;
+        public static ReadOnlySpan<byte> Scope => "scope"u8;
+        public static ReadOnlySpan<byte> SkuTelemetry => "x-client-SKU"u8;
+        public static ReadOnlySpan<byte> SessionState => "session_state"u8;
+        public static ReadOnlySpan<byte> Sid => "sid"u8;
+        public static ReadOnlySpan<byte> State => "state"u8;
+        public static ReadOnlySpan<byte> TargetLinkUri => "target_link_uri"u8;
+        public static ReadOnlySpan<byte> TokenType => "token_type"u8;
+        public static ReadOnlySpan<byte> UiLocales => "ui_locales"u8;
+        public static ReadOnlySpan<byte> UserId => "user_id"u8;
+        public static ReadOnlySpan<byte> Username => "username"u8;
+        public static ReadOnlySpan<byte> VersionTelemetry => "x-client-ver"u8;
     }
 }

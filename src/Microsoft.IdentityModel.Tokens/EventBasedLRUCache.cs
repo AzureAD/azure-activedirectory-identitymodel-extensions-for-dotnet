@@ -1,36 +1,14 @@
-﻿//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.CryptoProviderCacheOptions
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -94,6 +72,10 @@ namespace Microsoft.IdentityModel.Tokens
         private const int EventQueueTaskRunning = 1; // task is running
         private const int EventQueueTaskDoNotStop = 2; // force the task to continue even it has past the _eventQueueTaskStopTime, see StartEventQueueTaskIfNotRunning() for more details.
         private int _eventQueueTaskState = EventQueueTaskStopped;
+
+        private const int CompactionNotQueued = 0; // compaction action not in the event queue
+        private const int CompactionQueuedOrRunning = 1; // compaction action in the event queue or currently in progress
+        private int _compactionState = CompactionNotQueued;
 
         // set to true when the AppDomain is to be unloaded or the default AppDomain process is ready to exit
         private bool _shouldStopImmediately = false;
@@ -246,7 +228,8 @@ namespace Microsoft.IdentityModel.Tokens
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10900, ex));
+                    if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                        LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10900, ex));
                 }
             }
 
@@ -280,7 +263,8 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (ObjectDisposedException ex)
             {
-                LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10902, LogHelper.MarkAsNonPII(nameof(RemoveExpiredValuesLRU)), ex));
+                if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                    LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10902, LogHelper.MarkAsNonPII(nameof(RemoveExpiredValuesLRU)), ex));
             }
 
             return numItemsRemoved;
@@ -309,7 +293,8 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (ObjectDisposedException ex)
             {
-                LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10902, LogHelper.MarkAsNonPII(nameof(RemoveExpiredValues)), ex));
+                if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                    LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10902, LogHelper.MarkAsNonPII(nameof(RemoveExpiredValues)), ex));
             }
 
             return numItemsRemoved;
@@ -330,6 +315,9 @@ namespace Microsoft.IdentityModel.Tokens
 
                 _doubleLinkedList.RemoveLast();
             }
+
+            // reset _compactionState so the compaction action can be queued again when needed
+            _compactionState = CompactionNotQueued;
         }
 
         /// <summary>
@@ -350,6 +338,9 @@ namespace Microsoft.IdentityModel.Tokens
                         OnItemRemoved?.Invoke(cacheItem.Value);
                 }
             }
+
+            // reset _compactionState so the compaction action can be queued again when needed
+            _compactionState = CompactionNotQueued;
         }
 
         /// <summary>
@@ -403,10 +394,12 @@ namespace Microsoft.IdentityModel.Tokens
                 cacheItem.ExpirationTime = expirationTime;
                 if (_maintainLRU)
                 {
+                    var localCacheItem = cacheItem; // avoid closure when !_maintainLRU
+                    var localThis = this;
                     AddActionToEventQueue(() =>
                     {
-                        _doubleLinkedList.Remove(cacheItem);
-                        _doubleLinkedList.AddFirst(cacheItem);
+                        localThis._doubleLinkedList.Remove(localCacheItem);
+                        localThis._doubleLinkedList.AddFirst(localCacheItem);
                     });
                 }
             }
@@ -415,10 +408,13 @@ namespace Microsoft.IdentityModel.Tokens
                 // if cache is at _maxCapacityPercentage, trim it by _compactionPercentage
                 if ((double)_map.Count / _capacity >= _maxCapacityPercentage)
                 {
-                    if (_maintainLRU)
-                        _eventQueue.Enqueue(CompactLRU);
-                    else
-                        _eventQueue.Enqueue(Compact);
+                    if (Interlocked.CompareExchange(ref _compactionState, CompactionQueuedOrRunning, CompactionNotQueued) == CompactionNotQueued)
+                    {
+                        if (_maintainLRU)
+                            AddActionToEventQueue(CompactLRU);
+                        else
+                            AddActionToEventQueue(Compact);
+                    }
                 }
 
                 var newCacheItem = new LRUCacheItem<TKey, TValue>(key, value, expirationTime);
@@ -426,11 +422,13 @@ namespace Microsoft.IdentityModel.Tokens
                 // add the new node to the _doubleLinkedList if _maintainLRU == true
                 if (_maintainLRU)
                 {
+                    var localNewCacheItem = newCacheItem; // avoid closure when !_maintainLRU
+                    var localThis = this;
                     AddActionToEventQueue(() =>
                     {
                         // Add a remove operation in case two threads are trying to add the same value. Only the second remove will succeed in this case.
-                        _doubleLinkedList.Remove(newCacheItem);
-                        _doubleLinkedList.AddFirst(newCacheItem);
+                        localThis._doubleLinkedList.Remove(localNewCacheItem);
+                        localThis._doubleLinkedList.AddFirst(localNewCacheItem);
                     });
                 }
 
@@ -482,6 +480,11 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
+        internal KeyValuePair<TKey, LRUCacheItem<TKey, TValue>>[] ToArray()
+        {
+            return _map.ToArray();
+        }
+
         /// Each time a node gets accessed, it gets moved to the beginning (head) of the list if the _maintainLRU == true
         public bool TryGetValue(TKey key, out TValue value)
         {
@@ -497,10 +500,12 @@ namespace Microsoft.IdentityModel.Tokens
             // make sure node hasn't been removed by a different thread
             if (_maintainLRU)
             {
+                var localCacheItem = cacheItem; // avoid closure on fast path or when !_maintainLRU
+                var localThis = this;
                 AddActionToEventQueue(() =>
                 {
-                    _doubleLinkedList.Remove(cacheItem);
-                    _doubleLinkedList.AddFirst(cacheItem);
+                    localThis._doubleLinkedList.Remove(localCacheItem);
+                    localThis._doubleLinkedList.AddFirst(localCacheItem);
                 });
             }
 
@@ -521,7 +526,11 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             if (_maintainLRU)
-                AddActionToEventQueue(() => _doubleLinkedList.Remove(cacheItem));
+            {
+                var localCacheItem = cacheItem; // avoid closure on fast path or when !_maintainLRU
+                var localThis = this;
+                AddActionToEventQueue(() => localThis._doubleLinkedList.Remove(localCacheItem));
+            }
 
             value = cacheItem.Value;
             OnItemRemoved?.Invoke(cacheItem.Value);
@@ -569,11 +578,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         internal void WaitForProcessing()
         {
-            // The _eventQueue can be non-empty only if _maintainLRU = true.
-            // If _maintainLRU = false, neither the _doubleLinkedList nor _eventQueue will be used.
-            if (!_maintainLRU)
-                return;
-
             while (!_eventQueue.IsEmpty);
         }
 

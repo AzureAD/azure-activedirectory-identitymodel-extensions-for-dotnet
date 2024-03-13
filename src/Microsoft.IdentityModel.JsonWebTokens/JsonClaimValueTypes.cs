@@ -1,53 +1,34 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System.Security.Claims;
 
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
     /// <summary>
-    /// Constants for Json Web tokens.
+    /// Constants that indicate how the <see cref="Claim.Value"/> should be evaluated.
     /// </summary>
     public static class JsonClaimValueTypes
     {
         /// <summary>
-        /// A URI that represents the JSON XML data type.
+        /// A value that indicates the <see cref="Claim.Value"/> is a Json object.
         /// </summary>
-        /// <remarks>When mapping json to .Net Claim(s), if the value was not a string (or an enumeration of strings), the ClaimValue will serialized using the current JSON serializer, a property will be added with the .Net type and the ClaimTypeValue will be set to 'JsonClaimValueType'.</remarks>
+        /// <remarks>When creating a <see cref="Claim"/> from Json if the value was not a simple type {String, Null, True, False, Number}
+        /// then <see cref="Claim.Value"/> will contain the Json value. If the Json was a JsonObject, the <see cref="Claim.ValueType"/> will be set to "JSON".</remarks>
         public const string Json = "JSON";
 
         /// <summary>
-        /// A URI that represents the JSON array XML data type.
+        /// A value that indicates the <see cref="Claim.Value"/> is a Json object.
         /// </summary>
-        /// <remarks>When mapping json to .Net Claim(s), if the value was not a string (or an enumeration of strings), the ClaimValue will serialized using the current JSON serializer, a property will be added with the .Net type and the ClaimTypeValue will be set to 'JsonClaimValueType'.</remarks>
+        /// <remarks>When creating a <see cref="Claim"/> from Json if the value was not a simple type {String, Null, True, False, Number}
+        /// then <see cref="Claim.Value"/> will contain the Json value. If the Json was a JsonArray, the <see cref="Claim.ValueType"/> will be set to "JSON_ARRAY".</remarks>
         public const string JsonArray = "JSON_ARRAY";
 
         /// <summary>
-        /// A URI that represents the JSON null data type
+        /// A value that indicates the <see cref="Claim.Value"/> is Json null.
         /// </summary>
-        /// <remarks>When mapping json to .Net Claim(s), we use empty string to represent the claim value and set the ClaimValueType to JsonNull</remarks>
+        /// <remarks>When creating a <see cref="Claim"/> the <see cref="Claim.Value"/> cannot be null. If the Json value was null, then the <see cref="Claim.Value"/>
+        /// will be set to <see cref="string.Empty"/> and the <see cref="Claim.ValueType"/> will be set to "JSON_NULL".</remarks>
         public const string JsonNull = "JSON_NULL";
     }
 }

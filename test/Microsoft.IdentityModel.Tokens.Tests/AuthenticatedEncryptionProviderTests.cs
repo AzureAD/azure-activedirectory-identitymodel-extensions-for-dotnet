@@ -1,32 +1,9 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -77,7 +54,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     ///     - parameter validation for Encrypt
     /// Decrypt
     ///     - negative tests for tampering of (ciphertest, iv, authenticationtag, authenticateddata)
-    ///     - parameter validataion for Decrypt
+    ///     - parameter validation for Decrypt
     /// DecryptMismatch
     ///     - negative tests for switching (keys, algorithms)
     /// EncryptVirtual
@@ -87,39 +64,35 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     /// </summary>
     public class AuthenticatedEncryptionProviderTests
     {
-#if NET_CORE
-        [PlatformSpecific(TestPlatforms.Linux | TestPlatforms.OSX)]
-
-        [Fact]
-        public void AesGcmEncryptionOnLinuxAndMac()
-        {
-            Assert.Throws<PlatformNotSupportedException>(() => new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm));
-        }
-#endif
-
-#if NET_CORE
-        [PlatformSpecific(TestPlatforms.Windows)]
-#endif
         [Fact]
         public void AesGcmEncryptionOnWindows()
         {
-            var context = new CompareContext();
-            try
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                var provider = new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm);
+                Assert.Throws<PlatformNotSupportedException>(() => new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm));
             }
-            catch (Exception ex)
-            {
-                context.AddDiff($"AuthenticatedEncryptionProvider is not supposed to throw an exception, Exception:{ ex.ToString()}");
+            else
+            { 
+                var context = new CompareContext();
+                try
+                {
+                    var provider = new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm);
+                }
+                catch (Exception ex)
+                {
+                    context.AddDiff($"AuthenticatedEncryptionProvider is not supposed to throw an exception, Exception:{ex.ToString()}");
+                }
+                TestUtilities.AssertFailIfErrors(context);
             }
-            TestUtilities.AssertFailIfErrors(context);
         }
 
 #if NET_CORE
-        [PlatformSpecific(TestPlatforms.Windows)]
         [Fact]
         public void AesGcm_Dispose()
         {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                Assert.Throws<PlatformNotSupportedException>(() => new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm));
+
             AuthenticatedEncryptionProvider encryptionProvider = new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm);
             encryptionProvider.Dispose();
             var expectedException = ExpectedException.ObjectDisposedException;

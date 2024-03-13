@@ -1,34 +1,12 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
     /// <summary>
-    /// OpenIdProviderConfiguration Names
+    /// OpenId Provider Metadata parameter names
     /// http://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata 
     /// </summary>
     public static class OpenIdProviderMetadataNames
@@ -81,5 +59,60 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public const string UserInfoEncryptionEncValuesSupported = "userinfo_encryption_enc_values_supported";
         public const string UserInfoSigningAlgValuesSupported = "userinfo_signing_alg_values_supported";
 #pragma warning restore 1591
+    }
+
+    /// <summary>
+    /// OpenId Provider Metadata parameter names as UTF8Bytes
+    /// Used by UTF8JsonReader/Writer for performance gains.
+    /// http://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata
+    /// </summary>
+    internal static class OpenIdProviderMetadataUtf8Bytes
+    {
+        public static ReadOnlySpan<byte> AcrValuesSupported => "acr_values_supported"u8;
+        public static ReadOnlySpan<byte> AuthorizationEndpoint => "authorization_endpoint"u8;
+        public static ReadOnlySpan<byte> CheckSessionIframe => "check_session_iframe"u8;
+        public static ReadOnlySpan<byte> ClaimsLocalesSupported => "claims_locales_supported"u8;
+        public static ReadOnlySpan<byte> ClaimsParameterSupported => "claims_parameter_supported"u8;
+        public static ReadOnlySpan<byte> ClaimsSupported => "claims_supported"u8;
+        public static ReadOnlySpan<byte> ClaimTypesSupported => "claim_types_supported"u8;
+        public static ReadOnlySpan<byte> Discovery => ".well-known/openid-configuration"u8;
+        public static ReadOnlySpan<byte> DisplayValuesSupported => "display_values_supported"u8;
+        public static ReadOnlySpan<byte> EndSessionEndpoint => "end_session_endpoint"u8;
+        public static ReadOnlySpan<byte> FrontchannelLogoutSessionSupported => "frontchannel_logout_session_supported"u8;
+        public static ReadOnlySpan<byte> FrontchannelLogoutSupported => "frontchannel_logout_supported"u8;
+        public static ReadOnlySpan<byte> HttpLogoutSupported => "http_logout_supported"u8;
+        public static ReadOnlySpan<byte> GrantTypesSupported => "grant_types_supported"u8;
+        public static ReadOnlySpan<byte> IdTokenEncryptionAlgValuesSupported => "id_token_encryption_alg_values_supported"u8;
+        public static ReadOnlySpan<byte> IdTokenEncryptionEncValuesSupported => "id_token_encryption_enc_values_supported"u8;
+        public static ReadOnlySpan<byte> IdTokenSigningAlgValuesSupported => "id_token_signing_alg_values_supported"u8;
+        public static ReadOnlySpan<byte> IntrospectionEndpoint => "introspection_endpoint"u8;
+        public static ReadOnlySpan<byte> IntrospectionEndpointAuthMethodsSupported => "introspection_endpoint_auth_methods_supported"u8;
+        public static ReadOnlySpan<byte> IntrospectionEndpointAuthSigningAlgValuesSupported => "introspection_endpoint_auth_signing_alg_values_supported"u8;
+        public static ReadOnlySpan<byte> JwksUri => "jwks_uri"u8;
+        public static ReadOnlySpan<byte> Issuer => "issuer"u8;
+        public static ReadOnlySpan<byte> LogoutSessionSupported => "logout_session_supported"u8;
+        public static ReadOnlySpan<byte> MicrosoftMultiRefreshToken => "microsoft_multi_refresh_token"u8;
+        public static ReadOnlySpan<byte> OpPolicyUri => "op_policy_uri"u8;
+        public static ReadOnlySpan<byte> OpTosUri => "op_tos_uri"u8;
+        public static ReadOnlySpan<byte> RegistrationEndpoint => "registration_endpoint"u8;
+        public static ReadOnlySpan<byte> RequestObjectEncryptionAlgValuesSupported => "request_object_encryption_alg_values_supported"u8;
+        public static ReadOnlySpan<byte> RequestObjectEncryptionEncValuesSupported => "request_object_encryption_enc_values_supported"u8;
+        public static ReadOnlySpan<byte> RequestObjectSigningAlgValuesSupported => "request_object_signing_alg_values_supported"u8;
+        public static ReadOnlySpan<byte> RequestParameterSupported => "request_parameter_supported"u8;
+        public static ReadOnlySpan<byte> RequestUriParameterSupported => "request_uri_parameter_supported"u8;
+        public static ReadOnlySpan<byte> RequireRequestUriRegistration => "require_request_uri_registration"u8;
+        public static ReadOnlySpan<byte> ResponseModesSupported => "response_modes_supported"u8;
+        public static ReadOnlySpan<byte> ResponseTypesSupported => "response_types_supported"u8;
+        public static ReadOnlySpan<byte> ServiceDocumentation => "service_documentation"u8;
+        public static ReadOnlySpan<byte> ScopesSupported => "scopes_supported"u8;
+        public static ReadOnlySpan<byte> SubjectTypesSupported => "subject_types_supported"u8;
+        public static ReadOnlySpan<byte> TokenEndpoint => "token_endpoint"u8;
+        public static ReadOnlySpan<byte> TokenEndpointAuthMethodsSupported => "token_endpoint_auth_methods_supported"u8;
+        public static ReadOnlySpan<byte> TokenEndpointAuthSigningAlgValuesSupported => "token_endpoint_auth_signing_alg_values_supported"u8;
+        public static ReadOnlySpan<byte> UILocalesSupported => "ui_locales_supported"u8;
+        public static ReadOnlySpan<byte> UserInfoEndpoint => "userinfo_endpoint"u8;
+        public static ReadOnlySpan<byte> UserInfoEncryptionAlgValuesSupported => "userinfo_encryption_alg_values_supported"u8;
+        public static ReadOnlySpan<byte> UserInfoEncryptionEncValuesSupported => "userinfo_encryption_enc_values_supported"u8;
+        public static ReadOnlySpan<byte> UserInfoSigningAlgValuesSupported => "userinfo_signing_alg_values_supported"u8;
     }
 }

@@ -1,29 +1,5 @@
-﻿//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using Microsoft.IdentityModel.Logging;
@@ -93,7 +69,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         private static bool IsSupportedCompressionAlgorithm(string algorithm)
         {
-            return CompressionAlgorithms.Deflate.Equals(algorithm, StringComparison.Ordinal);
+            return CompressionAlgorithms.Deflate.Equals(algorithm);
         }
 
         /// <summary>
@@ -103,17 +79,29 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>a <see cref="ICompressionProvider"/>.</returns>
         public ICompressionProvider CreateCompressionProvider(string algorithm)
         {
+            return CreateCompressionProvider(algorithm, TokenValidationParameters.DefaultMaximumTokenSizeInBytes);
+        }
+
+        /// <summary>
+        /// Returns a <see cref="ICompressionProvider"/> for a specific algorithm.
+        /// </summary>
+        /// <param name="algorithm">the decompression algorithm.</param>
+        /// <param name="maximumDeflateSize">the maximum deflate size in chars that will be processed.</param>
+        /// <returns>a <see cref="ICompressionProvider"/>.</returns>
+        public ICompressionProvider CreateCompressionProvider(string algorithm, int maximumDeflateSize)
+        {
             if (string.IsNullOrEmpty(algorithm))
                 throw LogHelper.LogArgumentNullException(nameof(algorithm));
 
             if (CustomCompressionProvider != null && CustomCompressionProvider.IsSupportedAlgorithm(algorithm))
                 return CustomCompressionProvider;
 
-            if (algorithm.Equals(CompressionAlgorithms.Deflate, StringComparison.Ordinal))
-                return new DeflateCompressionProvider();
+            if (algorithm.Equals(CompressionAlgorithms.Deflate))
+                return new DeflateCompressionProvider { MaximumDeflateSize = maximumDeflateSize };
 
             throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10652, LogHelper.MarkAsNonPII(algorithm))));
         }
+
     }
 }
 

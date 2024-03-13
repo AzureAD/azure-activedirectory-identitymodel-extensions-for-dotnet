@@ -1,44 +1,18 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
-using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Azure.KeyVault.Cryptography;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
 using ALG = Microsoft.IdentityModel.Tokens.SecurityAlgorithms;
 using EE = Microsoft.IdentityModel.TestUtils.ExpectedException;
 using KEY = Microsoft.IdentityModel.TestUtils.KeyingMaterial;
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
@@ -216,10 +190,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 new SignatureProviderTheoryData("X509SecurityKey6", ALG.RsaSha512Signature, ALG.RsaSha512Signature, KEY.X509SecurityKeySelfSigned2048_SHA256, KEY.X509SecurityKeySelfSigned2048_SHA256_Public),
                 new SignatureProviderTheoryData("X509SecurityKey7", ALG.Aes128Encryption, ALG.RsaSha512Signature, KEY.X509SecurityKeySelfSigned2048_SHA256, KEY.X509SecurityKeySelfSigned2048_SHA256_Public, EE.NotSupportedException("IDX10634:")),
                 new SignatureProviderTheoryData("X509SecurityKey8", ALG.RsaSha256Signature, ALG.RsaSha512Signature, KEY.DefaultX509Key_2048, KEY.DefaultX509Key_2048_Public, null, false),
-#if NET452
-                new SignatureProviderTheoryData("RsaSecurityKeyWithCspProvider1", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.RsaSecurityKeyWithCspProvider_2048, KEY.RsaSecurityKeyWithCspProvider_2048_Public),
-                new SignatureProviderTheoryData("RsaSecurityKeyWithCspProvider2", ALG.RsaSha384Signature, ALG.RsaSha384Signature, KEY.RsaSecurityKeyWithCspProvider_2048, KEY.RsaSecurityKey_2048_Public),
-#endif
                 new SignatureProviderTheoryData("UnknownKeyType1", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.RsaSecurityKey_2048, NotAsymmetricOrSymmetricSecurityKey.New, EE.NotSupportedException("IDX10621:")),
                 new SignatureProviderTheoryData("UnKnownKeyType2", ALG.RsaSha256Signature, ALG.RsaSha256Signature, NotAsymmetricOrSymmetricSecurityKey.New, KEY.RsaSecurityKey_2048, EE.NotSupportedException("IDX10621:")),
 
@@ -228,12 +198,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 new SignatureProviderTheoryData("PrivateKeyMissing2", ALG.RsaSha256, ALG.RsaSha256, KEY.JsonWebKeyRsa_2048_Public, KEY.JsonWebKeyRsa_2048_Public, EE.InvalidOperationException("IDX10638:")),
                 new SignatureProviderTheoryData("PrivateKeyMissing3", ALG.RsaSha256Signature, ALG.RsaSha256Signature, KEY.RsaSecurityKey_2048_Public,KEY.RsaSecurityKey_2048_Public, EE.InvalidOperationException("IDX10638:")),
                 new SignatureProviderTheoryData("PrivateKeyMissing4", ALG.RsaSha256, ALG.RsaSha256, KEY.X509SecurityKeySelfSigned2048_SHA256_Public, KEY.X509SecurityKeySelfSigned2048_SHA256_Public, EE.InvalidOperationException("IDX10638:")),
-#if NET452
-                new SignatureProviderTheoryData("PrivateKeyMissing5", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.Ecdsa521Key_Public, KEY.Ecdsa521Key_Public, EE.CryptographicException()),
-#else
+
                 // .Net Core throws some funky inner exception that GetType() reports as: Internal.Cryptography.CryptoThrowHelper+WindowsCryptographicException
                 new SignatureProviderTheoryData("PrivateKeyMissing5", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.Ecdsa521Key_Public, KEY.Ecdsa521Key_Public, new EE(typeof(Exception)){IgnoreExceptionType = true}),
-#endif
+
                 // Invalid JsonWebKeyComponents
                 new SignatureProviderTheoryData("JsonWebKeyP521_Public_Invalid_X", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.JsonWebKeyP521_Public_Invalid_X, KEY.JsonWebKeyP521, EE.InvalidOperationException()),
                 new SignatureProviderTheoryData("JsonWebKeyP521_Public_Invalid_Y", ALG.EcdsaSha512, ALG.EcdsaSha512, KEY.JsonWebKeyP521_Public_Invalid_Y, KEY.JsonWebKeyP521, EE.InvalidOperationException()),
@@ -286,12 +254,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 new SignatureProviderTheoryData("SymmetricSecurityKey4", ALG.HmacSha256, ALG.HmacSha256Signature, Default.SymmetricSigningKey256,  Default.SymmetricSigningKey256),
 
                 // HmacSha384 <-> HmacSha384Signature
-                new SignatureProviderTheoryData("SymmetricSecurityKey5", ALG.HmacSha384, ALG.HmacSha384Signature, Default.SymmetricSigningKey256,  Default.SymmetricSigningKey256),
-                new SignatureProviderTheoryData("SymmetricSecurityKey6", ALG.HmacSha384Signature, ALG.HmacSha384, Default.SymmetricSigningKey256,  Default.SymmetricSigningKey256),
+                new SignatureProviderTheoryData("SymmetricSecurityKey5", ALG.HmacSha384, ALG.HmacSha384Signature, Default.SymmetricSigningKey384,  Default.SymmetricSigningKey384),
+                new SignatureProviderTheoryData("SymmetricSecurityKey6", ALG.HmacSha384Signature, ALG.HmacSha384, Default.SymmetricSigningKey384,  Default.SymmetricSigningKey384),
                 
                 // HmacSha512 <-> HmacSha512Signature
-                new SignatureProviderTheoryData("SymmetricSecurityKey7", ALG.HmacSha512, ALG.HmacSha512Signature, Default.SymmetricSigningKey256,  Default.SymmetricSigningKey256),
-                new SignatureProviderTheoryData("SymmetricSecurityKey8", ALG.HmacSha512Signature, ALG.HmacSha512, Default.SymmetricSigningKey256,  Default.SymmetricSigningKey256),
+                new SignatureProviderTheoryData("SymmetricSecurityKey7", ALG.HmacSha512, ALG.HmacSha512Signature, Default.SymmetricSigningKey512,  Default.SymmetricSigningKey512),
+                new SignatureProviderTheoryData("SymmetricSecurityKey8", ALG.HmacSha512Signature, ALG.HmacSha512, Default.SymmetricSigningKey512,  Default.SymmetricSigningKey512),
 
                 new SignatureProviderTheoryData("SymmetricSecurityKey9", ALG.HmacSha256Signature, ALG.HmacSha256Signature, KEY.SymmetricSecurityKey2_256, KEY.SymmetricSecurityKey2_256),
                 new SignatureProviderTheoryData("SymmetricSecurityKey10", ALG.RsaSha256Signature, ALG.RsaSha512Signature, KEY.SymmetricSecurityKey2_256, KEY.SymmetricSecurityKey2_256, EE.NotSupportedException("IDX10634:")),
@@ -413,11 +381,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 try
                 {
                     SecurityKey key = null;
-                    if (algorithm.Equals(ALG.EcdsaSha256, StringComparison.Ordinal))
+                    if (algorithm.Equals(ALG.EcdsaSha256))
                     {
                         key = KEY.Ecdsa256Key;
                     }
-                    else if (algorithm.Equals(ALG.EcdsaSha384, StringComparison.Ordinal))
+                    else if (algorithm.Equals(ALG.EcdsaSha384))
                     {
                         key = KEY.Ecdsa384Key;
                     }
@@ -436,21 +404,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
             TestUtilities.AssertFailIfErrors("AsymmetricSignatureProvider_SupportedAlgorithms", errors);
 
-        }
-
-        private static bool IsRunningOn462OrGreaterOrCore()
-        {
-#if NET452
-            // test for >=4.6.2
-            // AesCng was added to System.Core in 4.6.2. It doesn't exist in .NET Core.
-            Module systemCoreModule = typeof(System.Security.Cryptography.AesCryptoServiceProvider).GetTypeInfo().Assembly.GetModules()[0];
-            if (systemCoreModule != null && systemCoreModule.GetType("System.Security.Cryptography.AesCng") != null)
-                return true;
-            return false;
-#else
-            // test for Core
-            return true;
-#endif
         }
 
         [Theory, MemberData(nameof(AsymmetricSignatureProviderVerifyParameterChecksTheoryData))]
@@ -573,6 +526,151 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
+        [Theory, MemberData(nameof(SymmetricVerifySignatureSizeTheoryData))]
+        public void SymmetricVerify1Tests(SignatureProviderTheoryData theoryData)
+        {
+            // verifies: public bool Verify(byte[] input, byte[] signature)
+            var context = TestUtilities.WriteHeader($"{this}.SymmetricVerify1Tests", theoryData);
+            try
+            {
+                if (theoryData.SigningSignatureProvider.Verify(theoryData.RawBytes, theoryData.Signature))
+                    context.Diffs.Add("SigningSignatureProvider.Verify should not have succeeded");
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Theory, MemberData(nameof(SymmetricVerifySignatureSizeTheoryData))]
+        public void SymmetricVerify2Tests(SignatureProviderTheoryData theoryData)
+        {
+            // verifies: public bool Verify(byte[] input, byte[] signature, int length)
+            var context = TestUtilities.WriteHeader($"{this}.SymmetricVerify2Tests", theoryData);
+            try
+            {
+                ((SymmetricSignatureProvider)theoryData.SigningSignatureProvider).Verify(theoryData.RawBytes, theoryData.Signature, theoryData.Signature.Length);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Theory, MemberData(nameof(SymmetricVerifySignatureSizeTheoryData))]
+        public void SymmetricVerify3Tests(SignatureProviderTheoryData theoryData)
+        {
+            // verifies: public override bool Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength)
+            var context = TestUtilities.WriteHeader($"{this}.SymmetricVerify3Tests", theoryData);
+            try
+            {
+                theoryData.SigningSignatureProvider.Verify(theoryData.RawBytes, 0, theoryData.RawBytes.Length, theoryData.Signature, 0, theoryData.Signature.Length);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<SignatureProviderTheoryData> SymmetricVerifySignatureSizeTheoryData
+        {
+            get
+            {
+                return new TheoryData<SignatureProviderTheoryData>
+                {
+                    new SignatureProviderTheoryData("HmacSha256")
+                    {
+                        ExpectedException = EE.ArgumentException("IDX10719:"),
+                        RawBytes= new byte[16],
+                        Signature = new byte[16],
+                        SigningSignatureProvider = new SymmetricSignatureProvider(KEY.SymmetricSecurityKey2_256, ALG.HmacSha256),
+                    },
+                    new SignatureProviderTheoryData("HmacSha384")
+                    {
+                        ExpectedException = EE.ArgumentException("IDX10719:"),
+                        RawBytes= new byte[32],
+                        Signature = new byte[32],
+                        SigningSignatureProvider = new SymmetricSignatureProvider(KEY.SymmetricSecurityKey2_384, ALG.HmacSha384),
+                    },
+                    new SignatureProviderTheoryData("HmacSha512")
+                    {
+                        ExpectedException = EE.ArgumentException("IDX10719:"),
+                        RawBytes= new byte[48],
+                        Signature = new byte[48],
+                        SigningSignatureProvider = new SymmetricSignatureProvider(KEY.SymmetricSecurityKey2_512, ALG.HmacSha512),
+                    }
+                };
+            }
+        }
+
+        [Theory, MemberData(nameof(SymmetricVerifySignatureSizeInternalTheoryData))]
+        public void SymmetricVerify4Tests(SignatureProviderTheoryData theoryData)
+        {
+            // verifies: internal bool Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength, string algorithm)
+            var context = TestUtilities.WriteHeader($"{this}.SymmetricVerify4Tests", theoryData);
+            try
+            {
+                ((SymmetricSignatureProvider)theoryData.SigningSignatureProvider).Verify(theoryData.RawBytes, 0, theoryData.RawBytes.Length, theoryData.Signature, 0, theoryData.Signature.Length, theoryData.VerifyAlgorithm);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+        
+        public static TheoryData<SignatureProviderTheoryData> SymmetricVerifySignatureSizeInternalTheoryData
+        {
+            get
+            {
+                return new TheoryData<SignatureProviderTheoryData>
+                {
+                    new SignatureProviderTheoryData("UnknownAlgorithm")
+                    {
+                        ExpectedException = EE.ArgumentException("IDX10718:"),
+                        RawBytes= new byte[10],
+                        Signature = new byte[10],
+                        SigningSignatureProvider = new SymmetricSignatureProvider(KEY.SymmetricSecurityKey2_256, ALG.HmacSha256),
+                        VerifyAlgorithm = "ALG.Aes128CbcHmacSha256"
+                    },
+                    new SignatureProviderTheoryData("HmacSha256_HmacSha384")
+                    {
+                        ExpectedException = EE.ArgumentException("IDX10719:"),
+                        RawBytes= new byte[32],
+                        Signature = new byte[32],
+                        SigningSignatureProvider = new SymmetricSignatureProvider(KEY.SymmetricSecurityKey2_256, ALG.HmacSha256),
+                        VerifyAlgorithm = ALG.HmacSha384
+                    },
+                    new SignatureProviderTheoryData("HmacSha384_HmacSha256")
+                    {
+                        ExpectedException = EE.ArgumentException("IDX10719:"),
+                        RawBytes= new byte[384],
+                        Signature = new byte[384],
+                        SigningSignatureProvider = new SymmetricSignatureProvider(KEY.SymmetricSecurityKey2_256, ALG.HmacSha384),
+                        VerifyAlgorithm = ALG.HmacSha256
+                    },
+                    new SignatureProviderTheoryData("HmacSha512_HmacSha384")
+                    {
+                        ExpectedException = EE.ArgumentException("IDX10719:"),
+                        RawBytes= new byte[512],
+                        Signature = new byte[512],
+                        SigningSignatureProvider = new SymmetricSignatureProvider(KEY.SymmetricSecurityKey2_256, ALG.HmacSha512),
+                        VerifyAlgorithm = ALG.HmacSha384
+                    }
+                };
+            }
+        }
+
         [Fact]
         public void SymmetricSignatureProvider_SupportedAlgorithms()
         {
@@ -598,6 +696,111 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
                 TestUtilities.AssertFailIfErrors("AsymmetricSignatureProvider_SupportedAlgorithms", errors);
             }
+        }
+
+        [Theory, MemberData(nameof(SymmetricSecurityKeySizesTheoryData))]
+        public void SymmetricSecurityKeySizesSign(SymmetricSignatureProviderTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.SymmetricSecurityKeySizes", theoryData);
+            try
+            {
+                var provider = new SymmetricSignatureProvider(theoryData.SecurityKey, theoryData.Algorithm);
+                provider.Sign(new byte[32]);
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Theory, MemberData(nameof(SymmetricSecurityKeySizesTheoryData))]
+        public void SymmetricSecurityKeySizesVerify(SymmetricSignatureProviderTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.SymmetricSecurityKeySizes", theoryData);
+            try
+            {
+                var provider = new SymmetricSignatureProvider(theoryData.SecurityKey, theoryData.Algorithm);
+                provider.Verify(new byte[32], new byte[32]);
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<SymmetricSignatureProviderTheoryData> SymmetricSecurityKeySizesTheoryData()
+        {
+            var theoryData = new TheoryData<SymmetricSignatureProviderTheoryData>();
+
+            theoryData.Add(new SymmetricSignatureProviderTheoryData("HmacSha256Signature")
+            {
+                SecurityKey = new SymmetricSecurityKey(new byte[16]),
+                Algorithm = ALG.HmacSha256Signature,
+                ExpectedException = EE.ArgumentOutOfRangeException("IDX10720:")
+            });
+
+            theoryData.Add(new SymmetricSignatureProviderTheoryData("HmacSha256")
+            {
+                SecurityKey = new SymmetricSecurityKey(new byte[16]),
+                Algorithm = ALG.HmacSha256,
+                ExpectedException = EE.ArgumentOutOfRangeException("IDX10720:")
+            });
+
+            theoryData.Add(new SymmetricSignatureProviderTheoryData("HmacSha256_32")
+            {
+                SecurityKey = new SymmetricSecurityKey(new byte[32]),
+                Algorithm = ALG.HmacSha256
+            });
+
+            theoryData.Add(new SymmetricSignatureProviderTheoryData("HmacSha384Signature")
+            {
+                SecurityKey = new SymmetricSecurityKey(new byte[32]),
+                Algorithm = ALG.HmacSha384Signature,
+                ExpectedException = EE.ArgumentOutOfRangeException("IDX10720:")
+            });
+
+            theoryData.Add(new SymmetricSignatureProviderTheoryData("HmacSha384")
+            {
+                SecurityKey = new SymmetricSecurityKey(new byte[32]),
+                Algorithm = ALG.HmacSha384,
+                ExpectedException = EE.ArgumentOutOfRangeException("IDX10720:")
+            });
+
+            theoryData.Add(new SymmetricSignatureProviderTheoryData("HmacSha384_48")
+            {
+                SecurityKey = new SymmetricSecurityKey(new byte[48]),
+                Algorithm = ALG.HmacSha384
+            });
+
+            theoryData.Add(new SymmetricSignatureProviderTheoryData("HmacSha512Signature")
+            {
+                SecurityKey = new SymmetricSecurityKey(new byte[48]),
+                Algorithm = ALG.HmacSha512Signature,
+                ExpectedException = EE.ArgumentOutOfRangeException("IDX10720:")
+            });
+
+            theoryData.Add(new SymmetricSignatureProviderTheoryData("HmacSha512")
+            {
+                SecurityKey = new SymmetricSecurityKey(new byte[48]),
+                Algorithm = ALG.HmacSha512,
+                ExpectedException = EE.ArgumentOutOfRangeException("IDX10720:")
+            });
+
+            theoryData.Add(new SymmetricSignatureProviderTheoryData("HmacSha512_64")
+            {
+                SecurityKey = new SymmetricSecurityKey(new byte[64]),
+                Algorithm = ALG.HmacSha512
+            });
+
+            return theoryData;
         }
 
         [Fact]
@@ -700,14 +903,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             var theoryData = new TheoryData<string, SecurityKey, string, EE>
             {
-#if NET452
-                {
-                    "Test1",
-                    new RsaSecurityKey(new RSACryptoServiceProvider(2048)),
-                    ALG.RsaSha256,
-                    EE.NoExceptionExpected
-                },
-#endif
                 {
                     "Test2",
                     new RsaSecurityKey(KEY.RsaParameters_2048),
@@ -742,42 +937,39 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             return theoryData;
         }
-#if NET_CORE
-        // Excluding OSX as SignatureTampering test is slow on OSX (~6 minutes)
-        // especially tests with IDs RS256 and ES256
-        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.Linux)]
-#endif
+
         [Theory, MemberData(nameof(SignatureTheoryData))]
         public void SignatureTampering(SignatureProviderTheoryData theoryData)
         {
-            TestUtilities.WriteHeader($"{this}.SignatureTampering", theoryData);
-            var copiedSignature = theoryData.Signature.CloneByteArray();
-            for (int i = 0; i < theoryData.Signature.Length; i++)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                var originalB = theoryData.Signature[i];
-                for (byte b = 0; b < byte.MaxValue; b++)
-                {
-                    // skip here as this will succeed
-                    if (b == theoryData.Signature[i])
-                        continue;
-
-                    copiedSignature[i] = b;
-                    Assert.False(theoryData.VerifySignatureProvider.Verify(theoryData.RawBytes, copiedSignature), $"signature should not have verified: {theoryData.TestId} : {i} : {b} : {copiedSignature[i]}");
-
-                    // reset so we move to next byte
-                    copiedSignature[i] = originalB;
-                }
+                Console.WriteLine("OSX is excluded as the SignatureTampering test is slow (~6 minutes).") ;
             }
+            else
+            { 
+                TestUtilities.WriteHeader($"{this}.SignatureTampering", theoryData);
+                var copiedSignature = theoryData.Signature.CloneByteArray();
+                for (int i = 0; i < theoryData.Signature.Length; i++)
+                {
+                    var originalB = theoryData.Signature[i];
+                    for (byte b = 0; b < byte.MaxValue; b++)
+                    {
+                        // skip here as this will succeed
+                        if (b == theoryData.Signature[i])
+                            continue;
 
-            Assert.True(theoryData.VerifySignatureProvider.Verify(theoryData.RawBytes, copiedSignature), "Final check should have verified");
+                        copiedSignature[i] = b;
+                        Assert.False(theoryData.VerifySignatureProvider.Verify(theoryData.RawBytes, copiedSignature), $"signature should not have verified: {theoryData.TestId} : {i} : {b} : {copiedSignature[i]}");
+
+                        // reset so we move to next byte
+                        copiedSignature[i] = originalB;
+                    }
+                }
+
+                Assert.True(theoryData.VerifySignatureProvider.Verify(theoryData.RawBytes, copiedSignature), "Final check should have verified");
+            }
         }
 
-#if NET_CORE
-        // Excluding OSX as SignatureTruncation test throws an exception only on OSX
-        // This behavior should be fixed with netcore3.0
-        // Exceptions is thrown somewhere in System/Security/Cryptography/DerEncoder.cs class which is removed in netcore3.0
-        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.Linux)]
-#endif
         [Theory, MemberData(nameof(SignatureTheoryData))]
         public void SignatureTruncation(SignatureProviderTheoryData theoryData)
         {
@@ -844,19 +1036,382 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             return theoryData;
         }
+
+        /// <summary>
+        /// Tests that the signature size returned from TokenUtilities.GetSignatureSize(string algorithm) ia not too small.
+        /// Each supported signature is tried, 2k is the default.
+        /// </summary>
+        /// <param name="theoryData"></param>
+        [Theory, MemberData(nameof(MaximumSignatureSizeTestCases), DisableDiscoveryEnumeration = true)]
+        public void MaximumSignatureSizeTests(SignTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"MaximumSignatureSizeTests", theoryData);
+
+            try
+            {
+                byte[] signature = theoryData.SignatureProvider.Sign(theoryData.Bytes);
+                int maximumSignatureSize = SupportedAlgorithms.GetMaxByteCount(theoryData.SignatureProvider.Algorithm);
+                if (signature.Length > maximumSignatureSize)
+                    context.AddDiff($"signature.Length: '{signature.Length}' > maximumSignatureSize: '{maximumSignatureSize}'.");
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<SignTheoryData> MaximumSignatureSizeTestCases
+        {
+            get
+            {
+                var theoryData = new TheoryData<SignTheoryData>();
+
+                AddSymmetricKeySizes(KeyingMaterial.DefaultSymmetricSecurityKey_256, theoryData);
+                AddSymmetricKeySizes(KeyingMaterial.DefaultSymmetricSecurityKey_384, theoryData);
+                AddSymmetricKeySizes(KeyingMaterial.DefaultSymmetricSecurityKey_512, theoryData);
+
+                AddECDSAKeySizes(KeyingMaterial.Ecdsa256Key, theoryData);
+                AddECDSAKeySizes(KeyingMaterial.Ecdsa384Key, theoryData);
+                AddECDSAKeySizes(KeyingMaterial.Ecdsa521Key, theoryData);
+
+                AddRSAKeySize(KeyingMaterial.RsaSecurityKey_1024, theoryData);
+                AddRSAKeySize(KeyingMaterial.RsaSecurityKey_2048, theoryData);
+                AddRSAKeySize(KeyingMaterial.RsaSecurityKey_4096, theoryData);
+
+                theoryData.Add(new SignTheoryData("Custom2K")
+                {
+                    SignatureProvider = new SignatureProvider2K(KeyingMaterial.RsaSecurityKey_2048, "CustomAlgorithm")
+                });
+
+                return theoryData;
+            }
+        }
+        private static void AddECDSAKeySizes(SecurityKey securityKey, TheoryData<SignTheoryData> theoryData)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString());
+
+            foreach (string algorithm in SupportedAlgorithms.EcdsaSigningAlgorithms)
+            {
+                if (securityKey.KeySize >= AsymmetricSignatureProvider.DefaultMinimumAsymmetricKeySizeInBitsForSigningMap[algorithm])
+                    theoryData.Add(new SignTheoryData($"{algorithm}_Key{securityKey.KeySize}")
+                    {
+                        Bytes = bytes,
+                        SignatureProvider = CreateProvider(securityKey, algorithm)
+                    });
+            }
+        }
+
+        private static void AddSymmetricKeySizes(SecurityKey securityKey, TheoryData<SignTheoryData> theoryData)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString());
+
+            foreach (string algorithm in SupportedAlgorithms.SymmetricSigningAlgorithms)
+            {
+                if (securityKey.KeySize / 8 >= SymmetricSignatureProvider.ExpectedSignatureSizeInBytes[algorithm])
+                    theoryData.Add(new SignTheoryData($"{algorithm}_Key{securityKey.KeySize}")
+                    {
+                        Bytes = bytes,
+                        SignatureProvider = CreateProvider(securityKey, algorithm)
+                    });
+            }
+        }
+
+        private static void AddRSAKeySize(SecurityKey securityKey, TheoryData<SignTheoryData> theoryData)
+        {
+            byte[] bytes = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString());
+
+            foreach (string algorithm in SupportedAlgorithms.RsaSigningAlgorithms)
+            {
+                if (securityKey.KeySize >= AsymmetricSignatureProvider.DefaultMinimumAsymmetricKeySizeInBitsForSigningMap[algorithm])
+                    theoryData.Add(new SignTheoryData($"{algorithm}_Key{securityKey.KeySize}")
+                    {
+                        Bytes = bytes,
+                        SignatureProvider = CreateProvider(securityKey, algorithm)
+                    });
+            }
+
+            foreach (string algorithm in SupportedAlgorithms.RsaPssSigningAlgorithms)
+            {
+                if (securityKey.KeySize >= AsymmetricSignatureProvider.DefaultMinimumAsymmetricKeySizeInBitsForSigningMap[algorithm])
+                    theoryData.Add(new SignTheoryData($"{algorithm}_Key{securityKey.KeySize}")
+                    {
+                        Bytes = bytes,
+                        SignatureProvider = CreateProvider(securityKey, algorithm)
+                    });
+            }
+        }
+
+#if NET6_0_OR_GREATER
+        [Theory, MemberData(nameof(SignUsingSpanTestCases), DisableDiscoveryEnumeration = true)]
+        public void SignUsingSpanTests(SignTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader("SignUsingSpanTests", theoryData);
+
+            try
+            {
+                bool success = theoryData.SignatureProvider.Sign(theoryData.Bytes.AsSpan(), theoryData.Buffer.AsSpan<byte>(), out int bytesWritten);
+
+                IdentityComparer.AreBoolsEqual(success, theoryData.Success, context);
+                if (theoryData.Success)
+                    IdentityComparer.AreBoolsEqual(theoryData.SignatureProvider.Verify(theoryData.Bytes, theoryData.Buffer.AsSpan<byte>().Slice(0, bytesWritten).ToArray()), true, $"{theoryData.SignatureProvider}", "true", context);
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<SignTheoryData> SignUsingSpanTestCases
+        {
+            get
+            {
+                TheoryData<SignTheoryData> theoryData = new TheoryData<SignTheoryData>();
+                byte[] bytes = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString());
+
+                AddSignUsingSpans(bytes, KeyingMaterial.Ecdsa256Key, SecurityAlgorithms.EcdsaSha256, "ECDSA", theoryData);
+                AddSignUsingSpans(bytes, KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256, "RSA", theoryData);
+                AddSignUsingSpans(bytes, new SymmetricSecurityKey(KeyingMaterial.SymmetricKeyBytes2_256), SecurityAlgorithms.HmacSha256, "HMAC256", theoryData);
+
+                theoryData.Add(new SignTheoryData("NotImplementedException")
+                {
+                    Buffer = new byte[2048],
+                    Bytes = new byte[2048],
+                    Count = 2048,
+                    ExpectedException = new ExpectedException(typeof(NotImplementedException)),
+                    Offset = 0,
+                    SignatureProvider = new SignatureProvider2K(KeyingMaterial.Ecdsa256Key, SecurityAlgorithms.EcdsaSha256)
+                });
+
+                return theoryData;
+            }
+        }
+
+        internal static void AddSignUsingSpans(byte[] bytes, SecurityKey securityKey, string algorithm, string prefix, TheoryData<SignTheoryData> theoryData)
+        {
+            theoryData.Add(new SignTheoryData($"{prefix}_BufferNull")
+            {
+                Buffer = null,
+                Bytes = bytes,
+                SignatureProvider = CreateProvider(securityKey, algorithm),
+                Success = false
+            });
+
+            theoryData.Add(new SignTheoryData($"{prefix}_BufferOneByte")
+            {
+                Buffer = new byte[1],
+                Bytes = bytes,
+                SignatureProvider = CreateProvider(securityKey, algorithm),
+                Success = false
+            });
+
+            theoryData.Add(new SignTheoryData($"{prefix}_BufferTooSmall")
+            {
+                Buffer = new byte[10],
+                Bytes = bytes,
+                SignatureProvider = CreateProvider(securityKey, algorithm),
+                Success = false
+            });
+
+            theoryData.Add(new SignTheoryData($"{prefix}")
+            {
+                Buffer = new byte[512],
+                Bytes = bytes,
+                SignatureProvider = CreateProvider(securityKey, algorithm),
+                Success = true
+            });
+        }
+#endif
+
+        [Theory, MemberData(nameof(SignUsingOffsetTestCases), DisableDiscoveryEnumeration = true)]
+        public void SignUsingOffsetTests(SignTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader("SignUsingOffsetTests", theoryData);
+            try
+            {
+                byte[] signature = theoryData.SignatureProvider.Sign(theoryData.Bytes, theoryData.Offset, theoryData.Count);
+                if (theoryData.Success)
+                    IdentityComparer.AreBoolsEqual(
+                        theoryData.SignatureProvider.Verify(
+                            theoryData.Bytes.AsSpan<byte>().Slice(theoryData.Offset, theoryData.Count).ToArray(),
+                            signature),
+                        true,
+                        $"{theoryData.SignatureProvider}",
+                        "true",
+                        context);
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<SignTheoryData> SignUsingOffsetTestCases
+        {
+            get
+            {
+                TheoryData<SignTheoryData> theoryData = new TheoryData<SignTheoryData>();
+
+                byte[] bytes = Encoding.UTF8.GetBytes(Guid.NewGuid().ToString());
+                AddSignUsingOffsets(bytes, KeyingMaterial.Ecdsa256Key, SecurityAlgorithms.EcdsaSha256, "ECDSA", theoryData);
+                AddSignUsingOffsets(bytes, KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256, "RSA", theoryData);
+                AddSignUsingOffsets(bytes, new SymmetricSecurityKey(KeyingMaterial.SymmetricKeyBytes2_256), SecurityAlgorithms.HmacSha256, "HMAC256", theoryData);
+
+                theoryData.Add(new SignTheoryData("NotImplementedException")
+                {
+                    Bytes = new byte[1024],
+                    Count = 1024,
+                    ExpectedException = new ExpectedException(typeof(NotImplementedException)),
+                    Offset = 0,
+                    SignatureProvider = new SignatureProvider2K(KeyingMaterial.Ecdsa256Key, SecurityAlgorithms.EcdsaSha256)
+                });
+
+                return theoryData;
+            }
+        }
+
+        internal static void AddSignUsingOffsets(byte[] bytes, SecurityKey securityKey, string algorithm, string prefix, TheoryData<SignTheoryData> theoryData)
+        {
+            theoryData.Add(new SignTheoryData($"{prefix}_BytesNull")
+            {
+                Bytes = null,
+                Count = bytes.Length,
+                ExpectedException = ExpectedException.ArgumentNullException(),
+                Offset = 0,
+                SignatureProvider = CreateProvider(securityKey, algorithm)
+            });
+
+            theoryData.Add(new SignTheoryData($"{prefix}_BytesEmpty")
+            {
+                Bytes = Array.Empty<byte>(),
+                Count = bytes.Length,
+                ExpectedException = ExpectedException.ArgumentNullException(),
+                Offset = 0,
+                SignatureProvider = CreateProvider(securityKey, algorithm)
+            });
+
+#if NET461 || NET462
+            // RSA throws a different exception in the following three cases than HMAC or ECDSA 472+
+            theoryData.Add(new SignTheoryData($"{prefix}_CountNegative")
+            {
+                Bytes = bytes,
+                Count = -1,
+                ExpectedException = ExpectedException.ArgumentException(),
+                Offset = 0,
+                SignatureProvider = CreateProvider(securityKey, algorithm)
+            });
+
+            theoryData.Add(new SignTheoryData($"{prefix}_CountGreaterThanBytes")
+            {
+                Bytes = bytes,
+                Count = bytes.Length + 1,
+                ExpectedException = ExpectedException.ArgumentException(),
+                Offset = 0,
+                SignatureProvider = CreateProvider(securityKey, algorithm)
+            });
+
+            theoryData.Add(new SignTheoryData($"{prefix}_CountPlusOffsetGreaterThanBytes")
+            {
+                Bytes = bytes,
+                Count = 10,
+                ExpectedException = ExpectedException.ArgumentException(),
+                Offset = bytes.Length - 1,
+                SignatureProvider = CreateProvider(securityKey, algorithm)
+            });
+#else
+            // RSA throws a different exception in the following three cases than HMAC or ECDSA 472+
+            theoryData.Add(new SignTheoryData($"{prefix}_CountNegative")
+            {
+                Bytes = bytes,
+                Count = -1,
+                ExpectedException = prefix == "RSA" ? ExpectedException.ArgumentOutOfRangeException() : ExpectedException.ArgumentException(),
+                Offset = 0,
+                SignatureProvider = CreateProvider(securityKey, algorithm)
+            });
+
+            theoryData.Add(new SignTheoryData($"{prefix}_CountGreaterThanBytes")
+            {
+                Bytes = bytes,
+                Count = bytes.Length + 1,
+                ExpectedException = prefix == "RSA" ? ExpectedException.ArgumentOutOfRangeException() : ExpectedException.ArgumentException(),
+                Offset = 0,
+                SignatureProvider = CreateProvider(securityKey, algorithm)
+            });
+
+            theoryData.Add(new SignTheoryData($"{prefix}_CountPlusOffsetGreaterThanBytes")
+            {
+                Bytes = bytes,
+                Count = 10,
+                ExpectedException = prefix == "RSA" ? ExpectedException.ArgumentOutOfRangeException() : ExpectedException.ArgumentException(),
+                Offset = bytes.Length - 1,
+                SignatureProvider = CreateProvider(securityKey, algorithm)
+            });
+#endif
+            theoryData.Add(new SignTheoryData($"{prefix}_OffsetNegative")
+            {
+                Bytes = bytes,
+                Count = bytes.Length,
+                ExpectedException = ExpectedException.ArgumentOutOfRangeException(),
+                Offset = -1,
+                SignatureProvider = CreateProvider(securityKey, algorithm)
+            });
+
+            theoryData.Add(new SignTheoryData($"{prefix}")
+            {
+                Bytes = bytes,
+                Count = bytes.Length,
+                Offset = 0,
+                SignatureProvider = CreateProvider(securityKey, algorithm),
+                Success = true
+            });
+
+            byte[] bytesOffset = new byte[bytes.Length + 10];
+            Array.Copy(bytes, 0, bytesOffset, 5, bytes.Length);
+            theoryData.Add(new SignTheoryData($"{prefix}_Offset")
+            {
+                Bytes = bytesOffset,
+                Count = bytes.Length,
+                Offset = 5,
+                SignatureProvider = CreateProvider(securityKey, algorithm),
+                Success = true
+            });
+        }
+
+        public static SignatureProvider CreateProvider(SecurityKey securityKey, string algorithm)
+        {
+            if (securityKey is AsymmetricSecurityKey)
+                return new AsymmetricSignatureProvider(securityKey, algorithm);
+
+            if (securityKey is SymmetricSecurityKey)
+                return new SymmetricSignatureProvider(securityKey, algorithm);
+
+            throw new NotSupportedException($"Unknown securityKey type: '{securityKey}'");
+        }
     }
 
     public class CryptoProviderFactoryTheoryData : TheoryDataBase, IDisposable
     {
         public CryptoProviderFactoryTheoryData() { }
+        public CryptoProviderFactoryTheoryData(string testId) : base(testId) { }
 
         public CryptoProviderFactoryTheoryData(string testId, string algorithm, SecurityKey signingKey, SecurityKey verifyKey, EE expectedException = null)
+            : base(testId)
         {
             SigningAlgorithm = algorithm;
             SigningKey = signingKey;
             VerifyKey = verifyKey;
             ExpectedException = expectedException ?? EE.NoExceptionExpected;
-            TestId = testId;
         }
 
         public CryptoProviderFactory CryptoProviderFactory { get; set; } = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting())
@@ -910,6 +1465,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     {
         public SignatureProviderTheoryData() { }
 
+        public SignatureProviderTheoryData(string testId) : base(testId) { }
+
         public SignatureProviderTheoryData(string testId, string signingAlgorithm, string verifyAlgorithm, SecurityKey signingKey, SecurityKey verifyKey, EE expectedException = null, bool isValid = true)
         {
             SigningAlgorithm = signingAlgorithm;
@@ -929,8 +1486,55 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public string SignatureProviderType { get; set; }
 
-        public bool VerifySpecifyingLength { get; set; }
+        public bool VerifyUsingLength { get; set; }
+    }
+
+    public class SymmetricSignatureProviderTheoryData : TheoryDataBase
+    {
+        public SymmetricSignatureProviderTheoryData(string testId) : base(testId) { }
+
+        public string Algorithm { get; set; }
+
+        public SecurityKey SecurityKey { get; set; }
+    }
+
+    public class SignTheoryData : TheoryDataBase
+    {
+        public SignTheoryData() { }
+
+        public SignTheoryData(string testId) : base(testId) { }
+
+        public string Algorithm { get; set; }
+
+        public byte[] Buffer { get; set; }
+
+        public byte[] Bytes { get; set; }
+
+        public int Count { get; set; }
+
+        public string HashAlgorithmString { get; set; }
+
+        public int Offset { get; set; } = 0;
+
+        public SecurityKey SecurityKey { get; set; }
+
+        public byte[] Signature { get; set; }
+
+        public SignatureProvider SignatureProvider { get; set; }
+
+        public bool Success { get; set; }
+    }
+
+    public class SignatureProvider2K : SignatureProvider
+    {
+        public SignatureProvider2K(SecurityKey key, string algorithm):base(key, algorithm){}
+
+        public override byte[] Sign(byte[] input) => new byte[2048];
+
+        public override bool Verify(byte[] input, byte[] signature) => throw new NotImplementedException();
+
+        protected override void Dispose(bool disposing) => throw new NotImplementedException();
+
+        public override bool Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength) => throw new NotImplementedException();
     }
 }
-
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

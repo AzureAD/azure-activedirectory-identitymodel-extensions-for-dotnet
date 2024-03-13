@@ -1,31 +1,11 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
+using System.Buffers;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.IdentityModel.Logging;
 
@@ -37,25 +17,10 @@ namespace Microsoft.IdentityModel.Tokens
     public static class Base64UrlEncoder
     {
         private const char base64PadCharacter = '=';
-#if NET45
-        private const string doubleBase64PadCharacter = "==";
-#endif
         private const char base64Character62 = '+';
         private const char base64Character63 = '/';
         private const char base64UrlCharacter62 = '-';
         private const char base64UrlCharacter63 = '_';
-
-        /// <summary>
-        /// Encoding table
-        /// </summary>
-        internal static readonly char[] s_base64Table =
-        {
-            'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
-            'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
-            '0','1','2','3','4','5','6','7','8','9',
-            base64UrlCharacter62,
-            base64UrlCharacter63
-        };
 
         /// <summary>
         /// The following functions perform base64url encoding which differs from regular base64 encoding as follows
@@ -73,85 +38,6 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Converts a subset of an array of 8-bit unsigned integers to its equivalent string representation which is encoded with base-64-url digits. Parameters specify
-        /// the subset as an offset in the input array, and the number of elements in the array to convert.
-        /// </summary>
-        /// <param name="inArray">An array of 8-bit unsigned integers.</param>
-        /// <param name="length">An offset in inArray.</param>
-        /// <param name="offset">The number of elements of inArray to convert.</param>
-        /// <returns>The string representation in base 64 url encoding of length elements of inArray, starting at position offset.</returns>
-        /// <exception cref="ArgumentNullException">'inArray' is null.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">offset or length is negative OR offset plus length is greater than the length of inArray.</exception>
-        public static string Encode(byte[] inArray, int offset, int length)
-        {
-            _ = inArray ?? throw LogHelper.LogArgumentNullException(nameof(inArray));
-
-            if (length == 0)
-                return string.Empty;
-
-            if (length < 0)
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(LogHelper.FormatInvariant(LogMessages.IDX10106, LogHelper.MarkAsNonPII(nameof(length)), LogHelper.MarkAsNonPII(length))));
-
-            if (offset < 0 || inArray.Length < offset)
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(LogHelper.FormatInvariant(LogMessages.IDX10106, LogHelper.MarkAsNonPII(nameof(offset)), LogHelper.MarkAsNonPII(offset))));
-
-            if (inArray.Length < offset + length)
-                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(LogHelper.FormatInvariant(LogMessages.IDX10106, LogHelper.MarkAsNonPII(nameof(length)), LogHelper.MarkAsNonPII(length))));
-
-            int lengthmod3 = length % 3;
-            int limit = offset + (length - lengthmod3);
-            char[] output = new char[(length + 2) / 3 * 4];
-            char[] table = s_base64Table;
-            int i, j = 0;
-
-            // takes 3 bytes from inArray and insert 4 bytes into output
-            for (i = offset; i < limit; i += 3)
-            {
-                byte d0 = inArray[i];
-                byte d1 = inArray[i + 1];
-                byte d2 = inArray[i + 2];
-
-                output[j + 0] = table[d0 >> 2];
-                output[j + 1] = table[((d0 & 0x03) << 4) | (d1 >> 4)];
-                output[j + 2] = table[((d1 & 0x0f) << 2) | (d2 >> 6)];
-                output[j + 3] = table[d2 & 0x3f];
-                j += 4;
-            }
-
-            //Where we left off before
-            i = limit;
-
-            switch (lengthmod3)
-            {
-                case 2:
-                    {
-                        byte d0 = inArray[i];
-                        byte d1 = inArray[i + 1];
-
-                        output[j + 0] = table[d0 >> 2];
-                        output[j + 1] = table[((d0 & 0x03) << 4) | (d1 >> 4)];
-                        output[j + 2] = table[(d1 & 0x0f) << 2];
-                        j += 3;
-                    }
-                    break;
-
-                case 1:
-                    {
-                        byte d0 = inArray[i];
-
-                        output[j + 0] = table[d0 >> 2];
-                        output[j + 1] = table[(d0 & 0x03) << 4];
-                        j += 2;
-                    }
-                    break;
-
-                //default or case 0: no further operations are needed.
-            }
-
-            return new string(output, 0, j);
-        }
-
-        /// <summary>
         /// Converts a subset of an array of 8-bit unsigned integers to its equivalent string representation which is encoded with base-64-url digits.
         /// </summary>
         /// <param name="inArray">An array of 8-bit unsigned integers.</param>
@@ -165,84 +51,223 @@ namespace Microsoft.IdentityModel.Tokens
             return Encode(inArray, 0, inArray.Length);
         }
 
-        internal static string EncodeString(string str)
+        /// <summary>
+        /// Converts a subset of an array of 8-bit unsigned integers to its equivalent string representation which is encoded with base-64-url digits. Parameters specify
+        /// the subset as an offset in the input array, and the number of elements in the array to convert.
+        /// </summary>
+        /// <param name="inArray">An array of 8-bit unsigned integers.</param>
+        /// <param name="length">An offset in inArray.</param>
+        /// <param name="offset">The number of elements of inArray to convert.</param>
+        /// <returns>The string representation in base 64 url encoding of length elements of inArray, starting at position offset.</returns>
+        /// <exception cref="ArgumentNullException">'inArray' is null.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">offset or length is negative OR offset plus length is greater than the length of inArray.</exception>
+        public static string Encode(byte[] inArray, int offset, int length)
         {
-            _ = str ?? throw LogHelper.LogArgumentNullException(nameof(str));
+            _ = inArray ?? throw LogHelper.LogArgumentNullException(nameof(inArray));
 
-            return Encode(Encoding.UTF8.GetBytes(str));
+            if (offset < 0)
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(
+                    nameof(offset),
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10716,
+                        LogHelper.MarkAsNonPII(nameof(offset)),
+                        LogHelper.MarkAsNonPII(offset))));
+
+            if (length == 0)
+                return string.Empty;
+
+            if (length < 0)
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(
+                    nameof(length),
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10716,
+                        LogHelper.MarkAsNonPII(nameof(length)),
+                        LogHelper.MarkAsNonPII(length))));
+
+            if (inArray.Length < offset + length)
+#pragma warning disable CA2208 // Instantiate argument exceptions correctly
+                throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(
+                    "offset + length",
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10717,
+                        LogHelper.MarkAsNonPII(nameof(offset)),
+                        LogHelper.MarkAsNonPII(nameof(length)),
+                        LogHelper.MarkAsNonPII(nameof(inArray)),
+                        LogHelper.MarkAsNonPII(offset),
+                        LogHelper.MarkAsNonPII(length),
+                        LogHelper.MarkAsNonPII(inArray.Length))));
+#pragma warning restore CA2208 // Instantiate argument exceptions correctly
+
+            char[] destination = new char[(inArray.Length + 2) / 3 * 4];
+            int j = Encode(inArray.AsSpan<byte>().Slice(offset, length), destination.AsSpan<char>());
+
+            return new string(destination, 0, j);
         }
 
         /// <summary>
-        ///  Converts the specified string, which encodes binary data as base-64-url digits, to an equivalent 8-bit unsigned integer array.</summary>
+        /// Populates a <see cref="ReadOnlySpan{T}"/>Converts a <see cref="Span{T}"/> encoded with base-64-url digits. Parameters specify
+        /// the subset as an offset in the input array, and the number of elements in the array to convert.
+        /// </summary>
+        /// <param name="inArray">A span of bytes.</param>
+        /// <param name="output">output for encoding.</param>
+        /// <returns>The number of chars written to the output.</returns>
+        public static int Encode(ReadOnlySpan<byte> inArray, Span<char> output)
+        {
+            int lengthmod3 = inArray.Length % 3;
+            int limit = (inArray.Length - lengthmod3);
+            ReadOnlySpan<byte> table = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"u8;
+
+            int i, j = 0;
+
+            // takes 3 bytes from inArray and insert 4 bytes into output
+            for (i = 0; i < limit; i += 3)
+            {
+                byte d0 = inArray[i];
+                byte d1 = inArray[i + 1];
+                byte d2 = inArray[i + 2];
+
+                output[j + 0] = (char)table[d0 >> 2];
+                output[j + 1] = (char)table[((d0 & 0x03) << 4) | (d1 >> 4)];
+                output[j + 2] = (char)table[((d1 & 0x0f) << 2) | (d2 >> 6)];
+                output[j + 3] = (char)table[d2 & 0x3f];
+                j += 4;
+            }
+
+            //Where we left off before
+            i = limit;
+
+            switch (lengthmod3)
+            {
+                case 2:
+                    {
+                        byte d0 = inArray[i];
+                        byte d1 = inArray[i + 1];
+
+                        output[j + 0] = (char)table[d0 >> 2];
+                        output[j + 1] = (char)table[((d0 & 0x03) << 4) | (d1 >> 4)];
+                        output[j + 2] = (char)table[(d1 & 0x0f) << 2];
+                        j += 3;
+                    }
+                    break;
+
+                case 1:
+                    {
+                        byte d0 = inArray[i];
+
+                        output[j + 0] = (char)table[d0 >> 2];
+                        output[j + 1] = (char)table[(d0 & 0x03) << 4];
+                        j += 2;
+                    }
+                    break;
+
+                //default or case 0: no further operations are needed.
+            }
+
+            return j;
+        }
+
+        /// <summary>
+        /// Converts the specified string, base-64-url encoded to utf8 bytes.</summary>
         /// <param name="str">base64Url encoded string.</param>
         /// <returns>UTF8 bytes.</returns>
         public static byte[] DecodeBytes(string str)
         {
             _ = str ?? throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(str)));
-#if NET45
-            // 62nd char of encoding
-            str = str.Replace(base64UrlCharacter62, base64Character62);
-            
-            // 63rd char of encoding
-            str = str.Replace(base64UrlCharacter63, base64Character63);
-
-            // check for padding
-            switch (str.Length % 4)
-            {
-                case 0:
-                    // No pad chars in this case
-                    break;
-                case 2:
-                    // Two pad chars
-                    str += doubleBase64PadCharacter;
-                    break;
-                case 3:
-                    // One pad char
-                    str += base64PadCharacter;
-                    break;
-                default:
-                    throw LogHelper.LogExceptionMessage(new FormatException(LogHelper.FormatInvariant(LogMessages.IDX10400, str)));
-            }
-
-            return Convert.FromBase64String(str);
-#else
-            return UnsafeDecode(str);
-#endif
+            return UnsafeDecode(str.AsSpan());
         }
 
-#if !NET45
-        private unsafe static byte[] UnsafeDecode(string str)
+#if NET6_0_OR_GREATER
+        [SkipLocalsInit]
+#endif
+        internal static unsafe byte[] UnsafeDecode(ReadOnlySpan<char> strSpan)
         {
-            int mod = str.Length % 4;
+            int mod = strSpan.Length % 4;
             if (mod == 1)
-                throw LogHelper.LogExceptionMessage(new FormatException(LogHelper.FormatInvariant(LogMessages.IDX10400, str)));
+                throw LogHelper.LogExceptionMessage(new FormatException(LogHelper.FormatInvariant(LogMessages.IDX10400, strSpan.ToString())));
 
-            bool needReplace = false;
-            int decodedLength = str.Length + (4 - mod) % 4;
+            bool needReplace = strSpan.IndexOfAny(base64UrlCharacter62, base64UrlCharacter63) >= 0;
+            int decodedLength = strSpan.Length + (4 - mod) % 4;
 
-            for (int i = 0; i < str.Length; i++)
+#if NET6_0_OR_GREATER
+            // If the incoming chars don't contain any of the base64url characters that need to be replaced,
+            // and if the incoming chars are of the exact right length, then we'll be able to just pass the
+            // incoming chars directly to Convert.TryFromBase64Chars. Otherwise, rent an array, copy all the
+            // data into it, and do whatever fixups are necessary on that copy, then pass that copy into
+            // Convert.TryFromBase64Chars.
+
+            const int StackAllocThreshold = 512;
+            char[] arrayPoolChars = null;
+            scoped Span<char> charsSpan = default;
+            scoped ReadOnlySpan<char> source = strSpan;
+
+            if (needReplace || decodedLength != source.Length)
             {
-                if (str[i] == base64UrlCharacter62 || str[i] == base64UrlCharacter63)
+                charsSpan = decodedLength <= StackAllocThreshold ?
+                    stackalloc char[StackAllocThreshold] :
+                    arrayPoolChars = ArrayPool<char>.Shared.Rent(decodedLength);
+                charsSpan = charsSpan.Slice(0, decodedLength);
+
+                source.CopyTo(charsSpan);
+                if (source.Length < charsSpan.Length)
                 {
-                    needReplace = true;
-                    break;
+                    charsSpan[source.Length] = base64PadCharacter;
+                    if (source.Length + 1 < charsSpan.Length)
+                    {
+                        charsSpan[source.Length + 1] = base64PadCharacter;
+                    }
                 }
+
+                if (needReplace)
+                {
+                    Span<char> remaining = charsSpan;
+                    int pos;
+                    while ((pos = remaining.IndexOfAny(base64UrlCharacter62, base64UrlCharacter63)) >= 0)
+                    {
+                        remaining[pos] = (remaining[pos] == base64UrlCharacter62) ? base64Character62 : base64Character63;
+                        remaining = remaining.Slice(pos + 1);
+                    }
+                }
+
+                source = charsSpan;
             }
 
+            byte[] arrayPoolBytes = null;
+            Span<byte> bytesSpan = decodedLength <= StackAllocThreshold ?
+                stackalloc byte[StackAllocThreshold] :
+                arrayPoolBytes = ArrayPool<byte>.Shared.Rent(decodedLength);
+
+            bool converted = Convert.TryFromBase64Chars(source, bytesSpan, out int bytesWritten);
+            Debug.Assert(converted, "Expected TryFromBase64Chars to be successful");
+            byte[] result = bytesSpan.Slice(0, bytesWritten).ToArray();
+
+            if (arrayPoolBytes is not null)
+            {
+                bytesSpan.Clear();
+                ArrayPool<byte>.Shared.Return(arrayPoolBytes);
+            }
+
+            if (arrayPoolChars is not null)
+            {
+                charsSpan.Clear();
+                ArrayPool<char>.Shared.Return(arrayPoolChars);
+            }
+
+            return result;
+#else
             if (needReplace)
             {
-                string decodedString = new string(char.MinValue, decodedLength);
+                string decodedString = new(char.MinValue, decodedLength);
                 fixed (char* dest = decodedString)
                 {
                     int i = 0;
-                    for (; i < str.Length; i++)
+                    for (; i < strSpan.Length; i++)
                     {
-                        if (str[i] == base64UrlCharacter62)
+                        if (strSpan[i] == base64UrlCharacter62)
                             dest[i] = base64Character62;
-                        else if (str[i] == base64UrlCharacter63)
+                        else if (strSpan[i] == base64UrlCharacter63)
                             dest[i] = base64Character63;
                         else
-                            dest[i] = str[i];
+                            dest[i] = strSpan[i];
                     }
 
                     for (; i < decodedLength; i++)
@@ -253,27 +278,28 @@ namespace Microsoft.IdentityModel.Tokens
             }
             else
             {
-                if (decodedLength == str.Length)
+                if (decodedLength == strSpan.Length)
                 {
-                    return Convert.FromBase64String(str);
+                    return Convert.FromBase64CharArray(strSpan.ToArray(), 0, strSpan.Length);
                 }
                 else
                 {
-                    string decodedString = new string(char.MinValue, decodedLength);
-                    fixed (char* src = str)
+                    string decodedString = new(char.MinValue, decodedLength);
+                    fixed (char* src = strSpan)
                     fixed (char* dest = decodedString)
                     {
-                        Buffer.MemoryCopy(src, dest, str.Length * 2, str.Length * 2);
-                        dest[str.Length] = base64PadCharacter;
-                        if (str.Length + 2 == decodedLength)
-                            dest[str.Length + 1] = base64PadCharacter;
+                        Buffer.MemoryCopy(src, dest, strSpan.Length * 2, strSpan.Length * 2);
+
+                        dest[strSpan.Length] = base64PadCharacter;
+                        if (strSpan.Length + 2 == decodedLength)
+                            dest[strSpan.Length + 1] = base64PadCharacter;
                     }
 
                     return Convert.FromBase64String(decodedString);
                 }
             }
-        }
 #endif
+        }
 
         /// <summary>
         /// Decodes the string from Base64UrlEncoded to UTF8.

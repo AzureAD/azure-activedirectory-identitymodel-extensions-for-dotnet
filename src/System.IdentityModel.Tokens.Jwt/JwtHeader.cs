@@ -1,33 +1,16 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+
+using JsonPrimitives = Microsoft.IdentityModel.Tokens.Json.JsonSerializerPrimitives;
 
 namespace System.IdentityModel.Tokens.Jwt
 {
@@ -39,12 +22,56 @@ namespace System.IdentityModel.Tokens.Jwt
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2237:MarkISerializableTypesWithSerializable"), System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Serialize not really supported.")]
     public class JwtHeader : Dictionary<string, object>
     {
+        internal string ClassName = "System.IdentityModel.Tokens.Jwt.JwtHeader";
+
         /// <summary>
         /// Initializes a new instance of the <see cref="JwtHeader"/> class. Default string comparer <see cref="StringComparer.Ordinal"/>.
         /// </summary>
         public JwtHeader()
             : base(StringComparer.Ordinal)
         {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JwtHeader"/> class. Default string comparer <see cref="StringComparer.Ordinal"/>.
+        /// </summary>
+        internal JwtHeader(string json)
+        {
+            _ = json ?? throw LogHelper.LogArgumentNullException(nameof(json));
+
+            Utf8JsonReader reader = new(Encoding.UTF8.GetBytes(json));
+
+            if (!JsonPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, true))
+                throw LogHelper.LogExceptionMessage(
+                    new JsonException(
+                        LogHelper.FormatInvariant(
+                        Microsoft.IdentityModel.Tokens.LogMessages.IDX11023,
+                        LogHelper.MarkAsNonPII("JsonTokenType.StartObject"),
+                        LogHelper.MarkAsNonPII(reader.TokenType),
+                        LogHelper.MarkAsNonPII(ClassName),
+                        LogHelper.MarkAsNonPII(reader.TokenStartIndex),
+                        LogHelper.MarkAsNonPII(reader.CurrentDepth),
+                        LogHelper.MarkAsNonPII(reader.BytesConsumed))));
+
+            while (true)
+            {
+                if (reader.TokenType == JsonTokenType.PropertyName)
+                {
+                    string propertyName = JsonPrimitives.ReadPropertyName(ref reader, ClassName, true);
+                    object obj;
+                    if (reader.TokenType == JsonTokenType.StartArray)
+                        obj = JsonPrimitives.ReadArrayOfObjects(ref reader, propertyName, ClassName);
+                    else
+                        obj = JsonPrimitives.ReadPropertyValueAsObject(ref reader, propertyName, ClassName);
+
+                     this[propertyName] = obj;
+                }
+                // We read a JsonTokenType.StartObject above, exiting and positioning reader at next token.
+                else if (JsonPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, true))
+                    break;
+                else if (!reader.Read())
+                    break;
+            }
         }
 
         /// <summary>
@@ -91,6 +118,20 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
         /// <param name="tokenType"> will be added as the value for the 'typ' claim in the header. If it is null or empty <see cref="JwtConstants.HeaderType"/> will be used as token type</param>
         public JwtHeader(SigningCredentials signingCredentials, IDictionary<string, string> outboundAlgorithmMap, string tokenType)
+            : this(signingCredentials, outboundAlgorithmMap, tokenType, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="JwtHeader"/>.
+        /// With the Header Parameters:
+        /// <para>{ { typ, JWT }, { alg, SigningCredentials.Algorithm } }</para>
+        /// </summary>
+        /// <param name="signingCredentials"><see cref="SigningCredentials"/> used when creating a JWS Compact JSON.</param>
+        /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
+        /// <param name="tokenType"> will be added as the value for the 'typ' claim in the header. If it is null or empty <see cref="JwtConstants.HeaderType"/> will be used as token type</param>
+        /// <param name="additionalInnerHeaderClaims">Defines the dictionary containing any custom header claims that need to be added to the inner JWT token header.</param>
+        public JwtHeader(SigningCredentials signingCredentials, IDictionary<string, string> outboundAlgorithmMap, string tokenType, IDictionary<string, object> additionalInnerHeaderClaims)
             : base(StringComparer.Ordinal)
         {
             if (signingCredentials == null)
@@ -115,13 +156,14 @@ namespace System.IdentityModel.Tokens.Jwt
             else
                 Typ = tokenType;
 
+            AddAdditionalClaims(additionalInnerHeaderClaims, false);
             SigningCredentials = signingCredentials;
         }
 
         /// <summary>
         /// Initializes a new instance of <see cref="JwtHeader"/>.
         /// With the Header Parameters:
-        /// <para>{ { typ, JWT }, { alg, SigningCredentials.Algorithm } }</para>
+        /// <para>{ { typ, JWT }, { alg, EncryptingCredentials.Algorithm } }</para>
         /// </summary>
         /// <param name="encryptingCredentials"><see cref="EncryptingCredentials"/> used when creating a JWS Compact JSON.</param>
         /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
@@ -134,13 +176,28 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <summary>
         /// Initializes a new instance of <see cref="JwtHeader"/>.
         /// With the Header Parameters:
-        /// <para>{ { typ, JWT }, { alg, SigningCredentials.Algorithm } }</para>
+        /// <para>{ { typ, JWT }, { alg, EncryptingCredentials.Algorithm } }</para>
         /// </summary>
         /// <param name="encryptingCredentials"><see cref="EncryptingCredentials"/> used when creating a JWS Compact JSON.</param>
         /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
         /// <param name="tokenType"> provides the token type</param>
         /// <exception cref="ArgumentNullException">If 'encryptingCredentials' is null.</exception>
         public JwtHeader(EncryptingCredentials encryptingCredentials, IDictionary<string, string> outboundAlgorithmMap, string tokenType)
+            : this(encryptingCredentials, outboundAlgorithmMap, tokenType, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="JwtHeader"/>.
+        /// With the Header Parameters:
+        /// <para>{ { typ, JWT }, { alg, EncryptingCredentials.Algorithm } }</para>
+        /// </summary>
+        /// <param name="encryptingCredentials"><see cref="EncryptingCredentials"/> used when creating a JWS Compact JSON.</param>
+        /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
+        /// <param name="tokenType"> provides the token type</param>
+        /// <param name="additionalHeaderClaims">Defines the dictionary containing any custom header claims that need to be added to the outer JWT token header.</param>
+        /// <exception cref="ArgumentNullException">If 'encryptingCredentials' is null.</exception>
+        public JwtHeader(EncryptingCredentials encryptingCredentials, IDictionary<string, string> outboundAlgorithmMap, string tokenType, IDictionary<string, object> additionalHeaderClaims)
             : base(StringComparer.Ordinal)
         {
             if (encryptingCredentials == null)
@@ -165,6 +222,7 @@ namespace System.IdentityModel.Tokens.Jwt
             else
                 Typ = tokenType;
 
+            AddAdditionalClaims(additionalHeaderClaims, encryptingCredentials.SetDefaultCtyClaim);
             EncryptingCredentials = encryptingCredentials;
         }
 
@@ -306,32 +364,22 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <param name="base64UrlEncodedJsonString">Base64url encoded JSON to deserialize.</param>
         /// <returns>An instance of <see cref="JwtHeader"/>.</returns>
-        /// <remarks>Use <see cref="JsonExtensions.Deserializer"/> to customize JSON serialization.</remarks>
         public static JwtHeader Base64UrlDeserialize(string base64UrlEncodedJsonString)
         {
-            return JsonExtensions.DeserializeJwtHeader(Base64UrlEncoder.Decode(base64UrlEncodedJsonString));
+            _ = base64UrlEncodedJsonString ?? throw LogHelper.LogArgumentNullException(nameof(base64UrlEncodedJsonString));
+
+            return new JwtHeader(Base64UrlEncoder.Decode(base64UrlEncodedJsonString));
         }
 
         /// <summary>
         /// Encodes this instance as Base64UrlEncoded JSON.
         /// </summary>
         /// <returns>Base64UrlEncoded JSON.</returns>
-        /// <remarks>Use <see cref="JsonExtensions.Serializer"/> to customize JSON serialization.</remarks>
         public virtual string Base64UrlEncode()
         {
             return Base64UrlEncoder.Encode(SerializeToJson());
         }
 
-        /// <summary>
-        /// Deserialzes JSON into a <see cref="JwtHeader"/> instance.
-        /// </summary>
-        /// <param name="jsonString"> The JSON to deserialize.</param>
-        /// <returns>An instance of <see cref="JwtHeader"/>.</returns>
-        /// <remarks>Use <see cref="JsonExtensions.Deserializer"/> to customize JSON serialization.</remarks>
-        public static JwtHeader Deserialize(string jsonString)
-        {
-            return JsonExtensions.DeserializeJwtHeader(jsonString);
-        }
         /// <summary>
         /// Gets a standard claim from the header.
         /// A standard claim is either a string or a value of another type serialized in JSON format.
@@ -348,20 +396,96 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (value is string str)
                     return str;
 
-                return JsonExtensions.SerializeToJson(value);
+                if (value is JsonElement jsonElement)
+                    return jsonElement.ToString();
+                else if (value is IList<string> list)
+                {
+                    JsonElement json = JsonPrimitives.CreateJsonElement(list);
+                    return json.ToString();
+                }
+                else if (value is IList<object> objectList)
+                {
+                    var stringList = new List<string>(objectList.Count);
+                    foreach (object item in objectList)
+                    {
+                        if (item is string strItem)
+                            stringList.Add(strItem);
+                        else
+                        {
+                            // It isn't safe to ToString() an arbitrary object, so we throw here.
+                            // We could end up with a string that doesn't represent the object's value, for example a collection type.
+                            throw LogHelper.LogExceptionMessage(
+                                new JsonException(
+                                    LogHelper.FormatInvariant(
+                                    Microsoft.IdentityModel.Tokens.LogMessages.IDX11026,
+                                    LogHelper.MarkAsNonPII(claimType),
+                                    LogHelper.MarkAsNonPII(item.GetType()))));
+                        }
+                    }
+                    JsonElement json = JsonPrimitives.CreateJsonElement(stringList);
+                    return json.ToString();
+                }
+
+                // TODO - review dev
+                return string.Empty;
             }
 
             return null;
         }
 
+        internal void AddAdditionalClaims(IDictionary<string, object> additionalHeaderClaims, bool setDefaultCtyClaim)
+        {
+            if (additionalHeaderClaims?.Count > 0 && additionalHeaderClaims.Keys.Intersect(DefaultHeaderParameters, StringComparer.OrdinalIgnoreCase).Any())
+                throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(LogMessages.IDX12742, nameof(additionalHeaderClaims), string.Join(", ", DefaultHeaderParameters))));
+
+            if (additionalHeaderClaims != null)
+            {
+                if (!additionalHeaderClaims.TryGetValue(JwtHeaderParameterNames.Cty, out _) && setDefaultCtyClaim)
+                    Cty = JwtConstants.HeaderType;
+
+                foreach (string claim in additionalHeaderClaims.Keys)
+                    this[claim] = additionalHeaderClaims[claim];
+            }
+            else if (setDefaultCtyClaim)
+                Cty = JwtConstants.HeaderType;
+        }
+
+        internal static IList<string> DefaultHeaderParameters = new List<string>()
+        {
+            JwtHeaderParameterNames.Alg,
+            JwtHeaderParameterNames.Kid,
+            JwtHeaderParameterNames.X5t,
+            JwtHeaderParameterNames.Enc,
+            JwtHeaderParameterNames.Zip
+        };
+
         /// <summary>
         /// Serializes this instance to JSON.
         /// </summary>
         /// <returns>This instance as JSON.</returns>
-        /// <remarks>Use <see cref="JsonExtensions.Serializer"/> to customize JSON serialization.</remarks>
         public virtual string SerializeToJson()
         {
-            return JsonExtensions.SerializeToJson(this as IDictionary<string, object>);
+            // TODO - common method for JwtPayload and JwtHeader
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                Utf8JsonWriter writer = null;
+
+                try
+                {
+                    writer = new Utf8JsonWriter(memoryStream, new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
+                    writer.WriteStartObject();
+
+                    JsonPrimitives.WriteObjects(ref writer, this);
+
+                    writer.WriteEndObject();
+                    writer.Flush();
+                    return Encoding.UTF8.GetString(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
+                }
+                finally
+                {
+                    writer?.Dispose();
+                }
+            }
         }
     }
 }

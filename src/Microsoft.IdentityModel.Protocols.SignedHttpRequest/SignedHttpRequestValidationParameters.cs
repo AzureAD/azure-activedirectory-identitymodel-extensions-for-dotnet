@@ -1,35 +1,12 @@
-﻿//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
@@ -106,6 +83,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     public class SignedHttpRequestValidationParameters
     {
         private TimeSpan _signedHttpRequestLifetime = DefaultSignedHttpRequestLifetime;
+        private TokenHandler _tokenHandler = new JsonWebTokenHandler();
+        private ICollection<string> _allowedDomainsForJkuRetrieval;
 
         /// <summary>
         /// Gets or sets a value indicating whether the unsigned query parameters are accepted or not.
@@ -118,6 +97,26 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </summary>
         /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-5.1</remarks>
         public bool AcceptUnsignedHeaders { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether PoP key can be resolved from 'jku' claim.
+        /// If you set this property to true, you must set values in <see cref="AllowedDomainsForJkuRetrieval"/>.
+        /// </summary>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7800#section-3.5</remarks>
+        public bool AllowResolvingPopKeyFromJku { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets a list of allowed domains for 'jku' claim retrieval.
+        /// The domains are not directly compared with the 'jku' claim. Allowed domain would be
+        /// deemed valid if the host specified in the 'jku' claim ends with the domain value.
+        /// </summary>
+        /// <remarks>
+        /// Domains should be provided in the following format:
+        /// "contoso.com"
+        /// "abc.fabrikam.com"
+        /// </remarks>
+        public ICollection<string> AllowedDomainsForJkuRetrieval => _allowedDomainsForJkuRetrieval ??
+            Interlocked.CompareExchange(ref _allowedDomainsForJkuRetrieval, new List<string>(), null) ?? _allowedDomainsForJkuRetrieval;
 
         /// <summary>
         /// Gets or sets the claims to validate if present.
@@ -201,6 +200,22 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// Gets or sets the <see cref="SignatureValidatorAsync"/> delegate.
         /// </summary>
         public SignatureValidatorAsync SignatureValidatorAsync { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="TokenHandler"/> to AccessToken inside the SignedHttpRequest.
+        /// </summary>
+        public TokenHandler TokenHandler
+        {
+            get
+            {
+                return _tokenHandler;
+            }
+
+            set
+            {
+                _tokenHandler = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
+            }
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="SignedHttpRequestClaimTypes.Ts"/> claim should be validated or not.

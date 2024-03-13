@@ -1,29 +1,5 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Xml;
@@ -44,6 +20,47 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
             try
             {
                 var depth = theoryData.DelegatingReader.Depth;
+
+                if (!theoryData.First)
+                {
+                    Assert.Equal(theoryData.DelegatingReader.InnerReaderPublic.Depth, theoryData.DelegatingReader.Depth);
+                    Assert.Equal(theoryData.DelegatingReader.InnerReaderPublic.Value, theoryData.DelegatingReader.Value);
+                    Assert.Equal(theoryData.DelegatingReader.InnerReaderPublic.Name, theoryData.DelegatingReader.Name);
+                    Assert.Equal(theoryData.DelegatingReader.InnerReaderPublic.NamespaceURI, theoryData.DelegatingReader.NamespaceURI);
+                    Assert.Equal(theoryData.DelegatingReader.InnerReaderPublic.AttributeCount, theoryData.DelegatingReader.AttributeCount);
+                }
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Theory, MemberData(nameof(ReadPartialXmlWithUniqueIdTheoryData))]
+        public void ReadPartialXml(DelegatingXmlDictionaryReaderTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ReadXml", theoryData);
+            try
+            {
+                Assert.Equal(theoryData.DelegatingReader.InnerReaderPublic.Depth, theoryData.DelegatingReader.Depth);
+                Assert.Equal(theoryData.DelegatingReader.InnerReaderPublic.Value, theoryData.DelegatingReader.Value);
+                Assert.Equal(theoryData.DelegatingReader.InnerReaderPublic.Name, theoryData.DelegatingReader.Name);
+                Assert.Equal(theoryData.DelegatingReader.InnerReaderPublic.NamespaceURI, theoryData.DelegatingReader.NamespaceURI);
+                Assert.Equal(theoryData.DelegatingReader.InnerReaderPublic.AttributeCount, theoryData.DelegatingReader.AttributeCount);
+
+                theoryData.DelegatingReader.InnerReaderPublic.MoveToContent();
+                theoryData.DelegatingReader.MoveToContent();
+
+                theoryData.DelegatingReader.InnerReaderPublic.MoveToAttribute("URI");
+                theoryData.DelegatingReader.MoveToAttribute("URI");
+
+                Assert.Equal(theoryData.DelegatingReader.InnerReaderPublic.ReadContentAsUniqueId(),
+                    theoryData.DelegatingReader.ReadContentAsUniqueId());
+
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -74,6 +91,34 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
                             InnerReaderPublic = XmlUtilities.CreateDictionaryReader(Default.OuterXml)
                         },
                         TestId = "InnerReader-Set"
+                    }
+                };
+            }
+        }
+
+        public static TheoryData<DelegatingXmlDictionaryReaderTheoryData> ReadPartialXmlWithUniqueIdTheoryData
+        {
+            get
+            {
+                return new TheoryData<DelegatingXmlDictionaryReaderTheoryData>
+                {
+                    new DelegatingXmlDictionaryReaderTheoryData
+                    {
+                        DelegatingReader = new DelegatingXmlDictionaryReaderPublic
+                        {
+                            InnerReaderPublic = XmlUtilities.CreateDictionaryReader(Default.OuterXml)
+                        },
+                        First = true,
+                        ExpectedException = ExpectedException.XmlException(inner: typeof(FormatException)),
+                        TestId = "InnerReader-FullXml"
+                    },
+                    new DelegatingXmlDictionaryReaderTheoryData
+                    {
+                        DelegatingReader = new DelegatingXmlDictionaryReaderPublic
+                        {
+                            InnerReaderPublic = XmlUtilities.CreateDictionaryReader("<Elemnt URI=\"uuid-88d1a312-e27e-4bb8-a69f-e4fd295daf04\" />")
+                        },
+                        TestId = "InnerReader-PartialXmlWithUri"
                     }
                 };
             }

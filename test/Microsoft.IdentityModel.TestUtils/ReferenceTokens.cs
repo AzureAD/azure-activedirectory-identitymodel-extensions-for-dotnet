@@ -1,35 +1,18 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using Newtonsoft.Json.Linq;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.TestUtils
 {
     public class ReferenceTokens
     {
-#region Saml2 Token
+        #region Saml2 Token
         public static string AADJWKS = @"{""keys"":[{""kty"":""RSA"",""use"":""sig"",""kid"":""a3QN0BZS7s4nN-BdrjbF0Y_LdMM"",""x5t"":""a3QN0BZS7s4nN-BdrjbF0Y_LdMM"",""n"":""wESLNTU4mazfVL-vLuJq_8ggJhW1DYxE-EeFiSccia1TTeyBWTVfG5vgYPtHXmL1RYgZvNhIYppS0ZT2U_nnCt8ukONCMSBpeLh8TqZxkHBr2pzbaKzbcHpHrsoxxXLHINZ6L4g_ewqYJwxfshuyD65tlSm8obFdnbtiCoVM-oJPbOcPsrzVgp_L5JWDe5bp6lbXXjJnMKVNCVqum1i4Taa6PGNm3HtlSXBz0CFWLwJ6IvAY7XDNOal3-5y2md6vqhzffmu90mKQ2ZzVwUoIr7aKt7DVuBQke434skDTLmJVcq-iOIpnYiLtApefX1KyDUWgnfHY1YDTrBzQKeu4uw"",""e"":""AQAB"",""x5c"":[""MIIDBTCCAe2gAwIBAgIQY4RNIR0dX6dBZggnkhCRoDANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE3MDIxMzAwMDAwMFoXDTE5MDIxNDAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMBEizU1OJms31S/ry7iav/IICYVtQ2MRPhHhYknHImtU03sgVk1Xxub4GD7R15i9UWIGbzYSGKaUtGU9lP55wrfLpDjQjEgaXi4fE6mcZBwa9qc22is23B6R67KMcVyxyDWei+IP3sKmCcMX7Ibsg+ubZUpvKGxXZ27YgqFTPqCT2znD7K81YKfy+SVg3uW6epW114yZzClTQlarptYuE2mujxjZtx7ZUlwc9AhVi8CeiLwGO1wzTmpd/uctpner6oc335rvdJikNmc1cFKCK+2irew1bgUJHuN+LJA0y5iVXKvojiKZ2Ii7QKXn19Ssg1FoJ3x2NWA06wc0CnruLsCAwEAAaMhMB8wHQYDVR0OBBYEFDAr/HCMaGqmcDJa5oualVdWAEBEMA0GCSqGSIb3DQEBCwUAA4IBAQAiUke5mA86R/X4visjceUlv5jVzCn/SIq6Gm9/wCqtSxYvifRXxwNpQTOyvHhrY/IJLRUp2g9/fDELYd65t9Dp+N8SznhfB6/Cl7P7FRo99rIlj/q7JXa8UB/vLJPDlr+NREvAkMwUs1sDhL3kSuNBoxrbLC5Jo4es+juQLXd9HcRraE4U3UZVhUS2xqjFOfaGsCbJEqqkjihssruofaxdKT1CPzPMANfREFJznNzkpJt4H0aMDgVzq69NxZ7t1JiIuc43xRjeiixQMRGMi1mAB75fTyfFJ/rWQ5J/9kh0HMZVtHsqICBF1tHMTMIK5rwoweY0cuCIpN7A/zMOQtoD""]},{""kty"":""RSA"",""use"":""sig"",""kid"":""2S4SCVGs8Sg9LS6AqLIq6DpW-g8"",""x5t"":""2S4SCVGs8Sg9LS6AqLIq6DpW-g8"",""n"":""oZ-QQrNuB4ei9ATYrT61ebPtvwwYWnsrTpp4ISSp6niZYb92XM0oUTNgqd_C1vGN8J-y9wCbaJWkpBf46CjdZehrqczPhzhHau8WcRXocSB1u_tuZhv1ooAZ4bAcy79UkeLiG60HkuTNJJC8CfaTp1R97szBhuk0Vz5yt4r5SpfewIlBCnZUYwkDS172H9WapQu-3P2Qjh0l-JLyCkdrhvizZUk0atq5_AIDKRU-A0pRGc-EZhUL0LqUMz6c6M2s_4GnQaScv44A5iZUDD15B6e8Apb2yARohkWmOnmRcTVfes8EkfxjzZEzm3cNkvP0ogILyISHKlkzy2OmlU6iXw"",""e"":""AQAB"",""x5c"":[""MIIDKDCCAhCgAwIBAgIQBHJvVNxP1oZO4HYKh+rypDANBgkqhkiG9w0BAQsFADAjMSEwHwYDVQQDExhsb2dpbi5taWNyb3NvZnRvbmxpbmUudXMwHhcNMTYxMTE2MDgwMDAwWhcNMTgxMTE2MDgwMDAwWjAjMSEwHwYDVQQDExhsb2dpbi5taWNyb3NvZnRvbmxpbmUudXMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQChn5BCs24Hh6L0BNitPrV5s+2/DBhaeytOmnghJKnqeJlhv3ZczShRM2Cp38LW8Y3wn7L3AJtolaSkF/joKN1l6GupzM+HOEdq7xZxFehxIHW7+25mG/WigBnhsBzLv1SR4uIbrQeS5M0kkLwJ9pOnVH3uzMGG6TRXPnK3ivlKl97AiUEKdlRjCQNLXvYf1ZqlC77c/ZCOHSX4kvIKR2uG+LNlSTRq2rn8AgMpFT4DSlEZz4RmFQvQupQzPpzozaz/gadBpJy/jgDmJlQMPXkHp7wClvbIBGiGRaY6eZFxNV96zwSR/GPNkTObdw2S8/SiAgvIhIcqWTPLY6aVTqJfAgMBAAGjWDBWMFQGA1UdAQRNMEuAEDUj0BrjP0RTbmoRPTRMY3WhJTAjMSEwHwYDVQQDExhsb2dpbi5taWNyb3NvZnRvbmxpbmUudXOCEARyb1TcT9aGTuB2Cofq8qQwDQYJKoZIhvcNAQELBQADggEBAGnLhDHVz2gLDiu9L34V3ro/6xZDiSWhGyHcGqky7UlzQH3pT5so8iF5P0WzYqVtogPsyC2LPJYSTt2vmQugD4xlu/wbvMFLcV0hmNoTKCF1QTVtEQiAiy0Aq+eoF7Al5fV1S3Sune0uQHimuUFHCmUuF190MLcHcdWnPAmzIc8fv7quRUUsExXmxSX2ktUYQXzqFyIOSnDCuWFm6tpfK5JXS8fW5bpqTlrysXXz/OW/8NFGq/alfjrya4ojrOYLpunGriEtNPwK7hxj1AlCYEWaRHRXaUIW1ByoSff/6Y6+ZhXPUe0cDlNRt/qIz5aflwO7+W8baTS4O8m/icu7ItE=""]}]}";
 
         public static string Saml2Token_InclusiveNamespaces_WithoutPrefix =
@@ -170,9 +153,9 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
-#endregion
+        #endregion
 
-#region Saml Token
+        #region Saml Token
         public static string SamlToken_MissingMajorVersion =
             @"<Assertion MinorVersion=""1"" AssertionID = ""_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2"" Issuer=""http://Default.Issuer.com"" IssueInstant=""2017-03-20T15:52:31.957Z"" xmlns=""urn:oasis:names:tc:SAML:1.0:assertion""><Conditions NotBefore=""2017-03-20T15:47:31.957Z"" NotOnOrAfter=""2017-03-20T16:47:31.957Z""><AudienceRestrictionCondition><Audience>spn:fe78e0b4-6fe7-47e6-812c-fb75cee266a4</Audience></AudienceRestrictionCondition></Conditions><AttributeStatement><Subject /><Attribute Name=""http://schemas.microsoft.com/identity/claims/tenantid""><AttributeValue>add29489-7269-41f4-8841-b63c95564420</AttributeValue></Attribute><Attribute Name=""http://schemas.microsoft.com/identity/claims/objectidentifier""><AttributeValue>d1ad9ce7-b322-4221-ab74-1e1011e1bbcb</AttributeValue></Attribute><Attribute Name=""http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name""><AttributeValue>User1@Cyrano.onmicrosoft.com</AttributeValue></Attribute><Attribute Name=""http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname""><AttributeValue>1</AttributeValue></Attribute><Attribute Name=""http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname""><AttributeValue>User</AttributeValue></Attribute><Attribute Name=""http://schemas.microsoft.com/identity/claims/displayname""><AttributeValue>User1</AttributeValue></Attribute><Attribute Name=""http://schemas.microsoft.com/identity/claims/identityprovider""><AttributeValue>https://sts.windows.net/add29489-7269-41f4-8841-b63c95564420/</AttributeValue></Attribute></AttributeStatement><Signature xmlns=""http://www.w3.org/2000/09/xmldsig#""><SignedInfo><CanonicalizationMethod Algorithm=""http://www.w3.org/2001/10/xml-exc-c14n#"" /><SignatureMethod Algorithm=""http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"" /><Reference URI=""#_d60bd9ed-8aab-40c8-ba5f-f548c3401ae2""><Transforms><Transform Algorithm=""http://www.w3.org/2000/09/xmldsig#enveloped-signature"" /><Transform Algorithm=""http://www.w3.org/2001/10/xml-exc-c14n#"" /></Transforms><DigestMethod Algorithm=""http://www.w3.org/2001/04/xmlenc#sha256"" /><DigestValue>Ytfkc60mLe1Zgu7TBQpMv8nJ1SVxT0ZjsFHaFqSB2VI=</DigestValue></Reference></SignedInfo><SignatureValue>NRV7REVbDRflg616G6gYg0fAGTEw8BhtyPzqaU+kPQI35S1vpgt12VlQ57PkY7Rs0Jucx9npno+bQVMKN2DNhhnzs9qoNY2V3TcdJCcwaMexinHoFXHA0+J6+vR3RWTXhX+iAnfudtKThqbh/mECRLrjyTdy6L+qNkP7sALCWrSVwJVRmzkTOUF8zG4AKY9dQziec94Zv4S7G3cFgj/i7ok2DfBi7AEMCu1lh3dsQAMDeCvt7binhIH2D2ad3iCfYyifDGJ2ncn9hIyxrEiBdS8hZzWijcLs6+HQhVaz9yhZL9u/ZxSRaisXClMdqrLFjUghJ82sVfgQdp7SF165+Q==</SignatureValue><KeyInfo><X509Data><X509Certificate>MIIDBTCCAe2gAwIBAgIQY4RNIR0dX6dBZggnkhCRoDANBgkqhkiG9w0BAQsFADAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MB4XDTE3MDIxMzAwMDAwMFoXDTE5MDIxNDAwMDAwMFowLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMBEizU1OJms31S/ry7iav/IICYVtQ2MRPhHhYknHImtU03sgVk1Xxub4GD7R15i9UWIGbzYSGKaUtGU9lP55wrfLpDjQjEgaXi4fE6mcZBwa9qc22is23B6R67KMcVyxyDWei+IP3sKmCcMX7Ibsg+ubZUpvKGxXZ27YgqFTPqCT2znD7K81YKfy+SVg3uW6epW114yZzClTQlarptYuE2mujxjZtx7ZUlwc9AhVi8CeiLwGO1wzTmpd/uctpner6oc335rvdJikNmc1cFKCK+2irew1bgUJHuN+LJA0y5iVXKvojiKZ2Ii7QKXn19Ssg1FoJ3x2NWA06wc0CnruLsCAwEAAaMhMB8wHQYDVR0OBBYEFDAr/HCMaGqmcDJa5oualVdWAEBEMA0GCSqGSIb3DQEBCwUAA4IBAQAiUke5mA86R/X4visjceUlv5jVzCn/SIq6Gm9/wCqtSxYvifRXxwNpQTOyvHhrY/IJLRUp2g9/fDELYd65t9Dp+N8SznhfB6/Cl7P7FRo99rIlj/q7JXa8UB/vLJPDlr+NREvAkMwUs1sDhL3kSuNBoxrbLC5Jo4es+juQLXd9HcRraE4U3UZVhUS2xqjFOfaGsCbJEqqkjihssruofaxdKT1CPzPMANfREFJznNzkpJt4H0aMDgVzq69NxZ7t1JiIuc43xRjeiixQMRGMi1mAB75fTyfFJ/rWQ5J/9kh0HMZVtHsqICBF1tHMTMIK5rwoweY0cuCIpN7A/zMOQtoD</X509Certificate></X509Data></KeyInfo></Signature></Assertion>";
 
@@ -241,7 +224,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static string SamlToken_SignatureMissing =
             @"<Assertion AssertionID=""_fa5e974c-e3e1-4fb5-9f0f-65efd861920c"" MajorVersion=""1"" MinorVersion=""1"" Issuer=""http://Default.Issuer.com"" IssueInstant=""2017-08-25T21:17:29.561Z"" xmlns=""urn:oasis:names:tc:SAML:1.0:assertion""><Conditions NotBefore=""2017-08-25T21:17:29.554Z"" NotOnOrAfter=""2017-08-26T21:17:29.554Z""><saml:AudienceRestrictionCondition xmlns:saml=""urn:oasis:names:tc:SAML:1.0:assertion""><saml:Audience>http://Default.Audience.com</saml:Audience></saml:AudienceRestrictionCondition></Conditions><AttributeStatement><Subject><NameIdentifier>Bob</NameIdentifier><SubjectConfirmation><ConfirmationMethod>urn:oasis:names:tc:SAML:1.0:cm:bearer</ConfirmationMethod></SubjectConfirmation></Subject><Attribute AttributeName=""country"" AttributeNamespace=""http://schemas.xmlsoap.org/ws/2005/05/identity/claims"" OriginalIssuer=""http://Default.Issuer.com""><AttributeValue>USA</AttributeValue></Attribute><Attribute AttributeName=""emailaddress"" AttributeNamespace=""http://schemas.xmlsoap.org/ws/2005/05/identity/claims"" OriginalIssuer=""http://Default.Issuer.com""><AttributeValue>Bob@contoso.com</AttributeValue></Attribute><Attribute AttributeName=""givenname"" AttributeNamespace=""http://schemas.xmlsoap.org/ws/2005/05/identity/claims"" OriginalIssuer=""http://Default.Issuer.com""><AttributeValue>Bob</AttributeValue></Attribute><Attribute AttributeName=""homephone"" AttributeNamespace=""http://schemas.xmlsoap.org/ws/2005/05/identity/claims"" OriginalIssuer=""http://Default.Issuer.com""><AttributeValue>555.1212</AttributeValue></Attribute><Attribute AttributeName=""role"" AttributeNamespace=""http://schemas.microsoft.com/ws/2008/06/identity/claims"" OriginalIssuer=""http://Default.Issuer.com""><AttributeValue>Developer</AttributeValue><AttributeValue>Sales</AttributeValue></Attribute><Attribute AttributeName=""name"" AttributeNamespace=""http://schemas.xmlsoap.org/ws/2005/05/identity/claims"" OriginalIssuer=""http://Default.Issuer.com""><AttributeValue>Jean-Sébastien</AttributeValue></Attribute></AttributeStatement></Assertion>";
-    
+
         public static string SamlToken_Formated
         {
             get
@@ -314,9 +297,9 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
-#endregion
+        #endregion
 
-#region JWE compression tokens
+        #region JWE compression tokens
         /**
          * All the following tokens are signed with KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2, and encrypted with
          * EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.Aes256CbcHmacSha512)
@@ -334,40 +317,44 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static string JWECompressionTokenWithCustomAlgorithm = "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZDQkMtSFM1MTIiLCJraWQiOiJBNkFBMUU2QTY2RjY3Qjk2MTVDRDFFQkZBRUExNjk4ODJBQzU2NjBDIiwidHlwIjoiSldUIiwiemlwIjoiTXlBbGdvcml0aG0ifQ.cM5I0koddmiWcUrjwwGXNf-o-FyL6fKHtfW7YPxLgMxtMm4RXQJB_tjh3FJ5J26V5WUE0V4G1FOGYBIaJYGAFBN2MgXdbkWlCA8bGLTOHm6TZBtuEIikZb8_Uv7tfE8_5VHgeBN1hBu0OsYaEeU6ai7lVH7bE-u8xro_glChjO6DZKrCG6Yf96mhcyMF6WO_bDBlHIeFITvAhfy8d9XwCFVlsLMfQQimZ8QNMC-KBI2ueOp0xCzGOjQhwllaWXbOQb9HFO7AHO46-6E4_z9r6cJA1CAMbABG6lmanae3CE3h11YhdnAxsGl3b6jA0WGJSwQ6J9eIEb-ISuQSaFUyXg.quBNboK_nzmnnPPbPkp7Tw.yEXS_p_qHxfFzGs8a6lutTdJMZob4tA5Zb3PMMOfS9yPM0a_Zq3N-g2cNB-giieDXeOwAe5dDOIXIVxDX3B1Wb-GQoAfQ7EhQsV8FhdUTSNa9iV8rDbUGgMnvYI7aCGwP5uVRkyZlvC9YfTTkklTwyYYso6DEvoqFqoCow9wx8_t0fljGV1ZeCXpGAMpLOJgbSHlar6xxpQ9Wbf0IR4EyUaTvk6v51uRGpLwCpbPXXO--8mmWdRmztOR53zElLkQhDyq6brlrDzWJQ-IS5-JOCO--hvAVdsuY7feDKo7tYW0bErYIy5GLvNIxY0VgqJWkUPbtNXSoPhLNG-ZHuu9m0x9PHrTA-wZV8Lo1DVtxer17WHoJr15RD9o6L0zszTEXH0MEJFwiFr_mrz4lsmoW-WuLP4MydF-Fzt8x5s_ZsXXbdz9hdT0cPMIm-Ed0__aATp_FxEcp87dH_ViNVIC5NiePI_chW-2SS8VYgGOWWg262IeqnsR1G6R-7Ey3QgZnboixKYV_y0-497mJEYBA6MkXrhdsofOR-Gy0Y-WlSgvV314pbZT-cF62a5ZOT37NrsJ3_3P0oo08MBfBEvJI3iRqiZbNGlHpPW0Pg53GYtbaGWhFN6sx3Tg4EUgUWse9rzqpQYw_7Sf8wy3knUN1Q5PJdPWHIS5QJBz1ts-jPge3AqYtbltzJgDaYsiGVvVq3UM33G52jHmU83cHdcZPTdJw8jSSr2DBdbB_Eo2jfzmIxezN7EYRtMUIBSNuh2-PjHRxf_gW_z12UAeOBw09aelcHH2cUaHZvIHxoNxQHn09rPlMKgF7AxOaKiOZiIqznQTzGtgFCzbCIf7AohkMOuzjbOwvdKg0blHIIVWJbFhmEDustZKAeQ6PoruFjTmFt2AZ7X5Aqxwqed9ubjJVqLV-RMf6muA9Y_mOCBNaDc.0UOmt5CyGX9IylnQAPcc2UsbyexhYkcchrI6ubgZEbk";
 
-#endregion
+        #endregion
 
-#region JWE tokens
+        #region JWE tokens
         /**
          * The following tokens were created using <see cref="Default.PayloadDictionary"/>.
          **/
         // This token was signed with Default.SymmetricSigningCredentials and encryted with Default.SymmetricEncryptingCredentials.
         // This token includes two additional header claims:
         // { "int", 123 } and { "string", "string" }.
-        public static string JWEDirectEcryptionWithAdditionalHeaderClaims = "eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjoiRGVmYXVsdFN5bW1ldHJpY1NlY3VyaXR5S2V5XzI1NiIsInR5cCI6IkpXVCIsImludCI6MTIzLCJzdHJpbmciOiJzdHJpbmcifQ..Jph7tSiacUx4bdAlUZE49g.sOsePYxZ44SXyynUeLwvlw3Q0SioyNtHFy1AdYEuk4YC6U_zhAFC5jRPQf4wymjB7WMuqHLkj0uv9f6hRtvefWJA-yF9UOUUaBln5u6wtliotiGDh0JcyLpOLjuZwqiFj0rLe-6VoowG_1hbXmYrpb8jtvu23vib_cx-hj3vjAUiIgD6Gay7xgh9yPoxzbsEa4enzOh7Cgc-Zlv1GyC4B4Pj4AZ_5daabz62YGsu2DyffRqA-BNezICoYErw_vAs4SvhvzaE_b4_N5IQ5cwlGeNAVTPGabkYCu2D6oMGF2QDaebm06Fpr79kFni35sz3CERWzHt6sGSQT3sxCm0e7ORtM11d0O34oLmkbUdrBZaB047jv4aACK2MCdOWwvwNUSc5jE3rInSGzcKGistq_mmIBTWe0pZqo6k3cNJ_NTz6WL_r48f9p9rAe5wAR9ZfY_o3AlwHhKfl-Mhio5lfANKk5PylQcsOqWxBKrdbXznzQZ9eyluDpxNxdp62JU0jYvkUW2rjfmku-yh5A5qcgnMzqyDcunS-My8tbnyJ8XcEiEbq89cMrbe-4BGy1bha.djjhS_qNCs4dICnfw7676A";
+        public static string JWEDirectEcryptionWithAdditionalHeaderClaims = "eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjoiRGVmYXVsdFN5bW1ldHJpY1NlY3VyaXR5S2V5XzI1NiIsInR5cCI6IkpXVCIsImludCI6MTIzLCJzdHJpbmciOiJzdHJpbmciLCJjdHkiOiJKV1QifQ..C-8-f1uCz2JnM2V5034vVQ.oRaUEE3FPy4H72hicODQkK7m_0XjUOug502Uvds4DeMaR5EBxpyP8zz1_YXOLu736LBpSqS4Uy3MAxqBcUH3i7gMk-G53_MtM0voQxDvW9bofBlxzCsGC8cfz0wrrFskaU0rO_30N8YurOHsqCTCUguPqgrY18U1Z12VyBw-bxeKhERsT4uz-i8D0ZN0u64Ls1Z4IFTiQwpv7ruuTFVxXQOdSqW-fru6YIatqmOdXcP6ARgSB6FkDazi_LPwKQXDsp7NTKubyKfSIE2imGBisS78pgAS0edzs76Hk0r7zfkBBYF5PybSB33lSlPvOM0TViDVYPjEbrKec_UmvzzO9Ij1CcaYW5RR9F4c7n6bszdp1e0hIXvSg9YoxZA87saG2n3VBrKbXfwHhKqqPVt_Z2WSTfHkZ-XWQDd8sJEwVxGA3M7NkqLthusdy7HsbiXkQfkRZkNkhPD0Iw0tANxcJfCYgTU9RUTDAxt1RfiCJhxk_H_6xpweHhRDDACRnWd9lYn_A-NB1gIqCe0oI31WzqmHNLSRobb2FY1VSyjpHbCMn07HdhidJrDiYw08NO9Z.ZyVjUgWJd7B1fR4ftWPe0w";
 
         // This token was signed with Default.SymmetricSigningCredentials and encryted with Default.SymmetricEncryptingCredentials.
         // The value for the 'typ' header claim in this token has been changed to "TEST".
-        public static string JWEDirectEcryptionWithDifferentTyp = "eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjoiRGVmYXVsdFN5bW1ldHJpY1NlY3VyaXR5S2V5XzI1NiIsInR5cCI6IlRFU1QifQ..xJEJ2ClTfUIvjzh5wtS-ow.N-0XvCnAcjp5C59LiB7G3EO0XL7S9ILsDMgwqRWQ0bXoBgKM9GUhCRByft24iORAD5NOKBvs7gt3kbN6Yek5q7I3fRYUZBJlcA7tLhmdl3-XU-N3H9Z0du7NwOZPlytqNJByF0sTsz5MJDUo2BvBZ7tb0g7G8240eGnPBBOTyA0q6uEYQJSoxUKL-_-rkwEudyikTgVrlFOCTtaZZDUXPrT4406enNlXwel6PpYnZq_hxoAzS1tfZZpaW0lpg-55o4d6OiXu143EUq-JXMUDieln1AoKOtsBXM25JtXzo2QphP5PzM-knebR4PusOVupm44MTGZRjz0Upmj2DKR6wblO-Hc3U3LJIRR9FFSmAHew4QFKbC7I1KKvbZ0UMuHulnZR9DiE340_N2RKn0Odo4goXyUDLGcUolF5JthXE8ljIixbmbDgfalbFTlqbsLtbvzbZRRjspYACuB7kVkh-K6fyNLuawvkC_IgTKjFxAWDnFVaPirf8kYm-ckbyZmEhDyvMtVeREjTXV6jWW_mynwCHy78-cst8PAVSnsdQkLCYntAf-ZNhxLSTC9WlE2k.prYwXw1nKcjTCUrko6HF7Q";
+        public static string JWEDirectEcryptionWithDifferentTyp = "eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjoiRGVmYXVsdFN5bW1ldHJpY1NlY3VyaXR5S2V5XzI1NiIsInR5cCI6IlRFU1QiLCJjdHkiOiJKV1QifQ..vFA0IavkWL8XJVXez8dShg.dsiA6xvBzi1M4PZD8-qXHi7NKMCl-3HDyFbVTGv7JDwg7Bd7x5MUo2qL0tQgf4gLIf_a1EBpSquAM6YyKjvEbNcqoM8dopw_J0s2sPn2f5BPyZjI7IbysV7GVEYG8sESPy9xKOo4mUM2nmWrOa5Ua4Hm_VfAATnUe1ujx3XmuiZG3zFWK7s5cMOG7qVqOurLpmb4wQplaKqjSETr0qkSQ9BSGtIsziy3jphJkAaPwwXckcGskOUHFLoDeW3_M21uGHnBGqN95gBsIy6BCgv-Qs1yJTcFDUrJtFDn_TGNkyxhwjiMDjZMaLQ4ZXxEH-B32GDDNcG8VeBGJvgRSBbnXBEx4u1zyOPZAAFl5RPPrGI3GPCgcbORWf91nz6ewDqc4j8qwL6PpqTGjmqVkRzTvV6oMaJ9aOmCy__8U4wntn8A2nwWinfzCjb9QXL4ozSPCQilcebW034N_P3zyFZWq17xgG1u4eCVOjnib7Il2nCX0HMrOv49Hs8fFxdqy-xVzXqwJizGRswjYMVBpK7bHD7WFZtA10oQQ--ypoSF4uCdQOAyWq4pfH3vX6gCjpPG.WyrC70H_YtZFmyCSiU4IAQ";
 
         // This token was signed with Default.SymmetricSigningCredentials and encryted with Default.SymmetricEncryptingCredentials.
         // The inner JWT is unsigned and this token includes two additional header claims:
         // { "int", 123 } and { "string", "string" }.
-        public static string JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims = "eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjoiRGVmYXVsdFN5bW1ldHJpY1NlY3VyaXR5S2V5XzI1NiIsInR5cCI6IkpXVCIsImludCI6MTIzLCJzdHJpbmciOiJzdHJpbmcifQ..Z1hcrcpQf5jXayinT3rF-w.znWveolvSaum8K_PywIM52ByvxW0qbXd2cOMxqb-aHEiawZoCeXais4AnIAN3C4uVRdBQ38HfHq2QeMsnGSO1N1BS5baIXB_5bs3-WHo2CMCf30pjDCSNt9wDMCSUuwf4oYZ8yk55ibl0rnebWJ1K8NkpXRrIpALnkixsyG3tLAVM5tI8d3zP52IslmvSL-LpReX0MXp96odi5NmQm9G7C_iiEE7QMbmX6DcCJMPCVEhpBeC7SfrPW6r2GMjaRfp451lE0uTEY7g70nJO44uOMg79DNN6RgPcj57tF_UH-G_RudS94Mk7x-ojMlZk3KyOqTIkoF8QxmavapKNcuEBEJlLIw_B0ljTDff5fMdLys.5dLQqOaiOSkVOO2BwqLShw";
+        public static string JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims = "eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjoiRGVmYXVsdFN5bW1ldHJpY1NlY3VyaXR5S2V5XzI1NiIsInR5cCI6IkpXVCIsImludCI6MTIzLCJzdHJpbmciOiJzdHJpbmciLCJjdHkiOiJKV1QifQ..IaH2b5aXOGuDnI04NUt74Q.QwNrngDbHNY-CE_7QghcRuiAT5GwyGC5QwJdVzbW2kQ4HWwKOpqZkPmI49Cs6Ha537aVVQmanC28J3Zzldser5e1xJ6QT6IeeF0y2y9d4uM1ljT997tu9sfhAm8CmMOyw_FC5WIJrE7xUmvyBisSCP2xsFxItaoJcl9IlGdM9Av4bNp3S5ogJLps-KhWsNQ_i23yrw5HXYTWCRye4QfrkoraO3MbPU8_Oqo5CzJOej9qv7Nd7nJa_u7DDL80oiec2h3Ou0022IJ3nfPitOoUJ2r8yS1JA9w9xC7GEsPcvEQi4E978wjLHRR3KtEY5Mu8aGpUTtyMJKiRBkMQVq9C0fLQbOsIh0yDL6oIhUfOHhY.Y60oz4iBJvvZuItFrNlFcw";
 
         // This token was signed with Default.SymmetricSigningCredentials and encrypted with EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256).
         // This token includes two additional header claims:
         // { "int", 123 } and { "string", "string" }.
-        public static string JWEKeyWrappingWithAdditionalHeaderClaims = "eyJhbGciOiJSU0ExXzUiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjoiUnNhU2VjdXJpdHlLZXlfMjA0OCIsInR5cCI6IkpXVCIsImludCI6MTIzLCJzdHJpbmciOiJzdHJpbmcifQ.sw1A_ikOQlAroR_AAHGoe2vUA7ps7vQo8ZcNkprBaLSf0YES6hnzml0XeJ0gYjOumNAqZNxpWE7Jre1BqiK-o1uINjRdoOlgF62S-2Y2PSPlU202jzJhBo9OQMJzgpKewMFtR0poLtXvzgWpwI-scETh0IrrQ81zhwx2ZmaFaeJVTesZTNT_cE-MFE_xTDIv_sklpbBtcqdNdOUOSgPxSrsd1p2TG55w2FP-EvqoESF-F7agyK_szFaRCICIgz82VUUkp0Z1t6QDgNUw-lGpDV25w1REmT0y_I8j2a-9WlycVUwvtNXQxTZ5LeGyug9xAG_stomneYwqOwQXIOS04w.-OEPy1izi1LaiDQ6UmWzPA.phUKIJBqBdjTplTwZk3xI8GP9qN5TqKSPz5p5ix-GnAG4RaZg_XvsLlX6yFh_PBjp15Cd9Myzo9QnGUHd1fIGUkuCqS3fV1oLFHePEMx2b4HfHeQOXGNNnBg9PM0UEjTOmxhe3fq-c4o45nvmHz9jmC3sWJHK4Ev4GXSIrmyxC0_2vs81gspfeFg72s-azBFzhKNcUwhtniTFixregY722ezhEE5XLhB861G1hWqkphiMN-MAW0jAHtyWfyy4S4PV7ysZihQqU4DyjtYiSE36i_vV9lofjeXmPQp4yl529cawEFE2i3rQc6uP5vfBRkU08TokFdNA3O01DgsUhjzJ4VmWD8Z8zAYmu7YQwcLGGNZlYvRdVXnkxQkvITo4lRi7on05wo14VT46rNhmRDQ8r56b8-qgpODC60qLK9YhhsSTKhhsRUU-W4HsrkOopUjrHdzmSevepm81ISev7ZoJp1-9wSUomsxFaz8liux7wugEBkwqKhJh_tvclyUEq8Ta9pKDwvTExhycAlRKz-L3TwbHa4MIVaAXIR0IDeRV-0Q3DDE0TEdtLMK31N1pVmU.hsQ5f1Sz8lBnQPWnjnrX4A";
+        public static string JWEKeyWrappingWithAdditionalHeaderClaims = "eyJhbGciOiJSU0ExXzUiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjoiUnNhU2VjdXJpdHlLZXlfMjA0OCIsInR5cCI6IkpXVCIsImludCI6MTIzLCJzdHJpbmciOiJzdHJpbmciLCJjdHkiOiJKV1QifQ.aup73T5pXH_YXAu1tI2Ahyii4GSm5810Wr39YPEH_f6O3N4LDT_bKe63A0QVrqunHy8cT-DZTEuU_DDWq434IFFNWQ-o7F-4iutFH5oMXPsA8WT8nzlfMR9HXAVpZeiOgQGwh-DtStf7ZgNSqETzBJFyf0WCYCYcXqGbpDUQeNvQ-MCm-a9I-RHJKez2H7GQMZayWOCrrp3GoO-2_U1Qmzw9WILATUQykV-l5S2xYfW61EKiZC3oxGe89zgFN9EEjqIC34Na89b1KmwHMedJtxLNI4bDNxxv9xK7DqdOtbaEkPzYb--muIMNteaYycPdXOUY2xx3UBZZ1yVUzrFJDg.Fei3ubbZ3oNtaoqFhb1lzw.fdkNYZff2p22rQaB-nh1KgIADWSw7BDkDkIMfKvGOW4MpACgE1VAtYDPJQQFGwBdC-83iRL8RQWAYoGb2baOGVPq7NiVeRgcTqe03w8Knbeh-fEPWfcjE3kaEBxssX9JpKA6YcaD_mkkpg9Qx32BpuCgo7w8hnDFv29nGw75rusHrlvOHK2gxSGCqYNAV6TF78tHzLlsVuJD4t0DCKyfw91fy6cX8lWqfqik7aZG1fAUjUJ3KUTIEviSx1iGgqaLsN1A-QdVzVWJTwmWgIoZVR5g4nbWwdqGAE2xkWrmuMOSGBuyU95OE5rjvcOjBsPss_0Om1DzlN7CjsErjpa3ExCzK9e-ifyS1fwH_LjO06x7gtqhOuUw40Px4uo_rzDCzlGGFeUe31w3icGOaSqnBka6H8dJB1If98h3Hwx3g_CcBVmEwlev5MFJKC0M5au52ulyuf2X-PvdLKp5XBUFaHEdJDkgciXDzmDIL9J_JFqfyfcuQhh90PCHFFVXOnlJELpCM8DXKV8-oEl8BcvB26lvuOHCwQbUjjGRNZIJU6P7GEV1zVJ6dnIjE5qPUzXJ.LiHXY8UmlG0vNt5t5gRZhQ";
 
         // This token was signed with Default.SymmetricSigningCredentials and encrypted with EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256).
         // The value for the 'typ' header claim in this token has been changed to "TEST".
-        public static string JWEKeyWrappingWithDifferentTyp = "eyJhbGciOiJSU0ExXzUiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjoiUnNhU2VjdXJpdHlLZXlfMjA0OCIsInR5cCI6IlRFU1QifQ.4O-5-yN67fG2iEW3dvViUN9mj3hIHXhEXkf3_8YbvDqQz91hR6A2vrNQMAx5H8SBJvcKUj9xtMvs5yT4bSXJijN60xXJeP6SUyxxC9IlMgeNIlguJSeBGDxD_Oka1DKYdWjWO50LrvuD2FR99vpLA8merOmOXTkePrYb0Cgz4lPwHVrEuOsRa_YSg6FwHZS_nTKwHH6A5Y8Jo9m8IAIxWMxTeUksOip9kzZetURWIMrYToQIcwCESv5szAXV3uXMUa2veESDtwSTXOJc3GkzTt22vcxk5plRnX9vWT2cwKb33ZeX7SMJwd8OweEb47d93L0YJklwPIFuUrjPztyNCg.bI0Xb6prW9z6rQhhF4hDUg.n6gBVp7MVKU71lzYv0yJQsIIh05veO9Ee26C44Venp2KkqDrsHkUxAOGuwCEzrJG6e2H4trPa5mv8Nwi9voTf_YAtQyrZVojMD3N3Apqsl9vDdxV7yyOz1Y1LsUhkriWV3YgkRtlW8-oqKXDlkDlWv_o47aFOv4zqwn8xx58ohg6des0PjyKb5dORtSKmvAoIxBUlDN2vp9gEquZiRQSFjFKw9bK28rklf345wFB3MnLxPk2JVLXHk3IjggHNV8BR6fi38ViFzKD8uFO1pvNc_balCJWGIPUtOGU0D7paJWbzCHnjKK_SohG7-dBIPPoynSNRz5bubRuuIAvhUC2cjVCwp2KNV1_V3Tdaw9qo_x32TNIL-wO0-RNyKJB5SxTiEjO2xi-I5CGPNNf-yzRrwqfjvsF_3_yccdbNT_VleCwnBp403A4rnmq8Pa2nLB3hHL_Uv2qvkSa5GuJYyLtMb93mr_fyCL21KS6TlL5uD_x91oQsAeeT87bKnmP3RI3kgmR2MhXIQVabkI83rNpHqF-YyzpOIFMCtLN0ZtilbKWlc-0cxuoh2zJy-Dek20_.nk6ecxkk77wf-qSG59QwEw";
+        public static string JWEKeyWrappingWithDifferentTyp = "eyJhbGciOiJSU0ExXzUiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjoiUnNhU2VjdXJpdHlLZXlfMjA0OCIsInR5cCI6IlRFU1QiLCJjdHkiOiJKV1QifQ.GfOOyLBN3pEAQHVKlYB0AIaktBi33eBZdPP3_Lyv4I3KqNVyFh3jC1uj_uQ14s491ezHGaWdOwpR_j2Uxah_taDgFZ8IKp8yGNEKL-yrl1MdrY5nq2sgzlcsvW8dG73iMSn7fnzr-bpgiAIvHndse_PfEuvB-glj4qGarWE7rp-Fg1DhnhQpK1z3C075R3eAnWQkQd4euN59hmdvWcpxe-zS5eMHSNueoX9gGQ-1Ow31eqGL5A4RJXmOi0o_5mzc05gz2n2JNY4_pg-olqcHkx3Oh1dC_R-zWQKjy2DkZFa19D0lPc13ZTKc-ImQVtiQWhB-mPdUB3taJHbRhBbm7w.q1Nas2R8KWysJ9Sc6UAZuw.jOaIHr6zef7VRMVmXfEwNMZ2nuVQVp2IRG6BnZQ-FKloKIjg5eFTxHSaGMQaKMHWGqiFEz56FhsknJ2FqpcYZxZC37TehcMrSf82KEitXVFiLj7n-ojH-2QZUiUUiCs1R99AeTO3pdCdhJ2dOhexPkybcryyH-ls6BOFURFdNPVpJQHfXeQ6hUDiv3hDYmEEQFR0S-eJJgrJlvFPhWZFBfzHhGjJcmIBJDnr8aQyg1Q4kNYfxOWI2kWooxLtT31qNZKOzCmkSPQ34OG55GCZz-WQCeXiZQnFPPYfIotQd_huzEfd0RbschDxDcXsv9QR_g7QssY5hgRCy6j7_ZMMLqJyc9G0JR-TmR74o1gXstMTTXxTFVZ05MC-_cjml7ZH7O8GIbuApYNV3vUFJIN_NkTCl2NZVL4RiXF5rTG8ggKkPlUM6GtQ4BkLk4dWnf5iTlTxNwVJSzrztS7LmGSCHIwE33CkoU4beFNB6E1xjxH253QDkn2H0b2N5jDMddKYfTV2cQ-9NheKsHCu_lrZ9qdecq96loqFOLhbk50y368O5t11ggIiCT9IYoNhQoP1.SVpBa3ZbGyZBHoFZpLznqg";
 
         // This token was signed with Default.SymmetricSigningCredentials and encrypted with EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256).
         // The inner JWT is unsigned and yhis token includes two additional header claims:
         // { "int", 123 } and { "string", "string" }.
-        public static string JWEKeyWrappingUnsignedInnerJWTWithAdditionalHeaderClaims = "eyJhbGciOiJSU0ExXzUiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjoiUnNhU2VjdXJpdHlLZXlfMjA0OCIsInR5cCI6IkpXVCIsImludCI6MTIzLCJzdHJpbmciOiJzdHJpbmcifQ.UuIMP7ipqfWl0fjWpgUtDQtn9YVMy2_r7oQ-3moQOjQP_sfuxTPQ8LwlgSxGqZ42ihfzyZJ2RjuyQPETi_CN5t1T7EJzdLfjmLAExanc4XjtveKxcKgUxPfq1izIRzn4ceEswfbFqFRSw-MG5MiyxwZN7EMZFtHQZPbJFLZuOdtMUcNXCIbaJTRdyWHrOqd_3PoGJG29puuhbhTdWbK3qtrpaLULf0wUcEE5GL5K8Ob8f4XqKTlaF5t_QZOD1P9rtEiFvnF0Iw74yrs-cv6mvG1AgEG5AcfPH9mIO7Xul6o5KiPqaMsJ2PZSJ2CApeajWgdtgfxeUn8HUecss20P3g.XSpcWjCuqG2VBKhloR8DHw.LbUjGDCLvWxR1nxf_YKpTr_9Bx4OtivIgileWVFA8gwYqV73OSrt1TeuGOEdNrIFwf0uZomNSL7WWOQqrwGqpXL4I43Mua8SkG5vEACoXid_aTyo0ANil4ujnBBNxwDHopF0a-sH0AZGNsiaSLPwq2DjLq34Dg7YsWK3Y4BJtpGuXeJJmSxdn17uZFuJ3ptPdh29YRlWPl6wke6fWfotS95O40ydg-eGqcrdOVpm4Ccy88QEzT7zOW0NRFTGAh3dI8SrzRlKPh-f-uCyRWYkL4gHLty07g23PnsCj6w2xccI5iqcCQelFBouJhOqDNSrga0mdwfZ6dOFle0zTBrHDsdFNgEpT2ruhZS1-BD05ds.9s3x86R6cDfY8q-IvQLIRw";
+        public static string JWEKeyWrappingUnsignedInnerJWTWithAdditionalHeaderClaims = "eyJhbGciOiJSU0ExXzUiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjoiUnNhU2VjdXJpdHlLZXlfMjA0OCIsInR5cCI6IkpXVCIsImludCI6MTIzLCJzdHJpbmciOiJzdHJpbmciLCJjdHkiOiJKV1QifQ.4ZV5pdLrOjukt51gFAHhSDnR6FCriOjajEsxSBslnZhwtp9p0KKpYf5XeT7LIXRoj_iSxmKagCN33FGKjgLsMSqcGy_RhF0nAZdhKvRnfw6Wixa342zw44Pq6aaHcPRAcMlebYRsFjNB0aTYhTcGZUGB50011yCeDeJZjevFA4VMh_QXqXmiigX1hOqWSDDKamAETT6q_WIF51lLqjnOvjW8vuVe5axX1yA0pEbIjCsAuAJN5bJq9sc3McFshDgd8Ysr4rrMS2HobqUAlafuIU4eZofAixOtkDJuu0-RN9OETT2_DzAhwBxMkgQ3LZh9Ss66SeHbJJeYtE1Qv_Z7Lg.w1uj-_N4Puy16Rn_qGwFNw.9kZxcc5SSJ9C-I5wzpwLdryKXi4v0AsPY2TL1hsELtHIANcW3xTuIhj0ludvEEPuErq0pYulnJW2IBLWrqOZIqHtkz9LrSotlbx9ts14XeGQW8hvfPBdNXjlejGf2QggYqLnTxauW6gBnOarYDfkv5snDCw6Niuxnpq7VsO4z7mON_9JbB8MTxmIPpO3Q0sw0Yp942dfiVe6QgDff1czv3QUITSThEPPGxas4eoEc-l3bwLy3-m568Zgk3snKLRXMjjDMzzoFxg9Blrp3RZXP9nA-r3R21-7cZKXFbb6BzLsaiyyDcnBq6VYNELm80U9T3mMGpTVN0OOmf_S0pLqNpNXLFbsLH5mD2h1MT69xBo.T520Y8V3Dvx0lGVUB8Oi-g";
 
+        // This token was signed with Default.SymmetricSigningCredentials and encryted with Default.SymmetricEncryptingCredentials.
+        // This token includes one additional header claim:
+        // { "cty", "JWT"}.
+        public static string JWEDirectEcryptionWithCtyInAdditionalHeaderClaims = "eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2Iiwia2lkIjoiRGVmYXVsdFN5bW1ldHJpY1NlY3VyaXR5S2V5XzI1NiIsInR5cCI6IkpXVCIsImN0eSI6IkpXVCJ9..xrukZ8CBmmDBe10fwAoOng.SlxANnyUr--zfFXJ7LqgUzHIMPzGZ0uLdxJnXSINu9j8wINKA7uqIJ4HqyuSOjGg9-3ydx74X0uugqgjMs4yJ9uT1N-TIEJgBmb8tEwkWE-_HXNDLJuD3I9b6uWk4n6MJIqXf9ukPDsy8tK_fZIYRKWtOqz1CUnvdcaXSDJwLiBPabcC64rnlVI0ME9xQbAPZk7jE0OxdKagYGk_MQ2fxlWaOsdHnHGSPXpQepF-X2qytjdCIbHzZBjQ_n_P3SX5LsuXEOSwgqLNYsvh4SGDKxVnxZw1ePozyiNFFsF_rF6HimbBFkLUcQS543edujDPSDgjDdgMCMoMVQWz0hXHfG7uVb0Mq_yAxag7JY49BORRnZzS4MhogCbXida3YqucX4_cM8mSzeLCbwEcL35kitWibNKtfiWPFDYzw2Brh7jV1l49kX31Q6nqX5jB183emKgE7d2fimfZWTJA5nM_NG7l0B_oInwIv5JvB6HFUWX3kJgds3UOH4zYOe2paVuSj0qsLmzEknYWe3P8mou8ItW8353_Ts2GtU5CiiQu0aLXuJBPhMzK5Zgk-0S_qF0W.pEQ7c9S6GW6hYe3-OQBwVQ";
         #endregion
 
         #region JWS tokens
@@ -390,6 +377,70 @@ namespace Microsoft.IdentityModel.TestUtils
         // This token is unsigned and includes one additional header claim:
         // { "int", 123 }.
         public static string UnsignedJWSWithSingleAdditionalHeaderClaim = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIiwiaW50IjoxMjN9.eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwiaWF0IjoiMTQ4OTc3NTYxNyIsIm5iZiI6IjE0ODk3NzU2MTciLCJleHAiOiIyNTM0MDIzMDA3OTkifQ.";
+
+        // the following values are separate from the one in Default.cs, so we can change the Defaults
+        // Do not change any of these values either adding new values or order or the tests will break.
+        public static Dictionary<string, object> PayloadDictionary
+        {
+            get => new Dictionary<string, object>()
+            {
+                { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
+                { JwtRegisteredClaimNames.GivenName, "Bob" },
+                { JwtRegisteredClaimNames.Iss, Issuer },
+                { JwtRegisteredClaimNames.Aud, Audience },
+                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(IssueInstant).ToString() },
+                { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(NotBefore).ToString()},
+                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Expires).ToString() }
+            };
+        }
+
+        public static string PayloadString
+        {
+            get => new JObject()
+            {
+                { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
+                { JwtRegisteredClaimNames.GivenName, "Bob" },
+                { JwtRegisteredClaimNames.Iss, Issuer },
+                { JwtRegisteredClaimNames.Aud, Audience },
+                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(IssueInstant).ToString() },
+                { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(NotBefore).ToString()},
+                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Expires).ToString() },
+            }.ToString(Formatting.None);
+        }
+
+        public static string Audience
+        {
+            get => "http://Default.Audience.com";
+        }
+        public static DateTime Expires
+        {
+            get => DateTime.Parse(ExpiresString);
+        }
+
+        public static string ExpiresString
+        {
+            get => DateTime.MaxValue.ToString("s") + "Z";
+        }
+
+        public static DateTime IssueInstant
+        {
+            get => DateTime.Parse(IssueInstantString);
+        }
+
+        public static string IssueInstantString
+        {
+            get => "2017-03-17T18:33:37.095Z";
+        }
+
+        public static string Issuer
+        {
+            get => "http://Default.Issuer.com";
+        }
+
+        public static DateTime NotBefore
+        {
+            get => DateTime.Parse("2017-03-17T18:33:37.080Z");
+        }
         #endregion
     }
 }

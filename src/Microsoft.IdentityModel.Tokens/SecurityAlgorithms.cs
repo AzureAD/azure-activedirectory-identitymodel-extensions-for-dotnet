@@ -1,29 +1,5 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -51,6 +27,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         // See: https://datatracker.ietf.org/doc/html/rfc7518#section-4.1
         public const string Aes128KW = "A128KW";
+        public const string Aes192KW = "A192KW";
         public const string Aes256KW = "A256KW";
         public const string RsaPKCS1 = "RSA1_5";
         public const string RsaOAEP = "RSA-OAEP";
@@ -119,6 +96,13 @@ namespace Microsoft.IdentityModel.Tokens
         internal const string DefaultAsymmetricKeyWrapAlgorithm = RsaOaepKeyWrap;
         internal const string DefaultSymmetricEncryptionAlgorithm = Aes128CbcHmacSha256;
 
+        // See: https://datatracker.ietf.org/doc/html/rfc7518#section-4.6
+        public const string EcdhEsA128kw = "ECDH-ES+A128KW";
+        public const string EcdhEsA192kw = "ECDH-ES+A192KW";
+        public const string EcdhEsA256kw = "ECDH-ES+A256KW";
+
+        // See: https://datatracker.ietf.org/doc/html/rfc7518#section-4.6
+        public const string EcdhEs = "ECDH-ES";
 #pragma warning restore 1591
     }
 }

@@ -1,30 +1,7 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
+using System.IO.Compression;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.TestUtils
@@ -488,6 +465,132 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             get { return "6KB707dM9YTIgHtLvtgWQ8mKwboJW3of9locizkDTHzBC2IlrT1oOQ"; }
         }
+    }
+
+    // https://datatracker.ietf.org/doc/html/rfc7518#appendix-C
+    public static class ECDH_ES
+    {
+        public static byte[] AlgorithmID = new byte[] { 0, 0, 0, 7, 65, 49, 50, 56, 71, 67, 77 };
+
+        public static JsonWebKey AliceEphereralPrivateKey =>
+            new JsonWebKey
+            {
+                Crv = "P-256",
+                D = "0_NxaRPUMQoAJt50Gz8YiTr8gRTwyEaCumd-MToTmIo",
+                Kty = "EC",
+                X = "gI0GAILBdu7T53akrFmMyGcsF3n5dO7MmwNBHKW5SV0",
+                Y = "SLW_xSffzlPWrHEVI30DHM_4egVwt3NQqeUD7nMFpps"
+            };
+
+        public static string AliceEphereralPrivateKeyString =>
+            @"{
+                ""kty"":""EC"",
+                ""crv"":""P-256"",
+                ""x"":""gI0GAILBdu7T53akrFmMyGcsF3n5dO7MmwNBHKW5SV0"",
+                ""y"":""SLW_xSffzlPWrHEVI30DHM_4egVwt3NQqeUD7nMFpps"",
+                ""d"":""0_NxaRPUMQoAJt50Gz8YiTr8gRTwyEaCumd-MToTmIo""
+             }";
+
+        public static JsonWebKey AliceEphereralPublicKey =>
+            new JsonWebKey
+            {
+                Crv = "P-256",
+                Kty = "EC",
+                X = "gI0GAILBdu7T53akrFmMyGcsF3n5dO7MmwNBHKW5SV0",
+                Y = "SLW_xSffzlPWrHEVI30DHM_4egVwt3NQqeUD7nMFpps"
+            };
+
+        public static string AliceEphereralPublicKeyString =>
+            @"{
+                ""kty"":""EC"",
+                ""crv"":""P-256"",
+                ""x"":""gI0GAILBdu7T53akrFmMyGcsF3n5dO7MmwNBHKW5SV0"",
+                ""y"":""SLW_xSffzlPWrHEVI30DHM_4egVwt3NQqeUD7nMFpps""
+             }";
+
+        public static JsonWebKey BobEphereralPrivateKey =>
+            new JsonWebKey
+            {
+                Crv = "P-256",
+                D = "VEmDZpDXXK8p8N0Cndsxs924q6nS1RXFASRl6BfUqdw",
+                Kty = "EC",
+                X = "weNJy2HscCSM6AEDTDg04biOvhFhyyWvOHQfeF_PxMQ",
+                Y = "e8lnCO-AlStT-NJVX-crhB7QRYhiix03illJOVAOyck"
+            };
+
+        public static string BobEphereralPrivateKeyString =>
+            @"{
+                ""kty"":""EC"",
+                ""crv"":""P-256"",
+                ""x"":""weNJy2HscCSM6AEDTDg04biOvhFhyyWvOHQfeF_PxMQ"",
+                ""y"":""e8lnCO-AlStT-NJVX-crhB7QRYhiix03illJOVAOyck"",
+                ""d"":""VEmDZpDXXK8p8N0Cndsxs924q6nS1RXFASRl6BfUqdw""
+            }";
+
+        public static JsonWebKey BobEphereralPublicKey =>
+            new JsonWebKey
+            {
+                Crv = "P-256",
+                Kty = "EC",
+                X = "weNJy2HscCSM6AEDTDg04biOvhFhyyWvOHQfeF_PxMQ",
+                Y = "e8lnCO-AlStT-NJVX-crhB7QRYhiix03illJOVAOyck"
+            };
+
+        public static string BobEphereralPublicString =>
+            @"{
+                ""kty"":""EC"",
+                ""crv"":""P-256"",
+                ""x"":""weNJy2HscCSM6AEDTDg04biOvhFhyyWvOHQfeF_PxMQ"",
+                ""y"":""e8lnCO-AlStT-NJVX-crhB7QRYhiix03illJOVAOyck""
+            }";
+
+        public static byte[] ConcatKDF =
+            new byte[] { 0, 0, 0, 1,
+                         158, 86, 217, 29, 129, 113, 53, 211, 114, 131, 66, 131, 191, 132, 38, 156, 251, 49, 110, 163, 218, 128, 106, 72, 246, 218, 167, 121, 140, 254, 144, 196,
+                         0, 0, 0, 7, 65, 49, 50, 56, 71, 67, 77,
+                         0, 0, 0, 5, 65, 108, 105, 99, 101,
+                         0, 0, 0, 3, 66, 111, 98, 0, 0, 0, 128};
+
+        public static byte[] DerivedKeyBytes = new byte[] { 86, 170, 141, 234, 248, 35, 109, 32, 92, 34, 40, 205, 113, 167, 16, 26 };
+
+        public static string DerivedKeyEncoded = "VqqN6vgjbSBcIijNcacQGg";
+
+        public static string EPKString =>
+            @"{
+                ""alg"":""ECDH-ES"",
+                ""enc"":""A128GCM"",
+                ""apu"":""QWxpY2U"",
+                ""apv"":""Qm9i"",
+                ""epk"":
+                {
+                    ""kty"":""EC"",
+                    ""crv"":""P-256"",
+                    ""x"":""gI0GAILBdu7T53akrFmMyGcsF3n5dO7MmwNBHKW5SV0"",
+                    ""y"":""SLW_xSffzlPWrHEVI30DHM_4egVwt3NQqeUD7nMFpps""
+                }
+              }";
+
+        public static string Alg = "ECDH-ES";
+
+        public static string Enc = "A128GCM";
+
+        public static string Apu = "QWxpY2U";
+
+        public static string Apv = "Qm9i";
+
+        public static int KeyDataLen = 128;
+
+        public static byte[] PartyUInfo = new byte[] { 0, 0, 0, 5, 65, 108, 105, 99, 101 };
+
+        public static byte[] PartyVInfo = new byte[] { 0, 0, 0, 3, 66, 11, 98 };
+
+        public static byte[] OtherInfo = new byte[] { 0, 0, 0, 7, 65, 49, 50, 56, 71, 67, 77, 0, 0, 0, 5, 65, 108, 105, 99, 101, 0, 0, 0, 3, 66, 111, 98, 0, 0, 0, 128 };
+
+        public static byte[] SuppPubInfo = new byte[] { 0, 0, 0, 128 };
+
+        public static byte[] SuppPrivInfo = new byte[] { };
+
+        public static byte[] Z => new byte[] { 158, 86, 217, 29, 129, 113, 53, 211, 114, 131, 66, 131, 191, 132, 38, 156, 251, 49, 110, 163, 218, 128, 106, 72, 246, 218, 167, 121, 140, 254, 144, 196 };
     }
 
     // https://datatracker.ietf.org/doc/html/rfc7516#appendix-A.1.3

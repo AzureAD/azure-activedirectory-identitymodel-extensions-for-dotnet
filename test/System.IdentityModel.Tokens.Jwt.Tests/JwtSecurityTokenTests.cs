@@ -1,43 +1,62 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Security.Claims;
+using System.Text;
+using System.Threading;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
-
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
     public class JwtSecurityTokenTests
     {
+        [Fact]
+        public void BoolClaimsEncodedAsExpected()
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(new string('a', 128)));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[] { new Claim("testClaim", "true", ClaimValueTypes.Boolean), new Claim("testClaim2", "True", ClaimValueTypes.Boolean) };
+            var token = new JwtSecurityToken(
+                issuer: "issuer.contoso.com",
+                audience: "audience.contoso.com",
+                claims: claims,
+                expires: (new DateTime(2038, 1, 20)).ToUniversalTime(),
+                signingCredentials: creds);
+
+            var claimSet = token.Claims;
+
+            // Will throw if can't find.
+            var testClaim = claimSet.First(c => c.Type == "testClaim");
+            Assert.Equal("true", testClaim.Value);
+
+            var testClaim2 = claimSet.First(c => c.Type == "testClaim2");
+            Assert.Equal("true", testClaim2.Value);
+        }
+
+        [Fact]
+        public void DateTime2038Issue()
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(new string('a', 128)));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[] { new Claim(ClaimTypes.NameIdentifier, "Bob") };
+            var token = new JwtSecurityToken(
+                issuer: "issuer.contoso.com",
+                audience: "audience.contoso.com",
+                claims: claims,
+                expires: (new DateTime(2038, 1, 20)).ToUniversalTime(),
+                signingCredentials: creds);
+
+            Assert.Equal(token.ValidTo, (new DateTime(2038,1,20)).ToUniversalTime());
+        }
+
         [Fact]
         public void Defaults()
         {
@@ -280,12 +299,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             dataSet.Add("ValidJwe2- Construct by string", outerValidJwe2, null, EncodedJwts.ValidJwe2, ExpectedException.NoExceptionExpected);
 
             // Hand in a valid variation. We should fail before the variation is used.
-            dataSet.Add("Invalid outer token 1- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe, ExpectedException.ArgumentException(substringExpected: "IDX12741"));
-            dataSet.Add("Invalid outer token 2- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe2, ExpectedException.ArgumentException(substringExpected: "IDX12741"));
-            dataSet.Add("Invalid outer token 3- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe3, ExpectedException.ArgumentException(substringExpected: "IDX12740"));
-            dataSet.Add("Invalid outer token 4- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe4, ExpectedException.ArgumentException(substringExpected: "IDX12741"));
-            dataSet.Add("Invalid outer token 5- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe5, ExpectedException.ArgumentException(substringExpected: "IDX12740"));
-            dataSet.Add("Invalid outer token 6- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe6, ExpectedException.ArgumentException(substringExpected: "IDX12740"));
+            dataSet.Add("Invalid outer token 1- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe, ExpectedException.SecurityTokenMalformedTokenException(substringExpected: "IDX12741"));
+            dataSet.Add("Invalid outer token 2- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe2, ExpectedException.SecurityTokenMalformedTokenException(substringExpected: "IDX12741"));
+            dataSet.Add("Invalid outer token 3- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe3, ExpectedException.SecurityTokenMalformedTokenException(substringExpected: "IDX12740"));
+            dataSet.Add("Invalid outer token 4- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe4, ExpectedException.SecurityTokenMalformedTokenException(substringExpected: "IDX12741"));
+            dataSet.Add("Invalid outer token 5- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe5, ExpectedException.SecurityTokenMalformedTokenException(substringExpected: "IDX12740"));
+            dataSet.Add("Invalid outer token 6- Construct by string", outerValidJweDirect, null, EncodedJwts.InvalidJwe6, ExpectedException.SecurityTokenMalformedTokenException(substringExpected: "IDX12740"));
 
             return dataSet;
         }
@@ -322,12 +341,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.Equal(token1.Payload.Aud, token2.Payload.Aud);
             Assert.Equal(token1.Payload.AuthTime, token2.Payload.AuthTime);
             Assert.Equal(token1.Payload.CHash, token2.Payload.CHash);
-            Assert.Equal(token1.Payload.Exp, token2.Payload.Exp);
-            Assert.Equal(token1.Payload.Iat, token2.Payload.Iat);
+            Assert.Equal(token1.Payload.Expiration, token2.Payload.Expiration);
+            Assert.Equal(token1.Payload.IssuedAt, token2.Payload.IssuedAt);
             Assert.Equal(token1.Payload.Iss, token2.Payload.Iss);
             Assert.Equal(token1.Payload.Jti, token2.Payload.Jti);
             Assert.Equal(token1.Payload.Keys, token2.Payload.Keys);
-            Assert.Equal(token1.Payload.Nbf, token2.Payload.Nbf);
+            Assert.Equal(token1.Payload.NotBefore, token2.Payload.NotBefore);
             Assert.Equal(token1.Payload.Nonce, token2.Payload.Nonce);
             Assert.Equal(token1.Payload.Sub, token2.Payload.Sub);
             Assert.Equal(token1.Payload.ValidFrom, token2.Payload.ValidFrom);
@@ -418,7 +437,17 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 var theoryData = new TheoryData<JwtTheoryData>();
 
                 JwtTestData.InvalidRegExSegmentsData(theoryData);
-                JwtTestData.InvalidNumberOfSegmentsData("IDX12741:", theoryData);
+                JwtTestData.InvalidNumberOfSegmentsData(
+                    new List<string>
+                    {
+                        "IDX12741",
+                        "IDX12741:",
+                        "IDX12741:",
+                        "IDX12741:",
+                        "IDX12740:",
+                        "IDX12741:"
+                    },
+                    theoryData);
                 JwtTestData.InvalidEncodedSegmentsData("", theoryData);
                 JwtTestData.ValidEncodedSegmentsData(theoryData);
 
@@ -426,7 +455,38 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
 
         }
+
+        [Fact]
+        public void DifferentCultureJwtSecurityToken()
+        {
+            string numericClaim = string.Empty;
+            List<Claim> numericList = null;
+
+            var thread = new Thread(() =>
+            {
+                CultureInfo.CurrentCulture = new CultureInfo("fr-FR");
+
+                var handler = new JwtSecurityTokenHandler();
+                var token = handler.CreateJwtSecurityToken(new SecurityTokenDescriptor
+                {
+                    Claims = new Dictionary<string, object>
+                    {
+                        { "numericClaim", 10.9d },
+                        { "numericList", new List<object> { 12.2, 11.1 } }
+                    }
+                });
+
+                var claim = token.Claims.First(c => c.Type == "numericClaim");
+                numericClaim = claim.Value;
+                numericList = token.Claims.Where(c => c.Type == "numericList").ToList();
+            });
+
+            thread.Start();
+            thread.Join();
+
+            Assert.Equal("10.9", numericClaim);
+            Assert.Equal("12.2", numericList[0].Value);
+            Assert.Equal("11.1", numericList[1].Value);
+        }
     }
 }
-
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

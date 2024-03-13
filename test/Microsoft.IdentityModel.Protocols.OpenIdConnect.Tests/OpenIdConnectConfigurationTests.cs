@@ -1,44 +1,20 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Reflection;
-using Microsoft.IdentityModel.Json;
+using System.Text.Json;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 {
     /// <summary>
-    /// 
     /// </summary>
     public class OpenIdConnectConfigurationTests
     {
@@ -46,9 +22,25 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         public void Constructors()
         {
             var context = new CompareContext { Title = "OpenIdConnectConfigurationTests.Constructors" };
-            RunOpenIdConnectConfigurationTest((string)null, new OpenIdConnectConfiguration(), ExpectedException.ArgumentNullException(), context);
-            RunOpenIdConnectConfigurationTest(OpenIdConfigData.JsonAllValues, OpenIdConfigData.FullyPopulated, ExpectedException.NoExceptionExpected, context);
-            RunOpenIdConnectConfigurationTest(OpenIdConfigData.OpenIdConnectMetatadataBadJson, null, ExpectedException.ArgumentException(substringExpected: "IDX21815:", inner: typeof(JsonReaderException)), context);
+
+            RunOpenIdConnectConfigurationTest(
+                (string)null,
+                new OpenIdConnectConfiguration(),
+                ExpectedException.ArgumentNullException(),
+                context);
+
+            RunOpenIdConnectConfigurationTest(
+                OpenIdConfigData.JsonAllValues,
+                OpenIdConfigData.FullyPopulated,
+                ExpectedException.NoExceptionExpected,
+                context);
+
+            RunOpenIdConnectConfigurationTest(
+                OpenIdConfigData.OpenIdConnectMetatadataBadJson,
+                null,
+                new ExpectedException(typeof(ArgumentException), substringExpected: "IDX21815:", ignoreInnerException: true),
+                context);
+
             TestUtilities.AssertFailIfErrors(context);
         }
 
@@ -85,9 +77,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.NotNull(configuration.AcrValuesSupported);
             Assert.NotNull(configuration.ClaimsSupported);
             Assert.NotNull(configuration.ClaimsLocalesSupported);
+            Assert.False(configuration.ClaimsParameterSupported);
             Assert.NotNull(configuration.ClaimTypesSupported);
             Assert.NotNull(configuration.DisplayValuesSupported);
             Assert.NotNull(configuration.GrantTypesSupported);
+            Assert.False(configuration.HttpLogoutSupported);
             Assert.NotNull(configuration.IdTokenEncryptionAlgValuesSupported);
             Assert.NotNull(configuration.IdTokenEncryptionEncValuesSupported);
             Assert.NotNull(configuration.IdTokenSigningAlgValuesSupported);
@@ -96,8 +90,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.NotNull(configuration.RequestObjectEncryptionAlgValuesSupported);
             Assert.NotNull(configuration.RequestObjectEncryptionEncValuesSupported);
             Assert.NotNull(configuration.RequestObjectSigningAlgValuesSupported);
+            Assert.False(configuration.RequestParameterSupported);
             Assert.NotNull(configuration.ResponseModesSupported);
             Assert.NotNull(configuration.ResponseTypesSupported);
+            Assert.False(configuration.RequestUriParameterSupported);
+            Assert.False(configuration.RequireRequestUriRegistration);
             Assert.NotNull(configuration.ScopesSupported);
             Assert.NotNull(configuration.SigningKeys);
             Assert.NotNull(configuration.SubjectTypesSupported);
@@ -117,8 +114,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.WriteHeader($"{this}.DeserializeOpenIdConnectConfigurationWithSigningKeys");
             var context = new CompareContext();
 
-            var config = OpenIdConnectConfiguration.Create(
-                OpenIdConnectConfiguration.Write(new OpenIdConnectConfiguration(OpenIdConfigData.JsonWithSigningKeys)));
+            string json = OpenIdConnectConfiguration.Write(new OpenIdConnectConfiguration(OpenIdConfigData.JsonWithSigningKeys));
+
+            var config = OpenIdConnectConfiguration.Create(json);
 
             // "SigningKeys" should be found in AdditionalData.
             if (!config.AdditionalData.ContainsKey("SigningKeys"))
@@ -133,8 +131,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
             Type type = typeof(OpenIdConnectConfiguration);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 47)
-                Assert.True(false, "Number of properties has changed from 47 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 49)
+                Assert.True(false, "Number of properties has changed from 49 to: " + properties.Length + ", adjust tests");
 
             TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(configuration, "OpenIdConnectConfiguration_GetSets");
 
@@ -255,7 +253,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var oidcWithEmptyCollections = new OpenIdConnectConfiguration();
             var oidcWithEmptyCollectionsJson = OpenIdConnectConfiguration.Write(oidcWithEmptyCollections);
 
-            IdentityComparer.AreEqual(oidcWithEmptyCollectionsJson, "{\"JsonWebKeySet\":null}", context);
+            IdentityComparer.AreEqual(oidcWithEmptyCollectionsJson, "{}", context);
 
             TestUtilities.AssertFailIfErrors(context);
         }

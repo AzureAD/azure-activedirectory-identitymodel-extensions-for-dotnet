@@ -1,29 +1,8 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
+using System.Text;
 
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
@@ -34,6 +13,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// </summary>
     public struct JwtRegisteredClaimNames
     {
+        // Please keep in alphabetical order
+
         /// <summary>
         /// </summary>
         public const string Actort = "actort";
@@ -173,5 +154,44 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// </summary>
         public const string Website = "website";
+    }
+
+    /// <summary>
+    /// Parameter names for JsonWebToken registered claim names in UTF8 bytes.
+    /// Used by UTF8JsonReader/Writer for performance gains.
+    /// </summary>
+    internal readonly struct JwtPayloadUtf8Bytes
+    {
+        // Please keep in alphabetical order
+
+        public static ReadOnlySpan<byte> Actort => "actort"u8;
+        public static ReadOnlySpan<byte> Acr => "acr"u8;
+        public static ReadOnlySpan<byte> Amr => "amr"u8;
+        public static ReadOnlySpan<byte> AtHash => "at_hash"u8;
+        public static ReadOnlySpan<byte> Aud => "aud"u8;
+        public static ReadOnlySpan<byte> AuthTime => "auth_time"u8;
+        public static ReadOnlySpan<byte> Azp => "azp"u8;
+        public static ReadOnlySpan<byte> Birthdate => "birthdate"u8;
+        public static ReadOnlySpan<byte> CHash => "c_hash"u8;
+        public static ReadOnlySpan<byte> Email => "email"u8;
+        public static ReadOnlySpan<byte> Exp => "exp"u8;
+        public static ReadOnlySpan<byte> Gender => "gender"u8;
+        public static ReadOnlySpan<byte> FamilyName => "family_name"u8;
+        public static ReadOnlySpan<byte> GivenName => "given_name"u8;
+        public static ReadOnlySpan<byte> Iat => "iat"u8;
+        public static ReadOnlySpan<byte> Iss => "iss"u8;
+        public static ReadOnlySpan<byte> Jti => "jti"u8;
+        public static ReadOnlySpan<byte> Name => "name"u8;
+        public static ReadOnlySpan<byte> NameId => "nameid"u8;
+        public static ReadOnlySpan<byte> Nonce => "nonce"u8;
+        public static ReadOnlySpan<byte> Nbf => "nbf"u8;
+        public static ReadOnlySpan<byte> PhoneNumber => "phone_number"u8;
+        public static ReadOnlySpan<byte> PhoneNumberVerified => "phone_number_verified"u8;
+        public static ReadOnlySpan<byte> Prn => "prn"u8;
+        public static ReadOnlySpan<byte> Sid => "sid"u8;
+        public static ReadOnlySpan<byte> Sub => "sub"u8;
+        public static ReadOnlySpan<byte> Typ => "typ"u8;
+        public static ReadOnlySpan<byte> UniqueName => "unique_name"u8;
+        public static ReadOnlySpan<byte> Website => "website"u8;
     }
 }

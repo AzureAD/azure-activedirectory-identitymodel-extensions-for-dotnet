@@ -1,29 +1,5 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using Microsoft.IdentityModel.Logging;
 using System;
@@ -119,13 +95,62 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>signed bytes</returns>
         public abstract byte[] Sign(byte[] input);
 
+        /// <summary>
+        /// Produces a signature over the specified region of the <paramref name="input"/>.
+        /// </summary>
+        /// <param name="input">The bytes to produce a signature over.</param>
+        /// <param name="offset">The offset to specify the beginning of the region.</param>
+        /// <param name="count">The count to specify the end of the region.</param>
+        /// <returns>The signature bytes.</returns>
+        public virtual byte[] Sign(byte[] input, int offset, int count)
+        {
+            throw LogHelper.LogExceptionMessage(new NotImplementedException());
+        }
+
+#if NET6_0_OR_GREATER
+        /// <summary>
+        /// Produces a signature over the <paramref name="data"/> and writes it to <paramref name="destination"/>.
+        /// </summary>
+        /// <param name="data">The bytes to produce a signature over.</param>
+        /// <param name="destination">The pre-allocated span where signature bytes will be placed.</param>
+        /// <param name="bytesWritten">The number of bytes written into the signature span.</param>         
+        /// <returns>returns <see langword="true"/> if creation of signature succeeded, <see langword="false"/> otherwise.</returns>
+        public virtual bool Sign(ReadOnlySpan<byte> data, Span<byte> destination, out int bytesWritten)
+        {
+            throw LogHelper.LogExceptionMessage(new NotImplementedException());
+        }
+#endif
+        /// <summary>
         /// Verifies that the <paramref name="signature"/> over <paramref name="input"/> using the
         /// <see cref="SecurityKey"/> and <see cref="SignatureProvider.Algorithm"/> specified by this
         /// <see cref="SignatureProvider"/> are consistent.
+        /// </summary>
         /// <param name="input">the bytes that were signed.</param>
         /// <param name="signature">signature to compare against.</param>
         /// <returns>true if the computed signature matches the signature parameter, false otherwise.</returns>
         public abstract bool Verify(byte[] input, byte[] signature);
+
+        /// <summary>
+        /// Verifies that a signature created over the 'input' matches the signature. Using <see cref="SecurityKey"/> and 'algorithm' passed to <see cref="SignatureProvider( SecurityKey, string )"/>.
+        /// </summary>
+        /// <param name="input">The bytes to verify.</param>
+        /// <param name="inputOffset">offset in to input bytes to caculate hash.</param>
+        /// <param name="inputLength">number of bytes of signature to use.</param>
+        /// <param name="signature">signature to compare against.</param>
+        /// <param name="signatureOffset">offset into signature array.</param>
+        /// <param name="signatureLength">how many bytes to verfiy.</param>
+        /// <returns>true if computed signature matches the signature parameter, false otherwise.</returns>
+        /// <exception cref="ArgumentNullException">'input' is null.</exception>
+        /// <exception cref="ArgumentNullException">'signature' is null.</exception>
+        /// <exception cref="ArgumentException">'input.Length' == 0.</exception>
+        /// <exception cref="ArgumentException">'signature.Length' == 0. </exception>
+        /// <exception cref="ArgumentException">'length &lt; 1'</exception>
+        /// <exception cref="ArgumentException">'offset + length &gt; input.Length'</exception>
+        /// <exception cref="ObjectDisposedException"><see cref="Dispose(bool)"/> has been called.</exception>
+        public virtual bool Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength)
+        {
+            throw LogHelper.LogExceptionMessage(new NotImplementedException());
+        }
 
         /// <summary>
         /// Gets or sets a bool indicating if this <see cref="SignatureProvider"/> is expected to create signatures.

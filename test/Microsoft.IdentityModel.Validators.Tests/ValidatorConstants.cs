@@ -1,29 +1,5 @@
-﻿//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 namespace Microsoft.IdentityModel.Validators.Tests
 {
@@ -55,6 +31,8 @@ namespace Microsoft.IdentityModel.Validators.Tests
         public const string UsGovIssuer = "https://login.microsoftonline.us/" + UsGovTenantId + "/v2.0";
         public const string UsGovTenantId = "72f988bf-86f1-41af-91ab-2d7cd011db47";
         public const string V1Issuer = "https://sts.windows.net/f645ad92-e38d-4d1a-b510-d1b09a74a8ca/";
+        public const string AadIssuerV1CommonAuthority = "https://sts.windows.net/{tenantid}/";
+        public const string AadIssuerV2CommonAuthority = AadInstance + "/{tenantid}/v2.0";
 
         public const string B2CSignUpSignInUserFlow = "b2c_1_susi";
         public const string B2CInstance = "https://fabrikamb2c.b2clogin.com";
@@ -65,11 +43,11 @@ namespace Microsoft.IdentityModel.Validators.Tests
         public const string B2CTenant = "fabrikamb2c.onmicrosoft.com";
         public const string Tfp = "tfp";
         public const string B2CCustomDomainUserFlow = "B2C_1_signupsignin_userflow";
-        public const string B2CCustomDomainIssuer = B2CCustomDomainInstance + "/" + B2CCustomDomainTenant + "/v2.0";
+        public const string B2CCustomDomainIssuer = B2CCustomDomainInstance + "/" + B2CCustomDomainTenant + "/v2.0/";
         public const string B2CCustomDomainAuthority = B2CCustomDomainInstance + "/" + B2CCustomDomainTenant + "/" + B2CCustomDomainUserFlow;
         public const string B2CCustomDomainAuthorityWithV2 = B2CCustomDomainAuthority + "/v2.0";
-        public const string B2CIssuer = B2CInstance + "/" + B2CTenantAsGuid + "/v2.0";
-        public const string B2CIssuer2 = B2CInstance2 + "/" + B2CTenantAsGuid + "/v2.0";
+        public const string B2CIssuer = B2CInstance + "/" + B2CTenantAsGuid + "/v2.0/";
+        public const string B2CIssuer2 = B2CInstance2 + "/" + B2CTenantAsGuid + "/v2.0/";
         public const string B2CAuthority = B2CInstance + "/" + B2CTenant + "/" + B2CSignUpSignInUserFlow;
         public const string B2CAuthorityWithV2 = B2CAuthority + "/v2.0";
         public const string B2CIssuerTfp = B2CInstance + "/" + Tfp + "/" + B2CTenantAsGuid + "/" + B2CSignUpSignInUserFlow + "/v2.0";

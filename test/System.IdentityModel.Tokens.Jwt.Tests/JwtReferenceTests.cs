@@ -1,29 +1,5 @@
-//------------------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System.Text;
 using Microsoft.IdentityModel.TestUtils;
@@ -40,8 +16,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         public void Base64UrlEncoding(string testId, string dataToEncode, string encodedData)
         {
             TestUtilities.WriteHeader($"Base64UrlEncoding - {testId}", true);
-            Assert.True(dataToEncode.Equals(Base64UrlEncoder.Decode(encodedData), StringComparison.Ordinal), "dataToEncode.Equals(Base64UrlEncoder.Decode(encodedData), StringComparison.Ordinal)");
-            Assert.True(encodedData.Equals(Base64UrlEncoder.Encode(dataToEncode), StringComparison.Ordinal), "encodedData.Equals(Base64UrlEncoder.Encode(dataToEncode), StringComparison.Ordinal)");
+            Assert.True(dataToEncode.Equals(Base64UrlEncoder.Decode(encodedData)), "dataToEncode.Equals(Base64UrlEncoder.Decode(encodedData))");
+            Assert.True(encodedData.Equals(Base64UrlEncoder.Encode(dataToEncode)), "encodedData.Equals(Base64UrlEncoder.Encode(dataToEncode))");
         }
 
         public static TheoryData<string, string, string> Base64UrlEncodingTheoryData
@@ -63,7 +39,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         public void JwtEncoding(string testId, JwtHeader header, string encodedData)
         {
             TestUtilities.WriteHeader($"JwtEncoding - {testId}", true);
-            Assert.True(encodedData.Equals(header.Base64UrlEncode(), StringComparison.Ordinal), "encodedData.Equals(header.Base64UrlEncode(), StringComparison.Ordinal)");
+            Assert.True(encodedData.Equals(header.Base64UrlEncode()), "encodedData.Equals(header.Base64UrlEncode())");
         }
 
         public static TheoryData<string, JwtHeader, string> JwtEncodingTheoryData
@@ -90,7 +66,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             // Signatures aren't necessarily deterministic across different algorithms
             if (testParams.DeterministicSignatures)
-                Assert.True(testParams.EncodedSignature.Equals(encodedSignature, StringComparison.Ordinal), "encodedSignature != testParams.EncodedSignature");
+                Assert.True(testParams.EncodedSignature.Equals(encodedSignature), "encodedSignature != testParams.EncodedSignature");
             Assert.True(providerForVerifying.Verify(Encoding.UTF8.GetBytes(testParams.EncodedData), Base64UrlEncoder.DecodeBytes(testParams.EncodedSignature)), "Verify Failed");
         }
 
