@@ -13,6 +13,7 @@ using System.Text.Json;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Json;
 using JsonPrimitives = Microsoft.IdentityModel.Tokens.Json.JsonSerializerPrimitives;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
@@ -1070,7 +1071,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             writer.WriteString(JwtHeaderUtf8Bytes.Kid, encryptingCredentials.KeyExchangePublicKey.KeyId);
 
                         if (SupportedAlgorithms.EcdsaWrapAlgorithms.Contains(encryptingCredentials.Alg))
-                            writer.WriteString(JwtHeaderUtf8Bytes.Epk, JsonWebKeyConverter.ConvertFromSecurityKey(encryptingCredentials.Key).RepresentAsAsymmetricPublicJwk());
+                        {
+                            writer.WritePropertyName(JwtHeaderUtf8Bytes.Epk);
+                            string publicJwk = JsonWebKeyConverter.ConvertFromSecurityKey(encryptingCredentials.Key).RepresentAsAsymmetricPublicJwk();
+#if NET6_0_OR_GREATER
+                            writer.WriteRawValue(publicJwk);
+#else
+                            JsonPrimitives.WriteAsJsonElement(ref writer, publicJwk);
+#endif
+                        }
                     }
                     else
                     {
