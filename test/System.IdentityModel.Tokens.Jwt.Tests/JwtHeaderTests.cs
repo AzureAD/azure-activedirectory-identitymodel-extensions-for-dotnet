@@ -8,9 +8,8 @@ using System.Text.Json;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Json.Tests;
 using Xunit;
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
@@ -248,5 +247,3 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         public SigningCredentials SigningCredentials { get; set; }
    }
 }
-
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

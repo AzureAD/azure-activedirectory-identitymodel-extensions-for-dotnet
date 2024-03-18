@@ -181,7 +181,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         #endregion
 
         #region GOOGLE 2/2/2024 https://accounts.google.com/.well-known/openid-configuration
-        public static string AccountsGoogleCom =>
+        public static string AccountsGoogleComJson =>
                 $$"""
                 {
                 "issuer": "https://accounts.google.com",
@@ -234,7 +234,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         #endregion
 
         #region AADCommonV1 2/2/2024 https://login.microsoftonline.com/common/.well-known/openid-configuration 
-        public static string AADCommonV1 =>
+        public static string AADCommonV1Json =>
                 """
                 {
                 "token_endpoint": "https://login.microsoftonline.com/common/oauth2/token",
@@ -303,7 +303,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         #endregion
 
         #region AADCommonV2 2/2/2024 https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration
-        public static string AADCommonV2 =>
+        public static string AADCommonV2Json =>
             """
             {
             "token_endpoint": "https://login.microsoftonline.com/common/oauth2/v2.0/token",
@@ -331,6 +331,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             "rbac_url": "https://pas.windows.net"
             }
             """;
+
         public static OpenIdConnectConfiguration AADCommonV2Config
         {
             get
