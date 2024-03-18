@@ -204,7 +204,8 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
 #if NET6_0_OR_GREATER
-        internal override bool Sign(ReadOnlySpan<byte> input, Span<byte> signature, out int bytesWritten)
+        /// <inheritdoc/>
+        public override bool Sign(ReadOnlySpan<byte> input, Span<byte> signature, out int bytesWritten)
         {
             if (input == null || input.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(input));
@@ -235,7 +236,8 @@ namespace Microsoft.IdentityModel.Tokens
         }
 #endif
 
-        internal override byte[] Sign(byte[] input, int offset, int count)
+        /// <inheritdoc/>
+        public override byte[] Sign(byte[] input, int offset, int count)
         {
             if (input == null || input.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(input));

@@ -24,6 +24,10 @@ namespace Microsoft.IdentityModel.Benchmarks
         }
         private static void DebugThroughTests()
         {
+            ReadJWETokenTests readTokenTests = new ReadJWETokenTests();
+            readTokenTests.Setup();
+            readTokenTests.ReadJWE_FromMemory();
+
             AsymmetricAdapterSignatures asymmetricAdapter = new AsymmetricAdapterSignatures();
             asymmetricAdapter.Setup();
             asymmetricAdapter.SignDotnetCreatingBufferRSA();

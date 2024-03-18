@@ -13,12 +13,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     {
         internal JsonClaimSet CreateHeaderClaimSet(byte[] bytes)
         {
-            return CreateHeaderClaimSet(bytes, bytes.Length);
+            return CreateHeaderClaimSet(bytes.AsSpan());
         }
 
         internal JsonClaimSet CreateHeaderClaimSet(byte[] bytes, int length)
         {
-            Utf8JsonReader reader = new(bytes.AsSpan().Slice(0, length));
+            return CreateHeaderClaimSet(bytes.AsSpan(0, length));
+        }
+
+        internal JsonClaimSet CreateHeaderClaimSet(ReadOnlySpan<byte> byteSpan)
+        { 
+            Utf8JsonReader reader = new(byteSpan);
             if (!JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, true))
                 throw LogHelper.LogExceptionMessage(
                     new JsonException(
@@ -73,7 +78,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     }
                 }
                 // We read a JsonTokenType.StartObject above, exiting and positioning reader at next token.
-                else if (JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, true))
+                else if (JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, false))
                     break;
                 else if (!reader.Read())
                     break;

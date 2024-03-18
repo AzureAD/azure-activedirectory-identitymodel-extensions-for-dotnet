@@ -32,7 +32,7 @@
 
   <!-- Wilson version  -->
   <PropertyGroup>
-    <WilsonCurrentVersion>7.3.2</WilsonCurrentVersion>
+    <WilsonCurrentVersion>7.4.1</WilsonCurrentVersion>
 
     <PreviewVersionSuffix Condition="'$(PreviewVersionSuffix)' == '' and '$(BuildingInsideVisualStudio)' != 'true'">preview-$([System.DateTime]::Now.AddYears(-2019).Year)$([System.DateTime]::Now.ToString("MMddHHmmss"))</PreviewVersionSuffix>
     <!--VS re-evaluates the variables, so having seconds or minutes creates an infinite loop of package updates-->
