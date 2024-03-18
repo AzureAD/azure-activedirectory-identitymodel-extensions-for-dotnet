@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using Microsoft.IdentityModel.TestUtils;
+using Microsoft.IdentityModel.Tokens.Json.Tests;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Tests

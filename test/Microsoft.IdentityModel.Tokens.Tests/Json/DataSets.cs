@@ -2,12 +2,11 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
-using Microsoft.IdentityModel.Tokens;
 
 /// <summary>
 /// Data sets for testing 
 /// </summary>
-namespace Microsoft.IdentityModel.TestUtils
+namespace Microsoft.IdentityModel.Tokens.Json.Tests
 {
     public class DataSets
     {
@@ -360,7 +359,7 @@ namespace Microsoft.IdentityModel.TestUtils
         public static string JsonWebKeySetUseNoKtyString = @"{ ""keys"":[" + JsonWebKeyNoKtyString + "]}";
 
         #region GOOGLE 2/2/2024 https://www.googleapis.com/oauth2/v3/certs
-        public static string AccountsGoogle =
+        public static string AccountsGoogleJson =
             """
             {
                 "keys": [
@@ -430,7 +429,7 @@ namespace Microsoft.IdentityModel.TestUtils
         #endregion
 
         #region AADCommonV1 2/2/2024 https://login.microsoftonline.com/common/discovery/keys
-        public static string AADCommonKeySetString_V1 =
+        public static string AADCommonV1KeySetJson =
             """
             {
                 "keys": [
@@ -471,7 +470,7 @@ namespace Microsoft.IdentityModel.TestUtils
             }
             """;
 
-        public static JsonWebKey AADCommonKey1_V1
+        public static JsonWebKey AADCommonV1Key1
         {
             get
             {
@@ -489,7 +488,7 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
-        public static JsonWebKey AADCommonKey2_V1
+        public static JsonWebKey AADCommonV1Key2
         {
             get
             {
@@ -507,7 +506,7 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
-        public static JsonWebKey AADCommonKey3_V1
+        public static JsonWebKey AADCommonV1Key3
         {
             get
             {
@@ -525,7 +524,7 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
-        public static JsonWebKeySet AADCommonKeySet_V1
+        public static JsonWebKeySet AADCommonV1KeySet
         {
             get
             {
@@ -533,21 +532,21 @@ namespace Microsoft.IdentityModel.TestUtils
                 {
                     Keys = new List<JsonWebKey>
                     {
-                        AADCommonKey1_V1,
-                        AADCommonKey2_V1,
-                        AADCommonKey3_V1
+                        AADCommonV1Key1,
+                        AADCommonV1Key2,
+                        AADCommonV1Key3
                     }
                 };
             }
         }
-
         #endregion
 
         #region AADCommonV2 2/2/2024 https://login.microsoftonline.com/common/discovery/v2.0/keys
-        public static string AADCommonKeySetString_V2 =
+        public static string AADCommonV2KeySetJson =
             """
-                        {
-                "keys": [
+            {
+                "keys":
+                [
                     {
                         "kty": "RSA",
                         "use": "sig",
@@ -612,7 +611,7 @@ namespace Microsoft.IdentityModel.TestUtils
             }
             """;
 
-        public static JsonWebKey AADCommonKey1_V2
+        public static JsonWebKey AADCommonV2Key1
         {
             get
             {
@@ -631,7 +630,7 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
-        public static JsonWebKey AADCommonKey2_V2
+        public static JsonWebKey AADCommonV2Key2
         {
             get
             {
@@ -650,7 +649,7 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
-        public static JsonWebKey AADCommonKey3_V2
+        public static JsonWebKey AADCommonV2Key3
         {
             get
             {
@@ -669,7 +668,7 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
-        public static JsonWebKey AADCommonKey4_V2
+        public static JsonWebKey AADCommonV2Key4
         {
             get
             {
@@ -688,7 +687,7 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
-        public static JsonWebKey AADCommonKey5_V2
+        public static JsonWebKey AADCommonV2Key5
         {
             get
             {
@@ -707,7 +706,7 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
-        public static JsonWebKeySet AADCommonKeySet_V2
+        public static JsonWebKeySet AADCommonV2KeySet
         {
             get
             {
@@ -715,11 +714,11 @@ namespace Microsoft.IdentityModel.TestUtils
                 {
                     Keys = new List<JsonWebKey>
                     {
-                        AADCommonKey1_V2,
-                        AADCommonKey2_V2,
-                        AADCommonKey3_V2,
-                        AADCommonKey4_V2,
-                        AADCommonKey5_V2
+                        AADCommonV2Key1,
+                        AADCommonV2Key2,
+                        AADCommonV2Key3,
+                        AADCommonV2Key4,
+                        AADCommonV2Key5
                     }
                 };
             }

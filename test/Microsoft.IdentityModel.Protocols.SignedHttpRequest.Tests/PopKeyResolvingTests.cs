@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Json.Tests;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;

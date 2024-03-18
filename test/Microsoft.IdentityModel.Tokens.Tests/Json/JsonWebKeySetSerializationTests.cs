@@ -119,19 +119,22 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
 
                 theoryData.Add(new JsonWebKeySetTheoryData("AADCommonV1")
                 {
-                    Json = DataSets.AADCommonKeySetString_V1,
-                    JsonWebKeySet = DataSets.AADCommonKeySet_V1
+                    Json = DataSets.AADCommonV1KeySetJson,
+                    JsonWebKeySet = DataSets.AADCommonV1KeySet
                 });
 
+                // the reason to replace "issuer" with "ISSUER" is because the test deserializes uppercase and lowercase.
+                // since "issuer" is not a property of JsonWebKeySet the value ends up in the AdditionalData dictionary, which is case sensitive.
+                // we wanted to leave the data sets as they were obtained from metadata so they can be used in other tests.
                 theoryData.Add(new JsonWebKeySetTheoryData("AADCommonV2")
                 {
-                    Json = DataSets.AADCommonKeySetString_V2,
-                    JsonWebKeySet = DataSets.AADCommonKeySet_V2
+                    Json = JsonUtilities.SetAdditionalDataKeysToUpperCase(DataSets.AADCommonV2KeySetJson, DataSets.AADCommonV2KeySet),
+                    JsonWebKeySet = JsonUtilities.SetAdditionalDataKeysToUpperCase(DataSets.AADCommonV2KeySet)
                 });
 
                 theoryData.Add(new JsonWebKeySetTheoryData("AccountsGoogleCom")
                 {
-                    Json = DataSets.AccountsGoogle,
+                    Json = DataSets.AccountsGoogleJson,
                     JsonWebKeySet = DataSets.AccountsGoogleKeySet
                 });
 
