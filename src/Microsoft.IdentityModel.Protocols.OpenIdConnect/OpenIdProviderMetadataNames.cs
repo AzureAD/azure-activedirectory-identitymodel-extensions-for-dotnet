@@ -58,6 +58,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public const string UserInfoEncryptionAlgValuesSupported = "userinfo_encryption_alg_values_supported";
         public const string UserInfoEncryptionEncValuesSupported = "userinfo_encryption_enc_values_supported";
         public const string UserInfoSigningAlgValuesSupported = "userinfo_signing_alg_values_supported";
+        public const string PromptValuesSupported = "prompt_values_supported";
+        public const string PushedAuthorizationRequestEndpoint = "pushed_authorization_request_endpoint";
+        public const string RequirePushedAuthorizationRequests = "require_pushed_authorization_requests";
+        public const string BackchannelAuthenticationEndpoint = "backchannel_authentication_endpoint";
+        public const string BackchannelTokenDeliveryModesSupported = "backchannel_token_delivery_modes_supported";
+        public const string BackchannelAuthenticationRequestSigningAlgValuesSupported = "backchannel_authentication_request_signing_alg_values_supported";
+        public const string BackchannelUserCodeParameterSupported = "backchannel_user_code_parameter_supported";
+        public const string DPoPSigningAlgValuesSupported = "dpop_signing_alg_values_supported";
+        public const string AuthorizationResponseIssParameterSupported = "authorization_response_iss_parameter_supported";
 #pragma warning restore 1591
     }
 
@@ -114,5 +123,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public static ReadOnlySpan<byte> UserInfoEncryptionAlgValuesSupported => "userinfo_encryption_alg_values_supported"u8;
         public static ReadOnlySpan<byte> UserInfoEncryptionEncValuesSupported => "userinfo_encryption_enc_values_supported"u8;
         public static ReadOnlySpan<byte> UserInfoSigningAlgValuesSupported => "userinfo_signing_alg_values_supported"u8;
+        public static ReadOnlySpan<byte> PromptValuesSupported => "prompt_values_supported"u8;
+        public static ReadOnlySpan<byte> PushedAuthorizationRequestEndpoint => "pushed_authorization_request_endpoint"u8;
+        public static ReadOnlySpan<byte> RequirePushedAuthorizationRequests => "require_pushed_authorization_requests"u8;
+        public static ReadOnlySpan<byte> BackchannelAuthenticationEndpoint => "backchannel_authentication_endpoint"u8;
+        public static ReadOnlySpan<byte> BackchannelTokenDeliveryModesSupported => "backchannel_token_delivery_modes_supported"u8;
+        public static ReadOnlySpan<byte> BackchannelAuthenticationRequestSigningAlgValuesSupported => "backchannel_authentication_request_signing_alg_values_supported"u8;
+        public static ReadOnlySpan<byte> BackchannelUserCodeParameterSupported => "backchannel_user_code_parameter_supported"u8;
+        public static ReadOnlySpan<byte> DPoPSigningAlgValuesSupported => "dpop_signing_alg_values_supported"u8;
+        public static ReadOnlySpan<byte> AuthorizationResponseIssParameterSupported => "authorization_response_iss_parameter_supported"u8;
     }
 }
