@@ -70,6 +70,12 @@ namespace System.IdentityModel.Tokens.Jwt
             { SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.RsaSha256 },
             { SecurityAlgorithms.RsaSha384Signature, SecurityAlgorithms.RsaSha384 },
             { SecurityAlgorithms.RsaSha512Signature, SecurityAlgorithms.RsaSha512 },
+
+            { SecurityAlgorithms.EddsaEd25519Signature, SecurityAlgorithms.EdDSA },
+            { SecurityAlgorithms.EddsaEd25519Sha512Signature, SecurityAlgorithms.EdDSA },
+            { SecurityAlgorithms.EddsaEd25519WithContextSignature, SecurityAlgorithms.EdDSA },
+            { SecurityAlgorithms.EddsaEd448Signature, SecurityAlgorithms.EdDSA },
+            { SecurityAlgorithms.EddsaEd25519Shake256Signature, SecurityAlgorithms.EdDSA },
         };
 
         /// <summary>
