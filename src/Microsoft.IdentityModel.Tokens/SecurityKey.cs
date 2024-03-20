@@ -4,6 +4,7 @@
 using System;
 using Microsoft.IdentityModel.Logging;
 using System.Text.Json.Serialization;
+using System.Threading;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -118,6 +119,33 @@ namespace Microsoft.IdentityModel.Tokens
         {
             // do not throw if algorithm is null or empty to stay in sync with CryptoProviderFactory.IsSupportedAlgorithm.
             return CryptoProviderFactory.IsSupportedAlgorithm(algorithm, this);
+        }
+
+        CryptoProviderCacheHelper _mruCacheKeyInfo = null;
+
+        internal string GetCryptoProviderCacheKey(string algorithm, string typeofProvider)
+        {
+            // Acquire the original reference.
+            CryptoProviderCacheHelper item = _mruCacheKeyInfo;
+
+            // Check if the original reference is initialized, and if so, check if it matches the current request.
+            if (item != null && item.Algorithm == algorithm && item.TypeofProvider == typeofProvider)
+                return item.CacheKey;
+
+            string cacheKey = $"{GetType()}-{InternalId}-{algorithm}-{typeofProvider}";
+
+            CryptoProviderCacheHelper newItem = new(algorithm, typeofProvider, cacheKey);
+
+            Interlocked.CompareExchange(ref _mruCacheKeyInfo, newItem, item);
+
+            return cacheKey;
+        }
+
+        internal class CryptoProviderCacheHelper(string algorithm, string typeOfProvider, string cacheKey)
+        {
+            public string Algorithm { get; } = algorithm;
+            public string TypeofProvider { get; } = typeOfProvider;
+            public string CacheKey { get; } = cacheKey;
         }
     }
 }

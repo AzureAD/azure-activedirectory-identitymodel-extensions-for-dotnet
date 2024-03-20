@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
@@ -103,7 +102,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         private static string GetCacheKeyPrivate(SecurityKey securityKey, string algorithm, string typeofProvider)
         {
-            return $"{securityKey.GetType()}-{securityKey.InternalId}-{algorithm}-{typeofProvider}";
+            return securityKey.GetCryptoProviderCacheKey(algorithm, typeofProvider);
         }
 
         /// <summary>
