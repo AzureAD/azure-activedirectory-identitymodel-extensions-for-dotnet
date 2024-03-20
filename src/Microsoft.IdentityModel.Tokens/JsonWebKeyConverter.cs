@@ -97,9 +97,16 @@ namespace Microsoft.IdentityModel.Tokens
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
+            var kty = key.PublicKey switch
+            {
+                RSA => JsonWebAlgorithmsKeyTypes.RSA,
+                ECDsa => JsonWebAlgorithmsKeyTypes.EllipticCurve,
+                _ => throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10674, LogHelper.MarkAsNonPII(key.GetType().FullName))))
+            };
+
             var jsonWebKey = new JsonWebKey
             {
-                Kty = JsonWebAlgorithmsKeyTypes.RSA,
+                Kty = kty,
                 Kid = key.KeyId,
                 X5t = key.X5t,
                 ConvertedSecurityKey = key
@@ -129,13 +136,27 @@ namespace Microsoft.IdentityModel.Tokens
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
-            RSA rsaKey;
             if (key.PrivateKeyStatus == PrivateKeyStatus.Exists)
-                rsaKey = key.PrivateKey as RSA;
-            else
-                rsaKey = key.PublicKey as RSA;
+            {
+                if (key.PrivateKey is RSA rsaPrivateKey)
+                {
+                    return ConvertFromRSASecurityKey(new RsaSecurityKey(rsaPrivateKey) { KeyId = key.KeyId });
+                }
+                else if (key.PrivateKey is ECDsa ecdsaPrivateKey)
+                {
+                    return ConvertFromECDsaSecurityKey(new ECDsaSecurityKey(ecdsaPrivateKey) { KeyId = key.KeyId });
+                }
+            }
+            else if (key.PublicKey is RSA rsaPublicKey)
+            {
+                return ConvertFromRSASecurityKey(new RsaSecurityKey(rsaPublicKey) { KeyId = key.KeyId });
+            }
+            else if (key.PublicKey is ECDsa ecdsaPublicKey)
+            {
+                return ConvertFromECDsaSecurityKey(new ECDsaSecurityKey(ecdsaPublicKey) { KeyId = key.KeyId });
+            }
 
-            return ConvertFromRSASecurityKey(new RsaSecurityKey(rsaKey) { KeyId = key.KeyId });
+            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10674, LogHelper.MarkAsNonPII(key.GetType().FullName))));
         }
 
         /// <summary>
