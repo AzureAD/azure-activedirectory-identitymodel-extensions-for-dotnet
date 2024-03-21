@@ -105,6 +105,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Aot
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Benchmarks", "benchmark\Microsoft.IdentityModel.Benchmarks\Microsoft.IdentityModel.Benchmarks.csproj", "{F1BB31E4-8865-4425-8BD4-94F1815C16E0}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{A426FA3A-9323-4EEF-B312-CA5C266AEA03}"
+	ProjectSection(SolutionItems) = preProject
+		build\common.props = build\common.props
+		build\commonTest.props = build\commonTest.props
+		build\dependencies.props = build\dependencies.props
+		build\dependenciesTest.props = build\dependenciesTest.props
+		build\targets.props = build\targets.props
+		build\targetsTest.props = build\targetsTest.props
+		build\version.props = build\version.props
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
