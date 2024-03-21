@@ -450,6 +450,16 @@ namespace Microsoft.IdentityModel.Tokens
         public IDictionary<string, object> PropertyBag { get; set; }
 
         /// <summary>
+        /// Gets or sets a delegate that will be called when reading token payload claims.
+        /// </summary>
+        public ReadTokenHeaderValueDelegate ReadTokenHeaderValue { get; set; }
+
+        /// <summary>
+        /// Gets or sets a delegate that will be called when reading token payload claims.
+        /// </summary>
+        public ReadTokenPayloadValueDelegate ReadTokenPayloadValue { get; set; }
+
+        /// <summary>
         /// Gets or sets a boolean to control if configuration required to be refreshed before token validation.
         /// </summary>
         /// <remarks>

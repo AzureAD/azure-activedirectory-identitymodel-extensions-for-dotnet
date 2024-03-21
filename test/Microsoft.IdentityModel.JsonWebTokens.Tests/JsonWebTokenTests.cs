@@ -12,9 +12,11 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Json;
 using Microsoft.IdentityModel.Tokens.Json.Tests;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -1541,6 +1543,53 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
         }
 
+#if NET8_0_OR_GREATER
+        [Fact]
+        public void ParseToken_EscapedAndUnescaped_PropertiesCorrectlySet()
+        {
+            var unescapedAzp = "AA\\AA";
+            var unknownClaimName = "unknown_claim_name";
+            var unknownClaimValue = "unknown_claim_value";
+
+            // CreateToken uses Utf8JsonWriter which correctly escapes strings.
+            var tokenStr = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
+            {
+                TokenType = JwtHeaderParameterNames.Jwk,
+                Claims = new Dictionary<string, object>()
+                {
+                    { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires) },
+                    { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore) },
+                    { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant) },
+                    { JwtRegisteredClaimNames.Iss, Default.Issuer },
+                    { JwtRegisteredClaimNames.Aud, Default.Audience },
+                    { JwtRegisteredClaimNames.Azp, unescapedAzp },
+                    { JwtRegisteredClaimNames.Jti, Default.Jti },
+                    { unknownClaimName, unknownClaimValue },
+                }
+            });
+
+            var jwt = new JsonWebToken(tokenStr);
+
+            // Check known claim that doesn't need to be escaped.
+            Assert.True(jwt.TryGetPayloadValue(JwtRegisteredClaimNames.Iss, out string issuerFromPayload));
+            Assert.Equal(Default.Issuer, issuerFromPayload);
+            Assert.Equal(Default.Issuer, jwt.Issuer);
+            Assert.Equal(Default.Issuer, jwt.GetPayloadValue<string>(JwtRegisteredClaimNames.Iss));
+            Assert.True(jwt.IssuerBytes.SequenceEqual(Encoding.UTF8.GetBytes(Default.Issuer)));
+
+            // Check known claim that needs to be escaped.
+            Assert.True(jwt.TryGetPayloadValue(JwtRegisteredClaimNames.Azp, out string azpFromPayload));
+            Assert.Equal(unescapedAzp, azpFromPayload);
+            Assert.Equal(unescapedAzp, jwt.Azp);
+            Assert.Equal(unescapedAzp, jwt.GetPayloadValue<string>(JwtRegisteredClaimNames.Azp));
+            Assert.True(jwt.AzpBytes.SequenceEqual(Encoding.UTF8.GetBytes(unescapedAzp)));
+
+            // Check unknown claim that doesn't need to be escaped.
+            Assert.True(jwt.TryGetPayloadValue(unknownClaimName, out string unknownClaimValueFromPayload));
+            Assert.Equal(unknownClaimValue, unknownClaimValueFromPayload);
+        }
+#endif
+
         // Test ensures that we only try to populate a JsonWebToken from a string if it is a properly formatted JWT.
         // More specifically, we only want to try and decode
         // a JWT token if it has the correct number of (JWE or JWS) token parts.
@@ -1741,22 +1790,55 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         }
 
         [Fact]
-        public void DerivedJsonWebToken_IsCreatedCorrectly()
+        public void ReadTokenDelegates_CalledCorrectly()
         {
-            var expectedCustomClaim = "customclaim";
-            var tokenStr = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
+            var tokenSpan = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
             {
                 Issuer = Default.Issuer,
                 Claims = new Dictionary<string, object>
                 {
-                    { "CustomClaim", expectedCustomClaim },
+                    { "CustomPayload", "custom_payload" },
+                },
+                AdditionalHeaderClaims = new Dictionary<string, object>
+                {
+                    { "CustomHeader", "custom_header" }
                 }
-            });
+            }).AsMemory();
 
-            var derivedToken = new CustomJsonWebToken(tokenStr);
+            object ReadHeaderValue(ref Utf8JsonReader reader, string claimName)
+            {
+                if (reader.ValueTextEquals("CustomHeader"u8))
+                {
+                    return new CustomHeaderClaim(JsonSerializerPrimitives.ReadString(ref reader, "CustomHeader", string.Empty, true));
+                }
+                return JsonWebToken.ReadTokenHeaderValue(ref reader, claimName);
+            }
 
-            Assert.Equal(expectedCustomClaim, derivedToken.CustomClaim);
-            Assert.Equal(Default.Issuer, derivedToken.Issuer);
+            object ReadPayloadValue(ref Utf8JsonReader reader, string claimName)
+            {
+                if (reader.ValueTextEquals("CustomPayload"u8))
+                {
+                    return new CustomPayloadClaim(JsonSerializerPrimitives.ReadString(ref reader, "CustomPayload", string.Empty, true));
+                }
+                return JsonWebToken.ReadTokenPayloadValue(ref reader, claimName);
+            }
+
+            var jwt = new JsonWebToken(tokenSpan, ReadHeaderValue, ReadPayloadValue);
+
+            Assert.True(jwt.TryGetHeaderValue<CustomHeaderClaim>("CustomHeader", out var actualHeaderClaim));
+            Assert.True(jwt.TryGetPayloadValue<CustomPayloadClaim>("CustomPayload", out var actualPayloadClaim));
+
+            Assert.Equal("custom_header", actualHeaderClaim.CustomValue);
+            Assert.Equal("custom_payload", actualPayloadClaim.CustomValue);
+        }
+
+        private class CustomHeaderClaim(string customValue)
+        {
+            public string CustomValue { get; set; } = customValue;
+        }
+        private class CustomPayloadClaim(string customValue)
+        {
+            public string CustomValue { get; set; } = customValue;
         }
     }
 

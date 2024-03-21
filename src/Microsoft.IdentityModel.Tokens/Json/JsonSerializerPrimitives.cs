@@ -653,6 +653,32 @@ namespace Microsoft.IdentityModel.Tokens.Json
             return retval;
         }
 
+#if NET8_0_OR_GREATER
+        // Mostly the same as ReadString, but this method returns the position of the claim value in the token bytes.
+        // This method does not unescape the value. The JsonWebToken GetValue, etc. methods are responsible for unescaping the value.
+        internal static ValuePosition ReadStringBytesLocation(
+            ref Utf8JsonReader reader,
+            string propertyName,
+            string className,
+            bool read = false)
+        {
+            // returning null keeps the same logic as JsonSerialization.ReadObject
+            if (IsReaderPositionedOnNull(ref reader, read, true))
+                return null;
+
+            if (!IsReaderAtTokenType(ref reader, JsonTokenType.String, false))
+                throw LogHelper.LogExceptionMessage(
+                    CreateJsonReaderExceptionInvalidType(ref reader, "JsonTokenType.StartArray", className, propertyName));
+
+            var claimPosition = new ValuePosition((int)reader.TokenStartIndex + 1, reader.ValueSpan.Length, reader.ValueIsEscaped);
+
+            // Move to next token
+            reader.Read();
+
+            return claimPosition;
+        }
+#endif
+
         internal static string ReadStringAsBool(ref Utf8JsonReader reader, string propertyName, string className, bool read = false)
         {
             // The parameter 'read' can be used by callers reader position the reader to the next token.
@@ -1275,17 +1301,17 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 writer.WriteNumberValue(f);
 #else
 #pragma warning disable CA1031 // Do not catch general exception types, we have seen TryParse fault.
-                try
-                {
-                    if (decimal.TryParse(f.ToString(CultureInfo.InvariantCulture), out decimal dec))
-                        writer.WriteNumberValue(dec);
-                    else
-                        writer.WriteNumberValue(f);
-                }
-                catch (Exception)
-                {
+            try
+            {
+                if (decimal.TryParse(f.ToString(CultureInfo.InvariantCulture), out decimal dec))
+                    writer.WriteNumberValue(dec);
+                else
                     writer.WriteNumberValue(f);
-                }
+            }
+            catch (Exception)
+            {
+                writer.WriteNumberValue(f);
+            }
 #pragma warning restore CA1031
 #endif
 

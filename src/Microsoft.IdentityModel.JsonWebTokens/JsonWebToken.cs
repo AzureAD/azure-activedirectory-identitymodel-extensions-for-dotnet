@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text;
@@ -90,6 +89,29 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Initializes a new instance of <see cref="JsonWebToken"/> from a ReadOnlyMemory{char} in JWS or JWE Compact serialized format.
         /// </summary>
         /// <param name="encodedTokenMemory">A ReadOnlyMemory{char} containing the JSON Web Token serialized in JWS or JWE Compact format.</param>
+        /// <param name="readTokenHeaderValueDelegate">A custom delegate to be called when each header claim is being read. If null, default implementation is called.</param>
+        /// <param name="readTokenPayloadValueDelegate">A custom delegate to be called when each payload claim is being read. If null, default implementation is called.</param>
+        public JsonWebToken(
+            ReadOnlyMemory<char> encodedTokenMemory,
+            ReadTokenHeaderValueDelegate readTokenHeaderValueDelegate,
+            ReadTokenPayloadValueDelegate readTokenPayloadValueDelegate)
+        {
+            if (encodedTokenMemory.IsEmpty)
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(encodedTokenMemory)));
+
+            ReadTokenHeaderValueDelegate = readTokenHeaderValueDelegate ?? ReadTokenHeaderValue;
+            ReadTokenPayloadValueDelegate = readTokenPayloadValueDelegate ?? ReadTokenPayloadValue;
+
+            ReadToken(encodedTokenMemory);
+
+            _encodedTokenMemory = encodedTokenMemory;
+
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="JsonWebToken"/> from a ReadOnlyMemory{char} in JWS or JWE Compact serialized format.
+        /// </summary>
+        /// <param name="encodedTokenMemory">A ReadOnlyMemory{char} containing the JSON Web Token serialized in JWS or JWE Compact format.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="encodedTokenMemory"/> is empty.</exception>
         /// <exception cref="ArgumentException">Thrown if <paramref name="encodedTokenMemory"/> does not represent a valid JWS or JWE Compact Serialization format.</exception>
         /// <remarks>
@@ -140,6 +162,43 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             _encodedToken = encodedToken;
         }
+
+        /// <summary>
+        /// Called for each claim when token header is being read.
+        /// </summary>
+        /// <remarks>
+        /// An example implementation:
+        /// <code>
+        /// object ReadPayloadValueDelegate(ref Utf8JsonReader reader, string claimName) =>
+        /// {
+        ///     if (reader.ValueTextEquals("CustomProp"))
+        ///     {
+        ///         return JsonSerializerPrimitives.ReadString(ref reader, JwtRegisteredClaimNames.CustomProp, ClassName, true);    
+        ///     }
+        ///     return JsonWebToken.ReadTokenHeaderValue(ref reader, claimName);
+        /// }
+        /// </code>
+        /// </remarks>
+        internal ReadTokenHeaderValueDelegate ReadTokenHeaderValueDelegate { get; set; } = ReadTokenHeaderValue;
+
+
+        /// <summary>
+        /// Called for each claim when token payload is being read.
+        /// </summary>
+        /// <remarks>
+        /// An example implementation:
+        /// <code>
+        /// object ReadPayloadValueDelegate(ref Utf8JsonReader reader, string claimName) =>
+        /// {
+        ///     if (reader.ValueTextEquals("CustomProp"))
+        ///     {
+        ///         return JsonSerializerPrimitives.ReadString(ref reader, JwtRegisteredClaimNames.CustomProp, ClassName, true);    
+        ///     }
+        ///     return JsonWebToken.ReadTokenPayloadValue(ref reader, claimName);
+        /// }
+        /// </code>
+        /// </remarks>
+        internal ReadTokenPayloadValueDelegate ReadTokenPayloadValueDelegate { get; set; } = ReadTokenPayloadValue;
 
         internal string ActualIssuer { get; set; }
 
@@ -502,7 +561,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 try
                 {
-                    Header = CreateHeaderClaimSet(Base64UrlEncoder.Decode(headerSpan).AsSpan());
+                    Header = CreateHeaderClaimSet(Base64UrlEncoder.Decode(headerSpan).AsMemory());
                 }
                 catch (Exception ex)
                 {
@@ -569,16 +628,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             int outputSize = Base64UrlEncoding.ValidateAndGetOutputSize(strSpan, startIndex, length);
 
-            byte[] output = ArrayPool<byte>.Shared.Rent(outputSize);
-            try
-            {
-                Base64UrlEncoder.Decode(strSpan.Slice(startIndex, length), output);
-                return createHeaderClaimSet ? CreateHeaderClaimSet(output.AsSpan()) : CreatePayloadClaimSet(output.AsSpan());
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(output, true);
-            }
+            byte[] output = new byte[outputSize];
+            Base64UrlEncoder.Decode(strSpan.Slice(startIndex, length), output);
+            return createHeaderClaimSet ? CreateHeaderClaimSet(output.AsMemory()) : CreatePayloadClaimSet(output.AsMemory());
         }
 
         /// <summary>
@@ -1139,5 +1191,44 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
         #endregion
+
+#if NET8_0_OR_GREATER
+
+        #region Header Properties Bytes
+
+        /// <inheritdoc cref="Alg" />
+        public ReadOnlySpan<byte> AlgBytes => Payload.GetStringBytesValue(JwtHeaderParameterNames.Alg);
+
+        /// <inheritdoc cref="Cty" />
+        public ReadOnlySpan<byte> CtyBytes => Payload.GetStringBytesValue(JwtHeaderParameterNames.Cty);
+
+        /// <inheritdoc cref="Kid" />
+        public ReadOnlySpan<byte> KidBytes => Payload.GetStringBytesValue(JwtHeaderParameterNames.Kid);
+
+        /// <inheritdoc cref="Typ" />
+        public ReadOnlySpan<byte> TypBytes => Payload.GetStringBytesValue(JwtHeaderParameterNames.Typ);
+
+        /// <inheritdoc cref="X5t" />
+        public ReadOnlySpan<byte> X5tBytes => Payload.GetStringBytesValue(JwtHeaderParameterNames.X5t);
+
+        /// <inheritdoc cref="Zip" />
+        public ReadOnlySpan<byte> ZipBytes => Payload.GetStringBytesValue(JwtHeaderParameterNames.Zip);
+
+        #endregion
+
+        #region Payload Properties Bytes
+
+        /// <inheritdoc cref="Azp" />
+        public ReadOnlySpan<byte> AzpBytes => Payload.GetStringBytesValue(JwtRegisteredClaimNames.Azp);
+
+        /// <inheritdoc cref="Id" />
+        public ReadOnlySpan<byte> IdBytes => Payload.GetStringBytesValue(JwtRegisteredClaimNames.Jti);
+
+        /// <inheritdoc cref="Issuer" />
+        public ReadOnlySpan<byte> IssuerBytes => Payload.GetStringBytesValue(JwtRegisteredClaimNames.Iss);
+
+        #endregion
+
+#endif
     }
 }

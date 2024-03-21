@@ -24,17 +24,36 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal object _claimsLock = new();
         internal readonly Dictionary<string, object> _jsonClaims;
+
+#if NET8_0_OR_GREATER
+        internal readonly Memory<byte> _tokenAsMemory;
+#endif
+
         private List<Claim> _claims;
 
         internal JsonClaimSet()
         {
-            _jsonClaims = new Dictionary<string, object>();
+            _jsonClaims = [];
+
+#if NET8_0_OR_GREATER
+            _tokenAsMemory = Memory<byte>.Empty;
+#endif
         }
 
         internal JsonClaimSet(Dictionary<string, object> jsonClaims)
         {
             _jsonClaims = jsonClaims;
         }
+
+#if NET8_0_OR_GREATER
+        internal JsonClaimSet(
+            Dictionary<string, object> jsonClaims,
+            Memory<byte> tokenAsMemory)
+        {
+            _jsonClaims = jsonClaims;
+            _tokenAsMemory = tokenAsMemory;
+        }
+#endif
 
         internal List<Claim> Claims(string issuer)
         {
@@ -49,8 +68,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             var claims = new List<Claim>(_jsonClaims.Count);
             foreach (KeyValuePair<string, object> kvp in _jsonClaims)
+            {
                 CreateClaimFromObject(claims, kvp.Key, kvp.Value, issuer);
 
+#if NET8_0_OR_GREATER
+                if (kvp.Value is ValuePosition position)
+                {
+                    if (position.IsEscaped)
+                        EscapeStringBytesInPlace(position);
+
+                    string value = System.Text.Encoding.UTF8.GetString(_tokenAsMemory.Slice(position.StartIndex, position.Length).Span);
+                    claims.Add(new Claim(kvp.Key, value, ClaimValueTypes.String, issuer, issuer));
+                }
+#endif
+            }
             return claims;
         }
 
@@ -167,11 +198,55 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (obj == null)
                     return null;
 
+#if NET8_0_OR_GREATER
+                if (obj is ValuePosition position)
+                {
+                    if (position.IsEscaped)
+                        EscapeStringBytesInPlace(position);
+
+                    return System.Text.Encoding.UTF8.GetString(_tokenAsMemory.Slice(position.StartIndex, position.Length).Span);
+                }
+#endif
                 return obj.ToString();
             }
-
             return string.Empty;
         }
+
+#if NET8_0_OR_GREATER
+        // Similar to GetStringValue but returns the bytes directly.
+        internal ReadOnlySpan<byte> GetStringBytesValue(string key)
+        {
+            if (_jsonClaims.TryGetValue(key, out object obj))
+            {
+                if (obj == null)
+                    return null;
+
+                if (obj is ValuePosition position)
+                {
+                    if (position.IsEscaped)
+                        EscapeStringBytesInPlace(position);
+
+                    return _tokenAsMemory.Slice(position.StartIndex, position.Length).Span;
+                }
+            }
+
+            return [];
+        }
+
+        /// <summary>
+        /// Unescapes the bytes of a string claim value in-place in the token bytes Memory instance.
+        /// After escaping, updates the length of the claim value to reflect the unescaped bytes.
+        /// </summary>
+        /// <remarks>The start position and length provided to the Utf8JsonReader has to be adjusted to include double quotes.</remarks>
+        /// <param name="position">Position of the claim value.</param>
+        private void EscapeStringBytesInPlace(ValuePosition position)
+        {
+            var reader = new Utf8JsonReader(_tokenAsMemory.Span.Slice(position.StartIndex - 1, position.Length + 2));
+            reader.Read();
+            position.Length = reader.CopyString(_tokenAsMemory.Span.Slice(position.StartIndex, position.Length));
+            position.IsEscaped = false;
+        }
+#endif
 
         internal DateTime GetDateTime(string key)
         {
@@ -235,8 +310,19 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     if (list.Count == 1)
                         return (T)((object)(list[0]));
                 }
+#if NET8_0_OR_GREATER
+                else if (obj is ValuePosition position)
+                {
+                    if (position.IsEscaped)
+                        EscapeStringBytesInPlace(position);
+
+                    return (T)(object)System.Text.Encoding.UTF8.GetString(_tokenAsMemory.Slice(position.StartIndex, position.Length).Span);
+                }
+#endif
                 else
+                {
                     return (T)((object)obj.ToString());
+                }
             }
             else if (typeof(T) == typeof(bool))
             {
@@ -425,13 +511,24 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <returns><see langword="true"/> if the key was found; otherwise, <see langword="false"/>.</returns>
         internal bool TryGetValue<T>(string key, out T value)
         {
+#if NET8_0_OR_GREATER
+            if (typeof(T) == typeof(string))
+            {
+                var span = GetStringBytesValue(key);
+                if (!span.IsEmpty)
+                {
+                    value = (T)(object)System.Text.Encoding.UTF8.GetString(span);
+                    return true;
+                }
+            }
+#endif
             value = GetValue<T>(key, false, out bool found);
             return found;
         }
 
         internal bool HasClaim(string claimName)
         {
-            return _jsonClaims.TryGetValue(claimName, out _);
+            return _jsonClaims.ContainsKey(claimName);
         }
     }
 }
