@@ -37,6 +37,23 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
+                    ReadPayloadValue(reader, claims);
+                }
+                // We read a JsonTokenType.StartObject above, exiting and positioning reader at next token.
+                else if (JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, false))
+                    break;
+                else if (!reader.Read())
+                    break;
+            };
+
+            return new JsonClaimSet(claims);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected internal virtual void ReadPayloadValue(Utf8JsonReader reader, Dictionary<string, object> claims)
+        {
                     if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Aud))
                     {
                         _audiences = [];
@@ -103,14 +120,5 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         claims[propertyName] = JsonSerializerPrimitives.ReadPropertyValueAsObject(ref reader, propertyName, JsonClaimSet.ClassName, true);
                     }
                 }
-                // We read a JsonTokenType.StartObject above, exiting and positioning reader at next token.
-                else if (JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, false))
-                    break;
-                else if (!reader.Read())
-                    break;
-            };
-
-            return new JsonClaimSet(claims);
-        }
     }
 }
