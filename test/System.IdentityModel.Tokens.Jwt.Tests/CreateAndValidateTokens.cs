@@ -799,6 +799,30 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ExpectedException.NoExceptionExpected
             );
 
+            encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP256, SecurityAlgorithms.Aes128CbcHmacSha256);
+            theoryData.Add(
+                "RsaOAEP256-Aes128CbcHmacSha256",
+                Default.SecurityTokenDescriptor(encryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
+                Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
+                ExpectedException.NoExceptionExpected
+            );
+
+            encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP256, SecurityAlgorithms.Aes192CbcHmacSha384);
+            theoryData.Add(
+                "RsaOAEP256-Aes192CbcHmacSha384",
+                Default.SecurityTokenDescriptor(encryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
+                Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
+                ExpectedException.NoExceptionExpected
+            );
+
+            encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOAEP256, SecurityAlgorithms.Aes256CbcHmacSha512);
+            theoryData.Add(
+                "RsaOAEP256-Aes256CbcHmacSha512",
+                Default.SecurityTokenDescriptor(encryptingCredentials, Default.SymmetricSigningCredentials, ClaimSets.DefaultClaims),
+                Default.TokenValidationParameters(KeyingMaterial.RsaSecurityKey_2048, Default.SymmetricSigningKey256),
+                ExpectedException.NoExceptionExpected
+            );
+
             encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes128CbcHmacSha256);
             theoryData.Add(
                 "RsaOaepKeyWrap-Aes128CbcHmacSha256",
