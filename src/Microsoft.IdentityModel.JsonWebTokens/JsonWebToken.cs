@@ -569,15 +569,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal JsonClaimSet CreateClaimSet(ReadOnlySpan<char> strSpan, int startIndex, int length, bool createHeaderClaimSet)
         {
             int outputSize = Base64UrlEncoding.ValidateAndGetOutputSize(strSpan, startIndex, length);
+
             byte[] output = ArrayPool<byte>.Shared.Rent(outputSize);
             try
             {
-                Base64UrlEncoding.Decode(strSpan, startIndex, length, output);
+                ReadOnlySpan<char> slice = strSpan.Slice(startIndex, length);
+                Base64UrlEncoder.UnsafeDecode(slice, output);
                 return createHeaderClaimSet ? CreateHeaderClaimSet(output.AsSpan()) : CreatePayloadClaimSet(output.AsSpan());
             }
             finally
             {
-                ArrayPool<byte>.Shared.Return(output);
+                ArrayPool<byte>.Shared.Return(output, true);
             }
         }
 
