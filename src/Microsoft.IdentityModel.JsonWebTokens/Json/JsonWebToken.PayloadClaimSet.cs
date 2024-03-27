@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Text.Json;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -78,8 +79,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     }
                     else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Iss))
                     {
-                        _iss = JsonSerializerPrimitives.ReadString(ref reader, JwtRegisteredClaimNames.Iss, ClassName, true);
-                        claims[JwtRegisteredClaimNames.Iss] = _iss;
+                        
+                        IssuerUtf8 = JsonSerializerPrimitives.ReadStringUtf8(ref reader, JwtRegisteredClaimNames.Jti, ClassName, true).ToArray();
+                        claims[JwtRegisteredClaimNames.Iss] = Encoding.UTF8.GetString(IssuerUtf8.ToArray());
+                        reader.Read();
                     }
                     else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Jti))
                     {

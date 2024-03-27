@@ -1,8 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Text;
 using System.Text.Json.Serialization;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -12,10 +14,22 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public abstract class BaseConfiguration
     {
+        private string _issuer;
+
         /// <summary>
         /// Gets the issuer specified via the metadata endpoint.
         /// </summary>
-        public virtual string Issuer { get; set; }
+        public virtual string Issuer
+        {
+            get => _issuer;
+            set
+            {
+                _issuer = value;
+                IssuerUtf8 = value != null ? Encoding.UTF8.GetBytes(value) : null;
+            }
+        }
+
+        internal ReadOnlyMemory<byte> IssuerUtf8 { get; private set; }
 
         /// <summary>
         /// Gets the <see cref="ICollection{SecurityKey}"/> that the IdentityProvider indicates are to be used in order to sign tokens.
