@@ -7,12 +7,13 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Internal Validator
+    /// Internal Validator Utilities
     /// </summary>
     internal static class ValidatorUtilities
     {
         /// <summary>
         /// Validates the lifetime of a <see cref="SecurityToken"/>.
+        /// </summary>
         /// <param name="notBefore">The 'notBefore' time found in the <see cref="SecurityToken"/>.</param>
         /// <param name="expires">The 'expiration' time found in the <see cref="SecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
@@ -22,7 +23,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="SecurityTokenNotYetValidException">If 'notBefore' is &gt; DateTime.UtcNow.</exception>
         /// <exception cref="SecurityTokenExpiredException">If 'expires' is &lt; DateTime.UtcNow.</exception>
         /// <remarks>All time comparisons apply <see cref="TokenValidationParameters.ClockSkew"/>.</remarks>
-        /// </summary>
         internal static void ValidateLifetime(DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             if (!expires.HasValue && validationParameters.RequireExpirationTime)
