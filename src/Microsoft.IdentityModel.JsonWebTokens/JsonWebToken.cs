@@ -573,7 +573,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             try
             {
                 Base64UrlEncoding.Decode(strSpan, startIndex, length, output);
-                return createHeaderClaimSet ? CreateHeaderClaimSet(output.AsSpan()) : CreatePayloadClaimSet(output.AsSpan());
+                return createHeaderClaimSet ? CreateHeaderClaimSet(output.AsSpan()) : CreatePayloadClaimSet(output.AsMemory());
             }
             finally
             {
