@@ -1,5 +1,15 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+7.5.1
+=====
+### Performance Improvements:
+- Use Base64.DecodeFromUtf8InPlace for base64 decode that saves 12% on token read time. Note that [JsonWebToken](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/blob/a0ffac3dd9d7178430b617bae0e8e24b2188cf6a/src/Microsoft.IdentityModel.JsonWebTokens/JsonWebToken.cs#L4) no longer throws ArgumentOutOfRangeException and ArgumentException exceptions. See PR [#2504](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2504).
+
+### Fundamentals:
+- Moved token lifetime validation logic to an [internal static class](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/blob/dev/src/Microsoft.IdentityModel.Tokens/ValidatorUtilities.cs). See PR [#2547](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2547).
+
+### Bug Fix:
+- Contribution from @martinb69 to fix correct parsing of `UserInfoEndpoint`. See issue [#2548](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2548) for details.
 7.5.0
 =====
 ### New features
@@ -123,7 +133,7 @@ See [IdentityModel7x](https://github.com/AzureAD/azure-activedirectory-identitym
 
 ## Performance improvements:
 - Remove sync-over-async pattern with `JsonWebTokens.ValidateToken`, which when in the hot path can lead to threadpool starvation. See issue [#2253](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2253) for details.
-- Perf testing using brenchmark dotnet and crank, similar to aspnetcore, to better gauge requests per second perf impacts. See issue [#2232](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2232) for details.
+- Perf testing using benchmark dotnet and crank, similar to aspnetcore, to better gauge requests per second perf impacts. See issue [#2232](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2232) for details.
 - Use optimistic synchronization in `JsonWebToken.Audiences`. See [PR](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2243) for details.
 - Reduce allocations when enumerating over collections. See [PR](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2242) for details.
 
@@ -145,7 +155,7 @@ See [IdentityModel7x](https://github.com/AzureAD/azure-activedirectory-identitym
 
 - First increment in replacing newtonsoft with System.Text.Json, see [#2174](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2174)
 
-- Reading and writing JsonWebKey and JsonWebKeySet types now use System.Text.Json.Utf8JsonReaders/Writers for serialization. Seee PR [@2208](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2208) for details.
+- Reading and writing JsonWebKey and JsonWebKeySet types now use System.Text.Json.Utf8JsonReaders/Writers for serialization. See PR [@2208](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2208) for details.
 
 - Remove the use of Newtonsoft from OpenIdConnectConfiguration and OpenIdConnectMessage. See PR [@2214](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2214) for details.
 
@@ -243,7 +253,7 @@ https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-do
 Added support for AesGcm on .NET 6.0 or higher
 https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/commit/85fa86af743e2b1a0078a9ecd956f34ee703acfc
 
-First round of triming analysis preperation for AOT
+First round of trimming analysis preparation for AOT
 https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2042
 
 Added new API on TokenHandler.ValidateTokenAsync(SecurityToken ...) implemented only on JsonWebTokenHandler.
