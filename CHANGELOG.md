@@ -1,5 +1,10 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+7.5.0
+=====
+### New features
+- Supports the 1.1 version of the Microsoft Entra ID Endpoint [#2503](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2503)
+
 7.4.1
 ======
 ### Bug Fixes:
@@ -8,8 +13,8 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 
 ### Engineering Excellence:
 - Remove reference to `Microsoft.IdentityModel.Logging` in `Microsoft.IdentityModel.Protocols`, which already depends on it via `Microsoft.IdentityModel.Tokens`. See PR [#2508](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2508)
-- Adjust uppercase json serialization tests to fix an unreliable test method, add consistency to naming. See PR [#2512](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2512) 
-- Disable the 'restore' and 'build' steps of 'build and pack' in `build.sh`, improving speed. See PR [#2521](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2521) 
+- Adjust uppercase json serialization tests to fix an unreliable test method, add consistency to naming. See PR [#2512](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2512)
+- Disable the 'restore' and 'build' steps of 'build and pack' in `build.sh`, improving speed. See PR [#2521](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2521)
 
 7.4.0
 ======
@@ -27,7 +32,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 ### Engineering Excellence:
 - Streamlined the build and release process by replacing the dependency on updateAssemblyInfo.ps1 with the Version property. Check out the details in PR [#2494](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2494).
 - Excluded the packing of Benchmark and TestApp projects for a more efficient process. Details available in PR [#2496](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2496).
-  
+
 7.3.1
 ======
 ### Bug Fixes:
@@ -178,7 +183,7 @@ JwtSecurityTokenConverter, see [#2117](https://github.com/AzureAD/azure-activedi
 =======
 ## Bug fixes:
 - Fix logging messages. See [#2288](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2288) for details.
-  
+
 6.32.2
 =======
 ## Bug fixes:
@@ -210,7 +215,7 @@ This release contains work from the following PRs and commits:
 6.30.1
 =========
 This release contains work from the following PRs:
-- Modified token validation to be async throughout the call graph #2075 
+- Modified token validation to be async throughout the call graph #2075
 - Enforce key sizes when creating HMAC #2072
 - Fix AotCompatibilityTests #2066
 - Use up-to-date "now", in case take long time to get Metadata #2063
