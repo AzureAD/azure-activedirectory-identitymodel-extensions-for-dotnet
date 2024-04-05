@@ -1,5 +1,13 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+7.5.1
+=====
+### Performance Improvements:
+- Use Base64.DecodeFromUtf8InPlace for base64 decode that saves 12% on token read time. See PR [#2504](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2504).
+
+### Fundamentals:
+- Moved token lifetime validation logic to an [internal static class](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/blob/dev/src/Microsoft.IdentityModel.Tokens/ValidatorUtilities.cs). See PR [#2547](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2547).
+
 7.5.0
 =====
 ### New features
