@@ -8,6 +8,8 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 ### Fundamentals:
 - Moved token lifetime validation logic to an [internal static class](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/blob/dev/src/Microsoft.IdentityModel.Tokens/ValidatorUtilities.cs). See PR [#2547](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2547).
 
+### Bug Fix:
+- Contribution from @martinb69 to fix correct parsing of `UserInfoEndpoint`. See issue [#2548](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2548) for details.
 7.5.0
 =====
 ### New features
