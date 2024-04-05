@@ -173,10 +173,10 @@ namespace Microsoft.IdentityModel.Tokens
         public static byte[] DecodeBytes(string str)
         {
             _ = str ?? throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(str)));
-            return UnsafeDecode(str.AsSpan());
+            return Decode(str.AsSpan());
         }
 
-        internal static byte[] UnsafeDecode(ReadOnlySpan<char> strSpan)
+        internal static byte[] Decode(ReadOnlySpan<char> strSpan)
         {
             int mod = strSpan.Length % 4;
             if (mod == 1)
@@ -186,13 +186,18 @@ namespace Microsoft.IdentityModel.Tokens
             int decodedLength = strSpan.Length + (4 - mod) % 4;
 
 #if NET6_0_OR_GREATER
-            return Decode(strSpan, needReplace, decodedLength);
+
+            Span<byte> output = new byte[decodedLength];
+
+            int length = Decode(strSpan, output, needReplace, decodedLength);
+
+            return output.Slice(0, length).ToArray();
 #else
             return UnsafeDecode(strSpan, needReplace, decodedLength);
 #endif
         }
 
-        internal static unsafe void UnsafeDecode(ReadOnlySpan<char> strSpan, Span<byte> output)
+        internal static void Decode(ReadOnlySpan<char> strSpan, Span<byte> output)
         {
             int mod = strSpan.Length % 4;
             if (mod == 1)
@@ -204,14 +209,14 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET6_0_OR_GREATER
             Decode(strSpan, output, needReplace, decodedLength);
 #else
-            UnsafeDecode(strSpan, output, needReplace, decodedLength);
+            Decode(strSpan, output, needReplace, decodedLength);
 #endif
         }
 
 #if NET6_0_OR_GREATER
 
         [SkipLocalsInit]
-        private static byte[] Decode(ReadOnlySpan<char> strSpan, bool needReplace, int decodedLength)
+        private static int Decode(ReadOnlySpan<char> strSpan, Span<byte> output, bool needReplace, int decodedLength)
         {
             // If the incoming chars don't contain any of the base64url characters that need to be replaced,
             // and if the incoming chars are of the exact right length, then we'll be able to just pass the
@@ -231,67 +236,7 @@ namespace Microsoft.IdentityModel.Tokens
                     arrayPoolChars = ArrayPool<char>.Shared.Rent(decodedLength);
                 charsSpan = charsSpan.Slice(0, decodedLength);
 
-                source = HandlePaddingAndReplace(charsSpan, source, needReplace);
-            }
-
-            byte[] arrayPoolBytes = null;
-            Span<byte> bytesSpan = decodedLength <= StackAllocThreshold ?
-                stackalloc byte[StackAllocThreshold] :
-                arrayPoolBytes = ArrayPool<byte>.Shared.Rent(decodedLength);
-
-            int length = Encoding.UTF8.GetBytes(source, bytesSpan);
-            Span<byte> utf8Span = bytesSpan.Slice(0, length);
-
-            byte[] result = null;
-
-            try
-            {
-                OperationStatus status = System.Buffers.Text.Base64.DecodeFromUtf8InPlace(utf8Span, out int bytesWritten);
-                if (status != OperationStatus.Done)
-                    throw LogHelper.LogExceptionMessage(new FormatException(LogHelper.FormatInvariant(LogMessages.IDX10400, strSpan.ToString())));
-
-                result = bytesSpan.Slice(0, bytesWritten).ToArray();
-            }
-            finally
-            {
-                if (arrayPoolBytes is not null)
-                {
-                    bytesSpan.Clear();
-                    ArrayPool<byte>.Shared.Return(arrayPoolBytes);
-                }
-
-                if (arrayPoolChars is not null)
-                {
-                    charsSpan.Clear();
-                    ArrayPool<char>.Shared.Return(arrayPoolChars);
-                }
-            }
-
-            return result;
-        }
-
-        [SkipLocalsInit]
-        private static void Decode(ReadOnlySpan<char> strSpan, Span<byte> output, bool needReplace, int decodedLength)
-        {
-            // If the incoming chars don't contain any of the base64url characters that need to be replaced,
-            // and if the incoming chars are of the exact right length, then we'll be able to just pass the
-            // incoming chars directly to DecodeFromUtf8InPlace. Otherwise, rent an array, copy all the
-            // data into it, and do whatever fixups are necessary on that copy, then pass that copy into
-            // DecodeFromUtf8InPlace.
-
-            const int StackAllocThreshold = 512;
-            char[] arrayPoolChars = null;
-            scoped Span<char> charsSpan = default;
-            scoped ReadOnlySpan<char> source = strSpan;
-
-            if (needReplace || decodedLength != source.Length)
-            {
-                charsSpan = decodedLength <= StackAllocThreshold ?
-                    stackalloc char[StackAllocThreshold] :
-                    arrayPoolChars = ArrayPool<char>.Shared.Rent(decodedLength);
-                charsSpan = charsSpan.Slice(0, decodedLength);
-
-                source = HandlePaddingAndReplace(charsSpan, source, needReplace);
+                source = HandlePaddingAndReplace(source, charsSpan, needReplace);
             }
 
             byte[] arrayPoolBytes = null;
@@ -309,6 +254,8 @@ namespace Microsoft.IdentityModel.Tokens
                     throw LogHelper.LogExceptionMessage(new FormatException(LogHelper.FormatInvariant(LogMessages.IDX10400, strSpan.ToString())));
 
                 utf8Span.Slice(0, bytesWritten).CopyTo(output);
+
+                return bytesWritten;
             }
             finally
             {
@@ -326,7 +273,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        private static ReadOnlySpan<char> HandlePaddingAndReplace(Span<char> charsSpan, ReadOnlySpan<char> source, bool needReplace)
+        private static ReadOnlySpan<char> HandlePaddingAndReplace(ReadOnlySpan<char> source, Span<char> charsSpan, bool needReplace)
         {
             source.CopyTo(charsSpan);
             if (source.Length < charsSpan.Length)
@@ -402,7 +349,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        private static unsafe void UnsafeDecode(ReadOnlySpan<char> strSpan, Span<byte> output, bool needReplace, int decodedLength)
+        private static void Decode(ReadOnlySpan<char> strSpan, Span<byte> output, bool needReplace, int decodedLength)
         {
             byte[] result = UnsafeDecode(strSpan, needReplace, decodedLength);
             result.CopyTo(output);
