@@ -10,6 +10,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 
 ### Bug Fix:
 - Contribution from @martinb69 to fix correct parsing of `UserInfoEndpoint`. See issue [#2548](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2548) for details.
+
 7.5.0
 =====
 ### New features
