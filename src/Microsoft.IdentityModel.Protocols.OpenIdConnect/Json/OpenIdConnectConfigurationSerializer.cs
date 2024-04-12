@@ -275,7 +275,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                         JsonPrimitives.ReadStrings(ref reader, config.UserInfoEndpointEncryptionEncValuesSupported, MetadataName.UserInfoEncryptionEncValuesSupported, ClassName, true);
 
                     else if (reader.ValueTextEquals(Utf8Bytes.UserInfoEndpoint))
-                        config.UserInfoEndpoint = JsonPrimitives.ReadString(ref reader, MetadataName.ScopesSupported, ClassName, true);
+                        config.UserInfoEndpoint = JsonPrimitives.ReadString(ref reader, MetadataName.UserInfoEndpoint, ClassName, true);
 
                     else if (reader.ValueTextEquals(Utf8Bytes.UserInfoSigningAlgValuesSupported))
                         JsonPrimitives.ReadStrings(ref reader, config.UserInfoEndpointSigningAlgValuesSupported, MetadataName.UserInfoSigningAlgValuesSupported, ClassName, true);
