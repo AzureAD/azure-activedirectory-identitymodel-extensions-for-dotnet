@@ -7,6 +7,10 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading;
+#if NET8_0
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
+#endif
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
@@ -16,6 +20,10 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 {
     public class JwtSecurityTokenTests
     {
+#if NET8_0
+        private IOptions<JsonWebTokenSettings> AuthenticationSettings { get; init; } = default!;
+        private DateTime fixTime = DateTime.UtcNow;
+#endif
         [Fact]
         public void BoolClaimsEncodedAsExpected()
         {
@@ -488,5 +496,116 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.Equal("12.2", numericList[0].Value);
             Assert.Equal("11.1", numericList[1].Value);
         }
+#if NET8_0
+        internal class JsonWebTokenSettings
+        {
+            public bool ValidateIssuerSigningKey { get; set; }
+            public string IssuerSigningKey { get; set; }
+            public bool ValidateIssuer { get; set; }
+            public string ValidIssuer { get; set; }
+            public bool ValidateAudience { get; set; }
+            public string ValidAudience { get; set; }
+            public long AccessTokenExpirationMinutes { get; set; }
+            public long RefreshTokenExpirationMinutes { get; set; }
+            public long RefreshTokenExpirationMinutesPersistent { get; set; }
+            public bool RequireExpirationTime { get; set; }
+            public bool ValidateLifetime { get; set; }
+        }
+
+        internal class TokenService
+        {
+            public IOptions<JsonWebTokenSettings> AuthenticationSettings { get; init; } = default!;
+
+            public TokenService(IOptions<JsonWebTokenSettings> authenticationSettings)
+            {
+                AuthenticationSettings = Options.Create(new JsonWebTokenSettings
+                {
+                    ValidIssuer = "https://localhost:5213",
+                    ValidAudience = "https://localhost:5001",
+                    IssuerSigningKey = "4A857D75-A0B2-44F4-A8CB-807AEA2931F7",
+                    AccessTokenExpirationMinutes = 10,
+                    RefreshTokenExpirationMinutes = 60,
+                    RefreshTokenExpirationMinutesPersistent = 43200,
+                    ValidateAudience = true,
+                    ValidateIssuer = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    RequireExpirationTime = true
+                });
+            }
+
+            public string GenerateAccessToken(IEnumerable<Claim> authClaims, DateTime currentDate)
+            {
+                try
+                {
+                    var tokenHandler = new JwtSecurityTokenHandler();
+                    var symetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(AuthenticationSettings.Value.IssuerSigningKey));
+                    var identity = new ClaimsIdentity(authClaims, JwtBearerDefaults.AuthenticationScheme);
+                    var tokenValidityInMinutes = AuthenticationSettings.Value.AccessTokenExpirationMinutes;
+                    var expires = currentDate.AddMinutes(tokenValidityInMinutes);
+                    var algorithm = SecurityAlgorithms.HmacSha256;
+                    var signingCredentials = new SigningCredentials(symetricSecurityKey, algorithm);
+
+                    var tokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Issuer = AuthenticationSettings.Value.ValidIssuer,
+                        Audience = AuthenticationSettings.Value.ValidAudience,
+                        Subject = identity,
+                        Expires = expires,
+                        SigningCredentials = signingCredentials
+                    };
+
+                    var token = tokenHandler.CreateJwtSecurityToken(tokenDescriptor);
+
+                    return tokenHandler.WriteToken(token);
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+            }
+
+            public JwtSecurityToken ReadFromStrToken(string token)
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var securityToken = tokenHandler.ReadJwtToken(token);
+                return securityToken;
+            }
+        }
+
+        [Fact]
+        public void GenerateTokenAndExtarctDataWithRegularClaims()
+        {
+            //this is the test for the regular claims like you will normally do but 
+            //will fail because of the bug on the ReadJwtToken or the ReadToken in reality
+            //all methods that are reading the token are affected by this bug
+
+            var tokenService = new TokenService(AuthenticationSettings);
+
+            var userID = new Guid("92BD04F5-4834-4187-BCF8-C410AB741C2B");
+
+            var claims = new List<Claim>()
+            {
+			    //if you change the order of the claims that
+			    //will decide which one will be missing depending
+			    //if the are pair or odd
+			    new Claim(ClaimTypes.Name, "jtest"),
+                new Claim(ClaimTypes.IsPersistent, false.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, userID.ToString()),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            var accessToken = tokenService.GenerateAccessToken(claims, fixTime);
+
+            var jwtSecurityToken = tokenService.ReadFromStrToken(accessToken);
+
+            Assert.NotNull(jwtSecurityToken);
+            Assert.IsType<JwtSecurityToken>(jwtSecurityToken);
+            Assert.Equal(userID.ToString(), jwtSecurityToken.Claims.FirstOrDefault(a => a.Type == JwtRegisteredClaimNames.NameId)?.Value);
+            Assert.Equal("jtest", jwtSecurityToken.Claims.FirstOrDefault(a => a.Type == JwtRegisteredClaimNames.UniqueName)?.Value);
+            Assert.Equal("False", jwtSecurityToken.Claims.FirstOrDefault(a => a.Type == ClaimTypes.IsPersistent)?.Value);
+
+        }
+#endif
     }
 }
