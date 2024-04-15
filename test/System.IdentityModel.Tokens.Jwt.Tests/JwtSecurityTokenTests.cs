@@ -21,7 +21,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
     public class JwtSecurityTokenTests
     {
 #if NET8_0
-        private IOptions<JsonWebTokenSettings> AuthenticationSettings { get; init; } = default!;
+        //private IOptions<JsonWebTokenSettings> AuthenticationSettings { get; init; } = default!;
         private DateTime fixTime = DateTime.UtcNow;
 #endif
         [Fact]
@@ -513,10 +513,10 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
 
         internal class TokenService
-        {
+        { 
             public IOptions<JsonWebTokenSettings> AuthenticationSettings { get; init; } = default!;
 
-            public TokenService(IOptions<JsonWebTokenSettings> authenticationSettings)
+            public TokenService()
             {
                 AuthenticationSettings = Options.Create(new JsonWebTokenSettings
                 {
@@ -580,7 +580,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             //will fail because of the bug on the ReadJwtToken or the ReadToken in reality
             //all methods that are reading the token are affected by this bug
 
-            var tokenService = new TokenService(AuthenticationSettings);
+            var tokenService = new TokenService();
 
             var userID = new Guid("92BD04F5-4834-4187-BCF8-C410AB741C2B");
 
