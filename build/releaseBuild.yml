@@ -58,8 +58,8 @@ jobs:
   - task: UseDotNet@2
     displayName: 'Use .Net Core SDK 9'
     inputs:
-    version: 9.0.100-preview.2.24157.14
-    includePreviewVersions: true
+      version: 9.0.100-preview.2.24157.14
+      includePreviewVersions: true
     condition: eq(variables['TargetNet9'], 'True')
 
   - task: DotNetCoreCLI@2
