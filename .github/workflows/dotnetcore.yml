@@ -14,7 +14,7 @@ on:
       - dev
 
 env:
-  TargetNet8: True
+  TargetNet9: True
 
 jobs:
   build:
@@ -29,6 +29,11 @@ jobs:
       uses: actions/setup-dotnet@v4.0.0
       with:
         dotnet-version: 8.0.x
+
+    - name: Setup .NET 9.0.x
+      uses: actions/setup-dotnet@v2.1.0
+      with:
+        dotnet-version: 9.0.100-preview.2.24157.14
 
     - name: Run the tests
       run: dotnet test Wilson.sln
