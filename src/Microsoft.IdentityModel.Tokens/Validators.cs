@@ -222,7 +222,7 @@ namespace Microsoft.IdentityModel.Tokens
             ValueTask<string> vt = ValidateIssuerAsync(issuer, securityToken, validationParameters, configuration);
             return vt.IsCompletedSuccessfully ?
                 vt.Result :
-                vt.AsTask().GetAwaiter().GetResult();
+                vt.AsTask().ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         /// <summary>

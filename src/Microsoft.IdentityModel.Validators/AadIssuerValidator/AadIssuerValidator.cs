@@ -191,7 +191,7 @@ namespace Microsoft.IdentityModel.Validators
             ValueTask<string> vt = ValidateAsync(issuer, securityToken, validationParameters);
             return vt.IsCompletedSuccessfully ?
                 vt.Result :
-                vt.AsTask().GetAwaiter().GetResult();
+                vt.AsTask().ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         /// <summary>
