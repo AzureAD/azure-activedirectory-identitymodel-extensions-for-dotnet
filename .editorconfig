@@ -162,9 +162,6 @@ dotnet_code_quality.CA2208.api_surface = public
 # VSTHRD002: Avoid problematic synchronous waits
 dotnet_diagnostic.VSTHRD002.severity = none # Temporary, work-in-progress
 
-# VSTHRD110: Observe result of async calls
-dotnet_diagnostic.VSTHRD110.severity = none # Temporary, work-in-progress
-
 # Use .ConfigureAwait(bool)
 dotnet_diagnostic.VSTHRD111.severity = warning
 
