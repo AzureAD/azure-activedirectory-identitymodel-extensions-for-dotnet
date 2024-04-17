@@ -159,9 +159,6 @@ dotnet_code_quality.CA2208.api_surface = public
 
 # Threading analyzers https://github.com/microsoft/vs-threading/blob/main/doc/analyzers/index.md
 
-# VSTHRD002: Avoid problematic synchronous waits
-dotnet_diagnostic.VSTHRD002.severity = none # Temporary, work-in-progress
-
 # Use .ConfigureAwait(bool)
 dotnet_diagnostic.VSTHRD111.severity = warning
 
