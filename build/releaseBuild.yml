@@ -56,7 +56,7 @@ jobs:
       installationPath: $(Agent.ToolsDirectory)/dotnet
 
   - task: UseDotNet@2
-    displayName: 'Use .Net Core SDK 9'
+    displayName: 'Use .Net Core SDK 9.x'
     inputs:
       version: 9.0.100-preview.2.24157.14
       includePreviewVersions: true
@@ -121,7 +121,7 @@ jobs:
 
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
     displayName: 'Run Roslyn Analyzers'
-    condition: eq(variables['TargetNet9'], 'False')
+    condition: eq(variables['TargetNet8'], 'False')
 
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-binskim.BinSkim@4
     displayName: 'Run BinSkim'

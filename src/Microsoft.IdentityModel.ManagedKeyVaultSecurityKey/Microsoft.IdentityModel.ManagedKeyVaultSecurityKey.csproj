@@ -8,7 +8,7 @@
     Applications that are using Managed identities for Azure resources.</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>Microsoft.IdentityModel.ManagedKeyVaultSecurityKey</PackageId>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <PackageTags>.NET;Windows;Authentication;Identity;Azure;Key;Vault;Extensions</PackageTags>
     <Nullable>enable</Nullable>
   </PropertyGroup>
