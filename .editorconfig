@@ -166,7 +166,7 @@ dotnet_diagnostic.VSTHRD002.severity = none # Temporary, work-in-progress
 dotnet_diagnostic.VSTHRD110.severity = none # Temporary, work-in-progress
 
 # Use .ConfigureAwait(bool)
-dotnet_diagnostic.VSTHRD111.severity = none # Temporary, work-in-progress
+dotnet_diagnostic.VSTHRD111.severity = warning
 
 # Use Async suffix for async methods
 dotnet_diagnostic.VSTHRD200.severity = none # Temporary, work-in-progress
