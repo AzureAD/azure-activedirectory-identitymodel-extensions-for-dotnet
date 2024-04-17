@@ -254,7 +254,7 @@ namespace Microsoft.IdentityModel.Validators
                 }
                 else
                 {
-                    var baseConfiguration = await GetBaseConfiguration(effectiveConfigurationManager, validationParameters).ConfigureAwait(false);
+                    var baseConfiguration = await GetBaseConfigurationAsync(effectiveConfigurationManager, validationParameters).ConfigureAwait(false);
                     aadIssuer = baseConfiguration.Issuer;
                 }
 
@@ -524,7 +524,7 @@ namespace Microsoft.IdentityModel.Validators
             return ProtocolVersion.V1;
         }
 
-        private static async Task<BaseConfiguration> GetBaseConfiguration(BaseConfigurationManager configurationManager, TokenValidationParameters validationParameters)
+        private static async Task<BaseConfiguration> GetBaseConfigurationAsync(BaseConfigurationManager configurationManager, TokenValidationParameters validationParameters)
         {
             if (validationParameters.RefreshBeforeValidation)
                 configurationManager.RequestRefresh();

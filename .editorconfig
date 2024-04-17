@@ -162,9 +162,6 @@ dotnet_code_quality.CA2208.api_surface = public
 # Use .ConfigureAwait(bool)
 dotnet_diagnostic.VSTHRD111.severity = warning
 
-# Use Async suffix for async methods
-dotnet_diagnostic.VSTHRD200.severity = none # Temporary, work-in-progress
-
 # Do not pass literals as localized parameters, globalization is not used
 dotnet_diagnostic.CA1303.severity = none
 
