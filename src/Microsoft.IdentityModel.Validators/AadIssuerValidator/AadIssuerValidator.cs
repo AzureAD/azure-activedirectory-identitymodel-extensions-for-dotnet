@@ -212,7 +212,7 @@ namespace Microsoft.IdentityModel.Validators
         /// <exception cref="ArgumentNullException"> if <paramref name="securityToken"/> is null.</exception>
         /// <exception cref="ArgumentNullException"> if <paramref name="validationParameters"/> is null.</exception>
         /// <exception cref="SecurityTokenInvalidIssuerException">if the issuer is invalid or if there is a network issue. </exception>
-        internal async ValueTask<string> ValidateAsync(
+        public async ValueTask<string> ValidateAsync(
             string issuer,
             SecurityToken securityToken,
             TokenValidationParameters validationParameters)
