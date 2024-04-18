@@ -284,7 +284,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (string.IsNullOrWhiteSpace(actualIssuer))
             {
                 if (LogHelper.IsEnabled(EventLogLevel.Verbose))
-                    LogHelper.LogVerbose(TokenLogMessages.IDX10244, ClaimsIdentity.DefaultIssuer);
+                    LogHelper.LogVerbose(TokenLogMessages.IDX10244, LogHelper.MarkAsNonPII(ClaimsIdentity.DefaultIssuer));
 
                 actualIssuer = ClaimsIdentity.DefaultIssuer;
             }
@@ -356,7 +356,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
             if (string.IsNullOrEmpty(jwtToken.Enc))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TokenLogMessages.IDX10612)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenException(TokenLogMessages.IDX10612));
 
             var keys = GetContentEncryptionKeys(jwtToken, validationParameters, configuration);
             return JwtTokenUtilities.DecryptJwtToken(
@@ -652,7 +652,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     // The exception is not re-thrown as the TokenValidationParameters may have the issuer and signing key set
                     // directly on them, allowing the library to continue with token validation.
                     if (LogHelper.IsEnabled(EventLogLevel.Warning))
-                        LogHelper.LogWarning(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParameters.ConfigurationManager.MetadataAddress, ex.ToString()));
+                        LogHelper.LogWarning(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, LogHelper.MarkAsNonPII(validationParameters.ConfigurationManager.MetadataAddress), ex.ToString()));
                 }
             }
 

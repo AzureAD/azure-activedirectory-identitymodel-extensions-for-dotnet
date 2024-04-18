@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 throw LogHelper.LogArgumentNullException(nameof(json));
 
             if (LogHelper.IsEnabled(EventLogLevel.Verbose))
-                LogHelper.LogVerbose(LogMessages.IDX21808, json);
+                LogHelper.LogVerbose(LogMessages.IDX21808, LogHelper.MarkAsNonPII(json));
 
             return new OpenIdConnectConfiguration(json);
         }
@@ -102,13 +102,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             try
             {
                 if (LogHelper.IsEnabled(EventLogLevel.Verbose))
-                    LogHelper.LogVerbose(LogMessages.IDX21806, json, LogHelper.MarkAsNonPII(ClassName));
+                    LogHelper.LogVerbose(LogMessages.IDX21806, LogHelper.MarkAsNonPII(json), LogHelper.MarkAsNonPII(ClassName));
 
                 OpenIdConnectConfigurationSerializer.Read(json, this);
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX21815, json, LogHelper.MarkAsNonPII(ClassName)), ex));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX21815, LogHelper.MarkAsNonPII(json), LogHelper.MarkAsNonPII(ClassName)), ex));
             }
         }
 

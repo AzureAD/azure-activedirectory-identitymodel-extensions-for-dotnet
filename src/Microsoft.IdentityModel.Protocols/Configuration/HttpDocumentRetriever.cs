@@ -87,14 +87,14 @@ namespace Microsoft.IdentityModel.Protocols
                 throw LogHelper.LogArgumentNullException("address");
 
             if (!Utility.IsHttps(address) && RequireHttps)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX20108, address), nameof(address)));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX20108, LogHelper.MarkAsNonPII(address)), nameof(address)));
 
             Exception unsuccessfulHttpResponseException;
             HttpResponseMessage response;
             try
             {
                 if (LogHelper.IsEnabled(EventLogLevel.Verbose))
-                    LogHelper.LogVerbose(LogMessages.IDX20805, address);
+                    LogHelper.LogVerbose(LogMessages.IDX20805, LogHelper.MarkAsNonPII(address));
 
                 var httpClient = _httpClient ?? _defaultHttpClient;
                 var uri = new Uri(address, UriKind.RelativeOrAbsolute);
@@ -104,13 +104,13 @@ namespace Microsoft.IdentityModel.Protocols
                 if (response.IsSuccessStatusCode)
                     return responseContent;
 
-                unsuccessfulHttpResponseException = new IOException(LogHelper.FormatInvariant(LogMessages.IDX20807, address, response, responseContent));
+                unsuccessfulHttpResponseException = new IOException(LogHelper.FormatInvariant(LogMessages.IDX20807, LogHelper.MarkAsNonPII(address), response, responseContent));
                 unsuccessfulHttpResponseException.Data.Add(StatusCode, response.StatusCode);
                 unsuccessfulHttpResponseException.Data.Add(ResponseContent, responseContent);
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new IOException(LogHelper.FormatInvariant(LogMessages.IDX20804, address), ex));
+                throw LogHelper.LogExceptionMessage(new IOException(LogHelper.FormatInvariant(LogMessages.IDX20804, LogHelper.MarkAsNonPII(address)), ex));
             }
 
             throw LogHelper.LogExceptionMessage(unsuccessfulHttpResponseException);
@@ -135,12 +135,12 @@ namespace Microsoft.IdentityModel.Protocols
                     if (response.StatusCode.Equals(HttpStatusCode.RequestTimeout) || response.StatusCode.Equals(HttpStatusCode.ServiceUnavailable))
                     {
                         if (i < maxAttempt && LogHelper.IsEnabled(EventLogLevel.Informational)) // logging exception details and that we will attempt to retry document retrieval
-                            LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX20808, response.StatusCode, await response.Content.ReadAsStringAsync().ConfigureAwait(false), message.RequestUri));
+                            LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX20808, LogHelper.MarkAsNonPII(response.StatusCode), await response.Content.ReadAsStringAsync().ConfigureAwait(false), LogHelper.MarkAsNonPII(message.RequestUri)));
                     }
                     else // if the exception type does not indicate the need to retry we should break
                     {
                         if (LogHelper.IsEnabled(EventLogLevel.Warning))
-                            LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX20809, message.RequestUri, response.StatusCode, await response.Content.ReadAsStringAsync().ConfigureAwait(false)));
+                            LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX20809, LogHelper.MarkAsNonPII(message.RequestUri), LogHelper.MarkAsNonPII(response.StatusCode), await response.Content.ReadAsStringAsync().ConfigureAwait(false)));
 
                         break;
                     }

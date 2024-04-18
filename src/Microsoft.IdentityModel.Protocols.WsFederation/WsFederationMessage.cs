@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
             if (uri != null && uri.Query.Length > 1)
             {
                 if (LogHelper.IsEnabled(EventLogLevel.Verbose))
-                    LogHelper.LogVerbose(FormatInvariant(LogMessages.IDX22901, uri.ToString()));
+                    LogHelper.LogVerbose(FormatInvariant(LogMessages.IDX22901, LogHelper.MarkAsNonPII(uri.ToString())));
 
                 return FromQueryString(uri.Query.Substring(1));
             }

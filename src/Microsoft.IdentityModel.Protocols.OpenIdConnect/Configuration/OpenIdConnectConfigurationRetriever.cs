@@ -65,18 +65,18 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             string doc = await retriever.GetDocumentAsync(address, cancel).ConfigureAwait(false);
 
             if (LogHelper.IsEnabled(EventLogLevel.Verbose))
-                LogHelper.LogVerbose(LogMessages.IDX21811, doc);
+                LogHelper.LogVerbose(LogMessages.IDX21811, LogHelper.MarkAsNonPII(doc));
 
             OpenIdConnectConfiguration openIdConnectConfiguration = OpenIdConnectConfigurationSerializer.Read(doc);
             if (!string.IsNullOrEmpty(openIdConnectConfiguration.JwksUri))
             {
                 if (LogHelper.IsEnabled(EventLogLevel.Verbose))
-                    LogHelper.LogVerbose(LogMessages.IDX21812, openIdConnectConfiguration.JwksUri);
+                    LogHelper.LogVerbose(LogMessages.IDX21812, LogHelper.MarkAsNonPII(openIdConnectConfiguration.JwksUri));
 
                 string keys = await retriever.GetDocumentAsync(openIdConnectConfiguration.JwksUri, cancel).ConfigureAwait(false);
 
                 if (LogHelper.IsEnabled(EventLogLevel.Verbose))
-                    LogHelper.LogVerbose(LogMessages.IDX21813, openIdConnectConfiguration.JwksUri);
+                    LogHelper.LogVerbose(LogMessages.IDX21813, LogHelper.MarkAsNonPII(openIdConnectConfiguration.JwksUri));
 
                 openIdConnectConfiguration.JsonWebKeySet = new JsonWebKeySet(keys);
                 foreach (SecurityKey key in openIdConnectConfiguration.JsonWebKeySet.GetSigningKeys())
