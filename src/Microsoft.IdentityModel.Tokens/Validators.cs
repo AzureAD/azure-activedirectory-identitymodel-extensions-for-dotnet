@@ -213,16 +213,29 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>The issuer to use when creating the "Claim"(s) in a "ClaimsIdentity".</returns>
         /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
         /// <exception cref="ArgumentNullException">If 'issuer' is null or whitespace and <see cref="TokenValidationParameters.ValidateIssuer"/> is true.</exception>
-        /// <exception cref="ArgumentNullException">If ' configuration' is null.</exception>
+        /// <exception cref="ArgumentNullException">If 'configuration' is null.</exception>
         /// <exception cref="SecurityTokenInvalidIssuerException">If <see cref="TokenValidationParameters.ValidIssuer"/> is null or whitespace and <see cref="TokenValidationParameters.ValidIssuers"/> is null and <see cref="BaseConfiguration.Issuer"/> is null.</exception>
         /// <exception cref="SecurityTokenInvalidIssuerException">If 'issuer' failed to matched either <see cref="TokenValidationParameters.ValidIssuer"/> or one of <see cref="TokenValidationParameters.ValidIssuers"/> or <see cref="BaseConfiguration.Issuer"/>.</exception>
         /// <remarks>An EXACT match is required.</remarks>
         internal static string ValidateIssuer(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
         {
-            ValueTask<string> vt = ValidateIssuerAsync(issuer, securityToken, validationParameters, configuration);
-            return vt.IsCompletedSuccessfully ?
-                vt.Result :
-                vt.AsTask().ConfigureAwait(false).GetAwaiter().GetResult();
+            if (validationParameters == null)
+                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+
+            // Given that this is a synchronous method and to avoid consuming excesive threads
+            // we will favor the synchronous delegates over the asynchronous one.
+            if (validationParameters.IssuerValidator == null
+                && validationParameters.IssuerValidatorUsingConfiguration == null
+                && validationParameters.IssuerValidatorAsync != null)
+            {
+                if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                    LogHelper.LogWarning(LogMessages.IDX10266);
+
+                return validationParameters.IssuerValidatorAsync(issuer, securityToken, validationParameters)
+                    .ConfigureAwait(false).GetAwaiter().GetResult();
+            }
+
+            return ValidateIssuerInternal(issuer, securityToken,  validationParameters, configuration);
         }
 
         /// <summary>
@@ -248,9 +261,15 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
+            // Given that this is an asynchronous method we will favor the asynchronous delegate over the synchronous.
             if (validationParameters.IssuerValidatorAsync != null)
                 return await validationParameters.IssuerValidatorAsync(issuer, securityToken, validationParameters).ConfigureAwait(false);
 
+            return ValidateIssuerInternal(issuer, securityToken, validationParameters, configuration);
+        }
+
+        private static string ValidateIssuerInternal(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
+        {
             if (validationParameters.IssuerValidatorUsingConfiguration != null)
                 return validationParameters.IssuerValidatorUsingConfiguration(issuer, securityToken, validationParameters, configuration);
 
@@ -268,11 +287,13 @@ namespace Microsoft.IdentityModel.Tokens
                     { InvalidIssuer = issuer });
 
             // Throw if all possible places to validate against are null or empty
-            if (   string.IsNullOrWhiteSpace(validationParameters.ValidIssuer)
+            if (string.IsNullOrWhiteSpace(validationParameters.ValidIssuer)
                 && validationParameters.ValidIssuers.IsNullOrEmpty()
                 && string.IsNullOrWhiteSpace(configuration?.Issuer))
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX10204)
-                        { InvalidIssuer = issuer });
+            {
+                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX10204)
+                    { InvalidIssuer = issuer });
+            }
 
             if (configuration != null)
             {

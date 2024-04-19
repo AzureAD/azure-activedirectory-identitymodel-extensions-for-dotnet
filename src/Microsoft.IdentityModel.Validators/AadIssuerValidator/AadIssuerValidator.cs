@@ -13,7 +13,6 @@ using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
-using static Microsoft.IdentityModel.Validators.AadIssuerValidator;
 
 namespace Microsoft.IdentityModel.Validators
 {
@@ -188,7 +187,7 @@ namespace Microsoft.IdentityModel.Validators
             SecurityToken securityToken,
             TokenValidationParameters validationParameters)
         {
-            ValueTask<string> vt = ValidateAsync(issuer, securityToken, validationParameters);
+            ValueTask<string> vt = ValidateInternalAsync(issuer, securityToken, validationParameters);
             return vt.IsCompletedSuccessfully ?
                 vt.Result :
                 vt.AsTask().ConfigureAwait(false).GetAwaiter().GetResult();
@@ -203,7 +202,7 @@ namespace Microsoft.IdentityModel.Validators
         /// <param name="validationParameters">Token validation parameters.</param>
         /// <example><code>
         /// AadIssuerValidator aadIssuerValidator = AadIssuerValidator.GetAadIssuerValidator(authority, httpClient);
-        /// TokenValidationParameters.IssuerValidator = aadIssuerValidator.Validate;
+        /// TokenValidationParameters.IssuerValidatorAsync = aadIssuerValidator.ValidateAsync;
         /// </code></example>
         /// <remarks>The issuer is considered as valid if it has the same HTTP scheme and authority as the
         /// authority from the configuration file, has a tenant ID, and optionally v2.0 (if this web API
@@ -212,7 +211,15 @@ namespace Microsoft.IdentityModel.Validators
         /// <exception cref="ArgumentNullException"> if <paramref name="securityToken"/> is null.</exception>
         /// <exception cref="ArgumentNullException"> if <paramref name="validationParameters"/> is null.</exception>
         /// <exception cref="SecurityTokenInvalidIssuerException">if the issuer is invalid or if there is a network issue. </exception>
-        internal async ValueTask<string> ValidateAsync(
+        public Task<string> ValidateAsync(
+            string issuer,
+            SecurityToken securityToken,
+            TokenValidationParameters validationParameters)
+        {
+            return ValidateInternalAsync(issuer, securityToken, validationParameters).AsTask();
+        }
+
+        private async ValueTask<string> ValidateInternalAsync(
             string issuer,
             SecurityToken securityToken,
             TokenValidationParameters validationParameters)
@@ -466,14 +473,14 @@ namespace Microsoft.IdentityModel.Validators
             if (_configurationManagerProvider != null)
             {
                 string aadAuthority = GetAuthority(protocolVersion);
-                
 
                 var configurationManager = _configurationManagerProvider(aadAuthority);
+
                 if (configurationManager != null)
                     return configurationManager;
             }
 
-            // If no provider or provider returned null, fallback to previous strategy            
+            // If no provider or provider returned null, fallback to previous strategy
             return GetConfigurationManager(protocolVersion);
         }
 

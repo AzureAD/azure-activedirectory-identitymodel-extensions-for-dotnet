@@ -11,6 +11,7 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
+    #region Delegate Definitions
     /// <summary>
     /// Definition for AlgorithmValidator
     /// </summary>
@@ -84,8 +85,11 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
     /// <returns>The issuer to use when creating the "Claim"(s) in a "ClaimsIdentity".</returns>
     /// <remarks>The delegate should return a non null string that represents the 'issuer'. If null a default value will be used.
-    /// If both <see cref="IssuerValidatorUsingConfiguration"/> and <see cref="IssuerValidator"/> are set, IssuerValidatorUsingConfiguration takes
-    /// priority.</remarks>
+    /// If the validation method called is asynchronous and <see cref="IssuerValidatorAsync"/> is set, this validator will have priority over any other validator.
+    /// If the validation method called is synchronous and <see cref="IssuerValidatorAsync"/> is set, this validator will be last in priority.
+    /// If the validation method called is synchronous and both <see cref="IssuerValidatorUsingConfiguration"/> and <see cref="IssuerValidator"/> are set,
+    /// IssuerValidatorUsingConfiguration takes priority.
+    ///</remarks>
     public delegate string IssuerValidator(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters);
 
     /// <summary>
@@ -97,22 +101,27 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="configuration"><see cref="BaseConfiguration"/> required for validation.</param>
     /// <returns>The issuer to use when creating the "Claim"(s) in a "ClaimsIdentity".</returns>
     /// <remarks>The delegate should return a non null string that represents the 'issuer'. If null a default value will be used.
-    /// If both <see cref="IssuerValidatorUsingConfiguration"/> and <see cref="IssuerValidator"/> are set, IssuerValidatorUsingConfiguration takes
-    /// priority.
+    /// If the validation method called is asynchronous and <see cref="IssuerValidatorAsync"/> is set, this validator will have priority over any other validator.
+    /// If the validation method called is synchronous and <see cref="IssuerValidatorAsync"/> is set, this validator will be last in priority.
+    /// If the validation method called is synchronous and both <see cref="IssuerValidatorUsingConfiguration"/> and <see cref="IssuerValidator"/> are set,
+    /// IssuerValidatorUsingConfiguration takes priority.
     /// </remarks>
     public delegate string IssuerValidatorUsingConfiguration(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters, BaseConfiguration configuration);
 
     /// <summary>
-    /// Definition for IssuerValidatorAsync. Left internal for now while we work out the details of async validation for all delegates.
+    /// Definition for IssuerValidatorAsync.
     /// </summary>
     /// <param name="issuer">The issuer to validate.</param>
     /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
     /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
     /// <returns>The issuer to use when creating the "Claim"(s) in a "ClaimsIdentity".</returns>
     /// <remarks>The delegate should return a non null string that represents the 'issuer'. If null a default value will be used.
-    /// <see cref="IssuerValidatorAsync"/> if set, will be called before <see cref="IssuerSigningKeyValidatorUsingConfiguration"/> or <see cref="IssuerSigningKeyValidator"/>
+    /// If the validation method called is asynchronous and <see cref="IssuerValidatorAsync"/> is set, this validator will have priority over any other validator.
+    /// If the validation method called is synchronous and <see cref="IssuerValidatorAsync"/> is set, this validator will be last in priority.
+    /// If the validation method called is synchronous and both <see cref="IssuerValidatorUsingConfiguration"/> and <see cref="IssuerValidator"/> are set,
+    /// IssuerValidatorUsingConfiguration takes priority.
     /// </remarks>
-    internal delegate ValueTask<string> IssuerValidatorAsync(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters);
+    public delegate Task<string> IssuerValidatorAsync(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters);
 
     /// <summary>
     /// Definition for LifetimeValidator.
@@ -180,6 +189,8 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
     /// <returns>A transformed <see cref="SecurityToken"/>.</returns>
     public delegate SecurityToken TransformBeforeSignatureValidation(SecurityToken token, TokenValidationParameters validationParameters);
+
+    #endregion
 
     /// <summary>
     /// Contains a set of parameters that are used by a <see cref="SecurityTokenHandler"/> when validating a <see cref="SecurityToken"/>.
@@ -534,11 +545,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// If set, this delegate will be called to validate the 'issuer' of the token, instead of default processing.
         /// This means that no default 'issuer' validation will occur.
         /// Even if <see cref="ValidateIssuer"/> is false, this delegate will still be called.
-        /// If both <see cref="IssuerValidatorUsingConfiguration"/> and <see cref="IssuerValidator"/> are set, IssuerValidatorUsingConfiguration takes
-        /// priority. 
+        /// If the validation method called is asynchronous and <see cref="IssuerValidatorAsync"/> is set, this validator will have priority over any other validator.
+        /// If the validation method called is synchronous and <see cref="IssuerValidatorAsync"/> is set, this validator will be last in priority.
+        /// If the validation method called is synchronous and both <see cref="IssuerValidatorUsingConfiguration"/> and <see cref="IssuerValidator"/> are set,
+        /// IssuerValidatorUsingConfiguration takes priority.
         /// </remarks>
         public IssuerValidator IssuerValidator { get; set; }
-
 
         /// <summary>
         /// Gets or sets a delegate that will be used to validate the issuer of the token.
@@ -547,9 +559,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// If set, this delegate will be called to validate the 'issuer' of the token, instead of default processing.
         /// This means that no default 'issuer' validation will occur.
         /// Even if <see cref="ValidateIssuer"/> is false, this delegate will still be called.
-        /// IssuerValidatorAsync takes precedence over <see cref="IssuerValidatorUsingConfiguration"/> and <see cref="IssuerValidator"/>.
+        /// If the validation method called is asynchronous and <see cref="IssuerValidatorAsync"/> is set, this validator will have priority over any other validator.
+        /// If the validation method called is synchronous and <see cref="IssuerValidatorAsync"/> is set, this validator will be last in priority.
+        /// If the validation method called is synchronous and both <see cref="IssuerValidatorUsingConfiguration"/> and <see cref="IssuerValidator"/> are set,
+        /// IssuerValidatorUsingConfiguration takes priority.
         /// </remarks>
-        internal IssuerValidatorAsync IssuerValidatorAsync { get; set; }
+        public IssuerValidatorAsync IssuerValidatorAsync { get; set; }
 
         /// <summary>
         /// Gets or sets a delegate that will be used to validate the issuer of the token.
@@ -559,8 +574,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// This means that no default 'issuer' validation will occur.
         /// Even if <see cref="ValidateIssuer"/> is false, this delegate will still be called.
         /// This delegate should be used if properties from the configuration retrieved from the authority are necessary to validate the issuer.
-        /// If both <see cref="IssuerValidatorUsingConfiguration"/> and <see cref="IssuerValidator"/> are set, IssuerValidatorUsingConfiguration takes
-        /// priority.
+        /// If the validation method called is asynchronous and <see cref="IssuerValidatorAsync"/> is set, this validator will have priority over any other validator.
+        /// If the validation method called is synchronous and <see cref="IssuerValidatorAsync"/> is set, this validator will be last in priority.
+        /// If the validation method called is synchronous and both <see cref="IssuerValidatorUsingConfiguration"/> and <see cref="IssuerValidator"/> are set,
+        /// IssuerValidatorUsingConfiguration takes priority.
         /// </remarks>
         public IssuerValidatorUsingConfiguration IssuerValidatorUsingConfiguration { get; set; }
 

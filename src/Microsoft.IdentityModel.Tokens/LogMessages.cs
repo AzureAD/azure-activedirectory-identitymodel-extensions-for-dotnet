@@ -79,6 +79,7 @@ namespace Microsoft.IdentityModel.Tokens
         //public const string IDX10263 = "IDX10263: Unable to re-validate with ConfigurationManager.LastKnownGoodConfiguration as it is expired.";
         public const string IDX10264 = "IDX10264: Reading issuer signing keys from validation parameters and configuration.";
         public const string IDX10265 = "IDX10265: Reading issuer signing keys from configuration.";
+        public const string IDX10266 = "IDX10266: IssuerValidatorAsync property of ValidationParameters is defined and the Validation method called is synchronous. https://aka.ms/IdentityModel/TokenValidation";
 
         // 10500 - SignatureValidation
         public const string IDX10500 = "IDX10500: Signature validation failed. No security keys were provided to validate the signature.";
