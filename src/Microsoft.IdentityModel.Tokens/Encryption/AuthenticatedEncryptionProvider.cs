@@ -98,7 +98,35 @@ namespace Microsoft.IdentityModel.Tokens
 
         private AuthenticatedEncryptionResult EncryptWithAesGcm(byte[] plaintext, byte[] authenticatedData, byte[] iv)
         {
-            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10715, LogHelper.MarkAsNonPII(Algorithm))));
+            _ = _keySizeIsValid.Value;
+
+            byte[] nonce = new byte[Tokens.AesGcm.NonceSize];
+            byte[] cipherText = new byte[plaintext.Length];
+            byte[] authenticationTag = new byte[Tokens.AesGcm.TagSize];
+
+            using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(nonce);
+            }
+
+            AesGcm aes = null;
+            try
+            {
+                aes = _aesGcmObjectPool.Allocate();
+                aes.Encrypt(nonce, plaintext, cipherText, authenticationTag, authenticatedData);
+            }
+            catch
+            {
+                Dispose(true);
+                throw;
+            }
+            finally
+            {
+                if (!_disposed)
+                    _aesGcmObjectPool.Free(aes);
+            }
+
+            return new AuthenticatedEncryptionResult(Key, cipherText, nonce, authenticationTag);
         }
 
         private AesGcm CreateAesGcmInstance()
