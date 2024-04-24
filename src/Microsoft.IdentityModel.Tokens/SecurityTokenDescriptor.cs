@@ -1,9 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -12,10 +16,56 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class SecurityTokenDescriptor
     {
+        private bool _audienceSet = false;
+        private bool _audiencesSet = false;
+        private IList<string> _audiences;
+        internal bool HasAudiences => _audiences != null && _audiences.Count > 0;
+        internal string AudiencesJson
+        {
+            get
+            {
+                if (_audiences == null)
+                    return null;
+                return JsonSerializerPrimitives.CreateJsonElement(_audiences).ToString();
+            }
+        }
+
         /// <summary>
-        /// Gets or sets the value of the 'audience' claim.
+        /// Gets or sets the value of the 'audience' claim. Can only be set if <see cref="Audiences"/> is not set.
         /// </summary>
-        public string Audience { get; set; }
+        public string Audience {
+            get
+            {
+                if (_audiences == null)
+                    return null;
+                return _audiences.FirstOrDefault();
+            }
+            set
+            {
+                if (_audiencesSet)
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException(LogMessages.IDX10212));
+                if (_audienceSet == false)
+                {
+                    _audienceSet = true;
+                    _audiences = new List<string> { value };
+                }
+                _audiences[0] = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets multiple audiences to include in the 'audience' claim. Can only be set if <see cref="Audience"/> is not set.
+        /// </summary>
+        public IEnumerable<string> Audiences {
+            get { return _audiences; }
+            set
+            {
+                if (_audienceSet)
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException(LogMessages.IDX10213));
+                _audiencesSet = true;
+                _audiences = value.ToList();
+            }
+        }
 
         /// <summary>
         /// Defines the compression algorithm that will be used to compress the JWT token payload.

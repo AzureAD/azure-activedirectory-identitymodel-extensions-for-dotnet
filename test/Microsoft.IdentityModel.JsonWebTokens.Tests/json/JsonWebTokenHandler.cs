@@ -358,12 +358,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             if (tokenDescriptor.Claims != null && tokenDescriptor.Claims.Count > 0)
                 payload.Merge(JObject.FromObject(tokenDescriptor.Claims), new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Replace });
 
-            if (tokenDescriptor.Audience != null)
+            if (tokenDescriptor.HasAudiences)
             {
                 if (LogHelper.IsEnabled(EventLogLevel.Informational) && payload.ContainsKey(JwtRegisteredClaimNames.Aud))
-                    LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, LogHelper.MarkAsNonPII(nameof(tokenDescriptor.Audience))));
+                    LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, LogHelper.MarkAsNonPII(nameof(tokenDescriptor.Audiences))));
 
-                payload[JwtRegisteredClaimNames.Aud] = tokenDescriptor.Audience;
+                payload[JwtRegisteredClaimNames.Aud] = tokenDescriptor.AudiencesJson;
             }
 
             if (tokenDescriptor.Expires.HasValue)

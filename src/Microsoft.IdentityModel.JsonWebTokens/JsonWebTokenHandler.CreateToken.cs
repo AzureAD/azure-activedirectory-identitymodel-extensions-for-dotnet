@@ -706,11 +706,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             writer.WriteStartObject();
 
-            if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
+            if (tokenDescriptor.HasAudiences)
             {
                 audienceSet = true;
                 writer.WritePropertyName(JwtPayloadUtf8Bytes.Aud);
-                writer.WriteStringValue(tokenDescriptor.Audience);
+                writer.WriteStringValue(tokenDescriptor.AudiencesJson);
             }
 
             if (!string.IsNullOrEmpty(tokenDescriptor.Issuer))
@@ -755,7 +755,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         if (audienceSet)
                         {
                             if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                                LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, LogHelper.MarkAsNonPII(nameof(tokenDescriptor.Audience))));
+                                LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, LogHelper.MarkAsNonPII(nameof(tokenDescriptor.Audiences))));
 
                             continue;
                         }

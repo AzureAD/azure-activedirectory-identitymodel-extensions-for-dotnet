@@ -452,7 +452,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             return CreateJwtSecurityTokenPrivate(
                 tokenDescriptor.Issuer,
-                tokenDescriptor.Audience,
+                tokenDescriptor.AudiencesJson,
                 tokenDescriptor.Subject,
                 tokenDescriptor.NotBefore,
                 tokenDescriptor.Expires,
@@ -602,7 +602,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             return CreateJwtSecurityTokenPrivate(
                 tokenDescriptor.Issuer,
-                tokenDescriptor.Audience,
+                tokenDescriptor.AudiencesJson,
                 tokenDescriptor.Subject,
                 tokenDescriptor.NotBefore,
                 tokenDescriptor.Expires,

@@ -35,6 +35,20 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
+        /// Creates an instance of <see cref="SamlAudienceRestrictionCondition"/>.
+        /// </summary>
+        /// <param name="audiences">An <see cref="IEnumerable{String}"/> containing the audiences for a <see cref="SamlAssertion"/>.</param>
+        internal SamlAudienceRestrictionCondition(IEnumerable<string> audiences)
+        {
+            if (audiences == null)
+                throw LogArgumentNullException(nameof(audiences));
+
+            List<Uri> audienceUris = new();
+            foreach (var aud in audiences) { audienceUris.Add(new Uri(aud)); }
+            Audiences = audienceUris;
+        }
+
+        /// <summary>
         /// Gets the <see cref="ICollection{stringT}"/> of audiences for a <see cref="SamlAssertion"/>.
         /// </summary>
         public ICollection<Uri> Audiences
