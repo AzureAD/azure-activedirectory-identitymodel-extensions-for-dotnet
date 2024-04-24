@@ -2,9 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Security.Cryptography;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -32,6 +33,20 @@ namespace Microsoft.IdentityModel.Tokens
         private DecryptionDelegate DecryptFunction;
         private EncryptionDelegate EncryptFunction;
         private const string _className = "Microsoft.IdentityModel.Tokens.AuthenticatedEncryptionProvider";
+        internal const string _skipValidationOfAuthenticationTagLength = "Switch.Microsoft.IdentityModel.SkipValidationOfAuthenticationTagLength"; 
+
+        /// <summary>
+        /// Mapping from algorithm to the expected authentication tag length.
+        /// </summary>
+        internal static readonly Dictionary<string, int> ExpectedAuthenticationTagBase64UrlLength = new Dictionary<string, int>
+        {
+            { SecurityAlgorithms.Aes128Gcm, 24 },
+            { SecurityAlgorithms.Aes192Gcm, 24 },
+            { SecurityAlgorithms.Aes256Gcm, 24 },
+            { SecurityAlgorithms.Aes128CbcHmacSha256, 24 },
+            { SecurityAlgorithms.Aes192CbcHmacSha384, 32 },
+            { SecurityAlgorithms.Aes256CbcHmacSha512, 44 }
+        };
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthenticatedEncryptionProvider"/> class used for encryption and decryption.
@@ -165,13 +180,18 @@ namespace Microsoft.IdentityModel.Tokens
         private byte[] DecryptWithAesCbc(byte[] ciphertext, byte[] authenticatedData, byte[] iv, byte[] authenticationTag)
         {
             // Verify authentication Tag
+            if (!ExpectedAuthenticationTagBase64UrlLength.TryGetValue(Algorithm, out int expectedTagLength) &&
+                ShouldValidateAuthenticationTagLength()
+                && expectedTagLength != authenticationTag.Length)
+                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(LogMessages.IDX10625, Base64UrlEncoder.Encode(authenticationTag))));
+
             byte[] al = Utility.ConvertToBigEndian(authenticatedData.Length * 8);
             byte[] macBytes = new byte[authenticatedData.Length + iv.Length + ciphertext.Length + al.Length];
             Array.Copy(authenticatedData, 0, macBytes, 0, authenticatedData.Length);
             Array.Copy(iv, 0, macBytes, authenticatedData.Length, iv.Length);
             Array.Copy(ciphertext, 0, macBytes, authenticatedData.Length + iv.Length, ciphertext.Length);
             Array.Copy(al, 0, macBytes, authenticatedData.Length + iv.Length + ciphertext.Length, al.Length);
-            if (!_symmetricSignatureProvider.Value.Verify(macBytes, 0, macBytes.Length, authenticationTag, 0, _authenticatedkeys.Value.HmacKey.Key.Length, Algorithm))
+            if (!_symmetricSignatureProvider.Value.Verify(macBytes, 0, macBytes.Length, authenticationTag, 0, expectedTagLength, Algorithm))
                 throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(LogMessages.IDX10650, Base64UrlEncoder.Encode(authenticatedData), Base64UrlEncoder.Encode(iv), Base64UrlEncoder.Encode(authenticationTag))));
 
             using Aes aes = Aes.Create();
@@ -187,6 +207,11 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(LogMessages.IDX10654, ex)));
             }
+        }
+
+        private static bool ShouldValidateAuthenticationTagLength()
+        {
+            return !(AppContext.TryGetSwitch(_skipValidationOfAuthenticationTagLength, out bool skipValidation) && skipValidation);
         }
 
         private AuthenticatedKeys CreateAuthenticatedKeys()
