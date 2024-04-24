@@ -191,7 +191,7 @@ namespace Microsoft.IdentityModel.Tokens
             Array.Copy(iv, 0, macBytes, authenticatedData.Length, iv.Length);
             Array.Copy(ciphertext, 0, macBytes, authenticatedData.Length + iv.Length, ciphertext.Length);
             Array.Copy(al, 0, macBytes, authenticatedData.Length + iv.Length + ciphertext.Length, al.Length);
-            if (!_symmetricSignatureProvider.Value.Verify(macBytes, 0, macBytes.Length, authenticationTag, 0, expectedTagLength, Algorithm))
+            if (!_symmetricSignatureProvider.Value.Verify(macBytes, 0, macBytes.Length, authenticationTag, 0, _authenticatedkeys.Value.HmacKey.Key.Length, Algorithm))
                 throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(LogMessages.IDX10650, Base64UrlEncoder.Encode(authenticatedData), Base64UrlEncoder.Encode(iv), Base64UrlEncoder.Encode(authenticationTag))));
 
             using Aes aes = Aes.Create();
