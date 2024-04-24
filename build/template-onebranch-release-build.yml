@@ -49,14 +49,14 @@ steps:
   displayName: 'Run VerifyResourceUsage.pl'
   inputs:
     filename: perl
-    arguments: '$(Agent.BuildDirectory)\s\src\VerifyResourceUsage.pl'
+    arguments: '$(Agent.BuildDirectory)\$(WilsonSourceDirectory)s\src\VerifyResourceUsage.pl'
   enabled: false
 
 - task: CmdLine@2
   displayName: 'Run VerifyResourceUsage.pl'
   inputs:
     script: 'perl VerifyResourceUsage.pl'
-    workingDirectory: '$(Agent.BuildDirectory)\s\src\'
+    workingDirectory: '$(Agent.BuildDirectory)\$(WilsonSourceDirectory)s\src\'
 
 - powershell: |
     regedit /s .\build\strongNameBypass.reg
