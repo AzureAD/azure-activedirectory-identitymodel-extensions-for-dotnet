@@ -33,12 +33,12 @@ namespace Microsoft.IdentityModel.Tokens
         private DecryptionDelegate DecryptFunction;
         private EncryptionDelegate EncryptFunction;
         private const string _className = "Microsoft.IdentityModel.Tokens.AuthenticatedEncryptionProvider";
-        internal const string _skipValidationOfAuthenticationTagLength = "Switch.Microsoft.IdentityModel.SkipValidationOfAuthenticationTagLength"; 
+        internal const string _skipValidationOfAuthenticationTagLength = "Switch.Microsoft.IdentityModel.SkipAuthenticationTagLengthValidation"; 
 
         /// <summary>
         /// Mapping from algorithm to the expected authentication tag length.
         /// </summary>
-        internal static readonly Dictionary<string, int> ExpectedAuthenticationTagBase64UrlLength = new Dictionary<string, int>
+        internal static readonly Dictionary<string, int> ExpectedAuthenticationTagBase64UrlLength = new()
         {
             { SecurityAlgorithms.Aes128Gcm, 24 },
             { SecurityAlgorithms.Aes192Gcm, 24 },
@@ -180,7 +180,7 @@ namespace Microsoft.IdentityModel.Tokens
         private byte[] DecryptWithAesCbc(byte[] ciphertext, byte[] authenticatedData, byte[] iv, byte[] authenticationTag)
         {
             // Verify authentication Tag
-            if (!ExpectedAuthenticationTagBase64UrlLength.TryGetValue(Algorithm, out int expectedTagLength) &&
+            if (ExpectedAuthenticationTagBase64UrlLength.TryGetValue(Algorithm, out int expectedTagLength) &&
                 ShouldValidateAuthenticationTagLength()
                 && expectedTagLength != authenticationTag.Length)
                 throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(LogMessages.IDX10625, Base64UrlEncoder.Encode(authenticationTag))));
