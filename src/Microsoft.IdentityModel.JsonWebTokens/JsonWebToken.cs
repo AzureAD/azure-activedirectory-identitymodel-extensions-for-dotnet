@@ -226,7 +226,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     if (!_encodedTokenMemory.IsEmpty)
                         _encodedHeader = _encodedTokenMemory.Span.Slice(0, Dot1).ToString();
                     else
-                        _encodedHeader = (_encodedToken is not null) ? _encodedToken.Substring(0, Dot1) :  string.Empty;
+                        _encodedHeader = (_encodedToken is not null) ? _encodedToken.Substring(0, Dot1) : string.Empty;
                 }
 
                 return _encodedHeader;
@@ -325,10 +325,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             get
             {
-               if (_encodedToken is null && !_encodedTokenMemory.IsEmpty)
+                if (_encodedToken is null && !_encodedTokenMemory.IsEmpty)
                     _encodedToken = _encodedTokenMemory.ToString();
 
-               return _encodedToken;
+                return _encodedToken;
             }
         }
 
@@ -396,7 +396,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </remarks>
         public override SecurityKey SigningKey { get; set; }
 
-        internal byte[] MessageBytes{ get; set; }
+        internal byte[] MessageBytes { get; set; }
 
         internal int NumberOfDots { get; set; }
 
@@ -412,7 +412,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // JWT must have 2 dots for JWS or 4 dots for JWE (a.b.c.d.e)
             ReadOnlySpan<char> encodedTokenSpan = encodedTokenMemory.Span;
 
-            Dot1 = encodedTokenSpan.IndexOf('.'); 
+            Dot1 = encodedTokenSpan.IndexOf('.');
             if (Dot1 == -1 || Dot1 == encodedTokenSpan.Length - 1)
                 throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX14100));
 
@@ -466,11 +466,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 Dot3 = Dot2 + Dot3 + 1;
                 if (Dot3 == encodedTokenSpan.Length - 1)
                     throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX14121));
-                
+
                 Dot4 = encodedTokenSpan.Slice(Dot3 + 1).IndexOf('.');
                 if (Dot4 == -1)
                     throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogMessages.IDX14121));
-                
+
                 Dot4 = Dot3 + Dot4 + 1;
 
                 // must have something after 4th dot
@@ -570,16 +570,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             int outputSize = Base64UrlEncoding.ValidateAndGetOutputSize(strSpan, startIndex, length);
 
-            byte[] output = ArrayPool<byte>.Shared.Rent(outputSize);
-            try
-            {
-                Base64UrlEncoder.Decode(strSpan.Slice(startIndex, length), output);
-                return createHeaderClaimSet ? CreateHeaderClaimSet(output.AsSpan()) : CreatePayloadClaimSet(output.AsMemory());
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(output, true);
-            }
+            byte[] output = new byte[outputSize];
+            Base64UrlEncoder.Decode(strSpan.Slice(startIndex, length), output);
+            return createHeaderClaimSet ? CreateHeaderClaimSet(output.AsSpan()) : CreatePayloadClaimSet(output.AsMemory());
         }
 
         /// <summary>
@@ -952,13 +945,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// If the 'actort' claim is not found, an empty string is returned.
         /// </remarks>
         public string Actor
+        {
+            get
             {
-                get
-                {
-                    _act ??= Payload.GetStringValue(JwtRegisteredClaimNames.Actort);
-                    return _act;
-                }
+                _act ??= Payload.GetStringValue(JwtRegisteredClaimNames.Actort);
+                return _act;
             }
+        }
 
         /// <summary>
         /// Gets the list of 'aud' claims from the payload.
