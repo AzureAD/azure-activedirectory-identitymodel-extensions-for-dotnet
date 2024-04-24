@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal object _claimsLock = new();
         internal readonly Dictionary<string, object> _jsonClaims;
         internal readonly Dictionary<string, (int startIndex, int length)> _jsonClaimsUtf8;
-        internal readonly Memory<byte> _tokenUtf8;
+        internal readonly Memory<byte> _tokenAsMemory;
         private List<Claim> _claims;
 
         internal JsonClaimSet()
@@ -43,11 +43,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal JsonClaimSet(
             Dictionary<string, object> jsonClaims,
             Dictionary<string, (int startIndex, int length)> jsonClaimsUtf8,
-            Memory<byte> tokenUtf8)
+            Memory<byte> tokenAsMemory)
         {
             _jsonClaims = jsonClaims;
             _jsonClaimsUtf8 = jsonClaimsUtf8;
-            _tokenUtf8 = tokenUtf8;
+            _tokenAsMemory = tokenAsMemory;
         }
 
         internal List<Claim> Claims(string issuer)
@@ -179,7 +179,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 #if NET7_0_OR_GREATER
             if (_jsonClaimsUtf8.TryGetValue(key, out (int, int) tuple))
             {
-                return Encoding.UTF8.GetString(_tokenUtf8.Slice(tuple.Item1, tuple.Item2).Span);
+                return Encoding.UTF8.GetString(_tokenAsMemory.Slice(tuple.Item1, tuple.Item2).Span);
             }
 #else
             if (_jsonClaims.TryGetValue(key, out object obj))
@@ -199,7 +199,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             if (_jsonClaimsUtf8.TryGetValue(key, out (int, int) tuple))
             {
-                return _tokenUtf8.Slice(tuple.Item1, tuple.Item2).Span;
+                return _tokenAsMemory.Slice(tuple.Item1, tuple.Item2).Span;
             }
 
             return new Span<byte>();

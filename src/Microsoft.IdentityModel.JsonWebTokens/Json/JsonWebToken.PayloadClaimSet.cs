@@ -17,9 +17,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return CreatePayloadClaimSet(bytes.AsMemory(0, length));
         }
 
-        internal JsonClaimSet CreatePayloadClaimSet(Memory<byte> byteSpan)
+        internal JsonClaimSet CreatePayloadClaimSet(Memory<byte> tokenPayloadAsMemory)
         {
-            Utf8JsonReader reader = new(byteSpan.Span);
+            Utf8JsonReader reader = new(tokenPayloadAsMemory.Span);
             if (!JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, true))
                 throw LogHelper.LogExceptionMessage(
                     new JsonException(
@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
-                    ReadPayloadValue(ref reader, claims, claimsUtf8, byteSpan);
+                    ReadPayloadValue(ref reader, claims, claimsUtf8, tokenPayloadAsMemory);
                 }
                 // We read a JsonTokenType.StartObject above, exiting and positioning reader at next token.
                 else if (JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, false))
@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     break;
             };
 
-            return new JsonClaimSet(claims, claimsUtf8, byteSpan);
+            return new JsonClaimSet(claims, claimsUtf8, tokenPayloadAsMemory);
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             ref Utf8JsonReader reader,
             Dictionary<string, object> claims,
             Dictionary<string, (int startIndex, int length)> claimsUtf8,
-            Memory<byte> tokenUtf8)
+            Memory<byte> tokenAsMemory)
         {
             _ = claims ?? throw new ArgumentNullException(nameof(claims));
 
