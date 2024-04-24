@@ -66,7 +66,7 @@ steps:
   displayName: Build
   inputs:
     command: 'build'
-    projects: 'Product.proj'
+    projects: '$(WilsonSourceDirectory)Product.proj'
     arguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true'
 
 - task: PowerShell@2
