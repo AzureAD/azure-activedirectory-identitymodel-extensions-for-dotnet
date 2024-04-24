@@ -27,41 +27,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
     public class JsonWebTokenHandlerTests
     {
-
-        [Fact]
-        public async Task ValidateTokenAsync_ModifiedAuthNTag_IsNotValid()
-        {
-            var payload = new JObject()
-            {
-                { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
-                { JwtRegisteredClaimNames.GivenName, "Bob" },
-                { JwtRegisteredClaimNames.Iss, "http://Default.Issuer.com"},
-                { JwtRegisteredClaimNames.Aud, "http://Default.Audience.com" },
-                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.Parse("2017-03-17T18:33:37.095Z")).ToString() },
-                { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(DateTime.Parse("2017-03-17T18:33:37.080Z")).ToString() },
-                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.Now.AddDays(1)).ToString() },
-            }.ToString();
-
-            var jsonWebTokenHandler = new JsonWebTokenHandler();
-            var signingCredentials = Default.SymmetricSigningCredentials;
-            var encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256);
-            var jwe = jsonWebTokenHandler.CreateToken(payload, signingCredentials, encryptingCredentials);
-
-            // altering the JWE by appending some stuff to the Authentication Tag
-            var invalidToken = jwe + "the_token_has_been_tampered_with";
-
-            var tokenValidationParameters = new TokenValidationParameters
-            {
-                TokenDecryptionKey = KeyingMaterial.RsaSecurityKey_2048,
-                IssuerSigningKey = Default.SymmetricSigningKey256,
-                ValidAudience = "http://Default.Audience.com",
-                ValidIssuer = "http://Default.Issuer.com",
-            };
-            var tokenValidationResult = await jsonWebTokenHandler.ValidateTokenAsync(invalidToken, tokenValidationParameters).ConfigureAwait(false);
-
-            Assert.False(tokenValidationResult.IsValid);
-        }
-
         [Fact]
         public void JsonWebTokenHandler_CreateToken_SameTypeMultipleValues()
         {
@@ -4222,6 +4187,81 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     }
                 },
             };
+        }
+
+        [Fact]
+        public void ValidateTokenAsync_ModifiedAuthNTag_IsNotValidByDefault()
+        {
+            // arrange
+            var payload = new JObject()
+            {
+                { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
+                { JwtRegisteredClaimNames.GivenName, "Bob" },
+                { JwtRegisteredClaimNames.Iss, "http://Default.Issuer.com"},
+                { JwtRegisteredClaimNames.Aud, "http://Default.Audience.com" },
+                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.Parse("2017-03-17T18:33:37.095Z")).ToString() },
+                { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(DateTime.Parse("2017-03-17T18:33:37.080Z")).ToString() },
+                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.Now.AddDays(1)).ToString() },
+            }.ToString();
+
+            var jsonWebTokenHandler = new JsonWebTokenHandler();
+            var signingCredentials = Default.SymmetricSigningCredentials;
+            var encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256);
+            var jwe = jsonWebTokenHandler.CreateToken(payload, signingCredentials, encryptingCredentials);
+            var jweWithExtraCharacters = jwe + "cannoli_hunts_truffles";
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                TokenDecryptionKey = KeyingMaterial.RsaSecurityKey_2048,
+                IssuerSigningKey = Default.SymmetricSigningKey256,
+                ValidAudience = "http://Default.Audience.com",
+                ValidIssuer = "http://Default.Issuer.com",
+            };
+
+            // act
+            // calling ValidateTokenAsync.Result to prevent tests from sharing app context switch property
+            // normally, we would want to await ValidateTokenAsync().ConfigureAwait(false)
+            var tokenValidationResult = jsonWebTokenHandler.ValidateTokenAsync(jweWithExtraCharacters, tokenValidationParameters).Result;
+
+            // assert
+            Assert.False(tokenValidationResult.IsValid);
+        }
+
+        [Fact]
+        public void ValidateTokenAsync_ValidateAuthnTagContextSwitchTrue_ModifiedAuthNTag_IsValid()
+        {
+            // arrange
+            AppContext.SetSwitch(AuthenticatedEncryptionProvider._skipValidationOfAuthenticationTagLength, true);
+            var payload = new JObject()
+            {
+                { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
+                { JwtRegisteredClaimNames.GivenName, "Bob" },
+                { JwtRegisteredClaimNames.Iss, "http://Default.Issuer.com"},
+                { JwtRegisteredClaimNames.Aud, "http://Default.Audience.com" },
+                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.Parse("2017-03-17T18:33:37.095Z")).ToString() },
+                { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(DateTime.Parse("2017-03-17T18:33:37.080Z")).ToString() },
+                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.Now.AddDays(1)).ToString() },
+            }.ToString();
+
+            var jsonWebTokenHandler = new JsonWebTokenHandler();
+            var signingCredentials = Default.SymmetricSigningCredentials;
+            var encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256);
+            var jwe = jsonWebTokenHandler.CreateToken(payload, signingCredentials, encryptingCredentials);
+            var jweWithExtraCharacters = jwe + "cannoli_hunts_truffles";
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                TokenDecryptionKey = KeyingMaterial.RsaSecurityKey_2048,
+                IssuerSigningKey = Default.SymmetricSigningKey256,
+                ValidAudience = "http://Default.Audience.com",
+                ValidIssuer = "http://Default.Issuer.com",
+            };
+
+            // act
+            // calling ValidateTokenAsync.Result to prevent tests from sharing app context switch property
+            // normally, we would want to await ValidateTokenAsync().ConfigureAwait(false)
+            var tokenValidationResult = jsonWebTokenHandler.ValidateTokenAsync(jweWithExtraCharacters, tokenValidationParameters).Result;
+
+            // assert
+            Assert.True(tokenValidationResult.IsValid);
         }
     }
 
