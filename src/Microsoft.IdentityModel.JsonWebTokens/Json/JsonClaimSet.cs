@@ -195,7 +195,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
 #if NET7_0_OR_GREATER
-        internal ReadOnlySpan<byte> GetUtf8StringValue(string key)
+        internal ReadOnlySpan<byte> GetUtf8Bytes(string key)
         {
             if (_jsonClaimsUtf8.TryGetValue(key, out (int, int) tuple))
             {
@@ -461,7 +461,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 #if NET7_0_OR_GREATER
             if (typeof(T) == typeof(string))
             {
-                var span = GetUtf8StringValue(key);
+                var span = GetUtf8Bytes(key);
                 if (!span.IsEmpty)
                 {
                     value = (T)(object)Encoding.UTF8.GetString(span);
