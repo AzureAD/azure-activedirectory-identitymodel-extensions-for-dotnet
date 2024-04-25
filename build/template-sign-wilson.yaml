@@ -19,3 +19,12 @@ steps:
   inputs:
     scriptName: $(WilsonSourceDirectory)build/VerifySigning.ps1
     arguments: '-buildType ${{ parameters.BuildConfiguration }}'
+  enabled: false
+
+- task: PowerShell@2
+  displayName: 'Verify Signing'
+  inputs:
+    targetType: filePath
+    filePath: $(WilsonSourceDirectory)build/VerifySigning.ps1
+    arguments: '-buildType ${{ parameters.BuildConfiguration }}'
+
