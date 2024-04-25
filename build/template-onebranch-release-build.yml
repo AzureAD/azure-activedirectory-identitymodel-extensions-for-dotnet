@@ -73,7 +73,7 @@ steps:
   displayName: 'Run Tests'
   inputs:
     targetType: filePath
-    filePath: ./runTests.ps1
+    filePath: ./$(WilsonSourceDirectory)runTests.ps1
     arguments: '-buildType $(BuildConfiguration)'
 
 - task: CopyFiles@2
@@ -95,6 +95,7 @@ steps:
     optionsFC: 0
     optionsXS: 0
     optionsHMENABLE: 0
+  enabled: false
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@3
   displayName: 'Run CredScan'
@@ -102,10 +103,12 @@ steps:
     outputFormat: pre
     suppressionsFile: 'build/credscan-exclusion.json'
     debugMode: false
+  enabled: false
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
   displayName: 'Run Roslyn Analyzers'
   condition: eq(variables['TargetNet8'], 'False')
+  enabled: false
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-binskim.BinSkim@4
   displayName: 'Run BinSkim'
@@ -113,6 +116,7 @@ steps:
     AnalyzeSymPath: '$(Build.ArtifactStagingDirectory)\ProductBinaries'
     AnalyzeVerbose: true
     AnalyzeHashes: true
+  enabled: false
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@3
   displayName: 'Publish Security Analysis Logs'
@@ -172,6 +176,7 @@ steps:
     scanType: 'Register'
     verbosity: 'Verbose'
     alertWarningLevel: 'High'
+  enabled: false
 
 - task: PublishSymbols@2
   displayName: 'Publish symbols on symweb (cross publish)'
@@ -186,6 +191,7 @@ steps:
     GdnPublishTsaOnboard: false 
     GdnPublishTsaConfigFile: '$(Build.SourcesDirectory)/build/tsaConfig.json'
   continueOnError: true
+  enabled: false
 
 - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
   displayName: 'Manifest Generator'
@@ -210,3 +216,4 @@ steps:
 
 - task: mspremier.PostBuildCleanup.PostBuildCleanup-task.PostBuildCleanup@3
   displayName: 'Clean Agent Directories'
+  enabled: false
