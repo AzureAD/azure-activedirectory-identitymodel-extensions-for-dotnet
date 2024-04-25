@@ -26,5 +26,5 @@ steps:
   inputs:
     targetType: filePath
     filePath: $(WilsonSourceDirectory)build/VerifySigning.ps1
-    arguments: '-buildType ${{ parameters.BuildConfiguration }}'
+    arguments: '-root $(WilsonSourceDirectory) -buildType ${{ parameters.BuildConfiguration }}'
 
