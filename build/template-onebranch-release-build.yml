@@ -196,7 +196,7 @@ steps:
 - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
   displayName: 'Manifest Generator'
   inputs:
-    BuildDropPath: '$(Build.SourcesDirectory)\src'
+    BuildDropPath: '$(Build.SourcesDirectory)\$(WilsonSourceDirectory)src'
     ManifestDirPath: '$(Build.SourcesDirectory)\artifacts'
 
 - task: NuGetCommand@2
