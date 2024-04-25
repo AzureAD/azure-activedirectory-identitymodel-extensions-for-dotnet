@@ -79,7 +79,7 @@ steps:
 - task: CopyFiles@2
   displayName: 'Copy Files to: [staging]\ProductBinaries'
   inputs:
-    SourceFolder: src
+    SourceFolder: $(WilsonSourceDirectory)src
     Contents: |
       **\bin\$(BuildConfiguration)\**\Microsoft.IdentityModel.*.dll
       **\bin\$(BuildConfiguration)\**\Microsoft.IdentityModel.*.pdb
