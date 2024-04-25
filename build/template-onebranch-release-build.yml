@@ -132,7 +132,7 @@ steps:
     nobuild: true
     verbosityPack: 'Minimal'
     configuration: $(BuildConfiguration)
-    packagesToPack: 'Product.proj'
+    packagesToPack: '$(WilsonSourceDirectory)Product.proj'
     feedsToUse: 'config'
     nugetConfigPath: Nuget.config
     externalFeedCredentials: 'Internal Analyzers'
