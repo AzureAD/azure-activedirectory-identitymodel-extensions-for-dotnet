@@ -644,6 +644,19 @@ namespace Microsoft.IdentityModel.Tokens.Json
             return retval;
         }
 
+        internal static (int ValueStartIndex, int ValueLength)? ReadUtf8StringLocation(ref Utf8JsonReader reader, string propertyName, string className, bool read = false)
+        {
+            // returning null keeps the same logic as JsonSerialization.ReadObject
+            if (IsReaderPositionedOnNull(ref reader, read, true))
+                return null;
+
+            if (!IsReaderAtTokenType(ref reader, JsonTokenType.String, false))
+                throw LogHelper.LogExceptionMessage(
+                    CreateJsonReaderExceptionInvalidType(ref reader, "JsonTokenType.StartArray", className, propertyName));
+
+            return ((int)reader.TokenStartIndex + 1, reader.ValueSpan.Length);
+        }
+
         internal static string ReadStringAsBool(ref Utf8JsonReader reader, string propertyName, string className, bool read = false)
         {
             // The parameter 'read' can be used by callers reader position the reader to the next token.

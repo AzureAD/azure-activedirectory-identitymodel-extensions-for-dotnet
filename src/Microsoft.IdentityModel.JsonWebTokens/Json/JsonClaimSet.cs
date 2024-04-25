@@ -197,6 +197,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 #if NET7_0_OR_GREATER
         internal ReadOnlySpan<byte> GetUtf8Bytes(string key)
         {
+            // (int startIndex, int length) tuple
             if (_jsonClaimsUtf8.TryGetValue(key, out (int, int) tuple))
             {
                 return _tokenAsMemory.Slice(tuple.Item1, tuple.Item2).Span;
