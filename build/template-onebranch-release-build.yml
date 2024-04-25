@@ -45,18 +45,11 @@ steps:
     command: custom
     custom: '--list-sdks'
 
-- task: CmdLine@1
+- task: CmdLine@2
   displayName: 'Run VerifyResourceUsage.pl'
   inputs:
     filename: perl
     arguments: '$(Agent.BuildDirectory)\s\$(WilsonSourceDirectory)src\VerifyResourceUsage.pl'
-  enabled: false
-
-- task: CmdLine@2
-  displayName: 'Run VerifyResourceUsage.pl'
-  inputs:
-    script: 'perl VerifyResourceUsage.pl'
-    workingDirectory: '$(Agent.BuildDirectory)\s\$(WilsonSourceDirectory)src\'
 
 - powershell: |
     regedit /s .\build\strongNameBypass.reg
@@ -169,6 +162,16 @@ steps:
           }
       ]
     SessionTimeout: 20
+  enabled: false
+
+- task: onebranch.pipeline.signing@1
+  displayName: 'Sign Packages'
+  inputs:
+    command: 'sign'
+    signing_profile: 'CP-401405'
+    files_to_sign: '**/*.nupkg'
+    search_root: '$(Build.SourcesDirectory)\artifacts'
+  #condition: and(succeeded(), eq(variables['PipelineType'], Onebranch))
 
 - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
   displayName: 'Component Detection'
