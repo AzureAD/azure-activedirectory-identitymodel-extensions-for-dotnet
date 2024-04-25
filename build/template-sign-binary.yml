@@ -10,7 +10,7 @@ steps:
   displayName: 'Sign ${{ parameters.LibraryName }}'
   inputs:
     ConnectedServiceName: 'IDDP Code Signing'
-    FolderPath: '\$(Build.SourcesDirectory)src'
+    FolderPath: '$(Build.SourcesDirectory)\$(WilsonSourceDirectory)src'
     Pattern: ${{ parameters.LibraryName }}.dll
     signConfigType: inlineSignParams
     inlineOperation: |
