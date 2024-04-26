@@ -1,12 +1,4 @@
-#variables:
-#  - group: Middleware
-#  - name: BuildPlatform
-#    value: 'any cpu'
-
-
-    # The following variables are set in the release build UI:
-    # BuildConfiguration: 'debug|release'
-    # WilsonVersion: ''. Full version number
+# template-Build-run-tests-sign.yml
 
 steps:
 - script: echo $(BuildConfiguration)
