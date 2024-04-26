@@ -13,18 +13,18 @@ parameters:
 steps:
 - script: echo $(BuildConfiguration)
   displayName: 'display Build Configuration'
-  condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
+  condition: and(succeeded(), eq(variables['PipelineType'], ${{ parameters.PipelineType }}))
 
 - script: echo $(WilsonVersion)
   displayName: 'display WilsonVersion'
-  condition: and(succeeded(), eq(variables['PipelineType'], 'OneBranch'))
+  condition: and(succeeded(), eq(variables['PipelineType'], ${{ parameters.PipelineType }}))
 
 - task: UseDotNet@2
   displayName: 'Use .NET Core sdk 2.x'
   inputs:
     version: 2.x
     installationPath: $(Agent.ToolsDirectory)/dotnet
-  condition: and(succeeded(), eq(variables['PipelineType'], ''))
+  condition: and(succeeded(), eq(variables['PipelineType'], ${{ parameters.PipelineType }}))
 
 - task: UseDotNet@2
   displayName: 'Use .NET Core sdk 6.x'
@@ -94,7 +94,7 @@ steps:
     optionsFC: 0
     optionsXS: 0
     optionsHMENABLE: 0
-  enabled: false
+  condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@3
   displayName: 'Run CredScan'
@@ -102,12 +102,11 @@ steps:
     outputFormat: pre
     suppressionsFile: 'build/credscan-exclusion.json'
     debugMode: false
-  enabled: false
+  condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
   displayName: 'Run Roslyn Analyzers'
-  condition: eq(variables['TargetNet8'], 'False')
-  enabled: false
+  condition: and(eq(variables['TargetNet8'], 'False'), eq(variables['PipelineType'], 'Legacy'))
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-binskim.BinSkim@4
   displayName: 'Run BinSkim'
@@ -115,7 +114,7 @@ steps:
     AnalyzeSymPath: '$(Build.ArtifactStagingDirectory)\ProductBinaries'
     AnalyzeVerbose: true
     AnalyzeHashes: true
-  enabled: false
+  condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@3
   displayName: 'Publish Security Analysis Logs'
@@ -124,7 +123,6 @@ steps:
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@2
   displayName: 'Post SDL Analysis'
   continueOnError: true
-
 
 #Sign Wilson 7x task group
 - template: template-sign-wilson.yaml
