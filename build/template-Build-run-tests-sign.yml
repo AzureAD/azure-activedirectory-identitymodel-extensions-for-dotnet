@@ -93,7 +93,7 @@ steps:
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
   displayName: 'Run Roslyn Analyzers'
-  condition: and(eq(variables['TargetNet8'], 'False'), eq(variables['PipelineType'], 'Legacy'))
+  condition: and(eq(variables['TargetNet8'], 'False'), eq(variables['PipelineType'], 'legacy'))
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-binskim.BinSkim@4
   displayName: 'Run BinSkim'
@@ -156,7 +156,7 @@ steps:
   condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
 
 - task: onebranch.pipeline.signing@1
-  displayName: 'Sign Packages'
+  displayName: 'Sign Packages with OneBranch'
   inputs:
     command: 'sign'
     signing_profile: 'CP-401405'

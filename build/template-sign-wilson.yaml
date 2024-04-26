@@ -14,11 +14,10 @@ steps:
     LibraryName: 'Microsoft.IdentityModel*'
     BuildConfiguration: ${{ parameters.BuildConfiguration }}
 
-- task: PowerShell@2
+- task: PowerShell@1
   displayName: 'Verify Signing'
   inputs:
-    targetType: filePath
-    filePath: $(WilsonSourceDirectory)build/VerifySigning.ps1
+    scriptName: build/VerifySigning.ps1
     arguments: '-buildType ${{ parameters.BuildConfiguration }}'
   condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
 
