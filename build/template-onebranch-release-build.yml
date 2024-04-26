@@ -3,8 +3,6 @@
 #  - name: BuildPlatform
 #    value: 'any cpu'
 
-parameters:
-  PipelineType: 'legacy'
 
     # The following variables are set in the release build UI:
     # BuildConfiguration: 'debug|release'
@@ -13,18 +11,15 @@ parameters:
 steps:
 - script: echo $(BuildConfiguration)
   displayName: 'display Build Configuration'
-  condition: and(succeeded(), eq(variables['PipelineType'], ${{ parameters.PipelineType }}))
 
 - script: echo $(WilsonVersion)
   displayName: 'display WilsonVersion'
-  condition: and(succeeded(), eq(variables['PipelineType'], ${{ parameters.PipelineType }}))
 
 - task: UseDotNet@2
   displayName: 'Use .NET Core sdk 2.x'
   inputs:
     version: 2.x
     installationPath: $(Agent.ToolsDirectory)/dotnet
-  condition: and(succeeded(), eq(variables['PipelineType'], ${{ parameters.PipelineType }}))
 
 - task: UseDotNet@2
   displayName: 'Use .NET Core sdk 6.x'
@@ -166,7 +161,7 @@ steps:
           }
       ]
     SessionTimeout: 20
-  enabled: false
+  condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
 
 - task: onebranch.pipeline.signing@1
   displayName: 'Sign Packages'
@@ -175,7 +170,7 @@ steps:
     signing_profile: 'CP-401405'
     files_to_sign: '**/*.nupkg'
     search_root: '$(Build.SourcesDirectory)\artifacts'
-  #condition: and(succeeded(), eq(variables['PipelineType'], Onebranch))
+  condition: and(succeeded(), eq(variables['PipelineType'], onebranch))
 
 - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
   displayName: 'Component Detection'
@@ -183,7 +178,7 @@ steps:
     scanType: 'Register'
     verbosity: 'Verbose'
     alertWarningLevel: 'High'
-  enabled: false
+  condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
 
 - task: PublishSymbols@2
   displayName: 'Publish symbols on symweb (cross publish)'
@@ -198,7 +193,7 @@ steps:
     GdnPublishTsaOnboard: false 
     GdnPublishTsaConfigFile: '$(Build.SourcesDirectory)/build/tsaConfig.json'
   continueOnError: true
-  enabled: false
+  condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
 
 - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
   displayName: 'Manifest Generator'
@@ -223,4 +218,4 @@ steps:
 
 - task: mspremier.PostBuildCleanup.PostBuildCleanup-task.PostBuildCleanup@3
   displayName: 'Clean Agent Directories'
-  enabled: false
+  condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
