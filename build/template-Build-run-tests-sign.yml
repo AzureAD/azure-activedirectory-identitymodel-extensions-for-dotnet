@@ -162,7 +162,7 @@ steps:
     signing_profile: 'CP-401405'
     files_to_sign: '**/*.nupkg'
     search_root: '$(Build.SourcesDirectory)\artifacts'
-  condition: and(succeeded(), eq(variables['PipelineType'], onebranch))
+  condition: and(succeeded(), eq(variables['PipelineType'], 'onebranch'))
 
 - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
   displayName: 'Component Detection'
