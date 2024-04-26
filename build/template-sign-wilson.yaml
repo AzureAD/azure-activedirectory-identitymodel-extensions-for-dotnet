@@ -19,6 +19,6 @@ steps:
   inputs:
     targetType: filePath
     filePath: $(WilsonSourceDirectory)build/VerifySigning.ps1
-    arguments: '-root $(WilsonSourceDirectory) -buildType ${{ parameters.BuildConfiguration }}'
+    arguments: '-buildType ${{ parameters.BuildConfiguration }}'
   condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
 
