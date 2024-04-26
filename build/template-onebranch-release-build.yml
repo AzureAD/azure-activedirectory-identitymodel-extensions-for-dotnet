@@ -10,9 +10,11 @@
 steps:
 - script: echo $(BuildConfiguration)
   displayName: 'display Build Configuration'
+  condition: and(succeeded(), eq(variables['PipelineType'], ''))
 
 - script: echo $(WilsonVersion)
   displayName: 'display WilsonVersion'
+  condition: and(succeeded(), eq(variables['PipelineType'], ''))
 
 - task: UseDotNet@2
   displayName: 'Use .NET Core sdk 2.x'
