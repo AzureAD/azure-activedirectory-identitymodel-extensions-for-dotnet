@@ -3,6 +3,9 @@
 #  - name: BuildPlatform
 #    value: 'any cpu'
 
+parameters:
+  PipelineType: 'legacy'
+
     # The following variables are set in the release build UI:
     # BuildConfiguration: 'debug|release'
     # WilsonVersion: ''. Full version number
@@ -10,17 +13,18 @@
 steps:
 - script: echo $(BuildConfiguration)
   displayName: 'display Build Configuration'
-  condition: and(succeeded(), eq(variables['PipelineType'], ''))
+  condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
 
 - script: echo $(WilsonVersion)
   displayName: 'display WilsonVersion'
-  condition: and(succeeded(), eq(variables['PipelineType'], ''))
+  condition: and(succeeded(), eq(variables['PipelineType'], 'OneBranch'))
 
 - task: UseDotNet@2
   displayName: 'Use .NET Core sdk 2.x'
   inputs:
     version: 2.x
     installationPath: $(Agent.ToolsDirectory)/dotnet
+  condition: and(succeeded(), eq(variables['PipelineType'], ''))
 
 - task: UseDotNet@2
   displayName: 'Use .NET Core sdk 6.x'
