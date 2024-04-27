@@ -275,7 +275,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 theoryData);
 
 
-        JwtTestData.InvalidEncodedSegmentsData("", theoryData);
+            JwtTestData.InvalidEncodedSegmentsData("", theoryData);
             JwtTestData.ValidEncodedSegmentsData(theoryData);
 
             return theoryData;
@@ -475,7 +475,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
                 tokenHandler.InboundClaimTypeMap.Clear();
                 var encryptionCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_AesGcm128;
-                encryptionCredentials.CryptoProviderFactory = new CryptoProviderFactoryMock();
+                encryptionCredentials.CryptoProviderFactory = new CryptoProviderFactoryForGcm();
                 return new TheoryData<CreateTokenTheoryData>
                 {
                     new CreateTokenTheoryData
@@ -3567,7 +3567,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     var setupValidationResult = handler.ValidateTokenAsync(theoryData.Token, theoryData.ValidationParameters).Result;
 
                     theoryData.ValidationParameters.ValidateWithLKG = previousValidateWithLKG;
-                   
+
                     if (setupValidationResult.Exception != null)
                     {
                         if (setupValidationResult.IsValid)
@@ -4189,10 +4189,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
         }
 
-        [Fact]
-        public void ValidateTokenAsync_ModifiedAuthNTag_IsNotValidByDefault()
+        [Theory, MemberData(nameof(ValidateAuthenticationTagLengthTheoryData))]
+        public void ValidateTokenAsync_ModifiedAuthNTag(CreateTokenTheoryData theoryData)
         {
             // arrange
+            AppContext.SetSwitch(AuthenticatedEncryptionProvider._skipValidationOfAuthenticationTagLength, theoryData.EnableAppContextSwitch);
             var payload = new JObject()
             {
                 { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
@@ -4206,165 +4207,209 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             var jsonWebTokenHandler = new JsonWebTokenHandler();
             var signingCredentials = Default.SymmetricSigningCredentials;
-            var encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256);
-            var jwe = jsonWebTokenHandler.CreateToken(payload, signingCredentials, encryptingCredentials);
-            var jweWithExtraCharacters = jwe + "cannoli_hunts_truffles";
-            var tokenValidationParameters = new TokenValidationParameters
-            {
-                TokenDecryptionKey = KeyingMaterial.RsaSecurityKey_2048,
-                IssuerSigningKey = Default.SymmetricSigningKey256,
-                ValidAudience = "http://Default.Audience.com",
-                ValidIssuer = "http://Default.Issuer.com",
-            };
+            var jwe = jsonWebTokenHandler.CreateToken(payload, signingCredentials, theoryData.EncryptingCredentials);
+            var jweWithExtraCharacters = jwe + "_cannoli_hunts_truffles_";
 
             // act
             // calling ValidateTokenAsync.Result to prevent tests from sharing app context switch property
             // normally, we would want to await ValidateTokenAsync().ConfigureAwait(false)
-            var tokenValidationResult = jsonWebTokenHandler.ValidateTokenAsync(jweWithExtraCharacters, tokenValidationParameters).Result;
+            var tokenValidationResult = jsonWebTokenHandler.ValidateTokenAsync(jweWithExtraCharacters, theoryData.ValidationParameters).Result;
 
             // assert
-            Assert.False(tokenValidationResult.IsValid);
+            Assert.Equal(theoryData.IsValid, tokenValidationResult.IsValid);
         }
 
-        [Fact]
-        public void ValidateTokenAsync_ValidateAuthnTagContextSwitchTrue_ModifiedAuthNTag_IsValid()
+        public static TheoryData<CreateTokenTheoryData> ValidateAuthenticationTagLengthTheoryData()
         {
-            // arrange
-            AppContext.SetSwitch(AuthenticatedEncryptionProvider._skipValidationOfAuthenticationTagLength, true);
-            var payload = new JObject()
+            var signingCredentials512 = new SigningCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Sha512);
+            return new TheoryData<CreateTokenTheoryData>()
             {
-                { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
-                { JwtRegisteredClaimNames.GivenName, "Bob" },
-                { JwtRegisteredClaimNames.Iss, "http://Default.Issuer.com"},
-                { JwtRegisteredClaimNames.Aud, "http://Default.Audience.com" },
-                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.Parse("2017-03-17T18:33:37.095Z")).ToString() },
-                { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(DateTime.Parse("2017-03-17T18:33:37.080Z")).ToString() },
-                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.Now.AddDays(1)).ToString() },
-            }.ToString();
-
-            var jsonWebTokenHandler = new JsonWebTokenHandler();
-            var signingCredentials = Default.SymmetricSigningCredentials;
-            var encryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256);
-            var jwe = jsonWebTokenHandler.CreateToken(payload, signingCredentials, encryptingCredentials);
-            var jweWithExtraCharacters = jwe + "cannoli_hunts_truffles";
-            var tokenValidationParameters = new TokenValidationParameters
-            {
-                TokenDecryptionKey = KeyingMaterial.RsaSecurityKey_2048,
-                IssuerSigningKey = Default.SymmetricSigningKey256,
-                ValidAudience = "http://Default.Audience.com",
-                ValidIssuer = "http://Default.Issuer.com",
+                new("A128CBC-HS256_IsNotValidByDefault")
+                {
+                    Algorithm = SecurityAlgorithms.Aes128CbcHmacSha256,
+                    EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
+                    ValidationParameters = new TokenValidationParameters
+                    {
+                        TokenDecryptionKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                        IssuerSigningKey = Default.SymmetricSigningKey256,
+                        ValidAudience = "http://Default.Audience.com",
+                        ValidIssuer = "http://Default.Issuer.com",
+                    },
+                    IsValid = false
+                },
+                new("A192CBC-HS384_IsNotValidByDefault")
+                {
+                    Algorithm = SecurityAlgorithms.Aes192CbcHmacSha384,
+                    EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes192CbcHmacSha384),
+                    ValidationParameters = new TokenValidationParameters
+                    {
+                        TokenDecryptionKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                        IssuerSigningKey = Default.SymmetricSigningKey256,
+                        ValidAudience = "http://Default.Audience.com",
+                        ValidIssuer = "http://Default.Issuer.com",
+                    },
+                    IsValid = false
+                },
+                new("A256CBC-HS512_IsNotValidByDefault")
+                {
+                    Algorithm = SecurityAlgorithms.Aes256CbcHmacSha512,
+                    EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes256CbcHmacSha512),
+                    ValidationParameters = new TokenValidationParameters
+                    {
+                        TokenDecryptionKey = signingCredentials512.Key,
+                        IssuerSigningKey = Default.SymmetricSigningKey256,
+                        ValidAudience = "http://Default.Audience.com",
+                        ValidIssuer = "http://Default.Issuer.com",
+                    },
+                    IsValid = false
+                },
+                new("A128CBC-HS256_SkipTagLengthValidationAppContextSwitchOn_IsValid")
+                {
+                    EnableAppContextSwitch = true,
+                    Algorithm = SecurityAlgorithms.Aes128CbcHmacSha256,
+                    EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
+                    ValidationParameters = new TokenValidationParameters
+                    {
+                        TokenDecryptionKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                        IssuerSigningKey = Default.SymmetricSigningKey256,
+                        ValidAudience = "http://Default.Audience.com",
+                        ValidIssuer = "http://Default.Issuer.com",
+                    },
+                    IsValid = true
+                },
+                new("A192CBC-HS384_SkipTagLengthValidationAppContextSwitchOn_IsValid")
+                {
+                    EnableAppContextSwitch = true,
+                    Algorithm = SecurityAlgorithms.Aes192CbcHmacSha384,
+                    EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes192CbcHmacSha384),
+                    ValidationParameters = new TokenValidationParameters
+                    {
+                        TokenDecryptionKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                        IssuerSigningKey = Default.SymmetricSigningKey256,
+                        ValidAudience = "http://Default.Audience.com",
+                        ValidIssuer = "http://Default.Issuer.com",
+                    },
+                    IsValid = true
+                },
+                new("A256CBC-HS512_SkipTagLengthValidationAppContextSwitchOn_IsValid")
+                {
+                    EnableAppContextSwitch = true,
+                    EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes256CbcHmacSha512),
+                    ValidationParameters = new TokenValidationParameters
+                    {
+                        TokenDecryptionKey = signingCredentials512.Key,
+                        IssuerSigningKey = Default.SymmetricSigningKey256,
+                        ValidAudience = "http://Default.Audience.com",
+                        ValidIssuer = "http://Default.Issuer.com",
+                    },
+                    IsValid = true
+                }
             };
-
-            // act
-            // calling ValidateTokenAsync.Result to prevent tests from sharing app context switch property
-            // normally, we would want to await ValidateTokenAsync().ConfigureAwait(false)
-            var tokenValidationResult = jsonWebTokenHandler.ValidateTokenAsync(jweWithExtraCharacters, tokenValidationParameters).Result;
-
-            // assert
-            Assert.True(tokenValidationResult.IsValid);
-        }
-    }
-
-    public class CreateTokenTheoryData : TheoryDataBase
-    {
-        public CreateTokenTheoryData()
-        {
         }
 
-        public CreateTokenTheoryData(string testId) : base(testId)
+        public class CreateTokenTheoryData : TheoryDataBase
         {
-        }
-
-        public Dictionary<string, object> AdditionalHeaderClaims { get; set; }
-
-        public string Payload { get; set; }
-
-        public string CompressionAlgorithm { get; set; }
-
-        public BaseConfiguration Configuration { get; set; }
-
-        public CompressionProviderFactory CompressionProviderFactory { get; set; }
-
-        public EncryptingCredentials EncryptingCredentials { get; set; }
-
-        public bool IsValid { get; set; } = true;
-
-        public SigningCredentials SigningCredentials { get; set; }
-
-        public SecurityTokenDescriptor TokenDescriptor { get; set; }
-
-        public SecurityTokenDescriptor TokenDescriptor6x { get; set; }
-
-        public JsonWebTokenHandler JsonWebTokenHandler { get; set; }
-
-        public JwtSecurityTokenHandler JwtSecurityTokenHandler { get; set; }
-
-        public string JwtToken { get; set; }
-
-        public TokenValidationParameters ValidationParameters { get; set; }
-
-        public string Algorithm { get; set; }
-
-        public IEnumerable<SecurityKey> ExpectedDecryptionKeys { get; set; }
-
-        public Dictionary<string, object> ExpectedClaims { get; set; }
-    }
-
-    // Overrides CryptoProviderFactory.CreateAuthenticatedEncryptionProvider to create AuthenticatedEncryptionProviderMock that provides AesGcm encryption.
-    public class CryptoProviderFactoryMock: CryptoProviderFactory
-    {
-        public override AuthenticatedEncryptionProvider CreateAuthenticatedEncryptionProvider(SecurityKey key, string algorithm)
-        {
-            if (SupportedAlgorithms.IsSupportedEncryptionAlgorithm(algorithm, key) && SupportedAlgorithms.IsAesGcm(algorithm))
-                return new AuthenticatedEncryptionProviderMock(key, algorithm);
-
-            return null;
-        }
-    }
-
-    // Overrides AuthenticatedEncryptionProvider.Encrypt to offer AesGcm encryption for testing.
-    public class AuthenticatedEncryptionProviderMock: AuthenticatedEncryptionProvider
-    {
-        public AuthenticatedEncryptionProviderMock(SecurityKey key, string algorithm): base(key, algorithm)
-        { }
-
-        public override AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData)
-        {
-            byte[] nonce = new byte[Tokens.AesGcm.NonceSize];
-
-            // Generate random nonce
-            var random = RandomNumberGenerator.Create();
-            random.GetBytes(nonce);
-
-            return Encrypt(plaintext, authenticatedData, nonce);
-        }
-
-        public override AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData, byte[] iv)
-        {
-            byte[] authenticationTag = new byte[Tokens.AesGcm.TagSize];
-            byte[] ciphertext = new byte[plaintext.Length];
-
-            using (var aes = new Tokens.AesGcm(GetKeyBytes(Key)))
+            public CreateTokenTheoryData()
             {
-                aes.Encrypt(iv, plaintext, ciphertext, authenticationTag, authenticatedData);
             }
 
-            return new AuthenticatedEncryptionResult(Key, ciphertext, iv, authenticationTag); 
-        }
-    }
+            public CreateTokenTheoryData(string testId) : base(testId)
+            {
+            }
 
-    public class DerivedJsonWebTokenHandler : JsonWebTokenHandler
-    {
-        /// <summary>
-        /// Creates a <see cref="ClaimsIdentity"/> from a <see cref="JsonWebToken"/>.
-        /// </summary>
-        /// <param name="jwtToken">The <see cref="JsonWebToken"/> to use as a <see cref="Claim"/> source.</param>
-        /// <param name="validationParameters">Contains parameters for validating the token.</param>
-        /// <param name="issuer">Specifies the issuer for the <see cref="ClaimsIdentity"/>.</param>
-        /// <returns>A <see cref="ClaimsIdentity"/> containing the <see cref="JsonWebToken.Claims"/>.</returns>
-        protected override ClaimsIdentity CreateClaimsIdentity(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer)
+            public Dictionary<string, object> AdditionalHeaderClaims { get; set; }
+
+            public string Payload { get; set; }
+
+            public string CompressionAlgorithm { get; set; }
+
+            public BaseConfiguration Configuration { get; set; }
+
+            public CompressionProviderFactory CompressionProviderFactory { get; set; }
+
+            public EncryptingCredentials EncryptingCredentials { get; set; }
+
+            public bool IsValid { get; set; } = true;
+
+            public SigningCredentials SigningCredentials { get; set; }
+
+            public SecurityTokenDescriptor TokenDescriptor { get; set; }
+
+            public SecurityTokenDescriptor TokenDescriptor6x { get; set; }
+
+            public JsonWebTokenHandler JsonWebTokenHandler { get; set; }
+
+            public JwtSecurityTokenHandler JwtSecurityTokenHandler { get; set; }
+
+            public string JwtToken { get; set; }
+
+            public TokenValidationParameters ValidationParameters { get; set; }
+
+            public string Algorithm { get; set; }
+
+            public IEnumerable<SecurityKey> ExpectedDecryptionKeys { get; set; }
+
+            public Dictionary<string, object> ExpectedClaims { get; set; }
+
+            public bool EnableAppContextSwitch { get; set; } = false;
+        }
+
+        // Overrides CryptoProviderFactory.CreateAuthenticatedEncryptionProvider to create AuthenticatedEncryptionProviderMock that provides AesGcm encryption.
+        public class CryptoProviderFactoryForGcm : CryptoProviderFactory
         {
-            return base.CreateClaimsIdentity(jwtToken, validationParameters, issuer);
+            public override AuthenticatedEncryptionProvider CreateAuthenticatedEncryptionProvider(SecurityKey key, string algorithm)
+            {
+                if (SupportedAlgorithms.IsSupportedEncryptionAlgorithm(algorithm, key) && SupportedAlgorithms.IsAesGcm(algorithm))
+                    return new AuthenticatedEncryptionProviderMock(key, algorithm);
+
+                return null;
+            }
+        }
+
+        // Overrides AuthenticatedEncryptionProvider.Encrypt to offer AesGcm encryption for testing.
+        public class AuthenticatedEncryptionProviderMock : AuthenticatedEncryptionProvider
+        {
+            public AuthenticatedEncryptionProviderMock(SecurityKey key, string algorithm) : base(key, algorithm)
+            { }
+
+            public override AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData)
+            {
+                byte[] nonce = new byte[Tokens.AesGcm.NonceSize];
+
+                // Generate random nonce
+                var random = RandomNumberGenerator.Create();
+                random.GetBytes(nonce);
+
+                return Encrypt(plaintext, authenticatedData, nonce);
+            }
+
+            public override AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData, byte[] iv)
+            {
+                byte[] authenticationTag = new byte[Tokens.AesGcm.TagSize];
+                byte[] ciphertext = new byte[plaintext.Length];
+
+                using (var aes = new Tokens.AesGcm(GetKeyBytes(Key)))
+                {
+                    aes.Encrypt(iv, plaintext, ciphertext, authenticationTag, authenticatedData);
+                }
+
+                return new AuthenticatedEncryptionResult(Key, ciphertext, iv, authenticationTag);
+            }
+        }
+
+        public class DerivedJsonWebTokenHandler : JsonWebTokenHandler
+        {
+            /// <summary>
+            /// Creates a <see cref="ClaimsIdentity"/> from a <see cref="JsonWebToken"/>.
+            /// </summary>
+            /// <param name="jwtToken">The <see cref="JsonWebToken"/> to use as a <see cref="Claim"/> source.</param>
+            /// <param name="validationParameters">Contains parameters for validating the token.</param>
+            /// <param name="issuer">Specifies the issuer for the <see cref="ClaimsIdentity"/>.</param>
+            /// <returns>A <see cref="ClaimsIdentity"/> containing the <see cref="JsonWebToken.Claims"/>.</returns>
+            protected override ClaimsIdentity CreateClaimsIdentity(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer)
+            {
+                return base.CreateClaimsIdentity(jwtToken, validationParameters, issuer);
+            }
         }
     }
 }

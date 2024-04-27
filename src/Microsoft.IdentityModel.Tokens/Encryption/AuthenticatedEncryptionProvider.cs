@@ -38,14 +38,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Mapping from algorithm to the expected authentication tag length.
         /// </summary>
-        internal static readonly Dictionary<string, int> ExpectedAuthenticationTagBase64UrlLength = new()
+        internal static readonly Dictionary<string, int> ExpectedAuthenticationTagBase64UrlSizeInBytes = new()
         {
-            { SecurityAlgorithms.Aes128Gcm, 24 },
-            { SecurityAlgorithms.Aes192Gcm, 24 },
-            { SecurityAlgorithms.Aes256Gcm, 24 },
-            { SecurityAlgorithms.Aes128CbcHmacSha256, 24 },
-            { SecurityAlgorithms.Aes192CbcHmacSha384, 32 },
-            { SecurityAlgorithms.Aes256CbcHmacSha512, 44 }
+            { SecurityAlgorithms.Aes128Gcm, 16 },
+            { SecurityAlgorithms.Aes192Gcm, 16 },
+            { SecurityAlgorithms.Aes256Gcm, 16 },
+            { SecurityAlgorithms.Aes128CbcHmacSha256, 16 },
+            { SecurityAlgorithms.Aes192CbcHmacSha384, 24 },
+            { SecurityAlgorithms.Aes256CbcHmacSha512, 32 }
         };
 
         /// <summary>
@@ -180,8 +180,8 @@ namespace Microsoft.IdentityModel.Tokens
         private byte[] DecryptWithAesCbc(byte[] ciphertext, byte[] authenticatedData, byte[] iv, byte[] authenticationTag)
         {
             // Verify authentication Tag
-            if (ExpectedAuthenticationTagBase64UrlLength.TryGetValue(Algorithm, out int expectedTagLength) &&
-                ShouldValidateAuthenticationTagLength()
+            if (ShouldValidateAuthenticationTagLength()
+                && ExpectedAuthenticationTagBase64UrlSizeInBytes.TryGetValue(Algorithm, out int expectedTagLength)
                 && expectedTagLength != authenticationTag.Length)
                 throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(LogMessages.IDX10625, Base64UrlEncoder.Encode(authenticationTag))));
 
@@ -226,7 +226,6 @@ namespace Microsoft.IdentityModel.Tokens
             if (!IsSupportedAlgorithm(Key, Algorithm))
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10668, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII(Algorithm), Key)));
 
-            ValidateKeySize(Key, Algorithm);
 
             SymmetricSignatureProvider symmetricSignatureProvider;
 
