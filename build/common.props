@@ -55,6 +55,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
     <NoWarn>$(NoWarn);SYSLIB0050</NoWarn>
     <NoWarn>$(NoWarn);SYSLIB0051</NoWarn>
   </PropertyGroup>

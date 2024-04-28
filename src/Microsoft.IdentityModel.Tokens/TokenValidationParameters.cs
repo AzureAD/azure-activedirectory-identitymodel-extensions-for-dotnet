@@ -253,6 +253,7 @@ namespace Microsoft.IdentityModel.Tokens
             SaveSigninToken = other.SaveSigninToken;
             SignatureValidator = other.SignatureValidator;
             SignatureValidatorUsingConfiguration = other.SignatureValidatorUsingConfiguration;
+            TimeProvider = other.TimeProvider;
             TokenDecryptionKey = other.TokenDecryptionKey;
             TokenDecryptionKeyResolver = other.TokenDecryptionKeyResolver;
             TokenDecryptionKeys = other.TokenDecryptionKeys;
@@ -380,6 +381,14 @@ namespace Microsoft.IdentityModel.Tokens
                 _clockSkew = value;
             }
         }
+
+        /// <summary>
+        /// Gets or sets the time provider used for time validation.
+        /// </summary>
+        /// <remarks>
+        /// If not set, validators will fall back to using the <see cref="DateTime"/> class to obtain the current time.
+        /// </remarks>
+        public TimeProvider TimeProvider { get; set; }
 
         /// <summary>
         /// Returns a new instance of <see cref="TokenValidationParameters"/> with values copied from this object.
@@ -538,7 +547,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// priority. 
         /// </remarks>
         public IssuerValidator IssuerValidator { get; set; }
-
 
         /// <summary>
         /// Gets or sets a delegate that will be used to validate the issuer of the token.
