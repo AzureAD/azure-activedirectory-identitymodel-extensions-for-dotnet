@@ -2,6 +2,7 @@
   <PropertyGroup>
     <DotNetCoreAppRuntimeVersion>2.1.30</DotNetCoreAppRuntimeVersion>
     <MicrosoftAzureKeyVaultCryptographyVersion>2.0.5</MicrosoftAzureKeyVaultCryptographyVersion>
+    <MicrosoftExtensionsTimeProviderTestingVersion>8.4.0</MicrosoftExtensionsTimeProviderTestingVersion>
     <MicrosoftNETTestSdkVersion>16.10.0</MicrosoftNETTestSdkVersion>
     <NetStandardVersion>2.0.3</NetStandardVersion>
     <NewtonsoftVersion>13.0.3</NewtonsoftVersion>

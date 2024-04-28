@@ -4,6 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+#if NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER
+using Microsoft.Extensions.Time.Testing;
+#endif
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
@@ -365,6 +368,17 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 // clock skew, positive then negative
                 dataset.Add(DateTime.UtcNow + TimeSpan.FromMinutes(2), DateTime.UtcNow + TimeSpan.FromHours(1), null, new TokenValidationParameters{ ClockSkew = TimeSpan.FromMinutes(5) }, ExpectedException.NoExceptionExpected);
                 dataset.Add(DateTime.UtcNow - TimeSpan.FromMinutes(2), DateTime.UtcNow - TimeSpan.FromMinutes(1), null, new TokenValidationParameters{ ClockSkew = TimeSpan.FromMinutes(5) }, ExpectedException.NoExceptionExpected);
+
+                // With TimeProvider (default)
+                dataset.Add(DateTime.UtcNow - TimeSpan.FromHours(2), DateTime.UtcNow - TimeSpan.FromHours(1), null, new TokenValidationParameters { TimeProvider = TimeProvider.System }, ExpectedException.SecurityTokenExpiredException("IDX10223:"));
+                dataset.Add(DateTime.UtcNow - TimeSpan.FromHours(2), DateTime.UtcNow + TimeSpan.FromHours(1), null, new TokenValidationParameters { TimeProvider = TimeProvider.System }, ExpectedException.NoExceptionExpected);
+
+#if NET462_OR_GREATER || NETCOREAPP2_1_OR_GREATER 
+                // With TimeProvider (fake)
+                DateTime fakeUtcTime = DateTime.UtcNow.AddYears(-1);
+                dataset.Add(fakeUtcTime - TimeSpan.FromHours(2), fakeUtcTime - TimeSpan.FromHours(1), null, new TokenValidationParameters { TimeProvider = new FakeTimeProvider(fakeUtcTime) }, ExpectedException.SecurityTokenExpiredException("IDX10223:"));
+                dataset.Add(fakeUtcTime - TimeSpan.FromHours(2), fakeUtcTime + TimeSpan.FromHours(1), null, new TokenValidationParameters { TimeProvider = new FakeTimeProvider(fakeUtcTime) }, ExpectedException.NoExceptionExpected);
+#endif
 
                 notBefore = EpochTime.DateTime(EpochTime.GetIntDate((DateTime.UtcNow + TimeSpan.FromMinutes(6)).ToUniversalTime()));
                 expires = EpochTime.DateTime(EpochTime.GetIntDate((DateTime.UtcNow + TimeSpan.FromHours(1)).ToUniversalTime()));
