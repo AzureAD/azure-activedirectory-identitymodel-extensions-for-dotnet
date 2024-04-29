@@ -36,19 +36,6 @@ namespace Microsoft.IdentityModel.Tokens
         internal const string _skipValidationOfAuthenticationTagLength = "Switch.Microsoft.IdentityModel.SkipAuthenticationTagLengthValidation"; 
 
         /// <summary>
-        /// Mapping from algorithm to the expected authentication tag length.
-        /// </summary>
-        internal static readonly Dictionary<string, int> ExpectedAuthenticationTagBase64UrlSizeInBytes = new()
-        {
-            { SecurityAlgorithms.Aes128Gcm, 16 },
-            { SecurityAlgorithms.Aes192Gcm, 16 },
-            { SecurityAlgorithms.Aes256Gcm, 16 },
-            { SecurityAlgorithms.Aes128CbcHmacSha256, 16 },
-            { SecurityAlgorithms.Aes192CbcHmacSha384, 24 },
-            { SecurityAlgorithms.Aes256CbcHmacSha512, 32 }
-        };
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="AuthenticatedEncryptionProvider"/> class used for encryption and decryption.
         /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for crypto operations.</param>
@@ -180,9 +167,8 @@ namespace Microsoft.IdentityModel.Tokens
         private byte[] DecryptWithAesCbc(byte[] ciphertext, byte[] authenticatedData, byte[] iv, byte[] authenticationTag)
         {
             // Verify authentication Tag
-            int expectedTagLength = _authenticatedkeys.Value.HmacKey.Key.Length;
             if (ShouldValidateAuthenticationTagLength()
-                && ExpectedAuthenticationTagBase64UrlSizeInBytes.TryGetValue(Algorithm, out expectedTagLength)
+                && SymmetricSignatureProvider.ExpectedSignatureSizeInBytes.TryGetValue(Algorithm, out int expectedTagLength)
                 && expectedTagLength != authenticationTag.Length)
                 throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(LogMessages.IDX10625, Base64UrlEncoder.Encode(authenticationTag))));
 
@@ -192,7 +178,7 @@ namespace Microsoft.IdentityModel.Tokens
             Array.Copy(iv, 0, macBytes, authenticatedData.Length, iv.Length);
             Array.Copy(ciphertext, 0, macBytes, authenticatedData.Length + iv.Length, ciphertext.Length);
             Array.Copy(al, 0, macBytes, authenticatedData.Length + iv.Length + ciphertext.Length, al.Length);
-            if (!_symmetricSignatureProvider.Value.Verify(macBytes, 0, macBytes.Length, authenticationTag, 0, expectedTagLength, Algorithm))
+            if (!_symmetricSignatureProvider.Value.Verify(macBytes, 0, macBytes.Length, authenticationTag, 0, _authenticatedkeys.Value.HmacKey.Key.Length, Algorithm))
                 throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(LogMessages.IDX10650, Base64UrlEncoder.Encode(authenticatedData), Base64UrlEncoder.Encode(iv), Base64UrlEncoder.Encode(authenticationTag))));
 
             using Aes aes = Aes.Create();

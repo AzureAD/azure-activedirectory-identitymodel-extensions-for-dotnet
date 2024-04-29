@@ -4200,8 +4200,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 { JwtRegisteredClaimNames.GivenName, "Bob" },
                 { JwtRegisteredClaimNames.Iss, "http://Default.Issuer.com"},
                 { JwtRegisteredClaimNames.Aud, "http://Default.Audience.com" },
-                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.Parse("2017-03-17T18:33:37.095Z")).ToString() },
-                { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(DateTime.Parse("2017-03-17T18:33:37.080Z")).ToString() },
+                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(DateTime.Now).ToString() },
+                { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(DateTime.Now).ToString() },
                 { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.Now.AddDays(1)).ToString() },
             }.ToString();
 
