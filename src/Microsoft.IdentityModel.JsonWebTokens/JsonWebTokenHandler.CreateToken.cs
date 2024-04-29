@@ -706,11 +706,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             writer.WriteStartObject();
 
-            if (tokenDescriptor.HasAudiences)
+            if (tokenDescriptor.HasAudience)
             {
                 audienceSet = true;
-                writer.WritePropertyName(JwtPayloadUtf8Bytes.Aud);
-                writer.WriteStringValue(tokenDescriptor.AudiencesJson);
+                // TODO at next major version Audience will be removed at that time remove the else logic.
+                if (tokenDescriptor.UseAudiences)
+                    JsonPrimitives.WriteObject(ref writer, JwtRegisteredClaimNames.Aud, tokenDescriptor.Audiences);
+                else
+                    JsonPrimitives.WriteObject(ref writer, JwtRegisteredClaimNames.Aud, tokenDescriptor.Audience);
             }
 
             if (!string.IsNullOrEmpty(tokenDescriptor.Issuer))
@@ -754,8 +757,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         audienceChecked = true;
                         if (audienceSet)
                         {
+                            // TODO at next major version Audience will be removed at that time remove this local variable.
+                            string descriptorMemberName = tokenDescriptor.UseAudiences ? nameof(tokenDescriptor.Audiences) : nameof(tokenDescriptor.Audience);
                             if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                                LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, LogHelper.MarkAsNonPII(nameof(tokenDescriptor.Audiences))));
+                                LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, LogHelper.MarkAsNonPII(descriptorMemberName)));
 
                             continue;
                         }

@@ -368,8 +368,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             else if (SetDefaultTimesOnTokenCreation)
                 conditions.NotOnOrAfter = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes);
 
-            if (tokenDescriptor.HasAudiences)
-                conditions.Conditions.Add(new SamlAudienceRestrictionCondition(tokenDescriptor.Audiences));
+            if (tokenDescriptor.HasAudience)
+                // TODO: At next major version, remove the check for UseAudiences and only use the Audiences property.
+                if (tokenDescriptor.UseAudiences)
+                    conditions.Conditions.Add(new SamlAudienceRestrictionCondition(tokenDescriptor.Audiences));
+                else
+                    conditions.Conditions.Add(new SamlAudienceRestrictionCondition(new Uri(tokenDescriptor.Audience)));
 
             return conditions;
         }

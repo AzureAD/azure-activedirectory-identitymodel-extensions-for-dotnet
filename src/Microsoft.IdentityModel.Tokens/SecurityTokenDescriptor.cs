@@ -16,17 +16,22 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class SecurityTokenDescriptor
     {
+        // TODO: At next major version, remove _audienceSet, _audiencesSet, UseAudiences, Audience, and relevant logic.
         private bool _audienceSet = false;
         private bool _audiencesSet = false;
         private IList<string> _audiences;
-        internal bool HasAudiences => _audiences != null && _audiences.Count > 0;
+        internal bool UseAudiences => _audiencesSet;
+        internal bool HasAudience => _audiences != null && _audiences.Count > 0;
         internal string AudiencesJson
         {
             get
             {
-                if (_audiences == null)
+                if (_audienceSet)
+                    return _audiences.FirstOrDefault();
+                else if (_audiencesSet)
+                    return JsonSerializerPrimitives.CreateJsonElement(_audiences).ToString();
+                else
                     return null;
-                return JsonSerializerPrimitives.CreateJsonElement(_audiences).ToString();
             }
         }
 
