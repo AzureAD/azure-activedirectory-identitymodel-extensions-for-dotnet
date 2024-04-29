@@ -20,6 +20,26 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 {
     public class JwtSecurityTokenHandlerTests
     {
+        [Fact]
+        public void TestBug()
+        {
+            //EncryptingCredentials encryptingCredentials = new EncryptingCredentials(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes128CbcHmacSha256);
+            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Issuer = Default.Issuer,
+                IssuedAt = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
+                Subject = new ClaimsIdentity(Default.PayloadJsonClaims),
+                NotBefore = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
+                Expires = DateTime.UtcNow.Subtract(new TimeSpan(0, 10, 0)),
+                SigningCredentials = Default.SymmetricSigningCredentials,
+                EncryptingCredentials = Default.SymmetricEncryptingCredentials,
+                TokenType = "JWE"
+            };
+
+            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            JwtSecurityToken token = tokenHandler.CreateJwtSecurityToken(tokenDescriptor);
+            Assert.NotNull(token);
+        }
 
         [Fact]
         public void JwtSecurityTokenHandler_CreateToken_SameTypeMultipleValues()
