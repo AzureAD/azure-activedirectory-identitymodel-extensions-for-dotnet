@@ -4230,7 +4230,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var signingCredentials512 = new SigningCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Sha512);
             return new TheoryData<CreateTokenTheoryData>()
             {
-                new("Aes128Gcm_IsNotValidByDefault")
+                new("Aes256Gcm_IsNotValidByDefault")
                 {
                     Algorithm = SecurityAlgorithms.Aes256Gcm,
                     EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_AesGcm256,
