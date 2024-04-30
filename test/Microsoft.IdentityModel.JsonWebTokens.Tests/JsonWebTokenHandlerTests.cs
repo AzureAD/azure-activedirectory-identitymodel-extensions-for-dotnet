@@ -4207,6 +4207,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             var jsonWebTokenHandler = new JsonWebTokenHandler();
             var signingCredentials = Default.SymmetricSigningCredentials;
+
+            if (SupportedAlgorithms.IsAesGcm(theoryData.Algorithm))
+            {
+                theoryData.EncryptingCredentials.CryptoProviderFactory = new CryptoProviderFactoryForGcm();
+            }
+
             var jwe = jsonWebTokenHandler.CreateToken(payload, signingCredentials, theoryData.EncryptingCredentials);
             var jweWithExtraCharacters = jwe + "_cannoli_hunts_truffles_";
 
@@ -4224,6 +4230,19 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var signingCredentials512 = new SigningCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Sha512);
             return new TheoryData<CreateTokenTheoryData>()
             {
+                new("Aes128Gcm_IsNotValidByDefault")
+                {
+                    Algorithm = SecurityAlgorithms.Aes256Gcm,
+                    EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_AesGcm256,
+                    ValidationParameters = new TokenValidationParameters
+                    {
+                        TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
+                        IssuerSigningKey = Default.SymmetricSigningKey256,
+                        ValidAudience = "http://Default.Audience.com",
+                        ValidIssuer = "http://Default.Issuer.com",
+                    },
+                    IsValid = false
+                },
                 new("A128CBC-HS256_IsNotValidByDefault")
                 {
                     Algorithm = SecurityAlgorithms.Aes128CbcHmacSha256,
@@ -4360,16 +4379,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             public override AuthenticatedEncryptionProvider CreateAuthenticatedEncryptionProvider(SecurityKey key, string algorithm)
             {
                 if (SupportedAlgorithms.IsSupportedEncryptionAlgorithm(algorithm, key) && SupportedAlgorithms.IsAesGcm(algorithm))
-                    return new AuthenticatedEncryptionProviderMock(key, algorithm);
+                    return new AuthenticatedEncryptionProviderForGcm(key, algorithm);
 
                 return null;
             }
         }
 
         // Overrides AuthenticatedEncryptionProvider.Encrypt to offer AesGcm encryption for testing.
-        public class AuthenticatedEncryptionProviderMock : AuthenticatedEncryptionProvider
+        public class AuthenticatedEncryptionProviderForGcm : AuthenticatedEncryptionProvider
         {
-            public AuthenticatedEncryptionProviderMock(SecurityKey key, string algorithm) : base(key, algorithm)
+            public AuthenticatedEncryptionProviderForGcm(SecurityKey key, string algorithm) : base(key, algorithm)
             { }
 
             public override AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData)
