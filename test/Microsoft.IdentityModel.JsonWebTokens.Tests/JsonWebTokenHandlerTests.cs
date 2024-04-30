@@ -85,9 +85,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public void CreateTokenThrowsNullArgumentException()
         {
             var handler = new JsonWebTokenHandler();
-            Assert.Throws<ArgumentNullException>(() => handler.CreateToken(null, Default.SymmetricEncryptingCredentials, new Dictionary<string, object> { {"key", "value" } }));
-            Assert.Throws<ArgumentNullException>(() => handler.CreateToken("Payload", (EncryptingCredentials) null, new Dictionary<string, object> { { "key", "value" } }));
-            Assert.Throws<ArgumentNullException>(() => handler.CreateToken("Payload", Default.SymmetricEncryptingCredentials, (Dictionary<string, object>) null));
+            Assert.Throws<ArgumentNullException>(() => handler.CreateToken(null, Default.SymmetricEncryptingCredentials, new Dictionary<string, object> { { "key", "value" } }));
+            Assert.Throws<ArgumentNullException>(() => handler.CreateToken("Payload", (EncryptingCredentials)null, new Dictionary<string, object> { { "key", "value" } }));
+            Assert.Throws<ArgumentNullException>(() => handler.CreateToken("Payload", Default.SymmetricEncryptingCredentials, (Dictionary<string, object>)null));
         }
 
         [Theory, MemberData(nameof(TokenValidationClaimsTheoryData))]
@@ -2823,7 +2823,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
         // Test checks to make sure that default times are correctly added to the token
         // upon token creation.
-        [Fact (Skip = "Rewrite test to use claims, string will not succeed")]
+        [Fact(Skip = "Rewrite test to use claims, string will not succeed")]
         public void SetDefaultTimesOnTokenCreation()
         {
             // when the payload is passed as a string to JsonWebTokenHandler.CreateToken, we no longer
@@ -2979,9 +2979,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 }
             };
 
-            if(jsonValidationResult.IsValid && jwtValidationResult.IsValid)
+            if (jsonValidationResult.IsValid && jwtValidationResult.IsValid)
             {
-                if(!IdentityComparer.AreEqual(jsonValidationResult, jwtValidationResult, context))
+                if (!IdentityComparer.AreEqual(jsonValidationResult, jwtValidationResult, context))
                 {
                     context.AddDiff("jsonValidationResult.IsValid && jwtValidationResult.IsValid, Validation results are not equal");
                 }
@@ -3215,7 +3215,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             try
             {
                 var handler = new JsonWebTokenHandler();
-                var validationResult =handler.ValidateTokenAsync(theoryData.Token, theoryData.ValidationParameters).Result;
+                var validationResult = handler.ValidateTokenAsync(theoryData.Token, theoryData.ValidationParameters).Result;
                 if (validationResult.Exception != null)
                 {
                     if (validationResult.IsValid)
@@ -4325,110 +4325,110 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 }
             };
         }
+    }
 
-        public class CreateTokenTheoryData : TheoryDataBase
+    public class CreateTokenTheoryData : TheoryDataBase
+    {
+        public CreateTokenTheoryData()
         {
-            public CreateTokenTheoryData()
-            {
-            }
-
-            public CreateTokenTheoryData(string testId) : base(testId)
-            {
-            }
-
-            public Dictionary<string, object> AdditionalHeaderClaims { get; set; }
-
-            public string Payload { get; set; }
-
-            public string CompressionAlgorithm { get; set; }
-
-            public BaseConfiguration Configuration { get; set; }
-
-            public CompressionProviderFactory CompressionProviderFactory { get; set; }
-
-            public EncryptingCredentials EncryptingCredentials { get; set; }
-
-            public bool IsValid { get; set; } = true;
-
-            public SigningCredentials SigningCredentials { get; set; }
-
-            public SecurityTokenDescriptor TokenDescriptor { get; set; }
-
-            public SecurityTokenDescriptor TokenDescriptor6x { get; set; }
-
-            public JsonWebTokenHandler JsonWebTokenHandler { get; set; }
-
-            public JwtSecurityTokenHandler JwtSecurityTokenHandler { get; set; }
-
-            public string JwtToken { get; set; }
-
-            public TokenValidationParameters ValidationParameters { get; set; }
-
-            public string Algorithm { get; set; }
-
-            public IEnumerable<SecurityKey> ExpectedDecryptionKeys { get; set; }
-
-            public Dictionary<string, object> ExpectedClaims { get; set; }
-
-            public bool EnableAppContextSwitch { get; set; } = false;
         }
 
-        // Overrides CryptoProviderFactory.CreateAuthenticatedEncryptionProvider to create AuthenticatedEncryptionProviderMock that provides AesGcm encryption.
-        public class CryptoProviderFactoryForGcm : CryptoProviderFactory
+        public CreateTokenTheoryData(string testId) : base(testId)
         {
-            public override AuthenticatedEncryptionProvider CreateAuthenticatedEncryptionProvider(SecurityKey key, string algorithm)
-            {
-                if (SupportedAlgorithms.IsSupportedEncryptionAlgorithm(algorithm, key) && SupportedAlgorithms.IsAesGcm(algorithm))
-                    return new AuthenticatedEncryptionProviderForGcm(key, algorithm);
-
-                return null;
-            }
         }
 
-        // Overrides AuthenticatedEncryptionProvider.Encrypt to offer AesGcm encryption for testing.
-        public class AuthenticatedEncryptionProviderForGcm : AuthenticatedEncryptionProvider
+        public Dictionary<string, object> AdditionalHeaderClaims { get; set; }
+
+        public string Payload { get; set; }
+
+        public string CompressionAlgorithm { get; set; }
+
+        public BaseConfiguration Configuration { get; set; }
+
+        public CompressionProviderFactory CompressionProviderFactory { get; set; }
+
+        public EncryptingCredentials EncryptingCredentials { get; set; }
+
+        public bool IsValid { get; set; } = true;
+
+        public SigningCredentials SigningCredentials { get; set; }
+
+        public SecurityTokenDescriptor TokenDescriptor { get; set; }
+
+        public SecurityTokenDescriptor TokenDescriptor6x { get; set; }
+
+        public JsonWebTokenHandler JsonWebTokenHandler { get; set; }
+
+        public JwtSecurityTokenHandler JwtSecurityTokenHandler { get; set; }
+
+        public string JwtToken { get; set; }
+
+        public TokenValidationParameters ValidationParameters { get; set; }
+
+        public string Algorithm { get; set; }
+
+        public IEnumerable<SecurityKey> ExpectedDecryptionKeys { get; set; }
+
+        public Dictionary<string, object> ExpectedClaims { get; set; }
+
+        public bool EnableAppContextSwitch { get; set; } = false;
+    }
+
+    // Overrides CryptoProviderFactory.CreateAuthenticatedEncryptionProvider to create AuthenticatedEncryptionProviderMock that provides AesGcm encryption.
+    public class CryptoProviderFactoryForGcm : CryptoProviderFactory
+    {
+        public override AuthenticatedEncryptionProvider CreateAuthenticatedEncryptionProvider(SecurityKey key, string algorithm)
         {
-            public AuthenticatedEncryptionProviderForGcm(SecurityKey key, string algorithm) : base(key, algorithm)
-            { }
+            if (SupportedAlgorithms.IsSupportedEncryptionAlgorithm(algorithm, key) && SupportedAlgorithms.IsAesGcm(algorithm))
+                return new AuthenticatedEncryptionProviderForGcm(key, algorithm);
 
-            public override AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData)
-            {
-                byte[] nonce = new byte[Tokens.AesGcm.NonceSize];
+            return null;
+        }
+    }
 
-                // Generate random nonce
-                var random = RandomNumberGenerator.Create();
-                random.GetBytes(nonce);
+    // Overrides AuthenticatedEncryptionProvider.Encrypt to offer AesGcm encryption for testing.
+    public class AuthenticatedEncryptionProviderForGcm : AuthenticatedEncryptionProvider
+    {
+        public AuthenticatedEncryptionProviderForGcm(SecurityKey key, string algorithm) : base(key, algorithm)
+        { }
 
-                return Encrypt(plaintext, authenticatedData, nonce);
-            }
+        public override AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData)
+        {
+            byte[] nonce = new byte[Tokens.AesGcm.NonceSize];
 
-            public override AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData, byte[] iv)
-            {
-                byte[] authenticationTag = new byte[Tokens.AesGcm.TagSize];
-                byte[] ciphertext = new byte[plaintext.Length];
+            // Generate random nonce
+            var random = RandomNumberGenerator.Create();
+            random.GetBytes(nonce);
 
-                using (var aes = new Tokens.AesGcm(GetKeyBytes(Key)))
-                {
-                    aes.Encrypt(iv, plaintext, ciphertext, authenticationTag, authenticatedData);
-                }
-
-                return new AuthenticatedEncryptionResult(Key, ciphertext, iv, authenticationTag);
-            }
+            return Encrypt(plaintext, authenticatedData, nonce);
         }
 
-        public class DerivedJsonWebTokenHandler : JsonWebTokenHandler
+        public override AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData, byte[] iv)
         {
-            /// <summary>
-            /// Creates a <see cref="ClaimsIdentity"/> from a <see cref="JsonWebToken"/>.
-            /// </summary>
-            /// <param name="jwtToken">The <see cref="JsonWebToken"/> to use as a <see cref="Claim"/> source.</param>
-            /// <param name="validationParameters">Contains parameters for validating the token.</param>
-            /// <param name="issuer">Specifies the issuer for the <see cref="ClaimsIdentity"/>.</param>
-            /// <returns>A <see cref="ClaimsIdentity"/> containing the <see cref="JsonWebToken.Claims"/>.</returns>
-            protected override ClaimsIdentity CreateClaimsIdentity(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer)
+            byte[] authenticationTag = new byte[Tokens.AesGcm.TagSize];
+            byte[] ciphertext = new byte[plaintext.Length];
+
+            using (var aes = new Tokens.AesGcm(GetKeyBytes(Key)))
             {
-                return base.CreateClaimsIdentity(jwtToken, validationParameters, issuer);
+                aes.Encrypt(iv, plaintext, ciphertext, authenticationTag, authenticatedData);
             }
+
+            return new AuthenticatedEncryptionResult(Key, ciphertext, iv, authenticationTag);
+        }
+    }
+
+    public class DerivedJsonWebTokenHandler : JsonWebTokenHandler
+    {
+        /// <summary>
+        /// Creates a <see cref="ClaimsIdentity"/> from a <see cref="JsonWebToken"/>.
+        /// </summary>
+        /// <param name="jwtToken">The <see cref="JsonWebToken"/> to use as a <see cref="Claim"/> source.</param>
+        /// <param name="validationParameters">Contains parameters for validating the token.</param>
+        /// <param name="issuer">Specifies the issuer for the <see cref="ClaimsIdentity"/>.</param>
+        /// <returns>A <see cref="ClaimsIdentity"/> containing the <see cref="JsonWebToken.Claims"/>.</returns>
+        protected override ClaimsIdentity CreateClaimsIdentity(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer)
+        {
+            return base.CreateClaimsIdentity(jwtToken, validationParameters, issuer);
         }
     }
 }
