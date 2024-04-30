@@ -170,7 +170,8 @@ namespace Microsoft.IdentityModel.Tokens
             if (ShouldValidateAuthenticationTagLength()
                 && SymmetricSignatureProvider.ExpectedSignatureSizeInBytes.TryGetValue(Algorithm, out int expectedTagLength)
                 && expectedTagLength != authenticationTag.Length)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(LogMessages.IDX10625, Base64UrlEncoder.Encode(authenticationTag))));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(
+                    LogHelper.FormatInvariant(LogMessages.IDX10625, authenticationTag.Length, expectedTagLength, Base64UrlEncoder.Encode(authenticationTag), Algorithm)));
 
             byte[] al = Utility.ConvertToBigEndian(authenticatedData.Length * 8);
             byte[] macBytes = new byte[authenticatedData.Length + iv.Length + ciphertext.Length + al.Length];
@@ -213,6 +214,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (!IsSupportedAlgorithm(Key, Algorithm))
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10668, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII(Algorithm), Key)));
 
+            ValidateKeySize(Key, Algorithm);
 
             SymmetricSignatureProvider symmetricSignatureProvider;
 
