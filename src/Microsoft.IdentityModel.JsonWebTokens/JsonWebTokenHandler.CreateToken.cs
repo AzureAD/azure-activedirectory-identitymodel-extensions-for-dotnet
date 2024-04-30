@@ -709,11 +709,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (tokenDescriptor.HasAudience)
             {
                 audienceSet = true;
-                // TODO at next major version Audience will be removed at that time remove the else logic.
-                if (tokenDescriptor.UseAudiences)
+                // TODO at next major version Audience will be removed at that time remove this.
+                writer.WritePropertyName(JwtPayloadUtf8Bytes.Aud);
+                writer.WriteStringValue(tokenDescriptor.AudiencesJson);
+/*                if (tokenDescriptor.UseAudiences)
                     JsonPrimitives.WriteObject(ref writer, JwtRegisteredClaimNames.Aud, tokenDescriptor.Audiences);
                 else
-                    JsonPrimitives.WriteObject(ref writer, JwtRegisteredClaimNames.Aud, tokenDescriptor.Audience);
+                    JsonPrimitives.WriteObject(ref writer, JwtRegisteredClaimNames.Aud, tokenDescriptor.Audience);*/
             }
 
             if (!string.IsNullOrEmpty(tokenDescriptor.Issuer))
