@@ -4,7 +4,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System;
 using System.Security.Claims;
+using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols;
@@ -23,7 +26,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         [Fact]
         public void TestBug()
         {
-            //EncryptingCredentials encryptingCredentials = new EncryptingCredentials(KeyingMaterial.DefaultSymmetricSecurityKey_256, SecurityAlgorithms.RsaOaepKeyWrap, SecurityAlgorithms.Aes128CbcHmacSha256);
+            var encryptingCredentials = new X509EncryptingCredentials(Default.Certificate);
+
             SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
             {
                 Issuer = Default.Issuer,
@@ -31,14 +35,16 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 Subject = new ClaimsIdentity(Default.PayloadJsonClaims),
                 NotBefore = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
                 Expires = DateTime.UtcNow.Subtract(new TimeSpan(0, 10, 0)),
-                SigningCredentials = Default.SymmetricSigningCredentials,
-                EncryptingCredentials = Default.SymmetricEncryptingCredentials,
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                EncryptingCredentials = encryptingCredentials,
                 TokenType = "JWE"
             };
 
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
             JwtSecurityToken token = tokenHandler.CreateJwtSecurityToken(tokenDescriptor);
             Assert.NotNull(token);
+            Assert.NotEqual(token.Header.Alg, encryptingCredentials.Alg);
+            Assert.Equal(token.Header.Alg, SecurityAlgorithms.RsaOAEP);
         }
 
         [Fact]
