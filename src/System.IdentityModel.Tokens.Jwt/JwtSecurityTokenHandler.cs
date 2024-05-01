@@ -35,7 +35,6 @@ namespace System.IdentityModel.Tokens.Jwt
         private Dictionary<string, string> _outboundAlgorithmMap = null;
         private static string _shortClaimType = _namespace + "/ShortTypeName";
         private bool _mapInboundClaims = DefaultMapInboundClaims;
-        internal const string _skipValidationOfAuthenticationTagLength = "Switch.Microsoft.IdentityModel.SkipAuthenticationTagLengthValidation";
         internal const string _enableRsaOaepMappingSwitch = "Switch.Microsoft.IdentityModel.EnableRsaOaepShortFormMapping";
 
         /// <summary>
