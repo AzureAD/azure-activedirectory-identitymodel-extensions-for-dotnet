@@ -207,10 +207,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (outboundAlgorithmMap != null && outboundAlgorithmMap.TryGetValue(encryptingCredentials.Alg, out outboundAlg))
                 Alg = outboundAlg;
             else
-                if((encryptingCredentials.Alg).Equals(SecurityAlgorithms.RsaOaepKeyWrap))
-                    Alg = SecurityAlgorithms.RsaOAEP;
-                else
-                    Alg = encryptingCredentials.Alg;
+                Alg = encryptingCredentials.Alg;
             if (outboundAlgorithmMap != null && outboundAlgorithmMap.TryGetValue(encryptingCredentials.Enc, out outboundAlg))
                 Enc = outboundAlg;
             else

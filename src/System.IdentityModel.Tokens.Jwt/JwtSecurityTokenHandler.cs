@@ -35,6 +35,8 @@ namespace System.IdentityModel.Tokens.Jwt
         private Dictionary<string, string> _outboundAlgorithmMap = null;
         private static string _shortClaimType = _namespace + "/ShortTypeName";
         private bool _mapInboundClaims = DefaultMapInboundClaims;
+        internal const string _skipValidationOfAuthenticationTagLength = "Switch.Microsoft.IdentityModel.SkipAuthenticationTagLengthValidation";
+        internal const string _enableRsaOaepMappingSwitch = "Switch.Microsoft.IdentityModel.EnableRsaOaepShortFormMapping";
 
         /// <summary>
         /// Default claim type mapping for inbound claims.
@@ -70,7 +72,15 @@ namespace System.IdentityModel.Tokens.Jwt
             { SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.RsaSha256 },
             { SecurityAlgorithms.RsaSha384Signature, SecurityAlgorithms.RsaSha384 },
             { SecurityAlgorithms.RsaSha512Signature, SecurityAlgorithms.RsaSha512 },
+            { SecurityAlgorithms.RsaOaepKeyWrap, GetRsaOaepMapping() },
         };
+
+        private static string GetRsaOaepMapping()
+        {
+            bool useRsaOaepMapping = AppContext.TryGetSwitch(_enableRsaOaepMappingSwitch, out bool isEnabled) && isEnabled;
+
+            return useRsaOaepMapping ? SecurityAlgorithms.RsaOAEP : SecurityAlgorithms.RsaOaepKeyWrap;
+        }
 
         /// <summary>
         /// Static initializer for a new object. Static initializers run before the first instance of the type is created.
