@@ -4,10 +4,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System;
 using System.Security.Claims;
-using System.Security.Cryptography.X509Certificates;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols;
@@ -23,6 +20,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 {
     public class JwtSecurityTokenHandlerTests
     {
+
         [Fact]
         public void JwtSecurityTokenHandler_CreateToken_SameTypeMultipleValues()
         {

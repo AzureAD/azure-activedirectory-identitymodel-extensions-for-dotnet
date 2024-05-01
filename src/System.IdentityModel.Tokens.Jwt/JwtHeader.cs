@@ -208,6 +208,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 Alg = outboundAlg;
             else
                 Alg = encryptingCredentials.Alg;
+
             if (outboundAlgorithmMap != null && outboundAlgorithmMap.TryGetValue(encryptingCredentials.Enc, out outboundAlg))
                 Enc = outboundAlg;
             else
