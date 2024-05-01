@@ -24,30 +24,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
     public class JwtSecurityTokenHandlerTests
     {
         [Fact]
-        public void TestBug()
-        {
-            var encryptingCredentials = new X509EncryptingCredentials(Default.Certificate);
-
-            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Issuer = Default.Issuer,
-                IssuedAt = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
-                Subject = new ClaimsIdentity(Default.PayloadJsonClaims),
-                NotBefore = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
-                Expires = DateTime.UtcNow.Subtract(new TimeSpan(0, 10, 0)),
-                SigningCredentials = Default.AsymmetricSigningCredentials,
-                EncryptingCredentials = encryptingCredentials,
-                TokenType = "JWE"
-            };
-
-            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            JwtSecurityToken token = tokenHandler.CreateJwtSecurityToken(tokenDescriptor);
-            Assert.NotNull(token);
-            Assert.NotEqual(token.Header.Alg, encryptingCredentials.Alg);
-            Assert.Equal(token.Header.Alg, SecurityAlgorithms.RsaOAEP);
-        }
-
-        [Fact]
         public void JwtSecurityTokenHandler_CreateToken_SameTypeMultipleValues()
         {
             var identity = new ClaimsIdentity("Test");
@@ -79,6 +55,31 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             foreach (var value in claimValues)
                 Assert.NotNull(aTypeClaims.SingleOrDefault(c => c.Value == value));
+        }
+
+        [Fact]
+        public void JwtSecurityTokenHandler_CreateToken_AddShortFormMappingForRsaOAEP()
+        {
+            AppContext.SetSwitch(JwtSecurityTokenHandler._enableRsaOaepMappingSwitch, true); //Set to false to test the default behavior and adjust the expected values accordingly.
+            var encryptingCredentials = new X509EncryptingCredentials(Default.Certificate);
+            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Issuer = Default.Issuer,
+                IssuedAt = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
+                Subject = new ClaimsIdentity(Default.PayloadJsonClaims),
+                NotBefore = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
+                Expires = DateTime.UtcNow.Subtract(new TimeSpan(0, 10, 0)),
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                EncryptingCredentials = encryptingCredentials,
+                TokenType = "JWE"
+            };
+
+            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            JwtSecurityToken token = tokenHandler.CreateJwtSecurityToken(tokenDescriptor);
+
+            Assert.NotNull(token);
+            Assert.NotEqual(token.Header.Alg, encryptingCredentials.Alg);
+            Assert.Equal(token.Header.Alg, SecurityAlgorithms.RsaOAEP);
         }
 
         [Theory, MemberData(nameof(CreateJWEWithPayloadStringTheoryData))]
