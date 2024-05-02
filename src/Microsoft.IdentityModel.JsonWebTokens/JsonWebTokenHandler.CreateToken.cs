@@ -706,16 +706,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             writer.WriteStartObject();
 
-            if (tokenDescriptor.HasAudience)
+            // TODO at next major version (8.0) use only Audiences as SecurityTokenDescriptor.Audience will be removed.
+            if (!tokenDescriptor.Audiences.IsNullOrEmpty())
             {
-                audienceSet = true;
-                // TODO at next major version Audience will be removed at that time remove this.
                 writer.WritePropertyName(JwtPayloadUtf8Bytes.Aud);
-                writer.WriteStringValue(tokenDescriptor.AudiencesJson);
-/*                if (tokenDescriptor.UseAudiences)
-                    JsonPrimitives.WriteObject(ref writer, JwtRegisteredClaimNames.Aud, tokenDescriptor.Audiences);
-                else
-                    JsonPrimitives.WriteObject(ref writer, JwtRegisteredClaimNames.Aud, tokenDescriptor.Audience);*/
+                writer.WriteStringValue(JsonSerializer.Serialize(tokenDescriptor.Audiences));
+                audienceSet = true;
+            }
+            else if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
+            {
+                writer.WritePropertyName(JwtPayloadUtf8Bytes.Aud);
+                writer.WriteStringValue(tokenDescriptor.Audience);
+                audienceSet = true;
             }
 
             if (!string.IsNullOrEmpty(tokenDescriptor.Issuer))
@@ -760,7 +762,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         if (audienceSet)
                         {
                             // TODO at next major version Audience will be removed at that time remove this local variable.
-                            string descriptorMemberName = tokenDescriptor.UseAudiences ? nameof(tokenDescriptor.Audiences) : nameof(tokenDescriptor.Audience);
+                            string descriptorMemberName = null;
+                            if (!tokenDescriptor.Audiences.IsNullOrEmpty())
+                                descriptorMemberName = nameof(tokenDescriptor.Audiences);
+                            else if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
+                                descriptorMemberName = nameof(tokenDescriptor.Audience);
                             if (LogHelper.IsEnabled(EventLogLevel.Informational))
                                 LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, LogHelper.MarkAsNonPII(descriptorMemberName)));
 

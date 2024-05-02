@@ -1,13 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Text.Json;
+using Microsoft.IdentityModel.Tokens.Json;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -16,59 +14,38 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class SecurityTokenDescriptor
     {
-        // TODO: At next major version, remove _audienceSet, _audiencesSet, UseAudiences, Audience, and relevant logic.
-        private bool _audienceSet = false;
-        private bool _audiencesSet = false;
-        private IList<string> _audiences;
-        internal bool UseAudiences => _audiencesSet;
-        internal bool HasAudience => _audiences != null && _audiences.Count > 0;
-        internal string AudiencesJson
-        {
-            get
-            {
-                if (_audienceSet)
-                    return _audiences.FirstOrDefault();
-                else if (_audiencesSet)
-                    return JsonSerializerPrimitives.CreateJsonElement(_audiences).ToString();
-                else
-                    return null;
-            }
-        }
+        // TODO: At next major version (8.0), remove Audience and logic for combining with Audiences.
+        private HashSet<string> _audiences;
 
         /// <summary>
-        /// Gets or sets the value of the 'audience' claim. Can only be set if <see cref="Audiences"/> is not set.
+        /// Gets or sets the value of the 'audience' claim. Will be deprecated in favor of <see cref="Audiences"/> in the next
+        /// major version (8.x).
         /// </summary>
-        public string Audience {
-            get
-            {
-                if (_audiences == null)
-                    return null;
-                return _audiences.FirstOrDefault();
-            }
-            set
-            {
-                if (_audiencesSet)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException(LogMessages.IDX10212));
-                if (_audienceSet == false)
-                {
-                    _audienceSet = true;
-                    _audiences = new List<string> { value };
-                }
-                _audiences[0] = value;
-            }
-        }
+        public string Audience { get; set; }
 
         /// <summary>
-        /// Gets or sets multiple audiences to include in the 'audience' claim. Can only be set if <see cref="Audience"/> is not set.
+        /// Gets or sets one or more audiences to include in the token's 'Aud' claim. Automatically removes duplicates and empty
+        /// or null strings.
         /// </summary>
         public IEnumerable<string> Audiences {
-            get { return _audiences; }
+            get
+            {
+                // If Audiences isn't set, return null since this will be the behavior once Audience is removed.
+                if (_audiences.IsNullOrEmpty())
+                    return null;
+
+                // If both Audience and Audiences are set, return the union of the two.
+                else if (!string.IsNullOrEmpty(Audience))
+                    return _audiences.Union([Audience]);
+
+                // If only Audiences is set, return it
+                else
+                    return _audiences;
+            }
             set
             {
-                if (_audienceSet)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException(LogMessages.IDX10213));
-                _audiencesSet = true;
-                _audiences = value.ToList();
+                _audiences = new HashSet<string>(value);
+                _audiences.RemoveWhere(string.IsNullOrWhiteSpace);
             }
         }
 

@@ -15,6 +15,7 @@ using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Json;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 namespace System.IdentityModel.Tokens.Jwt
@@ -450,9 +451,16 @@ namespace System.IdentityModel.Tokens.Jwt
             if (tokenDescriptor == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
 
+            // TODO at next major version (8.0) use only Audiences as SecurityTokenDescriptor.Audience" will be removed.
+            string aud = null;
+            if (!tokenDescriptor.Audiences.IsNullOrEmpty())
+                aud = JsonSerializerPrimitives.CreateJsonElement(tokenDescriptor.Audiences.ToList()).ToString();
+            else if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
+                aud = tokenDescriptor.Audience;
+
             return CreateJwtSecurityTokenPrivate(
                 tokenDescriptor.Issuer,
-                tokenDescriptor.AudiencesJson,
+                aud,
                 tokenDescriptor.Subject,
                 tokenDescriptor.NotBefore,
                 tokenDescriptor.Expires,
@@ -600,9 +608,16 @@ namespace System.IdentityModel.Tokens.Jwt
             if (tokenDescriptor == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
 
+            // TODO at next major version (8.0) use only Audiences as SecurityTokenDescriptor.Audience" will be removed.
+            string aud = null;
+            if (!tokenDescriptor.Audiences.IsNullOrEmpty())
+                aud = JsonSerializerPrimitives.CreateJsonElement(tokenDescriptor.Audiences.ToList()).ToString();
+            else if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
+                aud = tokenDescriptor.Audience;
+
             return CreateJwtSecurityTokenPrivate(
                 tokenDescriptor.Issuer,
-                tokenDescriptor.AudiencesJson,
+                aud,
                 tokenDescriptor.Subject,
                 tokenDescriptor.NotBefore,
                 tokenDescriptor.Expires,

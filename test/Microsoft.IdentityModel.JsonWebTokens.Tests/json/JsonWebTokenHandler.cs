@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Json;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
@@ -358,16 +359,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             if (tokenDescriptor.Claims != null && tokenDescriptor.Claims.Count > 0)
                 payload.Merge(JObject.FromObject(tokenDescriptor.Claims), new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Replace });
 
-            if (tokenDescriptor.HasAudience)
+            // TODO at next major version (8.0) use only Audiences as SecurityTokenDescriptor.Audience will be removed.
+            if (!tokenDescriptor.Audiences.IsNullOrEmpty())
             {
                 if (payload.ContainsKey(JwtRegisteredClaimNames.Aud))
-                {
-                    // TODO At next major version remove any use of the Audience variable.
-                    var descriptorMemberName = tokenDescriptor.UseAudiences ? nameof(tokenDescriptor.Audiences) : nameof(tokenDescriptor.Audience);
-                    LogDuplicatedClaim(descriptorMemberName);
-                }
+                    LogDuplicatedClaim(nameof(tokenDescriptor.Audiences));
 
-                payload[JwtRegisteredClaimNames.Aud] = tokenDescriptor.AudiencesJson;
+                payload[JwtRegisteredClaimNames.Aud] = JsonSerializerPrimitives.CreateJsonElement(tokenDescriptor.Audiences.ToList()).ToString();
+            }
+            else if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
+            {
+                if (payload.ContainsKey(JwtRegisteredClaimNames.Aud))
+                    LogDuplicatedClaim(nameof(tokenDescriptor.Audience));
+
+                payload[JwtRegisteredClaimNames.Aud] = tokenDescriptor.Audience;
             }
 
             if (tokenDescriptor.Expires.HasValue)
