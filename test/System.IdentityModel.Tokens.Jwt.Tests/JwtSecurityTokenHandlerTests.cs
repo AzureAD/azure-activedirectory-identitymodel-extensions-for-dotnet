@@ -18,6 +18,7 @@ using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
 {
+    [CollectionDefinition("JwtSecurityTokenHandlerTests", DisableParallelization = true)]
     public class JwtSecurityTokenHandlerTests
     {
 
@@ -56,6 +57,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
 
         [Fact]
+        
         public void JwtSecurityTokenHandler_CreateToken_AddShortFormMappingForRsaOAEPEnabled()
         {
             AppContext.SetSwitch(X509EncryptingCredentials._useShortNameForRsaOaepKey, true);
