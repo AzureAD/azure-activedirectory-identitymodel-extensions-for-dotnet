@@ -710,7 +710,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (!tokenDescriptor.Audiences.IsNullOrEmpty())
             {
                 writer.WritePropertyName(JwtPayloadUtf8Bytes.Aud);
-                writer.WriteStringValue(JsonSerializer.Serialize(tokenDescriptor.Audiences));
+                writer.WriteStartArray();
+                foreach (string audience in tokenDescriptor.Audiences){ writer.WriteStringValue(audience);}
+                writer.WriteEndArray();
                 audienceSet = true;
             }
             else if (!string.IsNullOrEmpty(tokenDescriptor.Audience))

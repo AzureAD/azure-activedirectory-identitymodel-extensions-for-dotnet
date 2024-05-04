@@ -365,7 +365,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 if (payload.ContainsKey(JwtRegisteredClaimNames.Aud))
                     LogDuplicatedClaim(nameof(tokenDescriptor.Audiences));
 
-                payload[JwtRegisteredClaimNames.Aud] = JsonSerializerPrimitives.CreateJsonElement(tokenDescriptor.Audiences.ToList()).ToString();
+                payload[JwtRegisteredClaimNames.Aud] = JArray.FromObject(tokenDescriptor.Audiences);
             }
             else if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
             {
