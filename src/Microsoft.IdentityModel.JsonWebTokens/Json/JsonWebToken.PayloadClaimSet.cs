@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// 
         /// </summary>
-        protected internal virtual void ReadPayloadValue(
+        private protected virtual void ReadPayloadValue(
             ref Utf8JsonReader reader,
             Dictionary<string, object> claims,
             Dictionary<string, (int startIndex, int length)> claimsUtf8,
