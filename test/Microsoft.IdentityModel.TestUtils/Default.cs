@@ -9,6 +9,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Json;
 using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Tokens.Saml2;
 using Microsoft.IdentityModel.Xml;
@@ -404,6 +405,22 @@ namespace Microsoft.IdentityModel.TestUtils
             }.ToString(Formatting.None);
         }
 
+        public static string PayloadStringMultipleAudiences
+        {
+            get => new JObject()
+            {
+                { JwtRegisteredClaimNames.Aud, JArray.FromObject(Audiences) },
+                { JwtRegisteredClaimNames.Azp, Azp },
+                { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
+                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Expires).ToString() },
+                { JwtRegisteredClaimNames.GivenName, "Bob" },
+                { JwtRegisteredClaimNames.Iss, Issuer },
+                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(IssueInstant).ToString() },
+                { JwtRegisteredClaimNames.Jti, Jti },
+                { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(NotBefore).ToString()},
+            }.ToString(Formatting.None);
+        }
+
         public static List<Claim> PayloadClaims
         {
             get => new List<Claim>()
@@ -488,6 +505,22 @@ namespace Microsoft.IdentityModel.TestUtils
             get => new Dictionary<string, object>()
             {
                 { JwtRegisteredClaimNames.Aud, Audience },
+                { JwtRegisteredClaimNames.Azp, Azp },
+                { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
+                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Expires).ToString() },
+                { JwtRegisteredClaimNames.GivenName, "Bob" },
+                { JwtRegisteredClaimNames.Iss, Issuer },
+                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(IssueInstant).ToString() },
+                { JwtRegisteredClaimNames.Jti, Jti },
+                { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(NotBefore).ToString()},
+            };
+        }
+
+        public static Dictionary<string, object> PayloadDictionaryMultipleAudiences
+        {
+            get => new Dictionary<string, object>()
+            {
+                { JwtRegisteredClaimNames.Aud, JsonSerializerPrimitives.CreateJsonElement(Default.Audiences) },
                 { JwtRegisteredClaimNames.Azp, Azp },
                 { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
                 { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Expires).ToString() },
