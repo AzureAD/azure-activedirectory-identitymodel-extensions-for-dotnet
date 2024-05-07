@@ -134,6 +134,7 @@ namespace Microsoft.IdentityModel.Tokens
         // public const string IDX10622 = "IDX10622:";
         // public const string IDX10623 = "IDX10623:";
         // public const string IDX10624 = "IDX10624:";
+        public const string IDX10625 = "IDX10625: Failed to verify the authenticationTag length, the actual tag length '{0}' does not match the expected tag length '{1}'. authenticationTag: '{2}', algorithm: '{3}' See: https://aka.ms/IdentityModel/SkipAuthenticationTagLengthValidation";
         // public const string IDX10627 = "IDX10627:";
         public const string IDX10628 = "IDX10628: Cannot set the MinimumSymmetricKeySizeInBits to less than '{0}'.";
         public const string IDX10630 = "IDX10630: The '{0}' for signing cannot be smaller than '{1}' bits. KeySize: '{2}'.";
