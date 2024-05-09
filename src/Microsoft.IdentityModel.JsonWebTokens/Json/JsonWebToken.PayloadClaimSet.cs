@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
-                    ReadPropertyValue(ref reader, claims);
+                    ReadPayloadValue(ref reader, claims);
                 }
                 // We read a JsonTokenType.StartObject above, exiting and positioning reader at next token.
                 else if (JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, false))
@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return new JsonClaimSet(claims);
         }
 
-        private protected virtual void ReadPropertyValue(ref Utf8JsonReader reader, Dictionary<string, object> claims)
+        private protected virtual void ReadPayloadValue(ref Utf8JsonReader reader, IDictionary<string, object> claims)
         {
             if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Aud))
             {
