@@ -524,12 +524,12 @@ namespace Microsoft.IdentityModel.Validators
             return ProtocolVersion.V1;
         }
 
-        private static async Task<BaseConfiguration> GetBaseConfigurationAsync(BaseConfigurationManager configurationManager, TokenValidationParameters validationParameters)
+        private static Task<BaseConfiguration> GetBaseConfigurationAsync(BaseConfigurationManager configurationManager, TokenValidationParameters validationParameters)
         {
             if (validationParameters.RefreshBeforeValidation)
                 configurationManager.RequestRefresh();
 
-            return await configurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
+            return configurationManager.GetBaseConfigurationAsync(CancellationToken.None);
         }
 
         /// <summary>Gets the tenant ID from a token.</summary>
