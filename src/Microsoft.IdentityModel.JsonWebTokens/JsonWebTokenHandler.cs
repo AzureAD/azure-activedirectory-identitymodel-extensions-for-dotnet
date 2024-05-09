@@ -901,7 +901,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (key != null)
                 {
                     kidMatched = true;
-                    keys = new List<SecurityKey> { key };
+                    keys = [key];
                 }
             }
 

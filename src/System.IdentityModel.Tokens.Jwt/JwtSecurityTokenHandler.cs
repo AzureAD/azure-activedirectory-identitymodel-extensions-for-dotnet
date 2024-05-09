@@ -1359,7 +1359,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (key != null)
                 {
                     kidMatched = true;
-                    keys = new List<SecurityKey> { key };
+                    keys = [key];
                 }
             }
 
@@ -1827,7 +1827,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 var key = ResolveTokenDecryptionKey(jwtToken.RawData, jwtToken, validationParameters);
                 if (key != null)
-                    keys = new List<SecurityKey> { key };
+                    keys = [key];
             }
 
             // control gets here if:

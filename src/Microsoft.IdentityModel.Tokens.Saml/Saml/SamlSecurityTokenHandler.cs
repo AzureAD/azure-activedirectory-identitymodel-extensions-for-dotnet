@@ -1040,7 +1040,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 {
                     // remember that key was matched for throwing exception SecurityTokenSignatureKeyNotFoundException
                     keyMatched = true;
-                    keys = new List<SecurityKey> { securityKey };
+                    keys = [securityKey];
                 }
             }
 
