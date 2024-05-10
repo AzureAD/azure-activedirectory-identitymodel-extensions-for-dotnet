@@ -452,16 +452,16 @@ namespace System.IdentityModel.Tokens.Jwt
                 throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
 
             // TODO at next major version (8.0) use only Audiences as SecurityTokenDescriptor.Audience" will be removed.
-            string aud = null;
+            string aud = tokenDescriptor.Audience;
+            ClaimsIdentity subject = tokenDescriptor.Subject;
             if (!tokenDescriptor.Audiences.IsNullOrEmpty())
-                aud = JsonSerializerPrimitives.CreateJsonElement(tokenDescriptor.Audiences.ToList()).ToString();
-            else if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
-                aud = tokenDescriptor.Audience;
+                aud = null;
+                subject = AddAudienceClaimsToSubject(tokenDescriptor);
 
             return CreateJwtSecurityTokenPrivate(
                 tokenDescriptor.Issuer,
                 aud,
-                tokenDescriptor.Subject,
+                subject,
                 tokenDescriptor.NotBefore,
                 tokenDescriptor.Expires,
                 tokenDescriptor.IssuedAt,
@@ -609,16 +609,19 @@ namespace System.IdentityModel.Tokens.Jwt
                 throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
 
             // TODO at next major version (8.0) use only Audiences as SecurityTokenDescriptor.Audience" will be removed.
-            string aud = null;
+            string aud = tokenDescriptor.Audience;
+            ClaimsIdentity subject = tokenDescriptor.Subject;
+
             if (!tokenDescriptor.Audiences.IsNullOrEmpty())
-                aud = JsonSerializerPrimitives.CreateJsonElement(tokenDescriptor.Audiences.ToList()).ToString();
-            else if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
-                aud = tokenDescriptor.Audience;
+            {
+                subject = AddAudienceClaimsToSubject(tokenDescriptor);
+                aud = null;
+            }
 
             return CreateJwtSecurityTokenPrivate(
                 tokenDescriptor.Issuer,
                 aud,
-                tokenDescriptor.Subject,
+                subject,
                 tokenDescriptor.NotBefore,
                 tokenDescriptor.Expires,
                 tokenDescriptor.IssuedAt,
@@ -628,6 +631,13 @@ namespace System.IdentityModel.Tokens.Jwt
                 tokenDescriptor.TokenType,
                 tokenDescriptor.AdditionalHeaderClaims,
                 tokenDescriptor.AdditionalInnerHeaderClaims);
+        }
+        private static ClaimsIdentity AddAudienceClaimsToSubject(SecurityTokenDescriptor tokenDescriptor)
+        {
+            ClaimsIdentity claimsIdentity = tokenDescriptor.Subject != null ? tokenDescriptor.Subject.Clone() : new ClaimsIdentity();
+            foreach (string audience in tokenDescriptor.Audiences)
+                claimsIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Aud, audience, ClaimValueTypes.String));
+            return claimsIdentity;
         }
 
         private JwtSecurityToken CreateJwtSecurityTokenPrivate(
