@@ -164,6 +164,16 @@ steps:
     search_root: '$(Build.SourcesDirectory)\artifacts'
   condition: and(succeeded(), eq(variables['PipelineType'], 'onebranch'))
 
+# Copy all packages out to staging
+- task: CopyFiles@2
+  displayName: 'Copy Files from $(Build.SourcesDirectory) to: $(Build.ArtifactStagingDirectory)\packages'
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)'
+    Contents: '**\*nupkg'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)\packages'
+    flattenFolders: true
+  condition: and(succeeded(), eq(variables['PipelineType'], 'onebranch'))
+
 - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
   displayName: 'Component Detection'
   inputs:
