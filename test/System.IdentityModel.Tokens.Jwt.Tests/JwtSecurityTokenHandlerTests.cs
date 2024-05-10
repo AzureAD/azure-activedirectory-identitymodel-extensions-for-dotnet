@@ -1709,12 +1709,18 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         TestId = "'validateAudience == false, AudienceValidator return false'",
                         SecurityToken = tokenHandler.CreateJwtSecurityToken(issuer: Default.Issuer, audience: Default.Audience),
                         ValidationParameters = ValidateAudienceValidationParameters(null, null, ValidationDelegates.AudienceValidatorReturnsFalse, false),
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = "'validAudiences == audiences, validates successfully'",
+                        SecurityToken = tokenHandler.CreateJwtSecurityToken(new SecurityTokenDescriptor{ Issuer = Default.Issuer, Audiences = Default.Audiences}),
+                        ValidationParameters = ValidateAudienceValidationParameters(null, null, null, true, Default.Audiences),
                     }
                 };
             }
         }
 
-        private static TokenValidationParameters ValidateAudienceValidationParameters(string validAudience, IEnumerable<string> validAudiences, AudienceValidator audienceValidator, bool validateAudience)
+        private static TokenValidationParameters ValidateAudienceValidationParameters(string validAudience, IEnumerable<string> validIssuers, AudienceValidator audienceValidator, bool validateAudience, IEnumerable<string> validAudiences = null)
         {
             return new TokenValidationParameters
             {
@@ -1724,7 +1730,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ValidateIssuer = false,
                 ValidateLifetime = false,
                 ValidAudience = validAudience,
-                ValidIssuers = validAudiences
+                ValidAudiences = validAudiences,
+                ValidIssuers = validIssuers
             };
         }
 
