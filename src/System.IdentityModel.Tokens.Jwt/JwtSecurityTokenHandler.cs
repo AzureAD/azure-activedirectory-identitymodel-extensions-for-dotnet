@@ -455,8 +455,10 @@ namespace System.IdentityModel.Tokens.Jwt
             string aud = tokenDescriptor.Audience;
             ClaimsIdentity subject = tokenDescriptor.Subject;
             if (!tokenDescriptor.Audiences.IsNullOrEmpty())
+            {
                 aud = null;
                 subject = AddAudienceClaimsToSubject(tokenDescriptor);
+            }
 
             return CreateJwtSecurityTokenPrivate(
                 tokenDescriptor.Issuer,
