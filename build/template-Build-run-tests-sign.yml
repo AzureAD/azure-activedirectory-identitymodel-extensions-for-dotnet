@@ -72,6 +72,7 @@ steps:
       **\bin\$(BuildConfiguration)\**\System.IdentityModel.Tokens.Jwt.dll
       **\bin\$(BuildConfiguration)\**\System.IdentityModel.Tokens.Jwt.pdb
     TargetFolder: '$(Build.ArtifactStagingDirectory)\ProductBinaries'
+  condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@2
   displayName: 'Run PoliCheck'
