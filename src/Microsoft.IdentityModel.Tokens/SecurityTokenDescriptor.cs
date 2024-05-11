@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens.Json;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -24,8 +23,8 @@ namespace Microsoft.IdentityModel.Tokens
         public string Audience { get; set; }
 
         /// <summary>
-        /// Gets or sets one or more audiences to include in the token's 'Aud' claim. Automatically removes duplicates and empty
-        /// or null strings.
+        /// Gets or sets one or more audiences to include in the token's 'Aud' claim. Automatically removes duplicates and empty,
+        /// null, or whitespace-only strings. Does not use a threadsafe collection.
         /// </summary>
         public IEnumerable<string> Audiences {
             get
@@ -48,6 +47,21 @@ namespace Microsoft.IdentityModel.Tokens
                 _audiences.RemoveWhere(string.IsNullOrWhiteSpace);
             }
         }
+
+        /// <summary>
+        /// Adds an audience to the <see cref="Audiences"/> collection. Won't add duplicate, null, empty, or whitespace-only strings.
+        /// </summary>
+        /// <param name="audience">An audience to be added to the Aud claim</param>
+        public void AddAudience(string audience)
+        {
+            if (string.IsNullOrWhiteSpace(audience))
+                return;
+
+            if (_audiences == null)
+                _audiences = new HashSet<string>();
+
+            _audiences.Add(audience);
+        }   
 
         /// <summary>
         /// Defines the compression algorithm that will be used to compress the JWT token payload.
