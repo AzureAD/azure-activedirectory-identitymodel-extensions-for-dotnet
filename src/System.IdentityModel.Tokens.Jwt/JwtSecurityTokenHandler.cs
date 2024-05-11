@@ -15,7 +15,6 @@ using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Json;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 namespace System.IdentityModel.Tokens.Jwt
@@ -453,17 +452,16 @@ namespace System.IdentityModel.Tokens.Jwt
 
             // TODO at next major version (8.0) use only Audiences as SecurityTokenDescriptor.Audience" will be removed.
             string aud = tokenDescriptor.Audience;
-            ClaimsIdentity subject = tokenDescriptor.Subject;
             if (!tokenDescriptor.Audiences.IsNullOrEmpty())
             {
                 aud = null;
-                subject = AddAudienceClaimsToSubject(tokenDescriptor);
+                AddAudiencesToClaims(tokenDescriptor);
             }
 
             return CreateJwtSecurityTokenPrivate(
                 tokenDescriptor.Issuer,
                 aud,
-                subject,
+                tokenDescriptor.Subject,
                 tokenDescriptor.NotBefore,
                 tokenDescriptor.Expires,
                 tokenDescriptor.IssuedAt,
@@ -612,18 +610,17 @@ namespace System.IdentityModel.Tokens.Jwt
 
             // TODO at next major version (8.0) use only Audiences as SecurityTokenDescriptor.Audience" will be removed.
             string aud = tokenDescriptor.Audience;
-            ClaimsIdentity subject = tokenDescriptor.Subject;
 
             if (!tokenDescriptor.Audiences.IsNullOrEmpty())
             {
-                subject = AddAudienceClaimsToSubject(tokenDescriptor);
+                AddAudiencesToClaims(tokenDescriptor);
                 aud = null;
             }
 
             return CreateJwtSecurityTokenPrivate(
                 tokenDescriptor.Issuer,
                 aud,
-                subject,
+                tokenDescriptor.Subject,
                 tokenDescriptor.NotBefore,
                 tokenDescriptor.Expires,
                 tokenDescriptor.IssuedAt,
@@ -634,12 +631,46 @@ namespace System.IdentityModel.Tokens.Jwt
                 tokenDescriptor.AdditionalHeaderClaims,
                 tokenDescriptor.AdditionalInnerHeaderClaims);
         }
-        private static ClaimsIdentity AddAudienceClaimsToSubject(SecurityTokenDescriptor tokenDescriptor)
+        private static void AddAudiencesToClaims(SecurityTokenDescriptor tokenDescriptor)
         {
-            ClaimsIdentity claimsIdentity = tokenDescriptor.Subject != null ? tokenDescriptor.Subject.Clone() : new ClaimsIdentity();
-            foreach (string audience in tokenDescriptor.Audiences)
-                claimsIdentity.AddClaim(new Claim(JwtRegisteredClaimNames.Aud, audience, ClaimValueTypes.String));
-            return claimsIdentity;
+            if (tokenDescriptor.Claims == null)
+            {
+                tokenDescriptor.Claims = new Dictionary<string, object>(){{JwtRegisteredClaimNames.Aud, tokenDescriptor.Audiences}};
+                return;
+            }
+
+            if (tokenDescriptor.Claims.ContainsKey(JwtRegisteredClaimNames.Aud))
+                MergeAudClaims(tokenDescriptor);
+
+            tokenDescriptor.Claims[JwtRegisteredClaimNames.Aud] = tokenDescriptor.Audiences;
+        }
+
+        private static void MergeAudClaims(SecurityTokenDescriptor tokenDescriptor)
+        {
+            // This switch checks for Uri in addition to string per the definition of the 'aud' claim in the JWT RFC:
+            // https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.3
+            switch (tokenDescriptor.Claims[JwtRegisteredClaimNames.Aud])
+            {
+                case string audString:
+                    tokenDescriptor.AddAudience(audString);
+                    break;
+                case IEnumerable<string> audStrings:
+                    foreach (string aud in audStrings)
+                        tokenDescriptor.AddAudience(aud);
+                    break;
+                case Uri audUri:
+                    tokenDescriptor.AddAudience(audUri.ToString());
+                    break;
+                case IEnumerable<Uri> audUris:
+                    foreach (Uri aud in audUris)
+                        tokenDescriptor.AddAudience(aud.ToString());
+                    break;
+                default:
+                    throw new SecurityTokenInvalidAudienceException(
+                        LogHelper.FormatInvariant(LogMessages.IDX12724,
+                        LogHelper.MarkAsNonPII(tokenDescriptor.Claims[JwtRegisteredClaimNames.Aud].GetType()))
+                    );
+            }
         }
 
         private JwtSecurityToken CreateJwtSecurityTokenPrivate(
