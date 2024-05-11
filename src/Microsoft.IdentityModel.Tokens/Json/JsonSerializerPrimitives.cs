@@ -1036,6 +1036,8 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     writer.WriteNumber(key, d);
                     break;
                 case float f:
+                    // Below net6.0, we have to convert the float to a decimal otherwise values like 1.11 will be serailized as 1.11000001
+                    // In failure cases, we will write the float as is.
 #if NET6_0_OR_GREATER
                     writer.WriteNumber(key, f);
 #else
