@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
@@ -219,7 +220,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>An EXACT match is required.</remarks>
         internal static string ValidateIssuer(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters, BaseConfiguration configuration)
         {
-            ValueTask<string> vt = ValidateIssuerAsync(issuer, securityToken, validationParameters, configuration);
+            ValueTask<string> vt = ValidateIssuerAsync(Encoding.UTF8.GetBytes(issuer), securityToken, validationParameters, configuration);
             return vt.IsCompletedSuccessfully ?
                 vt.Result :
                 vt.AsTask().ConfigureAwait(false).GetAwaiter().GetResult();
@@ -228,7 +229,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Determines if an issuer found in a <see cref="SecurityToken"/> is valid.
         /// </summary>
-        /// <param name="issuer">The issuer to validate</param>
+        /// <param name="issuerUtf8">The issuer to validate</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
         /// <param name="configuration">The <see cref="BaseConfiguration"/> required for issuer and signing key validation.</param>
@@ -240,7 +241,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="SecurityTokenInvalidIssuerException">If 'issuer' failed to matched either <see cref="TokenValidationParameters.ValidIssuer"/> or one of <see cref="TokenValidationParameters.ValidIssuers"/> or <see cref="BaseConfiguration.Issuer"/>.</exception>
         /// <remarks>An EXACT match is required.</remarks>
         internal static async ValueTask<string> ValidateIssuerAsync(
-            string issuer,
+            ReadOnlyMemory<byte> issuerUtf8,
             SecurityToken securityToken,
             TokenValidationParameters validationParameters,
             BaseConfiguration configuration)
@@ -248,8 +249,11 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
+            string issuer = Encoding.UTF8.GetString(issuerUtf8.ToArray());
+
             if (validationParameters.IssuerValidatorAsync != null)
                 return await validationParameters.IssuerValidatorAsync(issuer, securityToken, validationParameters).ConfigureAwait(false);
+
 
             if (validationParameters.IssuerValidatorUsingConfiguration != null)
                 return validationParameters.IssuerValidatorUsingConfiguration(issuer, securityToken, validationParameters, configuration);
@@ -276,7 +280,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (configuration != null)
             {
-                if (string.Equals(configuration.Issuer, issuer))
+                if (string.Equals(configuration.IssuerUtf8, issuerUtf8))
                 {
                     if (LogHelper.IsEnabled(EventLogLevel.Informational))
                         LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer));
@@ -285,7 +289,7 @@ namespace Microsoft.IdentityModel.Tokens
                 }
             }
 
-            if (string.Equals(validationParameters.ValidIssuer, issuer))
+            if (validationParameters.ValidIssuerUtf8.Equals(issuerUtf8))
             {
                 if (LogHelper.IsEnabled(EventLogLevel.Informational))
                     LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer));

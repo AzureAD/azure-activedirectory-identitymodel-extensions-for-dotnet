@@ -845,7 +845,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             Validators.ValidateLifetime(notBefore, expires, jsonWebToken, validationParameters);
             Validators.ValidateAudience(jsonWebToken.Audiences, jsonWebToken, validationParameters);
-            string issuer = await Validators.ValidateIssuerAsync(jsonWebToken.Issuer, jsonWebToken, validationParameters, configuration).ConfigureAwait(false);
+            string issuer = await Validators.ValidateIssuerAsync(jsonWebToken.IssuerUtf8, jsonWebToken, validationParameters, configuration).ConfigureAwait(false);
 
             Validators.ValidateTokenReplay(expires, jsonWebToken.EncodedToken, validationParameters);
             if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jsonWebToken.Actor))
