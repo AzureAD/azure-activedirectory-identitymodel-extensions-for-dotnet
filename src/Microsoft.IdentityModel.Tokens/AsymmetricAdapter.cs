@@ -409,19 +409,22 @@ namespace Microsoft.IdentityModel.Tokens
             Span<byte> hash = hashByteLength <= 256 ? stackalloc byte[256] : array = ArrayPool<byte>.Shared.Rent(hashByteLength);
             hash = hash.Slice(0, hashByteLength);
 
-            bool hashResult = HashAlgorithm.TryComputeHash(bytes, hash, out int bytesWritten);
-            Debug.Assert(hashResult && bytesWritten == hashByteLength, "HashAlgorithm.TryComputeHash failed");
-
-            bool result = isRSA ?
-                RSA.VerifyHash(hash, signature, HashAlgorithmName, RSASignaturePadding) :
-                ECDsa.VerifyHash(hash, signature);
-
-            if (array is not null)
+            try
             {
-                ArrayPool<byte>.Shared.Return(array, clearArray: true);
-            }
+                bool hashResult = HashAlgorithm.TryComputeHash(bytes, hash, out int bytesWritten);
+                Debug.Assert(hashResult && bytesWritten == hashByteLength, "HashAlgorithm.TryComputeHash failed");
 
-            return result;
+                return isRSA ?
+                    RSA.VerifyHash(hash, signature, HashAlgorithmName, RSASignaturePadding) :
+                    ECDsa.VerifyHash(hash, signature);
+            }
+            finally
+            {
+                if (array is not null)
+                {
+                    ArrayPool<byte>.Shared.Return(array, clearArray: true);
+                }
+            }
         }
 #endif
 
