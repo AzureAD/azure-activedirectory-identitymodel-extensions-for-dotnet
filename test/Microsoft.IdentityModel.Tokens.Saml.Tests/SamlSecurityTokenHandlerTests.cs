@@ -1099,6 +1099,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         {
             get
             {
+
                 var validationParameters = new TokenValidationParameters
                 {
                     AuthenticationType = "Federation",
@@ -1107,8 +1108,96 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     ValidateLifetime = false,
                     IssuerSigningKey = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256
                 };
+                var validationParametersWithAudience = new TokenValidationParameters
+                {
+                    AuthenticationType = "Federation",
+                    ValidateAudience = true,
+                    ValidateIssuer = false,
+                    ValidateLifetime = false,
+                    IssuerSigningKey = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256,
+                    ValidAudience = Default.Audience
+                };
+                var validationParametersWithAudiences = new TokenValidationParameters
+                {
+                    AuthenticationType = "Federation",
+                    ValidateAudience = true,
+                    ValidateIssuer = false,
+                    ValidateLifetime = false,
+                    IssuerSigningKey = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256,
+                    ValidAudiences = Default.Audiences
+                };
+                var invalidAudience = "http://NotValid.Audience.com";
+                var invalidAudiences = new List<string> { "http://NotValid.Audience.com", "http://NotValid.Audience2.com" };
                 return new TheoryData<CreateTokenTheoryData>
                 {
+                    new CreateTokenTheoryData
+                    {
+                        First =true,
+                        TestId = "ValidAudiences",
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            Audiences = Default.Audiences,
+                            NotBefore = Default.NotBefore,
+                            Expires = Default.Expires,
+                            Issuer = Default.Issuer,
+                            SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
+                            EncryptingCredentials = null,
+                            Claims = Default.SamlClaimsDictionary,
+                        },
+                        SamlSecurityTokenHandler = new SamlSecurityTokenHandler(),
+                        ValidationParameters = validationParametersWithAudience
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "InvalidAudiences",
+                        ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            Audiences = invalidAudiences,
+                            NotBefore = Default.NotBefore,
+                            Expires = Default.Expires,
+                            Issuer = Default.Issuer,
+                            SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
+                            EncryptingCredentials = null,
+                            Claims = Default.SamlClaimsDictionary,
+                        },
+                        SamlSecurityTokenHandler = new SamlSecurityTokenHandler(),
+                        ValidationParameters = validationParametersWithAudience
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "UsingAudienceAndAudiences_OnlyAudienceValid",
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            Audience = Default.Audience,
+                            Audiences = new List<string> {invalidAudience},
+                            NotBefore = Default.NotBefore,
+                            Expires = Default.Expires,
+                            Issuer = Default.Issuer,
+                            SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
+                            EncryptingCredentials = null,
+                            Claims = Default.SamlClaimsDictionary,
+                        },
+                        SamlSecurityTokenHandler = new SamlSecurityTokenHandler(),
+                        ValidationParameters = validationParametersWithAudience
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "UsingAudienceAndAudiences_OnlyAudiencesValid",
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            Audience = invalidAudience,
+                            Audiences = Default.Audiences,
+                            NotBefore = Default.NotBefore,
+                            Expires = Default.Expires,
+                            Issuer = Default.Issuer,
+                            SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
+                            EncryptingCredentials = null,
+                            Claims = Default.SamlClaimsDictionary,
+                        },
+                        SamlSecurityTokenHandler = new SamlSecurityTokenHandler(),
+                        ValidationParameters = validationParametersWithAudience
+                    },
                     new CreateTokenTheoryData
                     {
                         TestId = "NotSupportedClaimValue",
@@ -1131,7 +1220,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     },
                     new CreateTokenTheoryData
                     {
-                        First =true,
                         TestId = "NoSubjectClaims",
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
