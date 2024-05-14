@@ -16,13 +16,13 @@ namespace Microsoft.IdentityModel.Benchmarks
 
         public const string Audience = "http://www.contoso.com/protected";
 
-        public readonly static IEnumerable<string> Audiences = [
+        public readonly static IEnumerable<string> Audiences = new string[] {
             "http://www.contoso.com/protected",
             "http://www.contoso.com/protected1",
             "http://www.contoso.com/protected2",
             "http://www.contoso.com/protected3",
             "http://www.contoso.com/protected4"
-        ];
+        };
 
         private static RSA _rsa;
         private static SymmetricSecurityKey _symmetricKey;

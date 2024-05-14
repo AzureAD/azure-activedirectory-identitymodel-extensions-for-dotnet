@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Benchmarks
             {
                 Claims = BenchmarkUtils.ClaimsNoAudience,
                 SigningCredentials = BenchmarkUtils.SigningCredentialsRsaSha256,
-                Audiences = [BenchmarkUtils.Audience],
+                Audiences = new string[] { BenchmarkUtils.Audience }
             };
         }
 
