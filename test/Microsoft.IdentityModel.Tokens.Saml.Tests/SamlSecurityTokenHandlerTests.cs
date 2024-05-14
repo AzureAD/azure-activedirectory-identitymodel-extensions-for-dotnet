@@ -1108,15 +1108,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     ValidateLifetime = false,
                     IssuerSigningKey = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256
                 };
-                var validationParametersWithAudience = new TokenValidationParameters
-                {
-                    AuthenticationType = "Federation",
-                    ValidateAudience = true,
-                    ValidateIssuer = false,
-                    ValidateLifetime = false,
-                    IssuerSigningKey = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256,
-                    ValidAudience = Default.Audience
-                };
                 var validationParametersWithAudiences = new TokenValidationParameters
                 {
                     AuthenticationType = "Federation",
@@ -1127,7 +1118,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     ValidAudiences = Default.Audiences
                 };
                 var invalidAudience = "http://NotValid.Audience.com";
-                var invalidAudiences = new List<string> { "http://NotValid.Audience.com", "http://NotValid.Audience2.com" };
+                var invalidAudiences = new List<string> { invalidAudience, "http://NotValid.Audience2.com" };
                 return new TheoryData<CreateTokenTheoryData>
                 {
                     new CreateTokenTheoryData
@@ -1145,7 +1136,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                             Claims = Default.SamlClaimsDictionary,
                         },
                         SamlSecurityTokenHandler = new SamlSecurityTokenHandler(),
-                        ValidationParameters = validationParametersWithAudience
+                        ValidationParameters = validationParametersWithAudiences
                     },
                     new CreateTokenTheoryData
                     {
@@ -1162,7 +1153,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                             Claims = Default.SamlClaimsDictionary,
                         },
                         SamlSecurityTokenHandler = new SamlSecurityTokenHandler(),
-                        ValidationParameters = validationParametersWithAudience
+                        ValidationParameters = validationParametersWithAudiences
                     },
                     new CreateTokenTheoryData
                     {
@@ -1179,7 +1170,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                             Claims = Default.SamlClaimsDictionary,
                         },
                         SamlSecurityTokenHandler = new SamlSecurityTokenHandler(),
-                        ValidationParameters = validationParametersWithAudience
+                        ValidationParameters = validationParametersWithAudiences
                     },
                     new CreateTokenTheoryData
                     {
@@ -1196,7 +1187,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                             Claims = Default.SamlClaimsDictionary,
                         },
                         SamlSecurityTokenHandler = new SamlSecurityTokenHandler(),
-                        ValidationParameters = validationParametersWithAudience
+                        ValidationParameters = validationParametersWithAudiences
                     },
                     new CreateTokenTheoryData
                     {
