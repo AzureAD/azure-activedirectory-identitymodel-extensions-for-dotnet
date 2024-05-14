@@ -334,17 +334,82 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     SetDefaultTimesOnTokenCreation = false
                 };
 
+                var invalidAudience = "http://NotValid.Audience.com";
+                var invalidAudiences = new List<string> { invalidAudience, "http://NotValid.Audience2.com" };
+
                 var claimsDictionaryNoAudience = Default.PayloadJsonDictionary;
                 claimsDictionaryNoAudience.Remove(JwtRegisteredClaimNames.Aud);
+
                 var claimsDictionaryIncorrectAudienceType = Default.PayloadJsonDictionary;
                 claimsDictionaryIncorrectAudienceType[JwtRegisteredClaimNames.Aud] = 42;
+
                 var claimsDictionaryUriForAud = Default.PayloadJsonDictionary;
                 claimsDictionaryUriForAud[JwtRegisteredClaimNames.Aud] = new Uri(Default.Audience);
+
                 var claimsDictionaryUrisForAud = Default.PayloadJsonDictionary;
                 claimsDictionaryUrisForAud[JwtRegisteredClaimNames.Aud] = Default.Audiences.Select(s => new Uri(s)).ToList();
 
                 return new TheoryData<CreateTokenTheoryData>
                 {
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "ValidAudiences",
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = Default.X509AsymmetricSigningCredentials,
+                            EncryptingCredentials = null,
+                            Claims = claimsDictionaryNoAudience,
+                            Audiences = Default.Audiences
+                        },
+                        JwtSecurityTokenHandler = tokenHandler,
+                        JsonWebTokenHandler = jsonTokenHandler,
+                        ValidationParameters = Default.AsymmetricSignTokenValidationParameters
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "InvalidAudiences",
+                        ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214"),
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = Default.X509AsymmetricSigningCredentials,
+                            EncryptingCredentials = null,
+                            Claims = claimsDictionaryNoAudience,
+                            Audiences = invalidAudiences
+                        },
+                        JwtSecurityTokenHandler = tokenHandler,
+                        JsonWebTokenHandler = jsonTokenHandler,
+                        ValidationParameters = Default.AsymmetricSignTokenValidationParameters
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "ValidAudienceInvalidAudiences",
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = Default.X509AsymmetricSigningCredentials,
+                            EncryptingCredentials = null,
+                            Claims = claimsDictionaryNoAudience,
+                            Audience = Default.Audience,
+                            Audiences = invalidAudiences
+                        },
+                        JwtSecurityTokenHandler = tokenHandler,
+                        JsonWebTokenHandler = jsonTokenHandler,
+                        ValidationParameters = Default.AsymmetricSignTokenValidationParameters
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "InvalidAudienceValidAudiences",
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = Default.X509AsymmetricSigningCredentials,
+                            EncryptingCredentials = null,
+                            Claims = claimsDictionaryNoAudience,
+                            Audience = invalidAudience,
+                            Audiences = Default.Audiences
+                        },
+                        JwtSecurityTokenHandler = tokenHandler,
+                        JsonWebTokenHandler = jsonTokenHandler,
+                        ValidationParameters = Default.AsymmetricSignTokenValidationParameters
+                    },
                     new CreateTokenTheoryData
                     {
                         TestId = "AudClaimPresentInClaimsDictionary_MultipleAudiences",
