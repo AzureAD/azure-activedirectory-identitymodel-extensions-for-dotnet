@@ -452,10 +452,12 @@ namespace System.IdentityModel.Tokens.Jwt
 
             // TODO at next major version (8.0) use only Audiences as SecurityTokenDescriptor.Audience" will be removed.
             string aud = tokenDescriptor.Audience;
+            IDictionary<string, object> claims = tokenDescriptor.Claims;
+
             if (!tokenDescriptor.Audiences.IsNullOrEmpty())
             {
+                claims = AddClaimsAudiencesToDescriptorAudiences(tokenDescriptor);
                 aud = null;
-                AddAudiencesToClaims(tokenDescriptor);
             }
 
             return CreateJwtSecurityTokenPrivate(
@@ -467,7 +469,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 tokenDescriptor.IssuedAt,
                 tokenDescriptor.SigningCredentials,
                 tokenDescriptor.EncryptingCredentials,
-                tokenDescriptor.Claims,
+                claims,
                 tokenDescriptor.TokenType,
                 tokenDescriptor.AdditionalHeaderClaims,
                 tokenDescriptor.AdditionalInnerHeaderClaims);
@@ -610,10 +612,11 @@ namespace System.IdentityModel.Tokens.Jwt
 
             // TODO at next major version (8.0) use only Audiences as SecurityTokenDescriptor.Audience" will be removed.
             string aud = tokenDescriptor.Audience;
+            IDictionary<string, object> claims = tokenDescriptor.Claims;
 
             if (!tokenDescriptor.Audiences.IsNullOrEmpty())
             {
-                AddAudiencesToClaims(tokenDescriptor);
+                claims = AddClaimsAudiencesToDescriptorAudiences(tokenDescriptor);
                 aud = null;
             }
 
@@ -626,26 +629,25 @@ namespace System.IdentityModel.Tokens.Jwt
                 tokenDescriptor.IssuedAt,
                 tokenDescriptor.SigningCredentials,
                 tokenDescriptor.EncryptingCredentials,
-                tokenDescriptor.Claims,
+                claims,
                 tokenDescriptor.TokenType,
                 tokenDescriptor.AdditionalHeaderClaims,
                 tokenDescriptor.AdditionalInnerHeaderClaims);
         }
-        private static void AddAudiencesToClaims(SecurityTokenDescriptor tokenDescriptor)
+        private static IDictionary<string, object> AddClaimsAudiencesToDescriptorAudiences(SecurityTokenDescriptor tokenDescriptor)
         {
             if (tokenDescriptor.Claims == null)
-            {
-                tokenDescriptor.Claims = new Dictionary<string, object>(){{JwtRegisteredClaimNames.Aud, tokenDescriptor.Audiences}};
-                return;
-            }
+                return new Dictionary<string, object>(){{JwtRegisteredClaimNames.Aud, tokenDescriptor.Audiences}};
 
             if (tokenDescriptor.Claims.ContainsKey(JwtRegisteredClaimNames.Aud))
-                MergeAudClaims(tokenDescriptor);
+                MergeAudClaimsIntoAudiencesProperty(tokenDescriptor);
 
-            tokenDescriptor.Claims[JwtRegisteredClaimNames.Aud] = tokenDescriptor.Audiences;
+            var claimsCopy = new Dictionary<string, object>(tokenDescriptor.Claims);
+            claimsCopy[JwtRegisteredClaimNames.Aud] = tokenDescriptor.Audiences;
+            return claimsCopy;
         }
 
-        private static void MergeAudClaims(SecurityTokenDescriptor tokenDescriptor)
+        private static void MergeAudClaimsIntoAudiencesProperty(SecurityTokenDescriptor tokenDescriptor)
         {
             // This switch checks for Uri in addition to string per the definition of the 'aud' claim in the JWT RFC:
             // https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.3
