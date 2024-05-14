@@ -456,7 +456,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             if (!tokenDescriptor.Audiences.IsNullOrEmpty())
             {
-                claims = AddClaimsAudiencesToDescriptorAudiences(tokenDescriptor);
+                claims = MergeClaimsAudValuesAndDescriptorAudiences(tokenDescriptor);
                 aud = null;
             }
 
@@ -616,7 +616,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             if (!tokenDescriptor.Audiences.IsNullOrEmpty())
             {
-                claims = AddClaimsAudiencesToDescriptorAudiences(tokenDescriptor);
+                claims = MergeClaimsAudValuesAndDescriptorAudiences(tokenDescriptor);
                 aud = null;
             }
 
@@ -634,7 +634,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 tokenDescriptor.AdditionalHeaderClaims,
                 tokenDescriptor.AdditionalInnerHeaderClaims);
         }
-        private static IDictionary<string, object> AddClaimsAudiencesToDescriptorAudiences(SecurityTokenDescriptor tokenDescriptor)
+        private static IDictionary<string, object> MergeClaimsAudValuesAndDescriptorAudiences(SecurityTokenDescriptor tokenDescriptor)
         {
             if (tokenDescriptor.Claims == null)
                 return new Dictionary<string, object>(){{JwtRegisteredClaimNames.Aud, tokenDescriptor.Audiences}};
