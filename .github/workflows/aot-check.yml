@@ -1,0 +1,32 @@
+name: "AOT Check"
+
+on:
+  push:
+    branches: [ "dev", "dev6x" ]
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+    branches: [ "dev", "dev6x" ]
+
+jobs:
+  analyze:
+    runs-on: windows-latest
+    name: Wilson GitHub AOT check
+
+    strategy:
+      matrix:
+        language: [ 'csharp' ]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 2
+
+    - name: Runs powershell script
+      id: aot-powershell
+      run: build\test-aot.ps1
+
