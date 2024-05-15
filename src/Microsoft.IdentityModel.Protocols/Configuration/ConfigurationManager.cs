@@ -31,6 +31,12 @@ namespace Microsoft.IdentityModel.Protocols
         private Exception _fetchMetadataFailure;
         private TimeSpan _bootstrapRefreshInterval = TimeSpan.FromSeconds(1);
 
+        // TODO inject via ctors
+        /// <summary>
+        /// 
+        /// </summary>
+        public IDistributedConfigurationManager<T> DistributedConfigurationManager { get; set; }
+
         /// <summary>
         /// Instantiates a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
         /// </summary>
@@ -156,21 +162,56 @@ namespace Microsoft.IdentityModel.Protocols
                 {
                     try
                     {
-                        // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
-                        // The transport should have it's own timeouts, etc..
-                        var configuration = await _configRetriever.GetConfigurationAsync(MetadataAddress, _docRetriever, CancellationToken.None).ConfigureAwait(false);
-                        if (_configValidator != null)
+                        T configuration = null;
+                        if (DistributedConfigurationManager != null)
                         {
-                            ConfigurationValidationResult result = _configValidator.Validate(configuration);
-                            if (!result.Succeeded)
-                                throw LogHelper.LogExceptionMessage(new InvalidConfigurationException(LogHelper.FormatInvariant(LogMessages.IDX20810, result.ErrorMessage)));
+                            // todo handle try catch
+                            configuration = await DistributedConfigurationManager.GetConfigurationAsync(MetadataAddress, CancellationToken.None).ConfigureAwait(false);
+                            if (_configValidator != null)
+                            {
+                                // TODO dont throw but log another exception
+                                ConfigurationValidationResult result = _configValidator.Validate(configuration);
+                                if (!result.Succeeded)
+                                {
+                                    configuration = null;
+                                    throw LogHelper.LogExceptionMessage(new InvalidConfigurationException(LogHelper.FormatInvariant(LogMessages.IDX20810, result.ErrorMessage)));
+                                }
+                            }
                         }
 
-                        _lastRefresh = DateTimeOffset.UtcNow;
-                        // Add a random amount between 0 and 5% of AutomaticRefreshInterval jitter to avoid spike traffic to IdentityProvider.
-                        _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval +
-                            TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 20)));
-                        _currentConfiguration = configuration;
+                        if (configuration == null)
+                        {
+                            // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
+                            // The transport should have it's own timeouts, etc..
+                            configuration = await _configRetriever.GetConfigurationAsync(MetadataAddress, _docRetriever, CancellationToken.None).ConfigureAwait(false);
+                            if (configuration is BaseConfiguration baseConfiguration1)
+                            {
+                                baseConfiguration1.RetrievalTime = DateTimeOffset.UtcNow;
+                            }
+                            if (_configValidator != null)
+                            {
+                                ConfigurationValidationResult result = _configValidator.Validate(configuration);
+                                if (!result.Succeeded)
+                                    throw LogHelper.LogExceptionMessage(new InvalidConfigurationException(LogHelper.FormatInvariant(LogMessages.IDX20810, result.ErrorMessage)));
+                            }
+
+                            if (DistributedConfigurationManager != null)
+                            {
+                                // TODO fire and forget (or not if refresh happens on a background thread)
+                                await DistributedConfigurationManager.SetConfigurationAsync(MetadataAddress, configuration, CancellationToken.None).ConfigureAwait(false);
+                            }
+                        }
+
+
+                        if (configuration is BaseConfiguration baseConfiguration)
+                            _lastRefresh = baseConfiguration.RetrievalTime;
+                        else
+                            _lastRefresh = DateTimeOffset.UtcNow;
+
+                         // Add a random amount between 0 and 5% of AutomaticRefreshInterval jitter to avoid spike traffic to IdentityProvider.
+                         _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval +
+                          TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 20)));
+                          _currentConfiguration = configuration;
                     }
                     catch (Exception ex)
                     {

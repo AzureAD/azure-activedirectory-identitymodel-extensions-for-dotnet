@@ -316,7 +316,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Gets or sets the <see cref="JsonWebKeySet"/>
         /// </summary>
         [JsonIgnore]
-        public JsonWebKeySet JsonWebKeySet {get; set;}
+        public JsonWebKeySet JsonWebKeySet { get; set; }
+
+        /// <summary>
+        /// Gets or sets <see cref="JsonWebKeySet"/> in a raw (string) form.
+        /// </summary>
+        [JsonIgnore]
+        public string RawJsonWebKeySet { get; set; }
 
         /// <summary>
         /// Boolean value specifying whether the OP can pass a sid (session ID) query parameter to identify the RP session at the OP when the logout_uri is used. Dafault Value is false.

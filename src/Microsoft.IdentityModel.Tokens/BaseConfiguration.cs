@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
@@ -37,6 +38,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// This is the fed:SecurityTokenServiceType in WS-Federation, http://docs.oasis-open.org/wsfed/federation/v1.2/os/ws-federation-1.2-spec-os.html#:~:text=fed%3ASecurityTokenSerivceEndpoint
         /// </summary>
         public virtual string ActiveTokenEndpoint { get; set; }
+
+        /// <summary>
+        /// TODO must be serialized too
+        /// </summary>
+        public virtual DateTimeOffset RetrievalTime { get; set; }
 
         /// <summary>
         /// Gets the <see cref="ICollection{SecurityKey}"/> that the IdentityProvider indicates are to be used in order to decrypt tokens.

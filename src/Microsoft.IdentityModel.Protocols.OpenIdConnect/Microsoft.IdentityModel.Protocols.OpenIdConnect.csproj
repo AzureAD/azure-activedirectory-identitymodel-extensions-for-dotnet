@@ -31,6 +31,10 @@
   	<PackageReference Include="System.Text.Encodings.Web" Version="$(SystemTextEncodingsWeb)" />
     <PackageReference Include="System.Text.Json" Version="$(SystemTextJson)" />
   </ItemGroup>
+<!-- Not needed in this assembly. Used only to showcase TestDistributedConfigurationManager-->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
+  </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Reference Include="System.Net.Http" />
