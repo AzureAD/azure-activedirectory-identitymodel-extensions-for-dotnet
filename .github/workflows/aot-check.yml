@@ -28,5 +28,5 @@ jobs:
 
     - name: Runs powershell script
       id: aot-powershell
-      run: build\test-aot.ps1
+      run: build\test-aot.ps1 'net8.0'
 

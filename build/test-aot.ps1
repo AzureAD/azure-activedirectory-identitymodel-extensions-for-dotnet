@@ -1,5 +1,4 @@
-$targetNetFramework='net8.0'
-#param([string]$targetNetFramework)
+param([string]$targetNetFramework)
 
 $projectName='Microsoft.IdentityModel.AotCompatibility.TestApp'
 $rootDirectory = Split-Path $PSScriptRoot -Parent
