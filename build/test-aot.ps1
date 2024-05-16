@@ -3,7 +3,7 @@ $targetNetFramework='net8.0'
 
 $projectName='Microsoft.IdentityModel.AotCompatibility.TestApp'
 $rootDirectory = Split-Path $PSScriptRoot -Parent
-$publishOutput = dotnet publish $rootDirectory/tests/$projectName/$projectName.csproj --self-contained -nodeReuse:false /p:UseSharedCompilation=false
+$publishOutput = dotnet publish $rootDirectory/test/$projectName/$projectName.csproj --self-contained -nodeReuse:false /p:UseSharedCompilation=false
 
 $actualWarningCount = 0
 
@@ -29,7 +29,7 @@ if ($LastExitCode -ne 0)
 $app = './$projectName.exe'
 #if ($IsWindows ) {"./Microsoft.IdentityModel.AotCompatibility.TestApp.exe" } else {"./Microsoft.IdentityModel.AotCompatibility.TestApp" }
 
-Push-Location $rootDirectory/tests/$projectName/bin/Release/$targetNetFramework/win-x64
+Push-Location $rootDirectory/test/$projectName/bin/Release/$targetNetFramework/win-x64
 
 Write-Host "Executing test App..."
 $app
