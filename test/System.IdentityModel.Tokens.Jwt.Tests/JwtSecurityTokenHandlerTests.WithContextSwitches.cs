@@ -13,7 +13,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
     public class JwtSecurityTokenHandlerTestsWithContextSwitches
     {
         [Fact]
-
         public void JwtSecurityTokenHandler_CreateToken_AddShortFormMappingForRsaOAEPEnabled()
         {
             AppContext.SetSwitch(X509EncryptingCredentials._useShortNameForRsaOaepKey, true);
