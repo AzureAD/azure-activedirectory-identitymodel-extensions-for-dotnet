@@ -83,7 +83,7 @@ namespace Microsoft.IdentityModel.Validators
 
 #endif
 
-                // comparing effectiveSigningKeyIssuer with v2TokenIssuer is required as well because of the following scenario:
+                // comparing effectiveSigningKeyIssuer with v2TokenIssuer is required because of the following scenario:
                 // 1. service trusts /common/v2.0 endpoint 
                 // 2. service receieves a v1 token that has issuer like sts.windows.net
                 // 3. signing key issuers will never match sts.windows.net as v1 endpoint doesn't have issuers attached to keys
