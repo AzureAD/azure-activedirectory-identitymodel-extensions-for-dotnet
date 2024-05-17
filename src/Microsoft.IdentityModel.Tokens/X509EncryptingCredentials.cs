@@ -23,7 +23,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </remarks>
         /// <exception cref="ArgumentNullException">if 'certificate' is null.</exception>
         public X509EncryptingCredentials(X509Certificate2 certificate)
-            : this(certificate, ShouldUseShortNameForRsaOaepKey() ? SecurityAlgorithms.RsaOAEP : SecurityAlgorithms.DefaultAsymmetricKeyWrapAlgorithm, SecurityAlgorithms.DefaultSymmetricEncryptionAlgorithm)
+            : this(certificate, GetEncryptionAlgorithm(), SecurityAlgorithms.DefaultSymmetricEncryptionAlgorithm)
         {
         }
 
@@ -51,9 +51,14 @@ namespace Microsoft.IdentityModel.Tokens
             private set;
         }
 
+        private static string GetEncryptionAlgorithm()
+        {
+            return ShouldUseShortNameForRsaOaepKey() ? SecurityAlgorithms.RsaOAEP : SecurityAlgorithms.DefaultAsymmetricKeyWrapAlgorithm;
+        }
+
         private static bool ShouldUseShortNameForRsaOaepKey()
         {
-            return AppContext.TryGetSwitch("Switch.Microsoft.IdentityModel.UseShortNameForRsaOaepKey", out var useKeyWrap) && useKeyWrap;
+            return AppContext.TryGetSwitch(_useShortNameForRsaOaepKey, out var useKeyWrap) && useKeyWrap;
         }
     }
 }
