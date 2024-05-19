@@ -16,7 +16,7 @@ namespace Microsoft.IdentityModel.Benchmarks
 
         public const string Audience = "http://www.contoso.com/protected";
 
-        public readonly static IEnumerable<string> Audiences = new string[] {
+        public readonly static IList<string> Audiences = new string[] {
             "http://www.contoso.com/protected",
             "http://www.contoso.com/protected1",
             "http://www.contoso.com/protected2",

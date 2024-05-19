@@ -644,11 +644,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             else if (SetDefaultTimesOnTokenCreation)
                 conditions.NotOnOrAfter = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes);
 
-            // TODO: At next major version remove use of the Audience property.
-            if (!tokenDescriptor.Audiences.IsNullOrEmpty())
-                conditions.AudienceRestrictions.Add(new Saml2AudienceRestriction(tokenDescriptor.Audiences));
-            else if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
-                conditions.AudienceRestrictions.Add(new Saml2AudienceRestriction(tokenDescriptor.Audience));
+            var audienceRestriction = new Saml2AudienceRestriction(tokenDescriptor.Audiences.Where(aud => !string.IsNullOrWhiteSpace(aud)));
+
+            if (!string.IsNullOrWhiteSpace(tokenDescriptor.Audience) && !tokenDescriptor.Audiences.Contains(tokenDescriptor.Audience))
+                audienceRestriction.Audiences.Add(tokenDescriptor.Audience);
+
+            conditions.AudienceRestrictions.Add(audienceRestriction);
 
             return conditions;
         }

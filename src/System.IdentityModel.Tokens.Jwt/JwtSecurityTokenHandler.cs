@@ -450,26 +450,17 @@ namespace System.IdentityModel.Tokens.Jwt
             if (tokenDescriptor == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
 
-            // TODO at next major version (8.0) use only Audiences as SecurityTokenDescriptor.Audience" will be removed.
-            string aud = tokenDescriptor.Audience;
-            IDictionary<string, object> claims = tokenDescriptor.Claims;
-
-            if (!tokenDescriptor.Audiences.IsNullOrEmpty())
-            {
-                claims = MergeClaimsAudValuesAndDescriptorAudiences(tokenDescriptor);
-                aud = null;
-            }
-
             return CreateJwtSecurityTokenPrivate(
                 tokenDescriptor.Issuer,
-                aud,
+                tokenDescriptor.Audience,
+                tokenDescriptor.Audiences,
                 tokenDescriptor.Subject,
                 tokenDescriptor.NotBefore,
                 tokenDescriptor.Expires,
                 tokenDescriptor.IssuedAt,
                 tokenDescriptor.SigningCredentials,
                 tokenDescriptor.EncryptingCredentials,
-                claims,
+                tokenDescriptor.Claims,
                 tokenDescriptor.TokenType,
                 tokenDescriptor.AdditionalHeaderClaims,
                 tokenDescriptor.AdditionalInnerHeaderClaims);
@@ -610,74 +601,45 @@ namespace System.IdentityModel.Tokens.Jwt
             if (tokenDescriptor == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
 
-            // TODO at next major version (8.0) use only Audiences as SecurityTokenDescriptor.Audience" will be removed.
-            string aud = tokenDescriptor.Audience;
-            IDictionary<string, object> claims = tokenDescriptor.Claims;
-
-            if (!tokenDescriptor.Audiences.IsNullOrEmpty())
-            {
-                claims = MergeClaimsAudValuesAndDescriptorAudiences(tokenDescriptor);
-                aud = null;
-            }
-
             return CreateJwtSecurityTokenPrivate(
                 tokenDescriptor.Issuer,
-                aud,
+                tokenDescriptor.Audience,
+                tokenDescriptor.Audiences,
                 tokenDescriptor.Subject,
                 tokenDescriptor.NotBefore,
                 tokenDescriptor.Expires,
                 tokenDescriptor.IssuedAt,
                 tokenDescriptor.SigningCredentials,
                 tokenDescriptor.EncryptingCredentials,
-                claims,
+                tokenDescriptor.Claims,
                 tokenDescriptor.TokenType,
                 tokenDescriptor.AdditionalHeaderClaims,
                 tokenDescriptor.AdditionalInnerHeaderClaims);
         }
-        private static IDictionary<string, object> MergeClaimsAudValuesAndDescriptorAudiences(SecurityTokenDescriptor tokenDescriptor)
+
+        private JwtSecurityToken CreateJwtSecurityTokenPrivate(
+        string issuer,
+        string audience,
+        ClaimsIdentity subject,
+        DateTime? notBefore,
+        DateTime? expires,
+        DateTime? issuedAt,
+        SigningCredentials signingCredentials,
+        EncryptingCredentials encryptingCredentials,
+        IDictionary<string, object> claimCollection,
+        string tokenType,
+        IDictionary<string, object> additionalHeaderClaims,
+        IDictionary<string, object> additionalInnerHeaderClaims)
         {
-            if (tokenDescriptor.Claims == null)
-                return new Dictionary<string, object>(){{JwtRegisteredClaimNames.Aud, tokenDescriptor.Audiences}};
-
-            if (tokenDescriptor.Claims.ContainsKey(JwtRegisteredClaimNames.Aud))
-                MergeAudClaimsIntoAudiencesProperty(tokenDescriptor);
-
-            var claimsCopy = new Dictionary<string, object>(tokenDescriptor.Claims);
-            claimsCopy[JwtRegisteredClaimNames.Aud] = tokenDescriptor.Audiences;
-            return claimsCopy;
-        }
-
-        private static void MergeAudClaimsIntoAudiencesProperty(SecurityTokenDescriptor tokenDescriptor)
-        {
-            // This switch checks for Uri in addition to string per the definition of the 'aud' claim in the JWT RFC:
-            // https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.3
-            switch (tokenDescriptor.Claims[JwtRegisteredClaimNames.Aud])
-            {
-                case string audString:
-                    tokenDescriptor.AddAudience(audString);
-                    break;
-                case IEnumerable<string> audStrings:
-                    foreach (string aud in audStrings)
-                        tokenDescriptor.AddAudience(aud);
-                    break;
-                case Uri audUri:
-                    tokenDescriptor.AddAudience(audUri.ToString());
-                    break;
-                case IEnumerable<Uri> audUris:
-                    foreach (Uri aud in audUris)
-                        tokenDescriptor.AddAudience(aud.ToString());
-                    break;
-                default:
-                    throw new SecurityTokenInvalidAudienceException(
-                        LogHelper.FormatInvariant(LogMessages.IDX12724,
-                        LogHelper.MarkAsNonPII(tokenDescriptor.Claims[JwtRegisteredClaimNames.Aud].GetType()))
-                    );
-            }
+            return CreateJwtSecurityTokenPrivate(
+                issuer, audience, [], subject, notBefore, expires, issuedAt, signingCredentials, encryptingCredentials,
+                claimCollection, tokenType, additionalHeaderClaims, additionalInnerHeaderClaims);
         }
 
         private JwtSecurityToken CreateJwtSecurityTokenPrivate(
             string issuer,
             string audience,
+            IList<string> audiences,
             ClaimsIdentity subject,
             DateTime? notBefore,
             DateTime? expires,
@@ -702,11 +664,11 @@ namespace System.IdentityModel.Tokens.Jwt
                     notBefore = now;
             }
 
-            if (LogHelper.IsEnabled(EventLogLevel.Verbose))
-                LogHelper.LogVerbose(LogMessages.IDX12721, LogHelper.MarkAsNonPII(issuer ?? "null"), LogHelper.MarkAsNonPII(audience ?? "null"));
-
-            JwtPayload payload = new JwtPayload(issuer, audience, (subject == null ? null : OutboundClaimTypeTransform(subject.Claims)), (claimCollection == null ? null : OutboundClaimTypeTransform(claimCollection)), notBefore, expires, issuedAt);
+            JwtPayload payload = new JwtPayload(issuer, audience, audiences, (subject == null ? null : OutboundClaimTypeTransform(subject.Claims)), (claimCollection == null ? null : OutboundClaimTypeTransform(claimCollection)), notBefore, expires, issuedAt);
             JwtHeader header = new JwtHeader(signingCredentials, OutboundAlgorithmMap, tokenType, additionalInnerHeaderClaims);
+
+            if (LogHelper.IsEnabled(EventLogLevel.Verbose))
+                LogHelper.LogVerbose(LogMessages.IDX12721, LogHelper.MarkAsNonPII(issuer ?? "null"), LogHelper.MarkAsNonPII(payload.Aud.ToString() ?? "null"));
 
             if (subject?.Actor != null)
                 payload.AddClaim(new Claim(JwtRegisteredClaimNames.Actort, CreateActorValue(subject.Actor)));

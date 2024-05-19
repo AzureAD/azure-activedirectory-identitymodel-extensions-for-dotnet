@@ -354,7 +354,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <exception cref="ArgumentNullException">if <paramref name="tokenDescriptor"/> is null.</exception>
         protected virtual SamlConditions CreateConditions(SecurityTokenDescriptor tokenDescriptor)
         {
-            if (null == tokenDescriptor)
+            if (tokenDescriptor == null)
                 throw LogArgumentNullException(nameof(tokenDescriptor));
 
             var conditions = new SamlConditions();
@@ -368,13 +368,28 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             else if (SetDefaultTimesOnTokenCreation)
                 conditions.NotOnOrAfter = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes);
 
-            // TODO at next major version (8.0) use only Audiences as SecurityTokenDescriptor.Audience will be removed.
-            if (!tokenDescriptor.Audiences.IsNullOrEmpty())
-                conditions.Conditions.Add(new SamlAudienceRestrictionCondition(tokenDescriptor.Audiences));
-            else if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
-                conditions.Conditions.Add(new SamlAudienceRestrictionCondition(new Uri(tokenDescriptor.Audience)));
+            var uriList = createUriList(tokenDescriptor);
+            if (!uriList.IsNullOrEmpty())
+                conditions.Conditions.Add(new SamlAudienceRestrictionCondition(uriList));
 
             return conditions;
+        }
+
+        private static List<Uri> createUriList(SecurityTokenDescriptor tokenDescriptor)
+        {
+            var uriList = new List<Uri>();
+            if (!tokenDescriptor.Audiences.IsNullOrEmpty())
+            {
+                foreach (var audience in tokenDescriptor.Audiences.Where(aud => !string.IsNullOrWhiteSpace(aud)))
+                    uriList.Add(new Uri(audience));
+
+                if(!string.IsNullOrWhiteSpace(tokenDescriptor.Audience) && !tokenDescriptor.Audiences.Contains(tokenDescriptor.Audience))
+                    uriList.Add(new Uri(tokenDescriptor.Audience));
+            }
+            else if (!string.IsNullOrWhiteSpace(tokenDescriptor.Audience))
+                uriList.Add(new Uri(tokenDescriptor.Audience));
+
+            return uriList;
         }
 
         /// <summary>

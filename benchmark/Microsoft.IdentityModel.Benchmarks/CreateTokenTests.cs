@@ -26,29 +26,30 @@ namespace Microsoft.IdentityModel.Benchmarks
             _tokenDescriptor = new SecurityTokenDescriptor
             {
                 Claims = BenchmarkUtils.Claims,
-                SigningCredentials = BenchmarkUtils.SigningCredentialsRsaSha256,
-            };
-
-            _tokenDescriptorMultipleAudiencesMemberOnly = new SecurityTokenDescriptor
-            {
-                Claims = BenchmarkUtils.ClaimsNoAudience,
-                SigningCredentials = BenchmarkUtils.SigningCredentialsRsaSha256,
-                Audiences = BenchmarkUtils.Audiences,
-            };
-
-            _tokenDescriptorMultipleAudiencesMemberAndClaims = new SecurityTokenDescriptor
-            {
-                Claims = BenchmarkUtils.ClaimsMultipleAudiences,
-                SigningCredentials = BenchmarkUtils.SigningCredentialsRsaSha256,
-                Audiences = BenchmarkUtils.Audiences,
+                SigningCredentials = BenchmarkUtils.SigningCredentialsRsaSha256
             };
 
             _tokenDescriptorSingleAudienceUsingAudiencesMember = new SecurityTokenDescriptor
             {
                 Claims = BenchmarkUtils.ClaimsNoAudience,
-                SigningCredentials = BenchmarkUtils.SigningCredentialsRsaSha256,
-                Audiences = new string[] { BenchmarkUtils.Audience }
+                SigningCredentials = BenchmarkUtils.SigningCredentialsRsaSha256
             };
+
+            _tokenDescriptorMultipleAudiencesMemberOnly = new SecurityTokenDescriptor
+            {
+                Claims = BenchmarkUtils.ClaimsNoAudience,
+                SigningCredentials = BenchmarkUtils.SigningCredentialsRsaSha256
+            };
+
+            _tokenDescriptorMultipleAudiencesMemberAndClaims = new SecurityTokenDescriptor
+            {
+                Claims = BenchmarkUtils.ClaimsMultipleAudiences,
+                SigningCredentials = BenchmarkUtils.SigningCredentialsRsaSha256
+            };
+
+            _tokenDescriptorSingleAudienceUsingAudiencesMember.Audiences.Add(BenchmarkUtils.Audience);
+            _tokenDescriptorMultipleAudiencesMemberOnly.AddAudiences(BenchmarkUtils.Audiences);
+            _tokenDescriptorMultipleAudiencesMemberAndClaims.AddAudiences(BenchmarkUtils.Audiences);
         }
 
         [Benchmark]

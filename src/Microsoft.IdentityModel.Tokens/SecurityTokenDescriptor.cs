@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -13,55 +14,30 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class SecurityTokenDescriptor
     {
-        // TODO: At next major version (8.0), remove Audience and logic for combining with Audiences.
-        private HashSet<string> _audiences;
+        private List<string> _audiences;
 
         /// <summary>
-        /// Gets or sets the value of the 'audience' claim. Will be deprecated in favor of <see cref="Audiences"/> in the next
-        /// major version (8.x).
+        /// Gets or sets the value of the {"": audience} claim. Will be combined with <see cref="Audiences"/> and any "Aud" claims in
+        /// <see cref="Claims"/> or <see cref="Subject"/> when creating a token.
         /// </summary>
         public string Audience { get; set; }
 
         /// <summary>
-        /// Gets or sets one or more audiences to include in the token's 'Aud' claim. Automatically removes duplicates and empty,
-        /// null, or whitespace-only strings. Does not use a threadsafe collection.
+        /// Gets the list audiences to include in the token's 'Aud' claim. Will be combined with <see cref="Audiences"/> and any
+        /// "Aud" claims in <see cref="Claims"/> or <see cref="Subject"/> when creating a token.
         /// </summary>
-        public IEnumerable<string> Audiences {
-            get
-            {
-                // If Audiences isn't set, return null since this will be the behavior once Audience is removed.
-                if (_audiences.IsNullOrEmpty())
-                    return null;
-
-                // If both Audience and Audiences are set, return the union of the two.
-                else if (!string.IsNullOrEmpty(Audience))
-                    return _audiences.Union([Audience]);
-
-                // If only Audiences is set, return it
-                else
-                    return _audiences;
-            }
-            set
-            {
-                _audiences = new HashSet<string>(value);
-                _audiences.RemoveWhere(string.IsNullOrWhiteSpace);
-            }
-        }
+        public IList<string> Audiences => _audiences ?? Interlocked.CompareExchange(ref _audiences, [], null) ?? _audiences;
 
         /// <summary>
-        /// Adds an audience to the <see cref="Audiences"/> collection. Won't add duplicate, null, empty, or whitespace-only strings.
+        /// Enables adding multiple audiences to the Audiences member at once.
         /// </summary>
-        /// <param name="audience">An audience to be added to the Aud claim</param>
-        public void AddAudience(string audience)
+        /// <param name="auds">List of strings with each representing an audience to add to the 'Aud' claim</param>
+        public void AddAudiences(IList<string> auds)
         {
-            if (string.IsNullOrWhiteSpace(audience))
-                return;
-
-            if (_audiences == null)
-                _audiences = new HashSet<string>();
-
-            _audiences.Add(audience);
-        }   
+            _ = Audiences;
+            if (auds != null)
+                _audiences.AddRange(auds);
+        }
 
         /// <summary>
         /// Defines the compression algorithm that will be used to compress the JWT token payload.

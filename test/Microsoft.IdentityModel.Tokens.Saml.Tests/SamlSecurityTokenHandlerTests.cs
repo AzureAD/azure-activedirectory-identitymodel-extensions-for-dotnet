@@ -1076,6 +1076,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 { typeof(SamlAssertion), new List<string> { "IssueInstant", "InclusiveNamespacesPrefixList", "Signature", "SigningCredentials", "CanonicalString" } },
                 { typeof(SamlSecurityToken), new List<string> { "SigningKey" } },
             };
+            theoryData.TokenDescriptor.AddAudiences(theoryData.AudiencesForSecurityTokenDescriptor);
 
             try
             {
@@ -1127,7 +1128,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         TestId = "ValidAudiences",
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
-                            Audiences = Default.Audiences,
                             NotBefore = Default.NotBefore,
                             Expires = Default.Expires,
                             Issuer = Default.Issuer,
@@ -1136,7 +1136,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                             Claims = Default.SamlClaimsDictionary,
                         },
                         SamlSecurityTokenHandler = new SamlSecurityTokenHandler(),
-                        ValidationParameters = validationParametersWithAudiences
+                        ValidationParameters = validationParametersWithAudiences,
+                        AudiencesForSecurityTokenDescriptor = Default.Audiences
                     },
                     new CreateTokenTheoryData
                     {
@@ -1144,7 +1145,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
-                            Audiences = invalidAudiences,
                             NotBefore = Default.NotBefore,
                             Expires = Default.Expires,
                             Issuer = Default.Issuer,
@@ -1153,7 +1153,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                             Claims = Default.SamlClaimsDictionary,
                         },
                         SamlSecurityTokenHandler = new SamlSecurityTokenHandler(),
-                        ValidationParameters = validationParametersWithAudiences
+                        ValidationParameters = validationParametersWithAudiences,
+                        AudiencesForSecurityTokenDescriptor = invalidAudiences
                     },
                     new CreateTokenTheoryData
                     {
@@ -1161,7 +1162,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
                             Audience = Default.Audience,
-                            Audiences = new List<string> {invalidAudience},
                             NotBefore = Default.NotBefore,
                             Expires = Default.Expires,
                             Issuer = Default.Issuer,
@@ -1170,7 +1170,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                             Claims = Default.SamlClaimsDictionary,
                         },
                         SamlSecurityTokenHandler = new SamlSecurityTokenHandler(),
-                        ValidationParameters = validationParametersWithAudiences
+                        ValidationParameters = validationParametersWithAudiences,
+                        AudiencesForSecurityTokenDescriptor = [invalidAudience]
                     },
                     new CreateTokenTheoryData
                     {
@@ -1178,7 +1179,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
                             Audience = invalidAudience,
-                            Audiences = Default.Audiences,
                             NotBefore = Default.NotBefore,
                             Expires = Default.Expires,
                             Issuer = Default.Issuer,
@@ -1187,7 +1187,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                             Claims = Default.SamlClaimsDictionary,
                         },
                         SamlSecurityTokenHandler = new SamlSecurityTokenHandler(),
-                        ValidationParameters = validationParametersWithAudiences
+                        ValidationParameters = validationParametersWithAudiences,
+                        AudiencesForSecurityTokenDescriptor = Default.Audiences
                     },
                     new CreateTokenTheoryData
                     {

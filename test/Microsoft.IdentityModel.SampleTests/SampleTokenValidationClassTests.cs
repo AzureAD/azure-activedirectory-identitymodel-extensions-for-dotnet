@@ -342,7 +342,9 @@ namespace Microsoft.IdentityModel.SampleTests
         }
 
         /// <summary>
-        /// Tests how the class under test using JwtSecurityTokenHandler handles a token missing the aud claim.
+        /// Tests how the class under test using JwtSecurityTokenHandler handles a token missing the 
+        /// 
+        /// claim.
         /// </summary>
         [Fact]
         public void TokenWithMissingAudience_Deprecated()

@@ -706,12 +706,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             writer.WriteStartObject();
 
-            // TODO at next major version (8.0) use only Audiences as SecurityTokenDescriptor.Audience will be removed.
             if (!tokenDescriptor.Audiences.IsNullOrEmpty())
             {
                 writer.WritePropertyName(JwtPayloadUtf8Bytes.Aud);
                 writer.WriteStartArray();
-                foreach (string audience in tokenDescriptor.Audiences){ writer.WriteStringValue(audience);}
+                foreach (string audience in tokenDescriptor.Audiences) { writer.WriteStringValue(audience); }
+
+                if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
+                    writer.WriteStringValue(tokenDescriptor.Audience);
+
                 writer.WriteEndArray();
                 audienceSet = true;
             }
@@ -763,7 +766,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         audienceChecked = true;
                         if (audienceSet)
                         {
-                            // TODO at next major version Audience will be removed at that time remove this local variable.
                             string descriptorMemberName = null;
                             if (!tokenDescriptor.Audiences.IsNullOrEmpty())
                                 descriptorMemberName = nameof(tokenDescriptor.Audiences);

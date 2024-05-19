@@ -263,6 +263,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.CreateJWEUsingSecurityTokenDescriptor", theoryData);
             theoryData.ValidationParameters.ValidateLifetime = false;
+            theoryData.TokenDescriptor.AddAudiences(theoryData.AudiencesForSecurityTokenDescriptor);
+
             try
             {
                 SecurityToken jweFromJwtHandler = theoryData.JwtSecurityTokenHandler.CreateToken(theoryData.TokenDescriptor);
@@ -340,15 +342,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 var claimsDictionaryNoAudience = Default.PayloadJsonDictionary;
                 claimsDictionaryNoAudience.Remove(JwtRegisteredClaimNames.Aud);
 
-                var claimsDictionaryIncorrectAudienceType = Default.PayloadJsonDictionary;
-                claimsDictionaryIncorrectAudienceType[JwtRegisteredClaimNames.Aud] = 42;
-
-                var claimsDictionaryUriForAud = Default.PayloadJsonDictionary;
-                claimsDictionaryUriForAud[JwtRegisteredClaimNames.Aud] = new Uri(Default.Audience);
-
-                var claimsDictionaryUrisForAud = Default.PayloadJsonDictionary;
-                claimsDictionaryUrisForAud[JwtRegisteredClaimNames.Aud] = Default.Audiences.Select(s => new Uri(s)).ToList();
-
                 return new TheoryData<CreateTokenTheoryData>
                 {
                     new CreateTokenTheoryData
@@ -358,9 +351,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         {
                             SigningCredentials = Default.X509AsymmetricSigningCredentials,
                             EncryptingCredentials = null,
-                            Claims = claimsDictionaryNoAudience,
-                            Audiences = Default.Audiences
+                            Claims = claimsDictionaryNoAudience
                         },
+                        AudiencesForSecurityTokenDescriptor = Default.Audiences,
                         JwtSecurityTokenHandler = tokenHandler,
                         JsonWebTokenHandler = jsonTokenHandler,
                         ValidationParameters = Default.AsymmetricSignTokenValidationParameters
@@ -373,9 +366,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         {
                             SigningCredentials = Default.X509AsymmetricSigningCredentials,
                             EncryptingCredentials = null,
-                            Claims = claimsDictionaryNoAudience,
-                            Audiences = invalidAudiences
+                            Claims = claimsDictionaryNoAudience
                         },
+                        AudiencesForSecurityTokenDescriptor = invalidAudiences,
                         JwtSecurityTokenHandler = tokenHandler,
                         JsonWebTokenHandler = jsonTokenHandler,
                         ValidationParameters = Default.AsymmetricSignTokenValidationParameters
@@ -388,9 +381,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             SigningCredentials = Default.X509AsymmetricSigningCredentials,
                             EncryptingCredentials = null,
                             Claims = claimsDictionaryNoAudience,
-                            Audience = Default.Audience,
-                            Audiences = invalidAudiences
+                            Audience = Default.Audience
                         },
+                        AudiencesForSecurityTokenDescriptor = invalidAudiences,
                         JwtSecurityTokenHandler = tokenHandler,
                         JsonWebTokenHandler = jsonTokenHandler,
                         ValidationParameters = Default.AsymmetricSignTokenValidationParameters
@@ -403,9 +396,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             SigningCredentials = Default.X509AsymmetricSigningCredentials,
                             EncryptingCredentials = null,
                             Claims = claimsDictionaryNoAudience,
-                            Audience = invalidAudience,
-                            Audiences = Default.Audiences
+                            Audience = invalidAudience
                         },
+                        AudiencesForSecurityTokenDescriptor = Default.Audiences,
                         JwtSecurityTokenHandler = tokenHandler,
                         JsonWebTokenHandler = jsonTokenHandler,
                         ValidationParameters = Default.AsymmetricSignTokenValidationParameters
@@ -417,9 +410,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         {
                             SigningCredentials = Default.AsymmetricSigningCredentials,
                             EncryptingCredentials = null,
-                            Claims = Default.PayloadJsonDictionary,
-                            Audiences = Default.Audiences
+                            Claims = Default.PayloadJsonDictionary
                         },
+                        AudiencesForSecurityTokenDescriptor = Default.Audiences,
                         JwtSecurityTokenHandler = tokenHandler,
                         JsonWebTokenHandler = jsonTokenHandler,
                         ValidationParameters = Default.AsymmetricSignTokenValidationParameters
@@ -432,9 +425,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             SigningCredentials = Default.X509AsymmetricSigningCredentials,
                             EncryptingCredentials = null,
                             Subject = new ClaimsIdentity(Default.PayloadJsonClaims),
-                            Audiences = Default.Audiences
-
                         },
+                        AudiencesForSecurityTokenDescriptor = Default.Audiences,
                         JwtSecurityTokenHandler = tokenHandler,
                         JsonWebTokenHandler = jsonTokenHandler,
                         ValidationParameters = Default.AsymmetricSignTokenValidationParameters
@@ -447,8 +439,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             SigningCredentials = Default.AsymmetricSigningCredentials,
                             EncryptingCredentials = null,
                             Claims = claimsDictionaryNoAudience,
-                            Audiences = Default.Audiences
                         },
+                        AudiencesForSecurityTokenDescriptor = Default.Audiences,
                         JwtSecurityTokenHandler = tokenHandler,
                         JsonWebTokenHandler = jsonTokenHandler,
                         ValidationParameters = Default.AsymmetricSignTokenValidationParameters
@@ -461,52 +453,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             SigningCredentials = Default.X509AsymmetricSigningCredentials,
                             EncryptingCredentials = null,
                             Subject = new ClaimsIdentity(Default.PayloadJsonClaims),
-                            Audiences = Default.Audiences
-
                         },
-                        JwtSecurityTokenHandler = tokenHandler,
-                        JsonWebTokenHandler = jsonTokenHandler,
-                        ValidationParameters = Default.AsymmetricSignTokenValidationParameters
-                    },
-                    new CreateTokenTheoryData
-                    {
-                        TestId = "AudClaimWrongTypeInDictionary_MultipleAudiences_ExpectException IDX12724",
-                        ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX12724"),
-                        TokenDescriptor =  new SecurityTokenDescriptor
-                        {
-                            SigningCredentials = Default.AsymmetricSigningCredentials,
-                            EncryptingCredentials = null,
-                            Claims = claimsDictionaryIncorrectAudienceType,
-                            Audiences = Default.Audiences
-                        },
-                        JwtSecurityTokenHandler = tokenHandler,
-                        JsonWebTokenHandler = jsonTokenHandler,
-                        ValidationParameters = Default.AsymmetricSignTokenValidationParameters
-                    },
-                    new CreateTokenTheoryData
-                    {
-                        TestId = "ClaimsDictionaryUriForAud_MultipleAudiences",
-                        TokenDescriptor =  new SecurityTokenDescriptor
-                        {
-                            SigningCredentials = Default.X509AsymmetricSigningCredentials,
-                            EncryptingCredentials = null,
-                            Claims = claimsDictionaryUriForAud,
-                            Audiences = Default.Audiences
-                        },
-                        JwtSecurityTokenHandler = tokenHandler,
-                        JsonWebTokenHandler = jsonTokenHandler,
-                        ValidationParameters = Default.AsymmetricSignTokenValidationParameters
-                    },
-                    new CreateTokenTheoryData
-                    {
-                        TestId = "ClaimsDictionaryMultiUrisForAud_MultipleAudiences",
-                        TokenDescriptor =  new SecurityTokenDescriptor
-                        {
-                            SigningCredentials = Default.X509AsymmetricSigningCredentials,
-                            EncryptingCredentials = null,
-                            Claims = claimsDictionaryUrisForAud,
-                            Audiences = Default.Audiences
-                        },
+                        AudiencesForSecurityTokenDescriptor = Default.Audiences,
                         JwtSecurityTokenHandler = tokenHandler,
                         JsonWebTokenHandler = jsonTokenHandler,
                         ValidationParameters = Default.AsymmetricSignTokenValidationParameters
@@ -1775,6 +1723,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             get
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
+                var securityTokenDescriptorWithAudiences = new SecurityTokenDescriptor{ Issuer = Default.Issuer };
+                securityTokenDescriptorWithAudiences.AddAudiences(Default.Audiences);
+
                 return new TheoryData<JwtTheoryData>
                 {
                     new JwtTheoryData
@@ -1887,7 +1838,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     new JwtTheoryData
                     {
                         TestId = "'validAudiences == audiences, validates successfully'",
-                        SecurityToken = tokenHandler.CreateJwtSecurityToken(new SecurityTokenDescriptor{ Issuer = Default.Issuer, Audiences = Default.Audiences}),
+                        SecurityToken = tokenHandler.CreateJwtSecurityToken(issuer: Default.Issuer, audience: Default.Audience),
                         ValidationParameters = ValidateAudienceValidationParameters(null, null, null, true, Default.Audiences),
                     }
                 };
@@ -3260,5 +3211,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         public string Algorithm { get; set; }
 
         public IEnumerable<SecurityKey> ExpectedDecryptionKeys { get; set; }
+        public List<string> AudiencesForSecurityTokenDescriptor { get; set; }
     }
 }
