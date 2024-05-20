@@ -1000,9 +1000,9 @@ namespace Microsoft.IdentityModel.Tokens.Json
                         WriteObject(ref writer, k.ToString(), dictionary[k]);
                     writer.WriteEndObject();
                     break;
-                case IEnumerable enumerable:
+                case IList list:
                     writer.WriteStartArray(key);
-                    foreach (var k in enumerable)
+                    foreach (var k in list)
                         WriteObjectValue(ref writer, k);
                     writer.WriteEndArray();
                     break;
