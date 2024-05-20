@@ -1006,6 +1006,12 @@ namespace Microsoft.IdentityModel.Tokens.Json
                         WriteObjectValue(ref writer, k);
                     writer.WriteEndArray();
                     break;
+                case IEnumerable enumerable:
+                    writer.WriteStartArray(key);
+                    foreach (var k in enumerable)
+                        WriteObjectValue(ref writer, k);
+                    writer.WriteEndArray();
+                    break;
                 case JsonElement j:
                     writer.WritePropertyName(key);
                     j.WriteTo(writer);
