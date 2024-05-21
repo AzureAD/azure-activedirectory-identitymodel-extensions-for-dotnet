@@ -11,6 +11,7 @@
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
     <ErrorOnDuplicatePublishOutputFiles>False</ErrorOnDuplicatePublishOutputFiles>
     <IsPackable>false</IsPackable>
+    <LangVersion>12</LangVersion>
   </PropertyGroup>
 
   <!-- Uncomment only when running EtwProfiler diagnoser on Release-->
