@@ -42,7 +42,7 @@ steps:
   displayName: "Install Strawberry Perl"
   inputs:
     targetType: filePath
-    filePath: $(Build.SourcesDirectory)\build\install-strawberry-perl.ps1
+    filePath: $(Build.SourcesDirectory)\$(WilsonSourceDirectory)build\install-strawberry-perl.ps1
     arguments: >
       -ci_path "$(Build.SourcesDirectory)"
       -debug
