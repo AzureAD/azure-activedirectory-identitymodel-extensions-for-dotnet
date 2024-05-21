@@ -45,6 +45,10 @@ steps:
     arguments: '$(Agent.BuildDirectory)\s\$(WilsonSourceDirectory)src\VerifyResourceUsage.pl'
 
 - powershell: |
+      perl "$(Build.SourcesDirectory)\src\VerifyResourceUsage.pl"
+  displayName: 'Verify error messages are all used.'
+
+- powershell: |
     regedit /s .\build\strongNameBypass.reg
   displayName: 'Strong Name Bypass'
 
