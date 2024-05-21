@@ -39,7 +39,7 @@ steps:
     custom: '--list-sdks'
 
 - powershell: |
-      perl "$(Agent.BuildDirectory)\s\$(WilsonSourceDirectory)src\VerifyResourceUsage.pl"
+      perl "$(Build.SourcesDirectory)\$(WilsonSourceDirectory)src\VerifyResourceUsage.pl"
   displayName: 'Verify error messages are all used.'
 
 - powershell: |
