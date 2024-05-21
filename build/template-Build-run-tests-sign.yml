@@ -42,6 +42,16 @@ steps:
       perl "$(Build.SourcesDirectory)\$(WilsonSourceDirectory)src\VerifyResourceUsage.pl"
   displayName: 'Verify error messages are all used.'
 
+- task: PowerShell@2
+  displayName: "Install Strawberry Perl"
+  inputs:
+    targetType: filePath
+    filePath: $(Build.SourcesDirectory)\build\install-strawberry-perl.ps1
+    arguments: >
+      -ci_path "$(Build.SourcesDirectory)"
+      -debug
+  condition: and(succeeded(), eq(variables['PipelineType'], 'onebranch'))
+
 - powershell: |
     regedit /s .\build\strongNameBypass.reg
   displayName: 'Strong Name Bypass'
