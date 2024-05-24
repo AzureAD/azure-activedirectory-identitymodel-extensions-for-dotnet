@@ -74,8 +74,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                     LogHelper.LogVerbose(LogMessages.IDX21812, openIdConnectConfiguration.JwksUri);
 
                 string keys = await retriever.GetDocumentAsync(openIdConnectConfiguration.JwksUri, cancel).ConfigureAwait(false);
-                // note: needs to be present in other OIDC retrievers
-                openIdConnectConfiguration.RawJsonWebKeySet = keys;
 
                 if (LogHelper.IsEnabled(EventLogLevel.Verbose))
                     LogHelper.LogVerbose(LogMessages.IDX21813, openIdConnectConfiguration.JwksUri);

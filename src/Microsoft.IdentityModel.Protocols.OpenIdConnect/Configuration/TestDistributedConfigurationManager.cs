@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.IdentityModel.Protocols.Configuration;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
 {
@@ -18,18 +19,16 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
             _l2Cache = cache;
         }
         /// <inheritdoc/>
-        public async Task<OpenIdConnectConfiguration> GetConfigurationAsync(string metadataAddress, CancellationToken cancellationToken = default)
+        public async Task<OpenIdConnectConfiguration> GetConfigurationAsync(string metadataAddress, DistributedConfigurationOptions distributedConfigurationOptions, CancellationToken cancellationToken = default)
         {
             string cacheResultAsString = await _l2Cache.GetStringAsync(metadataAddress, cancellationToken).ConfigureAwait(false);
             var config = OpenIdConnectConfigurationSerializer.Read(cacheResultAsString);
 
             // validate config
-            if (string.IsNullOrEmpty(config.RawJsonWebKeySet))
+            if (config.JsonWebKeySet == null)
                 return null;
             else
             {
-                config.JsonWebKeySet = new JsonWebKeySet(config.RawJsonWebKeySet);
-
                 foreach (JsonWebKey webKey in config.JsonWebKeySet.Keys)
                 {
                     // Convert to RsaSecurityKey if possible as they contain the X509Data which is about 1k.
@@ -56,10 +55,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
         }
 
         /// <inheritdoc/>
-        public async Task SetConfigurationAsync(string metadataAddress, OpenIdConnectConfiguration configuration, CancellationToken cancellationToken = default)
+        public async Task SetConfigurationAsync(string metadataAddress, OpenIdConnectConfiguration configuration, DistributedConfigurationOptions distributedConfigurationOptions, CancellationToken cancellationToken = default)
         {
-            if (!string.IsNullOrEmpty(configuration.RawJsonWebKeySet))
+            if (configuration.JsonWebKeySet != null)
             {
+                configuration.SerializeKeys = true;
                 string serializedConfig = OpenIdConnectConfigurationSerializer.Write(configuration);
                 await _l2Cache.SetStringAsync(metadataAddress, serializedConfig, cancellationToken).ConfigureAwait(false);
             }

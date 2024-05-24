@@ -12,15 +12,14 @@ using Microsoft.IdentityModel.Logging;
 using Utf8Bytes = Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdProviderMetadataUtf8Bytes;
 using JsonPrimitives = Microsoft.IdentityModel.Tokens.Json.JsonSerializerPrimitives;
 using MetadataName = Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdProviderMetadataNames;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Json;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
     internal static class OpenIdConnectConfigurationSerializer
     {
         public const string ClassName = OpenIdConnectConfiguration.ClassName;
-        private const string RawJsonWebKeySet = "RawJsonWebKeySet";
-
-        public static ReadOnlySpan<byte> RawJsonWebKeySetBytes => "RawJsonWebKeySet"u8;
 
         // This is used to perform performant case-insensitive property names.
         // 6x used Newtonsoft and was case-insensitive w.r.t. property names.
@@ -159,8 +158,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                     else if (reader.ValueTextEquals(Utf8Bytes.EndSessionEndpoint))
                         config.EndSessionEndpoint = JsonPrimitives.ReadString(ref reader, MetadataName.EndSessionEndpoint, ClassName, true);
 
-                    else if (reader.ValueTextEquals(RawJsonWebKeySetBytes))
-                        config.RawJsonWebKeySet = JsonPrimitives.ReadString(ref reader, RawJsonWebKeySet, ClassName, true);
+                    else if (reader.ValueTextEquals(Encoding.UTF8.GetBytes(JsonWebKeySetParameterNames.Keys)))
+                        JsonWebKeySetSerializer.ReadKeys(ref reader, config.JsonWebKeySet);
 
                     // FrontchannelLogoutSessionSupported and FrontchannelLogoutSupported are per spec 'boolean'.
                     // We shipped pervious versions accepting a string and transforming to a boolean.
@@ -560,8 +559,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             if (!string.IsNullOrEmpty(config.RegistrationEndpoint))
                  writer.WriteString(Utf8Bytes.RegistrationEndpoint, config.RegistrationEndpoint);
 
-            if (!string.IsNullOrEmpty(config.RawJsonWebKeySet))
-                writer.WriteString(RawJsonWebKeySetBytes, config.RawJsonWebKeySet);
+            if (config.SerializeKeys && config.JsonWebKeySet != null && config.JsonWebKeySet.Keys.Count > 0)
+                JsonWebKeySetSerializer.Write(ref writer, config.JsonWebKeySet);
 
             if (config.RequestObjectEncryptionAlgValuesSupported.Count > 0)
                 JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.RequestObjectEncryptionAlgValuesSupported, config.RequestObjectEncryptionAlgValuesSupported);

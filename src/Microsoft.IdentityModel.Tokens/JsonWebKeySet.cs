@@ -60,6 +60,7 @@ namespace Microsoft.IdentityModel.Tokens
                     LogHelper.LogVerbose(LogMessages.IDX10806, json, LogHelper.MarkAsNonPII(ClassName));
 
                 JsonWebKeySetSerializer.Read(json, this);
+
             }
             catch (Exception ex)
             {

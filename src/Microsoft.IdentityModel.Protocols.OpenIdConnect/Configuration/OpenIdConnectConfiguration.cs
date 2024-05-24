@@ -176,6 +176,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public bool ClaimsParameterSupported { get; set; }
 
         /// <summary>
+        /// Some sort of a marker to prevent serializing keys by default
+        /// </summary>
+        public bool SerializeKeys { get; set; }
+
+        /// <summary>
         /// Gets the collection of 'claim_types_supported'
         /// </summary>
         [JsonPropertyName(OpenIdProviderMetadataNames.ClaimTypesSupported)]
@@ -290,7 +295,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// </summary>
         [JsonPropertyName(OpenIdProviderMetadataNames.IntrospectionEndpointAuthSigningAlgValuesSupported)]
         public ICollection<string> IntrospectionEndpointAuthSigningAlgValuesSupported =>
-            _introspectionEndpointAuthSigningAlgValuesSupported ??
+            _introspectionEndpointAuthSigningAlgValuesSupported ??s
             Interlocked.CompareExchange(ref _introspectionEndpointAuthSigningAlgValuesSupported, new Collection<string>(), null) ??
             _introspectionEndpointAuthSigningAlgValuesSupported;
 
@@ -317,12 +322,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// </summary>
         [JsonIgnore]
         public JsonWebKeySet JsonWebKeySet { get; set; }
-
-        /// <summary>
-        /// Gets or sets <see cref="JsonWebKeySet"/> in a raw (string) form.
-        /// </summary>
-        [JsonIgnore]
-        public string RawJsonWebKeySet { get; set; }
 
         /// <summary>
         /// Boolean value specifying whether the OP can pass a sid (session ID) query parameter to identify the RP session at the OP when the logout_uri is used. Dafault Value is false.

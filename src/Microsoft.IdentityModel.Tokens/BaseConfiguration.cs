@@ -11,7 +11,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     ///  Represents a generic metadata configuration which is applicable for both XML and JSON based configurations.
     /// </summary>
-    public abstract class BaseConfiguration
+    public abstract class BaseConfiguration : IConfigurationRetrievalTime
     {
         /// <summary>
         /// Gets the issuer specified via the metadata endpoint.
@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// TODO must be serialized too
         /// </summary>
-        public virtual DateTimeOffset RetrievalTime { get; set; }
+        public DateTimeOffset RetrievalTime { get; set; }
 
         /// <summary>
         /// Gets the <see cref="ICollection{SecurityKey}"/> that the IdentityProvider indicates are to be used in order to decrypt tokens.

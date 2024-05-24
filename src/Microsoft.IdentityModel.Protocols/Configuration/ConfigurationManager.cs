@@ -22,6 +22,7 @@ namespace Microsoft.IdentityModel.Protocols
         private DateTimeOffset _syncAfter = DateTimeOffset.MinValue;
         private DateTimeOffset _lastRefresh = DateTimeOffset.MinValue;
         private bool _isFirstRefreshRequest = true;
+        private bool _skipDistributedConfigurationManager = false;
 
         private readonly SemaphoreSlim _refreshLock;
         private readonly IDocumentRetriever _docRetriever;
@@ -31,9 +32,10 @@ namespace Microsoft.IdentityModel.Protocols
         private Exception _fetchMetadataFailure;
         private TimeSpan _bootstrapRefreshInterval = TimeSpan.FromSeconds(1);
 
-        // TODO inject via ctors
+        private static readonly DistributedConfigurationOptions s_distributedConfigurationOptions = new();
+
         /// <summary>
-        /// 
+        /// TODO inject via ctors
         /// </summary>
         public IDistributedConfigurationManager<T> DistributedConfigurationManager { get; set; }
 
@@ -163,10 +165,10 @@ namespace Microsoft.IdentityModel.Protocols
                     try
                     {
                         T configuration = null;
-                        if (DistributedConfigurationManager != null)
+                        if (DistributedConfigurationManager != null && _skipDistributedConfigurationManager == false)
                         {
                             // todo handle try catch
-                            configuration = await DistributedConfigurationManager.GetConfigurationAsync(MetadataAddress, CancellationToken.None).ConfigureAwait(false);
+                            configuration = await DistributedConfigurationManager.GetConfigurationAsync(MetadataAddress, s_distributedConfigurationOptions, CancellationToken.None).ConfigureAwait(false);
                             if (_configValidator != null)
                             {
                                 // TODO dont throw but log another exception
@@ -184,9 +186,9 @@ namespace Microsoft.IdentityModel.Protocols
                             // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
                             // The transport should have it's own timeouts, etc..
                             configuration = await _configRetriever.GetConfigurationAsync(MetadataAddress, _docRetriever, CancellationToken.None).ConfigureAwait(false);
-                            if (configuration is BaseConfiguration baseConfiguration1)
+                            if (configuration is IConfigurationRetrievalTime configRetrievalTime)
                             {
-                                baseConfiguration1.RetrievalTime = DateTimeOffset.UtcNow;
+                                configRetrievalTime.RetrievalTime = DateTimeOffset.UtcNow;
                             }
                             if (_configValidator != null)
                             {
@@ -195,21 +197,24 @@ namespace Microsoft.IdentityModel.Protocols
                                     throw LogHelper.LogExceptionMessage(new InvalidConfigurationException(LogHelper.FormatInvariant(LogMessages.IDX20810, result.ErrorMessage)));
                             }
 
+                            if (_skipDistributedConfigurationManager == true)
+                                _skipDistributedConfigurationManager = false;
+
                             if (DistributedConfigurationManager != null)
                             {
                                 // TODO fire and forget (or not if refresh happens on a background thread)
-                                await DistributedConfigurationManager.SetConfigurationAsync(MetadataAddress, configuration, CancellationToken.None).ConfigureAwait(false);
+                                await DistributedConfigurationManager.SetConfigurationAsync(MetadataAddress, configuration, s_distributedConfigurationOptions, CancellationToken.None).ConfigureAwait(false);
                             }
                         }
 
 
-                        if (configuration is BaseConfiguration baseConfiguration)
-                            _lastRefresh = baseConfiguration.RetrievalTime;
+                        if (configuration is IConfigurationRetrievalTime configurationRetrievalTime)
+                            _lastRefresh = configurationRetrievalTime.RetrievalTime;
                         else
                             _lastRefresh = DateTimeOffset.UtcNow;
 
                          // Add a random amount between 0 and 5% of AutomaticRefreshInterval jitter to avoid spike traffic to IdentityProvider.
-                         _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval +
+                         _syncAfter = DateTimeUtil.Add(_lastRefresh.DateTime, AutomaticRefreshInterval +
                           TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 20)));
                           _currentConfiguration = configuration;
                     }
@@ -291,6 +296,9 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 _syncAfter = now;
                 _isFirstRefreshRequest = false;
+
+                if (DistributedConfigurationManager != null)
+                    _skipDistributedConfigurationManager = true;
             }
             else if (now >= DateTimeUtil.Add(_lastRefresh.UtcDateTime, RefreshInterval))
             {
