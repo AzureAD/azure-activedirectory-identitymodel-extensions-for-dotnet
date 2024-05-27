@@ -544,13 +544,15 @@ namespace Microsoft.IdentityModel.Tokens
         public SignatureValidatorUsingConfiguration SignatureValidatorUsingConfiguration { get; set; }
 
 #if SUPPORTS_TIME_PROVIDER
+#nullable enable
         /// <summary>
-        /// Gets or sets the time provider used for time validation.
+        /// Gets or sets the time provider.
         /// </summary>
         /// <remarks>
-        /// If not set, validators will fall back to using the <see cref="DateTime"/> class to obtain the current time.
+        /// If not set, fall back to using the <see cref="DateTime"/> class to obtain the current time.
         /// </remarks>
-        public TimeProvider TimeProvider { get; set; }
+        public TimeProvider? TimeProvider { get; set; }
+#nullable restore
 #endif
 
         /// <summary>

@@ -77,7 +77,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets the <see cref="Dictionary{TKey, TValue}"/> which contains any custom header claims that need to be added to the JWT token header.
         /// The 'alg', 'kid', 'x5t', 'enc', and 'zip' claims are added by default based on the <see cref="SigningCredentials"/>,
         /// <see cref="EncryptingCredentials"/>, and/or <see cref="CompressionAlgorithm"/> provided and SHOULD NOT be included in this dictionary as this
-        /// will result in an exception being thrown. 
+        /// will result in an exception being thrown.
         /// <remarks> These claims are only added to the outer header (in case of a JWE).</remarks>
         /// </summary>
         public IDictionary<string, object> AdditionalHeaderClaims { get; set; }
@@ -86,7 +86,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets the <see cref="Dictionary{TKey, TValue}"/> which contains any custom header claims that need to be added to the inner JWT token header.
         /// The 'alg', 'kid', 'x5t', 'enc', and 'zip' claims are added by default based on the <see cref="SigningCredentials"/>,
         /// <see cref="EncryptingCredentials"/>, and/or <see cref="CompressionAlgorithm"/> provided and SHOULD NOT be included in this dictionary as this
-        /// will result in an exception being thrown. 
+        /// will result in an exception being thrown.
         /// <remarks>
         /// For JsonWebTokenHandler, these claims are merged with <see cref="AdditionalHeaderClaims"/> while adding to the inner JWT header.
         /// </remarks>
@@ -105,5 +105,17 @@ namespace Microsoft.IdentityModel.Tokens
         /// values will be overridden.
         /// </summary>
         public ClaimsIdentity Subject { get; set; }
+
+#if SUPPORTS_TIME_PROVIDER
+#nullable enable
+        /// <summary>
+        /// Gets or sets the time provider.
+        /// </summary>
+        /// <remarks>
+        /// If not set, fall back to using the <see cref="DateTime"/> class to obtain the current time.
+        /// </remarks>
+        public TimeProvider? TimeProvider { get; set; }
+#nullable restore
+#endif
     }
 }

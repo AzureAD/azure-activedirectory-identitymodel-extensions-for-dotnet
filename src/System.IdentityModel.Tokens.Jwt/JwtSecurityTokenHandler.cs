@@ -356,7 +356,11 @@ namespace System.IdentityModel.Tokens.Jwt
                 expires,
                 issuedAt,
                 signingCredentials,
-                null, null, null, null, null).RawData;
+                null, null, null,
+#if SUPPORTS_TIME_PROVIDER
+                timeProvider: null,
+#endif
+                null, null).RawData;
         }
 
         /// <summary>
@@ -395,7 +399,11 @@ namespace System.IdentityModel.Tokens.Jwt
                 expires,
                 issuedAt,
                 signingCredentials,
-                encryptingCredentials, null, null, null, null).RawData;
+                encryptingCredentials, null, null,
+#if SUPPORTS_TIME_PROVIDER
+                timeProvider: null,
+#endif
+                null, null).RawData;
         }
 
         /// <summary>
@@ -437,7 +445,11 @@ namespace System.IdentityModel.Tokens.Jwt
                 issuedAt,
                 signingCredentials,
                 encryptingCredentials,
-                claimCollection, null, null, null).RawData;
+                claimCollection, null,
+#if SUPPORTS_TIME_PROVIDER
+                timeProvider: null,
+#endif
+                null, null).RawData;
         }
 
         /// <summary>
@@ -462,6 +474,9 @@ namespace System.IdentityModel.Tokens.Jwt
                 tokenDescriptor.EncryptingCredentials,
                 tokenDescriptor.Claims,
                 tokenDescriptor.TokenType,
+#if SUPPORTS_TIME_PROVIDER
+                tokenDescriptor.TimeProvider,
+#endif
                 tokenDescriptor.AdditionalHeaderClaims,
                 tokenDescriptor.AdditionalInnerHeaderClaims);
         }
@@ -505,7 +520,11 @@ namespace System.IdentityModel.Tokens.Jwt
                 expires,
                 issuedAt,
                 signingCredentials,
-                encryptingCredentials, null, null, null, null);
+                encryptingCredentials, null, null,
+#if SUPPORTS_TIME_PROVIDER
+                timeProvider: null,
+#endif
+                null, null);
         }
 
         /// <summary>
@@ -550,7 +569,11 @@ namespace System.IdentityModel.Tokens.Jwt
                 issuedAt,
                 signingCredentials,
                 encryptingCredentials,
-                claimCollection, null, null, null);
+                claimCollection, null,
+#if SUPPORTS_TIME_PROVIDER
+                timeProvider: null,
+#endif
+                null, null);
         }
 
         /// <summary>
@@ -588,7 +611,11 @@ namespace System.IdentityModel.Tokens.Jwt
                 notBefore,
                 expires,
                 issuedAt,
-                signingCredentials, null, null, null, null, null);
+                signingCredentials, null, null, null,
+#if SUPPORTS_TIME_PROVIDER
+                timeProvider: null,
+#endif
+                null, null);
         }
 
         /// <summary>
@@ -613,6 +640,9 @@ namespace System.IdentityModel.Tokens.Jwt
                 tokenDescriptor.EncryptingCredentials,
                 tokenDescriptor.Claims,
                 tokenDescriptor.TokenType,
+#if SUPPORTS_TIME_PROVIDER
+                tokenDescriptor.TimeProvider,
+#endif
                 tokenDescriptor.AdditionalHeaderClaims,
                 tokenDescriptor.AdditionalInnerHeaderClaims);
         }
@@ -628,6 +658,11 @@ namespace System.IdentityModel.Tokens.Jwt
             EncryptingCredentials encryptingCredentials,
             IDictionary<string, object> claimCollection,
             string tokenType,
+#if SUPPORTS_TIME_PROVIDER
+#nullable enable
+            TimeProvider? timeProvider,
+#nullable restore
+#endif
             IDictionary<string, object> additionalHeaderClaims,
             IDictionary<string, object> additionalInnerHeaderClaims)
         {
@@ -653,7 +688,11 @@ namespace System.IdentityModel.Tokens.Jwt
         {
             if (SetDefaultTimesOnTokenCreation && (!expires.HasValue || !issuedAt.HasValue || !notBefore.HasValue))
             {
-                DateTime now = DateTime.UtcNow;
+                DateTime now =
+#if SUPPORTS_TIME_PROVIDER
+                    timeProvider?.GetUtcNow().UtcDateTime ??
+#endif
+                    DateTime.UtcNow;
                 if (!expires.HasValue)
                     expires = now + TimeSpan.FromMinutes(TokenLifetimeInMinutes);
 

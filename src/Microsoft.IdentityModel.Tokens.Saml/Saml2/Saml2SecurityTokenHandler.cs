@@ -374,7 +374,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <exception cref="SecurityTokenValidationException">If <see cref="ReadSaml2Token(string)"/> return null.</exception>
         /// <exception cref="SecurityTokenValidationException">If <see cref="TokenValidationParameters.SignatureValidator"/> returns null OR an object other than a <see cref="Saml2SecurityToken"/>.</exception>
         /// <exception cref="SecurityTokenValidationException">If a signature is not found and <see cref="TokenValidationParameters.RequireSignedTokens"/> is true.</exception>
-        /// <exception cref="SecurityTokenSignatureKeyNotFoundException">If the  <paramref name="token"/> has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature. 
+        /// <exception cref="SecurityTokenSignatureKeyNotFoundException">If the  <paramref name="token"/> has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature.
         /// This can indicate that a key refresh is required.</exception>
         /// <exception cref="SecurityTokenInvalidSignatureException">If after trying all the <see cref="SecurityKey"/>(s), none result in a validated signature AND the 'token' does not have a key identifier.</exception>
         /// <returns>A <see cref="Saml2SecurityToken"/> that has had the signature validated if token was signed.</returns>
@@ -608,9 +608,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </summary>
         /// <remarks>
         /// <para>
-        /// Generally, conditions should be included in assertions to limit the 
-        /// impact of misuse of the assertion. Specifying the NotBefore and 
-        /// NotOnOrAfter conditions can limit the period of vulnerability in 
+        /// Generally, conditions should be included in assertions to limit the
+        /// impact of misuse of the assertion. Specifying the NotBefore and
+        /// NotOnOrAfter conditions can limit the period of vulnerability in
         /// the case of a compromised assertion. The AudienceRestrictionCondition
         /// can be used to explicitly state the intended relying party or parties
         /// of the assertion, which coupled with appropriate audience restriction
@@ -619,8 +619,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// </para>
         /// <para>
         /// The default implementation creates NotBefore and NotOnOrAfter conditions
-        /// based on the tokenDescriptor.Lifetime. It will also generate an 
-        /// AudienceRestrictionCondition limiting consumption of the assertion to 
+        /// based on the tokenDescriptor.Lifetime. It will also generate an
+        /// AudienceRestrictionCondition limiting consumption of the assertion to
         /// tokenDescriptor.Scope.Address.
         /// </para>
         /// </remarks>
@@ -636,12 +636,20 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (tokenDescriptor.NotBefore.HasValue)
                 conditions.NotBefore = tokenDescriptor.NotBefore.Value;
             else if (SetDefaultTimesOnTokenCreation)
-                conditions.NotBefore = DateTime.UtcNow;
+                conditions.NotBefore =
+#if SUPPORTS_TIME_PROVIDER
+                    tokenDescriptor.TimeProvider?.GetUtcNow().UtcDateTime ??
+#endif
+                    DateTime.UtcNow;
 
             if (tokenDescriptor.Expires.HasValue)
                 conditions.NotOnOrAfter = tokenDescriptor.Expires.Value;
             else if (SetDefaultTimesOnTokenCreation)
-                conditions.NotOnOrAfter = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes);
+                conditions.NotOnOrAfter =
+#if SUPPORTS_TIME_PROVIDER
+                    tokenDescriptor.TimeProvider?.GetUtcNow().UtcDateTime ??
+#endif
+                    DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes);
 
             if (tokenDescriptor.Audiences.Count > 0)
             {
@@ -801,7 +809,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="actor">A <see cref="ClaimsIdentity"/> to be transformed.</param>
         /// <exception cref="ArgumentNullException">if <paramref name="actor"/> is null.</exception>
         /// <returns>A well-formed XML string.</returns>
-        /// <remarks>Normally this is called when creating a <see cref="Saml2Assertion"/> from a <see cref="ClaimsIdentity"/>. When <see cref="ClaimsIdentity.Actor"/> is not null, 
+        /// <remarks>Normally this is called when creating a <see cref="Saml2Assertion"/> from a <see cref="ClaimsIdentity"/>. When <see cref="ClaimsIdentity.Actor"/> is not null,
         /// this method is called to create an string representation to add as an attribute.
         /// <para>The string is formed: "&lt;Actor&gt;&lt;Attribute name, namespace&gt;&lt;AttributeValue&gt;...&lt;/AttributeValue&gt;, ...&lt;/Attribute&gt;...&lt;/Actor&gt;</para></remarks>
         protected string CreateActorString(ClaimsIdentity actor)
@@ -820,7 +828,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// Builds an XML formatted string from a collection of SAML attributes that represent the Actor. 
+        /// Builds an XML formatted string from a collection of SAML attributes that represent the Actor.
         /// </summary>
         /// <param name="attributes">An enumeration of Saml2Attributes.</param>
         /// <returns>A well-formed XML string.</returns>
@@ -1059,14 +1067,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <summary>
-        /// This method gets called when a special type of Saml2Attribute is detected. The Saml2Attribute passed in 
-        /// wraps a Saml2Attribute that contains a collection of AttributeValues, each of which will get mapped to a 
+        /// This method gets called when a special type of Saml2Attribute is detected. The Saml2Attribute passed in
+        /// wraps a Saml2Attribute that contains a collection of AttributeValues, each of which will get mapped to a
         /// claim.  All of the claims will be returned in an ClaimsIdentity with the specified issuer.
         /// </summary>
         /// <param name="attribute">The <see cref="Saml2Attribute"/> to use.</param>
         /// <param name="identity">The <see cref="ClaimsIdentity"/> that is the subject of this token.</param>
         /// <param name="issuer">The issuer of the claim.</param>
-        /// <exception cref="InvalidOperationException">Will be thrown if the Saml2Attribute does not contain any 
+        /// <exception cref="InvalidOperationException">Will be thrown if the Saml2Attribute does not contain any
         /// valid Saml2AttributeValues.
         /// </exception>
         protected virtual void SetClaimsIdentityActorFromAttribute(Saml2Attribute attribute, ClaimsIdentity identity, string issuer)

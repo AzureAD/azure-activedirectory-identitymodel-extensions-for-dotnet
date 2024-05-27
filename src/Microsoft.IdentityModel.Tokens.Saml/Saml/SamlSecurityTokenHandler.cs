@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <summary>
         /// Gets or set the <see cref="SamlSerializer"/> that will be used to read and write a <see cref="SamlSecurityToken"/>.
         /// </summary>
-        /// <exception cref="ArgumentNullException">'value' is null.</exception> 
+        /// <exception cref="ArgumentNullException">'value' is null.</exception>
         public SamlSerializer Serializer
         {
             get { return _serializer; }
@@ -186,7 +186,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
-        /// Override this method to provide a SamlAdvice to place in the Samltoken. 
+        /// Override this method to provide a SamlAdvice to place in the Samltoken.
         /// </summary>
         /// <param name="tokenDescriptor">Contains information about the token.</param>
         /// <returns>SamlAdvice, default is null.</returns>
@@ -286,7 +286,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
-        /// Creates a SamlAuthenticationStatement for each AuthenticationInformation found in AuthenticationInformation. 
+        /// Creates a SamlAuthenticationStatement for each AuthenticationInformation found in AuthenticationInformation.
         /// Override this method to provide a custom implementation.
         /// </summary>
         /// <param name="subject">The SamlSubject of the Statement.</param>
@@ -360,12 +360,20 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (tokenDescriptor.NotBefore.HasValue)
                 conditions.NotBefore = tokenDescriptor.NotBefore.Value;
             else if (SetDefaultTimesOnTokenCreation)
-                conditions.NotBefore = DateTime.UtcNow;
+                conditions.NotBefore =
+#if SUPPORTS_TIME_PROVIDER
+                    tokenDescriptor.TimeProvider?.GetUtcNow().UtcDateTime ??
+#endif
+                    DateTime.UtcNow;
 
             if (tokenDescriptor.Expires.HasValue)
                 conditions.NotOnOrAfter = tokenDescriptor.Expires.Value;
             else if (SetDefaultTimesOnTokenCreation)
-                conditions.NotOnOrAfter = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes);
+                conditions.NotOnOrAfter =
+#if SUPPORTS_TIME_PROVIDER
+                    tokenDescriptor.TimeProvider?.GetUtcNow().UtcDateTime ??
+#endif
+                    DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes);
 
             if (tokenDescriptor.Audiences.Count > 0)
             {
@@ -516,7 +524,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             var conditions = CreateConditions(tokenDescriptor);
             var advice = CreateAdvice(tokenDescriptor);
 
-            var issuedAt = tokenDescriptor.IssuedAt.HasValue ? tokenDescriptor.IssuedAt.Value : DateTime.UtcNow;
+            var issuedAt = tokenDescriptor.IssuedAt.HasValue ? tokenDescriptor.IssuedAt.Value :
+#if SUPPORTS_TIME_PROVIDER
+                tokenDescriptor.TimeProvider?.GetUtcNow().UtcDateTime ??
+#endif
+                DateTime.UtcNow;
+
             return new SamlSecurityToken(new SamlAssertion("_" + Guid.NewGuid().ToString(), tokenDescriptor.Issuer, issuedAt, conditions, advice, statements)
             {
                 SigningCredentials = tokenDescriptor.SigningCredentials
@@ -525,11 +538,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
-        /// Builds an XML formated string from a collection of saml attributes that represent an Actor. 
+        /// Builds an XML formated string from a collection of saml attributes that represent an Actor.
         /// </summary>
         /// <param name="attributes"><see cref="ICollection{SamlAttribute}"/>.</param>
         /// <returns>A well formed XML string.</returns>
-        /// <remarks>The string is of the form "&lt;Actor&gt;&lt;SamlAttribute name, ns&gt;&lt;SamlAttributeValue&gt;...&lt;/SamlAttributeValue&gt;, ...&lt;/SamlAttribute&gt;...&lt;/Actor&gt;"</remarks>        
+        /// <remarks>The string is of the form "&lt;Actor&gt;&lt;SamlAttribute name, ns&gt;&lt;SamlAttributeValue&gt;...&lt;/SamlAttributeValue&gt;, ...&lt;/SamlAttribute&gt;...&lt;/Actor&gt;"</remarks>
         protected virtual string CreateXmlStringFromAttributes(ICollection<SamlAttribute> attributes)
         {
             if (attributes == null)
@@ -795,7 +808,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <summary>
         /// Deserializes from XML a token of the type handled by this instance.
         /// </summary>
-        /// <param name="reader">An XML reader positioned at the token's start 
+        /// <param name="reader">An XML reader positioned at the token's start
         /// element.</param>
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <returns>An instance of <see cref="SamlSecurityToken"/>.</returns>
@@ -830,7 +843,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
-        /// This method gets called when a special type of SamlAttribute is detected. The SamlAttribute passed in wraps a SamlAttribute 
+        /// This method gets called when a special type of SamlAttribute is detected. The SamlAttribute passed in wraps a SamlAttribute
         /// that contains a collection of AttributeValues, each of which are mapped to a claim.  All of the claims will be returned
         /// in an ClaimsIdentity with the specified issuer.
         /// </summary>
@@ -1008,7 +1021,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <exception cref="SecurityTokenValidationException">If <see cref="ReadSamlToken(string)"/> returns null"/>.</exception>
         /// <exception cref="SecurityTokenValidationException">If <see cref="TokenValidationParameters.SignatureValidator"/> returns null OR an object other than a <see cref="SamlSecurityToken"/>.</exception>
         /// <exception cref="SecurityTokenValidationException">If a signature is not found and <see cref="TokenValidationParameters.RequireSignedTokens"/> is true.</exception>
-        /// <exception cref="SecurityTokenSignatureKeyNotFoundException">If the 'token' has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature. 
+        /// <exception cref="SecurityTokenSignatureKeyNotFoundException">If the 'token' has a key identifier and none of the <see cref="SecurityKey"/>(s) provided result in a validated signature.
         /// This can indicate that a key refresh is required.</exception>
         /// <exception cref="SecurityTokenInvalidSignatureException">If after trying all the <see cref="SecurityKey"/>(s), none result in a validated signture AND the 'token' does not have a key identifier.</exception>
         /// <returns>A <see cref="SamlSecurityToken"/> that has had the signature validated if token was signed.</returns>

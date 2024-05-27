@@ -21,7 +21,7 @@ using JsonPrimitives = Microsoft.IdentityModel.Tokens.Json.JsonSerializerPrimiti
 namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 {
     /// <summary>
-    /// A handler designed for creating and validating signed http requests. 
+    /// A handler designed for creating and validating signed http requests.
     /// </summary>
     /// <remarks>The handler implementation is based on 'A Method for Signing HTTP Requests for OAuth' specification.</remarks>
     public class SignedHttpRequestHandler
@@ -143,7 +143,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// Creates a JSON representation of a HttpRequest payload.
         /// </summary>
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
-        /// <param name="callContext" >An opaque context used to store work and logs when working with authentication artifacts.</param> 
+        /// <param name="callContext" >An opaque context used to store work and logs when working with authentication artifacts.</param>
         /// <returns>A JSON representation of an HttpRequest payload.</returns>
         /// <remarks>
         /// Users can utilize <see cref="SignedHttpRequestDescriptor.AdditionalPayloadClaims"/> to create additional claim(s) and add them to the signed http request.
@@ -227,13 +227,19 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
         /// This method will be executed only if <see cref="SignedHttpRequestCreationParameters.CreateTs"/> is set to <c>true</c>.
-        /// </remarks>    
+        /// </remarks>
         internal virtual void AddTsClaim(ref Utf8JsonWriter writer, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
+            DateTime utcNow =
+#if SUPPORTS_TIME_PROVIDER
+                signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.TimeProvider?.GetUtcNow().UtcDateTime ??
+#endif
+                DateTime.UtcNow;
+
             writer.WriteNumber(
                 SignedHttpRequestClaimTypes.Ts,
                 EpochTime.GetIntDate(
-                    DateTime.UtcNow.Add(signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.TimeAdjustment)));
+                    utcNow.Add(signedHttpRequestDescriptor.SignedHttpRequestCreationParameters.TimeAdjustment)));
         }
 
         /// <summary>
@@ -243,7 +249,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
         /// This method will be executed only if <see cref="SignedHttpRequestCreationParameters.CreateM"/> is set to <c>true</c>.
-        /// </remarks>   
+        /// </remarks>
         internal virtual void AddMClaim(ref Utf8JsonWriter writer, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
             if (string.IsNullOrEmpty(signedHttpRequestDescriptor.HttpRequestData.Method))
@@ -263,7 +269,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
         /// This method will be executed only if <see cref="SignedHttpRequestCreationParameters.CreateU"/> is set to <c>true</c>.
-        /// </remarks>  
+        /// </remarks>
         internal virtual void AddUClaim(ref Utf8JsonWriter writer, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
             if (signedHttpRequestDescriptor.HttpRequestData.Uri == null)
@@ -289,7 +295,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
         /// This method will be executed only if <see cref="SignedHttpRequestCreationParameters.CreateP"/> is set to <c>true</c>.
-        /// </remarks>  
+        /// </remarks>
         internal virtual void AddPClaim(ref Utf8JsonWriter writer, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
             if (signedHttpRequestDescriptor.HttpRequestData.Uri == null)
@@ -351,7 +357,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
         /// This method will be executed only if <see cref="SignedHttpRequestCreationParameters.CreateH"/> is set to <c>true</c>.
-        /// </remarks>  
+        /// </remarks>
         internal void AddHClaim(ref Utf8JsonWriter writer, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
             IDictionary<string, string> sanitizedHeaders = SanitizeHeaders(signedHttpRequestDescriptor.HttpRequestData.Headers);
@@ -389,7 +395,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <param name="signedHttpRequestDescriptor">A structure that wraps parameters needed for SignedHttpRequest creation.</param>
         /// <remarks>
         /// This method will be executed only if <see cref="SignedHttpRequestCreationParameters.CreateB"/> is set to <c>true</c>.
-        /// </remarks> 
+        /// </remarks>
         internal virtual void AddBClaim(ref Utf8JsonWriter writer, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
             try
@@ -442,7 +448,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     JsonWebKey jsonWebKey;
                     if (signedHttpRequestDescriptor.SigningCredentials.Key is JsonWebKey jwk)
                         jsonWebKey = jwk;
-                    // create a JsonWebKey from an X509SecurityKey, represented as an RsaSecurityKey. 
+                    // create a JsonWebKey from an X509SecurityKey, represented as an RsaSecurityKey.
                     else if (signedHttpRequestDescriptor.SigningCredentials.Key is X509SecurityKey x509SecurityKey)
                         jsonWebKey = JsonWebKeyConverter.ConvertFromX509SecurityKey(x509SecurityKey, true);
                     else if (signedHttpRequestDescriptor.SigningCredentials.Key is AsymmetricSecurityKey asymmetricSecurityKey)
@@ -480,7 +486,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </summary>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
-        /// <returns>A <see cref="SignedHttpRequestValidationResult"/>. 
+        /// <returns>A <see cref="SignedHttpRequestValidationResult"/>.
         /// <see cref="TokenValidationResult.IsValid"/> will be <c>true</c> if the signed http request was successfully validated, <c>false</c> otherwise.
         /// </returns>
         public async Task<SignedHttpRequestValidationResult> ValidateSignedHttpRequestAsync(SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
@@ -725,7 +731,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (!signedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.Ts, out long tsClaimValue))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidTsClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.Ts))));
 
-            DateTime utcNow = DateTime.UtcNow;
+            DateTime utcNow =
+#if SUPPORTS_TIME_PROVIDER
+                signedHttpRequestValidationContext.AccessTokenValidationParameters.TimeProvider?.GetUtcNow().UtcDateTime ??
+#endif
+                DateTime.UtcNow;
+
             DateTime signedHttpRequestCreationTime = EpochTime.DateTime(tsClaimValue);
             DateTime signedHttpRequestExpirationTime = signedHttpRequestCreationTime.Add(signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.SignedHttpRequestLifetime);
 
@@ -762,7 +773,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         }
 
         /// <summary>
-        /// Validates the signed http request "u" claim. 
+        /// Validates the signed http request "u" claim.
         /// </summary>
         /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
@@ -796,7 +807,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         }
 
         /// <summary>
-        /// Validates the signed http request "p" claim. 
+        /// Validates the signed http request "p" claim.
         /// </summary>
         /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
@@ -825,7 +836,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         }
 
         /// <summary>
-        /// Validates the signed http request "q" claim. 
+        /// Validates the signed http request "q" claim.
         /// </summary>
         /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
@@ -900,7 +911,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         }
 
         /// <summary>
-        /// Validates the signed http request "h" claim. 
+        /// Validates the signed http request "h" claim.
         /// </summary>
         /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
@@ -969,7 +980,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         }
 
         /// <summary>
-        /// Validates the signed http request "b" claim. 
+        /// Validates the signed http request "b" claim.
         /// </summary>
         /// <param name="signedHttpRequest">A SignedHttpRequest.</param>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
@@ -1082,7 +1093,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         }
 
         /// <summary>
-        /// Resolves a PoP <see cref="SecurityKey"/> from the asymmetric representation of a PoP key. 
+        /// Resolves a PoP <see cref="SecurityKey"/> from the asymmetric representation of a PoP key.
         /// </summary>
         /// <param name="jsonWebKey">The JsonWebKey to resolve.</param>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
@@ -1103,7 +1114,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         }
 
         /// <summary>
-        /// Resolves a PoP <see cref="SecurityKey"/> from the encrypted symmetric representation of a PoP key. 
+        /// Resolves a PoP <see cref="SecurityKey"/> from the encrypted symmetric representation of a PoP key.
         /// </summary>
         /// <param name="jwe">An encrypted symmetric representation of a PoP key (JSON).</param>
         /// <param name="signedHttpRequestValidationContext">A structure that wraps parameters needed for SignedHttpRequest validation.</param>
@@ -1119,7 +1130,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         }
 
         /// <summary>
-        /// Resolves a PoP <see cref="SecurityKey"/> from the URL reference to a PoP key.  
+        /// Resolves a PoP <see cref="SecurityKey"/> from the URL reference to a PoP key.
         /// </summary>
         /// <param name="jkuSetUrl">A URL reference to a PoP JWK set.</param>
         /// <param name="cnf">A confirmation ("cnf") claim as a JObject.</param>
@@ -1203,7 +1214,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         }
 
         /// <summary>
-        /// Resolves a PoP <see cref="SecurityKey"/> using a key identifier of a PoP key. 
+        /// Resolves a PoP <see cref="SecurityKey"/> using a key identifier of a PoP key.
         /// </summary>
         /// <param name="kid">A <see cref="ConfirmationClaimTypes.Kid"/> claim value.</param>
         /// <param name="signedHttpRequest">A signed http request as a JWT.</param>
