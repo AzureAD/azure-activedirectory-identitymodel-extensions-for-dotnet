@@ -82,6 +82,9 @@ namespace Microsoft.IdentityModel.Tokens
             SaveSigninToken = other.SaveSigninToken;
             SignatureValidator = other.SignatureValidator;
             SignatureValidatorUsingConfiguration = other.SignatureValidatorUsingConfiguration;
+#if SUPPORTS_TIME_PROVIDER
+            TimeProvider = other.TimeProvider;
+#endif
             TokenDecryptionKey = other.TokenDecryptionKey;
             TokenDecryptionKeyResolver = other.TokenDecryptionKeyResolver;
             TokenDecryptionKeys = other.TokenDecryptionKeys;
@@ -352,7 +355,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// This means that no default 'issuer' validation will occur.
         /// Even if <see cref="ValidateIssuer"/> is false, this delegate will still be called.
         /// If both <see cref="IssuerValidatorUsingConfiguration"/> and <see cref="IssuerValidator"/> are set, IssuerValidatorUsingConfiguration takes
-        /// priority. 
+        /// priority.
         /// </remarks>
         public IssuerValidator IssuerValidator { get; set; }
 
@@ -540,6 +543,16 @@ namespace Microsoft.IdentityModel.Tokens
         /// </remarks>
         public SignatureValidatorUsingConfiguration SignatureValidatorUsingConfiguration { get; set; }
 
+#if SUPPORTS_TIME_PROVIDER
+        /// <summary>
+        /// Gets or sets the time provider used for time validation.
+        /// </summary>
+        /// <remarks>
+        /// If not set, validators will fall back to using the <see cref="DateTime"/> class to obtain the current time.
+        /// </remarks>
+        public TimeProvider TimeProvider { get; set; }
+#endif
+
         /// <summary>
         /// Gets or sets the <see cref="SecurityKey"/> that is to be used for decryption.
         /// </summary>
@@ -649,7 +662,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets a boolean that controls if validation of the <see cref="SecurityKey"/> that signed the securityToken is called.
         /// </summary>
         /// <remarks>It is possible for tokens to contain the public key needed to check the signature. For example, X509Data can be hydrated into an X509Certificate,
-        /// which can be used to validate the signature. In these cases it is important to validate the SigningKey that was used to validate the signature. 
+        /// which can be used to validate the signature. In these cases it is important to validate the SigningKey that was used to validate the signature.
         /// This boolean only applies to default signing key validation. If <see cref= "IssuerSigningKeyValidator" /> is set, it will be called regardless of whether this
         /// property is true or false.
         /// The default is <c>false</c>.
@@ -679,7 +692,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Gets or sets a boolean to control if the token replay will be validated during token validation.
-        /// </summary> 
+        /// </summary>
         /// <remarks>
         /// This boolean only applies to default token replay validation. If <see cref= "TokenReplayValidator" /> is set, it will be called regardless of whether this
         /// property is true or false.
