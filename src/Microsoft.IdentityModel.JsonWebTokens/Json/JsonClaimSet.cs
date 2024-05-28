@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal List<Claim> CreateClaims(string issuer)
         {
-            var claims = new List<Claim>();
+            var claims = new List<Claim>(_jsonClaims.Count);
             foreach (KeyValuePair<string, object> kvp in _jsonClaims)
                 CreateClaimFromObject(claims, kvp.Key, kvp.Value, issuer);
 

@@ -35,7 +35,7 @@ namespace System.IdentityModel.Tokens.Jwt
         private Dictionary<string, string> _outboundAlgorithmMap = null;
         private static string _shortClaimType = _namespace + "/ShortTypeName";
         private bool _mapInboundClaims = DefaultMapInboundClaims;
-
+       
         /// <summary>
         /// Default claim type mapping for inbound claims.
         /// </summary>

@@ -38,11 +38,19 @@ steps:
     command: custom
     custom: '--list-sdks'
 
-- task: CmdLine@2
-  displayName: 'Run VerifyResourceUsage.pl'
+- task: PowerShell@2
+  displayName: "Install Strawberry Perl"
   inputs:
-    filename: perl
-    arguments: '$(Agent.BuildDirectory)\s\$(WilsonSourceDirectory)src\VerifyResourceUsage.pl'
+    targetType: filePath
+    filePath: $(Build.SourcesDirectory)\$(WilsonSourceDirectory)build\install-strawberry-perl.ps1
+    arguments: >
+      -ci_path "$(Build.SourcesDirectory)"
+      -debug
+  condition: and(succeeded(), eq(variables['PipelineType'], 'onebranch'))
+
+- powershell: |
+      perl "$(Build.SourcesDirectory)\$(WilsonSourceDirectory)src\VerifyResourceUsage.pl"
+  displayName: 'Verify error messages are all used.'
 
 - powershell: |
     regedit /s .\build\strongNameBypass.reg
