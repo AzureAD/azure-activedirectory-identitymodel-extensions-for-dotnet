@@ -708,7 +708,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (!tokenDescriptor.Audiences.IsNullOrEmpty())
             {
-                if (!tokenDescriptor.Audience.IsNullOrEmpty())
+                if (!tokenDescriptor.Audience.IsNullOrEmpty() && !tokenDescriptor.Audiences.Contains(tokenDescriptor.Audience))
                     JsonPrimitives.WriteStrings(ref writer, JwtPayloadUtf8Bytes.Aud, tokenDescriptor.Audiences, tokenDescriptor.Audience);
                 else
                     JsonPrimitives.WriteStrings(ref writer, JwtPayloadUtf8Bytes.Aud, tokenDescriptor.Audiences);
