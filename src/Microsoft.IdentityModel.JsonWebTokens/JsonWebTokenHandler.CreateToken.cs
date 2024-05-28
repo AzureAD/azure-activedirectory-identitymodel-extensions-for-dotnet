@@ -708,23 +708,19 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (!tokenDescriptor.Audiences.IsNullOrEmpty())
             {
-                writer.WritePropertyName(JwtPayloadUtf8Bytes.Aud);
-                writer.WriteStartArray();
-                foreach (string audience in tokenDescriptor.Audiences) { writer.WriteStringValue(audience); }
+                if (!tokenDescriptor.Audience.IsNullOrEmpty())
+                    JsonPrimitives.WriteStrings(ref writer, JwtPayloadUtf8Bytes.Aud, tokenDescriptor.Audiences, tokenDescriptor.Audience);
+                else
+                    JsonPrimitives.WriteStrings(ref writer, JwtPayloadUtf8Bytes.Aud, tokenDescriptor.Audiences);
 
-                if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
-                    writer.WriteStringValue(tokenDescriptor.Audience);
-
-                writer.WriteEndArray();
                 audienceSet = true;
             }
-            else if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
+            else if (!tokenDescriptor.Audience.IsNullOrEmpty())
             {
                 writer.WritePropertyName(JwtPayloadUtf8Bytes.Aud);
                 writer.WriteStringValue(tokenDescriptor.Audience);
                 audienceSet = true;
             }
-
             if (!string.IsNullOrEmpty(tokenDescriptor.Issuer))
             {
                 issuerSet = true;

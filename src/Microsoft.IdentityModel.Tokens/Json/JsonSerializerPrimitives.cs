@@ -1188,6 +1188,15 @@ namespace Microsoft.IdentityModel.Tokens.Json
 
             writer.WriteEndArray();
         }
-#endregion
+
+        public static void WriteStrings(ref Utf8JsonWriter writer, ReadOnlySpan<byte> propertyName, IList<string> strings, string extraString)
+        {
+            writer.WriteStartArray(propertyName);
+            foreach (string str in strings)
+                writer.WriteStringValue(str);
+            writer.WriteStringValue(extraString);
+            writer.WriteEndArray();
+        }
+        #endregion
     }
 }
