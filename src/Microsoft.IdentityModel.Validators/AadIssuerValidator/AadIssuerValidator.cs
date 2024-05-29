@@ -387,9 +387,10 @@ namespace Microsoft.IdentityModel.Validators
             if (string.IsNullOrEmpty(validIssuerTemplate))
                 return false;
 
-            if (validIssuerTemplate.Contains(TenantIdTemplate))
+            int indexOfTenantIdTemplate = validIssuerTemplate.IndexOf(TenantIdTemplate, StringComparison.Ordinal);
+            if (indexOfTenantIdTemplate >= 0)
             {
-                return IssuersWithTemplatesAreEqual(validIssuerTemplate, TenantIdTemplate, actualIssuer, tenantId);
+                return IssuersWithTemplatesAreEqual(validIssuerTemplate.AsSpan(), TenantIdTemplate.AsSpan(), indexOfTenantIdTemplate, actualIssuer.AsSpan(), tenantId.AsSpan());
             }
             else
             {
@@ -399,48 +400,29 @@ namespace Microsoft.IdentityModel.Validators
 
         /// <summary>
         /// Compare two Issuers with templates without string allocations.
+        /// This function replaces: issuer1.Replace(issuer1Template, tenantId) == issuer2
+        /// Example:
+        ///     issuer1 = "https://login.microsoftonline.com/{tenantid}/v2.0"
+        ///     issuer1Template = "{tenantid}"
+        ///     issuer2 = "https://login.microsoftonline.com/12345678/v2.0"
+        ///     tenantId = "12345678"
         /// </summary>
-        internal static bool IssuersWithTemplatesAreEqual(string issuer1, string issuer1Template, string issuer2, string issuer2Template)
+        internal static bool IssuersWithTemplatesAreEqual(ReadOnlySpan<char> issuer1, ReadOnlySpan<char> issuer1Template, int templateStartIndex, ReadOnlySpan<char> issuer2, ReadOnlySpan<char> tenantId)
         {
-            int firstHalfIssuer1EndIndex = issuer1.IndexOf(issuer1Template, StringComparison.Ordinal);
-            int firstHalfIssuer2EndIndex = issuer2.IndexOf(issuer2Template, StringComparison.Ordinal);
-
-            // ensure indices exist for both issuers
-            if (firstHalfIssuer1EndIndex == -1  || firstHalfIssuer2EndIndex == -1)
-                return false;
-
-            // if the indices aren't equal, then the issuers aren't equal
-            if (firstHalfIssuer1EndIndex != firstHalfIssuer2EndIndex)
+            var issuer2TemplateStartIndex = issuer2.IndexOf(tenantId);
+            if (templateStartIndex == -1 || issuer2TemplateStartIndex == -1 || templateStartIndex != issuer2TemplateStartIndex)
                 return false;
 
             // ensure the first part of the issuer1 matches the first part of issuer2
-            if (!StringSegmentsAreEqual(issuer1, 0, firstHalfIssuer1EndIndex, issuer2, 0, firstHalfIssuer2EndIndex))
+            if (issuer1.Slice(0, templateStartIndex).SequenceCompareTo(issuer2.Slice(0, templateStartIndex)) != 0)
                 return false;
 
-            int secondHalfIssuer1StartIndex = firstHalfIssuer1EndIndex + issuer1Template.Length;
-            int secondHalfIssuer2StartIndex = firstHalfIssuer2EndIndex + issuer2Template.Length;
-
-            // if the indices aren't equal, then the issuers aren't equal
-            if (secondHalfIssuer1StartIndex != secondHalfIssuer2StartIndex)
-                return false;
+            int secondHalfIssuer1StartIndex = templateStartIndex + issuer1Template.Length;
+            int secondHalfIssuer2StartIndex = templateStartIndex + tenantId.Length;
 
             // ensure the second halves are equal
-            if (!StringSegmentsAreEqual(issuer1, secondHalfIssuer1StartIndex, issuer1.Length, issuer2, secondHalfIssuer2StartIndex, issuer2.Length))
+            if (issuer1.Slice(secondHalfIssuer1StartIndex).SequenceCompareTo(issuer2.Slice(secondHalfIssuer2StartIndex)) != 0)
                 return false;
-
-            return true;
-        }
-
-        /// <summary>
-        /// Compare two string segments for equality without string allocations.
-        /// </summary>
-        private static bool StringSegmentsAreEqual(string str1, int str1Start, int str1End, string str2, int str2Start, int str2End)
-        {
-            for (int i = str1Start, j = str2Start; i < str1End && j < str2End; i++, j++)
-            {
-                if (str1[i] != str2[j])
-                    return false;
-            }
 
             return true;
         }

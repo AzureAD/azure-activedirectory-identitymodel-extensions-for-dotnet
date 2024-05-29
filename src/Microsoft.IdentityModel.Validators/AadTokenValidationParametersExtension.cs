@@ -76,24 +76,35 @@ namespace Microsoft.IdentityModel.Validators
 #if NET6_0_OR_GREATER
                 if (!string.IsNullOrEmpty(tokenIssuer) && !tokenIssuer.Contains(tenantIdFromToken, StringComparison.Ordinal))
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40004, LogHelper.MarkAsNonPII(tokenIssuer), LogHelper.MarkAsNonPII(tenantIdFromToken))));
-
 #else
                 if (!string.IsNullOrEmpty(tokenIssuer) && !tokenIssuer.Contains(tenantIdFromToken))
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40004, LogHelper.MarkAsNonPII(tokenIssuer), LogHelper.MarkAsNonPII(tenantIdFromToken))));
-
 #endif
+
+                // creating an effectiveSigningKeyIssuer is required as signingKeyIssuer might contain {tenantid}
+                int templateStartIndex = signingKeyIssuer.IndexOf(AadIssuerValidator.TenantIdTemplate, StringComparison.Ordinal);
+                string effectiveSigningKeyIssuer = templateStartIndex > -1 ? CreateIssuer(signingKeyIssuer, AadIssuerValidator.TenantIdTemplate, tenantIdFromToken, templateStartIndex) : signingKeyIssuer;
 
                 // comparing effectiveSigningKeyIssuer with v2TokenIssuer is required because of the following scenario:
                 // 1. service trusts /common/v2.0 endpoint 
                 // 2. service receieves a v1 token that has issuer like sts.windows.net
                 // 3. signing key issuers will never match sts.windows.net as v1 endpoint doesn't have issuers attached to keys
                 // v2TokenIssuer is the representation of Token.Issuer (if it was a v2 issuer)
-                if (!AadIssuerValidator.IssuersWithTemplatesAreEqual(signingKeyIssuer, tenantIdFromToken, tokenIssuer, tenantIdFromToken)
-                        && !AadIssuerValidator.IssuersWithTemplatesAreEqual(signingKeyIssuer, tenantIdFromToken, openIdConnectConfiguration.Issuer ?? string.Empty, tenantIdFromToken))
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40005, LogHelper.MarkAsNonPII(tokenIssuer), LogHelper.MarkAsNonPII(openIdConnectConfiguration.Issuer))));
+                if (!AadIssuerValidator.IssuersWithTemplatesAreEqual(effectiveSigningKeyIssuer.AsSpan(), tenantIdFromToken.AsSpan(), templateStartIndex, tokenIssuer.AsSpan(), tenantIdFromToken.AsSpan())
+                        && !AadIssuerValidator.IssuersWithTemplatesAreEqual(effectiveSigningKeyIssuer.AsSpan(), tenantIdFromToken.AsSpan(), templateStartIndex, openIdConnectConfiguration.Issuer == null ? [] : openIdConnectConfiguration.Issuer.AsSpan(), tenantIdFromToken.AsSpan()))
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40005, LogHelper.MarkAsNonPII(tokenIssuer), LogHelper.MarkAsNonPII(effectiveSigningKeyIssuer))));
             }
 
             return true;
+        }
+
+        private static string CreateIssuer(string issuer, string tenantIdTemplate, string tenantId, int templateStartIndex)
+        {
+#if NET6_0_OR_GREATER
+            return string.Concat(issuer.AsSpan(0, templateStartIndex), tenantId, issuer.AsSpan(templateStartIndex + tenantIdTemplate.Length, issuer.Length - tenantIdTemplate.Length - templateStartIndex));
+#else
+            return string.Concat(issuer.Substring(0, templateStartIndex), tenantId, issuer.Substring(templateStartIndex, templateStartIndex + tenantIdTemplate.Length));
+#endif
         }
 
         /// <summary>
