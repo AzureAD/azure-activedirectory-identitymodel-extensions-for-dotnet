@@ -103,7 +103,7 @@ namespace Microsoft.IdentityModel.Validators
 #if NET6_0_OR_GREATER
             return string.Concat(issuer.AsSpan(0, templateStartIndex), tenantId, issuer.AsSpan(templateStartIndex + tenantIdTemplate.Length, issuer.Length - tenantIdTemplate.Length - templateStartIndex));
 #else
-            return string.Concat(issuer.Substring(0, templateStartIndex), tenantId, issuer.Substring(templateStartIndex, templateStartIndex + tenantIdTemplate.Length));
+            return string.Concat(issuer.Substring(0, templateStartIndex), tenantId, issuer.Substring(templateStartIndex + tenantIdTemplate.Length));
 #endif
         }
 
