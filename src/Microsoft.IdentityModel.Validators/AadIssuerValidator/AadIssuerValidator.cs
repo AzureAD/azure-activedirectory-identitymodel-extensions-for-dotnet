@@ -409,12 +409,15 @@ namespace Microsoft.IdentityModel.Validators
         /// </summary>
         internal static bool IssuersWithTemplatesAreEqual(ReadOnlySpan<char> issuer1, ReadOnlySpan<char> issuer1Template, int templateStartIndex, ReadOnlySpan<char> issuer2, ReadOnlySpan<char> tenantId)
         {
-            var issuer2TemplateStartIndex = issuer2.IndexOf(tenantId);
-            if (templateStartIndex == -1 || issuer2TemplateStartIndex == -1 || templateStartIndex != issuer2TemplateStartIndex)
+            if (templateStartIndex == -1)
                 return false;
 
             // ensure the first part of the issuer1 matches the first part of issuer2
             if (!issuer1.Slice(0, templateStartIndex).SequenceEqual(issuer2.Slice(0, templateStartIndex)))
+                return false;
+
+            // ensure that issuer2 contains the tenantId from templateStartIndex for the length of tenantId.Length
+            if (!issuer2.Slice(templateStartIndex, tenantId.Length).SequenceEqual(tenantId))
                 return false;
 
             int secondHalfIssuer1StartIndex = templateStartIndex + issuer1Template.Length;
