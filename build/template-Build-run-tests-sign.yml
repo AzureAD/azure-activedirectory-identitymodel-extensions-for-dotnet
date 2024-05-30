@@ -158,6 +158,7 @@ steps:
     inputs:
       PathtoPublish: '$(Build.SourcesDirectory)\artifacts'
       ArtifactName: '$(Build.BuildNumber)-nuget-package'
+    condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
 
   - task: mspremier.PostBuildCleanup.PostBuildCleanup-task.PostBuildCleanup@3
     displayName: 'Clean Agent Directories'
