@@ -1,80 +1,5 @@
 steps:
-  - task: UseDotNet@2
-    displayName: 'Use .NET Core sdk 2.x'
-    inputs:
-      version: 2.x
-      installationPath: $(Agent.ToolsDirectory)/dotnet
-
-  - task: UseDotNet@2
-    displayName: 'Use .Net Core SDK 6.x'
-    inputs:
-      version: 6.x
-
-  - task: DotNetCoreCLI@2
-    displayName: 'dotnet --list-sdks '
-    inputs:
-      command: custom
-      custom: '--list-sdks '
-
-  - task: PowerShell@2
-    displayName: "Install Strawberry Perl"
-    inputs:
-      targetType: filePath
-      filePath: $(Build.SourcesDirectory)\$(WilsonSourceDirectory)build\install-strawberry-perl.ps1
-      arguments: >
-        -ci_path "$(Build.SourcesDirectory)"
-        -debug
-    condition: and(succeeded(), eq(variables['PipelineType'], 'onebranch'))
-
-  - powershell: |
-        perl "$(Build.SourcesDirectory)\$(WilsonSourceDirectory)src\VerifyResourceUsage.pl"
-    displayName: 'Verify error messages are all used.'
-
-  - powershell: |
-      regedit /s .\build\strongNameBypass.reg
-    displayName: 'Strong Name Bypass'
-
-  - task: PowerShell@2
-    displayName: 'Update Assembly Info'
-    inputs:
-      targetType: filePath
-      filePath: ./$(WilsonSourceDirectory)updateAssemblyInfo.ps1
-      arguments: '-packageType $(BuildConfiguration)'
-
-  - task: PowerShell@2 
-    displayName: Install .NET Framework 4.8.1 on Windows
-    inputs:
-      targetType: 'inline'
-      script: |
-        Set-Location "C:\Program Files (x86)\Microsoft Visual Studio\Installer\"
-        $InstallPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise"
-        $componentsToAdd = @(
-          "Microsoft.Net.Component.4.5.0.SDK",
-          "Microsoft.Net.Component.4.5.0.TargetingPack"
-        )
-        [string]$workloadArgs = $componentsToAdd | ForEach-Object {" --add " +  $_}
-        $Arguments = ('/c', "vs_installer.exe", 'modify', '--installPath', "`"$InstallPath`"",$workloadArgs, '--quiet', '--norestart', '--nocache')
-        $process = Start-Process -FilePath cmd.exe -ArgumentList $Arguments -Wait -PassThru
-        if ($process.ExitCode -eq 0)
-        {
-            Write-Host "components have been successfully added"
-        }
-        else
-        {
-            Write-Host "components were not installed"
-            Write-Host "Exit code: $($process.ExitCode)"
-            exit 1
-        }
-    condition: and(succeeded(), eq(variables['PipelineType'], 'onebranch'))
-    
-
-  - task: MSBuild@1
-    displayName: Build
-    inputs:
-      solution: $(WilsonSourceDirectory)wilson.sln
-      msbuildVersion: '17.0.0'
-      msbuildArchitecture: x64
-      msbuildArguments: '/r:True /p:Configuration=$(BuildConfiguration) /p:Platform="Any CPU" /verbosity:m /p:SourceLinkCreate=true'
+  - template: template-build-source.yml
 
   - task: PowerShell@2
     displayName: 'Run Tests'
@@ -82,6 +7,7 @@ steps:
       targetType: filePath
       filePath: ./$(WilsonSourceDirectory)runTests.ps1
       arguments: '-buildType $(BuildConfiguration)'
+    condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
 
   - task: CopyFiles@2
     displayName: 'Copy Files to: [staging]\ProductBinaries'
