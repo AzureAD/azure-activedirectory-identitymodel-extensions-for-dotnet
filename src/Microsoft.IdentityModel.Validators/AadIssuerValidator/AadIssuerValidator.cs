@@ -414,14 +414,14 @@ namespace Microsoft.IdentityModel.Validators
                 return false;
 
             // ensure the first part of the issuer1 matches the first part of issuer2
-            if (issuer1.Slice(0, templateStartIndex).SequenceCompareTo(issuer2.Slice(0, templateStartIndex)) != 0)
+            if (!issuer1.Slice(0, templateStartIndex).SequenceEqual(issuer2.Slice(0, templateStartIndex)))
                 return false;
 
             int secondHalfIssuer1StartIndex = templateStartIndex + issuer1Template.Length;
             int secondHalfIssuer2StartIndex = templateStartIndex + tenantId.Length;
 
             // ensure the second halves are equal
-            if (issuer1.Slice(secondHalfIssuer1StartIndex).SequenceCompareTo(issuer2.Slice(secondHalfIssuer2StartIndex)) != 0)
+            if (!issuer1.Slice(secondHalfIssuer1StartIndex).SequenceEqual(issuer2.Slice(secondHalfIssuer2StartIndex)))
                 return false;
 
             return true;
