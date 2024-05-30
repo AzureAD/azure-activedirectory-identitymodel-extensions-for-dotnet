@@ -44,27 +44,27 @@ steps:
   - task: PowerShell@2 
     displayName: Install .NET Framework 4.8.1 on Windows
     inputs:
-    targetType: 'inline'
-    script: |
-      Set-Location "C:\Program Files (x86)\Microsoft Visual Studio\Installer\"
-      $InstallPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise"
-      $componentsToAdd = @(
-        "Microsoft.Net.Component.4.5.0.SDK",
-        "Microsoft.Net.Component.4.5.0.TargetingPack"
-      )
-      [string]$workloadArgs = $componentsToAdd | ForEach-Object {" --add " +  $_}
-      $Arguments = ('/c', "vs_installer.exe", 'modify', '--installPath', "`"$InstallPath`"",$workloadArgs, '--quiet', '--norestart', '--nocache')
-      $process = Start-Process -FilePath cmd.exe -ArgumentList $Arguments -Wait -PassThru
-      if ($process.ExitCode -eq 0)
-      {
-          Write-Host "components have been successfully added"
-      }
-      else
-      {
-          Write-Host "components were not installed"
-          Write-Host "Exit code: $($process.ExitCode)"
-          exit 1
-      }
+      targetType: 'inline'
+      script: |
+        Set-Location "C:\Program Files (x86)\Microsoft Visual Studio\Installer\"
+        $InstallPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise"
+        $componentsToAdd = @(
+          "Microsoft.Net.Component.4.5.0.SDK",
+          "Microsoft.Net.Component.4.5.0.TargetingPack"
+        )
+        [string]$workloadArgs = $componentsToAdd | ForEach-Object {" --add " +  $_}
+        $Arguments = ('/c', "vs_installer.exe", 'modify', '--installPath', "`"$InstallPath`"",$workloadArgs, '--quiet', '--norestart', '--nocache')
+        $process = Start-Process -FilePath cmd.exe -ArgumentList $Arguments -Wait -PassThru
+        if ($process.ExitCode -eq 0)
+        {
+            Write-Host "components have been successfully added"
+        }
+        else
+        {
+            Write-Host "components were not installed"
+            Write-Host "Exit code: $($process.ExitCode)"
+            exit 1
+        }
     condition: and(succeeded(), eq(variables['PipelineType'], 'onebranch'))
     
 
