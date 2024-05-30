@@ -151,6 +151,7 @@ steps:
     inputs:
       BuildDropPath: '$(Build.SourcesDirectory)\$(WilsonSourceDirectory)src'
       ManifestDirPath: '$(Build.SourcesDirectory)\artifacts'
+    condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
 
   - task: PublishBuildArtifacts@1
     displayName: 'Publish NuGet Package Artifact'
