@@ -146,7 +146,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
 
             if (jsonElement.ValueKind == JsonValueKind.String)
             {
-                if (!string.IsNullOrEmpty(claimType) && !TryAllStringClaimsAsDateTime() && KnownNonDateTimesClaimTypes.Contains(claimType))
+                if (!string.IsNullOrEmpty(claimType) && !TryAllStringClaimsAsDateTime() && IsKnownToNotBeDateTime(claimType))
                     return jsonElement.GetString();
 
                 if (DateTime.TryParse(jsonElement.GetString(), CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out DateTime dateTime))
@@ -718,7 +718,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
         /// sourced from expected Entra V1 and V2 claims, OpenID Connect claims, and a selection of
         /// restricted claim names.
         /// </summary>
-        public static HashSet<string> KnownNonDateTimesClaimTypes = new(StringComparer.Ordinal)
+        private static HashSet<string> KnownNonDateTimesClaimTypes = new(StringComparer.Ordinal)
         {
             "acr",
             "acrs",
@@ -798,6 +798,17 @@ namespace Microsoft.IdentityModel.Tokens.Json
             "ztdid"
         };
 
+        internal static bool IsKnownToNotBeDateTime(string claimType)
+        {
+            if (string.IsNullOrEmpty(claimType))
+                return true;
+
+            if (KnownNonDateTimesClaimTypes.Contains(claimType))
+                return true;
+
+            return false;
+        }
+
         internal static object ReadStringAsObject(ref Utf8JsonReader reader, string propertyName, string className, bool read = false)
         {
             // returning null keeps the same logic as JsonSerialization.ReadObject
@@ -810,7 +821,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
 
             string originalString = reader.GetString();
 
-            if (!TryAllStringClaimsAsDateTime() && KnownNonDateTimesClaimTypes.Contains(propertyName))
+            if (!TryAllStringClaimsAsDateTime() && IsKnownToNotBeDateTime(propertyName))
             {
                 reader.Read();
                 return originalString;
