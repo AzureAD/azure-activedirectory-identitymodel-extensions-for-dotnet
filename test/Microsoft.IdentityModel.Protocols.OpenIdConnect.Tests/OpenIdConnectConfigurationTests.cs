@@ -75,11 +75,16 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
             Assert.NotNull(configuration.AcrValuesSupported);
+            Assert.False(configuration.AuthorizationResponseIssParameterSupported);
+            Assert.NotNull(configuration.BackchannelTokenDeliveryModesSupported);
+            Assert.NotNull(configuration.BackchannelAuthenticationRequestSigningAlgValuesSupported);
+            Assert.False(configuration.BackchannelUserCodeParameterSupported);
             Assert.NotNull(configuration.ClaimsSupported);
             Assert.NotNull(configuration.ClaimsLocalesSupported);
             Assert.False(configuration.ClaimsParameterSupported);
             Assert.NotNull(configuration.ClaimTypesSupported);
             Assert.NotNull(configuration.DisplayValuesSupported);
+            Assert.NotNull(configuration.DPoPSigningAlgValuesSupported);
             Assert.NotNull(configuration.GrantTypesSupported);
             Assert.False(configuration.HttpLogoutSupported);
             Assert.NotNull(configuration.IdTokenEncryptionAlgValuesSupported);
@@ -87,14 +92,16 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.NotNull(configuration.IdTokenSigningAlgValuesSupported);
             Assert.NotNull(configuration.IntrospectionEndpointAuthMethodsSupported);
             Assert.NotNull(configuration.IntrospectionEndpointAuthSigningAlgValuesSupported);
+            Assert.NotNull(configuration.PromptValuesSupported);
             Assert.NotNull(configuration.RequestObjectEncryptionAlgValuesSupported);
             Assert.NotNull(configuration.RequestObjectEncryptionEncValuesSupported);
             Assert.NotNull(configuration.RequestObjectSigningAlgValuesSupported);
             Assert.False(configuration.RequestParameterSupported);
-            Assert.NotNull(configuration.ResponseModesSupported);
-            Assert.NotNull(configuration.ResponseTypesSupported);
+            Assert.False(configuration.RequirePushedAuthorizationRequests);
             Assert.False(configuration.RequestUriParameterSupported);
             Assert.False(configuration.RequireRequestUriRegistration);
+            Assert.NotNull(configuration.ResponseModesSupported);
+            Assert.NotNull(configuration.ResponseTypesSupported);
             Assert.NotNull(configuration.ScopesSupported);
             Assert.NotNull(configuration.SigningKeys);
             Assert.NotNull(configuration.SubjectTypesSupported);
@@ -104,13 +111,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.NotNull(configuration.UserInfoEndpointEncryptionAlgValuesSupported);
             Assert.NotNull(configuration.UserInfoEndpointEncryptionEncValuesSupported);
             Assert.NotNull(configuration.UserInfoEndpointSigningAlgValuesSupported);
-            Assert.NotNull(configuration.PromptValuesSupported);
-            Assert.False(configuration.RequirePushedAuthorizationRequests);
-            Assert.NotNull(configuration.BackchannelTokenDeliveryModesSupported);
-            Assert.NotNull(configuration.BackchannelAuthenticationRequestSigningAlgValuesSupported);
-            Assert.False(configuration.BackchannelUserCodeParameterSupported);
-            Assert.NotNull(configuration.DPoPSigningAlgValuesSupported);
-            Assert.False(configuration.AuthorizationResponseIssParameterSupported);
         }
 
         // If the OpenIdConnect metadata has a "SigningKeys" claim, it should NOT be deserialized into the corresponding OpenIdConnectConfiguration.SigningKeys property.
@@ -149,6 +149,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
                         {
                             new KeyValuePair<string, List<object>>("AuthorizationEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
+                            new KeyValuePair<string, List<object>>("AuthorizationResponseIssParameterSupported", new List<object>{ false, true, true }),
+                            new KeyValuePair<string, List<object>>("BackchannelAuthenticationEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
+                            new KeyValuePair<string, List<object>>("BackchannelUserCodeParameterSupported", new List<object>{ false, true, true }),
                             new KeyValuePair<string, List<object>>("CheckSessionIframe", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
                             new KeyValuePair<string, List<object>>("ClaimsParameterSupported", new List<object>{ false, true, false }),
                             new KeyValuePair<string, List<object>>("EndSessionEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
@@ -160,19 +163,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                             new KeyValuePair<string, List<object>>("LogoutSessionSupported", new List<object>{ false, true, true }),
                             new KeyValuePair<string, List<object>>("OpPolicyUri", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
                             new KeyValuePair<string, List<object>>("OpTosUri", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
+                            new KeyValuePair<string, List<object>>("PushedAuthorizationRequestEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
                             new KeyValuePair<string, List<object>>("RegistrationEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
-                            new KeyValuePair<string, List<object>>("RequireRequestUriRegistration", new List<object>{ false, true, true }),
                             new KeyValuePair<string, List<object>>("RequestParameterSupported", new List<object>{ false, true, false }),
                             new KeyValuePair<string, List<object>>("RequestUriParameterSupported", new List<object>{ false, true, true }),
+                            new KeyValuePair<string, List<object>>("RequirePushedAuthorizationRequests", new List<object>{ false, true, true }),
+                            new KeyValuePair<string, List<object>>("RequireRequestUriRegistration", new List<object>{ false, true, true }),
                             new KeyValuePair<string, List<object>>("ServiceDocumentation", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
                             new KeyValuePair<string, List<object>>("TokenEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
                             new KeyValuePair<string, List<object>>("UserInfoEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
-
-                            new KeyValuePair<string, List<object>>("PushedAuthorizationRequestEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
-                            new KeyValuePair<string, List<object>>("RequirePushedAuthorizationRequests", new List<object>{ false, true, true }),
-                            new KeyValuePair<string, List<object>>("BackchannelAuthenticationEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
-                            new KeyValuePair<string, List<object>>("BackchannelUserCodeParameterSupported", new List<object>{ false, true, true }),
-                            new KeyValuePair<string, List<object>>("AuthorizationResponseIssParameterSupported", new List<object>{ false, true, true }),
                         },
 
                     Object = configuration,
@@ -282,16 +281,20 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var collectionNames = new List<string>
             {
                 "acr_values_supported",
+                "backchannel_token_delivery_modes_supported",
+                "backchannel_authentication_request_signing_alg_values_supported",
                 "claims_supported",
                 "claims_locales_supported",
                 "claim_types_supported",
                 "display_values_supported",
+                "dpop_signing_alg_values_supported",
                 "grant_types_supported",
                 "id_token_encryption_alg_values_supported",
                 "id_token_encryption_enc_values_supported",
                 "id_token_signing_alg_values_supported",
                 "introspection_endpoint_auth_methods_supported",
                 "introspection_endpoint_auth_signing_alg_values_supported",
+                "prompt_values_supported",
                 "request_object_encryption_alg_values_supported",
                 "request_object_encryption_enc_values_supported",
                 "request_object_signing_alg_values_supported",
@@ -304,11 +307,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 "ui_locales_supported",
                 "userinfo_encryption_alg_values_supported",
                 "userinfo_encryption_enc_values_supported",
-                "userinfo_signing_alg_values_supported",                
-                "prompt_values_supported",
-                "backchannel_token_delivery_modes_supported",
-                "backchannel_authentication_request_signing_alg_values_supported",
-                "dpop_signing_alg_values_supported",
+                "userinfo_signing_alg_values_supported",
             };
 
             foreach (var collection in collectionNames)
