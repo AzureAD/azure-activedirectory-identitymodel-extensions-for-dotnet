@@ -720,6 +720,21 @@ namespace Microsoft.IdentityModel.Tokens.Json
         /// </summary>
         private static HashSet<string> KnownNonDateTimesClaimTypes = new(StringComparer.Ordinal)
         {
+            // Header Values.
+            "alg",
+            "cty",
+            "crit",
+            "enc",
+            "jku",
+            "jwk",
+            "kid",
+            "typ",
+            "x5c",
+            "x5t",
+            "x5t#S256",
+            "x5u",
+            "zip",
+            // JWT claims.
             "acr",
             "acrs",
             "access_token",
@@ -756,7 +771,6 @@ namespace Microsoft.IdentityModel.Tokens.Json
             "ipaddr",
             "iss",
             "jti",
-            "jwk",
             "login_hint",
             "name",
             "nameid",
@@ -780,7 +794,6 @@ namespace Microsoft.IdentityModel.Tokens.Json
             "tenant_ctry",
             "tenant_region_scope",
             "tid",
-            "typ",
             "unique_name",
             "upn",
             "uti",
