@@ -157,6 +157,10 @@ csharp_space_between_square_brackets = false
 dotnet_code_quality.ca1802.api_surface = private, internal
 dotnet_code_quality.CA2208.api_surface = public
 
+# IDE0073: Require file header
+dotnet_diagnostic.IDE0073.severity = warning
+file_header_template = Copyright (c) Microsoft Corporation. All rights reserved.\nLicensed under the MIT License.
+
 # Threading analyzers https://github.com/microsoft/vs-threading/blob/main/doc/analyzers/index.md
 
 # Use .ConfigureAwait(bool)
