@@ -264,7 +264,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (!string.IsNullOrEmpty(audience))
                 AddClaim(new Claim(JwtRegisteredClaimNames.Aud, audience, ClaimValueTypes.String));
 
-            AddClaims( audiences
+            AddClaims(audiences
                 .Where(aud => !aud.IsNullOrEmpty())
                 .Select(aud => new Claim(JwtRegisteredClaimNames.Aud, aud, ClaimValueTypes.String))
             );
