@@ -760,15 +760,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     if (!audienceChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Aud, StringComparison.Ordinal))
                     {
                         audienceChecked = true;
-                        if (audienceSet)
+                        if (audienceSet && LogHelper.IsEnabled(EventLogLevel.Informational))
                         {
                             string descriptorMemberName = null;
                             if (!tokenDescriptor.Audiences.IsNullOrEmpty())
                                 descriptorMemberName = nameof(tokenDescriptor.Audiences);
                             else if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
                                 descriptorMemberName = nameof(tokenDescriptor.Audience);
-                            if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                                LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, LogHelper.MarkAsNonPII(descriptorMemberName)));
+
+                            LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, LogHelper.MarkAsNonPII(descriptorMemberName)));
 
                             continue;
                         }
