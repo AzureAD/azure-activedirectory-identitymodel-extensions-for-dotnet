@@ -8,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.IdentityModel.Abstractions;
@@ -380,8 +379,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             var uriList = new List<Uri>();
             if (!tokenDescriptor.Audiences.IsNullOrEmpty())
             {
-                foreach (var audience in tokenDescriptor.Audiences.Where(aud => !string.IsNullOrWhiteSpace(aud)))
+                foreach (var audience in tokenDescriptor.Audiences)
+                {
+                    if (audience != null)
                     uriList.Add(new Uri(audience));
+                }
 
                 if(!string.IsNullOrWhiteSpace(tokenDescriptor.Audience) && !tokenDescriptor.Audiences.Contains(tokenDescriptor.Audience))
                     uriList.Add(new Uri(tokenDescriptor.Audience));
