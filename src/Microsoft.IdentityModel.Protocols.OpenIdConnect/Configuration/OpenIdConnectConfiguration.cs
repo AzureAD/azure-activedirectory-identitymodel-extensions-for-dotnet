@@ -23,16 +23,20 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         // these are used to lazy create
         private Dictionary<string, object> _additionalData;
         private ICollection<string> _acrValuesSupported;
+        private ICollection<string> _backchannelTokenDeliveryModesSupported;
+        private ICollection<string> _backchannelAuthenticationRequestSigningAlgValuesSupported;
         private ICollection<string> _claimsSupported;
         private ICollection<string> _claimsLocalesSupported;
         private ICollection<string> _claimTypesSupported;
         private ICollection<string> _displayValuesSupported;
+        private ICollection<string> _dPoPSigningAlgValuesSupported;
         private ICollection<string> _grantTypesSupported;
         private ICollection<string> _idTokenEncryptionAlgValuesSupported;
         private ICollection<string> _idTokenEncryptionEncValuesSupported;
         private ICollection<string> _idTokenSigningAlgValuesSupported;
         private ICollection<string> _introspectionEndpointAuthMethodsSupported;
         private ICollection<string> _introspectionEndpointAuthSigningAlgValuesSupported;
+        private ICollection<string> _promptValuesSupported;
         private ICollection<string> _requestObjectEncryptionAlgValuesSupported;
         private ICollection<string> _requestObjectEncryptionEncValuesSupported;
         private ICollection<string> _requestObjectSigningAlgValuesSupported;
@@ -46,10 +50,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         private ICollection<string> _userInfoEndpointEncryptionAlgValuesSupported;
         private ICollection<string> _userInfoEndpointEncryptionEncValuesSupported;
         private ICollection<string> _userInfoEndpointSigningAlgValuesSupported;
-        private ICollection<string> _promptValuesSupported;
-        private ICollection<string> _backchannelTokenDeliveryModesSupported;
-        private ICollection<string> _backchannelAuthenticationRequestSigningAlgValuesSupported;
-        private ICollection<string> _dPoPSigningAlgValuesSupported;
 
         /// <summary>
         /// Deserializes the json string into an <see cref="OpenIdConnectConfiguration"/> object.
@@ -144,6 +144,51 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public string AuthorizationEndpoint { get; set; }
 
         /// <summary>
+        /// Gets or sets the 'authorization_response_iss_parameter_supported'
+        /// </summary>
+        [JsonPropertyName(OpenIdProviderMetadataNames.AuthorizationResponseIssParameterSupported)]
+#if NET6_0_OR_GREATER
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+#endif
+        public bool AuthorizationResponseIssParameterSupported { get; set; }
+
+        /// <summary>
+        /// Gets or sets the 'backchannel_authentication_endpoint'.
+        /// </summary>
+        [JsonPropertyName(OpenIdProviderMetadataNames.BackchannelAuthenticationEndpoint)]
+#if NET6_0_OR_GREATER
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+#endif
+        public string BackchannelAuthenticationEndpoint { get; set; }
+
+        /// <summary>
+        /// Gets the collection of 'backchannel_token_delivery_modes_supported'
+        /// </summary>
+        [JsonPropertyName(OpenIdProviderMetadataNames.BackchannelTokenDeliveryModesSupported)]
+        public ICollection<string> BackchannelTokenDeliveryModesSupported =>
+            _backchannelTokenDeliveryModesSupported ??
+            Interlocked.CompareExchange(ref _backchannelTokenDeliveryModesSupported, new Collection<string>(), null) ??
+            _backchannelTokenDeliveryModesSupported;
+
+        /// <summary>
+        /// Gets the collection of 'backchannel_authentication_request_signing_alg_values_supported'
+        /// </summary>
+        [JsonPropertyName(OpenIdProviderMetadataNames.BackchannelAuthenticationRequestSigningAlgValuesSupported)]
+        public ICollection<string> BackchannelAuthenticationRequestSigningAlgValuesSupported =>
+            _backchannelAuthenticationRequestSigningAlgValuesSupported ??
+            Interlocked.CompareExchange(ref _backchannelAuthenticationRequestSigningAlgValuesSupported, new Collection<string>(), null) ??
+            _backchannelAuthenticationRequestSigningAlgValuesSupported;
+
+        /// <summary>
+        /// Gets or sets the 'backchannel_user_code_parameter_supported'
+        /// </summary>
+        [JsonPropertyName(OpenIdProviderMetadataNames.BackchannelUserCodeParameterSupported)]
+#if NET6_0_OR_GREATER
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+#endif
+        public bool BackchannelUserCodeParameterSupported { get; set; }
+
+        /// <summary>
         /// Gets or sets the 'check_session_iframe'.
         /// </summary>
         [JsonPropertyName(OpenIdProviderMetadataNames.CheckSessionIframe)]
@@ -196,6 +241,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             _displayValuesSupported ??
             Interlocked.CompareExchange(ref _displayValuesSupported, new Collection<string>(), null) ??
             _displayValuesSupported;
+
+        /// <summary>
+        /// Gets the collection of 'dpop_signing_alg_values_supported'
+        /// </summary>
+        [JsonPropertyName(OpenIdProviderMetadataNames.DPoPSigningAlgValuesSupported)]
+        public ICollection<string> DPoPSigningAlgValuesSupported =>
+            _dPoPSigningAlgValuesSupported ??
+            Interlocked.CompareExchange(ref _dPoPSigningAlgValuesSupported, new Collection<string>(), null) ??
+            _dPoPSigningAlgValuesSupported;
 
         /// <summary>
         /// Gets or sets the 'end_session_endpoint'.
@@ -347,6 +401,24 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public string OpTosUri { get; set; }
 
         /// <summary>
+        /// Gets the collection of 'prompt_values_supported'
+        /// </summary>
+        [JsonPropertyName(OpenIdProviderMetadataNames.PromptValuesSupported)]
+        public ICollection<string> PromptValuesSupported =>
+            _promptValuesSupported ??
+            Interlocked.CompareExchange(ref _promptValuesSupported, new Collection<string>(), null) ??
+            _promptValuesSupported;
+
+        /// <summary>
+        /// Gets or sets the 'pushed_authorization_request_endpoint'.
+        /// </summary>
+        [JsonPropertyName(OpenIdProviderMetadataNames.PushedAuthorizationRequestEndpoint)]
+#if NET6_0_OR_GREATER
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+#endif
+        public string PushedAuthorizationRequestEndpoint { get; set; }
+
+        /// <summary>
         /// Gets or sets the 'registration_endpoint'
         /// </summary>
         [JsonPropertyName(OpenIdProviderMetadataNames.RegistrationEndpoint)]
@@ -399,6 +471,16 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
 #endif
         public bool RequestUriParameterSupported { get; set; }
+
+
+        /// <summary>
+        /// Gets or sets the 'require_pushed_authorization_requests'
+        /// </summary>
+        [JsonPropertyName(OpenIdProviderMetadataNames.RequirePushedAuthorizationRequests)]
+#if NET6_0_OR_GREATER
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+#endif
+        public bool RequirePushedAuthorizationRequests { get; set; }
 
         /// <summary>
         /// Gets or sets the 'require_request_uri_registration'
@@ -538,87 +620,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             Interlocked.CompareExchange(ref _userInfoEndpointSigningAlgValuesSupported, new Collection<string>(), null) ??
             _userInfoEndpointSigningAlgValuesSupported;
 
-        /// <summary>
-        /// Gets the collection of 'prompt_values_supported'
-        /// </summary>
-        [JsonPropertyName(OpenIdProviderMetadataNames.PromptValuesSupported)]
-        public ICollection<string> PromptValuesSupported =>
-            _promptValuesSupported ??
-            Interlocked.CompareExchange(ref _promptValuesSupported, new Collection<string>(), null) ??
-            _promptValuesSupported;
-
-        /// <summary>
-        /// Gets or sets the 'pushed_authorization_request_endpoint'.
-        /// </summary>
-        [JsonPropertyName(OpenIdProviderMetadataNames.PushedAuthorizationRequestEndpoint)]
-#if NET6_0_OR_GREATER
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-#endif
-        public string PushedAuthorizationRequestEndpoint { get; set; }
-
-        /// <summary>
-        /// Gets or sets the 'require_pushed_authorization_requests'
-        /// </summary>
-        [JsonPropertyName(OpenIdProviderMetadataNames.RequirePushedAuthorizationRequests)]
-#if NET6_0_OR_GREATER
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-#endif
-        public bool RequirePushedAuthorizationRequests { get; set; }
-
-        /// <summary>
-        /// Gets or sets the 'backchannel_authentication_endpoint'.
-        /// </summary>
-        [JsonPropertyName(OpenIdProviderMetadataNames.BackchannelAuthenticationEndpoint)]
-#if NET6_0_OR_GREATER
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-#endif
-        public string BackchannelAuthenticationEndpoint { get; set; }
-
-        /// <summary>
-        /// Gets the collection of 'backchannel_token_delivery_modes_supported'
-        /// </summary>
-        [JsonPropertyName(OpenIdProviderMetadataNames.BackchannelTokenDeliveryModesSupported)]
-        public ICollection<string> BackchannelTokenDeliveryModesSupported =>
-            _backchannelTokenDeliveryModesSupported ??
-            Interlocked.CompareExchange(ref _backchannelTokenDeliveryModesSupported, new Collection<string>(), null) ??
-            _backchannelTokenDeliveryModesSupported;
-
-        /// <summary>
-        /// Gets the collection of 'backchannel_authentication_request_signing_alg_values_supported'
-        /// </summary>
-        [JsonPropertyName(OpenIdProviderMetadataNames.BackchannelAuthenticationRequestSigningAlgValuesSupported)]
-        public ICollection<string> BackchannelAuthenticationRequestSigningAlgValuesSupported =>
-            _backchannelAuthenticationRequestSigningAlgValuesSupported ??
-            Interlocked.CompareExchange(ref _backchannelAuthenticationRequestSigningAlgValuesSupported, new Collection<string>(), null) ??
-            _backchannelAuthenticationRequestSigningAlgValuesSupported;
-
-        /// <summary>
-        /// Gets or sets the 'backchannel_user_code_parameter_supported'
-        /// </summary>
-        [JsonPropertyName(OpenIdProviderMetadataNames.BackchannelUserCodeParameterSupported)]
-#if NET6_0_OR_GREATER
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-#endif
-        public bool BackchannelUserCodeParameterSupported { get; set; }
-
-        /// <summary>
-        /// Gets the collection of 'dpop_signing_alg_values_supported'
-        /// </summary>
-        [JsonPropertyName(OpenIdProviderMetadataNames.DPoPSigningAlgValuesSupported)]
-        public ICollection<string> DPoPSigningAlgValuesSupported =>
-            _dPoPSigningAlgValuesSupported ??
-            Interlocked.CompareExchange(ref _dPoPSigningAlgValuesSupported, new Collection<string>(), null) ??
-            _dPoPSigningAlgValuesSupported;
-
-        /// <summary>
-        /// Gets or sets the 'authorization_response_iss_parameter_supported'
-        /// </summary>
-        [JsonPropertyName(OpenIdProviderMetadataNames.AuthorizationResponseIssParameterSupported)]
-#if NET6_0_OR_GREATER
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-#endif
-        public bool AuthorizationResponseIssParameterSupported { get; set; }
-
         #region shouldserialize
         // TODO - should we keep these, they were used by Newtonsoft to control serialization of collections.
         // May help users to keep them hanging around.
@@ -631,6 +632,28 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public bool ShouldSerializeAcrValuesSupported()
         {
             return AcrValuesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'backchannel_token_delivery_modes_supported' (BackchannelTokenDeliveryModesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'backchannel_token_delivery_modes_supported' (BackchannelTokenDeliveryModesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeBackchannelTokenDeliveryModesSupported()
+        {
+            return BackchannelTokenDeliveryModesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'backchannel_authentication_request_signing_alg_values_supported' (BackchannelAuthenticationRequestSigningAlgValuesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'backchannel_authentication_request_signing_alg_values_supported' (BackchannelAuthenticationRequestSigningAlgValuesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeBackchannelAuthenticationRequestSigningAlgValuesSupported()
+        {
+            return BackchannelAuthenticationRequestSigningAlgValuesSupported.Count > 0;
         }
 
         /// <summary>
@@ -675,6 +698,17 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public bool ShouldSerializeDisplayValuesSupported()
         {
             return DisplayValuesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'dpop_signing_alg_values_supported' (DPoPSigningAlgValuesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'dpop_signing_alg_values_supported' (DPoPSigningAlgValuesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeDPoPSigningAlgValuesSupported()
+        {
+            return DPoPSigningAlgValuesSupported.Count > 0;
         }
 
         /// <summary>
@@ -741,6 +775,17 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public bool ShouldSerializeIntrospectionEndpointAuthSigningAlgValuesSupported()
         {
             return IntrospectionEndpointAuthSigningAlgValuesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'prompt_values_supported' (PromptValuesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'prompt_values_supported' (PromptValuesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializePromptValuesSupported()
+        {
+            return PromptValuesSupported.Count > 0;
         }
 
         /// <summary>
@@ -895,50 +940,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public bool ShouldSerializeUserInfoEndpointSigningAlgValuesSupported()
         {
             return UserInfoEndpointSigningAlgValuesSupported.Count > 0;
-        }
-
-        /// <summary>
-        /// Gets a bool that determines if the 'prompt_values_supported' (PromptValuesSupported) property should be serialized.
-        /// This is used by Json.NET in order to conditionally serialize properties.
-        /// </summary>
-        /// <return>true if 'prompt_values_supported' (PromptValuesSupported) is not empty; otherwise, false.</return>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public bool ShouldSerializePromptValuesSupported()
-        {
-            return PromptValuesSupported.Count > 0;
-        }
-
-        /// <summary>
-        /// Gets a bool that determines if the 'backchannel_token_delivery_modes_supported' (BackchannelTokenDeliveryModesSupported) property should be serialized.
-        /// This is used by Json.NET in order to conditionally serialize properties.
-        /// </summary>
-        /// <return>true if 'backchannel_token_delivery_modes_supported' (BackchannelTokenDeliveryModesSupported) is not empty; otherwise, false.</return>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public bool ShouldSerializeBackchannelTokenDeliveryModesSupported()
-        {
-            return BackchannelTokenDeliveryModesSupported.Count > 0;
-        }
-
-        /// <summary>
-        /// Gets a bool that determines if the 'backchannel_authentication_request_signing_alg_values_supported' (BackchannelAuthenticationRequestSigningAlgValuesSupported) property should be serialized.
-        /// This is used by Json.NET in order to conditionally serialize properties.
-        /// </summary>
-        /// <return>true if 'backchannel_authentication_request_signing_alg_values_supported' (BackchannelAuthenticationRequestSigningAlgValuesSupported) is not empty; otherwise, false.</return>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public bool ShouldSerializeBackchannelAuthenticationRequestSigningAlgValuesSupported()
-        {
-            return BackchannelAuthenticationRequestSigningAlgValuesSupported.Count > 0;
-        }
-
-        /// <summary>
-        /// Gets a bool that determines if the 'dpop_signing_alg_values_supported' (DPoPSigningAlgValuesSupported) property should be serialized.
-        /// This is used by Json.NET in order to conditionally serialize properties.
-        /// </summary>
-        /// <return>true if 'dpop_signing_alg_values_supported' (DPoPSigningAlgValuesSupported) is not empty; otherwise, false.</return>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public bool ShouldSerializeDPoPSigningAlgValuesSupported()
-        {
-            return DPoPSigningAlgValuesSupported.Count > 0;
         }
 #endregion shouldserialize
     }
