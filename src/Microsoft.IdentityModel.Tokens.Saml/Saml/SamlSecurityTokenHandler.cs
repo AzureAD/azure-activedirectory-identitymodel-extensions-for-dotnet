@@ -382,14 +382,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 foreach (var audience in tokenDescriptor.Audiences)
                 {
                     if (audience != null)
-                    uriList.Add(new Uri(audience));
+                    uriList.Add(new Uri(audience, UriKind.Absolute));
                 }
 
                 if(!string.IsNullOrWhiteSpace(tokenDescriptor.Audience) && !tokenDescriptor.Audiences.Contains(tokenDescriptor.Audience))
-                    uriList.Add(new Uri(tokenDescriptor.Audience));
+                    uriList.Add(new Uri(tokenDescriptor.Audience, UriKind.Absolute));
             }
             else if (!string.IsNullOrWhiteSpace(tokenDescriptor.Audience))
-                uriList.Add(new Uri(tokenDescriptor.Audience));
+                uriList.Add(new Uri(tokenDescriptor.Audience, UriKind.Absolute));
 
             return uriList;
         }
