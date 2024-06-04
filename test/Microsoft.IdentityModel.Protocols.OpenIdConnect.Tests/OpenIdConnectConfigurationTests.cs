@@ -76,8 +76,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
             Assert.NotNull(configuration.AcrValuesSupported);
             Assert.False(configuration.AuthorizationResponseIssParameterSupported);
-            Assert.NotNull(configuration.BackchannelTokenDeliveryModesSupported);
             Assert.NotNull(configuration.BackchannelAuthenticationRequestSigningAlgValuesSupported);
+            Assert.NotNull(configuration.BackchannelTokenDeliveryModesSupported);
             Assert.False(configuration.BackchannelUserCodeParameterSupported);
             Assert.NotNull(configuration.ClaimsSupported);
             Assert.NotNull(configuration.ClaimsLocalesSupported);
@@ -281,8 +281,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var collectionNames = new List<string>
             {
                 "acr_values_supported",
-                "backchannel_token_delivery_modes_supported",
                 "backchannel_authentication_request_signing_alg_values_supported",
+                "backchannel_token_delivery_modes_supported",
                 "claims_supported",
                 "claims_locales_supported",
                 "claim_types_supported",

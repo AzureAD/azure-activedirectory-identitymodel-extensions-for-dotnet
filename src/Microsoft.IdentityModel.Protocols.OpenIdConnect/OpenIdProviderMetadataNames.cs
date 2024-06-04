@@ -16,8 +16,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public const string AuthorizationEndpoint = "authorization_endpoint";
         public const string AuthorizationResponseIssParameterSupported = "authorization_response_iss_parameter_supported";
         public const string BackchannelAuthenticationEndpoint = "backchannel_authentication_endpoint";
-        public const string BackchannelTokenDeliveryModesSupported = "backchannel_token_delivery_modes_supported";
         public const string BackchannelAuthenticationRequestSigningAlgValuesSupported = "backchannel_authentication_request_signing_alg_values_supported";
+        public const string BackchannelTokenDeliveryModesSupported = "backchannel_token_delivery_modes_supported";
         public const string BackchannelUserCodeParameterSupported = "backchannel_user_code_parameter_supported";
         public const string CheckSessionIframe = "check_session_iframe";
         public const string ClaimsLocalesSupported = "claims_locales_supported";
@@ -81,8 +81,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public static ReadOnlySpan<byte> AuthorizationEndpoint => "authorization_endpoint"u8;
         public static ReadOnlySpan<byte> AuthorizationResponseIssParameterSupported => "authorization_response_iss_parameter_supported"u8;
         public static ReadOnlySpan<byte> BackchannelAuthenticationEndpoint => "backchannel_authentication_endpoint"u8;
-        public static ReadOnlySpan<byte> BackchannelTokenDeliveryModesSupported => "backchannel_token_delivery_modes_supported"u8;
         public static ReadOnlySpan<byte> BackchannelAuthenticationRequestSigningAlgValuesSupported => "backchannel_authentication_request_signing_alg_values_supported"u8;
+        public static ReadOnlySpan<byte> BackchannelTokenDeliveryModesSupported => "backchannel_token_delivery_modes_supported"u8;
         public static ReadOnlySpan<byte> BackchannelUserCodeParameterSupported => "backchannel_user_code_parameter_supported"u8;
         public static ReadOnlySpan<byte> CheckSessionIframe => "check_session_iframe"u8;
         public static ReadOnlySpan<byte> ClaimsLocalesSupported => "claims_locales_supported"u8;

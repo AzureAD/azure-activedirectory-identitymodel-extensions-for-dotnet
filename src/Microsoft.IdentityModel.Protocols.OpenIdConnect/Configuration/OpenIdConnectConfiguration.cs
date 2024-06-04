@@ -23,8 +23,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         // these are used to lazy create
         private Dictionary<string, object> _additionalData;
         private ICollection<string> _acrValuesSupported;
-        private ICollection<string> _backchannelTokenDeliveryModesSupported;
         private ICollection<string> _backchannelAuthenticationRequestSigningAlgValuesSupported;
+        private ICollection<string> _backchannelTokenDeliveryModesSupported;
         private ICollection<string> _claimsSupported;
         private ICollection<string> _claimsLocalesSupported;
         private ICollection<string> _claimTypesSupported;
@@ -162,15 +162,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public string BackchannelAuthenticationEndpoint { get; set; }
 
         /// <summary>
-        /// Gets the collection of 'backchannel_token_delivery_modes_supported'
-        /// </summary>
-        [JsonPropertyName(OpenIdProviderMetadataNames.BackchannelTokenDeliveryModesSupported)]
-        public ICollection<string> BackchannelTokenDeliveryModesSupported =>
-            _backchannelTokenDeliveryModesSupported ??
-            Interlocked.CompareExchange(ref _backchannelTokenDeliveryModesSupported, new Collection<string>(), null) ??
-            _backchannelTokenDeliveryModesSupported;
-
-        /// <summary>
         /// Gets the collection of 'backchannel_authentication_request_signing_alg_values_supported'
         /// </summary>
         [JsonPropertyName(OpenIdProviderMetadataNames.BackchannelAuthenticationRequestSigningAlgValuesSupported)]
@@ -178,6 +169,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             _backchannelAuthenticationRequestSigningAlgValuesSupported ??
             Interlocked.CompareExchange(ref _backchannelAuthenticationRequestSigningAlgValuesSupported, new Collection<string>(), null) ??
             _backchannelAuthenticationRequestSigningAlgValuesSupported;
+
+        /// <summary>
+        /// Gets the collection of 'backchannel_token_delivery_modes_supported'
+        /// </summary>
+        [JsonPropertyName(OpenIdProviderMetadataNames.BackchannelTokenDeliveryModesSupported)]
+        public ICollection<string> BackchannelTokenDeliveryModesSupported =>
+            _backchannelTokenDeliveryModesSupported ??
+            Interlocked.CompareExchange(ref _backchannelTokenDeliveryModesSupported, new Collection<string>(), null) ??
+            _backchannelTokenDeliveryModesSupported;
 
         /// <summary>
         /// Gets or sets the 'backchannel_user_code_parameter_supported'
@@ -472,7 +472,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 #endif
         public bool RequestUriParameterSupported { get; set; }
 
-
         /// <summary>
         /// Gets or sets the 'require_pushed_authorization_requests'
         /// </summary>
@@ -552,7 +551,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public override string TokenEndpoint { get; set; }
 
         /// <summary>
-        /// This base class property is not used in OpenIdConnect. 
+        /// This base class property is not used in OpenIdConnect.
         /// </summary>
         [JsonIgnore]
         public override string ActiveTokenEndpoint { get; set; }

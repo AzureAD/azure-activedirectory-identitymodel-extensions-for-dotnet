@@ -30,6 +30,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             "ACR_VALUES_SUPPORTED",
             "AUTHORIZATION_ENDPOINT",
+            "AUTHORIZATION_RESPONSE_ISS_PARAMETER_SUPPORTED"
+            "BACKCHANNEL_AUTHENTICATION_ENDPOINT",
+            "BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG_VALUES_SUPPORTED",
+            "BACKCHANNEL_TOKEN_DELIVERY_MODES_SUPPORTED",
+            "BACKCHANNEL_USER_CODE_PARAMETER_SUPPORTED",
             "CHECK_SESSION_IFRAME",
             "CLAIMS_LOCALES_SUPPORTED",
             "CLAIMS_PARAMETER_SUPPORTED",
@@ -37,6 +42,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             "CLAIM_TYPES_SUPPORTED",
             ".WELL-KNOWN/OPENID-CONFIGURATION",
             "DISPLAY_VALUES_SUPPORTED",
+            "DPOP_SIGNING_ALG_VALUES_SUPPORTED",
             "END_SESSION_ENDPOINT",
             "FRONTCHANNEL_LOGOUT_SESSION_SUPPORTED",
             "FRONTCHANNEL_LOGOUT_SUPPORTED",
@@ -53,12 +59,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             "LOGOUT_SESSION_SUPPORTED",
             "OP_POLICY_URI",
             "OP_TOS_URI",
+            "PROMPT_VALUES_SUPPORTED",
+            "PUSHED_AUTHORIZATION_REQUEST_ENDPOINT",
             "REGISTRATION_ENDPOINT",
             "REQUEST_OBJECT_ENCRYPTION_ALG_VALUES_SUPPORTED",
             "REQUEST_OBJECT_ENCRYPTION_ENC_VALUES_SUPPORTED",
             "REQUEST_OBJECT_SIGNING_ALG_VALUES_SUPPORTED",
             "REQUEST_PARAMETER_SUPPORTED",
             "REQUEST_URI_PARAMETER_SUPPORTED",
+            "REQUIRE_PUSHED_AUTHORIZATION_REQUESTS",
             "REQUIRE_REQUEST_URI_REGISTRATION",
             "RESPONSE_MODES_SUPPORTED",
             "RESPONSE_TYPES_SUPPORTED",
@@ -73,15 +82,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             "USERINFO_ENCRYPTION_ALG_VALUES_SUPPORTED",
             "USERINFO_ENCRYPTION_ENC_VALUES_SUPPORTED",
             "USERINFO_SIGNING_ALG_VALUES_SUPPORTED",
-            "PROMPT_VALUES_SUPPORTED",
-            "PUSHED_AUTHORIZATION_REQUEST_ENDPOINT",
-            "REQUIRE_PUSHED_AUTHORIZATION_REQUESTS",
-            "BACKCHANNEL_AUTHENTICATION_ENDPOINT",
-            "BACKCHANNEL_TOKEN_DELIVERY_MODES_SUPPORTED",
-            "BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG_VALUES_SUPPORTED",
-            "BACKCHANNEL_USER_CODE_PARAMETER_SUPPORTED",
-            "DPOP_SIGNING_ALG_VALUES_SUPPORTED",
-            "AUTHORIZATION_RESPONSE_ISS_PARAMETER_SUPPORTED"
         };
 
         #region Read
@@ -144,6 +144,21 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                     else if (reader.ValueTextEquals(Utf8Bytes.AuthorizationEndpoint))
                         config.AuthorizationEndpoint = JsonPrimitives.ReadString(ref reader, MetadataName.AuthorizationEndpoint, ClassName, true);
 
+                    else if (reader.ValueTextEquals(Utf8Bytes.AuthorizationResponseIssParameterSupported))
+                        config.AuthorizationResponseIssParameterSupported = JsonPrimitives.ReadBoolean(ref reader, MetadataName.AuthorizationResponseIssParameterSupported, ClassName, true);
+
+                    else if (reader.ValueTextEquals(Utf8Bytes.BackchannelAuthenticationEndpoint))
+                        config.BackchannelAuthenticationEndpoint = JsonPrimitives.ReadString(ref reader, MetadataName.BackchannelAuthenticationEndpoint, ClassName, true);
+
+                    else if (reader.ValueTextEquals(Utf8Bytes.BackchannelAuthenticationRequestSigningAlgValuesSupported))
+                        JsonPrimitives.ReadStrings(ref reader, config.BackchannelAuthenticationRequestSigningAlgValuesSupported, MetadataName.BackchannelAuthenticationRequestSigningAlgValuesSupported, ClassName, true);
+
+                    else if (reader.ValueTextEquals(Utf8Bytes.BackchannelTokenDeliveryModesSupported))
+                        JsonPrimitives.ReadStrings(ref reader, config.BackchannelTokenDeliveryModesSupported, MetadataName.BackchannelTokenDeliveryModesSupported, ClassName, true);
+
+                    else if (reader.ValueTextEquals(Utf8Bytes.BackchannelUserCodeParameterSupported))
+                        config.BackchannelUserCodeParameterSupported = JsonPrimitives.ReadBoolean(ref reader, MetadataName.BackchannelUserCodeParameterSupported, ClassName, true);
+
                     else if (reader.ValueTextEquals(Utf8Bytes.CheckSessionIframe))
                         config.CheckSessionIframe = JsonPrimitives.ReadString(ref reader, MetadataName.CheckSessionIframe, ClassName, true);
 
@@ -161,6 +176,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
                     else if (reader.ValueTextEquals(Utf8Bytes.DisplayValuesSupported))
                         JsonPrimitives.ReadStrings(ref reader, config.DisplayValuesSupported, MetadataName.DisplayValuesSupported, ClassName, true);
+
+                    else if (reader.ValueTextEquals(Utf8Bytes.DPoPSigningAlgValuesSupported))
+                        JsonPrimitives.ReadStrings(ref reader, config.DPoPSigningAlgValuesSupported, MetadataName.DPoPSigningAlgValuesSupported, ClassName, true);
 
                     else if (reader.ValueTextEquals(Utf8Bytes.EndSessionEndpoint))
                         config.EndSessionEndpoint = JsonPrimitives.ReadString(ref reader, MetadataName.EndSessionEndpoint, ClassName, true);
@@ -226,6 +244,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                     else if (reader.ValueTextEquals(Utf8Bytes.OpTosUri))
                         config.OpTosUri = JsonPrimitives.ReadString(ref reader, MetadataName.OpTosUri, ClassName, true);
 
+                    else if (reader.ValueTextEquals(Utf8Bytes.PromptValuesSupported))
+                        JsonPrimitives.ReadStrings(ref reader, config.PromptValuesSupported, MetadataName.PromptValuesSupported, ClassName, true);
+
+                    else if (reader.ValueTextEquals(Utf8Bytes.PushedAuthorizationRequestEndpoint))
+                        config.PushedAuthorizationRequestEndpoint = JsonPrimitives.ReadString(ref reader, MetadataName.PushedAuthorizationRequestEndpoint, ClassName, true);
+
                     else if (reader.ValueTextEquals(Utf8Bytes.RegistrationEndpoint))
                         config.RegistrationEndpoint = JsonPrimitives.ReadString(ref reader, MetadataName.RegistrationEndpoint, ClassName, true);
 
@@ -288,33 +312,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
                     else if (reader.ValueTextEquals(Utf8Bytes.UserInfoSigningAlgValuesSupported))
                         JsonPrimitives.ReadStrings(ref reader, config.UserInfoEndpointSigningAlgValuesSupported, MetadataName.UserInfoSigningAlgValuesSupported, ClassName, true);
-                    
-                    else if (reader.ValueTextEquals(Utf8Bytes.PromptValuesSupported))
-                        JsonPrimitives.ReadStrings(ref reader, config.PromptValuesSupported, MetadataName.PromptValuesSupported, ClassName, true);
 
-                    else if (reader.ValueTextEquals(Utf8Bytes.PushedAuthorizationRequestEndpoint))
-                        config.PushedAuthorizationRequestEndpoint = JsonPrimitives.ReadString(ref reader, MetadataName.PushedAuthorizationRequestEndpoint, ClassName, true);                    
-                    
                     else if (reader.ValueTextEquals(Utf8Bytes.RequirePushedAuthorizationRequests))
                         config.RequirePushedAuthorizationRequests = JsonPrimitives.ReadBoolean(ref reader, MetadataName.RequirePushedAuthorizationRequests, ClassName, true);
-
-                    else if (reader.ValueTextEquals(Utf8Bytes.BackchannelAuthenticationEndpoint))
-                        config.BackchannelAuthenticationEndpoint = JsonPrimitives.ReadString(ref reader, MetadataName.BackchannelAuthenticationEndpoint, ClassName, true);                    
-                    
-                    else if (reader.ValueTextEquals(Utf8Bytes.BackchannelTokenDeliveryModesSupported))
-                        JsonPrimitives.ReadStrings(ref reader, config.BackchannelTokenDeliveryModesSupported, MetadataName.BackchannelTokenDeliveryModesSupported, ClassName, true);
-    
-                    else if (reader.ValueTextEquals(Utf8Bytes.BackchannelAuthenticationRequestSigningAlgValuesSupported))
-                        JsonPrimitives.ReadStrings(ref reader, config.BackchannelAuthenticationRequestSigningAlgValuesSupported, MetadataName.BackchannelAuthenticationRequestSigningAlgValuesSupported, ClassName, true);
-
-                    else if (reader.ValueTextEquals(Utf8Bytes.BackchannelUserCodeParameterSupported))
-                        config.BackchannelUserCodeParameterSupported = JsonPrimitives.ReadBoolean(ref reader, MetadataName.BackchannelUserCodeParameterSupported, ClassName, true);
-
-                    else if (reader.ValueTextEquals(Utf8Bytes.DPoPSigningAlgValuesSupported))
-                        JsonPrimitives.ReadStrings(ref reader, config.DPoPSigningAlgValuesSupported, MetadataName.DPoPSigningAlgValuesSupported, ClassName, true);
-
-                    else if (reader.ValueTextEquals(Utf8Bytes.AuthorizationResponseIssParameterSupported))
-                        config.AuthorizationResponseIssParameterSupported = JsonPrimitives.ReadBoolean(ref reader, MetadataName.AuthorizationResponseIssParameterSupported, ClassName, true);
                     #endregion
                     else
                     {
@@ -336,6 +336,21 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                             else if (propertyName.Equals(MetadataName.AuthorizationEndpoint, StringComparison.OrdinalIgnoreCase))
                                 config.AuthorizationEndpoint = JsonPrimitives.ReadString(ref reader, propertyName, ClassName);
 
+                            else if (propertyName.Equals(MetadataName.AuthorizationResponseIssParameterSupported, StringComparison.OrdinalIgnoreCase))
+                                config.AuthorizationResponseIssParameterSupported = JsonPrimitives.ReadBoolean(ref reader, propertyName, ClassName);
+
+                            else if (propertyName.Equals(MetadataName.BackchannelAuthenticationEndpoint, StringComparison.OrdinalIgnoreCase))
+                                config.BackchannelAuthenticationEndpoint = JsonPrimitives.ReadString(ref reader, propertyName, ClassName);
+
+                            else if (propertyName.Equals(MetadataName.BackchannelAuthenticationRequestSigningAlgValuesSupported, StringComparison.OrdinalIgnoreCase))
+                                JsonPrimitives.ReadStrings(ref reader, config.BackchannelAuthenticationRequestSigningAlgValuesSupported, propertyName, ClassName);
+
+                            else if (propertyName.Equals(MetadataName.BackchannelTokenDeliveryModesSupported, StringComparison.OrdinalIgnoreCase))
+                                JsonPrimitives.ReadStrings(ref reader, config.BackchannelTokenDeliveryModesSupported, propertyName, ClassName);
+
+                            else if (propertyName.Equals(MetadataName.BackchannelUserCodeParameterSupported, StringComparison.OrdinalIgnoreCase))
+                                config.BackchannelUserCodeParameterSupported = JsonPrimitives.ReadBoolean(ref reader, propertyName, ClassName);
+
                             else if (propertyName.Equals(MetadataName.CheckSessionIframe, StringComparison.OrdinalIgnoreCase))
                                 config.CheckSessionIframe = JsonPrimitives.ReadString(ref reader, propertyName, ClassName);
 
@@ -353,6 +368,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
                             else if (propertyName.Equals(MetadataName.DisplayValuesSupported, StringComparison.OrdinalIgnoreCase))
                                 JsonPrimitives.ReadStrings(ref reader, config.DisplayValuesSupported, propertyName, ClassName);
+
+                            else if (propertyName.Equals(MetadataName.DPoPSigningAlgValuesSupported, StringComparison.OrdinalIgnoreCase))
+                                JsonPrimitives.ReadStrings(ref reader, config.DPoPSigningAlgValuesSupported, propertyName, ClassName);
 
                             else if (propertyName.Equals(MetadataName.EndSessionEndpoint, StringComparison.OrdinalIgnoreCase))
                                 config.EndSessionEndpoint = JsonPrimitives.ReadString(ref reader, propertyName, ClassName);
@@ -416,6 +434,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                             else if (propertyName.Equals(MetadataName.OpTosUri, StringComparison.OrdinalIgnoreCase))
                                 config.OpTosUri = JsonPrimitives.ReadString(ref reader, propertyName, ClassName);
 
+                            else if (propertyName.Equals(MetadataName.PromptValuesSupported, StringComparison.OrdinalIgnoreCase))
+                                JsonPrimitives.ReadStrings(ref reader, config.PromptValuesSupported, propertyName, ClassName);
+
+                            else if (propertyName.Equals(MetadataName.PushedAuthorizationRequestEndpoint, StringComparison.OrdinalIgnoreCase))
+                                config.PushedAuthorizationRequestEndpoint = JsonPrimitives.ReadString(ref reader, propertyName, ClassName);
+
                             else if (propertyName.Equals(MetadataName.RegistrationEndpoint, StringComparison.OrdinalIgnoreCase))
                                 config.RegistrationEndpoint = JsonPrimitives.ReadString(ref reader, propertyName, ClassName);
 
@@ -433,6 +457,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
                             else if (propertyName.Equals(MetadataName.RequestUriParameterSupported, StringComparison.OrdinalIgnoreCase))
                                 config.RequestUriParameterSupported = JsonPrimitives.ReadBoolean(ref reader, propertyName, ClassName);
+
+                            else if (propertyName.Equals(MetadataName.RequirePushedAuthorizationRequests, StringComparison.OrdinalIgnoreCase))
+                                config.RequirePushedAuthorizationRequests = JsonPrimitives.ReadBoolean(ref reader, propertyName, ClassName);
 
                             else if (propertyName.Equals(MetadataName.RequireRequestUriRegistration, StringComparison.OrdinalIgnoreCase))
                                 config.RequireRequestUriRegistration = JsonPrimitives.ReadBoolean(ref reader, propertyName, ClassName);
@@ -475,33 +502,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
                             else if (propertyName.Equals(MetadataName.UserInfoSigningAlgValuesSupported, StringComparison.OrdinalIgnoreCase))
                                 JsonPrimitives.ReadStrings(ref reader, config.UserInfoEndpointSigningAlgValuesSupported, propertyName, ClassName);
-
-                            else if (propertyName.Equals(MetadataName.PromptValuesSupported, StringComparison.OrdinalIgnoreCase))
-                                JsonPrimitives.ReadStrings(ref reader, config.PromptValuesSupported, propertyName, ClassName);
-
-                            else if (propertyName.Equals(MetadataName.PushedAuthorizationRequestEndpoint, StringComparison.OrdinalIgnoreCase))
-                                config.PushedAuthorizationRequestEndpoint = JsonPrimitives.ReadString(ref reader, propertyName, ClassName);
-
-                            else if (propertyName.Equals(MetadataName.RequirePushedAuthorizationRequests, StringComparison.OrdinalIgnoreCase))
-                                config.RequirePushedAuthorizationRequests = JsonPrimitives.ReadBoolean(ref reader, propertyName, ClassName);
-
-                            else if (propertyName.Equals(MetadataName.BackchannelAuthenticationEndpoint, StringComparison.OrdinalIgnoreCase))
-                                config.BackchannelAuthenticationEndpoint = JsonPrimitives.ReadString(ref reader, propertyName, ClassName);
-
-                            else if (propertyName.Equals(MetadataName.BackchannelTokenDeliveryModesSupported, StringComparison.OrdinalIgnoreCase))
-                                JsonPrimitives.ReadStrings(ref reader, config.BackchannelTokenDeliveryModesSupported, propertyName, ClassName);
-
-                            else if (propertyName.Equals(MetadataName.BackchannelAuthenticationRequestSigningAlgValuesSupported, StringComparison.OrdinalIgnoreCase))
-                                JsonPrimitives.ReadStrings(ref reader, config.BackchannelAuthenticationRequestSigningAlgValuesSupported, propertyName, ClassName);
-
-                            else if (propertyName.Equals(MetadataName.BackchannelUserCodeParameterSupported, StringComparison.OrdinalIgnoreCase))
-                                config.BackchannelUserCodeParameterSupported = JsonPrimitives.ReadBoolean(ref reader, propertyName, ClassName);
-
-                            else if (propertyName.Equals(MetadataName.DPoPSigningAlgValuesSupported, StringComparison.OrdinalIgnoreCase))
-                                JsonPrimitives.ReadStrings(ref reader, config.DPoPSigningAlgValuesSupported, propertyName, ClassName);
-
-                            else if (propertyName.Equals(MetadataName.AuthorizationResponseIssParameterSupported, StringComparison.OrdinalIgnoreCase))
-                                config.AuthorizationResponseIssParameterSupported = JsonPrimitives.ReadBoolean(ref reader, propertyName, ClassName);
                         }
                         #endregion case-insensitive
                     }
@@ -547,6 +547,21 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             if (!string.IsNullOrEmpty(config.AuthorizationEndpoint))
                 writer.WriteString(Utf8Bytes.AuthorizationEndpoint, config.AuthorizationEndpoint);
 
+            if (config.AuthorizationResponseIssParameterSupported)
+                writer.WriteBoolean(Utf8Bytes.AuthorizationResponseIssParameterSupported, config.AuthorizationResponseIssParameterSupported);
+
+            if (!string.IsNullOrEmpty(config.BackchannelAuthenticationEndpoint))
+                writer.WriteString(Utf8Bytes.BackchannelAuthenticationEndpoint, config.BackchannelAuthenticationEndpoint);
+
+            if (config.BackchannelAuthenticationRequestSigningAlgValuesSupported.Count > 0)
+                JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.BackchannelAuthenticationRequestSigningAlgValuesSupported, config.BackchannelAuthenticationRequestSigningAlgValuesSupported);
+
+            if (config.BackchannelTokenDeliveryModesSupported.Count > 0)
+                JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.BackchannelTokenDeliveryModesSupported, config.BackchannelTokenDeliveryModesSupported);
+
+            if (config.BackchannelUserCodeParameterSupported)
+                writer.WriteBoolean(Utf8Bytes.BackchannelUserCodeParameterSupported, config.BackchannelUserCodeParameterSupported);
+
             if (!string.IsNullOrEmpty(config.CheckSessionIframe))
                 writer.WriteString(Utf8Bytes.CheckSessionIframe, config.CheckSessionIframe);
 
@@ -564,6 +579,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             if (config.DisplayValuesSupported.Count > 0)
                 JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.DisplayValuesSupported, config.DisplayValuesSupported);
+
+            if (config.DPoPSigningAlgValuesSupported.Count > 0)
+                JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.DPoPSigningAlgValuesSupported, config.DPoPSigningAlgValuesSupported);
 
             if (!string.IsNullOrEmpty(config.EndSessionEndpoint))
                 writer.WriteString(Utf8Bytes.EndSessionEndpoint, config.EndSessionEndpoint);
@@ -613,6 +631,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             if (!string.IsNullOrEmpty(config.OpTosUri))
                 writer.WriteString(Utf8Bytes.OpTosUri, config.OpTosUri);
 
+            if (config.PromptValuesSupported.Count > 0)
+                JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.PromptValuesSupported, config.PromptValuesSupported);
+
+            if (!string.IsNullOrEmpty(config.PushedAuthorizationRequestEndpoint))
+                writer.WriteString(Utf8Bytes.PushedAuthorizationRequestEndpoint, config.PushedAuthorizationRequestEndpoint);
+
             if (!string.IsNullOrEmpty(config.RegistrationEndpoint))
                  writer.WriteString(Utf8Bytes.RegistrationEndpoint, config.RegistrationEndpoint);
 
@@ -630,6 +654,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             if (config.RequestUriParameterSupported)
                 writer.WriteBoolean(Utf8Bytes.RequestUriParameterSupported, config.RequestUriParameterSupported);
+
+            if (config.RequirePushedAuthorizationRequests)
+                writer.WriteBoolean(Utf8Bytes.RequirePushedAuthorizationRequests, config.RequirePushedAuthorizationRequests);
 
             if (config.RequireRequestUriRegistration)
                 writer.WriteBoolean(Utf8Bytes.RequireRequestUriRegistration, config.RequireRequestUriRegistration);
@@ -672,33 +699,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             if (config.UserInfoEndpointSigningAlgValuesSupported.Count > 0)
                 JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.UserInfoSigningAlgValuesSupported, config.UserInfoEndpointSigningAlgValuesSupported);
-
-            if (config.PromptValuesSupported.Count > 0)
-                JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.PromptValuesSupported, config.PromptValuesSupported);
-
-            if (!string.IsNullOrEmpty(config.PushedAuthorizationRequestEndpoint))
-                writer.WriteString(Utf8Bytes.PushedAuthorizationRequestEndpoint, config.PushedAuthorizationRequestEndpoint);
-
-            if (config.RequirePushedAuthorizationRequests)
-                writer.WriteBoolean(Utf8Bytes.RequirePushedAuthorizationRequests, config.RequirePushedAuthorizationRequests);
-
-            if (!string.IsNullOrEmpty(config.BackchannelAuthenticationEndpoint))
-                writer.WriteString(Utf8Bytes.BackchannelAuthenticationEndpoint, config.BackchannelAuthenticationEndpoint);
-
-            if (config.BackchannelTokenDeliveryModesSupported.Count > 0)
-                JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.BackchannelTokenDeliveryModesSupported, config.BackchannelTokenDeliveryModesSupported);
-
-            if (config.BackchannelAuthenticationRequestSigningAlgValuesSupported.Count > 0)
-                JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.BackchannelAuthenticationRequestSigningAlgValuesSupported, config.BackchannelAuthenticationRequestSigningAlgValuesSupported);
-
-            if (config.BackchannelUserCodeParameterSupported)
-                writer.WriteBoolean(Utf8Bytes.BackchannelUserCodeParameterSupported, config.BackchannelUserCodeParameterSupported);
-
-            if (config.DPoPSigningAlgValuesSupported.Count > 0)
-                JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.DPoPSigningAlgValuesSupported, config.DPoPSigningAlgValuesSupported);
-
-            if (config.AuthorizationResponseIssParameterSupported)
-                writer.WriteBoolean(Utf8Bytes.AuthorizationResponseIssParameterSupported, config.AuthorizationResponseIssParameterSupported);
 
             if (config.AdditionalData.Count > 0)
                 JsonPrimitives.WriteObjects(ref writer, config.AdditionalData);
