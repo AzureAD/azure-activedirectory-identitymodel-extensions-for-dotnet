@@ -382,52 +382,32 @@ namespace Microsoft.IdentityModel.Validators
             }
         }
 
-        private static bool IsValidIssuer(string validIssuerTemplate, string tenantId, string actualIssuer)
+        internal static bool IsValidIssuer(string validIssuerTemplate, string tenantId, string actualIssuer)
         {
             if (string.IsNullOrEmpty(validIssuerTemplate))
                 return false;
 
+            ReadOnlySpan<char> validIssuerTemplateSpan = validIssuerTemplate.AsSpan();
+            ReadOnlySpan<char> actualIssuerSpan = actualIssuer.AsSpan();
             int indexOfTenantIdTemplate = validIssuerTemplate.IndexOf(TenantIdTemplate, StringComparison.Ordinal);
-            if (indexOfTenantIdTemplate >= 0)
+
+            if (indexOfTenantIdTemplate >= 0 && actualIssuer.Length > indexOfTenantIdTemplate)
             {
-                return IssuersWithTemplatesAreEqual(validIssuerTemplate.AsSpan(), TenantIdTemplate.AsSpan(), indexOfTenantIdTemplate, actualIssuer.AsSpan(), tenantId.AsSpan());
+                // ensure the first part of the validIssuerTemplate matches the first part of actualIssuer
+                if (!validIssuerTemplateSpan.Slice(0, indexOfTenantIdTemplate).SequenceEqual(actualIssuerSpan.Slice(0, indexOfTenantIdTemplate)))
+                    return false;
+
+                // ensure that actualIssuer contains the tenantId from indexOfTenantIdTemplate for the length of tenantId.Length
+                if (!actualIssuerSpan.Slice(indexOfTenantIdTemplate, tenantId.Length).SequenceEqual(tenantId.AsSpan()))
+                    return false;
+
+                // ensure the second halves are equal
+                return validIssuerTemplateSpan.Slice(indexOfTenantIdTemplate + TenantIdTemplate.Length).SequenceEqual(actualIssuerSpan.Slice(indexOfTenantIdTemplate + tenantId.Length));
             }
             else
             {
-                return validIssuerTemplate == actualIssuer;
+                return validIssuerTemplateSpan.SequenceEqual(actualIssuerSpan);
             }
-        }
-
-        /// <summary>
-        /// Compare two Issuers with templates without string allocations.
-        /// This function replaces: issuer1.Replace(issuer1Template, tenantId) == issuer2
-        /// Example:
-        ///     issuer1 = "https://login.microsoftonline.com/{tenantid}/v2.0"
-        ///     issuer1Template = "{tenantid}"
-        ///     issuer2 = "https://login.microsoftonline.com/12345678/v2.0"
-        ///     tenantId = "12345678"
-        /// </summary>
-        internal static bool IssuersWithTemplatesAreEqual(ReadOnlySpan<char> issuer1, ReadOnlySpan<char> issuer1Template, int templateStartIndex, ReadOnlySpan<char> issuer2, ReadOnlySpan<char> tenantId)
-        {
-            if (templateStartIndex == -1)
-                return false;
-
-            // ensure the first part of the issuer1 matches the first part of issuer2
-            if (!issuer1.Slice(0, templateStartIndex).SequenceEqual(issuer2.Slice(0, templateStartIndex)))
-                return false;
-
-            // ensure that issuer2 contains the tenantId from templateStartIndex for the length of tenantId.Length
-            if (!issuer2.Slice(templateStartIndex, tenantId.Length).SequenceEqual(tenantId))
-                return false;
-
-            int secondHalfIssuer1StartIndex = templateStartIndex + issuer1Template.Length;
-            int secondHalfIssuer2StartIndex = templateStartIndex + tenantId.Length;
-
-            // ensure the second halves are equal
-            if (!issuer1.Slice(secondHalfIssuer1StartIndex).SequenceEqual(issuer2.Slice(secondHalfIssuer2StartIndex)))
-                return false;
-
-            return true;
         }
 
         private void SetEffectiveLKGIssuer(string aadIssuer, ProtocolVersion protocolVersion, TimeSpan lastKnownGoodLifetime)
