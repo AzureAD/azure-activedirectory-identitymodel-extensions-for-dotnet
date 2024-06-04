@@ -114,8 +114,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                                                 ""pushed_authorization_request_endpoint"" : ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/par"",
                                                 ""require_pushed_authorization_requests"" : false,
                                                 ""backchannel_authentication_endpoint"" : ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/bc-authorize"",
-                                                ""backchannel_token_delivery_modes_supported"" : [""poll"", ""ping""],
                                                 ""backchannel_authentication_request_signing_alg_values_supported"" : [""ES384"", ""ES512""],
+                                                ""backchannel_token_delivery_modes_supported"" : [""poll"", ""ping""],
                                                 ""backchannel_user_code_parameter_supported"" : false,
                                                 ""dpop_signing_alg_values_supported"" : [""ES384"", ""ES512""],
                                                 ""authorization_response_iss_parameter_supported"" : false
@@ -652,8 +652,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             config.PushedAuthorizationRequestEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/par";
             config.RequirePushedAuthorizationRequests = false;
             config.BackchannelAuthenticationEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/bc-authorize";
-            AddToCollection(config.BackchannelTokenDeliveryModesSupported, "poll", "ping");
             AddToCollection(config.BackchannelAuthenticationRequestSigningAlgValuesSupported, "ES384", "ES512");
+            AddToCollection(config.BackchannelTokenDeliveryModesSupported, "poll", "ping");
             config.BackchannelUserCodeParameterSupported = false;
             AddToCollection(config.DPoPSigningAlgValuesSupported, "ES384", "ES512");
             config.AuthorizationResponseIssParameterSupported = false;
