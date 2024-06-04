@@ -97,7 +97,7 @@ namespace Microsoft.IdentityModel.Validators
             return true;
         }
 
-        private static string CreateIssuer(string issuer, string tenantIdTemplate, string tenantId, int templateStartIndex)
+        internal static string CreateIssuer(string issuer, string tenantIdTemplate, string tenantId, int templateStartIndex)
         {
 #if NET6_0_OR_GREATER
             return string.Concat(issuer.AsSpan(0, templateStartIndex), tenantId, issuer.AsSpan(templateStartIndex + tenantIdTemplate.Length, issuer.Length - tenantIdTemplate.Length - templateStartIndex));
