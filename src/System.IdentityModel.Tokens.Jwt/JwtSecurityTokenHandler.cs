@@ -618,18 +618,18 @@ namespace System.IdentityModel.Tokens.Jwt
         }
 
         private JwtSecurityToken CreateJwtSecurityTokenPrivate(
-        string issuer,
-        string audience,
-        ClaimsIdentity subject,
-        DateTime? notBefore,
-        DateTime? expires,
-        DateTime? issuedAt,
-        SigningCredentials signingCredentials,
-        EncryptingCredentials encryptingCredentials,
-        IDictionary<string, object> claimCollection,
-        string tokenType,
-        IDictionary<string, object> additionalHeaderClaims,
-        IDictionary<string, object> additionalInnerHeaderClaims)
+            string issuer,
+            string audience,
+            ClaimsIdentity subject,
+            DateTime? notBefore,
+            DateTime? expires,
+            DateTime? issuedAt,
+            SigningCredentials signingCredentials,
+            EncryptingCredentials encryptingCredentials,
+            IDictionary<string, object> claimCollection,
+            string tokenType,
+            IDictionary<string, object> additionalHeaderClaims,
+            IDictionary<string, object> additionalInnerHeaderClaims)
         {
             return CreateJwtSecurityTokenPrivate(
                 issuer, audience, [], subject, notBefore, expires, issuedAt, signingCredentials, encryptingCredentials,

@@ -154,8 +154,8 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (validAudience.Length == tokenAudience.Length)
                 return string.Equals(validAudience, tokenAudience);
-            else
-                return (validationParameters.IgnoreTrailingSlashWhenValidatingAudience && AudiencesMatchIgnoringTrailingSlash(tokenAudience, validAudience));
+
+            return (validationParameters.IgnoreTrailingSlashWhenValidatingAudience && AudiencesMatchIgnoringTrailingSlash(tokenAudience, validAudience));
         }
 
         private static bool AudiencesMatchIgnoringTrailingSlash(string tokenAudience, string validAudience)

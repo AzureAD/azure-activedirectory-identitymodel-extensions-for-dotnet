@@ -367,14 +367,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             else if (SetDefaultTimesOnTokenCreation)
                 conditions.NotOnOrAfter = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes);
 
-            var uriList = createUriList(tokenDescriptor);
+            var uriList = CreateUriList(tokenDescriptor);
             if (!uriList.IsNullOrEmpty())
                 conditions.Conditions.Add(new SamlAudienceRestrictionCondition(uriList));
 
             return conditions;
         }
 
-        private static List<Uri> createUriList(SecurityTokenDescriptor tokenDescriptor)
+        private static List<Uri> CreateUriList(SecurityTokenDescriptor tokenDescriptor)
         {
             var uriList = new List<Uri>();
             if (!tokenDescriptor.Audiences.IsNullOrEmpty())

@@ -359,7 +359,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             if (tokenDescriptor.Claims != null && tokenDescriptor.Claims.Count > 0)
                 payload.Merge(JObject.FromObject(tokenDescriptor.Claims), new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Replace });
 
-            // TODO at next major version (8.0) use only Audiences as SecurityTokenDescriptor.Audience will be removed.
             if (!tokenDescriptor.Audiences.IsNullOrEmpty())
             {
                 if (payload.ContainsKey(JwtRegisteredClaimNames.Aud))

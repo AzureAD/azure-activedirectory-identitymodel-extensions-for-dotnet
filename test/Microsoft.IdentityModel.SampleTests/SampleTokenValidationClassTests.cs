@@ -343,7 +343,6 @@ namespace Microsoft.IdentityModel.SampleTests
 
         /// <summary>
         /// Tests how the class under test using JwtSecurityTokenHandler handles a token missing the 
-        /// 
         /// claim.
         /// </summary>
         [Fact]
