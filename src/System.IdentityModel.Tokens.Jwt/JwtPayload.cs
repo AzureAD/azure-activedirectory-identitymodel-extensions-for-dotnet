@@ -25,7 +25,7 @@ namespace System.IdentityModel.Tokens.Jwt
     {
         internal const string ClassName = "System.IdentityModel.Tokens.Jwt.JwtPayload";
 
-        internal HashSet<string> _audiences;
+        internal List<string> _audiences;
         internal string _azp;
         internal long? _exp;
         internal DateTime? _expDateTime;
@@ -72,7 +72,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Aud))
                     {
                         reader.Read();
-                        payload._audiences = new HashSet<string>();
+                        payload._audiences = new();
                         if (reader.TokenType == JsonTokenType.StartArray)
                         {
                             JsonSerializerPrimitives.ReadStrings(ref reader, payload._audiences, JwtRegisteredClaimNames.Aud, ClassName, false);
@@ -328,10 +328,10 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (_audiences == null)
                 {
-                    HashSet<string> tmp = new (GetListOfClaims(JwtRegisteredClaimNames.Aud));
+                    List<string> tmp = new (GetListOfClaims(JwtRegisteredClaimNames.Aud));
                     Interlocked.CompareExchange(ref _audiences, tmp, null);
                 }
-                return [.. _audiences];
+                return _audiences;
             }
         }
 
