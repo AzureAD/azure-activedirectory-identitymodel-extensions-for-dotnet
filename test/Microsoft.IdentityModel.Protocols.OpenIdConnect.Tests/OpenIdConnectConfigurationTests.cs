@@ -307,7 +307,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 "ui_locales_supported",
                 "userinfo_encryption_alg_values_supported",
                 "userinfo_encryption_enc_values_supported",
-                "userinfo_signing_alg_values_supported",
+                "userinfo_signing_alg_values_supported"
             };
 
             foreach (var collection in collectionNames)
