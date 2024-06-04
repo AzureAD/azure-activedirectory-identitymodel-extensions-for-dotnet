@@ -85,10 +85,10 @@ namespace Microsoft.IdentityModel.Validators
                 // 2. service receieves a v1 token that has issuer like sts.windows.net
                 // 3. signing key issuers will never match sts.windows.net as v1 endpoint doesn't have issuers attached to keys
                 // v2TokenIssuer is the representation of Token.Issuer (if it was a v2 issuer)
-                int templateStartIndex = signingKeyIssuer.IndexOf(AadIssuerValidator.TenantIdTemplate, StringComparison.Ordinal);
                 if (!AadIssuerValidator.IsValidIssuer(signingKeyIssuer, tenantIdFromToken, tokenIssuer)
                     && !AadIssuerValidator.IsValidIssuer(signingKeyIssuer, tenantIdFromToken, openIdConnectConfiguration.Issuer == null ? string.Empty : openIdConnectConfiguration.Issuer))
                 {
+                    int templateStartIndex = signingKeyIssuer.IndexOf(AadIssuerValidator.TenantIdTemplate, StringComparison.Ordinal);
                     string effectiveSigningKeyIssuer = templateStartIndex > -1 ? CreateIssuer(signingKeyIssuer, AadIssuerValidator.TenantIdTemplate, tenantIdFromToken, templateStartIndex) : signingKeyIssuer;
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40005, LogHelper.MarkAsNonPII(tokenIssuer), LogHelper.MarkAsNonPII(effectiveSigningKeyIssuer))));
                 }
