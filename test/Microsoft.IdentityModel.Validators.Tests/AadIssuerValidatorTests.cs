@@ -9,6 +9,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
         [Theory]
         [InlineData(ValidatorConstants.AadInstance + AadIssuerValidator.TenantIdTemplate, ValidatorConstants.AadInstance + ValidatorConstants.TenantIdAsGuid, true)]
         [InlineData(ValidatorConstants.AadInstancePPE + AadIssuerValidator.TenantIdTemplate, ValidatorConstants.AadInstance + ValidatorConstants.TenantIdAsGuid, false)]
+        [InlineData(ValidatorConstants.AadInstance + AadIssuerValidator.TenantIdTemplate, ValidatorConstants.AadInstance + ValidatorConstants.B2CTenantAsGuid, false)]
         [InlineData("", ValidatorConstants.AadInstance + ValidatorConstants.TenantIdAsGuid, false)]
         [InlineData(ValidatorConstants.AadInstance + AadIssuerValidator.TenantIdTemplate, "", false)]
         public static void IsValidIssuer_CanValidateTemplatedIssuers(string templatedIssuer, string issuer, bool expectedResult)
