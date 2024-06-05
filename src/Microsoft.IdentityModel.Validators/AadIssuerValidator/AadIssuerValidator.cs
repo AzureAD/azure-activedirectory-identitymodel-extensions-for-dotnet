@@ -13,7 +13,6 @@ using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
-using static Microsoft.IdentityModel.Validators.AadIssuerValidator;
 
 namespace Microsoft.IdentityModel.Validators
 {
@@ -383,18 +382,31 @@ namespace Microsoft.IdentityModel.Validators
             }
         }
 
-        private static bool IsValidIssuer(string validIssuerTemplate, string tenantId, string actualIssuer)
+        internal static bool IsValidIssuer(string validIssuerTemplate, string tenantId, string actualIssuer)
         {
-            if (string.IsNullOrEmpty(validIssuerTemplate))
+            if (string.IsNullOrEmpty(validIssuerTemplate) || string.IsNullOrEmpty(actualIssuer) || string.IsNullOrEmpty(tenantId))
                 return false;
 
-            if (validIssuerTemplate.Contains(TenantIdTemplate))
+            ReadOnlySpan<char> validIssuerTemplateSpan = validIssuerTemplate.AsSpan();
+            ReadOnlySpan<char> actualIssuerSpan = actualIssuer.AsSpan();
+            int indexOfTenantIdTemplate = validIssuerTemplate.IndexOf(TenantIdTemplate, StringComparison.Ordinal);
+
+            if (indexOfTenantIdTemplate >= 0 && actualIssuer.Length > indexOfTenantIdTemplate)
             {
-                return validIssuerTemplate.Replace(TenantIdTemplate, tenantId) == actualIssuer;
+                // ensure the first part of the validIssuerTemplate matches the first part of actualIssuer
+                if (!validIssuerTemplateSpan.Slice(0, indexOfTenantIdTemplate).SequenceEqual(actualIssuerSpan.Slice(0, indexOfTenantIdTemplate)))
+                    return false;
+
+                // ensure that actualIssuer contains the tenantId from indexOfTenantIdTemplate for the length of tenantId.Length
+                if (!actualIssuerSpan.Slice(indexOfTenantIdTemplate, tenantId.Length).SequenceEqual(tenantId.AsSpan()))
+                    return false;
+
+                // ensure the second halves are equal
+                return validIssuerTemplateSpan.Slice(indexOfTenantIdTemplate + TenantIdTemplate.Length).SequenceEqual(actualIssuerSpan.Slice(indexOfTenantIdTemplate + tenantId.Length));
             }
             else
             {
-                return validIssuerTemplate == actualIssuer;
+                return validIssuerTemplateSpan.SequenceEqual(actualIssuerSpan);
             }
         }
 
