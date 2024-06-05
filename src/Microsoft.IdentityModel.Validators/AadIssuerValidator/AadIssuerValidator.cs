@@ -384,7 +384,7 @@ namespace Microsoft.IdentityModel.Validators
 
         internal static bool IsValidIssuer(string validIssuerTemplate, string tenantId, string actualIssuer)
         {
-            if (string.IsNullOrEmpty(validIssuerTemplate))
+            if (string.IsNullOrEmpty(validIssuerTemplate) || string.IsNullOrEmpty(actualIssuer) || string.IsNullOrEmpty(tenantId))
                 return false;
 
             ReadOnlySpan<char> validIssuerTemplateSpan = validIssuerTemplate.AsSpan();
