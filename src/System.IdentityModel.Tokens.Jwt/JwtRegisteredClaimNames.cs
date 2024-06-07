@@ -7,9 +7,13 @@ namespace System.IdentityModel.Tokens.Jwt
     /// List of registered claims from different sources
     /// https://datatracker.ietf.org/doc/html/rfc7519#section-4
     /// http://openid.net/specs/openid-connect-core-1_0.html#IDToken
+    /// https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
     /// </summary>
     public struct JwtRegisteredClaimNames
     {
+
+        // Please keep in alphabetical order
+
         /// <summary>
         /// </summary>
         public const string Actort = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Actort;
@@ -25,7 +29,7 @@ namespace System.IdentityModel.Tokens.Jwt
         public const string Amr = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Amr;
 
         /// <summary>
-        /// https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims //TODO: clarify if this should be a JSON obj based on spec? 
+        /// https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
         /// </summary>
         public const string Address = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Address;
 
@@ -65,7 +69,7 @@ namespace System.IdentityModel.Tokens.Jwt
         public const string Email = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Email;
 
         /// <summary>
-        /// https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims //TODO: clarify if this should be a Boolean based on spec?
+        /// https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
         /// </summary>
         public const string EmailVerified = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.EmailVerified;
 

@@ -25,7 +25,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public const string Acr = "acr";
 
         /// <summary>
-        /// https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims //TODO: clarify if this should be a JSON obj based on spec? 
+        /// https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
         /// </summary>
         public const string Address = "address";
 
@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public const string Email = "email";
 
         /// <summary>
-        /// https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims //TODO: clarify if this should be a Boolean based on spec?
+        /// https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
         /// </summary>
         public const string EmailVerified = "email_verified";
 
@@ -160,7 +160,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public const string Picture = "picture";
 
         /// <summary>
-        /// TODO:Add description?
         /// </summary>
         public const string Prn = "prn";
 
