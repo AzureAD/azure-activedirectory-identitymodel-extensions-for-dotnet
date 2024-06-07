@@ -109,7 +109,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         public const string Jti = "jti";
 
-
         /// <summary>
         /// https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
         /// </summary>
