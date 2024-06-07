@@ -34,6 +34,11 @@ namespace System.IdentityModel.Tokens.Jwt
         public const string Address = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Address;
 
         /// <summary>
+        /// http://openid.net/specs/openid-connect-core-1_0.html#CodeIDToken
+        /// </summary>
+        public const string AtHash = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.AtHash;
+
+        /// <summary>
         /// https://datatracker.ietf.org/doc/html/rfc7519#section-4
         /// </summary>
         public const string Aud = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Aud;
@@ -57,11 +62,6 @@ namespace System.IdentityModel.Tokens.Jwt
         /// https://openid.net/specs/openid-connect-core-1_0.html#HybridIDToken
         /// </summary>
         public const string CHash = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.CHash;
-
-        /// <summary>
-        /// http://openid.net/specs/openid-connect-core-1_0.html#CodeIDToken
-        /// </summary>
-        public const string AtHash = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.AtHash;
 
         /// <summary>
         /// https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
@@ -141,6 +141,16 @@ namespace System.IdentityModel.Tokens.Jwt
         /// https://datatracker.ietf.org/doc/html/rfc7519#section-4
         /// </summary>
         public const string Nbf = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Nbf;
+
+        /// <summary>
+        /// https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
+        /// </summary>
+        public const string PhoneNumber = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.PhoneNumber;
+
+        /// <summary>
+        /// https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
+        /// </summary>
+        public const string PhoneNumberVerified = Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.PhoneNumberVerified;
 
         /// <summary>
         /// https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims
