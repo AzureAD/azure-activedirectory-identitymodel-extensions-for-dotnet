@@ -24,7 +24,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions.Tests
             _key = new KeyVaultSecurityKey(KeyVaultUtilities.CreateKeyIdentifier(), keySize: default);
         }
 
-        [Theory, MemberData(nameof(DisposeProviderTheoryData))]
+        [Theory, MemberData(nameof(DisposeProviderTheoryData), DisableDiscoveryEnumeration = true)]
         public void DisposeProviderTest(SignatureProviderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.DisposeProviderTest", theoryData);
@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions.Tests
             };
         }
 
-        [Theory, MemberData(nameof(SignatureProviderTheoryData))]
+        [Theory, MemberData(nameof(SignatureProviderTheoryData), DisableDiscoveryEnumeration = true)]
         public void SignatureTest(SignatureProviderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.SignatureTest", theoryData);

@@ -21,7 +21,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
     {
         internal const string _defaultJkuDomain = "contoso.com";
 
-        [Theory, MemberData(nameof(ResolvePopKeyFromCnfClaimAsyncTheoryData))]
+        [Theory, MemberData(nameof(ResolvePopKeyFromCnfClaimAsyncTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task ResolvePopKeyFromCnfClaimAsync(ResolvePopKeyTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ResolvePopKeyFromCnfClaimAsync", theoryData);
@@ -142,7 +142,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ResolvePopKeyAsyncTheoryData))]
+        [Theory, MemberData(nameof(ResolvePopKeyAsyncTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task ResolvePopKeyAsync(ResolvePopKeyTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ResolvePopKeyTheoryData", theoryData);
@@ -198,7 +198,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ResolvePopKeyFromJwkTheoryData))]
+        [Theory, MemberData(nameof(ResolvePopKeyFromJwkTheoryData), DisableDiscoveryEnumeration = true)]
         public void ResolvePopKeyFromJwk(ResolvePopKeyTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ResolvePopKeyTheoryData", theoryData);
@@ -269,7 +269,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ResolvePopKeyFromJweTheoryData))]
+        [Theory, MemberData(nameof(ResolvePopKeyFromJweTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task ResolvePopKeyFromJweAsync(ResolvePopKeyTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ResolvePopKeyFromJwe", theoryData);
@@ -393,7 +393,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ResolvePopKeyFromJkuTheoryData))]
+        [Theory, MemberData(nameof(ResolvePopKeyFromJkuTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task ResolvePopKeyFromJkuAsync(ResolvePopKeyTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ResolvePopKeyFromJkuAsync", theoryData);
@@ -562,7 +562,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(GetCnfClaimValueTheoryData))]
+        [Theory, MemberData(nameof(GetCnfClaimValueTheoryData), DisableDiscoveryEnumeration = true)]
         public void GetCnfClaimValue(ResolvePopKeyTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.GetCnfClaimValue", theoryData);
@@ -625,7 +625,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ResolvePopKeyFromJkuKidTheoryData))]
+        [Theory, MemberData(nameof(ResolvePopKeyFromJkuKidTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task ResolvePopKeyFromJkuKidAsync(ResolvePopKeyTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ResolvePopKeyFromJkuKidAsync", theoryData);
@@ -856,7 +856,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ResolvePopKeyFromKeyIdentifierAsyncTheoryData))]
+        [Theory, MemberData(nameof(ResolvePopKeyFromKeyIdentifierAsyncTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task ResolvePopKeyFromKeyIdentifierAsync(ResolvePopKeyTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ResolvePopKeyFromKeyIdentifierAsync", theoryData);

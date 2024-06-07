@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             new Claim("dateTimeIso8061", _dateTime.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
         };
 
-        [Theory, MemberData(nameof(DirectClaimSetTestCases))]
+        [Theory, MemberData(nameof(DirectClaimSetTestCases), DisableDiscoveryEnumeration = true)]
         public void DirectClaimSetTests(JsonClaimSetTheoryData theoryData)
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.ClaimSetTests", theoryData);
@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             return theoryData;
         }
 
-        [Theory, MemberData(nameof(GetClaimAsTypeTheoryData))]
+        [Theory, MemberData(nameof(GetClaimAsTypeTheoryData), DisableDiscoveryEnumeration = true)]
         public void GetClaimAsType(JsonClaimSetTheoryData theoryData)
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.GetClaimAsType", theoryData);

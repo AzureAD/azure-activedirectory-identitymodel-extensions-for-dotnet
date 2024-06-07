@@ -16,7 +16,7 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions.Tests
         private static ExpectedException ArgumentNullExceptionExpected = new ExpectedException(typeExpected: typeof(TargetInvocationException), substringExpected: "Exception has been thrown by the target of an invocation.", innerTypeExpected: typeof(ArgumentNullException));
         private static ExpectedException KeyVaultErrorExceptionExpected = new ExpectedException(typeExpected: typeof(TargetInvocationException), substringExpected: "Exception has been thrown by the target of an invocation.", innerTypeExpected: typeof(KeyVaultErrorException));
 
-        [Theory, MemberData(nameof(KeyVaultSecurityKeyAuthenticationCallbackTheoryData))]
+        [Theory, MemberData(nameof(KeyVaultSecurityKeyAuthenticationCallbackTheoryData), DisableDiscoveryEnumeration = true)]
         public void AuthenticationCallbackConstructorParams(KeyVaultSecurityKeyAuthenticationCallbackTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.AuthenticationCallbackConstructorParams", theoryData);

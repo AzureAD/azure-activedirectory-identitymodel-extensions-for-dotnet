@@ -108,7 +108,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 #endif
 
-        [Theory, MemberData(nameof(AEPConstructorTheoryData))]
+        [Theory, MemberData(nameof(AEPConstructorTheoryData), DisableDiscoveryEnumeration = true)]
         public void Constructors(string testId, SymmetricSecurityKey key, string algorithm, ExpectedException ee)
         {
             TestUtilities.WriteHeader("Constructors - " + testId, true);
@@ -161,7 +161,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return theoryData;
         }
 
-        [Theory, MemberData(nameof(DecryptTheoryData))]
+        [Theory, MemberData(nameof(DecryptTheoryData), DisableDiscoveryEnumeration = true)]
         public void Decrypt(AuthenticatedEncryptionTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.Decrypt", theoryData);
@@ -284,7 +284,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
         }
 
-        [Theory, MemberData(nameof(DecryptMismatchTheoryData))]
+        [Theory, MemberData(nameof(DecryptMismatchTheoryData), DisableDiscoveryEnumeration = true)]
         public void DecryptMismatch(AuthenticatedEncryptionTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.DecryptMismatch", theoryData);
@@ -391,7 +391,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
         }
 
-        [Theory, MemberData(nameof(DisposeTheoryData))]
+        [Theory, MemberData(nameof(DisposeTheoryData), DisableDiscoveryEnumeration = true)]
         public void Dispose(AuthenticatedEncryptionTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.Dispose", theoryData);
@@ -639,7 +639,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 #endregion
 
-        [Theory, MemberData(nameof(EncryptDecryptTheoryData))]
+        [Theory, MemberData(nameof(EncryptDecryptTheoryData), DisableDiscoveryEnumeration = true)]
         public void EncryptDecrypt(AuthenticatedEncryptionTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.EncryptDecrypt", theoryData);

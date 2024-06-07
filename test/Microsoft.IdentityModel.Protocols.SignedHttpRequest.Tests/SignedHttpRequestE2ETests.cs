@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         });
 
 
-        [Theory, MemberData(nameof(RoundtripTheoryData))]
+        [Theory, MemberData(nameof(RoundtripTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task Roundtrips(RoundtripSignedHttpRequestTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.Roundtrips", theoryData);

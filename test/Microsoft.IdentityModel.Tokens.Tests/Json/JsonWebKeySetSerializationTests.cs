@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
         /// The keysets are fully populated and each property checked.
         /// </summary>
         /// <param name="theoryData"></param>
-        [Theory, MemberData(nameof(SerializeDataSet))]
+        [Theory, MemberData(nameof(SerializeDataSet), DisableDiscoveryEnumeration = true)]
         public void Serialize(JsonWebKeySetTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.Serialize", theoryData);
@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             }
         }
 
-        [Theory, MemberData(nameof(JsonWebKeySetTheoryData))]
+        [Theory, MemberData(nameof(JsonWebKeySetTheoryData), DisableDiscoveryEnumeration = true)]
         public void Deserialize(JsonWebKeySetTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.Deserialize", theoryData);

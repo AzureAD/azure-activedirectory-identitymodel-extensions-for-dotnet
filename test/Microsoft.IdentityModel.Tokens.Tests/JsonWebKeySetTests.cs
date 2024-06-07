@@ -13,7 +13,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
 {
     public class JsonWebKeySetTests
     {
-        [Theory, MemberData(nameof(ConstructorDataSet))]
+        [Theory, MemberData(nameof(ConstructorDataSet), DisableDiscoveryEnumeration = true)]
         public void Constructors(JsonWebKeySetTheoryData theoryData)
         {
             var context = new CompareContext(theoryData);
@@ -215,7 +215,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             return null;
         }
 
-        [Theory, MemberData(nameof(GetSigningKeysTheoryData))]
+        [Theory, MemberData(nameof(GetSigningKeysTheoryData), DisableDiscoveryEnumeration = true)]
         public void GetSigningKeys(JsonWebKeySetTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.GetSigningKeys", theoryData);

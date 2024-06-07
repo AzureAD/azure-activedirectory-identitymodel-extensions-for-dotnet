@@ -19,7 +19,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
 {
     public class AadSigningKeyIssuerValidatorTests
     {
-        [Theory, MemberData(nameof(EnableAadSigningKeyIssuerValidationTestCases))]
+        [Theory, MemberData(nameof(EnableAadSigningKeyIssuerValidationTestCases), DisableDiscoveryEnumeration = true)]
         public async Task EnableAadSigningKeyIssuerValidationTests(AadSigningKeyIssuerTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.EnableAadSigningKeyIssuerValidationTests", theoryData);
@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             return theoryData;
         }
 
-        [Theory, MemberData(nameof(ValidateIssuerSigningKeyCertificateTestCases))]
+        [Theory, MemberData(nameof(ValidateIssuerSigningKeyCertificateTestCases), DisableDiscoveryEnumeration = true)]
         public void ValidateIssuerSigningKeyCertificateTests(AadSigningKeyIssuerTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateIssuerSigningKeyCertificateTests", theoryData);
@@ -160,7 +160,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             return theoryData;
         }
 
-        [Theory, MemberData(nameof(ValidateIssuerSigningKeyTestCases))]
+        [Theory, MemberData(nameof(ValidateIssuerSigningKeyTestCases), DisableDiscoveryEnumeration = true)]
         public void ValidateIssuerSigningKeyTests(AadSigningKeyIssuerTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateIssuerSigningKeyTests", theoryData);

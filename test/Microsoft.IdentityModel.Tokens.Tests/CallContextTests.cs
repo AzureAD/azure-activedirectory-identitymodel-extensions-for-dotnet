@@ -13,7 +13,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class CallContextTests
     {
-        [Theory, MemberData(nameof(CallContextTestTheoryData))]
+        [Theory, MemberData(nameof(CallContextTestTheoryData), DisableDiscoveryEnumeration = true)]
         public void LoggerInstanceTests(CallContextTheoryData theoryData)
         {
             var context = new CallContext(theoryData.ActivityId) { DebugId = theoryData.TestId };

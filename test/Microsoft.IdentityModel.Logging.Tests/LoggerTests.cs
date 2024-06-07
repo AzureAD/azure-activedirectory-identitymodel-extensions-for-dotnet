@@ -247,7 +247,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
              var exception = LogHelper.LogExceptionMessage(new ArgumentException("This is the first parameter '{0}'. This is the second parameter '{1}'."));
         }
 
-        [Theory, MemberData(nameof(LoggerTestTheoryData))]
+        [Theory, MemberData(nameof(LoggerTestTheoryData), DisableDiscoveryEnumeration = true)]
         public void LoggerInstanceTests(LoggerTheoryData theoryData)
         {
             LogHelper.Logger = theoryData.Logger;

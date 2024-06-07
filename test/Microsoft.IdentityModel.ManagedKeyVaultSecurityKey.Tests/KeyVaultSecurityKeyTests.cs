@@ -20,7 +20,7 @@ namespace Microsoft.IdentityModel.ManagedKeyVaultSecurityKey.Tests
         private static ExpectedException ArgumentNullExceptionExpected = new ExpectedException(typeExpected: typeof(TargetInvocationException), substringExpected: "Exception has been thrown by the target of an invocation.", innerTypeExpected: typeof(ArgumentNullException));
         private static ExpectedException KeyVaultErrorExceptionExpected = new ExpectedException(typeExpected: typeof(TargetInvocationException), substringExpected: "Exception has been thrown by the target of an invocation.", innerTypeExpected: typeof(KeyVaultErrorException));
 
-        [Theory, MemberData(nameof(KeyVaultSecurityKeyConfidentialClientTheoryData))]
+        [Theory, MemberData(nameof(KeyVaultSecurityKeyConfidentialClientTheoryData), DisableDiscoveryEnumeration = true)]
         public void ConfidentialClientConstructorParams(KeyVaultSecurityKeyConfidentialClientTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ConfidentialClientConstructorParams", theoryData);
@@ -110,7 +110,7 @@ namespace Microsoft.IdentityModel.ManagedKeyVaultSecurityKey.Tests
             };
         }
 
-        [Theory, MemberData(nameof(KeyVaultSecurityKeyManagedServiceIdentityTheoryData))]
+        [Theory, MemberData(nameof(KeyVaultSecurityKeyManagedServiceIdentityTheoryData), DisableDiscoveryEnumeration = true)]
         public void ManagedServiceIdentityConstructorParams(KeyVaultSecurityKeyTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ManagedServiceIdentityConstructorParams", theoryData);

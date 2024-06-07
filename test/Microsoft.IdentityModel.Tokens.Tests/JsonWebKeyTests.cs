@@ -10,7 +10,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
 {
     public class JsonWebKeyTests
     {
-        [Theory, MemberData(nameof(ConstructorDataSet))]
+        [Theory, MemberData(nameof(ConstructorDataSet), DisableDiscoveryEnumeration = true)]
         public void Constructors(JsonWebKeyTheoryData theoryData)
         {
             var context = new CompareContext();
@@ -200,7 +200,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Theory, MemberData(nameof(ComputeJwkThumbprintTheoryData))]
+        [Theory, MemberData(nameof(ComputeJwkThumbprintTheoryData), DisableDiscoveryEnumeration = true)]
         public void ComputeJwkThumbprint(JwkThumbprintTheoryData theoryData)
         {
             Logging.IdentityModelEventSource.ShowPII = true;
@@ -219,7 +219,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Theory, MemberData(nameof(ComputeJwkThumbprintTheoryData))]
+        [Theory, MemberData(nameof(ComputeJwkThumbprintTheoryData), DisableDiscoveryEnumeration = true)]
         public void CanComputeJwkThumbprint(JwkThumbprintTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CanComputeJwkThumbprint", theoryData);

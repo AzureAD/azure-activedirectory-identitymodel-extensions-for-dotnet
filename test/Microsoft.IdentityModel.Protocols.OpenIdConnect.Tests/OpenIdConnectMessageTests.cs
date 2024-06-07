@@ -273,7 +273,7 @@ new OpenIdConnectMessageTheoryData("EmptyJsonStringEmptyJobj")
             TestUtilities.AssertFailIfErrors("OpenIdConnectMessage_GetSets*** Test Failures:\n", context.Errors);
         }
 
-        [Theory, MemberData(nameof(CreateAuthenticationRequestUrlTheoryData))]
+        [Theory, MemberData(nameof(CreateAuthenticationRequestUrlTheoryData), DisableDiscoveryEnumeration = true)]
         public void OidcCreateAuthenticationRequestUrl(string testId, OpenIdConnectMessage message, string expectedMessage)
         {
             TestUtilities.WriteHeader(testId, "OidcCreateAuthenticationRequestUrl", true);
@@ -550,7 +550,7 @@ new OpenIdConnectMessageTheoryData("EmptyJsonStringEmptyJobj")
             return theoryData;
         }
 
-        [Theory, MemberData(nameof(CreateLogoutRequestUrlTheoryData))]
+        [Theory, MemberData(nameof(CreateLogoutRequestUrlTheoryData), DisableDiscoveryEnumeration = true)]
         public void OidcCreateLogoutRequestUrl(string testId, OpenIdConnectMessage message, string expectedMessage)
         {
             TestUtilities.WriteHeader("OidcCreateLogoutRequestUrl - " + testId, true);

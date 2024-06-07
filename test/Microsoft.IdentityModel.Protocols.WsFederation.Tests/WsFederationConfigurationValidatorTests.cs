@@ -16,7 +16,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
     /// </summary>
     public class WsFederationConfigurationValidatorTests
     {
-        [Theory, MemberData(nameof(ValidateConfigurationTheoryData))]
+        [Theory, MemberData(nameof(ValidateConfigurationTheoryData), DisableDiscoveryEnumeration = true)]
         public void ValidateConfiguration(WsFederationConfigurationTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateConfiguration", theoryData);

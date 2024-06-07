@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
         /// This test is designed to ensure that JsonDeserialize and Utf8Reader are consistent w.r.t. exceptions.
         /// </summary>
         /// <param name="theoryData"></param>
-        [Theory, MemberData(nameof(DeserializeTheoryData))]
+        [Theory, MemberData(nameof(DeserializeTheoryData), DisableDiscoveryEnumeration = true)]
         public void DeserializeExceptions(JsonSerializerTheoryData theoryData)
         {
             var context = new CompareContext(theoryData);
@@ -184,7 +184,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
         /// comparing the results JsonSerializer.Deserialize and Utf8JsonReader.
         /// </summary>
         /// <param name="theoryData"></param>
-        [Theory, MemberData(nameof(DeserializeDataSet))]
+        [Theory, MemberData(nameof(DeserializeDataSet), DisableDiscoveryEnumeration = true)]
         public void Deserialize(JsonWebKeyTheoryData theoryData)
         {
             CompareContext context = new CompareContext(theoryData);
@@ -321,7 +321,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
         /// This is different that Deserialize as we are roundtripping objects in AdditionalData.
         /// </summary>
         /// <param name="theoryData"></param>
-        [Theory, MemberData(nameof(RoundTripDataSet))]
+        [Theory, MemberData(nameof(RoundTripDataSet), DisableDiscoveryEnumeration = true)]
         public void RoundTrip(JsonWebKeyTheoryData theoryData)
         {
             var context = new CompareContext(theoryData);
