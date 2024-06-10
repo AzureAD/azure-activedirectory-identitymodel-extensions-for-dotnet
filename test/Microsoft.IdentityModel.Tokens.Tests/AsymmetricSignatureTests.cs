@@ -7,12 +7,20 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 #pragma warning disable SYSLIB0028 // Type or member is obsolete
 #pragma warning disable SYSLIB0027 // Type or member is obsolete
 
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
+    /// <summary>
+    /// This class defines the test collection for all tests that set an AppContext switch.
+    /// All tests in this collection will run sequentially to prevent unexpected behavior
+    /// due to interference between tests as multiple tests set the switch.
+    /// </summary>
+    [CollectionDefinition(nameof(AppContextTestCollection), DisableParallelization = true)]
+    public class AppContextTestCollection { }
+
+    [Collection(nameof(AppContextTestCollection))]
     public class AsymmetricSignatureTests
     {
         [Fact]
@@ -92,17 +100,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
                 return theoryData;
             }
-        }
-
-        public class AsymmetricAdapterTheoryData : TheoryDataBase
-        {
-            public AsymmetricAdapterTheoryData() { }
-
-            public AsymmetricAdapterTheoryData(string testId) : base(testId) { }
-
-            public string Algorithm { get; set; }
-
-            public bool EnablePkcs1SignaturePaddingSwitch { get; set; }
         }
 
         [Theory, MemberData(nameof(SignVerifyTheoryData))]
@@ -522,8 +519,18 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public bool WillCreateSignatures { get; set; }
     }
+
+    public class AsymmetricAdapterTheoryData : TheoryDataBase
+    {
+        public AsymmetricAdapterTheoryData() { }
+
+        public AsymmetricAdapterTheoryData(string testId) : base(testId) { }
+
+        public string Algorithm { get; set; }
+
+        public bool EnablePkcs1SignaturePaddingSwitch { get; set; }
+    }
 }
 
 #pragma warning restore SYSLIB0027 // Type or member is obsolete
 #pragma warning restore SYSLIB0028 // Type or member is obsolete
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
