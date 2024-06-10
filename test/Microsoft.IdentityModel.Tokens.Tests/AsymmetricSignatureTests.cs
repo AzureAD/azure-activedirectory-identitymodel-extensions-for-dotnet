@@ -51,6 +51,60 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        [Theory, MemberData(nameof(RSASignaturePaddingTheoryData))]
+        public void TestSupportedSignaturePaddingValues(AsymmetricAdapterTheoryData theoryData)
+        {
+            var context = new CompareContext("TestSupportedSignaturePaddingValues");
+            TestUtilities.WriteHeader($"{this}.TestSupportedSignaturePaddingValues");
+
+            try
+            {
+                AppContext.SetSwitch("Switch.Microsoft.IdentityModel.EnablePkcs1SignaturePaddingSwitch", theoryData.EnablePkcs1SignaturePaddingSwitch);
+                var asymmetricAdapter = new AsymmetricAdapter(new RsaSecurityKey(new DerivedRsa(2048)), theoryData.Algorithm, false);
+            }
+            catch(Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<AsymmetricAdapterTheoryData> RSASignaturePaddingTheoryData
+        {
+            get
+            {
+                var theoryData = new TheoryData<AsymmetricAdapterTheoryData>
+                {
+                    new AsymmetricAdapterTheoryData("AppContextSwitchFalse_UseUnsupportedAlgorithm_Exception")
+                    {
+                        Algorithm = SecurityAlgorithms.RsaSha256,
+                        EnablePkcs1SignaturePaddingSwitch = false,
+                        ExpectedException = ExpectedException.NotSupportedException("IDX10721:")
+                    },
+                    new AsymmetricAdapterTheoryData("AppContextSwitchTrue_UseUnsupportedAlgorithm_NoException")
+                    {
+                        Algorithm = SecurityAlgorithms.RsaSha256,
+                        EnablePkcs1SignaturePaddingSwitch = true,
+                        ExpectedException = ExpectedException.NoExceptionExpected
+                    }
+                };
+
+                return theoryData;
+            }
+        }
+
+        public class AsymmetricAdapterTheoryData : TheoryDataBase
+        {
+            public AsymmetricAdapterTheoryData() { }
+
+            public AsymmetricAdapterTheoryData(string testId) : base(testId) { }
+
+            public string Algorithm { get; set; }
+
+            public bool EnablePkcs1SignaturePaddingSwitch { get; set; }
+        }
+
         [Theory, MemberData(nameof(SignVerifyTheoryData))]
         public void SignVerify(SignatureProviderTheoryData theoryData)
         {

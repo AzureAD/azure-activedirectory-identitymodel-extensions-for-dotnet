@@ -41,6 +41,8 @@ namespace Microsoft.IdentityModel.Tokens
         private VerifyDelegate _verifyFunction = VerifyNotFound;
         private VerifyUsingOffsetDelegate _verifyUsingOffsetFunction = VerifyUsingOffsetNotFound;
 
+        internal const string _enablePkcs1SignaturePaddingSwitch = "Switch.Microsoft.IdentityModel.EnablePkcs1SignaturePaddingSwitch";
+
         // Encryption algorithms do not need a HashAlgorithm, this is called by RSAKeyWrap
         internal AsymmetricAdapter(SecurityKey key, string algorithm, bool requirePrivateKey)
             : this(key, algorithm, null, requirePrivateKey)
@@ -195,8 +197,14 @@ namespace Microsoft.IdentityModel.Tokens
             }
             else
             {
-                // default RSASignaturePadding for other supported RSA algorithms is Pkcs1
-                RSASignaturePadding = RSASignaturePadding.Pkcs1;
+                if (AppContext.TryGetSwitch(_enablePkcs1SignaturePaddingSwitch, out bool enablePaddingSwitch) && enablePaddingSwitch)
+                {
+                    RSASignaturePadding = RSASignaturePadding.Pkcs1;
+                }
+                else
+                {
+                    throw new NotSupportedException(LogMessages.IDX10721);
+                }
             }
 
             RSAEncryptionPadding = (algorithm.Equals(SecurityAlgorithms.RsaOAEP) || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap))

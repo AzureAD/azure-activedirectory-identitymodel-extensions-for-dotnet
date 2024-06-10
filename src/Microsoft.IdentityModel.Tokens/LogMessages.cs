@@ -226,6 +226,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10718 = "IDX10718: AlgorithmToValidate is not supported: '{0}'. Algorithm '{1}'.";
         public const string IDX10719 = "IDX10719: SignatureSize (in bytes) was expected to be '{0}', was '{1}'.";
         public const string IDX10720 = "IDX10720: Unable to create KeyedHashAlgorithm for algorithm '{0}', the key size must be greater than: '{1}' bits, key has '{2}' bits.";
+        public const string IDX10721 = "IDX10721: RSASignaturePadding.Pkcs1 is no longer supported. Please use one of the supported algorithms: PS256, SecurityAlgorithms.RsaSsaPssSha256Signature, PS384, SecurityAlgorithms.RsaSsaPssSha384Signature, PS512, SecurityAlgorithms.RsaSsaPssSha512Signature.";
 
         // Json specific errors
         //public const string IDX10801 = "IDX10801:"
