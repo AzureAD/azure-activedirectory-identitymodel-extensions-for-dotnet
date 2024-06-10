@@ -812,6 +812,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             return UserInfoEndpointSigningAlgValuesSupported.Count > 0;
         }
 
-#endregion shouldserialize
+        /// <summary>
+        /// Gets or sets a value indicating whether the JsonWebKeys should be serialized.
+        /// </summary>
+        public bool ShouldSerializeJsonWebKeys { get; set; }
+
+        #endregion shouldserialize
     }
 }

@@ -12,6 +12,8 @@ using Microsoft.IdentityModel.Logging;
 using Utf8Bytes = Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdProviderMetadataUtf8Bytes;
 using JsonPrimitives = Microsoft.IdentityModel.Tokens.Json.JsonSerializerPrimitives;
 using MetadataName = Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdProviderMetadataNames;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Json;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
@@ -279,6 +281,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
                     else if (reader.ValueTextEquals(Utf8Bytes.UserInfoSigningAlgValuesSupported))
                         JsonPrimitives.ReadStrings(ref reader, config.UserInfoEndpointSigningAlgValuesSupported, MetadataName.UserInfoSigningAlgValuesSupported, ClassName, true);
+
+                    else if (reader.ValueTextEquals(JsonWebKeySetParameterNames.Keys))
+                        JsonWebKeySetSerializer.ReadKeys(ref reader, config.JsonWebKeySet);
+
                     #endregion
                     else
                     {
@@ -577,6 +583,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             if (config.ResponseTypesSupported.Count > 0)
                 JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.ResponseTypesSupported, config.ResponseTypesSupported);
+
+            if (config.ShouldSerializeJsonWebKeys && config.JsonWebKeySet != null && config.JsonWebKeySet.Keys.Count > 0)
+                JsonWebKeySetSerializer.Write(ref writer, config.JsonWebKeySet);
 
             if (config.ScopesSupported.Count > 0)
                 JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.ScopesSupported, config.ScopesSupported);
