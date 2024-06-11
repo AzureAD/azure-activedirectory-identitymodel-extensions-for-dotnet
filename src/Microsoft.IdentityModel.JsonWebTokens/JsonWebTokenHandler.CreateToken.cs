@@ -681,6 +681,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// A <see cref="SecurityTokenDescriptor"/> can contain claims from multiple locations.
         /// This method consolidates the claims and adds default times {exp, iat, nbf} if needed.
+        /// In the case of a claim from this set: {Audience, Issuer, Expires, IssuedAt, NotBefore} being defined in multiple
+        /// locations in the SecurityTokenDescriptor, the following priority is used:
+        /// SecurityTokenDescriptor.{Audience/Audiences, Issuer, Expires, IssuedAt, NotBefore} > SecurityTokenDescriptor.Claims >
+        /// SecurityTokenDescriptor.Subject.Claims
         /// </summary>
         /// <param name="writer">The <see cref="Utf8JsonWriter"/> to use.</param>
         /// <param name="tokenDescriptor">The <see cref="SecurityTokenDescriptor"/> used to create the token.</param>
