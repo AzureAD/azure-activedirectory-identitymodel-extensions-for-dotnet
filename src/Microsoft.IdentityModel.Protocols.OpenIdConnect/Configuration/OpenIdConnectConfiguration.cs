@@ -815,6 +815,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <summary>
         /// Gets or sets a value indicating whether the JsonWebKeys should be serialized.
         /// </summary>
+        [JsonIgnore]
         public bool ShouldSerializeJsonWebKeys { get; set; }
 
         #endregion shouldserialize

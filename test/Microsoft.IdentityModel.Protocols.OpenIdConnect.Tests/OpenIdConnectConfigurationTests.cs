@@ -104,6 +104,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.NotNull(configuration.UserInfoEndpointEncryptionAlgValuesSupported);
             Assert.NotNull(configuration.UserInfoEndpointEncryptionEncValuesSupported);
             Assert.NotNull(configuration.UserInfoEndpointSigningAlgValuesSupported);
+            Assert.False(configuration.ShouldSerializeSigningKeys);
         }
 
         // If the OpenIdConnect metadata has a "SigningKeys" claim, it should NOT be deserialized into the corresponding OpenIdConnectConfiguration.SigningKeys property.
