@@ -28,17 +28,6 @@ namespace Microsoft.IdentityModel.Tokens
         public IList<string> Audiences => _audiences ?? Interlocked.CompareExchange(ref _audiences, [], null) ?? _audiences;
 
         /// <summary>
-        /// Enables adding multiple audiences to the Audiences member at once.
-        /// </summary>
-        /// <param name="auds">List of strings with each representing an audience to add to the 'Aud' claim</param>
-        public void AddAudiences(IList<string> auds)
-        {
-            _ = Audiences;
-            if (auds != null)
-                _audiences.AddRange(auds);
-        }
-
-        /// <summary>
         /// Defines the compression algorithm that will be used to compress the JWT token payload.
         /// </summary>
         public string CompressionAlgorithm { get; set; }

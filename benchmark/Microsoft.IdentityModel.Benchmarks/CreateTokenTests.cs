@@ -48,8 +48,11 @@ namespace Microsoft.IdentityModel.Benchmarks
             };
 
             _tokenDescriptorSingleAudienceUsingAudiencesMember.Audiences.Add(BenchmarkUtils.Audience);
-            _tokenDescriptorMultipleAudiencesMemberOnly.AddAudiences(BenchmarkUtils.Audiences);
-            _tokenDescriptorMultipleAudiencesMemberAndClaims.AddAudiences(BenchmarkUtils.Audiences);
+            foreach (var audience in BenchmarkUtils.Audiences)
+            {
+                _tokenDescriptorMultipleAudiencesMemberOnly.Audiences.Add(audience);
+                _tokenDescriptorMultipleAudiencesMemberAndClaims.Audiences.Add(audience);
+            }
         }
 
         [Benchmark]

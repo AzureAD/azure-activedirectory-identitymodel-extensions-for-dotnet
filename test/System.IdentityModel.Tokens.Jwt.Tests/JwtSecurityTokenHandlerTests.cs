@@ -263,7 +263,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.CreateJWEUsingSecurityTokenDescriptor", theoryData);
             theoryData.ValidationParameters.ValidateLifetime = false;
-            theoryData.TokenDescriptor.AddAudiences(theoryData.AudiencesForSecurityTokenDescriptor);
+
+            if (!theoryData.AudiencesForSecurityTokenDescriptor.IsNullOrEmpty())
+            {
+                foreach (var audience in theoryData.AudiencesForSecurityTokenDescriptor)
+                    theoryData.TokenDescriptor.Audiences.Add(audience);
+            }
 
             try
             {

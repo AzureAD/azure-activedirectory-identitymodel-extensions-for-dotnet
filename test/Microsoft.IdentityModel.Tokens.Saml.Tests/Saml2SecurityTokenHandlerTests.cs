@@ -1092,7 +1092,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                 { typeof(Saml2Assertion), new List<string> { "IssueInstant", "InclusiveNamespacesPrefixList", "Signature", "SigningCredentials", "CanonicalString" } },
                 { typeof(Saml2SecurityToken), new List<string> { "SigningKey" } },
             };
-            theoryData.TokenDescriptor.AddAudiences(theoryData.AudiencesForSecurityTokenDescriptor);
+
+            if (!theoryData.AudiencesForSecurityTokenDescriptor.IsNullOrEmpty())
+            {
+                foreach (var audience in theoryData.AudiencesForSecurityTokenDescriptor)
+                    theoryData.TokenDescriptor.Audiences.Add(audience);
+            }
 
             try
             {

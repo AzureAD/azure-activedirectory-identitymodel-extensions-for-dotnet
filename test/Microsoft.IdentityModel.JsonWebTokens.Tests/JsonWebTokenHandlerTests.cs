@@ -801,8 +801,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateJWEUsingSecurityTokenDescriptor", theoryData);
             theoryData.ValidationParameters.ValidateLifetime = false;
-            if (theoryData.TokenDescriptor != null)
-                theoryData.TokenDescriptor.AddAudiences(theoryData.AudiencesForSecurityTokenDescriptor);
+            if (theoryData.TokenDescriptor != null && !theoryData.AudiencesForSecurityTokenDescriptor.IsNullOrEmpty())
+                foreach (var audience in theoryData.AudiencesForSecurityTokenDescriptor)
+                    theoryData.TokenDescriptor.Audiences.Add(audience);
 
             try
             {
@@ -1913,8 +1914,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             try
             {
                 JsonWebTokenHandler6x jsonWebTokenHandler6x = new JsonWebTokenHandler6x();
-                if (theoryData.TokenDescriptor != null)
-                    theoryData.TokenDescriptor.AddAudiences(theoryData.AudiencesForSecurityTokenDescriptor);
+                if (theoryData.TokenDescriptor != null && !theoryData.AudiencesForSecurityTokenDescriptor.IsNullOrEmpty())
+                    foreach (var audience in theoryData.AudiencesForSecurityTokenDescriptor)
+                        theoryData.TokenDescriptor.Audiences.Add(audience);
 
                 string jwtFromSecurityTokenDescriptor6x = jwtFromSecurityTokenDescriptor6x = jsonWebTokenHandler6x.CreateToken(theoryData.TokenDescriptor6x ?? theoryData.TokenDescriptor);
                 string jwtFromSecurityTokenDescriptor = theoryData.JsonWebTokenHandler.CreateToken(theoryData.TokenDescriptor);
