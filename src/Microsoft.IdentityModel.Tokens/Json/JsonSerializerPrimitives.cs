@@ -130,13 +130,13 @@ namespace Microsoft.IdentityModel.Tokens.Json
 
         internal static object CreateObjectFromJsonElement(JsonElement jsonElement, int currentDepth)
         {
-            return CreateObjectFromJsonElement(string.Empty, jsonElement, currentDepth);
+            return CreateObjectFromJsonElement(jsonElement, currentDepth, string.Empty);
         }
 
         /// <remarks>
         /// <paramref name="claimType"/> is not considered on recursive calls.
         /// </remarks>
-        internal static object CreateObjectFromJsonElement(string claimType, JsonElement jsonElement, int currentDepth)
+        internal static object CreateObjectFromJsonElement(JsonElement jsonElement, int currentDepth, string claimType)
         {
             if (currentDepth >= MaxDepth)
                 throw new InvalidOperationException(LogHelper.FormatInvariant(
@@ -186,7 +186,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 int index = 0;
                 foreach (JsonElement j in jsonElement.EnumerateArray())
                 {
-                    items[index++] = CreateObjectFromJsonElement(string.Empty, j, currentDepth + 1);
+                    items[index++] = CreateObjectFromJsonElement(j, currentDepth + 1, string.Empty);
                 }
 
                 return items;
@@ -201,7 +201,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 KeyValuePair<string, object>[] kvps = new KeyValuePair<string, object>[numItems];
                 foreach (JsonProperty property in jsonElement.EnumerateObject())
                 {
-                    kvps[index++] = new KeyValuePair<string, object>(property.Name, CreateObjectFromJsonElement(string.Empty, property.Value, currentDepth + 1));
+                    kvps[index++] = new KeyValuePair<string, object>(property.Name, CreateObjectFromJsonElement(property.Value, currentDepth + 1, string.Empty));
                 }
 
                 return kvps;
@@ -306,7 +306,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     Dictionary<string, object> dictionary = new();
                     foreach (JsonProperty property in jsonElement.EnumerateObject())
                     {
-                        dictionary[property.Name] = CreateObjectFromJsonElement(string.Empty, property.Value, currentDepth + 1);
+                        dictionary[property.Name] = CreateObjectFromJsonElement(property.Value, currentDepth + 1, string.Empty);
                     }
 
                     t = (T)(object)dictionary;
@@ -397,7 +397,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     numItems = 0;
                     foreach (JsonElement j in jsonElement.EnumerateArray())
                     {
-                        items[numItems++] = CreateObjectFromJsonElement(string.Empty, j, currentDepth + 1);
+                        items[numItems++] = CreateObjectFromJsonElement(j, currentDepth + 1, string.Empty);
                     }
 
                     t = (T)(object)items;
@@ -408,7 +408,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     List<object> items = new();
                     foreach (JsonElement j in jsonElement.EnumerateArray())
                     {
-                        items.Add(CreateObjectFromJsonElement(string.Empty, j, currentDepth + 1));
+                        items.Add(CreateObjectFromJsonElement(j, currentDepth + 1, string.Empty));
                     }
 
                     t = (T)(object)items;
@@ -419,7 +419,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     Collection<object> items = new();
                     foreach (JsonElement j in jsonElement.EnumerateArray())
                     {
-                        items.Add(CreateObjectFromJsonElement(string.Empty, j, currentDepth + 1));
+                        items.Add(CreateObjectFromJsonElement(j, currentDepth + 1, string.Empty));
                     }
 
                     t = (T)(object)items;
@@ -718,7 +718,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
         /// sourced from expected Entra V1 and V2 claims, OpenID Connect claims, and a selection of
         /// restricted claim names.
         /// </summary>
-        private static HashSet<string> KnownNonDateTimesClaimTypes = new(StringComparer.Ordinal)
+        private static readonly HashSet<string> s_knownNonDateTimeClaimTypes = new(StringComparer.Ordinal)
         {
             // Header Values.
             "alg",
@@ -816,7 +816,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
             if (string.IsNullOrEmpty(claimType))
                 return true;
 
-            if (KnownNonDateTimesClaimTypes.Contains(claimType))
+            if (s_knownNonDateTimeClaimTypes.Contains(claimType))
                 return true;
 
             return false;

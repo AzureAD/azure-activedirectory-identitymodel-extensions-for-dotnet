@@ -672,7 +672,7 @@ namespace System.IdentityModel.Tokens.Jwt
             Type objType = value.GetType();
 
             if (value is string str)
-                return JwtTokenUtilities.GetStringClaimValueType(claimType, str);
+                return JwtTokenUtilities.GetStringClaimValueType(str, claimType);
             else if (objType == typeof(int))
                 return ClaimValueTypes.Integer32;
             else if (objType == typeof(long))

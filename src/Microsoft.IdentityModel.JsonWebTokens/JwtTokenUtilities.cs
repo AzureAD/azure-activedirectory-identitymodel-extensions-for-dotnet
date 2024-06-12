@@ -604,10 +604,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         // breaking compatibility.
         internal static string GetStringClaimValueType(string str)
         {
-            return GetStringClaimValueType(string.Empty, str);
+            return GetStringClaimValueType(str, string.Empty);
         }
 
-        internal static string GetStringClaimValueType(string claimType, string str)
+        internal static string GetStringClaimValueType(string str, string claimType)
         {
             if (!string.IsNullOrEmpty(claimType) && !JsonSerializerPrimitives.TryAllStringClaimsAsDateTime() && JsonSerializerPrimitives.IsKnownToNotBeDateTime(claimType))
                 return ClaimValueTypes.String;
