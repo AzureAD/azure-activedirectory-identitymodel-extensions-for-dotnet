@@ -139,6 +139,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     Json = JsonData.NullObject
                 });
 
+                theoryData.Add(new OpenIdConnectTheoryData("SerializeJsonWebKeySet")
+                {
+                    CompareTo = OpenIdConfigData.WithJsonWebKeySet,
+                    Json = ""
+                });
+
                 return theoryData;
             }
         }
