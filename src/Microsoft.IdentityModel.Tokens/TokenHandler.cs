@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Logging;
 using System;
 using System.ComponentModel;
 using System.Security.Claims;
+using System.Text.Json;
 using System.Threading.Tasks;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
@@ -53,7 +54,22 @@ namespace Microsoft.IdentityModel.Tokens
             set => _defaultTokenLifetimeInMinutes = (value < 1) ? throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), FormatInvariant(LogMessages.IDX10104, LogHelper.MarkAsNonPII(value)))) : value;
         }
 
+        /// <summary>
+        /// Gets the <see cref="JsonTokenType"/> of the token.
+        /// </summary>
+        public JsonTokenType TokenType { get; }
+
         #region methods
+
+        /// <summary>
+        /// Validates a token.
+        /// On a validation failure, no exception will be thrown; instead, the exception will be set in the returned TokenValidationResult.Exception property.
+        /// Callers should always check the TokenValidationResult.IsValid property to verify the validity of the result.
+        /// </summary>
+        /// <param name="token">The token to be validated.</param>
+        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <returns>A <see cref="TokenValidationResult"/></returns>
+        public virtual TokenValidationResult ValidateToken(string token, TokenValidationParameters validationParameters) => throw new NotImplementedException();
 
         /// <summary>
         /// Validates a token.
@@ -74,6 +90,21 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
         /// <returns>A <see cref="TokenValidationResult"/></returns>
         public virtual Task<TokenValidationResult> ValidateTokenAsync(SecurityToken token, TokenValidationParameters validationParameters) => throw new NotImplementedException();
+
+        /// <summary>
+        /// Evaluates whether a token can be converted into an instance of <see cref="SecurityToken"/>.
+        /// </summary>
+        /// <param name="token">The string to be evaluated.</param>
+        /// <returns>A <see cref="bool"/>.</returns>
+        public virtual bool CanReadToken(string token) => throw new NotImplementedException();
+
+        /// <summary>
+        /// Creates a token as described by the provided <see cref="SecurityTokenDescriptor"/>.
+        /// </summary>
+        /// <param name="tokenDescriptor">The <see cref="SecurityTokenDescriptor"/> used to create the token.</param>
+        /// <returns>A <see cref="string"/>.</returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public virtual string CreateToken(SecurityTokenDescriptor tokenDescriptor) => throw new NotImplementedException();
 
         /// <summary>
         /// Converts a string into an instance of <see cref="SecurityToken"/>.
