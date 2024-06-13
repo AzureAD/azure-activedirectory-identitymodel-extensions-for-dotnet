@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
@@ -10,7 +11,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     ///  Represents a generic metadata configuration which is applicable for both XML and JSON based configurations.
     /// </summary>
-    public abstract class BaseConfiguration
+    public abstract class BaseConfiguration /*: IConfigurationRetrievalTime*/ // L2 TODO: internal until L2 cache is implemented S2S.
     {
         /// <summary>
         /// Gets the issuer specified via the metadata endpoint.
@@ -46,5 +47,11 @@ namespace Microsoft.IdentityModel.Tokens
         {
             get;
         } = new Collection<SecurityKey>();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        // L2 TODO: internal until L2 cache is implemented S2S.
+        internal DateTimeOffset RetrievalTime { get; set; }
     }
 }
