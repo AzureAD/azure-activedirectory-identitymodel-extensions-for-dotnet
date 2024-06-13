@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ValidationFailureType.IssuerValidationFailed,
                         new ExceptionDetail(
                             new MessageDetail(
-                                LogMessages.IDX10205.AsMemory(),
+                                LogMessages.IDX10205,
                                 LogHelper.MarkAsNonPII(issClaim),
                                 LogHelper.MarkAsNonPII(validIssuer),
                                 LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(null)),
@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ValidationFailureType.NullArgument,
                         new ExceptionDetail(
                             new MessageDetail(
-                                LogMessages.IDX10211.AsMemory(),
+                                LogMessages.IDX10211,
                                 LogHelper.MarkAsNonPII(null),
                                 LogHelper.MarkAsNonPII(validIssuer),
                                 LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(null)),

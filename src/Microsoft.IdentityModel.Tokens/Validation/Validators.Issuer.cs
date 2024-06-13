@@ -201,7 +201,7 @@ namespace Microsoft.IdentityModel.Tokens
                     ValidationFailureType.NullArgument,
                     new ExceptionDetail(
                         new MessageDetail(
-                            LogMessages.IDX10211.AsMemory(),
+                            LogMessages.IDX10211,
                             null),
                         typeof(SecurityTokenInvalidIssuerException),
                         new StackFrame(true),
@@ -228,7 +228,7 @@ namespace Microsoft.IdentityModel.Tokens
                     ValidationFailureType.IssuerValidationFailed,
                         new ExceptionDetail(
                             new MessageDetail(
-                                LogMessages.IDX10211.AsMemory(),
+                                LogMessages.IDX10211,
                                 null),
                             typeof(SecurityTokenInvalidIssuerException),
                             new StackFrame(true)));
@@ -281,7 +281,7 @@ namespace Microsoft.IdentityModel.Tokens
                 ValidationFailureType.IssuerValidationFailed,
                 new ExceptionDetail(
                     new MessageDetail(
-                        LogMessages.IDX10205.AsMemory(),
+                        LogMessages.IDX10205,
                         LogHelper.MarkAsNonPII(issuer),
                         LogHelper.MarkAsNonPII(validationParameters.ValidIssuer ?? "null"),
                         LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers)),
