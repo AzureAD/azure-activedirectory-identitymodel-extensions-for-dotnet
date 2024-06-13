@@ -20,7 +20,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="formatString">The message to be formated.</param>
         /// <param name="parameters">The parameters for formatting.</param>
-        public MessageDetail(ReadOnlyMemory<char> formatString, params object[] parameters)
+        public MessageDetail(string formatString, params object[] parameters)
         {
             // TODO - paramter validation.
             FormatString = formatString;
@@ -34,12 +34,12 @@ namespace Microsoft.IdentityModel.Tokens
         {
             get
             {
-                _message ??= LogHelper.FormatInvariant(FormatString.ToString(), Parameters);
+                _message ??= LogHelper.FormatInvariant(FormatString, Parameters);
                 return _message;
             }
         }
 
-        private ReadOnlyMemory<char> FormatString { get; }
+        private string FormatString { get; }
 
         private object[] Parameters { get; }
     }
