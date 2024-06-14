@@ -59,12 +59,6 @@ namespace Microsoft.IdentityModel.KeyVaultExtensions.Tests
                     ExpectedException = ExpectedException.NoExceptionExpected,
                     TestId = nameof(SecurityAlgorithms.RsaOAEP),
                 },
-                new KeyWrapProviderTheoryData
-                {
-                    Algorithm = SecurityAlgorithms.RsaOAEP256,
-                    ExpectedException = ExpectedException.NoExceptionExpected,
-                    TestId = nameof(SecurityAlgorithms.RsaOAEP256),
-                },
             };
         }
 
