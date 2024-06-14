@@ -367,31 +367,35 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             else if (SetDefaultTimesOnTokenCreation)
                 conditions.NotOnOrAfter = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes);
 
-            var uriList = CreateUriList(tokenDescriptor);
-            if (!uriList.IsNullOrEmpty())
-                conditions.Conditions.Add(new SamlAudienceRestrictionCondition(uriList));
+            if (TryCreateAudienceRestrictionCondition(tokenDescriptor, out SamlAudienceRestrictionCondition audRestrictionCondition))
+                conditions.Conditions.Add(audRestrictionCondition);
 
             return conditions;
         }
 
-        private static List<Uri> CreateUriList(SecurityTokenDescriptor tokenDescriptor)
+        private static bool TryCreateAudienceRestrictionCondition(
+            SecurityTokenDescriptor tokenDescriptor,
+            out SamlAudienceRestrictionCondition audRestrictionCondition
+            )
         {
-            var uriList = new List<Uri>();
+            audRestrictionCondition = new SamlAudienceRestrictionCondition();
             if (!tokenDescriptor.Audiences.IsNullOrEmpty())
             {
                 foreach (var audience in tokenDescriptor.Audiences)
                 {
                     if (audience != null)
-                        uriList.Add(new Uri(audience));
+                        audRestrictionCondition.Audiences.Add(new Uri(audience));
                 }
 
                 if(!string.IsNullOrEmpty(tokenDescriptor.Audience))
-                    uriList.Add(new Uri(tokenDescriptor.Audience));
+                    audRestrictionCondition.Audiences.Add(new Uri(tokenDescriptor.Audience));
             }
             else if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
-                uriList.Add(new Uri(tokenDescriptor.Audience));
+                audRestrictionCondition.Audiences.Add(new Uri(tokenDescriptor.Audience));
+            else
+                return false;
 
-            return uriList;
+            return true;
         }
 
         /// <summary>
