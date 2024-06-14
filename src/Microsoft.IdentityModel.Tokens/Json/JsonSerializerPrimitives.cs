@@ -976,98 +976,94 @@ namespace Microsoft.IdentityModel.Tokens.Json
 
             Type objType = obj.GetType();
 
-            switch (obj)
+            if (obj is string str)
+                writer.WriteString(key, str);
+            else if (obj is long l)
+                writer.WriteNumber(key, l);
+            else if (obj is int i)
+                writer.WriteNumber(key, i);
+            else if (obj is bool b)
+                writer.WriteBoolean(key, b);
+            else if (obj is DateTime dt)
+                writer.WriteString(key, dt.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture));
+            else if (typeof(IDictionary).IsAssignableFrom(objType))
             {
-                case string str:
-                    writer.WriteString(key, str);
-                    break;
-                case long l:
-                    writer.WriteNumber(key, l);
-                    break;
-                case int i:
-                    writer.WriteNumber(key, i);
-                    break;
-                case bool b:
-                    writer.WriteBoolean(key, b);
-                    break;
-                case DateTime dt:
-                    writer.WriteString(key, dt.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture));
-                    break;
-                case IDictionary dictionary:
-                    writer.WritePropertyName(key);
-                    writer.WriteStartObject();
-                    foreach (var k in dictionary.Keys)
-                        WriteObject(ref writer, k.ToString(), dictionary[k]);
-                    writer.WriteEndObject();
-                    break;
-                case IList list:
-                    writer.WriteStartArray(key);
-                    foreach (var k in list)
-                        WriteObjectValue(ref writer, k);
-                    writer.WriteEndArray();
-                    break;
-                case JsonElement j:
-                    writer.WritePropertyName(key);
-                    j.WriteTo(writer);
-                    break;
-                case double dub:
-                    // Below net6.0, we have to convert the double to a decimal otherwise values like 1.11 will be serailized as 1.1100000000000001
-                    // large and small values such as double.MaxValue and double.MinValue cannot be converted to decimal.
-                    // In these cases, we will write the double as is.
-#if NET6_0_OR_GREATER
-                    writer.WriteNumber(key, dub);
-#else
-#pragma warning disable CA1031 // Do not catch general exception types, we have seen TryParse fault.
-                    try
-                    {
-                        if (decimal.TryParse(dub.ToString(CultureInfo.InvariantCulture), out decimal dec))
-                            writer.WriteNumber(key, dec);
-                        else
-                            writer.WriteNumber(key, dub);
-                    }
-                    catch (Exception)
-                    {
-                        writer.WriteNumber(key, dub);
-                    }
-#pragma warning restore CA1031
-#endif
-                    break;
-                case decimal d:
-                    writer.WriteNumber(key, d);
-                    break;
-                case float f:
-                    // Below net6.0, we have to convert the float to a decimal otherwise values like 1.11 will be serailized as 1.11000001
-                    // In failure cases, we will write the float as is.
-#if NET6_0_OR_GREATER
-                    writer.WriteNumber(key, f);
-#else
-#pragma warning disable CA1031 // Do not catch general exception types, we have seen TryParse fault.
-                    try
-                    {
-                        if (decimal.TryParse(f.ToString(CultureInfo.InvariantCulture), out decimal dec))
-                            writer.WriteNumber(key, dec);
-                        else
-                            writer.WriteNumber(key, f);
-                    }
-                    catch (Exception)
-                    {
-                        writer.WriteNumber(key, f);
-                    }
-#pragma warning restore CA1031
-#endif
-                    break;
-                case Guid g:
-                    writer.WriteString(key, g);
-                    break;
-                default:
-                    throw LogHelper.LogExceptionMessage(
-                        new ArgumentException(
-                            LogHelper.FormatInvariant(
-                                LogMessages.IDX11025,
-                                LogHelper.MarkAsNonPII(objType.ToString()),
-                                LogHelper.MarkAsNonPII(key))));
+                IDictionary dictionary = (IDictionary)obj;
+                writer.WritePropertyName(key);
+
+                writer.WriteStartObject();
+                foreach (var k in dictionary.Keys)
+                    WriteObject(ref writer, k.ToString(), dictionary[k]);
+
+                writer.WriteEndObject();
             }
-        }
+            else if (typeof(IList).IsAssignableFrom(objType))
+            {
+                IList list = (IList)obj;
+                writer.WriteStartArray(key);
+                foreach (var k in list)
+                    WriteObjectValue(ref writer, k);
+
+                writer.WriteEndArray();
+            }
+            else if (obj is JsonElement j)
+            {
+                writer.WritePropertyName(key);
+                j.WriteTo(writer);
+            }
+            else if (obj is double dub)
+                // Below net6.0, we have to convert the double to a decimal otherwise values like 1.11 will be serailized as 1.1100000000000001
+                // large and small values such as double.MaxValue and double.MinValue cannot be converted to decimal.
+                // In these cases, we will write the double as is.
+#if NET6_0_OR_GREATER
+                writer.WriteNumber(key, dub);
+#else
+#pragma warning disable CA1031 // Do not catch general exception types, we have seen TryParse fault.
+                try
+                {
+                    if (decimal.TryParse(dub.ToString(CultureInfo.InvariantCulture), out decimal dec))
+                        writer.WriteNumber(key, dec);
+                    else
+                        writer.WriteNumber(key, dub);
+                }
+                catch (Exception)
+                {
+                    writer.WriteNumber(key, dub);
+                }
+#pragma warning restore CA1031
+#endif
+            else if (obj is decimal d)
+                writer.WriteNumber(key, d);
+            else if (obj is float f)
+                // Below net6.0, we have to convert the float to a decimal otherwise values like 1.11 will be serailized as 1.11000001
+                // In failure cases, we will write the float as is.
+#if NET6_0_OR_GREATER
+                writer.WriteNumber(key, f);
+#else
+#pragma warning disable CA1031 // Do not catch general exception types, we have seen TryParse fault.
+                try
+                {
+                    if (decimal.TryParse(f.ToString(CultureInfo.InvariantCulture), out decimal dec))
+                        writer.WriteNumber(key, dec);
+                    else
+                        writer.WriteNumber(key, f);
+                }
+                catch (Exception)
+                {
+                    writer.WriteNumber(key, f);
+                }
+#pragma warning restore CA1031
+#endif
+            else if (obj is Guid g)
+                writer.WriteString(key, g);
+            else
+                throw LogHelper.LogExceptionMessage(
+                    new ArgumentException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX11025,
+                            LogHelper.MarkAsNonPII(objType.ToString()),
+                            LogHelper.MarkAsNonPII(key))));
+    }
 
         /// <summary>
         /// Writes values into an array.
