@@ -127,6 +127,22 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
 
         [Fact]
+        public void DeserializeOpenIdConnectConfigurationWithJsonWebKeySet()
+        {
+            TestUtilities.WriteHeader($"{this}.DeserializeOpenIdConnectConfigurationWithJsonWebKeySet");
+            var context = new CompareContext();
+            var config = OpenIdConfigData.FullyPopulatedWithKeys;
+            config.ShouldSerializeJsonWebKeys = true;
+            var json = OpenIdConnectConfiguration.Write(config);
+            var actualConfig = OpenIdConnectConfiguration.Create(json);
+
+            // "JsonWebKeySet" should be identical
+            IdentityComparer.AreEqual(OpenIdConfigData.FullyPopulatedWithKeys.JsonWebKeySet, actualConfig.JsonWebKeySet, context);
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
         public void GetSets()
         {
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();

@@ -594,17 +594,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             get => SetDefaultConfiguration(new OpenIdConnectConfiguration());
         }
 
-        public static OpenIdConnectConfiguration WithJsonWebKeySet
-        {
-            get
-            {
-                var config = Default;
-                config.JsonWebKeySet = JsonUtilities.FullyPopulatedJsonWebKeySet();
-                config.ShouldSerializeJsonWebKeys = true;
-                return config;
-            }
-        }
-
         private static OpenIdConnectConfiguration SetDefaultConfiguration(OpenIdConnectConfiguration config)
         {
             AddToCollection(config.AcrValuesSupported, "acr_value1", "acr_value2", "acr_value3");
