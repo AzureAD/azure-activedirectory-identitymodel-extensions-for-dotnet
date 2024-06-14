@@ -382,7 +382,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 foreach (var audience in tokenDescriptor.Audiences)
                 {
                     if (audience != null)
-                    uriList.Add(new Uri(audience, UriKind.Absolute));
+                        uriList.Add(new Uri(audience, UriKind.Absolute));
                 }
 
                 if(!string.IsNullOrWhiteSpace(tokenDescriptor.Audience) && !tokenDescriptor.Audiences.Contains(tokenDescriptor.Audience))

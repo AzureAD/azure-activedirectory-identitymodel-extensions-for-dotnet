@@ -1190,6 +1190,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
             writer.WriteStartArray(propertyName);
             foreach (string str in strings)
                 writer.WriteStringValue(str);
+
             writer.WriteStringValue(extraString);
             writer.WriteEndArray();
         }
