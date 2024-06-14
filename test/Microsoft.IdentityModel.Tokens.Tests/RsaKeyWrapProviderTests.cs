@@ -380,14 +380,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             // round trip positive tests
             AddWrapUnwrapTheoryData(
-                "Test1",
+                "RsaPKCS1",
                 SecurityAlgorithms.RsaPKCS1,
                 KeyingMaterial.RsaSecurityKey_2048_Public,
                 KeyingMaterial.RsaSecurityKey_2048,
                 theoryData);
 
             AddWrapUnwrapTheoryData(
-                "Test2",
+                "RsaOAEP",
                 SecurityAlgorithms.RsaOAEP,
                 KeyingMaterial.RsaSecurityKey_2048_Public,
                 KeyingMaterial.RsaSecurityKey_2048,
@@ -395,7 +395,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             // Wrap parameter checking
             AddWrapParameterCheckTheoryData(
-                "Test3",
+                "RsaPKCS1",
                 SecurityAlgorithms.RsaPKCS1,
                 KeyingMaterial.RsaSecurityKey_2048_Public,
                 KeyingMaterial.RsaSecurityKey_2048,
@@ -404,11 +404,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 theoryData);
 
             AddWrapUnwrapTheoryData(
-                "Test4",
+                "RsaOAEP256",
                 SecurityAlgorithms.RsaOAEP256,
                 KeyingMaterial.RsaSecurityKey_2048_Public,
                 KeyingMaterial.RsaSecurityKey_2048,
-                theoryData);
+                theoryData
+#if NET461 || NET462 || NET472 || NETCOREAPP2_0_OR_GREATER
+                ,
+                ExpectedException.SecurityTokenKeyWrapException("IDX10658:")
+#endif
+                );
 
             return theoryData;
         }
@@ -417,12 +422,15 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             string testId,
             string algorithm,
             SecurityKey encryptKey,
-            SecurityKey decryptKey, TheoryData<KeyWrapTheoryData> theoryData)
+            SecurityKey decryptKey,
+            TheoryData<KeyWrapTheoryData> theoryData,
+            ExpectedException expectedException = null)
         {
             theoryData.Add(new KeyWrapTheoryData
             {
+                ExpectedException = expectedException ?? ExpectedException.NoExceptionExpected,
                 KeyToWrap = Guid.NewGuid().ToByteArray(),
-                TestId = "AddWrapUnwrapTheoryData" + testId,
+                TestId = testId,
                 UnwrapAlgorithm = algorithm,
                 UnwrapKey = decryptKey,
                 WrapAlgorithm = algorithm,
