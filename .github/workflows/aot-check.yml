@@ -2,14 +2,14 @@ name: "AOT Check"
 
 on:
   push:
-    branches: [ "dev" ]
+    branches: [ "dev7x" ]
   pull_request:
     types:
       - opened
       - synchronize
       - reopened
       - ready_for_review
-    branches: [ "dev" ]
+    branches: [ "dev7x" ]
 
 jobs:
   analyze:
