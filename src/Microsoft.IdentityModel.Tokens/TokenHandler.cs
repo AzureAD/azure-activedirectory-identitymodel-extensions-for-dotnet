@@ -90,7 +90,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="tokenDescriptor">The <see cref="SecurityTokenDescriptor"/> used to create the token.</param>
         /// <returns>A <see cref="string"/>.</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public virtual string CreateSecuritTokenAsString(SecurityTokenDescriptor tokenDescriptor) => throw new NotImplementedException();
+        public virtual string CreateSecurityTokenAsString(SecurityTokenDescriptor tokenDescriptor) => throw new NotImplementedException();
 
         /// <summary>
         /// Creates a <see cref="SecurityToken"/> as described by the provided <see cref="SecurityTokenDescriptor"/>.
