@@ -409,7 +409,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 KeyingMaterial.RsaSecurityKey_2048_Public,
                 KeyingMaterial.RsaSecurityKey_2048,
                 theoryData
-#if NET461 || NET462 || NET472 || NETCOREAPP2_0_OR_GREATER
+#if NET461 || NET462 || NET472 || NETCOREAPP2_1
                 ,
                 ExpectedException.SecurityTokenKeyWrapException("IDX10658:")
 #endif
