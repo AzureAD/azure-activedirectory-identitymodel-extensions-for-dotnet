@@ -646,7 +646,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             var audienceRestriction = new Saml2AudienceRestriction(tokenDescriptor.Audiences);
 
-            if (!string.IsNullOrWhiteSpace(tokenDescriptor.Audience))
+            if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
                 audienceRestriction.Audiences.Add(tokenDescriptor.Audience);
 
             conditions.AudienceRestrictions.Add(audienceRestriction);

@@ -385,10 +385,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                         uriList.Add(new Uri(audience));
                 }
 
-                if(!string.IsNullOrWhiteSpace(tokenDescriptor.Audience) && !tokenDescriptor.Audiences.Contains(tokenDescriptor.Audience))
+                if(!string.IsNullOrEmpty(tokenDescriptor.Audience))
                     uriList.Add(new Uri(tokenDescriptor.Audience));
             }
-            else if (!string.IsNullOrWhiteSpace(tokenDescriptor.Audience))
+            else if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
                 uriList.Add(new Uri(tokenDescriptor.Audience));
 
             return uriList;

@@ -93,8 +93,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrWhiteSpace(validationParameters.ValidAudience) && (validationParameters.ValidAudiences == null))
                 throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException(LogMessages.IDX10208) { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences) });
 
-            // If audiences has no elements or all elements are null or empty, throw
-            if (!audiences.Any(s => !s.IsNullOrEmpty()))
+            if (!audiences.Any())
                 throw LogHelper.LogExceptionMessage(
                     new SecurityTokenInvalidAudienceException(LogHelper.FormatInvariant(LogMessages.IDX10206))
                     { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences) });
