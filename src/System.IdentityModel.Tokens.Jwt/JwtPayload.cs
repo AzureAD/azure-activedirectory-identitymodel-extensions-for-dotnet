@@ -346,7 +346,7 @@ namespace System.IdentityModel.Tokens.Jwt
             {
                 if (_audiences == null)
                 {
-                    List<string> tmp = new (GetListOfClaims(JwtRegisteredClaimNames.Aud));
+                    List<string> tmp = GetListOfClaims(JwtRegisteredClaimNames.Aud);
                     Interlocked.CompareExchange(ref _audiences, tmp, null);
                 }
                 return _audiences;
@@ -884,29 +884,6 @@ namespace System.IdentityModel.Tokens.Jwt
                 claimValues.Add(value.ToString());
 
             return claimValues;
-        }
-
-        internal List<string> GetListOfUniqueClaims(string claimType)
-        {
-            if (TryGetValue(claimType, out object value))
-            {
-                // JsonArray and JsonObject are stored in the dictionary as JsonElement
-                if (value is JsonElement jsonElement)
-                {
-                    if (JsonSerializerPrimitives.TryCreateTypeFromJsonElement(jsonElement, out List<string> list))
-                        return list.Distinct().ToList();
-                }
-
-                // value may not be a string, use ToString();
-                else if (value is IEnumerable<object> values)
-                {
-                    return values.Select(item => item.ToString()).Distinct().ToList();
-                }
-                else
-                    return [value.ToString()];
-            }
-
-            return [];
         }
 
         /// <summary>
