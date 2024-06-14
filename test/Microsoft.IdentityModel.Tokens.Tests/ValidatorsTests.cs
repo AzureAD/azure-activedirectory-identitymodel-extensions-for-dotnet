@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     new AudienceValidationTheoryData
                     {
                         Audiences = new List<string> { "" },
-                        ExpectedException =  ExpectedException.SecurityTokenInvalidAudienceException("IDX10206:"),
+                        ExpectedException =  ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
                         TestId = "AudiencesEmptyString",
                         TokenValidationParameters = new TokenValidationParameters{ ValidAudience = "audience"}
                     },
