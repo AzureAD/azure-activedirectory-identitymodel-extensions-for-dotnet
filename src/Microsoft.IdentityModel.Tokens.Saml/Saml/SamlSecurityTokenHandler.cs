@@ -367,36 +367,43 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             else if (SetDefaultTimesOnTokenCreation)
                 conditions.NotOnOrAfter = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes);
 
-            if (TryCreateAudienceRestrictionCondition(tokenDescriptor, out SamlAudienceRestrictionCondition audRestrictionCondition))
-                conditions.Conditions.Add(audRestrictionCondition);
+            if (!tokenDescriptor.Audiences.IsNullOrEmpty())
+                if (!tokenDescriptor.Audience.IsNullOrEmpty())
+                    conditions.Conditions.Add(CreateAudienceRestrictionCondition(tokenDescriptor.Audience, tokenDescriptor.Audiences));
+                else
+                    conditions.Conditions.Add(CreateAudienceRestrictionCondition(tokenDescriptor.Audiences));
+
+            else if(!tokenDescriptor.Audience.IsNullOrEmpty())
+                conditions.Conditions.Add(CreateAudienceRestrictionCondition(tokenDescriptor.Audience));
 
             return conditions;
         }
-
-        private static bool TryCreateAudienceRestrictionCondition(
-            SecurityTokenDescriptor tokenDescriptor,
-            out SamlAudienceRestrictionCondition audRestrictionCondition
-            )
+        private static SamlAudienceRestrictionCondition CreateAudienceRestrictionCondition(string audience)
         {
-            audRestrictionCondition = new SamlAudienceRestrictionCondition();
-            if (!tokenDescriptor.Audiences.IsNullOrEmpty())
-            {
-                foreach (var audience in tokenDescriptor.Audiences)
-                {
-                    if (audience != null)
-                        audRestrictionCondition.Audiences.Add(new Uri(audience));
-                }
-
-                if(!string.IsNullOrEmpty(tokenDescriptor.Audience))
-                    audRestrictionCondition.Audiences.Add(new Uri(tokenDescriptor.Audience));
-            }
-            else if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
-                audRestrictionCondition.Audiences.Add(new Uri(tokenDescriptor.Audience));
-            else
-                return false;
-
-            return true;
+            SamlAudienceRestrictionCondition audRestrictionCondition = new ();
+            audRestrictionCondition.Audiences.Add(new Uri(audience));
+            return audRestrictionCondition;
         }
+
+        private static SamlAudienceRestrictionCondition CreateAudienceRestrictionCondition(IList<string> audiences)
+        {
+            SamlAudienceRestrictionCondition audRestrictionCondition = new();
+            foreach (var audience in audiences)
+                audRestrictionCondition.Audiences.Add(new Uri(audience));
+
+            return audRestrictionCondition;
+        }
+
+        private static SamlCondition CreateAudienceRestrictionCondition(string audience, IList<string> audiences)
+        {
+            SamlAudienceRestrictionCondition audRestrictionCondition = new();
+            audRestrictionCondition.Audiences.Add(new Uri(audience));
+            for (int i = 0; i < audiences.Count; i++)
+                audRestrictionCondition.Audiences.Add(new Uri(audiences[i]));
+            
+            return audRestrictionCondition;
+        }
+
 
         /// <summary>
         /// Generates an enumeration of SamlStatements from a SecurityTokenDescriptor.
