@@ -219,7 +219,10 @@ namespace System.IdentityModel.Tokens.Jwt
             if (claimsCollection != null && claimsCollection.Any())
                 AddDictionaryClaims(claimsCollection);
 
-            AddFirstPriorityClaims(issuer, audience, audiences, notBefore, expires, issuedAt);
+            if (audiences != null)
+                AddFirstPriorityClaims(issuer, audience, audiences, notBefore, expires, issuedAt);
+            else
+                AddFirstPriorityClaims(issuer, audience, [], notBefore, expires, issuedAt);
         }
 
         internal void AddFirstPriorityClaims(string issuer, string audience, DateTime? notBefore, DateTime? expires, DateTime? issuedAt)
