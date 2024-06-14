@@ -325,6 +325,21 @@ namespace Microsoft.IdentityModel.Validators.Tests
             }
         }
 
+        [Fact]
+        public static void CreateIssuer_ReturnsExpectedIssuer()
+        {
+            // arrange
+            var issuerTemplate = "{tenantId}";
+            var issuer = ValidatorConstants.AadInstance + issuerTemplate;
+            int templateStartIndex = issuer.IndexOf(issuerTemplate);
+
+            // act
+            var result = AadTokenValidationParametersExtension.CreateIssuer(issuer, issuerTemplate, ValidatorConstants.TenantIdAsGuid, templateStartIndex);
+
+            // assert
+            Assert.Equal(ValidatorConstants.AadInstance + ValidatorConstants.TenantIdAsGuid, result);
+        }
+
         private static OpenIdConnectConfiguration GetConfigurationMock()
         {
             var config = new OpenIdConnectConfiguration();

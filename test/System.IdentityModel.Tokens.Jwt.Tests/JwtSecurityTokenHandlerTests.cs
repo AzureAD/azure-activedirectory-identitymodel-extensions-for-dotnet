@@ -2987,6 +2987,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var theoryData = new TheoryData<KeyWrapTokenTheoryData>();
             var handler = new JwtSecurityTokenHandler();
             var rsaOAEPEncryptingCredential = new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaOAEP, SecurityAlgorithms.Aes256CbcHmacSha512);
+            var rsaOAEP256EncryptingCredential = new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaOAEP256, SecurityAlgorithms.Aes256CbcHmacSha512);
             var rsaPKCS1EncryptingCredential = new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes256CbcHmacSha512);
 
             theoryData.Add(new KeyWrapTokenTheoryData
@@ -2994,6 +2995,13 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 EncryptingCredentials = rsaOAEPEncryptingCredential,
                 DecryptingCredentials = rsaOAEPEncryptingCredential,
                 TestId = "Key wrap token test using OAEP padding"
+            });
+
+            theoryData.Add(new KeyWrapTokenTheoryData
+            {
+                EncryptingCredentials = rsaOAEP256EncryptingCredential,
+                DecryptingCredentials = rsaOAEP256EncryptingCredential,
+                TestId = "Key wrap token test using OAEP-256 padding"
             });
 
             theoryData.Add(new KeyWrapTokenTheoryData

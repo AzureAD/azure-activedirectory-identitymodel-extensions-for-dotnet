@@ -557,7 +557,7 @@ namespace System.IdentityModel.Tokens.Jwt
                         claims.Add(new Claim(keyValuePair.Key, string.Empty, JsonClaimValueTypes.JsonNull, issuer, issuer));
 
                     else if (keyValuePair.Value is string str)
-                        claims.Add(new Claim(keyValuePair.Key, str, GetClaimValueType(str), issuer, issuer));
+                        claims.Add(new Claim(keyValuePair.Key, str, GetClaimValueType(keyValuePair.Key, str), issuer, issuer));
 
                     else if (keyValuePair.Value is JsonElement j)
                         AddClaimsFromJsonElement(keyValuePair.Key, issuer, j, claims);
@@ -570,7 +570,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     {
                         foreach (var item in dictionary)
                             if (item.Value != null)
-                                claims.Add(new Claim(keyValuePair.Key, "{" + item.Key + ":" + item.Value.ToString() + "}", GetClaimValueType(item.Value), issuer, issuer));
+                                claims.Add(new Claim(keyValuePair.Key, "{" + item.Key + ":" + item.Value.ToString() + "}", GetClaimValueType(item.Key, item.Value), issuer, issuer));
                     }
                     else if (keyValuePair.Value is DateTime dateTime)
                         claims.Add(new Claim(keyValuePair.Key, dateTime.ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, issuer, issuer));
@@ -585,7 +585,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     else if (keyValuePair.Value != null)
                     {
                         var value = keyValuePair.Value;
-                        var claimValueType = GetClaimValueType(value);
+                        var claimValueType = GetClaimValueType(keyValuePair.Key, value);
                         if (value is IFormattable formattable)
                             claims.Add(new Claim(keyValuePair.Key, formattable.ToString(null, CultureInfo.InvariantCulture), claimValueType, issuer, issuer));
                         else
@@ -618,7 +618,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     AddListofObjects(key, innerObjects, claims, issuer);
                 else
                 {
-                    var claimValueType = GetClaimValueType(obj);
+                    var claimValueType = GetClaimValueType(key, obj);
                     if (obj is IFormattable formattable)
                         claims.Add(new Claim(key, formattable.ToString(null, CultureInfo.InvariantCulture), claimValueType, issuer, issuer));
                     else
@@ -713,7 +713,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 this[kvp.Key] = kvp.Value;
         }
 
-        internal static string GetClaimValueType(object value)
+        private static string GetClaimValueType(string claimType, object value)
         {
             if (value == null)
                 return JsonClaimValueTypes.JsonNull;
@@ -721,7 +721,7 @@ namespace System.IdentityModel.Tokens.Jwt
             Type objType = value.GetType();
 
             if (value is string str)
-                return JwtTokenUtilities.GetStringClaimValueType(str);
+                return JwtTokenUtilities.GetStringClaimValueType(str, claimType);
             else if (objType == typeof(int))
                 return ClaimValueTypes.Integer32;
             else if (objType == typeof(long))
