@@ -68,6 +68,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         public static string JsonAllValues =
                                             @"{ ""acr_values_supported"" : [""acr_value1"", ""acr_value2"", ""acr_value3""],
                                                 ""authorization_endpoint"" : ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize"",
+                                                ""authorization_response_iss_parameter_supported"" : false,
+                                                ""backchannel_authentication_endpoint"" : ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/bc-authorize"",
+                                                ""backchannel_authentication_request_signing_alg_values_supported"" : [""ES384"", ""ES512""],
+                                                ""backchannel_token_delivery_modes_supported"" : [""poll"", ""ping""],
+                                                ""backchannel_user_code_parameter_supported"" : false,
                                                 ""frontchannel_logout_session_supported"": ""true"",
                                                 ""frontchannel_logout_supported"": ""true"",
                                                 ""check_session_iframe"":""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/checksession"",
@@ -76,6 +81,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                                                 ""claims_supported"": [ ""sub"", ""iss"", ""aud"", ""exp"", ""iat"", ""auth_time"", ""acr"", ""amr"", ""nonce"", ""email"", ""given_name"", ""family_name"", ""nickname"" ],
                                                 ""claim_types_supported"" : [ ""Normal Claims"", ""Aggregated Claims"", ""Distributed Claims"" ],
                                                 ""display_values_supported"" : [ ""displayValue1"", ""displayValue2"", ""displayValue3"" ],
+                                                ""dpop_signing_alg_values_supported"" : [""ES384"", ""ES512""],
                                                 ""end_session_endpoint"" : ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/logout"",
                                                 ""grant_types_supported"" : [""authorization_code"",""implicit""],
                                                 ""http_logout_supported"" : true,
@@ -91,11 +97,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                                                 ""microsoft_multi_refresh_token"" : true,
                                                 ""op_policy_uri"" : ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/op_policy_uri"",
                                                 ""op_tos_uri"" : ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/op_tos_uri"",
+                                                ""prompt_values_supported"" : [""none"", ""login"", ""consent""],
+                                                ""pushed_authorization_request_endpoint"" : ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/par"",
                                                 ""request_object_encryption_alg_values_supported"" : [""A192KW"", ""A256KW""],
                                                 ""request_object_encryption_enc_values_supported"" : [""A192GCM"",""A256GCM""],
                                                 ""request_object_signing_alg_values_supported"" : [""PS256"", ""PS512""],
                                                 ""request_parameter_supported"" : true,
                                                 ""request_uri_parameter_supported"" : true,
+                                                ""require_pushed_authorization_requests"" : false,
                                                 ""require_request_uri_registration"" : true,
                                                 ""response_modes_supported"" : [""query"", ""fragment"",""form_post""],
                                                 ""response_types_supported"" : [""code"",""id_token"",""code id_token""],
@@ -598,12 +607,18 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             AddToCollection(config.AcrValuesSupported, "acr_value1", "acr_value2", "acr_value3");
             config.AuthorizationEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize";
+            config.AuthorizationResponseIssParameterSupported = false;
+            config.BackchannelAuthenticationEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/bc-authorize";
+            AddToCollection(config.BackchannelAuthenticationRequestSigningAlgValuesSupported, "ES384", "ES512");
+            AddToCollection(config.BackchannelTokenDeliveryModesSupported, "poll", "ping");
+            config.BackchannelUserCodeParameterSupported = false;
             config.CheckSessionIframe = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/checksession";
             AddToCollection(config.ClaimsLocalesSupported, "claim_local1", "claim_local2", "claim_local3");
             config.ClaimsParameterSupported = true;
             AddToCollection(config.ClaimsSupported, "sub", "iss", "aud", "exp", "iat", "auth_time", "acr", "amr", "nonce", "email", "given_name", "family_name", "nickname");
             AddToCollection(config.ClaimTypesSupported, "Normal Claims", "Aggregated Claims", "Distributed Claims");
             AddToCollection(config.DisplayValuesSupported, "displayValue1", "displayValue2", "displayValue3");
+            AddToCollection(config.DPoPSigningAlgValuesSupported, "ES384", "ES512");
             config.EndSessionEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/logout";
             config.FrontchannelLogoutSessionSupported = "true";
             config.FrontchannelLogoutSupported = "true";
@@ -620,11 +635,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             config.LogoutSessionSupported = true;
             config.OpPolicyUri = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/op_policy_uri";
             config.OpTosUri = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/op_tos_uri";
+            AddToCollection(config.PromptValuesSupported, "none", "login", "consent");
+            config.PushedAuthorizationRequestEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/par";
             AddToCollection(config.RequestObjectEncryptionAlgValuesSupported, "A192KW", "A256KW");
             AddToCollection(config.RequestObjectEncryptionEncValuesSupported, "A192GCM", "A256GCM");
             AddToCollection(config.RequestObjectSigningAlgValuesSupported, "PS256", "PS512");
             config.RequestParameterSupported = true;
             config.RequestUriParameterSupported = true;
+            config.RequirePushedAuthorizationRequests = false;
             config.RequireRequestUriRegistration = true;
             AddToCollection(config.ResponseModesSupported, "query", "fragment", "form_post");
             AddToCollection(config.ResponseTypesSupported, "code", "id_token", "code id_token");
