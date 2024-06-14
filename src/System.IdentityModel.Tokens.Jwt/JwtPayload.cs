@@ -80,9 +80,8 @@ namespace System.IdentityModel.Tokens.Jwt
                         }
                         else
                         {
-                            string audStr = JsonSerializerPrimitives.ReadString(ref reader, JwtRegisteredClaimNames.Aud, ClassName, false);
-                            payload._audiences.Add(audStr);
-                            payload[JwtRegisteredClaimNames.Aud] = audStr;
+                            payload._audiences.Add(JsonSerializerPrimitives.ReadString(ref reader, JwtRegisteredClaimNames.Aud, ClassName, false));
+                            payload[JwtRegisteredClaimNames.Aud] = payload._audiences[0];
                         }
                     }
                     else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Exp))
