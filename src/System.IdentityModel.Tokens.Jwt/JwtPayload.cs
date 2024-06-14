@@ -278,14 +278,16 @@ namespace System.IdentityModel.Tokens.Jwt
             if (!string.IsNullOrEmpty(issuer))
                 this[JwtRegisteredClaimNames.Iss] = issuer;
 
-            // if could be the case that some of the claims above had an 'aud' claim;
+            // Using AddClaim() since it could be the case that some of the claims processed earlier in the flow had 'aud' claims
+            // we don't want to overwrite;
             if (!string.IsNullOrEmpty(audience))
                 AddClaim(new Claim(JwtRegisteredClaimNames.Aud, audience, ClaimValueTypes.String));
 
-            AddClaims(audiences
-                .Where(aud => !aud.IsNullOrEmpty())
-                .Select(aud => new Claim(JwtRegisteredClaimNames.Aud, aud, ClaimValueTypes.String))
-            );
+            foreach (string aud in audiences)
+            {
+                if (!string.IsNullOrEmpty(aud))
+                    AddClaim(new Claim(JwtRegisteredClaimNames.Aud, aud, ClaimValueTypes.String));
+            }
         }
 
         /// <summary>
