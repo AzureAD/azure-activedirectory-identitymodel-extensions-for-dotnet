@@ -40,7 +40,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             "CLAIMS_PARAMETER_SUPPORTED",
             "CLAIMS_SUPPORTED",
             "CLAIM_TYPES_SUPPORTED",
+            "CODE_CHALLENGE_METHODS_SUPPORTED",
             ".WELL-KNOWN/OPENID-CONFIGURATION",
+            "DEVICE_AUTHORIZATION_ENDPOINT",
             "DISPLAY_VALUES_SUPPORTED",
             "DPOP_SIGNING_ALG_VALUES_SUPPORTED",
             "END_SESSION_ENDPOINT",
@@ -71,6 +73,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             "REQUIRE_REQUEST_URI_REGISTRATION",
             "RESPONSE_MODES_SUPPORTED",
             "RESPONSE_TYPES_SUPPORTED",
+            "REVOCATION_ENDPOINT",
+            "REVOCATION_ENDPOINT_AUTH_METHODS_SUPPORTED",
+            "REVOCATION_ENDPOINT_AUTH_SIGNING_ALG_VALUES_SUPPORTED",
             "SERVICE_DOCUMENTATION",
             "SCOPES_SUPPORTED",
             "SUBJECT_TYPES_SUPPORTED",
@@ -97,7 +102,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             {
                 return Read(ref reader, config);
             }
-            catch(JsonException ex)
+            catch (JsonException ex)
             {
                 if (ex.GetType() == typeof(JsonException))
                     throw;
@@ -131,7 +136,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                         LogHelper.MarkAsNonPII(reader.CurrentDepth),
                         LogHelper.MarkAsNonPII(reader.BytesConsumed))));
 
-            while(true)
+            while (true)
             {
                 #region Check property name using ValueTextEquals
                 // https://datatracker.ietf.org/doc/html/rfc7517#section-4, does not require that we reject JSON with duplicate member names.
@@ -173,6 +178,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
                     else if (reader.ValueTextEquals(Utf8Bytes.ClaimTypesSupported))
                         JsonPrimitives.ReadStrings(ref reader, config.ClaimTypesSupported, MetadataName.ClaimTypesSupported, ClassName, true);
+
+                    else if (reader.ValueTextEquals(Utf8Bytes.CodeChallengeMethodsSupported))
+                        JsonPrimitives.ReadStrings(ref reader, config.CodeChallengeMethodsSupported, MetadataName.CodeChallengeMethodsSupported, ClassName, true);
+
+                    else if (reader.ValueTextEquals(Utf8Bytes.DeviceAuthorizationEndpoint))
+                        config.DeviceAuthorizationEndpoint = JsonPrimitives.ReadString(ref reader, MetadataName.DeviceAuthorizationEndpoint, ClassName, true);
 
                     else if (reader.ValueTextEquals(Utf8Bytes.DisplayValuesSupported))
                         JsonPrimitives.ReadStrings(ref reader, config.DisplayValuesSupported, MetadataName.DisplayValuesSupported, ClassName, true);
@@ -277,14 +288,20 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                     else if (reader.ValueTextEquals(Utf8Bytes.ResponseTypesSupported))
                         JsonPrimitives.ReadStrings(ref reader, config.ResponseTypesSupported, MetadataName.ResponseTypesSupported, ClassName, true);
 
-                    else if (reader.ValueTextEquals(Utf8Bytes.ScopesSupported))
-                        JsonPrimitives.ReadStrings(ref reader, config.ScopesSupported, MetadataName.ScopesSupported, ClassName, true);
+                    else if (reader.ValueTextEquals(Utf8Bytes.RevocationEndpoint))
+                        config.RevocationEndpoint = JsonPrimitives.ReadString(ref reader, MetadataName.RevocationEndpoint, ClassName, true);
+
+                    else if (reader.ValueTextEquals(Utf8Bytes.RevocationEndpointAuthMethodsSupported))
+                        JsonPrimitives.ReadStrings(ref reader, config.RevocationEndpointAuthMethodsSupported, MetadataName.RevocationEndpointAuthMethodsSupported, ClassName, true);
+
+                    else if (reader.ValueTextEquals(Utf8Bytes.RevocationEndpointAuthSigningAlgValuesSupported))
+                        JsonPrimitives.ReadStrings(ref reader, config.RevocationEndpointAuthSigningAlgValuesSupported, MetadataName.RevocationEndpointAuthSigningAlgValuesSupported, ClassName, true);
 
                     else if (reader.ValueTextEquals(Utf8Bytes.ServiceDocumentation))
-                        config.ServiceDocumentation = JsonPrimitives.ReadString(ref reader, MetadataName.ScopesSupported, ClassName, true);
+                        config.ServiceDocumentation = JsonPrimitives.ReadString(ref reader, MetadataName.ServiceDocumentation, ClassName, true);
 
-                    else if (reader.ValueTextEquals(Utf8Bytes.SubjectTypesSupported))
-                        JsonPrimitives.ReadStrings(ref reader, config.SubjectTypesSupported, MetadataName.SubjectTypesSupported, ClassName, true);
+                    else if (reader.ValueTextEquals(Utf8Bytes.ScopesSupported))
+                        JsonPrimitives.ReadStrings(ref reader, config.ScopesSupported, MetadataName.ScopesSupported, ClassName, true);
 
                     else if (reader.ValueTextEquals(Utf8Bytes.SubjectTypesSupported))
                         JsonPrimitives.ReadStrings(ref reader, config.SubjectTypesSupported, MetadataName.SubjectTypesSupported, ClassName, true);
@@ -366,6 +383,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                             else if (propertyName.Equals(MetadataName.ClaimTypesSupported, StringComparison.OrdinalIgnoreCase))
                                 JsonPrimitives.ReadStrings(ref reader, config.ClaimTypesSupported, propertyName, ClassName);
 
+                            else if (propertyName.Equals(MetadataName.CodeChallengeMethodsSupported, StringComparison.OrdinalIgnoreCase))
+                                JsonPrimitives.ReadStrings(ref reader, config.CodeChallengeMethodsSupported, propertyName, ClassName);
+
+                            else if (propertyName.Equals(MetadataName.DeviceAuthorizationEndpoint, StringComparison.OrdinalIgnoreCase))
+                                config.DeviceAuthorizationEndpoint = JsonPrimitives.ReadString(ref reader, propertyName, ClassName);
+
                             else if (propertyName.Equals(MetadataName.DisplayValuesSupported, StringComparison.OrdinalIgnoreCase))
                                 JsonPrimitives.ReadStrings(ref reader, config.DisplayValuesSupported, propertyName, ClassName);
 
@@ -407,7 +430,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                             else if (propertyName.Equals(MetadataName.IdTokenEncryptionEncValuesSupported, StringComparison.OrdinalIgnoreCase))
                                 JsonPrimitives.ReadStrings(ref reader, config.IdTokenEncryptionEncValuesSupported, propertyName, ClassName);
 
-                            else if (propertyName.Equals(MetadataName.IdTokenSigningAlgValuesSupported , StringComparison.OrdinalIgnoreCase))
+                            else if (propertyName.Equals(MetadataName.IdTokenSigningAlgValuesSupported, StringComparison.OrdinalIgnoreCase))
                                 JsonPrimitives.ReadStrings(ref reader, config.IdTokenSigningAlgValuesSupported, propertyName, ClassName);
 
                             else if (propertyName.Equals(MetadataName.IntrospectionEndpoint, StringComparison.OrdinalIgnoreCase))
@@ -469,6 +492,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
                             else if (propertyName.Equals(MetadataName.ResponseTypesSupported, StringComparison.OrdinalIgnoreCase))
                                 JsonPrimitives.ReadStrings(ref reader, config.ResponseTypesSupported, propertyName, ClassName);
+
+                            else if (propertyName.Equals(MetadataName.RevocationEndpoint, StringComparison.OrdinalIgnoreCase))
+                                config.RevocationEndpoint = JsonPrimitives.ReadString(ref reader, propertyName, ClassName);
+
+                            else if (propertyName.Equals(MetadataName.RevocationEndpointAuthMethodsSupported, StringComparison.OrdinalIgnoreCase))
+                                JsonPrimitives.ReadStrings(ref reader, config.RevocationEndpointAuthMethodsSupported, propertyName, ClassName);
+
+                            else if (propertyName.Equals(MetadataName.RevocationEndpointAuthSigningAlgValuesSupported, StringComparison.OrdinalIgnoreCase))
+                                JsonPrimitives.ReadStrings(ref reader, config.RevocationEndpointAuthSigningAlgValuesSupported, propertyName, ClassName);
 
                             else if (propertyName.Equals(MetadataName.ScopesSupported, StringComparison.OrdinalIgnoreCase))
                                 JsonPrimitives.ReadStrings(ref reader, config.ScopesSupported, propertyName, ClassName);
@@ -577,6 +609,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             if (config.ClaimTypesSupported.Count > 0)
                 JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.ClaimTypesSupported, config.ClaimTypesSupported);
 
+            if (config.CodeChallengeMethodsSupported.Count > 0)
+                JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.CodeChallengeMethodsSupported, config.CodeChallengeMethodsSupported);
+
+            if (!string.IsNullOrEmpty(config.DeviceAuthorizationEndpoint))
+                writer.WriteString(Utf8Bytes.DeviceAuthorizationEndpoint, config.DeviceAuthorizationEndpoint);
+
             if (config.DisplayValuesSupported.Count > 0)
                 JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.DisplayValuesSupported, config.DisplayValuesSupported);
 
@@ -638,7 +676,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 writer.WriteString(Utf8Bytes.PushedAuthorizationRequestEndpoint, config.PushedAuthorizationRequestEndpoint);
 
             if (!string.IsNullOrEmpty(config.RegistrationEndpoint))
-                 writer.WriteString(Utf8Bytes.RegistrationEndpoint, config.RegistrationEndpoint);
+                writer.WriteString(Utf8Bytes.RegistrationEndpoint, config.RegistrationEndpoint);
 
             if (config.RequestObjectEncryptionAlgValuesSupported.Count > 0)
                 JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.RequestObjectEncryptionAlgValuesSupported, config.RequestObjectEncryptionAlgValuesSupported);
@@ -669,6 +707,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             if (config.ScopesSupported.Count > 0)
                 JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.ScopesSupported, config.ScopesSupported);
+
+            if (!string.IsNullOrEmpty(config.RevocationEndpoint))
+                writer.WriteString(Utf8Bytes.RevocationEndpoint, config.RevocationEndpoint);
+
+            if (config.RevocationEndpointAuthMethodsSupported.Count > 0)
+                JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.RevocationEndpointAuthMethodsSupported, config.RevocationEndpointAuthMethodsSupported);
+
+            if (config.RevocationEndpointAuthSigningAlgValuesSupported.Count > 0)
+                JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.RevocationEndpointAuthSigningAlgValuesSupported, config.RevocationEndpointAuthSigningAlgValuesSupported);
 
             if (!string.IsNullOrEmpty(config.ServiceDocumentation))
                 writer.WriteString(Utf8Bytes.ServiceDocumentation, config.ServiceDocumentation);
@@ -708,4 +755,3 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         #endregion
     }
 }
-

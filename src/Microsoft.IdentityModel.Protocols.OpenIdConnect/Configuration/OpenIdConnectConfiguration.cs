@@ -28,6 +28,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         private ICollection<string> _claimsSupported;
         private ICollection<string> _claimsLocalesSupported;
         private ICollection<string> _claimTypesSupported;
+        private ICollection<string> _codeChallengeMethodsSupported;
         private ICollection<string> _displayValuesSupported;
         private ICollection<string> _dPoPSigningAlgValuesSupported;
         private ICollection<string> _grantTypesSupported;
@@ -42,6 +43,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         private ICollection<string> _requestObjectSigningAlgValuesSupported;
         private ICollection<string> _responseModesSupported;
         private ICollection<string> _responseTypesSupported;
+        private ICollection<string> _revocationEndpointAuthMethodsSupported;
+        private ICollection<string> _revocationEndpointAuthSigningAlgValuesSupported;
         private ICollection<string> _scopesSupported;
         private ICollection<string> _subjectTypesSupported;
         private ICollection<string> _tokenEndpointAuthMethodsSupported;
@@ -234,6 +237,24 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             _claimTypesSupported;
 
         /// <summary>
+        /// Gets the collection of 'code_challenge_methods_supported'
+        /// </summary>
+        [JsonPropertyName(OpenIdProviderMetadataNames.CodeChallengeMethodsSupported)]
+        public ICollection<string> CodeChallengeMethodsSupported =>
+            _codeChallengeMethodsSupported ??
+            Interlocked.CompareExchange(ref _codeChallengeMethodsSupported, new Collection<string>(), null) ??
+            _codeChallengeMethodsSupported;
+
+        /// <summary>
+        /// Gets or sets the 'device_authorization_endpoint'.
+        /// </summary>
+        [JsonPropertyName(OpenIdProviderMetadataNames.DeviceAuthorizationEndpoint)]
+#if NET6_0_OR_GREATER
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+#endif
+        public string DeviceAuthorizationEndpoint { get; set; }
+
+        /// <summary>
         /// Gets the collection of 'display_values_supported'
         /// </summary>
         [JsonPropertyName(OpenIdProviderMetadataNames.DisplayValuesSupported)]
@@ -374,7 +395,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Gets or sets the <see cref="JsonWebKeySet"/>
         /// </summary>
         [JsonIgnore]
-        public JsonWebKeySet JsonWebKeySet {get; set;}
+        public JsonWebKeySet JsonWebKeySet { get; set; }
 
         /// <summary>
         /// Boolean value specifying whether the OP can pass a sid (session ID) query parameter to identify the RP session at the OP when the logout_uri is used. Dafault Value is false.
@@ -507,6 +528,33 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             _responseTypesSupported ??
             Interlocked.CompareExchange(ref _responseTypesSupported, new Collection<string>(), null) ??
             _responseTypesSupported;
+
+        /// <summary>
+        /// Gets or sets the 'revocation_endpoint'
+        /// </summary>
+        [JsonPropertyName(OpenIdProviderMetadataNames.RevocationEndpoint)]
+#if NET6_0_OR_GREATER
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+#endif
+        public string RevocationEndpoint { get; set; }
+
+        /// <summary>
+        /// Gets the collection of 'revocation_endpoint_auth_methods_supported'.
+        /// </summary>
+        [JsonPropertyName(OpenIdProviderMetadataNames.RevocationEndpointAuthMethodsSupported)]
+        public ICollection<string> RevocationEndpointAuthMethodsSupported =>
+            _revocationEndpointAuthMethodsSupported ??
+            Interlocked.CompareExchange(ref _revocationEndpointAuthMethodsSupported, new Collection<string>(), null) ??
+            _revocationEndpointAuthMethodsSupported;
+
+        /// <summary>
+        /// Gets the collection of 'revocation_endpoint_auth_signing_alg_values_supported'.
+        /// </summary>
+        [JsonPropertyName(OpenIdProviderMetadataNames.RevocationEndpointAuthSigningAlgValuesSupported)]
+        public ICollection<string> RevocationEndpointAuthSigningAlgValuesSupported =>
+            _revocationEndpointAuthSigningAlgValuesSupported ??
+            Interlocked.CompareExchange(ref _revocationEndpointAuthSigningAlgValuesSupported, new Collection<string>(), null) ??
+            _revocationEndpointAuthSigningAlgValuesSupported;
 
         /// <summary>
         /// Gets or sets the 'service_documentation'
@@ -689,6 +737,17 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         }
 
         /// <summary>
+        /// Gets a bool that determines if the 'code_challenge_methods_supported' (CodeChallengeMethodsSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'code_challenge_methods_supported' (CodeChallengeMethodsSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeCodeChallengeMethodsSupported()
+        {
+            return CodeChallengeMethodsSupported.Count > 0;
+        }
+
+        /// <summary>
         /// Gets a bool that determines if the 'display_values_supported' (DisplayValuesSupported) property should be serialized.
         /// This is used by Json.NET in order to conditionally serialize properties.
         /// </summary>
@@ -840,6 +899,28 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public bool ShouldSerializeResponseTypesSupported()
         {
             return ResponseTypesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'revocation_endpoint_auth_methods_supported' (RevocationEndpointAuthMethodsSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'revocation_endpoint_auth_methods_supported' (RevocationEndpointAuthMethodsSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeRevocationEndpointAuthMethodsSupported()
+        {
+            return RevocationEndpointAuthMethodsSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'revocation_endpoint_auth_signing_alg_values_supported' (RevocationEndpointAuthSigningAlgValuesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'revocation_endpoint_auth_signing_alg_values_supported' (RevocationEndpointAuthSigningAlgValuesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeRevocationEndpointAuthSigningAlgValuesSupported()
+        {
+            return RevocationEndpointAuthSigningAlgValuesSupported.Count > 0;
         }
 
         /// <summary>
