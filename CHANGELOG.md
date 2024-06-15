@@ -1,12 +1,43 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
-Pending Next Release:
+
+Pending Next Release
+=====
+### Bug Fixes:
+- Reduced allocations in `AadIssuerValidator` by not using `string.Replace` where appropriate. See issue [#2595](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2595) and PR [#2597](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2597) for more details.
+
+7.6.0
+=====
+### New Features:
+- Update `JsonWebToken` - extract and expose the method that reads the header/payload property values from the reader so it can be overridden in children classes to add any extra own logic. See issues [#2581](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2581), [#2583](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2583), and [#2495](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2495) for details.
+
+### Bug Fixes:
+- JWE header algorithm is now compliant to IANA document. See issue [#2089](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2089) for details.
+
+### Performance Improvements:
+- Reduce the number of internal array allocations that need to happen for each claim set, see PR [#2596](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2596).
+
+### Fundamentals:
+- Add an AOT compatibility check on each PR to ensure only AOT compatible code is checked-in. See PR [#2598](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2598).
+- Update perl scrip for OneBranch build. See PR [#2602](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2602).
+- Add langversion 12 to benchmark tests. See PR [#2601](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2601).
+- Removed unused build.cmd file. See PR [#2605](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2605).
+- Create CodeQL exclusions file. See PR [#2609](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2609).
+- Fix variable usage in AOT script. See PR [#2610](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2610).
+- Move `Microsoft.IdentityModel.Tokens` delegates to a new file. See PR [#2606](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2606)
+
+7.5.2
 =====
 ### Bug Fixes:
 - Validate authentication tag length so a JWE with appended characters will not be considered a valid token. See issues [#2201](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2201), [#1641](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/1641), PR [#2569](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2569), and [IDX10625 Wiki](IDX10625) for details. 
 
 ### Fundamentals:
 - App Context Switches in Identity Model 7x are now documented [here](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki/App-Context-Switches-in-IdentityModel-7x).
+
+### Performance Improvements:
+- In .NET 6 or greater, use a temporary buffer to reduce intermediate allocation in `VerifyRsa`/`VerifyECDsa`. See PR [#2589](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2589) for more details.
+- Reduce allocations in `ValidateSignature` by using a collection expression instead of `new List<SecurityKey> { key }`, to optimize for the single element case. See PR [#2586](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2586) for more details.
+- Remove Task allocation in `AadIssuerValidator`. See PR [#2584](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2584) for more details.
 
 7.5.1
 =====
