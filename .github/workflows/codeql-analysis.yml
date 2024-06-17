@@ -7,7 +7,7 @@ on:
       - 'test/Microsoft.IdentityModel.ManagedKeyVaultSecurityKey.Tests/**'
       - '/src/Microsoft.IdentityModel.KeyVaultExtensions/**'
       - '/src/Microsoft.IdentityModel.ManagedKeyVaultSecurityKey/**'      
-    branches: [ "dev", "dev6x" ]
+    branches: [ "dev", "dev6x", "dev7x"]
   pull_request:
    paths-ignore:
       - 'test/Microsoft.IdentityModel.KeyVaultExtensions.Tests/**'
@@ -19,7 +19,7 @@ on:
       - synchronize
       - reopened
       - ready_for_review
-    branches: [ "dev", "dev6x" ]
+    branches: [ "dev", "dev6x", "dev7x"]
 
 jobs:
   analyze:
