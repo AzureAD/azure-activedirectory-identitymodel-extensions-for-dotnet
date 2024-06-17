@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -21,7 +22,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
         // If not found, then we assume we should put the value into AdditionalData.
         // If we didn't do that, we would pay a performance penalty for those cases where there is AdditionalData
         // but otherwise the JSON properties are all lower case.
-        public static HashSet<string> JsonWebKeyParameterNamesUpperCase = new HashSet<string>
+        public static readonly FrozenSet<string> JsonWebKeyParameterNamesUpperCase = new HashSet<string>
         {
             "ALG",
             "CRV",
@@ -46,7 +47,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
             "X5T#S256",
             "X5U",
             "Y"
-        };
+        }.ToFrozenSet();
 
         #region Read
         public static JsonWebKey Read(string json)
