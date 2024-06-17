@@ -303,8 +303,6 @@ namespace Microsoft.IdentityModel.TestUtils
             _keySize = keySize;
         }
 
-        internal override string InternalId { get =>_keyId; }
-
         public Exception ThrowOnGetKeyId { get; set; }
 
         public Exception ThrowOnSetKeyId { get; set; }
