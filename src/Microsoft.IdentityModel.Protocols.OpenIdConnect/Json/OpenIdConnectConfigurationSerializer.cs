@@ -3,8 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Collections.Generic;
+#if NET8_0_OR_GREATER
 using System.Collections.Frozen;
+#endif
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -27,7 +29,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         // If not found, then we assume we should put the value into AdditionalData.
         // If we didn't do that, we would pay a performance penalty for those cases where there is AdditionalData
         // but otherwise the JSON properties are all lower case.
-        public static readonly FrozenSet<string> OpenIdProviderMetadataNamesUpperCase = new HashSet<string>
+        public static readonly
+#if NET8_0_OR_GREATER
+        FrozenSet<string>
+#else
+        HashSet<string>
+#endif
+        OpenIdProviderMetadataNamesUpperCase = new HashSet<string>
         {
             "ACR_VALUES_SUPPORTED",
             "AUTHORIZATION_ENDPOINT",
@@ -88,7 +96,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             "USERINFO_ENCRYPTION_ALG_VALUES_SUPPORTED",
             "USERINFO_ENCRYPTION_ENC_VALUES_SUPPORTED",
             "USERINFO_SIGNING_ALG_VALUES_SUPPORTED",
-        }.ToFrozenSet();
+        }
+#if NET8_0_OR_GREATER
+        .ToFrozenSet()
+#endif
+        ;
 
         #region Read
         public static OpenIdConnectConfiguration Read(string json)
