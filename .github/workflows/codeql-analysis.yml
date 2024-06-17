@@ -2,7 +2,7 @@ name: "CodeQL"
 
 on:
   push:   
-      paths-ignore:
+    paths-ignore:
       - 'test/Microsoft.IdentityModel.KeyVaultExtensions.Tests/**'
       - 'test/Microsoft.IdentityModel.ManagedKeyVaultSecurityKey.Tests/**'
       - '/src/Microsoft.IdentityModel.KeyVaultExtensions/**'
