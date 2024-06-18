@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -49,7 +50,8 @@ namespace Microsoft.IdentityModel.Tokens
                 });
 
             // if it reaches here, that means lifetime of the token is valid
-            LogHelper.LogInformation(LogMessages.IDX10239);
+            if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                LogHelper.LogInformation(LogMessages.IDX10239);
         }
     }
 }
