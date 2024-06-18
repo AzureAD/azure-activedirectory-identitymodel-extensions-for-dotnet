@@ -3580,7 +3580,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 incorrectSigningKeysConfig.SigningKeys.Add(KeyingMaterial.X509SecurityKey2);
                 theoryData.Add(new JwtTheoryData
                 {
-                    TestId = nameof(Default.AsymmetricJws) + "_" + "TVPInvalid" + "_" + "ConfigSigningKeysInvalid" + "_SignatureValidatorReturnsValidToken",
+                    TestId = nameof(Default.AsymmetricJws) + "_TVPInvalid_ConfigSigningKeysInvalid_SignatureValidatorReturnsValidToken",
                     Token = Default.AsymmetricJws,
                     ValidationParameters = new TokenValidationParameters
                     {

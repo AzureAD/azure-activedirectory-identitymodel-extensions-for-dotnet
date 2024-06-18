@@ -24,6 +24,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public const string ClaimsParameterSupported = "claims_parameter_supported";
         public const string ClaimsSupported = "claims_supported";
         public const string ClaimTypesSupported = "claim_types_supported";
+        public const string CodeChallengeMethodsSupported = "code_challenge_methods_supported";
+        public const string DeviceAuthorizationEndpoint = "device_authorization_endpoint";
         public const string Discovery = ".well-known/openid-configuration";
         public const string DisplayValuesSupported = "display_values_supported";
         public const string DPoPSigningAlgValuesSupported = "dpop_signing_alg_values_supported";
@@ -56,6 +58,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public const string RequireRequestUriRegistration = "require_request_uri_registration";
         public const string ResponseModesSupported = "response_modes_supported";
         public const string ResponseTypesSupported = "response_types_supported";
+        public const string RevocationEndpoint = "revocation_endpoint";
+        public const string RevocationEndpointAuthMethodsSupported = "revocation_endpoint_auth_methods_supported";
+        public const string RevocationEndpointAuthSigningAlgValuesSupported = "revocation_endpoint_auth_signing_alg_values_supported";
         public const string ServiceDocumentation = "service_documentation";
         public const string ScopesSupported = "scopes_supported";
         public const string SubjectTypesSupported = "subject_types_supported";
@@ -89,6 +94,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public static ReadOnlySpan<byte> ClaimsParameterSupported => "claims_parameter_supported"u8;
         public static ReadOnlySpan<byte> ClaimsSupported => "claims_supported"u8;
         public static ReadOnlySpan<byte> ClaimTypesSupported => "claim_types_supported"u8;
+        public static ReadOnlySpan<byte> CodeChallengeMethodsSupported => "code_challenge_methods_supported"u8;
+        public static ReadOnlySpan<byte> DeviceAuthorizationEndpoint => "device_authorization_endpoint"u8;
         public static ReadOnlySpan<byte> Discovery => ".well-known/openid-configuration"u8;
         public static ReadOnlySpan<byte> DisplayValuesSupported => "display_values_supported"u8;
         public static ReadOnlySpan<byte> DPoPSigningAlgValuesSupported => "dpop_signing_alg_values_supported"u8;
@@ -121,6 +128,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public static ReadOnlySpan<byte> RequireRequestUriRegistration => "require_request_uri_registration"u8;
         public static ReadOnlySpan<byte> ResponseModesSupported => "response_modes_supported"u8;
         public static ReadOnlySpan<byte> ResponseTypesSupported => "response_types_supported"u8;
+        public static ReadOnlySpan<byte> RevocationEndpoint => "revocation_endpoint"u8;
+        public static ReadOnlySpan<byte> RevocationEndpointAuthMethodsSupported => "revocation_endpoint_auth_methods_supported"u8;
+        public static ReadOnlySpan<byte> RevocationEndpointAuthSigningAlgValuesSupported => "revocation_endpoint_auth_signing_alg_values_supported"u8;
         public static ReadOnlySpan<byte> ServiceDocumentation => "service_documentation"u8;
         public static ReadOnlySpan<byte> ScopesSupported => "scopes_supported"u8;
         public static ReadOnlySpan<byte> SubjectTypesSupported => "subject_types_supported"u8;
