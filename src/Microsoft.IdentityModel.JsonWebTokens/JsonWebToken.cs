@@ -1128,5 +1128,65 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
         #endregion
+
+        #region Payload Properties Bytes
+#if NET8_0_OR_GREATER
+
+        /// <summary>
+        /// Gets the 'azp' claim from the payload.
+        /// </summary>
+        /// <remarks>
+        /// Identifies the authorized party for the id_token.
+        /// see: https://openid.net/specs/openid-connect-core-1_0.html
+        /// <para>
+        /// If the 'azp' claim is not found, an empty string is returned.
+        /// </para>
+        /// </remarks>
+        public ReadOnlySpan<byte> AzpBytes
+        {
+            get
+            {
+                return Payload.GetStringBytesValue(JwtRegisteredClaimNames.Azp);
+            }
+        }
+
+        /// <summary>
+        /// Gets the 'value' of the 'jti' claim from the payload.
+        /// </summary>
+        /// <remarks>
+        /// Provides a unique identifier for the JWT.
+        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.7
+        /// <para>
+        /// If the 'jti' claim is not found, an empty string is returned.
+        /// </para>
+        /// </remarks>
+        public ReadOnlySpan<byte> IdBytes
+        {
+            get
+            {
+                return Payload.GetStringBytesValue(JwtRegisteredClaimNames.Jti);
+            }
+        }
+
+        /// <summary>
+        /// Gets the 'value' of the 'iss' claim from the payload.
+        /// </summary>
+        /// <remarks>
+        /// Identifies the principal that issued the JWT.
+        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.1
+        /// <para>
+        /// If the 'iss' claim is not found, an empty string is returned.
+        /// </para>
+        /// </remarks>
+        public ReadOnlySpan<byte> IssuerBytes
+        {
+            get
+            {
+                return Payload.GetStringBytesValue(JwtRegisteredClaimNames.Iss);
+            }
+        }
+
+#endif
+        #endregion
     }
 }

@@ -25,31 +25,35 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal object _claimsLock = new();
         internal readonly Dictionary<string, object> _jsonClaims;
-        internal readonly Dictionary<string, (int startIndex, int length)> _jsonClaimsUtf8;
+#if NET8_0_OR_GREATER
+        internal readonly Dictionary<string, (int startIndex, int length)?> _jsonClaimsBytes;
         internal readonly Memory<byte> _tokenAsMemory;
+#endif
         private List<Claim> _claims;
 
         internal JsonClaimSet()
         {
             _jsonClaims = new();
-            _jsonClaimsUtf8 = new();
+#if NET8_0_OR_GREATER
+            _jsonClaimsBytes = new();
+#endif
         }
 
         internal JsonClaimSet(Dictionary<string, object> jsonClaims)
         {
             _jsonClaims = jsonClaims;
         }
-
+#if NET8_0_OR_GREATER
         internal JsonClaimSet(
             Dictionary<string, object> jsonClaims,
-            Dictionary<string, (int startIndex, int length)> jsonClaimsUtf8,
+            Dictionary<string, (int startIndex, int length)?> jsonClaimsBytes,
             Memory<byte> tokenAsMemory)
         {
             _jsonClaims = jsonClaims;
-            _jsonClaimsUtf8 = jsonClaimsUtf8;
+            _jsonClaimsBytes = jsonClaimsBytes;
             _tokenAsMemory = tokenAsMemory;
         }
-
+#endif
         internal List<Claim> Claims(string issuer)
         {
             if (_claims == null)
@@ -176,10 +180,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal string GetStringValue(string key)
         {
-#if NET7_0_OR_GREATER
-            if (_jsonClaimsUtf8.TryGetValue(key, out (int, int) tuple))
+#if NET8_0_OR_GREATER
+            if (_jsonClaimsBytes.TryGetValue(key, out (int StartIndex, int Length)? location))
             {
-                return Encoding.UTF8.GetString(_tokenAsMemory.Slice(tuple.Item1, tuple.Item2).Span);
+                if (!location.HasValue)
+                    return null;
+
+                return Encoding.UTF8.GetString(_tokenAsMemory.Slice(location.Value.StartIndex, location.Value.Length).Span);
             }
 #else
             if (_jsonClaims.TryGetValue(key, out object obj))
@@ -194,13 +201,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return string.Empty;
         }
 
-#if NET7_0_OR_GREATER
-        internal ReadOnlySpan<byte> GetUtf8Bytes(string key)
+#if NET8_0_OR_GREATER
+        // Similar to GetStringValue but returns the bytes directly.
+        internal ReadOnlySpan<byte> GetStringBytesValue(string key)
         {
-            // (int startIndex, int length) tuple
-            if (_jsonClaimsUtf8.TryGetValue(key, out (int, int) tuple))
+            if (_jsonClaimsBytes.TryGetValue(key, out (int StartIndex, int Length)? location))
             {
-                return _tokenAsMemory.Slice(tuple.Item1, tuple.Item2).Span;
+                if (!location.HasValue)
+                    return null;
+
+                return _tokenAsMemory.Slice(location.Value.StartIndex, location.Value.Length).Span;
             }
 
             return new Span<byte>();
@@ -459,10 +469,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <returns></returns>
         internal bool TryGetValue<T>(string key, out T value)
         {
-#if NET7_0_OR_GREATER
+#if NET8_0_OR_GREATER
             if (typeof(T) == typeof(string))
             {
-                var span = GetUtf8Bytes(key);
+                var span = GetStringBytesValue(key);
                 if (!span.IsEmpty)
                 {
                     value = (T)(object)Encoding.UTF8.GetString(span);

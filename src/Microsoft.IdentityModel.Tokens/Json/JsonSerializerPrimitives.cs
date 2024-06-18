@@ -655,7 +655,14 @@ namespace Microsoft.IdentityModel.Tokens.Json
             return retval;
         }
 
-        internal static (int ValueStartIndex, int ValueLength)? ReadUtf8StringLocation(ref Utf8JsonReader reader, string propertyName, string className, bool read = false)
+#if NET8_0_OR_GREATER
+        // Mostly the same as ReadString, but this method returns the location of the string in the token.
+        internal static (int StartIndex, int Length)? ReadStringBytesLocation(
+            ref Utf8JsonReader reader,
+            Memory<byte> tokenAsMemory,
+            string propertyName,
+            string className,
+            bool read = false)
         {
             // returning null keeps the same logic as JsonSerialization.ReadObject
             if (IsReaderPositionedOnNull(ref reader, read, true))
@@ -665,8 +672,23 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 throw LogHelper.LogExceptionMessage(
                     CreateJsonReaderExceptionInvalidType(ref reader, "JsonTokenType.StartArray", className, propertyName));
 
-            return ((int)reader.TokenStartIndex + 1, reader.ValueSpan.Length);
+            if (reader.ValueIsEscaped)
+            {
+                // Escaped string is always longer than unescaped
+                // Unescapes in-place
+                int bytesWritten = reader.CopyString(tokenAsMemory.Span.Slice((int)reader.TokenStartIndex, reader.ValueSpan.Length));
+
+                return ((int)reader.TokenStartIndex, bytesWritten);
+            }
+
+            var location = ((int)reader.TokenStartIndex + 1, reader.ValueSpan.Length);
+
+            // Move to next token
+            reader.Read();
+
+            return location;
         }
+#endif
 
         internal static string ReadStringAsBool(ref Utf8JsonReader reader, string propertyName, string className, bool read = false)
         {
@@ -1078,7 +1100,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
 
             return true;
         }
-        #endregion
+#endregion
 
         #region Write
         public static void WriteAsJsonElement(ref Utf8JsonWriter writer, string json)
@@ -1165,7 +1187,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
 #if NET6_0_OR_GREATER
                 writer.WriteNumber(key, dub);
 #else
-                #pragma warning disable CA1031 // Do not catch general exception types, we have seen TryParse fault.
+#pragma warning disable CA1031 // Do not catch general exception types, we have seen TryParse fault.
                 try
                 {
                     if (decimal.TryParse(dub.ToString(CultureInfo.InvariantCulture), out decimal dec))
@@ -1177,7 +1199,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 {
                     writer.WriteNumber(key, dub);
                 }
-                #pragma warning restore CA1031
+#pragma warning restore CA1031
 #endif
             else if (obj is decimal d)
                 writer.WriteNumber(key, d);
@@ -1187,7 +1209,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
 #if NET6_0_OR_GREATER
                 writer.WriteNumber(key, f);
 #else
-                #pragma warning disable CA1031 // Do not catch general exception types, we have seen TryParse fault.
+#pragma warning disable CA1031 // Do not catch general exception types, we have seen TryParse fault.
                 try
                 {
                     if (decimal.TryParse(f.ToString(CultureInfo.InvariantCulture), out decimal dec))
@@ -1199,7 +1221,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 {
                     writer.WriteNumber(key, f);
                 }
-                #pragma warning restore CA1031
+#pragma warning restore CA1031
 #endif
             else if (obj is Guid g)
                 writer.WriteString(key, g);
@@ -1253,7 +1275,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
 #if NET6_0_OR_GREATER
                 writer.WriteNumberValue(dub);
 #else
-                #pragma warning disable CA1031 // Do not catch general exception types, we have seen TryParse fault.
+#pragma warning disable CA1031 // Do not catch general exception types, we have seen TryParse fault.
                 try
                 {
                     if (decimal.TryParse(dub.ToString(CultureInfo.InvariantCulture), out decimal dec))
@@ -1265,7 +1287,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 {
                     writer.WriteNumberValue(dub);
                 }
-                #pragma warning restore CA1031
+#pragma warning restore CA1031
 #endif
             else if (obj is JsonElement j)
                 j.WriteTo(writer);
@@ -1295,7 +1317,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
 #if NET6_0_OR_GREATER
             writer.WriteNumberValue(f);
 #else
-            #pragma warning disable CA1031 // Do not catch general exception types, we have seen TryParse fault.
+#pragma warning disable CA1031 // Do not catch general exception types, we have seen TryParse fault.
             try
             {
                 if (decimal.TryParse(f.ToString(CultureInfo.InvariantCulture), out decimal dec))
@@ -1307,7 +1329,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
             {
                 writer.WriteNumberValue(f);
             }
-            #pragma warning restore CA1031
+#pragma warning restore CA1031
 #endif
 
             else
