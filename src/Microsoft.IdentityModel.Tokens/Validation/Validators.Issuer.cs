@@ -209,10 +209,28 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+                return new IssuerValidationResult(
+                    issuer,
+                    ValidationFailureType.NullArgument,
+                    new ExceptionDetail(
+                        new MessageDetail(
+                            LogMessages.IDX10000,
+                            LogHelper.MarkAsNonPII(nameof(validationParameters))),
+                        typeof(ArgumentNullException),
+                        new StackFrame(true),
+                        null));
 
             if (securityToken == null)
-                throw LogHelper.LogArgumentNullException(nameof(securityToken));
+                return new IssuerValidationResult(
+                    issuer,
+                    ValidationFailureType.NullArgument,
+                    new ExceptionDetail(
+                        new MessageDetail(
+                            LogMessages.IDX10000,
+                            LogHelper.MarkAsNonPII(nameof(securityToken))),
+                        typeof(ArgumentNullException),
+                        new StackFrame(true),
+                        null));
 
             BaseConfiguration configuration = null;
             if (validationParameters.ConfigurationManager != null)

@@ -92,6 +92,43 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     ValidationParameters = new TokenValidationParameters(),
                 });
 
+                theoryData.Add(new IssuerValidationResultsTheoryData("NULL_ValidationParameters")
+                {
+                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    Issuer = issClaim,
+                    IssuerValidationResult = new IssuerValidationResult(
+                        issClaim,
+                        ValidationFailureType.NullArgument,
+                        new ExceptionDetail(
+                        new MessageDetail(
+                            LogMessages.IDX10000,
+                            LogHelper.MarkAsNonPII("validationParameters")),
+                        typeof(ArgumentNullException),
+                        new StackFrame(true),
+                        null)),
+                    IsValid = false,
+                    SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
+                    ValidationParameters = null
+                });
+
+                theoryData.Add(new IssuerValidationResultsTheoryData("NULL_SecurityToken")
+                {
+                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    Issuer = issClaim,
+                    IssuerValidationResult = new IssuerValidationResult(
+                        issClaim,
+                        ValidationFailureType.NullArgument,
+                        new ExceptionDetail(
+                        new MessageDetail(
+                            LogMessages.IDX10000,
+                            LogHelper.MarkAsNonPII("securityToken")),
+                        typeof(ArgumentNullException),
+                        new StackFrame(true),
+                        null)),
+                    IsValid = false,
+                    SecurityToken = null,
+                    ValidationParameters = new TokenValidationParameters()
+                });
                 return theoryData;
             }
         }
