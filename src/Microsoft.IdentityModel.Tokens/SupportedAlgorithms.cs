@@ -104,7 +104,7 @@ namespace Microsoft.IdentityModel.Tokens
             SecurityAlgorithms.EcdhEsA256kw
         };
 
-#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
+#if NET462 || NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
         /// <summary>
         /// Creating a Signature requires the use of a <see cref="HashAlgorithm"/>.
         /// This method returns the <see cref="HashAlgorithmName"/>
