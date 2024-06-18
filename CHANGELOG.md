@@ -5,7 +5,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 ### Breaking changes:
 - IdentityModel 8x no longer supports .net461, which has reached end of life and is no longer supported. See issue [#2544](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2544) for details.
 - Two IdentityModel extension dlls `Microsoft.IdentityModel.KeyVaultExtensions` and `Microsoft.IdentityModel.ManagedKeyVaultSecurityKey` were using ADAL, which is no longer supported . The affected packages have been removed, as the replacement is to use [Microsoft.Identity.Web](https://github.com/AzureAD/microsoft-identity-web/wiki/Certificates). See issue [#2454](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2454) for details.
-- `AppContext.SetSwitch` which were included in IdentityModel 7x, have been removed and are the default in IdentityModel 8x. The result is a more performant IdentityModel by default. See issue [#2629](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2629) for details.
+- `AppContext.SetSwitch` which were included in IdentityModel 7x, have been removed and are the default in IdentityModel 8x. The result is a more performant IdentityModel by default. See issue [#2629](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2629) and https://aka.ms/IdentityModel8x for details.
 
 7.6.1
 =====
