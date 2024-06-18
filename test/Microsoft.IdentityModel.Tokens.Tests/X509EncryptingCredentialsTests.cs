@@ -82,7 +82,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 new X509EncryptingCredentialsTheoryData
                 {
                     Certificate = Default.Certificate,
-                    Alg =  SecurityAlgorithms.RsaOAEP,
+                    Alg = SecurityAlgorithms.RsaOAEP,
                     Enc = SecurityAlgorithms.Aes128CbcHmacSha256,
                     TestId = "ValidTest"
                 }
