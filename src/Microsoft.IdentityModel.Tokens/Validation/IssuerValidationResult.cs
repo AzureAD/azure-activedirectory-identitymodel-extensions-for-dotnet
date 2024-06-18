@@ -11,17 +11,27 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     internal class IssuerValidationResult : ValidationResult
     {
+        internal enum ValidationSource
+        {
+            NotValidated = 0,
+            IssuerIsConfigurationIssuer,
+            IssuerIsValidIssuer,
+            IssuerIsAmongValidIssuers
+        }
+
         private Exception _exception;
 
         /// <summary>
         /// Creates an instance of <see cref="IssuerValidationResult"/>
         /// </summary>
         /// <paramref name="issuer"/> is the issuer that was validated successfully.
-        public IssuerValidationResult(string issuer)
+        /// <paramref name="source"/> is the <see cref="ValidationSource"/> indicating how this issuer was validated.
+        public IssuerValidationResult(string issuer, ValidationSource source = ValidationSource.NotValidated)
             : base(ValidationFailureType.ValidationSucceeded)
         {
             Issuer = issuer;
             IsValid = true;
+            Source = source;
         }
 
         /// <summary>
@@ -30,11 +40,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// <paramref name="issuer"/> is the issuer that was intended to be validated.
         /// <paramref name="validationFailure"/> is the <see cref="ValidationFailureType"/> that occurred during validation.
         /// <paramref name="exceptionDetail"/> is the <see cref="ExceptionDetail"/> that occurred during validation.
-        public IssuerValidationResult(string issuer, ValidationFailureType validationFailure, ExceptionDetail exceptionDetail)
+        /// <paramref name="source"/> is the <see cref="ValidationSource"/> indicating how this issuer was validated.
+        public IssuerValidationResult(string issuer, ValidationFailureType validationFailure, ExceptionDetail exceptionDetail, ValidationSource source = ValidationSource.NotValidated)
             : base(validationFailure, exceptionDetail)
         {
             Issuer = issuer;
             IsValid = false;
+            Source = source;
         }
 
         /// <summary>
@@ -65,5 +77,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets the issuer that was validated or intended to be validated.
         /// </summary>
         public string Issuer { get; }
+
+        public ValidationSource Source { get; }
     }
 }
