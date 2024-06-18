@@ -199,14 +199,9 @@ namespace Microsoft.IdentityModel.Tokens
                 RSASignaturePadding = RSASignaturePadding.Pkcs1;
             }
 
-            RSAEncryptionPadding = algorithm switch
-            {
-                SecurityAlgorithms.RsaOAEP => RSAEncryptionPadding.OaepSHA1,
-                SecurityAlgorithms.RsaOaepKeyWrap => RSAEncryptionPadding.OaepSHA1,
-                SecurityAlgorithms.RsaOAEP256 => RSAEncryptionPadding.OaepSHA256,
-                _ => RSAEncryptionPadding.Pkcs1
-            };
-
+            RSAEncryptionPadding = (algorithm.Equals(SecurityAlgorithms.RsaOAEP) || algorithm.Equals(SecurityAlgorithms.RsaOaepKeyWrap))
+                        ? RSAEncryptionPadding.OaepSHA1
+                        : RSAEncryptionPadding.Pkcs1;
             RSA = rsa;
             _decryptFunction = DecryptWithRsa;
             _encryptFunction = EncryptWithRsa;

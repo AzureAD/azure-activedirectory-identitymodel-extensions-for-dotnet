@@ -83,6 +83,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.NotNull(configuration.ClaimsLocalesSupported);
             Assert.False(configuration.ClaimsParameterSupported);
             Assert.NotNull(configuration.ClaimTypesSupported);
+            Assert.NotNull(configuration.CodeChallengeMethodsSupported);
             Assert.NotNull(configuration.DisplayValuesSupported);
             Assert.NotNull(configuration.DPoPSigningAlgValuesSupported);
             Assert.NotNull(configuration.GrantTypesSupported);
@@ -102,6 +103,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.False(configuration.RequireRequestUriRegistration);
             Assert.NotNull(configuration.ResponseModesSupported);
             Assert.NotNull(configuration.ResponseTypesSupported);
+            Assert.NotNull(configuration.RevocationEndpointAuthMethodsSupported);
+            Assert.NotNull(configuration.RevocationEndpointAuthSigningAlgValuesSupported);
             Assert.NotNull(configuration.ScopesSupported);
             Assert.NotNull(configuration.SigningKeys);
             Assert.NotNull(configuration.SubjectTypesSupported);
@@ -138,8 +141,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
             Type type = typeof(OpenIdConnectConfiguration);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 58)
-                Assert.True(false, "Number of properties has changed from 58 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 63)
+                Assert.True(false, "Number of properties has changed from 63 to: " + properties.Length + ", adjust tests");
 
             TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(configuration, "OpenIdConnectConfiguration_GetSets");
 
@@ -154,6 +157,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                             new KeyValuePair<string, List<object>>("BackchannelUserCodeParameterSupported", new List<object>{ false, true, true }),
                             new KeyValuePair<string, List<object>>("CheckSessionIframe", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
                             new KeyValuePair<string, List<object>>("ClaimsParameterSupported", new List<object>{ false, true, false }),
+                            new KeyValuePair<string, List<object>>("CodeChallengeMethodsSupported", new List<object>{ false, true, true }),
+                            new KeyValuePair<string, List<object>>("DeviceAuthorizationEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
                             new KeyValuePair<string, List<object>>("EndSessionEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
                             new KeyValuePair<string, List<object>>("HttpLogoutSupported", new List<object>{ false, true, true }),
                             new KeyValuePair<string, List<object>>("IntrospectionEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
@@ -169,6 +174,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                             new KeyValuePair<string, List<object>>("RequestUriParameterSupported", new List<object>{ false, true, true }),
                             new KeyValuePair<string, List<object>>("RequirePushedAuthorizationRequests", new List<object>{ false, true, true }),
                             new KeyValuePair<string, List<object>>("RequireRequestUriRegistration", new List<object>{ false, true, true }),
+                            new KeyValuePair<string, List<object>>("RevocationEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
+                            new KeyValuePair<string, List<object>>("RevocationEndpointAuthMethodsSupported", new List<object>{ false, true, true }),
+                            new KeyValuePair<string, List<object>>("RevocationEndpointAuthSigningAlgValuesSupported", new List<object>{ false, true, true }),
                             new KeyValuePair<string, List<object>>("ServiceDocumentation", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
                             new KeyValuePair<string, List<object>>("TokenEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
                             new KeyValuePair<string, List<object>>("UserInfoEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
@@ -286,6 +294,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 "claims_supported",
                 "claims_locales_supported",
                 "claim_types_supported",
+                "code_challenge_methods_supported",
+                "device_authorization_endpoint",
                 "display_values_supported",
                 "dpop_signing_alg_values_supported",
                 "grant_types_supported",
@@ -300,6 +310,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 "request_object_signing_alg_values_supported",
                 "response_modes_supported",
                 "response_types_supported",
+                "revocation_endpoint",
+                "revocation_endpoint_auth_methods_supported",
+                "revocation_endpoint_auth_signing_alg_values_supported",
                 "scopes_supported",
                 "subject_types_supported",
                 "token_endpoint_auth_methods_supported",

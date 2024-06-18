@@ -13,7 +13,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// Contains a set of parameters that are used by a <see cref="SecurityTokenHandler"/> when validating a <see cref="SecurityToken"/>.
     /// </summary>
-    public class TokenValidationParameters
+    public partial class TokenValidationParameters
     {
         private string _authenticationType;
         private TimeSpan _clockSkew = DefaultClockSkew;
@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Default for the maximum token size.
         /// </summary>
         /// <remarks>250 KB (kilobytes).</remarks>
-        public const Int32 DefaultMaximumTokenSizeInBytes = 1024 * 250;
+        public const int DefaultMaximumTokenSizeInBytes = 1024 * 250;
 
         /// <summary>
         /// Copy constructor for <see cref="TokenValidationParameters"/>.
@@ -66,6 +66,7 @@ namespace Microsoft.IdentityModel.Tokens
             IssuerSigningKeyValidatorUsingConfiguration = other.IssuerSigningKeyValidatorUsingConfiguration;
             IssuerValidator = other.IssuerValidator;
             IssuerValidatorAsync = other.IssuerValidatorAsync;
+            IssuerValidationDelegateAsync = other.IssuerValidationDelegateAsync;
             IssuerValidatorUsingConfiguration = other.IssuerValidatorUsingConfiguration;
             LifetimeValidator = other.LifetimeValidator;
             LogTokenId = other.LogTokenId;
@@ -171,22 +172,6 @@ namespace Microsoft.IdentityModel.Tokens
                 _authenticationType = value;
             }
         }
-
-        ///// <summary>
-        ///// Gets or sets the <see cref="X509CertificateValidator"/> for validating X509Certificate2(s).
-        ///// </summary>
-        //public X509CertificateValidator CertificateValidator
-        //{
-        //    get
-        //    {
-        //        return _certificateValidator;
-        //    }
-
-        //    set
-        //    {
-        //        _certificateValidator = value;
-        //    }
-        //}
 
         /// <summary>
         /// Gets or sets the clock skew to apply when validating a time.
@@ -367,7 +352,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// priority. 
         /// </remarks>
         public IssuerValidator IssuerValidator { get; set; }
-
 
         /// <summary>
         /// Gets or sets a delegate that will be used to validate the issuer of the token.
