@@ -209,10 +209,28 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
+                return new IssuerValidationResult(
+                    issuer,
+                    ValidationFailureType.NullArgument,
+                    new ExceptionDetail(
+                        new MessageDetail(
+                            LogMessages.IDX10000,
+                            LogHelper.MarkAsNonPII(nameof(validationParameters))),
+                        typeof(ArgumentNullException),
+                        new StackFrame(true),
+                        null));
 
             if (securityToken == null)
-                throw LogHelper.LogArgumentNullException(nameof(securityToken));
+                return new IssuerValidationResult(
+                    issuer,
+                    ValidationFailureType.NullArgument,
+                    new ExceptionDetail(
+                        new MessageDetail(
+                            LogMessages.IDX10000,
+                            LogHelper.MarkAsNonPII(nameof(securityToken))),
+                        typeof(ArgumentNullException),
+                        new StackFrame(true),
+                        null));
 
             BaseConfiguration configuration = null;
             if (validationParameters.ConfigurationManager != null)
@@ -234,7 +252,6 @@ namespace Microsoft.IdentityModel.Tokens
                             new StackFrame(true)));
             }
 
-            // TODO - we should distinguish if configuration, TVP.ValidIssuer or TVP.ValidIssuers was used to validate the issuer.
             if (configuration != null)
             {
                 if (string.Equals(configuration.Issuer, issuer))
@@ -245,13 +262,15 @@ namespace Microsoft.IdentityModel.Tokens
                     if (LogHelper.IsEnabled(EventLogLevel.Informational))
                         LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer), callContext);
 
-                    return new IssuerValidationResult(issuer);
+                    return new IssuerValidationResult(issuer,
+                        IssuerValidationResult.ValidationSource.IssuerIsConfigurationIssuer);
                 }
             }
 
             if (string.Equals(validationParameters.ValidIssuer, issuer))
             {
-                return new IssuerValidationResult(issuer);
+                return new IssuerValidationResult(issuer,
+                    IssuerValidationResult.ValidationSource.IssuerIsValidIssuer);
             }
 
             if (validationParameters.ValidIssuers != null)
@@ -271,7 +290,8 @@ namespace Microsoft.IdentityModel.Tokens
                         if (LogHelper.IsEnabled(EventLogLevel.Informational))
                             LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer));
 
-                        return new IssuerValidationResult(issuer);
+                        return new IssuerValidationResult(issuer,
+                            IssuerValidationResult.ValidationSource.IssuerIsAmongValidIssuers);
                     }
                 }
             }

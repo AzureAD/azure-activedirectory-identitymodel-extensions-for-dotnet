@@ -13,7 +13,7 @@ namespace Microsoft.IdentityModel.Tokens
     {
 #pragma warning disable 1591
         // general
-        // public const string IDX10000 = "IDX10000:";
+        public const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object. ";
 
         // properties, configuration 
         public const string IDX10101 = "IDX10101: MaximumTokenSizeInBytes must be greater than zero. value: '{0}'";
