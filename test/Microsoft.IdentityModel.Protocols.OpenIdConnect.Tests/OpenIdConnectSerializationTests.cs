@@ -40,7 +40,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             get
             {
                 TheoryData<OpenIdConnectTheoryData> theoryData = new TheoryData<OpenIdConnectTheoryData>();
-                
                 // the reason to replace AdditionalData with upper case is because the test deserializes uppercase and lowercase.
                 // we wanted to leave the data sets in original form from discovery to be used in other tests.
                 theoryData.Add(new OpenIdConnectTheoryData("AADCommonV1")
@@ -138,11 +137,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     CompareTo = OpenIdConfigData.NullConfig,
                     Json = JsonData.NullObject
                 });
-                
+
                 theoryData.Add(new OpenIdConnectTheoryData("SerializeJsonWebKeySet")
                 {
-                    CompareTo = OpenIdConfigData.FullyPopulatedWithKeys,
-                    Json = OpenIdConfigData.JsonAllValues
+                    CompareTo = OpenIdConfigData.DefaultConfigWithJWK,
+                    Json = OpenIdConfigData.JsonWithJWK
                 });
 
                 return theoryData;

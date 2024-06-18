@@ -68,6 +68,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             "INTROSPECTION_ENDPOINT_AUTH_METHODS_SUPPORTED",
             "INTROSPECTION_ENDPOINT_AUTH_SIGNING_ALG_VALUES_SUPPORTED",
             "JWKS_URI",
+            "KEYS",
             "ISSUER",
             "LOGOUT_SESSION_SUPPORTED",
             "OP_POLICY_URI",
@@ -215,6 +216,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                         if (config.JsonWebKeySet == null)
                             config.JsonWebKeySet = new JsonWebKeySet();
                         JsonWebKeySetSerializer.Read(ref reader, config.JsonWebKeySet);
+                        config.ShouldSerializeJsonWebKeys = true;
                     }
 
                     // FrontchannelLogoutSessionSupported and FrontchannelLogoutSupported are per spec 'boolean'.
@@ -557,6 +559,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
                             else if (propertyName.Equals(MetadataName.UserInfoSigningAlgValuesSupported, StringComparison.OrdinalIgnoreCase))
                                 JsonPrimitives.ReadStrings(ref reader, config.UserInfoEndpointSigningAlgValuesSupported, propertyName, ClassName);
+
+                            else if (propertyName.Equals(JsonWebKeySetParameterNames.Keys, StringComparison.OrdinalIgnoreCase))
+                            {
+                                if (config.JsonWebKeySet == null)
+                                    config.JsonWebKeySet = new JsonWebKeySet();
+                                JsonWebKeySetSerializer.Read(ref reader, config.JsonWebKeySet);
+                                config.ShouldSerializeJsonWebKeys = true;
+                            }
                         }
                         #endregion case-insensitive
                     }
