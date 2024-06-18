@@ -252,7 +252,6 @@ namespace Microsoft.IdentityModel.Tokens
                             new StackFrame(true)));
             }
 
-            // TODO - we should distinguish if configuration, TVP.ValidIssuer or TVP.ValidIssuers was used to validate the issuer.
             if (configuration != null)
             {
                 if (string.Equals(configuration.Issuer, issuer))
