@@ -31,9 +31,13 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET472 || NET6_0_OR_GREATER
             CreateECDsaFunction = CreateECDsaUsingECParams;
 #elif NETSTANDARD2_0
-            CreateECDsaFunction = CreateECDsaUsingCNGKey;
+            // Although NETSTANDARD2_0 specifies that ECParameters are supported, we still need to call SupportsECParameters()
+            // as NET462 is listed as supporting NETSTANDARD2_0, but DOES NOT support ECParameters.
+            // See: https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.ecparameters?view=netstandard-2.0
+            if (SupportsECParameters()) CreateECDsaFunction = CreateECDsaUsingECParams;
+            else CreateECDsaFunction = CreateECDsaUsingCNGKey;
 #else
-            CreateECDsaFunction = CreateECDsaUsingCNGKey;
+        CreateECDsaFunction = CreateECDsaUsingCNGKey;
 #endif
         }
 
@@ -222,26 +226,6 @@ namespace Microsoft.IdentityModel.Tokens
                     throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10645, LogHelper.MarkAsNonPII(curveId))));
             }
             return (uint)magicNumber;
-        }
-
-        /// <summary>
-        /// Tests if user's runtime platform supports operations using <see cref="CngKey"/>.
-        /// </summary>
-        /// <returns>True if operations using <see cref="CngKey"/> are supported on user's runtime platform, false otherwise.</returns>
-        [MethodImpl(MethodImplOptions.NoOptimization)]
-        private static bool SupportsCNGKey()
-        {
-            try
-            {
-#pragma warning disable CA1416 // Validate platform compatibility
-                _ = CngKeyBlobFormat.EccPrivateBlob;
-#pragma warning restore CA1416 // Validate platform compatibility
-                return true;
-            }
-            catch (PlatformNotSupportedException)
-            {
-                return false;
-            }
         }
 
 #if NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
