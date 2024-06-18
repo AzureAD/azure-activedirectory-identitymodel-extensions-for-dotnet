@@ -25,7 +25,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// Creates an instance of <see cref="IssuerValidationResult"/>
         /// </summary>
         /// <paramref name="issuer"/> is the issuer that was validated successfully.
-        public IssuerValidationResult(string issuer, ValidationSource source)
+        /// <paramref name="source"/> is the <see cref="ValidationSource"/> indicating how this issuer was validated.
+        public IssuerValidationResult(string issuer, ValidationSource source = ValidationSource.NotValidated)
             : base(ValidationFailureType.ValidationSucceeded)
         {
             Issuer = issuer;
@@ -39,6 +40,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <paramref name="issuer"/> is the issuer that was intended to be validated.
         /// <paramref name="validationFailure"/> is the <see cref="ValidationFailureType"/> that occurred during validation.
         /// <paramref name="exceptionDetail"/> is the <see cref="ExceptionDetail"/> that occurred during validation.
+        /// <paramref name="source"/> is the <see cref="ValidationSource"/> indicating how this issuer was validated.
         public IssuerValidationResult(string issuer, ValidationFailureType validationFailure, ExceptionDetail exceptionDetail, ValidationSource source = ValidationSource.NotValidated)
             : base(validationFailure, exceptionDetail)
         {
