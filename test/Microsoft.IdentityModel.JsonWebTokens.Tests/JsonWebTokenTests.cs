@@ -11,6 +11,7 @@ using System.IdentityModel.Tokens.Jwt.Tests;
 using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using Microsoft.IdentityModel.TestUtils;
@@ -1513,6 +1514,56 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 };
             }
         }
+
+#if NET8_0_OR_GREATER
+        [Fact]
+        public void ParseToken_WithByteProperties()
+        {
+            // Arrange
+            var escapedAzp = "azp\u0027azp";
+            var unescapedAzp = "azp'azp";
+
+            RSA rsa = RSA.Create(2048);
+            RSAParameters rsaParameters = rsa.ExportParameters(true);
+            RsaSecurityKey rsaSecurityKey = new(rsaParameters) { KeyId = "RsaPrivate" };
+
+            var jwsTokenDescriptor = new SecurityTokenDescriptor
+            {
+                SigningCredentials = new(rsaSecurityKey, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256),
+                TokenType = JwtHeaderParameterNames.Jwk,
+                Claims = new Dictionary<string, object>()
+                {
+                    { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Default.Expires) },
+                    { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(Default.NotBefore) },
+                    { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant) },
+                    { JwtRegisteredClaimNames.Iss, Default.Issuer },
+                    { JwtRegisteredClaimNames.Aud, Default.Audience },
+                    { JwtRegisteredClaimNames.Azp, escapedAzp },
+                    { JwtRegisteredClaimNames.Jti, Default.Jti },
+                    { "uknown_claim", "unknown_claim_value" },
+                }
+            };
+
+            var tokenStr = new JsonWebTokenHandler().CreateToken(jwsTokenDescriptor);
+
+            // Act
+            var jwt = new JsonWebToken(tokenStr);
+            jwt.TryGetPayloadValue(JwtRegisteredClaimNames.Iss, out string issuerFromPayload);
+            jwt.TryGetPayloadValue(JwtRegisteredClaimNames.Jti, out string jtiFromPayload);
+            jwt.TryGetPayloadValue(JwtRegisteredClaimNames.Azp, out string azpFromPayload);
+
+            // Assert
+            Assert.Equal(Default.Issuer, issuerFromPayload);
+            Assert.Equal(Default.Issuer, jwt.Issuer);
+            Assert.True(jwt.IssuerBytes.SequenceEqual(Encoding.UTF8.GetBytes(Default.Issuer)));
+            Assert.Equal(Default.Jti, jtiFromPayload);
+            Assert.Equal(Default.Jti, jwt.Id);
+            Assert.True(jwt.IdBytes.SequenceEqual(Encoding.UTF8.GetBytes(Default.Jti)));
+            Assert.Equal(unescapedAzp, azpFromPayload);
+            Assert.Equal(unescapedAzp, jwt.Azp);
+            Assert.True(jwt.AzpBytes.SequenceEqual(Encoding.UTF8.GetBytes(unescapedAzp)));
+        }
+#endif
 
         // Test ensures that we only try to populate a JsonWebToken from a string if it is a properly formatted JWT.
         // More specifically, we only want to try and decode
