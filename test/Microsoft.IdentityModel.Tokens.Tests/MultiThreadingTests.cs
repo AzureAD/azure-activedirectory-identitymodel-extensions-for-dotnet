@@ -235,7 +235,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         TokenDescriptor = securityTokenDescriptorEncryptedDir,
                         ValidationParameters = tokenValidationParametersEncryptedDir
                     },
-#if SNET462 || NET472
+#if NET462 || NET472
                     new MultiThreadingTheoryData
                     {
                         JwtSecurityTokenHandler = jwtSecurityTokenHandler,
