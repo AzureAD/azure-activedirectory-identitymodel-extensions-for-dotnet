@@ -263,13 +263,15 @@ namespace Microsoft.IdentityModel.Tokens
                     if (LogHelper.IsEnabled(EventLogLevel.Informational))
                         LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer), callContext);
 
-                    return new IssuerValidationResult(issuer);
+                    return new IssuerValidationResult(issuer,
+                        IssuerValidationResult.ValidationSource.IssuerIsConfigurationIssuer);
                 }
             }
 
             if (string.Equals(validationParameters.ValidIssuer, issuer))
             {
-                return new IssuerValidationResult(issuer);
+                return new IssuerValidationResult(issuer,
+                    IssuerValidationResult.ValidationSource.IssuerIsValidIssuer);
             }
 
             if (validationParameters.ValidIssuers != null)
@@ -289,7 +291,8 @@ namespace Microsoft.IdentityModel.Tokens
                         if (LogHelper.IsEnabled(EventLogLevel.Informational))
                             LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer));
 
-                        return new IssuerValidationResult(issuer);
+                        return new IssuerValidationResult(issuer,
+                            IssuerValidationResult.ValidationSource.IssuerIsAmongValidIssuers);
                     }
                 }
             }
