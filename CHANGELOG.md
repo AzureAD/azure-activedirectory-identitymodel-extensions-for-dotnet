@@ -3,6 +3,9 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 
 Pending Next Release
 =====
+### New Features:
+-  Added an Audiences member to the SecurityTokenDescriptor to make it easier to define multiple audiences in JWT and SAML tokens. Addresses issue [#1479](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/1479) with PR [#2575](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2575)
+
 ### Bug Fixes:
 - Reduced allocations in `AadIssuerValidator` by not using `string.Replace` where appropriate. See issue [#2595](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2595) and PR [#2597](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2597) for more details.
 
