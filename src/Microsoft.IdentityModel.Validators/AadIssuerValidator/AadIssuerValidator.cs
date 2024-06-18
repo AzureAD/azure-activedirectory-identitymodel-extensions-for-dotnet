@@ -397,6 +397,11 @@ namespace Microsoft.IdentityModel.Validators
                 if (!validIssuerTemplateSpan.Slice(0, indexOfTenantIdTemplate).SequenceEqual(actualIssuerSpan.Slice(0, indexOfTenantIdTemplate)))
                     return false;
 
+                // Ensure actualIssuer is long enough to match the validIssuerTemplate with tenantId replaced.
+                // This prevents index out-of-range errors in the next step.
+                if (actualIssuer.Length <= indexOfTenantIdTemplate + tenantId.Length)
+                    return false;
+
                 // ensure that actualIssuer contains the tenantId from indexOfTenantIdTemplate for the length of tenantId.Length
                 if (!actualIssuerSpan.Slice(indexOfTenantIdTemplate, tenantId.Length).SequenceEqual(tenantId.AsSpan()))
                     return false;
