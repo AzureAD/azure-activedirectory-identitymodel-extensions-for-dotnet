@@ -574,6 +574,9 @@ namespace Microsoft.IdentityModel.TestUtils
             if (issuerValidationResult1.Issuer != issuerValidationResult2.Issuer)
                 localContext.Diffs.Add($"IssuerValidationResult1.Issuer: {issuerValidationResult1.Issuer} != IssuerValidationResult2.Issuer: {issuerValidationResult2.Issuer}");
 
+            if (issuerValidationResult1.Source != issuerValidationResult2.Source)
+                localContext.Diffs.Add($"IssuerValidationResult1.Source: {issuerValidationResult1.Source} != IssuerValidationResult2.Source: {issuerValidationResult2.Source}");
+
             // true => both are not null.
             if (ContinueCheckingEquality(issuerValidationResult1.Exception, issuerValidationResult2.Exception, localContext))
             {
