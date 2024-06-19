@@ -4247,10 +4247,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         }
 
         [Theory, MemberData(nameof(ValidateAuthenticationTagLengthTheoryData))]
-        public void ValidateTokenAsync_ModifiedAuthNTag(CreateTokenTheoryData theoryData)
+        public async Task ValidateTokenAsync_ModifiedAuthNTag(CreateTokenTheoryData theoryData)
         {
             // arrange
-            AppContext.SetSwitch(AuthenticatedEncryptionProvider._skipValidationOfAuthenticationTagLength, theoryData.EnableAppContextSwitch);
             var payload = new JObject()
             {
                 { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
@@ -4274,9 +4273,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var jweWithExtraCharacters = jwe + "_cannoli_hunts_truffles_";
 
             // act
-            // calling ValidateTokenAsync.Result to prevent tests from sharing app context switch property
-            // normally, we would want to await ValidateTokenAsync().ConfigureAwait(false)
-            var tokenValidationResult = jsonWebTokenHandler.ValidateTokenAsync(jweWithExtraCharacters, theoryData.ValidationParameters).Result;
+            var tokenValidationResult = await jsonWebTokenHandler.ValidateTokenAsync(jweWithExtraCharacters, theoryData.ValidationParameters).ConfigureAwait(false);
 
             // assert
             Assert.Equal(theoryData.IsValid, tokenValidationResult.IsValid);
@@ -4338,47 +4335,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ValidIssuer = "http://Default.Issuer.com",
                     },
                     IsValid = false
-                },
-                new("A128CBC-HS256_SkipTagLengthValidationAppContextSwitchOn_IsValid")
-                {
-                    EnableAppContextSwitch = true,
-                    Algorithm = SecurityAlgorithms.Aes128CbcHmacSha256,
-                    EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
-                    ValidationParameters = new TokenValidationParameters
-                    {
-                        TokenDecryptionKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
-                        IssuerSigningKey = Default.SymmetricSigningKey256,
-                        ValidAudience = "http://Default.Audience.com",
-                        ValidIssuer = "http://Default.Issuer.com",
-                    },
-                    IsValid = true
-                },
-                new("A192CBC-HS384_SkipTagLengthValidationAppContextSwitchOn_IsValid")
-                {
-                    EnableAppContextSwitch = true,
-                    Algorithm = SecurityAlgorithms.Aes192CbcHmacSha384,
-                    EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes192CbcHmacSha384),
-                    ValidationParameters = new TokenValidationParameters
-                    {
-                        TokenDecryptionKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
-                        IssuerSigningKey = Default.SymmetricSigningKey256,
-                        ValidAudience = "http://Default.Audience.com",
-                        ValidIssuer = "http://Default.Issuer.com",
-                    },
-                    IsValid = true
-                },
-                new("A256CBC-HS512_SkipTagLengthValidationAppContextSwitchOn_IsValid")
-                {
-                    EnableAppContextSwitch = true,
-                    EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes256CbcHmacSha512),
-                    ValidationParameters = new TokenValidationParameters
-                    {
-                        TokenDecryptionKey = signingCredentials512.Key,
-                        IssuerSigningKey = Default.SymmetricSigningKey256,
-                        ValidAudience = "http://Default.Audience.com",
-                        ValidIssuer = "http://Default.Issuer.com",
-                    },
-                    IsValid = true
                 }
             };
         }
@@ -4427,8 +4383,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public IEnumerable<SecurityKey> ExpectedDecryptionKeys { get; set; }
 
         public Dictionary<string, object> ExpectedClaims { get; set; }
-
-        public bool EnableAppContextSwitch { get; set; } = false;
 
         public List<string> AudiencesForSecurityTokenDescriptor { get; set; }
     }
