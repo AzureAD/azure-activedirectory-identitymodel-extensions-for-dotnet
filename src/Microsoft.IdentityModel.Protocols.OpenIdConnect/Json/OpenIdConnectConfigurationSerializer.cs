@@ -824,7 +824,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             if (config.UserInfoEndpointSigningAlgValuesSupported.Count > 0)
                 JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.UserInfoSigningAlgValuesSupported, config.UserInfoEndpointSigningAlgValuesSupported);
-            
+
             if (config.AdditionalData.Count > 0)
                 JsonPrimitives.WriteObjects(ref writer, config.AdditionalData);
 

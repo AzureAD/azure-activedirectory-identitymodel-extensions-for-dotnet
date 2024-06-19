@@ -634,7 +634,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ConfigurationValidator = openIdConnectConfigurationValidator2,
                     DocumentRetriever = new FileDocumentRetriever(),
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX21817:", typeof(InvalidConfigurationException)),
-                    MetadataAddress = "JsonWebKeySetUnrecognizedKty.json",
+                    MetadataAddress = "EmptyJsonWebKeySet.json",
                     TestId = "InvalidConfiguration_EmptyJsonWenKeySet"
                 });
 
@@ -645,7 +645,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     DocumentRetriever = new FileDocumentRetriever(),
                     PresetCurrentConfiguration = true,
                     ExpectedErrorMessage = "IDX21817: ",
-                    MetadataAddress = "JsonWebKeySetUnrecognizedKty.json",
+                    MetadataAddress = "EmptyJsonWebKeySet.json",
                     TestId = "InvalidConfiguration_EmptyJsonWenKeySet_PresetCurrentConfiguration"
                 });
 
