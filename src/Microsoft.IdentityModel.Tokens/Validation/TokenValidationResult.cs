@@ -19,10 +19,6 @@ namespace Microsoft.IdentityModel.Tokens
         private readonly TokenValidationParameters _validationParameters;
         private readonly TokenHandler _tokenHandler;
 
-        private Exception _exception;
-        private bool _hasIsValidOrExceptionBeenRead = false;
-        private bool _isValid = false;
-
         // Fields lazily initialized in a thread-safe manner. _claimsIdentity is protected by the _claimsIdentitySyncObj
         // lock, and since null is a valid initialized value, _claimsIdentityInitialized tracks whether or not it's valid.
         // _claims is constructed by reading the data from the ClaimsIdentity and is synchronized using Interlockeds
@@ -37,6 +33,11 @@ namespace Microsoft.IdentityModel.Tokens
         private ClaimsIdentity _claimsIdentity;
         private Dictionary<string, object> _claims;
         private Dictionary<string, object> _propertyBag;
+        // TODO - lazy creation of _validationResults
+        private List<ValidationResult> _validationResults = [];
+
+        private Exception _exception;
+        private bool _isValid;
 
         /// <summary>
         /// Creates an instance of <see cref="TokenValidationResult"/>
@@ -61,13 +62,25 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Adds a <see cref="ValidationResult"/> to the list of <see cref="ValidationResults"/>.
+        /// </summary>
+        /// <param name="validationResult"> the <see cref="ValidationResult"/> associated with one of the validation steps. For example <see cref="IssuerValidationResult"/>.</param>
+        internal void AddValidationResult(ValidationResult validationResult)
+        {
+            if (validationResult is null)
+                throw LogHelper.LogArgumentNullException(nameof(validationResult));
+
+            _validationResults.Add(validationResult);
+        }
+
+        /// <summary>
         /// The <see cref="Dictionary{String, Object}"/> created from the validated security token.
         /// </summary>
         public IDictionary<string, object> Claims
         {
             get
             {
-                if (!_hasIsValidOrExceptionBeenRead)
+                if (!HasValidOrExceptionWasRead)
                     LogHelper.LogWarning(LogMessages.IDX10109);
 
                 if (_claims is null && ClaimsIdentity is { } ci)
@@ -162,7 +175,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             get
             {
-                _hasIsValidOrExceptionBeenRead = true;
+                HasValidOrExceptionWasRead = true;
                 return _exception;
             }
             set
@@ -170,6 +183,8 @@ namespace Microsoft.IdentityModel.Tokens
                 _exception = value;
             }
         }
+
+        internal bool HasValidOrExceptionWasRead { get; set; }
 
         /// <summary>
         /// Gets or sets the issuer that was found in the token.
@@ -183,7 +198,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             get
             {
-                _hasIsValidOrExceptionBeenRead = true;
+                HasValidOrExceptionWasRead = true;
                 return _isValid;
             }
             set
@@ -228,5 +243,19 @@ namespace Microsoft.IdentityModel.Tokens
         /// (e.g for a JSON Web Token, from the "typ" header). 
         /// </summary>
         public string TokenType { get; set; }
+
+        /// <summary>
+        /// Gets the list of <see cref="ValidationResult"/> that contains the result of validating the token.
+        /// </summary>
+        internal IReadOnlyList<ValidationResult> ValidationResults
+        {
+            get
+            {
+                if (_validationResults is null)
+                    Interlocked.CompareExchange(ref _validationResults, new List<ValidationResult>(), null);
+
+                return _validationResults;
+            }
+        }
     }
 }
