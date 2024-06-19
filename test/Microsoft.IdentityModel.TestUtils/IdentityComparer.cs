@@ -574,6 +574,9 @@ namespace Microsoft.IdentityModel.TestUtils
             if (issuerValidationResult1.Issuer != issuerValidationResult2.Issuer)
                 localContext.Diffs.Add($"IssuerValidationResult1.Issuer: {issuerValidationResult1.Issuer} != IssuerValidationResult2.Issuer: {issuerValidationResult2.Issuer}");
 
+            if (issuerValidationResult1.IsValid != issuerValidationResult2.IsValid)
+                localContext.Diffs.Add($"IssuerValidationResult1.IsValid: {issuerValidationResult1.IsValid} != IssuerValidationResult2.IsValid: {issuerValidationResult2.IsValid}");
+
             if (issuerValidationResult1.Source != issuerValidationResult2.Source)
                 localContext.Diffs.Add($"IssuerValidationResult1.Source: {issuerValidationResult1.Source} != IssuerValidationResult2.Source: {issuerValidationResult2.Source}");
 
@@ -600,6 +603,69 @@ namespace Microsoft.IdentityModel.TestUtils
                         issuerValidationResult2.Exception.StackTrace.Trim(),
                         $"({name1})issuerValidationResult1.Exception.StackTrace",
                         $"({name2})issuerValidationResult2.Exception.StackTrace",
+                        stackPrefix.Trim(),
+                        localContext);
+            }
+
+            return context.Merge(localContext);
+        }
+
+        public static bool AreAudienceValidationResultsEqual(object object1, object object2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, context))
+                return context.Merge(localContext);
+
+            return AreAudienceValidationResultsEqual(
+                object1 as AudienceValidationResult,
+                object2 as AudienceValidationResult,
+                "AudienceValidationResult1",
+                "AudienceValidationResult2",
+                null,
+                context);
+        }
+
+        internal static bool AreAudienceValidationResultsEqual(
+            AudienceValidationResult audienceValidationResult1,
+            AudienceValidationResult audienceValidationResult2,
+            string name1,
+            string name2,
+            string stackPrefix,
+            CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(audienceValidationResult1, audienceValidationResult2, localContext))
+                return context.Merge(localContext);
+
+            if (audienceValidationResult1.Audience != audienceValidationResult2.Audience)
+                localContext.Diffs.Add($"AudienceValidationResult1.Audience: '{audienceValidationResult1.Audience}' != AudienceValidationResult2.Audience: '{audienceValidationResult2.Audience}'");
+
+            if (audienceValidationResult1.IsValid != audienceValidationResult2.IsValid)
+                localContext.Diffs.Add($"AudienceValidationResult1.IsValid: {audienceValidationResult1.IsValid} != AudienceValidationResult2.IsValid: {audienceValidationResult2.IsValid}");
+
+            // true => both are not null.
+            if (ContinueCheckingEquality(audienceValidationResult1.Exception, audienceValidationResult2.Exception, localContext))
+            {
+                AreStringsEqual(
+                    audienceValidationResult1.Exception.Message,
+                    audienceValidationResult2.Exception.Message,
+                    $"({name1})audienceValidationResult1.Exception.Message",
+                    $"({name2})audienceValidationResult2.Exception.Message",
+                    localContext);
+
+                AreStringsEqual(
+                    audienceValidationResult1.Exception.Source,
+                    audienceValidationResult2.Exception.Source,
+                    $"({name1})audienceValidationResult1.Exception.Source",
+                    $"({name2})audienceValidationResult2.Exception.Source",
+                    localContext);
+
+                if (!string.IsNullOrEmpty(stackPrefix))
+                    AreStringPrefixesEqual(
+                        audienceValidationResult1.Exception.StackTrace.Trim(),
+                        audienceValidationResult2.Exception.StackTrace.Trim(),
+                        $"({name1})audienceValidationResult1.Exception.StackTrace",
+                        $"({name2})audienceValidationResult2.Exception.StackTrace",
                         stackPrefix.Trim(),
                         localContext);
             }
