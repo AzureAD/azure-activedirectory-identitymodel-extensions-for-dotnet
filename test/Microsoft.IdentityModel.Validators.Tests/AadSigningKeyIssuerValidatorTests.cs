@@ -289,6 +289,19 @@ namespace Microsoft.IdentityModel.Validators.Tests
                     OpenIdConnectConfiguration = mockConfiguration
                 });
 
+                jwk = KeyingMaterial.JsonWebKeyP256;
+                jwk.AdditionalData.Add(OpenIdProviderMetadataNames.Issuer, ValidatorConstants.AadIssuerV2CommonAuthority);
+                mockConfiguration.JsonWebKeySet.Keys.Add(jwk);
+                mockConfiguration.Issuer = ValidatorConstants.AadIssuerV2CommonAuthority;
+                var jwtSecurityTokenV1Issuer = new JwtSecurityToken(issuer: ValidatorConstants.V1Issuer, claims: new[] { issClaim, tidClaim });
+                theoryData.Add(new AadSigningKeyIssuerTheoryData
+                {
+                    TestId = "HappyPath_V2AuthorityV1TokenIssuer_Matches_SigningKeyIssuer",
+                    SecurityKey = KeyingMaterial.JsonWebKeyP256,
+                    SecurityToken = jwtSecurityTokenV1Issuer,
+                    OpenIdConnectConfiguration = mockConfiguration
+                });
+
                 theoryData.Add(new AadSigningKeyIssuerTheoryData
                 {
                     TestId = "MissingTenantIdClaimInToken",
