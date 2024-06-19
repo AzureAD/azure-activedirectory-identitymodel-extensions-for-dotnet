@@ -1,5 +1,10 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+7.6.2
+=====
+### Bug Fix:
+- Revert reduced allocations in `AadIssuerValidator` by not using `string.Replace` where appropriate due to an index out-of-range error. 
+
 7.6.1
 =====
 ### New Features:
