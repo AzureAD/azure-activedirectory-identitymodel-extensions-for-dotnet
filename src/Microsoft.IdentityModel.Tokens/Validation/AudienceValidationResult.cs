@@ -63,6 +63,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the audience that was validated or intended to be validated.
         /// </summary>
-        public string Audience { get; } = "null";
+        public string Audience { get; };
     }
 }
