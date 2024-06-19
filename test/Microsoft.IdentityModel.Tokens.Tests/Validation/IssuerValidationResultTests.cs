@@ -9,6 +9,7 @@ using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Json.Tests;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Validation.Tests
@@ -29,7 +30,9 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     new CallContext(),
                     CancellationToken.None).ConfigureAwait(false);
 
-                theoryData.ExpectedException.ProcessException(issuerValidationResult.Exception, context);
+                if (issuerValidationResult.Exception != null)
+                    theoryData.ExpectedException.ProcessException(issuerValidationResult.Exception, context);
+
                 IdentityComparer.AreIssuerValidationResultsEqual(
                     issuerValidationResult,
                     theoryData.IssuerValidationResult,
@@ -90,6 +93,90 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     IsValid = false,
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
                     ValidationParameters = new TokenValidationParameters(),
+                });
+
+                theoryData.Add(new IssuerValidationResultsTheoryData("NULL_ValidationParameters")
+                {
+                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    Issuer = issClaim,
+                    IssuerValidationResult = new IssuerValidationResult(
+                        issClaim,
+                        ValidationFailureType.NullArgument,
+                        new ExceptionDetail(
+                        new MessageDetail(
+                            LogMessages.IDX10000,
+                            LogHelper.MarkAsNonPII("validationParameters")),
+                        typeof(ArgumentNullException),
+                        new StackFrame(true),
+                        null)),
+                    IsValid = false,
+                    SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
+                    ValidationParameters = null
+                });
+
+                theoryData.Add(new IssuerValidationResultsTheoryData("NULL_SecurityToken")
+                {
+                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    Issuer = issClaim,
+                    IssuerValidationResult = new IssuerValidationResult(
+                        issClaim,
+                        ValidationFailureType.NullArgument,
+                        new ExceptionDetail(
+                        new MessageDetail(
+                            LogMessages.IDX10000,
+                            LogHelper.MarkAsNonPII("securityToken")),
+                        typeof(ArgumentNullException),
+                        new StackFrame(true),
+                        null)),
+                    IsValid = false,
+                    SecurityToken = null,
+                    ValidationParameters = new TokenValidationParameters()
+                });
+
+                var validConfig = new OpenIdConnectConfiguration() { Issuer = issClaim };
+                theoryData.Add(new IssuerValidationResultsTheoryData("Valid_FromConfig")
+                {
+                    ExpectedException = ExpectedException.NoExceptionExpected,
+                    Issuer = issClaim,
+                    IssuerValidationResult = new IssuerValidationResult(
+                        issClaim,
+                        IssuerValidationResult.ValidationSource.IssuerIsConfigurationIssuer),
+                    IsValid = true,
+                    SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
+                    ValidationParameters = new TokenValidationParameters()
+                    {
+                        ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(validConfig)
+                    }
+                });
+
+                theoryData.Add(new IssuerValidationResultsTheoryData("Valid_FromValidationParametersValidIssuer")
+                {
+                    ExpectedException = ExpectedException.NoExceptionExpected,
+                    Issuer = issClaim,
+                    IssuerValidationResult = new IssuerValidationResult(
+                        issClaim,
+                        IssuerValidationResult.ValidationSource.IssuerIsValidIssuer),
+                    IsValid = true,
+                    SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
+                    ValidationParameters = new TokenValidationParameters()
+                    {
+                        ValidIssuer = issClaim
+                    }
+                });
+
+                theoryData.Add(new IssuerValidationResultsTheoryData("Valid_FromValidationParametersValidIssuers")
+                {
+                    ExpectedException = ExpectedException.NoExceptionExpected,
+                    Issuer = issClaim,
+                    IssuerValidationResult = new IssuerValidationResult(
+                        issClaim,
+                        IssuerValidationResult.ValidationSource.IssuerIsAmongValidIssuers),
+                    IsValid = true,
+                    SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
+                    ValidationParameters = new TokenValidationParameters()
+                    {
+                        ValidIssuers = [issClaim]
+                    }
                 });
 
                 return theoryData;

@@ -14,7 +14,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void ComputeJwkThumbprint()
         {
-#if NET461 || NET462
+#if NET462
             var exception = Assert.Throws<PlatformNotSupportedException>(() => new ECDsaSecurityKey(KeyingMaterial.JsonWebKeyP256, false).ComputeJwkThumbprint());
             Assert.Contains("IDX10695", exception.Message);
 #else

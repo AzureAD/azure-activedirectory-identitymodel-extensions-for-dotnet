@@ -273,7 +273,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         public static string JsonAllValues =
                                             @"{ ""acr_values_supported"": [""acr_value1"", ""acr_value2"", ""acr_value3""],
                                                 ""authorization_endpoint"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize"",
+                                                ""authorization_encryption_alg_values_supported"": [""A192KW"", ""A256KW""],
+                                                ""authorization_encryption_enc_values_supported"": [""A128CBC-HS256"", ""A256CBC-HS512""],
                                                 ""authorization_response_iss_parameter_supported"": false,
+                                                ""authorization_signing_alg_values_supported"": [""ES384"", ""ES512""],
                                                 ""backchannel_authentication_endpoint"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/bc-authorize"",
                                                 ""backchannel_authentication_request_signing_alg_values_supported"": [""ES384"", ""ES512""],
                                                 ""backchannel_token_delivery_modes_supported"": [""poll"", ""ping""],
@@ -324,6 +327,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                                                 ""token_endpoint"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/token"",
                                                 ""token_endpoint_auth_methods_supported"": [""client_secret_post"", ""private_key_jwt""],
                                                 ""token_endpoint_auth_signing_alg_values_supported"": [""ES192"", ""ES256""],
+                                                ""tls_client_certificate_bound_access_tokens"": true,
                                                 ""ui_locales_supported"": [""hak-CN"", ""en-us""],
                                                 ""userinfo_endpoint"": ""https://login.microsoftonline.com/add29489-7269-41f4-8841-b63c95564420/openid/userinfo"",
                                                 ""userinfo_encryption_alg_values_supported"": [""ECDH-ES+A128KW"", ""ECDH-ES+A192KW""],
@@ -815,7 +819,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             AddToCollection(config.AcrValuesSupported, "acr_value1", "acr_value2", "acr_value3");
             config.AuthorizationEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize";
+            AddToCollection(config.AuthorizationEncryptionAlgValuesSupported, "A192KW", "A256KW");
+            AddToCollection(config.AuthorizationEncryptionEncValuesSupported, "A128CBC-HS256", "A256CBC-HS512");
             config.AuthorizationResponseIssParameterSupported = false;
+            AddToCollection(config.AuthorizationSigningAlgValuesSupported, "ES384", "ES512");
             config.BackchannelAuthenticationEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/bc-authorize";
             AddToCollection(config.BackchannelAuthenticationRequestSigningAlgValuesSupported, "ES384", "ES512");
             AddToCollection(config.BackchannelTokenDeliveryModesSupported, "poll", "ping");
@@ -865,6 +872,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             config.TokenEndpoint = "https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/token";
             AddToCollection(config.TokenEndpointAuthMethodsSupported, "client_secret_post", "private_key_jwt");
             AddToCollection(config.TokenEndpointAuthSigningAlgValuesSupported, "ES192", "ES256");
+            config.TlsClientCertificateBoundAccessTokens = true;
             AddToCollection(config.UILocalesSupported, "hak-CN", "en-us");
             config.UserInfoEndpoint = "https://login.microsoftonline.com/add29489-7269-41f4-8841-b63c95564420/openid/userinfo";
             AddToCollection(config.UserInfoEndpointEncryptionAlgValuesSupported, "ECDH-ES+A128KW", "ECDH-ES+A192KW");

@@ -23,6 +23,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         // these are used to lazy create
         private Dictionary<string, object> _additionalData;
         private ICollection<string> _acrValuesSupported;
+        private ICollection<string> _authorizationEncryptionAlgValuesSupported;
+        private ICollection<string> _authorizationEncryptionEncValuesSupported;
+        private ICollection<string> _authorizationSigningAlgValuesSupported;
         private ICollection<string> _backchannelAuthenticationRequestSigningAlgValuesSupported;
         private ICollection<string> _backchannelTokenDeliveryModesSupported;
         private ICollection<string> _claimsSupported;
@@ -147,6 +150,24 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public string AuthorizationEndpoint { get; set; }
 
         /// <summary>
+        /// Gets the collection of 'authorization_encryption_alg_values_supported'
+        /// </summary>
+        [JsonPropertyName(OpenIdProviderMetadataNames.AuthorizationEncryptionAlgValuesSupported)]
+        public ICollection<string> AuthorizationEncryptionAlgValuesSupported =>
+            _authorizationEncryptionAlgValuesSupported ??
+            Interlocked.CompareExchange(ref _authorizationEncryptionAlgValuesSupported, new Collection<string>(), null) ??
+            _authorizationEncryptionAlgValuesSupported;
+
+        /// <summary>
+        /// Gets the collection of 'authorization_encryption_enc_values_supported'
+        /// </summary>
+        [JsonPropertyName(OpenIdProviderMetadataNames.AuthorizationEncryptionEncValuesSupported)]
+        public ICollection<string> AuthorizationEncryptionEncValuesSupported =>
+            _authorizationEncryptionEncValuesSupported ??
+            Interlocked.CompareExchange(ref _authorizationEncryptionEncValuesSupported, new Collection<string>(), null) ??
+            _authorizationEncryptionEncValuesSupported;
+
+        /// <summary>
         /// Gets or sets the 'authorization_response_iss_parameter_supported'
         /// </summary>
         [JsonPropertyName(OpenIdProviderMetadataNames.AuthorizationResponseIssParameterSupported)]
@@ -154,6 +175,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
 #endif
         public bool AuthorizationResponseIssParameterSupported { get; set; }
+
+        /// <summary>
+        /// Gets the collection of 'authorization_signing_alg_values_supported'
+        /// </summary>
+        [JsonPropertyName(OpenIdProviderMetadataNames.AuthorizationSigningAlgValuesSupported)]
+        public ICollection<string> AuthorizationSigningAlgValuesSupported =>
+            _authorizationSigningAlgValuesSupported ??
+            Interlocked.CompareExchange(ref _authorizationSigningAlgValuesSupported, new Collection<string>(), null) ??
+            _authorizationSigningAlgValuesSupported;
 
         /// <summary>
         /// Gets or sets the 'backchannel_authentication_endpoint'.
@@ -623,6 +653,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             _tokenEndpointAuthSigningAlgValuesSupported;
 
         /// <summary>
+        /// Gets or sets the 'tls_client_certificate_bound_access_tokens'
+        /// </summary>
+        [JsonPropertyName(OpenIdProviderMetadataNames.TlsClientCertificateBoundAccessTokens)]
+#if NET6_0_OR_GREATER
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+#endif
+        public bool TlsClientCertificateBoundAccessTokens { get; set; }
+
+        /// <summary>
         /// Gets the collection of 'ui_locales_supported'
         /// </summary>
         [JsonPropertyName(OpenIdProviderMetadataNames.UILocalesSupported)]
@@ -679,6 +718,39 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public bool ShouldSerializeAcrValuesSupported()
         {
             return AcrValuesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'authorization_encryption_alg_values_supported' (AuthorizationEncryptionAlgValuesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'authorization_encryption_alg_values_supported' (AuthorizationEncryptionAlgValuesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeAuthorizationEncryptionAlgValuesSupported()
+        {
+            return AuthorizationEncryptionAlgValuesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'authorization_encryption_enc_values_supported' (AuthorizationEncryptionEncValuesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'authorization_encryption_enc_values_supported' (AuthorizationEncryptionEncValuesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeAuthorizationEncryptionEncValuesSupported()
+        {
+            return AuthorizationEncryptionEncValuesSupported.Count > 0;
+        }
+
+        /// <summary>
+        /// Gets a bool that determines if the 'authorization_signing_alg_values_supported' (AuthorizationSigningAlgValuesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'authorization_signing_alg_values_supported' (AuthorizationSigningAlgValuesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeAuthorizationSigningAlgValuesSupported()
+        {
+            return AuthorizationSigningAlgValuesSupported.Count > 0;
         }
 
         /// <summary>
