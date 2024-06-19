@@ -390,8 +390,10 @@ namespace Microsoft.IdentityModel.Validators
             ReadOnlySpan<char> validIssuerTemplateSpan = validIssuerTemplate.AsSpan();
             ReadOnlySpan<char> actualIssuerSpan = actualIssuer.AsSpan();
             int indexOfTenantIdTemplate = validIssuerTemplate.IndexOf(TenantIdTemplate, StringComparison.Ordinal);
+            int indexOfTenantIdInActualIssuer = actualIssuer.IndexOf(TenantIdTemplate, StringComparison.Ordinal);
+            bool actualIssuerTemplated = indexOfTenantIdInActualIssuer >= 0;
 
-            if (indexOfTenantIdTemplate >= 0 && actualIssuer.Length > indexOfTenantIdTemplate)
+            if (!actualIssuerTemplated && indexOfTenantIdTemplate >= 0 && actualIssuer.Length > indexOfTenantIdTemplate)
             {
                 // ensure the first part of the validIssuerTemplate matches the first part of actualIssuer
                 if (!validIssuerTemplateSpan.Slice(0, indexOfTenantIdTemplate).SequenceEqual(actualIssuerSpan.Slice(0, indexOfTenantIdTemplate)))
