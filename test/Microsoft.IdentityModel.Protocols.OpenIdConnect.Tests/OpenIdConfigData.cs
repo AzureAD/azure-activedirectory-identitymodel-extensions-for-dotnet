@@ -77,201 +77,199 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         public static string OpenIdConnectMetadataFileEnd2EndEC = @"OpenIdConnectMetadataEnd2EndEC.json";
         public static string JsonWebKeySetBadUriFile = @"OpenIdConnectMetadataJsonWebKeySetBadUri.json";
         public static string JsonWithJWK = @"{
-                                                        ""acr_values_supported"": [
-                                                            ""acr_value1"",
-                                                            ""acr_value2"",
-                                                            ""acr_value3""
+                                                ""acr_values_supported"": [
+                                                    ""acr_value1"",
+                                                    ""acr_value2"",
+                                                    ""acr_value3""
+                                                ],
+                                                ""authorization_endpoint"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize"",
+                                                ""backchannel_authentication_endpoint"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/bc-authorize"",
+                                                ""backchannel_authentication_request_signing_alg_values_supported"": [
+                                                    ""ES384"",
+                                                    ""ES512""
+                                                ],
+                                                ""backchannel_token_delivery_modes_supported"": [
+                                                    ""poll"",
+                                                    ""ping""
+                                                ],
+                                                ""check_session_iframe"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/checksession"",
+                                                ""claims_supported"": [
+                                                    ""sub"",
+                                                    ""iss"",
+                                                    ""aud"",
+                                                    ""exp"",
+                                                    ""iat"",
+                                                    ""auth_time"",
+                                                    ""acr"",
+                                                    ""amr"",
+                                                    ""nonce"",
+                                                    ""email"",
+                                                    ""given_name"",
+                                                    ""family_name"",
+                                                    ""nickname""
+                                                ],
+                                                ""claims_locales_supported"": [
+                                                    ""claim_local1"",
+                                                    ""claim_local2"",
+                                                    ""claim_local3""
+                                                ],
+                                                ""claims_parameter_supported"": true,
+                                                ""claim_types_supported"": [
+                                                    ""Normal Claims"",
+                                                    ""Aggregated Claims"",
+                                                    ""Distributed Claims""
+                                                ],
+                                                ""code_challenge_methods_supported"": [
+                                                    ""plain"",
+                                                    ""S256""
+                                                ],
+                                                ""device_authorization_endpoint"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/devicecode"",
+                                                ""display_values_supported"": [
+                                                    ""displayValue1"",
+                                                    ""displayValue2"",
+                                                    ""displayValue3""
+                                                ],
+                                                ""dpop_signing_alg_values_supported"": [
+                                                    ""ES384"",
+                                                    ""ES512""
+                                                ],
+                                                ""end_session_endpoint"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/logout"",
+                                                ""frontchannel_logout_session_supported"": ""true"",
+                                                ""frontchannel_logout_supported"": ""true"",
+                                                ""grant_types_supported"": [
+                                                    ""authorization_code"",
+                                                    ""implicit""
+                                                ],
+                                                ""http_logout_supported"": true,
+                                                ""id_token_encryption_alg_values_supported"": [
+                                                    ""RSA1_5"",
+                                                    ""A256KW""
+                                                ],
+                                                ""id_token_encryption_enc_values_supported"": [
+                                                    ""A128CBC-HS256"",
+                                                    ""A256CBC-HS512""
+                                                ],
+                                                ""id_token_signing_alg_values_supported"": [
+                                                    ""RS256""
+                                                ],
+                                                ""introspection_endpoint"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/introspect"",
+                                                ""introspection_endpoint_auth_methods_supported"": [
+                                                    ""client_secret_post"",
+                                                    ""private_key_jwt""
+                                                ],
+                                                ""introspection_endpoint_auth_signing_alg_values_supported"": [
+                                                    ""ES192"",
+                                                    ""ES256""
+                                                ],
+                                                ""issuer"": ""https://sts.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/"",
+                                                ""jwks_uri"": ""JsonWebKeySet.json"",
+                                                ""logout_session_supported"": true,
+                                                ""op_policy_uri"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/op_policy_uri"",
+                                                ""op_tos_uri"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/op_tos_uri"",
+                                                ""prompt_values_supported"": [
+                                                    ""none"",
+                                                    ""login"",
+                                                    ""consent""
+                                                ],
+                                                ""pushed_authorization_request_endpoint"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/par"",
+                                                ""request_object_encryption_alg_values_supported"": [
+                                                    ""A192KW"",
+                                                    ""A256KW""
+                                                ],
+                                                ""request_object_encryption_enc_values_supported"": [
+                                                    ""A192GCM"",
+                                                    ""A256GCM""
+                                                ],
+                                                ""request_object_signing_alg_values_supported"": [
+                                                    ""PS256"",
+                                                    ""PS512""
+                                                ],
+                                                ""request_parameter_supported"": true,
+                                                ""request_uri_parameter_supported"": true,
+                                                ""require_request_uri_registration"": true,
+                                                ""response_modes_supported"": [
+                                                    ""query"",
+                                                    ""fragment"",
+                                                    ""form_post""
+                                                ],
+                                                ""response_types_supported"": [
+                                                    ""code"",
+                                                    ""id_token"",
+                                                    ""code id_token""
+                                                ],
+                                                ""keys"": [
+                                                    {
+                                                        ""alg"": ""SHA256"",
+                                                        ""e"": ""AQAB"",
+                                                        ""key_ops"": [
+                                                            ""signing""
                                                         ],
-                                                        ""authorization_endpoint"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize"",
-                                                        ""backchannel_authentication_endpoint"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/bc-authorize"",
-                                                        ""backchannel_authentication_request_signing_alg_values_supported"": [
-                                                            ""ES384"",
-                                                            ""ES512""
+                                                        ""kid"": ""NGTFvdK-fythEuLwjpwAJOM9n-A"",
+                                                        ""kty"": ""RSA"",
+                                                        ""n"": ""rCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVw=="",
+                                                        ""use"": ""sig"",
+                                                        ""x5c"": [
+                                                            ""MIIDPjCCAiqgAwIBAgIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTIwNjA3MDcwMDAwWhcNMTQwNjA3MDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVwIDAQABo2IwYDBeBgNVHQEEVzBVgBCxDDsLd8xkfOLKm4Q/SzjtoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAA4IBAQAkJtxxm/ErgySlNk69+1odTMP8Oy6L0H17z7XGG3w4TqvTUSWaxD4hSFJ0e7mHLQLQD7oV/erACXwSZn2pMoZ89MBDjOMQA+e6QzGB7jmSzPTNmQgMLA8fWCfqPrz6zgH+1F1gNp8hJY57kfeVPBiyjuBmlTEBsBlzolY9dd/55qqfQk6cgSeCbHCy/RU/iep0+UsRMlSgPNNmqhj5gmN2AFVCN96zF694LwuPae5CeR2ZcVknexOWHYjFM0MgUSw0ubnGl0h9AJgGyhvNGcjQqu9vd1xkupFgaN+f7P3p3EVN5csBg5H94jEcQZT7EKeTiZ6bTrpDAnrr8tDCy8ng""
                                                         ],
-                                                        ""backchannel_token_delivery_modes_supported"": [
-                                                            ""poll"",
-                                                            ""ping""
+                                                        ""x5t"": ""NGTFvdK-fythEuLwjpwAJOM9n-A"",
+                                                        ""x5u"": ""https://jsonkeyurl""
+                                                    },
+                                                    {
+                                                        ""alg"": ""SHA256"",
+                                                        ""e"": ""AQAB"",
+                                                        ""kid"": ""kriMPdmBvx68skT8-mPAB3BseeA"",
+                                                        ""kty"": ""RSA"",
+                                                        ""n"": ""kSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuw=="",
+                                                        ""use"": ""sig"",
+                                                        ""x5c"": [
+                                                            ""MIIDPjCCAiqgAwIBAgIQsRiM0jheFZhKk49YD0SK1TAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTQwMTAxMDcwMDAwWhcNMTYwMTAxMDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuwIDAQABo2IwYDBeBgNVHQEEVzBVgBDLebM6bK3BjWGqIBrBNFeNoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQsRiM0jheFZhKk49YD0SK1TAJBgUrDgMCHQUAA4IBAQCJ4JApryF77EKC4zF5bUaBLQHQ1PNtA1uMDbdNVGKCmSf8M65b8h0NwlIjGGGy/unK8P6jWFdm5IlZ0YPTOgzcRZguXDPj7ajyvlVEQ2K2ICvTYiRQqrOhEhZMSSZsTKXFVwNfW6ADDkN3bvVOVbtpty+nBY5UqnI7xbcoHLZ4wYD251uj5+lo13YLnsVrmQ16NCBYq2nQFNPuNJw6t3XUbwBHXpF46aLT1/eGf/7Xx6iy8yPJX4DyrpFTutDz882RWofGEO5t4Cw+zZg70dJ/hH/ODYRMorfXEW+8uKmXMKmX2wyxMKvfiPbTy5LmAU8Jvjs2tLg4rOBcXWLAIarZ""
                                                         ],
-                                                        ""check_session_iframe"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/checksession"",
-                                                        ""claims_supported"": [
-                                                            ""sub"",
-                                                            ""iss"",
-                                                            ""aud"",
-                                                            ""exp"",
-                                                            ""iat"",
-                                                            ""auth_time"",
-                                                            ""acr"",
-                                                            ""amr"",
-                                                            ""nonce"",
-                                                            ""email"",
-                                                            ""given_name"",
-                                                            ""family_name"",
-                                                            ""nickname""
-                                                        ],
-                                                        ""claims_locales_supported"": [
-                                                            ""claim_local1"",
-                                                            ""claim_local2"",
-                                                            ""claim_local3""
-                                                        ],
-                                                        ""claims_parameter_supported"": true,
-                                                        ""claim_types_supported"": [
-                                                            ""Normal Claims"",
-                                                            ""Aggregated Claims"",
-                                                            ""Distributed Claims""
-                                                        ],
-                                                        ""code_challenge_methods_supported"": [
-                                                            ""plain"",
-                                                            ""S256""
-                                                        ],
-                                                        ""device_authorization_endpoint"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/devicecode"",
-                                                        ""display_values_supported"": [
-                                                            ""displayValue1"",
-                                                            ""displayValue2"",
-                                                            ""displayValue3""
-                                                        ],
-                                                        ""dpop_signing_alg_values_supported"": [
-                                                            ""ES384"",
-                                                            ""ES512""
-                                                        ],
-                                                        ""end_session_endpoint"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/logout"",
-                                                        ""frontchannel_logout_session_supported"": ""true"",
-                                                        ""frontchannel_logout_supported"": ""true"",
-                                                        ""grant_types_supported"": [
-                                                            ""authorization_code"",
-                                                            ""implicit""
-                                                        ],
-                                                        ""http_logout_supported"": true,
-                                                        ""id_token_encryption_alg_values_supported"": [
-                                                            ""RSA1_5"",
-                                                            ""A256KW""
-                                                        ],
-                                                        ""id_token_encryption_enc_values_supported"": [
-                                                            ""A128CBC-HS256"",
-                                                            ""A256CBC-HS512""
-                                                        ],
-                                                        ""id_token_signing_alg_values_supported"": [
-                                                            ""RS256""
-                                                        ],
-                                                        ""introspection_endpoint"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/introspect"",
-                                                        ""introspection_endpoint_auth_methods_supported"": [
-                                                            ""client_secret_post"",
-                                                            ""private_key_jwt""
-                                                        ],
-                                                        ""introspection_endpoint_auth_signing_alg_values_supported"": [
-                                                            ""ES192"",
-                                                            ""ES256""
-                                                        ],
-                                                        ""issuer"": ""https://sts.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/"",
-                                                        ""jwks_uri"": ""JsonWebKeySet.json"",
-                                                        ""logout_session_supported"": true,
-                                                        ""op_policy_uri"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/op_policy_uri"",
-                                                        ""op_tos_uri"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/op_tos_uri"",
-                                                        ""prompt_values_supported"": [
-                                                            ""none"",
-                                                            ""login"",
-                                                            ""consent""
-                                                        ],
-                                                        ""pushed_authorization_request_endpoint"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/par"",
-                                                        ""request_object_encryption_alg_values_supported"": [
-                                                            ""A192KW"",
-                                                            ""A256KW""
-                                                        ],
-                                                        ""request_object_encryption_enc_values_supported"": [
-                                                            ""A192GCM"",
-                                                            ""A256GCM""
-                                                        ],
-                                                        ""request_object_signing_alg_values_supported"": [
-                                                            ""PS256"",
-                                                            ""PS512""
-                                                        ],
-                                                        ""request_parameter_supported"": true,
-                                                        ""request_uri_parameter_supported"": true,
-                                                        ""require_request_uri_registration"": true,
-                                                        ""response_modes_supported"": [
-                                                            ""query"",
-                                                            ""fragment"",
-                                                            ""form_post""
-                                                        ],
-                                                        ""response_types_supported"": [
-                                                            ""code"",
-                                                            ""id_token"",
-                                                            ""code id_token""
-                                                        ],
-                                                        ""keys"": {
-                                                            ""keys"": [
-                                                                {
-                                                                    ""alg"": ""SHA256"",
-                                                                    ""e"": ""AQAB"",
-                                                                    ""key_ops"": [
-                                                                        ""signing""
-                                                                    ],
-                                                                    ""kid"": ""NGTFvdK-fythEuLwjpwAJOM9n-A"",
-                                                                    ""kty"": ""RSA"",
-                                                                    ""n"": ""rCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVw=="",
-                                                                    ""use"": ""sig"",
-                                                                    ""x5c"": [
-                                                                        ""MIIDPjCCAiqgAwIBAgIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTIwNjA3MDcwMDAwWhcNMTQwNjA3MDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVwIDAQABo2IwYDBeBgNVHQEEVzBVgBCxDDsLd8xkfOLKm4Q/SzjtoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAA4IBAQAkJtxxm/ErgySlNk69+1odTMP8Oy6L0H17z7XGG3w4TqvTUSWaxD4hSFJ0e7mHLQLQD7oV/erACXwSZn2pMoZ89MBDjOMQA+e6QzGB7jmSzPTNmQgMLA8fWCfqPrz6zgH+1F1gNp8hJY57kfeVPBiyjuBmlTEBsBlzolY9dd/55qqfQk6cgSeCbHCy/RU/iep0+UsRMlSgPNNmqhj5gmN2AFVCN96zF694LwuPae5CeR2ZcVknexOWHYjFM0MgUSw0ubnGl0h9AJgGyhvNGcjQqu9vd1xkupFgaN+f7P3p3EVN5csBg5H94jEcQZT7EKeTiZ6bTrpDAnrr8tDCy8ng""
-                                                                    ],
-                                                                    ""x5t"": ""NGTFvdK-fythEuLwjpwAJOM9n-A"",
-                                                                    ""x5u"": ""https://jsonkeyurl""
-                                                                },
-                                                                {
-                                                                    ""alg"": ""SHA256"",
-                                                                    ""e"": ""AQAB"",
-                                                                    ""kid"": ""kriMPdmBvx68skT8-mPAB3BseeA"",
-                                                                    ""kty"": ""RSA"",
-                                                                    ""n"": ""kSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuw=="",
-                                                                    ""use"": ""sig"",
-                                                                    ""x5c"": [
-                                                                        ""MIIDPjCCAiqgAwIBAgIQsRiM0jheFZhKk49YD0SK1TAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTQwMTAxMDcwMDAwWhcNMTYwMTAxMDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuwIDAQABo2IwYDBeBgNVHQEEVzBVgBDLebM6bK3BjWGqIBrBNFeNoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQsRiM0jheFZhKk49YD0SK1TAJBgUrDgMCHQUAA4IBAQCJ4JApryF77EKC4zF5bUaBLQHQ1PNtA1uMDbdNVGKCmSf8M65b8h0NwlIjGGGy/unK8P6jWFdm5IlZ0YPTOgzcRZguXDPj7ajyvlVEQ2K2ICvTYiRQqrOhEhZMSSZsTKXFVwNfW6ADDkN3bvVOVbtpty+nBY5UqnI7xbcoHLZ4wYD251uj5+lo13YLnsVrmQ16NCBYq2nQFNPuNJw6t3XUbwBHXpF46aLT1/eGf/7Xx6iy8yPJX4DyrpFTutDz882RWofGEO5t4Cw+zZg70dJ/hH/ODYRMorfXEW+8uKmXMKmX2wyxMKvfiPbTy5LmAU8Jvjs2tLg4rOBcXWLAIarZ""
-                                                                    ],
-                                                                    ""x5t"": ""kriMPdmBvx68skT8-mPAB3BseeA""
-                                                                }
-                                                            ]
-                                                        },
-                                                        ""scopes_supported"": [
-                                                            ""openid""
-                                                        ],
-                                                        ""revocation_endpoint"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/revocation"",
-                                                        ""revocation_endpoint_auth_methods_supported"": [
-                                                            ""client_secret_post"",
-                                                            ""client_secret_basic""
-                                                        ],
-                                                        ""revocation_endpoint_auth_signing_alg_values_supported"": [
-                                                            ""ES192"",
-                                                            ""ES256""
-                                                        ],
-                                                        ""service_documentation"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/service_documentation"",
-                                                        ""subject_types_supported"": [
-                                                            ""pairwise""
-                                                        ],
-                                                        ""token_endpoint"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/token"",
-                                                        ""token_endpoint_auth_methods_supported"": [
-                                                            ""client_secret_post"",
-                                                            ""private_key_jwt""
-                                                        ],
-                                                        ""token_endpoint_auth_signing_alg_values_supported"": [
-                                                            ""ES192"",
-                                                            ""ES256""
-                                                        ],
-                                                        ""ui_locales_supported"": [
-                                                            ""hak-CN"",
-                                                            ""en-us""
-                                                        ],
-                                                        ""userinfo_endpoint"": ""https://login.microsoftonline.com/add29489-7269-41f4-8841-b63c95564420/openid/userinfo"",
-                                                        ""userinfo_encryption_alg_values_supported"": [
-                                                            ""ECDH-ES+A128KW"",
-                                                            ""ECDH-ES+A192KW""
-                                                        ],
-                                                        ""userinfo_encryption_enc_values_supported"": [
-                                                            ""A256CBC-HS512"",
-                                                            ""A128CBC-HS256""
-                                                        ],
-                                                        ""userinfo_signing_alg_values_supported"": [
-                                                            ""ES384"",
-                                                            ""ES512""
-                                                        ]
-                                                    }";
+                                                        ""x5t"": ""kriMPdmBvx68skT8-mPAB3BseeA""
+                                                    }
+                                                ],
+                                                ""scopes_supported"": [
+                                                    ""openid""
+                                                ],
+                                                ""revocation_endpoint"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/revocation"",
+                                                ""revocation_endpoint_auth_methods_supported"": [
+                                                    ""client_secret_post"",
+                                                    ""client_secret_basic""
+                                                ],
+                                                ""revocation_endpoint_auth_signing_alg_values_supported"": [
+                                                    ""ES192"",
+                                                    ""ES256""
+                                                ],
+                                                ""service_documentation"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/service_documentation"",
+                                                ""subject_types_supported"": [
+                                                    ""pairwise""
+                                                ],
+                                                ""token_endpoint"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/token"",
+                                                ""token_endpoint_auth_methods_supported"": [
+                                                    ""client_secret_post"",
+                                                    ""private_key_jwt""
+                                                ],
+                                                ""token_endpoint_auth_signing_alg_values_supported"": [
+                                                    ""ES192"",
+                                                    ""ES256""
+                                                ],
+                                                ""ui_locales_supported"": [
+                                                    ""hak-CN"",
+                                                    ""en-us""
+                                                ],
+                                                ""userinfo_endpoint"": ""https://login.microsoftonline.com/add29489-7269-41f4-8841-b63c95564420/openid/userinfo"",
+                                                ""userinfo_encryption_alg_values_supported"": [
+                                                    ""ECDH-ES+A128KW"",
+                                                    ""ECDH-ES+A192KW""
+                                                ],
+                                                ""userinfo_encryption_enc_values_supported"": [
+                                                    ""A256CBC-HS512"",
+                                                    ""A128CBC-HS256""
+                                                ],
+                                                ""userinfo_signing_alg_values_supported"": [
+                                                    ""ES384"",
+                                                    ""ES512""
+                                                ]
+                                            }";
         public static string JsonAllValues =
                                             @"{ ""acr_values_supported"": [""acr_value1"", ""acr_value2"", ""acr_value3""],
                                                 ""authorization_endpoint"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize"",

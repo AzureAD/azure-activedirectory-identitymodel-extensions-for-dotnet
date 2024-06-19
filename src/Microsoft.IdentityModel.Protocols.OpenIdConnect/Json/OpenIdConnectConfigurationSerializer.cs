@@ -212,11 +212,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
                     else if (reader.ValueTextEquals(Encoding.UTF8.GetBytes(JsonWebKeySetParameterNames.Keys)))
                     {
-                        reader.Read();
+                        config.ShouldSerializeJsonWebKeys = true;
                         if (config.JsonWebKeySet == null)
                             config.JsonWebKeySet = new JsonWebKeySet();
-                        JsonWebKeySetSerializer.Read(ref reader, config.JsonWebKeySet);
-                        config.ShouldSerializeJsonWebKeys = true;
+                        // Skip key "Keys"
+                        reader.Read();
+                        JsonWebKeySetSerializer.ReadKeys(ref reader, config.JsonWebKeySet);
                     }
 
                     // FrontchannelLogoutSessionSupported and FrontchannelLogoutSupported are per spec 'boolean'.
@@ -562,10 +563,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
                             else if (propertyName.Equals(JsonWebKeySetParameterNames.Keys, StringComparison.OrdinalIgnoreCase))
                             {
+                                config.ShouldSerializeJsonWebKeys = true;
                                 if (config.JsonWebKeySet == null)
                                     config.JsonWebKeySet = new JsonWebKeySet();
-                                JsonWebKeySetSerializer.Read(ref reader, config.JsonWebKeySet);
-                                config.ShouldSerializeJsonWebKeys = true;
+                                // Skip key "Keys"
+                                JsonWebKeySetSerializer.ReadKeys(ref reader, config.JsonWebKeySet);
                             }
                         }
                         #endregion case-insensitive
@@ -739,10 +741,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.ResponseTypesSupported, config.ResponseTypesSupported);
 
             if (config.ShouldSerializeJsonWebKeys && config.JsonWebKeySet != null && config.JsonWebKeySet.Keys.Count > 0)
-            {
-                writer.WritePropertyName(Encoding.UTF8.GetBytes(JsonWebKeySetParameterNames.Keys));
-                JsonWebKeySetSerializer.Write(ref writer, config.JsonWebKeySet);
-            }
+                JsonWebKeySetSerializer.Write(ref writer, config.JsonWebKeySet, shouldWriteObject: false);
 
             if (config.ScopesSupported.Count > 0)
                 JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.ScopesSupported, config.ScopesSupported);
