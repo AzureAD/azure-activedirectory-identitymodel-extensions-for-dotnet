@@ -1639,7 +1639,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="audiences">The audiences found in the <see cref="JwtSecurityToken"/>.</param>
         /// <param name="jwtToken">The <see cref="JwtSecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-        /// <remarks>See <see cref="Validators.ValidateAudience"/> for additional details.</remarks>
+        /// <remarks>See <see cref="Validators.ValidateAudience(IEnumerable{string}, SecurityToken, TokenValidationParameters)"/> for additional details.</remarks>
         protected virtual void ValidateAudience(IEnumerable<string> audiences, JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
         {
             Validators.ValidateAudience(audiences, jwtToken, validationParameters);
