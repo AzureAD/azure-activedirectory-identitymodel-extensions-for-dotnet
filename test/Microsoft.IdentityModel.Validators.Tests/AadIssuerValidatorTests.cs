@@ -50,6 +50,27 @@ namespace Microsoft.IdentityModel.Validators.Tests
                     TenantIdClaim = ValidatorConstants.TenantIdAsGuid,
                     ExpectedResult = true,
                 },
+                new AadIssuerValidatorTheoryData("ValidateIssuer_V11TemplateWithV11Issuer_Success")
+                {
+                    TemplatedIssuer = ValidatorConstants.AadIssuerV11CommonAuthority,
+                    TokenIssuer =  ValidatorConstants.AadIssuerV11,
+                    TenantIdClaim = ValidatorConstants.TenantIdAsGuid,
+                    ExpectedResult = true,
+                },
+                new AadIssuerValidatorTheoryData("ValidateIssuer_V11TemplateWithV1Issuer_Failure")
+                {
+                    TemplatedIssuer = ValidatorConstants.AadIssuerV11CommonAuthority,
+                    TokenIssuer =  ValidatorConstants.V1Issuer,
+                    TenantIdClaim = ValidatorConstants.TenantIdAsGuid,
+                    ExpectedResult = false,
+                },
+                new AadIssuerValidatorTheoryData("ValidateIssuer_V11TemplateWithV2Issuer_Failure")
+                {
+                    TemplatedIssuer = ValidatorConstants.AadIssuerV11CommonAuthority,
+                    TokenIssuer =  ValidatorConstants.AadIssuer,
+                    TenantIdClaim = ValidatorConstants.TenantIdAsGuid,
+                    ExpectedResult = false,
+                },
                 new AadIssuerValidatorTheoryData("ValidateIssuer_NullTemplate_Failure")
                 {
                     TemplatedIssuer = ValidatorConstants.AadIssuerV1CommonAuthority,
@@ -57,7 +78,6 @@ namespace Microsoft.IdentityModel.Validators.Tests
                     TenantIdClaim = ValidatorConstants.TenantIdAsGuid,
                     ExpectedResult = false,
                 },
-
                 new AadIssuerValidatorTheoryData("ValidateIssuer_NullIssuer_Failure")
                 {
                     TemplatedIssuer = ValidatorConstants.AadIssuerV1CommonAuthority,
@@ -99,7 +119,14 @@ namespace Microsoft.IdentityModel.Validators.Tests
                     TokenIssuer =  "https://login.microsoftonline.com/{tenantid}/v2.0",
                     TenantIdClaim = ValidatorConstants.TenantIdAsGuid,
                     ExpectedResult = false,
-                }
+                },
+                new AadIssuerValidatorTheoryData("ValidateIssuerSigningKey_MalformedV2TokenIssuer_Failure")
+                {
+                    TemplatedIssuer = ValidatorConstants.AadIssuerV2CommonAuthority,
+                    TokenIssuer =  "https://login.microsoftonline.com/{tenantid}/v2.0",
+                    TenantIdClaim = ValidatorConstants.TenantIdAsGuid,
+                    ExpectedResult = false,
+                },
             };
 
             return theoryData;
