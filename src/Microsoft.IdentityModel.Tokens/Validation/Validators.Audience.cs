@@ -10,6 +10,7 @@ using System.Threading;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
+#nullable enable
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
@@ -23,7 +24,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <remarks>This delegate is not expected to throw.</remarks>
     internal delegate AudienceValidationResult ValidateAudience(
         IEnumerable<string> audiences,
-        SecurityToken securityToken,
+        SecurityToken? securityToken,
         TokenValidationParameters validationParameters,
         CallContext callContext);
 
@@ -107,7 +108,6 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
 
-#nullable enable
         /// <summary>
         /// Determines if the audiences found in a <see cref="SecurityToken"/> are valid.
         /// </summary>
@@ -121,7 +121,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="SecurityTokenInvalidAudienceException">If none of the 'audiences' matched either <see cref="TokenValidationParameters.ValidAudience"/> or one of <see cref="TokenValidationParameters.ValidAudiences"/>.</exception>
         /// <remarks>An EXACT match is required.</remarks>
 #pragma warning disable CA1801 // TODO: remove pragma disable once callContext is used for logging
-        internal static AudienceValidationResult ValidateAudience(IEnumerable<string> audiences, SecurityToken securityToken, TokenValidationParameters validationParameters, CallContext callContext)
+        internal static AudienceValidationResult ValidateAudience(IEnumerable<string> audiences, SecurityToken? securityToken, TokenValidationParameters validationParameters, CallContext callContext)
 #pragma warning restore CA1801
         {
             if (validationParameters == null)
@@ -140,18 +140,6 @@ namespace Microsoft.IdentityModel.Tokens
                 LogHelper.LogWarning(LogMessages.IDX10233);
                 return new AudienceValidationResult(Utility.SerializeAsSingleCommaDelimitedString(audiences));
             }
-
-            if (securityToken == null)
-                return new AudienceValidationResult(
-                    Utility.SerializeAsSingleCommaDelimitedString(audiences),
-                    ValidationFailureType.NullArgument,
-                    new ExceptionDetail(
-                        new MessageDetail(
-                            LogMessages.IDX10000,
-                            LogHelper.MarkAsNonPII(nameof(securityToken))),
-                        typeof(ArgumentNullException),
-                        new StackFrame(true),
-                        null));
 
             if (audiences == null)
                 return new AudienceValidationResult(
@@ -285,3 +273,4 @@ namespace Microsoft.IdentityModel.Tokens
 
     }
 }
+#nullable disable

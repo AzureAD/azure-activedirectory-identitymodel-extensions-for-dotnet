@@ -50,7 +50,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                         TestId = "ValidationParametersNull",
                         ValidationParameters = null,
-                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
                         AudienceValidationResult = new AudienceValidationResult(
                             "audience1",
                             ValidationFailureType.NullArgument,
@@ -64,29 +63,10 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     },
                     new AudienceValidationTheoryData
                     {
-                        Audiences = new List<string> { "audience1" },
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
-                        TestId = "SecurityTokenNull",
-                        ValidationParameters = new TokenValidationParameters{ ValidAudience = "audience"},
-                        SecurityToken = null,
-                        AudienceValidationResult = new AudienceValidationResult(
-                            "audience1",
-                            ValidationFailureType.NullArgument,
-                            new ExceptionDetail(
-                                new MessageDetail(
-                                    LogMessages.IDX10000,
-                                    LogHelper.MarkAsNonPII("securityToken")),
-                                typeof(ArgumentNullException),
-                                new StackFrame(true),
-                                null)),
-                    },
-                    new AudienceValidationTheoryData
-                    {
                         Audiences = new List<string> { "" },
                         ExpectedException =  ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
                         TestId = "AudiencesEmptyString",
                         ValidationParameters = new TokenValidationParameters{ ValidAudience = "audience"},
-                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
                         AudienceValidationResult = new AudienceValidationResult(
                             "",
                             ValidationFailureType.NullArgument,
@@ -106,7 +86,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException =  ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
                         TestId = "AudiencesWhiteSpace",
                         ValidationParameters = new TokenValidationParameters{ ValidAudience = "audience"},
-                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
                         AudienceValidationResult = new AudienceValidationResult(
                             "    ",
                             ValidationFailureType.NullArgument,
@@ -125,7 +104,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         Audiences = null,
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10207:"),
                         TestId = "AudiencesNull",
-                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
                         AudienceValidationResult = new AudienceValidationResult(
                             "null",
                             ValidationFailureType.NullArgument,
@@ -143,7 +121,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10206:"),
                         TestId = "AudiencesEmptyList",
                         ValidationParameters = new TokenValidationParameters{ ValidAudience = "audience"},
-                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
                         AudienceValidationResult = new AudienceValidationResult(
                             "empty",
                             ValidationFailureType.NullArgument,
@@ -175,7 +152,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10208:"),
                         TestId = "ValidAudienceEmptyString",
                         ValidationParameters = new TokenValidationParameters{ ValidAudience = "" },
-                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
                         AudienceValidationResult = new AudienceValidationResult(
                             "audience1",
                             ValidationFailureType.NullArgument,
@@ -193,7 +169,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10208:"),
                         TestId = "ValidAudienceWhiteSpace",
                         ValidationParameters = new TokenValidationParameters{ ValidAudience = "    " },
-                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
                         AudienceValidationResult = new AudienceValidationResult(
                             "audience1",
                             ValidationFailureType.NullArgument,
@@ -211,7 +186,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
                         TestId = "ValidAudiencesEmptyString",
                         ValidationParameters = new TokenValidationParameters{ ValidAudiences = new List<string>{ "" } },
-                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
                         AudienceValidationResult = new AudienceValidationResult(
                             "audience1",
                             ValidationFailureType.NullArgument,
@@ -231,7 +205,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
                         TestId = "ValidAudiencesWhiteSpace",
                         ValidationParameters = new TokenValidationParameters{ ValidAudiences = new List<string>{ "    " } },
-                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
                         AudienceValidationResult = new AudienceValidationResult(
                             "audience1",
                             ValidationFailureType.NullArgument,
@@ -250,7 +223,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         Audiences = new List<string> { "audience1" },
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10208:"),
                         TestId = "ValidateAudienceTrueValidAudienceAndValidAudiencesNull",
-                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
                         AudienceValidationResult = new AudienceValidationResult(
                             "audience1",
                             ValidationFailureType.NullArgument,
@@ -372,7 +344,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
                         TestId = "AudiencesWithSlashValidAudienceSameLengthNotMatched",
                         ValidationParameters = new TokenValidationParameters{ ValidAudience = audience1 },
-                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
                         AudienceValidationResult = new AudienceValidationResult(
                             commaAudience2Slash,
                             ValidationFailureType.NullArgument,
@@ -392,7 +363,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
                         TestId = "ValidAudienceWithSlashTVPFalse",
                         ValidationParameters = new TokenValidationParameters{ IgnoreTrailingSlashWhenValidatingAudience = false, ValidAudience = audience1 + "/" },
-                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
                         AudienceValidationResult = new AudienceValidationResult(
                             commaAudience1,
                             ValidationFailureType.NullArgument,
@@ -411,7 +381,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         Audiences = audiences1,
                         TestId = "ValidAudienceWithSlashTVPTrue",
                         ValidationParameters = new TokenValidationParameters{ ValidAudience = audience1 + "/" },
-                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
                         AudienceValidationResult = new AudienceValidationResult(audience1Slash)
                     },
                     new AudienceValidationTheoryData
@@ -420,7 +389,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
                         TestId = "ValidAudiencesWithSlashTVPFalse",
                         ValidationParameters = new TokenValidationParameters{ IgnoreTrailingSlashWhenValidatingAudience = false, ValidAudiences = audiences1WithSlash },
-                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
                         AudienceValidationResult = new AudienceValidationResult(
                             commaAudience1,
                             ValidationFailureType.NullArgument,
@@ -439,7 +407,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         Audiences = audiences1,
                         TestId = "ValidAudiencesWithSlashTVPTrue",
                         ValidationParameters = new TokenValidationParameters{ ValidAudiences = audiences1WithSlash },
-                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
                         AudienceValidationResult = new AudienceValidationResult(audience1Slash)
                     },
                     new AudienceValidationTheoryData
@@ -448,7 +415,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
                         TestId = "ValidAudienceWithExtraChar",
                         ValidationParameters = new TokenValidationParameters{ ValidAudience = audience1 + "A" },
-                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
                         AudienceValidationResult = new AudienceValidationResult(
                             commaAudience1,
                             ValidationFailureType.NullArgument,
@@ -468,7 +434,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
                         TestId = "ValidAudienceWithDoubleSlashTVPTrue",
                         ValidationParameters = new TokenValidationParameters{ ValidAudience = audience1 + "//" },
-                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
                         AudienceValidationResult = new AudienceValidationResult(
                             commaAudience1,
                             ValidationFailureType.NullArgument,
@@ -488,7 +453,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
                         TestId = "ValidAudiencesWithDoubleSlashTVPTrue",
                         ValidationParameters = new TokenValidationParameters{ ValidAudiences = audiences1WithTwoSlashes },
-                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
                         AudienceValidationResult = new AudienceValidationResult(
                             commaAudience1,
                             ValidationFailureType.NullArgument,
@@ -508,7 +472,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
                         TestId = "TokenAudienceWithSlashTVPFalse",
                         ValidationParameters = new TokenValidationParameters{ IgnoreTrailingSlashWhenValidatingAudience = false, ValidAudience = audience1 },
-                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
                         AudienceValidationResult = new AudienceValidationResult(
                             commaAudience1Slash,
                             ValidationFailureType.NullArgument,
@@ -527,7 +490,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         Audiences = audiences1WithSlash,
                         TestId = "TokenAudienceWithSlashTVPTrue",
                         ValidationParameters = new TokenValidationParameters{ ValidAudience = audience1 },
-                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
                         AudienceValidationResult = new AudienceValidationResult(audience1)
                     },
                     new AudienceValidationTheoryData
@@ -536,7 +498,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
                         TestId = "TokenAudienceWithSlashNotEqual",
                         ValidationParameters = new TokenValidationParameters{ ValidAudience = audience1 },
-                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
                         AudienceValidationResult = new AudienceValidationResult(
                             commaAudience2Slash,
                             ValidationFailureType.NullArgument,
@@ -556,7 +517,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
                         TestId = "TokenAudiencesWithSlashTVPFalse",
                         ValidationParameters = new TokenValidationParameters{ IgnoreTrailingSlashWhenValidatingAudience = false, ValidAudience = audience1 },
-                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
                         AudienceValidationResult = new AudienceValidationResult(
                             commaAudience1Slash,
                             ValidationFailureType.NullArgument,
@@ -575,7 +535,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         Audiences = audiences1WithSlash,
                         TestId = "TokenAudiencesWithSlashTVPTrue",
                         ValidationParameters = new TokenValidationParameters{ ValidAudience = audience1 },
-                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
                         AudienceValidationResult = new AudienceValidationResult(audience1)
                     },
                     new AudienceValidationTheoryData
@@ -584,7 +543,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
                         TestId = "TokenAudiencesWithSlashValidAudiencesNotMatchedTVPTrue",
                         ValidationParameters = new TokenValidationParameters{ ValidAudiences = audiences2 },
-                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
                         AudienceValidationResult = new AudienceValidationResult(
                             commaAudience1Slash,
                             ValidationFailureType.NullArgument,
@@ -604,7 +562,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
                         TestId = "TokenAudienceWithTwoSlashesTVPTrue",
                         ValidationParameters = new TokenValidationParameters{ ValidAudience = audience1 },
-                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, "Issuer"),
                         AudienceValidationResult = new AudienceValidationResult(
                             commaAudience1 + "//",
                             ValidationFailureType.NullArgument,
