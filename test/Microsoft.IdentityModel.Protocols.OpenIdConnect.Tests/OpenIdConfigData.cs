@@ -23,7 +23,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             {
                 var config = Default;
                 config.JsonWebKeySet = DataSets.JsonWebKeySet1;
-                config.ShouldSerializeJsonWebKeys = true;
                 return config;
             }
         }

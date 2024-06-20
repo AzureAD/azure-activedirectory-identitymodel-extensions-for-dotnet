@@ -225,7 +225,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
                     else if (reader.ValueTextEquals(Encoding.UTF8.GetBytes(JsonWebKeySetParameterNames.Keys)))
                     {
-                        config.ShouldSerializeJsonWebKeys = true;
                         if (config.JsonWebKeySet == null)
                             config.JsonWebKeySet = new JsonWebKeySet();
                         // Skip key "Keys"
@@ -591,7 +590,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
                             else if (propertyName.Equals(JsonWebKeySetParameterNames.Keys, StringComparison.OrdinalIgnoreCase))
                             {
-                                config.ShouldSerializeJsonWebKeys = true;
                                 if (config.JsonWebKeySet == null)
                                     config.JsonWebKeySet = new JsonWebKeySet();
                                 // Skip key "Keys"
