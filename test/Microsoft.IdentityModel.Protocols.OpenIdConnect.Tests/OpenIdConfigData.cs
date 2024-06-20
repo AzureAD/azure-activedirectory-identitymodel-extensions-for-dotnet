@@ -83,6 +83,18 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                                                     ""acr_value3""
                                                 ],
                                                 ""authorization_endpoint"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/authorize"",
+                                                ""authorization_encryption_alg_values_supported"": [
+                                                    ""A192KW"",
+                                                    ""A256KW""
+                                                ],
+                                                ""authorization_encryption_enc_values_supported"": [
+                                                    ""A128CBC-HS256"",
+                                                    ""A256CBC-HS512""
+                                                ],
+                                                ""authorization_signing_alg_values_supported"": [
+                                                    ""ES384"",
+                                                    ""ES512""
+                                                ],
                                                 ""backchannel_authentication_endpoint"": ""https://login.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/oauth2/bc-authorize"",
                                                 ""backchannel_authentication_request_signing_alg_values_supported"": [
                                                     ""ES384"",
@@ -252,6 +264,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                                                     ""ES192"",
                                                     ""ES256""
                                                 ],
+                                                ""tls_client_certificate_bound_access_tokens"": true,
                                                 ""ui_locales_supported"": [
                                                     ""hak-CN"",
                                                     ""en-us""
