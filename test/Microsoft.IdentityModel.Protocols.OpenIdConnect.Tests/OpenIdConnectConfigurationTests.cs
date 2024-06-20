@@ -75,6 +75,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
             Assert.NotNull(configuration.AcrValuesSupported);
+            Assert.NotNull(configuration.AuthorizationEncryptionAlgValuesSupported);
+            Assert.NotNull(configuration.AuthorizationEncryptionEncValuesSupported);
+            Assert.NotNull(configuration.AuthorizationSigningAlgValuesSupported);
             Assert.False(configuration.AuthorizationResponseIssParameterSupported);
             Assert.NotNull(configuration.BackchannelAuthenticationRequestSigningAlgValuesSupported);
             Assert.NotNull(configuration.BackchannelTokenDeliveryModesSupported);
@@ -110,6 +113,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Assert.NotNull(configuration.SubjectTypesSupported);
             Assert.NotNull(configuration.TokenEndpointAuthMethodsSupported);
             Assert.NotNull(configuration.TokenEndpointAuthSigningAlgValuesSupported);
+            Assert.False(configuration.TlsClientCertificateBoundAccessTokens);
             Assert.NotNull(configuration.UILocalesSupported);
             Assert.NotNull(configuration.UserInfoEndpointEncryptionAlgValuesSupported);
             Assert.NotNull(configuration.UserInfoEndpointEncryptionEncValuesSupported);
@@ -141,8 +145,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
             Type type = typeof(OpenIdConnectConfiguration);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 63)
-                Assert.True(false, "Number of properties has changed from 63 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 67)
+                Assert.True(false, "Number of properties has changed from 67 to: " + properties.Length + ", adjust tests");
 
             TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(configuration, "OpenIdConnectConfiguration_GetSets");
 
@@ -152,7 +156,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
                         {
                             new KeyValuePair<string, List<object>>("AuthorizationEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
+                            new KeyValuePair<string, List<object>>("AuthorizationEncryptionAlgValuesSupported", new List<object>{ false, true, true }),
+                            new KeyValuePair<string, List<object>>("AuthorizationEncryptionEncValuesSupported", new List<object>{ false, true, true }),
                             new KeyValuePair<string, List<object>>("AuthorizationResponseIssParameterSupported", new List<object>{ false, true, true }),
+                            new KeyValuePair<string, List<object>>("AuthorizationSigningAlgValuesSupported", new List<object>{ false, true, true }),
                             new KeyValuePair<string, List<object>>("BackchannelAuthenticationEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
                             new KeyValuePair<string, List<object>>("BackchannelUserCodeParameterSupported", new List<object>{ false, true, true }),
                             new KeyValuePair<string, List<object>>("CheckSessionIframe", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
@@ -178,6 +185,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                             new KeyValuePair<string, List<object>>("RevocationEndpointAuthMethodsSupported", new List<object>{ false, true, true }),
                             new KeyValuePair<string, List<object>>("RevocationEndpointAuthSigningAlgValuesSupported", new List<object>{ false, true, true }),
                             new KeyValuePair<string, List<object>>("ServiceDocumentation", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
+                            new KeyValuePair<string, List<object>>("TlsClientCertificateBoundAccessTokens", new List<object>{ false, true, false }),
                             new KeyValuePair<string, List<object>>("TokenEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
                             new KeyValuePair<string, List<object>>("UserInfoEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
                         },
@@ -289,6 +297,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var collectionNames = new List<string>
             {
                 "acr_values_supported",
+                "authorization_encryption_alg_values_supported",
+                "authorization_encryption_enc_values_supported",
+                "authorization_signing_alg_values_supported",
                 "backchannel_authentication_request_signing_alg_values_supported",
                 "backchannel_token_delivery_modes_supported",
                 "claims_supported",

@@ -33,7 +33,6 @@ namespace Microsoft.IdentityModel.Tokens
         private DecryptionDelegate DecryptFunction;
         private EncryptionDelegate EncryptFunction;
         private const string _className = "Microsoft.IdentityModel.Tokens.AuthenticatedEncryptionProvider";
-        internal const string _skipValidationOfAuthenticationTagLength = "Switch.Microsoft.IdentityModel.SkipAuthenticationTagLengthValidation"; 
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthenticatedEncryptionProvider"/> class used for encryption and decryption.
@@ -167,8 +166,7 @@ namespace Microsoft.IdentityModel.Tokens
         private byte[] DecryptWithAesCbc(byte[] ciphertext, byte[] authenticatedData, byte[] iv, byte[] authenticationTag)
         {
             // Verify authentication Tag
-            if (ShouldValidateAuthenticationTagLength()
-                && SymmetricSignatureProvider.ExpectedSignatureSizeInBytes.TryGetValue(Algorithm, out int expectedTagLength)
+            if (SymmetricSignatureProvider.ExpectedSignatureSizeInBytes.TryGetValue(Algorithm, out int expectedTagLength)
                 && expectedTagLength != authenticationTag.Length)
                 throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(
                     LogHelper.FormatInvariant(LogMessages.IDX10625, authenticationTag.Length, expectedTagLength, Base64UrlEncoder.Encode(authenticationTag), Algorithm)));
@@ -195,11 +193,6 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(LogMessages.IDX10654, ex)));
             }
-        }
-
-        private static bool ShouldValidateAuthenticationTagLength()
-        {
-            return !(AppContext.TryGetSwitch(_skipValidationOfAuthenticationTagLength, out bool skipValidation) && skipValidation);
         }
 
         private AuthenticatedKeys CreateAuthenticatedKeys()
