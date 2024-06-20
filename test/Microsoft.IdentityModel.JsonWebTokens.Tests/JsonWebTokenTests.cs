@@ -1540,7 +1540,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     { JwtRegisteredClaimNames.Aud, Default.Audience },
                     { JwtRegisteredClaimNames.Azp, escapedAzp },
                     { JwtRegisteredClaimNames.Jti, Default.Jti },
-                    { "uknown_claim", "unknown_claim_value" },
+                    { "unknown_claim", "unknown_claim_value" },
                 }
             };
 

@@ -62,6 +62,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         private protected virtual void ReadPayloadValue(ref Utf8JsonReader reader, IDictionary<string, object> claims)
         {
+            _ = claims ?? throw LogHelper.LogArgumentNullException(nameof(claims));
+
             if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Aud))
             {
                 _audiences = [];
@@ -136,6 +138,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             Dictionary<string, (int startIndex, int length)?> claimsBytes,
             Memory<byte> tokenAsMemory)
         {
+            _ = claims ?? throw LogHelper.LogArgumentNullException(nameof(claims));
+            _ = claimsBytes ?? throw LogHelper.LogArgumentNullException(nameof(claimsBytes));
+
             if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Aud))
             {
                 _audiences = [];

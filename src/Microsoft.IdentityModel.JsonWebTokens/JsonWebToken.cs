@@ -503,7 +503,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 try
                 {
-                    Header = CreateHeaderClaimSet(Base64UrlEncoder.Decode(headerSpan).AsSpan());
+                    Header = CreateHeaderClaimSet(Base64UrlEncoder.Decode(headerSpan).AsMemory());
                 }
                 catch (Exception ex)
                 {
@@ -572,7 +572,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             byte[] output = new byte[outputSize];
             Base64UrlEncoder.Decode(strSpan.Slice(startIndex, length), output);
-            return createHeaderClaimSet ? CreateHeaderClaimSet(output.AsSpan()) : CreatePayloadClaimSet(output.AsMemory());
+            return createHeaderClaimSet ? CreateHeaderClaimSet(output.AsMemory()) : CreatePayloadClaimSet(output.AsMemory());
         }
 
         /// <summary>
@@ -1129,64 +1129,43 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
         #endregion
 
-        #region Payload Properties Bytes
 #if NET8_0_OR_GREATER
 
-        /// <summary>
-        /// Gets the 'azp' claim from the payload.
-        /// </summary>
-        /// <remarks>
-        /// Identifies the authorized party for the id_token.
-        /// see: https://openid.net/specs/openid-connect-core-1_0.html
-        /// <para>
-        /// If the 'azp' claim is not found, an empty string is returned.
-        /// </para>
-        /// </remarks>
-        public ReadOnlySpan<byte> AzpBytes
-        {
-            get
-            {
-                return Payload.GetStringBytesValue(JwtRegisteredClaimNames.Azp);
-            }
-        }
+        #region Header Properties Bytes
 
-        /// <summary>
-        /// Gets the 'value' of the 'jti' claim from the payload.
-        /// </summary>
-        /// <remarks>
-        /// Provides a unique identifier for the JWT.
-        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.7
-        /// <para>
-        /// If the 'jti' claim is not found, an empty string is returned.
-        /// </para>
-        /// </remarks>
-        public ReadOnlySpan<byte> IdBytes
-        {
-            get
-            {
-                return Payload.GetStringBytesValue(JwtRegisteredClaimNames.Jti);
-            }
-        }
+        /// <inheritdoc cref="Alg" />
+        public ReadOnlySpan<byte> AlgBytes => Payload.GetStringBytesValue(JwtHeaderParameterNames.Alg);
 
-        /// <summary>
-        /// Gets the 'value' of the 'iss' claim from the payload.
-        /// </summary>
-        /// <remarks>
-        /// Identifies the principal that issued the JWT.
-        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.1
-        /// <para>
-        /// If the 'iss' claim is not found, an empty string is returned.
-        /// </para>
-        /// </remarks>
-        public ReadOnlySpan<byte> IssuerBytes
-        {
-            get
-            {
-                return Payload.GetStringBytesValue(JwtRegisteredClaimNames.Iss);
-            }
-        }
+        /// <inheritdoc cref="Cty" />
+        public ReadOnlySpan<byte> CtyBytes => Payload.GetStringBytesValue(JwtHeaderParameterNames.Cty);
+
+        /// <inheritdoc cref="Kid" />
+        public ReadOnlySpan<byte> KidBytes => Payload.GetStringBytesValue(JwtHeaderParameterNames.Kid);
+
+        /// <inheritdoc cref="Typ" />
+        public ReadOnlySpan<byte> TypBytes => Payload.GetStringBytesValue(JwtHeaderParameterNames.Typ);
+
+        /// <inheritdoc cref="X5t" />
+        public ReadOnlySpan<byte> X5tBytes => Payload.GetStringBytesValue(JwtHeaderParameterNames.X5t);
+
+        /// <inheritdoc cref="Zip" />
+        public ReadOnlySpan<byte> ZipBytes => Payload.GetStringBytesValue(JwtHeaderParameterNames.Zip);
+
+        #endregion
+
+        #region Payload Properties Bytes
+
+        /// <inheritdoc cref="Azp" />
+        public ReadOnlySpan<byte> AzpBytes => Payload.GetStringBytesValue(JwtRegisteredClaimNames.Azp);
+
+        /// <inheritdoc cref="Id" />
+        public ReadOnlySpan<byte> IdBytes => Payload.GetStringBytesValue(JwtRegisteredClaimNames.Jti);
+
+        /// <inheritdoc cref="Issuer" />
+        public ReadOnlySpan<byte> IssuerBytes => Payload.GetStringBytesValue(JwtRegisteredClaimNames.Iss);
+
+        #endregion
 
 #endif
-        #endregion
     }
 }
