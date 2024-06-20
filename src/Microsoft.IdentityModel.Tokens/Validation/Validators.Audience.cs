@@ -5,8 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
-using System.Threading;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
@@ -81,17 +79,7 @@ namespace Microsoft.IdentityModel.Tokens
                     new SecurityTokenInvalidAudienceException(LogHelper.FormatInvariant(LogMessages.IDX10206))
                     { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences) });
 
-            // create enumeration of all valid audiences from validationParameters
-            IEnumerable<string> validationParametersAudiences;
-
-            if (validationParameters.ValidAudiences == null)
-                validationParametersAudiences = new[] { validationParameters.ValidAudience };
-            else if (string.IsNullOrWhiteSpace(validationParameters.ValidAudience))
-                validationParametersAudiences = validationParameters.ValidAudiences;
-            else
-                validationParametersAudiences = validationParameters.ValidAudiences.Concat(new[] { validationParameters.ValidAudience });
-
-            if (AudienceIsValid(audiences, validationParameters, validationParametersAudiences))
+            if (AudienceIsValid(audiences, validationParameters))
                 return;
 
             SecurityTokenInvalidAudienceException ex = new SecurityTokenInvalidAudienceException(
@@ -174,17 +162,7 @@ namespace Microsoft.IdentityModel.Tokens
                         typeof(SecurityTokenInvalidAudienceException),
                         new StackFrame(true)));
 
-            // create enumeration of all valid audiences from validationParameters
-            IEnumerable<string> validationParametersAudiences;
-
-            if (validationParameters.ValidAudiences == null)
-                validationParametersAudiences = new[] { validationParameters.ValidAudience };
-            else if (string.IsNullOrWhiteSpace(validationParameters.ValidAudience))
-                validationParametersAudiences = validationParameters.ValidAudiences;
-            else
-                validationParametersAudiences = validationParameters.ValidAudiences.Concat(new[] { validationParameters.ValidAudience });
-
-            string? validAudience = AudienceIsValidReturning(audiences, validationParameters, validationParametersAudiences);
+            string? validAudience = AudienceIsValidReturning(audiences, validationParameters);
             if (validAudience != null)
             {
                 return new AudienceValidationResult(validAudience);
@@ -203,45 +181,72 @@ namespace Microsoft.IdentityModel.Tokens
                         new StackFrame(true)));
         }
 
-        private static bool AudienceIsValid(IEnumerable<string> audiences, TokenValidationParameters validationParameters, IEnumerable<string> validationParametersAudiences)
+        private static bool AudienceIsValid(IEnumerable<string> audiences, TokenValidationParameters validationParameters)
         {
-            return AudienceIsValidReturning(audiences, validationParameters, validationParametersAudiences) != null;
+            return AudienceIsValidReturning(audiences, validationParameters) != null;
         }
 
-        private static string? AudienceIsValidReturning(IEnumerable<string> audiences, TokenValidationParameters validationParameters, IEnumerable<string> validationParametersAudiences)
+        private static string? AudienceIsValidReturning(IEnumerable<string> audiences, TokenValidationParameters validationParameters)
+        {
+            string? validAudience = null;
+            if (!string.IsNullOrWhiteSpace(validationParameters.ValidAudience))
+                validAudience = AudiencesMatchSingle(audiences, validationParameters.ValidAudience, validationParameters.IgnoreTrailingSlashWhenValidatingAudience);
+
+            if (validAudience == null && validationParameters.ValidAudiences != null)
+                validAudience = AudiencesMatchList(audiences, validationParameters.ValidAudiences, validationParameters.IgnoreTrailingSlashWhenValidatingAudience);
+
+            return validAudience;
+        }
+
+        private static string? AudiencesMatchSingle(IEnumerable<string> audiences, string validAudience, bool ignoreTrailingSlashWhenValidatingAudience)
         {
             foreach (string tokenAudience in audiences)
             {
                 if (string.IsNullOrWhiteSpace(tokenAudience))
                     continue;
 
-                foreach (string validAudience in validationParametersAudiences)
+                if (AudiencesMatch(ignoreTrailingSlashWhenValidatingAudience, tokenAudience, validAudience))
                 {
-                    if (string.IsNullOrWhiteSpace(validAudience))
+                    if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                        LogHelper.LogInformation(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
+
+                    return tokenAudience;
+                }
+            }
+
+            return null;
+        }
+
+        private static string? AudiencesMatchList(IEnumerable<string> audiences, IEnumerable<string> validAudiences, bool ignoreTrailingSlashWhenValidatingAudience)
+        {
+            foreach (string tokenAudience in audiences)
+            {
+                if (string.IsNullOrWhiteSpace(tokenAudience))
+                    continue;
+
+                foreach (string validAudience in validAudiences)
+                {
+                    if (string.IsNullOrEmpty(validAudience))
                         continue;
 
-                    if (AudiencesMatch(validationParameters, tokenAudience, validAudience))
+                    if (AudiencesMatch(ignoreTrailingSlashWhenValidatingAudience, tokenAudience, validAudience))
                     {
                         if (LogHelper.IsEnabled(EventLogLevel.Informational))
                             LogHelper.LogInformation(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
 
-                        return validAudience;
+                        return tokenAudience;
                     }
                 }
             }
 
             return null;
         }
-#nullable disable
 
-        private static bool AudiencesMatch(TokenValidationParameters validationParameters, string tokenAudience, string validAudience)
+        private static bool AudiencesMatch(bool ignoreTrailingSlashWhenValidatingAudience, string tokenAudience, string validAudience)
         {
             if (validAudience.Length == tokenAudience.Length)
-            {
-                if (string.Equals(validAudience, tokenAudience))
-                    return true;
-            }
-            else if (validationParameters.IgnoreTrailingSlashWhenValidatingAudience && AudiencesMatchIgnoringTrailingSlash(tokenAudience, validAudience))
+                return string.Equals(validAudience, tokenAudience);
+            else if (ignoreTrailingSlashWhenValidatingAudience && AudiencesMatchIgnoringTrailingSlash(tokenAudience, validAudience))
                 return true;
 
             return false;

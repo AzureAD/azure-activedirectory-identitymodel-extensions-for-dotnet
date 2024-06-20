@@ -381,7 +381,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         Audiences = audiences1,
                         TestId = "ValidAudienceWithSlashTVPTrue",
                         ValidationParameters = new TokenValidationParameters{ ValidAudience = audience1 + "/" },
-                        AudienceValidationResult = new AudienceValidationResult(audience1Slash)
+                        AudienceValidationResult = new AudienceValidationResult(audience1)
                     },
                     new AudienceValidationTheoryData
                     {
@@ -407,7 +407,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         Audiences = audiences1,
                         TestId = "ValidAudiencesWithSlashTVPTrue",
                         ValidationParameters = new TokenValidationParameters{ ValidAudiences = audiences1WithSlash },
-                        AudienceValidationResult = new AudienceValidationResult(audience1Slash)
+                        AudienceValidationResult = new AudienceValidationResult(audience1)
                     },
                     new AudienceValidationTheoryData
                     {
@@ -490,7 +490,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         Audiences = audiences1WithSlash,
                         TestId = "TokenAudienceWithSlashTVPTrue",
                         ValidationParameters = new TokenValidationParameters{ ValidAudience = audience1 },
-                        AudienceValidationResult = new AudienceValidationResult(audience1)
+                        AudienceValidationResult = new AudienceValidationResult(audience1Slash)
                     },
                     new AudienceValidationTheoryData
                     {
@@ -535,7 +535,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         Audiences = audiences1WithSlash,
                         TestId = "TokenAudiencesWithSlashTVPTrue",
                         ValidationParameters = new TokenValidationParameters{ ValidAudience = audience1 },
-                        AudienceValidationResult = new AudienceValidationResult(audience1)
+                        AudienceValidationResult = new AudienceValidationResult(audience1Slash)
                     },
                     new AudienceValidationTheoryData
                     {
