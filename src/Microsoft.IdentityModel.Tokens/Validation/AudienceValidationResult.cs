@@ -48,8 +48,7 @@ namespace Microsoft.IdentityModel.Tokens
 
                 HasValidOrExceptionWasRead = true;
                 _exception = ExceptionDetail.GetException();
-                SecurityTokenInvalidAudienceException securityTokenInvalidAudienceException = _exception as SecurityTokenInvalidAudienceException;
-                if (securityTokenInvalidAudienceException != null)
+                if (_exception is SecurityTokenInvalidAudienceException securityTokenInvalidAudienceException)
                 {
                     securityTokenInvalidAudienceException.InvalidAudience = Audience;
                     securityTokenInvalidAudienceException.ExceptionDetail = ExceptionDetail;
