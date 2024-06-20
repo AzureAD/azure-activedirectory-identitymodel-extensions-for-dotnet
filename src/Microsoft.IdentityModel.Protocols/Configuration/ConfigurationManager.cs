@@ -22,6 +22,7 @@ namespace Microsoft.IdentityModel.Protocols
         private DateTimeOffset _lastRefresh = DateTimeOffset.MinValue;
         private bool _isFirstRefreshRequest = true;
         private bool _skipDistributedConfigurationManager = false;
+        private bool _distributedCacheUpdateInProgress = false;
 
         private readonly SemaphoreSlim _refreshLock;
         private readonly IDocumentRetriever _docRetriever;
@@ -166,26 +167,33 @@ namespace Microsoft.IdentityModel.Protocols
                         T configuration = null;
                         if (DistributedConfigurationManager != null && !_skipDistributedConfigurationManager)
                         {
-                            // TODO handle try/catch
-                            configuration = await DistributedConfigurationManager.GetConfigurationAsync(MetadataAddress, s_distributedConfigurationOptions, CancellationToken.None).ConfigureAwait(false);
-                            if (_configValidator != null)
+                            try
                             {
-                                // TODO don't throw but log another exception
-                                ConfigurationValidationResult result = _configValidator.Validate(configuration);
-                                if (!result.Succeeded)
+                                configuration = await DistributedConfigurationManager.GetConfigurationAsync(MetadataAddress, s_distributedConfigurationOptions, CancellationToken.None).ConfigureAwait(false);
+                                if (_configValidator != null)
                                 {
-                                    configuration = null;
-                                    LogHelper.LogExceptionMessage(new InvalidConfigurationException(LogHelper.FormatInvariant(LogMessages.IDX20810, result.ErrorMessage)));
+                                    ConfigurationValidationResult result = _configValidator.Validate(configuration);
+                                    if (!result.Succeeded)
+                                    {
+                                        configuration = null;
+                                        LogHelper.LogExceptionMessage(new InvalidConfigurationException(LogHelper.FormatInvariant(LogMessages.IDX20812, result.ErrorMessage)));
+                                    }
                                 }
+                            }
+                            catch (Exception ex)
+                            {
+                                LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX20811), ex));
                             }
                         }
 
                        if (configuration == null)
                        {
+                            LogHelper.LogInformation(LogMessages.IDX20811);
+                            
                             // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
                             // The transport should have it's own timeouts, etc..
                             configuration = await _configRetriever.GetConfigurationAsync(MetadataAddress, _docRetriever, CancellationToken.None).ConfigureAwait(false);
-                            if (configuration is IConfigurationRetrievalTime configRetrievalTime)
+                            if (configuration is IConfigurationTimeRetriever configRetrievalTime)
                                 configRetrievalTime.RetrievalTime = DateTimeOffset.UtcNow;
 
                             if (_configValidator != null)
@@ -198,11 +206,16 @@ namespace Microsoft.IdentityModel.Protocols
                             if (_skipDistributedConfigurationManager)
                                 _skipDistributedConfigurationManager = false;
 
-                            if (DistributedConfigurationManager != null)
-                                // TODO fire and forget (or not if refresh happens on a background thread)
-                                await DistributedConfigurationManager.SetConfigurationAsync(MetadataAddress, configuration, s_distributedConfigurationOptions, CancellationToken.None).ConfigureAwait(false);
+                            if (DistributedConfigurationManager != null && !_distributedCacheUpdateInProgress)
+                            {
+                                _distributedCacheUpdateInProgress = true;
+                                _ = DistributedConfigurationManager.SetConfigurationAsync(MetadataAddress, configuration, s_distributedConfigurationOptions, CancellationToken.None).ContinueWith(t =>
+                                {
+                                    _distributedCacheUpdateInProgress = false;
+                                }, TaskScheduler.Default);
+                            }
 
-                            if (configuration is IConfigurationRetrievalTime configurationRetrievalTime)
+                            if (configuration is IConfigurationTimeRetriever configurationRetrievalTime)
                                 _lastRefresh = configurationRetrievalTime.RetrievalTime;
                             else
                                 _lastRefresh = DateTimeOffset.UtcNow;

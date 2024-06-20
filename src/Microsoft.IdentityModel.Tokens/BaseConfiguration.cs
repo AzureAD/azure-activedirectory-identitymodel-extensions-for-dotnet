@@ -11,7 +11,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     ///  Represents a generic metadata configuration which is applicable for both XML and JSON based configurations.
     /// </summary>
-    public abstract class BaseConfiguration /*: IConfigurationRetrievalTime*/ // L2 TODO: internal until L2 cache is implemented S2S.
+    public abstract class BaseConfiguration /*: IConfigurationTimeRetriever*/ // L2 TODO: internal until L2 cache is implemented S2S.
     {
         /// <summary>
         /// Gets the issuer specified via the metadata endpoint.

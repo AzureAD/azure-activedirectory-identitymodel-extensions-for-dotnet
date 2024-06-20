@@ -9,7 +9,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// 
     /// </summary>
     // L2 TODO: internal until L2 cache is implemented S2S.
-    internal interface IConfigurationRetrievalTime
+    internal interface IConfigurationTimeRetriever
     {
         // L2 TODO: internal until L2 cache is implemented S2S.
         internal DateTimeOffset RetrievalTime { get; set; }
