@@ -19,7 +19,6 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 - `JwtRegisteredClaimNames` now contains previously missing Standard OpenIdConnect claims. See issue [#1598](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/1598) for details.
 
 ### Performance Improvements:
-- Reduced allocations in `AadIssuerValidator` by not using `string.Replace` where appropriate. See issue [#2595](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2595) and PR [#2597](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2597) for more details.
 - No longer for every string claim, calling DateTime.TryParse on each value, whether it is expected to be a DateTime or not. See issue [#2615](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2615) for details.
 
 7.6.0
