@@ -188,17 +188,20 @@ namespace Microsoft.IdentityModel.Tokens
 
         private static string? AudienceIsValidReturning(IEnumerable<string> audiences, TokenValidationParameters validationParameters)
         {
+            if (audiences is not List<string> internalAudiences)
+                internalAudiences = audiences.ToList();
+
             string? validAudience = null;
             if (!string.IsNullOrWhiteSpace(validationParameters.ValidAudience))
-                validAudience = AudiencesMatchSingle(audiences, validationParameters.ValidAudience, validationParameters.IgnoreTrailingSlashWhenValidatingAudience);
+                validAudience = AudiencesMatchSingle(internalAudiences, validationParameters.ValidAudience, validationParameters.IgnoreTrailingSlashWhenValidatingAudience);
 
             if (validAudience == null && validationParameters.ValidAudiences != null)
-                validAudience = AudiencesMatchList(audiences, validationParameters.ValidAudiences, validationParameters.IgnoreTrailingSlashWhenValidatingAudience);
+                validAudience = AudiencesMatchList(internalAudiences, validationParameters.ValidAudiences, validationParameters.IgnoreTrailingSlashWhenValidatingAudience);
 
             return validAudience;
         }
 
-        private static string? AudiencesMatchSingle(IEnumerable<string> audiences, string validAudience, bool ignoreTrailingSlashWhenValidatingAudience)
+        private static string? AudiencesMatchSingle(List<string> audiences, string validAudience, bool ignoreTrailingSlashWhenValidatingAudience)
         {
             foreach (string tokenAudience in audiences)
             {
@@ -217,7 +220,7 @@ namespace Microsoft.IdentityModel.Tokens
             return null;
         }
 
-        private static string? AudiencesMatchList(IEnumerable<string> audiences, IEnumerable<string> validAudiences, bool ignoreTrailingSlashWhenValidatingAudience)
+        private static string? AudiencesMatchList(List<string> audiences, IEnumerable<string> validAudiences, bool ignoreTrailingSlashWhenValidatingAudience)
         {
             foreach (string tokenAudience in audiences)
             {
