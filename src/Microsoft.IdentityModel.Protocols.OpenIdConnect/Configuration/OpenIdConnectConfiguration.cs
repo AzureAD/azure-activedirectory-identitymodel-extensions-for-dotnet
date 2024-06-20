@@ -23,6 +23,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         // these are used to lazy create
         private Dictionary<string, object> _additionalData;
         private ICollection<string> _acrValuesSupported;
+        private ICollection<string> _authorizationDetailsTypesSupported;
         private ICollection<string> _authorizationEncryptionAlgValuesSupported;
         private ICollection<string> _authorizationEncryptionEncValuesSupported;
         private ICollection<string> _authorizationSigningAlgValuesSupported;
@@ -139,6 +140,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             _acrValuesSupported ??
             Interlocked.CompareExchange(ref _acrValuesSupported, new Collection<string>(), null) ??
             _acrValuesSupported;
+
+        /// <summary>
+        /// Gets the collection of 'authorization_details_types_supported'
+        /// </summary>
+        [JsonPropertyName(OpenIdProviderMetadataNames.AuthorizationDetailsTypesSupported)]
+        public ICollection<string> AuthorizationDetailsTypesSupported =>
+            _authorizationDetailsTypesSupported ??
+            Interlocked.CompareExchange(ref _authorizationDetailsTypesSupported, new Collection<string>(), null) ??
+            _authorizationDetailsTypesSupported;
 
         /// <summary>
         /// Gets or sets the 'authorization_endpoint'.
@@ -721,6 +731,17 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         }
 
         /// <summary>
+        /// Gets a bool that determines if the 'authorization_details_types_supported' (AuthorizationDetailsTypesSupported) property should be serialized.
+        /// This is used by Json.NET in order to conditionally serialize properties.
+        /// </summary>
+        /// <return>true if 'authorization_details_types_supported' (AuthorizationDetailsTypesSupported) is not empty; otherwise, false.</return>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public bool ShouldSerializeAuthorizationDetailsTypesSupported()
+        {
+            return AuthorizationDetailsTypesSupported.Count > 0;
+        }
+
+        /// <summary>
         /// Gets a bool that determines if the 'authorization_encryption_alg_values_supported' (AuthorizationEncryptionAlgValuesSupported) property should be serialized.
         /// This is used by Json.NET in order to conditionally serialize properties.
         /// </summary>
@@ -1093,6 +1114,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             return UserInfoEndpointSigningAlgValuesSupported.Count > 0;
         }
-#endregion shouldserialize
+        #endregion shouldserialize
     }
 }

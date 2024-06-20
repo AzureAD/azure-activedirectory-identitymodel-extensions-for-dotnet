@@ -13,6 +13,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     {
 #pragma warning disable 1591
         public const string AcrValuesSupported = "acr_values_supported";
+        public const string AuthorizationDetailsTypesSupported = "authorization_details_types_supported";
         public const string AuthorizationEndpoint = "authorization_endpoint";
         public const string AuthorizationEncryptionAlgValuesSupported = "authorization_encryption_alg_values_supported";
         public const string AuthorizationEncryptionEncValuesSupported = "authorization_encryption_enc_values_supported";
@@ -87,6 +88,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     internal static class OpenIdProviderMetadataUtf8Bytes
     {
         public static ReadOnlySpan<byte> AcrValuesSupported => "acr_values_supported"u8;
+        public static ReadOnlySpan<byte> AuthorizationDetailsTypesSupported => "authorization_details_types_supported"u8;
         public static ReadOnlySpan<byte> AuthorizationEndpoint => "authorization_endpoint"u8;
         public static ReadOnlySpan<byte> AuthorizationEncryptionAlgValuesSupported => "authorization_encryption_alg_values_supported"u8;
         public static ReadOnlySpan<byte> AuthorizationEncryptionEncValuesSupported => "authorization_encryption_enc_values_supported"u8;
