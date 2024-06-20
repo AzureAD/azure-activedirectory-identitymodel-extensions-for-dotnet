@@ -778,7 +778,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.ResponseTypesSupported, config.ResponseTypesSupported);
 
             if (config.ShouldSerializeJsonWebKeys && config.JsonWebKeySet != null && config.JsonWebKeySet.Keys.Count > 0)
-                JsonWebKeySetSerializer.Write(ref writer, config.JsonWebKeySet, shouldWriteObject: false);
+                JsonWebKeySetSerializer.Append(ref writer, config.JsonWebKeySet);
 
             if (config.ScopesSupported.Count > 0)
                 JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.ScopesSupported, config.ScopesSupported);

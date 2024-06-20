@@ -136,12 +136,15 @@ namespace Microsoft.IdentityModel.Tokens.Json
         /// </summary>
         /// <param name="writer"></param>
         /// <param name="jsonWebKeySet"></param>
-        /// <param name="shouldWriteObject"></param>
-        public static void Write(ref Utf8JsonWriter writer, JsonWebKeySet jsonWebKeySet, bool shouldWriteObject = true)
+        public static void Write(ref Utf8JsonWriter writer, JsonWebKeySet jsonWebKeySet)
         {
-            if (shouldWriteObject)
-                writer.WriteStartObject();
+            writer.WriteStartObject();
+            Append(ref writer, jsonWebKeySet);
+            writer.WriteEndObject();
+        }
 
+        internal static void Append(ref Utf8JsonWriter writer, JsonWebKeySet jsonWebKeySet)
+        {
             writer.WritePropertyName(JsonWebKeyParameterUtf8Bytes.Keys);
             writer.WriteStartArray();
 
@@ -152,9 +155,6 @@ namespace Microsoft.IdentityModel.Tokens.Json
 
             if (jsonWebKeySet.AdditionalData.Count > 0)
                 JsonSerializerPrimitives.WriteObjects(ref writer, jsonWebKeySet.AdditionalData);
-
-            if (shouldWriteObject)
-                writer.WriteEndObject();
         }
 
         #endregion
