@@ -646,9 +646,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             if (tokenDescriptor.Audiences.Count > 0)
             {
-                conditions.AudienceRestrictions.Add(new Saml2AudienceRestriction(tokenDescriptor.Audiences));
+                var audienceRestriction = new Saml2AudienceRestriction(tokenDescriptor.Audiences);
                 if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
-                    conditions.AudienceRestrictions.Add(new Saml2AudienceRestriction(tokenDescriptor.Audience));
+                    audienceRestriction.Audiences.Add(tokenDescriptor.Audience);
+                    conditions.AudienceRestrictions.Add(audienceRestriction);
             }
             else if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
                 conditions.AudienceRestrictions.Add(new Saml2AudienceRestriction(tokenDescriptor.Audience));
