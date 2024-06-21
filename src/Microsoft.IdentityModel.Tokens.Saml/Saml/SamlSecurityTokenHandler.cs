@@ -367,40 +367,37 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             else if (SetDefaultTimesOnTokenCreation)
                 conditions.NotOnOrAfter = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes);
 
-            if (!tokenDescriptor.Audiences.IsNullOrEmpty())
+            if (tokenDescriptor.Audiences.Count > 0)
+            {
                 if (!tokenDescriptor.Audience.IsNullOrEmpty())
                     conditions.Conditions.Add(CreateAudienceRestrictionCondition(tokenDescriptor.Audience, tokenDescriptor.Audiences));
                 else
                     conditions.Conditions.Add(CreateAudienceRestrictionCondition(tokenDescriptor.Audiences));
-
-            else if(!tokenDescriptor.Audience.IsNullOrEmpty())
-                conditions.Conditions.Add(CreateAudienceRestrictionCondition(tokenDescriptor.Audience));
+            }
+            else if (!tokenDescriptor.Audience.IsNullOrEmpty())
+            {
+                conditions.Conditions.Add(new SamlAudienceRestrictionCondition(new Uri(tokenDescriptor.Audience)));
+            }
 
             return conditions;
         }
-        private static SamlAudienceRestrictionCondition CreateAudienceRestrictionCondition(string audience)
-        {
-            SamlAudienceRestrictionCondition audRestrictionCondition = new ();
-            audRestrictionCondition.Audiences.Add(new Uri(audience));
-            return audRestrictionCondition;
-        }
+
 
         private static SamlAudienceRestrictionCondition CreateAudienceRestrictionCondition(IList<string> audiences)
         {
             SamlAudienceRestrictionCondition audRestrictionCondition = new();
-            foreach (var audience in audiences)
-                audRestrictionCondition.Audiences.Add(new Uri(audience));
+            for (int i = 0; i < audiences.Count; i++)
+                audRestrictionCondition.Audiences.Add(new Uri(audiences[i]));
 
             return audRestrictionCondition;
         }
 
         private static SamlCondition CreateAudienceRestrictionCondition(string audience, IList<string> audiences)
         {
-            SamlAudienceRestrictionCondition audRestrictionCondition = new();
-            audRestrictionCondition.Audiences.Add(new Uri(audience));
+            SamlAudienceRestrictionCondition audRestrictionCondition = new(new Uri(audience));
             for (int i = 0; i < audiences.Count; i++)
                 audRestrictionCondition.Audiences.Add(new Uri(audiences[i]));
-            
+
             return audRestrictionCondition;
         }
 

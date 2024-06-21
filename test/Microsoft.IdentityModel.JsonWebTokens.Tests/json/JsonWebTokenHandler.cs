@@ -359,7 +359,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             if (tokenDescriptor.Claims != null && tokenDescriptor.Claims.Count > 0)
                 payload.Merge(JObject.FromObject(tokenDescriptor.Claims), new JsonMergeSettings { MergeArrayHandling = MergeArrayHandling.Replace });
 
-            if (!tokenDescriptor.Audiences.IsNullOrEmpty())
+            if (tokenDescriptor.Audiences.Count > 0)
             {
                 if (payload.ContainsKey(JwtRegisteredClaimNames.Aud))
                     LogDuplicatedClaim(nameof(tokenDescriptor.Audiences));

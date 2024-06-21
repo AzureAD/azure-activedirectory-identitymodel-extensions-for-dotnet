@@ -303,7 +303,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
                 if (audMemberSet)
                 {
-                    if (!theoryData.TokenDescriptor.Audiences.IsNullOrEmpty())
+                    if (theoryData.TokenDescriptor.Audiences.Count > 0)
                         expectedAudClaimCount += theoryData.TokenDescriptor.Audiences.Count;
 
                     if (!theoryData.TokenDescriptor.Audience.IsNullOrEmpty())

@@ -710,7 +710,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             writer.WriteStartObject();
 
-            if (!tokenDescriptor.Audiences.IsNullOrEmpty())
+            if (tokenDescriptor.Audiences.Count > 0)
             {
                 if (!tokenDescriptor.Audience.IsNullOrEmpty())
                     JsonPrimitives.WriteStrings(ref writer, JwtPayloadUtf8Bytes.Aud, tokenDescriptor.Audiences, tokenDescriptor.Audience);
@@ -725,6 +725,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 writer.WriteStringValue(tokenDescriptor.Audience);
                 audienceSet = true;
             }
+
             if (!string.IsNullOrEmpty(tokenDescriptor.Issuer))
             {
                 issuerSet = true;
@@ -769,7 +770,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             if (LogHelper.IsEnabled(EventLogLevel.Informational))
                             {
                                 string descriptorMemberName = null;
-                                if (!tokenDescriptor.Audiences.IsNullOrEmpty())
+                                if (tokenDescriptor.Audiences.Count > 0)
                                     descriptorMemberName = nameof(tokenDescriptor.Audiences);
                                 else if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
                                     descriptorMemberName = nameof(tokenDescriptor.Audience);
