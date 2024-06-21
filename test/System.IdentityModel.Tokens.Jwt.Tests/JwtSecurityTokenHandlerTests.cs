@@ -476,6 +476,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 {
                     new CreateTokenTheoryData
                     {
+                        First = true,
                         TestId = "ValidAudiences",
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
@@ -549,7 +550,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     },
                     new CreateTokenTheoryData
                     {
-                        First = true,
                         TestId = "IdenticalClaims",
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
