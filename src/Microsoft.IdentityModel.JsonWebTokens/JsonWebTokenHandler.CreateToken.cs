@@ -681,6 +681,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// A <see cref="SecurityTokenDescriptor"/> can contain claims from multiple locations.
         /// This method consolidates the claims and adds default times {exp, iat, nbf} if needed.
+        /// In the case of a claim from this set: {Audience, Issuer, Expires, IssuedAt, NotBefore} being defined in multiple
+        /// locations in the SecurityTokenDescriptor, the following priority is used:
+        /// SecurityTokenDescriptor.{Audience/Audiences, Issuer, Expires, IssuedAt, NotBefore} > SecurityTokenDescriptor.Claims >
+        /// SecurityTokenDescriptor.Subject.Claims
         /// </summary>
         /// <param name="writer">The <see cref="Utf8JsonWriter"/> to use.</param>
         /// <param name="tokenDescriptor">The <see cref="SecurityTokenDescriptor"/> used to create the token.</param>
@@ -706,11 +710,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             writer.WriteStartObject();
 
-            if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
+            if (tokenDescriptor.Audiences.Count > 0)
             {
+                if (!tokenDescriptor.Audience.IsNullOrEmpty())
+                    JsonPrimitives.WriteStrings(ref writer, JwtPayloadUtf8Bytes.Aud, tokenDescriptor.Audiences, tokenDescriptor.Audience);
+                else
+                    JsonPrimitives.WriteStrings(ref writer, JwtPayloadUtf8Bytes.Aud, tokenDescriptor.Audiences);
+
                 audienceSet = true;
+            }
+            else if (!tokenDescriptor.Audience.IsNullOrEmpty())
+            {
                 writer.WritePropertyName(JwtPayloadUtf8Bytes.Aud);
                 writer.WriteStringValue(tokenDescriptor.Audience);
+                audienceSet = true;
             }
 
             if (!string.IsNullOrEmpty(tokenDescriptor.Issuer))
@@ -742,7 +755,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             // Duplicates are resolved according to the following priority:
-            // SecurityTokenDescriptor.{Audience, Issuer, Expires, IssuedAt, NotBefore}, SecurityTokenDescriptor.Claims, SecurityTokenDescriptor.Subject.Claims
+            // SecurityTokenDescriptor.{Audience/Audiences, Issuer, Expires, IssuedAt, NotBefore}, SecurityTokenDescriptor.Claims, SecurityTokenDescriptor.Subject.Claims
             // SecurityTokenDescriptor.Claims are KeyValuePairs<string,object>, whereas SecurityTokenDescriptor.Subject.Claims are System.Security.Claims.Claim and are processed differently.
 
             if (tokenDescriptor.Claims != null && tokenDescriptor.Claims.Count > 0)
@@ -755,7 +768,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         if (audienceSet)
                         {
                             if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                                LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, LogHelper.MarkAsNonPII(nameof(tokenDescriptor.Audience))));
+                            {
+                                string descriptorMemberName = null;
+                                if (tokenDescriptor.Audiences.Count > 0)
+                                    descriptorMemberName = nameof(tokenDescriptor.Audiences);
+                                else if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
+                                    descriptorMemberName = nameof(tokenDescriptor.Audience);
+
+                                LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, LogHelper.MarkAsNonPII(descriptorMemberName)));
+                            }
 
                             continue;
                         }

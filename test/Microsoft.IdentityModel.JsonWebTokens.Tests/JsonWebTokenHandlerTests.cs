@@ -801,6 +801,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateJWEUsingSecurityTokenDescriptor", theoryData);
             theoryData.ValidationParameters.ValidateLifetime = false;
+            if (theoryData.TokenDescriptor != null && !theoryData.AudiencesForSecurityTokenDescriptor.IsNullOrEmpty())
+            {
+                foreach (var audience in theoryData.AudiencesForSecurityTokenDescriptor)
+                    theoryData.TokenDescriptor.Audiences.Add(audience);
+            }
+
             try
             {
                 string jweFromSecurityTokenDescriptor = theoryData.JsonWebTokenHandler.CreateToken(theoryData.TokenDescriptor);
@@ -889,6 +895,35 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
                             ValidAudience = Default.Audience,
                             ValidIssuer = Default.Issuer
+                        }
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "SecurityTokenDescriptorMultipleAudiences",
+                        Payload = Default.PayloadStringMultipleAudiences,
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                            EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes256_Sha512_512,
+                            Claims = Default.PayloadDictionaryMultipleAudiences
+                        },
+                        AudiencesForSecurityTokenDescriptor = Default.Audiences,
+                        JsonWebTokenHandler = new JsonWebTokenHandler(),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_512,
+                            ValidAudiences = Default.Audiences,
+                            ValidIssuer = Default.Issuer
+                        },
+
+                        // There is a known difference in the 'Aud' claim between the two tokens. Since the JsonWebTokenHandler
+                        // will only include the SecurityTokenDescriptor Audience and Audiences members if one or both are set in
+                        // the 'Aud' claim, while the JwtSecurityTokenHandler will also include any aud claims set in either the
+                        // Claims or Subject members even if Audience/Audiences is defined (not both, Claims takes precedence).
+                        PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+                        {
+                            { typeof(JsonWebToken), new List<string> {"EncodedPayload", "EncodedSignature"} },
                         }
                     },
                     new CreateTokenTheoryData
@@ -1890,6 +1925,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             try
             {
                 JsonWebTokenHandler6x jsonWebTokenHandler6x = new JsonWebTokenHandler6x();
+                if (theoryData.TokenDescriptor != null && !theoryData.AudiencesForSecurityTokenDescriptor.IsNullOrEmpty())
+                {
+                    foreach (var audience in theoryData.AudiencesForSecurityTokenDescriptor)
+                        theoryData.TokenDescriptor.Audiences.Add(audience);
+                }
 
                 string jwtFromSecurityTokenDescriptor6x = jwtFromSecurityTokenDescriptor6x = jsonWebTokenHandler6x.CreateToken(theoryData.TokenDescriptor6x ?? theoryData.TokenDescriptor);
                 string jwtFromSecurityTokenDescriptor = theoryData.JsonWebTokenHandler.CreateToken(theoryData.TokenDescriptor);
@@ -2095,6 +2135,23 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                             ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer
+                        }
+                    },
+                    new CreateTokenTheoryData("ValidUsingMultipleAudiences")
+                    {
+                        Payload = Default.PayloadStringMultipleAudiences,
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                            Claims = Default.PayloadDictionaryMultipleAudiences
+                        },
+                        AudiencesForSecurityTokenDescriptor = Default.Audiences,
+                        JsonWebTokenHandler = new JsonWebTokenHandler(),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                            ValidAudiences = Default.Audiences,
                             ValidIssuer = Default.Issuer
                         }
                     },
@@ -4326,6 +4383,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public IEnumerable<SecurityKey> ExpectedDecryptionKeys { get; set; }
 
         public Dictionary<string, object> ExpectedClaims { get; set; }
+
+        public List<string> AudiencesForSecurityTokenDescriptor { get; set; }
     }
 
     // Overrides CryptoProviderFactory.CreateAuthenticatedEncryptionProvider to create AuthenticatedEncryptionProviderMock that provides AesGcm encryption.

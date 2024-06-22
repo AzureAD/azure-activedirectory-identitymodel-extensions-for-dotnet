@@ -10,7 +10,9 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 7.6.1
 =====
 ### New Features:
+- Added an Audiences member to the SecurityTokenDescriptor to make it easier to define multiple audiences in JWT and SAML tokens. Addresses issue [#1479](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/1479) with PR [#2575](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2575)
 - Add  missing metadata parameters to OpenIdConnectConfiguration. See issue [#2498](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2498) for details. 
+
 
 ### Bug Fixes:
 - Fix over-reporting of `IDX14100`. See issue [#2058](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2058) and PR [#2618](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2618) for details.
