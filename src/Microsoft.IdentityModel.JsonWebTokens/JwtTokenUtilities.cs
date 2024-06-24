@@ -401,7 +401,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             out byte[] wrappedKey)
         {
             SecurityKey securityKey = null;
-            KeyWrapProvider kwProvider = null;
             wrappedKey = null;
 
             // if direct algorithm, look for support
@@ -428,7 +427,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 EcdhKeyExchangeProvider ecdhKeyExchangeProvider = new EcdhKeyExchangeProvider(encryptingCredentials.Key as ECDsaSecurityKey, encryptingCredentials.KeyExchangePublicKey, encryptingCredentials.Alg, encryptingCredentials.Enc);
                 SecurityKey kdf = ecdhKeyExchangeProvider.GenerateKdf(apu, apv);
-                kwProvider = cryptoProviderFactory.CreateKeyWrapProvider(kdf, ecdhKeyExchangeProvider.GetEncryptionAlgorithm());
+                using KeyWrapProvider kwProvider = cryptoProviderFactory.CreateKeyWrapProvider(kdf, ecdhKeyExchangeProvider.GetEncryptionAlgorithm());
 
                 // only 128, 384 and 512 AesKeyWrap for CEK algorithm
                 if (SecurityAlgorithms.Aes128KW.Equals(kwProvider.Algorithm, StringComparison.Ordinal))
@@ -460,7 +459,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     throw LogHelper.LogExceptionMessage(
                         new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10617, LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes128CbcHmacSha256), LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes192CbcHmacSha384), LogHelper.MarkAsNonPII(SecurityAlgorithms.Aes256CbcHmacSha512), LogHelper.MarkAsNonPII(encryptingCredentials.Enc))));
 
-                kwProvider = cryptoProviderFactory.CreateKeyWrapProvider(encryptingCredentials.Key, encryptingCredentials.Alg);
+                using KeyWrapProvider kwProvider = cryptoProviderFactory.CreateKeyWrapProvider(encryptingCredentials.Key, encryptingCredentials.Alg);
                 wrappedKey = kwProvider.WrapKey(((SymmetricSecurityKey)securityKey).Key);
             }
 
