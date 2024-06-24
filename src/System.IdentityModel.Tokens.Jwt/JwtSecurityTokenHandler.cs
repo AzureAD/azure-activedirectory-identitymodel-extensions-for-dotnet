@@ -1867,7 +1867,7 @@ namespace System.IdentityModel.Tokens.Jwt
                         string apu = jwtToken.Header.GetStandardClaim(JwtHeaderParameterNames.Apu);
                         string apv = jwtToken.Header.GetStandardClaim(JwtHeaderParameterNames.Apv);
                         SecurityKey kdf = ecdhKeyExchangeProvider.GenerateKdf(apu, apv);
-                        var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(kdf, ecdhKeyExchangeProvider.GetEncryptionAlgorithm());
+                        using var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(kdf, ecdhKeyExchangeProvider.GetEncryptionAlgorithm());
                         var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.RawEncryptedKey));
                         unwrappedKeys.Add(new SymmetricSecurityKey(unwrappedKey));
                     }
@@ -1875,7 +1875,7 @@ namespace System.IdentityModel.Tokens.Jwt
 #endif
                     if (key.CryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Header.Alg, key))
                     {
-                        var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(key, jwtToken.Header.Alg);
+                        using var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(key, jwtToken.Header.Alg);
                         var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.RawEncryptedKey));
                         unwrappedKeys.Add(new SymmetricSecurityKey(unwrappedKey));
                     }
