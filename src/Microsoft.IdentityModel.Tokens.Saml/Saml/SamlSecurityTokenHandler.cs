@@ -908,7 +908,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="audiences"><see cref="IEnumerable{String}"/>.</param>
         /// <param name="securityToken">The <see cref="SamlSecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-        /// <remarks>see <see cref="Validators.ValidateAudience"/> for additional details.</remarks>
+        /// <remarks>see <see cref="Validators.ValidateAudience(IEnumerable{string}, SecurityToken, TokenValidationParameters)"/> for additional details.</remarks>
         protected virtual void ValidateAudience(IEnumerable<string> audiences, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             Validators.ValidateAudience(audiences, securityToken, validationParameters);

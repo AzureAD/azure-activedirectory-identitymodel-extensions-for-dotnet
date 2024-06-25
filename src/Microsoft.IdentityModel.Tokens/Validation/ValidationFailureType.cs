@@ -34,6 +34,12 @@ namespace Microsoft.IdentityModel.Tokens
         private class IssuerValidationFailure : ValidationFailureType { internal IssuerValidationFailure(string name) : base(name) { } }
 
         /// <summary>
+        /// Defines a type that represents that audience validation failed.
+        /// </summary>
+        public static readonly ValidationFailureType AudienceValidationFailed = new AudienceValidationFailure("AudienceValidationFailed");
+        private class AudienceValidationFailure : ValidationFailureType { internal AudienceValidationFailure(string name) : base(name) { } }
+
+        /// <summary>
         /// Defines a type that represents that no evaluation has taken place.
         /// </summary>
         public static readonly ValidationFailureType ValidationNotEvaluated = new NotEvaluated("NotEvaluated");
