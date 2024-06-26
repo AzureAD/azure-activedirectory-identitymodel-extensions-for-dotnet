@@ -1,9 +1,10 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 using System.Linq;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
 
 namespace Microsoft.IdentityModel.Tokens
 {
