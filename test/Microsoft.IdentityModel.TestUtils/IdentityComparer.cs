@@ -673,6 +673,72 @@ namespace Microsoft.IdentityModel.TestUtils
             return context.Merge(localContext);
         }
 
+        public static bool AreSigningKeyValidationResultsEqual(object object1, object object2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, context))
+                return context.Merge(localContext);
+
+            return AreSigningKeyValidationResultsEqual(
+                object1 as SigningKeyValidationResult,
+                object2 as SigningKeyValidationResult,
+                "SigningKeyValidationResult1",
+                "SigningKeyValidationResult2",
+                null,
+                context);
+        }
+
+        internal static bool AreSigningKeyValidationResultsEqual(
+            SigningKeyValidationResult signingKeyValidationResult1,
+            SigningKeyValidationResult signingKeyValidationResult2,
+            string name1,
+            string name2,
+            string stackPrefix,
+            CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+
+            AreSecurityKeysEqual(signingKeyValidationResult1.SigningKey, signingKeyValidationResult2.SigningKey, localContext);
+
+            if (!ContinueCheckingEquality(signingKeyValidationResult1, signingKeyValidationResult2, localContext))
+                return context.Merge(localContext);
+
+            if (signingKeyValidationResult1.IsValid != signingKeyValidationResult2.IsValid)
+                localContext.Diffs.Add($"SigningKeyValidationResult1.IsValid: {signingKeyValidationResult2.IsValid} != SigningKeyValidationResult2.IsValid: {signingKeyValidationResult2.IsValid}");
+
+            if (signingKeyValidationResult1.ValidationFailureType != signingKeyValidationResult2.ValidationFailureType)
+                localContext.Diffs.Add($"SigningKeyValidationResult1.ValidationFailureType: {signingKeyValidationResult1.ValidationFailureType} != SigningKeyValidationResult2.ValidationFailureType: {signingKeyValidationResult2.ValidationFailureType}");
+
+            // true => both are not null.
+            if (ContinueCheckingEquality(signingKeyValidationResult1.Exception, signingKeyValidationResult2.Exception, localContext))
+            {
+                AreStringsEqual(
+                    signingKeyValidationResult1.Exception.Message,
+                    signingKeyValidationResult2.Exception.Message,
+                    $"({name1})signingKeyValidationResult1.Exception.Message",
+                    $"({name2})signingKeyValidationResult2.Exception.Message",
+                    localContext);
+
+                AreStringsEqual(
+                    signingKeyValidationResult1.Exception.Source,
+                    signingKeyValidationResult2.Exception.Source,
+                    $"({name1})signingKeyValidationResult1.Exception.Source",
+                    $"({name2})signingKeyValidationResult2.Exception.Source",
+                    localContext);
+
+                if (!string.IsNullOrEmpty(stackPrefix))
+                    AreStringPrefixesEqual(
+                        signingKeyValidationResult1.Exception.StackTrace.Trim(),
+                        signingKeyValidationResult2.Exception.StackTrace.Trim(),
+                        $"({name1})signingKeyValidationResult1.Exception.StackTrace",
+                        $"({name2})signingKeyValidationResult2.Exception.StackTrace",
+                        stackPrefix.Trim(),
+                        localContext);
+            }
+
+            return context.Merge(localContext);
+        }
+
         public static bool AreJArraysEqual(object object1, object object2, CompareContext context)
         {
             var localContext = new CompareContext(context);
