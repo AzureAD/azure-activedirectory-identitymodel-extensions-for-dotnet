@@ -50,6 +50,87 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 {
                     new SigningKeyValidationTheoryData
                     {
+                        TestId = "Valid_SecurityTokenIsPresent_ValidateIssuerSigningKeyIsTrue",
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
+                        SecurityToken = new JwtSecurityToken(),
+                        ValidationParameters = new TokenValidationParameters { ValidateIssuerSigningKey = true },
+                        SigningKeyValidationResult = new SigningKeyValidationResult(KeyingMaterial.SymmetricSecurityKey2_256)
+                    },
+                    new SigningKeyValidationTheoryData
+                    {
+                        TestId = "Valid_SecurityKeyIsNull_ValidateIssuerSigningKeyIsFalse",
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        SecurityKey = null,
+                        SecurityToken = new JwtSecurityToken(),
+                        ValidationParameters = new TokenValidationParameters { ValidateIssuerSigningKey = false },
+                        SigningKeyValidationResult = new SigningKeyValidationResult(null)
+                    },
+                    new SigningKeyValidationTheoryData
+                    {
+                        TestId = "Valid_SecurityTokenIsNull_ValidateIssuerSigningKeyIsFalse",
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
+                        SecurityToken = null,
+                        ValidationParameters = new TokenValidationParameters { ValidateIssuerSigningKey = false },
+                        SigningKeyValidationResult = new SigningKeyValidationResult(KeyingMaterial.SymmetricSecurityKey2_256)
+                    },
+                    new SigningKeyValidationTheoryData
+                    {
+                        TestId = "Valid_SecurityKeyIsNull_RequireSignedTokensIsFalse",
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        SecurityKey = null,
+                        SecurityToken = new JwtSecurityToken(),
+                        ValidationParameters = new TokenValidationParameters { ValidateIssuerSigningKey = true, RequireSignedTokens = false },
+                        SigningKeyValidationResult = new SigningKeyValidationResult(null)
+                    },
+                    new SigningKeyValidationTheoryData
+                    {
+                        TestId = "Valid_SecurityKeyIsPresent_RequireSignedTokensIsTrue",
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
+                        SecurityToken = new JwtSecurityToken(),
+                        ValidationParameters = new TokenValidationParameters { ValidateIssuerSigningKey = true, RequireSignedTokens = true },
+                        SigningKeyValidationResult = new SigningKeyValidationResult(KeyingMaterial.SymmetricSecurityKey2_256)
+                    },
+                    new SigningKeyValidationTheoryData
+                    {
+                        TestId = "Valid_SecurityKeyIsPresent_RequireSignedTokensIsFalse",
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
+                        SecurityToken = new JwtSecurityToken(),
+                        ValidationParameters = new TokenValidationParameters { ValidateIssuerSigningKey = true, RequireSignedTokens = false },
+                        SigningKeyValidationResult = new SigningKeyValidationResult(KeyingMaterial.SymmetricSecurityKey2_256)
+                    },
+                    new SigningKeyValidationTheoryData
+                    {
+                        TestId = "Valid_DelegateSet_ReturnsTrue",
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
+                        SecurityToken = new JwtSecurityToken(),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            IssuerSigningKeyValidator = (SecurityKey securityKey, SecurityToken token, TokenValidationParameters validationParameters) => true
+                        },
+                        SigningKeyValidationResult = new SigningKeyValidationResult(KeyingMaterial.SymmetricSecurityKey2_256)
+                    },
+                    new SigningKeyValidationTheoryData
+                    {
+                        TestId = "Valid_DelegateUsingConfigurationSet_ReturnsTrue",
+                        ExpectedException = ExpectedException.NoExceptionExpected,
+                        SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
+                        SecurityToken = new JwtSecurityToken(),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            IssuerSigningKeyValidatorUsingConfiguration = (SecurityKey securityKey, SecurityToken token, TokenValidationParameters validationParameters, BaseConfiguration configuration) => true
+                        },
+                        BaseConfiguration = new OpenIdConnectConfiguration(),
+                        SigningKeyValidationResult = new SigningKeyValidationResult(KeyingMaterial.SymmetricSecurityKey2_256)
+                    },
+                    new SigningKeyValidationTheoryData
+                    {
                         TestId = "Invalid_SecurityKeyIsNull",
                         ExpectedException = ExpectedException.ArgumentNullException(substringExpected: "IDX10253:"),
                         SecurityKey = null,
@@ -99,87 +180,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     },
                     new SigningKeyValidationTheoryData
                     {
-                        TestId = "Valid_SecurityTokenIsPresentAndValidateIssuerSigningKeyTrue",
-                        ExpectedException = ExpectedException.NoExceptionExpected,
-                        SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
-                        SecurityToken = new JwtSecurityToken(),
-                        ValidationParameters = new TokenValidationParameters { ValidateIssuerSigningKey = true },
-                        SigningKeyValidationResult = new SigningKeyValidationResult(KeyingMaterial.SymmetricSecurityKey2_256)
-                    },
-                    new SigningKeyValidationTheoryData
-                    {
-                        TestId = "Valid_SecurityKeyIsNullAndValidateIssuerSigningKeyFalse",
-                        ExpectedException = ExpectedException.NoExceptionExpected,
-                        SecurityKey = null,
-                        SecurityToken = new JwtSecurityToken(),
-                        ValidationParameters = new TokenValidationParameters { ValidateIssuerSigningKey = false },
-                        SigningKeyValidationResult = new SigningKeyValidationResult(null)
-                    },
-                    new SigningKeyValidationTheoryData
-                    {
-                        TestId = "Valid_SecurityTokenIsNullAndValidateIssuerSigningKeyFalse",
-                        ExpectedException = ExpectedException.NoExceptionExpected,
-                        SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
-                        SecurityToken = null,
-                        ValidationParameters = new TokenValidationParameters { ValidateIssuerSigningKey = false },
-                        SigningKeyValidationResult = new SigningKeyValidationResult(KeyingMaterial.SymmetricSecurityKey2_256)
-                    },
-                    new SigningKeyValidationTheoryData
-                    {
-                        TestId = "Valid_SecurityKeyIsNullAndRequireSignedTokensFalse",
-                        ExpectedException = ExpectedException.NoExceptionExpected,
-                        SecurityKey = null,
-                        SecurityToken = new JwtSecurityToken(),
-                        ValidationParameters = new TokenValidationParameters { ValidateIssuerSigningKey = true, RequireSignedTokens = false },
-                        SigningKeyValidationResult = new SigningKeyValidationResult(null)
-                    },
-                    new SigningKeyValidationTheoryData
-                    {
-                        TestId = "Valid_SecurityKeyIsPresentAndRequireSignedTokensTrue",
-                        ExpectedException = ExpectedException.NoExceptionExpected,
-                        SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
-                        SecurityToken = new JwtSecurityToken(),
-                        ValidationParameters = new TokenValidationParameters { ValidateIssuerSigningKey = true, RequireSignedTokens = true },
-                        SigningKeyValidationResult = new SigningKeyValidationResult(KeyingMaterial.SymmetricSecurityKey2_256)
-                    },
-                    new SigningKeyValidationTheoryData
-                    {
-                        TestId = "Valid_SecurityKeyIsPresentAndRequireSignedTokensFalse",
-                        ExpectedException = ExpectedException.NoExceptionExpected,
-                        SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
-                        SecurityToken = new JwtSecurityToken(),
-                        ValidationParameters = new TokenValidationParameters { ValidateIssuerSigningKey = true, RequireSignedTokens = false },
-                        SigningKeyValidationResult = new SigningKeyValidationResult(KeyingMaterial.SymmetricSecurityKey2_256)
-                    },
-                    new SigningKeyValidationTheoryData
-                    {
-                        TestId = "Valid_DelegateSetAndReturnsTrue",
-                        ExpectedException = ExpectedException.NoExceptionExpected,
-                        SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
-                        SecurityToken = new JwtSecurityToken(),
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ValidateIssuerSigningKey = true,
-                            IssuerSigningKeyValidator = (SecurityKey securityKey, SecurityToken token, TokenValidationParameters validationParameters) => true
-                        },
-                        SigningKeyValidationResult = new SigningKeyValidationResult(KeyingMaterial.SymmetricSecurityKey2_256)
-                    },
-                    new SigningKeyValidationTheoryData
-                    {
-                        TestId = "Valid_DelegateUsingConfigurationSetConfigurationAndReturnsTrue",
-                        ExpectedException = ExpectedException.NoExceptionExpected,
-                        SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
-                        SecurityToken = new JwtSecurityToken(),
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ValidateIssuerSigningKey = true,
-                            IssuerSigningKeyValidatorUsingConfiguration = (SecurityKey securityKey, SecurityToken token, TokenValidationParameters validationParameters, BaseConfiguration configuration) => true
-                        },
-                        BaseConfiguration = new OpenIdConnectConfiguration(),
-                        SigningKeyValidationResult = new SigningKeyValidationResult(KeyingMaterial.SymmetricSecurityKey2_256)
-                    },
-                    new SigningKeyValidationTheoryData
-                    {
                         TestId = "Invalid_SecurityKeyIsExpired",
                         ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException(substringExpected: "IDX10249:"),
                         SecurityKey = KeyingMaterial.ExpiredX509SecurityKey_Public,
@@ -216,7 +216,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     },
                     new SigningKeyValidationTheoryData
                     {
-                        TestId = "Invalid_SecurityKeyIsNullAndRequireSignedTokensTrue",
+                        TestId = "Invalid_SecurityKeyIsNull_RequireSignedTokensIsTrue",
                         ExpectedException = ExpectedException.ArgumentNullException(substringExpected: "IDX10253:"),
                         SecurityKey = null,
                         SecurityToken = new JwtSecurityToken(),
@@ -231,7 +231,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     },
                     new SigningKeyValidationTheoryData
                     {
-                        TestId = "Invalid_DelegateIsSetAndReturnsFalse",
+                        TestId = "Invalid_DelegateIsSet_ReturnsFalse",
                         ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException(substringExpected: "IDX10232:"),
                         SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
                         SecurityToken = new JwtSecurityToken(),
@@ -252,7 +252,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     },
                     new SigningKeyValidationTheoryData
                     {
-                        TestId = "Invalid_DelegateUsingConfigurationSetConfigurationAndReturnsFalse",
+                        TestId = "Invalid_DelegateUsingConfigurationSet_ReturnsFalse",
                         ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException(substringExpected: "IDX10232:"),
                         SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
                         SecurityToken = new JwtSecurityToken(),
@@ -274,7 +274,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     },
                     new SigningKeyValidationTheoryData
                     {
-                        TestId = "Invalid_DelegateIsSetAndThrows",
+                        TestId = "Invalid_DelegateIsSet_Throws",
                         ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException(substringExpected: "IDX10232:", innerTypeExpected: typeof(SecurityTokenInvalidSigningKeyException)),
                         SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
                         SecurityToken = new JwtSecurityToken(),
@@ -296,7 +296,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     },
                     new SigningKeyValidationTheoryData
                     {
-                        TestId = "Invalid_DelegateUsingConfigurationSetConfigurationAndThrows",
+                        TestId = "Invalid_DelegateUsingConfigurationSet_Throws",
                         ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException(substringExpected: "IDX10232:", innerTypeExpected: typeof(SecurityTokenInvalidSigningKeyException)),
                         SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
                         SecurityToken = new JwtSecurityToken(),
