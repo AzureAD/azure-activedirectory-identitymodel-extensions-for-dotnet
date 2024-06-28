@@ -687,6 +687,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null,
                 context);
         }
+
         internal static bool AreLifetimeValidationResultsEqual(
             LifetimeValidationResult lifetimeValidationResult1,
             LifetimeValidationResult lifetimeValidationResult2,
