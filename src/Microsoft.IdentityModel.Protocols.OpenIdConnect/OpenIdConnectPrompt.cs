@@ -14,6 +14,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public const string None = "none";
 
         /// <summary>
+        /// Indicates 'create' prompt type see: https://openid.net/specs/openid-connect-prompt-create-1_0.html.
+        /// </summary>
+        public const string Create = "create";
+
+        /// <summary>
         /// Indicates 'login' prompt type see: http://openid.net/specs/openid-connect-core-1_0.html#AuthRequest.
         /// </summary>
         public const string Login = "login";
@@ -29,4 +34,3 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public const string SelectAccount = "select_account";
     }
 }
-

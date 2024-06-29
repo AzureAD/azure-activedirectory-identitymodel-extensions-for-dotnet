@@ -14,7 +14,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 #pragma warning disable 1591
         public const string AcrValuesSupported = "acr_values_supported";
         public const string AuthorizationEndpoint = "authorization_endpoint";
+        public const string AuthorizationEncryptionAlgValuesSupported = "authorization_encryption_alg_values_supported";
+        public const string AuthorizationEncryptionEncValuesSupported = "authorization_encryption_enc_values_supported";
         public const string AuthorizationResponseIssParameterSupported = "authorization_response_iss_parameter_supported";
+        public const string AuthorizationSigningAlgValuesSupported = "authorization_signing_alg_values_supported";
         public const string BackchannelAuthenticationEndpoint = "backchannel_authentication_endpoint";
         public const string BackchannelAuthenticationRequestSigningAlgValuesSupported = "backchannel_authentication_request_signing_alg_values_supported";
         public const string BackchannelTokenDeliveryModesSupported = "backchannel_token_delivery_modes_supported";
@@ -24,6 +27,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public const string ClaimsParameterSupported = "claims_parameter_supported";
         public const string ClaimsSupported = "claims_supported";
         public const string ClaimTypesSupported = "claim_types_supported";
+        public const string CodeChallengeMethodsSupported = "code_challenge_methods_supported";
+        public const string DeviceAuthorizationEndpoint = "device_authorization_endpoint";
         public const string Discovery = ".well-known/openid-configuration";
         public const string DisplayValuesSupported = "display_values_supported";
         public const string DPoPSigningAlgValuesSupported = "dpop_signing_alg_values_supported";
@@ -56,6 +61,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public const string RequireRequestUriRegistration = "require_request_uri_registration";
         public const string ResponseModesSupported = "response_modes_supported";
         public const string ResponseTypesSupported = "response_types_supported";
+        public const string RevocationEndpoint = "revocation_endpoint";
+        public const string RevocationEndpointAuthMethodsSupported = "revocation_endpoint_auth_methods_supported";
+        public const string RevocationEndpointAuthSigningAlgValuesSupported = "revocation_endpoint_auth_signing_alg_values_supported";
         public const string ServiceDocumentation = "service_documentation";
         public const string ScopesSupported = "scopes_supported";
         public const string SubjectTypesSupported = "subject_types_supported";
@@ -63,6 +71,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public const string TokenEndpointAuthMethodsSupported = "token_endpoint_auth_methods_supported";
         public const string TokenEndpointAuthSigningAlgValuesSupported = "token_endpoint_auth_signing_alg_values_supported";
         public const string UILocalesSupported = "ui_locales_supported";
+        public const string TlsClientCertificateBoundAccessTokens = "tls_client_certificate_bound_access_tokens";
         public const string UserInfoEndpoint = "userinfo_endpoint";
         public const string UserInfoEncryptionAlgValuesSupported = "userinfo_encryption_alg_values_supported";
         public const string UserInfoEncryptionEncValuesSupported = "userinfo_encryption_enc_values_supported";
@@ -79,7 +88,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     {
         public static ReadOnlySpan<byte> AcrValuesSupported => "acr_values_supported"u8;
         public static ReadOnlySpan<byte> AuthorizationEndpoint => "authorization_endpoint"u8;
+        public static ReadOnlySpan<byte> AuthorizationEncryptionAlgValuesSupported => "authorization_encryption_alg_values_supported"u8;
+        public static ReadOnlySpan<byte> AuthorizationEncryptionEncValuesSupported => "authorization_encryption_enc_values_supported"u8;
         public static ReadOnlySpan<byte> AuthorizationResponseIssParameterSupported => "authorization_response_iss_parameter_supported"u8;
+        public static ReadOnlySpan<byte> AuthorizationSigningAlgValuesSupported => "authorization_signing_alg_values_supported"u8;
         public static ReadOnlySpan<byte> BackchannelAuthenticationEndpoint => "backchannel_authentication_endpoint"u8;
         public static ReadOnlySpan<byte> BackchannelAuthenticationRequestSigningAlgValuesSupported => "backchannel_authentication_request_signing_alg_values_supported"u8;
         public static ReadOnlySpan<byte> BackchannelTokenDeliveryModesSupported => "backchannel_token_delivery_modes_supported"u8;
@@ -89,6 +101,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public static ReadOnlySpan<byte> ClaimsParameterSupported => "claims_parameter_supported"u8;
         public static ReadOnlySpan<byte> ClaimsSupported => "claims_supported"u8;
         public static ReadOnlySpan<byte> ClaimTypesSupported => "claim_types_supported"u8;
+        public static ReadOnlySpan<byte> CodeChallengeMethodsSupported => "code_challenge_methods_supported"u8;
+        public static ReadOnlySpan<byte> DeviceAuthorizationEndpoint => "device_authorization_endpoint"u8;
         public static ReadOnlySpan<byte> Discovery => ".well-known/openid-configuration"u8;
         public static ReadOnlySpan<byte> DisplayValuesSupported => "display_values_supported"u8;
         public static ReadOnlySpan<byte> DPoPSigningAlgValuesSupported => "dpop_signing_alg_values_supported"u8;
@@ -121,12 +135,16 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public static ReadOnlySpan<byte> RequireRequestUriRegistration => "require_request_uri_registration"u8;
         public static ReadOnlySpan<byte> ResponseModesSupported => "response_modes_supported"u8;
         public static ReadOnlySpan<byte> ResponseTypesSupported => "response_types_supported"u8;
+        public static ReadOnlySpan<byte> RevocationEndpoint => "revocation_endpoint"u8;
+        public static ReadOnlySpan<byte> RevocationEndpointAuthMethodsSupported => "revocation_endpoint_auth_methods_supported"u8;
+        public static ReadOnlySpan<byte> RevocationEndpointAuthSigningAlgValuesSupported => "revocation_endpoint_auth_signing_alg_values_supported"u8;
         public static ReadOnlySpan<byte> ServiceDocumentation => "service_documentation"u8;
         public static ReadOnlySpan<byte> ScopesSupported => "scopes_supported"u8;
         public static ReadOnlySpan<byte> SubjectTypesSupported => "subject_types_supported"u8;
         public static ReadOnlySpan<byte> TokenEndpoint => "token_endpoint"u8;
         public static ReadOnlySpan<byte> TokenEndpointAuthMethodsSupported => "token_endpoint_auth_methods_supported"u8;
         public static ReadOnlySpan<byte> TokenEndpointAuthSigningAlgValuesSupported => "token_endpoint_auth_signing_alg_values_supported"u8;
+        public static ReadOnlySpan<byte> TlsClientCertificateBoundAccessTokens => "tls_client_certificate_bound_access_tokens"u8;
         public static ReadOnlySpan<byte> UILocalesSupported => "ui_locales_supported"u8;
         public static ReadOnlySpan<byte> UserInfoEndpoint => "userinfo_endpoint"u8;
         public static ReadOnlySpan<byte> UserInfoEncryptionAlgValuesSupported => "userinfo_encryption_alg_values_supported"u8;
