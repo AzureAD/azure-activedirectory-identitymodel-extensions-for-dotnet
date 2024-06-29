@@ -453,6 +453,7 @@ namespace System.IdentityModel.Tokens.Jwt
             return CreateJwtSecurityTokenPrivate(
                 tokenDescriptor.Issuer,
                 tokenDescriptor.Audience,
+                tokenDescriptor.Audiences,
                 tokenDescriptor.Subject,
                 tokenDescriptor.NotBefore,
                 tokenDescriptor.Expires,
@@ -603,6 +604,7 @@ namespace System.IdentityModel.Tokens.Jwt
             return CreateJwtSecurityTokenPrivate(
                 tokenDescriptor.Issuer,
                 tokenDescriptor.Audience,
+                tokenDescriptor.Audiences,
                 tokenDescriptor.Subject,
                 tokenDescriptor.NotBefore,
                 tokenDescriptor.Expires,
@@ -629,6 +631,26 @@ namespace System.IdentityModel.Tokens.Jwt
             IDictionary<string, object> additionalHeaderClaims,
             IDictionary<string, object> additionalInnerHeaderClaims)
         {
+            return CreateJwtSecurityTokenPrivate(
+                issuer, audience, [], subject, notBefore, expires, issuedAt, signingCredentials, encryptingCredentials,
+                claimCollection, tokenType, additionalHeaderClaims, additionalInnerHeaderClaims);
+        }
+
+        private JwtSecurityToken CreateJwtSecurityTokenPrivate(
+            string issuer,
+            string audience,
+            IList<string> audiences,
+            ClaimsIdentity subject,
+            DateTime? notBefore,
+            DateTime? expires,
+            DateTime? issuedAt,
+            SigningCredentials signingCredentials,
+            EncryptingCredentials encryptingCredentials,
+            IDictionary<string, object> claimCollection,
+            string tokenType,
+            IDictionary<string, object> additionalHeaderClaims,
+            IDictionary<string, object> additionalInnerHeaderClaims)
+        {
             if (SetDefaultTimesOnTokenCreation && (!expires.HasValue || !issuedAt.HasValue || !notBefore.HasValue))
             {
                 DateTime now = DateTime.UtcNow;
@@ -642,11 +664,11 @@ namespace System.IdentityModel.Tokens.Jwt
                     notBefore = now;
             }
 
-            if (LogHelper.IsEnabled(EventLogLevel.Verbose))
-                LogHelper.LogVerbose(LogMessages.IDX12721, LogHelper.MarkAsNonPII(issuer ?? "null"), LogHelper.MarkAsNonPII(audience ?? "null"));
-
-            JwtPayload payload = new JwtPayload(issuer, audience, (subject == null ? null : OutboundClaimTypeTransform(subject.Claims)), (claimCollection == null ? null : OutboundClaimTypeTransform(claimCollection)), notBefore, expires, issuedAt);
+            JwtPayload payload = new JwtPayload(issuer, audience, audiences, (subject == null ? null : OutboundClaimTypeTransform(subject.Claims)), (claimCollection == null ? null : OutboundClaimTypeTransform(claimCollection)), notBefore, expires, issuedAt);
             JwtHeader header = new JwtHeader(signingCredentials, OutboundAlgorithmMap, tokenType, additionalInnerHeaderClaims);
+
+            if (LogHelper.IsEnabled(EventLogLevel.Verbose))
+                LogHelper.LogVerbose(LogMessages.IDX12721, LogHelper.MarkAsNonPII(issuer ?? "null"), LogHelper.MarkAsNonPII(payload.Aud.ToString() ?? "null"));
 
             if (subject?.Actor != null)
                 payload.AddClaim(new Claim(JwtRegisteredClaimNames.Actort, CreateActorValue(subject.Actor)));
@@ -1639,7 +1661,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="audiences">The audiences found in the <see cref="JwtSecurityToken"/>.</param>
         /// <param name="jwtToken">The <see cref="JwtSecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-        /// <remarks>See <see cref="Validators.ValidateAudience"/> for additional details.</remarks>
+        /// <remarks>See <see cref="Validators.ValidateAudience(IEnumerable{string}, SecurityToken, TokenValidationParameters)"/> for additional details.</remarks>
         protected virtual void ValidateAudience(IEnumerable<string> audiences, JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
         {
             Validators.ValidateAudience(audiences, jwtToken, validationParameters);
@@ -1652,7 +1674,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="expires">The <see cref="DateTime"/> value of the 'exp' claim if it exists in the 'jwtToken'.</param>
         /// <param name="jwtToken">The <see cref="JwtSecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-        /// <remarks><see cref="Validators.ValidateLifetime"/> for additional details.</remarks>
+        /// <remarks><see cref="Validators.ValidateLifetime(DateTime?, DateTime?, SecurityToken, TokenValidationParameters)"/> for additional details.</remarks>
         protected virtual void ValidateLifetime(DateTime? notBefore, DateTime? expires, JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
         {
             Validators.ValidateLifetime(notBefore, expires, jwtToken, validationParameters);

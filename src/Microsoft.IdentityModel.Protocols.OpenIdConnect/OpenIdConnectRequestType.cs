@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         Authentication,
 
         /// <summary>
-        /// Indicates a Logout Request see:http://openid.net/specs/openid-connect-frontchannel-1_0.html#RPLogout.
+        /// Indicates a Logout Request see: http://openid.net/specs/openid-connect-frontchannel-1_0.html#RPLogout.
         /// </summary>
         Logout,
 

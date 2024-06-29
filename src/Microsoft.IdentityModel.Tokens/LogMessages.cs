@@ -267,7 +267,6 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX11025 = "IDX11025: Cannot serialize object of type: '{0}' into property: '{1}'.";
         public const string IDX11026 = "IDX11026: Unable to get claim value as a string from claim type:'{0}', value type was:'{1}'. Acceptable types are String, IList<String>, and System.Text.Json.JsonElement.";
 
-
 #pragma warning restore 1591
     }
 }
