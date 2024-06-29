@@ -8,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.IdentityModel.Abstractions;
@@ -354,7 +353,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <exception cref="ArgumentNullException">if <paramref name="tokenDescriptor"/> is null.</exception>
         protected virtual SamlConditions CreateConditions(SecurityTokenDescriptor tokenDescriptor)
         {
-            if (null == tokenDescriptor)
+            if (tokenDescriptor == null)
                 throw LogArgumentNullException(nameof(tokenDescriptor));
 
             var conditions = new SamlConditions();
@@ -368,11 +367,40 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             else if (SetDefaultTimesOnTokenCreation)
                 conditions.NotOnOrAfter = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes);
 
-            if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
+            if (tokenDescriptor.Audiences.Count > 0)
+            {
+                if (!tokenDescriptor.Audience.IsNullOrEmpty())
+                    conditions.Conditions.Add(CreateAudienceRestrictionCondition(tokenDescriptor.Audience, tokenDescriptor.Audiences));
+                else
+                    conditions.Conditions.Add(CreateAudienceRestrictionCondition(tokenDescriptor.Audiences));
+            }
+            else if (!tokenDescriptor.Audience.IsNullOrEmpty())
+            {
                 conditions.Conditions.Add(new SamlAudienceRestrictionCondition(new Uri(tokenDescriptor.Audience)));
+            }
 
             return conditions;
         }
+
+
+        private static SamlAudienceRestrictionCondition CreateAudienceRestrictionCondition(IList<string> audiences)
+        {
+            SamlAudienceRestrictionCondition audRestrictionCondition = new();
+            for (int i = 0; i < audiences.Count; i++)
+                audRestrictionCondition.Audiences.Add(new Uri(audiences[i]));
+
+            return audRestrictionCondition;
+        }
+
+        private static SamlCondition CreateAudienceRestrictionCondition(string audience, IList<string> audiences)
+        {
+            SamlAudienceRestrictionCondition audRestrictionCondition = new(new Uri(audience));
+            for (int i = 0; i < audiences.Count; i++)
+                audRestrictionCondition.Audiences.Add(new Uri(audiences[i]));
+
+            return audRestrictionCondition;
+        }
+
 
         /// <summary>
         /// Generates an enumeration of SamlStatements from a SecurityTokenDescriptor.
@@ -880,7 +908,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="audiences"><see cref="IEnumerable{String}"/>.</param>
         /// <param name="securityToken">The <see cref="SamlSecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-        /// <remarks>see <see cref="Validators.ValidateAudience"/> for additional details.</remarks>
+        /// <remarks>see <see cref="Validators.ValidateAudience(IEnumerable{string}, SecurityToken, TokenValidationParameters)"/> for additional details.</remarks>
         protected virtual void ValidateAudience(IEnumerable<string> audiences, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             Validators.ValidateAudience(audiences, securityToken, validationParameters);
@@ -964,7 +992,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="expires">The <see cref="DateTime"/> value found in the <see cref="SamlSecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="SamlSecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-        /// <remarks><see cref="Validators.ValidateLifetime"/> for additional details.</remarks>
+        /// <remarks><see cref="Validators.ValidateLifetime(DateTime?, DateTime?, SecurityToken, TokenValidationParameters)"/> for additional details.</remarks>
         protected virtual void ValidateLifetime(DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
             Validators.ValidateLifetime(notBefore, expires, securityToken, validationParameters);
