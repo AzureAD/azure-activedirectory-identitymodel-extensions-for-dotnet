@@ -158,7 +158,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Produces a signature over the <paramref name="data"/>.
         /// </summary>
-        /// <param name="data">The <see cref="ReadOnlySpan{Byte}"/> containing bytes to be signed.</param>
+        /// <param name="data">The <see cref="ReadOnlySpan{Byte}"/> containing the bytes to be signed.</param>
         /// <param name="destination">destination for signature.</param>
         /// <param name="signingCredentials">The <see cref="SigningCredentials"/> that contain crypto specs used to sign the token.</param>
         /// <param name="bytesWritten"></param>

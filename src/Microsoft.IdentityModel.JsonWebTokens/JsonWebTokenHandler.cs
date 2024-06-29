@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Gets the type of the <see cref="JsonWebToken"/>.
         /// </summary>
-        /// <return>The type of <see cref="JsonWebToken"/></return>
+        /// <return>The type of <see cref="JsonWebToken"/>.</return>
         public Type TokenType
         {
             get { return typeof(JsonWebToken); }
@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Gets or sets the property name of <see cref="Claim.Properties"/> the will contain the original JSON claim 'name' if a mapping occurred when the <see cref="Claim"/>(s) were created.
         /// </summary>
-        /// <exception cref="ArgumentException">Thrown if <see cref="string"/>.IsNullOrWhiteSpace('value') is true.</exception>
+        /// <exception cref="ArgumentException">Thrown if 'value' is null or whitespace.</exception>
         public static string ShortClaimTypeProperty
         {
             get
@@ -104,7 +104,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <para>The <see cref="Claim.Type"/> is set to the JSON claim 'name' after translating using this mapping.</para>
         /// <para>The default value is ClaimTypeMapping.InboundClaimTypeMap.</para>
         /// </summary>
-        /// <exception cref="ArgumentNullException">'value' is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if 'value' is null.</exception>
         public IDictionary<string, string> InboundClaimTypeMap
         {
             get
@@ -179,7 +179,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Creates a <see cref="ClaimsIdentity"/> from a <see cref="JsonWebToken"/>.
         /// </summary>
         /// <param name="jwtToken">The <see cref="JsonWebToken"/> to use as a <see cref="Claim"/> source.</param>
-        /// <param name="validationParameters"> Contains parameters for validating the token.</param>
+        /// <param name="validationParameters">The parameters for validating the token.</param>
         /// <returns>A <see cref="ClaimsIdentity"/> containing the <see cref="JsonWebToken.Claims"/>.</returns>
         protected virtual ClaimsIdentity CreateClaimsIdentity(JsonWebToken jwtToken, TokenValidationParameters validationParameters)
         {
@@ -192,7 +192,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Creates a <see cref="ClaimsIdentity"/> from a <see cref="JsonWebToken"/> with the specified issuer.
         /// </summary>
         /// <param name="jwtToken">The <see cref="JsonWebToken"/> to use as a <see cref="Claim"/> source.</param>
-        /// <param name="validationParameters">Contains parameters for validating the token.</param>
+        /// <param name="validationParameters">The parameters for validating the token.</param>
         /// <param name="issuer">Specifies the issuer for the <see cref="ClaimsIdentity"/>.</param>
         /// <returns>A <see cref="ClaimsIdentity"/> containing the <see cref="JsonWebToken.Claims"/>.</returns>
         protected virtual ClaimsIdentity CreateClaimsIdentity(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer)
@@ -316,16 +316,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Decrypts a JWE and returns the clear text
+        /// Decrypts a JWE and returns the clear text.
         /// </summary>
-        /// <param name="jwtToken">the JWE that contains the cypher text.</param>
-        /// <param name="validationParameters">contains crypto material.</param>
-        /// <returns>the decoded / cleartext contents of the JWE.</returns>
+        /// <param name="jwtToken">The JWE that contains the cypher text.</param>
+        /// <param name="validationParameters">The parameters to decrypt the token.</param>
+        /// <returns>The decoded / cleartext contents of the JWE.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="jwtToken"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="validationParameters"/>  is null.</exception>
-        /// <exception cref="SecurityTokenException">Thrown if '<paramref name="jwtToken"/> .Enc' is null or empty.</exception>
-        /// <exception cref="SecurityTokenDecompressionFailedException">Thrown if decompression failed.</exception>
-        /// <exception cref="SecurityTokenEncryptionKeyNotFoundException">Thrown if '<paramref name="jwtToken"/> .Kid' is not null AND decryption fails.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="validationParameters"/> is null.</exception>
+        /// <exception cref="SecurityTokenException">Thrown if <see cref="JsonWebToken.Enc"/> is null or empty.</exception>
+        /// <exception cref="SecurityTokenDecompressionFailedException">Thrown if the decompression failed.</exception>
+        /// <exception cref="SecurityTokenEncryptionKeyNotFoundException">Thrown if <see cref="JsonWebToken.Kid"/> is not null AND the decryption fails.</exception>
         /// <exception cref="SecurityTokenDecryptionFailedException">Thrown if the JWE was not able to be decrypted.</exception>
         public string DecryptToken(JsonWebToken jwtToken, TokenValidationParameters validationParameters)
         {
@@ -390,9 +390,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <param name="token">The <see cref="string"/> the token that is being decrypted.</param>
         /// <param name="jwtToken">The <see cref="JsonWebToken"/> that is being decrypted.</param>
-        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/>  required for validation.</param>
+        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
         /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
-        /// <remarks>If key fails to resolve, then null is returned</remarks>
+        /// <remarks>If key fails to resolve, then null is returned.</remarks>
         protected virtual SecurityKey ResolveTokenDecryptionKey(string token, JsonWebToken jwtToken, TokenValidationParameters validationParameters)
         {
             if (jwtToken == null)
@@ -453,7 +453,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="token">A JSON Web Token (JWT) in JWS or JWE Compact Serialization format.</param>
         /// <returns>A <see cref="JsonWebToken"/></returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="token"/> is null or empty.</exception>
-        /// <exception cref="ArgumentException">Thrown if 'token.Length' is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentException">Thrown if the length of <param name="token"> is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         /// <remarks>
         /// <para>If the <paramref name="token"/> is in JWE Compact Serialization format, only the protected header will be deserialized.</para>
         /// This method is unable to decrypt the payload. Use <see cref="ValidateToken(string, TokenValidationParameters)"/>to obtain the payload.
@@ -479,7 +479,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="token">A JSON Web Token (JWT) in JWS or JWE Compact Serialization format.</param>
         /// <returns>A <see cref="JsonWebToken"/></returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="token"/> is null or empty.</exception>
-        /// <exception cref="ArgumentException">Thrown if 'token.Length' is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
+        /// <exception cref="ArgumentException">Thrown if the length of <param name="token"> is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         /// <remarks>The token is NOT validated and no security decisions should be made about the contents.
         /// <para>Use <see cref="ValidateToken(string, TokenValidationParameters)"/> or <see cref="ValidateTokenAsync(string, TokenValidationParameters)"/> to ensure the token is acceptable.</para>
         /// </remarks>
