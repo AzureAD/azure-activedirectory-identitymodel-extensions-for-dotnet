@@ -19,7 +19,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     public partial class JsonWebTokenHandler : TokenHandler
     {
         private IDictionary<string, string> _inboundClaimTypeMap;
-        private const string _namespace = "https://schemas.xmlsoap.org/ws/2005/05/identity/claimproperties";
+        private const string _namespace = "http://schemas.xmlsoap.org/ws/2005/05/identity/claimproperties";
         private static string _shortClaimType = _namespace + "/ShortTypeName";
         private bool _mapInboundClaims = DefaultMapInboundClaims;
 
