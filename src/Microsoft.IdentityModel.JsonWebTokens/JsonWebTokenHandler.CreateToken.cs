@@ -697,15 +697,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             bool setDefaultTimesOnTokenCreation,
             int tokenLifetimeInMinutes)
         {
-            bool audienceChecked = false;
+            bool descriptorClaimsAudienceChecked = false;
             bool audienceSet = false;
-            bool issuerChecked = false;
+            bool descriptorClaimsIssuerChecked = false;
             bool issuerSet = false;
-            bool expChecked = false;
+            bool descriptorClaimsExpChecked = false;
             bool expSet = false;
-            bool iatChecked = false;
+            bool descriptorClaimsIatChecked = false;
             bool iatSet = false;
-            bool nbfChecked = false;
+            bool descriptorClaimsNbfChecked = false;
             bool nbfSet = false;
 
             writer.WriteStartObject();
@@ -762,9 +762,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 foreach (KeyValuePair<string, object> kvp in tokenDescriptor.Claims)
                 {
-                    if (!audienceChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Aud, StringComparison.Ordinal))
+                    if (!descriptorClaimsAudienceChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Aud, StringComparison.Ordinal))
                     {
-                        audienceChecked = true;
+                        descriptorClaimsAudienceChecked = true;
                         if (audienceSet)
                         {
                             if (LogHelper.IsEnabled(EventLogLevel.Informational))
@@ -784,9 +784,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         audienceSet = true;
                     }
 
-                    if (!issuerChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Iss, StringComparison.Ordinal))
+                    if (!descriptorClaimsIssuerChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Iss, StringComparison.Ordinal))
                     {
-                        issuerChecked = true;
+                        descriptorClaimsIssuerChecked = true;
                         if (issuerSet)
                         {
                             if (LogHelper.IsEnabled(EventLogLevel.Informational))
@@ -798,9 +798,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         issuerSet = true;
                     }
 
-                    if (!expChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Exp, StringComparison.Ordinal))
+                    if (!descriptorClaimsExpChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Exp, StringComparison.Ordinal))
                     {
-                        expChecked = true;
+                        descriptorClaimsExpChecked = true;
                         if (expSet)
                         {
                             if (LogHelper.IsEnabled(EventLogLevel.Informational))
@@ -812,9 +812,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         expSet = true;
                     }
 
-                    if (!iatChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Iat, StringComparison.Ordinal))
+                    if (!descriptorClaimsIatChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Iat, StringComparison.Ordinal))
                     {
-                        iatChecked = true;
+                        descriptorClaimsIatChecked = true;
                         if (iatSet)
                         {
                             if (LogHelper.IsEnabled(EventLogLevel.Informational))
@@ -826,9 +826,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         iatSet = true;
                     }
 
-                    if (!nbfChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Nbf, StringComparison.Ordinal))
+                    if (!descriptorClaimsNbfChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Nbf, StringComparison.Ordinal))
                     {
-                        nbfChecked = true;
+                        descriptorClaimsNbfChecked = true;
                         if (nbfSet)
                         {
                             if (LogHelper.IsEnabled(EventLogLevel.Informational))
