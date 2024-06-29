@@ -26,7 +26,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal readonly Dictionary<string, object> _jsonClaims;
         private List<Claim> _claims;
 
-        internal JsonClaimSet() { _jsonClaims = new Dictionary<string, object>(); }
+        internal JsonClaimSet()
+        {
+            _jsonClaims = new Dictionary<string, object>();
+        }
 
         internal JsonClaimSet(Dictionary<string, object> jsonClaims)
         {
@@ -412,14 +415,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         /// <summary>
         /// The return types that are expected in a JWT token.
-        /// The 5 basic types: number, string, true / false, nil, array (of basic types).
+        /// The 5 basic types: number, string, true/false, nil, array (of basic types).
         /// This is not a general purpose translation layer for complex types.
-        /// For that we would need to provide a way to hook a JsonConverter to for complex types.
+        /// For that, we would need to provide a way to hook a JsonConverter for complex types.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
+        /// <typeparam name="T">The type of the value to retrieve.</typeparam>
+        /// <param name="key">The key associated with the value to retrieve.</param>
+        /// <param name="value">The retrieved value associated with the specified key, if found.</param>
+        /// <returns><see langword="true"/> if the key was found; otherwise, <see langword="false"/>.</returns>
         internal bool TryGetValue<T>(string key, out T value)
         {
             value = GetValue<T>(key, false, out bool found);
