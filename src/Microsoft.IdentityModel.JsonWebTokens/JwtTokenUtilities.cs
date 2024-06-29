@@ -512,7 +512,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="x5t">The <see cref="string"/> x5t field of the token being validated.</param>
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
         /// <param name="configuration">The <see cref="BaseConfiguration"/> that will be used along with the <see cref="TokenValidationParameters"/> to resolve the signing key.</param>
-        /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
+        /// <returns>A <see cref="SecurityKey"/> to use for signature validation.</returns>
         /// <remarks>Resolve the signing key using configuration then the validationParameters until a key is resolved. If key fails to resolve, then null is returned.</remarks>
         internal static SecurityKey ResolveTokenSigningKey(string kid, string x5t, TokenValidationParameters validationParameters, BaseConfiguration configuration)
         {
@@ -525,7 +525,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="kid">The <see cref="string"/> kid field of the token being validated.</param>
         /// <param name="x5t">The <see cref="string"/> x5t field of the token being validated.</param>
         /// <param name="signingKeys">A collection of <see cref="SecurityKey"/> a signing key to be resolved from.</param>
-        /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
+        /// <returns>A <see cref="SecurityKey"/> to use for signature validation.</returns>
         /// <remarks>If key fails to resolve, then <see langword="null"/> is returned.</remarks>
         internal static SecurityKey ResolveTokenSigningKey(string kid, string x5t, IEnumerable<SecurityKey> signingKeys)
         {

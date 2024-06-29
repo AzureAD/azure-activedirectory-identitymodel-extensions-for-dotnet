@@ -20,7 +20,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Returns a value that indicates if this handler can validate a <see cref="SecurityToken"/>.
         /// </summary>
-        /// <returns>Returns <see langword="true"/> if this instance can validate a <see cref="JsonWebToken"/>.</returns>
+        /// <returns><see langword="true"/> if this instance can validate a <see cref="JsonWebToken"/>.</returns>
         public virtual bool CanValidateToken
         {
             get { return true; }

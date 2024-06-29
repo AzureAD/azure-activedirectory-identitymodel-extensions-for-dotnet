@@ -391,7 +391,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="token">The <see cref="string"/> the token that is being decrypted.</param>
         /// <param name="jwtToken">The <see cref="JsonWebToken"/> that is being decrypted.</param>
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
-        /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
+        /// <returns>A <see cref="SecurityKey"/> to use for signature validation.</returns>
         /// <remarks>If key fails to resolve, then null is returned.</remarks>
         protected virtual SecurityKey ResolveTokenDecryptionKey(string token, JsonWebToken jwtToken, TokenValidationParameters validationParameters)
         {
