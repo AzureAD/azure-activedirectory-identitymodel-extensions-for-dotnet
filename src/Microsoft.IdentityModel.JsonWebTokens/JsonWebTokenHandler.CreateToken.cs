@@ -681,6 +681,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// A <see cref="SecurityTokenDescriptor"/> can contain claims from multiple locations.
         /// This method consolidates the claims and adds default times {exp, iat, nbf} if needed.
+        /// In the case of a claim from this set: {Audience, Issuer, Expires, IssuedAt, NotBefore} being defined in multiple
+        /// locations in the SecurityTokenDescriptor, the following priority is used:
+        /// SecurityTokenDescriptor.{Audience/Audiences, Issuer, Expires, IssuedAt, NotBefore} > SecurityTokenDescriptor.Claims >
+        /// SecurityTokenDescriptor.Subject.Claims
         /// </summary>
         /// <param name="writer">The <see cref="Utf8JsonWriter"/> to use.</param>
         /// <param name="tokenDescriptor">The <see cref="SecurityTokenDescriptor"/> used to create the token.</param>
@@ -693,24 +697,33 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             bool setDefaultTimesOnTokenCreation,
             int tokenLifetimeInMinutes)
         {
-            bool audienceChecked = false;
+            bool descriptorClaimsAudienceChecked = false;
             bool audienceSet = false;
-            bool issuerChecked = false;
+            bool descriptorClaimsIssuerChecked = false;
             bool issuerSet = false;
-            bool expChecked = false;
+            bool descriptorClaimsExpChecked = false;
             bool expSet = false;
-            bool iatChecked = false;
+            bool descriptorClaimsIatChecked = false;
             bool iatSet = false;
-            bool nbfChecked = false;
+            bool descriptorClaimsNbfChecked = false;
             bool nbfSet = false;
 
             writer.WriteStartObject();
 
-            if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
+            if (tokenDescriptor.Audiences.Count > 0)
             {
+                if (!tokenDescriptor.Audience.IsNullOrEmpty())
+                    JsonPrimitives.WriteStrings(ref writer, JwtPayloadUtf8Bytes.Aud, tokenDescriptor.Audiences, tokenDescriptor.Audience);
+                else
+                    JsonPrimitives.WriteStrings(ref writer, JwtPayloadUtf8Bytes.Aud, tokenDescriptor.Audiences);
+
                 audienceSet = true;
+            }
+            else if (!tokenDescriptor.Audience.IsNullOrEmpty())
+            {
                 writer.WritePropertyName(JwtPayloadUtf8Bytes.Aud);
                 writer.WriteStringValue(tokenDescriptor.Audience);
+                audienceSet = true;
             }
 
             if (!string.IsNullOrEmpty(tokenDescriptor.Issuer))
@@ -742,20 +755,28 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             // Duplicates are resolved according to the following priority:
-            // SecurityTokenDescriptor.{Audience, Issuer, Expires, IssuedAt, NotBefore}, SecurityTokenDescriptor.Claims, SecurityTokenDescriptor.Subject.Claims
+            // SecurityTokenDescriptor.{Audience/Audiences, Issuer, Expires, IssuedAt, NotBefore}, SecurityTokenDescriptor.Claims, SecurityTokenDescriptor.Subject.Claims
             // SecurityTokenDescriptor.Claims are KeyValuePairs<string,object>, whereas SecurityTokenDescriptor.Subject.Claims are System.Security.Claims.Claim and are processed differently.
 
             if (tokenDescriptor.Claims != null && tokenDescriptor.Claims.Count > 0)
             {
                 foreach (KeyValuePair<string, object> kvp in tokenDescriptor.Claims)
                 {
-                    if (!audienceChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Aud, StringComparison.Ordinal))
+                    if (!descriptorClaimsAudienceChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Aud, StringComparison.Ordinal))
                     {
-                        audienceChecked = true;
+                        descriptorClaimsAudienceChecked = true;
                         if (audienceSet)
                         {
                             if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                                LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, LogHelper.MarkAsNonPII(nameof(tokenDescriptor.Audience))));
+                            {
+                                string descriptorMemberName = null;
+                                if (tokenDescriptor.Audiences.Count > 0)
+                                    descriptorMemberName = nameof(tokenDescriptor.Audiences);
+                                else if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
+                                    descriptorMemberName = nameof(tokenDescriptor.Audience);
+
+                                LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, LogHelper.MarkAsNonPII(descriptorMemberName)));
+                            }
 
                             continue;
                         }
@@ -763,9 +784,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         audienceSet = true;
                     }
 
-                    if (!issuerChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Iss, StringComparison.Ordinal))
+                    if (!descriptorClaimsIssuerChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Iss, StringComparison.Ordinal))
                     {
-                        issuerChecked = true;
+                        descriptorClaimsIssuerChecked = true;
                         if (issuerSet)
                         {
                             if (LogHelper.IsEnabled(EventLogLevel.Informational))
@@ -777,9 +798,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         issuerSet = true;
                     }
 
-                    if (!expChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Exp, StringComparison.Ordinal))
+                    if (!descriptorClaimsExpChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Exp, StringComparison.Ordinal))
                     {
-                        expChecked = true;
+                        descriptorClaimsExpChecked = true;
                         if (expSet)
                         {
                             if (LogHelper.IsEnabled(EventLogLevel.Informational))
@@ -791,9 +812,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         expSet = true;
                     }
 
-                    if (!iatChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Iat, StringComparison.Ordinal))
+                    if (!descriptorClaimsIatChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Iat, StringComparison.Ordinal))
                     {
-                        iatChecked = true;
+                        descriptorClaimsIatChecked = true;
                         if (iatSet)
                         {
                             if (LogHelper.IsEnabled(EventLogLevel.Informational))
@@ -805,9 +826,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         iatSet = true;
                     }
 
-                    if (!nbfChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Nbf, StringComparison.Ordinal))
+                    if (!descriptorClaimsNbfChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Nbf, StringComparison.Ordinal))
                     {
-                        nbfChecked = true;
+                        descriptorClaimsNbfChecked = true;
                         if (nbfSet)
                         {
                             if (LogHelper.IsEnabled(EventLogLevel.Informational))

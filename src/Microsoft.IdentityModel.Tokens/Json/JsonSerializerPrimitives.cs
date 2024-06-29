@@ -1152,7 +1152,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
 #if NET6_0_OR_GREATER
                 writer.WriteNumber(key, dub);
 #else
-                #pragma warning disable CA1031 // Do not catch general exception types, we have seen TryParse fault.
+#pragma warning disable CA1031 // Do not catch general exception types, we have seen TryParse fault.
                 try
                 {
                     if (decimal.TryParse(dub.ToString(CultureInfo.InvariantCulture), out decimal dec))
@@ -1164,7 +1164,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 {
                     writer.WriteNumber(key, dub);
                 }
-                #pragma warning restore CA1031
+#pragma warning restore CA1031
 #endif
             else if (obj is decimal d)
                 writer.WriteNumber(key, d);
@@ -1174,7 +1174,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
 #if NET6_0_OR_GREATER
                 writer.WriteNumber(key, f);
 #else
-                #pragma warning disable CA1031 // Do not catch general exception types, we have seen TryParse fault.
+#pragma warning disable CA1031 // Do not catch general exception types, we have seen TryParse fault.
                 try
                 {
                     if (decimal.TryParse(f.ToString(CultureInfo.InvariantCulture), out decimal dec))
@@ -1186,7 +1186,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 {
                     writer.WriteNumber(key, f);
                 }
-                #pragma warning restore CA1031
+#pragma warning restore CA1031
 #endif
             else if (obj is Guid g)
                 writer.WriteString(key, g);
@@ -1197,7 +1197,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                             LogMessages.IDX11025,
                             LogHelper.MarkAsNonPII(objType.ToString()),
                             LogHelper.MarkAsNonPII(key))));
-        }
+    }
 
         /// <summary>
         /// Writes values into an array.
@@ -1318,6 +1318,16 @@ namespace Microsoft.IdentityModel.Tokens.Json
 
             writer.WriteEndArray();
         }
-#endregion
+
+        public static void WriteStrings(ref Utf8JsonWriter writer, ReadOnlySpan<byte> propertyName, IList<string> strings, string extraString)
+        {
+            writer.WriteStartArray(propertyName);
+            foreach (string str in strings)
+                writer.WriteStringValue(str);
+
+            writer.WriteStringValue(extraString);
+            writer.WriteEndArray();
+        }
+        #endregion
     }
 }
