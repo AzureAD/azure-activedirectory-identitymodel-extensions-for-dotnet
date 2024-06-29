@@ -13,7 +13,7 @@ using JsonPrimitives = Microsoft.IdentityModel.Tokens.Json.JsonSerializerPrimiti
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
     /// <summary>
-    /// Provides access to common OpenIdConnect parameters.
+    /// Provides access to common OpenID Connect parameters.
     /// </summary>
     public class OpenIdConnectMessage : AuthenticationProtocolMessage
     {

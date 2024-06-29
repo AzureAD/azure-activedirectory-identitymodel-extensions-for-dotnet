@@ -6,8 +6,8 @@ using System;
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
     /// <summary>
-    /// OpenId Provider Metadata parameter names
-    /// http://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata 
+    /// OpenID Provider Metadata parameter names
+    /// <see href="https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderMetadata"/>.
     /// </summary>
     public static class OpenIdProviderMetadataNames
     {
