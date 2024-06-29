@@ -1674,7 +1674,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// <param name="expires">The <see cref="DateTime"/> value of the 'exp' claim if it exists in the 'jwtToken'.</param>
         /// <param name="jwtToken">The <see cref="JwtSecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-        /// <remarks><see cref="Validators.ValidateLifetime"/> for additional details.</remarks>
+        /// <remarks><see cref="Validators.ValidateLifetime(DateTime?, DateTime?, SecurityToken, TokenValidationParameters)"/> for additional details.</remarks>
         protected virtual void ValidateLifetime(DateTime? notBefore, DateTime? expires, JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)
         {
             Validators.ValidateLifetime(notBefore, expires, jwtToken, validationParameters);
