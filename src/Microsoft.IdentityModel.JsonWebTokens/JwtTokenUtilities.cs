@@ -161,8 +161,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="data">The <see cref="ReadOnlySpan{Byte}"/> containing the bytes to be signed.</param>
         /// <param name="destination">destination for signature.</param>
         /// <param name="signingCredentials">The <see cref="SigningCredentials"/> that contain crypto specs used to sign the token.</param>
-        /// <param name="bytesWritten"></param>
-        /// <returns>The size of the signature.</returns>
+        /// <param name="bytesWritten">The number of bytes actually written to <paramref name="destination"/>.</param>
+        /// <returns><see langword="true"/> if the signature was successfully written to <paramref name="destination"/>; otherwise, <see langword="false"/>.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="signingCredentials"/> is null.</exception>
         internal static bool CreateSignature(
             ReadOnlySpan<byte> data,
