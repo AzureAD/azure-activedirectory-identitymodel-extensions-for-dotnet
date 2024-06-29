@@ -687,7 +687,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null,
                 context);
         }
-
+      
         internal static bool AreSigningKeyValidationResultsEqual(
             SigningKeyValidationResult signingKeyValidationResult1,
             SigningKeyValidationResult signingKeyValidationResult2,
@@ -697,7 +697,6 @@ namespace Microsoft.IdentityModel.TestUtils
             CompareContext context)
         {
             var localContext = new CompareContext(context);
-
             AreSecurityKeysEqual(signingKeyValidationResult1.SigningKey, signingKeyValidationResult2.SigningKey, localContext);
 
             if (!ContinueCheckingEquality(signingKeyValidationResult1, signingKeyValidationResult2, localContext))
@@ -732,6 +731,75 @@ namespace Microsoft.IdentityModel.TestUtils
                         signingKeyValidationResult2.Exception.StackTrace.Trim(),
                         $"({name1})signingKeyValidationResult1.Exception.StackTrace",
                         $"({name2})signingKeyValidationResult2.Exception.StackTrace",
+                        stackPrefix.Trim(),
+                        localContext);
+            }
+          
+            return context.Merge(localContext);
+        }
+      
+        public static bool AreLifetimeValidationResultsEqual(object object1, object object2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, context))
+                return context.Merge(localContext);
+
+            return AreLifetimeValidationResultsEqual(
+                object1 as LifetimeValidationResult,
+                object2 as LifetimeValidationResult,
+                "LifetimeValidationResult1",
+                "LifetimeValidationResult2",
+                null,
+                context);
+        }
+
+        internal static bool AreLifetimeValidationResultsEqual(
+            LifetimeValidationResult lifetimeValidationResult1,
+            LifetimeValidationResult lifetimeValidationResult2,
+            string name1,
+            string name2,
+            string stackPrefix,
+            CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(lifetimeValidationResult1, lifetimeValidationResult2, localContext))
+                return context.Merge(localContext);
+
+            if (lifetimeValidationResult1.NotBefore != lifetimeValidationResult2.NotBefore)
+                localContext.Diffs.Add($"LifetimeValidationResult1.NotBefore: '{lifetimeValidationResult1.NotBefore}' != LifetimeValidationResult2.NotBefore: '{lifetimeValidationResult2.NotBefore}'");
+
+            if (lifetimeValidationResult1.Expires != lifetimeValidationResult2.Expires)
+                localContext.Diffs.Add($"LifetimeValidationResult1.Expires: '{lifetimeValidationResult1.Expires}' != LifetimeValidationResult2.Expires: '{lifetimeValidationResult2.Expires}'");
+
+            if (lifetimeValidationResult1.IsValid != lifetimeValidationResult2.IsValid)
+                localContext.Diffs.Add($"LifetimeValidationResult1.IsValid: {lifetimeValidationResult1.IsValid} != LifetimeValidationResult2.IsValid: {lifetimeValidationResult2.IsValid}");
+
+            if (lifetimeValidationResult1.ValidationFailureType != lifetimeValidationResult2.ValidationFailureType)
+                localContext.Diffs.Add($"LifetimeValidationResult1.ValidationFailureType: {lifetimeValidationResult1.ValidationFailureType} != LifetimeValidationResult2.ValidationFailureType: {lifetimeValidationResult2.ValidationFailureType}");
+
+            // true => both are not null.
+            if (ContinueCheckingEquality(lifetimeValidationResult1.Exception, lifetimeValidationResult2.Exception, localContext))
+            {
+                AreStringsEqual(
+                    lifetimeValidationResult1.Exception.Message,
+                    lifetimeValidationResult2.Exception.Message,
+                    $"({name1})lifetimeValidationResult1.Exception.Message",
+                    $"({name2})lifetimeValidationResult2.Exception.Message",
+                    localContext);
+
+                AreStringsEqual(
+                    lifetimeValidationResult1.Exception.Source,
+                    lifetimeValidationResult2.Exception.Source,
+                    $"({name1})lifetimeValidationResult1.Exception.Source",
+                    $"({name2})lifetimeValidationResult2.Exception.Source",
+                    localContext);
+
+                if (!string.IsNullOrEmpty(stackPrefix))
+                    AreStringPrefixesEqual(
+                        lifetimeValidationResult1.Exception.StackTrace.Trim(),
+                        lifetimeValidationResult2.Exception.StackTrace.Trim(),
+                        $"({name1})lifetimeValidationResult1.Exception.StackTrace",
+                        $"({name2})lifetimeValidationResult2.Exception.StackTrace",
                         stackPrefix.Trim(),
                         localContext);
             }

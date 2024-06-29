@@ -46,6 +46,12 @@ namespace Microsoft.IdentityModel.Tokens
         private class SigningKeyValidationFailure : ValidationFailureType { internal SigningKeyValidationFailure(string name) : base(name) { } }
 
         /// <summary>
+        /// Defines a type that represents that lifetime validation failed.
+        /// </summary>
+        public static readonly ValidationFailureType LifetimeValidationFailed = new LifetimeValidationFailure("LifetimeValidationFailure");
+        private class LifetimeValidationFailure : ValidationFailureType { internal LifetimeValidationFailure(string name) : base(name) { } }
+
+        /// <summary>
         /// Defines a type that represents that no evaluation has taken place.
         /// </summary>
         public static readonly ValidationFailureType ValidationNotEvaluated = new NotEvaluated("NotEvaluated");
