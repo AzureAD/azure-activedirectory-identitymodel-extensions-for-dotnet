@@ -1115,7 +1115,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="encryptingCredentials">Defines the security key and algorithm that will be used to encrypt the <paramref name="innerJwt"/>.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="innerJwt"/> is null or empty.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="encryptingCredentials"/> is null.</exception>
-        /// <exception cref="ArgumentException">Thrown if both <see cref="EncryptingCredentials.CryptoProviderFactory"/> and <see cref="EncryptingCredentials.Key"/>.<see cref="CryptoProviderFactory"/> are null.</exception>
+        /// <exception cref="ArgumentException">Thrown if both <see cref="EncryptingCredentials.CryptoProviderFactory"/> and <see cref="EncryptingCredentials.Key"/> are null.</exception>
         /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if the CryptoProviderFactory being used does not support the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
         /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if unable to create a token encryption provider for the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
         /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if encryption fails using the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
@@ -1140,7 +1140,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="innerJwt"/> is null or empty.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="encryptingCredentials"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="additionalHeaderClaims"/> is null.</exception>
-        /// <exception cref="ArgumentException">Thrown if both <see cref="EncryptingCredentials.CryptoProviderFactory"/> and <see cref="EncryptingCredentials.Key"/>.<see cref="CryptoProviderFactory"/> are null.</exception>
+        /// <exception cref="ArgumentException">Thrown if both <see cref="EncryptingCredentials.CryptoProviderFactory"/> and <see cref="EncryptingCredentials.Key"/> are null.</exception>
         /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if the CryptoProviderFactory being used does not support the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
         /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if unable to create a token encryption provider for the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
         /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if encryption fails using the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
@@ -1171,7 +1171,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="innerJwt"/> is null or empty.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="encryptingCredentials"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="algorithm"/> is null or empty.</exception>
-        /// <exception cref="ArgumentException">Thrown if both <see cref="EncryptingCredentials.CryptoProviderFactory"/> and <see cref="EncryptingCredentials.Key"/>.<see cref="CryptoProviderFactory"/> are null.</exception>
+        /// <exception cref="ArgumentException">Thrown if both <see cref="EncryptingCredentials.CryptoProviderFactory"/> and <see cref="EncryptingCredentials.Key"/> are null.</exception>
         /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if the CryptoProviderFactory being used does not support the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
         /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if unable to create a token encryption provider for the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
         /// <exception cref="SecurityTokenCompressionFailedException">Thrown if compression using <paramref name="algorithm"/> fails.</exception>
@@ -1205,7 +1205,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="encryptingCredentials"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="algorithm"/> is null or empty.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="additionalHeaderClaims"/> is null or empty.</exception>
-        /// <exception cref="ArgumentException">Thrown if both <see cref="EncryptingCredentials.CryptoProviderFactory"/> and <see cref="EncryptingCredentials.Key"/>.<see cref="CryptoProviderFactory"/> are null.</exception>
+        /// <exception cref="ArgumentException">Thrown if both <see cref="EncryptingCredentials.CryptoProviderFactory"/> and <see cref="EncryptingCredentials.Key"/> are null.</exception>
         /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if the CryptoProviderFactory being used does not support the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
         /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if unable to create a token encryption provider for the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
         /// <exception cref="SecurityTokenCompressionFailedException">Thrown if compression using 'algorithm' fails.</exception>
