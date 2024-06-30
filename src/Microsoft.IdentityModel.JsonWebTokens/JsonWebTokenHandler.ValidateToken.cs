@@ -514,9 +514,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <param name="token">The token to be validated.</param>
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
-        /// <returns>A <see cref="TokenValidationResult"/></returns>
+        /// <returns>A <see cref="TokenValidationResult"/>.</returns>
         /// <remarks>
-        /// <para>TokenValidationResult.Exception will be set to one of the following exceptions if the  <paramref name="token"/> is invalid.</para>
+        /// <para>TokenValidationResult.Exception will be set to one of the following exceptions if the <paramref name="token"/> is invalid.</para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="token"/> is null or empty.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="validationParameters"/> is null.</exception>
@@ -584,8 +584,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         ///  (1) Obtaining a configuration from the <see cref="TokenValidationParameters.ConfigurationManager"/>.
         ///  (2) Revalidating using the Last Known Good Configuration (if present), and obtaining a refreshed configuration (if necessary) and revalidating using it.
         /// </summary>
-        /// <param name="jsonWebToken">The JWT token</param>
-        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validation.</param>
+        /// <param name="jsonWebToken">The JWT token.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <returns></returns>
         internal async ValueTask<TokenValidationResult> ValidateTokenAsync(
             JsonWebToken jsonWebToken,

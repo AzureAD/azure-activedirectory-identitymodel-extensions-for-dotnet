@@ -128,9 +128,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <para>JWE: (wrappedkey): @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]$"</para>
         /// </remarks>
         /// <returns>
-        /// <para>Returns <see langword="false"/> if the token is null or whitespace.</para>
-        /// <para>Returns <see langword="false"/> if token.Length is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</para>
-        /// <para>Returns <see langword="true"/> if the token is in JSON Compact Serialization format.</para>
+        /// <para><see langword="false"/> if the token is null or whitespace.</para>
+        /// <para><see langword="false"/> if token.Length is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</para>
+        /// <para><see langword="true"/> if the token is in JSON Compact Serialization format.</para>
         /// </returns>
         public virtual bool CanReadToken(string token)
         {
@@ -179,7 +179,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Creates a <see cref="ClaimsIdentity"/> from a <see cref="JsonWebToken"/>.
         /// </summary>
         /// <param name="jwtToken">The <see cref="JsonWebToken"/> to use as a <see cref="Claim"/> source.</param>
-        /// <param name="validationParameters">The parameters for validating the token.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <returns>A <see cref="ClaimsIdentity"/> containing the <see cref="JsonWebToken.Claims"/>.</returns>
         protected virtual ClaimsIdentity CreateClaimsIdentity(JsonWebToken jwtToken, TokenValidationParameters validationParameters)
         {
@@ -192,7 +192,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Creates a <see cref="ClaimsIdentity"/> from a <see cref="JsonWebToken"/> with the specified issuer.
         /// </summary>
         /// <param name="jwtToken">The <see cref="JsonWebToken"/> to use as a <see cref="Claim"/> source.</param>
-        /// <param name="validationParameters">The parameters for validating the token.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <param name="issuer">Specifies the issuer for the <see cref="ClaimsIdentity"/>.</param>
         /// <returns>A <see cref="ClaimsIdentity"/> containing the <see cref="JsonWebToken.Claims"/>.</returns>
         protected virtual ClaimsIdentity CreateClaimsIdentity(JsonWebToken jwtToken, TokenValidationParameters validationParameters, string issuer)
@@ -319,7 +319,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Decrypts a JWE and returns the clear text.
         /// </summary>
         /// <param name="jwtToken">The JWE that contains the cypher text.</param>
-        /// <param name="validationParameters">The parameters to decrypt the token.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <returns>The decoded / cleartext contents of the JWE.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="jwtToken"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="validationParameters"/> is null.</exception>
@@ -451,7 +451,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Converts a string into an instance of <see cref="JsonWebToken"/>.
         /// </summary>
         /// <param name="token">A JSON Web Token (JWT) in JWS or JWE Compact Serialization format.</param>
-        /// <returns>A <see cref="JsonWebToken"/></returns>
+        /// <returns>A <see cref="JsonWebToken"/>.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="token"/> is null or empty.</exception>
         /// <exception cref="ArgumentException">Thrown if the length of <param name="token"> is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         /// <remarks>
@@ -477,7 +477,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Converts a string into an instance of <see cref="JsonWebToken"/>.
         /// </summary>
         /// <param name="token">A JSON Web Token (JWT) in JWS or JWE Compact Serialization format.</param>
-        /// <returns>A <see cref="JsonWebToken"/></returns>
+        /// <returns>A <see cref="JsonWebToken"/>.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="token"/> is null or empty.</exception>
         /// <exception cref="ArgumentException">Thrown if the length of <param name="token"> is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         /// <remarks>The token is NOT validated and no security decisions should be made about the contents.
@@ -493,7 +493,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <param name="token">A JSON Web Token (JWT) in JWS or JWE Compact Serialization format.</param>
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> whose TokenReader, if set, will be used to read a JWT.</param>
-        /// <returns>A <see cref="TokenValidationResult"/></returns>
+        /// <returns>A <see cref="TokenValidationResult"/>.</returns>
         /// <exception cref="SecurityTokenMalformedException">Thrown if the validationParameters.TokenReader delegate is not able to parse/read the token as a valid <see cref="JsonWebToken"/>.</exception>
         /// <exception cref="SecurityTokenMalformedException">Thrown if <paramref name="token"/> is not a valid JWT, <see cref="JsonWebToken"/>.</exception>
         private static TokenValidationResult ReadToken(string token, TokenValidationParameters validationParameters)

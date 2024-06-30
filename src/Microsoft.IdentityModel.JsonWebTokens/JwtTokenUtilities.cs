@@ -229,7 +229,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Decrypts a JWT token.
         /// </summary>
         /// <param name="securityToken">The JWT token, could be a JwtSecurityToken or JsonWebToken.</param>
-        /// <param name="validationParameters">The validation parameters containing cryptographic material.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <param name="decryptionParameters">The decryption parameters container.</param>
         /// <returns>The decrypted, and if the 'zip' claim is set, decompressed string representation of the token.</returns>
         internal static string DecryptJwtToken(
