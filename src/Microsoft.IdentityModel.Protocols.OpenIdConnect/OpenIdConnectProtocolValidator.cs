@@ -669,7 +669,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// </summary>
         /// <param name="validationContext">A <see cref="OpenIdConnectProtocolValidationContext"/> that contains the 'state' to validate.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="validationContext"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">Thrown if <see cref="OpenIdConnectProtocolValidationContext.ProcotolMessage"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <see cref="OpenIdConnectProtocolValidationContext.ProtocolMessage"/> is null.</exception>
         /// <exception cref="OpenIdConnectProtocolInvalidStateException">Thrown if <see cref="OpenIdConnectProtocolValidationContext.State"/> is present in <see cref="OpenIdConnectProtocolValidationContext.State"/> but either <see cref="OpenIdConnectProtocolValidationContext.ProtocolMessage"/> or its state property is null.</exception>
         /// <exception cref="OpenIdConnectProtocolInvalidStateException">Thrown if 'state' in the context does not match the state in the message.</exception>
         protected virtual void ValidateState(OpenIdConnectProtocolValidationContext validationContext)
