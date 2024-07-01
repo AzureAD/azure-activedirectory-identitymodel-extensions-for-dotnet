@@ -12,37 +12,37 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     public static class OpenIdConnectResponseType
     {
         /// <summary>
-        /// Indicates the 'code' response type. See <see href="https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth"/>.
+        /// Indicates the 'code' response type. See: <see href="https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth"/>.
         /// For example: <see href="https://openid.net/specs/openid-connect-core-1_0.html#codeExample"/>.
         /// </summary>
         public const string Code = "code";
 
         /// <summary>
-        /// Indicates the 'code id_token' response type. See <see href="https://openid.net/specs/openid-connect-core-1_0.html#HybridAuthRequest"/>.
+        /// Indicates the 'code id_token' response type. See: <see href="https://openid.net/specs/openid-connect-core-1_0.html#HybridAuthRequest"/>.
         /// For example: <see href="https://openid.net/specs/openid-connect-core-1_0.html#code-id_tokenExample"/>.
         /// </summary>
         public const string CodeIdToken = "code id_token";
 
         /// <summary>
-        /// Indicates the 'code id_token token' response type. See <see href="https://openid.net/specs/openid-connect-core-1_0.html#HybridAuthRequest"/>.
+        /// Indicates the 'code id_token token' response type. See: <see href="https://openid.net/specs/openid-connect-core-1_0.html#HybridAuthRequest"/>.
         /// For example: <see href="https://openid.net/specs/openid-connect-core-1_0.html#code-id_token-tokenExample"/>.
         /// </summary>
         public const string CodeIdTokenToken = "code id_token token";
 
         /// <summary>
-        /// Indicates the 'code token' response type. See <see href="https://openid.net/specs/openid-connect-core-1_0.html#HybridAuthRequest"/>.
+        /// Indicates the 'code token' response type. See: <see href="https://openid.net/specs/openid-connect-core-1_0.html#HybridAuthRequest"/>.
         /// For example: <see href="https://openid.net/specs/openid-connect-core-1_0.html#code-tokenExample"/>.
         /// </summary>
         public const string CodeToken = "code token";
 
         /// <summary>
-        /// Indicates the 'id_token' response type. See <see href="https://openid.net/specs/openid-connect-core-1_0.html#HybridAuthRequest"/>.
+        /// Indicates the 'id_token' response type. See: <see href="https://openid.net/specs/openid-connect-core-1_0.html#HybridAuthRequest"/>.
         /// For example: <see href="https://openid.net/specs/openid-connect-core-1_0.html#id_tokenExample"/>.
         /// </summary>
         public const string IdToken = "id_token";
 
         /// <summary>
-        /// Indicates the 'id_token token' response type. See <see href="https://openid.net/specs/openid-connect-core-1_0.html#ImplicitFlowAuth"/>.
+        /// Indicates the 'id_token token' response type. See: <see href="https://openid.net/specs/openid-connect-core-1_0.html#ImplicitFlowAuth"/>.
         /// For example: <see href="https://openid.net/specs/openid-connect-core-1_0.html#id_token-tokenExample"/>.
         /// </summary>
         public const string IdTokenToken = "id_token token";

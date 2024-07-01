@@ -12,17 +12,17 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
     public enum OpenIdConnectRequestType
     {
         /// <summary>
-        /// Indicates an Authentication Request. See <see href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest"/>.
+        /// Indicates an Authentication Request. See: <see href="https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest"/>.
         /// </summary>
         Authentication,
 
         /// <summary>
-        /// Indicates a Logout Request. See <see href="https://openid.net/specs/openid-connect-frontchannel-1_0.html#RPLogout"/>.
+        /// Indicates a Logout Request. See: <see href="https://openid.net/specs/openid-connect-frontchannel-1_0.html#RPLogout"/>.
         /// </summary>
         Logout,
 
         /// <summary>
-        /// Indicates a Token Request. See <see href="https://openid.net/specs/openid-connect-core-1_0.html#TokenRequest"/>.
+        /// Indicates a Token Request. See: <see href="https://openid.net/specs/openid-connect-core-1_0.html#TokenRequest"/>.
         /// </summary>
         Token,
     }

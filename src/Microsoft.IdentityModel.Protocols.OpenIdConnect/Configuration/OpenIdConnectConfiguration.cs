@@ -62,8 +62,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// </summary>
         /// <param name="json">json string representing the configuration.</param>
         /// <returns><see cref="OpenIdConnectConfiguration"/> object representing the configuration.</returns>
-        /// <exception cref="ArgumentNullException">If 'json' is null or empty.</exception>
-        /// <exception cref="ArgumentException">If 'json' fails to deserialize.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="json"/> is null or empty.</exception>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="json"/> fails to deserialize.</exception>
         public static OpenIdConnectConfiguration Create(string json)
         {
             if (string.IsNullOrEmpty(json))
@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// </summary>
         /// <param name="configuration"><see cref="OpenIdConnectConfiguration"/> object to serialize.</param>
         /// <returns>json string representing the configuration object.</returns>
-        /// <exception cref="ArgumentNullException">If 'configuration' is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="configuration"/> is null.</exception>
         public static string Write(OpenIdConnectConfiguration configuration)
         {
             if (configuration == null)
@@ -103,7 +103,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// Initializes an new instance of <see cref="OpenIdConnectConfiguration"/> from a json string.
         /// </summary>
         /// <param name="json">a json string containing the metadata</param>
-        /// <exception cref="ArgumentNullException">If 'json' is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="json"/> is null or empty.</exception>
         public OpenIdConnectConfiguration(string json)
         {
             if (string.IsNullOrEmpty(json))
