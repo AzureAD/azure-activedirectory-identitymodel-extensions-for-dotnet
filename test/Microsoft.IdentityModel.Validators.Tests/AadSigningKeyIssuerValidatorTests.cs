@@ -18,6 +18,8 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Validators.Tests
 {
+    // Serialize as one of the tests depends on static state (app context)
+    [Collection(nameof(AadSigningKeyIssuerValidatorTests))]
     public class AadSigningKeyIssuerValidatorTests
     {
         [Theory, MemberData(nameof(EnableAadSigningKeyIssuerValidationTestCases))]
@@ -168,6 +170,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
             try
             {
+                theoryData.SetupAction?.Invoke();
                 var result = AadTokenValidationParametersExtension.ValidateIssuerSigningKey(theoryData.SecurityKey, theoryData.SecurityToken, theoryData.OpenIdConnectConfiguration);
                 theoryData.ExpectedException.ProcessNoException(context);
                 Assert.True(result);
@@ -175,6 +178,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             catch (Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex, context);
+                theoryData.TearDownAction?.Invoke();
             }
 
             TestUtilities.AssertFailIfErrors(context);
@@ -332,6 +336,28 @@ namespace Microsoft.IdentityModel.Validators.Tests
                     ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX40004")
                 });
 
+                theoryData.Add(new AadSigningKeyIssuerTheoryData
+                {
+                    TestId = "Doesnt_Fail_With_Switch",
+                    SecurityKey = KeyingMaterial.JsonWebKeyP256,
+                    SecurityToken = new JwtSecurityToken(),
+                    OpenIdConnectConfiguration = mockConfiguration,
+                    SetupAction = () => AppContext.SetSwitch(AadTokenValidationParametersExtension.DontFailOnMissingTidSwitch, true),
+                    TearDownAction = () => AppContext.SetSwitch(AadTokenValidationParametersExtension.DontFailOnMissingTidSwitch, false)
+                });
+
+                theoryData.Add(new AadSigningKeyIssuerTheoryData
+                {
+                    TestId = "Fail_With_Switch_True",
+                    SecurityKey = KeyingMaterial.JsonWebKeyP256,
+                    SecurityToken = new JwtSecurityToken(),
+                    OpenIdConnectConfiguration = mockConfiguration,
+                    ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX40009"),
+                    SetupAction = () => AppContext.SetSwitch(AadTokenValidationParametersExtension.DontFailOnMissingTidSwitch, false),
+                    TearDownAction = () => AppContext.SetSwitch(AadTokenValidationParametersExtension.DontFailOnMissingTidSwitch, isEnabled: false)
+                });
+
+
                 return theoryData;
             }
         }
@@ -357,6 +383,10 @@ namespace Microsoft.IdentityModel.Validators.Tests
             public bool SetDelegateUsingConfig { get; set; } = false;
 
             public bool SetDelegateWithoutConfig { get; set; } = false;
+
+            public Action SetupAction { get; set; }
+
+            public Action TearDownAction { get; set; }
         }
     }
 }

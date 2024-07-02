@@ -43,6 +43,13 @@ namespace Microsoft.IdentityModel.Validators
             };
         }
 
+        internal const string DontFailOnMissingTidSwitch = "Switch.Microsoft.IdentityModel.DontFailOnMissingTidValidateIssuerSigning";
+
+        private static bool DontFailOnMissingTid()
+        {
+            return (AppContext.TryGetSwitch(DontFailOnMissingTidSwitch, out bool dontFailOnMissingTid) && dontFailOnMissingTid);
+        }
+
         /// <summary>
         /// Validates the issuer signing key.
         /// </summary>
@@ -71,7 +78,12 @@ namespace Microsoft.IdentityModel.Validators
 
                 var tenantIdFromToken = GetTid(securityToken);
                 if (string.IsNullOrEmpty(tenantIdFromToken))
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40009));
+                {
+                    if (DontFailOnMissingTid())
+                        return true; 
+                    else
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40009));
+                }
 
                 var tokenIssuer = securityToken.Issuer;
 
