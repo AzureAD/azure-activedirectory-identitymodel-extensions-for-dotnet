@@ -142,19 +142,23 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     return ConvertFromRSASecurityKey(new RsaSecurityKey(rsaPrivateKey) { KeyId = key.KeyId });
                 }
+#if NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
                 else if (key.PrivateKey is ECDsa ecdsaPrivateKey)
                 {
                     return ConvertFromECDsaSecurityKey(new ECDsaSecurityKey(ecdsaPrivateKey) { KeyId = key.KeyId });
                 }
+#endif
             }
             else if (key.PublicKey is RSA rsaPublicKey)
             {
                 return ConvertFromRSASecurityKey(new RsaSecurityKey(rsaPublicKey) { KeyId = key.KeyId });
             }
+#if NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
             else if (key.PublicKey is ECDsa ecdsaPublicKey)
             {
                 return ConvertFromECDsaSecurityKey(new ECDsaSecurityKey(ecdsaPublicKey) { KeyId = key.KeyId });
             }
+#endif
 
             throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10674, LogHelper.MarkAsNonPII(key.GetType().FullName))));
         }
