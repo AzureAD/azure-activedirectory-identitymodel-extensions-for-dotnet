@@ -159,8 +159,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="algorithm">The SignatureAlgorithm in use.</param>
         /// <returns>The <see cref="HashAlgorithmName"/> to use.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if if <paramref name="algorithm"/> is null or whitespace.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if if <paramref name="algorithm"/> is not supported.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="algorithm"/> is null or whitespace.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="algorithm"/> is not supported.</exception>
         protected virtual HashAlgorithmName GetHashAlgorithmName(string algorithm)
         {
             if (string.IsNullOrWhiteSpace(algorithm))
