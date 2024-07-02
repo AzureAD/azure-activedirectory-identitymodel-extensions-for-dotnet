@@ -99,8 +99,16 @@ namespace Microsoft.IdentityModel.TestUtils
         public static X509Certificate2 DefaultAsymmetricCert_2048 = new X509Certificate2(Convert.FromBase64String(DefaultX509Data_2048), CertPassword, X509KeyStorageFlags.MachineKeySet);
 
         // 256 bit ECDSA
-        public const string DefaultX509Data_256ECDSA = @"MIIEnwIBAzCCBFsGCSqGSIb3DQEHAaCCBEwEggRIMIIERDCCAc0GCSqGSIb3DQEHAaCCAb4EggG6MIIBtjCCAbIGCyqGSIb3DQEMCgECoIHMMIHJMBwGCiqGSIb3DQEMAQMwDgQIX9xRjIVa2ZcCAgfQBIGo+O4xXEkTBqcaF9nf6qRwrMfy7hvE7katRb6braieeTFrDZO4QwnmheBT3RMk/9sBEXjFGhdJHpf4FQHkKtTpimlyTVHlSR+B2NWrzQK4id18ZwsVihusyPwbM73Uu9o+3vZMCdM15tNQBwsUpmYIRzD3wcnVAD/VJBr3JoRSSjBmz6nKpMvjc1ZtBADjqUWdjO+aDLxS+AM0sfH8i0ivmSIZqUekf6wuMYHTMBMGCSqGSIb3DQEJFTEGBAQBAAAAMF0GCSqGSIb3DQEJFDFQHk4AdABlAC0ANQBiAGIANwA5ADIAYgA5AC0AOAA5AGIANAAtADQAYgBmADAALQA4ADcAZAA0AC0ANgBjADkAZQBhADQANwA3ADAAYgA5ADkwXQYJKwYBBAGCNxEBMVAeTgBNAGkAYwByAG8AcwBvAGYAdAAgAFMAbwBmAHQAdwBhAHIAZQAgAEsAZQB5ACAAUwB0AG8AcgBhAGcAZQAgAFAAcgBvAHYAaQBkAGUAcjCCAm8GCSqGSIb3DQEHBqCCAmAwggJcAgEAMIICVQYJKoZIhvcNAQcBMBwGCiqGSIb3DQEMAQMwDgQIOd7DHkPXTdwCAgfQgIICKAGcaQokoScTUhpYGZvp5i78HCicnc5l9YpWqhDBMMFhQDhziIdu2Kd0Rc9eprukunrcsbWiH2N8Ag6RgyPZwSgdKJF/oHMQ5L40KzOl1i7c+Uz+PfOfPTRGSqNpTVVm7d2/C8XfZFpDFUugNkY+NknFEvODEPtVTsXc6LB/Tjdr4o8ypt+ZKtKLfFD8n0mo1gX6A694cjLE89vHKUMsF1zito8My8k9Z6fakaXv92GlpC1Jro/gTp2TPAfp166F7pUQrd4jQuDZhKId4GeXwi9Ggn4KxvGpuOW0dJdtR+lNNLPh2AnsGXyL3gYCsHiLKGz3bAvMql9Lee12BErVf/7iYG3XDtx8i4xLzTJm6l8CwoUuLh8XCcBLmYxnBGHXhBfHNoFri+OiO/IHRZpMkDws5fnzT5VjTZ0umuJKbLmgdh4j465IcZUKSvSPxon13fyC5wxZZHD4W3XCP9lTEtFxsUkYfn6j3HNrfq+4zclr7zjPnyGOxD3V0B3oGn8xzzXoyVbgaxrWRvFQPau1mEdTLlSbKkHQIkI1qYlTGjbX5BTXt3vPo3juThe5O47WpRLp8lmFTrVIv/qvcQ3pBlVJaYhtijGxJOMH8Qii4dB3Ru/4w+u54UzzFAepPLJbn5fwnw3Lw6+gaiUyxRUmykB4tLjpFBQd1BIEdpKpzS0aT4Q68YScOGQdEDvPibimdlhcXabdNAEvX5Hv2yRE8gNMc8l52f8ckTA7MB8wBwYFKw4DAhoEFJRQSVRoIwasJHhxXd4V2H5b9OvaBBQs4phgMd4xS41WD/LsCBhxV2AhRgICB9A=";
+        public const string DefaultX509Data_256ECDSA = "MIIEnwIBAzCCBFsGCSqGSIb3DQEHAaCCBEwEggRIMIIERDCCAc0GCSqGSIb3DQEHAaCCAb4EggG6MIIBtjCCAbIGCyqGSIb3DQEMCgECoIHMMIHJMBwGCiqGSIb3DQEMAQMwDgQIX9xRjIVa2ZcCAgfQBIGo+O4xXEkTBqcaF9nf6qRwrMfy7hvE7katRb6braieeTFrDZO4QwnmheBT3RMk/9sBEXjFGhdJHpf4FQHkKtTpimlyTVHlSR+B2NWrzQK4id18ZwsVihusyPwbM73Uu9o+3vZMCdM15tNQBwsUpmYIRzD3wcnVAD/VJBr3JoRSSjBmz6nKpMvjc1ZtBADjqUWdjO+aDLxS+AM0sfH8i0ivmSIZqUekf6wuMYHTMBMGCSqGSIb3DQEJFTEGBAQBAAAAMF0GCSqGSIb3DQEJFDFQHk4AdABlAC0ANQBiAGIANwA5ADIAYgA5AC0AOAA5AGIANAAtADQAYgBmADAALQA4ADcAZAA0AC0ANgBjADkAZQBhADQANwA3ADAAYgA5ADkwXQYJKwYBBAGCNxEBMVAeTgBNAGkAYwByAG8AcwBvAGYAdAAgAFMAbwBmAHQAdwBhAHIAZQAgAEsAZQB5ACAAUwB0AG8AcgBhAGcAZQAgAFAAcgBvAHYAaQBkAGUAcjCCAm8GCSqGSIb3DQEHBqCCAmAwggJcAgEAMIICVQYJKoZIhvcNAQcBMBwGCiqGSIb3DQEMAQMwDgQIOd7DHkPXTdwCAgfQgIICKAGcaQokoScTUhpYGZvp5i78HCicnc5l9YpWqhDBMMFhQDhziIdu2Kd0Rc9eprukunrcsbWiH2N8Ag6RgyPZwSgdKJF/oHMQ5L40KzOl1i7c+Uz+PfOfPTRGSqNpTVVm7d2/C8XfZFpDFUugNkY+NknFEvODEPtVTsXc6LB/Tjdr4o8ypt+ZKtKLfFD8n0mo1gX6A694cjLE89vHKUMsF1zito8My8k9Z6fakaXv92GlpC1Jro/gTp2TPAfp166F7pUQrd4jQuDZhKId4GeXwi9Ggn4KxvGpuOW0dJdtR+lNNLPh2AnsGXyL3gYCsHiLKGz3bAvMql9Lee12BErVf/7iYG3XDtx8i4xLzTJm6l8CwoUuLh8XCcBLmYxnBGHXhBfHNoFri+OiO/IHRZpMkDws5fnzT5VjTZ0umuJKbLmgdh4j465IcZUKSvSPxon13fyC5wxZZHD4W3XCP9lTEtFxsUkYfn6j3HNrfq+4zclr7zjPnyGOxD3V0B3oGn8xzzXoyVbgaxrWRvFQPau1mEdTLlSbKkHQIkI1qYlTGjbX5BTXt3vPo3juThe5O47WpRLp8lmFTrVIv/qvcQ3pBlVJaYhtijGxJOMH8Qii4dB3Ru/4w+u54UzzFAepPLJbn5fwnw3Lw6+gaiUyxRUmykB4tLjpFBQd1BIEdpKpzS0aT4Q68YScOGQdEDvPibimdlhcXabdNAEvX5Hv2yRE8gNMc8l52f8ckTA7MB8wBwYFKw4DAhoEFJRQSVRoIwasJHhxXd4V2H5b9OvaBBQs4phgMd4xS41WD/LsCBhxV2AhRgICB9A=";
+        public const string DefaultX509Data_256ECDSA_Public = "MIIBujCCAV+gAwIBAgIQQ6xJuTdhTpFKGAJNoeAXNTAKBggqhkjOPQQDAjAiMSAwHgYDVQQDDBdLZXlTdG9yZVRlc3RDZXJ0aWZpY2F0ZTAeFw0yNDA3MDIwNTIyNDdaFw0yNTA3MDIwNTQyNDdaMCIxIDAeBgNVBAMMF0tleVN0b3JlVGVzdENlcnRpZmljYXRlMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE9+coKp9Bai6DHq5f9FCSBTizhlZDp4hY1E98AG9YGZIt/8SPRaZzKIe6JKcqT/PaOywh0MAwtNDglttAa+Tr8KN3MHUwDgYDVR0PAQH/BAQDAgWgMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATAlBgNVHREEHjAcghpDTj1LZXlTdG9yZVRlc3RDZXJ0aWZpY2F0ZTAdBgNVHQ4EFgQUjmT0SStRinfVGLKXtQXPf2dRiuYwCgYIKoZIzj0EAwIDSQAwRgIhAKhS2I54EALm367IuKHE1P44TNWOqGphLUfwj6e/HwUNAiEAmOzj//RrjFauhxGLn50Fn8M05Y1KmNtP5UGHytaPEsE=";
+        public static string DefaultX509Key_256ECDSA_KeyId = "DefaultX509Key_256ECDSA_KeyId";
+        public static string DefaultX509Key_256ECDSA_Thumbprint = "CEE96753ACDF7BBE12F61FD59BE9521482B566D8";
         public static X509Certificate2 DefaultCert_256ECDSA = new X509Certificate2(Convert.FromBase64String(DefaultX509Data_256ECDSA), CertPassword, X509KeyStorageFlags.Exportable);
+        public static X509Certificate2 DefaultCert_256ECDSA_Public = new X509Certificate2(Convert.FromBase64String(DefaultX509Data_256ECDSA_Public), CertPassword, X509KeyStorageFlags.Exportable);
+        public static X509SecurityKey DefaultX509Key_256ECDSA = new X509SecurityKey(DefaultCert_256ECDSA);
+        public static X509SecurityKey DefaultX509Key_256ECDSA_With_KeyId = new X509SecurityKey(DefaultCert_256ECDSA) { KeyId = DefaultX509Key_256ECDSA_KeyId };
+        public static X509SecurityKey DefaultX509Key_256ECDSA_Public = new X509SecurityKey(DefaultCert_256ECDSA_Public);
+        public static X509SecurityKey DefaultX509Key_256ECDSA_Public_With_KeyId = new X509SecurityKey(DefaultCert_256ECDSA_Public) { KeyId = DefaultX509Key_256ECDSA_KeyId };
 
         public static string DefaultX509Data_2048_Public = @"MIICyjCCAbKgAwIBAgIQJPMYqnyiTY1GQYAwZxadMjANBgkqhkiG9w0BAQsFADAhMR8wHQYDVQQDExZBREZTIFNpZ25pbmcgLSBTVFMuY29tMB4XDTEyMTAwOTIyMTA0OVoXDTEzMTAwOTIyMTA0OVowITEfMB0GA1UEAxMWQURGUyBTaWduaW5nIC0gU1RTLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMmeVPJz8o7ayB3AS2dJtsIo/eXqeNhZ+ZqEJgHVHc0JAAgNNwR++moMt8+iIlOKZiAL8dvQBKOuPms+FfqrG1HshnMiLcuadtWUqOntxUdyQLcEKvdaFOqOppqmasqGFtRLPwYKIkZOkj8ikndNzI6PZV46mw18nLaN6rTByMnjVA5n9Lf7Cdu7lmxlKGJOI5F0IfeaW68/kY1bdw3KAEb1aOKHj0r7RJ2joRuHJ+96kw1bA2T6bGC/1LYND3DFsnQQtMBl7LlDrSG1gGoiZxCoQmPCxfrTCrYKGK6y9j6IQ4MCmJpnt0l/INL5i88TjctF4IkJwbJGn9iY2fIIBxMCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAq/SyHGCLpBm+Gmh5I7BAWJXvtPaIelt30WgKVXRHccxRVIYpKOfAA2iPuD/CVruFz6pnP4K7o2KLAs+XJptigYzLEjKw6rY4836ZJC8m5kfBVanu45OW39nxzxp1udbxQ5gAdmvnY/2agpFhCFR8M1BtWON6G3SzHwo2dXHh+ettOO2LtK38e1+Uy+KGowRw/m4gprSIvgN3AAo7e0PnFblZn6vRgMsK60QB5D8f+Kxdg2I3ZGQcPBQI2fpjEDQCZVc2LV4ywPX4QDPfmYjn+1IaU9w7unbh+oUGQsrdKw3gsdzWEsX/IMXTDf46FEOjV+JqE7VilzcNuDcQ0x9K8gAA";
         public static X509Certificate2 DefaultCert_2048_Public
@@ -217,7 +225,6 @@ namespace Microsoft.IdentityModel.TestUtils
         public static readonly ECDsaSecurityKey Ecdsa521Key_Public;
 
         // SymmetricKeys
-
         public static string DefaultSymmetricKeyEncoded_56 = "bd0Q+Z6Ydw==";
         public static byte[] DefaultSymmetricKeyBytes_56 = Convert.FromBase64String(DefaultSymmetricKeyEncoded_56);
         public static SymmetricSecurityKey DefaultSymmetricSecurityKey_56 = new SymmetricSecurityKey(DefaultSymmetricKeyBytes_56) { KeyId = "DefaultSymmetricSecurityKey_56" };
@@ -1060,6 +1067,80 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
+#if NET472 || NET_CORE
+        public static JsonWebKey JsonWebKeyX509_256ECDSA
+        {
+            get
+            {
+                var jsonWebKey = new JsonWebKey
+                {
+                    Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve,
+                    Kid = DefaultX509Key_256ECDSA_Thumbprint,
+                    X5t = Base64UrlEncoder.Encode(DefaultCert_256ECDSA.GetCertHash())
+                };
+
+                jsonWebKey.X5c.Add(Convert.ToBase64String(DefaultCert_256ECDSA.RawData));
+                return jsonWebKey;
+            }
+        }
+
+        public static JsonWebKey JsonWebKeyX509_256ECDSA_With_KeyId
+        {
+            get
+            {
+                var jsonWebKey = new JsonWebKey
+                {
+                    Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve,
+                    Kid = DefaultX509Key_256ECDSA_KeyId,
+                    X5t = Base64UrlEncoder.Encode(DefaultCert_256ECDSA.GetCertHash())
+                };
+
+                jsonWebKey.X5c.Add(Convert.ToBase64String(DefaultCert_256ECDSA.RawData));
+                return jsonWebKey;
+            }
+        }
+
+        public static JsonWebKey JsonWebKeyX509_256ECDSA_As_ECDSA_With_KeyId_Public
+        {
+            get
+            {
+                var ecdsa = DefaultX509Key_256ECDSA_Public_With_KeyId.PublicKey as ECDsa;
+                var ecParams = ecdsa.ExportParameters(false);
+
+                var jsonWebKey = new JsonWebKey
+                {
+                    Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve,
+                    Kid = DefaultX509Key_256ECDSA_KeyId,
+                    Crv = JsonWebKeyECTypes.P256,
+                    X = Base64UrlEncoder.Encode(ecParams.Q.X),
+                    Y = Base64UrlEncoder.Encode(ecParams.Q.Y),
+                };
+
+                return jsonWebKey;
+            }
+        }
+
+        public static JsonWebKey JsonWebKeyX509_256ECDSA_As_ECDSA_With_KeyId
+        {
+            get
+            {
+                var ecdsa = DefaultX509Key_256ECDSA_With_KeyId.PrivateKey as ECDsa;
+                var ecParams = ecdsa.ExportParameters(true);
+
+                var jsonWebKey = new JsonWebKey
+                {
+                    Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve,
+                    Kid = DefaultX509Key_256ECDSA_KeyId,
+                    Crv = JsonWebKeyECTypes.P256,
+                    D = Base64UrlEncoder.Encode(ecParams.D),
+                    X = Base64UrlEncoder.Encode(ecParams.Q.X),
+                    Y = Base64UrlEncoder.Encode(ecParams.Q.Y),
+                };
+
+                return jsonWebKey;
+            }
+        }
+#endif
         private static SecureString ConvertToSecureString(string password)
         {
             if (password == null)
