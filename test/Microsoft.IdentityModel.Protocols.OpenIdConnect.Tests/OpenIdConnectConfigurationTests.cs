@@ -75,6 +75,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
             Assert.NotNull(configuration.AcrValuesSupported);
+            Assert.NotNull(configuration.AuthorizationDetailsTypesSupported);
             Assert.NotNull(configuration.AuthorizationEncryptionAlgValuesSupported);
             Assert.NotNull(configuration.AuthorizationEncryptionEncValuesSupported);
             Assert.NotNull(configuration.AuthorizationSigningAlgValuesSupported);
@@ -145,8 +146,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             OpenIdConnectConfiguration configuration = new OpenIdConnectConfiguration();
             Type type = typeof(OpenIdConnectConfiguration);
             PropertyInfo[] properties = type.GetProperties();
-            if (properties.Length != 67)
-                Assert.True(false, "Number of properties has changed from 67 to: " + properties.Length + ", adjust tests");
+            if (properties.Length != 68)
+                Assert.True(false, "Number of properties has changed from 68 to: " + properties.Length + ", adjust tests");
 
             TestUtilities.CallAllPublicInstanceAndStaticPropertyGets(configuration, "OpenIdConnectConfiguration_GetSets");
 
@@ -155,6 +156,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 {
                     PropertyNamesAndSetGetValue = new List<KeyValuePair<string, List<object>>>
                         {
+                            new KeyValuePair<string, List<object>>("AcrValuesSupported", new List<object>{ false, true, true }),
+                            new KeyValuePair<string, List<object>>("AuthorizationDetailsTypesSupported", new List<object>{ false, true, true }),
                             new KeyValuePair<string, List<object>>("AuthorizationEndpoint", new List<object>{ (string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }),
                             new KeyValuePair<string, List<object>>("AuthorizationEncryptionAlgValuesSupported", new List<object>{ false, true, true }),
                             new KeyValuePair<string, List<object>>("AuthorizationEncryptionEncValuesSupported", new List<object>{ false, true, true }),
@@ -297,6 +300,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var collectionNames = new List<string>
             {
                 "acr_values_supported",
+                "authorization_details_types_supported",
                 "authorization_encryption_alg_values_supported",
                 "authorization_encryption_enc_values_supported",
                 "authorization_signing_alg_values_supported",
