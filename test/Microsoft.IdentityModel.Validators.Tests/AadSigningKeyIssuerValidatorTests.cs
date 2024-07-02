@@ -11,6 +11,7 @@ using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Saml2;
 using Xunit;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
@@ -294,7 +295,17 @@ namespace Microsoft.IdentityModel.Validators.Tests
                     TestId = "MissingTenantIdClaimInToken",
                     SecurityKey = KeyingMaterial.JsonWebKeyP256,
                     SecurityToken = new JwtSecurityToken(),
-                    OpenIdConnectConfiguration = mockConfiguration
+                    OpenIdConnectConfiguration = mockConfiguration,
+                    ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX40009")
+                });
+
+                theoryData.Add(new AadSigningKeyIssuerTheoryData
+                {
+                    TestId = "WrongSecurityKeyType",
+                    SecurityKey = KeyingMaterial.JsonWebKeyP256,
+                    SecurityToken = new Saml2SecurityToken(new Saml2Assertion(new Saml2NameIdentifier("nameIdentifier"))),
+                    OpenIdConnectConfiguration = mockConfiguration,
+                    ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX40010")
                 });
 
                 theoryData.Add(new AadSigningKeyIssuerTheoryData

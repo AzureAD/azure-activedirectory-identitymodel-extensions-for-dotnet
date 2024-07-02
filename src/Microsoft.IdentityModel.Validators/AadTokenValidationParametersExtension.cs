@@ -2,7 +2,9 @@
 // Licensed under the MIT License.
 
 using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
@@ -67,9 +69,9 @@ namespace Microsoft.IdentityModel.Validators
                 if (string.IsNullOrWhiteSpace(signingKeyIssuer))
                     return true;
 
-                var tenantIdFromToken = AadIssuerValidator.GetTenantIdFromToken(securityToken);
+                var tenantIdFromToken = GetTid(securityToken);
                 if (string.IsNullOrEmpty(tenantIdFromToken))
-                    return true;
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40009));
 
                 var tokenIssuer = securityToken.Issuer;
 
@@ -91,7 +93,7 @@ namespace Microsoft.IdentityModel.Validators
 
                 // comparing effectiveSigningKeyIssuer with v2TokenIssuer is required as well because of the following scenario:
                 // 1. service trusts /common/v2.0 endpoint 
-                // 2. service receieves a v1 token that has issuer like sts.windows.net
+                // 2. service receives a v1 token that has issuer like sts.windows.net
                 // 3. signing key issuers will never match sts.windows.net as v1 endpoint doesn't have issuers attached to keys
                 // v2TokenIssuer is the representation of Token.Issuer (if it was a v2 issuer)
                 if (effectiveSigningKeyIssuer != tokenIssuer && effectiveSigningKeyIssuer != v2TokenIssuer)
@@ -99,6 +101,26 @@ namespace Microsoft.IdentityModel.Validators
             }
 
             return true;
+        }
+
+        private static string GetTid(SecurityToken securityToken)
+        {
+            if (securityToken is JsonWebToken jsonWebToken)
+            {
+                if (jsonWebToken.TryGetPayloadValue<string>("tid", out string tid))
+                    return tid;
+
+                return string.Empty;
+            }
+            else if (securityToken is JwtSecurityToken jwtSecurityToken)
+            {
+                if ((jwtSecurityToken.Payload.TryGetValue("tid", out object tidObject) && tidObject is string tid))
+                    return tid;
+
+                return string.Empty;
+            }
+            else
+                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40010));
         }
 
         /// <summary>
