@@ -4,12 +4,12 @@
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Base class for a Security Key that contains Asymmetric key material.
+    /// Base class for a <see cref="SecurityKey"/> that contains Asymmetric key material.
     /// </summary>
     public abstract class AsymmetricSecurityKey : SecurityKey
     {
         /// <summary>
-        /// Default constructor
+        /// Initializes a new instance of the <see cref="AsymmetricSecurityKey"/> class.
         /// </summary>
         public AsymmetricSecurityKey()
         {
@@ -30,7 +30,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the status of the private key.
         /// </summary>
-        /// <return>'Exists' if private key exists for sure; 'DoesNotExist' if private key doesn't exist for sure; 'Unknown' if we cannot determine.</return>
+        /// <return><see cref="PrivateKeyStatus.Exists"/> if private key exists for sure; <see cref="PrivateKeyStatus.DoesNotExist"/> if private key doesn't exist for sure; <see cref="PrivateKeyStatus.Unknown"/> if we cannot determine.</return>
         public abstract PrivateKeyStatus PrivateKeyStatus { get; }
     }
 
