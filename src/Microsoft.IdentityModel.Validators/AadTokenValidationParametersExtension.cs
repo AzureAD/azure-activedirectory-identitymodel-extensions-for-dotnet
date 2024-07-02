@@ -81,8 +81,8 @@ namespace Microsoft.IdentityModel.Validators
                 {
                     if (DontFailOnMissingTid())
                         return true; 
-                    else
-                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40009));
+                    
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40009));
                 }
 
                 var tokenIssuer = securityToken.Issuer;
@@ -117,22 +117,23 @@ namespace Microsoft.IdentityModel.Validators
 
         private static string GetTid(SecurityToken securityToken)
         {
-            if (securityToken is JsonWebToken jsonWebToken)
+            switch (securityToken)
             {
-                if (jsonWebToken.TryGetPayloadValue<string>("tid", out string tid))
-                    return tid;
+                case JsonWebToken jsonWebToken:
+                    if (jsonWebToken.TryGetPayloadValue<string>("tid", out string tid))
+                        return tid;
 
-                return string.Empty;
-            }
-            else if (securityToken is JwtSecurityToken jwtSecurityToken)
-            {
-                if ((jwtSecurityToken.Payload.TryGetValue("tid", out object tidObject) && tidObject is string tid))
-                    return tid;
+                    return string.Empty;
 
-                return string.Empty;
+                case JwtSecurityToken jwtSecurityToken:
+                    if ((jwtSecurityToken.Payload.TryGetValue("tid", out object tidObject) && tidObject is string jwtTid))
+                        return jwtTid;
+
+                    return string.Empty;
+
+                default:
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40010));
             }
-            else
-                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40010));
         }
 
         /// <summary>
