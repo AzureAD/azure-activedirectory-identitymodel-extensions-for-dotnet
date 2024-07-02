@@ -52,6 +52,12 @@ namespace Microsoft.IdentityModel.Tokens
         private class LifetimeValidationFailure : ValidationFailureType { internal LifetimeValidationFailure(string name) : base(name) { } }
 
         /// <summary>
+        /// Defines a type that represents that token replay validation failed.
+        /// </summary>
+        public static readonly ValidationFailureType TokenReplayValidationFailed = new TokenReplayValidationFailure("TokenReplayValidationFailed");
+        private class TokenReplayValidationFailure : ValidationFailureType { internal TokenReplayValidationFailure(string name) : base(name) { } }
+
+        /// <summary>
         /// Defines a type that represents that no evaluation has taken place.
         /// </summary>
         public static readonly ValidationFailureType ValidationNotEvaluated = new NotEvaluated("NotEvaluated");
