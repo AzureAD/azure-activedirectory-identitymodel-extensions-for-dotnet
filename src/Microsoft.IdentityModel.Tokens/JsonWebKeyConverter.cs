@@ -130,11 +130,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException">if <paramref name="key"/>is null.</exception>
         public static JsonWebKey ConvertFromX509SecurityKey(X509SecurityKey key, bool representAsRsaKey)
         {
-            if (!representAsRsaKey)
-                return ConvertFromX509SecurityKey(key);
-
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
+
+            if (!representAsRsaKey)
+                return ConvertFromX509SecurityKey(key);
 
             if (key.PrivateKeyStatus == PrivateKeyStatus.Exists)
             {
@@ -192,14 +192,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException">if <paramref name="key"/>is null.</exception>
         public static JsonWebKey ConvertFromECDsaSecurityKey(ECDsaSecurityKey key)
         {
-            if (!ECDsaAdapter.SupportsECParameters())
-                throw LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogMessages.IDX10695));
-
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
             if (key.ECDsa == null)
                 throw LogHelper.LogArgumentNullException(nameof(key.ECDsa));
+
+            if (!ECDsaAdapter.SupportsECParameters())
+                throw LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogMessages.IDX10695));
 
             ECParameters parameters;
             try
