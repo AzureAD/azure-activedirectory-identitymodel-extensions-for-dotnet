@@ -807,6 +807,72 @@ namespace Microsoft.IdentityModel.TestUtils
             return context.Merge(localContext);
         }
 
+        public static bool AreTokenTypeValidationResultsEqual(object object1, object object2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, context))
+                return context.Merge(localContext);
+
+            return AreTokenTypeValidationResultsEqual(
+                object1 as TokenTypeValidationResult,
+                object2 as TokenTypeValidationResult,
+                "TokenTypeValidationResult1",
+                "TokenTypeValidationResult2",
+                null,
+                context);
+        }
+
+        internal static bool AreTokenTypeValidationResultsEqual(
+            TokenTypeValidationResult tokenTypeValidationResult1,
+            TokenTypeValidationResult tokenTypeValidationResult2,
+            string name1,
+            string name2,
+            string stackPrefix,
+            CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(tokenTypeValidationResult1, tokenTypeValidationResult2, localContext))
+                return context.Merge(localContext);
+
+            if (tokenTypeValidationResult1.Type != tokenTypeValidationResult2.Type)
+                localContext.Diffs.Add($"TokenTypeValidationResult1.Type: '{tokenTypeValidationResult1.Type}' != TokenTypeValidationResult2.ExpirationTime: '{tokenTypeValidationResult2.Type}'");
+
+            if (tokenTypeValidationResult1.IsValid != tokenTypeValidationResult2.IsValid)
+                localContext.Diffs.Add($"TokenTypeValidationResult1.IsValid: {tokenTypeValidationResult1.IsValid} != TokenTypeValidationResult2.IsValid: {tokenTypeValidationResult2.IsValid}");
+
+            if (tokenTypeValidationResult1.ValidationFailureType != tokenTypeValidationResult2.ValidationFailureType)
+                localContext.Diffs.Add($"TokenTypeValidationResult1.ValidationFailureType: {tokenTypeValidationResult1.ValidationFailureType} != TokenTypeValidationResult2.ValidationFailureType: {tokenTypeValidationResult2.ValidationFailureType}");
+
+            // true => both are not null.
+            if (ContinueCheckingEquality(tokenTypeValidationResult1.Exception, tokenTypeValidationResult2.Exception, localContext))
+            {
+                AreStringsEqual(
+                    tokenTypeValidationResult1.Exception.Message,
+                    tokenTypeValidationResult2.Exception.Message,
+                    $"({name1}).Exception.Message",
+                    $"({name2}).Exception.Message",
+                    localContext);
+
+                AreStringsEqual(
+                    tokenTypeValidationResult1.Exception.Source,
+                    tokenTypeValidationResult2.Exception.Source,
+                    $"({name1}).Exception.Source",
+                    $"({name2}).Exception.Source",
+                    localContext);
+
+                if (!string.IsNullOrEmpty(stackPrefix))
+                    AreStringPrefixesEqual(
+                        tokenTypeValidationResult1.Exception.StackTrace.Trim(),
+                        tokenTypeValidationResult2.Exception.StackTrace.Trim(),
+                        $"({name1}).Exception.StackTrace",
+                        $"({name2}).Exception.StackTrace",
+                        stackPrefix.Trim(),
+                        localContext);
+            }
+
+            return context.Merge(localContext);
+        }
+
         public static bool AreJArraysEqual(object object1, object object2, CompareContext context)
         {
             var localContext = new CompareContext(context);
