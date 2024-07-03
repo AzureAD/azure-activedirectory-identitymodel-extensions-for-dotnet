@@ -98,12 +98,14 @@ namespace Microsoft.IdentityModel.TestUtils
         public static SigningCredentials DefaultX509SigningCreds_2048_RsaSha2_Sha2 = new SigningCredentials(DefaultX509Key_2048, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest);
         public static X509Certificate2 DefaultAsymmetricCert_2048 = new X509Certificate2(Convert.FromBase64String(DefaultX509Data_2048), CertPassword, X509KeyStorageFlags.MachineKeySet);
 
+#if NET472 || NET_CORE
         // 256 bit ECDSA
         public static X509Certificate2 DefaultCert_256ECDSA;
         public static string DefaultX509Key_256ECDSA_Thumbprint;
         public static string DefaultX509Key_256ECDSA_KeyId = "DefaultX509Key_256ECDSA_KeyId";
         public static X509SecurityKey DefaultX509Key_256ECDSA;
         public static X509SecurityKey DefaultX509Key_256ECDSA_With_KeyId;
+#endif
 
         public static string DefaultX509Data_2048_Public = @"MIICyjCCAbKgAwIBAgIQJPMYqnyiTY1GQYAwZxadMjANBgkqhkiG9w0BAQsFADAhMR8wHQYDVQQDExZBREZTIFNpZ25pbmcgLSBTVFMuY29tMB4XDTEyMTAwOTIyMTA0OVoXDTEzMTAwOTIyMTA0OVowITEfMB0GA1UEAxMWQURGUyBTaWduaW5nIC0gU1RTLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMmeVPJz8o7ayB3AS2dJtsIo/eXqeNhZ+ZqEJgHVHc0JAAgNNwR++moMt8+iIlOKZiAL8dvQBKOuPms+FfqrG1HshnMiLcuadtWUqOntxUdyQLcEKvdaFOqOppqmasqGFtRLPwYKIkZOkj8ikndNzI6PZV46mw18nLaN6rTByMnjVA5n9Lf7Cdu7lmxlKGJOI5F0IfeaW68/kY1bdw3KAEb1aOKHj0r7RJ2joRuHJ+96kw1bA2T6bGC/1LYND3DFsnQQtMBl7LlDrSG1gGoiZxCoQmPCxfrTCrYKGK6y9j6IQ4MCmJpnt0l/INL5i88TjctF4IkJwbJGn9iY2fIIBxMCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAq/SyHGCLpBm+Gmh5I7BAWJXvtPaIelt30WgKVXRHccxRVIYpKOfAA2iPuD/CVruFz6pnP4K7o2KLAs+XJptigYzLEjKw6rY4836ZJC8m5kfBVanu45OW39nxzxp1udbxQ5gAdmvnY/2agpFhCFR8M1BtWON6G3SzHwo2dXHh+ettOO2LtK38e1+Uy+KGowRw/m4gprSIvgN3AAo7e0PnFblZn6vRgMsK60QB5D8f+Kxdg2I3ZGQcPBQI2fpjEDQCZVc2LV4ywPX4QDPfmYjn+1IaU9w7unbh+oUGQsrdKw3gsdzWEsX/IMXTDf46FEOjV+JqE7VilzcNuDcQ0x9K8gAA";
         public static X509Certificate2 DefaultCert_2048_Public
