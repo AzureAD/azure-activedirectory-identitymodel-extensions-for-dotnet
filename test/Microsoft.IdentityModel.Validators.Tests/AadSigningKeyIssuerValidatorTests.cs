@@ -403,6 +403,30 @@ namespace Microsoft.IdentityModel.Validators.Tests
                     OpenIdConnectConfiguration = mockConfiguration
                 });
 
+                theoryData.Add(new AadSigningKeyIssuerTheoryData
+                {
+                    TestId = "Fails_With_Multiple_tids_alternate_order",
+                    SecurityKey = KeyingMaterial.JsonWebKeyP256,
+                    SecurityToken = new JsonWebToken(
+                        Default.Jwt(Default.SecurityTokenDescriptor(
+                            Default.SymmetricSigningCredentials,
+                            [issClaim, new Claim("TID", Guid.NewGuid().ToString()), tidClaim]))),
+                    ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX40011"),
+                    OpenIdConnectConfiguration = mockConfiguration
+                });
+
+                theoryData.Add(new AadSigningKeyIssuerTheoryData
+                {
+                    TestId = "Fails_With_no standard_tid",
+                    SecurityKey = KeyingMaterial.JsonWebKeyP256,
+                    SecurityToken = new JsonWebToken(
+                        Default.Jwt(Default.SecurityTokenDescriptor(
+                            Default.SymmetricSigningCredentials,
+                            [issClaim, new Claim("TID", Guid.NewGuid().ToString())]))),
+                    ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX40009"),
+                    OpenIdConnectConfiguration = mockConfiguration
+                });
+
                 return theoryData;
             }
         }
