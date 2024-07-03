@@ -26,6 +26,7 @@ namespace Microsoft.IdentityModel.Validators
         public const string IDX40008 = "IDX40008: When setting LastKnownGoodLifetime, the value must be greater than or equal to zero. value: '{0}'.";
 
         public const string IDX40009 = "IDX40009: Either the 'tid' claim was not found or it didn't have a value.";
-        public const string IDX40010 = "IDX40010: The SecurityToken must be a 'JsonWebToken' or 'JwtSecurityToken'";   
+        public const string IDX40010 = "IDX40010: The SecurityToken must be a 'JsonWebToken' or 'JwtSecurityToken'";
+        public const string IDX40011 = "IDX40011: The SecurityToken has multiple instances of the '{0}' claim.";
     }
 }

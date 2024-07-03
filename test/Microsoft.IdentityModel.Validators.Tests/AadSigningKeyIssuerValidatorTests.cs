@@ -391,6 +391,18 @@ namespace Microsoft.IdentityModel.Validators.Tests
                     TearDownAction = () => AppContext.SetSwitch(AadTokenValidationParametersExtension.DontFailOnMissingTidSwitch, false)
                 });
 
+                theoryData.Add(new AadSigningKeyIssuerTheoryData
+                {
+                    TestId = "Fails_With_Multiple_tids",
+                    SecurityKey = KeyingMaterial.JsonWebKeyP256,
+                    SecurityToken = new JsonWebToken(
+                        Default.Jwt(Default.SecurityTokenDescriptor(
+                            Default.SymmetricSigningCredentials,
+                            [tidClaim, issClaim, new Claim("TID", Guid.NewGuid().ToString())]))),
+                    ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX40011"),
+                    OpenIdConnectConfiguration = mockConfiguration
+                });
+
                 return theoryData;
             }
         }

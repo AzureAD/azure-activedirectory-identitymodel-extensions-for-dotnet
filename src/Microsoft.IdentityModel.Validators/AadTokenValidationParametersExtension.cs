@@ -2,8 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -121,18 +123,39 @@ namespace Microsoft.IdentityModel.Validators
             {
                 case JsonWebToken jsonWebToken:
                     if (jsonWebToken.TryGetPayloadValue<string>("tid", out string tid))
+                    {
+                        EnforceSingleClaimCaseInsensitive(jsonWebToken.Claims, "tid");
                         return tid;
+                    }
 
                     return string.Empty;
 
                 case JwtSecurityToken jwtSecurityToken:
                     if ((jwtSecurityToken.Payload.TryGetValue("tid", out object tidObject) && tidObject is string jwtTid))
+                    {
+                        EnforceSingleClaimCaseInsensitive(jwtSecurityToken.Claims, "tid");
                         return jwtTid;
+                    }
 
                     return string.Empty;
 
                 default:
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40010));
+            }
+        }
+
+        private static void EnforceSingleClaimCaseInsensitive(IEnumerable<Claim> claims, string claimType)
+        {
+            bool claimSeen = false;
+            foreach (var claim in claims)
+            {
+                if (string.Equals(claim.Type, claimType, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (claimSeen)
+                        throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40011, claimType)));
+
+                    claimSeen = true;
+                }
             }
         }
 
