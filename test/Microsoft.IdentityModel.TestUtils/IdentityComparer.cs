@@ -765,10 +765,10 @@ namespace Microsoft.IdentityModel.TestUtils
             if (!ContinueCheckingEquality(lifetimeValidationResult1, lifetimeValidationResult2, localContext))
                 return context.Merge(localContext);
 
-            if (AreDatesEqualWithEpsilon(lifetimeValidationResult1.NotBefore, lifetimeValidationResult2.NotBefore, 1))
+            if (!AreDatesEqualWithEpsilon(lifetimeValidationResult1.NotBefore, lifetimeValidationResult2.NotBefore, 1))
                 localContext.Diffs.Add($"LifetimeValidationResult1.NotBefore: '{lifetimeValidationResult1.NotBefore}' != LifetimeValidationResult2.NotBefore: '{lifetimeValidationResult2.NotBefore}'");
 
-            if (AreDatesEqualWithEpsilon(lifetimeValidationResult1.Expires, lifetimeValidationResult2.Expires, 1))
+            if (!AreDatesEqualWithEpsilon(lifetimeValidationResult1.Expires, lifetimeValidationResult2.Expires, 1))
                 localContext.Diffs.Add($"LifetimeValidationResult1.Expires: '{lifetimeValidationResult1.Expires}' != LifetimeValidationResult2.Expires: '{lifetimeValidationResult2.Expires}'");
 
             if (lifetimeValidationResult1.IsValid != lifetimeValidationResult2.IsValid)
