@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.Tokens
         };
 
         /// <summary>
-        /// Mapping from algorithm to minimum <see cref="SecurityKey.KeySize"/> when verifying signatures.
+        /// Mapping from algorithm to minimum <see cref="AsymmetricSecurityKey"/>.KeySize when verifying signatures.
         /// </summary>
         public static readonly Dictionary<string, int> DefaultMinimumAsymmetricKeySizeInBitsForVerifyingMap = new Dictionary<string, int>()
         {
