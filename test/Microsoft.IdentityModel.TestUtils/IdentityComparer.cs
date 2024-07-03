@@ -765,10 +765,10 @@ namespace Microsoft.IdentityModel.TestUtils
             if (!ContinueCheckingEquality(lifetimeValidationResult1, lifetimeValidationResult2, localContext))
                 return context.Merge(localContext);
 
-            if (lifetimeValidationResult1.NotBefore != lifetimeValidationResult2.NotBefore)
+            if (AreDatesEqualWithEpsilon(lifetimeValidationResult1.NotBefore, lifetimeValidationResult2.NotBefore, 1))
                 localContext.Diffs.Add($"LifetimeValidationResult1.NotBefore: '{lifetimeValidationResult1.NotBefore}' != LifetimeValidationResult2.NotBefore: '{lifetimeValidationResult2.NotBefore}'");
 
-            if (lifetimeValidationResult1.Expires != lifetimeValidationResult2.Expires)
+            if (AreDatesEqualWithEpsilon(lifetimeValidationResult1.Expires, lifetimeValidationResult2.Expires, 1))
                 localContext.Diffs.Add($"LifetimeValidationResult1.Expires: '{lifetimeValidationResult1.Expires}' != LifetimeValidationResult2.Expires: '{lifetimeValidationResult2.Expires}'");
 
             if (lifetimeValidationResult1.IsValid != lifetimeValidationResult2.IsValid)
@@ -1669,5 +1669,14 @@ namespace Microsoft.IdentityModel.TestUtils
             else
                 return string.Format(CultureInfo.InvariantCulture, "{0}", (str ?? "null"));
         }
+
+        public static bool AreDatesEqualWithEpsilon(DateTime? dateTime1, DateTime? dateTime2, int epsilon)
+        {
+            if (dateTime1 is DateTime date1 && dateTime2 is DateTime date2)
+                return Math.Abs((date1 - date2).TotalSeconds) <= epsilon;
+
+            return dateTime1 == dateTime2;
+        }
+
     }
 }
