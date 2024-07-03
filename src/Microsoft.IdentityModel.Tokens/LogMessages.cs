@@ -73,6 +73,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10256 = "IDX10256: Unable to validate the token type. TokenValidationParameters.ValidTypes is set, but the 'typ' header claim is null or empty.";
         public const string IDX10257 = "IDX10257: Token type validation failed. Type: '{0}'. Did not match: validationParameters.TokenTypes: '{1}'.";
         public const string IDX10258 = "IDX10258: Token type validated. Type: '{0}'.";
+        public const string IDX10259 = "IDX10259: Unable to validate the token type, delegate threw an exception";
         // public const string IDX10260 = "IDX10260:";
         public const string IDX10261 = "IDX10261: Unable to retrieve configuration from authority: '{0}'. \nProceeding with token validation in case the relevant properties have been set manually on the TokenValidationParameters. Exception caught: \n {1}. See https://aka.ms/validate-using-configuration-manager for additional information.";
         public const string IDX10262 = "IDX10262: One of the issuers in TokenValidationParameters.ValidIssuers was null or an empty string. See https://aka.ms/wilson/tokenvalidation for details.";
