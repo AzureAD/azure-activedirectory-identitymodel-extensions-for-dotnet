@@ -226,18 +226,18 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
                 theoryData.Add(new JsonWebKeyConverterTheoryData
                 {
-                    SecurityKey = KeyingMaterial.DefaultX509Key_256ECDSA_Public_With_KeyId,
+                    SecurityKey = KeyingMaterial.DefaultX509Key_256ECDSA,
                     RepresentAsRsaKey = true,
-                    JsonWebKey = KeyingMaterial.JsonWebKeyX509_256ECDSA_As_ECDSA_With_KeyId_Public,
-                    TestId = nameof(KeyingMaterial.DefaultX509Key_256ECDSA_Public) + nameof(JsonWebKeyConverterTheoryData.RepresentAsRsaKey)
+                    JsonWebKey = KeyingMaterial.JsonWebKeyX509_256ECDSA_As_ECDSA,
+                    TestId = nameof(KeyingMaterial.DefaultX509Key_256ECDSA_With_KeyId) + nameof(JsonWebKeyConverterTheoryData.RepresentAsRsaKey)
                 });
 
                 theoryData.Add(new JsonWebKeyConverterTheoryData
                 {
-                    SecurityKey = KeyingMaterial.DefaultX509Key_256ECDSA,
+                    SecurityKey = KeyingMaterial.DefaultX509Key_256ECDSA_With_KeyId,
                     RepresentAsRsaKey = true,
                     JsonWebKey = KeyingMaterial.JsonWebKeyX509_256ECDSA_As_ECDSA_With_KeyId,
-                    TestId = nameof(KeyingMaterial.DefaultX509Key_256ECDSA)
+                    TestId = nameof(KeyingMaterial.DefaultX509Key_256ECDSA) + nameof(JsonWebKeyConverterTheoryData.RepresentAsRsaKey)
                 });
 #endif
                 return theoryData;
