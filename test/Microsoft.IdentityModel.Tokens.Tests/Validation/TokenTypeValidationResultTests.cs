@@ -140,7 +140,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     new TokenTypeTheoryData
                     {
                         TestId = "Invalid_TokenTypeIsEmpty",
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10256:"),
+                        ExpectedException = ExpectedException.SecurityTokenInvalidTypeException("IDX10256:"),
                         Type = String.Empty,
                         SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Typ, String.Empty),
                         ValidationParameters = new TokenValidationParameters
@@ -149,18 +149,18 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         },
                         TokenTypeValidationResult = new TokenTypeValidationResult(
                             string.Empty,
-                            ValidationFailureType.NullArgument,
+                            ValidationFailureType.TokenTypeValidationFailed,
                             new ExceptionDetail(
                                 new MessageDetail(
                                     LogMessages.IDX10256,
                                     LogHelper.MarkAsNonPII("type")),
-                                typeof(ArgumentNullException),
+                                typeof(SecurityTokenInvalidTypeException),
                                 new StackFrame(true)))
                     },
                     new TokenTypeTheoryData
                     {
                         TestId = "Invalid_TokenTypeIsNull",
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10256:"),
+                        ExpectedException = ExpectedException.SecurityTokenInvalidTypeException("IDX10256:"),
                         Type = null,
                         SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Typ, null),
                         ValidationParameters = new TokenValidationParameters
@@ -169,12 +169,12 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         },
                         TokenTypeValidationResult = new TokenTypeValidationResult(
                             null,
-                            ValidationFailureType.NullArgument,
+                            ValidationFailureType.TokenTypeValidationFailed,
                             new ExceptionDetail(
                                 new MessageDetail(
                                     LogMessages.IDX10256,
                                     LogHelper.MarkAsNonPII("type")),
-                                typeof(ArgumentNullException),
+                                typeof(SecurityTokenInvalidTypeException),
                                 new StackFrame(true)))
                     },
                     new TokenTypeTheoryData
