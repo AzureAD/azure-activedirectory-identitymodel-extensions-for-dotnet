@@ -30,7 +30,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             IdentityComparer.AreTokenReplayValidationResultsEqual(
                 replayValidationResult,
                 theoryData.ReplayValidationResult,
-            context);
+                context);
 
             TestUtilities.AssertFailIfErrors(context);
 
