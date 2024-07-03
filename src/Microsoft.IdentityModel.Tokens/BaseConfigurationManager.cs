@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Tokens
         public static readonly TimeSpan DefaultLastKnownGoodConfigurationLifetime = new TimeSpan(0, 1, 0, 0);
 
         /// <summary>
-        /// Default time interval (5 minutes) that must pass before calling <see cref="RequestRefresh"/> to obtain a new configuration.
+        /// Default time interval (5 minutes) that must pass for <see cref="RequestRefresh"/> to obtain a new configuration.
         /// </summary>
         public static readonly TimeSpan DefaultRefreshInterval = new TimeSpan(0, 0, 5, 0);
 

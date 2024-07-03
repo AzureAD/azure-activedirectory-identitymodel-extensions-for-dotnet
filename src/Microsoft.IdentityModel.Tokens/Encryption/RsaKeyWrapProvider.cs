@@ -82,7 +82,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Checks if a specified algorithm is supported.
+        /// Checks if the specified algorithm is supported.
         /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for cryptographic operations.</param>
         /// <param name="algorithm">The KeyWrap algorithm to apply.</param>

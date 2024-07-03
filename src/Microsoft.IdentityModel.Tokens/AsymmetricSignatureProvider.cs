@@ -20,7 +20,7 @@ namespace Microsoft.IdentityModel.Tokens
         private Dictionary<string, int> _minimumAsymmetricKeySizeInBitsForVerifyingMap;
 
         /// <summary>
-        /// Mapping from algorithm to minimum <see cref="SecurityKey.KeySize"/> when creating signatures.
+        /// Mapping from algorithm to minimum <see cref="AsymmetricSecurityKey"/>.KeySize when creating signatures.
         /// </summary>
         public static readonly Dictionary<string, int> DefaultMinimumAsymmetricKeySizeInBitsForSigningMap = new Dictionary<string, int>()
         {
@@ -126,7 +126,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets the mapping from algorithm to the minimum <see cref="SecurityKey.KeySize"/> for creating signatures.
+        /// Gets the mapping from algorithm to the minimum <see cref="AsymmetricSecurityKey"/>.KeySize for creating signatures.
         /// </summary>
         public IReadOnlyDictionary<string, int> MinimumAsymmetricKeySizeInBitsForSigningMap
         {
@@ -134,7 +134,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets the mapping from algorithm to the minimum <see cref="SecurityKey.KeySize"/> for verifying signatures.
+        /// Gets the mapping from algorithm to the minimum <see cref="AsymmetricSecurityKey"/>.KeySize for verifying signatures.
         /// </summary>
         public IReadOnlyDictionary<string, int> MinimumAsymmetricKeySizeInBitsForVerifyingMap
         {

@@ -626,7 +626,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Checks if a specified hash algorithm is supported.
+        /// Checks if the specified hash algorithm is supported.
         /// </summary>
         /// <param name="algorithm">The name of the hash algorithm.</param>
         /// <remarks>Considers only known hash algorithms.</remarks>

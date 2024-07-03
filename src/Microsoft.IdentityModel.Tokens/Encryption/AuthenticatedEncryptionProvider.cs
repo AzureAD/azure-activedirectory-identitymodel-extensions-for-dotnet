@@ -257,7 +257,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Encrypts the specified plaintext.
         /// </summary>
         /// <param name="plaintext">The data to be encrypted.</param>
-        /// <param name="iv">The initialization vector used for the encryption algorithm.</param>
+        /// <param name="iv">The initialization vector to be used with the encryption algorithm.</param>
         /// <param name="authenticatedData">Will be combined with the initialization vector and ciphertext to create an authentication tag.</param>
         /// <returns>A <see cref="AuthenticatedEncryptionResult"/> containing the ciphertext, initialization vector, and the authentication tag.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="plaintext"/> is null or empty.</exception>
@@ -348,11 +348,11 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Checks if an key/algorithm pair is supported.
+        /// Checks if the key/algorithm pair is supported.
         /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/>.</param>
         /// <param name="algorithm">The algorithm to check.</param>
-        /// <returns><see langword="true"/> if key/algorithm pair is supported.</returns>
+        /// <returns><see langword="true"/> if the key/algorithm pair is supported.</returns>
         protected virtual bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
         {
             return SupportedAlgorithms.IsSupportedEncryptionAlgorithm(algorithm, key);
