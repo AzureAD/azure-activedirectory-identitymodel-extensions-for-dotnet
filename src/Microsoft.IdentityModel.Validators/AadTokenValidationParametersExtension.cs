@@ -124,7 +124,7 @@ namespace Microsoft.IdentityModel.Validators
                 case JsonWebToken jsonWebToken:
                     if (jsonWebToken.TryGetPayloadValue<string>("tid", out string tid))
                     {
-                        EnforceSingleClaimCaseInsensitive(jsonWebToken.Keys, "tid");
+                        EnforceSingleClaimCaseInsensitive(jsonWebToken.PayloadClaimNames, "tid");
                         return tid;
                     }
 
