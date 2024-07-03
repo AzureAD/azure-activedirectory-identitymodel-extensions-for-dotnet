@@ -124,7 +124,7 @@ namespace Microsoft.IdentityModel.Validators
                 case JsonWebToken jsonWebToken:
                     if (jsonWebToken.TryGetPayloadValue<string>("tid", out string tid))
                     {
-                        EnforceSingleClaimCaseInsensitive(jsonWebToken.Claims, "tid");
+                        EnforceSingleClaimCaseInsensitive(jsonWebToken.Keys, "tid");
                         return tid;
                     }
 
@@ -133,7 +133,7 @@ namespace Microsoft.IdentityModel.Validators
                 case JwtSecurityToken jwtSecurityToken:
                     if ((jwtSecurityToken.Payload.TryGetValue("tid", out object tidObject) && tidObject is string jwtTid))
                     {
-                        EnforceSingleClaimCaseInsensitive(jwtSecurityToken.Claims, "tid");
+                        EnforceSingleClaimCaseInsensitive(jwtSecurityToken.Payload.Keys, "tid");
                         return jwtTid;
                     }
 
@@ -144,12 +144,12 @@ namespace Microsoft.IdentityModel.Validators
             }
         }
 
-        private static void EnforceSingleClaimCaseInsensitive(IEnumerable<Claim> claims, string claimType)
+        private static void EnforceSingleClaimCaseInsensitive(IEnumerable<string> keys, string claimType)
         {
             bool claimSeen = false;
-            foreach (var claim in claims)
+            foreach (var key in keys)
             {
-                if (string.Equals(claim.Type, claimType, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(key, claimType, StringComparison.OrdinalIgnoreCase))
                 {
                     if (claimSeen)
                         throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogHelper.FormatInvariant(LogMessages.IDX40011, claimType)));
