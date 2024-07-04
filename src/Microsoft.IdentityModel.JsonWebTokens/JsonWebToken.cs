@@ -625,6 +625,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return Payload.GetClaim(key, Issuer ?? ClaimsIdentity.DefaultIssuer);
         }
 
+        /// <summary>
+        /// Gets the names of the payload claims on the JsonWebToken.
+        /// </summary>
+        internal IReadOnlyCollection<string> PayloadClaimNames => Payload._jsonClaims.Keys;
+
         internal ClaimsIdentity ClaimsIdentity
         {
             get
