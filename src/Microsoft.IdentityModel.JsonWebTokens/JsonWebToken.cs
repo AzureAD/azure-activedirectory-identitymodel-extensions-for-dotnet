@@ -190,6 +190,26 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             set;
         }
 
+        /// <summary>
+        /// Gets the names of the payload claims on the JsonWebToken.
+        /// </summary>
+        internal IReadOnlyCollection<string> PayloadClaimNames
+        {
+#if NET45
+            get
+            {
+                var payloadClaimNames = new List<string>();
+
+                foreach (Claim claim in Claims)
+                    payloadClaimNames.Add(claim.Type);
+
+                return payloadClaimNames;
+            }
+#else
+            get => Payload.Elements.Keys;
+#endif
+        }
+
         internal ClaimsIdentity ClaimsIdentity
         {
             get
