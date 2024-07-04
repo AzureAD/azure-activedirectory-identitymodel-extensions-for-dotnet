@@ -807,6 +807,72 @@ namespace Microsoft.IdentityModel.TestUtils
             return context.Merge(localContext);
         }
 
+        public static bool AreTokenReplayValidationResultsEqual(object object1, object object2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, context))
+                return context.Merge(localContext);
+
+            return AreTokenReplayValidationResultsEqual(
+                object1 as ReplayValidationResult,
+                object2 as ReplayValidationResult,
+                "ReplayValidationResult1",
+                "ReplayValidationResult2",
+                null,
+                context);
+        }
+
+        internal static bool AreTokenReplayValidationResultsEqual(
+            ReplayValidationResult replayValidationResult1,
+            ReplayValidationResult replayValidationResult2,
+            string name1,
+            string name2,
+            string stackPrefix,
+            CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(replayValidationResult1, replayValidationResult2, localContext))
+                return context.Merge(localContext);
+
+            if (replayValidationResult1.ExpirationTime != replayValidationResult2.ExpirationTime)
+                localContext.Diffs.Add($"ReplayValidationResult1.ExpirationTime: '{replayValidationResult1.ExpirationTime}' != ReplayValidationResult2.ExpirationTime: '{replayValidationResult2.ExpirationTime}'");
+
+            if (replayValidationResult1.IsValid != replayValidationResult2.IsValid)
+                localContext.Diffs.Add($"ReplayValidationResult1.IsValid: {replayValidationResult1.IsValid} != ReplayValidationResult2.IsValid: {replayValidationResult2.IsValid}");
+
+            if (replayValidationResult1.ValidationFailureType != replayValidationResult2.ValidationFailureType)
+                localContext.Diffs.Add($"ReplayValidationResult1.ValidationFailureType: {replayValidationResult1.ValidationFailureType} != ReplayValidationResult2.ValidationFailureType: {replayValidationResult2.ValidationFailureType}");
+
+            // true => both are not null.
+            if (ContinueCheckingEquality(replayValidationResult1.Exception, replayValidationResult2.Exception, localContext))
+            {
+                AreStringsEqual(
+                    replayValidationResult1.Exception.Message,
+                    replayValidationResult2.Exception.Message,
+                    $"({name1}).Exception.Message",
+                    $"({name2}).Exception.Message",
+                    localContext);
+
+                AreStringsEqual(
+                    replayValidationResult1.Exception.Source,
+                    replayValidationResult2.Exception.Source,
+                    $"({name1}).Exception.Source",
+                    $"({name2}).Exception.Source",
+                    localContext);
+
+                if (!string.IsNullOrEmpty(stackPrefix))
+                    AreStringPrefixesEqual(
+                        replayValidationResult1.Exception.StackTrace.Trim(),
+                        replayValidationResult2.Exception.StackTrace.Trim(),
+                        $"({name1}).Exception.StackTrace",
+                        $"({name2}).Exception.StackTrace",
+                        stackPrefix.Trim(),
+                        localContext);
+            }
+
+            return context.Merge(localContext);
+        }
+
         public static bool AreJArraysEqual(object object1, object object2, CompareContext context)
         {
             var localContext = new CompareContext(context);
