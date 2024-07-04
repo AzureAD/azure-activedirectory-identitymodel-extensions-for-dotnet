@@ -124,6 +124,29 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         }
 
         /// <summary>
+        /// Initializes an new instance of <see cref="OpenIdConnectConfiguration"/> from a json byte array.
+        /// </summary>
+        /// <param name="utf8Json">a byte array containing the metadata</param>
+        /// <exception cref="ArgumentNullException">Throw if <paramref name="utf8Json"/> is null or empty.</exception>
+        public OpenIdConnectConfiguration(Span<byte> utf8Json)
+        {
+            if (utf8Json == null)
+                throw LogHelper.LogArgumentNullException(nameof(utf8Json));
+
+            try
+            {
+                if (LogHelper.IsEnabled(EventLogLevel.Verbose))
+                    LogHelper.LogVerbose(LogMessages.IDX21819, utf8Json.ToArray(), LogHelper.MarkAsNonPII(ClassName));
+
+                OpenIdConnectConfigurationSerializer.Read(utf8Json, this);
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX21815, utf8Json.ToArray(), LogHelper.MarkAsNonPII(ClassName)), ex));
+            }
+        }
+
+        /// <summary>
         /// When deserializing from JSON any properties that are not defined will be placed here.
         /// </summary>
         [JsonExtensionData]

@@ -113,6 +113,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             return Read(json, new OpenIdConnectConfiguration());
         }
 
+        public static OpenIdConnectConfiguration Read(Span<byte> utf8Json, OpenIdConnectConfiguration config)
+        {
+            var reader = new Utf8JsonReader(utf8Json);
+            return Read(ref reader, config);
+        }
+
         public static OpenIdConnectConfiguration Read(string json, OpenIdConnectConfiguration config)
         {
             Utf8JsonReader reader = new(Encoding.UTF8.GetBytes(json).AsSpan());
@@ -595,6 +601,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 
             return config;
         }
+
         #endregion
 
         #region Write

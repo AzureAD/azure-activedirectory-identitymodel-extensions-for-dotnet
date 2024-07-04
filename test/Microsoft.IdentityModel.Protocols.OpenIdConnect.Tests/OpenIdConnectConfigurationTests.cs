@@ -6,10 +6,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Reflection;
-using System.Text.Json;
+using System.Text;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
@@ -44,7 +43,67 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        private void RunOpenIdConnectConfigurationTest(object obj, OpenIdConnectConfiguration compareTo, ExpectedException expectedException, CompareContext context, bool asString = true)
+        [Fact]
+        public void ConstructorsUtf8Json()
+        {
+            var context = new CompareContext { Title = "OpenIdConnectConfigurationTests.ConstructorsUtf8Json" };
+
+            RunOpenIdConnectConfigurationTest(
+                (Span<byte>)null,
+                new OpenIdConnectConfiguration(),
+                ExpectedException.ArgumentNullException(),
+                context);
+
+            RunOpenIdConnectConfigurationTest(
+                ToUtf8Span(OpenIdConfigData.JsonAllValues),
+                OpenIdConfigData.FullyPopulated,
+                ExpectedException.NoExceptionExpected,
+                context);
+
+            RunOpenIdConnectConfigurationTest(
+                ToUtf8Span(OpenIdConfigData.OpenIdConnectMetatadataBadJson),
+                null,
+                new ExpectedException(
+                    typeof(ArgumentException),
+                    substringExpected: "IDX21815:",
+                    ignoreInnerException: true),
+                context);
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        private void RunOpenIdConnectConfigurationTest(
+            Span<byte> utf8String,
+            OpenIdConnectConfiguration compareTo,
+            ExpectedException expectedException,
+            CompareContext context)
+        {
+            bool exceptionHit = false;
+
+            OpenIdConnectConfiguration openIdConnectConfiguration = null;
+            try
+            {
+                openIdConnectConfiguration = new OpenIdConnectConfiguration(utf8String);
+                expectedException.ProcessNoException(context.Diffs);
+            }
+            catch (Exception ex)
+            {
+                exceptionHit = true;
+                expectedException.ProcessException(ex, context.Diffs);
+            }
+
+            if (!exceptionHit && compareTo != null)
+            {
+                IdentityComparer.AreEqual(openIdConnectConfiguration, compareTo, context);
+            }
+        }
+
+        private void RunOpenIdConnectConfigurationTest(
+            object obj,
+            OpenIdConnectConfiguration compareTo,
+            ExpectedException expectedException,
+            CompareContext context,
+            bool asString = true)
         {
             bool exceptionHit = false;
 
@@ -68,6 +127,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             {
                 IdentityComparer.AreEqual(openIdConnectConfiguration, compareTo, context);
             }
+        }
+
+        private static Span<byte> ToUtf8Span(string input)
+        {
+            if (input == null)
+                throw new ArgumentNullException(nameof(input));
+            byte[] bytes = Encoding.UTF8.GetBytes(input);
+            return new Span<byte>(bytes);
         }
 
         [Fact]

@@ -79,6 +79,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         internal const string IDX21816 = "IDX21816: The number of signing keys must be greater or equal to '{0}'. Value: '{1}'.";
         internal const string IDX21817 = "IDX21817: The OpenIdConnectConfiguration did not contain any JsonWebKeys. This is required to validate the configuration.";
         internal const string IDX21818 = "IDX21818: The OpenIdConnectConfiguration's valid signing keys cannot be less than {0}. Values: {1}. Invalid keys: {2}";
+        internal const string IDX21819 = "IDX21819: Deserializing utf8 json into json web keys.";
 #pragma warning restore 1591
     }
 }
