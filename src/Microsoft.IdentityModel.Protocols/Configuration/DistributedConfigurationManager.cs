@@ -31,6 +31,8 @@ namespace Microsoft.IdentityModel.Protocols.Configuration
         private readonly IDistributedConfigurationRetriever<T> _distributedConfigurationRetriever;
         private readonly IConfigurationValidator<T> _configValidator;
         private readonly DistributedConfigurationOptions _distributedConfigurationOptions;
+        private readonly IDistributedCache _l2Cache = new RedisCache(new RedisCacheOptions());
+        private readonly IConfigurationDeserializer<T> _configurationDeserializer;
         private T _currentConfiguration;
         private Exception _fetchMetadataFailure;
         private TimeSpan _bootstrapRefreshInterval = TimeSpan.FromSeconds(1);
@@ -42,10 +44,12 @@ namespace Microsoft.IdentityModel.Protocols.Configuration
         /// </summary>
         /// <param name="metadataAddress">The address to obtain configuration.</param>
         /// <param name="configRetriever">The <see cref="IDistributedConfigurationRetriever{T}"/></param>
+        /// <param name="configurationDeserializer">The <see cref="IConfigurationDeserializer{T}"/></param>
         public DistributedConfigurationManager(
             string metadataAddress,
-            IDistributedConfigurationRetriever<T> configRetriever)
-            : this(metadataAddress, configRetriever, new HttpDocumentRetriever(), new LastKnownGoodConfigurationCacheOptions(), new DistributedConfigurationOptions())
+            IDistributedConfigurationRetriever<T> configRetriever,
+            IConfigurationDeserializer<T> configurationDeserializer)
+            : this(metadataAddress, configRetriever, new HttpDocumentRetriever(), new LastKnownGoodConfigurationCacheOptions(), new DistributedConfigurationOptions(), configurationDeserializer)
         {
         }
 
@@ -55,11 +59,13 @@ namespace Microsoft.IdentityModel.Protocols.Configuration
         /// <param name="metadataAddress">The address to obtain configuration.</param>
         /// <param name="configRetriever">The <see cref="IDistributedConfigurationRetriever{T}"/></param>
         /// <param name="httpClient">The client to use when obtaining configuration.</param>
+        /// <param name="configurationDeserializer">The <see cref="IConfigurationDeserializer{T}"/></param>
         public DistributedConfigurationManager(
             string metadataAddress,
             IDistributedConfigurationRetriever<T> configRetriever,
-            HttpClient httpClient)
-            : this(metadataAddress, configRetriever, new HttpDocumentRetriever(httpClient), new LastKnownGoodConfigurationCacheOptions(), new DistributedConfigurationOptions())
+            HttpClient httpClient,
+            IConfigurationDeserializer<T> configurationDeserializer)
+            : this(metadataAddress, configRetriever, new HttpDocumentRetriever(httpClient), new LastKnownGoodConfigurationCacheOptions(), new DistributedConfigurationOptions(), configurationDeserializer)
         {
         }
 
@@ -69,14 +75,16 @@ namespace Microsoft.IdentityModel.Protocols.Configuration
         /// <param name="metadataAddress">The address to obtain configuration.</param>
         /// <param name="configRetriever">The <see cref="IDistributedConfigurationRetriever{T}"/></param>
         /// <param name="docRetriever">The <see cref="IDocumentRetriever"/> that reaches out to obtain the configuration.</param>
+        /// <param name="configurationDeserializer">The <see cref="IConfigurationDeserializer{T}"/></param>
         /// <exception cref="ArgumentNullException">If 'metadataAddress' is null or empty.</exception>
         /// <exception cref="ArgumentNullException">If 'configRetriever' is null.</exception>
         /// <exception cref="ArgumentNullException">If 'docRetriever' is null.</exception>
         public DistributedConfigurationManager(
             string metadataAddress,
             IDistributedConfigurationRetriever<T> configRetriever,
-            IDocumentRetriever docRetriever)
-            : this(metadataAddress, configRetriever, docRetriever, new LastKnownGoodConfigurationCacheOptions(), new DistributedConfigurationOptions())
+            IDocumentRetriever docRetriever,
+            IConfigurationDeserializer<T> configurationDeserializer)
+            : this(metadataAddress, configRetriever, docRetriever, new LastKnownGoodConfigurationCacheOptions(), new DistributedConfigurationOptions(), configurationDeserializer)
         {
         }
 
@@ -88,6 +96,7 @@ namespace Microsoft.IdentityModel.Protocols.Configuration
         /// <param name="docRetriever">The <see cref="IDocumentRetriever"/> that reaches out to obtain the configuration.</param>
         /// <param name="lkgCacheOptions">The <see cref="LastKnownGoodConfigurationCacheOptions"/></param>
         /// <param name="distributedConfigurationOptions">The <see cref="DistributedConfigurationOptions"/></param>
+        /// <param name="configurationDeserializer">The <see cref="IConfigurationDeserializer{T}"/></param>
         /// <exception cref="ArgumentNullException">If 'metadataAddress' is null or empty.</exception>
         /// <exception cref="ArgumentNullException">If 'configRetriever' is null.</exception>
         /// <exception cref="ArgumentNullException">If 'docRetriever' is null.</exception>
@@ -97,7 +106,8 @@ namespace Microsoft.IdentityModel.Protocols.Configuration
             IDistributedConfigurationRetriever<T> configurationRetriever,
             IDocumentRetriever docRetriever,
             LastKnownGoodConfigurationCacheOptions lkgCacheOptions,
-            DistributedConfigurationOptions distributedConfigurationOptions)
+            DistributedConfigurationOptions distributedConfigurationOptions,
+            IConfigurationDeserializer<T> configurationDeserializer)
             : base(lkgCacheOptions)
         {
             if (string.IsNullOrWhiteSpace(metadataAddress))
@@ -114,6 +124,8 @@ namespace Microsoft.IdentityModel.Protocols.Configuration
             _distributedConfigurationRetriever = configurationRetriever;
             _refreshLock = new SemaphoreSlim(1);
             _distributedConfigurationOptions = distributedConfigurationOptions;
+            _configurationDeserializer = configurationDeserializer;
+            _configurationDeserializer = configurationDeserializer;
         }
 
         /// <summary>
@@ -123,9 +135,15 @@ namespace Microsoft.IdentityModel.Protocols.Configuration
         /// <param name="configRetriever">The <see cref="IDistributedConfigurationRetriever{T}"/></param>
         /// <param name="docRetriever">The <see cref="IDocumentRetriever"/> that reaches out to obtain the configuration.</param>
         /// <param name="configValidator">The <see cref="IConfigurationValidator{T}"/></param>
+        /// <param name="configurationDeserializer">The <see cref="IConfigurationDeserializer{T}"/></param>
         /// <exception cref="ArgumentNullException">If 'configValidator' is null.</exception>
-        public DistributedConfigurationManager(string metadataAddress, IDistributedConfigurationRetriever<T> configRetriever, IDocumentRetriever docRetriever, IConfigurationValidator<T> configValidator)
-            : this(metadataAddress, configRetriever, docRetriever, configValidator, new LastKnownGoodConfigurationCacheOptions(), new DistributedConfigurationOptions())
+        public DistributedConfigurationManager(
+            string metadataAddress,
+            IDistributedConfigurationRetriever<T> configRetriever,
+            IDocumentRetriever docRetriever,
+            IConfigurationValidator<T> configValidator,
+            IConfigurationDeserializer<T> configurationDeserializer)
+            : this(metadataAddress, configRetriever, docRetriever, configValidator, new LastKnownGoodConfigurationCacheOptions(), new DistributedConfigurationOptions(), configurationDeserializer)
         {
         }
 
@@ -138,9 +156,17 @@ namespace Microsoft.IdentityModel.Protocols.Configuration
         /// <param name="configValidator">The <see cref="IConfigurationValidator{T}"/></param>
         /// <param name="lkgCacheOptions">The <see cref="LastKnownGoodConfigurationCacheOptions"/></param>
         /// <param name="distributedConfigurationOptions">The <see cref="DistributedConfigurationOptions"/></param>
+        /// <param name="configurationDeserializer">The <see cref="IConfigurationDeserializer{T}"/></param>
         /// <exception cref="ArgumentNullException">If 'configValidator' is null.</exception>
-        public DistributedConfigurationManager(string metadataAddress, IDistributedConfigurationRetriever<T> configRetriever, IDocumentRetriever docRetriever, IConfigurationValidator<T> configValidator, LastKnownGoodConfigurationCacheOptions lkgCacheOptions, DistributedConfigurationOptions distributedConfigurationOptions)
-            : this(metadataAddress, configRetriever, docRetriever, lkgCacheOptions, distributedConfigurationOptions)
+        public DistributedConfigurationManager(
+            string metadataAddress,
+            IDistributedConfigurationRetriever<T> configRetriever,
+            IDocumentRetriever docRetriever,
+            IConfigurationValidator<T> configValidator,
+            LastKnownGoodConfigurationCacheOptions lkgCacheOptions,
+            DistributedConfigurationOptions distributedConfigurationOptions,
+            IConfigurationDeserializer<T> configurationDeserializer)
+            : this(metadataAddress, configRetriever, docRetriever, lkgCacheOptions, distributedConfigurationOptions, configurationDeserializer)
         {
             if (configValidator == null)
                 throw LogHelper.LogArgumentNullException(nameof(configValidator));
@@ -158,6 +184,24 @@ namespace Microsoft.IdentityModel.Protocols.Configuration
             return await GetConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
+        private async Task<T> GetConfigurationFromL2CacheAsync(CancellationToken cancel)
+        {
+            var cachedConfigString = await _l2Cache.GetStringAsync(MetadataAddress, cancel).ConfigureAwait(true);
+            T configuration = null;
+            if (cachedConfigString != null)
+            {
+                configuration = _configurationDeserializer.Deserialize(new Span<byte>(Encoding.UTF8.GetBytes(cachedConfigString)));
+
+                if (_configValidator != null)
+                {
+                    ConfigurationValidationResult result = _configValidator.Validate(configuration);
+                    if (!result.Succeeded)
+                        configuration = null;
+                }
+            }
+            return configuration;
+        }
+
         /// <summary>
         /// Obtains an updated version of Configuration.
         /// </summary>
@@ -166,21 +210,26 @@ namespace Microsoft.IdentityModel.Protocols.Configuration
         /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
         public async Task<T> GetConfigurationAsync(CancellationToken cancel)
         {
-            if (_currentConfiguration != null && _syncAfter > DateTimeOffset.UtcNow)
+            bool shouldRefreshCache = _syncAfter <= DateTimeOffset.UtcNow;
+
+            if (!shouldRefreshCache)
             {
+                if (_currentConfiguration == null)
+                    _currentConfiguration = await GetConfigurationFromL2CacheAsync(cancel).ConfigureAwait(true);
                 return _currentConfiguration;
             }
 
             await _refreshLock.WaitAsync(cancel).ConfigureAwait(false);
             try
             {
-                if (_syncAfter <= DateTimeOffset.UtcNow)
+                if (shouldRefreshCache)
                 {
                     try
                     {
                         // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
                         // The transport should have it's own timeouts, etc..
-                        var configuration = await _distributedConfigurationRetriever.GetConfigurationAsync(MetadataAddress, _docRetriever, CancellationToken.None).ConfigureAwait(false);
+                        T configuration = await _distributedConfigurationRetriever.GetConfigurationAsync(MetadataAddress, _docRetriever, CancellationToken.None).ConfigureAwait(false);
+
                         if (_configValidator != null)
                         {
                             ConfigurationValidationResult result = _configValidator.Validate(configuration);
@@ -193,6 +242,7 @@ namespace Microsoft.IdentityModel.Protocols.Configuration
                         _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval +
                             TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 20)));
                         _currentConfiguration = configuration;
+                        
                     }
                     catch (Exception ex)
                     {

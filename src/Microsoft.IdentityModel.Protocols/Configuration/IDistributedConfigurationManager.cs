@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Microsoft.IdentityModel.Protocols
+namespace Microsoft.IdentityModel.Protocols.Configuration
 {
     internal interface IDistributedConfigurationManager<T> where T : class
     {
