@@ -190,7 +190,7 @@ namespace Microsoft.IdentityModel.Protocols.Configuration
             T configuration = null;
             if (cachedConfigString != null)
             {
-                configuration = _configurationSerializer.Serialize(new Span<byte>(Encoding.UTF8.GetBytes(cachedConfigString)));
+                configuration = _configurationSerializer.Deserialize(cachedConfigString);
 
                 if (_configValidator != null)
                 {
@@ -310,8 +310,7 @@ namespace Microsoft.IdentityModel.Protocols.Configuration
         /// <returns></returns>
         public Task SetConfigurationAsync(T configuration, CancellationToken cancellationToken)
 		{
-			var serializedConfigBytes = _configurationSerializer.Deserialize(configuration);
-			var serializedConfig = Encoding.UTF8.GetString(serializedConfigBytes.ToArray());
+			var serializedConfig = _configurationSerializer.Serialize(configuration);
 			return _l2Cache.SetStringAsync(MetadataAddress, serializedConfig, cancellationToken);
 		}
 
