@@ -9,13 +9,20 @@ namespace Microsoft.IdentityModel.Protocols.Configuration
     /// <summary>
     /// 
     /// </summary>
-    public interface IConfigurationDeserializer<T> where T : class
+    public interface IConfigurationSerializer<T> where T : class
     {
         /// <summary>
         /// 
         /// </summary>
         /// <param name="metadata"></param>
         /// <returns></returns>
-        T Deserialize(Span<byte> metadata);
+        T Serialize(Span<byte> metadata);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="metadata"></param>
+        /// <returns></returns>
+        Span<byte> Deserialize(T metadata);
     }
 }
