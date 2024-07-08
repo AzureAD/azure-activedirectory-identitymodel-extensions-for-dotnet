@@ -245,7 +245,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="authenticatedData">Will be combined with the initialization vector and ciphertext to create an authentication tag.</param>
         /// <returns>A <see cref="AuthenticatedEncryptionResult"/> the containing ciphertext, initialization vector, the and authentication tag.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="plaintext"/> is null or empty.</exception>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="authenticationData"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="authenticatedData"/> is null or empty.</exception>
         /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if AES crypto operation threw. See inner exception for details.</exception>
         /// <exception cref="ObjectDisposedException">Thrown if the internal <see cref="SignatureProvider"/> is disposed.</exception>
         public virtual AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData)
@@ -261,7 +261,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="authenticatedData">Will be combined with the initialization vector and ciphertext to create an authentication tag.</param>
         /// <returns>A <see cref="AuthenticatedEncryptionResult"/> containing the ciphertext, initialization vector, and the authentication tag.</returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="plaintext"/> is null or empty.</exception>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="authenticationData"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="authenticatedData"/> is null or empty.</exception>
         /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if AES crypto operation threw. See inner exception for details.</exception>
         /// <exception cref="ObjectDisposedException">Thrown if the internal <see cref="SignatureProvider"/> is disposed.</exception>
         public virtual AuthenticatedEncryptionResult Encrypt(byte[] plaintext, byte[] authenticatedData, byte[] iv)
