@@ -313,7 +313,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </para>
         /// </remarks>
         /// <returns>A <see cref="SignatureProvider"/> instance that can be used to validate signatures using the <see cref="SecurityKey"/> and algorithm.</returns>
-        public virtual SignatureProvider CreateForVerifying(SecurityKey key, string algorithm, bool cacheProvider
+        public virtual SignatureProvider CreateForVerifying(SecurityKey key, string algorithm, bool cacheProvider)
         {
             return CreateSignatureProvider(key, algorithm, false, cacheProvider);
         }
