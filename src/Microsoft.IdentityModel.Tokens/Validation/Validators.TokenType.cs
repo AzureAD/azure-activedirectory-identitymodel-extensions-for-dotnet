@@ -90,6 +90,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             if (validationParameters == null)
+            {
                 return new TokenTypeValidationResult(
                     type,
                     ValidationFailureType.NullArgument,
@@ -99,6 +100,7 @@ namespace Microsoft.IdentityModel.Tokens
                             LogHelper.MarkAsNonPII(nameof(validationParameters))),
                         typeof(ArgumentNullException),
                         new StackFrame(true)));
+            }
 
             if (validationParameters.TypeValidator == null && (validationParameters.ValidTypes == null || !validationParameters.ValidTypes.Any()))
             {
@@ -141,7 +143,9 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             if (LogHelper.IsEnabled(EventLogLevel.Informational))
+            {
                 LogHelper.LogInformation(LogMessages.IDX10258, LogHelper.MarkAsNonPII(type));
+            }
 
             return new TokenTypeValidationResult(type);
         }

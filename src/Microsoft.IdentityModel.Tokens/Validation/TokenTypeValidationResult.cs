@@ -12,6 +12,7 @@ namespace Microsoft.IdentityModel.Tokens
     internal class TokenTypeValidationResult : ValidationResult
     {
         private Exception? _exception;
+        private const string TokenSource = "Microsoft.IdentityModel.Tokens";
 
         /// <summary>
         /// Creates an instance of <see cref="TokenTypeValidationResult"/>.
@@ -52,7 +53,7 @@ namespace Microsoft.IdentityModel.Tokens
                 if (_exception is SecurityTokenInvalidTypeException securityTokenInvalidTypeException)
                 {
                     securityTokenInvalidTypeException.InvalidType = Type;
-                    securityTokenInvalidTypeException.Source = "Microsoft.IdentityModel.Tokens";
+                    securityTokenInvalidTypeException.Source = TokenSource;
                 }
 
                 return _exception;
