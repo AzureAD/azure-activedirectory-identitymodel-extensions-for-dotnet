@@ -29,27 +29,27 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public const string ClientCredentials = "client_credentials";
 
         /// <summary>
-        /// Indicates the 'saml2-bearer' grant type. See <see href="https://datatracker.ietf.org/doc/html/rfc7522"/>.
+        /// Indicates the 'saml2-bearer' grant type. See: <see href="https://datatracker.ietf.org/doc/html/rfc7522"/>.
         /// </summary>
         public const string Saml2Bearer = "urn:ietf:params:oauth:grant-type:saml2-bearer";
 
         /// <summary>
-        /// Indicates the 'jwt-bearer' grant type. See <see href="https://datatracker.ietf.org/doc/html/rfc7523"/>.
+        /// Indicates the 'jwt-bearer' grant type. See: <see href="https://datatracker.ietf.org/doc/html/rfc7523"/>.
         /// </summary>
         public const string JwtBearer = "urn:ietf:params:oauth:grant-type:jwt-bearer";
 
         /// <summary>
-        /// Indicates the 'device_code' grant type. See <see href="https://datatracker.ietf.org/doc/html/rfc8628"/>.
+        /// Indicates the 'device_code' grant type. See: <see href="https://datatracker.ietf.org/doc/html/rfc8628"/>.
         /// </summary>
         public const string DeviceCode = "urn:ietf:params:oauth:grant-type:device_code";
 
         /// <summary>
-        /// Indicates the 'token-exchange' grant type. See <see href="https://datatracker.ietf.org/doc/html/rfc8693"/>.
+        /// Indicates the 'token-exchange' grant type. See: <see href="https://datatracker.ietf.org/doc/html/rfc8693"/>.
         /// </summary>
         public const string TokenExchange = "urn:ietf:params:oauth:grant-type:token-exchange";
 
         /// <summary>
-        /// Indicates the 'ciba' grant type. See <see href="https://openid.net/specs/openid-client-initiated-backchannel-authentication-core-1_0.html"/>.
+        /// Indicates the 'ciba' grant type. See: <see href="https://openid.net/specs/openid-client-initiated-backchannel-authentication-core-1_0.html"/>.
         /// </summary>
         public const string Ciba = "urn:openid:params:grant-type:ciba";
     }
