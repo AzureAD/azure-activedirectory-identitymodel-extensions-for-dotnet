@@ -1343,7 +1343,7 @@ namespace System.IdentityModel.Tokens.Jwt
             bool kidMatched = false;
             IEnumerable<SecurityKey> keys = null;
 
-            if (validationParameters.RequireSignedTokens)
+            if (validationParameters.RequireSignedTokens == false)
                 return jwtToken;
 
             if (string.IsNullOrEmpty(jwtToken.RawSignature))
