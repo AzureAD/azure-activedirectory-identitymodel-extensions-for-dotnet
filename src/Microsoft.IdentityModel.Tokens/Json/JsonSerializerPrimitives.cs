@@ -1129,6 +1129,10 @@ namespace Microsoft.IdentityModel.Tokens.Json
 
                 writer.WriteEndObject();
             }
+            else if ((typeof(byte[])).IsAssignableFrom(objType))
+            {
+                writer.WriteBase64String(key, (byte[])obj);
+            }
             else if (typeof(IList).IsAssignableFrom(objType))
             {
                 IList list = (IList)obj;
