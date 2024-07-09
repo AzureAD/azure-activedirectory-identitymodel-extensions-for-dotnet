@@ -28,9 +28,13 @@ namespace Microsoft.IdentityModel.Tokens
         public abstract bool HasPrivateKey { get; }
 
         /// <summary>
-        /// Gets the status of the private key.
+        /// Gets a value indicating the existence of the private key.
         /// </summary>
-        /// <return><see cref="PrivateKeyStatus.Exists"/> if private key exists for sure; <see cref="PrivateKeyStatus.DoesNotExist"/> if private key doesn't exist for sure; <see cref="PrivateKeyStatus.Unknown"/> if we cannot determine.</return>
+        /// <returns>
+        /// <see cref="PrivateKeyStatus.Exists"/> if the private key exists.
+        /// <see cref="PrivateKeyStatus.DoesNotExist"/> if the private key does not exist.
+        /// <see cref="PrivateKeyStatus.Unknown"/> if the existence of the private key cannot be determined.
+        /// </returns>
         public abstract PrivateKeyStatus PrivateKeyStatus { get; }
     }
 

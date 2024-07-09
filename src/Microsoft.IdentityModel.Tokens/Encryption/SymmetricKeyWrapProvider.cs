@@ -177,11 +177,11 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Determines if a specified algorithm is supported.
+        /// Determines whether the specified algorithm is supported.
         /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/> to use for cryptographic operations.</param>
         /// <param name="algorithm">The algorithm to check for support.</param>
-        /// <returns>true if the algorithm is supported; otherwise, false.</returns>
+        /// <returns><see langword="true"/> if the algorithm is supported; otherwise, <see langword="false"/>.</returns>
         protected virtual bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
         {
             return SupportedAlgorithms.IsSupportedSymmetricKeyWrap(algorithm, key);

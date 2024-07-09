@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityKey">The key used by the cryptographic provider.</param>
         /// <param name="algorithm">The algorithm used by the cryptographic provider.</param>
         /// <param name="typeofProvider">The type of the cryptographic provider obtained by calling object.GetType().</param>
-        /// <param name="willCreateSignatures">A boolean indicating if the <see cref="SignatureProvider"/> will be used to sign.</param>
+        /// <param name="willCreateSignatures">If true, the provider will be used for creating signatures.</param>
         /// <param name="signatureProvider">The <see cref="SignatureProvider"/> if found.</param>
         /// <returns>True if a <see cref="SignatureProvider"/> was found; false otherwise.</returns>
         public abstract bool TryGetSignatureProvider(SecurityKey securityKey, string algorithm, string typeofProvider, bool willCreateSignatures, out SignatureProvider signatureProvider);

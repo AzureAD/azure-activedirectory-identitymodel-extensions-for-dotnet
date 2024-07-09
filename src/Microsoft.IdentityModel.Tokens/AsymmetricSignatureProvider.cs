@@ -293,8 +293,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// Validates that an asymmetric key size is of sufficient size for a SignatureAlgorithm.
         /// </summary>
         /// <param name="key">The asymmetric key to validate.</param>
-        /// <param name="algorithm">Algorithm for which this key will be used.</param>
-        /// <param name="willCreateSignatures">Whether they key will be used for creating signatures.</param>
+        /// <param name="algorithm">The algorithm for which this key will be used.</param>
+        /// <param name="willCreateSignatures">If true, the provider will be used for creating signatures.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="key"/>is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="algorithm"/> is null or empty.</exception>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="key.KeySize"/> is less than the minimum acceptable size.</exception>
