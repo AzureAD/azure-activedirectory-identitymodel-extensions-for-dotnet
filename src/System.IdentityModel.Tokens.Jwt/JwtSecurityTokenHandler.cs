@@ -1343,12 +1343,12 @@ namespace System.IdentityModel.Tokens.Jwt
             bool kidMatched = false;
             IEnumerable<SecurityKey> keys = null;
 
+            if (validationParameters.RequireSignedTokens)
+                return jwtToken;
+
             if (string.IsNullOrEmpty(jwtToken.RawSignature))
             {
-                if (validationParameters.RequireSignedTokens)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10504, jwtToken)));
-                else
-                    return jwtToken;
+                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10504, jwtToken)));
             }
 
             if (validationParameters.IssuerSigningKeyResolverUsingConfiguration != null)
