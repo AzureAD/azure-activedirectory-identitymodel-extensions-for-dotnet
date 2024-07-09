@@ -1118,6 +1118,8 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 writer.WriteBoolean(key, b);
             else if (obj is DateTime dt)
                 writer.WriteString(key, dt.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture));
+            else if (obj is byte[] byteArray)
+                writer.WriteBase64String(key, byteArray);
             else if (typeof(IDictionary).IsAssignableFrom(objType))
             {
                 IDictionary dictionary = (IDictionary)obj;
@@ -1128,10 +1130,6 @@ namespace Microsoft.IdentityModel.Tokens.Json
                     WriteObject(ref writer, k.ToString(), dictionary[k]);
 
                 writer.WriteEndObject();
-            }
-            else if ((typeof(byte[])).IsAssignableFrom(objType))
-            {
-                writer.WriteBase64String(key, (byte[])obj);
             }
             else if (typeof(IList).IsAssignableFrom(objType))
             {
