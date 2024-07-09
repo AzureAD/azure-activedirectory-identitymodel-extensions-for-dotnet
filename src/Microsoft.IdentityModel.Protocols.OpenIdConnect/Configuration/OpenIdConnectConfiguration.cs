@@ -130,7 +130,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <exception cref="ArgumentNullException">Throw if <paramref name="utf8Json"/> is null or empty.</exception>
         public OpenIdConnectConfiguration(Span<byte> utf8Json)
         {
-            if (utf8Json == null)
+            if (utf8Json == Span<byte>.Empty)
                 throw LogHelper.LogArgumentNullException(nameof(utf8Json));
 
             try
