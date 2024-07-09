@@ -55,10 +55,10 @@ namespace Microsoft.IdentityModel.Tokens
         public ICompressionProvider CustomCompressionProvider { get; set; }
 
         /// <summary>
-        /// Checks if the specified cryptographic algorithm is supported.
+        /// Determines whether the specified algorithm is supported.
         /// </summary>
         /// <param name="algorithm">The name of the cryptographic algorithm.</param>
-        /// <returns>True if the algorithm is supported; otherwise, false.</returns>
+        /// <returns><see langword="true"/> if the algorithm is supported; otherwise, <see langword="false"/>.</returns>
         public virtual bool IsSupportedAlgorithm(string algorithm)
         {
             if (CustomCompressionProvider != null && CustomCompressionProvider.IsSupportedAlgorithm(algorithm))
