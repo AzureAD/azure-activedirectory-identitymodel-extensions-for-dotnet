@@ -104,7 +104,7 @@ steps:
     inputs:
       command: 'sign'
       signing_profile: 'CP-401405'
-      files_to_sign: '**/*.nupkg'
+      files_to_sign: '*nupkg'
       search_root: '$(Build.SourcesDirectory)\artifacts'
     condition: and(succeeded(), eq(variables['PipelineType'], 'onebranch'))
 
