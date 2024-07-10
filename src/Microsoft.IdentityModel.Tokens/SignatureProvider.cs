@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.IdentityModel.Logging;
 using System;
 using System.Threading;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -104,7 +104,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>The signature bytes.</returns>
         public virtual byte[] Sign(byte[] input, int offset, int count)
         {
-            throw LogHelper.LogExceptionMessage(new NotImplementedException());
+            throw LogHelper.LogExceptionMessage(
+                new NotImplementedException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10267,
+                        LogHelper.MarkAsNonPII("public virtual byte[] Sign(byte[] input, int offset, int count)"),
+                        LogHelper.MarkAsNonPII(GetType().FullName))));
+
         }
 
 #if NET6_0_OR_GREATER
@@ -117,7 +123,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>returns <see langword="true"/> if creation of signature succeeded, <see langword="false"/> otherwise.</returns>
         public virtual bool Sign(ReadOnlySpan<byte> data, Span<byte> destination, out int bytesWritten)
         {
-            throw LogHelper.LogExceptionMessage(new NotImplementedException());
+            throw LogHelper.LogExceptionMessage(
+                new NotImplementedException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10267,
+                        LogHelper.MarkAsNonPII("public virtual bool Sign(ReadOnlySpan<byte> data, Span<byte> destination, out int bytesWritten)"),
+                        LogHelper.MarkAsNonPII(GetType().FullName))));
         }
 #endif
         /// <summary>
@@ -149,7 +160,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ObjectDisposedException"><see cref="Dispose(bool)"/> has been called.</exception>
         public virtual bool Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength)
         {
-            throw LogHelper.LogExceptionMessage(new NotImplementedException());
+            throw LogHelper.LogExceptionMessage(
+                new NotImplementedException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10267,
+                        LogHelper.MarkAsNonPII("public virtual bool Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength)"),
+                        LogHelper.MarkAsNonPII(GetType().FullName))));
         }
 
         /// <summary>
