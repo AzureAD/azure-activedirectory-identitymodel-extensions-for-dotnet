@@ -15,6 +15,8 @@ using Microsoft.IdentityModel.Logging;
 using Utf8Bytes = Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdProviderMetadataUtf8Bytes;
 using JsonPrimitives = Microsoft.IdentityModel.Tokens.Json.JsonSerializerPrimitives;
 using MetadataName = Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdProviderMetadataNames;
+using System.Runtime.InteropServices.ComTypes;
+using System.Linq;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
@@ -602,19 +604,42 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
             using (MemoryStream memoryStream = new MemoryStream())
             {
-                Utf8JsonWriter writer = null;
-                try
-                {
-                    writer = new Utf8JsonWriter(memoryStream, new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
-                    Write(ref writer, OpenIdConnectConfiguration);
-                    writer.Flush();
-                    return Encoding.UTF8.GetString(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
-                }
-                finally
-                {
-                    writer?.Dispose();
-                }
+                return Write(OpenIdConnectConfiguration, memoryStream);
             }
+        }
+
+        public static string Write(OpenIdConnectConfiguration OpenIdConnectConfiguration, Stream stream)
+        {
+            Utf8JsonWriter writer = null;
+            try
+            {
+                writer = new Utf8JsonWriter(stream, new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
+                Write(ref writer, OpenIdConnectConfiguration);
+                writer.Flush();
+                var bytes = UseMemoryStream(stream);
+                return Encoding.UTF8.GetString(bytes, 0, (int)stream.Length);
+            }
+            finally
+            {
+                writer?.Dispose();
+            }
+        }
+
+        private static byte[] UseMemoryStream(Stream stream)
+        {
+            if (stream is MemoryStream memStream)
+            {
+                return memStream.GetBuffer();
+            }
+
+            byte[] bytes;
+            using (var memoryStream = new MemoryStream())
+            {
+                stream.CopyTo(memoryStream);
+                bytes = memoryStream.GetBuffer();
+            }
+
+            return bytes;
         }
 
         public static void Write(ref Utf8JsonWriter writer, OpenIdConnectConfiguration config)
