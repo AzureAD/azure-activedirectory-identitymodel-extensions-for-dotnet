@@ -27,10 +27,10 @@ namespace Microsoft.IdentityModel.Tokens
     internal class AsymmetricAdapter : IDisposable
     {
 #if DESKTOP
-        private bool _useRSAOeapPadding = false;
+        private bool _useRSAOeapPadding;
 #endif
-        private bool _disposeCryptoOperators = false;
-        private bool _disposed = false;
+        private bool _disposeCryptoOperators;
+        private bool _disposed;
         private DecryptDelegate _decryptFunction = DecryptFunctionNotFound;
         private EncryptDelegate _encryptFunction = EncryptFunctionNotFound;
         private SignDelegate _signFunction = SignFunctionNotFound;

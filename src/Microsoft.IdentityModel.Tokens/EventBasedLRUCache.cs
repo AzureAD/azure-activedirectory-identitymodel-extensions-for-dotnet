@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.Tokens
         private readonly bool _removeExpiredValues;
         private readonly int _removeExpiredValuesIntervalInSeconds;
         // for testing purpose only to verify the task count
-        private int _taskCount = 0;
+        private int _taskCount;
         private DateTime _timeForNextExpiredValuesRemoval;
         private DateTime _timeForNextCompaction;
 
@@ -77,7 +77,7 @@ namespace Microsoft.IdentityModel.Tokens
         private int _processCompactedValuesState = ActionNotQueued;
 
         // set to true when the AppDomain is to be unloaded or the default AppDomain process is ready to exit
-        private bool _shouldStopImmediately = false;
+        private bool _shouldStopImmediately;
 
         internal ItemExpired OnItemExpired { get; set; }
 

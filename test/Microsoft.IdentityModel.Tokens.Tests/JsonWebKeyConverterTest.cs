@@ -255,7 +255,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
         // related to ConvertX509SecurityKeyToJsonWebKeyTheoryData
-        public bool RepresentAsRsaKey { get; set; } = false;
+        public bool RepresentAsRsaKey { get; set; }
     }
 }
 

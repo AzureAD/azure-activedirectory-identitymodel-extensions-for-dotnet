@@ -588,7 +588,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <returns>Encoded token string without signature or authentication tag.</returns>
         public override string ToString()
         {
-            return EncodedToken.Substring(0, EncodedToken.LastIndexOf("."));
+            return EncodedToken.Substring(0, EncodedToken.LastIndexOf('.'));
         }
 
         /// <inheritdoc/>

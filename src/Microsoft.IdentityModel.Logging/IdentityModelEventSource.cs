@@ -33,12 +33,12 @@ namespace Microsoft.IdentityModel.Logging
         /// <summary>
         /// Flag which indicates whether or not PII is shown in logs. False by default.
         /// </summary>
-        public static bool ShowPII { get; set; } = false;
+        public static bool ShowPII { get; set; }
 
         /// <summary>
         /// Flag which indicates whether or not complete <see cref="SecurityArtifact"/> is shown in logs when <see cref="ShowPII"/> is set to true. False by default.
         /// </summary>
-        public static bool LogCompleteSecurityArtifact { get; set; } = false;
+        public static bool LogCompleteSecurityArtifact { get; set; }
 
         /// <summary>
         /// String that is used in place of any arguments to log messages if the 'ShowPII' flag is set to false.
@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <summary>
         /// Indicates whether or the log message header (contains library version, date/time, and PII debugging information) has been written.
         /// </summary>
-        public static bool HeaderWritten { get; set; } = false;
+        public static bool HeaderWritten { get; set; }
 
         /// <summary>
         /// The log message that indicates the current library version.

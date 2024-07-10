@@ -35,7 +35,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
         public bool ShouldSetLastKnownConfiguration { get; set; }
 
-        public bool SetupIssuerLkg { get; set; } = false;
+        public bool SetupIssuerLkg { get; set; }
 
         public BaseConfigurationManager SetupIssuerLkgConfigurationManager { get; set; }
     }
