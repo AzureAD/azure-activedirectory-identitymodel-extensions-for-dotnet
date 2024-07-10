@@ -15,8 +15,6 @@ using Microsoft.IdentityModel.Logging;
 using Utf8Bytes = Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdProviderMetadataUtf8Bytes;
 using JsonPrimitives = Microsoft.IdentityModel.Tokens.Json.JsonSerializerPrimitives;
 using MetadataName = Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdProviderMetadataNames;
-using System.Runtime.InteropServices.ComTypes;
-using System.Linq;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
