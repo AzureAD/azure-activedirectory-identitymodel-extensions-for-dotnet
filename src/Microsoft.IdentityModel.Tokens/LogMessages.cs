@@ -81,6 +81,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10264 = "IDX10264: Reading issuer signing keys from validation parameters and configuration.";
         public const string IDX10265 = "IDX10265: Reading issuer signing keys from configuration.";
         //public const string IDX10266 = "IDX10266: Unable to validate issuer. validationParameters.ValidIssuer is null or whitespace, validationParameters.ValidIssuers is null or empty and ConfigurationManager is null.";
+        public const string IDX10267 = "IDX10267: '{0}' has been called by a derived class '{1}' which has not implemented this method. For this call graph to succeed, '{1}' will need to implement '{0}'.";
 
 
         // 10500 - SignatureValidation

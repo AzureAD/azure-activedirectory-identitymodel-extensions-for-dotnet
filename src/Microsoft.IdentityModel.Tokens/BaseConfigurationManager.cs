@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -88,7 +87,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// as it is meant to be overridden by the class that extends it.</remarks>
         public virtual Task<BaseConfiguration> GetBaseConfigurationAsync(CancellationToken cancel)
         {
-            throw new NotImplementedException();
+            throw LogHelper.LogExceptionMessage(
+                new NotImplementedException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10267,
+                        LogHelper.MarkAsNonPII("public virtual Task<BaseConfiguration> GetBaseConfigurationAsync(CancellationToken cancel)"),
+                        LogHelper.MarkAsNonPII(GetType().FullName))));
         }
 
         /// <summary>
