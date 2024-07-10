@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Validates if a given algorithm for a <see cref="SecurityKey"/> is valid.
+        /// Validates a given algorithm for a <see cref="SecurityKey"/>.
         /// </summary>
         /// <param name="algorithm">The algorithm to be validated.</param>
         /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
