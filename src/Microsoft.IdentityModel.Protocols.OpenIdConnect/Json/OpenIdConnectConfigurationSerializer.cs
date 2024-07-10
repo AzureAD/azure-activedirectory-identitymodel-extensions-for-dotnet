@@ -616,7 +616,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 writer = new Utf8JsonWriter(stream, new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
                 Write(ref writer, OpenIdConnectConfiguration);
                 writer.Flush();
-                var bytes = UseMemoryStream(stream);
+                var bytes = GetBytesFromStream(stream);
                 return Encoding.UTF8.GetString(bytes, 0, (int)stream.Length);
             }
             finally
@@ -625,7 +625,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
         }
 
-        private static byte[] UseMemoryStream(Stream stream)
+        private static byte[] GetBytesFromStream(Stream stream)
         {
             if (stream is MemoryStream memStream)
             {
