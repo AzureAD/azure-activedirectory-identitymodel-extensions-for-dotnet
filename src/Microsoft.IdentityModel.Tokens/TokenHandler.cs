@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Logging;
 using System;
 using System.ComponentModel;
 using System.Security.Claims;
+using System.Text.Json;
 using System.Threading.Tasks;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
@@ -75,6 +76,28 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>A <see cref="TokenValidationResult"/></returns>
         public virtual Task<TokenValidationResult> ValidateTokenAsync(SecurityToken token, TokenValidationParameters validationParameters) => throw new NotImplementedException();
 
+        /// <summary>
+        /// Indicates whether the current token string can be read as a token 
+        /// of the type handled by this instance.
+        /// </summary>
+        /// <param name="tokenString">The token string thats needs to be read.</param>
+        /// <returns>'True' if the ReadToken method can parse the token string.</returns>
+        public virtual bool CanReadToken(string tokenString) => false;
+
+        /// <summary>
+        /// Creates a <see cref="SecurityToken"/> as a <see cref="string"/> as described by the provided <see cref="SecurityTokenDescriptor"/>.
+        /// </summary>
+        /// <param name="tokenDescriptor">The <see cref="SecurityTokenDescriptor"/> used to create the token.</param>
+        /// <returns>A <see cref="string"/>.</returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public virtual string CreateSecurityTokenAsString(SecurityTokenDescriptor tokenDescriptor) => throw new NotImplementedException();
+
+        /// <summary>
+        /// Creates a <see cref="SecurityToken"/> as described by the provided <see cref="SecurityTokenDescriptor"/>.
+        /// </summary>
+        /// <param name="tokenDescriptor"><see cref="SecurityTokenDescriptor"/></param>
+        public virtual SecurityToken CreateSecurityToken(SecurityTokenDescriptor tokenDescriptor) => throw new NotImplementedException();
+        
         /// <summary>
         /// Converts a string into an instance of <see cref="SecurityToken"/>.
         /// </summary>

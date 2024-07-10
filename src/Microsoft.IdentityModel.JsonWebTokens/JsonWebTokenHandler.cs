@@ -132,7 +132,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <para><see langword="false"/> if token.Length is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</para>
         /// <para><see langword="true"/> if the token is in JSON Compact Serialization format.</para>
         /// </returns>
-        public virtual bool CanReadToken(string token)
+        public override bool CanReadToken(string token)
         {
             if (string.IsNullOrWhiteSpace(token))
                 return false;
