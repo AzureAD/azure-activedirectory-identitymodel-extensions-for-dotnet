@@ -34,7 +34,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 context);
 
             TestUtilities.AssertFailIfErrors(context);
-
         }
 
         public static TheoryData<AlgorithmTheoryData> AlgorithmValidationTestCases
