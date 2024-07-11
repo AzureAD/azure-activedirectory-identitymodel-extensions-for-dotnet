@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using Microsoft.IdentityModel.Logging;
 
+#nullable enable
 namespace Microsoft.IdentityModel.Tokens
 {
     public static partial class Validators
@@ -45,7 +46,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Validates a given algorithm for a <see cref="SecurityKey"/>.
+        /// Validates a given algorithm for a <see cref="SecurityKey"/> is valid, if given.
         /// </summary>
         /// <param name="algorithm">The algorithm to be validated.</param>
         /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
@@ -53,7 +54,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
         /// <param name="callContext"></param>
 #pragma warning disable CA1801 // TODO: remove pragma disable once callContext is used for logging
-        internal static AlgorithmValidationResult ValidateAlgorithm(string algorithm, SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters, CallContext callContext)
+        internal static AlgorithmValidationResult ValidateAlgorithm(
+            string algorithm,
+            SecurityKey securityKey,
+            SecurityToken securityToken,
+            TokenValidationParameters validationParameters,
+            CallContext? callContext)
 #pragma warning restore CA1801 // TODO: remove pragma disable once callContext is used for logging
         {
             if (validationParameters == null)
@@ -105,3 +111,4 @@ namespace Microsoft.IdentityModel.Tokens
         }
     }
 }
+#nullable restore
