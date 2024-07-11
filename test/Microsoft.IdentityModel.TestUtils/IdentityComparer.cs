@@ -939,6 +939,76 @@ namespace Microsoft.IdentityModel.TestUtils
             return context.Merge(localContext);
         }
 
+        public static bool AreTokenReadingResultsEqual(object object1, object object2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, context))
+                return context.Merge(localContext);
+
+            return AreTokenReadingResultsEqual(
+                object1 as TokenReadingResult,
+                object2 as TokenReadingResult,
+                "TokenReadingResult1",
+                "TokenReadingResult2",
+                null,
+                context);
+        }
+
+        internal static bool AreTokenReadingResultsEqual(
+            TokenReadingResult tokenReadingResult1,
+            TokenReadingResult tokenReadingResult2,
+            string name1,
+            string name2,
+            string stackPrefix,
+            CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(tokenReadingResult1, tokenReadingResult2, localContext))
+                return context.Merge(localContext);
+
+            if (tokenReadingResult1.IsValid != tokenReadingResult2.IsValid)
+                localContext.Diffs.Add($"TokenReadingResult1.IsValid: {tokenReadingResult1.IsValid} != TokenReadingResult2.IsValid: {tokenReadingResult2.IsValid}");
+
+            if (tokenReadingResult1.TokenInput != tokenReadingResult2.TokenInput)
+                localContext.Diffs.Add($"TokenReadingResult1.TokenInput: '{tokenReadingResult1.TokenInput}' != TokenReadingResult2.TokenInput: '{tokenReadingResult2.TokenInput}'");
+
+            // Only compare the security token if both are valid.
+            if (tokenReadingResult1.IsValid && (tokenReadingResult1.SecurityToken.ToString() != tokenReadingResult2.SecurityToken.ToString()))
+                localContext.Diffs.Add($"TokenReadingResult1.SecurityToken: '{tokenReadingResult1.SecurityToken}' != TokenReadingResult2.SecurityToken: '{tokenReadingResult2.SecurityToken}'");
+
+            if (tokenReadingResult1.ValidationFailureType != tokenReadingResult2.ValidationFailureType)
+                localContext.Diffs.Add($"TokenReadingResult1.ValidationFailureType: {tokenReadingResult1.ValidationFailureType} != TokenReadingResult2.ValidationFailureType: {tokenReadingResult2.ValidationFailureType}");
+            
+            // true => both are not null.
+            if (ContinueCheckingEquality(tokenReadingResult1.Exception, tokenReadingResult2.Exception, localContext))
+            {
+                AreStringsEqual(
+                    tokenReadingResult1.Exception.Message,
+                    tokenReadingResult2.Exception.Message,
+                    $"({name1}).Exception.Message",
+                    $"({name2}).Exception.Message",
+                    localContext);
+
+                AreStringsEqual(
+                    tokenReadingResult1.Exception.Source,
+                    tokenReadingResult2.Exception.Source,
+                    $"({name1}).Exception.Source",
+                    $"({name2}).Exception.Source",
+                    localContext);
+
+                if (!string.IsNullOrEmpty(stackPrefix))
+                    AreStringPrefixesEqual(
+                        tokenReadingResult1.Exception.StackTrace.Trim(),
+                        tokenReadingResult2.Exception.StackTrace.Trim(),
+                        $"({name1}).Exception.StackTrace",
+                        $"({name2}).Exception.StackTrace",
+                        stackPrefix.Trim(),
+                        localContext);
+            }
+
+            return context.Merge(localContext);
+        }
+
         public static bool AreJArraysEqual(object object1, object object2, CompareContext context)
         {
             var localContext = new CompareContext(context);

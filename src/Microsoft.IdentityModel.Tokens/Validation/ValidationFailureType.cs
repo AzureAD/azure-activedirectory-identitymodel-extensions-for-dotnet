@@ -64,6 +64,12 @@ namespace Microsoft.IdentityModel.Tokens
         private class TokenReplayValidationFailure : ValidationFailureType { internal TokenReplayValidationFailure(string name) : base(name) { } }
 
         /// <summary>
+        /// Defines a type that represents that a token could not be read.
+        /// </summary>
+        public static readonly ValidationFailureType TokenReadingFailed = new TokenReadingFailure("TokenReadingFailed");
+        private class TokenReadingFailure : ValidationFailureType { internal TokenReadingFailure(string name) : base(name) { } }
+
+        /// <summary>
         /// Defines a type that represents that no evaluation has taken place.
         /// </summary>
         public static readonly ValidationFailureType ValidationNotEvaluated = new NotEvaluated("NotEvaluated");

@@ -487,51 +487,5 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             return ReadJsonWebToken(token);
         }
-
-        /// <summary>
-        /// Converts a string into an instance of <see cref="JsonWebToken"/>.
-        /// </summary>
-        /// <param name="token">A JSON Web Token (JWT) in JWS or JWE Compact Serialization format.</param>
-        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> whose TokenReader, if set, will be used to read a JWT.</param>
-        /// <returns>A <see cref="TokenValidationResult"/>.</returns>
-        /// <exception cref="SecurityTokenMalformedException">Thrown if the validationParameters.TokenReader delegate is not able to parse/read the token as a valid <see cref="JsonWebToken"/>.</exception>
-        /// <exception cref="SecurityTokenMalformedException">Thrown if <paramref name="token"/> is not a valid JWT, <see cref="JsonWebToken"/>.</exception>
-        private static TokenValidationResult ReadToken(string token, TokenValidationParameters validationParameters)
-        {
-            JsonWebToken jsonWebToken = null;
-            if (validationParameters.TokenReader != null)
-            {
-                var securityToken = validationParameters.TokenReader(token, validationParameters);
-                if (securityToken == null)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10510, LogHelper.MarkAsSecurityArtifact(token, JwtTokenUtilities.SafeLogJwtToken))));
-
-                jsonWebToken = securityToken as JsonWebToken;
-                if (jsonWebToken == null)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenMalformedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10509, typeof(JsonWebToken), securityToken.GetType(), LogHelper.MarkAsSecurityArtifact(token, JwtTokenUtilities.SafeLogJwtToken))));
-            }
-            else
-            {
-#pragma warning disable CA1031 // Do not catch general exception types
-                try
-                {
-                    jsonWebToken = new JsonWebToken(token);
-                }
-                catch (Exception ex)
-                {
-                    return new TokenValidationResult
-                    {
-                        Exception = ex,
-                        IsValid = false
-                    };
-                }
-#pragma warning restore CA1031 // Do not catch general exception types
-            }
-
-            return new TokenValidationResult
-            {
-                SecurityToken = jsonWebToken,
-                IsValid = true
-            };
-        }
     }
 }
