@@ -23,8 +23,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         private static string _shortClaimType = _namespace + "/ShortTypeName";
         private bool _mapInboundClaims = DefaultMapInboundClaims;
 
-        internal const string UseClaimsIdentityTypeSwitch = "Microsoft.IdentityModel.S2S.UseClaimsIdentityType";
-
         /// <summary>
         /// Default claim type mapping for inbound claims.
         /// </summary>
@@ -312,20 +310,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                     identity.AddClaim(claim);
                 }
-            }
-
-            return identity;
-        }
-
-        private static bool UseClaimsIdentityType() => (AppContext.TryGetSwitch(UseClaimsIdentityTypeSwitch, out bool useClaimsIdentityType) && useClaimsIdentityType);
-
-        internal static ClaimsIdentity CreateCaseSensitiveClaimsIdentityFromTokenValidationParameters(JsonWebToken securityToken, TokenValidationParameters validationParameters, string issuer)
-        {
-            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(securityToken, issuer);
-
-            if (!UseClaimsIdentityType() && identity is not CaseSensitiveClaimsIdentity)
-            {
-                identity = new CaseSensitiveClaimsIdentity(identity);
             }
 
             return identity;

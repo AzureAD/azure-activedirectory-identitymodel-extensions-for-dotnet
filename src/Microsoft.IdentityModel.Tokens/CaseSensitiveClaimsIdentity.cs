@@ -57,6 +57,17 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Initializes an instance of <see cref="CaseSensitiveClaimsIdentity"/>.
+        /// </summary>
+        /// <param name="authenticationType">The authentication method used to establish this identity.</param>
+        /// <param name="nameType">The <see cref="Claim.Type"/> used when obtaining the value of <see cref="ClaimsIdentity.Name"/>.</param>
+        /// <param name="roleType">The <see cref="Claim.Type"/> used when performing logic for <see cref="ClaimsPrincipal.IsInRole"/>.</param>
+        public CaseSensitiveClaimsIdentity(string authenticationType, string nameType, string roleType) :
+            base(authenticationType, nameType, roleType)
+        {
+        }
+
+        /// <summary>
         /// Retrieves a <see cref="IEnumerable{Claim}"/> where each Claim.Type equals <paramref name="type"/>.
         /// </summary>
         /// <param name="type">The type of the claim to match.</param>

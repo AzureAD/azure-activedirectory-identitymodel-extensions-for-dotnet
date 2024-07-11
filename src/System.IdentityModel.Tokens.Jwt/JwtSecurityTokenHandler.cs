@@ -1188,7 +1188,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             Validators.ValidateTokenType(jwtToken.Header.Typ, jwtToken, validationParameters);
 
-            var identity = CreateClaimsIdentity(jwtToken, issuer, validationParameters);
+            var identity = CreateCaseSensitiveClaimsIdentityFromTokenValidationParameters(jwtToken, validationParameters, issuer);
             if (validationParameters.SaveSigninToken)
                 identity.BootstrapContext = jwtToken.RawData;
 
@@ -1198,9 +1198,9 @@ namespace System.IdentityModel.Tokens.Jwt
             return new ClaimsPrincipal(identity);
         }
 
-        private ClaimsPrincipal CreateClaimsPrincipalFromToken(JwtSecurityToken jwtToken, string issuer, TokenValidationParameters validationParameters)
+        private static ClaimsPrincipal CreateClaimsPrincipalFromToken(JwtSecurityToken jwtToken, string issuer, TokenValidationParameters validationParameters)
         {
-            var identity = CreateClaimsIdentity(jwtToken, issuer, validationParameters);
+            var identity = CreateCaseSensitiveClaimsIdentityFromTokenValidationParameters(jwtToken, validationParameters, issuer);
             if (validationParameters.SaveSigninToken)
                 identity.BootstrapContext = jwtToken.RawData;
 
@@ -1527,7 +1527,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
         private ClaimsIdentity CreateClaimsIdentityWithMapping(JwtSecurityToken jwtToken, string actualIssuer, TokenValidationParameters validationParameters)
         {
-            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, actualIssuer);
+            ClaimsIdentity identity = CreateCaseSensitiveClaimsIdentityFromTokenValidationParameters(jwtToken, validationParameters, actualIssuer);
             foreach (Claim jwtClaim in jwtToken.Claims)
             {
                 if (_inboundClaimFilter.Contains(jwtClaim.Type))
@@ -1573,7 +1573,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
         private ClaimsIdentity CreateClaimsIdentityWithoutMapping(JwtSecurityToken jwtToken, string actualIssuer, TokenValidationParameters validationParameters)
         {
-            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, actualIssuer);
+            ClaimsIdentity identity = CreateCaseSensitiveClaimsIdentityFromTokenValidationParameters(jwtToken, validationParameters, actualIssuer);
             foreach (Claim jwtClaim in jwtToken.Claims)
             {
                 if (_inboundClaimFilter.Contains(jwtClaim.Type))
