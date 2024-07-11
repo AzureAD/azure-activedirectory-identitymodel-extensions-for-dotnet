@@ -499,7 +499,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Validates a JWS or a JWE.
         /// </summary>
         /// <param name="token">A JSON Web Token (JWT) in JWS or JWE Compact Serialization format.</param>
-        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <returns>A <see cref="TokenValidationResult"/>.</returns>
         [Obsolete("`JsonWebTokens.ValidateToken(string, TokenValidationParameters)` has been deprecated and will be removed in a future release. Use `JsonWebTokens.ValidateTokenAsync(string, TokenValidationParameters)` instead. For more information, see https://aka.ms/IdentityModel/7-breaking-changes", false)]
         public virtual TokenValidationResult ValidateToken(string token, TokenValidationParameters validationParameters)
@@ -513,7 +513,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Callers should always check the TokenValidationResult.IsValid property to verify the validity of the result.
         /// </summary>
         /// <param name="token">The token to be validated.</param>
-        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <returns>A <see cref="TokenValidationResult"/>.</returns>
         /// <remarks>
         /// <para>TokenValidationResult.Exception will be set to one of the following exceptions if the <paramref name="token"/> is invalid.</para>

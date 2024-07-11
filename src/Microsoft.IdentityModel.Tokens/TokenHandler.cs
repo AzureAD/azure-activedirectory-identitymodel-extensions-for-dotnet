@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Callers should always check the TokenValidationResult.IsValid property to verify the validity of the result.
         /// </summary>
         /// <param name="token">The token to be validated.</param>
-        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <returns>A <see cref="TokenValidationResult"/></returns>
         public virtual Task<TokenValidationResult> ValidateTokenAsync(string token, TokenValidationParameters validationParameters)
         {
@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Callers should always check the TokenValidationResult.IsValid property to verify the validity of the result.
         /// </summary>
         /// <param name="token">The <see cref="SecurityToken"/> to be validated.</param>
-        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <returns>A <see cref="TokenValidationResult"/></returns>
         public virtual Task<TokenValidationResult> ValidateTokenAsync(SecurityToken token, TokenValidationParameters validationParameters)
         {

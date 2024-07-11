@@ -16,7 +16,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     /// <param name="audiences">The audiences to validate.</param>
     /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
-    /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+    /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
     /// <param name="callContext"></param>
     /// <returns>A <see cref="IssuerValidationResult"/>that contains the results of validating the issuer.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="audiences">The audiences found in the <see cref="SecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
-        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
         /// <exception cref="ArgumentNullException">If 'audiences' is null and <see cref="TokenValidationParameters.ValidateAudience"/> is true.</exception>
         /// <exception cref="SecurityTokenInvalidAudienceException">If <see cref="TokenValidationParameters.ValidAudience"/> is null or whitespace and <see cref="TokenValidationParameters.ValidAudiences"/> is null.</exception>
@@ -104,7 +104,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="audiences">The audiences found in the <see cref="SecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
-        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext"></param>
         /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
         /// <exception cref="ArgumentNullException">If 'audiences' is null and <see cref="TokenValidationParameters.ValidateAudience"/> is true.</exception>
