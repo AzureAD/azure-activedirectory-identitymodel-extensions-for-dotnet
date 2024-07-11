@@ -21,7 +21,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="certificate">The <see cref="X509Certificate2"/> used to encrypt data.</param>
         /// <param name="alg">A key wrap algorithm to use when encrypting a session key.</param>
-        /// <param name="enc">The encryption algorithm to apply.</param>
+        /// <param name="enc">The encryption algorithm to be used.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="certificate"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="alg"/> is null or empty.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="enc"/> is null or empty.</exception>
@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/> to use for encryption.</param>
         /// <param name="alg">A key wrap algorithm to use when encrypting a session key.</param>
-        /// <param name="enc">The encryption algorithm to apply.</param>
+        /// <param name="enc">The encryption algorithm to be used.</param>
         /// <exception cref="ArgumentNullException">if <paramref name="key"/> is null.</exception>
         /// <exception cref="ArgumentNullException">if <paramref name="alg"/> is null or empty.</exception>
         /// <exception cref="ArgumentNullException">if <paramref name="enc"/> is null or empty.</exception>
@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// which won't be serialized to a SAML token.
         /// </remarks>
         /// <param name="key">The <see cref="SymmetricSecurityKey"/> to use for encryption.</param>
-        /// <param name="enc">The encryption algorithm to apply.</param>
+        /// <param name="enc">The encryption algorithm to be used.</param>
         /// <exception cref="ArgumentException">Thrown if <paramref name="key"/> is not a <see cref="SymmetricSecurityKey"/>.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="enc"/> is null or empty.</exception>
         public EncryptingCredentials(SymmetricSecurityKey key, string enc)

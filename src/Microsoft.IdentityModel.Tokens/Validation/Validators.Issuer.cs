@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     /// <param name="issuer">The issuer to validate.</param>
     /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
-    /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+    /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
     /// <param name="callContext"></param>
     /// <param name="cancellationToken"></param>
     /// <returns>A <see cref="IssuerValidationResult"/>that contains the results of validating the issuer.</returns>
@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="issuer">The issuer to validate</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
-        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <returns>The issuer to use when creating the "Claim"(s) in a "ClaimsIdentity".</returns>
         /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
         /// <exception cref="ArgumentNullException">If 'issuer' is null or whitespace and <see cref="TokenValidationParameters.ValidateIssuer"/> is true.</exception>
@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="issuer">The issuer to validate</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
-        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <param name="configuration">The <see cref="BaseConfiguration"/> required for issuer and signing key validation.</param>
         /// <returns>The issuer to use when creating the "Claim"(s) in a "ClaimsIdentity".</returns>
         /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="issuer">The issuer to validate</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
-        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <param name="configuration">The <see cref="BaseConfiguration"/> required for issuer and signing key validation.</param>
         /// <returns>The issuer to use when creating the "Claim"(s) in a "ClaimsIdentity".</returns>
         /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
@@ -178,7 +178,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="issuer">The issuer to validate</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
-        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>The issuer to use when creating the "Claim"(s) in a "ClaimsIdentity".</returns>

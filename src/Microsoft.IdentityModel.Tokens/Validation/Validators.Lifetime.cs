@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="notBefore">The 'notBefore' time found in the <see cref="SecurityToken"/>.</param>
     /// <param name="expires">The 'expiration' time found in the <see cref="SecurityToken"/>.</param>
     /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
-    /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+    /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
     /// <param name="callContext"></param>
     /// <returns>A <see cref="IssuerValidationResult"/>that contains the results of validating the issuer.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="notBefore">The 'notBefore' time found in the <see cref="SecurityToken"/>.</param>
         /// <param name="expires">The 'expiration' time found in the <see cref="SecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
-        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
         /// <exception cref="SecurityTokenNoExpirationException">If 'expires.HasValue' is false and <see cref="TokenValidationParameters.RequireExpirationTime"/> is true.</exception>
         /// <exception cref="SecurityTokenInvalidLifetimeException">If 'notBefore' is &gt; 'expires'.</exception>
@@ -73,7 +73,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="notBefore">The 'notBefore' time found in the <see cref="SecurityToken"/>.</param>
         /// <param name="expires">The 'expiration' time found in the <see cref="SecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
-        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext"></param>
         /// <returns>A <see cref="LifetimeValidationResult"/> indicating whether validation was successful, and providing a <see cref="SecurityTokenInvalidLifetimeException"/> if it was not.</returns>
         /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
