@@ -707,14 +707,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (tokenDescriptor.Audiences.Count > 0)
             {
-                if (!tokenDescriptor.Audience.IsNullOrEmpty())
+                if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
                     JsonPrimitives.WriteStrings(ref writer, JwtPayloadUtf8Bytes.Aud, tokenDescriptor.Audiences, tokenDescriptor.Audience);
                 else
                     JsonPrimitives.WriteStrings(ref writer, JwtPayloadUtf8Bytes.Aud, tokenDescriptor.Audiences);
 
                 audienceSet = true;
             }
-            else if (!tokenDescriptor.Audience.IsNullOrEmpty())
+            else if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
             {
                 writer.WritePropertyName(JwtPayloadUtf8Bytes.Aud);
                 writer.WriteStringValue(tokenDescriptor.Audience);

@@ -369,12 +369,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             if (tokenDescriptor.Audiences.Count > 0)
             {
-                if (!tokenDescriptor.Audience.IsNullOrEmpty())
+                if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
                     conditions.Conditions.Add(CreateAudienceRestrictionCondition(tokenDescriptor.Audience, tokenDescriptor.Audiences));
                 else
                     conditions.Conditions.Add(CreateAudienceRestrictionCondition(tokenDescriptor.Audiences));
             }
-            else if (!tokenDescriptor.Audience.IsNullOrEmpty())
+            else if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
             {
                 conditions.Conditions.Add(new SamlAudienceRestrictionCondition(new Uri(tokenDescriptor.Audience)));
             }
