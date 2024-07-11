@@ -23,6 +23,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         private static string _shortClaimType = _namespace + "/ShortTypeName";
         private bool _mapInboundClaims = DefaultMapInboundClaims;
 
+        internal const string UseClaimsIdentityTypeSwitch = "Microsoft.IdentityModel.S2S.UseClaimsIdentityType";
+
         /// <summary>
         /// Default claim type mapping for inbound claims.
         /// </summary>
@@ -212,7 +214,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, issuer);
+            ClaimsIdentity identity = CreateCaseSensitiveClaimsIdentityFromTokenValidationParameters(jwtToken, validationParameters, issuer);
             foreach (Claim jwtClaim in jwtToken.Claims)
             {
                 bool wasMapped = _inboundClaimTypeMap.TryGetValue(jwtClaim.Type, out string claimType);
@@ -281,7 +283,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, issuer);
+            ClaimsIdentity identity = CreateCaseSensitiveClaimsIdentityFromTokenValidationParameters(jwtToken, validationParameters, issuer);
             foreach (Claim jwtClaim in jwtToken.Claims)
             {
                 string claimType = jwtClaim.Type;
@@ -310,6 +312,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                     identity.AddClaim(claim);
                 }
+            }
+
+            return identity;
+        }
+
+        private static bool UseClaimsIdentityType() => (AppContext.TryGetSwitch(UseClaimsIdentityTypeSwitch, out bool useClaimsIdentityType) && useClaimsIdentityType);
+
+        internal static ClaimsIdentity CreateCaseSensitiveClaimsIdentityFromTokenValidationParameters(JsonWebToken securityToken, TokenValidationParameters validationParameters, string issuer)
+        {
+            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(securityToken, issuer);
+
+            if (!UseClaimsIdentityType() && identity is not CaseSensitiveClaimsIdentity)
+            {
+                identity = new CaseSensitiveClaimsIdentity(identity);
             }
 
             return identity;
