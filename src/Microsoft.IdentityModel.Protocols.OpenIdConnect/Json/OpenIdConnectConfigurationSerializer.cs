@@ -598,15 +598,37 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         #endregion
 
         #region Write
+        /// <summary>
+        /// Writes an <see cref="OpenIdConnectConfiguration"/> to a UTF8-encoded JSON string.
+        /// </summary>
+        /// <param name="OpenIdConnectConfiguration">The configuration to be written.</param>
+        /// <returns>A UTF8-encoded JSON string.</returns>
         public static string Write(OpenIdConnectConfiguration OpenIdConnectConfiguration)
         {
             using (MemoryStream memoryStream = new MemoryStream())
             {
-                return Write(OpenIdConnectConfiguration, memoryStream);
+                Utf8JsonWriter writer = null;
+                try
+                {
+                    writer = new Utf8JsonWriter(memoryStream, new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
+                    Write(ref writer, OpenIdConnectConfiguration);
+                    writer.Flush();
+                    return Encoding.UTF8.GetString(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
+                }
+                finally
+                {
+                    writer?.Dispose();
+                }
             }
         }
 
-        public static string Write(OpenIdConnectConfiguration OpenIdConnectConfiguration, Stream stream)
+        /// <summary>
+        /// Writes an <see cref="OpenIdConnectConfiguration"/> to a UTF8-encoded JSON string using the provided <see cref="Stream"/>.
+        /// </summary>
+        /// <param name="OpenIdConnectConfiguration">The <see cref="OpenIdConnectConfiguration"/> to be written.</param>
+        /// <param name="stream">The <see cref="Stream"/> to write to.</param>
+        /// <remarks>Because a <see cref="Stream"/> is provided, this method does not return a value.</remarks>
+        public static void Write(OpenIdConnectConfiguration OpenIdConnectConfiguration, Stream stream)
         {
             Utf8JsonWriter writer = null;
             try
@@ -614,30 +636,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 writer = new Utf8JsonWriter(stream, new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
                 Write(ref writer, OpenIdConnectConfiguration);
                 writer.Flush();
-                var bytes = GetBytesFromStream(stream);
-                return Encoding.UTF8.GetString(bytes, 0, (int)stream.Length);
             }
             finally
             {
                 writer?.Dispose();
             }
-        }
-
-        private static byte[] GetBytesFromStream(Stream stream)
-        {
-            if (stream is MemoryStream memStream)
-            {
-                return memStream.GetBuffer();
-            }
-
-            byte[] bytes;
-            using (var memoryStream = new MemoryStream())
-            {
-                stream.CopyTo(memoryStream);
-                bytes = memoryStream.GetBuffer();
-            }
-
-            return bytes;
         }
 
         public static void Write(ref Utf8JsonWriter writer, OpenIdConnectConfiguration config)
