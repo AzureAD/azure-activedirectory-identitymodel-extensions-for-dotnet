@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <typeparam name="T">The type of the elements in the <paramref name="enumerable"/>.</typeparam>
         /// <param name="enumerable">The <see cref="IEnumerable{T}"/> to be checked.</param>
         /// <returns>True if the <paramref name="enumerable"/> is null or contains no elements; otherwise, false.</returns>
-        public static bool IsNullOrEmpty<T>(this IEnumerable<T> enumerable)
+        internal static bool IsNullOrEmpty<T>(this IEnumerable<T> enumerable)
         {
             return enumerable == null || !enumerable.Any();
         }
