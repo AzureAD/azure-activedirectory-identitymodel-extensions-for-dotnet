@@ -124,18 +124,6 @@ namespace Microsoft.IdentityModel.Tokens
                         MarkAsNonPII("internal virtual ClaimsIdentity CreateClaimsIdentityInternal(SecurityToken securityToken, TokenValidationParameters tokenValidationParameters, string issuer)"),
                         MarkAsNonPII(GetType().FullName))));
         }
-
-        internal static ClaimsIdentity CreateCaseSensitiveClaimsIdentityFromTokenValidationParameters(SecurityToken securityToken, TokenValidationParameters validationParameters, string issuer)
-        {
-            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(securityToken, issuer);
-
-            if (identity is not CaseSensitiveClaimsIdentity && !AppContextSwitches.UseClaimsIdentityType())
-            {
-                identity = new CaseSensitiveClaimsIdentity(identity);
-            }
-
-            return identity;
-        }
         #endregion
     }
 }

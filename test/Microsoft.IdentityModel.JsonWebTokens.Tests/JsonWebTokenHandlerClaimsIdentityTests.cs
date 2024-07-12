@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             tokenValidationParameters.NameClaimType = "custom-name";
             tokenValidationParameters.RoleClaimType = "custom-role";
 
-            var actualClaimsIdentity = TokenHandler.CreateCaseSensitiveClaimsIdentityFromTokenValidationParameters(jsonWebToken, tokenValidationParameters, Default.Issuer);
+            var actualClaimsIdentity = ClaimsIdentityFactory.Create(jsonWebToken, tokenValidationParameters, Default.Issuer);
 
             Assert.IsType<CaseSensitiveClaimsIdentity>(actualClaimsIdentity);
             Assert.NotNull(((CaseSensitiveClaimsIdentity)actualClaimsIdentity).SecurityToken);
@@ -86,7 +86,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             tokenValidationParameters.NameClaimType = "custom-name";
             tokenValidationParameters.RoleClaimType = "custom-role";
 
-            var actualClaimsIdentity = TokenHandler.CreateCaseSensitiveClaimsIdentityFromTokenValidationParameters(jsonWebToken, tokenValidationParameters, Default.Issuer);
+            var actualClaimsIdentity = ClaimsIdentityFactory.Create(jsonWebToken, tokenValidationParameters, Default.Issuer);
 
             Assert.IsType<CaseSensitiveClaimsIdentity>(actualClaimsIdentity);
             Assert.Equal(tokenValidationParameters.AuthenticationType, actualClaimsIdentity.AuthenticationType);

@@ -677,7 +677,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                 if (!identityDict.TryGetValue(statement.Subject, out ClaimsIdentity identity))
                 {
-                    identity = CreateCaseSensitiveClaimsIdentityFromTokenValidationParameters(samlToken, validationParameters, issuer);
+                    identity = ClaimsIdentityFactory.Create(samlToken, validationParameters, issuer);
                     ProcessSubject(statement.Subject, identity, issuer);
                     identityDict.Add(statement.Subject, identity);
                 }

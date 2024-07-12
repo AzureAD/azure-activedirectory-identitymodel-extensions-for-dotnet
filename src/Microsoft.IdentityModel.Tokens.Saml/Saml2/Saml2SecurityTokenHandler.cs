@@ -1314,7 +1314,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 actualIssuer = ClaimsIdentity.DefaultIssuer;
             }
 
-            var identity = CreateCaseSensitiveClaimsIdentityFromTokenValidationParameters(samlToken, validationParameters, issuer);
+            var identity = ClaimsIdentityFactory.Create(samlToken, validationParameters, issuer);
 
             ProcessSubject(samlToken.Assertion.Subject, identity, actualIssuer);
             ProcessStatements(samlToken.Assertion.Statements, identity, actualIssuer);

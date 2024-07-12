@@ -6,6 +6,9 @@ using System.Security.Claims;
 
 namespace Microsoft.IdentityModel.Tokens
 {
+    /// <summary>
+    /// Facilitates the creation of <see cref="ClaimsIdentity"/> and <see cref="CaseSensitiveClaimsIdentity"/> instances based on the <see cref="AppContextSwitches.UseClaimsIdentityTypeSwitch"/>.
+    /// </summary>
     internal static class ClaimsIdentityFactory
     {
         internal static ClaimsIdentity Create(IEnumerable<Claim> claims)
@@ -22,6 +25,39 @@ namespace Microsoft.IdentityModel.Tokens
                 return new ClaimsIdentity(claims, authenticationType);
 
             return new CaseSensitiveClaimsIdentity(claims, authenticationType);
+        }
+
+        internal static ClaimsIdentity Create(string authenticationType, string nameType, string roleType, SecurityToken securityToken)
+        {
+            if (AppContextSwitches.UseClaimsIdentityType())
+                return new ClaimsIdentity(authenticationType: authenticationType, nameType: nameType, roleType: roleType);
+
+            return new CaseSensitiveClaimsIdentity(authenticationType: authenticationType, nameType: nameType, roleType: roleType)
+            {
+                SecurityToken = securityToken,
+            };
+        }
+
+        internal static ClaimsIdentity Create(SecurityToken securityToken, TokenValidationParameters validationParameters, string issuer)
+        {
+            ClaimsIdentity claimsIdentity = validationParameters.CreateClaimsIdentity(securityToken, issuer);
+
+            if (claimsIdentity is not CaseSensitiveClaimsIdentity && !AppContextSwitches.UseClaimsIdentityType())
+            {
+                claimsIdentity = new CaseSensitiveClaimsIdentity(claimsIdentity);
+            }
+
+            return claimsIdentity;
+        }
+
+        internal static ClaimsIdentity Create(TokenHandler tokenHandler, SecurityToken securityToken, TokenValidationParameters validationParameters, string issuer)
+        {
+            ClaimsIdentity claimsIdentity = tokenHandler.CreateClaimsIdentityInternal(securityToken, validationParameters, issuer);
+
+            if (claimsIdentity is not CaseSensitiveClaimsIdentity && !AppContextSwitches.UseClaimsIdentityType())
+                claimsIdentity = new CaseSensitiveClaimsIdentity(claimsIdentity);
+
+            return claimsIdentity;
         }
     }
 }
