@@ -239,4 +239,3 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
     }
 }
-}
