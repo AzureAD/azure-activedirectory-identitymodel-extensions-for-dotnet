@@ -68,11 +68,11 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Retrieves a <see cref="IEnumerable{Claim}"/> where each Claim.Type equals <paramref name="type"/>.
+        /// Retrieves a <see cref="IEnumerable{Claim}"/> where each <see cref="Claim.Type"/> equals <paramref name="type"/>.
         /// </summary>
         /// <param name="type">The type of the claim to match.</param>
         /// <returns>A <see cref="IEnumerable{Claim}"/> of matched claims.</returns>
-        /// <remarks>Comparison is: StringComparison.Ordinal.</remarks>
+        /// <remarks>Comparison is <see cref="StringComparison.Ordinal"/>.</remarks>
         /// <exception cref="ArgumentNullException">if <paramref name="type"/> is null.</exception>
         public override IEnumerable<Claim> FindAll(string type)
         {
@@ -80,11 +80,11 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Retrieves the first <see cref="Claim"/> where Claim.Type equals <paramref name="type"/>.
+        /// Retrieves the first <see cref="Claim"/> where <see cref="Claim.Type"/> equals <paramref name="type"/>.
         /// </summary>
         /// <param name="type">The type of the claim to match.</param>
         /// <returns>A <see cref="Claim"/>, <see langword="null"/> if nothing matches.</returns>
-        /// <remarks>Comparison is: StringComparison.Ordinal.</remarks>
+        /// <remarks>Comparison is <see cref="StringComparison.Ordinal"/>.</remarks>
         /// <exception cref="ArgumentNullException">if <paramref name="type"/> is null.</exception>
         public override Claim FindFirst(string type)
         {
@@ -97,7 +97,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="type">The type of the claim to match.</param>
         /// <param name="value">The value of the claim to match.</param>
         /// <returns><c>true</c> if a claim is matched, <c>false</c> otherwise.</returns>
-        /// <remarks>Comparison is: StringComparison.Ordinal for Claim.Type and Claim.Value.</remarks>
+        /// <remarks>Comparison is <see cref="StringComparison.Ordinal"/> for <see cref="Claim.Type"/> and <see cref="Claim.Value"/>.</remarks>
         /// <exception cref="ArgumentNullException">if <paramref name="type"/> is null.</exception>
         /// <exception cref="ArgumentNullException">if <paramref name="value"/> is null.</exception>
         public override bool HasClaim(string type, string value)
