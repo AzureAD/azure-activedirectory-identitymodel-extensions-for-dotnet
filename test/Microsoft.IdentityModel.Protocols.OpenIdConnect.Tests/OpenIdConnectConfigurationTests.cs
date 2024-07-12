@@ -5,7 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.IO;
 using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
@@ -290,6 +293,22 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
 
         [Fact]
+        public void EmptyCollectionSerializationWithStream()
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                var context = new CompareContext {Title = "EmptyCollectionSerialization"};
+                // Initialize an OpenIdConnectConfiguration object with all collections empty.
+                var oidcWithEmptyCollections = new OpenIdConnectConfiguration();
+                OpenIdConnectConfiguration.Write(oidcWithEmptyCollections, stream);
+                var emptyCollectionBytes = Encoding.UTF8.GetBytes("{}");
+                IdentityComparer.AreEqual(stream.ToArray(), emptyCollectionBytes, context);
+
+                TestUtilities.AssertFailIfErrors(context);
+            }
+        }
+
+        [Fact]
         public void NonemptyCollectionSerialization()
         {
             var context = new CompareContext { Title = "NonemptyCollectionSerialization" };
@@ -344,6 +363,26 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     context.Diffs.Add(collection + " should be serialized.");
             }
             TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
+        public void NonemptyCollectionSerializationWithStream()
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+
+                var context = new CompareContext { Title = "NonemptyCollectionSerialization" };
+                // Initialize an OpenIdConnectConfiguration object that has at least one element in each Collection.
+                var oidcWithAllCollections = OpenIdConnectConfiguration.Create(OpenIdConfigData.JsonAllValues);
+                var oidcWithAllCollectionsJson = OpenIdConnectConfiguration.Write(oidcWithAllCollections);
+                var oidcWithAllCollectionsBytes = Encoding.UTF8.GetBytes(oidcWithAllCollectionsJson);
+
+                OpenIdConnectConfiguration.Write(oidcWithAllCollections, stream);
+
+                IdentityComparer.AreBytesEqual(oidcWithAllCollectionsBytes, stream.GetBuffer(), context);
+                
+                TestUtilities.AssertFailIfErrors(context);
+            }
         }
     }
 }
