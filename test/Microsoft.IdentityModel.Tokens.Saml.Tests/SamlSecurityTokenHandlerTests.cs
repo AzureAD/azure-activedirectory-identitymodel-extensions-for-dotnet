@@ -881,7 +881,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     Expires = Default.Expires,
                     Issuer = Default.Issuer,
                     SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
-                    Subject = new ClaimsIdentity(Default.SamlClaims),
+                    Subject = new CaseSensitiveClaimsIdentity(Default.SamlClaims),
                 };
 
                 var validationParameters = new TokenValidationParameters
@@ -1241,7 +1241,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                             Issuer = Default.Issuer,
                             SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
                             EncryptingCredentials = null,
-                            Subject = new ClaimsIdentity(Default.SamlClaims)
+                            Subject = new CaseSensitiveClaimsIdentity(Default.SamlClaims)
                         },
                         SamlSecurityTokenHandler = new SamlSecurityTokenHandler(),
                         ValidationParameters = validationParameters
@@ -1258,7 +1258,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                             SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
                             EncryptingCredentials = null,
                             Claims = Default.SamlClaimsDictionary,
-                            Subject = new ClaimsIdentity(Default.SamlClaims)
+                            Subject = new CaseSensitiveClaimsIdentity(Default.SamlClaims)
                         },
                         SamlSecurityTokenHandler = new SamlSecurityTokenHandler(),
                         ValidationParameters = validationParameters
@@ -1305,7 +1305,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                                 { ClaimTypes.GivenName, "Bob" },
                                 { ClaimTypes.Role, "HR" }
                             },
-                            Subject = new ClaimsIdentity(Default.SamlClaims)
+                            Subject = new CaseSensitiveClaimsIdentity(Default.SamlClaims)
                         },
                         SamlSecurityTokenHandler = new SamlSecurityTokenHandler(),
                         ValidationParameters = validationParameters

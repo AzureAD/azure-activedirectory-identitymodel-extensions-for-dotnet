@@ -27,6 +27,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Initializes an instance of <see cref="CaseSensitiveClaimsIdentity"/>.
         /// </summary>
+        /// <param name="authenticationType">The authentication method used to establish this identity.</param>
+        public CaseSensitiveClaimsIdentity(string authenticationType) : base(authenticationType)
+        {
+        }
+
+        /// <summary>
+        /// Initializes an instance of <see cref="CaseSensitiveClaimsIdentity"/>.
+        /// </summary>
         /// <param name="claimsIdentity"><see cref="ClaimsIdentity"/> to copy.</param>
         public CaseSensitiveClaimsIdentity(ClaimsIdentity claimsIdentity) : base(claimsIdentity)
         {
