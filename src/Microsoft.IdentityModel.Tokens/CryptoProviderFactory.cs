@@ -649,7 +649,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Checks if the specified algorithm and <see cref="SecurityKey"/> are supported.
         /// </summary>
-        /// <param name="algorithm">The security algorithm to apply.</param>
+        /// <param name="algorithm">The security algorithm to be used.</param>
         /// <param name="key">The <see cref="SecurityKey"/>.</param>
         /// <remarks>
         /// Algorithms are supported for specific key types.

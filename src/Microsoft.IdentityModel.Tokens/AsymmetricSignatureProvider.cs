@@ -84,8 +84,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Initializes a new instance of the <see cref="AsymmetricSignatureProvider"/> class used to create and verify signatures.
         /// </summary>
-        /// <param name="key">The <see cref="SecurityKey"/> that will be used for signature operations.<see cref="SecurityKey"/></param>
-        /// <param name="algorithm">The signature algorithm to apply.</param>
+        /// <param name="key">The <see cref="SecurityKey"/> that will be used for signature operations.</param>
+        /// <param name="algorithm">The signature algorithm to be used.</param>
         public AsymmetricSignatureProvider(SecurityKey key, string algorithm)
             : this(key, algorithm, false)
         {
@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Initializes a new instance of the <see cref="AsymmetricSignatureProvider"/> class used for creating and verifying signatures.
         /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for signature operations.</param>
-        /// <param name="algorithm">The signature algorithm to apply.</param>
+        /// <param name="algorithm">The signature algorithm to be used.</param>
         /// <param name="willCreateSignatures">If true, the provider will be used for creating signatures; otherwise, it will be used for verifying signatures.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="key"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="algorithm"/> is null or empty.</exception>
@@ -486,9 +486,9 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Calls to release managed resources.
+        /// Releases the resources used by the current instance.
         /// </summary>
-        /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
+        /// <param name="disposing">If true, release both managed and unmanaged resources; otherwise, release only unmanaged resources.</param>
         protected override void Dispose(bool disposing)
         {
             if (!_disposed)

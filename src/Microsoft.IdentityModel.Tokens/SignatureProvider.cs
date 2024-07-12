@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Initializes a new instance of the <see cref="SignatureProvider"/> class used to create and verify signatures.
         /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for signature operations.</param>
-        /// <param name="algorithm">The signature algorithm to apply.</param>
+        /// <param name="algorithm">The signature algorithm to be used.</param>
         /// <exception cref="ArgumentNullException"><paramref name="key"/> is null.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="algorithm"/> is null or empty.</exception>
         protected SignatureProvider(SecurityKey key, string algorithm)

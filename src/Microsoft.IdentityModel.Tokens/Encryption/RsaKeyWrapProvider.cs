@@ -20,7 +20,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// These keys are usually symmetric session keys that are wrapped using the recipient's public key.
         /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for cryptographic operations.</param>
-        /// <param name="algorithm">The KeyWrap algorithm to apply.</param>
+        /// <param name="algorithm">The KeyWrap algorithm to be used.</param>
         /// <param name="willUnwrap">Whether this <see cref="RsaKeyWrapProvider"/> is required to unwrap keys. If true, the private key is required.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="key"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="algorithm"/> is null.</exception>
@@ -66,9 +66,9 @@ namespace Microsoft.IdentityModel.Tokens
         public override SecurityKey Key { get; }
 
         /// <summary>
-        /// Disposes of internal components.
+        /// Releases the resources used by the current instance.
         /// </summary>
-        /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
+        /// <param name="disposing">If true, release both managed and unmanaged resources; otherwise, release only unmanaged resources.</param>
         protected override void Dispose(bool disposing)
         {
             if (!_disposed)
@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Checks if the specified algorithm is supported.
         /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for cryptographic operations.</param>
-        /// <param name="algorithm">The KeyWrap algorithm to apply.</param>
+        /// <param name="algorithm">The KeyWrap algorithm to be used.</param>
         /// <returns>true if the algorithm is supported; otherwise, false.</returns>
         protected virtual bool IsSupportedAlgorithm(SecurityKey key, string algorithm)
         {

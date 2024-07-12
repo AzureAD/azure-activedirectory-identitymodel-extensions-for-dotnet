@@ -27,7 +27,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Initializes a new instance of the <see cref="KeyWrapProvider"/> class used for wrapping and unwrapping keys.
         /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for cryptographic operations.</param>
-        /// <param name="algorithm">The KeyWrap algorithm to apply.</param>
+        /// <param name="algorithm">The KeyWrap algorithm to be used.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="key"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="algorithm"/> is null.</exception>
         /// <exception cref="ArgumentException">Thrown if the <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
@@ -78,9 +78,9 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Disposes of internal components.
+        /// Releases the resources used by the current instance.
         /// </summary>
-        /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
+        /// <param name="disposing">If true, release both managed and unmanaged resources; otherwise, release only unmanaged resources.</param>
         protected override void Dispose(bool disposing)
         {
             if (!_disposed)
@@ -126,7 +126,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Returns the <see cref="SymmetricAlgorithm"/>.
         /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for cryptographic operations.</param>
-        /// <param name="algorithm">The algorithm to apply.</param>
+        /// <param name="algorithm">The encryption algorithm to be used.</param>
         /// <returns>The initialized <see cref="SymmetricAlgorithm"/>.</returns>
         /// <exception cref="ArgumentException">Thrown if the <see cref="SecurityKey"/> cannot be converted to a byte array.</exception>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if the key size doesn't match the algorithm.</exception>

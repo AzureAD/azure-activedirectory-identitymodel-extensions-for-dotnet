@@ -276,7 +276,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 foreach (var audience in theoryData.AudiencesForSecurityTokenDescriptor)
                     theoryData.TokenDescriptor.Audiences.Add(audience);
             }
-            else if (!theoryData.TokenDescriptor.Audience.IsNullOrEmpty())
+            else if (!string.IsNullOrEmpty(theoryData.TokenDescriptor.Audience))
             {
                 audMemberSet = true;
             }
@@ -306,7 +306,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     if (theoryData.TokenDescriptor.Audiences.Count > 0)
                         expectedAudClaimCount += theoryData.TokenDescriptor.Audiences.Count;
 
-                    if (!theoryData.TokenDescriptor.Audience.IsNullOrEmpty())
+                    if (!string.IsNullOrEmpty(theoryData.TokenDescriptor.Audience))
                         expectedAudClaimCount++;
 
                     if (audSetInClaims)

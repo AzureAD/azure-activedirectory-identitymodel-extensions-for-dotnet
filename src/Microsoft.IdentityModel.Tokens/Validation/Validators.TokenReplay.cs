@@ -16,7 +16,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     /// <param name="expirationTime">When does the <see cref="SecurityToken"/> expire..</param>
     /// <param name="securityToken">The security token that is being validated.</param>
-    /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+    /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
     /// <param name="callContext"></param>
     /// <returns>A <see cref="ReplayValidationResult"/>that contains the results of validating the token.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="expirationTime">When does the security token expire.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
-        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <exception cref="ArgumentNullException">If 'securityToken' is null or whitespace.</exception>
         /// <exception cref="ArgumentNullException">If 'validationParameters' is null or whitespace.</exception>
         /// <exception cref="SecurityTokenNoExpirationException">If <see cref="TokenValidationParameters.TokenReplayCache"/> is not null and expirationTime.HasValue is false. When a TokenReplayCache is set, tokens require an expiration time.</exception>
@@ -88,7 +88,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="expirationTime">When does the security token expire.</param>
-        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <exception cref="ArgumentNullException">If 'securityToken' is null or whitespace.</exception>
         /// <exception cref="ArgumentNullException">If 'validationParameters' is null or whitespace.</exception>
         /// <exception cref="SecurityTokenNoExpirationException">If <see cref="TokenValidationParameters.TokenReplayCache"/> is not null and expirationTime.HasValue is false. When a TokenReplayCache is set, tokens require an expiration time.</exception>
@@ -104,7 +104,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="expirationTime">When does the security token expire.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
-        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext"></param>
         /// <exception cref="ArgumentNullException">If 'securityToken' is null or whitespace.</exception>
         /// <exception cref="ArgumentNullException">If 'validationParameters' is null or whitespace.</exception>

@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Initializes a new instance of the <see cref="AuthenticatedEncryptionProvider"/> class used for encryption and decryption.
         /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for crypto operations.</param>
-        /// <param name="algorithm">The encryption algorithm to apply.</param>
+        /// <param name="algorithm">The encryption algorithm to be used.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="key"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="algorithm"/> is null or whitespace.</exception>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if the key size is not large enough.</exception>
@@ -447,7 +447,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Checks that the key has sufficient length.
         /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/> that contains bytes.</param>
-        /// <param name="algorithm">The algorithm to apply.</param>
+        /// <param name="algorithm">The encryption algorithm to be used.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="key"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="algorithm"/> is null or empty.</exception>
         /// <exception cref="ArgumentException">Thrown if <paramref name="algorithm"/> is not a supported algorithm.</exception>
