@@ -1129,7 +1129,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 }
             }
 
-            identity.Actor = new ClaimsIdentity(claims);
+            identity.Actor = ClaimsIdentityFactory.Create(claims);
             SetClaimsIdentityActorFromAttribute(actorAttribute, identity.Actor, issuer);
         }
 
