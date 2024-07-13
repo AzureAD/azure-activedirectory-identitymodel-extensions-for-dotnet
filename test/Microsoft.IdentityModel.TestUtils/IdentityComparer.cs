@@ -1707,6 +1707,12 @@ namespace Microsoft.IdentityModel.TestUtils
                             continue;
                     }
 
+                    if (type == typeof(CaseSensitiveClaimsIdentity))
+                    {
+                        if (propertyInfo.Name == "SecurityToken")
+                            continue;
+                    }
+
                     if (propertyInfo.GetMethod != null)
                     {
                         object val1 = propertyInfo.GetValue(obj1, null);

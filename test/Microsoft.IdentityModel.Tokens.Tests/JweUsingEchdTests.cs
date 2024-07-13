@@ -22,10 +22,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public void CreateJweEcdhEsTests(CreateEcdhEsTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateJweEcdhEsTests", theoryData);
-            context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
-            {
-                [typeof(CaseSensitiveClaimsIdentity)] = ["SecurityToken"]
-            };
             context.AddClaimTypesToIgnoreWhenComparing("exp", "iat", "nbf");
             context.AddDictionaryKeysToIgnoreWhenComparing("exp", "iat", "nbf");
 

@@ -123,10 +123,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             var context = new CompareContext($"{this}.CreateClaimsIdentities, {theoryData.TestId}")
             {
                 IgnoreType = true,
-                PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
-                {
-                    [typeof(CaseSensitiveClaimsIdentity)] = ["SecurityToken"]
-                }
             };
 
             try
