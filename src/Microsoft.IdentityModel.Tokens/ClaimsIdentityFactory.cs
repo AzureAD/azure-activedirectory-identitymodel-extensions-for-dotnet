@@ -44,7 +44,10 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (claimsIdentity is not CaseSensitiveClaimsIdentity && !AppContextSwitches.UseClaimsIdentityType())
             {
-                claimsIdentity = new CaseSensitiveClaimsIdentity(claimsIdentity);
+                claimsIdentity = new CaseSensitiveClaimsIdentity(claimsIdentity)
+                {
+                    SecurityToken = securityToken,
+                };
             }
 
             return claimsIdentity;
@@ -55,7 +58,10 @@ namespace Microsoft.IdentityModel.Tokens
             ClaimsIdentity claimsIdentity = tokenHandler.CreateClaimsIdentityInternal(securityToken, validationParameters, issuer);
 
             if (claimsIdentity is not CaseSensitiveClaimsIdentity && !AppContextSwitches.UseClaimsIdentityType())
-                claimsIdentity = new CaseSensitiveClaimsIdentity(claimsIdentity);
+                claimsIdentity = new CaseSensitiveClaimsIdentity(claimsIdentity)
+                {
+                    SecurityToken = securityToken,
+                };
 
             return claimsIdentity;
         }
