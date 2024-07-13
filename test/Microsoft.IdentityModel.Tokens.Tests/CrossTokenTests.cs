@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
@@ -23,6 +24,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public void CrossTokenValidateToken(CrossTokenTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CrossTokenValidateToken", theoryData);
+            context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+            {
+                [typeof(CaseSensitiveClaimsIdentity)] = ["SecurityToken"]
+            };
+
             try
             {
                 var samlToken = IdentityUtilities.CreateEncodedSaml(theoryData.SecurityTokenDescriptor, theoryData.SamlTokenHandler);

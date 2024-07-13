@@ -120,7 +120,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         public void CreateClaimsIdentities(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.CreateClaimsIdentities", theoryData);
-            var context = new CompareContext($"{this}.CreateClaimsIdentities, {theoryData.TestId}") { IgnoreType = true };
+            var context = new CompareContext($"{this}.CreateClaimsIdentities, {theoryData.TestId}")
+            {
+                IgnoreType = true,
+                PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+                {
+                    [typeof(CaseSensitiveClaimsIdentity)] = ["SecurityToken"]
+                }
+            };
+
             try
             {
                 var identities = ((theoryData.Handler) as SamlSecurityTokenHandlerPublic).CreateClaimsIdentitiesPublic(theoryData.TokenTestSet.SecurityToken as SamlSecurityToken, theoryData.Issuer, theoryData.ValidationParameters);
