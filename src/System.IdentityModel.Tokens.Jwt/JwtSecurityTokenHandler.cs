@@ -1188,7 +1188,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             Validators.ValidateTokenType(jwtToken.Header.Typ, jwtToken, validationParameters);
 
-            var identity = ClaimsIdentityFactory.Create(jwtToken, validationParameters, issuer);
+            var identity = CreateClaimsIdentity(jwtToken, issuer, validationParameters);
             if (validationParameters.SaveSigninToken)
                 identity.BootstrapContext = jwtToken.RawData;
 
@@ -1198,9 +1198,9 @@ namespace System.IdentityModel.Tokens.Jwt
             return new ClaimsPrincipal(identity);
         }
 
-        private static ClaimsPrincipal CreateClaimsPrincipalFromToken(JwtSecurityToken jwtToken, string issuer, TokenValidationParameters validationParameters)
+        private ClaimsPrincipal CreateClaimsPrincipalFromToken(JwtSecurityToken jwtToken, string issuer, TokenValidationParameters validationParameters)
         {
-            var identity = ClaimsIdentityFactory.Create(jwtToken, validationParameters, issuer);
+            var identity = CreateClaimsIdentity(jwtToken, issuer, validationParameters);
             if (validationParameters.SaveSigninToken)
                 identity.BootstrapContext = jwtToken.RawData;
 
