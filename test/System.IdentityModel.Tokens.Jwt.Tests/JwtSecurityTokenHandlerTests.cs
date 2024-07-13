@@ -621,7 +621,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             SigningCredentials = Default.AsymmetricSigningCredentials,
                             Claims = Default.PayloadJsonDictionary,
                             EncryptingCredentials = null,
-                            Subject = new ClaimsIdentity
+                            Subject = new CaseSensitiveClaimsIdentity
                             (
                                 new List<Claim>
                                 {

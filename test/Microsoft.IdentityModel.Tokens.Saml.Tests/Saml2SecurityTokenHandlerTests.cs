@@ -1275,7 +1275,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                             SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
                             EncryptingCredentials = null,
                             Claims = Default.SamlClaimsDictionary,
-                            Subject = new ClaimsIdentity
+                            Subject = new CaseSensitiveClaimsIdentity
                             (
                                 new List<Claim>
                                 {
@@ -1327,7 +1327,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                                 { ClaimTypes.GivenName, "Alice" },
                                 { ClaimTypes.Role, "HR" }
                             },
-                            Subject = new ClaimsIdentity
+                            Subject = new CaseSensitiveClaimsIdentity
                             (
                                 new List<Claim>
                                 {
