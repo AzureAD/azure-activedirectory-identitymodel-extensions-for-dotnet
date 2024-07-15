@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets the security token algorithm used to sign the token.
+        /// Gets the algorithm used to sign the token.
         /// </summary>
         public string? Algorithm { get; }
 

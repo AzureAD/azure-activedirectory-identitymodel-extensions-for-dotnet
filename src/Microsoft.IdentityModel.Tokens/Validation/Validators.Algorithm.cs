@@ -80,15 +80,15 @@ namespace Microsoft.IdentityModel.Tokens
                 if (!validationParameters.AlgorithmValidator(algorithm, securityKey, securityToken, validationParameters))
                 {
                     return new AlgorithmValidationResult(
-                    algorithm,
-                    ValidationFailureType.AlgorithmValidationFailed,
-                    new ExceptionDetail(
-                        new MessageDetail(
-                            LogMessages.IDX10697,
-                            LogHelper.MarkAsNonPII(algorithm),
-                            securityKey),
-                        typeof(SecurityTokenInvalidAlgorithmException),
-                        new StackFrame(true)));
+                        algorithm,
+                        ValidationFailureType.AlgorithmValidationFailed,
+                        new ExceptionDetail(
+                            new MessageDetail(
+                                LogMessages.IDX10697,
+                                LogHelper.MarkAsNonPII(algorithm),
+                                securityKey),
+                            typeof(SecurityTokenInvalidAlgorithmException),
+                            new StackFrame(true)));
                 }
 
                 return new AlgorithmValidationResult(algorithm);
