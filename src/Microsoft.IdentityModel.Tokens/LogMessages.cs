@@ -83,6 +83,9 @@ namespace Microsoft.IdentityModel.Tokens
         //public const string IDX10266 = "IDX10266: Unable to validate issuer. validationParameters.ValidIssuer is null or whitespace, validationParameters.ValidIssuers is null or empty and ConfigurationManager is null.";
         public const string IDX10267 = "IDX10267: '{0}' has been called by a derived class '{1}' which has not implemented this method. For this call graph to succeed, '{1}' will need to implement '{0}'.";
 
+        public const string IDX10268 = "IDX10268: Issuer validation failed. Issuer: '{0}'. ValidationParameters.ValidIssuers: '{2}' or ValidationParameters.ConfigurationManager.CurrentConfiguration.Issuer: '{3}'. For more details, see https://aka.ms/IdentityModel/issuer-validation.";
+        public const string IDX10269 = "IDX10268: Unable to validate issuer. ValidationParameters.ValidIssuers.Count is empty and ValidationParameters.ConfigurationManager.CurrentConfiguration.Issuer is null or empty. For more details, see https://aka.ms/IdentityModel/issuer-validation.";
+
 
         // 10500 - SignatureValidation
         public const string IDX10500 = "IDX10500: Signature validation failed. No security keys were provided to validate the signature.";

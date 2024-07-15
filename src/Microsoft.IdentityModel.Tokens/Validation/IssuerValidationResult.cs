@@ -14,9 +14,8 @@ namespace Microsoft.IdentityModel.Tokens
         internal enum ValidationSource
         {
             NotValidated = 0,
-            IssuerIsConfigurationIssuer,
-            IssuerIsValidIssuer,
-            IssuerIsAmongValidIssuers
+            IssuerMatchedConfiguration,
+            IssuerMatchedValidationParameters
         }
 
         private Exception _exception;

@@ -21,6 +21,8 @@ namespace Microsoft.IdentityModel.Tokens
         private string _roleClaimType = ClaimsIdentity.DefaultRoleClaimType;
         private Dictionary<string, object> _instancePropertyBag;
 
+        private IssuerValidationDelegateAsync _issuerValidationDelegate = Validators.ValidateIssuerAsync;
+
         /// <summary>
         /// This is the default value of <see cref="ClaimsIdentity.AuthenticationType"/> when creating a <see cref="ClaimsIdentity"/>.
         /// The value is <c>"AuthenticationTypes.Federation"</c>.
@@ -59,7 +61,6 @@ namespace Microsoft.IdentityModel.Tokens
             IssuerSigningKeyResolver = other.IssuerSigningKeyResolver;
             IssuerSigningKeys = other.IssuerSigningKeys;
             IssuerSigningKeyValidator = other.IssuerSigningKeyValidator;
-            IssuerValidator = other.IssuerValidator;
             IssuerValidatorAsync = other.IssuerValidatorAsync;
             LifetimeValidator = other.LifetimeValidator;
             LogTokenId = other.LogTokenId;
@@ -76,20 +77,19 @@ namespace Microsoft.IdentityModel.Tokens
             TokenReplayCache = other.TokenReplayCache;
             TokenReplayValidator = other.TokenReplayValidator;
             TransformBeforeSignatureValidation = other.TransformBeforeSignatureValidation;
-            TryAllIssuerSigningKeys = other.TryAllIssuerSigningKeys;
             TypeValidator = other.TypeValidator;
             ValidateActor = other.ValidateActor;
-            ValidateAudience = other.ValidateAudience;
-            ValidateIssuer = other.ValidateIssuer;
-            ValidateIssuerSigningKey = other.ValidateIssuerSigningKey;
-            ValidateLifetime = other.ValidateLifetime;
             ValidateSignatureLast = other.ValidateSignatureLast;
-            ValidateTokenReplay = other.ValidateTokenReplay;
             ValidateWithLKG = other.ValidateWithLKG;
             ValidAlgorithms = other.ValidAlgorithms;
             ValidAudiences = other.ValidAudiences;
             ValidIssuers = other.ValidIssuers;
             ValidTypes = other.ValidTypes;
+        }
+
+        public ValidationParameters(TokenValidationParameters tvp)
+        {
+
         }
 
         /// <summary>
@@ -98,18 +98,8 @@ namespace Microsoft.IdentityModel.Tokens
         public ValidationParameters()
         {
             LogTokenId = true;
-            LogValidationExceptions = true;
-            RequireExpirationTime = true;
-            RequireSignedTokens = true;
-            RequireAudience = true;
             SaveSigninToken = false;
-            TryAllIssuerSigningKeys = true;
             ValidateActor = false;
-            ValidateAudience = true;
-            ValidateIssuer = true;
-            ValidateIssuerSigningKey = false;
-            ValidateLifetime = true;
-            ValidateTokenReplay = false;
         }
 
         /// <summary>
@@ -286,7 +276,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// If both <see cref="IssuerSigningKeyResolverUsingConfiguration"/> and <see cref="IssuerSigningKeyResolver"/> are set, IssuerSigningKeyResolverUsingConfiguration takes
         /// priority.
         /// </remarks>
-        public IssuerSigningKeyResolver IssuerSigningKeyResolver { get; set; }
+        public IssuerSigningKeyResolverDelegate IssuerSigningKeyResolver { get; set; }
 
         /// <summary>
         /// Gets or sets an <see cref="IList{SecurityKey}"/> used for signature validation.
@@ -296,18 +286,17 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets a delegate that will be used to validate the issuer of the token.
         /// </summary>
-        public IssuerValidator IssuerValidator { get; set; }
-
-        /// <summary>
-        /// Gets or sets a delegate that will be used to validate the issuer of the token.
-        /// </summary>
-        /// <remarks>
-        /// If set, this delegate will be called to validate the 'issuer' of the token, instead of default processing.
-        /// This means that no default 'issuer' validation will occur.
-        /// Even if <see cref="ValidateIssuer"/> is false, this delegate will still be called.
-        /// IssuerValidatorAsync takes precedence over <see cref="IssuerValidatorUsingConfiguration"/> and <see cref="IssuerValidator"/>.
-        /// </remarks>
-        internal IssuerValidatorAsync IssuerValidatorAsync { get; set; }
+        public IssuerValidationDelegateAsync IssuerValidatorAsync
+        {
+            get
+            {
+                return _issuerValidationDelegate;
+            }
+            set
+            {
+                _issuerValidationDelegate = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
+            }
+        }
 
         /// <summary>
         /// Gets or sets a delegate that will be called to transform a token to a supported format before validation.
@@ -425,7 +414,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// If set, this delegate will be called to validate the signature of the token, instead of default processing.
         /// </remarks>
-        public SignatureValidator SignatureValidator { get; set; }
+        public SignatureValidationDelegate SignatureValidator { get; set; }
 
         /// <summary>
         /// Gets or sets a delegate that will be called to retreive a <see cref="SecurityKey"/> used for decryption.
@@ -514,5 +503,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// The default is <c>null</c>.
         /// </summary>
         public IList<string> ValidTypes { get; }
+
+        public bool ValidateActor { get; set; }
     }
 }

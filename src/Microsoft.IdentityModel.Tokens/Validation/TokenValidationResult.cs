@@ -16,7 +16,8 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class TokenValidationResult
     {
-        private readonly TokenValidationParameters _validationParameters;
+        private readonly TokenValidationParameters _tokenValidationParameters;
+        private readonly ValidationParameters _validationParameters;
         private readonly TokenHandler _tokenHandler;
 
         // Fields lazily initialized in a thread-safe manner. _claimsIdentity is protected by the _claimsIdentitySyncObj
@@ -54,6 +55,21 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters"></param>
         /// <param name="issuer"></param>
         internal TokenValidationResult(SecurityToken securityToken, TokenHandler tokenHandler, TokenValidationParameters validationParameters, string issuer)
+        {
+            _tokenValidationParameters = validationParameters;
+            _tokenHandler = tokenHandler;
+            Issuer = issuer;
+            SecurityToken = securityToken;
+        }
+
+        /// <summary>
+        /// This ctor is used by the JsonWebTokenHandler as part of delaying creation of ClaimsIdentity.
+        /// </summary>
+        /// <param name="securityToken"></param>
+        /// <param name="tokenHandler"></param>
+        /// <param name="validationParameters"></param>
+        /// <param name="issuer"></param>
+        internal TokenValidationResult(SecurityToken securityToken, TokenHandler tokenHandler, ValidationParameters validationParameters, string issuer)
         {
             _validationParameters = validationParameters;
             _tokenHandler = tokenHandler;
@@ -133,9 +149,9 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     Debug.Assert(_claimsIdentity is null);
 
-                    if (_validationParameters != null && SecurityToken != null && _tokenHandler != null && Issuer != null)
+                    if (_tokenValidationParameters != null && SecurityToken != null && _tokenHandler != null && Issuer != null)
                     {
-                        _claimsIdentity = _tokenHandler.CreateClaimsIdentityInternal(SecurityToken, _validationParameters, Issuer);
+                        _claimsIdentity = _tokenHandler.CreateClaimsIdentityInternal(SecurityToken, _tokenValidationParameters, Issuer);
                     }
 
                     _claimsIdentityInitialized = true;

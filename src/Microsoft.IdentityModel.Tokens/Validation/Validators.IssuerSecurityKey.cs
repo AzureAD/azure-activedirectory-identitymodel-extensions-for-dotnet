@@ -151,12 +151,27 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <param name="callContext"></param>
+        /// <exception cref="ArgumentNullException"> if 'securityKey' is null and ValidateIssuerSigningKey is true.</exception>
+        /// <exception cref="ArgumentNullException"> if 'securityToken' is null and ValidateIssuerSigningKey is true.</exception>
+        /// <exception cref="ArgumentNullException"> if 'validationParameters' is null.</exception>
+        internal static SigningKeyValidationResult ValidateIssuerSecurityKey(SecurityKey securityKey, SecurityToken securityToken, ValidationParameters validationParameters, CallContext callContext)
+        {
+            return ValidateIssuerSecurityKey(securityKey, securityToken, validationParameters as TokenValidationParameters, null, callContext);
+        }
+
+        /// <summary>
+        /// Validates the <see cref="SecurityKey"/> that signed a <see cref="SecurityToken"/>.
+        /// </summary>
+        /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
+        /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
+        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
         /// <param name="configuration">The <see cref="BaseConfiguration"/> required for issuer and signing key validation.</param>
         /// <param name="callContext"></param>
         /// <exception cref="ArgumentNullException"> if 'securityKey' is null and ValidateIssuerSigningKey is true.</exception>
         /// <exception cref="ArgumentNullException"> if 'securityToken' is null and ValidateIssuerSigningKey is true.</exception>
         /// <exception cref="ArgumentNullException"> if 'validationParameters' is null.</exception>
-        internal static SigningKeyValidationResult ValidateIssuerSecurityKey(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters, BaseConfiguration? configuration, CallContext callContext)
+        internal static SigningKeyValidationResult ValidateIssuerSecurityKey(SecurityKey securityKey, SecurityToken securityToken, ValidationParameters validationParameters, CallContext callContext)
         {
             if (validationParameters == null)
                 return new SigningKeyValidationResult(
@@ -168,11 +183,6 @@ namespace Microsoft.IdentityModel.Tokens
                             LogHelper.MarkAsNonPII(nameof(validationParameters))),
                         typeof(ArgumentNullException),
                         new StackFrame(true)));
-
-            if (validationParameters.IssuerSigningKeyValidatorUsingConfiguration != null)
-            {
-                return ValidateSigningKeyUsingDelegateAndConfiguration(securityKey, securityToken, validationParameters, configuration);
-            }
 
             if (validationParameters.IssuerSigningKeyValidator != null)
             {

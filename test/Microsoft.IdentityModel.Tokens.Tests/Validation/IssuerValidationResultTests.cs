@@ -142,7 +142,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     Issuer = issClaim,
                     IssuerValidationResult = new IssuerValidationResult(
                         issClaim,
-                        IssuerValidationResult.ValidationSource.IssuerIsConfigurationIssuer),
+                        IssuerValidationResult.ValidationSource.IssuerMatchedConfiguration),
                     IsValid = true,
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
                     ValidationParameters = new TokenValidationParameters()
@@ -172,7 +172,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     Issuer = issClaim,
                     IssuerValidationResult = new IssuerValidationResult(
                         issClaim,
-                        IssuerValidationResult.ValidationSource.IssuerIsAmongValidIssuers),
+                        IssuerValidationResult.ValidationSource.IssuerMatchedValidationParameters),
                     IsValid = true,
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
                     ValidationParameters = new TokenValidationParameters()

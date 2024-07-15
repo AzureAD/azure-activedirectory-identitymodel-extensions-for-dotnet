@@ -68,55 +68,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
 
-        internal async ValueTask<TokenValidationResult> ValidateJWEAsync(
-            JsonWebToken jwtToken,
-            TokenValidationParameters validationParameters,
-            CallContext callContext,
-            CancellationToken cancellationToken)
-        {
-            try
-            {
-                TokenValidationResult tokenValidationResult = ReadToken(DecryptToken(jwtToken, validationParameters), validationParameters);
-                if (!tokenValidationResult.IsValid)
-                    return tokenValidationResult;
-
-                tokenValidationResult = await ValidateJWSAsync(
-                    tokenValidationResult.SecurityToken as JsonWebToken,
-                    validationParameters,
-                    callContext,
-                    cancellationToken).ConfigureAwait(false);
-
-                if (!tokenValidationResult.IsValid)
-                    return tokenValidationResult;
-
-                jwtToken.InnerToken = tokenValidationResult.SecurityToken as JsonWebToken;
-                jwtToken.Payload = (tokenValidationResult.SecurityToken as JsonWebToken).Payload;
-                return new TokenValidationResult
-                {
-                    SecurityToken = jwtToken,
-                    ClaimsIdentityNoLocking = tokenValidationResult.ClaimsIdentityNoLocking,
-                    IsValid = true,
-                    TokenType = tokenValidationResult.TokenType
-                };
-            }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
-            {
-                return new TokenValidationResult
-                {
-                    Exception = ex,
-                    IsValid = false,
-                    TokenOnFailedValidation = validationParameters.IncludeTokenOnFailedValidation ? jwtToken : null
-                };
-            }
-        }
-
         internal async ValueTask<TokenValidationResult> ValidateJWSAsync(
             JsonWebToken jsonWebToken,
             TokenValidationParameters validationParameters,
             BaseConfiguration configuration)
         {
+            new ValidationParameters(validationParameters)
+
             try
             {
                 TokenValidationResult tokenValidationResult;
@@ -152,86 +110,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             validatedToken,
                             validationParameters,
                             configuration).ConfigureAwait(false);
-                    }
-                }
-
-                return tokenValidationResult;
-            }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
-            {
-                return new TokenValidationResult
-                {
-                    Exception = ex,
-                    IsValid = false,
-                    TokenOnFailedValidation = validationParameters.IncludeTokenOnFailedValidation ? jsonWebToken : null
-                };
-            }
-        }
-
-        internal async ValueTask<TokenValidationResult> ValidateJWSAsync(
-            JsonWebToken jsonWebToken,
-            TokenValidationParameters validationParameters,
-            CallContext callContext,
-            CancellationToken cancellationToken)
-        {
-            try
-            {
-                BaseConfiguration currentConfiguration = null;
-                if (validationParameters.ConfigurationManager != null)
-                {
-                    try
-                    {
-                        currentConfiguration = await validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
-                    }
-#pragma warning disable CA1031 // Do not catch general exception types
-                    catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
-                    {
-                        // The exception is not re-thrown as the TokenValidationParameters may have the issuer and signing key set
-                        // directly on them, allowing the library to continue with token validation.
-                        if (LogHelper.IsEnabled(EventLogLevel.Warning))
-                            LogHelper.LogWarning(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParameters.ConfigurationManager.MetadataAddress, ex.ToString()));
-                    }
-                }
-
-                TokenValidationResult tokenValidationResult;
-                if (validationParameters.TransformBeforeSignatureValidation != null)
-                    jsonWebToken = validationParameters.TransformBeforeSignatureValidation(jsonWebToken, validationParameters) as JsonWebToken;
-
-                if (validationParameters.SignatureValidator != null || validationParameters.SignatureValidatorUsingConfiguration != null)
-                {
-                    var validatedToken = ValidateSignatureUsingDelegates(jsonWebToken, validationParameters);
-                    tokenValidationResult = await ValidateTokenPayloadAsync(
-                        validatedToken,
-                        validationParameters,
-                        callContext,
-                        cancellationToken).ConfigureAwait(false);
-
-                    Validators.ValidateIssuerSecurityKey(validatedToken.SigningKey, validatedToken, validationParameters);
-                }
-                else
-                {
-                    if (validationParameters.ValidateSignatureLast)
-                    {
-                        tokenValidationResult = await ValidateTokenPayloadAsync(
-                            jsonWebToken,
-                            validationParameters,
-                            callContext,
-                            cancellationToken).ConfigureAwait(false);
-
-                        if (tokenValidationResult.IsValid)
-                            tokenValidationResult.SecurityToken = ValidateSignatureAndIssuerSecurityKey(jsonWebToken, validationParameters, currentConfiguration);
-                    }
-                    else
-                    {
-                        var validatedToken = ValidateSignatureAndIssuerSecurityKey(jsonWebToken, validationParameters, currentConfiguration);
-                        tokenValidationResult = await ValidateTokenPayloadAsync(
-                            validatedToken,
-                            validationParameters,
-                            callContext,
-                            cancellationToken).ConfigureAwait(false);
                     }
                 }
 
@@ -706,58 +584,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             string tokenType = Validators.ValidateTokenType(jsonWebToken.Typ, jsonWebToken, validationParameters);
             return new TokenValidationResult(jsonWebToken, this, validationParameters.Clone(), issuer)
-            {
-                IsValid = true,
-                TokenType = tokenType
-            };
-        }
-
-        internal async ValueTask<TokenValidationResult> ValidateTokenPayloadAsync(
-            JsonWebToken jsonWebToken,
-            TokenValidationParameters validationParameters,
-            CallContext callContext,
-            CancellationToken cancellationToken)
-        {
-            var expires = jsonWebToken.HasPayloadClaim(JwtRegisteredClaimNames.Exp) ? (DateTime?)jsonWebToken.ValidTo : null;
-            var notBefore = jsonWebToken.HasPayloadClaim(JwtRegisteredClaimNames.Nbf) ? (DateTime?)jsonWebToken.ValidFrom : null;
-
-            Validators.ValidateLifetime(notBefore, expires, jsonWebToken, validationParameters);
-            Validators.ValidateAudience(jsonWebToken.Audiences, jsonWebToken, validationParameters);
-
-            IssuerValidationResult issuerValidationResult = await Validators.ValidateIssuerAsync(
-                jsonWebToken.Issuer,
-                jsonWebToken,
-                validationParameters,
-                callContext,
-                cancellationToken).ConfigureAwait(false);
-
-            if (!issuerValidationResult.IsValid)
-            {
-                return new TokenValidationResult(jsonWebToken, this, validationParameters, issuerValidationResult.Issuer)
-                {
-                    IsValid = false,
-                    Exception = issuerValidationResult.Exception
-                };
-            }
-
-            Validators.ValidateTokenReplay(expires, jsonWebToken.EncodedToken, validationParameters);
-            if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jsonWebToken.Actor))
-            {
-                // Infinite recursion should not occur here, as the JsonWebToken passed into this method is (1) constructed from a string
-                // AND (2) the signature is successfully validated on it. (1) implies that even if there are nested actor tokens,
-                // they must end at some point since they cannot reference one another. (2) means that the token has a valid signature
-                // and (since issuer validation occurs first) came from a trusted authority.
-                // NOTE: More than one nested actor token should not be considered a valid token, but if we somehow encounter one,
-                // this code will still work properly.
-                TokenValidationResult tokenValidationResult =
-                    await ValidateTokenAsync(jsonWebToken.Actor, validationParameters.ActorValidationParameters ?? validationParameters).ConfigureAwait(false);
-
-                if (!tokenValidationResult.IsValid)
-                    return tokenValidationResult;
-            }
-
-            string tokenType = Validators.ValidateTokenType(jsonWebToken.Typ, jsonWebToken, validationParameters);
-            return new TokenValidationResult(jsonWebToken, this, validationParameters.Clone(), issuerValidationResult.Issuer)
             {
                 IsValid = true,
                 TokenType = tokenType
