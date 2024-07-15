@@ -14,7 +14,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Enables a new behavior of using <see cref="CaseSensitiveClaimsIdentity"/> instead of <see cref="ClaimsIdentity"/> globally.
         /// </summary>
-        internal const string UseCaseSensitiveClaimsIdentityIdentityTypeSwitch = "Microsoft.IdentityModel.Tokens.UseCaseSensitiveClaimsIdentity";
+        internal const string UseCaseSensitiveClaimsIdentityTypeSwitch = "Microsoft.IdentityModel.Tokens.UseCaseSensitiveClaimsIdentity";
 
         internal static bool UseCaseSensitiveClaimsIdentityType() => (AppContext.TryGetSwitch(UseCaseSensitiveClaimsIdentityIdentityTypeSwitch, out bool useCaseSensitiveClaimsIdentityType) && useCaseSensitiveClaimsIdentityType);
     }
