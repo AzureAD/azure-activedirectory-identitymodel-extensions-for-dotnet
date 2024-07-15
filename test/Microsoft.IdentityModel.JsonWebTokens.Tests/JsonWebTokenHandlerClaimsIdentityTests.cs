@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         }
 
         [Fact]
-        public void CreateClaimsIdentity_ReturnsClaimsIdentity_WithAppContextSwitch()
+        public void CreateClaimsIdentity_ReturnsCaseSensitiveClaimsIdentity_WithAppContextSwitch()
         {
             AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityIdentityTypeSwitch, true);
 
