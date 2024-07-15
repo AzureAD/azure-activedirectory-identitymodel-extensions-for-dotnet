@@ -13,6 +13,7 @@ using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegiste
 
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
+    [Collection(nameof(CaseSensitiveClaimsIdentityTests))]
     public class CaseSensitiveClaimsIdentityTests
     {
         private static readonly string LowerCaseClaimName = "tid";
@@ -226,8 +227,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         private static ClaimsIdentity CreateCaseSensitiveClaimsIdentity(JObject claims, TokenValidationParameters validationParameters = null)
         {
+            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityIdentityTypeSwitch, true);
             var handler = new JsonWebTokenHandler();
-            return handler.CreateClaimsIdentityInternal(new JsonWebToken(CreateUnsignedToken(claims)), validationParameters ?? new TokenValidationParameters(), Default.Issuer);
+            var claimsIdentity = handler.CreateClaimsIdentityInternal(new JsonWebToken(CreateUnsignedToken(claims)), validationParameters ?? new TokenValidationParameters(), Default.Issuer);
+            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityIdentityTypeSwitch, false);
+            return claimsIdentity;
         }
 
         private static string CreateUnsignedToken(JObject payload)

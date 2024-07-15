@@ -15,9 +15,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void Create_FromTokenValidationParameters_ReturnsCorrectClaimsIdentity(bool useClaimsIdentity)
+        public void Create_FromTokenValidationParameters_ReturnsCorrectClaimsIdentity(bool useCaseSensitiveClaimsIdentity)
         {
-            AppContext.SetSwitch(AppContextSwitches.UseClaimsIdentityTypeSwitch, useClaimsIdentity);
+            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityIdentityTypeSwitch, useCaseSensitiveClaimsIdentity);
 
             var jsonWebToken = new JsonWebToken(Default.Jwt(Default.SecurityTokenDescriptor()));
             var tokenValidationParameters = new TokenValidationParameters();
@@ -31,18 +31,18 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Equal(tokenValidationParameters.NameClaimType, actualClaimsIdentity.NameClaimType);
             Assert.Equal(tokenValidationParameters.RoleClaimType, actualClaimsIdentity.RoleClaimType);
 
-            if (useClaimsIdentity)
-            {
-                Assert.IsType<ClaimsIdentity>(actualClaimsIdentity);
-            }
-            else
+            if (useCaseSensitiveClaimsIdentity)
             {
                 Assert.IsType<CaseSensitiveClaimsIdentity>(actualClaimsIdentity);
                 Assert.NotNull(((CaseSensitiveClaimsIdentity)actualClaimsIdentity).SecurityToken);
                 Assert.Equal(jsonWebToken, ((CaseSensitiveClaimsIdentity)actualClaimsIdentity).SecurityToken);
             }
+            else
+            {
+                Assert.IsType<ClaimsIdentity>(actualClaimsIdentity);
+            }
 
-            AppContext.SetSwitch(AppContextSwitches.UseClaimsIdentityTypeSwitch, false);
+            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityIdentityTypeSwitch, false);
         }
 
         [Fact]
@@ -74,6 +74,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [InlineData(false)]
         public void Create_FromDerivedTokenValidationParameters_ReturnsCorrectClaimsIdentity(bool tvpReturnsCaseSensitiveClaimsIdentityWithoutToken)
         {
+            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityIdentityTypeSwitch, true);
+
             var jsonWebToken = new JsonWebToken(Default.Jwt(Default.SecurityTokenDescriptor()));
             var tokenValidationParameters = new DerivedTokenValidationParameters(returnCaseSensitiveClaimsIdentityWithoutToken: tvpReturnsCaseSensitiveClaimsIdentityWithoutToken);
             tokenValidationParameters.AuthenticationType = "custom-authentication-type";
@@ -91,6 +93,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Equal(tokenValidationParameters.AuthenticationType, actualClaimsIdentity.AuthenticationType);
             Assert.Equal(tokenValidationParameters.NameClaimType, actualClaimsIdentity.NameClaimType);
             Assert.Equal(tokenValidationParameters.RoleClaimType, actualClaimsIdentity.RoleClaimType);
+
+            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityIdentityTypeSwitch, false);
         }
 
 
