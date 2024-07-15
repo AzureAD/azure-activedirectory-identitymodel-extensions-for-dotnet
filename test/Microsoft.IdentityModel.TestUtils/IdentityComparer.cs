@@ -38,12 +38,6 @@ namespace Microsoft.IdentityModel.TestUtils
             new Dictionary<string, Func<object, object, CompareContext, bool>>
             {
                 { typeof(bool).ToString(), AreBoolsEqual },
-                { typeof(byte[]).ToString(), AreBytesEqual },
-                { typeof(CanonicalizingTransfrom).ToString(), CompareAllPublicProperties },
-                { typeof(Claim).ToString(), CompareAllPublicProperties },
-                { typeof(ClaimsIdentity).ToString(), CompareAllPublicProperties },
-                { typeof(CaseSensitiveClaimsIdentity).ToString(), CompareAllPublicProperties },
-                { typeof(ClaimsPrincipal).ToString(), CompareAllPublicProperties },
                 { typeof(Collection<SecurityKey>).ToString(), ContinueCheckingEquality },
                 { typeof(DateTime).ToString(), AreDateTimesEqual },
                 { typeof(Dictionary<string, object>).ToString(), AreObjectDictionariesEqual },
@@ -74,6 +68,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 { typeof(byte[]).ToString(), AreBytesEqual },
                 { typeof(Claim).ToString(), CompareAllPublicProperties },
                 { typeof(ClaimsIdentity).ToString(), CompareAllPublicProperties },
+                { typeof(CaseSensitiveClaimsIdentity).ToString(), CompareAllPublicProperties },
                 { typeof(ClaimsPrincipal).ToString(), CompareAllPublicProperties },
                 { typeof(ExclusiveCanonicalizationTransform).ToString(), CompareAllPublicProperties },
                 { typeof(CanonicalizingTransfrom).ToString(), CompareAllPublicProperties },

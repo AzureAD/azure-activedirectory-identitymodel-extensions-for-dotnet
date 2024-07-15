@@ -50,8 +50,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void Create_FromDerivedTokenValidationParameters_HonorsSetSecurityToken()
         {
-            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, true);
-
             var jsonWebToken = new JsonWebToken(Default.Jwt(Default.SecurityTokenDescriptor()));
             var tokenValidationParameters = new DerivedTokenValidationParameters(returnCaseSensitiveClaimsIdentityWithToken: true);
             tokenValidationParameters.AuthenticationType = "custom-authentication-type";
@@ -71,8 +69,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Equal(tokenValidationParameters.AuthenticationType, actualClaimsIdentity.AuthenticationType);
             Assert.Equal(tokenValidationParameters.NameClaimType, actualClaimsIdentity.NameClaimType);
             Assert.Equal(tokenValidationParameters.RoleClaimType, actualClaimsIdentity.RoleClaimType);
-
-            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, false);
         }
 
         [Theory]
@@ -80,6 +76,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [InlineData(false)]
         public void Create_FromDerivedTokenValidationParameters_ReturnsCorrectClaimsIdentity(bool tvpReturnsCaseSensitiveClaimsIdentityWithoutToken)
         {
+            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, true);
+
             var jsonWebToken = new JsonWebToken(Default.Jwt(Default.SecurityTokenDescriptor()));
             var tokenValidationParameters = new DerivedTokenValidationParameters(returnCaseSensitiveClaimsIdentityWithoutToken: tvpReturnsCaseSensitiveClaimsIdentityWithoutToken);
             tokenValidationParameters.AuthenticationType = "custom-authentication-type";
@@ -97,6 +95,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Equal(tokenValidationParameters.AuthenticationType, actualClaimsIdentity.AuthenticationType);
             Assert.Equal(tokenValidationParameters.NameClaimType, actualClaimsIdentity.NameClaimType);
             Assert.Equal(tokenValidationParameters.RoleClaimType, actualClaimsIdentity.RoleClaimType);
+
+            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, false);
         }
 #endif
 
