@@ -27,7 +27,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 - When we added virtuals to abstract methods that threw in the base class, we then called those methods that were implemented in user derived classes. The user code would fault with a `NotImplementedException`. Now a message is returned that the user can act on to fix the issue. See issue [#1970](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/1970).
 
 ### Fundamentals
-- Remove unneeded `if` targets. See PR [#2673](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2673) for details.
+- Remove code that was used in target frameworks that got removed. See PR [#2673](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2673) for details.
 - Rename local variables for better readability. See PR [#2674](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2674) for details.
 - Refactor XML comments for improved clarity. See PR [#2676](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2676), [#2677](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2677), [#2678](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2678), [#2689](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2689) and [#2703](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2703) for details.
 - Fix flaky test. See issue [#2683](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2683) for details.
