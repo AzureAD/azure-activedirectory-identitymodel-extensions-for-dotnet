@@ -31,7 +31,7 @@ namespace Microsoft.IdentityModel.TestUtils
             var originalClaim = new Claim(ClaimTypes.Country, Default.Country, ClaimValueTypes.String, Default.Issuer, Default.OriginalIssuer);
 
             var claimsToCompare = new List<Claim>()
-            {    
+            {
                 // Claim with different value for 'type'
                 new Claim(Guid.NewGuid().ToString(), Default.Country, ClaimValueTypes.String, Default.Issuer, Default.OriginalIssuer),
                 // Claim with different value for 'value'
@@ -127,7 +127,7 @@ namespace Microsoft.IdentityModel.TestUtils
             var originalRoleType = Guid.NewGuid().ToString();
             var originalBootstrapContext = Guid.NewGuid().ToString();
             var originalLabel = Guid.NewGuid().ToString();
-            var originalActor = new CaseSensitiveClaimsIdentity(Guid.NewGuid().ToString());
+            var originalActor = new ClaimsIdentity(Guid.NewGuid().ToString());
 
             // Base ClaimsIdentity to use for all future comparisons.
             var originalClaimsIdentity = CreateClaimsIdentity(originalClaims, originalAuthenticationType,
@@ -189,7 +189,7 @@ namespace Microsoft.IdentityModel.TestUtils
             string nameType, string roleType,
             string label, object bootstrapContext, ClaimsIdentity actor)
         {
-            ClaimsIdentity claimsIdentity = new CaseSensitiveClaimsIdentity(claims, authenticationType, nameType, roleType);
+            ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, authenticationType, nameType, roleType);
             claimsIdentity.Label = label;
             claimsIdentity.BootstrapContext = bootstrapContext;
             claimsIdentity.Actor = actor;
@@ -202,7 +202,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             TestUtilities.WriteHeader($"{this}.CompareClaimsPrincipals", true);
             var context = new CompareContext($"{this}.CompareClaimsPrincipals");
-            var claimsPrincipal1 = new ClaimsPrincipal(new List<ClaimsIdentity> { new CaseSensitiveClaimsIdentity(Guid.NewGuid().ToString()) });
+            var claimsPrincipal1 = new ClaimsPrincipal(new List<ClaimsIdentity> { new ClaimsIdentity(Guid.NewGuid().ToString()) });
             var claimsPrincipal2 = new ClaimsPrincipal();
             IdentityComparer.AreEqual(claimsPrincipal1, claimsPrincipal2, context);
 
@@ -480,10 +480,10 @@ namespace Microsoft.IdentityModel.TestUtils
             var context = new CompareContext($"{this}.CompareSamlAuthorizationDecisionStatements");
             var samlAction = new SamlAction(Guid.NewGuid().ToString());
             var samlAttributeStatement1 =
-                new SamlAuthorizationDecisionStatement(new SamlSubject(), 
+                new SamlAuthorizationDecisionStatement(new SamlSubject(),
                     Guid.NewGuid().ToString(), Default.SamlAccessDecision, new List<SamlAction> { samlAction });
             var samlAttributeStatement2 =
-                new SamlAuthorizationDecisionStatement(new SamlSubject(), 
+                new SamlAuthorizationDecisionStatement(new SamlSubject(),
                     Guid.NewGuid().ToString(), Default.SamlAccessDecision, new List<SamlAction> { samlAction });
             IdentityComparer.AreEqual(samlAttributeStatement1, samlAttributeStatement2, context);
 
@@ -503,7 +503,7 @@ namespace Microsoft.IdentityModel.TestUtils
                         new SamlAttributeStatement(new SamlSubject(),
                             new List<SamlAttribute> {new SamlAttribute("1", "2", "3")})
                     }));
-            var samlSecurityToken2 = 
+            var samlSecurityToken2 =
                 new SamlSecurityToken(new SamlAssertion(Guid.NewGuid().ToString(), Default.Issuer,
                     DateTime.Parse(Default.IssueInstantString), null, new SamlAdvice(),
                     new List<SamlStatement>

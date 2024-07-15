@@ -248,7 +248,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 IssuedAt = Default.IssueInstant,
                 Issuer = Default.Issuer,
                 SigningCredentials = Default.AsymmetricSigningCredentials,
-                Subject = new CaseSensitiveClaimsIdentity(claims)
+                Subject = new ClaimsIdentity(claims)
             };
 
             var token = samlTokenHandler.CreateToken(tokenDescriptor) as SamlSecurityToken;
@@ -267,7 +267,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 IssuedAt = Default.IssueInstant,
                 Issuer = Default.Issuer,
                 SigningCredentials = Default.AsymmetricSigningCredentials,
-                Subject = new CaseSensitiveClaimsIdentity(claims)
+                Subject = new ClaimsIdentity(claims)
             };
 
             var token = saml2TokenHandler.CreateToken(tokenDescriptor) as Saml2SecurityToken;
@@ -474,7 +474,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                         TestId = nameof(ReferenceXml.WresultWsTrust14WithoutNamespaceUnusualSpacing)
                     },
                     // these tests show that one shouldn't rely on parsing the Wresult alone as
-                    // the following Wresult's should error. The correct pattern is to call GetToken() or GetTokenUsingXmlReader() to ensure 
+                    // the following Wresult's should error. The correct pattern is to call GetToken() or GetTokenUsingXmlReader() to ensure
                     // the Wresult is well formed.
                     new WsFederationMessageTheoryData
                     {

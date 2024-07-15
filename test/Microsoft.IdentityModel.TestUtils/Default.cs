@@ -208,7 +208,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static ClaimsIdentity ClaimsIdentity
         {
-            get => new CaseSensitiveClaimsIdentity(Claims, AuthenticationType);
+            get => new ClaimsIdentity(Claims, AuthenticationType);
         }
 
         public static string ClaimsIdentityLabel
@@ -480,7 +480,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static ClaimsIdentity PayloadClaimsIdentity
         {
-            get => new CaseSensitiveClaimsIdentity(PayloadClaims, "AuthenticationTypes.Federation");
+            get => new ClaimsIdentity(PayloadClaims, "AuthenticationTypes.Federation");
         }
 
         public static Dictionary<string, object> PayloadDictionary
@@ -873,7 +873,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static ClaimsIdentity SamlClaimsIdentity
         {
-            get => new CaseSensitiveClaimsIdentity(SamlClaims, AuthenticationType);
+            get => new ClaimsIdentity(SamlClaims, AuthenticationType);
         }
 
         public static SamlConditions SamlConditionsSingleCondition
@@ -925,7 +925,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 IssuedAt = DateTime.UtcNow,
                 NotBefore = DateTime.UtcNow,
                 SigningCredentials = signingCredentials,
-                Subject = claims == null ? ClaimsIdentity : new CaseSensitiveClaimsIdentity(claims)
+                Subject = claims == null ? ClaimsIdentity : new ClaimsIdentity(claims)
             };
         }
 
@@ -940,7 +940,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 IssuedAt = DateTime.UtcNow,
                 NotBefore = DateTime.UtcNow,
                 SigningCredentials = signingCredentials,
-                Subject = claims == null ? ClaimsIdentity : new CaseSensitiveClaimsIdentity(claims),
+                Subject = claims == null ? ClaimsIdentity : new ClaimsIdentity(claims),
             };
 
             if (securityTokenDescriptor.Claims == null)
@@ -965,7 +965,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 IssuedAt = DateTime.UtcNow,
                 NotBefore = DateTime.UtcNow,
                 SigningCredentials = signingCredentials,
-                Subject = claims == null ? ClaimsIdentity : new CaseSensitiveClaimsIdentity(claims)
+                Subject = claims == null ? ClaimsIdentity : new ClaimsIdentity(claims)
             };
         }
 

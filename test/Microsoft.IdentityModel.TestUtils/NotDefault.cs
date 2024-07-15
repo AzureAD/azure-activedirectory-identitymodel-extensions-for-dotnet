@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             get
             {
-                return new CaseSensitiveClaimsIdentity(Claims, AuthenticationType, NameClaimType, RoleClaimType)
+                return new ClaimsIdentity(Claims, AuthenticationType, NameClaimType, RoleClaimType)
                 {
                     Label = ClaimsIdentityLabel
                 };
@@ -100,7 +100,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             get { return Default.RoleClaimType.Replace("Default", "NotDefault"); }
         }
-        
+
         public static EncryptingCredentials SymmetricEncryptionCredentials
         {
             get { return new EncryptingCredentials(new SymmetricSecurityKey(KeyingMaterial.SymmetricKeyBytes2_256), "dir", SecurityAlgorithms.Aes128CbcHmacSha256); }

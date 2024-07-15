@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
             {
                 SigningCredentials = creds,
-                Subject = new CaseSensitiveClaimsIdentity(claims),
+                Subject = new ClaimsIdentity(claims),
                 Expires = (new DateTime(2038, 1, 20)).ToUniversalTime(),
             };
 
@@ -81,7 +81,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
             {
                 SigningCredentials = creds,
-                Subject = new CaseSensitiveClaimsIdentity(claims),
+                Subject = new ClaimsIdentity(claims),
                 Expires = (new DateTime(2038, 1, 20)).ToUniversalTime(),
             };
 
@@ -103,7 +103,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
                 EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes256_Sha512_512,
-                Subject = new CaseSensitiveClaimsIdentity(Default.PayloadClaims),
+                Subject = new ClaimsIdentity(Default.PayloadClaims),
                 TokenType = "TokenType"
             };
 
@@ -116,7 +116,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        // Test checks to make sure that the JsonWebToken.GetClaim() method is able to retrieve every Claim returned by the Claims property (with the exception 
+        // Test checks to make sure that the JsonWebToken.GetClaim() method is able to retrieve every Claim returned by the Claims property (with the exception
         // of Claims that are JObjects or arrays, as those are converted to strings by the GetClaim() method).
         [Fact]
         public void CompareGetClaimAndClaims()
