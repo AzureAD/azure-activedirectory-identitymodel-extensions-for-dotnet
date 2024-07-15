@@ -120,6 +120,18 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     },
                     new AlgorithmTheoryData
                     {
+                        TestId = "Valid_ValidateAlgorithmWhenValidAlgorithmsIsNull",
+                        Algorithm = SecurityAlgorithms.Sha256,
+                        SecurityKey = securityKey,
+                        SecurityToken = null,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidAlgorithms = null
+                        },
+                        AlgorithmValidationResult = new AlgorithmValidationResult(SecurityAlgorithms.Sha256)
+                    },
+                    new AlgorithmTheoryData
+                    {
                         TestId = "Valid_ValidateAlgorithmDefaultAlgorithmValidation",
                         Algorithm = SecurityAlgorithms.Sha256,
                         SecurityKey = securityKey,
