@@ -1,5 +1,31 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+6.36.0
+======
+### New feature
+- A derived `ClaimsIdentity` where claim retrieval is case-sensitive. The current `ClaimsIdentity`, in .NET, retrieves claims in a case-insensitive manner which is different than querying the underlying `SecurityToken`. The new `CaseSensitiveClaimsIdentity` class provides consistent retrieval logic with `SecurityToken`. Opt in to the new behavior via an AppContext switch. See PR [#2710](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2710) for details.
+
+### Fundamentals
+- Update signing info for NuGet packages. See PR [#2696](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2696) for details.
+
+6.35.1
+======
+### Bug Fix
+- Remove dependency on `AadIssuerValidator.GetTenantIdFromToken` in `ValidateIssuerSigningKey`, to only consider the `tid`. An AppContext switch enables fallbacking to the previous behavior, which should not be needed. See PR [#2680](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2680) for details.
+
+6.35.0
+======
+### Bug Fix
+- fix `AadIssuerValidator`'s handling of trailing forward slashes. See issue [#2415] for more details.
+
+### Feature
+- Adds an AppContext switch to control HMAC key size verification. See #2421 for more details.
+
+6.34.0
+======
+### Security fixes
+- See https://aka.ms/IdentityModel/Jan2024/zip and https://aka.ms/IdentityModel/Jan2024/jku for details.
+
 6.33.0
 =======
 ## Bug Fixes:
