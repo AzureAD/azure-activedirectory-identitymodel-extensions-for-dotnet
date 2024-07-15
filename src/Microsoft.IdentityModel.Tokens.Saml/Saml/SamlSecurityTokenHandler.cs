@@ -677,7 +677,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                 if (!identityDict.TryGetValue(statement.Subject, out ClaimsIdentity identity))
                 {
-                    identity = validationParameters.CreateClaimsIdentity(samlToken, issuer);
+                    identity = ClaimsIdentityFactory.Create(samlToken, validationParameters, issuer);
                     ProcessSubject(statement.Subject, identity, issuer);
                     identityDict.Add(statement.Subject, identity);
                 }
@@ -898,7 +898,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 }
             }
 
-            subject.Actor = new ClaimsIdentity(claims, "Federation");
+            subject.Actor = ClaimsIdentityFactory.Create(claims, "Federation");
             SetDelegateFromAttribute(actingAsAttribute, subject.Actor, issuer);
         }
 
