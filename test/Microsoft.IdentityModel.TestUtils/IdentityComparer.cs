@@ -38,12 +38,19 @@ namespace Microsoft.IdentityModel.TestUtils
             new Dictionary<string, Func<object, object, CompareContext, bool>>
             {
                 { typeof(bool).ToString(), AreBoolsEqual },
+                { typeof(byte[]).ToString(), AreBytesEqual },
+                { typeof(CanonicalizingTransfrom).ToString(), CompareAllPublicProperties },
+                { typeof(Claim).ToString(), CompareAllPublicProperties },
+                { typeof(ClaimsIdentity).ToString(), CompareAllPublicProperties },
+                { typeof(CaseSensitiveClaimsIdentity).ToString(), CompareAllPublicProperties },
+                { typeof(ClaimsPrincipal).ToString(), CompareAllPublicProperties },
                 { typeof(Collection<SecurityKey>).ToString(), ContinueCheckingEquality },
                 { typeof(DateTime).ToString(), AreDateTimesEqual },
                 { typeof(Dictionary<string, object>).ToString(), AreObjectDictionariesEqual },
                 { typeof(Dictionary<string, object>.ValueCollection).ToString(), AreValueCollectionsEqual },
                 { typeof(IEnumerable<Claim>).ToString(), AreClaimsEnumsEqual },
                 { typeof(IEnumerable<ClaimsIdentity>).ToString(), AreClaimsIdentitiesEnumsEqual },
+                { typeof(IEnumerable<CaseSensitiveClaimsIdentity>).ToString(), AreClaimsIdentitiesEnumsEqual },
                 { typeof(IEnumerable<object>).ToString(), AreObjectEnumsEqual },
                 { typeof(IEnumerable<SecurityKey>).ToString(), AreSecurityKeyEnumsEqual },
                 { typeof(IEnumerable<string>).ToString(), AreStringEnumsEqual },
@@ -1047,6 +1054,12 @@ namespace Microsoft.IdentityModel.TestUtils
                             continue;
 
                         if (context.IgnoreProperties && propertyInfo.Name == "Properties")
+                            continue;
+                    }
+
+                    if (type == typeof(CaseSensitiveClaimsIdentity))
+                    {
+                        if (propertyInfo.Name == "SecurityToken")
                             continue;
                     }
 

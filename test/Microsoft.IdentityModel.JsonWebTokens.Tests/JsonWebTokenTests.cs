@@ -167,7 +167,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
                 EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes256_Sha512_512,
-                Subject = new ClaimsIdentity(Default.PayloadClaims),
+                Subject = new CaseSensitiveClaimsIdentity(Default.PayloadClaims),
                 TokenType = "TokenType"
             };
 

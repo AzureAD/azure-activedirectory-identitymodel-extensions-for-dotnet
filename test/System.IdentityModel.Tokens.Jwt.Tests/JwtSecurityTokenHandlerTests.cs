@@ -300,7 +300,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             SigningCredentials = Default.X509AsymmetricSigningCredentials,
                             EncryptingCredentials = null,
                             Claims = Default.PayloadJsonDictionary,
-                            Subject = new ClaimsIdentity(Default.PayloadJsonClaims)
+                            Subject = new CaseSensitiveClaimsIdentity(Default.PayloadJsonClaims)
                         },
                         JwtSecurityTokenHandler = tokenHandler,
                         JsonWebTokenHandler = jsonTokenHandler,
@@ -325,7 +325,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                                 { "ClaimValueTypes.JsonClaimValueTypes.JsonArray1", JArray.Parse(@"[1,2,3,4]") },
                                 {"ClaimValueTypes.JsonClaimValueTypes.Integer1", 1 },
                             },
-                            Subject = new ClaimsIdentity(Default.PayloadJsonClaims)
+                            Subject = new CaseSensitiveClaimsIdentity(Default.PayloadJsonClaims)
                         },
                         JwtSecurityTokenHandler = tokenHandler,
                         JsonWebTokenHandler = jsonTokenHandler,
@@ -351,7 +351,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         {
                             SigningCredentials = Default.X509AsymmetricSigningCredentials,
                             EncryptingCredentials = null,
-                            Subject = new ClaimsIdentity(Default.PayloadJsonClaims)
+                            Subject = new CaseSensitiveClaimsIdentity(Default.PayloadJsonClaims)
                         },
                         JwtSecurityTokenHandler = tokenHandler,
                         JsonWebTokenHandler = jsonTokenHandler,
@@ -365,7 +365,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             SigningCredentials = Default.AsymmetricSigningCredentials,
                             Claims = Default.PayloadJsonDictionary,
                             EncryptingCredentials = null,
-                            Subject = new ClaimsIdentity
+                            Subject = new CaseSensitiveClaimsIdentity
                             (
                                 new List<Claim>
                                 {
@@ -410,7 +410,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
                 // Actor validation is true
                 // Actor will be validated using validationParameters since validationsParameters.ActorValidationParameters is null
-                ClaimsIdentity claimsIdentity = new ClaimsIdentity(ClaimSets.DefaultClaimsIdentity);
+                ClaimsIdentity claimsIdentity = new CaseSensitiveClaimsIdentity(ClaimSets.DefaultClaimsIdentity);
                 claimsIdentity.AddClaim(new Claim(ClaimTypes.Actor, Default.AsymmetricJwt));
                 var validationParameters = Default.AsymmetricSignTokenValidationParameters;
                 validationParameters.ValidateActor = true;
@@ -427,7 +427,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
                 // Actor validation is true
                 // Actor will be validated using validationParameters since validationsParameters.ActorValidationParameters is null
-                claimsIdentity = new ClaimsIdentity(ClaimSets.DefaultClaimsIdentity);
+                claimsIdentity = new CaseSensitiveClaimsIdentity(ClaimSets.DefaultClaimsIdentity);
                 claimsIdentity.AddClaim(new Claim(ClaimTypes.Actor, Default.AsymmetricJwt));
                 validationParameters = Default.AsymmetricSignTokenValidationParameters;
                 validationParameters.ValidateActor = true;
@@ -445,7 +445,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 // Actor validation is true
                 // Actor is signed with symmetric key
                 // TokenValidationParameters.ActorValidationParameters will not find signing key because an assymetric signing key is provided
-                claimsIdentity = new ClaimsIdentity(ClaimSets.DefaultClaimsIdentity);
+                claimsIdentity = new CaseSensitiveClaimsIdentity(ClaimSets.DefaultClaimsIdentity);
                 claimsIdentity.AddClaim(new Claim(ClaimTypes.Actor, Default.SymmetricJws));
                 validationParameters = Default.AsymmetricSignTokenValidationParameters;
                 validationParameters.ValidateActor = true;
@@ -465,7 +465,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 // Actor is signed with symmetric key
                 // TokenValidationParameters.ActorValidationParameters is null
                 // TokenValidationParameters will be used, but will not find signing key because an assymetric signing key is provided
-                claimsIdentity = new ClaimsIdentity(ClaimSets.DefaultClaimsIdentity);
+                claimsIdentity = new CaseSensitiveClaimsIdentity(ClaimSets.DefaultClaimsIdentity);
                 claimsIdentity.AddClaim(new Claim(ClaimTypes.Actor, Default.SymmetricJws));
                 validationParameters = Default.AsymmetricSignTokenValidationParameters;
                 validationParameters.ValidateActor = true;
@@ -485,7 +485,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 // TokenValidationParameters.ActorValidationParameters is null
                 // TokenValidationParameters will be used, but will not find signing key because an assymetric signing key is provided
                 // All Signing keys will not be tried to verify signature because validationParameters.TryAllIssuerSigningKeys is set to false
-                claimsIdentity = new ClaimsIdentity(ClaimSets.DefaultClaimsIdentity);
+                claimsIdentity = new CaseSensitiveClaimsIdentity(ClaimSets.DefaultClaimsIdentity);
                 claimsIdentity.AddClaim(new Claim(ClaimTypes.Actor, Default.SymmetricJws));
                 validationParameters = Default.AsymmetricSignTokenValidationParameters;
                 validationParameters.ValidateActor = true;
@@ -504,7 +504,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 // Actor validation is false
                 // Actor is signed with symmetric key
                 // TokenValidationParameters.ActorValidationParameters will not find signing key, but Actor should not be validated
-                claimsIdentity = new ClaimsIdentity(ClaimSets.DefaultClaimsIdentity);
+                claimsIdentity = new CaseSensitiveClaimsIdentity(ClaimSets.DefaultClaimsIdentity);
                 claimsIdentity.AddClaim(new Claim(ClaimTypes.Actor, Default.SymmetricJws));
                 validationParameters = Default.AsymmetricSignTokenValidationParameters;
                 validationParameters.ValidateActor = false;
@@ -522,7 +522,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
                 // Actor validation is true
                 // Actor will be validated using validationsParameters.ActorValidationParameters
-                claimsIdentity = new ClaimsIdentity(ClaimSets.DefaultClaimsIdentity);
+                claimsIdentity = new CaseSensitiveClaimsIdentity(ClaimSets.DefaultClaimsIdentity);
                 claimsIdentity.AddClaim(new Claim(ClaimTypes.Actor, Default.SymmetricJws));
                 validationParameters = Default.AsymmetricSignTokenValidationParameters;
                 validationParameters.ActorValidationParameters = Default.SymmetricSignTokenValidationParameters;
@@ -790,7 +790,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var jwt = handler.CreateJwtSecurityToken(
                 issuer: Default.Issuer,
                 audience: Default.Audience,
-                subject: new ClaimsIdentity(
+                subject: new CaseSensitiveClaimsIdentity(
                     ClaimSets.AllInboundShortClaimTypes(
                         Default.Issuer,
                         Default.Issuer)));
@@ -844,7 +844,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 { JwtRegisteredClaimNames.Sub, "Mapped_" + JwtRegisteredClaimNames.Sub },
             };
 
-            jwt = handler.CreateJwtSecurityToken(issuer: Default.Issuer, audience: Default.Audience, subject: new ClaimsIdentity(claims));
+            jwt = handler.CreateJwtSecurityToken(issuer: Default.Issuer, audience: Default.Audience, subject: new CaseSensitiveClaimsIdentity(claims));
 
             List<Claim> expectedClaims = new List<Claim>()
             {
@@ -893,7 +893,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
              new Claim(JwtRegisteredClaimNames.GivenName, "Bob", ClaimValueTypes.String, Default.Issuer)
             };
 
-            var jwt = handler.CreateJwtSecurityToken(issuer: Default.Issuer, audience: Default.Audience, subject: new ClaimsIdentity(claims));
+            var jwt = handler.CreateJwtSecurityToken(issuer: Default.Issuer, audience: Default.Audience, subject: new CaseSensitiveClaimsIdentity(claims));
 
             // Check to make sure none of the short claim types have been mapped to longer ones.
             foreach (var claim in claims)
@@ -1052,12 +1052,12 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             handler.OutboundClaimTypeMap.Add("internalClaim", "jwtClaim");
 
             // Test outgoing
-            var outgoingToken = handler.CreateJwtSecurityToken(subject: new ClaimsIdentity(new Claim[] { internalClaim }));
+            var outgoingToken = handler.CreateJwtSecurityToken(subject: new CaseSensitiveClaimsIdentity(new Claim[] { internalClaim }));
             var wasClaimMapped = System.Linq.Enumerable.Contains<Claim>(outgoingToken.Claims, jwtClaim, new ClaimComparer());
             Assert.True(wasClaimMapped);
 
             // Test incoming
-            var incomingToken = handler.CreateJwtSecurityToken(issuer: "Test Issuer", subject: new ClaimsIdentity(new Claim[] { jwtClaim, unwantedClaim }));
+            var incomingToken = handler.CreateJwtSecurityToken(issuer: "Test Issuer", subject: new CaseSensitiveClaimsIdentity(new Claim[] { jwtClaim, unwantedClaim }));
             var validationParameters = new TokenValidationParameters
             {
                 RequireSignedTokens = false,
@@ -2236,7 +2236,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     {
                         TestId = "NullToken_PayloadValidationFailure",
                         ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException(TokenLogMessages.IDX10211),
-                        Token = handler.CreateEncodedJwt("", Default.Audience, new ClaimsIdentity(ClaimSets.DefaultClaimsIdentity), null, null, null, Default.AsymmetricSigningCredentials),
+                        Token = handler.CreateEncodedJwt("", Default.Audience, new CaseSensitiveClaimsIdentity(ClaimSets.DefaultClaimsIdentity), null, null, null, Default.AsymmetricSigningCredentials),
                         TokenHandler = handler,
                         ValidationParameters = Default.AsymmetricSignTokenValidationParameters
                     },
@@ -2864,7 +2864,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     TestId = "TokenExpired",
                     TokenDescriptor = new SecurityTokenDescriptor
                     {
-                        Subject = new ClaimsIdentity(Default.PayloadClaimsExpired),
+                        Subject = new CaseSensitiveClaimsIdentity(Default.PayloadClaimsExpired),
                         Expires = DateTime.UtcNow.Subtract(new TimeSpan(0, 10, 0)),
                         IssuedAt = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
                         NotBefore = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
@@ -2882,7 +2882,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     TestId = "InvalidIssuer",
                     TokenDescriptor = new SecurityTokenDescriptor
                     {
-                        Subject = new ClaimsIdentity(Default.PayloadClaims),
+                        Subject = new CaseSensitiveClaimsIdentity(Default.PayloadClaims),
                         SigningCredentials = Default.AsymmetricSigningCredentials,
                     },
                     ValidationParameters = new TokenValidationParameters
@@ -2896,7 +2896,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     TestId = "InvalidIssuerAndExpiredToken",
                     TokenDescriptor = new SecurityTokenDescriptor
                     {
-                        Subject = new ClaimsIdentity(Default.PayloadClaimsExpired),
+                        Subject = new CaseSensitiveClaimsIdentity(Default.PayloadClaimsExpired),
                         Expires = DateTime.UtcNow.Subtract(new TimeSpan(0, 10, 0)),
                         IssuedAt = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
                         NotBefore = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
@@ -2913,7 +2913,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     TestId = "KeysDontMatch-ValidLifeTimeAndIssuer",
                     TokenDescriptor = new SecurityTokenDescriptor
                     {
-                        Subject = new ClaimsIdentity(Default.PayloadClaims),
+                        Subject = new CaseSensitiveClaimsIdentity(Default.PayloadClaims),
                         SigningCredentials = Default.AsymmetricSigningCredentials,
                     },
                     ValidationParameters = new TokenValidationParameters

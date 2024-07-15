@@ -117,7 +117,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         public void CreateClaimsIdentities(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.CreateClaimsIdentities", theoryData);
-            var context = new CompareContext($"{this}.CreateClaimsIdentities, {theoryData.TestId}") { IgnoreType = true };
+            var context = new CompareContext($"{this}.CreateClaimsIdentities, {theoryData.TestId}");
+
             try
             {
                 var identities = ((theoryData.Handler) as SamlSecurityTokenHandlerPublic).CreateClaimsIdentitiesPublic(theoryData.TokenTestSet.SecurityToken as SamlSecurityToken, theoryData.Issuer, theoryData.ValidationParameters);
@@ -804,7 +805,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     Expires = Default.Expires,
                     Issuer = Default.Issuer,
                     SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
-                    Subject = new ClaimsIdentity(Default.SamlClaims),
+                    Subject = new CaseSensitiveClaimsIdentity(Default.SamlClaims),
                 };
 
                 var validationParameters = new TokenValidationParameters
@@ -1080,7 +1081,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                             Issuer = Default.Issuer,
                             SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
                             EncryptingCredentials = null,
-                            Subject = new ClaimsIdentity(Default.SamlClaims)
+                            Subject = new CaseSensitiveClaimsIdentity(Default.SamlClaims)
                         },
                         SamlSecurityTokenHandler = new SamlSecurityTokenHandler(),
                         ValidationParameters = validationParameters
@@ -1097,7 +1098,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                             SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
                             EncryptingCredentials = null,
                             Claims = Default.SamlClaimsDictionary,
-                            Subject = new ClaimsIdentity(Default.SamlClaims)
+                            Subject = new CaseSensitiveClaimsIdentity(Default.SamlClaims)
                         },
                         SamlSecurityTokenHandler = new SamlSecurityTokenHandler(),
                         ValidationParameters = validationParameters
@@ -1114,7 +1115,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                             SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
                             EncryptingCredentials = null,
                             Claims = Default.SamlClaimsDictionary,
-                            Subject = new ClaimsIdentity
+                            Subject = new CaseSensitiveClaimsIdentity
                             (
                                 new List<Claim>
                                 {
@@ -1144,7 +1145,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                                 { ClaimTypes.GivenName, "Bob" },
                                 { ClaimTypes.Role, "HR" }
                             },
-                            Subject = new ClaimsIdentity(Default.SamlClaims)
+                            Subject = new CaseSensitiveClaimsIdentity(Default.SamlClaims)
                         },
                         SamlSecurityTokenHandler = new SamlSecurityTokenHandler(),
                         ValidationParameters = validationParameters
@@ -1166,7 +1167,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                                 { ClaimTypes.GivenName, "Alice" },
                                 { ClaimTypes.Role, "HR" }
                             },
-                            Subject = new ClaimsIdentity
+                            Subject = new CaseSensitiveClaimsIdentity
                             (
                                 new List<Claim>
                                 {

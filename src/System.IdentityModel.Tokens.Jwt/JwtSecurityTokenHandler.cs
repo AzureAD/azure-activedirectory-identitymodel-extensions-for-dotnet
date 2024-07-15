@@ -1469,7 +1469,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
         private ClaimsIdentity CreateClaimsIdentityWithMapping(JwtSecurityToken jwtToken, string actualIssuer, TokenValidationParameters validationParameters)
         {
-            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, actualIssuer);
+            ClaimsIdentity identity = ClaimsIdentityFactory.Create(jwtToken, validationParameters, actualIssuer);
             foreach (Claim jwtClaim in jwtToken.Claims)
             {
                 if (_inboundClaimFilter.Contains(jwtClaim.Type))
@@ -1515,7 +1515,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
         private ClaimsIdentity CreateClaimsIdentityWithoutMapping(JwtSecurityToken jwtToken, string actualIssuer, TokenValidationParameters validationParameters)
         {
-            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, actualIssuer);
+            ClaimsIdentity identity = ClaimsIdentityFactory.Create(jwtToken, validationParameters, actualIssuer);
             foreach (Claim jwtClaim in jwtToken.Claims)
             {
                 if (_inboundClaimFilter.Contains(jwtClaim.Type))
