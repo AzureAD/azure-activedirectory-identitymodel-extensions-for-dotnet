@@ -135,7 +135,7 @@ namespace Microsoft.IdentityModel.Tokens
 
                     if (_validationParameters != null && SecurityToken != null && _tokenHandler != null && Issuer != null)
                     {
-                        _claimsIdentity = ClaimsIdentityFactory.Create(_tokenHandler, SecurityToken, _validationParameters, Issuer);
+                        _claimsIdentity = _tokenHandler.CreateClaimsIdentityInternal(SecurityToken, _validationParameters, Issuer);
                     }
 
                     _claimsIdentityInitialized = true;
