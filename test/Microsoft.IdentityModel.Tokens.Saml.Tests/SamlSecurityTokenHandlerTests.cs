@@ -120,10 +120,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         public void CreateClaimsIdentities(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.CreateClaimsIdentities", theoryData);
-            var context = new CompareContext($"{this}.CreateClaimsIdentities, {theoryData.TestId}")
-            {
-                IgnoreType = true,
-            };
+            var context = new CompareContext($"{this}.CreateClaimsIdentities, {theoryData.TestId}");
 
             try
             {
