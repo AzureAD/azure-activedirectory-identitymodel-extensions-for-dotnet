@@ -13,7 +13,7 @@ namespace Microsoft.IdentityModel.Tokens
     public class CaseSensitiveClaimsIdentity : ClaimsIdentity
     {
         /// <summary>
-        /// Gets the <see cref="SecurityToken"/> that was used to create this claims identity.
+        /// Gets the <see cref="SecurityToken"/> associated with this claims identity.
         /// </summary>
         public SecurityToken SecurityToken { get; internal set; }
 
