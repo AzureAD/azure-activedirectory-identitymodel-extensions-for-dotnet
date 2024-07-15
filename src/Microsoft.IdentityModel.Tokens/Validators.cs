@@ -14,7 +14,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// AudienceValidator
     /// </summary>
-    public static class Validators
+    public static partial class Validators
     {
         /// <summary>
         /// Validates if a given algorithm for a <see cref="SecurityKey"/> is valid.
@@ -338,7 +338,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException"> if 'validationParameters' is null.</exception>
         public static void ValidateIssuerSecurityKey(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
-            ValidateIssuerSecurityKey(securityKey, securityToken, validationParameters, null);
+            ValidateIssuerSecurityKey(securityKey, securityToken, validationParameters, configuration: null);
         }
 
         /// <summary>

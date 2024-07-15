@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// The value is <c>"AuthenticationTypes.Federation"</c>.
         /// To change the value, set <see cref="AuthenticationType"/> to a different value.
         /// </summary>
-        public static readonly string DefaultAuthenticationType = "AuthenticationTypes.Federation"; // Note: The change was because 5.x removed the dependency on System.IdentityModel and we used a different string which was a mistake.
+        public const string DefaultAuthenticationType = "AuthenticationTypes.Federation"; // Note: The change was because 5.x removed the dependency on System.IdentityModel and we used a different string which was a mistake.
 
         /// <summary>
         /// Default for the clock skew.
@@ -246,7 +246,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// If set, this delegate will be called to validate the <see cref="SecurityKey"/> that signed the token, instead of default processing.
         /// This means that no default <see cref="SecurityKey"/> validation will occur.
-        /// Even if <see cref="ValidateIssuerSigningKey"/> is false, this delegate will still be called.
         /// If both <see cref="IssuerSigningKeyValidatorUsingConfiguration"/> and <see cref="IssuerSigningKeyValidator"/> are set, IssuerSigningKeyResolverUsingConfiguration takes
         /// priority.
         /// </remarks>
@@ -271,7 +270,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// If both <see cref="IssuerSigningKeyResolverUsingConfiguration"/> and <see cref="IssuerSigningKeyResolver"/> are set, IssuerSigningKeyResolverUsingConfiguration takes
         /// priority.
         /// </remarks>
-        public IssuerSigningKeyResolverDelegate IssuerSigningKeyResolver { get; set; }
+        public IssuerSigningKeyResolver IssuerSigningKeyResolver { get; set; }
 
         /// <summary>
         /// Gets or sets an <see cref="IList{SecurityKey}"/> used for signature validation.
@@ -409,7 +408,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// If set, this delegate will be called to validate the signature of the token, instead of default processing.
         /// </remarks>
-        public SignatureValidationDelegate SignatureValidator { get; set; }
+        public SignatureValidator SignatureValidator { get; set; }
 
         /// <summary>
         /// Gets or sets a delegate that will be called to retreive a <see cref="SecurityKey"/> used for decryption.
