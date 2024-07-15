@@ -37,45 +37,5 @@ namespace Microsoft.IdentityModel.Tokens
                 SecurityToken = securityToken,
             };
         }
-
-        internal static ClaimsIdentity Create(SecurityToken securityToken, TokenValidationParameters validationParameters, string issuer)
-        {
-            ClaimsIdentity claimsIdentity = validationParameters.CreateClaimsIdentity(securityToken, issuer);
-
-            // Set the SecurityToken in cases where derived TokenValidationParameters created a CaseSensitiveClaimsIdentity.
-            if (claimsIdentity is CaseSensitiveClaimsIdentity caseSensitiveClaimsIdentity && caseSensitiveClaimsIdentity.SecurityToken == null)
-            {
-                caseSensitiveClaimsIdentity.SecurityToken = securityToken;
-            }
-            else if (claimsIdentity is not CaseSensitiveClaimsIdentity && !AppContextSwitches.UseClaimsIdentityType())
-            {
-                claimsIdentity = new CaseSensitiveClaimsIdentity(claimsIdentity)
-                {
-                    SecurityToken = securityToken,
-                };
-            }
-
-            return claimsIdentity;
-        }
-
-        internal static ClaimsIdentity Create(TokenHandler tokenHandler, SecurityToken securityToken, TokenValidationParameters validationParameters, string issuer)
-        {
-            ClaimsIdentity claimsIdentity = tokenHandler.CreateClaimsIdentityInternal(securityToken, validationParameters, issuer);
-
-            // Set the SecurityToken in cases where derived TokenHandler created a CaseSensitiveClaimsIdentity.
-            if (claimsIdentity is CaseSensitiveClaimsIdentity caseSensitiveClaimsIdentity && caseSensitiveClaimsIdentity.SecurityToken == null)
-            {
-                caseSensitiveClaimsIdentity.SecurityToken = securityToken;
-            }
-            else if (claimsIdentity is not CaseSensitiveClaimsIdentity && !AppContextSwitches.UseClaimsIdentityType())
-            {
-                claimsIdentity = new CaseSensitiveClaimsIdentity(claimsIdentity)
-                {
-                    SecurityToken = securityToken,
-                };
-            }
-
-            return claimsIdentity;
-        }
     }
 }
