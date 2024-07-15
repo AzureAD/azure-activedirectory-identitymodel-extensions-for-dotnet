@@ -31,6 +31,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 - Rename local variables for better readability. See PR [#2674](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2674) for details.
 - Refactor XML comments for improved clarity. See PR [#2676](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2676), [#2677](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2677), [#2678](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2678), [#2689](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2689) and [#2703](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2703) for details.
 - Fix flaky test. See issue [#2683](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2683) for details.
+- Made `ConfigurationManager.GetConfigurationAsync` a virtual method. See PR [#2661](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2661)
 
 8.0.0-preview1
 =====
