@@ -44,6 +44,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 { typeof(CanonicalizingTransfrom).ToString(), CompareAllPublicProperties },
                 { typeof(Claim).ToString(), CompareAllPublicProperties },
                 { typeof(ClaimsIdentity).ToString(), CompareAllPublicProperties },
+                { typeof(CaseSensitiveClaimsIdentity).ToString(), CompareAllPublicProperties },
                 { typeof(ClaimsPrincipal).ToString(), CompareAllPublicProperties },
                 { typeof(Collection<SecurityKey>).ToString(), ContinueCheckingEquality },
                 { typeof(DateTime).ToString(), AreDateTimesEqual },
@@ -54,6 +55,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 { typeof(IDictionary<string, string>).ToString(), AreStringDictionariesEqual},
                 { typeof(IEnumerable<Claim>).ToString(), AreClaimsEnumsEqual },
                 { typeof(IEnumerable<ClaimsIdentity>).ToString(), AreClaimsIdentitiesEnumsEqual },
+                { typeof(IEnumerable<CaseSensitiveClaimsIdentity>).ToString(), AreClaimsIdentitiesEnumsEqual },
                 { typeof(IEnumerable<object>).ToString(), AreObjectEnumsEqual },
                 { typeof(IEnumerable<SecurityKey>).ToString(), AreSecurityKeyEnumsEqual },
                 { typeof(IEnumerable<string>).ToString(), AreStringEnumsEqual },
@@ -1277,6 +1279,12 @@ namespace Microsoft.IdentityModel.TestUtils
                             continue;
 
                         if (context.IgnoreProperties && propertyInfo.Name == "Properties")
+                            continue;
+                    }
+
+                    if (type == typeof(CaseSensitiveClaimsIdentity))
+                    {
+                        if (propertyInfo.Name == "SecurityToken")
                             continue;
                     }
 

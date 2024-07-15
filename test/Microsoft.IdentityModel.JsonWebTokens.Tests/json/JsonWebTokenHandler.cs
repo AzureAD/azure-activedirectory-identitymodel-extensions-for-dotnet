@@ -792,7 +792,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, issuer);
+            ClaimsIdentity identity = ClaimsIdentityFactory.Create(jwtToken, validationParameters, issuer);
             foreach (Claim jwtClaim in jwtToken.Claims)
             {
                 bool wasMapped = _inboundClaimTypeMap.TryGetValue(jwtClaim.Type, out string claimType);
@@ -861,7 +861,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             _ = validationParameters ?? throw LogHelper.LogArgumentNullException(nameof(validationParameters));
 
-            ClaimsIdentity identity = validationParameters.CreateClaimsIdentity(jwtToken, issuer);
+            ClaimsIdentity identity = ClaimsIdentityFactory.Create(jwtToken, validationParameters, issuer);
             foreach (Claim jwtClaim in jwtToken.Claims)
             {
                 string claimType = jwtClaim.Type;

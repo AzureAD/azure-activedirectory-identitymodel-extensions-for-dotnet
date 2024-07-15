@@ -342,7 +342,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                     Expires = Default.Expires,
                     Issuer = Default.Issuer,
                     SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
-                    Subject = new ClaimsIdentity(Default.SamlClaims),
+                    Subject = new CaseSensitiveClaimsIdentity(Default.SamlClaims),
                 };
 
                 var validationParameters = new TokenValidationParameters
@@ -487,7 +487,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                 Issuer = Default.Issuer,
                 Audience = Default.Audience,
                 SigningCredentials = Default.AsymmetricSigningCredentials,
-                Subject = new ClaimsIdentity()
+                Subject = new CaseSensitiveClaimsIdentity()
             };
 
             var token = tokenHandler.CreateToken(descriptorNoTimeValues);
@@ -1157,7 +1157,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                             Issuer = Default.Issuer,
                             SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
                             EncryptingCredentials = null,
-                            Subject = new ClaimsIdentity(Default.SamlClaims)
+                            Subject = new CaseSensitiveClaimsIdentity(Default.SamlClaims)
                         },
                         Saml2SecurityTokenHandler = new Saml2SecurityTokenHandler(),
                         ValidationParameters = validationParameters
@@ -1174,7 +1174,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                             SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
                             EncryptingCredentials = null,
                             Claims = Default.SamlClaimsDictionary,
-                            Subject = new ClaimsIdentity(Default.SamlClaims)
+                            Subject = new CaseSensitiveClaimsIdentity(Default.SamlClaims)
                         },
                         Saml2SecurityTokenHandler = new Saml2SecurityTokenHandler(),
                         ValidationParameters = validationParameters
@@ -1191,7 +1191,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                             SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
                             EncryptingCredentials = null,
                             Claims = Default.SamlClaimsDictionary,
-                            Subject = new ClaimsIdentity
+                            Subject = new CaseSensitiveClaimsIdentity
                             (
                                 new List<Claim>
                                 {
@@ -1221,7 +1221,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                                 { ClaimTypes.GivenName, "Bob" },
                                 { ClaimTypes.Role, "HR" }
                             },
-                            Subject = new ClaimsIdentity(Default.SamlClaims)
+                            Subject = new CaseSensitiveClaimsIdentity(Default.SamlClaims)
                         },
                         Saml2SecurityTokenHandler = new Saml2SecurityTokenHandler(),
                         ValidationParameters = validationParameters
@@ -1243,7 +1243,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                                 { ClaimTypes.GivenName, "Alice" },
                                 { ClaimTypes.Role, "HR" }
                             },
-                            Subject = new ClaimsIdentity
+                            Subject = new CaseSensitiveClaimsIdentity
                             (
                                 new List<Claim>
                                 {

@@ -1122,7 +1122,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 }
             }
 
-            identity.Actor = new ClaimsIdentity(claims);
+            identity.Actor = ClaimsIdentityFactory.Create(claims);
             SetClaimsIdentityActorFromAttribute(actorAttribute, identity.Actor, issuer);
         }
 
@@ -1307,7 +1307,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 actualIssuer = ClaimsIdentity.DefaultIssuer;
             }
 
-            var identity = validationParameters.CreateClaimsIdentity(samlToken, actualIssuer);
+            var identity = ClaimsIdentityFactory.Create(samlToken, validationParameters, issuer);
+
             ProcessSubject(samlToken.Assertion.Subject, identity, actualIssuer);
             ProcessStatements(samlToken.Assertion.Statements, identity, actualIssuer);
 
