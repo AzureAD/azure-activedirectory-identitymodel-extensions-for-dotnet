@@ -37,74 +37,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="audiences">The audiences found in the <see cref="SecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
-        /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
-        /// <exception cref="ArgumentNullException">If 'audiences' is null and <see cref="TokenValidationParameters.ValidateAudience"/> is true.</exception>
-        /// <exception cref="SecurityTokenInvalidAudienceException">If <see cref="TokenValidationParameters.ValidAudience"/> is null or whitespace and <see cref="TokenValidationParameters.ValidAudiences"/> is null.</exception>
-        /// <exception cref="SecurityTokenInvalidAudienceException">If none of the 'audiences' matched either <see cref="TokenValidationParameters.ValidAudience"/> or one of <see cref="TokenValidationParameters.ValidAudiences"/>.</exception>
-        /// <remarks>An EXACT match is required.</remarks>
-        public static void ValidateAudience(IEnumerable<string> audiences, SecurityToken securityToken, TokenValidationParameters validationParameters)
-        {
-            if (validationParameters == null)
-                throw LogHelper.LogArgumentNullException(nameof(validationParameters));
-
-            if (validationParameters.AudienceValidator != null)
-            {
-                if (!validationParameters.AudienceValidator(audiences, securityToken, validationParameters))
-                    throw LogHelper.LogExceptionMessage(
-                        new SecurityTokenInvalidAudienceException(
-                            LogHelper.FormatInvariant(
-                                LogMessages.IDX10231,
-                                LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())))
-                        {
-                            InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences)
-                        });
-
-                return;
-            }
-
-            if (!validationParameters.ValidateAudience)
-            {
-                LogHelper.LogWarning(LogMessages.IDX10233);
-                return;
-            }
-
-            if (audiences == null)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException(LogMessages.IDX10207) { InvalidAudience = null });
-
-            if (string.IsNullOrWhiteSpace(validationParameters.ValidAudience) && (validationParameters.ValidAudiences == null))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException(LogMessages.IDX10208) { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences) });
-
-            if (!audiences.Any())
-                throw LogHelper.LogExceptionMessage(
-                    new SecurityTokenInvalidAudienceException(LogHelper.FormatInvariant(LogMessages.IDX10206))
-                    { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences) });
-
-            if (audiences is not List<string> audiencesAsList)
-                audiencesAsList = audiences.ToList();
-
-            if (AudienceIsValid(audiencesAsList, validationParameters))
-                return;
-
-            SecurityTokenInvalidAudienceException ex = new SecurityTokenInvalidAudienceException(
-                LogHelper.FormatInvariant(LogMessages.IDX10214,
-                    LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(audiences)),
-                    LogHelper.MarkAsNonPII(validationParameters.ValidAudience ?? "null"),
-                    LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences))))
-            { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences) };
-
-            if (!validationParameters.LogValidationExceptions)
-                throw ex;
-
-            throw LogHelper.LogExceptionMessage(ex);
-        }
-
-
-        /// <summary>
-        /// Determines if the audiences found in a <see cref="SecurityToken"/> are valid.
-        /// </summary>
-        /// <param name="audiences">The audiences found in the <see cref="SecurityToken"/>.</param>
-        /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
-        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext"></param>
         /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
         /// <exception cref="ArgumentNullException">If 'audiences' is null and <see cref="TokenValidationParameters.ValidateAudience"/> is true.</exception>
@@ -259,13 +191,13 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (validAudience.Length == tokenAudience.Length)
                 return string.Equals(validAudience, tokenAudience);
-            else if (ignoreTrailingSlashWhenValidatingAudience && AudiencesMatchIgnoringTrailingSlash(tokenAudience, validAudience))
+            else if (ignoreTrailingSlashWhenValidatingAudience && NewAudiencesMatchIgnoringTrailingSlash(tokenAudience, validAudience))
                 return true;
 
             return false;
         }
 
-        private static bool AudiencesMatchIgnoringTrailingSlash(string tokenAudience, string validAudience)
+        private static bool NewAudiencesMatchIgnoringTrailingSlash(string tokenAudience, string validAudience)
         {
             int length = -1;
 
