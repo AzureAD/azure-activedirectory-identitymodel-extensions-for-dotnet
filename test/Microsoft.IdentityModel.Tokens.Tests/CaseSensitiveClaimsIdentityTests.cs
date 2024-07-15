@@ -13,6 +13,8 @@ using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegiste
 
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
+
+#if NET46_OR_GREATER || NETCOREAPP || NETSTANDARD
     public class CaseSensitiveClaimsIdentityTests
     {
         private static readonly string LowerCaseClaimName = "tid";
@@ -226,8 +228,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         private static ClaimsIdentity CreateCaseSensitiveClaimsIdentity(JObject claims, TokenValidationParameters validationParameters = null)
         {
+            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, true);
+
             var handler = new JsonWebTokenHandler();
-            return handler.CreateClaimsIdentityInternal(new JsonWebToken(CreateUnsignedToken(claims)), validationParameters ?? new TokenValidationParameters(), Default.Issuer);
+            var claimsIdentity = handler.CreateClaimsIdentityInternal(new JsonWebToken(CreateUnsignedToken(claims)), validationParameters ?? new TokenValidationParameters(), Default.Issuer);
+
+            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, false);
+
+            return claimsIdentity;
         }
 
         private static string CreateUnsignedToken(JObject payload)
@@ -238,4 +246,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return string.Concat(Base64UrlEncoder.Encode("{}"), ".", Base64UrlEncoder.Encode(jObject.ToString()), ".");
         }
     }
+#endif
+
 }

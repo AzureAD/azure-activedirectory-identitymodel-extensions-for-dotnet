@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             get
             {
-                return new CaseSensitiveClaimsIdentity(Claims, AuthenticationType, NameClaimType, RoleClaimType)
+                return new ClaimsIdentity(Claims, AuthenticationType, NameClaimType, RoleClaimType)
                 {
                     Label = ClaimsIdentityLabel
                 };

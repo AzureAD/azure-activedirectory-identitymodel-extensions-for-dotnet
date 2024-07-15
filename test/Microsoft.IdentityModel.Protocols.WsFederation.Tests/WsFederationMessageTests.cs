@@ -248,7 +248,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 IssuedAt = Default.IssueInstant,
                 Issuer = Default.Issuer,
                 SigningCredentials = Default.AsymmetricSigningCredentials,
-                Subject = new CaseSensitiveClaimsIdentity(claims)
+                Subject = new ClaimsIdentity(claims)
             };
 
             var token = samlTokenHandler.CreateToken(tokenDescriptor) as SamlSecurityToken;
@@ -267,7 +267,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 IssuedAt = Default.IssueInstant,
                 Issuer = Default.Issuer,
                 SigningCredentials = Default.AsymmetricSigningCredentials,
-                Subject = new CaseSensitiveClaimsIdentity(claims)
+                Subject = new ClaimsIdentity(claims)
             };
 
             var token = saml2TokenHandler.CreateToken(tokenDescriptor) as Saml2SecurityToken;

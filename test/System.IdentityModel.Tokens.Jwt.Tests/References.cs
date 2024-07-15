@@ -574,7 +574,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
         public static ClaimsIdentity ClaimsIdentityDistributedClaims(string issuer, string authType, Dictionary<string, object> claimSources, Dictionary<string, object> claimNames)
         {
-            var identity = new CaseSensitiveClaimsIdentity(authType);
+            var identity = new ClaimsIdentity(authType);
             var claimValue = BuildClaimValue(claimSources);
             identity.AddClaim(new Claim("_claim_sources", claimValue, JsonClaimValueTypes.Json, issuer, issuer, identity));
             claimValue = BuildClaimValue(claimNames);
