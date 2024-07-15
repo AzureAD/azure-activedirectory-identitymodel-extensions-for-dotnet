@@ -5,7 +5,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 ### CVE package updates
 [CVE-2024-30105](https://github.com/advisories/GHSA-hh2w-p6rv-4g7w)
 
-- A derived `ClaimsIdentity` where claim retrieval is case-sensitive. The current `ClaimsIdentity`, in .NET, retrieves claims in a case-insensitive manner which is different than querying the underlying `SecurityToken`. The new `CaseSensitiveClaimsIdentity` class provides consistent retrieval logic with `SecurityToken`. Opt in to the new behavior via an AppContext switch. See PR [#2710](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2710) for details.
+- A derived `ClaimsIdentity` where claim retrieval is case-sensitive. The current `ClaimsIdentity`, in .NET, retrieves claims in a case-insensitive manner which is different than querying the underlying `SecurityToken`. The new `CaseSensitiveClaimsIdentity` class provides consistent retrieval logic with `SecurityToken`. Opt in to the new behavior via an AppContext switch. See PR [#2715](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2715) for details.
 
 7.6.3
 =====
