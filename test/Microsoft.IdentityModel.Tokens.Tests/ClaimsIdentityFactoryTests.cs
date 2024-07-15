@@ -12,12 +12,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     [Collection(nameof(ClaimsIdentityFactoryTests))]
     public class ClaimsIdentityFactoryTests
     {
+
+#if NET46_OR_GREATER
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
         public void Create_FromTokenValidationParameters_ReturnsCorrectClaimsIdentity(bool useClaimsIdentity)
         {
-            AppContext.SetSwitch(AppContextSwitches.UseClaimsIdentityTypeSwitch, useClaimsIdentity);
+            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, useClaimsIdentity);
 
             var jsonWebToken = new JsonWebToken(Default.Jwt(Default.SecurityTokenDescriptor()));
             var tokenValidationParameters = new TokenValidationParameters();
@@ -42,8 +44,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 Assert.Equal(jsonWebToken, ((CaseSensitiveClaimsIdentity)actualClaimsIdentity).SecurityToken);
             }
 
-            AppContext.SetSwitch(AppContextSwitches.UseClaimsIdentityTypeSwitch, false);
+            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, false);
         }
+#endif
 
         [Fact]
         public void Create_FromDerivedTokenValidationParameters_HonorsSetSecurityToken()

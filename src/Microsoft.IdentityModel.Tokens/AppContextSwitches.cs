@@ -14,8 +14,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Enables a fallback to the previous behavior of using <see cref="ClaimsIdentity"/> instead of <see cref="CaseSensitiveClaimsIdentity"/> globally.
         /// </summary>
-        internal const string UseClaimsIdentityTypeSwitch = "Microsoft.IdentityModel.Tokens.UseClaimsIdentityType";
+        internal const string UseCaseSensitiveClaimsIdentityTypeSwitch = "Microsoft.IdentityModel.Tokens.UseCaseSensitiveClaimsIdentityType";
 
-        internal static bool UseClaimsIdentityType() => (AppContext.TryGetSwitch(UseClaimsIdentityTypeSwitch, out bool useClaimsIdentityType) && useClaimsIdentityType);
+#if NET46_OR_GREATER
+        internal static bool UseCaseSensitiveClaimsIdentityType() => AppContext.TryGetSwitch(UseCaseSensitiveClaimsIdentityTypeSwitch, out bool useCaseSensitiveClaimsIdentityType) && useCaseSensitiveClaimsIdentityType;
+
+#else
+        // .NET 4.5 does not support AppContext switches. Always use ClaimsIdentity.
+        internal static bool UseCaseSensitiveClaimsIdentityType() => false;
+#endif
     }
 }
