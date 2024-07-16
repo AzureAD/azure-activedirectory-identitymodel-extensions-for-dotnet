@@ -64,46 +64,12 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     },
                     new AlgorithmTheoryData
                     {
-                        TestId = "Valid_ValidateAlgorithmUsingDelegate",
-                        Algorithm = SecurityAlgorithms.Sha256,
-                        SecurityKey = null,
-                        SecurityToken = null,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            AlgorithmValidator = (algorithm, securityKey, securityToken, validationParameters) => true
-                        },
-                        AlgorithmValidationResult = new AlgorithmValidationResult(SecurityAlgorithms.Sha256)
-                    },
-                    new AlgorithmTheoryData
-                    {
-                        TestId = "Invalid_ValidateAlgorithmUsingDelegate",
-                        ExpectedException = ExpectedException.SecurityTokenInvalidAlgorithmException("IDX10697:"),
-                        Algorithm = SecurityAlgorithms.Sha256,
-                        SecurityKey = securityKey,
-                        SecurityToken = null,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            AlgorithmValidator = (algorithm, securityKey, securityToken, validationParameters) => false
-                        },
-                        AlgorithmValidationResult = new AlgorithmValidationResult(
-                            SecurityAlgorithms.Sha256,
-                            ValidationFailureType.AlgorithmValidationFailed,
-                            new ExceptionDetail(
-                                new MessageDetail(
-                                    LogMessages.IDX10697,
-                                    LogHelper.MarkAsNonPII(SecurityAlgorithms.Sha256),
-                                    securityKey),
-                                typeof(SecurityTokenInvalidAlgorithmException),
-                                new StackFrame(true)))
-                    },
-                    new AlgorithmTheoryData
-                    {
                         TestId = "Invalid_ValidateAlgorithmNotAValidAlgorithm",
                         ExpectedException = ExpectedException.SecurityTokenInvalidAlgorithmException("IDX10696:"),
                         Algorithm = SecurityAlgorithms.Sha256,
                         SecurityKey = securityKey,
                         SecurityToken = null,
-                        ValidationParameters = new TokenValidationParameters
+                        ValidationParameters = new ValidationParameters
                         {
                             ValidAlgorithms = new[] { SecurityAlgorithms.HmacSha256 }
                         },
@@ -124,7 +90,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         Algorithm = SecurityAlgorithms.Sha256,
                         SecurityKey = securityKey,
                         SecurityToken = null,
-                        ValidationParameters = new TokenValidationParameters
+                        ValidationParameters = new ValidationParameters
                         {
                             ValidAlgorithms = null
                         },
@@ -136,7 +102,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         Algorithm = SecurityAlgorithms.Sha256,
                         SecurityKey = securityKey,
                         SecurityToken = null,
-                        ValidationParameters = new TokenValidationParameters
+                        ValidationParameters = new ValidationParameters
                         {
                             ValidAlgorithms = new[] { SecurityAlgorithms.HmacSha256, SecurityAlgorithms.Sha256 }
                         },
@@ -154,7 +120,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
             public SecurityToken SecurityToken { get; set; }
 
-            public TokenValidationParameters ValidationParameters { get; set; }
+            internal ValidationParameters ValidationParameters { get; set; }
 
             internal AlgorithmValidationResult AlgorithmValidationResult { get; set; }
         }

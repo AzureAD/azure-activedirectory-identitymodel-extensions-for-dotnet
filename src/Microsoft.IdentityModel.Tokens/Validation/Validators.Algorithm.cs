@@ -24,7 +24,7 @@ namespace Microsoft.IdentityModel.Tokens
             string algorithm,
             SecurityKey securityKey,
             SecurityToken securityToken,
-            TokenValidationParameters validationParameters,
+            ValidationParameters validationParameters,
             CallContext callContext)
 #pragma warning restore CA1801 // TODO: remove pragma disable once callContext is used for logging
         {
@@ -39,25 +39,6 @@ namespace Microsoft.IdentityModel.Tokens
                             LogHelper.MarkAsNonPII(nameof(validationParameters))),
                         typeof(ArgumentNullException),
                         new StackFrame(true)));
-            }
-
-            if (validationParameters.AlgorithmValidator != null)
-            {
-                if (!validationParameters.AlgorithmValidator(algorithm, securityKey, securityToken, validationParameters))
-                {
-                    return new AlgorithmValidationResult(
-                        algorithm,
-                        ValidationFailureType.AlgorithmValidationFailed,
-                        new ExceptionDetail(
-                            new MessageDetail(
-                                LogMessages.IDX10697,
-                                LogHelper.MarkAsNonPII(algorithm),
-                                securityKey),
-                            typeof(SecurityTokenInvalidAlgorithmException),
-                            new StackFrame(true)));
-                }
-
-                return new AlgorithmValidationResult(algorithm);
             }
 
             if (validationParameters.ValidAlgorithms != null && validationParameters.ValidAlgorithms.Any() && !validationParameters.ValidAlgorithms.Contains(algorithm, StringComparer.Ordinal))
