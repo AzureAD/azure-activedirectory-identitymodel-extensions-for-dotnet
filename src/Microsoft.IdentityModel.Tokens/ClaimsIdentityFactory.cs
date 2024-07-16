@@ -7,7 +7,7 @@ using System.Security.Claims;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Facilitates the creation of <see cref="ClaimsIdentity"/> and <see cref="CaseSensitiveClaimsIdentity"/> instances based on the <see cref="AppContextSwitches.UseCaseSensitiveClaimsIdentityIdentityTypeSwitch"/>.
+    /// Facilitates the creation of <see cref="ClaimsIdentity"/> and <see cref="CaseSensitiveClaimsIdentity"/> instances based on the <see cref="AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch"/>.
     /// </summary>
     internal static class ClaimsIdentityFactory
     {

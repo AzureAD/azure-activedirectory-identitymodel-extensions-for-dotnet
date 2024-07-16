@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         [Fact]
         public void CreateClaimsIdentity_ReturnsCaseSensitiveClaimsIdentity_WithAppContextSwitch()
         {
-            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityIdentityTypeSwitch, true);
+            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, true);
 
             var handler = new DerivedJsonWebTokenHandler();
             var jsonWebToken = new JsonWebToken(Default.Jwt(Default.SecurityTokenDescriptor()));
@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.IsType<CaseSensitiveClaimsIdentity>(actualClaimsIdentity);
             Assert.NotNull(((CaseSensitiveClaimsIdentity)actualClaimsIdentity).SecurityToken);
 
-            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityIdentityTypeSwitch, false);
+            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, false);
         }
 
         private class DerivedJsonWebTokenHandler : JsonWebTokenHandler
