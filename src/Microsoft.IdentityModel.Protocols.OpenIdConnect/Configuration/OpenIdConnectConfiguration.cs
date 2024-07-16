@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Text.Json.Serialization;
 using System.Threading;
 using Microsoft.IdentityModel.Abstractions;
@@ -81,7 +82,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// </summary>
         /// <param name="configuration"><see cref="OpenIdConnectConfiguration"/> object to serialize.</param>
         /// <returns>json string representing the configuration object.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="configuration"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="configuration"/> is <see langword="null"/>.</exception>
         public static string Write(OpenIdConnectConfiguration configuration)
         {
             if (configuration == null)
@@ -91,6 +92,27 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                 LogHelper.LogVerbose(LogMessages.IDX21809);
 
             return OpenIdConnectConfigurationSerializer.Write(configuration);
+        }
+
+        /// <summary>
+        /// Writes an <see cref="OpenIdConnectConfiguration"/> as JSON to the <paramref name="stream"/>.
+        /// </summary>
+        /// <param name="configuration">The <see cref="OpenIdConnectConfiguration"/> to serialize.</param>
+        /// <param name="stream">The <see cref="Stream"/> to write to.</param>
+        /// <remarks>Because a <see cref="Stream"/> is provided, this method does not return a value.</remarks>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="configuration"/> or <paramref name="stream"/> is <see langword="null"/>.</exception>
+        public static void Write(OpenIdConnectConfiguration configuration, Stream stream)
+        {
+            if (configuration == null)
+                throw LogHelper.LogArgumentNullException(nameof(configuration));
+
+            if (stream == null)
+                throw LogHelper.LogArgumentNullException(nameof(stream));
+
+            if (LogHelper.IsEnabled(EventLogLevel.Verbose))
+                LogHelper.LogVerbose(LogMessages.IDX21809);
+
+            OpenIdConnectConfigurationSerializer.Write(configuration, stream);
         }
 
         /// <summary>

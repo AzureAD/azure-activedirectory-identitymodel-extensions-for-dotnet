@@ -617,6 +617,20 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
         }
 
+        public static void Write(OpenIdConnectConfiguration OpenIdConnectConfiguration, Stream stream)
+        {
+            Utf8JsonWriter writer = null;
+            try
+            {
+                writer = new Utf8JsonWriter(stream, new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
+                Write(ref writer, OpenIdConnectConfiguration);
+            }
+            finally
+            {
+                writer?.Dispose();
+            }
+        }
+
         public static void Write(ref Utf8JsonWriter writer, OpenIdConnectConfiguration config)
         {
             writer.WriteStartObject();

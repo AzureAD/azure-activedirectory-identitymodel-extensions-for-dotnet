@@ -30,8 +30,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentOutOfRangeException">'value' less than 1.</exception>
         public virtual int MaximumTokenSizeInBytes
         {
-            get => _maximumTokenSizeInBytes; 
-            set => _maximumTokenSizeInBytes =  (value < 1) ? throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), FormatInvariant(LogMessages.IDX10101, MarkAsNonPII(value)))) : value;
+            get => _maximumTokenSizeInBytes;
+            set => _maximumTokenSizeInBytes = (value < 1) ? throw LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), FormatInvariant(LogMessages.IDX10101, MarkAsNonPII(value)))) : value;
         }
 
         /// <summary>
@@ -53,14 +53,13 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         #region methods
-
         /// <summary>
         /// Validates a token.
         /// On a validation failure, no exception will be thrown; instead, the exception will be set in the returned TokenValidationResult.Exception property.
         /// Callers should always check the TokenValidationResult.IsValid property to verify the validity of the result.
         /// </summary>
         /// <param name="token">The token to be validated.</param>
-        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <returns>A <see cref="TokenValidationResult"/></returns>
         public virtual Task<TokenValidationResult> ValidateTokenAsync(string token, TokenValidationParameters validationParameters)
         {
@@ -78,7 +77,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Callers should always check the TokenValidationResult.IsValid property to verify the validity of the result.
         /// </summary>
         /// <param name="token">The <see cref="SecurityToken"/> to be validated.</param>
-        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <returns>A <see cref="TokenValidationResult"/></returns>
         public virtual Task<TokenValidationResult> ValidateTokenAsync(SecurityToken token, TokenValidationParameters validationParameters)
         {

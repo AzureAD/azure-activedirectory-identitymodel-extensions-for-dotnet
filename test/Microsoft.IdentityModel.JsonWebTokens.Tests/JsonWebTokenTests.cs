@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
             {
                 SigningCredentials = creds,
-                Subject = new ClaimsIdentity(claims),
+                Subject = new CaseSensitiveClaimsIdentity(claims),
                 Expires = (new DateTime(2038, 1, 20)).ToUniversalTime(),
             };
 
@@ -108,7 +108,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
             {
                 SigningCredentials = creds,
-                Subject = new ClaimsIdentity(claims),
+                Subject = new CaseSensitiveClaimsIdentity(claims),
                 Expires = (new DateTime(2038, 1, 20)).ToUniversalTime(),
             };
 
@@ -130,7 +130,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
                 EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes256_Sha512_512,
-                Subject = new ClaimsIdentity(Default.PayloadClaims),
+                Subject = new CaseSensitiveClaimsIdentity(Default.PayloadClaims),
                 TokenType = "TokenType"
             };
 
