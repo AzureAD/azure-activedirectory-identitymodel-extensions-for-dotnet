@@ -491,12 +491,12 @@ namespace Microsoft.IdentityModel.Tokens
         public IList<string> ValidIssuers { get; }
 
         /// <summary>
-        /// Gets the <see cref="IList{String}"/> that contains valid types that will be used to check against the JWT header's 'typ' claim.
+        /// Gets or sets the <see cref="IList{String}"/> that contains valid types that will be used to check against the JWT header's 'typ' claim.
         /// If this property is not set, the 'typ' header claim will not be validated and all types will be accepted.
         /// In the case of a JWE, this property will ONLY apply to the inner token header.
         /// The default is <c>null</c>.
         /// </summary>
-        public IList<string> ValidTypes { get; }
+        public IList<string> ValidTypes { get; set; }
 
         public bool ValidateActor { get; set; }
     }

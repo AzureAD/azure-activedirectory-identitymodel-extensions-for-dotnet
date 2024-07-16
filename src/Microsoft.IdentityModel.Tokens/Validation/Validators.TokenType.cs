@@ -17,15 +17,19 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="type">The token type or <c>null</c> if it couldn't be resolved (e.g from the 'typ' header for a JWT).</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
-        /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <param name="validationParameters"><see cref="ValidationParameters"/> required for validation.</param>
         /// <param name="callContext"></param>
         /// <exception cref="ArgumentNullException">If <paramref name="validationParameters"/> is null.</exception>
         /// <exception cref="ArgumentNullException">If <paramref name="securityToken"/> is null.</exception>
-        /// <exception cref="SecurityTokenInvalidTypeException">If <paramref name="type"/> is null or whitespace and <see cref="TokenValidationParameters.ValidTypes"/> is not null.</exception>
-        /// <exception cref="SecurityTokenInvalidTypeException">If <paramref name="type"/> failed to match <see cref="TokenValidationParameters.ValidTypes"/>.</exception>
+        /// <exception cref="SecurityTokenInvalidTypeException">If <paramref name="type"/> is null or whitespace and <see cref="ValidationParameters.ValidTypes"/> is not null.</exception>
+        /// <exception cref="SecurityTokenInvalidTypeException">If <paramref name="type"/> failed to match <see cref="ValidationParameters.ValidTypes"/>.</exception>
         /// <remarks>An EXACT match is required. <see cref="StringComparison.Ordinal"/> (case sensitive) is used for comparing <paramref name="type"/> against <see cref="TokenValidationParameters.ValidTypes"/>.</remarks>
 #pragma warning disable CA1801 // TODO: remove pragma disable once callContext is used for logging
-        internal static TokenTypeValidationResult ValidateTokenType(string? type, SecurityToken? securityToken, TokenValidationParameters validationParameters, CallContext callContext)
+        internal static TokenTypeValidationResult ValidateTokenType(
+            string? type,
+            SecurityToken? securityToken,
+            ValidationParameters validationParameters,
+            CallContext callContext)
 #pragma warning restore CA1801 // TODO: remove pragma disable once callContext is used for logging
         {
             if (securityToken == null)
@@ -54,19 +58,12 @@ namespace Microsoft.IdentityModel.Tokens
                         new StackFrame(true)));
             }
 
-            if (validationParameters.TypeValidator == null && (validationParameters.ValidTypes == null || !validationParameters.ValidTypes.Any()))
+            if (validationParameters.ValidTypes == null || validationParameters.ValidTypes.Count == 0)
             {
                 LogHelper.LogVerbose(LogMessages.IDX10255);
                 return new TokenTypeValidationResult(type);
             }
 
-            if (validationParameters.TypeValidator != null)
-            {
-                return ValidateTokenTypeUsingDelegate(type, securityToken, validationParameters);
-            }
-
-            // Note: don't return an invalid TokenTypeValidationResult for a null or empty token type when a user-defined delegate is set
-            // to allow it to extract the actual token type from a different location (e.g from the claims).
             if (string.IsNullOrEmpty(type))
             {
                 return new TokenTypeValidationResult(
@@ -100,31 +97,6 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             return new TokenTypeValidationResult(type);
-        }
-
-        private static TokenTypeValidationResult ValidateTokenTypeUsingDelegate(string? type, SecurityToken securityToken, TokenValidationParameters validationParameters)
-        {
-            try
-            {
-                var validatedType = validationParameters.TypeValidator(type, securityToken, validationParameters);
-                return new TokenTypeValidationResult(validatedType);
-            }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
-            {
-                return new TokenTypeValidationResult(
-                    type,
-                    ValidationFailureType.TokenTypeValidationFailed,
-                    new ExceptionDetail(
-                        new MessageDetail(
-                            LogMessages.IDX10259,
-                            LogHelper.MarkAsNonPII(nameof(validationParameters.TypeValidator)),
-                            LogHelper.MarkAsNonPII(ex.Message)),
-                        ex.GetType(),
-                        new StackFrame(true),
-                        ex));
-            }
         }
     }
 }
