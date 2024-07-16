@@ -10,6 +10,7 @@ namespace Microsoft.IdentityModel.Tokens
     {
 #pragma warning disable 1591
         public const string Keys = "keys";
+        public const string OriginalString = "SAL_JWKS";
 #pragma warning restore 1591
     }
 }

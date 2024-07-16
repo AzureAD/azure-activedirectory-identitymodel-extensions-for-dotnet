@@ -18,6 +18,8 @@ namespace Microsoft.IdentityModel.Tokens.Json
         #region Read
         public static JsonWebKeySet Read(string json, JsonWebKeySet jsonWebKeySet)
         {
+            // store the original JSON string
+            jsonWebKeySet.AdditionalData[JsonWebKeySetParameterNames.OriginalString] = json;
             Utf8JsonReader reader = new(Encoding.UTF8.GetBytes(json).AsSpan());
 
             try

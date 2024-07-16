@@ -732,6 +732,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                 JsonWebKeySet jsonWebKeySet = new JsonWebKeySet();
                 jsonWebKeySet.Keys.Add(JsonWebKey1);
                 jsonWebKeySet.Keys.Add(JsonWebKey2);
+                jsonWebKeySet.AdditionalData.Add(JsonWebKeySetParameterNames.OriginalString, JsonWebKeySetString1);
 
                 return jsonWebKeySet;
             }
@@ -753,6 +754,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
 
                 JsonWebKeySet jsonWebKeySet = new JsonWebKeySet();
                 jsonWebKeySet.Keys.Add(jsonWebKey);
+                jsonWebKeySet.AdditionalData.Add(JsonWebKeySetParameterNames.OriginalString, JsonWebKeySetX509DataString);
 
                 return jsonWebKeySet;
             }
@@ -766,6 +768,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                 jsonWebKeySet.Keys.Add(JsonWebKeyES256);
                 jsonWebKeySet.Keys.Add(JsonWebKeyES384);
                 jsonWebKeySet.Keys.Add(JsonWebKeyES512);
+                jsonWebKeySet.AdditionalData.Add(JsonWebKeySetParameterNames.OriginalString, JsonWebKeySetECCString);
 
                 return jsonWebKeySet;
             }
@@ -785,6 +788,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
 
                 JsonWebKeySet jsonWebKeySet = new JsonWebKeySet();
                 jsonWebKeySet.Keys.Add(jsonWebKey);
+                jsonWebKeySet.AdditionalData.Add(JsonWebKeySetParameterNames.OriginalString, JsonWebKeySetOnlyX5tString);
 
                 return jsonWebKeySet;
             }
