@@ -538,7 +538,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
         }
 
-        // Tests checks to make sure that the token string created by the JsonWebTokenHandler is consistent with the 
+        // Tests checks to make sure that the token string created by the JsonWebTokenHandler is consistent with the
         // token string created by the JwtSecurityTokenHandler.
         [Theory, MemberData(nameof(CreateJWETheoryData))]
         public void CreateJWE(CreateTokenTheoryData theoryData)
@@ -793,7 +793,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
         }
 
-        // Tests checks to make sure that the token string (JWE) created by calling 
+        // Tests checks to make sure that the token string (JWE) created by calling
         // CreateToken(string payload, SigningCredentials signingCredentials, EncryptingCredentials encryptingCredentials)
         // is equivalent to the token string created by calling CreateToken(SecurityTokenDescriptor tokenDescriptor).
         [Theory, MemberData(nameof(CreateJWEUsingSecurityTokenDescriptorTheoryData))]
@@ -1149,7 +1149,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
         }
 
-        // Tests checks to make sure that the token string created by the JsonWebTokenHandler is consistent with the 
+        // Tests checks to make sure that the token string created by the JsonWebTokenHandler is consistent with the
         // token string created by the JwtSecurityTokenHandler.
         [Theory, MemberData(nameof(CreateJWSTheoryData))]
         public void CreateJWS(CreateTokenTheoryData theoryData)
@@ -2007,7 +2007,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 {
                     // Test checks that the values in SecurityTokenDescriptor.Subject.Claims
                     // are properly combined with those specified in SecurityTokenDescriptor.Claims.
-                    // Duplicate values (if present with different case) should not be overridden. 
+                    // Duplicate values (if present with different case) should not be overridden.
                     // For example, the 'aud' claim on TokenDescriptor.Claims will not be overridden
                     // by the 'AUD' claim on TokenDescriptor.Subject.Claims, but the 'exp' claim will.
                     new CreateTokenTheoryData("TokenDescriptorWithBothSubjectAndClaims")
@@ -2476,7 +2476,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
 
         // Test checks to make sure that the token payload retrieved from ValidateToken is the same as the payload
-        // the token was initially created with. 
+        // the token was initially created with.
         [Fact]
         public void RoundTripJWS()
         {
@@ -3004,7 +3004,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        // Test shows if the JwtSecurityTokenHandler has mapping OFF and 
+        // Test shows if the JwtSecurityTokenHandler has mapping OFF and
         // the JsonWebTokenHandler has mapping ON,the claims are different.
         [Fact]
         public async Task ValidateDifferentClaimsBetweenHandlers()

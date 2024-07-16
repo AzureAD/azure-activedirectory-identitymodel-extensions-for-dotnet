@@ -20,7 +20,7 @@ using Xunit;
 namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public class SamlSecurityTokenHandlerTests
     {
@@ -120,7 +120,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         public void CreateClaimsIdentities(SamlTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.CreateClaimsIdentities", theoryData);
-            var context = new CompareContext($"{this}.CreateClaimsIdentities, {theoryData.TestId}") { IgnoreType = true };
+            var context = new CompareContext($"{this}.CreateClaimsIdentities, {theoryData.TestId}");
+
             try
             {
                 var identities = ((theoryData.Handler) as SamlSecurityTokenHandlerPublic).CreateClaimsIdentitiesPublic(theoryData.TokenTestSet.SecurityToken as SamlSecurityToken, theoryData.Issuer, theoryData.ValidationParameters);

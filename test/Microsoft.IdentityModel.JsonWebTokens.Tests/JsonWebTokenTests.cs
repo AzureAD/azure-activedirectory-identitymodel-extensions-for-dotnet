@@ -116,7 +116,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        // Test checks to make sure that the JsonWebToken.GetClaim() method is able to retrieve every Claim returned by the Claims property (with the exception 
+        // Test checks to make sure that the JsonWebToken.GetClaim() method is able to retrieve every Claim returned by the Claims property (with the exception
         // of Claims that are JObjects or arrays, as those are converted to strings by the GetClaim() method).
         [Fact]
         public void CompareGetClaimAndClaims()
