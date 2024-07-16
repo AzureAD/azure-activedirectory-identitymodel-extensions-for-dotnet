@@ -9,5 +9,6 @@
     <SystemIdentityModelTokensJwtVersion4x>4.0.4.403061554</SystemIdentityModelTokensJwtVersion4x>
     <SystemNetHttpVersion>4.3.4</SystemNetHttpVersion>
     <XunitVersion>2.4.0</XunitVersion>
+    <SystemTextJson>8.0.4</SystemTextJson>
   </PropertyGroup>
 </Project>
