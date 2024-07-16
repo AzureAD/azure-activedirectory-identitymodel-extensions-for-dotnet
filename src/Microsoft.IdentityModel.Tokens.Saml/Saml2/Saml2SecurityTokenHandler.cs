@@ -1314,7 +1314,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 actualIssuer = ClaimsIdentity.DefaultIssuer;
             }
 
-            var identity = ClaimsIdentityFactory.Create(samlToken, validationParameters, issuer);
+            var identity = validationParameters.CreateClaimsIdentity(samlToken, issuer);
 
             ProcessSubject(samlToken.Assertion.Subject, identity, actualIssuer);
             ProcessStatements(samlToken.Assertion.Statements, identity, actualIssuer);
