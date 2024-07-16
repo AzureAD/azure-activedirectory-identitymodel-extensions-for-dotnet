@@ -649,7 +649,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                 if (!identityDict.TryGetValue(statement.Subject, out ClaimsIdentity identity))
                 {
-                    identity = ClaimsIdentityFactory.Create(samlToken, validationParameters, issuer);
+                    identity = validationParameters.CreateClaimsIdentity(samlToken, issuer);
                     ProcessSubject(statement.Subject, identity, issuer);
                     identityDict.Add(statement.Subject, identity);
                 }
