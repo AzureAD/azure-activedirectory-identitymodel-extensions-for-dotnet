@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new StackFrame(true)));
             }
 
-            if (validationParameters.ValidAlgorithms != null && validationParameters.ValidAlgorithms.Any() && !validationParameters.ValidAlgorithms.Contains(algorithm, StringComparer.Ordinal))
+            if (validationParameters.ValidAlgorithms != null && validationParameters.ValidAlgorithms.Count > 0 && !validationParameters.ValidAlgorithms.Contains(algorithm, StringComparer.Ordinal))
             {
                 return new AlgorithmValidationResult(
                     algorithm,
