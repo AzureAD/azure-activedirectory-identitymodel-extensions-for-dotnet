@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                 var originalString = jsonWebKeys.AdditionalData[JsonWebKeySetParameterNames.OriginalString];
                 theoryData.ExpectedException.ProcessNoException(context);
 
-                IdentityComparer.AreEqual(theoryData.Json, originalString, context);
+                IdentityComparer.AreEqual(originalString, theoryData.Json, context);
                 if (theoryData.JsonWebKeySet != null)
                     IdentityComparer.AreEqual(jsonWebKeys, theoryData.JsonWebKeySet, context);
 
