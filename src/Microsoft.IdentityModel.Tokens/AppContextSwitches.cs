@@ -16,9 +16,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         internal const string UseCaseSensitiveClaimsIdentityTypeSwitch = "Microsoft.IdentityModel.Tokens.UseCaseSensitiveClaimsIdentity";
 
-        private static bool? _useCaseSensitiveClaimsIdentity;
+        private static bool? _useCaseSensitiveClaimsIdentityType;
 
-        internal static bool UseCaseSensitiveClaimsIdentityType => _useCaseSensitiveClaimsIdentity ??= (AppContext.TryGetSwitch(UseCaseSensitiveClaimsIdentityTypeSwitch, out bool useCaseSensitiveClaimsIdentityType) && useCaseSensitiveClaimsIdentityType);
+        internal static bool UseCaseSensitiveClaimsIdentityType => _useCaseSensitiveClaimsIdentityType ??= (AppContext.TryGetSwitch(UseCaseSensitiveClaimsIdentityTypeSwitch, out bool useCaseSensitiveClaimsIdentityType) && useCaseSensitiveClaimsIdentityType);
 
         /// <summary>
         /// When validating the issuer signing key, specifies whether to fail if the 'tid' claim is missing.
@@ -27,7 +27,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         private static bool? _doNotFailOnMissingTid;
 
-        internal static bool DontFailOnMissingTid => _doNotFailOnMissingTid ??= (AppContext.TryGetSwitch(DoNotFailOnMissingTidSwitch, out bool doNotFailOnMissingTid) && doNotFailOnMissingTid);
+        internal static bool DoNotFailOnMissingTid => _doNotFailOnMissingTid ??= (AppContext.TryGetSwitch(DoNotFailOnMissingTidSwitch, out bool doNotFailOnMissingTid) && doNotFailOnMissingTid);
 
         /// <summary>
         /// When reading claims from the token, specifies whether to try to convert all string claims to DateTime.
@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         internal static void ResetAllSwitches()
         {
-            _useCaseSensitiveClaimsIdentity = null;
+            _useCaseSensitiveClaimsIdentityType = null;
             AppContext.SetSwitch(UseCaseSensitiveClaimsIdentityTypeSwitch, false);
 
             _doNotFailOnMissingTid = null;

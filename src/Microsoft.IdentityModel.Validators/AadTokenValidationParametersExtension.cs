@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.Validators
                 var tenantIdFromToken = GetTid(securityToken);
                 if (string.IsNullOrEmpty(tenantIdFromToken))
                 {
-                    if (AppContextSwitches.DontFailOnMissingTid)
+                    if (AppContextSwitches.DoNotFailOnMissingTid)
                         return true; 
                     
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40009));
