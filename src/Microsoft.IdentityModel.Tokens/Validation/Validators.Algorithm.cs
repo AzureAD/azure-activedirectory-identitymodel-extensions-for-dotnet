@@ -11,7 +11,7 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Definition for delegate that will validate the audiences value in a token.
+    /// Definition for delegate that will validate a given algorithm for a <see cref="SecurityKey"/>.
     /// </summary>
     /// <param name="algorithm">The algorithm to be validated.</param>
     /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
