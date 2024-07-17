@@ -975,8 +975,8 @@ namespace Microsoft.IdentityModel.TestUtils
                 localContext.Diffs.Add($"TokenReadingResult1.TokenInput: '{tokenReadingResult1.TokenInput}' != TokenReadingResult2.TokenInput: '{tokenReadingResult2.TokenInput}'");
 
             // Only compare the security token if both are valid.
-            if (tokenReadingResult1.IsValid && (tokenReadingResult1.SecurityToken.ToString() != tokenReadingResult2.SecurityToken.ToString()))
-                localContext.Diffs.Add($"TokenReadingResult1.SecurityToken: '{tokenReadingResult1.SecurityToken}' != TokenReadingResult2.SecurityToken: '{tokenReadingResult2.SecurityToken}'");
+            if (tokenReadingResult1.IsValid && (tokenReadingResult1.SecurityToken().ToString() != tokenReadingResult2.SecurityToken().ToString()))
+                localContext.Diffs.Add($"TokenReadingResult1.SecurityToken: '{tokenReadingResult1.SecurityToken()}' != TokenReadingResult2.SecurityToken: '{tokenReadingResult2.SecurityToken()}'");
 
             if (tokenReadingResult1.ValidationFailureType != tokenReadingResult2.ValidationFailureType)
                 localContext.Diffs.Add($"TokenReadingResult1.ValidationFailureType: {tokenReadingResult1.ValidationFailureType} != TokenReadingResult2.ValidationFailureType: {tokenReadingResult2.ValidationFailureType}");

@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 null,
                 new CallContext());
 
-            Assert.Throws<InvalidOperationException>(() => tokenReadingResult.SecurityToken);
+            Assert.Throws<InvalidOperationException>(() => tokenReadingResult.SecurityToken());
         }
 
         public static TheoryData<TokenReadingTheoryData> JsonWebTokenHandlerReadTokenTestCases
