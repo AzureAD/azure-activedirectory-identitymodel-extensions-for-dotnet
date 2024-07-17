@@ -1,13 +1,16 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 
 #nullable enable
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Contains the result of reading that a <see cref="SecurityToken"/>.
+    /// Contains the result of reading a <see cref="SecurityToken"/>.
     /// The <see cref="TokenValidationResult"/> contains a collection of <see cref="ValidationResult"/> for each step in the token validation.
     /// </summary>
-    internal class TokenReadingResult: ValidationResult
+    internal class TokenReadingResult : ValidationResult
     {
         private Exception? _exception;
         private SecurityToken? _securityToken;
@@ -39,6 +42,19 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Gets the <see cref="SecurityToken"/> that was read.
+        /// </summary>
+        /// <exception cref="InvalidOperationException"/> if the <see cref="SecurityToken"/> is null.
+        /// <remarks>It is expected that the caller would check <see cref="ValidationResult.IsValid"/> returns true before accessing this.</remarks>
+        public SecurityToken SecurityToken()
+        {
+            if (_securityToken is null)
+                throw new InvalidOperationException("Attempted to retrieve the SecurityToken from a failed TokenReading result.");
+
+            return _securityToken;
+        }
+
+        /// <summary>
         /// Gets the <see cref="Exception"/> that occurred during reading.
         /// </summary>
         public override Exception? Exception
@@ -65,19 +81,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets the string from which the <see cref="SecurityToken"/> was read.
         /// </summary>
         public string? TokenInput { get; }
-
-        /// <summary>
-        /// Gets the <see cref="SecurityToken"/> that was read.
-        /// </summary>
-        public SecurityToken SecurityToken {
-            get
-            {
-                if (_securityToken is null)
-                    throw new InvalidOperationException("Attempted to retrieve the SecurityToken from a failed TokenReading result.");
-
-                return _securityToken;
-            }
-        }
     }
 }
 #nullable restore

@@ -13,7 +13,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// </summary>
     /// <param name="token">A JSON Web Token (JWT) in JWS or JWE Compact Serialization format.</param>
     /// <param name="callContext"></param>
-    /// <returns>A <see cref="IssuerValidationResult"/>that contains the results of validating the issuer.</returns>
+    /// <returns>A <see cref="TokenReadingResult"/>that contains the results of reading the token.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
     internal delegate TokenReadingResult TokenReadingDelegate(
         string token,
