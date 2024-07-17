@@ -40,6 +40,19 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
+        /// Gets the decoded contents of the JWE.
+        /// </summary>
+        /// <exception cref="InvalidOperationException"/> if the result is not valid, and the decrypted token is not available.
+        /// <remarks>It is expected that this method will only be called if <see cref="ValidationResult.IsValid"/> returns true.</remarks>
+        public string DecryptionToken()
+        {
+            if (_decryptedToken is null)
+                throw new InvalidOperationException("Attempted to retrieve the DecryptedToken from a failed TokenDecrypting result.");
+
+            return _decryptedToken;
+        }
+
+        /// <summary>
         /// Gets the <see cref="Exception"/> that occurred during reading.
         /// </summary>
         public override Exception? Exception
@@ -66,20 +79,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Gets the string from which the <see cref="SecurityToken"/> was read.
         /// </summary>
         public JsonWebToken? JWT { get; }
-
-        /// <summary>
-        /// Gets the decoded contents of the JWE.
-        /// </summary>
-        public string DecryptedToken
-        {
-            get
-            {
-                if (_decryptedToken is null)
-                    throw new InvalidOperationException("Attempted to retrieve the DecryptedToken from a failed TokenDecrypting result.");
-
-                return _decryptedToken;
-            }
-        }
     }
 }
 #nullable restore
