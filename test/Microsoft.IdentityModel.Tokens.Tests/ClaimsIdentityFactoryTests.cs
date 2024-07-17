@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [InlineData(false)]
         public void Create_FromTokenValidationParameters_ReturnsCorrectClaimsIdentity(bool useClaimsIdentity)
         {
-            AppContextSwitches.UseClaimsIdentityType = useClaimsIdentity;
+            AppContext.SetSwitch(AppContextSwitches.UseClaimsIdentityTypeSwitch, useClaimsIdentity);
 
             var jsonWebToken = new JsonWebToken(Default.Jwt(Default.SecurityTokenDescriptor()));
             var tokenValidationParameters = new TokenValidationParameters();
@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 Assert.Equal(jsonWebToken, ((CaseSensitiveClaimsIdentity)actualClaimsIdentity).SecurityToken);
             }
 
-            AppContextSwitches.UseClaimsIdentityType = false;
+            AppContextSwitches.ResetUseClaimsIdentityTypeSwitch();
         }
 
         [Theory]

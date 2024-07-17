@@ -14,41 +14,56 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Enables a fallback to the previous behavior of using <see cref="ClaimsIdentity"/> instead of <see cref="CaseSensitiveClaimsIdentity"/> globally.
         /// </summary>
-        private const string UseClaimsIdentityTypeSwitch = "Microsoft.IdentityModel.Tokens.UseClaimsIdentityType";
+        internal const string UseClaimsIdentityTypeSwitch = "Microsoft.IdentityModel.Tokens.UseClaimsIdentityType";
 
         private static bool? _useClaimsIdentity;
 
-        internal static bool UseClaimsIdentityType
+        internal static bool UseClaimsIdentityType => _useClaimsIdentity ??= (AppContext.TryGetSwitch(UseClaimsIdentityTypeSwitch, out bool useClaimsIdentityType) && useClaimsIdentityType);
+
+        /// <summary>
+        /// Used for testing to reset the <see cref="UseClaimsIdentityType"/> switch to its default value.
+        /// </summary>
+        internal static void ResetUseClaimsIdentityTypeSwitch()
         {
-            get => _useClaimsIdentity ??= (AppContext.TryGetSwitch(UseClaimsIdentityTypeSwitch, out bool useClaimsIdentityType) && useClaimsIdentityType);
-            set => _useClaimsIdentity = value;
+            _useClaimsIdentity = null;
+            AppContext.SetSwitch(UseClaimsIdentityTypeSwitch, false);
         }
 
         /// <summary>
         /// When validating the issuer signing key, specifies whether to fail if the 'tid' claim is missing.
         /// </summary>
-        private const string DontFailOnMissingTidSwitch = "Switch.Microsoft.IdentityModel.DontFailOnMissingTidValidateIssuerSigning";
+        internal const string DontFailOnMissingTidSwitch = "Switch.Microsoft.IdentityModel.DontFailOnMissingTidValidateIssuerSigning";
 
         private static bool? _dontFailOnMissingTid;
 
-        internal static bool DontFailOnMissingTid
+        internal static bool DontFailOnMissingTid => _dontFailOnMissingTid ??= (AppContext.TryGetSwitch(DontFailOnMissingTidSwitch, out bool dontFailOnMissingTid) && dontFailOnMissingTid);
+
+        /// <summary>
+        /// Used for testing to reset the <see cref="UseClaimsIdentityType"/> switch to its default value.
+        /// </summary>
+        internal static void ResetDontFailOnMissingTidSwitch()
         {
-            get => _dontFailOnMissingTid ??= (AppContext.TryGetSwitch(DontFailOnMissingTidSwitch, out bool dontFailOnMissingTid) && dontFailOnMissingTid);
-            set => _dontFailOnMissingTid = value;
+            _dontFailOnMissingTid = null;
+            AppContext.SetSwitch(DontFailOnMissingTidSwitch, false);
         }
 
         /// <summary>
         /// When reading claims from the token, specifies whether to try to convert all string claims to DateTime.
         /// Some claims are known not to be DateTime, so conversion is skipped.
         /// </summary>
-        private const string TryAllStringClaimsAsDateTimeSwitch = "Switch.Microsoft.IdentityModel.TryAllStringClaimsAsDateTime";
+        internal const string TryAllStringClaimsAsDateTimeSwitch = "Switch.Microsoft.IdentityModel.TryAllStringClaimsAsDateTime";
 
         private static bool? _tryAllStringClaimsAsDateTime;
 
-        internal static bool TryAllStringClaimsAsDateTime
+        internal static bool TryAllStringClaimsAsDateTime => _tryAllStringClaimsAsDateTime ??= (AppContext.TryGetSwitch(TryAllStringClaimsAsDateTimeSwitch, out bool tryAsDateTime) && tryAsDateTime);
+
+        /// <summary>
+        /// Used for testing to reset the <see cref="UseClaimsIdentityType"/> switch to its default value.
+        /// </summary>
+        internal static void ResetTryAllStringClaimsAsDateTimeSwitch()
         {
-            get => _tryAllStringClaimsAsDateTime ??= (AppContext.TryGetSwitch(TryAllStringClaimsAsDateTimeSwitch, out bool tryAsDateTime) && tryAsDateTime);
-            set => _tryAllStringClaimsAsDateTime = value;
+            _tryAllStringClaimsAsDateTime = null;
+            AppContext.SetSwitch(TryAllStringClaimsAsDateTimeSwitch, false);
         }
     }
 }
