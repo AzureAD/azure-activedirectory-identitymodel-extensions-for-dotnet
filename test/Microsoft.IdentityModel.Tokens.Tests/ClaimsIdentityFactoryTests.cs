@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 Assert.IsType<ClaimsIdentity>(actualClaimsIdentity);
             }
 
-            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, false);
+            AppContextSwitches.ResetAllSwitches();
         }
 
         [Theory]

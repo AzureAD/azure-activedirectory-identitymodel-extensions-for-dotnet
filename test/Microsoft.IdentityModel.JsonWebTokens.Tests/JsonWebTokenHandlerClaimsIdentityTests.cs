@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.IsType<CaseSensitiveClaimsIdentity>(actualClaimsIdentity);
             Assert.NotNull(((CaseSensitiveClaimsIdentity)actualClaimsIdentity).SecurityToken);
 
-            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, false);
+            AppContextSwitches.ResetAllSwitches();
         }
 
         private class DerivedJsonWebTokenHandler : JsonWebTokenHandler
