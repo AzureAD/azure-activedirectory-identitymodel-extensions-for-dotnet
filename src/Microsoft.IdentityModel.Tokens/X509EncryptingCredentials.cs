@@ -11,8 +11,6 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class X509EncryptingCredentials : EncryptingCredentials
     {
-        internal const string _useShortNameForRsaOaepKey = "Switch.Microsoft.IdentityModel.UseShortNameForRsaOaepKey";
-
         /// <summary>
         /// Designed to construct <see cref="EncryptingCredentials"/> based on a x509 certificate.
         /// </summary>
@@ -53,12 +51,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         private static string GetEncryptionAlgorithm()
         {
-            return ShouldUseShortNameForRsaOaepKey() ? SecurityAlgorithms.RsaOAEP : SecurityAlgorithms.DefaultAsymmetricKeyWrapAlgorithm;
-        }
-
-        private static bool ShouldUseShortNameForRsaOaepKey()
-        {
-            return AppContext.TryGetSwitch(_useShortNameForRsaOaepKey, out var useKeyWrap) && useKeyWrap;
+            return AppContextSwitches.ShouldUseShortNameForRsaOaepKey ? SecurityAlgorithms.RsaOAEP : SecurityAlgorithms.DefaultAsymmetricKeyWrapAlgorithm;
         }
     }
 }
