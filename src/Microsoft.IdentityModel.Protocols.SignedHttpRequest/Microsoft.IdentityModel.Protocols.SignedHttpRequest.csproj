@@ -27,6 +27,11 @@
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Protocols\Microsoft.IdentityModel.Protocols.csproj" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'">
+    <PackageReference Include="System.Text.Json" Version="$(SystemTextJson)" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="$(SystemTextEncodingsWeb)" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Reference Include="System.Net.Http" />
   </ItemGroup>
