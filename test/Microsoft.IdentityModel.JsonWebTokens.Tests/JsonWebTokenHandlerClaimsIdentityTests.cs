@@ -15,6 +15,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         [Fact]
         public void CreateClaimsIdentity_ReturnsClaimsIdentity_ByDefault()
         {
+            AppContextSwitches.ResetAllSwitches();
             var handler = new DerivedJsonWebTokenHandler();
             var jsonWebToken = new JsonWebToken(Default.Jwt(Default.SecurityTokenDescriptor()));
             var tokenValidationParameters = new TokenValidationParameters();
@@ -39,6 +40,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         [Fact]
         public void CreateClaimsIdentity_ReturnsCaseSensitiveClaimsIdentity_WithAppContextSwitch()
         {
+            AppContextSwitches.ResetAllSwitches();
             AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, true);
 
             var handler = new DerivedJsonWebTokenHandler();

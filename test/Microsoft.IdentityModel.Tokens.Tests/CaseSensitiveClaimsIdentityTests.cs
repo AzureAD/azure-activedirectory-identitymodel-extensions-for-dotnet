@@ -29,6 +29,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Theory, MemberData(nameof(GetCaseSensitiveClaimsIdentityTheoryData))]
         public void FindAll_DoesCaseSensitiveSearch(CaseSensitiveClaimsIdentityTheoryData theoryData)
         {
+            AppContextSwitches.ResetAllSwitches();
             var context = TestUtilities.WriteHeader($"{this}.FindAll_DoesCaseSensitiveSearch", theoryData);
 
             try
@@ -49,6 +50,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Theory, MemberData(nameof(GetCaseSensitiveClaimsIdentityTheoryData))]
         public void FindFirst_DoesCaseSensitiveSearch(CaseSensitiveClaimsIdentityTheoryData theoryData)
         {
+            AppContextSwitches.ResetAllSwitches();
             var context = TestUtilities.WriteHeader($"{this}.FindFirst_DoesCaseSensitiveSearch", theoryData);
 
             try
@@ -69,6 +71,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Theory, MemberData(nameof(GetCaseSensitiveClaimsIdentityTheoryData))]
         public void HasClaim_DoesCaseSensitiveSearch(CaseSensitiveClaimsIdentityTheoryData theoryData)
         {
+            AppContextSwitches.ResetAllSwitches();
             var context = TestUtilities.WriteHeader($"{this}.HasClaim_DoesCaseSensitiveSearch", theoryData);
 
             try

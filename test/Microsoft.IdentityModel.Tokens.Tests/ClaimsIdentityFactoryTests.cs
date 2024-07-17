@@ -17,6 +17,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [InlineData(false)]
         public void Create_FromTokenValidationParameters_ReturnsCorrectClaimsIdentity(bool useCaseSensitiveClaimsIdentity)
         {
+            AppContextSwitches.ResetAllSwitches();
             AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, useCaseSensitiveClaimsIdentity);
 
             var jsonWebToken = new JsonWebToken(Default.Jwt(Default.SecurityTokenDescriptor()));
@@ -51,6 +52,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [InlineData(false, false)]
         public void Create_FromDerivedTokenValidationParameters_ReturnsCorrectClaimsIdentity(bool tvpReturnsCaseSensitiveClaimsIdentity, bool tvpReturnsCaseSensitiveClaimsIdentityWithToken)
         {
+            AppContextSwitches.ResetAllSwitches();
             AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, true);
 
             var jsonWebToken = new JsonWebToken(Default.Jwt(Default.SecurityTokenDescriptor()));
