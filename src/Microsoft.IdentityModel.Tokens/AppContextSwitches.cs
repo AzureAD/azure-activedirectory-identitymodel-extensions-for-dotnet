@@ -32,19 +32,19 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// When validating the issuer signing key, specifies whether to fail if the 'tid' claim is missing.
         /// </summary>
-        internal const string DontFailOnMissingTidSwitch = "Switch.Microsoft.IdentityModel.DontFailOnMissingTidValidateIssuerSigning";
+        internal const string DoNotFailOnMissingTidSwitch = "Switch.Microsoft.IdentityModel.DontFailOnMissingTidValidateIssuerSigning";
 
-        private static bool? _dontFailOnMissingTid;
+        private static bool? _doNotFailOnMissingTid;
 
-        internal static bool DontFailOnMissingTid => _dontFailOnMissingTid ??= (AppContext.TryGetSwitch(DontFailOnMissingTidSwitch, out bool dontFailOnMissingTid) && dontFailOnMissingTid);
+        internal static bool DontFailOnMissingTid => _doNotFailOnMissingTid ??= (AppContext.TryGetSwitch(DoNotFailOnMissingTidSwitch, out bool doNotFailOnMissingTid) && doNotFailOnMissingTid);
 
         /// <summary>
         /// Used for testing to reset the <see cref="UseClaimsIdentityType"/> switch to its default value.
         /// </summary>
-        internal static void ResetDontFailOnMissingTidSwitch()
+        internal static void ResetDoNotFailOnMissingTidSwitch()
         {
-            _dontFailOnMissingTid = null;
-            AppContext.SetSwitch(DontFailOnMissingTidSwitch, false);
+            _doNotFailOnMissingTid = null;
+            AppContext.SetSwitch(DoNotFailOnMissingTidSwitch, false);
         }
 
         /// <summary>
