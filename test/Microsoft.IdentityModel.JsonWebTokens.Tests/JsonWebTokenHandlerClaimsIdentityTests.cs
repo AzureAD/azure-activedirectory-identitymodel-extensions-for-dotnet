@@ -32,6 +32,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             handler.MapInboundClaims = true;
             actualClaimsIdentity = handler.CreateClaimsIdentityInternal(jsonWebToken, tokenValidationParameters, Default.Issuer);
             Assert.IsType<ClaimsIdentity>(actualClaimsIdentity);
+
+            AppContextSwitches.ResetAllSwitches();
         }
 
         [Fact]
