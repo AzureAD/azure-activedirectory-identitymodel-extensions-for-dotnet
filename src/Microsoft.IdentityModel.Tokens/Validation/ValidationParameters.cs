@@ -103,13 +103,13 @@ namespace Microsoft.IdentityModel.Tokens
         public ValidationParameters ActorValidationParameters { get; set; }
 
         /// <summary>
-        /// Gets or sets a delegate used to validate the cryptographic algorithm used.
+        /// Allows overriding the delegate used to validate the cryptographic algorithm used.
         /// </summary>
         /// <remarks>
-        /// If set, this delegate will validate the cryptographic algorithm used and
-        /// the algorithm will not be checked against <see cref="ValidAlgorithms"/>.
+        /// If no delegate is set, the default implementation will be used. The default checks the algorithm
+        /// against the <see cref="ValidAlgorithms"/> property, if present. If not, it will succeed.
         /// </remarks>
-        public AlgorithmValidator AlgorithmValidator { get; set; }
+        public AlgorithmValidationDelegate AlgorithmValidator { get; set; } = Validators.ValidateAlgorithm;
 
         /// <summary>
         /// Gets or sets a delegate that will be used to validate the audience.
@@ -227,6 +227,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets a string that helps with setting breakpoints when debugging.
         /// </summary>
         public string DebugId { get; set; }
+
+        /// <summary>
+        /// Gets the <see cref="SecurityKey"/> representing the ephemeral public key used for ECDH-ES decryption.
+        /// </summary>
+        public SecurityKey EcdhEsDecryptionKey { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean that controls if a '/' is significant at the end of the audience.
@@ -416,7 +421,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// This <see cref="SecurityKey"/> will be used to decrypt the token. This can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier.
         /// </remarks>
-        public TokenDecryptionKeyResolver TokenDecryptionKeyResolver { get; set; }
+        public ResolveTokenDecryptionKeyDelegate TokenDecryptionKeyResolver { get; set; }
 
         /// <summary>
         /// Gets the <see cref="IList{SecurityKey}"/> that is to be used for decrypting inbound tokens.

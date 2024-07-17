@@ -169,4 +169,17 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
     /// <returns>The transformed <see cref="SecurityToken"/>.</returns>
     public delegate SecurityToken TransformBeforeSignatureValidation(SecurityToken token, TokenValidationParameters validationParameters);
+
+#nullable enable
+    /// <summary>
+    /// Resolves the decryption key for the security token.
+    /// </summary>
+    /// <param name="token">The string representation of the token to be decrypted.</param>
+    /// <param name="securityToken">The <see cref="SecurityToken"/> to be decrypted, which is null by default.</param>
+    /// <param name="kid">The key identifier, which may be null.</param>
+    /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
+    /// <param name="callContext">The <see cref="CallContext"/> to be used for logging.</param>
+    /// <returns>The <see cref="SecurityKey"/> used to decrypt the token.</returns>
+    internal delegate IList<SecurityKey> ResolveTokenDecryptionKeyDelegate(string token, SecurityToken securityToken, string kid, ValidationParameters validationParameters, CallContext? callContext);
+#nullable restore
 }
