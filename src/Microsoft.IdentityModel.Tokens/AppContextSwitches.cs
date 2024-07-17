@@ -16,9 +16,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         internal const string UseCaseSensitiveClaimsIdentityTypeSwitch = "Microsoft.IdentityModel.Tokens.UseCaseSensitiveClaimsIdentity";
 
-        private static bool? _useClaimsIdentity;
+        private static bool? _useCaseSensitiveClaimsIdentity;
 
-        internal static bool UseClaimsIdentityType => _useClaimsIdentity ??= (AppContext.TryGetSwitch(UseClaimsIdentityTypeSwitch, out bool useClaimsIdentityType) && useClaimsIdentityType);
+        internal static bool UseCaseSensitiveClaimsIdentityType => _useCaseSensitiveClaimsIdentity ??= (AppContext.TryGetSwitch(UseCaseSensitiveClaimsIdentityTypeSwitch, out bool useCaseSensitiveClaimsIdentityType) && useCaseSensitiveClaimsIdentityType);
 
         /// <summary>
         /// When validating the issuer signing key, specifies whether to fail if the 'tid' claim is missing.
@@ -40,19 +40,42 @@ namespace Microsoft.IdentityModel.Tokens
         internal static bool TryAllStringClaimsAsDateTime => _tryAllStringClaimsAsDateTime ??= (AppContext.TryGetSwitch(TryAllStringClaimsAsDateTimeSwitch, out bool tryAsDateTime) && tryAsDateTime);
 
         /// <summary>
+        /// Controls whether to validate the length of the authentication tag when decrypting a token.
+        /// </summary>
+        internal const string SkipValidationOfAuthenticationTagLengthSwitch = "Switch.Microsoft.IdentityModel.SkipAuthenticationTagLengthValidation";
+
+        private static bool? _skipValidationOfAuthenticationTagLength;
+
+        internal static bool ShouldValidateAuthenticationTagLength => _skipValidationOfAuthenticationTagLength ??= !(AppContext.TryGetSwitch(SkipValidationOfAuthenticationTagLengthSwitch, out bool skipValidation) && skipValidation);
+
+        /// <summary>
+        /// Controls whether to use the short name for the RSA OAEP key wrap algorithm.
+        /// </summary>
+        internal const string UseShortNameForRsaOaepKeySwitch = "Switch.Microsoft.IdentityModel.UseShortNameForRsaOaepKey";
+
+        private static bool? _useShortNameForRsaOaepKey;
+
+        internal static bool ShouldUseShortNameForRsaOaepKey => _useShortNameForRsaOaepKey ??= AppContext.TryGetSwitch(UseShortNameForRsaOaepKeySwitch, out var useKeyWrap) && useKeyWrap;
+
+        /// <summary>
         /// Used for testing to reset all switches to its default value.
         /// </summary>
         internal static void ResetAllSwitches()
         {
-            _useClaimsIdentity = null;
-            AppContext.SetSwitch(UseClaimsIdentityTypeSwitch, false);
+            _useCaseSensitiveClaimsIdentity = null;
+            AppContext.SetSwitch(UseCaseSensitiveClaimsIdentityTypeSwitch, false);
 
             _doNotFailOnMissingTid = null;
             AppContext.SetSwitch(DoNotFailOnMissingTidSwitch, false);
 
             _tryAllStringClaimsAsDateTime = null;
             AppContext.SetSwitch(TryAllStringClaimsAsDateTimeSwitch, false);
+
+            _skipValidationOfAuthenticationTagLength = null;
+            AppContext.SetSwitch(SkipValidationOfAuthenticationTagLengthSwitch, false);
+
+            _useShortNameForRsaOaepKey = null;
+            AppContext.SetSwitch(UseShortNameForRsaOaepKeySwitch, false);
         }
-        internal static bool UseCaseSensitiveClaimsIdentityType() => (AppContext.TryGetSwitch(UseCaseSensitiveClaimsIdentityTypeSwitch, out bool useCaseSensitiveClaimsIdentityType) && useCaseSensitiveClaimsIdentityType);
     }
 }
