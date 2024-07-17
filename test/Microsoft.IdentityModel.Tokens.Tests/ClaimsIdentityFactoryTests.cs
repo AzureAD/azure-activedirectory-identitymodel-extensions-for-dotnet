@@ -85,10 +85,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Equal(tokenValidationParameters.NameClaimType, actualClaimsIdentity.NameClaimType);
             Assert.Equal(tokenValidationParameters.RoleClaimType, actualClaimsIdentity.RoleClaimType);
 
-            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, false);
+            AppContextSwitches.ResetAllSwitches();
         }
-
-
 
         private class DerivedTokenValidationParameters : TokenValidationParameters
         {

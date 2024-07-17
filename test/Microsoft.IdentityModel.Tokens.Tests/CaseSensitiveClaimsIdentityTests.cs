@@ -230,7 +230,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, true);
             var handler = new JsonWebTokenHandler();
             var claimsIdentity = handler.CreateClaimsIdentityInternal(new JsonWebToken(CreateUnsignedToken(claims)), validationParameters ?? new TokenValidationParameters(), Default.Issuer);
-            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, false);
+            AppContextSwitches.ResetAllSwitches();
             return claimsIdentity;
         }
 
