@@ -36,6 +36,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             actualClaimsIdentity = handler.CreateClaimsIdentityInternal(jsonWebToken, tokenValidationParameters, Default.Issuer);
             Assert.IsType<CaseSensitiveClaimsIdentity>(actualClaimsIdentity);
             Assert.NotNull(((CaseSensitiveClaimsIdentity)actualClaimsIdentity).SecurityToken);
+
+            AppContextSwitches.ResetAllSwitches();
         }
 
         [Fact]
