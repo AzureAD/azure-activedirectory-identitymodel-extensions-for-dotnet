@@ -45,11 +45,11 @@ namespace Microsoft.IdentityModel.Validators
         }
 
 #if !NET45
-        internal const string DontFailOnMissingTidSwitch = "Switch.Microsoft.IdentityModel.DontFailOnMissingTidValidateIssuerSigning";
+        internal const string DoNotFailOnMissingTidSwitch = "Switch.Microsoft.IdentityModel.DontFailOnMissingTidValidateIssuerSigning";
 
         private static bool DontFailOnMissingTid()
         {
-            return (AppContext.TryGetSwitch(DontFailOnMissingTidSwitch, out bool dontFailOnMissingTid) && dontFailOnMissingTid);
+            return (AppContext.TryGetSwitch(DoNotFailOnMissingTidSwitch, out bool doNotFailOnMissingTid) && doNotFailOnMissingTid);
         }
 #endif
 
@@ -83,10 +83,9 @@ namespace Microsoft.IdentityModel.Validators
                 if (string.IsNullOrEmpty(tenantIdFromToken))
                 {
 #if !NET45
-                    if (DontFailOnMissingTid())
-                        return true;
+                    if (AppContextSwitches.DoNotFailOnMissingTid)
+                        return true; 
 #endif
-                    
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40009));
                 }
 

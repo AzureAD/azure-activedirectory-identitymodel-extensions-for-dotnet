@@ -228,12 +228,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         private static ClaimsIdentity CreateCaseSensitiveClaimsIdentity(JObject claims, TokenValidationParameters validationParameters = null)
         {
-            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, true);
+            AppContext.SetSwitch(AppContextSwitches.UseClaimsIdentityTypeSwitch, false);
 
             var handler = new JsonWebTokenHandler();
             var claimsIdentity = handler.CreateClaimsIdentityInternal(new JsonWebToken(CreateUnsignedToken(claims)), validationParameters ?? new TokenValidationParameters(), Default.Issuer);
 
-            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, false);
+            AppContext.SetSwitch(AppContextSwitches.UseClaimsIdentityTypeSwitch, true);
 
             return claimsIdentity;
         }
