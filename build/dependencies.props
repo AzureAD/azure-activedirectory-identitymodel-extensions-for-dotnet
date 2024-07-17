@@ -14,6 +14,7 @@
 
   <PropertyGroup Condition="'$(TargetFramework)' != 'net461'">
     <SystemTextJson>8.0.4</SystemTextJson>
+    <SystemTextEncodingsWeb>8.0.0</SystemTextEncodingsWeb>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net461'">
