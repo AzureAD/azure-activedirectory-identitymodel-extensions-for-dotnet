@@ -17,8 +17,15 @@
     <SystemSecurityClaimsVersion>4.3.0</SystemSecurityClaimsVersion>
     <SystemSecurityCryptographyCngVersion>4.5.0</SystemSecurityCryptographyCngVersion>
     <SystemTextEncoding>4.3.0</SystemTextEncoding>
-    <SystemTextJson>4.7.2</SystemTextJson>
-    <SystemTextEncodingsWeb>4.7.2</SystemTextEncodingsWeb>
     <SystemXmlXmlDocumentVersion>4.3.0</SystemXmlXmlDocumentVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' != 'net461'">
+    <SystemTextJson>8.0.4</SystemTextJson>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net461'">
+    <SystemTextEncodingsWeb>4.7.2</SystemTextEncodingsWeb>
+    <SystemTextJson>4.7.2</SystemTextJson>
   </PropertyGroup>
 </Project>
