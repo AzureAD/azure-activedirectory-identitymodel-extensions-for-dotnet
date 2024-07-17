@@ -21,15 +21,6 @@ namespace Microsoft.IdentityModel.Tokens
         internal static bool UseClaimsIdentityType => _useClaimsIdentity ??= (AppContext.TryGetSwitch(UseClaimsIdentityTypeSwitch, out bool useClaimsIdentityType) && useClaimsIdentityType);
 
         /// <summary>
-        /// Used for testing to reset the <see cref="UseClaimsIdentityType"/> switch to its default value.
-        /// </summary>
-        internal static void ResetUseClaimsIdentityTypeSwitch()
-        {
-            _useClaimsIdentity = null;
-            AppContext.SetSwitch(UseClaimsIdentityTypeSwitch, false);
-        }
-
-        /// <summary>
         /// When validating the issuer signing key, specifies whether to fail if the 'tid' claim is missing.
         /// </summary>
         internal const string DoNotFailOnMissingTidSwitch = "Switch.Microsoft.IdentityModel.DontFailOnMissingTidValidateIssuerSigning";
@@ -37,15 +28,6 @@ namespace Microsoft.IdentityModel.Tokens
         private static bool? _doNotFailOnMissingTid;
 
         internal static bool DontFailOnMissingTid => _doNotFailOnMissingTid ??= (AppContext.TryGetSwitch(DoNotFailOnMissingTidSwitch, out bool doNotFailOnMissingTid) && doNotFailOnMissingTid);
-
-        /// <summary>
-        /// Used for testing to reset the <see cref="UseClaimsIdentityType"/> switch to its default value.
-        /// </summary>
-        internal static void ResetDoNotFailOnMissingTidSwitch()
-        {
-            _doNotFailOnMissingTid = null;
-            AppContext.SetSwitch(DoNotFailOnMissingTidSwitch, false);
-        }
 
         /// <summary>
         /// When reading claims from the token, specifies whether to try to convert all string claims to DateTime.
@@ -58,10 +40,16 @@ namespace Microsoft.IdentityModel.Tokens
         internal static bool TryAllStringClaimsAsDateTime => _tryAllStringClaimsAsDateTime ??= (AppContext.TryGetSwitch(TryAllStringClaimsAsDateTimeSwitch, out bool tryAsDateTime) && tryAsDateTime);
 
         /// <summary>
-        /// Used for testing to reset the <see cref="UseClaimsIdentityType"/> switch to its default value.
+        /// Used for testing to reset all switches to its default value.
         /// </summary>
-        internal static void ResetTryAllStringClaimsAsDateTimeSwitch()
+        internal static void ResetAllSwitches()
         {
+            _useClaimsIdentity = null;
+            AppContext.SetSwitch(UseClaimsIdentityTypeSwitch, false);
+
+            _doNotFailOnMissingTid = null;
+            AppContext.SetSwitch(DoNotFailOnMissingTidSwitch, false);
+
             _tryAllStringClaimsAsDateTime = null;
             AppContext.SetSwitch(TryAllStringClaimsAsDateTimeSwitch, false);
         }

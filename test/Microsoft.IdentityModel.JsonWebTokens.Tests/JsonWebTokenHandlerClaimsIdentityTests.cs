@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             handler.MapInboundClaims = true;
             Assert.IsType<ClaimsIdentity>(handler.CreateClaimsIdentityInternal(jsonWebToken, tokenValidationParameters, Default.Issuer));
 
-            AppContextSwitches.ResetUseClaimsIdentityTypeSwitch();
+            AppContextSwitches.ResetAllSwitches();
         }
 
         private class DerivedJsonWebTokenHandler : JsonWebTokenHandler
