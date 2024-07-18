@@ -63,7 +63,7 @@ steps:
     continueOnError: true
 
   #Sign Wilson 6x task group
-  - template: template-sign-wilson-6x.yaml
+  - template: template-sign-wilson-5x.yaml
 
   - task: PowerShell@2
     displayName: Pack
