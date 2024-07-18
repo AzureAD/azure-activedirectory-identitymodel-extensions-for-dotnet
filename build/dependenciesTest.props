@@ -7,6 +7,15 @@
     <NewtonsoftVersion>13.0.3</NewtonsoftVersion>
     <SystemSecurityClaimsVersion>4.3.0</SystemSecurityClaimsVersion>
     <XunitVersion>2.4.0</XunitVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' != 'net461'">
     <SystemTextJson>8.0.4</SystemTextJson>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net461'">
+    <SystemTextEncodingsWeb>4.7.2</SystemTextEncodingsWeb>
+    <SystemTextJson>4.7.2</SystemTextJson>
+  </PropertyGroup>
+
 </Project>
