@@ -225,13 +225,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             internal List<string> ExpectedClaims { get; set; }
         }
 
-        private static ClaimsIdentity CreateCaseSensitiveClaimsIdentity(JObject claims, TokenValidationParameters validationParameters = null)
+        private static CaseSensitiveClaimsIdentity CreateCaseSensitiveClaimsIdentity(JObject claims, TokenValidationParameters validationParameters = null)
         {
-            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, true);
-            var handler = new JsonWebTokenHandler();
-            var claimsIdentity = handler.CreateClaimsIdentityInternal(new JsonWebToken(CreateUnsignedToken(claims)), validationParameters ?? new TokenValidationParameters(), Default.Issuer);
-            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, false);
-            return claimsIdentity;
+            JsonWebToken jsonWebToken = new JsonWebToken(CreateUnsignedToken(claims));
+            if (validationParameters == null)
+                return new CaseSensitiveClaimsIdentity(jsonWebToken.Claims);
+            else
+                return new CaseSensitiveClaimsIdentity(jsonWebToken.Claims, validationParameters.AuthenticationType, validationParameters.NameClaimType, validationParameters.RoleClaimType);
         }
 
         private static string CreateUnsignedToken(JObject payload)
