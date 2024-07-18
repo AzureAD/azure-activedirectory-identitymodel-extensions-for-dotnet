@@ -119,10 +119,13 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             return jsonWebKey;
         }
 
+        public static string FullyPopulatedJsonWebKeyString = @"{ ""keys"":[" + FullyPopulatedJsonWebKey() + "]}";
+
         public static JsonWebKeySet FullyPopulatedJsonWebKeySet()
         {
             JsonWebKeySet jsonWebKeySet = new JsonWebKeySet();
             jsonWebKeySet.Keys.Add(FullyPopulatedJsonWebKey());
+            jsonWebKeySet.JsonWebKeySetString = FullyPopulatedJsonWebKeyString;
             SetAdditionalData(jsonWebKeySet.AdditionalData);
 
             return jsonWebKeySet;

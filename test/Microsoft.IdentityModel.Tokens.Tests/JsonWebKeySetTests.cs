@@ -23,7 +23,14 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             {
                 var jsonWebKeys = new JsonWebKeySet(theoryData.Json);
                 var keys = jsonWebKeys.GetSigningKeys();
+                var originalString = jsonWebKeys.JsonWebKeySetString;
                 theoryData.ExpectedException.ProcessNoException(context);
+
+                if (theoryData.Json != null)
+                    IdentityComparer.AreStringsEqual(originalString, theoryData.Json, context);
+                else
+                    IdentityComparer.AreStringsEqual(originalString, string.Empty, context);
+
                 if (theoryData.JsonWebKeySet != null)
                     IdentityComparer.AreEqual(jsonWebKeys, theoryData.JsonWebKeySet, context);
 

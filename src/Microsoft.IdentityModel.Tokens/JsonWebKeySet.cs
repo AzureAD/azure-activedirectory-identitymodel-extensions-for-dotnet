@@ -20,6 +20,7 @@ namespace Microsoft.IdentityModel.Tokens
     {
         internal const string ClassName = "Microsoft.IdentityModel.Tokens.JsonWebKeySet";
         private Dictionary<string, object> _additionalData;
+        private string _jsonWebKeySetString = string.Empty;
 
         /// <summary>
         /// Returns a new instance of <see cref="JsonWebKeySet"/>.
@@ -53,6 +54,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (string.IsNullOrEmpty(json))
                 throw LogHelper.LogArgumentNullException(nameof(json));
+            _jsonWebKeySetString = json;
 
             try
             {
@@ -96,6 +98,21 @@ namespace Microsoft.IdentityModel.Tokens
         [DefaultValue(true)]
         [JsonIgnore]
         public bool SkipUnresolvedJsonWebKeys { get; set; } = DefaultSkipUnresolvedJsonWebKeys;
+
+        /// <summary>
+        /// The original <see cref="string"/> used to create this instance.
+        /// </summary>
+        public string JsonWebKeySetString
+        {
+            get
+            {
+                return _jsonWebKeySetString;
+            }
+            internal set
+            {
+                _jsonWebKeySetString = value;
+            }
+        }
 
         /// <summary>
         /// Returns the JsonWebKeys as a <see cref="IList{SecurityKey}"/>.
