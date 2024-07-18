@@ -84,17 +84,22 @@ namespace Microsoft.IdentityModel.Protocols
         public async Task<string> GetDocumentAsync(string address, CancellationToken cancel)
         {
             if (string.IsNullOrWhiteSpace(address))
-                throw LogHelper.LogArgumentNullException("address");
+                throw LogHelper.LogArgumentNullException(nameof(address));
 
             if (!Utility.IsHttps(address) && RequireHttps)
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX20108, address), nameof(address)));
+                throw LogHelper.LogExceptionMessage(
+                    new ArgumentException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX20108,
+                            LogHelper.MarkAsNonPII(address)),
+                        nameof(address)));
 
             Exception unsuccessfulHttpResponseException;
             HttpResponseMessage response;
             try
             {
                 if (LogHelper.IsEnabled(EventLogLevel.Verbose))
-                    LogHelper.LogVerbose(LogMessages.IDX20805, address);
+                    LogHelper.LogVerbose(LogMessages.IDX20805, LogHelper.MarkAsNonPII(address));
 
                 var httpClient = _httpClient ?? _defaultHttpClient;
                 var uri = new Uri(address, UriKind.RelativeOrAbsolute);
@@ -104,13 +109,24 @@ namespace Microsoft.IdentityModel.Protocols
                 if (response.IsSuccessStatusCode)
                     return responseContent;
 
-                unsuccessfulHttpResponseException = new IOException(LogHelper.FormatInvariant(LogMessages.IDX20807, address, response, responseContent));
+                unsuccessfulHttpResponseException = new IOException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX20807,
+                        LogHelper.MarkAsNonPII(address),
+                        response,
+                        responseContent));
+
                 unsuccessfulHttpResponseException.Data.Add(StatusCode, response.StatusCode);
                 unsuccessfulHttpResponseException.Data.Add(ResponseContent, responseContent);
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new IOException(LogHelper.FormatInvariant(LogMessages.IDX20804, address), ex));
+                throw LogHelper.LogExceptionMessage(
+                    new IOException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX20804,
+                            LogHelper.MarkAsNonPII(address)),
+                        ex));
             }
 
             throw LogHelper.LogExceptionMessage(unsuccessfulHttpResponseException);
