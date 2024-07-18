@@ -257,7 +257,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
         }
 
-        // Tests checks to make sure that the token string created by the JwtSecurityTokenHandler is consistent with the
+        // Tests checks to make sure that the token string created by the JwtSecurityTokenHandler is consistent with the 
         // token string created by the JsonWebTokenHandler.
         [Theory, MemberData(nameof(CreateJWEUsingSecurityTokenDescriptorTheoryData))]
         public void CreateJWEUsingSecurityTokenDescriptor(CreateTokenTheoryData theoryData)

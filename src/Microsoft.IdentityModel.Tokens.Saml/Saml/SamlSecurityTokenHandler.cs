@@ -870,7 +870,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 }
             }
 
-            subject.Actor = ClaimsIdentityFactory.Create(claims, "Federation");
+            subject.Actor = new ClaimsIdentity(claims, "Federation");
             SetDelegateFromAttribute(actingAsAttribute, subject.Actor, issuer);
         }
 
