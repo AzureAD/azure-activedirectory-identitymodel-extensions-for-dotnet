@@ -1,0 +1,165 @@
+steps:
+  - template: template-build-source.yml
+
+  - task: PowerShell@2
+    displayName: 'Run Tests'
+    inputs:
+      targetType: filePath
+      filePath: ./$(WilsonSourceDirectory)runTests.ps1
+      arguments: '-buildType $(BuildConfiguration)'
+    condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
+
+  - task: CopyFiles@2
+    displayName: 'Copy Files to: [staging]\ProductBinaries'
+    inputs:
+      SourceFolder: src
+      Contents: |
+        **\bin\$(BuildConfiguration)\**\Microsoft.IdentityModel.*.dll
+        **\bin\$(BuildConfiguration)\**\Microsoft.IdentityModel.*.pdb
+        **\bin\$(BuildConfiguration)\**\System.IdentityModel.Tokens.Jwt.dll
+        **\bin\$(BuildConfiguration)\**\System.IdentityModel.Tokens.Jwt.pdb
+      TargetFolder: '$(Build.ArtifactStagingDirectory)\ProductBinaries'
+    condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
+
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@1
+    displayName: 'Run PoliCheck'
+    inputs:
+      targetType: F
+      optionsFC: 0
+      optionsXS: 0
+      optionsHMENABLE: 0
+    condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
+
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@2
+    displayName: 'Run CredScan'
+    inputs:
+      suppressionsFile: 'build/credscan-exclusion.json'
+      debugMode: false
+    condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
+
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
+    displayName: 'Run Roslyn Analyzers'
+
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-binskim.BinSkim@3
+    displayName: 'Run BinSkim'
+    inputs:
+      InputType: Basic
+      AnalyzeTarget: '$(Build.ArtifactStagingDirectory)\*.dll'
+      AnalyzeSymPath: '$(Build.ArtifactStagingDirectory)\ProductBinaries'
+      AnalyzeVerbose: true
+      AnalyzeHashes: true
+    condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
+
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@2
+    displayName: 'Publish Security Analysis Logs'
+    continueOnError: true
+
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
+    displayName: 'Post SDL Analysis'
+    inputs:
+      BinSkim: true
+      CredScan: true
+      PoliCheck: true
+    continueOnError: true
+
+  #Sign Wilson 6x task group
+  - template: template-sign-wilson-6x.yaml
+
+  - task: PowerShell@2
+    displayName: Pack
+    inputs:
+      targetType: filePath
+      filePath: ./$(WilsonSourceDirectory)pack.ps1
+      arguments: '-buildType $(BuildConfiguration)'
+
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: 'Sign Nuget Packages'
+    inputs:
+      ConnectedServiceName: 'IDDP Code Signing'
+      FolderPath: artifacts
+      Pattern: '*.nupkg'
+      signConfigType: inlineSignParams
+      inlineOperation: |
+        [
+            {
+                "keyCode": "CP-401405",
+                "operationSetCode": "NuGetSign",
+                "parameters": [ ],
+                "toolName": "sign",
+                "toolVersion": "1.0"
+            },
+            {
+                "keyCode": "CP-401405",
+                "operationSetCode": "NuGetVerify",
+                "parameters": [ ],
+                "toolName": "sign",
+                "toolVersion": "1.0"
+            }
+        ]
+      SessionTimeout: 20
+    condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
+
+  - task: onebranch.pipeline.signing@1
+    displayName: 'Sign Packages with OneBranch'
+    inputs:
+      command: 'sign'
+      signing_profile: 'CP-401405'
+      files_to_sign: '*nupkg'
+      search_root: '$(Build.SourcesDirectory)\$(WilsonSourceDirectory)artifacts'
+    condition: and(succeeded(), eq(variables['PipelineType'], 'onebranch'))
+
+  # Copy all packages out to staging
+  - task: CopyFiles@2
+    displayName: 'Copy Files from $(Build.SourcesDirectory) to: $(Build.ArtifactStagingDirectory)\packages'
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)'
+      Contents: '**\*nupkg'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)\packages'
+      flattenFolders: true
+    condition: and(succeeded(), eq(variables['PipelineType'], 'onebranch'))
+
+  - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
+    displayName: 'Component Detection'
+    inputs:
+      scanType: 'Register'
+      verbosity: 'Verbose'
+      alertWarningLevel: 'High'
+    condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
+
+  - task: PublishSymbols@2
+    displayName: 'Publish symbols on symweb (cross publish)'
+    inputs:
+      SearchPattern: '**\bin\**\*.IdentityModel.*'
+      SymbolServerType: TeamServices
+      TreatNotIndexedAsWarning: true
+
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-uploadtotsa.TSAUpload@1
+    displayName: 'TSA upload to Codebase: WILSON Stamp: Azure'
+    inputs:
+      tsaVersion: TsaV2
+      codeBaseName: WILSON
+      uploadAPIScan: false
+      uploadFortifySCA: false
+      uploadFxCop: false
+      uploadModernCop: false
+      uploadPREfast: false
+      uploadTSLint: false
+    condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
+
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'Manifest Generator '
+    inputs:
+      BuildDropPath: '$(Build.SourcesDirectory)\$(WilsonSourceDirectory)src'
+      ManifestDirPath: '$(Build.SourcesDirectory)\artifacts'
+    condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish NuGet Package Artifact'
+    inputs:
+      PathtoPublish: '$(Build.SourcesDirectory)\artifacts'
+      ArtifactName: '$(Build.BuildNumber)-nuget-package'
+    condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
+
+  - task: mspremier.PostBuildCleanup.PostBuildCleanup-task.PostBuildCleanup@3
+    displayName: 'Clean Agent Directories'
+    condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
