@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Tests
 {
-    [Collection(nameof(ClaimsIdentityFactoryTests))]
+    [Collection(nameof(CaseSensitiveClaimsIdentityTests))]
     public class ClaimsIdentityFactoryTests
     {
         [Theory]
@@ -43,6 +43,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 Assert.IsType<ClaimsIdentity>(actualClaimsIdentity);
             }
+
+            AppContextSwitches.ResetAllSwitches();
         }
 
         [Theory]
@@ -86,6 +88,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Equal(tokenValidationParameters.AuthenticationType, actualClaimsIdentity.AuthenticationType);
             Assert.Equal(tokenValidationParameters.NameClaimType, actualClaimsIdentity.NameClaimType);
             Assert.Equal(tokenValidationParameters.RoleClaimType, actualClaimsIdentity.RoleClaimType);
+
+            AppContextSwitches.ResetAllSwitches();
         }
 
         private class DerivedTokenValidationParameters : TokenValidationParameters
