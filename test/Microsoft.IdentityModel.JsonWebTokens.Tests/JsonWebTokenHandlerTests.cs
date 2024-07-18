@@ -4192,11 +4192,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         [Theory, MemberData(nameof(ValidateAuthenticationTagLengthTheoryData))]
         public void ValidateTokenAsync_ModifiedAuthNTag(CreateTokenTheoryData theoryData)
         {
-            try
-            {
-                // arrange
-                AppContext.SetSwitch(AppContextSwitches.SkipValidationOfAuthenticationTagLengthSwitch, theoryData.EnableAppContextSwitch);
-                var payload = new JObject()
+            // arrange
+            AppContext.SetSwitch(AuthenticatedEncryptionProvider._skipValidationOfAuthenticationTagLength, theoryData.EnableAppContextSwitch);
+            var payload = new JObject()
             {
                 { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
                 { JwtRegisteredClaimNames.GivenName, "Bob" },
@@ -4207,29 +4205,24 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(DateTime.Now.AddDays(1)).ToString() },
             }.ToString();
 
-                var jsonWebTokenHandler = new JsonWebTokenHandler();
-                var signingCredentials = Default.SymmetricSigningCredentials;
+            var jsonWebTokenHandler = new JsonWebTokenHandler();
+            var signingCredentials = Default.SymmetricSigningCredentials;
 
-                if (SupportedAlgorithms.IsAesGcm(theoryData.Algorithm))
-                {
-                    theoryData.EncryptingCredentials.CryptoProviderFactory = new CryptoProviderFactoryForGcm();
-                }
-
-                var jwe = jsonWebTokenHandler.CreateToken(payload, signingCredentials, theoryData.EncryptingCredentials);
-                var jweWithExtraCharacters = jwe + "_cannoli_hunts_truffles_";
-
-                // act
-                // calling ValidateTokenAsync.Result to prevent tests from sharing app context switch property
-                // normally, we would want to await ValidateTokenAsync().ConfigureAwait(false)
-                var tokenValidationResult = jsonWebTokenHandler.ValidateTokenAsync(jweWithExtraCharacters, theoryData.ValidationParameters).Result;
-
-                // assert
-                Assert.Equal(theoryData.IsValid, tokenValidationResult.IsValid);
-            }
-            finally
+            if (SupportedAlgorithms.IsAesGcm(theoryData.Algorithm))
             {
-                AppContextSwitches.ResetAllSwitches();
+                theoryData.EncryptingCredentials.CryptoProviderFactory = new CryptoProviderFactoryForGcm();
             }
+
+            var jwe = jsonWebTokenHandler.CreateToken(payload, signingCredentials, theoryData.EncryptingCredentials);
+            var jweWithExtraCharacters = jwe + "_cannoli_hunts_truffles_";
+
+            // act
+            // calling ValidateTokenAsync.Result to prevent tests from sharing app context switch property
+            // normally, we would want to await ValidateTokenAsync().ConfigureAwait(false)
+            var tokenValidationResult = jsonWebTokenHandler.ValidateTokenAsync(jweWithExtraCharacters, theoryData.ValidationParameters).Result;
+
+            // assert
+            Assert.Equal(theoryData.IsValid, tokenValidationResult.IsValid);
         }
 
         public static TheoryData<CreateTokenTheoryData> ValidateAuthenticationTagLengthTheoryData()

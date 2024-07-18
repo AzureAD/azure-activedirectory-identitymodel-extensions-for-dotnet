@@ -181,7 +181,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             }
             finally
             {
-                AppContextSwitches.ResetAllSwitches();
+                theoryData.TearDownAction?.Invoke();
             }
 
             TestUtilities.AssertFailIfErrors(context);
@@ -345,7 +345,8 @@ namespace Microsoft.IdentityModel.Validators.Tests
                     SecurityKey = KeyingMaterial.JsonWebKeyP256,
                     SecurityToken = new JwtSecurityToken(),
                     OpenIdConnectConfiguration = mockConfiguration,
-                    SetupAction = () => AppContext.SetSwitch(AppContextSwitches.DoNotFailOnMissingTidSwitch, true),
+                    SetupAction = () => AppContext.SetSwitch(AadTokenValidationParametersExtension.DontFailOnMissingTidSwitch, true),
+                    TearDownAction = () => AppContext.SetSwitch(AadTokenValidationParametersExtension.DontFailOnMissingTidSwitch, false)
                 });
 
                 theoryData.Add(new AadSigningKeyIssuerTheoryData
@@ -355,7 +356,8 @@ namespace Microsoft.IdentityModel.Validators.Tests
                     SecurityToken = new JwtSecurityToken(),
                     OpenIdConnectConfiguration = mockConfiguration,
                     ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX40009"),
-                    SetupAction = () => AppContext.SetSwitch(AppContextSwitches.DoNotFailOnMissingTidSwitch, false),
+                    SetupAction = () => AppContext.SetSwitch(AadTokenValidationParametersExtension.DontFailOnMissingTidSwitch, false),
+                    TearDownAction = () => AppContext.SetSwitch(AadTokenValidationParametersExtension.DontFailOnMissingTidSwitch, isEnabled: false)
                 });
 
                 theoryData.Add(new AadSigningKeyIssuerTheoryData
@@ -364,7 +366,8 @@ namespace Microsoft.IdentityModel.Validators.Tests
                     SecurityKey = KeyingMaterial.JsonWebKeyP256,
                     SecurityToken = new JwtSecurityToken(),
                     OpenIdConnectConfiguration = mockConfiguration,
-                    SetupAction = () => AppContext.SetSwitch(AppContextSwitches.DoNotFailOnMissingTidSwitch, true),
+                    SetupAction = () => AppContext.SetSwitch(AadTokenValidationParametersExtension.DontFailOnMissingTidSwitch, true),
+                    TearDownAction = () => AppContext.SetSwitch(AadTokenValidationParametersExtension.DontFailOnMissingTidSwitch, false)
                 });
 
                 theoryData.Add(new AadSigningKeyIssuerTheoryData
@@ -374,7 +377,8 @@ namespace Microsoft.IdentityModel.Validators.Tests
                     SecurityToken = new JsonWebToken(Default.Jwt(Default.SecurityTokenDescriptor(Default.SymmetricSigningCredentials, [issClaim]))),
                     OpenIdConnectConfiguration = mockConfiguration,
                     ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX40009"),
-                    SetupAction = () => AppContext.SetSwitch(AppContextSwitches.DoNotFailOnMissingTidSwitch, false),
+                    SetupAction = () => AppContext.SetSwitch(AadTokenValidationParametersExtension.DontFailOnMissingTidSwitch, false),
+                    TearDownAction = () => AppContext.SetSwitch(AadTokenValidationParametersExtension.DontFailOnMissingTidSwitch, isEnabled: false)
                 });
 
                 theoryData.Add(new AadSigningKeyIssuerTheoryData
@@ -383,7 +387,8 @@ namespace Microsoft.IdentityModel.Validators.Tests
                     SecurityKey = KeyingMaterial.JsonWebKeyP256,
                     SecurityToken = new JsonWebToken(Default.Jwt(Default.SecurityTokenDescriptor(Default.SymmetricSigningCredentials, [issClaim]))),
                     OpenIdConnectConfiguration = mockConfiguration,
-                    SetupAction = () => AppContext.SetSwitch(AppContextSwitches.DoNotFailOnMissingTidSwitch, true),
+                    SetupAction = () => AppContext.SetSwitch(AadTokenValidationParametersExtension.DontFailOnMissingTidSwitch, true),
+                    TearDownAction = () => AppContext.SetSwitch(AadTokenValidationParametersExtension.DontFailOnMissingTidSwitch, false)
                 });
 
                 theoryData.Add(new AadSigningKeyIssuerTheoryData
@@ -449,6 +454,8 @@ namespace Microsoft.IdentityModel.Validators.Tests
             public bool SetDelegateWithoutConfig { get; set; } = false;
 
             public Action SetupAction { get; set; }
+
+            public Action TearDownAction { get; set; }
         }
     }
 }

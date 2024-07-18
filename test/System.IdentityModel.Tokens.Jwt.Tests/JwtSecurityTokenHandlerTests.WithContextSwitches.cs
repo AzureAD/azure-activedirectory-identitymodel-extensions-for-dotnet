@@ -16,7 +16,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         [InlineData(SecurityAlgorithms.RsaOaepKeyWrap, false)]
         public void JwtSecurityTokenHandler_CreateToken_AddShortFormMappingForRsaOAEP(string algorithm, bool useShortNameForRsaOaepKey)
         {
-            AppContext.SetSwitch(AppContextSwitches.UseShortNameForRsaOaepKeySwitch, useShortNameForRsaOaepKey);
+            AppContext.SetSwitch(X509EncryptingCredentials._useShortNameForRsaOaepKey, useShortNameForRsaOaepKey);
             var encryptingCredentials = new X509EncryptingCredentials(Default.Certificate);
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
 
@@ -24,7 +24,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             Assert.Equal(token.Header.Alg, algorithm);
 
-            AppContextSwitches.ResetAllSwitches();
+            AppContext.SetSwitch(X509EncryptingCredentials._useShortNameForRsaOaepKey, false);
         }
 
         [Theory]
@@ -32,7 +32,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         [InlineData(SecurityAlgorithms.RsaOaepKeyWrap, false)]
         public void JsonWebTokenHandler_CreateToken_AddShortFormMappingForRsaOAEP(string algorithm, bool useShortNameForRsaOaepKey)
         {
-            AppContext.SetSwitch(AppContextSwitches.UseShortNameForRsaOaepKeySwitch, useShortNameForRsaOaepKey);
+            AppContext.SetSwitch(X509EncryptingCredentials._useShortNameForRsaOaepKey, useShortNameForRsaOaepKey);
             var encryptingCredentials = new X509EncryptingCredentials(Default.Certificate);
             JsonWebTokenHandler tokenHandler = new JsonWebTokenHandler();
 
@@ -40,7 +40,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             Assert.Equal(jsonToken.Alg, algorithm);
 
-            AppContextSwitches.ResetAllSwitches();
+            AppContext.SetSwitch(X509EncryptingCredentials._useShortNameForRsaOaepKey, false);
         }
 
         private JwtSecurityToken CreateJwtSecurityToken(JwtSecurityTokenHandler tokenHandler, X509EncryptingCredentials encryptingCredentials)

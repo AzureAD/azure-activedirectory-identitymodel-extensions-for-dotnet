@@ -32,8 +32,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             handler.MapInboundClaims = true;
             actualClaimsIdentity = handler.CreateClaimsIdentityInternal(jsonWebToken, tokenValidationParameters, Default.Issuer);
             Assert.IsType<ClaimsIdentity>(actualClaimsIdentity);
-
-            AppContextSwitches.ResetAllSwitches();
         }
 
         [Fact]
@@ -63,7 +61,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.IsType<CaseSensitiveClaimsIdentity>(actualClaimsIdentity);
             Assert.NotNull(((CaseSensitiveClaimsIdentity)actualClaimsIdentity).SecurityToken);
 
-            AppContextSwitches.ResetAllSwitches();
+            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, false);
         }
 
         private class DerivedJsonWebTokenHandler : JsonWebTokenHandler
