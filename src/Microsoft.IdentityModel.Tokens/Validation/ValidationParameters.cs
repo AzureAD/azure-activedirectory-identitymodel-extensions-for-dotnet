@@ -440,16 +440,16 @@ namespace Microsoft.IdentityModel.Tokens
         public TokenReplayValidator TokenReplayValidator { get; set; }
 
         /// <summary>
-        /// Gets or sets a delegate that will be used to validate the type of the token.
-        /// If the token type cannot be validated, an exception MUST be thrown by the delegate.
+        /// Allows overriding the delegate that will be used to validate the type of the token.
+        /// If the token type cannot be validated, a <see cref="TokenTypeValidationResult"/> MUST be returned by the delegate.
         /// Note: the 'type' parameter may be null if it couldn't be extracted from its usual location.
         /// Implementations that need to resolve it from a different location can use the 'token' parameter.
         /// </summary>
         /// <remarks>
-        /// If set, this delegate will be called to validate the 'type' of the token, instead of default processing.
-        /// This means that no default 'type' validation will occur.
+        /// If no delegate is set, the default implementation will be used. The default checks the type
+        /// against the <see cref="ValidTypes"/> property, if it's present then, it will succeed.
         /// </remarks>
-        public TypeValidator TypeValidator { get; set; }
+        public TypeValidatorDelegate TypeValidator { get; set; } = Validators.ValidateTokenType;
 
         /// <summary>
         /// Gets or sets a boolean to control if the LKG configuration will be used for token validation.

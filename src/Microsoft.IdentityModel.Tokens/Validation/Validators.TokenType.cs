@@ -10,6 +10,21 @@ using Microsoft.IdentityModel.Logging;
 #nullable enable
 namespace Microsoft.IdentityModel.Tokens
 {
+    /// <summary>
+    /// Definition for delegate that will validate the token type of a token.
+    /// </summary>
+    /// <param name="type">The token type or <c>null</c> if it couldn't be resolved (e.g from the 'typ' header for a JWT).</param>
+    /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
+    /// <param name="validationParameters"><see cref="ValidationParameters"/> required for validation.</param>
+    /// <param name="callContext"></param>
+    /// <returns> A <see cref="TokenTypeValidationResult"/>that contains the results of validating the token type.</returns>
+    /// <remarks>An EXACT match is required. <see cref="StringComparison.Ordinal"/> (case sensitive) is used for comparing <paramref name="type"/> against <see cref="TokenValidationParameters.ValidTypes"/>.</remarks>
+    internal delegate TokenTypeValidationResult TypeValidatorDelegate(
+        string? type,
+        SecurityToken? securityToken,
+        ValidationParameters validationParameters,
+        CallContext callContext);
+
     public static partial class Validators
     {
         /// <summary>
@@ -19,10 +34,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
         /// <param name="validationParameters"><see cref="ValidationParameters"/> required for validation.</param>
         /// <param name="callContext"></param>
-        /// <exception cref="ArgumentNullException">If <paramref name="validationParameters"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">If <paramref name="securityToken"/> is null.</exception>
-        /// <exception cref="SecurityTokenInvalidTypeException">If <paramref name="type"/> is null or whitespace and <see cref="ValidationParameters.ValidTypes"/> is not null.</exception>
-        /// <exception cref="SecurityTokenInvalidTypeException">If <paramref name="type"/> failed to match <see cref="ValidationParameters.ValidTypes"/>.</exception>
+        /// <returns> A <see cref="TokenTypeValidationResult"/>that contains the results of validating the token type.</returns>
         /// <remarks>An EXACT match is required. <see cref="StringComparison.Ordinal"/> (case sensitive) is used for comparing <paramref name="type"/> against <see cref="TokenValidationParameters.ValidTypes"/>.</remarks>
 #pragma warning disable CA1801 // TODO: remove pragma disable once callContext is used for logging
         internal static TokenTypeValidationResult ValidateTokenType(
