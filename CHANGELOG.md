@@ -1,5 +1,10 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+7.7.1
+=====
+### Bug Fix
+- Re-add `JsonSerializerPrimitives.TryAllStringClaimsAsDateTime` which was removed as it is in an internal class, but due to `InternalsVisibleTo` can lead to a `MissingMethodException` if IdentityModel versions are not aligned. See PR [#2734](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2734) for details.
+
 7.7.0
 =====
 ### CVE package updates
