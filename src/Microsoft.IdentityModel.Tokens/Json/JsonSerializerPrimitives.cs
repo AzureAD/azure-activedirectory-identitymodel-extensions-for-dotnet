@@ -706,6 +706,11 @@ namespace Microsoft.IdentityModel.Tokens.Json
             return retVal;
         }
 
+        public static bool TryAllStringClaimsAsDateTime()
+        {
+            return AppContextSwitches.TryAllStringClaimsAsDateTime;
+        }
+
         /// <summary>
         /// This is a non-exhaustive list of claim types that are not expected to be DateTime values
         /// sourced from expected Entra V1 and V2 claims, OpenID Connect claims, and a selection of
