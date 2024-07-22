@@ -11,6 +11,13 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     internal class AudienceValidationResult : ValidationResult
     {
+        /// <summary>
+        /// Internal static instance of <see cref="AudienceValidationResult"/> that indicates audience validation was skipped.
+        /// </summary>
+        internal static AudienceValidationResult SkippedAudienceValidation = new AudienceValidationResult(
+            true,
+            ValidationFailureType.ValidationSkipped);
+
         private Exception _exception;
 
         /// <summary>
@@ -34,6 +41,15 @@ namespace Microsoft.IdentityModel.Tokens
         {
             IsValid = false;
             Audience = audience;
+        }
+
+        /// <summary>
+        /// Creates an instance of <see cref="AudienceValidationResult"/> to indicate validation was skipped.
+        /// <paramref name="validationFailure"/> is the <see cref="ValidationFailureType"/> that occurred during validation.
+        /// </summary>
+        internal AudienceValidationResult(bool isValid, ValidationFailureType validationFailure): base(validationFailure)
+        {
+            IsValid = isValid;
         }
 
         /// <summary>

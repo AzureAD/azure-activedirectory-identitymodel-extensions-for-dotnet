@@ -82,6 +82,12 @@ namespace Microsoft.IdentityModel.Tokens
         private class NotEvaluated : ValidationFailureType { internal NotEvaluated(string name) : base(name) { } }
 
         /// <summary>
+        /// Defines a type that represents that an evaluation was intentionally skipped.
+        /// </summary>
+        internal static readonly ValidationFailureType ValidationSkipped = new Skipped("Skipped");
+        private class Skipped : ValidationFailureType { internal Skipped(string name) : base(name) { } }
+
+        /// <summary>
         /// Defines a type that represents that no evaluation has taken place.
         /// </summary>
         public static readonly ValidationFailureType ValidationSucceeded = new Succeeded("Succeeded");

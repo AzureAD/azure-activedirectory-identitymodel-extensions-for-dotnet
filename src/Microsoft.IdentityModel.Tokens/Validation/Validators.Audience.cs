@@ -32,6 +32,20 @@ namespace Microsoft.IdentityModel.Tokens
     public static partial class Validators
     {
         /// <summary>
+        /// Skips audience validation and returns a successful <see cref="AudienceValidationResult"/>.
+        /// </summary>
+        internal static AudienceValidationResult SkipAudienceValidationResult(
+#pragma warning disable CA1801 // Review unused parameters
+        IEnumerable<string> audiences,
+        SecurityToken? securityToken,
+        TokenValidationParameters validationParameters,
+        CallContext callContext)
+#pragma warning restore CA1801 // Review unused parameters
+        {
+            return AudienceValidationResult.SkippedAudienceValidation;
+        }
+
+        /// <summary>
         /// Determines if the audiences found in a <see cref="SecurityToken"/> are valid.
         /// </summary>
         /// <param name="audiences">The audiences found in the <see cref="SecurityToken"/>.</param>
