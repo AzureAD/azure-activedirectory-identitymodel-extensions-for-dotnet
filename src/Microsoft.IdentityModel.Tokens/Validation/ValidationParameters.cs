@@ -229,9 +229,9 @@ namespace Microsoft.IdentityModel.Tokens
         public string DebugId { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="SecurityKey"/> representing the ephemeral public key used for ECDH-ES decryption.
+        /// Gets the <see cref="SecurityKey"/> representing the ephemeral decryption key used for decryption by certain algorithms.
         /// </summary>
-        public SecurityKey EcdhEsDecryptionKey { get; set; }
+        public SecurityKey EphemeralDecryptionKey { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean that controls if a '/' is significant at the end of the audience.

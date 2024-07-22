@@ -116,12 +116,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 callContext);
 
             if (exceptionDetail != null)
-            {
                 return new TokenDecryptingResult(
                     jsonWebToken,
                     ValidationFailureType.TokenDecryptingFailed,
                     exceptionDetail);
-            }
 
             try
             {

@@ -143,7 +143,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         // on decryption we get the public key from the EPK value see: https://datatracker.ietf.org/doc/html/rfc7518#appendix-C
                         var ecdhKeyExchangeProvider = new EcdhKeyExchangeProvider(
                             key as ECDsaSecurityKey,
-                            validationParameters.EcdhEsDecryptionKey as ECDsaSecurityKey,
+                            validationParameters.EphemeralDecryptionKey as ECDsaSecurityKey,
                             jwtToken.Alg,
                             jwtToken.Enc);
                         jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Apu, out string apu);
