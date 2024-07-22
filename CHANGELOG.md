@@ -3,7 +3,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 8.0.1
 =====
 ### Bug fixes
-- IdentityModel now resolves the public key to EPK. See issue [#1951](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2120) for details.
+- IdentityModel now resolves the public key to EPK. See issue [#1951](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/1951) for details.
 - Fix a race condition where `SignatureProvider` was disposed but still able to leverage the cache and `SignatureProvider` now disposes when compacting. See PR [#2682](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2682) for details.
 - For JWE, `JsonWebTokenHandler.ValidateJWEAsync` now considers the decrypt keys in the configuration. See issue [#2737](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2737) for details.
 
