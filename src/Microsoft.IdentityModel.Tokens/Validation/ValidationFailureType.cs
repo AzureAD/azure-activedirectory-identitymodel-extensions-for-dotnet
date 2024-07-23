@@ -70,6 +70,12 @@ namespace Microsoft.IdentityModel.Tokens
         private class TokenReplayValidationFailure : ValidationFailureType { internal TokenReplayValidationFailure(string name) : base(name) { } }
 
         /// <summary>
+        /// Defines a type that represents that a token could not be read.
+        /// </summary>
+        public static readonly ValidationFailureType TokenReadingFailed = new TokenReadingFailure("TokenReadingFailed");
+        private class TokenReadingFailure : ValidationFailureType { internal TokenReadingFailure(string name) : base(name) { } }
+
+        /// <summary>
         /// Defines a type that represents that a JWE could not be decrypted.
         /// </summary>
         public static readonly ValidationFailureType TokenDecryptingFailed = new TokenDecryptingFailure("TokenDecryptingFailed");

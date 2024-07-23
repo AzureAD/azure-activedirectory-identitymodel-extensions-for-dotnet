@@ -19,6 +19,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -1007,6 +1008,76 @@ namespace Microsoft.IdentityModel.TestUtils
             return context.Merge(localContext);
         }
 
+        public static bool AreTokenReadingResultsEqual(object object1, object object2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, context))
+                return context.Merge(localContext);
+
+            return AreTokenReadingResultsEqual(
+                object1 as TokenReadingResult,
+                object2 as TokenReadingResult,
+                "TokenReadingResult1",
+                "TokenReadingResult2",
+                null,
+                context);
+        }
+
+        internal static bool AreTokenReadingResultsEqual(
+            TokenReadingResult tokenReadingResult1,
+            TokenReadingResult tokenReadingResult2,
+            string name1,
+            string name2,
+            string stackPrefix,
+            CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(tokenReadingResult1, tokenReadingResult2, localContext))
+                return context.Merge(localContext);
+
+            if (tokenReadingResult1.IsValid != tokenReadingResult2.IsValid)
+                localContext.Diffs.Add($"TokenReadingResult1.IsValid: {tokenReadingResult1.IsValid} != TokenReadingResult2.IsValid: {tokenReadingResult2.IsValid}");
+
+            if (tokenReadingResult1.TokenInput != tokenReadingResult2.TokenInput)
+                localContext.Diffs.Add($"TokenReadingResult1.TokenInput: '{tokenReadingResult1.TokenInput}' != TokenReadingResult2.TokenInput: '{tokenReadingResult2.TokenInput}'");
+
+            // Only compare the security token if both are valid.
+            if (tokenReadingResult1.IsValid && (tokenReadingResult1.SecurityToken().ToString() != tokenReadingResult2.SecurityToken().ToString()))
+                localContext.Diffs.Add($"TokenReadingResult1.SecurityToken: '{tokenReadingResult1.SecurityToken()}' != TokenReadingResult2.SecurityToken: '{tokenReadingResult2.SecurityToken()}'");
+
+            if (tokenReadingResult1.ValidationFailureType != tokenReadingResult2.ValidationFailureType)
+                localContext.Diffs.Add($"TokenReadingResult1.ValidationFailureType: {tokenReadingResult1.ValidationFailureType} != TokenReadingResult2.ValidationFailureType: {tokenReadingResult2.ValidationFailureType}");
+            
+            // true => both are not null.
+            if (ContinueCheckingEquality(tokenReadingResult1.Exception, tokenReadingResult2.Exception, localContext))
+            {
+                AreStringsEqual(
+                    tokenReadingResult1.Exception.Message,
+                    tokenReadingResult2.Exception.Message,
+                    $"({name1}).Exception.Message",
+                    $"({name2}).Exception.Message",
+                    localContext);
+
+                AreStringsEqual(
+                    tokenReadingResult1.Exception.Source,
+                    tokenReadingResult2.Exception.Source,
+                    $"({name1}).Exception.Source",
+                    $"({name2}).Exception.Source",
+                    localContext);
+
+                if (!string.IsNullOrEmpty(stackPrefix))
+                    AreStringPrefixesEqual(
+                        tokenReadingResult1.Exception.StackTrace.Trim(),
+                        tokenReadingResult2.Exception.StackTrace.Trim(),
+                        $"({name1}).Exception.StackTrace",
+                        $"({name2}).Exception.StackTrace",
+                        stackPrefix.Trim(),
+                        localContext);
+            }
+
+            return context.Merge(localContext);
+        }
+
         public static bool AreJArraysEqual(object object1, object object2, CompareContext context)
         {
             var localContext = new CompareContext(context);
@@ -1531,6 +1602,8 @@ namespace Microsoft.IdentityModel.TestUtils
             return AreStringsEqual(object1, object2, "str1", "str2", context);
         }
 
+        private static readonly Regex timestampRegex = new Regex(@"\d{1,2}:\d{2}:\d{2}", RegexOptions.Compiled);
+
         public static bool AreStringsEqual(object object1, object object2, string name1, string name2, CompareContext context)
         {
             var localContext = new CompareContext(context);
@@ -1554,10 +1627,36 @@ namespace Microsoft.IdentityModel.TestUtils
 
             if (!string.Equals(str1, str2, context.StringComparison))
             {
-                localContext.Diffs.Add($"'{name1}' != '{name2}', StringComparison: '{context.StringComparison}'");
-                localContext.Diffs.Add($"'{str1}'");
-                localContext.Diffs.Add($"!=");
-                localContext.Diffs.Add($"'{str2}'");
+                // Try to find timestamps in the strings which might differ due to skew and compare them with epsilon.
+                MatchCollection match1 = timestampRegex.Matches(str1);
+                MatchCollection match2 = timestampRegex.Matches(str2);
+                int matched = 0;
+                // Check that at least one timestamp matched and both strings matched the same number of timestamps.
+                if (match1.Count != 0 && match1.Count == match2.Count)
+                {
+                    for (int i = 0; i < match1.Count; i++)
+                    {
+                        string time1 = match1[i].Value;
+                        string time2 = match2[i].Value;
+                        // If the matches match string-wise exactly or are parseable DateTimes and are equal within epsilon count as matched.
+                        if (time1 == time2 ||
+                            (DateTime.TryParse(time1, out DateTime datetime1) &&
+                            DateTime.TryParse(time2, out DateTime datetime2) &&
+                            AreDatesEqualWithEpsilon(datetime1, datetime2, 1)))
+                        {
+                            matched++;
+                        }
+                    }
+                }
+
+                // If no fancy timestamp comparison happened or some timestamps didn't match add the diff.
+                if (matched == 0 || matched != match1.Count)
+                {
+                    localContext.Diffs.Add($"'{name1}' != '{name2}', StringComparison: '{context.StringComparison}'");
+                    localContext.Diffs.Add($"'{str1}'");
+                    localContext.Diffs.Add($"!=");
+                    localContext.Diffs.Add($"'{str2}'");
+                }
             }
 
             return context.Merge(localContext);
