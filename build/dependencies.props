@@ -11,6 +11,7 @@
     <SystemMemoryVersion>4.5.5</SystemMemoryVersion>
     <SystemSecurityCryptographyCngVersion>4.5.0</SystemSecurityCryptographyCngVersion>
     <SystemTextJson>8.0.4</SystemTextJson>
+    <MicrosoftBclMemory>9.0.0-rc.1.24431.7</MicrosoftBclMemory>
   </PropertyGroup>
 
 </Project>

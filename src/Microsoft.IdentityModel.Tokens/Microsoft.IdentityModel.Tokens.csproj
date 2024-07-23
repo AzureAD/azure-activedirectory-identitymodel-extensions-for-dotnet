@@ -39,6 +39,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.IdentityModel.Logging\Microsoft.IdentityModel.Logging.csproj" />
+    <PackageReference Include="Microsoft.Bcl.Memory" Version="$(MicrosoftBclMemory)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">

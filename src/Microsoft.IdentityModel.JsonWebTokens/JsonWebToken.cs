@@ -569,15 +569,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             int outputSize = Base64UrlEncoding.ValidateAndGetOutputSize(strSpan, startIndex, length);
 
-            byte[] output = ArrayPool<byte>.Shared.Rent(outputSize);
+            byte[] rented = null;
+
+            const int MaxStackallocThreshold = 256;
+            Span<byte> output = outputSize <= MaxStackallocThreshold
+                ? stackalloc byte[outputSize]
+                : (rented = ArrayPool<byte>.Shared.Rent(outputSize));
+
             try
             {
                 Base64UrlEncoder.Decode(strSpan.Slice(startIndex, length), output);
-                return createHeaderClaimSet ? CreateHeaderClaimSet(output.AsSpan()) : CreatePayloadClaimSet(output.AsSpan());
+                return createHeaderClaimSet ? CreateHeaderClaimSet(output) : CreatePayloadClaimSet(output);
             }
             finally
             {
-                ArrayPool<byte>.Shared.Return(output, true);
+                if (rented is not null)
+                    ArrayPool<byte>.Shared.Return(rented, true);
             }
         }
 

@@ -33,6 +33,9 @@ namespace Microsoft.IdentityModel.Tokens.UrlEncoding.Tests
 
                 string encodingString = Base64UrlEncoding.Encode(theoryData.Bytes);
                 string encodingBytesUsingOffset = Base64UrlEncoding.Encode(theoryData.OffsetBytes, theoryData.Offset, theoryData.Length);
+                byte[] decodedBytes = theoryData.Bytes?.Length == 0 ? Array.Empty<byte>() : Base64UrlEncoding.Decode(encodingString);
+                const string randomPadding = "RANDOMPADDING";
+                byte[] decodedBytes2 = theoryData.Bytes?.Length == 0 ? Array.Empty<byte>() : Base64UrlEncoding.Decode(randomPadding + encodingString + randomPadding, randomPadding.Length, encodingString.Length);
 
                 theoryData.ExpectedException.ProcessNoException(context);
 
@@ -46,7 +49,8 @@ namespace Microsoft.IdentityModel.Tokens.UrlEncoding.Tests
 
                 IdentityComparer.AreStringsEqual(encodingBytesUsingOffset, encodingString, "encodingBytesUsingOffset", "encodingString", context);
                 IdentityComparer.AreStringsEqual(theoryData.ExpectedValue, encodingString, "theoryData.ExpectedValue", "encodingString", context);
-
+                IdentityComparer.AreEqual(theoryData.Bytes, decodedBytes, context);
+                IdentityComparer.AreEqual(theoryData.Bytes, decodedBytes2, context);
             }
             catch (Exception ex)
             {
@@ -326,6 +330,18 @@ namespace Microsoft.IdentityModel.Tokens.UrlEncoding.Tests
 
             actualOutputSize = Base64UrlEncoding.ValidateAndGetOutputSize("abc=".AsSpan(), 0, 4);
             Assert.Equal(2, actualOutputSize);
+        }
+
+        [Fact]
+        public void EncodeDecodeExceptionTests()
+        {
+            Assert.Throws<ArgumentNullException>(static () => Base64UrlEncoding.Decode(null));
+            Assert.Throws<ArgumentNullException>(static () => Base64UrlEncoding.Decode(null, 0, 0));
+            Assert.Throws<ArgumentNullException>(static () => Base64UrlEncoding.Encode(null));
+            Assert.Throws<ArgumentNullException>(static () => Base64UrlEncoding.Encode(null, 0, 0));
+            Assert.Throws<ArgumentNullException>(static () => Base64UrlEncoding.Decode<object>("abc", 0, 0, null));
+            Assert.Throws<ArgumentNullException>(static () => Base64UrlEncoding.Decode<object, object>("abc", 0, 0, null, null));
+            Assert.Throws<ArgumentNullException>(static () => Base64UrlEncoding.Decode<object, object, object, object>(null, 0, 0, null, null, null, null));
         }
     }
 }
