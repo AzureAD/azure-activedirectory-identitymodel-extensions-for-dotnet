@@ -76,6 +76,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 var validToken = EncodedJwts.LiveJwt;
                 var token = new JsonWebToken(validToken);
+#if NET472 || NET6_0_OR_GREATER
                 var ecdsaEncryptingCredentials = new EncryptingCredentials(
                                 new ECDsaSecurityKey(KeyingMaterial.JsonWebKeyP256, true),
                                 SecurityAlgorithms.EcdhEsA256kw,
@@ -93,7 +94,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
                 var jsonWebTokenHandler = new JsonWebTokenHandler();
                 var ecdsaToken = new JsonWebToken(jsonWebTokenHandler.CreateToken(ecdsaTokenDescriptor));
-
+#endif
 
                 return new TheoryData<TokenDecryptingTheoryData>
                 {
