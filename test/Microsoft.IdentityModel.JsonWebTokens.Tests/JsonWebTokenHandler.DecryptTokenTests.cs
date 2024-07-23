@@ -173,6 +173,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwiaWF0IjoiMTQ4OTc3NTYxNyIsIm5iZiI6IjE0ODk3NzU2MTciLCJleHAiOiIyNTM0MDIzMDA3OTkifQ.",
                             new JsonWebToken(ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims)),
                     },
+#if NET472 || NET6_0_OR_GREATER
                     new TokenDecryptingTheoryData
                     {
                         TestId = "Valid_Ecdsa256_FromValidationParameters",
@@ -186,6 +187,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjI1MzQwMjMwMDgwMCwiaWF0IjowLCJuYmYiOjB9.",
                             ecdsaToken),
                     },
+#endif
                     new TokenDecryptingTheoryData
                     {
                         TestId = "Valid_NullKeysFromResolver_DegeneratePath",
