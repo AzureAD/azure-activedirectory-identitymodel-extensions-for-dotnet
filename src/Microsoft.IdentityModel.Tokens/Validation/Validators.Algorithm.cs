@@ -20,7 +20,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="callContext"></param>
     /// <returns>A <see cref="AlgorithmValidationResult"/>that contains the results of validating the algorithm.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
-    internal delegate AlgorithmValidationResult AlgorithmValidationDelegate(
+    internal delegate AlgorithmValidationResult AlgorithmValidatorDelegate(
         string algorithm,
         SecurityKey securityKey,
         SecurityToken securityToken,

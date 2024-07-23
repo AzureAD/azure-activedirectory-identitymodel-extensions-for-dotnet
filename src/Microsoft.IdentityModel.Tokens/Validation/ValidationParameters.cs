@@ -109,7 +109,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// If no delegate is set, the default implementation will be used. The default checks the algorithm
         /// against the <see cref="ValidAlgorithms"/> property, if present. If not, it will succeed.
         /// </remarks>
-        public AlgorithmValidationDelegate AlgorithmValidator { get; set; } = Validators.ValidateAlgorithm;
+        public AlgorithmValidatorDelegate AlgorithmValidator { get; set; } = Validators.ValidateAlgorithm;
 
         /// <summary>
         /// Gets or sets a delegate that will be used to validate the audience.
