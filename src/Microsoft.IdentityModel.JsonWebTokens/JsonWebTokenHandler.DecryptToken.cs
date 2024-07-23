@@ -68,6 +68,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             var keys = GetContentEncryptionKeys(jwtToken, validationParameters, configuration, callContext);
 
+            if (keys == null)
+                return new TokenDecryptingResult(
+                    jwtToken,
+                    ValidationFailureType.TokenDecryptingFailed,
+                    new ExceptionDetail(
+                        new MessageDetail(
+                            TokenLogMessages.IDX10609,
+                            LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken)),
+                        typeof(SecurityTokenException),
+                        new System.Diagnostics.StackFrame()));
+
             return JwtTokenUtilities.DecryptJwtToken(
                 jwtToken,
                 validationParameters,
@@ -128,6 +139,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (jwtToken.Alg.Equals(JwtConstants.DirectKeyUseAlg, StringComparison.Ordinal)
                 || jwtToken.Alg.Equals(SecurityAlgorithms.EcdhEs, StringComparison.Ordinal))
                 return keys;
+
+            if (keys is null)
+                return null; // Cannot iterate over null.
 
             var unwrappedKeys = new List<SecurityKey>();
             // keep track of exceptions thrown, keys that were tried

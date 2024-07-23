@@ -426,7 +426,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the <see cref="IList{SecurityKey}"/> that is to be used for decrypting inbound tokens.
         /// </summary>
-        public IList<SecurityKey> TokenDecryptionKeys { get; }
+        public IList<SecurityKey> TokenDecryptionKeys { get; internal set; }
 
         /// <summary>
         /// Gets or set the <see cref="ITokenReplayCache"/> that store tokens that can be checked to help detect token replay.

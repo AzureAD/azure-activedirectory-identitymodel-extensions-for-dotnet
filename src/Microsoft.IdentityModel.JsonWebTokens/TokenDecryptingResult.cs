@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <exception cref="InvalidOperationException"/> if the result is not valid, and the decrypted token is not available.
         /// <remarks>It is expected that this method will only be called if <see cref="ValidationResult.IsValid"/> returns true.</remarks>
-        public string DecryptionToken()
+        public string DecryptedToken()
         {
             if (_decryptedToken is null)
                 throw new InvalidOperationException("Attempted to retrieve the DecryptedToken from a failed TokenDecrypting result.");
