@@ -119,13 +119,56 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             return jsonWebKey;
         }
 
-        public static string FullyPopulatedJsonWebKeyString = @"{ ""keys"":[" + FullyPopulatedJsonWebKey() + "]}";
+        public static string FullyPopulatedJsonWebKeyString =>
+            @"{ ""alg"":""SHA256"",
+                ""crv"":""CRV"",
+                ""d"":""OOX7PnYlSTE41BSclDj5Gi_sx_SPgEqStjY3doku4TQ"",
+                ""dp"":""ErP3OpudePAY3uGFSoF16Sde69PnOra62jDEZGnPx_v3nPNpA5sr-tNc8bQP074yQl5kzSFRjRlstyW0TpBVMP0ocbD8RsN4EKsgJ1jvaSIEoP87OxduGkim49wFA0Qxf_NyrcYUnz6XSidY3lC_pF4JDJXg5bP_x0MUkQCTtQE"",
+                ""dq"":""YbBsthPt15Pshb8rN8omyfy9D7-m4AGcKzqPERWuX8bORNyhQ5M8JtdXcu8UmTez0j188cNMJgkiN07nYLIzNT3Wg822nhtJaoKVwZWnS2ipoFlgrBgmQiKcGU43lfB5e3qVVYUebYY0zRGBM1Fzetd6Yertl5Ae2g2CakQAcPs"",
+                ""e"":""AQAB"",
+                ""k"":""K"",
+                ""key_ops"":[""keyOps""],
+                ""kid"":""NGTFvdK-fythEuLwjpwAJOM9n-A"",
+                ""kty"":""RSA"",
+                ""n"":""6-FrFkt_TByQ_L5d7or-9PVAowpswxUe3dJeYFTY0Lgq7zKI5OQ5RnSrI0T9yrfnRzE9oOdd4zmVj9txVLI-yySvinAu3yQDQou2Ga42ML_-K4Jrd5clMUPRGMbXdV5Rl9zzB0s2JoZJedua5dwoQw0GkS5Z8YAXBEzULrup06fnB5n6x5r2y1C_8Ebp5cyE4Bjs7W68rUlyIlx1lzYvakxSnhUxSsjx7u_mIdywyGfgiT3tw0FsWvki_KYurAPR1BSMXhCzzZTkMWKE8IaLkhauw5MdxojxyBVuNY-J_elq-HgJ_dZK6g7vMNvXz2_vT-SykIkzwiD9eSI9UWfsjw"",
+                ""oth"":[""oth1"",""oth2""],
+                ""p"":""_avCCyuo7hHlqu9Ec6R47ub_Ul_zNiS-xvkkuYwW-4lNnI66A5zMm_BOQVMnaCkBua1OmOgx7e63-jHFvG5lyrhyYEmkA2CS3kMCrI-dx0fvNMLEXInPxd4np_7GUd1_XzPZEkPxBhqf09kqryHMj_uf7UtPcrJNvFY-GNrzlJk"",
+                ""q"":""7gvYRkpqM-SC883KImmy66eLiUrGE6G6_7Y8BS9oD4HhXcZ4rW6JJKuBzm7FlnsVhVGro9M-QQ_GSLaDoxOPQfHQq62ERt-y_lCzSsMeWHbqOMci_pbtvJknpMv4ifsQXKJ4Lnk_AlGr-5r5JR5rUHgPFzCk9dJt69ff3QhzG2c"",
+                ""qi"":""lbljWyVY-DD_Zuii2ifAz0jrHTMvN-YS9l_zyYyA_Scnalw23fQf5WIcZibxJJll5H0kNTIk8SCxyPzNShKGKjgpyZHsJBKgL3iAgmnwk6k8zrb_lqa0sd1QWSB-Rqiw7AqVqvNUdnIqhm-v3R8tYrxzAqkUsGcFbQYj4M5_F_4"",
+                ""use"":""sig"",
+                ""x"":""luR290c8sXxbOGhNquQ3J3rh763Os4D609cHK-L_5fA"",
+                ""x5c"":[""MIIDPjCCAiqgAwIBAgIQsRiM0jheFZhKk49YD0SK1TAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTQwMTAxMDcwMDAwWhcNMTYwMTAxMDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkSCWg6q9iYxvJE2NIhSyOiKvqoWCO2GFipgH0sTSAs5FalHQosk9ZNTztX0ywS/AHsBeQPqYygfYVJL6/EgzVuwRk5txr9e3n1uml94fLyq/AXbwo9yAduf4dCHTP8CWR1dnDR+Qnz/4PYlWVEuuHHONOw/blbfdMjhY+C/BYM2E3pRxbohBb3x//CfueV7ddz2LYiH3wjz0QS/7kjPiNCsXcNyKQEOTkbHFi3mu0u13SQwNddhcynd/GTgWN8A+6SN1r4hzpjFKFLbZnBt77ACSiYx+IHK4Mp+NaVEi5wQtSsjQtI++XsokxRDqYLwus1I1SihgbV/STTg5enufuwIDAQABo2IwYDBeBgNVHQEEVzBVgBDLebM6bK3BjWGqIBrBNFeNoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQsRiM0jheFZhKk49YD0SK1TAJBgUrDgMCHQUAA4IBAQCJ4JApryF77EKC4zF5bUaBLQHQ1PNtA1uMDbdNVGKCmSf8M65b8h0NwlIjGGGy/unK8P6jWFdm5IlZ0YPTOgzcRZguXDPj7ajyvlVEQ2K2ICvTYiRQqrOhEhZMSSZsTKXFVwNfW6ADDkN3bvVOVbtpty+nBY5UqnI7xbcoHLZ4wYD251uj5+lo13YLnsVrmQ16NCBYq2nQFNPuNJw6t3XUbwBHXpF46aLT1/eGf/7Xx6iy8yPJX4DyrpFTutDz882RWofGEO5t4Cw+zZg70dJ/hH/ODYRMorfXEW+8uKmXMKmX2wyxMKvfiPbTy5LmAU8Jvjs2tLg4rOBcXWLAIarZ""],
+                ""x5t"":""NGTFvdK-fythEuLwjpwAJOM9n-A"",
+                ""x5t#S256"":""x5t256"",
+                ""x5u"":""https://jsonkeyurl"",
+                ""y"":""tUqUwtaVHwc7_CXnuBrCpMQTF5BJKdFnw9_JkSIXWpQ"",
+                ""int"":1,
+                ""long"":1234567890123456,
+                ""string"":""string"",
+                ""false"":false,
+                ""true"":true,
+                ""Object"":{""Object"":""string""},
+                ""Array"":[""value1"",""value2""]
+            }";
+
+        public static string FullyPopulatedJsonWebKeySetString =
+            @"{ ""keys"":[" + FullyPopulatedJsonWebKeyString + @"],
+                ""int"":1,
+                ""long"":1234567890123456,
+                ""string"":""string"",
+                ""?"":false,
+                ""true"":false,
+                ""Object"":{""Object"":""string""},
+                ""Array"":[
+                    ""value1"", ""value2""
+                ]
+            ]}";
 
         public static JsonWebKeySet FullyPopulatedJsonWebKeySet()
         {
             JsonWebKeySet jsonWebKeySet = new JsonWebKeySet();
             jsonWebKeySet.Keys.Add(FullyPopulatedJsonWebKey());
-            jsonWebKeySet.JsonWebKeySetString = FullyPopulatedJsonWebKeyString;
+            jsonWebKeySet.JsonWebKeySetString = FullyPopulatedJsonWebKeySetString;
             SetAdditionalData(jsonWebKeySet.AdditionalData);
 
             return jsonWebKeySet;
