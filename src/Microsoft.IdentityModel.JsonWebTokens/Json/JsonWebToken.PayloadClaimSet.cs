@@ -19,6 +19,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal JsonClaimSet CreatePayloadClaimSet(ReadOnlySpan<byte> byteSpan)
         {
+            if (byteSpan.Length == 0)
+                return new JsonClaimSet([]);
+
             Utf8JsonReader reader = new(byteSpan);
             if (!JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, true))
                 throw LogHelper.LogExceptionMessage(
