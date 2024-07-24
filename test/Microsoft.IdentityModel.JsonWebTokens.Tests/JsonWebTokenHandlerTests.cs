@@ -1469,20 +1469,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public void CreateJWSWithAdditionalHeaderClaims(CreateTokenTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateJWSWithAdditionalHeaderClaims", theoryData);
-
             var jwtToken = new JsonWebTokenHandler().CreateToken(theoryData.TokenDescriptor);
-            var jwtToken6x = new JsonWebTokenHandler6x().CreateToken(theoryData.TokenDescriptor);
-
             JsonWebToken jsonWebToken = new JsonWebToken(jwtToken);
-            JsonWebToken jsonWebToken6x = new JsonWebToken(jwtToken6x);
-
-            if (!IdentityComparer.AreEqual(jsonWebToken.Header, jsonWebToken6x.Header, context))
-            {
-                context.AddDiff("jsonWebToken.Header != jsonWebToken6x.Header");
-                context.AddDiff("********************************************");
-            }
-
-            IdentityComparer.AreEqual(jwtToken6x, theoryData.JwtToken, context);
             TestUtilities.AssertFailIfErrors(context);
         }
 
@@ -1924,14 +1912,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             theoryData.ValidationParameters.ValidateLifetime = false;
             try
             {
-                JsonWebTokenHandler6x jsonWebTokenHandler6x = new JsonWebTokenHandler6x();
                 if (theoryData.TokenDescriptor != null && !theoryData.AudiencesForSecurityTokenDescriptor.IsNullOrEmpty())
                 {
                     foreach (var audience in theoryData.AudiencesForSecurityTokenDescriptor)
                         theoryData.TokenDescriptor.Audiences.Add(audience);
                 }
 
-                string jwtFromSecurityTokenDescriptor6x = jwtFromSecurityTokenDescriptor6x = jsonWebTokenHandler6x.CreateToken(theoryData.TokenDescriptor6x ?? theoryData.TokenDescriptor);
                 string jwtFromSecurityTokenDescriptor = theoryData.JsonWebTokenHandler.CreateToken(theoryData.TokenDescriptor);
                 string jwtPayloadAsString;
 
@@ -1943,7 +1929,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     jwtPayloadAsString = theoryData.JsonWebTokenHandler.CreateToken(theoryData.Payload, theoryData.TokenDescriptor.SigningCredentials);
 
                 var jwsTokenFromSecurityTokenDescriptor = new JsonWebToken(jwtFromSecurityTokenDescriptor);
-                var jwsTokenFromSecurityTokenDescriptor6x = new JsonWebToken(jwtFromSecurityTokenDescriptor6x);
                 var jwsTokenFromString = new JsonWebToken(jwtPayloadAsString);
 
                 var tokenValidationResultFromSecurityTokenDescriptor = theoryData.JsonWebTokenHandler.ValidateTokenAsync(jwtFromSecurityTokenDescriptor, theoryData.ValidationParameters).Result;
@@ -1963,64 +1948,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 }
 
                 context.PropertiesToIgnoreWhenComparing = theoryData.PropertiesToIgnoreWhenComparing;
-
-                if (!IdentityComparer.AreEqual(jwsTokenFromSecurityTokenDescriptor.Header, jwsTokenFromSecurityTokenDescriptor6x.Header, context))
-                {
-                    context.AddDiff("jwsTokenFromSecurityTokenDescriptor.Header != jwsTokenFromSecurityTokenDescriptor6x.Header");
-                    context.AddDiff("******************************************************************************************");
-                    context.AddDiff(" ");
-                }
-
-                bool claimsEqual;
-                if (!IdentityComparer.AreEqual(jwsTokenFromSecurityTokenDescriptor.Claims, jwsTokenFromSecurityTokenDescriptor6x.Claims, context))
-                {
-                    context.AddDiff("jwsTokenFromSecurityTokenDescriptor.Claims != jwsTokenFromSecurityTokenDescriptor6x.Claims");
-                    context.AddDiff("****************************************************************************");
-                    context.AddDiff(" ");
-                    claimsEqual = false;
-                }
-                else
-                {
-                    claimsEqual = true;
-                }
-
-                if (!IdentityComparer.AreEqual(jwsTokenFromSecurityTokenDescriptor.Header, jwsTokenFromSecurityTokenDescriptor6x.Header))
-                {
-                    context.AddDiff("jwsTokenFromSecurityTokenDescriptor.Header != jwsTokenFromSecurityTokenDescriptor6x.Header");
-                    context.AddDiff("****************************************************************************");
-                    context.AddDiff(" ");
-                }
-
-                // if the claims are the same some properties could be different because of ordering
                 CompareContext localContext = new CompareContext(context);
-                if (claimsEqual)
-                    localContext.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
-                    {
-                        {typeof(JsonWebToken), new List<string> {"EncodedHeader", "EncodedToken", "EncodedPayload", "EncodedSignature"}},
-                    };
 
-                if (!IdentityComparer.AreEqual(jwsTokenFromSecurityTokenDescriptor, jwsTokenFromSecurityTokenDescriptor6x, localContext))
+                localContext.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
                 {
-                    context.AddDiff("jwsTokenFromSecurityTokenDescriptor != jwsTokenFromSecurityTokenDescriptor6x");
-                    context.AddDiff("****************************************************************************");
-                    context.AddDiff(" ");
-                }
+                    {typeof(JsonWebToken), new List<string> {"EncodedHeader", "EncodedToken", "EncodedPayload", "EncodedSignature"}},
+                };
 
-                context.Merge(localContext);
-
-                if (!IdentityComparer.AreEqual(jwsTokenFromSecurityTokenDescriptor.Claims, jwsTokenFromString.Claims, context))
-                {
-                    context.AddDiff("jwsTokenFromSecurityTokenDescriptor.Claims != jwsTokenFromString.Claims");
-                    context.AddDiff("****************************************************************************");
-                    context.AddDiff(" ");
-                    claimsEqual = false;
-                }
-                else
-                {
-                    claimsEqual = true;
-                }
-
-                localContext.Diffs.Clear();
                 // if the claims are the same some properties could be different because of ordering
                 if (!IdentityComparer.AreEqual(jwsTokenFromSecurityTokenDescriptor, jwsTokenFromString, localContext))
                 {
@@ -2889,7 +2823,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var context = new CompareContext();
 
             var tokenHandler7 = new JsonWebTokenHandler();
-            var tokenHandler6 = new JsonWebTokenHandler6x();
             var payloadWithoutTimeValues = new JObject()
             {
                 { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
@@ -2900,15 +2833,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             var jwtString7 = tokenHandler7.CreateToken(payloadWithoutTimeValues, KeyingMaterial.JsonWebKeyRsa256SigningCredentials);
             var jwt7 = new JsonWebToken(jwtString7);
-
-            var jwtString6 = tokenHandler6.CreateToken(payloadWithoutTimeValues, KeyingMaterial.JsonWebKeyRsa256SigningCredentials);
-            var jwt6 = new JsonWebToken(jwtString6);
-
-            if (!IdentityComparer.AreEqual(jwt7, jwt6, context))
-            {
-                context.AddDiff("jwt7 != jwt6");
-                context.AddDiff("********************************************");
-            }
 
             // DateTime.MinValue is returned if the value of a DateTime claim is not found in the payload
             if (DateTime.MinValue.Equals(jwt7.IssuedAt))
