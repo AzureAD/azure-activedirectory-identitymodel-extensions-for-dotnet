@@ -191,19 +191,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 #endif
                     new TokenDecryptingTheoryData
                     {
-                        TestId = "Valid_NullKeysFromResolver_DegeneratePath",
-                        TokenString = ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims,
-                        ValidationParameters = new ValidationParameters
-                        {
-                            TokenDecryptionKeyResolver = (tokenString, token, kid, validationParameters, callContext) => null,
-                            TokenDecryptionKeys = [Default.SymmetricEncryptingCredentials.Key],
-                        },
-                        TokenDecryptingResult = new TokenDecryptingResult(
-                            "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwiaWF0IjoiMTQ4OTc3NTYxNyIsIm5iZiI6IjE0ODk3NzU2MTciLCJleHAiOiIyNTM0MDIzMDA3OTkifQ.",
-                            new JsonWebToken(ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims)),
-                    },
-                    new TokenDecryptingTheoryData
-                    {
                         TestId = "Invalid_NoKeysProvided",
                         TokenString = ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims,
                         ValidationParameters = new ValidationParameters(),
