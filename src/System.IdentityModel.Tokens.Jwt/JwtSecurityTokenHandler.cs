@@ -1865,7 +1865,7 @@ namespace System.IdentityModel.Tokens.Jwt
                         // is treated as opt-in. When the library is at the point where it is able to make breaking changes
                         // (such as the next major version update) we should consider whether or not this app-compat switch
                         // needs to be maintained.
-                        if (AppContext.TryGetSwitch(AppCompatSwitches.UseRfcDefinitionOfEpkAndKid, out bool isEnabled) && isEnabled)
+                        if (AppContextSwitches.UseRfcDefinitionOfEpkAndKid)
                         {
                             //// on decryption we get the public key from the EPK value see: https://datatracker.ietf.org/doc/html/rfc7518#appendix-C
                             string epk = jwtToken.Header.GetStandardClaim(JwtHeaderParameterNames.Epk);
