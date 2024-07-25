@@ -94,17 +94,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     },
                     new TokenTypeTheoryData
                     {
-                        TestId = "Valid_ValidationParametersTypeValidTypesAreNull",
-                        Type = "JWT",
-                        SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Typ, "JWT"),
-                        ValidationParameters = new ValidationParameters
-                        {
-                            ValidTypes = null
-                        },
-                        TokenTypeValidationResult = new TokenTypeValidationResult("JWT")
-                    },
-                    new TokenTypeTheoryData
-                    {
                         TestId = "Invalid_TokenTypeIsEmpty",
                         ExpectedException = ExpectedException.SecurityTokenInvalidTypeException("IDX10256:"),
                         Type = String.Empty,
