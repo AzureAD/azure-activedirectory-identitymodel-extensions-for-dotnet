@@ -25,9 +25,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         internal const string UseClaimsIdentityTypeSwitch = "Microsoft.IdentityModel.Tokens.UseClaimsIdentityType";
 
-        private static bool? _useClaimsIdentity;
+        private static bool? _useClaimsIdentityType;
 
-        internal static bool UseClaimsIdentityType => _useClaimsIdentity ??= (AppContext.TryGetSwitch(UseClaimsIdentityTypeSwitch, out bool useClaimsIdentityType) && useClaimsIdentityType);
+        internal static bool UseClaimsIdentityType => _useClaimsIdentityType ??= (AppContext.TryGetSwitch(UseClaimsIdentityTypeSwitch, out bool useClaimsIdentityType) && useClaimsIdentityType);
 
         /// <summary>
         /// When validating the issuer signing key, specifies whether to fail if the 'tid' claim is missing.
@@ -71,7 +71,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         internal static void ResetAllSwitches()
         {
-            _useClaimsIdentity = null;
+            _useClaimsIdentityType = null;
             AppContext.SetSwitch(UseClaimsIdentityTypeSwitch, false);
 
             _doNotFailOnMissingTid = null;
@@ -79,6 +79,9 @@ namespace Microsoft.IdentityModel.Tokens
 
             _tryAllStringClaimsAsDateTime = null;
             AppContext.SetSwitch(TryAllStringClaimsAsDateTimeSwitch, false);
+
+            _useRfcDefinitionOfEpkAndKid = null;
+            AppContext.SetSwitch(UseRfcDefinitionOfEpkAndKidSwitch, false);
         }
     }
 }
