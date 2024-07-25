@@ -1085,8 +1085,8 @@ namespace Microsoft.IdentityModel.TestUtils
                 return context.Merge(localContext);
 
             return AreTokenDecryptingResultsEqual(
-                object1 as TokenDecryptingResult,
-                object2 as TokenDecryptingResult,
+                object1 as TokenDecryptionResult,
+                object2 as TokenDecryptionResult,
                 "TokenDecryptingResult1",
                 "TokenDecryptingResult2",
                 null,
@@ -1094,8 +1094,8 @@ namespace Microsoft.IdentityModel.TestUtils
         }
 
         internal static bool AreTokenDecryptingResultsEqual(
-            TokenDecryptingResult tokenDecryptingResult1,
-            TokenDecryptingResult tokenDecryptingResult2,
+            TokenDecryptionResult tokenDecryptingResult1,
+            TokenDecryptionResult tokenDecryptingResult2,
             string name1,
             string name2,
             string stackPrefix,
@@ -1108,13 +1108,13 @@ namespace Microsoft.IdentityModel.TestUtils
             if (tokenDecryptingResult1.IsValid != tokenDecryptingResult2.IsValid)
                 localContext.Diffs.Add($"TokenDecryptingResult1.IsValid: {tokenDecryptingResult1.IsValid} != TokenDecryptingResult2.IsValid: {tokenDecryptingResult2.IsValid}");
 
-            if (tokenDecryptingResult1.JWT == null || tokenDecryptingResult2.JWT == null)
+            if (tokenDecryptingResult1.SecurityToken == null || tokenDecryptingResult2.SecurityToken == null)
             {
-                if (tokenDecryptingResult1.JWT != tokenDecryptingResult2.JWT)
-                    localContext.Diffs.Add($"TokenDecryptingResult1.JWT: '{tokenDecryptingResult1.JWT}' != TokenDecryptingResult2.JWT: '{tokenDecryptingResult2.JWT}'");
+                if (tokenDecryptingResult1.SecurityToken != tokenDecryptingResult2.SecurityToken)
+                    localContext.Diffs.Add($"TokenDecryptingResult1.SecurityToken: '{tokenDecryptingResult1.SecurityToken}' != TokenDecryptingResult2.SecurityToken: '{tokenDecryptingResult2.SecurityToken}'");
             }
-            else if (tokenDecryptingResult1.JWT.ToString() != tokenDecryptingResult2.JWT.ToString())
-                localContext.Diffs.Add($"TokenDecryptingResult1.JWT: '{tokenDecryptingResult1.JWT}' != TokenDecryptingResult2.JWT: '{tokenDecryptingResult2.JWT}'");
+            else if (tokenDecryptingResult1.SecurityToken.ToString() != tokenDecryptingResult2.SecurityToken.ToString())
+                localContext.Diffs.Add($"TokenDecryptingResult1.SecurityToken: '{tokenDecryptingResult1.SecurityToken}' != TokenDecryptingResult2.SecurityToken: '{tokenDecryptingResult2.SecurityToken}'");
 
             // Only compare the decrypted token if both results are valid.
             if (tokenDecryptingResult1.IsValid && (tokenDecryptingResult1.DecryptedToken().ToString() != tokenDecryptingResult2.DecryptedToken().ToString()))

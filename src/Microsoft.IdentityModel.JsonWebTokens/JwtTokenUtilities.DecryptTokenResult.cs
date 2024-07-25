@@ -18,14 +18,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="decryptionParameters">The decryption parameters container.</param>
         /// <param name="callContext">The call context used for logging.</param>
         /// <returns>The decrypted, and if the 'zip' claim is set, decompressed string representation of the token.</returns>
-        internal static TokenDecryptingResult DecryptJwtToken(
+        internal static TokenDecryptionResult DecryptJwtToken(
             JsonWebToken jsonWebToken,
             ValidationParameters validationParameters,
             JwtTokenDecryptionParameters decryptionParameters,
             CallContext callContext)
         {
             if (validationParameters == null)
-                return new TokenDecryptingResult(
+                return new TokenDecryptionResult(
                     jsonWebToken,
                     ValidationFailureType.NullArgument,
                     new ExceptionDetail(
@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         new System.Diagnostics.StackFrame()));
 
             if (decryptionParameters == null)
-                return new TokenDecryptingResult(
+                return new TokenDecryptionResult(
                     jsonWebToken,
                     ValidationFailureType.NullArgument,
                     new ExceptionDetail(
@@ -116,9 +116,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 callContext);
 
             if (exceptionDetail != null)
-                return new TokenDecryptingResult(
+                return new TokenDecryptionResult(
                     jsonWebToken,
-                    ValidationFailureType.TokenDecryptingFailed,
+                    ValidationFailureType.TokenDecryptionFailed,
                     exceptionDetail);
 
             try
@@ -129,15 +129,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 else
                     decodedString = decryptionParameters.DecompressionFunction(decryptedTokenBytes, zipAlgorithm, decryptionParameters.MaximumDeflateSize);
 
-                return new TokenDecryptingResult(decodedString, jsonWebToken);
+                return new TokenDecryptionResult(decodedString, jsonWebToken);
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                return new TokenDecryptingResult(
+                return new TokenDecryptionResult(
                     jsonWebToken,
-                    ValidationFailureType.TokenDecryptingFailed,
+                    ValidationFailureType.TokenDecryptionFailed,
                     new ExceptionDetail(
                         new MessageDetail(
                             TokenLogMessages.IDX10679,
