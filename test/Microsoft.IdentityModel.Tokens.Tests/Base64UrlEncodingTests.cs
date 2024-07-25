@@ -305,7 +305,7 @@ namespace Microsoft.IdentityModel.Tokens.UrlEncoding.Tests
 
             public int OffsetLength { get; set; }
 
-            public bool EncodingOnly { get; set; } = false;
+            public bool EncodingOnly { get; set; }
         }
 
         [Fact]

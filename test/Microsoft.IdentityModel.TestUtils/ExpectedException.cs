@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 PropertiesExpected = propertiesExpected;
         }
 
-        public static bool DefaultVerbose { get; set; } = false;
+        public static bool DefaultVerbose { get; set; }
 
         public static ExpectedException ArgumentException(string substringExpected = null, Type inner = null)
         {
@@ -320,7 +320,7 @@ namespace Microsoft.IdentityModel.TestUtils
             return new ExpectedException(typeof(JsonException), substringExpected, innerTypeExpected);
         }
 
-        public bool IgnoreExceptionType { get; set; } = false;
+        public bool IgnoreExceptionType { get; set; }
 
         public bool IgnoreInnerException { get; set; }
 
@@ -342,6 +342,6 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public Type TypeExpected { get; set; }
 
-        public bool Verbose { get; set; } = false;
+        public bool Verbose { get; set; }
     }
 }

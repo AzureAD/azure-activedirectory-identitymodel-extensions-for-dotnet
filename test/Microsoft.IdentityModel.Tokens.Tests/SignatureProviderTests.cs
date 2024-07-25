@@ -1458,7 +1458,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public string VerifySignatureProviderType { get; set; }
 
-        public bool WillCreateSignatures { get; set; } = false;
+        public bool WillCreateSignatures { get; set; }
     }
 
     public class SignatureProviderTheoryData : CryptoProviderFactoryTheoryData
@@ -1514,7 +1514,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public string HashAlgorithmString { get; set; }
 
-        public int Offset { get; set; } = 0;
+        public int Offset { get; set; }
 
         public SecurityKey SecurityKey { get; set; }
 

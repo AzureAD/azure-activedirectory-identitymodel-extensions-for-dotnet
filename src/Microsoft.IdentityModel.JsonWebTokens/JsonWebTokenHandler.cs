@@ -31,7 +31,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Default value for the flag that determines whether or not the InboundClaimTypeMap is used.
         /// </summary>
-        public static bool DefaultMapInboundClaims = false;
+        public static bool DefaultMapInboundClaims;
 
         /// <summary>
         /// Gets the Base64Url encoded string representation of the following JWT header:

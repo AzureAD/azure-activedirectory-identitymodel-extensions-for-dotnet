@@ -633,7 +633,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public InMemoryCryptoProviderCachePublic() : base(new CryptoProviderCacheOptions(), TaskCreationOptions.None, 50)
         {}
 
-        public bool DisposeCalled { get; set; } = false;
+        public bool DisposeCalled { get; set; }
 
         public string GetCacheKeyPublic(SignatureProvider signatureProvider)
         {

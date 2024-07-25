@@ -694,7 +694,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             public string MetadataAddress { get; set; }
 
-            public bool PresetCurrentConfiguration { get; set; } = false;
+            public bool PresetCurrentConfiguration { get; set; }
 
             public TimeSpan RefreshInterval { get; set; }
 

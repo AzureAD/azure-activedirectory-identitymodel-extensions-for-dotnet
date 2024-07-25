@@ -444,9 +444,9 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
             public OpenIdConnectConfiguration OpenIdConnectConfiguration { get; set; }
 
-            public bool SetDelegateUsingConfig { get; set; } = false;
+            public bool SetDelegateUsingConfig { get; set; }
 
-            public bool SetDelegateWithoutConfig { get; set; } = false;
+            public bool SetDelegateWithoutConfig { get; set; }
 
             public Action SetupAction { get; set; }
         }

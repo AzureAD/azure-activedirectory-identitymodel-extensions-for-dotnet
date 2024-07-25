@@ -663,7 +663,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 return $"TestId: {TestId}, {ExpectedException}";
             }
 
-            public bool UseNullWriter { get; set; } = false;
+            public bool UseNullWriter { get; set; }
         }
 
         private class WsFederationMetadataSerializerPublic : WsFederationMetadataSerializer
