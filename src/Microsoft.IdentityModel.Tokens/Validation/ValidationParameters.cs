@@ -20,6 +20,7 @@ namespace Microsoft.IdentityModel.Tokens
         private string _nameClaimType = ClaimsIdentity.DefaultNameClaimType;
         private string _roleClaimType = ClaimsIdentity.DefaultRoleClaimType;
         private Dictionary<string, object> _instancePropertyBag;
+        private AlgorithmValidatorDelegate _algorithmValidator = Validators.ValidateAlgorithm;
 
         private IssuerValidationDelegateAsync _issuerValidationDelegate = Validators.ValidateIssuerAsync;
 
@@ -109,7 +110,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// If no delegate is set, the default implementation will be used. The default checks the algorithm
         /// against the <see cref="ValidAlgorithms"/> property, if present. If not, it will succeed.
         /// </remarks>
-        public AlgorithmValidatorDelegate AlgorithmValidator { get; set; } = Validators.ValidateAlgorithm;
+        public AlgorithmValidatorDelegate AlgorithmValidator {
+            get { return _algorithmValidator; }
+            set { _algorithmValidator = value ?? throw new ArgumentNullException(nameof(value), "AlgorithmValidator cannot be null."); }
+        }
 
         /// <summary>
         /// Gets or sets a delegate that will be used to validate the audience.
