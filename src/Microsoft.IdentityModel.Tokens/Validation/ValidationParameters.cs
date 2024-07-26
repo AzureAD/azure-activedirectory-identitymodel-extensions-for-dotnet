@@ -556,10 +556,15 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>The <see cref="IList{String}"/> that contains valid token types that will be used to check against the token's 'typ' claim.</returns>
         public IList<string> ValidTypes
         {
-            get => _validTokenTypes ?? Interlocked.CompareExchange(ref _validTokenTypes, new List<string>(), null);
-            set => _validTokenTypes = value ?? throw new ArgumentNullException(nameof(value));
+            get
+            {
+                return _validTokenTypes;
+            }
+            set
+            {
+                _validTokenTypes = value ?? throw new ArgumentNullException(nameof(value));
+            }
         }
-
 
         public bool ValidateActor { get; set; }
     }
