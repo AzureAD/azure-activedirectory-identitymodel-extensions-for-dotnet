@@ -9,7 +9,7 @@ on:
       - '/src/Microsoft.IdentityModel.ManagedKeyVaultSecurityKey/**'      
     branches: [ "dev", "dev6x", "dev7x"]
   pull_request:
-   paths-ignore:
+    paths-ignore:
       - 'test/Microsoft.IdentityModel.KeyVaultExtensions.Tests/**'
       - 'test/Microsoft.IdentityModel.ManagedKeyVaultSecurityKey.Tests/**'
       - '/src/Microsoft.IdentityModel.KeyVaultExtensions/**'
