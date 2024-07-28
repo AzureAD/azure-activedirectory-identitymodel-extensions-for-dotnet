@@ -51,10 +51,9 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         TestId = "Valid_ReplayCache_Null",
                         ExpirationTime = oneHourAgo,
                         SecurityToken = "token",
-                        ValidationParameters = new TokenValidationParameters
+                        ValidationParameters = new ValidationParameters
                         {
-                            TokenReplayCache = null,
-                            ValidateTokenReplay = true
+                            TokenReplayCache = null
                         },
                         ReplayValidationResult = new ReplayValidationResult(oneHourAgo)
                     },
@@ -63,38 +62,9 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         TestId = "Valid_ReplayCache_NotNull",
                         ExpirationTime = oneHourFromNow,
                         SecurityToken = "token",
-                        ValidationParameters = new TokenValidationParameters
+                        ValidationParameters = new ValidationParameters
                         {
                             TokenReplayCache = new TokenReplayCache { OnAddReturnValue = true, OnFindReturnValue = false },
-                            ValidateTokenReplay = true
-                        },
-                        ReplayValidationResult = new ReplayValidationResult(oneHourFromNow)
-                    },
-                    new TokenReplayTheoryData
-                    {
-                        TestId = "Valid_ValidateTokenReplay_False",
-                        ExpirationTime = oneHourFromNow,
-                        SecurityToken = "token",
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            TokenReplayCache = new TokenReplayCache
-                            {
-                                OnAddReturnValue = true, 
-                                OnFindReturnValue = true // token already exists in cache, if ValidateTokenReplay were true, this would fail.
-                            },
-                            ValidateTokenReplay = false
-                        },
-                        ReplayValidationResult = new ReplayValidationResult(oneHourFromNow)
-                    },
-                    new TokenReplayTheoryData
-                    {
-                        TestId = "Valid_DelegateIsSet_ReturnsTrue",
-                        ExpirationTime = oneHourFromNow,
-                        SecurityToken = "token",
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            TokenReplayValidator = (token, expirationTime, validationParameters) => true,
-                            ValidateTokenReplay = true
                         },
                         ReplayValidationResult = new ReplayValidationResult(oneHourFromNow)
                     },
@@ -103,10 +73,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         TestId = "Invalid_SecurityToken_Null",
                         ExpirationTime = now,
                         SecurityToken = null,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ValidateTokenReplay = true
-                        },
+                        ValidationParameters = new ValidationParameters(),
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                         ReplayValidationResult = new ReplayValidationResult(
                             now,
@@ -124,10 +91,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         TestId = "Invalid_SecurityToken_Empty",
                         ExpirationTime = now,
                         SecurityToken = string.Empty,
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            ValidateTokenReplay = true
-                        },
+                        ValidationParameters = new ValidationParameters(),
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                         ReplayValidationResult = new ReplayValidationResult(
                             now,
@@ -160,61 +124,16 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     },
                     new TokenReplayTheoryData
                     {
-                        TestId = "Invalid_DelegateIsSet_ReturnsFalse",
-                        ExpirationTime = now,
-                        SecurityToken = "token",
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            TokenReplayValidator = (token, expirationTime, validationParameters) => false,
-                            ValidateTokenReplay = true
-                        },
-                        ExpectedException = ExpectedException.SecurityTokenReplayDetected("IDX10228"),
-                        ReplayValidationResult = new ReplayValidationResult(
-                            now,
-                            ValidationFailureType.TokenReplayValidationFailed,
-                            new ExceptionDetail(
-                                new MessageDetail(
-                                    LogMessages.IDX10228,
-                                    LogHelper.MarkAsUnsafeSecurityArtifact("token", t => t.ToString())),
-                                typeof(SecurityTokenReplayDetectedException),
-                                new StackFrame(),
-                                null))
-                    },
-                    new TokenReplayTheoryData
-                    {
-                        TestId = "Invalid_DelegateIsSet_ThrowsException",
-                        ExpirationTime = now,
-                        SecurityToken = "token",
-                        ValidationParameters = new TokenValidationParameters
-                        {
-                            TokenReplayValidator = (token, expirationTime, validationParameters) => throw new SecurityTokenReplayDetectedException(),
-                            ValidateTokenReplay = true
-                        },
-                        ExpectedException = ExpectedException.SecurityTokenReplayDetected("IDX10228:", innerTypeExpected: typeof(SecurityTokenReplayDetectedException)),
-                        ReplayValidationResult = new ReplayValidationResult(
-                            now,
-                            ValidationFailureType.TokenReplayValidationFailed,
-                            new ExceptionDetail(
-                                new MessageDetail(
-                                    LogMessages.IDX10228,
-                                    LogHelper.MarkAsUnsafeSecurityArtifact("token", t => t.ToString())),
-                                typeof(SecurityTokenReplayDetectedException),
-                                new StackFrame(),
-                                new SecurityTokenReplayDetectedException()))
-                    },
-                    new TokenReplayTheoryData
-                    {
                         TestId = "Invalid_ReplayCacheIsPresent_ExpirationTimeIsNull",
                         ExpirationTime = null,
                         SecurityToken = "token",
-                        ValidationParameters = new TokenValidationParameters
+                        ValidationParameters = new ValidationParameters
                         {
                             TokenReplayCache = new TokenReplayCache
                             {
                                 OnAddReturnValue = true,
                                 OnFindReturnValue = false
-                            },
-                            ValidateTokenReplay = true
+                            }
                         },
                         ExpectedException = ExpectedException.SecurityTokenReplayDetected("IDX10227:"),
                         ReplayValidationResult = new ReplayValidationResult(
@@ -233,14 +152,13 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         TestId = "Invalid_ReplayCacheIsPresent_TokenIsAlreadyInCache",
                         ExpirationTime = oneHourFromNow,
                         SecurityToken= "token",
-                        ValidationParameters = new TokenValidationParameters
+                        ValidationParameters = new ValidationParameters
                         {
                             TokenReplayCache = new TokenReplayCache
                             {
                                 OnAddReturnValue = true,
                                 OnFindReturnValue = true
                             },
-                            ValidateTokenReplay = true
                         },
                         ExpectedException = ExpectedException.SecurityTokenReplayDetected("IDX10228:"),
                         ReplayValidationResult = new ReplayValidationResult(
@@ -259,14 +177,13 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         TestId = "Invalid_ReplayCacheIsPresent_AddingTokenToCacheFails",
                         ExpirationTime = oneHourFromNow,
                         SecurityToken= "token",
-                        ValidationParameters = new TokenValidationParameters
+                        ValidationParameters = new ValidationParameters
                         {
                             TokenReplayCache = new TokenReplayCache
                             {
                                 OnAddReturnValue = false,
                                 OnFindReturnValue = false
-                            },
-                            ValidateTokenReplay = true
+                            }
                         },
                         ExpectedException = ExpectedException.SecurityTokenReplayAddFailed("IDX10229:"),
                         ReplayValidationResult = new ReplayValidationResult(
@@ -291,7 +208,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
         public string SecurityToken { get; set; }
 
-        public TokenValidationParameters ValidationParameters { get; set; }
+        internal ValidationParameters ValidationParameters { get; set; }
 
         internal ReplayValidationResult ReplayValidationResult { get; set; }
     }

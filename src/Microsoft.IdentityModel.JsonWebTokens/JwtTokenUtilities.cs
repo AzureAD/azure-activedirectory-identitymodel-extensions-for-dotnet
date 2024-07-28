@@ -546,7 +546,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (!(obj is string token))
                 return obj.GetType().ToString();
 
-            int lastDot = token.LastIndexOf(".");
+            int lastDot = token.LastIndexOf('.');
 
             // no dots, not a JWT, we do not know how to sanitize so we return UnrecognizedEncodedToken
             if (lastDot == -1)

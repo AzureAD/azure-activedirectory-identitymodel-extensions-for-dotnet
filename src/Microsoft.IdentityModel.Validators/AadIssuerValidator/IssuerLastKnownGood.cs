@@ -18,7 +18,7 @@ namespace Microsoft.IdentityModel.Validators
     {
         private string _issuer;
         private TimeSpan _lastKnownGoodLifetime;
-        private DateTime? _lastKnownGoodConfigFirstUse = null;
+        private DateTime? _lastKnownGoodConfigFirstUse;
 
         /// <summary>
         /// Gets or sets the issuer value.

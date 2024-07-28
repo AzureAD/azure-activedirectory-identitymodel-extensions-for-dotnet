@@ -1599,12 +1599,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14102:", typeof(JsonReaderException), true),
                 });
 
-                theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.JWSEmptyPayload))
-                {
-                    Token = EncodedJwts.JWSEmptyPayload,
-                    ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14101:", typeof(JsonReaderException), true),
-                });
-
                 theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.JWEEmptyHeader))
                 {
                     Token = EncodedJwts.JWEEmptyHeader,

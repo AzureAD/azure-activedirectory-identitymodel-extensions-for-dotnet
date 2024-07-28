@@ -14,7 +14,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     internal abstract class ValidationResult
     {
-        private bool _isValid = false;
+        private bool _isValid;
 
         /// <summary>
         /// Creates an instance of <see cref="ValidationResult"/>

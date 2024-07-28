@@ -12,7 +12,7 @@ namespace Microsoft.IdentityModel.Tokens
     public class RsaKeyWrapProvider : KeyWrapProvider
     {
         private Lazy<AsymmetricAdapter> _asymmetricAdapter;
-        private bool _disposed = false;
+        private bool _disposed;
         private bool _willUnwrap;
 
         /// <summary>

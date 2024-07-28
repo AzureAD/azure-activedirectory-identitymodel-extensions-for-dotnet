@@ -12,7 +12,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         private static readonly SafeAlgorithmHandle s_aesGcm = AesBCryptModes.OpenAesAlgorithm(Cng.BCRYPT_CHAIN_MODE_GCM).Value;
         private SafeKeyHandle _keyHandle;
-        private bool _disposed = false;
+        private bool _disposed;
 
         public AesGcm(byte[] key)
         {
