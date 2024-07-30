@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -17,6 +18,10 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
         public void Serialize(JsonWebKeySetTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.Serialize", theoryData);
+            context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+            {
+                { typeof(JsonWebKeySet), new List<string> { "JsonWebKeySetString" } },
+            };
 
             try
             {
@@ -60,6 +65,10 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
         public void Deserialize(JsonWebKeySetTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.Deserialize", theoryData);
+            context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+            {
+                { typeof(JsonWebKeySet), new List<string> { "JsonWebKeySetString" } },
+            };
 
             try
             {
