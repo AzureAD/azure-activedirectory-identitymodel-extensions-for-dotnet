@@ -36,26 +36,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             CallContext? callContext)
         {
             if (jwtToken == null)
-                return new TokenDecryptionResult(
-                    jwtToken,
-                    ValidationFailureType.TokenDecryptionFailed,
-                    new ExceptionDetail(
-                        new MessageDetail(
-                            TokenLogMessages.IDX10000,
-                            LogHelper.MarkAsNonPII(nameof(jwtToken))),
-                        typeof(ArgumentNullException),
-                        new System.Diagnostics.StackFrame()));
+                return TokenDecryptionResult.NullParameterFailure(jwtToken, nameof(jwtToken));
 
             if (validationParameters == null)
-                return new TokenDecryptionResult(
-                    jwtToken,
-                    ValidationFailureType.TokenDecryptionFailed,
-                    new ExceptionDetail(
-                        new MessageDetail(
-                            TokenLogMessages.IDX10000,
-                            LogHelper.MarkAsNonPII(nameof(validationParameters))),
-                        typeof(ArgumentNullException),
-                        new System.Diagnostics.StackFrame()));
+                return TokenDecryptionResult.NullParameterFailure(jwtToken, nameof(validationParameters));
 
             if (string.IsNullOrEmpty(jwtToken.Enc))
                 return new TokenDecryptionResult(

@@ -42,6 +42,17 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Creates an instance of <see cref="TokenDecryptionResult"/> representing a failure due to a null parameter.
+        /// </summary>
+        /// <param name="securityToken">The securityToken that could not be decrypted.</param>
+        /// <param name="parameterName">The name of the null parameter.</param>
+        internal static TokenDecryptionResult NullParameterFailure(SecurityToken? securityToken, string parameterName) =>
+            new TokenDecryptionResult(
+                securityToken,
+                ValidationFailureType.TokenDecryptionFailed,
+                ExceptionDetail.NullParameter(parameterName));
+
+        /// <summary>
         /// Gets the decoded contents of the SecurityToken.
         /// </summary>
         /// <exception cref="InvalidOperationException"/> if the result is not valid, and the decrypted token is not available.

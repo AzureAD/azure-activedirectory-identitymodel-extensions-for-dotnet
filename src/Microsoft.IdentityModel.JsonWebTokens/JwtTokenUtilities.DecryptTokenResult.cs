@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Logging;
@@ -107,19 +110,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     (keysAttempted ??= new StringBuilder()).AppendLine(key.ToString());
             }
 
-            ExceptionDetail exceptionDetail = ValidateDecryption(
-                decryptionParameters,
-                decryptionSucceeded,
-                algorithmNotSupportedByCryptoProvider,
-                exceptionStrings,
-                keysAttempted,
-                callContext);
-
-            if (exceptionDetail != null)
+            if (!decryptionSucceeded)
                 return new TokenDecryptionResult(
                     jsonWebToken,
                     ValidationFailureType.TokenDecryptionFailed,
-                    exceptionDetail);
+                    GetDecryptionExceptionDetail(
+                        decryptionParameters,
+                        algorithmNotSupportedByCryptoProvider,
+                        exceptionStrings,
+                        keysAttempted,
+                        callContext));
 
             try
             {

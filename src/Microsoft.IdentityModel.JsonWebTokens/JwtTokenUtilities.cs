@@ -330,7 +330,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     (keysAttempted ??= new StringBuilder()).AppendLine(key.ToString());
             }
 
-            ValidateDecryption(decryptionParameters, decryptionSucceeded, algorithmNotSupportedByCryptoProvider, exceptionStrings, keysAttempted);
+            if (!decryptionSucceeded)
+                throw GetDecryptionExceptionDetail(
+                    decryptionParameters,
+                    algorithmNotSupportedByCryptoProvider,
+                    exceptionStrings,
+                    keysAttempted,
+                    null).GetException();
+
             try
             {
                 if (string.IsNullOrEmpty(zipAlgorithm))
@@ -344,27 +351,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
 
-        private static void ValidateDecryption(JwtTokenDecryptionParameters decryptionParameters,
-            bool decryptionSucceeded,
-            bool algorithmNotSupportedByCryptoProvider,
-            StringBuilder exceptionStrings,
-            StringBuilder keysAttempted)
-        {
-            ExceptionDetail exceptionDetail = ValidateDecryption(
-                decryptionParameters,
-                decryptionSucceeded,
-                algorithmNotSupportedByCryptoProvider,
-                exceptionStrings,
-                keysAttempted,
-                null);
-
-            if (exceptionDetail is not null)
-                throw LogHelper.LogExceptionMessage(exceptionDetail.GetException());
-        }
-
-        private static ExceptionDetail ValidateDecryption(
+        private static ExceptionDetail GetDecryptionExceptionDetail(
             JwtTokenDecryptionParameters decryptionParameters,
-            bool decryptionSucceeded,
             bool algorithmNotSupportedByCryptoProvider,
             StringBuilder exceptionStrings,
             StringBuilder keysAttempted,
@@ -372,9 +360,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             CallContext callContext)
 #pragma warning restore CA1801 // Review unused parameters
         {
-            ExceptionDetail exceptionDetail = null;
-
-            if (!decryptionSucceeded && keysAttempted is not null)
+            if (keysAttempted is not null)
                 return new ExceptionDetail(
                     new MessageDetail(
                         TokenLogMessages.IDX10603,
@@ -384,7 +370,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     typeof(SecurityTokenDecryptionFailedException),
                     new StackFrame(true),
                     null);
-            else if (!decryptionSucceeded && algorithmNotSupportedByCryptoProvider)
+            else if (algorithmNotSupportedByCryptoProvider)
                 return new ExceptionDetail(
                     new MessageDetail(
                         TokenLogMessages.IDX10619,
@@ -393,7 +379,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     typeof(SecurityTokenDecryptionFailedException),
                     new StackFrame(true),
                     null);
-            else if (!decryptionSucceeded)
+            else
                 return new ExceptionDetail(
                     new MessageDetail(
                         TokenLogMessages.IDX10609,
@@ -401,8 +387,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     typeof(SecurityTokenDecryptionFailedException),
                     new StackFrame(true),
                     null);
-
-            return exceptionDetail;
         }
 
         private static byte[] DecryptToken(CryptoProviderFactory cryptoProviderFactory, SecurityKey key, string encAlg, byte[] ciphertext, byte[] headerAscii, byte[] initializationVector, byte[] authenticationTag)
