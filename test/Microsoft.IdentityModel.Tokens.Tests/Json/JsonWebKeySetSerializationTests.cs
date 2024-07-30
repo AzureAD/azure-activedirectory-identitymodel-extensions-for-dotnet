@@ -20,7 +20,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             var context = TestUtilities.WriteHeader($"{this}.Serialize", theoryData);
             context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
             {
-                { typeof(JsonWebKeySet), new List<string> { "JsonWebKeySetString" } },
+                { typeof(JsonWebKeySet), [ "JsonWebKeySetString" ] },
             };
 
             try
@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             var context = TestUtilities.WriteHeader($"{this}.Deserialize", theoryData);
             context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
             {
-                { typeof(JsonWebKeySet), new List<string> { "JsonWebKeySetString" } },
+                { typeof(JsonWebKeySet), [ "JsonWebKeySetString" ] },
             };
 
             try
