@@ -327,7 +327,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
 
             // get configuration from https address, should throw
-            configManager = new ConfigurationManager<OpenIdConnectConfiguration>("https://someaddress.com", new OpenIdConnectConfigurationRetriever());
+            configManager = new ConfigurationManager<OpenIdConnectConfiguration>("https://someadress.com", new OpenIdConnectConfigurationRetriever());
             ee = new ExpectedException(typeof(InvalidOperationException), "IDX20803:", typeof(IOException));
             try
             {
