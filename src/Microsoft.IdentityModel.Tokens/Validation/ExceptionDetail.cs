@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -49,6 +50,13 @@ namespace Microsoft.IdentityModel.Tokens
 
             return Activator.CreateInstance(ExceptionType, MessageDetail.Message) as Exception;
         }
+
+        internal static ExceptionDetail NullParameter(string parameterName) => new ExceptionDetail(
+            new MessageDetail(
+                LogMessages.IDX10000,
+                LogHelper.MarkAsNonPII(parameterName)),
+            typeof(ArgumentNullException),
+            new StackFrame());
 
         /// <summary>
         /// Gets the type of exception that occurred.

@@ -14,7 +14,7 @@ namespace Microsoft.IdentityModel.Xml
     {
         private int _depth;
         private bool _recordDone;
-        private XmlTokenStreamReader _innerTokenStreamReader = null;
+        private XmlTokenStreamReader _innerTokenStreamReader;
 
         /// <summary>
         /// Initializes a new instance of <see cref="XmlTokenStreamReader"/> for creating a <see cref="XmlTokenStream"/>.

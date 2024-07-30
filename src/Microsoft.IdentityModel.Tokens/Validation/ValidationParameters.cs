@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Claims;
+using System.Threading;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
@@ -20,8 +21,14 @@ namespace Microsoft.IdentityModel.Tokens
         private string _nameClaimType = ClaimsIdentity.DefaultNameClaimType;
         private string _roleClaimType = ClaimsIdentity.DefaultRoleClaimType;
         private Dictionary<string, object> _instancePropertyBag;
+        private IList<string> _validTokenTypes = [];
 
-        private IssuerValidationDelegateAsync _issuerValidationDelegate = Validators.ValidateIssuerAsync;
+        private AlgorithmValidatorDelegate _algorithmValidator = Validators.ValidateAlgorithm;
+        private AudienceValidatorDelegate _audienceValidator = Validators.ValidateAudience;
+        private IssuerValidationDelegateAsync _issuerValidatorAsync = Validators.ValidateIssuerAsync;
+        private LifetimeValidatorDelegate _lifetimeValidator = Validators.ValidateLifetime;
+        private TokenReplayValidatorDelegate _tokenReplayValidator = Validators.ValidateTokenReplay;
+        private TypeValidatorDelegate _typeValidator = Validators.ValidateTokenType;
 
         /// <summary>
         /// This is the default value of <see cref="ClaimsIdentity.AuthenticationType"/> when creating a <see cref="ClaimsIdentity"/>.
@@ -103,23 +110,31 @@ namespace Microsoft.IdentityModel.Tokens
         public ValidationParameters ActorValidationParameters { get; set; }
 
         /// <summary>
-        /// Gets or sets a delegate used to validate the cryptographic algorithm used.
+        /// Allows overriding the delegate used to validate the cryptographic algorithm used.
         /// </summary>
         /// <remarks>
-        /// If set, this delegate will validate the cryptographic algorithm used and
-        /// the algorithm will not be checked against <see cref="ValidAlgorithms"/>.
+        /// If no delegate is set, the default implementation will be used. The default checks the algorithm
+        /// against the <see cref="ValidAlgorithms"/> property, if present. If not, it will succeed.
         /// </remarks>
-        public AlgorithmValidator AlgorithmValidator { get; set; }
+        public AlgorithmValidatorDelegate AlgorithmValidator {
+            get { return _algorithmValidator; }
+            set { _algorithmValidator = value ?? throw new ArgumentNullException(nameof(value), "AlgorithmValidator cannot be null."); }
+        }
 
         /// <summary>
-        /// Gets or sets a delegate that will be used to validate the audience.
+        /// Allows overriding the delegate that will be used to validate the audience.
         /// </summary>
         /// <remarks>
-        /// If set, this delegate will be called to validate the 'audience', instead of default processing.
+        /// If set, this delegate will be responsible for validating the 'audience', instead of default processing.
         /// This means that no default 'audience' validation will occur.
-        /// Even if <see cref="ValidateAudience"/> is false, this delegate will still be called.
         /// </remarks>
-        public AudienceValidator AudienceValidator { get; set; }
+        /// <exception cref="ArgumentNullException">Thrown when the value is set as null.</exception>
+        /// <returns>The <see cref="AudienceValidatorDelegate"/> used to validate the issuer of a token</returns>
+        public AudienceValidatorDelegate AudienceValidator
+        {
+            get { return _audienceValidator; }
+            set { _audienceValidator = value ?? throw new ArgumentNullException(nameof(value), "AudienceValidator cannot be set as null."); }
+        }
 
         /// <summary>
         /// Gets or sets the AuthenticationType when creating a <see cref="ClaimsIdentity"/>.
@@ -229,6 +244,11 @@ namespace Microsoft.IdentityModel.Tokens
         public string DebugId { get; set; }
 
         /// <summary>
+        /// Gets the <see cref="SecurityKey"/> representing the ephemeral decryption key used for decryption by certain algorithms.
+        /// </summary>
+        public SecurityKey EphemeralDecryptionKey { get; set; }
+
+        /// <summary>
         /// Gets or sets a boolean that controls if a '/' is significant at the end of the audience.
         /// The default is <c>true</c>.
         /// </summary>
@@ -238,7 +258,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the flag that indicates whether to include the <see cref="SecurityToken"/> when the validation fails.
         /// </summary>
-        public bool IncludeTokenOnFailedValidation { get; set; } = false;
+        public bool IncludeTokenOnFailedValidation { get; set; }
 
         /// <summary>
         /// Gets or sets a delegate for validating the <see cref="SecurityKey"/> that signed the token.
@@ -260,7 +280,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets a value indicating if <see cref="Clone"/> was called to obtain this instance.
         /// </summary>
-        public bool IsClone { get; protected set; } = false;
+        public bool IsClone { get; protected set; }
 
         /// <summary>
         /// Gets or sets a delegate that will be called to retrieve a <see cref="SecurityKey"/> used for signature validation.
@@ -278,18 +298,14 @@ namespace Microsoft.IdentityModel.Tokens
         public IList<SecurityKey> IssuerSigningKeys { get; }
 
         /// <summary>
-        /// Gets or sets a delegate that will be used to validate the issuer of the token.
+        /// Allows overriding the delegate that will be used to validate the issuer of the token.
         /// </summary>
+        /// <exception cref="ArgumentNullException">Thrown when the value is set as null.</exception>
+        /// <returns>The <see cref="IssuerValidationDelegateAsync"/> used to validate the issuer of a token</returns>
         public IssuerValidationDelegateAsync IssuerValidatorAsync
         {
-            get
-            {
-                return _issuerValidationDelegate;
-            }
-            set
-            {
-                _issuerValidationDelegate = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
-            }
+            get { return _issuerValidatorAsync; }
+            set { _issuerValidatorAsync = value ?? throw new ArgumentNullException(nameof(value), "IssuerValidatorAsync cannot be set as null."); }
         }
 
         /// <summary>
@@ -298,9 +314,15 @@ namespace Microsoft.IdentityModel.Tokens
         public TransformBeforeSignatureValidation TransformBeforeSignatureValidation { get; set; }
 
         /// <summary>
-        /// Gets or sets a delegate that will be used to validate the lifetime of the token
+        /// Allows overriding the delegate that will be used to validate the lifetime of the token
         /// </summary>
-        public LifetimeValidator LifetimeValidator { get; set; }
+        /// <exception cref="ArgumentNullException">Thrown when the value is set as null.</exception>
+        /// <returns>The <see cref="LifetimeValidatorDelegate"/> used to validate the lifetime of a token</returns>
+        public LifetimeValidatorDelegate LifetimeValidator
+        {
+            get { return _lifetimeValidator; }
+            set { _lifetimeValidator = value ?? throw new ArgumentNullException(nameof(value), "LifetimeValidator cannot be set as null."); }
+        }
 
         /// <summary>
         /// Gets or sets a <see cref="bool"/> that will decide if the token identifier claim needs to be logged.
@@ -416,12 +438,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// This <see cref="SecurityKey"/> will be used to decrypt the token. This can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier.
         /// </remarks>
-        public TokenDecryptionKeyResolver TokenDecryptionKeyResolver { get; set; }
+        public ResolveTokenDecryptionKeyDelegate TokenDecryptionKeyResolver { get; set; }
 
         /// <summary>
         /// Gets the <see cref="IList{SecurityKey}"/> that is to be used for decrypting inbound tokens.
         /// </summary>
-        public IList<SecurityKey> TokenDecryptionKeys { get; }
+        public IList<SecurityKey> TokenDecryptionKeys { get; internal set; }
 
         /// <summary>
         /// Gets or set the <see cref="ITokenReplayCache"/> that store tokens that can be checked to help detect token replay.
@@ -430,26 +452,37 @@ namespace Microsoft.IdentityModel.Tokens
         public ITokenReplayCache TokenReplayCache { get; set; }
 
         /// <summary>
-        /// Gets or sets a delegate that will be used to validate the token replay of the token
+        /// Allows overriding the delegate that will be used to validate the token replay of the token.
         /// </summary>
         /// <remarks>
-        /// If set, this delegate will be called to validate the token replay of the token, instead of default processing.
+        /// If no delegate is set, the default implementation will be used.
         /// This means no default token replay validation will occur.
-        /// Even if <see cref="ValidateTokenReplay"/> is false, this delegate will still be called.
         /// </remarks>
-        public TokenReplayValidator TokenReplayValidator { get; set; }
+        /// <exception cref="ArgumentNullException">Thrown when the value is set as null.</exception>
+        /// <returns>The <see cref="TokenReplayValidatorDelegate"/> used to validate the token replay of the token.</returns>
+        public TokenReplayValidatorDelegate TokenReplayValidator
+        {
+            get { return _tokenReplayValidator; }
+            set { _tokenReplayValidator = value ?? throw new ArgumentNullException(nameof(value), "TokenReplayValidator cannot be set as null."); }
+        }
 
         /// <summary>
-        /// Gets or sets a delegate that will be used to validate the type of the token.
-        /// If the token type cannot be validated, an exception MUST be thrown by the delegate.
+        /// Allows overriding the delegate that will be used to validate the type of the token.
+        /// If the token type cannot be validated, a <see cref="TokenTypeValidationResult"/> MUST be returned by the delegate.
         /// Note: the 'type' parameter may be null if it couldn't be extracted from its usual location.
         /// Implementations that need to resolve it from a different location can use the 'token' parameter.
         /// </summary>
         /// <remarks>
-        /// If set, this delegate will be called to validate the 'type' of the token, instead of default processing.
-        /// This means that no default 'type' validation will occur.
+        /// If no delegate is set, the default implementation will be used. The default checks the type
+        /// against the <see cref="ValidTypes"/> property, if the type is present then, it will succeed.
         /// </remarks>
-        public TypeValidator TypeValidator { get; set; }
+        /// <exception cref="ArgumentNullException">Thrown when the value is set as null.</exception>
+        /// <returns>The <see cref="TypeValidatorDelegate"/> used to validate the token type of a token</returns>
+        public TypeValidatorDelegate TypeValidator
+        {
+            get { return _typeValidator; }
+            set { _typeValidator = value ?? throw new ArgumentNullException(nameof(value), "TypeValidator cannot be set as null."); }
+        }
 
         /// <summary>
         /// Gets or sets a boolean to control if the LKG configuration will be used for token validation.
@@ -494,9 +527,21 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets the <see cref="IList{String}"/> that contains valid types that will be used to check against the JWT header's 'typ' claim.
         /// If this property is not set, the 'typ' header claim will not be validated and all types will be accepted.
         /// In the case of a JWE, this property will ONLY apply to the inner token header.
-        /// The default is <c>null</c>.
+        /// The default is an empty collection.
         /// </summary>
-        public IList<string> ValidTypes { get; }
+        /// <exception cref="ArgumentNullException">Thrown when the value is set as null.</exception>
+        /// <returns>The <see cref="IList{String}"/> that contains valid token types that will be used to check against the token's 'typ' claim.</returns>
+        public IList<string> ValidTypes
+        {
+            get
+            {
+                return _validTokenTypes;
+            }
+            set
+            {
+                _validTokenTypes = value ?? throw new ArgumentNullException(nameof(value));
+            }
+        }
 
         public bool ValidateActor { get; set; }
     }

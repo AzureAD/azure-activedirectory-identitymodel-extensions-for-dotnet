@@ -13,7 +13,6 @@ using System.Text.Json;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Json;
 using JsonPrimitives = Microsoft.IdentityModel.Tokens.Json.JsonSerializerPrimitives;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
@@ -34,10 +33,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <returns>A JWS in Compact Serialization format.</returns>
         public virtual string CreateToken(string payload)
         {
-            if (string.IsNullOrEmpty(payload))
-                throw LogHelper.LogArgumentNullException(nameof(payload));
+            _ = payload ?? throw LogHelper.LogArgumentNullException(nameof(payload));
 
-                return CreateToken(
+            return CreateToken(
                     payload,
                     null,
                     null,
@@ -59,9 +57,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             string payload,
             IDictionary<string, object> additionalHeaderClaims)
         {
-            if (string.IsNullOrEmpty(payload))
-                throw LogHelper.LogArgumentNullException(nameof(payload));
-
+            _ = payload ?? throw LogHelper.LogArgumentNullException(nameof(payload));
             _ = additionalHeaderClaims ?? throw LogHelper.LogArgumentNullException(nameof(additionalHeaderClaims));
 
             return CreateToken(payload,
@@ -85,9 +81,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             string payload,
             SigningCredentials signingCredentials)
         {
-            if (string.IsNullOrEmpty(payload))
-                throw LogHelper.LogArgumentNullException(nameof(payload));
-
+            _ = payload ?? throw LogHelper.LogArgumentNullException(nameof(payload));
             _ = signingCredentials ?? throw LogHelper.LogArgumentNullException(nameof(signingCredentials));
 
             return CreateToken(
@@ -118,9 +112,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             SigningCredentials signingCredentials,
             IDictionary<string, object> additionalHeaderClaims)
         {
-            if (string.IsNullOrEmpty(payload))
-                throw LogHelper.LogArgumentNullException(nameof(payload));
-
+            _ = payload ?? throw LogHelper.LogArgumentNullException(nameof(payload));
             _ = signingCredentials ?? throw LogHelper.LogArgumentNullException(nameof(signingCredentials));
             _ = additionalHeaderClaims ?? throw LogHelper.LogArgumentNullException(nameof(additionalHeaderClaims));
 
@@ -296,9 +288,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             string payload,
             EncryptingCredentials encryptingCredentials)
         {
-            if (string.IsNullOrEmpty(payload))
-                throw LogHelper.LogArgumentNullException(nameof(payload));
-
+            _ = payload ?? throw LogHelper.LogArgumentNullException(nameof(payload));
             _ = encryptingCredentials ?? throw LogHelper.LogArgumentNullException(nameof(encryptingCredentials));
 
             return CreateToken(
@@ -329,9 +319,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             EncryptingCredentials encryptingCredentials,
             IDictionary<string, object> additionalHeaderClaims)
         {
-            if (string.IsNullOrEmpty(payload))
-                throw LogHelper.LogArgumentNullException(nameof(payload));
-
+            _ = payload ?? throw LogHelper.LogArgumentNullException(nameof(payload));
             _ = encryptingCredentials ?? throw LogHelper.LogArgumentNullException(nameof(encryptingCredentials));
             _ = additionalHeaderClaims ?? throw LogHelper.LogArgumentNullException(nameof(additionalHeaderClaims));
 
@@ -360,9 +348,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             SigningCredentials signingCredentials,
             EncryptingCredentials encryptingCredentials)
         {
-            if (string.IsNullOrEmpty(payload))
-                throw LogHelper.LogArgumentNullException(nameof(payload));
-
+            _ = payload ?? throw LogHelper.LogArgumentNullException(nameof(payload));
             _ = signingCredentials ?? throw LogHelper.LogArgumentNullException(nameof(signingCredentials));
             _ = encryptingCredentials ?? throw LogHelper.LogArgumentNullException(nameof(encryptingCredentials));
 
@@ -397,9 +383,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             EncryptingCredentials encryptingCredentials,
             IDictionary<string, object> additionalHeaderClaims)
         {
-            if (string.IsNullOrEmpty(payload))
-                throw LogHelper.LogArgumentNullException(nameof(payload));
-
+            _ = payload ?? throw LogHelper.LogArgumentNullException(nameof(payload));
             _ = signingCredentials ?? throw LogHelper.LogArgumentNullException(nameof(signingCredentials));
             _ = encryptingCredentials ?? throw LogHelper.LogArgumentNullException(nameof(encryptingCredentials));
             _ = additionalHeaderClaims ?? throw LogHelper.LogArgumentNullException(nameof(additionalHeaderClaims));
@@ -420,14 +404,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="payload">A string containing JSON which represents the JWT token payload.</param>
         /// <param name="encryptingCredentials">The security key and algorithm that will be used to encrypt the JWT.</param>
         /// <param name="compressionAlgorithm">The compression algorithm that will be used to compress the JWT token payload.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="payload"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="encryptingCredentials"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="compressionAlgorithm"/> is null or empty.</exception>
         /// <returns>A JWE in Compact Serialization format.</returns>
         public virtual string CreateToken(
             string payload,
             EncryptingCredentials encryptingCredentials,
             string compressionAlgorithm)
         {
-            if (string.IsNullOrEmpty(payload))
-                throw LogHelper.LogArgumentNullException(nameof(payload));
+            _ = payload ?? throw LogHelper.LogArgumentNullException(nameof(payload));
 
             if (string.IsNullOrEmpty(compressionAlgorithm))
                 throw LogHelper.LogArgumentNullException(nameof(compressionAlgorithm));
@@ -462,7 +448,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             EncryptingCredentials encryptingCredentials,
             string compressionAlgorithm)
         {
-            if (string.IsNullOrEmpty(payload))
+            if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
             if (string.IsNullOrEmpty(compressionAlgorithm))
@@ -507,7 +493,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             IDictionary<string, object> additionalHeaderClaims,
             IDictionary<string, object> additionalInnerHeaderClaims)
         {
-            if (string.IsNullOrEmpty(payload))
+            if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
             if (string.IsNullOrEmpty(compressionAlgorithm))
@@ -552,7 +538,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             string compressionAlgorithm,
             IDictionary<string, object> additionalHeaderClaims)
         {
-            if (string.IsNullOrEmpty(payload))
+            if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
             if (string.IsNullOrEmpty(compressionAlgorithm))
@@ -1065,7 +1051,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     // is treated as opt-in. When the library is at the point where it is able to make breaking changes
                     // (such as the next major version update) we should consider whether or not this app-compat switch
                     // needs to be maintained.
-                    if (AppContext.TryGetSwitch(AppCompatSwitches.UseRfcDefinitionOfEpkAndKid, out bool isEnabled) && isEnabled)
+                    if (AppContextSwitches.UseRfcDefinitionOfEpkAndKid)
                     {
                         if (encryptingCredentials.KeyExchangePublicKey.KeyId != null)
                             writer.WriteString(JwtHeaderUtf8Bytes.Kid, encryptingCredentials.KeyExchangePublicKey.KeyId);
@@ -1396,7 +1382,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         // is treated as opt-in. When the library is at the point where it is able to make breaking changes
                         // (such as the next major version update) we should consider whether or not this app-compat switch
                         // needs to be maintained.
-                        if (AppContext.TryGetSwitch(AppCompatSwitches.UseRfcDefinitionOfEpkAndKid, out bool isEnabled) && isEnabled)
+                        if (AppContextSwitches.UseRfcDefinitionOfEpkAndKid)
                         {
                             // on decryption we get the public key from the EPK value see: https://datatracker.ietf.org/doc/html/rfc7518#appendix-C
                             jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Epk, out string epk);

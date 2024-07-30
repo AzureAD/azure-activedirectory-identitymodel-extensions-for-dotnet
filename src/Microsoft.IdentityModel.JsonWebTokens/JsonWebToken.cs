@@ -114,7 +114,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Initializes a new instance of the <see cref="JsonWebToken"/> class where the header contains the crypto algorithms applied to the encoded header and payload.
         /// </summary>
         /// <param name="header">A string containing JSON which represents the cryptographic operations applied to the JWT and optionally any additional properties of the JWT.</param>
-        /// <param name="payload">A string containing JSON which represents the claims contained in the JWT. Each claim is a JSON object of the form { Name, Value }.</param>
+        /// <param name="payload">A string containing JSON which represents the claims contained in the JWT. Each claim is a JSON object of the form { Name, Value }. Can be the empty.</param>
         /// <remarks>
         /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7519"/> (JWT).
         /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7515"/> (JWS).
@@ -124,14 +124,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </para>
         /// </remarks>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="header"/> is null or empty.</exception>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="payload"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="payload"/> is null.</exception>
         public JsonWebToken(string header, string payload)
         {
             if (string.IsNullOrEmpty(header))
                 throw LogHelper.LogArgumentNullException(nameof(header));
 
-            if (string.IsNullOrEmpty(payload))
-                throw LogHelper.LogArgumentNullException(nameof(payload));
+            _ = payload ?? throw LogHelper.LogArgumentNullException(nameof(payload));
 
             var encodedHeader = Base64UrlEncoder.Encode(header);
             var encodedPayload = Base64UrlEncoder.Encode(payload);
@@ -588,7 +587,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <returns>Encoded token string without signature or authentication tag.</returns>
         public override string ToString()
         {
-            return EncodedToken.Substring(0, EncodedToken.LastIndexOf("."));
+            return EncodedToken.Substring(0, EncodedToken.LastIndexOf('.'));
         }
 
         /// <inheritdoc/>
