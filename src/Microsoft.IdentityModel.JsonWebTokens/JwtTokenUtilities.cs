@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -265,7 +266,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 try
                 {
                     // The JsonWebTokenHandler will set the JsonWebToken and those values will be used.
-                    // The JwtSecurityTokenHandler will calculate values and set the values on DecrytionParameters.
+                    // The JwtSecurityTokenHandler will calculate values and set the values on DecryptionParameters.
 
                     // JsonWebToken from JsonWebTokenHandler
                     if (securityToken is JsonWebToken jsonWebToken)
@@ -329,7 +330,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     (keysAttempted ??= new StringBuilder()).AppendLine(key.ToString());
             }
 
-            ValidateDecryption(decryptionParameters, decryptionSucceeded, algorithmNotSupportedByCryptoProvider, exceptionStrings, keysAttempted);
+            if (!decryptionSucceeded)
+                throw GetDecryptionExceptionDetail(
+                    decryptionParameters,
+                    algorithmNotSupportedByCryptoProvider,
+                    exceptionStrings,
+                    keysAttempted,
+                    null).GetException();
+
             try
             {
                 if (string.IsNullOrEmpty(zipAlgorithm))
@@ -343,16 +351,42 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
 
-        private static void ValidateDecryption(JwtTokenDecryptionParameters decryptionParameters, bool decryptionSucceeded, bool algorithmNotSupportedByCryptoProvider, StringBuilder exceptionStrings, StringBuilder keysAttempted)
+        private static ExceptionDetail GetDecryptionExceptionDetail(
+            JwtTokenDecryptionParameters decryptionParameters,
+            bool algorithmNotSupportedByCryptoProvider,
+            StringBuilder exceptionStrings,
+            StringBuilder keysAttempted,
+#pragma warning disable CA1801 // Review unused parameters
+            CallContext callContext)
+#pragma warning restore CA1801 // Review unused parameters
         {
-            if (!decryptionSucceeded && keysAttempted is not null)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10603, keysAttempted, (object)exceptionStrings ?? "", LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken))));
-
-            if (!decryptionSucceeded && algorithmNotSupportedByCryptoProvider)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10619, LogHelper.MarkAsNonPII(decryptionParameters.Alg), LogHelper.MarkAsNonPII(decryptionParameters.Enc))));
-
-            if (!decryptionSucceeded)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10609, LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken))));
+            if (keysAttempted is not null)
+                return new ExceptionDetail(
+                    new MessageDetail(
+                        TokenLogMessages.IDX10603,
+                        keysAttempted.ToString(),
+                        exceptionStrings?.ToString() ?? string.Empty,
+                        LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken)),
+                    typeof(SecurityTokenDecryptionFailedException),
+                    new StackFrame(true),
+                    null);
+            else if (algorithmNotSupportedByCryptoProvider)
+                return new ExceptionDetail(
+                    new MessageDetail(
+                        TokenLogMessages.IDX10619,
+                        LogHelper.MarkAsNonPII(decryptionParameters.Alg),
+                        LogHelper.MarkAsNonPII(decryptionParameters.Enc)),
+                    typeof(SecurityTokenDecryptionFailedException),
+                    new StackFrame(true),
+                    null);
+            else
+                return new ExceptionDetail(
+                    new MessageDetail(
+                        TokenLogMessages.IDX10609,
+                        LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken)),
+                    typeof(SecurityTokenDecryptionFailedException),
+                    new StackFrame(true),
+                    null);
         }
 
         private static byte[] DecryptToken(CryptoProviderFactory cryptoProviderFactory, SecurityKey key, string encAlg, byte[] ciphertext, byte[] headerAscii, byte[] initializationVector, byte[] authenticationTag)
