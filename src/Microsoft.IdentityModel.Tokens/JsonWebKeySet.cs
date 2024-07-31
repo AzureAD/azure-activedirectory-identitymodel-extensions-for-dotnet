@@ -102,6 +102,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// The original <see cref="string"/> used to create this instance.
         /// </summary>
+        [JsonIgnore]
         public string JsonWebKeySetString
         {
             get
