@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.Protocols
         private T _currentConfiguration;
         private TimeSpan _bootstrapRefreshInterval = TimeSpan.FromSeconds(1);
 
-        // task states used to ensure only one call to update config is only running at once uses Interlocked.CompareExchange.
+        // task states are used to ensure the call to 'update config' (UpdateCurrentConfiguration) is a singleton. Uses Interlocked.CompareExchange.
         // metadata is not being obtained
         private const int ConfigurationRetrieverIdle = 0;
         // metadata is being retrieved

@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
             }
 
             int numberOfValidKeys = 0;
-            for( int i = 0;  i < openIdConnectConfiguration.JsonWebKeySet.Keys.Count; i++)
+            for (int i = 0;  i < openIdConnectConfiguration.JsonWebKeySet.Keys.Count; i++)
                 if (openIdConnectConfiguration.JsonWebKeySet.Keys[i].ConvertedSecurityKey != null)
                     numberOfValidKeys++;
 
