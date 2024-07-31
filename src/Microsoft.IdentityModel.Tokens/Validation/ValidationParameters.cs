@@ -27,6 +27,7 @@ namespace Microsoft.IdentityModel.Tokens
         private AudienceValidatorDelegate _audienceValidator = Validators.ValidateAudience;
         private IssuerValidationDelegateAsync _issuerValidatorAsync = Validators.ValidateIssuerAsync;
         private LifetimeValidatorDelegate _lifetimeValidator = Validators.ValidateLifetime;
+        private SignatureValidatorDelegate _signatureValidator;
         private TokenReplayValidatorDelegate _tokenReplayValidator = Validators.ValidateTokenReplay;
         private TypeValidatorDelegate _typeValidator = Validators.ValidateTokenType;
 
@@ -201,7 +202,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>A <see cref="ClaimsIdentity"/> with Authentication, NameClaimType and RoleClaimType set.</returns>
         public virtual ClaimsIdentity CreateClaimsIdentity(SecurityToken securityToken, string issuer)
         {
-            string nameClaimType = null;
+            string nameClaimType;
             if (NameClaimTypeRetriever != null)
             {
                 nameClaimType = NameClaimTypeRetriever(securityToken, issuer);
@@ -211,7 +212,7 @@ namespace Microsoft.IdentityModel.Tokens
                 nameClaimType = NameClaimType;
             }
 
-            string roleClaimType = null;
+            string roleClaimType;
             if (RoleClaimTypeRetriever != null)
             {
                 roleClaimType = RoleClaimTypeRetriever(securityToken, issuer);
@@ -290,7 +291,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// If both <see cref="IssuerSigningKeyResolverUsingConfiguration"/> and <see cref="IssuerSigningKeyResolver"/> are set, IssuerSigningKeyResolverUsingConfiguration takes
         /// priority.
         /// </remarks>
-        public IssuerSigningKeyResolver IssuerSigningKeyResolver { get; set; }
+        public IssuerSigningKeyResolverDelegate IssuerSigningKeyResolver { get; set; }
 
         /// <summary>
         /// Gets or sets an <see cref="IList{SecurityKey}"/> used for signature validation.
@@ -372,7 +373,7 @@ namespace Microsoft.IdentityModel.Tokens
         public IDictionary<string, object> PropertyBag { get; }
 
         /// <summary>
-        /// Gets or sets a boolean to control if configuration required to be refreshed before token validation.
+        /// A boolean to control whether configuration should be refreshed before validating a token.
         /// </summary>
         /// <remarks>
         /// The default is <c>false</c>.
@@ -430,7 +431,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// If set, this delegate will be called to validate the signature of the token, instead of default processing.
         /// </remarks>
-        public SignatureValidator SignatureValidator { get; set; }
+        public SignatureValidatorDelegate SignatureValidator {
+            get { return _signatureValidator; }
+            set { _signatureValidator = value; }
+        }
 
         /// <summary>
         /// Gets or sets a delegate that will be called to retreive a <see cref="SecurityKey"/> used for decryption.
@@ -465,6 +469,13 @@ namespace Microsoft.IdentityModel.Tokens
             get { return _tokenReplayValidator; }
             set { _tokenReplayValidator = value ?? throw new ArgumentNullException(nameof(value), "TokenReplayValidator cannot be set as null."); }
         }
+
+        /// <summary>
+        /// If the IssuerSigningKeyResolver is unable to resolve the key when validating the signature of the SecurityToken,
+        /// all available keys will be tried.
+        /// </summary>
+        /// <remarks>Default is false.</remarks>
+        public bool TryAllIssuerSigningKeys { get; set; }
 
         /// <summary>
         /// Allows overriding the delegate that will be used to validate the type of the token.
