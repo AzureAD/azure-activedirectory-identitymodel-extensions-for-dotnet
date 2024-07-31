@@ -40,7 +40,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 return new TheoryData<JsonWebTokenHandlerValidateSignatureTheoryData>
                 {
                     new JsonWebTokenHandlerValidateSignatureTheoryData {
-
+                        JWT = null,
+                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                        SignatureValidationResult = new SignatureValidationResult(
+                            ValidationFailureType.SignatureValidationFailed,
+                            new ExceptionDetail(
+                                new MessageDetail(
+                                    TokenLogMessages.IDX10000,
+                                    "jwtToken"),
+                                typeof(ArgumentNullException),
+                                new System.Diagnostics.StackFrame()))
                     }
                 };
             }
