@@ -33,18 +33,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         LogHelper.MarkAsNonPII(reader.BytesConsumed))));
 
             Dictionary<string, object> claims = [];
-#if NET8_0_OR_GREATER
-            Dictionary<string, (int startIndex, int length)?> claimsBytes = [];
-#endif
+
             while (true)
             {
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
-#if NET8_0_OR_GREATER
-                    ReadPayloadValue(ref reader, claims, claimsBytes, tokenPayloadAsMemory);
-#else
-                    ReadPayloadValue(ref reader, claims);
-#endif
+                    string claimName = reader.GetString();
+                    claims[claimName] = ReadTokenPayloadValue(ref reader, claimName);
                 }
                 // We read a JsonTokenType.StartObject above, exiting and positioning reader at next token.
                 else if (JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, false))
@@ -53,17 +48,30 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     break;
             };
 
-#if NET8_0_OR_GREATER
-            return new JsonClaimSet(claims, claimsBytes, tokenPayloadAsMemory);
-#else
             return new JsonClaimSet(claims);
-#endif
         }
 
-        private protected virtual void ReadPayloadValue(ref Utf8JsonReader reader, IDictionary<string, object> claims)
+        /*
+         * Custom implemenation
+           ReadPayloadValueDelegate(ref Utf8JsonReader reader, string claimName) => 
+           {
+                if (claimName == JwtRegisteredClaimNames.CustomProp)
+                {
+                    return JsonSerializerPrimitives.ReadLong(ref reader, JwtRegisteredClaimNames.CustomProp, ClassName, true);    
+                }
+                else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.CustomProp))
+                {
+                    return JsonSerializerPrimitives.ReadLong(ref reader, JwtRegisteredClaimNames.CustomProp, ClassName, true);    
+                } else
+                {
+                    return JsonWebToken.ReadPayloadValue(ref reader, claimName);
+                }
+           }
+         */
+        // Default implementation
+        // Read the value of the claimName from the reader into the dictionary.
+        public static object ReadPayloadValue(ref Utf8JsonReader reader, string claimName)
         {
-            _ = claims ?? throw LogHelper.LogArgumentNullException(nameof(claims));
-
             if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Aud))
             {
                 _audiences = [];

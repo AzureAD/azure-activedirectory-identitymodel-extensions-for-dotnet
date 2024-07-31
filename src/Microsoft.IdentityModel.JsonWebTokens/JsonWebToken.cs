@@ -87,6 +87,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="encodedTokenMemory"></param>
+        /// <param name="readTokenPayloadValueDelegate"></param>
+        public JsonWebToken(ReadOnlyMemory<char> encodedTokenMemory, ReadTokenPayloadValue readTokenPayloadValueDelegate) : this(encodedTokenMemory)
+        {
+            ReadTokenPayloadValue = readTokenPayloadValueDelegate;
+        }
+
+        /// <summary>
         /// Initializes a new instance of <see cref="JsonWebToken"/> from a ReadOnlyMemory{char} in JWS or JWE Compact serialized format.
         /// </summary>
         /// <param name="encodedTokenMemory">A ReadOnlyMemory{char} containing the JSON Web Token serialized in JWS or JWE Compact format.</param>
@@ -141,6 +151,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             _encodedToken = encodedToken;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        internal ReadTokenPayloadValue ReadTokenPayloadValue { get; set; } = ReadPayloadValue;
 
         internal string ActualIssuer { get; set; }
 

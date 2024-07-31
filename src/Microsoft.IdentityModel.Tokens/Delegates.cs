@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -176,4 +177,12 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
     /// <returns>A transformed <see cref="SecurityToken"/>.</returns>
     public delegate SecurityToken TransformBeforeSignatureValidation(SecurityToken token, TokenValidationParameters validationParameters);
+
+    /// <summary>
+    /// Definition for ReadTokenPayloadValue.
+    /// </summary>
+    /// <param name="reader">Reader for the underlying token bytes.</param>
+    /// <param name="claimName">The name of the claim being read.</param>
+    /// <returns></returns>
+    public delegate object ReadTokenPayloadValue(ref Utf8JsonReader reader, string claimName);
 }
