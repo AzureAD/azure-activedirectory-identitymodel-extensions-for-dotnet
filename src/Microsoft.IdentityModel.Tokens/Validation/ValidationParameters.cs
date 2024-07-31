@@ -22,6 +22,7 @@ namespace Microsoft.IdentityModel.Tokens
         private string _roleClaimType = ClaimsIdentity.DefaultRoleClaimType;
         private Dictionary<string, object> _instancePropertyBag;
         private IList<string> _validTokenTypes = [];
+        private IList<string> _validAudiences = [];
 
         private AlgorithmValidatorDelegate _algorithmValidator = Validators.ValidateAlgorithm;
         private AudienceValidatorDelegate _audienceValidator = Validators.ValidateAudience;
@@ -513,9 +514,14 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Gets the <see cref="IList{String}"/> that contains valid audiences that will be used to check against the token's audience.
-        /// The default is <c>null</c>.
+        /// The default is an empty collection.
         /// </summary>
-        public IList<string> ValidAudiences { get; }
+        /// <exception cref="ArgumentNullException">Thrown when the value is set as null.</exception>
+        public IList<string> ValidAudiences
+        {
+            get { return _validAudiences; }
+            set { _validAudiences = value ?? throw new ArgumentNullException(nameof(value), "ValidAudiences cannot be set as null."); }
+        }
 
         /// <summary>
         /// Gets the <see cref="IList{String}"/> that contains valid issuers that will be used to check against the token's issuer.
@@ -533,14 +539,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>The <see cref="IList{String}"/> that contains valid token types that will be used to check against the token's 'typ' claim.</returns>
         public IList<string> ValidTypes
         {
-            get
-            {
-                return _validTokenTypes;
-            }
-            set
-            {
-                _validTokenTypes = value ?? throw new ArgumentNullException(nameof(value));
-            }
+            get { return _validTokenTypes; }
+            set { _validTokenTypes = value ?? throw new ArgumentNullException(nameof(value), "ValidTypes cannot be set as null."); }
         }
 
         public bool ValidateActor { get; set; }

@@ -21,6 +21,25 @@ namespace Microsoft.IdentityModel.Tokens.Tests.Validation
         }
 
         [Fact]
+        public void ValidAudiences_GetSet_ValidValue_Success()
+        {
+            var validationParameters = new ValidationParameters();
+            var validAudiences = new List<string> { "audience1", "audience2" };
+
+            validationParameters.ValidAudiences = validAudiences;
+
+            Assert.Equal(validAudiences, validationParameters.ValidAudiences);
+        }
+
+        [Fact]
+        public void ValidAudiences_SetNull_ThrowsArgumentNullException()
+        {
+            var validationParameters = new ValidationParameters();
+
+            Assert.Throws<ArgumentNullException>(() => validationParameters.ValidAudiences = null);
+        }
+
+        [Fact]
         public void ValidTypes_Get_ReturnsValidTokenTypes()
         {
             var validationParameters = new ValidationParameters();
