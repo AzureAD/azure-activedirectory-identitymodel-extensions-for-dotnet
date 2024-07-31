@@ -23,7 +23,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             {
                 var jsonWebKeys = new JsonWebKeySet(theoryData.Json);
                 var keys = jsonWebKeys.GetSigningKeys();
-                var originalString = jsonWebKeys.JsonWebKeySetString;
+                var originalString = jsonWebKeys.JsonData;
                 theoryData.ExpectedException.ProcessNoException(context);
 
                 if (theoryData.Json != null)
