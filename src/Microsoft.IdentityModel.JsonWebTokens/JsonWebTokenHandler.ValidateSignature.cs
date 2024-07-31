@@ -21,12 +21,26 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Validates the JWT signature.
         /// </summary>
-        private static SignatureValidationResult ValidateSignature(
+        /// <param name="jwtToken">The JWT token to validate.</param>
+        /// <param name="validationParameters">The parameters used for validation.</param>
+        /// <param name="configuration">The optional configuration used for validation.</param>
+        /// <param name="callContext">The context in which the method is called.</param>
+        /// <exception cref="ArgumentNullException">Returned if <paramref name="jwtToken"/> or <paramref name="validationParameters"/> is null.</exception>"
+        /// <exception cref="SecurityTokenInvalidSignatureException">Returned by the default implementation if the token is not signed, or if the validation fails.</exception>
+        /// <exception cref="SecurityTokenInvalidAlgorithmException">Returned if the algorithm is not supported by the key.</exception>
+        /// <exception cref="SecurityTokenSignatureKeyNotFoundException">Returned if the key cannot be resolved.</exception>
+        internal static SignatureValidationResult ValidateSignature(
             JsonWebToken jwtToken,
             ValidationParameters validationParameters,
-            BaseConfiguration configuration,
+            BaseConfiguration? configuration,
             CallContext callContext)
         {
+            if (jwtToken is null)
+                return SignatureValidationResult.NullParameterFailure(nameof(jwtToken));
+
+            if (validationParameters is null)
+                return SignatureValidationResult.NullParameterFailure(nameof(validationParameters));
+
             // Delegate is set by the user, we call it and return the result.
             if (validationParameters.SignatureValidator is not null)
                 return validationParameters.SignatureValidator(jwtToken, validationParameters, configuration, callContext);
@@ -60,7 +74,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 // Resolve the key using the token's 'kid' and 'x5t' headers.
                 // Fall back to the validation parameters' keys if configuration keys are not set.
-                key = JwtTokenUtilities.ResolveTokenSigningKey(jwtToken.Kid, jwtToken.X5t, configuration.SigningKeys)
+                key = JwtTokenUtilities.ResolveTokenSigningKey(jwtToken.Kid, jwtToken.X5t, configuration?.SigningKeys)
                     ?? JwtTokenUtilities.ResolveTokenSigningKey(jwtToken.Kid, jwtToken.X5t, validationParameters.IssuerSigningKeys);
             }
 
@@ -87,7 +101,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         private static SignatureValidationResult ValidateSignatureUsingAllKeys(
             JsonWebToken jwtToken,
             ValidationParameters
-            validationParameters, BaseConfiguration configuration,
+            validationParameters, BaseConfiguration? configuration,
             CallContext callContext)
         {
             // control gets here if:
