@@ -91,7 +91,7 @@ namespace Microsoft.IdentityModel.Tokens
                     ValidationFailureType.AudienceValidationFailed,
                     new ExceptionDetail(
                         new MessageDetail(
-                            LogMessages.IDX10214,
+                            LogMessages.IDX10215,
                             LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(audiences)),
                             LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences))),
                         typeof(SecurityTokenInvalidAudienceException),
@@ -102,7 +102,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             string? validAudience = null;
 
-            List<string> validAudiences = validationParameters.ValidAudiences.ToList();
+            List<string> validAudiences = [.. validationParameters.ValidAudiences];
             validAudience = AudiencesMatchList(audiences, validAudiences, validationParameters.IgnoreTrailingSlashWhenValidatingAudience);
 
             return validAudience;
@@ -113,15 +113,15 @@ namespace Microsoft.IdentityModel.Tokens
             for (int i = 0; i < audiences.Count; i++)
             {
                 string tokenAudience = audiences[i];
-                if (string.IsNullOrWhiteSpace(tokenAudience))
+                if (string.IsNullOrEmpty(tokenAudience))
                     continue;
 
-                foreach (string validAudience in validAudiences)
+                for (int j = 0; j < validAudiences.Count; j++)
                 {
-                    if (string.IsNullOrEmpty(validAudience))
+                    if (string.IsNullOrEmpty(validAudiences[j]))
                         continue;
 
-                    if (AudiencesMatch(ignoreTrailingSlashWhenValidatingAudience, tokenAudience, validAudience))
+                    if (AudiencesMatch(ignoreTrailingSlashWhenValidatingAudience, tokenAudience, validAudiences[j]))
                     {
                         if (LogHelper.IsEnabled(EventLogLevel.Informational))
                             LogHelper.LogInformation(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
