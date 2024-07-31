@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             {
                 // If the objects being compared are created from the same string and they are equal, the string itself can be ignored.
                 // The strings may not be equal because of whitespace, but the json they represent is semantically identical.
-                { typeof(JsonWebKeySet), [ "JsonWebKeySetString" ] },
+                { typeof(JsonWebKeySet), [ "JsonData" ] },
             };
 
             try
@@ -71,7 +71,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             {
                 // If the objects being compared are created from the same string and they are equal, the string itself can be ignored.
                 // The strings may not be equal because of whitespace, but the json they represent is semantically identical.
-                { typeof(JsonWebKeySet), [ "JsonWebKeySetString" ] },
+                { typeof(JsonWebKeySet), [ "JsonData" ] },
             };
 
             try

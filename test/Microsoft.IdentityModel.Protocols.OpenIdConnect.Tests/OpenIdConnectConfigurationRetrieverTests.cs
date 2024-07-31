@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 {
                     // If the objects being compared are created from the same string and they are equal, the string itself can be ignored.
                     // The strings may not be equal because of whitespace, but the json they represent is semantically identical.
-                    { typeof(JsonWebKeySet), [ "JsonWebKeySetString" ] },
+                    { typeof(JsonWebKeySet), [ "JsonData" ] },
                 }
             };
             var configuration = await GetConfigurationAsync(
@@ -68,7 +68,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 {
                     // If the objects being compared are created from the same string and they are equal, the string itself can be ignored.
                     // The strings may not be equal because of whitespace, but the json they represent is semantically identical.
-                    { typeof(JsonWebKeySet), [ "JsonWebKeySetString" ] },
+                    { typeof(JsonWebKeySet), [ "JsonData" ] },
                 }
             };
             var configuration = await GetConfigurationFromMixedAsync(
