@@ -296,7 +296,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets an <see cref="IList{SecurityKey}"/> used for signature validation.
         /// </summary>
-        public IList<SecurityKey> IssuerSigningKeys { get; }
+        public IList<SecurityKey> IssuerSigningKeys { get; set; }
 
         /// <summary>
         /// Allows overriding the delegate that will be used to validate the issuer of the token.
