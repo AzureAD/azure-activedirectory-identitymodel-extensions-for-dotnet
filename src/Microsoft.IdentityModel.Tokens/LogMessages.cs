@@ -36,6 +36,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10208 = "IDX10208: Unable to validate audience. validationParameters.ValidAudience is null or whitespace and validationParameters.ValidAudiences is null.";
         public const string IDX10209 = "IDX10209: Token has length: '{0}' which is larger than the MaximumTokenSizeInBytes: '{1}'.";
         public const string IDX10211 = "IDX10211: Unable to validate issuer. The 'issuer' parameter is null or whitespace.";
+        public const string IDX10212 = "IDX10212: Issuer validation failed. Issuer: '{0}'. Did not match any: validationParameters.ValidIssuers: '{1}' or validationParameters.ConfigurationManager.CurrentConfiguration.Issuer: '{2}'. For more details, see https://aka.ms/IdentityModel/issuer-validation. ";
         public const string IDX10214 = "IDX10214: Audience validation failed. Audiences: '{0}'. Did not match: validationParameters.ValidAudience: '{1}' or validationParameters.ValidAudiences: '{2}'.";
         public const string IDX10222 = "IDX10222: Lifetime validation failed. The token is not yet valid. ValidFrom (UTC): '{0}', Current time (UTC): '{1}'.";
         public const string IDX10223 = "IDX10223: Lifetime validation failed. The token is expired. ValidTo (UTC): '{0}', Current time (UTC): '{1}'.";
