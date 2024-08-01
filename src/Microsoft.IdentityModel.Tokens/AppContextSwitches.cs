@@ -38,6 +38,10 @@ namespace Microsoft.IdentityModel.Tokens
 
         internal static bool DontFailOnMissingTid => _doNotFailOnMissingTid ??= (AppContext.TryGetSwitch(DoNotFailOnMissingTidSwitch, out bool doNotFailOnMissingTid) && doNotFailOnMissingTid);
 
+        // 7x was released with the property name "DoNotFailOnMissingTid" 8x was released with "DontFailOnMissingTid"
+        // This is to ensure that both property names are supported.
+        internal static bool DoNotFailOnMissingTid => DontFailOnMissingTid;
+
         /// <summary>
         /// When reading claims from the token, specifies whether to try to convert all string claims to DateTime.
         /// Some claims are known not to be DateTime, so conversion is skipped.
