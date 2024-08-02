@@ -37,11 +37,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             if (theoryData.Configuration is not null && theoryData.KeyToAddToConfiguration is not null)
                 theoryData.Configuration.SigningKeys.Add(theoryData.KeyToAddToConfiguration);
 
+            if (theoryData.ValidationParameters is not null && theoryData.KeyToAddToValidationParameters is not null)
+                theoryData.ValidationParameters.IssuerSigningKeys.Add(theoryData.KeyToAddToValidationParameters);
+
             SignatureValidationResult validationResult = JsonWebTokenHandler.ValidateSignature(
             jsonWebToken,
             theoryData.ValidationParameters,
             theoryData.Configuration,
-            new CallContext());
+            new CallContext
+            {
+                DebugId = theoryData.TestId
+            });
 
             if (validationResult.Exception != null)
                 theoryData.ExpectedException.ProcessException(validationResult.Exception);
@@ -124,29 +130,25 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         JWT = new JsonWebToken(EncodedJwts.LiveJwt),
                         ValidationParameters = new ValidationParameters
                         {
-                            SignatureValidator = (token, parameters, configuration, callContext) => new SignatureValidationResult()
+                            SignatureValidator = (token, parameters, configuration, callContext) => SignatureValidationResult.Success()
                         },
-                        SignatureValidationResult = new SignatureValidationResult()
+                        SignatureValidationResult = SignatureValidationResult.Success()
                     },
                     new JsonWebTokenHandlerValidateSignatureTheoryData
                     {
                         TestId = "Valid_SignatureValidationResult_Success_KidMatches",
                         SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
-                        ValidationParameters = new ValidationParameters
-                        {
-                            IssuerSigningKeys = [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]
-                        },
-                        SignatureValidationResult = new SignatureValidationResult()
-                    },
+                        ValidationParameters = new ValidationParameters(),
+                        KeyToAddToValidationParameters = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                        SignatureValidationResult = SignatureValidationResult.Success(),
+            },
                     new JsonWebTokenHandlerValidateSignatureTheoryData
                     {
                         TestId = "Valid_SignatureValidationResult_Success_X5tMatches",
                         SigningCredentials = KeyingMaterial.X509SigningCreds_1024_RsaSha2_Sha2,
-                        ValidationParameters = new ValidationParameters
-                        {
-                            IssuerSigningKeys = [KeyingMaterial.X509SigningCreds_1024_RsaSha2_Sha2.Key]
-                        },
-                        SignatureValidationResult = new SignatureValidationResult()
+                        ValidationParameters = new ValidationParameters(),
+                        KeyToAddToValidationParameters = KeyingMaterial.X509SigningCreds_1024_RsaSha2_Sha2.Key,
+                        SignatureValidationResult = SignatureValidationResult.Success()
                     },
                     new JsonWebTokenHandlerValidateSignatureTheoryData
                     {
@@ -156,7 +158,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             IssuerSigningKeyResolver = (token, securityToken, kid, validationParameters, configuration, callContext) => KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key
                         },
-                        SignatureValidationResult = new SignatureValidationResult()
+                        SignatureValidationResult = SignatureValidationResult.Success()
                     },
                     new JsonWebTokenHandlerValidateSignatureTheoryData
                     {
@@ -165,7 +167,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Configuration = new OpenIdConnectConfiguration(),
                         KeyToAddToConfiguration = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
                         ValidationParameters = new ValidationParameters(),
-                        SignatureValidationResult = new SignatureValidationResult()
+                        SignatureValidationResult = SignatureValidationResult.Success()
                     },
                     new JsonWebTokenHandlerValidateSignatureTheoryData
                     {
@@ -173,19 +175,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2_NoKeyId,
                         ValidationParameters = new ValidationParameters
                         {
-                            IssuerSigningKeys = [KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2_NoKeyId.Key],
                             TryAllIssuerSigningKeys = true
                         },
-                        SignatureValidationResult = new SignatureValidationResult()
+                        KeyToAddToValidationParameters = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2_NoKeyId.Key,
+                        SignatureValidationResult = SignatureValidationResult.Success()
                     },
                     new JsonWebTokenHandlerValidateSignatureTheoryData
                     {
                         TestId = "Invalid_NoKeyId_DontTryAllKeys",
                         SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2_NoKeyId,
-                        ValidationParameters = new ValidationParameters
-                        {
-                            IssuerSigningKeys = [KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2_NoKeyId.Key],
-                        },
+                        ValidationParameters = new ValidationParameters(),
+                        KeyToAddToValidationParameters = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2_NoKeyId.Key,
                         ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10500:"),
                         SignatureValidationResult = new SignatureValidationResult(
                             ValidationFailureType.SignatureValidationFailed,
@@ -218,6 +218,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public BaseConfiguration Configuration { get; set; }
         public SigningCredentials SigningCredentials { get; internal set; }
         public SecurityKey KeyToAddToConfiguration { get; internal set; }
+        public SecurityKey KeyToAddToValidationParameters { get; internal set; }
         internal SignatureValidationResult SignatureValidationResult { get; set; }
         internal ValidationParameters ValidationParameters { get; set; }
     }

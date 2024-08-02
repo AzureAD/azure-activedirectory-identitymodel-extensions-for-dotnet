@@ -18,9 +18,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Results
         /// <summary>
         /// Creates an instance of <see cref="SignatureValidationResult"/> representing the successful result of validating a signature.
         /// </summary>
-        public SignatureValidationResult() : base(ValidationFailureType.ValidationSucceeded)
+        public SignatureValidationResult(bool isValid, ValidationFailureType validationFailureType) : base(validationFailureType)
         {
-            IsValid = true;
+            IsValid = isValid;
         }
 
         /// <summary>
@@ -33,6 +33,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Results
         {
             IsValid = false;
         }
+
+        /// <summary>
+        /// Creates an instance of <see cref="SignatureValidationResult"/> representing a successful validation.
+        /// </summary>
+        internal static SignatureValidationResult Success() =>
+            new SignatureValidationResult(true, ValidationFailureType.ValidationSucceeded);
 
         /// <summary>
         /// Creates an instance of <see cref="SignatureValidationResult"/> representing a failure due to a null parameter.

@@ -22,6 +22,7 @@ namespace Microsoft.IdentityModel.Tokens
         private string _roleClaimType = ClaimsIdentity.DefaultRoleClaimType;
         private Dictionary<string, object> _instancePropertyBag;
         private IList<string> _validTokenTypes = [];
+        private IList<SecurityKey> _issuerSigningKeys;
 
         private AlgorithmValidatorDelegate _algorithmValidator = Validators.ValidateAlgorithm;
         private AudienceValidatorDelegate _audienceValidator = Validators.ValidateAudience;
@@ -67,7 +68,7 @@ namespace Microsoft.IdentityModel.Tokens
             IncludeTokenOnFailedValidation = other.IncludeTokenOnFailedValidation;
             IgnoreTrailingSlashWhenValidatingAudience = other.IgnoreTrailingSlashWhenValidatingAudience;
             IssuerSigningKeyResolver = other.IssuerSigningKeyResolver;
-            IssuerSigningKeys = other.IssuerSigningKeys;
+            _issuerSigningKeys = other.IssuerSigningKeys;
             IssuerSigningKeyValidator = other.IssuerSigningKeyValidator;
             IssuerValidatorAsync = other.IssuerValidatorAsync;
             LifetimeValidator = other.LifetimeValidator;
@@ -294,9 +295,12 @@ namespace Microsoft.IdentityModel.Tokens
         public IssuerSigningKeyResolverDelegate IssuerSigningKeyResolver { get; set; }
 
         /// <summary>
-        /// Gets or sets an <see cref="IList{SecurityKey}"/> used for signature validation.
+        /// Gets the <see cref="IList{SecurityKey}"/> used for signature validation.
         /// </summary>
-        public IList<SecurityKey> IssuerSigningKeys { get; set; }
+        public IList<SecurityKey> IssuerSigningKeys =>
+            _issuerSigningKeys ??
+            Interlocked.CompareExchange(ref _issuerSigningKeys, [], null) ??
+            _issuerSigningKeys;
 
         /// <summary>
         /// Allows overriding the delegate that will be used to validate the issuer of the token.
