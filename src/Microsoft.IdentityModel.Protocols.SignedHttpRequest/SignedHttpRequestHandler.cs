@@ -326,7 +326,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 foreach (var queryParam in sanitizedQueryParams)
                 {
                     if (!firstQueryParam)
-                        stringBuffer.Append("&");
+                        stringBuffer.Append('&');
 
                     stringBuffer.Append(queryParam.Key).Append('=').Append(queryParam.Value);
                     firstQueryParam = false;
@@ -876,7 +876,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     else
                     {
                         if (!firstQueryParam)
-                            stringBuffer.Append("&");
+                            stringBuffer.Append('&');
 
                         stringBuffer.Append((string)queryParamName).Append('=').Append(queryParamsValue);
                         firstQueryParam = false;

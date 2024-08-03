@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -58,10 +59,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Produces a signature over the <paramref name="input"/>.
         /// </summary>
-        /// <param name="input">String to be signed</param>
+        /// <param name="input">The value to be signed.</param>
         /// <param name="signingCredentials">The <see cref="SigningCredentials"/> that contain crypto specs used to sign the token.</param>
         /// <returns>The base 64 url encoded signature over the bytes obtained from UTF8Encoding.GetBytes( 'input' ).</returns>
-        /// <exception cref="ArgumentNullException">'input' or 'signingCredentials' is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="input"/> or <paramref name="signingCredentials"/> is null.</exception>
         public static string CreateEncodedSignature(string input, SigningCredentials signingCredentials)
         {
             if (input == null)
@@ -89,11 +90,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Produces a signature over the <paramref name="input"/>.
         /// </summary>
-        /// <param name="input">String to be signed</param>
+        /// <param name="input">The value to be signed.</param>
         /// <param name="signingCredentials">The <see cref="SigningCredentials"/> that contain crypto specs used to sign the token.</param>
-        /// <param name="cacheProvider">should the <see cref="SignatureProvider"/> be cached.</param>
+        /// <param name="cacheProvider">Indicates whether the <see cref="SignatureProvider"/> should be cached.</param>
         /// <returns>The base 64 url encoded signature over the bytes obtained from UTF8Encoding.GetBytes( 'input' ).</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="input"/> or <paramref name="signingCredentials"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="input"/> or <paramref name="signingCredentials"/> is null.</exception>
         public static string CreateEncodedSignature(string input, SigningCredentials signingCredentials, bool cacheProvider)
         {
             if (input == null)
@@ -158,12 +159,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Produces a signature over the <paramref name="data"/>.
         /// </summary>
-        /// <param name="data">Span containing bytes to be signed.</param>
+        /// <param name="data">The <see cref="ReadOnlySpan{Byte}"/> containing the bytes to be signed.</param>
         /// <param name="destination">destination for signature.</param>
         /// <param name="signingCredentials">The <see cref="SigningCredentials"/> that contain crypto specs used to sign the token.</param>
-        /// <param name="bytesWritten"></param>
-        /// <returns>The size of the signature.</returns>
-        /// <exception cref="ArgumentNullException">'input' or 'signingCredentials' is null.</exception>
+        /// <param name="bytesWritten">The number of bytes actually written to <paramref name="destination"/>.</param>
+        /// <returns><see langword="true"/> if the signature was successfully written to <paramref name="destination"/>; otherwise, <see langword="false"/>.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="signingCredentials"/> is null.</exception>
         internal static bool CreateSignature(
             ReadOnlySpan<byte> data,
             Span<byte> destination,
@@ -199,14 +200,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Decompress JWT token bytes.
         /// </summary>
-        /// <param name="tokenBytes"></param>
-        /// <param name="algorithm"></param>
-        /// <param name="maximumDeflateSize"></param>
-        /// <exception cref="ArgumentNullException">if <paramref name="tokenBytes"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="algorithm"/> is null.</exception>
-        /// <exception cref="NotSupportedException">if the decompression <paramref name="algorithm"/> is not supported.</exception>
-        /// <exception cref="SecurityTokenDecompressionFailedException">if decompression using <paramref name="algorithm"/> fails.</exception>
-        /// <returns>Decompressed JWT token</returns>
+        /// <param name="tokenBytes">The JWT token bytes to be decompressed.</param>
+        /// <param name="algorithm">The algorithm used for decompression.</param>
+        /// <param name="maximumDeflateSize">The maximum allowable size for the decompressed data.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="tokenBytes"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="algorithm"/> is null.</exception>
+        /// <exception cref="NotSupportedException">Thrown if the decompression <paramref name="algorithm"/> is not supported.</exception>
+        /// <exception cref="SecurityTokenDecompressionFailedException">Thrown if decompression using <paramref name="algorithm"/> fails.</exception>
+        /// <returns>The decompressed JWT token.</returns>
         internal static string DecompressToken(byte[] tokenBytes, string algorithm, int maximumDeflateSize)
         {
             if (tokenBytes == null)
@@ -226,10 +227,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Decrypts a Json Web Token.
+        /// Decrypts a JWT token.
         /// </summary>
-        /// <param name="securityToken">The Json Web Token, could be a JwtSecurityToken or JsonWebToken</param>
-        /// <param name="validationParameters">The validation parameters containing cryptographic material.</param>
+        /// <param name="securityToken">The JWT token, could be a JwtSecurityToken or JsonWebToken.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <param name="decryptionParameters">The decryption parameters container.</param>
         /// <returns>The decrypted, and if the 'zip' claim is set, decompressed string representation of the token.</returns>
         internal static string DecryptJwtToken(
@@ -265,7 +266,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 try
                 {
                     // The JsonWebTokenHandler will set the JsonWebToken and those values will be used.
-                    // The JwtSecurityTokenHandler will calculate values and set the values on DecrytionParameters.
+                    // The JwtSecurityTokenHandler will calculate values and set the values on DecryptionParameters.
 
                     // JsonWebToken from JsonWebTokenHandler
                     if (securityToken is JsonWebToken jsonWebToken)
@@ -329,7 +330,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     (keysAttempted ??= new StringBuilder()).AppendLine(key.ToString());
             }
 
-            ValidateDecryption(decryptionParameters, decryptionSucceeded, algorithmNotSupportedByCryptoProvider, exceptionStrings, keysAttempted);
+            if (!decryptionSucceeded)
+                throw GetDecryptionExceptionDetail(
+                    decryptionParameters,
+                    algorithmNotSupportedByCryptoProvider,
+                    exceptionStrings,
+                    keysAttempted,
+                    null).GetException();
+
             try
             {
                 if (string.IsNullOrEmpty(zipAlgorithm))
@@ -343,16 +351,42 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
 
-        private static void ValidateDecryption(JwtTokenDecryptionParameters decryptionParameters, bool decryptionSucceeded, bool algorithmNotSupportedByCryptoProvider, StringBuilder exceptionStrings, StringBuilder keysAttempted)
+        private static ExceptionDetail GetDecryptionExceptionDetail(
+            JwtTokenDecryptionParameters decryptionParameters,
+            bool algorithmNotSupportedByCryptoProvider,
+            StringBuilder exceptionStrings,
+            StringBuilder keysAttempted,
+#pragma warning disable CA1801 // Review unused parameters
+            CallContext callContext)
+#pragma warning restore CA1801 // Review unused parameters
         {
-            if (!decryptionSucceeded && keysAttempted is not null)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10603, keysAttempted, (object)exceptionStrings ?? "", LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken))));
-
-            if (!decryptionSucceeded && algorithmNotSupportedByCryptoProvider)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10619, LogHelper.MarkAsNonPII(decryptionParameters.Alg), LogHelper.MarkAsNonPII(decryptionParameters.Enc))));
-
-            if (!decryptionSucceeded)
-                throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10609, LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken))));
+            if (keysAttempted is not null)
+                return new ExceptionDetail(
+                    new MessageDetail(
+                        TokenLogMessages.IDX10603,
+                        keysAttempted.ToString(),
+                        exceptionStrings?.ToString() ?? string.Empty,
+                        LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken)),
+                    typeof(SecurityTokenDecryptionFailedException),
+                    new StackFrame(true),
+                    null);
+            else if (algorithmNotSupportedByCryptoProvider)
+                return new ExceptionDetail(
+                    new MessageDetail(
+                        TokenLogMessages.IDX10619,
+                        LogHelper.MarkAsNonPII(decryptionParameters.Alg),
+                        LogHelper.MarkAsNonPII(decryptionParameters.Enc)),
+                    typeof(SecurityTokenDecryptionFailedException),
+                    new StackFrame(true),
+                    null);
+            else
+                return new ExceptionDetail(
+                    new MessageDetail(
+                        TokenLogMessages.IDX10609,
+                        LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken)),
+                    typeof(SecurityTokenDecryptionFailedException),
+                    new StackFrame(true),
+                    null);
         }
 
         private static byte[] DecryptToken(CryptoProviderFactory cryptoProviderFactory, SecurityKey key, string encAlg, byte[] ciphertext, byte[] headerAscii, byte[] initializationVector, byte[] authenticationTag)
@@ -496,7 +530,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (!(obj is string token))
                 return obj.GetType().ToString();
 
-            int lastDot = token.LastIndexOf(".");
+            int lastDot = token.LastIndexOf('.');
 
             // no dots, not a JWT, we do not know how to sanitize so we return UnrecognizedEncodedToken
             if (lastDot == -1)
@@ -508,11 +542,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Returns a <see cref="SecurityKey"/> to use when validating the signature of a token.
         /// </summary>
-        /// <param name="kid">The <see cref="string"/> kid field of the token being validated</param>
-        /// <param name="x5t">The <see cref="string"/> x5t field of the token being validated</param>
-        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
-        /// <param name="configuration">The <see cref="BaseConfiguration"/> that will be used along with the <see cref="TokenValidationParameters"/> to resolve the signing key</param>
-        /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
+        /// <param name="kid">The <see cref="string"/> kid field of the token being validated.</param>
+        /// <param name="x5t">The <see cref="string"/> x5t field of the token being validated.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
+        /// <param name="configuration">The <see cref="BaseConfiguration"/> that will be used along with the <see cref="TokenValidationParameters"/> to resolve the signing key.</param>
+        /// <returns>A <see cref="SecurityKey"/> to use for signature validation.</returns>
         /// <remarks>Resolve the signing key using configuration then the validationParameters until a key is resolved. If key fails to resolve, then null is returned.</remarks>
         internal static SecurityKey ResolveTokenSigningKey(string kid, string x5t, TokenValidationParameters validationParameters, BaseConfiguration configuration)
         {
@@ -522,11 +556,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Returns a <see cref="SecurityKey"/> to use when validating the signature of a token.
         /// </summary>
-        /// <param name="kid">The <see cref="string"/> kid field of the token being validated</param>
-        /// <param name="x5t">The <see cref="string"/> x5t field of the token being validated</param>
+        /// <param name="kid">The <see cref="string"/> kid field of the token being validated.</param>
+        /// <param name="x5t">The <see cref="string"/> x5t field of the token being validated.</param>
         /// <param name="signingKeys">A collection of <see cref="SecurityKey"/> a signing key to be resolved from.</param>
-        /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
-        /// <remarks>If key fails to resolve, then null is returned</remarks>
+        /// <returns>A <see cref="SecurityKey"/> to use for signature validation.</returns>
+        /// <remarks>If key fails to resolve, then <see langword="null"/> is returned.</remarks>
         internal static SecurityKey ResolveTokenSigningKey(string kid, string x5t, IEnumerable<SecurityKey> signingKeys)
         {
             if (signingKeys == null)
@@ -558,9 +592,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Counts the number of Jwt Token segments.
+        /// Counts the number of JWT token segments.
         /// </summary>
-        /// <param name="token">The Jwt Token.</param>
+        /// <param name="token">The JWT token.</param>
         /// <param name="maxCount">The maximum number of segments to count up to.</param>
         /// <returns>The number of segments up to <paramref name="maxCount"/>.</returns>
         internal static int CountJwtTokenPart(string token, int maxCount)
@@ -609,7 +643,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal static string GetStringClaimValueType(string str, string claimType)
         {
-            if (!string.IsNullOrEmpty(claimType) && !JsonSerializerPrimitives.TryAllStringClaimsAsDateTime() && JsonSerializerPrimitives.IsKnownToNotBeDateTime(claimType))
+            if (!string.IsNullOrEmpty(claimType) && !AppContextSwitches.TryAllStringClaimsAsDateTime && JsonSerializerPrimitives.IsKnownToNotBeDateTime(claimType))
                 return ClaimValueTypes.String;
 
             if (DateTime.TryParse(str, out DateTime dateTimeValue))

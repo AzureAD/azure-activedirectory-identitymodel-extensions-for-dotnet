@@ -80,6 +80,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10264 = "IDX10264: Reading issuer signing keys from validation parameters and configuration.";
         public const string IDX10265 = "IDX10265: Reading issuer signing keys from configuration.";
         //public const string IDX10266 = "IDX10266: Unable to validate issuer. validationParameters.ValidIssuer is null or whitespace, validationParameters.ValidIssuers is null or empty and ConfigurationManager is null.";
+        public const string IDX10267 = "IDX10267: '{0}' has been called by a derived class '{1}' which has not implemented this method. For this call graph to succeed, '{1}' will need to implement '{0}'.";
 
 
         // 10500 - SignatureValidation
@@ -149,7 +150,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10640 = "IDX10640: Algorithm is not supported: '{0}'.";
         // public const string IDX10641 = "IDX10641:";
         public const string IDX10642 = "IDX10642: Creating signature using the input: '{0}'.";
-        public const string IDX10643 = "IDX10643: Comparing the signature created over the input with the token signature: '{0}'.";
+        // public const string IDX10643 = "IDX10643:";
         // public const string IDX10644 = "IDX10644:";
         public const string IDX10645 = "IDX10645: Elliptical Curve not supported for curveId: '{0}'";
         public const string IDX10646 = "IDX10646: A CustomCryptoProvider was set and returned 'true' for IsSupportedAlgorithm(Algorithm: '{0}', Key: '{1}'), but Create.(algorithm, args) as '{2}' == NULL.";
@@ -253,7 +254,8 @@ namespace Microsoft.IdentityModel.Tokens
         //EventBasedLRUCache errors
         public const string IDX10900 = "IDX10900: EventBasedLRUCache._eventQueue encountered an error while processing a cache operation. Exception '{0}'.";
         public const string IDX10901 = "IDX10901: CryptoProviderCacheOptions.SizeLimit must be greater than 10. Value: '{0}'";
-        public const string IDX10902 = "IDX10902: Object disposed exception in '{0}': '{1}'";
+        public const string IDX10902 = "IDX10902: Exception caught while removing expired items: '{0}', Exception: '{1}'";
+        public const string IDX10906 = "IDX10906: Exception caught while compacting items: '{0}', Exception: '{1}'";
 
         // Crypto Errors
         public const string IDX11000 = "IDX11000: Cannot create EcdhKeyExchangeProvider. '{0}'\'s Curve '{1}' does not match with '{2}'\'s curve '{3}'.";
@@ -266,7 +268,6 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX11023 = "IDX11023: Expecting json reader to be positioned on '{0}', reader was positioned at: '{1}', Reading: '{2}', Position: '{3}', CurrentDepth: '{4}', BytesConsumed: '{5}'.";
         public const string IDX11025 = "IDX11025: Cannot serialize object of type: '{0}' into property: '{1}'.";
         public const string IDX11026 = "IDX11026: Unable to get claim value as a string from claim type:'{0}', value type was:'{1}'. Acceptable types are String, IList<String>, and System.Text.Json.JsonElement.";
-
 
 #pragma warning restore 1591
     }

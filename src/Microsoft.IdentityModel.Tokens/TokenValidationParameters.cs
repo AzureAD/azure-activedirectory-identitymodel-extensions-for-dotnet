@@ -240,7 +240,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (LogHelper.IsEnabled(EventLogLevel.Informational))
                 LogHelper.LogInformation(LogMessages.IDX10245, securityToken);
 
-            return new ClaimsIdentity(authenticationType: AuthenticationType ?? DefaultAuthenticationType, nameType: nameClaimType ?? ClaimsIdentity.DefaultNameClaimType, roleType: roleClaimType ?? ClaimsIdentity.DefaultRoleClaimType);
+            return ClaimsIdentityFactory.Create(authenticationType: AuthenticationType ?? DefaultAuthenticationType, nameType: nameClaimType ?? ClaimsIdentity.DefaultNameClaimType, roleType: roleClaimType ?? ClaimsIdentity.DefaultRoleClaimType, securityToken);
         }
 
         /// <summary>
@@ -269,7 +269,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the flag that indicates whether to include the <see cref="SecurityToken"/> when the validation fails.
         /// </summary>
-        public bool IncludeTokenOnFailedValidation { get; set; } = false;
+        public bool IncludeTokenOnFailedValidation { get; set; }
 
         /// <summary>
         /// Gets or sets a delegate for validating the <see cref="SecurityKey"/> that signed the token.
@@ -306,7 +306,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets a value indicating if <see cref="Clone"/> was called to obtain this instance.
         /// </summary>
-        public bool IsClone { get; protected set; } = false;
+        public bool IsClone { get; protected set; }
 
         /// <summary>
         /// Gets or sets the <see cref="SecurityKey"/> that is to be used for signature validation.

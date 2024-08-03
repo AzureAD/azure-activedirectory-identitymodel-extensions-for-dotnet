@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 PropertiesExpected = propertiesExpected;
         }
 
-        public static bool DefaultVerbose { get; set; } = false;
+        public static bool DefaultVerbose { get; set; }
 
         public static ExpectedException ArgumentException(string substringExpected = null, Type inner = null)
         {
@@ -255,6 +255,11 @@ namespace Microsoft.IdentityModel.TestUtils
             return new ExpectedException(typeof(SecurityTokenKeyWrapException), substringExpected, innerTypeExpected, propertiesExpected: propertiesExpected);
         }
 
+        public static ExpectedException SecurityTokenInvalidAlgorithmException(string substringExpected = null, Type innerTypeExpected = null, Dictionary<string, object> propertiesExpected = null)
+        {
+            return new ExpectedException(typeof(SecurityTokenInvalidAlgorithmException), substringExpected, innerTypeExpected, propertiesExpected: propertiesExpected);
+        }
+
         public static ExpectedException SecurityTokenInvalidLifetimeException(string substringExpected = null, Type innerTypeExpected = null, Dictionary<string, object> propertiesExpected = null)
         {
             return new ExpectedException(typeof(SecurityTokenInvalidLifetimeException), substringExpected, innerTypeExpected, propertiesExpected: propertiesExpected);
@@ -263,6 +268,11 @@ namespace Microsoft.IdentityModel.TestUtils
         public static ExpectedException SecurityTokenInvalidSignatureException(string substringExpected = null, Type innerTypeExpected = null)
         {
             return new ExpectedException(typeof(SecurityTokenInvalidSignatureException), substringExpected, innerTypeExpected);
+        }
+
+        public static ExpectedException SecurityTokenInvalidTypeException(string substringExpected = null, Type innerTypeExpected = null)
+        {
+            return new ExpectedException(typeof(SecurityTokenInvalidTypeException), substringExpected, innerTypeExpected);
         }
 
         public static ExpectedException SecurityTokenNoExpirationException(string substringExpected = null, Type innerTypeExpected = null)
@@ -310,7 +320,7 @@ namespace Microsoft.IdentityModel.TestUtils
             return new ExpectedException(typeof(JsonException), substringExpected, innerTypeExpected);
         }
 
-        public bool IgnoreExceptionType { get; set; } = false;
+        public bool IgnoreExceptionType { get; set; }
 
         public bool IgnoreInnerException { get; set; }
 
@@ -332,6 +342,6 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public Type TypeExpected { get; set; }
 
-        public bool Verbose { get; set; } = false;
+        public bool Verbose { get; set; }
     }
 }

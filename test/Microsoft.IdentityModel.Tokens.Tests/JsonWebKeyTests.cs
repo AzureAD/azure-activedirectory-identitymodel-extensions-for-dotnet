@@ -21,8 +21,6 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                 if (theoryData.JsonWebKey != null)
                 {
                     IdentityComparer.AreEqual(jsonWebKey, theoryData.JsonWebKey, context);
-                    JsonWebKey6x jsonWebKey6x = new JsonWebKey6x(theoryData.Json);
-                    IdentityComparer.AreEqual(jsonWebKey6x, jsonWebKey, context);
                 }
             }
             catch (Exception ex)

@@ -25,8 +25,8 @@ namespace Microsoft.IdentityModel.Tokens
         private const int PROV_RSA_FULL = 1;
         private const int PROV_RSA_SCHANNEL = 12;
 
-        private bool _disposed = false;
-        private bool _disposeRsa = false;
+        private bool _disposed;
+        private bool _disposeRsa;
 
         // Only dispose of the RsaCryptoServiceProvider object if we created a new instance that supports SHA-256,
         // otherwise do not disposed of the referenced RsaCryptoServiceProvider
@@ -283,9 +283,9 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Calls to release managed resources.
+        /// Releases the resources used by the current instance.
         /// </summary>
-        /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
+        /// <param name="disposing">If true, release both managed and unmanaged resources; otherwise, release only unmanaged resources.</param>
         protected override void Dispose(bool disposing)
         {
             if (!_disposed)

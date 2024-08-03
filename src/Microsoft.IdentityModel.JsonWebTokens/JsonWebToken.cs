@@ -13,7 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
     /// <summary>
-    /// A <see cref="SecurityToken"/> designed for representing a JSON Web Token (JWT). 
+    /// A <see cref="SecurityToken"/> designed for representing a JSON Web Token (JWT).
     /// </summary>
     public partial class JsonWebToken : SecurityToken
     {
@@ -66,12 +66,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Initializes a new instance of <see cref="JsonWebToken"/> from a string in JWS or JWE Compact serialized format.
         /// </summary>
         /// <param name="jwtEncodedString">A JSON Web Token that has been serialized in JWS or JWE Compact serialized format.</param>
-        /// <exception cref="ArgumentNullException">'jwtEncodedString' is null or empty.</exception>
-        /// <exception cref="ArgumentException">'jwtEncodedString' is not in JWS or JWE Compact serialization format.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="jwtEncodedString"/> is null or empty.</exception>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="jwtEncodedString"/> is not in JWS or JWE Compact Serialization format.</exception>
         /// <remarks>
-        /// see: https://datatracker.ietf.org/doc/html/rfc7519 (JWT)
-        /// see: https://datatracker.ietf.org/doc/html/rfc7515 (JWS)
-        /// see: https://datatracker.ietf.org/doc/html/rfc7516 (JWE)
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7519"/> (JWT).
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7515"/> (JWS).
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7516"/> (JWE).
         /// <para>
         /// The contents of the returned <see cref="JsonWebToken"/> have not been validated, the JSON Web Token is simply decoded. Validation can be accomplished using the validation methods in <see cref="JsonWebTokenHandler"/>
         /// </para>
@@ -105,12 +105,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Initializes a new instance of <see cref="JsonWebToken"/> from a ReadOnlyMemory{char} in JWS or JWE Compact serialized format.
         /// </summary>
         /// <param name="encodedTokenMemory">A ReadOnlyMemory{char} containing the JSON Web Token serialized in JWS or JWE Compact format.</param>
-        /// <exception cref="ArgumentNullException">Thrown when <paramref name="encodedTokenMemory"/> is empty.</exception>
-        /// <exception cref="ArgumentException">Thrown when <paramref name="encodedTokenMemory"/> does not represent a valid JWS or JWE Compact serialization format.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="encodedTokenMemory"/> is empty.</exception>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="encodedTokenMemory"/> does not represent a valid JWS or JWE Compact Serialization format.</exception>
         /// <remarks>
-        /// See: https://datatracker.ietf.org/doc/html/rfc7519 (JWT)
-        /// See: https://datatracker.ietf.org/doc/html/rfc7515 (JWS)
-        /// See: https://datatracker.ietf.org/doc/html/rfc7516 (JWE)
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7519"/> (JWT).
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7515"/> (JWS).
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7516"/> (JWE).
         /// <para>
         /// The contents of the returned <see cref="JsonWebToken"/> have not been validated; the JSON Web Token is simply decoded. Validation can be performed using the methods in <see cref="JsonWebTokenHandler"/>.
         /// </para>
@@ -129,24 +129,23 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Initializes a new instance of the <see cref="JsonWebToken"/> class where the header contains the crypto algorithms applied to the encoded header and payload.
         /// </summary>
         /// <param name="header">A string containing JSON which represents the cryptographic operations applied to the JWT and optionally any additional properties of the JWT.</param>
-        /// <param name="payload">A string containing JSON which represents the claims contained in the JWT. Each claim is a JSON object of the form { Name, Value }.</param>
+        /// <param name="payload">A string containing JSON which represents the claims contained in the JWT. Each claim is a JSON object of the form { Name, Value }. Can be the empty.</param>
         /// <remarks>
-        /// see: https://datatracker.ietf.org/doc/html/rfc7519 (JWT)
-        /// see: https://datatracker.ietf.org/doc/html/rfc7515 (JWS)
-        /// see: https://datatracker.ietf.org/doc/html/rfc7516 (JWE)
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7519"/> (JWT).
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7515"/> (JWS).
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7516"/> (JWE).
         /// <para>
         /// The contents of the returned <see cref="JsonWebToken"/> have not been validated, the JSON Web Token is simply decoded. Validation can be accomplished using the validation methods in <see cref="JsonWebTokenHandler"/>
         /// </para>
         /// </remarks>
-        /// <exception cref="ArgumentNullException">'header' is null.</exception>
-        /// <exception cref="ArgumentNullException">'payload' is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="header"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="payload"/> is null.</exception>
         public JsonWebToken(string header, string payload)
         {
             if (string.IsNullOrEmpty(header))
                 throw LogHelper.LogArgumentNullException(nameof(header));
 
-            if (string.IsNullOrEmpty(payload))
-                throw LogHelper.LogArgumentNullException(nameof(payload));
+            _ = payload ?? throw LogHelper.LogArgumentNullException(nameof(payload));
 
             var encodedHeader = Base64UrlEncoder.Encode(header);
             var encodedPayload = Base64UrlEncoder.Encode(payload);
@@ -177,7 +176,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <remarks>
         /// Contains the results of a Authentication Encryption with Associated Data (AEAD).
-        /// see: https://datatracker.ietf.org/doc/html/rfc7516#section-2
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7516#section-2"/>.
         /// <para>
         /// If this JWT is not encrypted with an algorithms that uses an Authentication Tag, an empty string will be returned.
         /// </para>
@@ -192,7 +191,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        ///
+        /// Gets or sets the AuthenticationTag as byte array.
         /// </summary>
         internal byte[] AuthenticationTagBytes
         {
@@ -205,7 +204,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <remarks>
         /// When decrypted using values in the JWE header will contain the plaintext payload.
-        /// see: https://datatracker.ietf.org/doc/html/rfc7516#section-2
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7516#section-2"/>.
         /// <para>
         /// If this JWT is not encrypted, an empty string will be returned.
         /// </para>
@@ -220,7 +219,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        ///
+        /// Gets or sets the Ciphertext as byte array.
         /// </summary>
         internal byte[] CipherTextBytes
         {
@@ -264,7 +263,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <remarks>
         /// For some algorithms this value may be null even though the JWT was encrypted.
-        /// see: https://datatracker.ietf.org/doc/html/rfc7516#section-2
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7516#section-2"/>.
         /// <para>
         /// If not found, an empty string is returned.
         /// </para>
@@ -368,7 +367,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Gets the Initialization Vector used when encrypting the plaintext.
         /// </summary>
         /// <remarks>
-        /// see: https://datatracker.ietf.org/doc/html/rfc7516#appendix-A-1-4
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7516#appendix-A-1-4"/>.
         /// <para>
         /// Some algorithms may not use an Initialization Vector.
         /// If not found an empty string is returned.
@@ -389,8 +388,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Gets the <see cref="JsonWebToken"/> associated with this instance.
         /// </summary>
         /// <remarks>
-        /// see: https://datatracker.ietf.org/doc/html/rfc7516#section-2
-        /// For encrypted tokens {JWE}, this represents the JWT that was encrypted.
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7516#section-2"/>.
+        /// For encrypted tokens (JWE), this represents the JWT that was encrypted.
         /// <para>
         /// If the JWT is not encrypted, this value will be null.
         /// </para>
@@ -398,12 +397,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public JsonWebToken InnerToken { get; internal set; }
 
         /// <summary>
-        /// Returns true if this JsonWebToken was encrypted a JWE.
+        /// Returns <see langword="true"/> if this JsonWebToken was encrypted a JWE.
         /// </summary>
         public bool IsEncrypted { get => CipherTextBytes != null; }
 
         /// <summary>
-        /// Returns true if this JsonWebToken was signed a JWS.
+        /// Returns <see langword="true"/> if this JsonWebToken was signed a JWS.
         /// </summary>
         public bool IsSigned { get; internal set; }
 
@@ -429,10 +428,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Converts a span into an instance of <see cref="JsonWebToken"/>.
         /// </summary>
-        /// <param name="encodedTokenMemory">A span representing a 'JSON Web Token' (JWT) in JWS or JWE Compact Serialization Format.</param>
-        /// <exception cref="SecurityTokenMalformedException">if <paramref name="encodedTokenMemory"/> is malformed, a valid JWT should have either 2 dots (JWS) or 4 dots (JWE).</exception>
-        /// <exception cref="SecurityTokenMalformedException">if <paramref name="encodedTokenMemory"/> does not have a non-empty authentication tag after the 4th dot for a JWE.</exception>
-        /// <exception cref="SecurityTokenMalformedException">if <paramref name="encodedTokenMemory"/> has more than 4 dots.</exception>
+        /// <param name="encodedTokenMemory">A span representing a JSON Web Token (JWT) in JWS or JWE Compact Serialization format.</param>
+        /// <exception cref="SecurityTokenMalformedException">Thrown if <paramref name="encodedTokenMemory"/> is malformed, a valid JWT should have either 2 dots (JWS) or 4 dots (JWE).</exception>
+        /// <exception cref="SecurityTokenMalformedException">Thrown if <paramref name="encodedTokenMemory"/> does not have a non-empty authentication tag after the 4th dot for a JWE.</exception>
+        /// <exception cref="SecurityTokenMalformedException">Thrown if <paramref name="encodedTokenMemory"/> has more than 4 dots.</exception>
         internal void ReadToken(ReadOnlyMemory<char> encodedTokenMemory)
         {
             // JWT must have 2 dots for JWS or 4 dots for JWE (a.b.c.d.e)
@@ -607,7 +606,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <returns>Encoded token string without signature or authentication tag.</returns>
         public override string ToString()
         {
-            return EncodedToken.Substring(0, EncodedToken.LastIndexOf("."));
+            return EncodedToken.Substring(0, EncodedToken.LastIndexOf('.'));
         }
 
         /// <inheritdoc/>
@@ -643,6 +642,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             return Payload.GetClaim(key, Issuer ?? ClaimsIdentity.DefaultIssuer);
         }
+
+        /// <summary>
+        /// Gets the names of the payload claims on the JsonWebToken.
+        /// </summary>
+        internal IReadOnlyCollection<string> PayloadClaimNames => Payload._jsonClaims.Keys;
 
         internal ClaimsIdentity ClaimsIdentity
         {
@@ -729,7 +733,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// This is not a general purpose translation layer for complex types.
         /// </remarks>
         /// <returns>The value as <typeparamref name="T"/>.</returns>
-        /// <exception cref="ArgumentException">if claim is not found or a transformation to <typeparamref name="T"/> cannot be made.</exception>
+        /// <exception cref="ArgumentException">Thrown if claim is not found or a transformation to <typeparamref name="T"/> cannot be made.</exception>
         public T GetHeaderValue<T>(string key)
         {
             if (string.IsNullOrEmpty(key))
@@ -747,7 +751,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// This is not a general purpose translation layer for complex types.
         /// </remarks>
         /// <returns>The value as <typeparamref name="T"/>.</returns>
-        /// <exception cref="ArgumentException">if claim is not found or a transformation to <typeparamref name="T"/> cannot be made.</exception>
+        /// <exception cref="ArgumentException">Thrown if claim is not found or a transformation to <typeparamref name="T"/> cannot be made.</exception>
         public T GetPayloadValue<T>(string key)
         {
             if (string.IsNullOrEmpty(key))
@@ -765,7 +769,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <remarks>
         /// The 'value' a type T if possible.
         /// </remarks>
-        /// <returns>true if successful, false otherwise.</returns>
+        /// <returns><see langword="true"/> if successful, false otherwise.</returns>
         public bool TryGetValue<T>(string key, out T value)
         {
             if (string.IsNullOrEmpty(key))
@@ -785,7 +789,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// The 5 basic types: number, string, true / false, nil, array (of basic types).
         /// This is not a general purpose translation layer for complex types.
         /// </remarks>
-        /// <returns>true if successful, false otherwise.</returns>
+        /// <returns><see langword="true"/> if successful, false otherwise.</returns>
         public bool TryGetHeaderValue<T>(string key, out T value)
         {
             if (string.IsNullOrEmpty(key))
@@ -805,7 +809,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// The 5 basic types: number, string, true / false, nil, array (of basic types).
         /// This is not a general purpose translation layer for complex types.
         /// </remarks>
-        /// <returns>true if successful, false otherwise.</returns>
+        /// <returns><see langword="true"/> if successful, false otherwise.</returns>
         public bool TryGetPayloadValue<T>(string key, out T value)
         {
             if (string.IsNullOrEmpty(key))
@@ -831,8 +835,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <remarks>
         /// Identifies the cryptographic algorithm used to encrypt or determine the value of the Content Encryption Key.
-        /// Applicable to an encrypted JWT {JWE}.
-        /// see: https://datatracker.ietf.org/doc/html/rfc7516#section-4-1-1
+        /// Applicable to an encrypted JWT (JWE).
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7516#section-4-1-1"/>.
         /// <para>
         /// If the 'alg' claim is not found, an empty string is returned.
         /// </para>
@@ -851,8 +855,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <remarks>
         /// Used by JWS applications to declare the media type[IANA.MediaTypes] of the secured content (the payload).
-        /// see: https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.12 (JWE)
-        /// see: https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.10 (JWS)
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.12"/> (JWE).
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.10"/> (JWS).
         /// <para>
         /// If the 'cty' claim is not found, an empty string is returned.
         /// </para>
@@ -872,7 +876,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <remarks>
         /// Identifies the content encryption algorithm used to perform authenticated encryption
         /// on the plaintext to produce the ciphertext and the Authentication Tag.
-        /// see: https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.2
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.2"/>.
         /// </remarks>
         public string Enc
         {
@@ -888,8 +892,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <remarks>
         /// 'kid'is a hint indicating which key was used to secure the JWS.
-        /// see: https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.4 (JWS)
-        /// see: https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.6 (JWE)
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.4"/> (JWS).
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.6"/> (JWE).
         /// <para>
         /// If the 'kid' claim is not found, an empty string is returned.
         /// </para>
@@ -908,7 +912,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <remarks>
         /// Is used by JWT applications to declare the media type.
-        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-5.1
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7519#section-5.1"/>.
         /// <para>
         /// If the 'typ' claim is not found, an empty string is returned.
         /// </para>
@@ -929,7 +933,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <remarks>
         /// Is the base64url-encoded SHA-1 thumbprint(a.k.a.digest) of the DER encoding of the X.509 certificate used to sign this token.
-        /// see: https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.7
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.7"/>.
         /// <para>
         /// If the 'x5t' claim is not found, an empty string is returned.
         /// </para>
@@ -948,7 +952,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <remarks>
         /// The "zip" (compression algorithm) applied to the plaintext before encryption, if any.
-        /// see: https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.3
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7516#section-4.1.3"/>.
         /// <para>
         /// If the 'zip' claim is not found, an empty string is returned.
         /// </para>
@@ -984,7 +988,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <remarks>
         /// Identifies the recipients that the JWT is intended for.
-        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4-1-3
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7519#section-4-1-3"/>.
         /// <para>
         /// If the 'aud' claim is not found, enumeration will be empty.
         /// </para>
@@ -1008,7 +1012,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <remarks>
         /// Identifies the authorized party for the id_token.
-        /// see: https://openid.net/specs/openid-connect-core-1_0.html
+        /// See: <see href="https://openid.net/specs/openid-connect-core-1_0.html"/>.
         /// <para>
         /// If the 'azp' claim is not found, an empty string is returned.
         /// </para>
@@ -1027,7 +1031,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <remarks>
         /// Identifies the time at which the JWT was issued.
-        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.6
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.6"/>.
         /// <para>
         /// If the 'iat' claim is not found, then <see cref="DateTime.MinValue"/> is returned.
         /// </para>
@@ -1046,7 +1050,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <remarks>
         /// Identifies the principal that issued the JWT.
-        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.1
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.1"/>.
         /// <para>
         /// If the 'iss' claim is not found, an empty string is returned.
         /// </para>
@@ -1065,7 +1069,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <remarks>
         /// Provides a unique identifier for the JWT.
-        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.7
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.7"/>.
         /// <para>
         /// If the 'jti' claim is not found, an empty string is returned.
         /// </para>
@@ -1083,7 +1087,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Gets the 'value' of the 'sub' claim from the payload.
         /// </summary>
         /// <remarks>
-        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.2
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.2"/>.
         /// Identifies the principal that is the subject of the JWT.
         /// <para>
         /// If the 'sub' claim is not found, an empty string is returned.
@@ -1103,7 +1107,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <remarks>
         /// Identifies the time before which the JWT MUST NOT be accepted for processing.
-        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.5
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.5"/>.
         /// <para>
         /// If the 'nbf' claim is not found, then <see cref="DateTime.MinValue"/> is returned.
         /// </para>
@@ -1131,7 +1135,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <remarks>
         /// Identifies the expiration time on or after which the JWT MUST NOT be accepted for processing.
-        /// see: https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.4
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.4"/>.
         /// <para>
         /// If the 'exp' claim is not found, then <see cref="DateTime.MinValue"/> is returned.
         /// </para>

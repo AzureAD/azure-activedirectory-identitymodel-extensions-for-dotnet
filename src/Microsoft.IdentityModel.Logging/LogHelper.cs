@@ -23,7 +23,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <summary>
         /// Indicates whether the log message header (contains library version, date/time, and PII debugging information) has been written.
         /// </summary>
-        private static bool _isHeaderWritten = false;
+        private static bool _isHeaderWritten;
 
         /// <summary>
         /// The log message that is shown when PII is off.

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -103,9 +104,9 @@ namespace Microsoft.IdentityModel.TestExtensions
             new Claim(JwtRegisteredClaimNames.GivenName, "Bob", ClaimValueTypes.String, _defaultTestIssuer, _defaultTestIssuer),
             new Claim(JwtRegisteredClaimNames.Iss, _defaultTestIssuer, ClaimValueTypes.String, _defaultTestIssuer, _defaultTestIssuer),
             new Claim(JwtRegisteredClaimNames.Aud, _defaultTestAudience, ClaimValueTypes.String, _defaultTestIssuer, _defaultTestIssuer),
-            new Claim(JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(_defaultIssuedAtNotBefore).ToString(), ClaimValueTypes.String, _defaultTestIssuer, _defaultTestIssuer),
-            new Claim(JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(_defaultIssuedAtNotBefore).ToString(), ClaimValueTypes.String, _defaultTestIssuer, _defaultTestIssuer),
-            new Claim(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(_defaultExpirationTime).ToString(), ClaimValueTypes.String, _defaultTestIssuer, _defaultTestIssuer),
+            new Claim(JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(_defaultIssuedAtNotBefore).ToString(CultureInfo.InvariantCulture), ClaimValueTypes.String, _defaultTestIssuer, _defaultTestIssuer),
+            new Claim(JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(_defaultIssuedAtNotBefore).ToString(CultureInfo.InvariantCulture), ClaimValueTypes.String, _defaultTestIssuer, _defaultTestIssuer),
+            new Claim(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(_defaultExpirationTime).ToString(CultureInfo.InvariantCulture), ClaimValueTypes.String, _defaultTestIssuer, _defaultTestIssuer),
         };
 
         /// <summary>
@@ -357,7 +358,7 @@ namespace Microsoft.IdentityModel.TestExtensions
         {
             var securityTokenDescriptor = new SecurityTokenDescriptor()
             {
-                Subject = new ClaimsIdentity(_payloadClaims),
+                Subject = ClaimsIdentityFactory.Create(_payloadClaims),
             };
 
             if (!string.IsNullOrEmpty(Issuer))
