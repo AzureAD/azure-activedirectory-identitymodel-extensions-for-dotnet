@@ -27,7 +27,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal readonly Dictionary<string, object> _jsonClaims;
 
 #if NET8_0_OR_GREATER
-        internal readonly Dictionary<string, (int startIndex, int length)?> _jsonClaimsBytes;
         internal readonly Memory<byte> _tokenAsMemory;
 #endif
 
@@ -38,7 +37,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             _jsonClaims = [];
 
 #if NET8_0_OR_GREATER
-            _jsonClaimsBytes = [];
             _tokenAsMemory = Memory<byte>.Empty;
 #endif
         }
@@ -46,20 +44,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal JsonClaimSet(Dictionary<string, object> jsonClaims)
         {
             _jsonClaims = jsonClaims;
-
-#if NET8_0_OR_GREATER
-            _jsonClaimsBytes = [];
-#endif
         }
 
 #if NET8_0_OR_GREATER
         internal JsonClaimSet(
             Dictionary<string, object> jsonClaims,
-            Dictionary<string, (int startIndex, int length)?> jsonClaimsBytes,
             Memory<byte> tokenAsMemory)
         {
             _jsonClaims = jsonClaims;
-            _jsonClaimsBytes = jsonClaimsBytes;
             _tokenAsMemory = tokenAsMemory;
         }
 #endif
@@ -77,16 +69,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             var claims = new List<Claim>(_jsonClaims.Count);
             foreach (KeyValuePair<string, object> kvp in _jsonClaims)
+            {
                 CreateClaimFromObject(claims, kvp.Key, kvp.Value, issuer);
 
 #if NET8_0_OR_GREATER
-            // _jsonClaimsBytes is only for string values for known claims, which would not be in _jsonClaims.
-            foreach (KeyValuePair<string, (int StartIndex, int Length)?> kvp in _jsonClaimsBytes)
-            {
-                string value = Encoding.UTF8.GetString(_tokenAsMemory.Slice(kvp.Value.Value.StartIndex, kvp.Value.Value.Length).Span);
-                claims.Add(new Claim(kvp.Key, value, ClaimValueTypes.String, issuer, issuer));
-            }
+                if (kvp.Value is ClaimPosition position)
+                {
+                    string value = Encoding.UTF8.GetString(_tokenAsMemory.Slice(position.StartIndex, position.Length).Span);
+                    claims.Add(new Claim(kvp.Key, value, ClaimValueTypes.String, issuer, issuer));
+                }
 #endif
+            }
             return claims;
         }
 
@@ -186,11 +179,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
-#if NET8_0_OR_GREATER
-            if (_jsonClaims.TryGetValue(key, out object _) || _jsonClaimsBytes.TryGetValue(key, out _))
-#else
             if (_jsonClaims.TryGetValue(key, out object _))
-#endif
             {
                 foreach (var claim in Claims(issuer))
                     if (claim.Type == key)
@@ -202,23 +191,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal string GetStringValue(string key)
         {
-#if NET8_0_OR_GREATER
-            if (_jsonClaimsBytes.TryGetValue(key, out (int StartIndex, int Length)? location))
-            {
-                if (!location.HasValue)
-                    return null;
-
-                return Encoding.UTF8.GetString(_tokenAsMemory.Slice(location.Value.StartIndex, location.Value.Length).Span);
-            }
-#else
             if (_jsonClaims.TryGetValue(key, out object obj))
             {
                 if (obj == null)
                     return null;
 
+#if NET8_0_OR_GREATER
+                if (obj is ClaimPosition position)
+                    return Encoding.UTF8.GetString(_tokenAsMemory.Slice(position.StartIndex, position.Length).Span);
+#endif
                 return obj.ToString();
             }
-#endif
             return string.Empty;
         }
 
@@ -226,15 +209,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         // Similar to GetStringValue but returns the bytes directly.
         internal ReadOnlySpan<byte> GetStringBytesValue(string key)
         {
-            if (_jsonClaimsBytes.TryGetValue(key, out (int StartIndex, int Length)? location))
+            if (_jsonClaims.TryGetValue(key, out object obj))
             {
-                if (!location.HasValue)
+                if (obj == null)
                     return null;
 
-                return _tokenAsMemory.Slice(location.Value.StartIndex, location.Value.Length).Span;
+                if (obj is ClaimPosition position)
+                    return _tokenAsMemory.Slice(position.StartIndex, position.Length).Span;
             }
 
-            return new Span<byte>();
+            return [];
         }
 #endif
 
@@ -507,11 +491,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal bool HasClaim(string claimName)
         {
-#if NET8_0_OR_GREATER
-            return _jsonClaims.ContainsKey(claimName) || _jsonClaimsBytes.ContainsKey(claimName);
-#else
             return _jsonClaims.ContainsKey(claimName);
-#endif
         }
     }
 }

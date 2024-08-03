@@ -656,10 +656,9 @@ namespace Microsoft.IdentityModel.Tokens.Json
         }
 
 #if NET8_0_OR_GREATER
-        // Mostly the same as ReadString, but this method returns the location of the string in the token.
-        internal static (int StartIndex, int Length)? ReadStringBytesLocation(
+        // Mostly the same as ReadString, but this method returns the position of the claim value in the token bytes.
+        internal static ClaimPosition ReadStringBytesLocation(
             ref Utf8JsonReader reader,
-            Memory<byte> tokenAsMemory,
             string propertyName,
             string className,
             bool read = false)
@@ -672,21 +671,12 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 throw LogHelper.LogExceptionMessage(
                     CreateJsonReaderExceptionInvalidType(ref reader, "JsonTokenType.StartArray", className, propertyName));
 
-            if (reader.ValueIsEscaped)
-            {
-                // Escaped string is always longer than unescaped
-                // Unescapes in-place
-                int bytesWritten = reader.CopyString(tokenAsMemory.Span.Slice((int)reader.TokenStartIndex, reader.ValueSpan.Length));
-
-                return ((int)reader.TokenStartIndex, bytesWritten);
-            }
-
-            var location = ((int)reader.TokenStartIndex + 1, reader.ValueSpan.Length);
+            var claimPosition = new ClaimPosition((int)reader.TokenStartIndex + 1, reader.ValueSpan.Length, reader.ValueIsEscaped);
 
             // Move to next token
             reader.Read();
 
-            return location;
+            return claimPosition;
         }
 #endif
 

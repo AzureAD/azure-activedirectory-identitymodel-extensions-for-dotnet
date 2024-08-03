@@ -90,10 +90,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// 
         /// </summary>
         /// <param name="encodedTokenMemory"></param>
+        /// <param name="readTokenHeaderValueDelegate"></param>
         /// <param name="readTokenPayloadValueDelegate"></param>
-        public JsonWebToken(ReadOnlyMemory<char> encodedTokenMemory, ReadTokenPayloadValue readTokenPayloadValueDelegate) : this(encodedTokenMemory)
+        public JsonWebToken(
+            ReadOnlyMemory<char> encodedTokenMemory,
+            ReadTokenHeaderValueDelegate readTokenHeaderValueDelegate,
+            ReadTokenPayloadValueDelegate readTokenPayloadValueDelegate) : this(encodedTokenMemory)
         {
-            ReadTokenPayloadValue = readTokenPayloadValueDelegate;
+            ReadTokenHeaderValueDelegate = readTokenHeaderValueDelegate;
+            ReadTokenPayloadValueDelegate = readTokenPayloadValueDelegate;
         }
 
         /// <summary>
@@ -153,9 +158,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// 
+        /// Called for each claim when token header is being read.
         /// </summary>
-        internal ReadTokenPayloadValue ReadTokenPayloadValue { get; set; } = ReadPayloadValue;
+        internal ReadTokenHeaderValueDelegate ReadTokenHeaderValueDelegate { get; set; } = ReadTokenHeaderValue;
+
+
+        /// <summary>
+        /// Called for each claim when token payload is being read.
+        /// </summary>
+        internal ReadTokenPayloadValueDelegate ReadTokenPayloadValueDelegate { get; set; } = ReadTokenPayloadValue;
 
         internal string ActualIssuer { get; set; }
 

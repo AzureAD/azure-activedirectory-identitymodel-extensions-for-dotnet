@@ -179,10 +179,20 @@ namespace Microsoft.IdentityModel.Tokens
     public delegate SecurityToken TransformBeforeSignatureValidation(SecurityToken token, TokenValidationParameters validationParameters);
 
     /// <summary>
-    /// Definition for ReadTokenPayloadValue.
+    /// Definition for ReadTokenHeaderValueDelegate.
+    /// Called for each claim when token header is being read.
     /// </summary>
     /// <param name="reader">Reader for the underlying token bytes.</param>
     /// <param name="claimName">The name of the claim being read.</param>
     /// <returns></returns>
-    public delegate object ReadTokenPayloadValue(ref Utf8JsonReader reader, string claimName);
+    public delegate object ReadTokenHeaderValueDelegate(ref Utf8JsonReader reader, string claimName);
+
+    /// <summary>
+    /// Definition for ReadTokenPayloadValueDelegate.
+    /// Called for each claim when token payload is being read.
+    /// </summary>
+    /// <param name="reader">Reader for the underlying token bytes.</param>
+    /// <param name="claimName">The name of the claim being read.</param>
+    /// <returns></returns>
+    public delegate object ReadTokenPayloadValueDelegate(ref Utf8JsonReader reader, string claimName);
 }

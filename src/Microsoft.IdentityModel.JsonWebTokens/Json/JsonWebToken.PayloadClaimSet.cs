@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Json;
 
 namespace Microsoft.IdentityModel.JsonWebTokens
@@ -39,7 +38,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
                     string claimName = reader.GetString();
-                    claims[claimName] = ReadTokenPayloadValue(ref reader, claimName);
+                    claims[claimName] = ReadTokenPayloadValueDelegate(ref reader, claimName);
                 }
                 // We read a JsonTokenType.StartObject above, exiting and positioning reader at next token.
                 else if (JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, false))
@@ -48,7 +47,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     break;
             };
 
+#if NET8_0_OR_GREATER
+            return new JsonClaimSet(claims, tokenPayloadAsMemory);
+#else
             return new JsonClaimSet(claims);
+#endif
         }
 
         /*
@@ -70,148 +73,73 @@ namespace Microsoft.IdentityModel.JsonWebTokens
          */
         // Default implementation
         // Read the value of the claimName from the reader into the dictionary.
-        public static object ReadPayloadValue(ref Utf8JsonReader reader, string claimName)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="claimName"></param>
+        /// <returns></returns>
+        public static object ReadTokenPayloadValue(ref Utf8JsonReader reader, string claimName)
         {
             if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Aud))
             {
-                _audiences = [];
+                List<string> _audiences = [];
                 reader.Read();
                 if (reader.TokenType == JsonTokenType.StartArray)
                 {
                     JsonSerializerPrimitives.ReadStringsSkipNulls(ref reader, _audiences, JwtRegisteredClaimNames.Aud, ClassName);
-                    claims[JwtRegisteredClaimNames.Aud] = _audiences;
                 }
                 else
                 {
                     if (reader.TokenType != JsonTokenType.Null)
                     {
                         _audiences.Add(JsonSerializerPrimitives.ReadString(ref reader, JwtRegisteredClaimNames.Aud, ClassName));
-                        claims[JwtRegisteredClaimNames.Aud] = _audiences[0];
-                    }
-                    else
-                    {
-                        claims[JwtRegisteredClaimNames.Aud] = _audiences;
                     }
                 }
+                return _audiences;
             }
             else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Azp))
             {
-                _azp = JsonSerializerPrimitives.ReadString(ref reader, JwtRegisteredClaimNames.Azp, ClassName, true);
-                claims[JwtRegisteredClaimNames.Azp] = _azp;
-            }
-            else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Exp))
-            {
-                _exp = JsonSerializerPrimitives.ReadLong(ref reader, JwtRegisteredClaimNames.Exp, ClassName, true);
-                _expDateTime = EpochTime.DateTime(_exp.Value);
-                claims[JwtRegisteredClaimNames.Exp] = _exp;
-            }
-            else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Iat))
-            {
-                _iat = JsonSerializerPrimitives.ReadLong(ref reader, JwtRegisteredClaimNames.Iat, ClassName, true);
-                _iatDateTime = EpochTime.DateTime(_iat.Value);
-                claims[JwtRegisteredClaimNames.Iat] = _iat;
-            }
-            else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Iss))
-            {
-                _iss = JsonSerializerPrimitives.ReadString(ref reader, JwtRegisteredClaimNames.Iss, ClassName, true);
-                claims[JwtRegisteredClaimNames.Iss] = _iss;
-            }
-            else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Jti))
-            {
-                _jti = JsonSerializerPrimitives.ReadString(ref reader, JwtRegisteredClaimNames.Jti, ClassName, true);
-                claims[JwtRegisteredClaimNames.Jti] = _jti;
-            }
-            else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Nbf))
-            {
-                _nbf = JsonSerializerPrimitives.ReadLong(ref reader, JwtRegisteredClaimNames.Nbf, ClassName, true);
-                _nbfDateTime = EpochTime.DateTime(_nbf.Value);
-                claims[JwtRegisteredClaimNames.Nbf] = _nbf;
-            }
-            else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Sub))
-            {
-                _sub = JsonSerializerPrimitives.ReadStringOrNumberAsString(ref reader, JwtRegisteredClaimNames.Sub, ClassName, true);
-                claims[JwtRegisteredClaimNames.Sub] = _sub;
-            }
-            else
-            {
-                string propertyName = reader.GetString();
-                claims[propertyName] = JsonSerializerPrimitives.ReadPropertyValueAsObject(ref reader, propertyName, JsonClaimSet.ClassName, true);
-            }
-        }
-
 #if NET8_0_OR_GREATER
-        private protected virtual void ReadPayloadValue(
-            ref Utf8JsonReader reader,
-            Dictionary<string, object> claims,
-            Dictionary<string, (int startIndex, int length)?> claimsBytes,
-            Memory<byte> tokenAsMemory)
-        {
-            _ = claims ?? throw LogHelper.LogArgumentNullException(nameof(claims));
-            _ = claimsBytes ?? throw LogHelper.LogArgumentNullException(nameof(claimsBytes));
-
-            if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Aud))
-            {
-                _audiences = [];
-                reader.Read();
-                if (reader.TokenType == JsonTokenType.StartArray)
-                {
-                    JsonSerializerPrimitives.ReadStringsSkipNulls(ref reader, _audiences, JwtRegisteredClaimNames.Aud, ClassName);
-                    claims[JwtRegisteredClaimNames.Aud] = _audiences;
-                }
-                else
-                {
-                    if (reader.TokenType != JsonTokenType.Null)
-                    {
-                        _audiences.Add(JsonSerializerPrimitives.ReadString(ref reader, JwtRegisteredClaimNames.Aud, ClassName));
-                        claims[JwtRegisteredClaimNames.Aud] = _audiences[0];
-                    }
-                    else
-                    {
-                        claims[JwtRegisteredClaimNames.Aud] = _audiences;
-                    }
-                }
-            }
-            else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Azp))
-            {
-                claimsBytes[JwtRegisteredClaimNames.Azp] = JsonSerializerPrimitives.ReadStringBytesLocation(ref reader, tokenAsMemory, JwtRegisteredClaimNames.Azp, ClassName, true);
+                return JsonSerializerPrimitives.ReadStringBytesLocation(ref reader, JwtRegisteredClaimNames.Azp, ClassName, true);
+#else
+                return JsonSerializerPrimitives.ReadString(ref reader, JwtRegisteredClaimNames.Azp, ClassName, true);
+#endif
             }
             else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Exp))
             {
-                _exp = JsonSerializerPrimitives.ReadLong(ref reader, JwtRegisteredClaimNames.Exp, ClassName, true);
-                _expDateTime = EpochTime.DateTime(_exp.Value);
-                claims[JwtRegisteredClaimNames.Exp] = _exp;
+                return JsonSerializerPrimitives.ReadLong(ref reader, JwtRegisteredClaimNames.Exp, ClassName, true);
             }
             else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Iat))
             {
-                _iat = JsonSerializerPrimitives.ReadLong(ref reader, JwtRegisteredClaimNames.Iat, ClassName, true);
-                _iatDateTime = EpochTime.DateTime(_iat.Value);
-                claims[JwtRegisteredClaimNames.Iat] = _iat;
+                return JsonSerializerPrimitives.ReadLong(ref reader, JwtRegisteredClaimNames.Iat, ClassName, true);
             }
             else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Iss))
             {
-                claimsBytes[JwtRegisteredClaimNames.Iss] = JsonSerializerPrimitives.ReadStringBytesLocation(ref reader, tokenAsMemory, JwtRegisteredClaimNames.Iss, ClassName, true);
+#if NET8_0_OR_GREATER
+                return JsonSerializerPrimitives.ReadStringBytesLocation(ref reader, JwtRegisteredClaimNames.Iss, ClassName, true);
+#else
+                return JsonSerializerPrimitives.ReadString(ref reader, JwtRegisteredClaimNames.Iss, ClassName, true);
+#endif
             }
             else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Jti))
             {
-                claimsBytes[JwtRegisteredClaimNames.Jti] = JsonSerializerPrimitives.ReadStringBytesLocation(ref reader, tokenAsMemory, JwtRegisteredClaimNames.Jti, ClassName, true);
+#if NET8_0_OR_GREATER
+                return JsonSerializerPrimitives.ReadStringBytesLocation(ref reader, JwtRegisteredClaimNames.Jti, ClassName, true);
+#else
+                return JsonSerializerPrimitives.ReadString(ref reader, JwtRegisteredClaimNames.Jti, ClassName, true);
+#endif
             }
             else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Nbf))
             {
-                _nbf = JsonSerializerPrimitives.ReadLong(ref reader, JwtRegisteredClaimNames.Nbf, ClassName, true);
-                _nbfDateTime = EpochTime.DateTime(_nbf.Value);
-                claims[JwtRegisteredClaimNames.Nbf] = _nbf;
+                return JsonSerializerPrimitives.ReadLong(ref reader, JwtRegisteredClaimNames.Nbf, ClassName, true);
             }
             else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Sub))
             {
-                _sub = JsonSerializerPrimitives.ReadStringOrNumberAsString(ref reader, JwtRegisteredClaimNames.Sub, ClassName, true);
-                claims[JwtRegisteredClaimNames.Sub] = _sub;
+                return JsonSerializerPrimitives.ReadStringOrNumberAsString(ref reader, JwtRegisteredClaimNames.Sub, ClassName, true);
             }
-            else
-            {
-                string propertyName = reader.GetString();
-                claims[propertyName] = JsonSerializerPrimitives.ReadPropertyValueAsObject(ref reader, propertyName, JsonClaimSet.ClassName, true);
-            }
+
+            return JsonSerializerPrimitives.ReadPropertyValueAsObject(ref reader, claimName, JsonClaimSet.ClassName, true);
         }
-#endif
     }
 }

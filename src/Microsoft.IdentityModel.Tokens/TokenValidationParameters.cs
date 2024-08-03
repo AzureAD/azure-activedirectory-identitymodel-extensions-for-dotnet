@@ -449,7 +449,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets a delegate that will be called when reading token payload claims.
         /// </summary>
-        public ReadTokenPayloadValue ReadTokenPayloadValue { get; set; }
+        public ReadTokenHeaderValueDelegate ReadTokenHeaderValue { get; set; }
+
+        /// <summary>
+        /// Gets or sets a delegate that will be called when reading token payload claims.
+        /// </summary>
+        public ReadTokenPayloadValueDelegate ReadTokenPayloadValue { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean to control if configuration required to be refreshed before token validation.

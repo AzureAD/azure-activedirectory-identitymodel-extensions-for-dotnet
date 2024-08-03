@@ -1771,7 +1771,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         }
 
         [Fact]
-        public void DerivedJsonWebToken_IsCreatedCorrectly()
+        public void ReadTokenDelegates_CalledCorrectly()
         {
             var expectedCustomClaim = "customclaim";
             var tokenStr = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
