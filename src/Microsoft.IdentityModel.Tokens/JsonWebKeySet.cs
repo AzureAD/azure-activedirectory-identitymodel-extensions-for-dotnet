@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.Tokens
         public bool SkipUnresolvedJsonWebKeys { get; set; } = DefaultSkipUnresolvedJsonWebKeys;
 
         /// <summary>
-        /// The original <see cref="string"/> used to create this instance.
+        /// The original string used to create this instance if a string was provided.
         /// </summary>
         [JsonIgnore]
         internal string JsonData
