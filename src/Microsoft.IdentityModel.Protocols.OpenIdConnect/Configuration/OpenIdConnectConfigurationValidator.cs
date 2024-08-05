@@ -39,20 +39,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
                     Succeeded = false
                 };
             }
-
-            int numberOfValidKeys = 0;
-            for (int i = 0;  i < openIdConnectConfiguration.JsonWebKeySet.Keys.Count; i++)
-                if (openIdConnectConfiguration.JsonWebKeySet.Keys[i].ConvertedSecurityKey != null)
-                    numberOfValidKeys++;
+            var numberOfValidKeys = openIdConnectConfiguration.JsonWebKeySet.Keys.Where(key => key.ConvertedSecurityKey != null).Count();
 
             if (numberOfValidKeys < MinimumNumberOfKeys)
             {
-                string convertKeyInfos = string.Join(
-                    "\n",
-                    openIdConnectConfiguration.JsonWebKeySet.Keys.Where(
-                        key => !string.IsNullOrEmpty(key.ConvertKeyInfo))
-                    .Select(key => key.Kid.ToString() + ": " + key.ConvertKeyInfo));
-
+                var convertKeyInfos = string.Join("\n", openIdConnectConfiguration.JsonWebKeySet.Keys.Where(key => !string.IsNullOrEmpty(key.ConvertKeyInfo)).Select(key => key.Kid.ToString() + ": " + key.ConvertKeyInfo));
                 return new ConfigurationValidationResult
                 {
                     ErrorMessage = LogHelper.FormatInvariant(

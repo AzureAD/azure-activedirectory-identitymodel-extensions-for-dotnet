@@ -73,27 +73,24 @@ namespace Microsoft.IdentityModel.Protocols.Tests
         {
             var docRetriever = new FileDocumentRetriever();
             var configManager = new ConfigurationManager<IssuerMetadata>("IssuerMetadata.json", new IssuerConfigurationRetriever(), docRetriever);
-            var context = new CompareContext($"{this}.ConfigurationManagerUsingCustomClass");
+            var context = new CompareContext($"{this}.GetConfiguration");
 
             var configuration = configManager.GetConfigurationAsync().Result;
             configManager.MetadataAddress = "IssuerMetadata.json";
             var configuration2 = configManager.GetConfigurationAsync().Result;
-            if (!IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer, context))
+            if (!IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer))
                 context.Diffs.Add("!IdentityComparer.AreEqual(configuration, configuration2)");
 
             // AutomaticRefreshInterval should pick up new bits.
             configManager = new ConfigurationManager<IssuerMetadata>("IssuerMetadata.json", new IssuerConfigurationRetriever(), docRetriever);
             configManager.RequestRefresh();
             configuration = configManager.GetConfigurationAsync().Result;
-            TestUtilities.SetField(configManager, "_lastRequestRefresh", DateTimeOffset.UtcNow - TimeSpan.FromHours(1));
+            TestUtilities.SetField(configManager, "_lastRefresh", DateTimeOffset.UtcNow - TimeSpan.FromHours(1));
             configManager.MetadataAddress = "IssuerMetadata2.json";
             configManager.RequestRefresh();
-
-            // Wait for the refresh to complete.
-            Thread.Sleep(50);
             configuration2 = configManager.GetConfigurationAsync().Result;
             if (IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer))
-                context.Diffs.Add("IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer)");
+                context.Diffs.Add("IdentityComparer.AreEqual(configuration, configuration2)");
 
             TestUtilities.AssertFailIfErrors(context);
         }
