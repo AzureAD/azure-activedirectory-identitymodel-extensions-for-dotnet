@@ -14,7 +14,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
 
         public IList<SecurityKey> ExpectedSigningKeys { get; set; }
 
-        public string Json { get; set; }
+        public string Json { get; set; } = string.Empty;
 
         public JsonWebKeySet JsonWebKeySet { get; set; }
     }

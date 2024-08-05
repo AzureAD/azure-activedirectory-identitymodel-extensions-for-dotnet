@@ -103,13 +103,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// The original <see cref="string"/> used to create this instance.
         /// </summary>
         [JsonIgnore]
-        public string JsonData
+        internal string JsonData
         {
             get
             {
                 return _jsonData;
             }
-            internal set
+            set
             {
                 _jsonData = value;
             }

@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                 // compare our utf8Reader with expected value
                 if (!IdentityComparer.AreEqual(jsonWebKeySetUtf8Reader, theoryData.JsonWebKeySet, context))
                 {
-                    context.Diffs.Add("jsonWebKeySetUtf8Reader != theoryData.JsonWebKeySet1");
+                    context.Diffs.Add("jsonWebKeySetUtf8Reader != theoryData.JsonWebKeySet");
                     context.Diffs.Add("=========================================");
                 }
             }

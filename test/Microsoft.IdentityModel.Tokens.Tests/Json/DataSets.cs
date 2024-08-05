@@ -729,10 +729,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
         {
             get
             {
-                JsonWebKeySet jsonWebKeySet = new JsonWebKeySet();
-                jsonWebKeySet.Keys.Add(JsonWebKey1);
-                jsonWebKeySet.Keys.Add(JsonWebKey2);
-                jsonWebKeySet.JsonData = JsonWebKeySetString1;
+                JsonWebKeySet jsonWebKeySet = new JsonWebKeySet(JsonWebKeySetString1);
 
                 return jsonWebKeySet;
             }
