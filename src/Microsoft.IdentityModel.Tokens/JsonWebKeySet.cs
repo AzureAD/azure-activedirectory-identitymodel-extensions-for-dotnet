@@ -54,6 +54,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (string.IsNullOrEmpty(json))
                 throw LogHelper.LogArgumentNullException(nameof(json));
+
             _jsonData = json;
 
             try
