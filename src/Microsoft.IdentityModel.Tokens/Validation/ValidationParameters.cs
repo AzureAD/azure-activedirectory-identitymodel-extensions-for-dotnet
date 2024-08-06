@@ -33,6 +33,7 @@ namespace Microsoft.IdentityModel.Tokens
         private SignatureValidatorDelegate _signatureValidator;
         private TokenReplayValidatorDelegate _tokenReplayValidator = Validators.ValidateTokenReplay;
         private TypeValidatorDelegate _typeValidator = Validators.ValidateTokenType;
+        private IssuerSigningKeyValidatorDelegate _issuerSigningKeyValidator = Validators.ValidateIssuerSigningKey;
 
         /// <summary>
         /// This is the default value of <see cref="ClaimsIdentity.AuthenticationType"/> when creating a <see cref="ClaimsIdentity"/>.
@@ -274,7 +275,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// If both <see cref="IssuerSigningKeyValidatorUsingConfiguration"/> and <see cref="IssuerSigningKeyValidator"/> are set, IssuerSigningKeyResolverUsingConfiguration takes
         /// priority.
         /// </remarks>
-        public IssuerSigningKeyValidator IssuerSigningKeyValidator { get; set; }
+        public IssuerSigningKeyValidatorDelegate IssuerSigningKeyValidator
+        {
+            get => _issuerSigningKeyValidator;
+            set => _issuerSigningKeyValidator = value ?? throw new ArgumentNullException(nameof(value), "IssuerSigningKeyValidator cannot be set as null.");
+        }
 
         /// <summary>
         /// Gets a <see cref="IDictionary{TKey, TValue}"/> that is unique to this instance.
