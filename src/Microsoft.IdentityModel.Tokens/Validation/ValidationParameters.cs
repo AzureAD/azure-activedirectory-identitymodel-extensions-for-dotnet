@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Claims;
+using System.Threading;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
@@ -20,7 +21,7 @@ namespace Microsoft.IdentityModel.Tokens
         private string _nameClaimType = ClaimsIdentity.DefaultNameClaimType;
         private string _roleClaimType = ClaimsIdentity.DefaultRoleClaimType;
         private Dictionary<string, object> _instancePropertyBag;
-        private IList<string> _validIssuers = [];
+        private IList<string> _validIssuers;
         private IList<string> _validTokenTypes = [];
 
         private AlgorithmValidatorDelegate _algorithmValidator = Validators.ValidateAlgorithm;
@@ -90,7 +91,7 @@ namespace Microsoft.IdentityModel.Tokens
             ValidateWithLKG = other.ValidateWithLKG;
             ValidAlgorithms = other.ValidAlgorithms;
             ValidAudiences = other.ValidAudiences;
-            ValidIssuers = other.ValidIssuers;
+            _validIssuers = other.ValidIssuers;
             ValidTypes = other.ValidTypes;
         }
 
@@ -518,16 +519,14 @@ namespace Microsoft.IdentityModel.Tokens
         public IList<string> ValidAudiences { get; }
 
         /// <summary>
-        /// Gets or sets the <see cref="IList{String}"/> that contains valid issuers that will be used to check against the token's issuer.
+        /// Gets the <see cref="IList{String}"/> that contains valid issuers that will be used to check against the token's issuer.
         /// The default is an empty collection.
         /// </summary>
-        /// <exception cref="ArgumentNullException">Thrown when the value is set as null.</exception>
         /// <returns>The <see cref="IList{String}"/> that contains valid issuers that will be used to check against the token's 'iss' claim.</returns>
-        public IList<string> ValidIssuers
-        {
-            get { return _validIssuers; }
-            set { _validIssuers = value ?? throw new ArgumentNullException(nameof(value), "ValidIssuers cannot be set as null."); }
-        }
+        public IList<string> ValidIssuers =>
+            _validIssuers ??
+            Interlocked.CompareExchange(ref _validIssuers, [], null) ??
+            _validIssuers;
 
         /// <summary>
         /// Gets the <see cref="IList{String}"/> that contains valid types that will be used to check against the JWT header's 'typ' claim.

@@ -92,7 +92,7 @@ namespace Microsoft.IdentityModel.Tokens
                 configuration = await validationParameters.ConfigurationManager.GetBaseConfigurationAsync(cancellationToken).ConfigureAwait(false);
 
             // Return failed IssuerValidationResult if all possible places to validate against are null or empty.
-            if (validationParameters.ValidIssuers.IsNullOrEmpty() && string.IsNullOrWhiteSpace(configuration?.Issuer))
+            if (validationParameters.ValidIssuers.Count == 0 && string.IsNullOrWhiteSpace(configuration?.Issuer))
             {
                 return new IssuerValidationResult(
                     issuer,
