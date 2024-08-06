@@ -30,33 +30,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests.Validation
         }
 
         [Fact]
-        public void ValidTypes_Get_ReturnsValidTokenTypes()
+        public void ValidTypes_Get_ReturnsEmptyList()
         {
             var validationParameters = new ValidationParameters();
-            var validTokenTypes = new List<string> { "JWT", "SAML" };
-            validationParameters.ValidTypes = validTokenTypes;
-
-            var result = validationParameters.ValidTypes;
-
-            Assert.Equal(validTokenTypes, result);
-        }
-
-        [Fact]
-        public void ValidTypes_Set_UpdatesValidTokenTypes()
-        {
-            var validationParameters = new ValidationParameters();
-            var validTokenTypes = new List<string> { "JWT", "SAML" };
-
-            validationParameters.ValidTypes = validTokenTypes;
-
-            Assert.Equal(validTokenTypes, validationParameters.ValidTypes);
-        }
-
-        [Fact]
-        public void ValidTypes_Set_Null_ThrowsArgumentNullException()
-        {
-            var validationParameters = new ValidationParameters();
-            Assert.Throws<ArgumentNullException>(() => validationParameters.ValidTypes = null);
+            Assert.Equal(0, validationParameters.ValidTypes.Count);
+            Assert.True(validationParameters.ValidTypes is IList<string>);
         }
     }
 }
