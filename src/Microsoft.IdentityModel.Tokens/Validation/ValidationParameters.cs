@@ -652,7 +652,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return this;
             }
 
-            public Builder WithIssuerSigningKeyResolver(IssuerSigningKeyResolver issuerSigningKeyResolver)
+            public Builder WithIssuerSigningKeyResolver(IssuerSigningKeyResolverDelegate issuerSigningKeyResolver)
             {
                 _validationParameters.IssuerSigningKeyResolver = issuerSigningKeyResolver;
                 return this;
@@ -712,7 +712,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return this;
             }
 
-            public Builder WithSignatureValidator(SignatureValidator signatureValidator)
+            public Builder WithSignatureValidator(SignatureValidatorDelegate signatureValidator)
             {
                 _validationParameters.SignatureValidator = signatureValidator;
                 return this;
