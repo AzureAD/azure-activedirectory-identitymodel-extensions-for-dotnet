@@ -265,7 +265,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var compareContext = new CompareContext();
 
             TokenValidationParameters validationParameters = CreateTokenValidationParameters();
-           
+
             compareContext.PropertiesToIgnoreWhenComparing.Add(typeof(TokenValidationParameters), new List<string> { "InstancePropertyBag", "IsClone" });
             TokenValidationParameters validationParametersClone = validationParameters.Clone();
             IdentityComparer.AreEqual(validationParametersClone, validationParameters, compareContext);

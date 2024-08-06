@@ -298,7 +298,7 @@ namespace Microsoft.IdentityModel.Logging
                 // Obtain the current library version dynamically.
                 WriteAlways(string.Format(CultureInfo.InvariantCulture, _versionLogMessage, typeof(IdentityModelEventSource).GetTypeInfo().Assembly.GetName().Version.ToString()));
                 WriteAlways(string.Format(CultureInfo.InvariantCulture, _dateLogMessage, DateTime.UtcNow));
-                if (ShowPII) 
+                if (ShowPII)
                     WriteAlways(_piiOnLogMessage);
                 else
                     WriteAlways(_piiOffLogMessage);
@@ -340,7 +340,7 @@ namespace Microsoft.IdentityModel.Logging
         {
             get; set;
         }
-        
+
         private static string PrepareMessage(EventLevel level, string message, params object[] args)
         {
             if (message == null)

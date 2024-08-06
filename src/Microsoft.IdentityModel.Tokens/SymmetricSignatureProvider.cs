@@ -3,11 +3,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
+
+#if NET6_0_OR_GREATER
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+#endif
 
 namespace Microsoft.IdentityModel.Tokens
 {

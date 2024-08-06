@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         internal JsonClaimSet CreateHeaderClaimSet(ReadOnlySpan<byte> byteSpan)
-        { 
+        {
             Utf8JsonReader reader = new(byteSpan);
             if (!JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, true))
                 throw LogHelper.LogExceptionMessage(

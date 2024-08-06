@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             get
             {
                 String[] validTypesNoJwt = { "ID Token", "Refresh Token", "Access Token" };
-                String[] validTypesWithJwt = { "ID Token", "Refresh Token", "Access Token", "JWT" }; 
+                String[] validTypesWithJwt = { "ID Token", "Refresh Token", "Access Token", "JWT" };
 
                 return new TheoryData<TokenTypeTheoryData>
                 {

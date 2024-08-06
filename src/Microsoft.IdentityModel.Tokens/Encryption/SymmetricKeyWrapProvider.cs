@@ -296,7 +296,7 @@ namespace Microsoft.IdentityModel.Tokens
                 }
             }
 
-           if (Utility.AreEqual(a, _defaultIV))
+            if (Utility.AreEqual(a, _defaultIV))
             {
                 var keyBytes = new byte[n << 3];
 

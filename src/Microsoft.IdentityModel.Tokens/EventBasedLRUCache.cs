@@ -267,7 +267,7 @@ namespace Microsoft.IdentityModel.Tokens
                     node = nextNode;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 if (LogHelper.IsEnabled(EventLogLevel.Warning))
                     LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10902, LogHelper.MarkAsNonPII(nameof(RemoveExpiredValuesLRU)), ex));
@@ -299,7 +299,7 @@ namespace Microsoft.IdentityModel.Tokens
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 if (LogHelper.IsEnabled(EventLogLevel.Warning))
                     LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10902, LogHelper.MarkAsNonPII(nameof(ProcessCompactedValues)), ex));
@@ -331,7 +331,7 @@ namespace Microsoft.IdentityModel.Tokens
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 if (LogHelper.IsEnabled(EventLogLevel.Warning))
                     LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX10906, LogHelper.MarkAsNonPII(nameof(ProcessCompactedValues)), ex));
@@ -541,7 +541,7 @@ namespace Microsoft.IdentityModel.Tokens
             // the caller's TaskScheduler (if there is one) as some custom TaskSchedulers might be single-threaded and its execution can be blocked.
             if (Interlocked.CompareExchange(ref _eventQueueTaskState, EventQueueTaskRunning, EventQueueTaskStopped) == EventQueueTaskStopped)
             {
-                _  = Task.Run(EventQueueTaskAction);
+                _ = Task.Run(EventQueueTaskAction);
             }
         }
 

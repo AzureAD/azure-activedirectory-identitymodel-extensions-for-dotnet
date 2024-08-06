@@ -13,7 +13,7 @@ namespace Microsoft.IdentityModel.Tokens
     public class SecurityTokenInvalidTypeException : SecurityTokenValidationException
     {
         [NonSerialized]
-        const string _Prefix = "Microsoft.IdentityModel." + nameof(SecurityTokenInvalidTypeException) +".";
+        const string _Prefix = "Microsoft.IdentityModel." + nameof(SecurityTokenInvalidTypeException) + ".";
 
         [NonSerialized]
         const string _InvalidTypeKey = _Prefix + nameof(InvalidType);

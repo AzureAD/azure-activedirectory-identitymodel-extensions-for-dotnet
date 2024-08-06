@@ -30,7 +30,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Xml;
-using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 using static Microsoft.IdentityModel.Xml.XmlUtil;
@@ -203,10 +202,10 @@ namespace Microsoft.IdentityModel.Xml
                 // see: https://www.w3.org/TR/2001/PR-xmldsig-core-20010820/#sec-ReferenceProcessingModel
                 // - If the data object is a node-set and the next transform requires octets, the signature application 
                 //   MUST attempt to convert the node-set to an octet stream using the specified canonicalization algorithm.
-                for (int i = 0;  i < Transforms.Count; i++)
+                for (int i = 0; i < Transforms.Count; i++)
                     TokenStream = Transforms[i].Process(TokenStream);
-                
-                if (CanonicalizingTransfrom == null) 
+
+                if (CanonicalizingTransfrom == null)
                     return ProcessAndDigest(TokenStream, hashAlg);
 
                 // only run canonicalizing transform if it was specified

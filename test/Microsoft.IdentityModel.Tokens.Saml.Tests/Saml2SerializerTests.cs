@@ -357,7 +357,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                 theoryData.ExpectedException.ProcessNoException();
 
                 IdentityComparer.AreEqual(statement, theoryData.AuthorizationDecision, context);
-                
+
             }
             catch (Exception ex)
             {
@@ -422,7 +422,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                             NotOnOrAfter = DateTime.ParseExact("2017-03-18T18:33:37.080Z", Saml2Constants.AcceptedDateTimeFormats, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.None)
                         },
                         Xml = @"<Conditions NotBefore=""2017-03-17T18:33:37.080Z"" NotOnOrAfter=""2017-03-18T18:33:37.080Z"" xmlns=""urn:oasis:names:tc:SAML:2.0:assertion""/>",
-                        First = true, 
+                        First = true,
                         Saml2Serializer = new Saml2SerializerPublic(),
                         TestId = "Saml2ConditionsEmpty"
                     }

@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 Assert.Throws<PlatformNotSupportedException>(() => new AuthenticatedEncryptionProvider(Default.SymmetricEncryptionKey256, SecurityAlgorithms.Aes256Gcm));
             }
             else
-            { 
+            {
                 var context = new CompareContext();
                 try
                 {
@@ -309,7 +309,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var keys128_256 = new List<SymmetricSecurityKey> { Default.SymmetricEncryptionKey512, Default.SymmetricEncryptionKey768, Default.SymmetricEncryptionKey1024, Default.SymmetricEncryptionKey256, Default.SymmetricEncryptionKey384 };
 
             for (int i = 0; i < keys128.Count - 1; i++)
-                for(int j = i + 1; j < keys128.Count; j++)
+                for (int j = i + 1; j < keys128.Count; j++)
                     AddDecryptMismatchTheoryData(
                         "Test1-" + i.ToString() + "-" + j.ToString(),
                         keys128[i],
@@ -414,7 +414,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-#region DisposeTests
+        #region DisposeTests
         public static TheoryData<AuthenticatedEncryptionTheoryData> DisposeTheoryData()
         {
             var theoryData = new TheoryData<AuthenticatedEncryptionTheoryData>();
@@ -637,7 +637,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             return theoryData;
         }
-#endregion
+        #endregion
 
         [Theory, MemberData(nameof(EncryptDecryptTheoryData))]
         public void EncryptDecrypt(AuthenticatedEncryptionTheoryData theoryData)
@@ -679,9 +679,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             AddEncryptDecryptTheoryData("Test8", SecurityAlgorithms.Aes256CbcHmacSha512, Default.SymmetricEncryptionKey1024, theoryData);
 
             // Encrypt parameter checking
-            AddEncryptParameterCheckTheoryData("Test9",  null,        new byte[1], theoryData);
+            AddEncryptParameterCheckTheoryData("Test9", null, new byte[1], theoryData);
             AddEncryptParameterCheckTheoryData("Test10", new byte[0], new byte[1], theoryData);
-            AddEncryptParameterCheckTheoryData("Test11", new byte[1], null,        theoryData);
+            AddEncryptParameterCheckTheoryData("Test11", new byte[1], null, theoryData);
             AddEncryptParameterCheckTheoryData("Test12", new byte[1], new byte[0], theoryData);
 
             return theoryData;

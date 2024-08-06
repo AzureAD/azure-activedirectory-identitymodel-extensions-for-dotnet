@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.SampleTests
         /// Validates the passed token using the instance of the deprecated <see cref="JwtSecurityTokenHandler"/>.
         /// </summary>
         /// <param name="token">The token to validate.</param>
-        /// <param name="tokenValidationParameters">
+        /// <param name="overrideTokenValidationParameters">
         /// The <see cref="TokenValidationParameters"/> to use instead of the instance's value.
         /// </param>
         /// <returns>A <see cref="ClaimsPrincipal"/> representing the claims from the passed JWT.</returns>

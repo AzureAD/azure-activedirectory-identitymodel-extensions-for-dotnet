@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 {
                     //KeyInfoTest(KeyInfoTestSet.MalformedCertificate, new ExpectedException(typeof(XmlReadException), "IDX30017:", typeof(FormatException)), true),
                     KeyInfoTest(KeyInfoTestSet.KeyInfoFullyPopulated),
-                    KeyInfoTest(KeyInfoTestSet.MultipleCertificates), 
+                    KeyInfoTest(KeyInfoTestSet.MultipleCertificates),
                     KeyInfoTest(KeyInfoTestSet.MultipleIssuerSerial, new ExpectedException(typeof(XmlReadException), "IDX30015:")),
                     KeyInfoTest(KeyInfoTestSet.MultipleSKI, new ExpectedException(typeof(XmlReadException), "IDX30015:")),
                     KeyInfoTest(KeyInfoTestSet.MultipleSubjectName, new ExpectedException(typeof(XmlReadException), "IDX30015:")),
@@ -280,7 +280,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             return new DSigSerializerTheoryData
             {
                 ExpectedException = expectedException ?? ExpectedException.NoExceptionExpected,
-                First = first,                
+                First = first,
                 Signature = testSet.Signature,
                 TestId = testSet.TestId ?? nameof(testSet),
                 Xml = testSet.Xml,
@@ -369,7 +369,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 // ExpectedException.DefaultVerbose = true;
 
                 return new TheoryData<DSigSerializerTheoryData>
-                { 
+                {
                     SignedInfoTest(SignedInfoTestSet.SignedInfoFullyPopulated)
                 };
             }
@@ -570,7 +570,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
 
                 theoryData.ExpectedException.ProcessNoException();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex);
             }

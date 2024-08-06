@@ -109,7 +109,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex, context);
             }
@@ -299,7 +299,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
                 int expectedAudClaimCount = 0;
                 int additionalAudClaimsForJwtHandler = 0;
-                
+
 
                 if (audMemberSet)
                 {
@@ -1811,7 +1811,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             get
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var securityTokenDescriptorWithAudiences = new SecurityTokenDescriptor{ Issuer = Default.Issuer };
+                var securityTokenDescriptorWithAudiences = new SecurityTokenDescriptor { Issuer = Default.Issuer };
                 foreach (var audience in Default.Audiences)
                     securityTokenDescriptorWithAudiences.Audiences.Add(audience);
 

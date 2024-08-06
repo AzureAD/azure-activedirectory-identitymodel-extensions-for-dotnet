@@ -428,7 +428,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 #endif
 
-#region DESKTOP related code
+        #region DESKTOP related code
 #if DESKTOP
         internal byte[] DecryptWithRsaCryptoServiceProviderProxy(byte[] bytes)
         {
@@ -461,7 +461,7 @@ namespace Microsoft.IdentityModel.Tokens
             return RsaCryptoServiceProviderProxy.VerifyDataWithLength(bytes, offset, length, HashAlgorithm, HashAlgorithmName, signature);
         }
 #endif
-#endregion
+        #endregion
 
     }
 }

@@ -279,7 +279,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 theoryData.Add(new SignatureProviderTheoryData
                 {
                     First = true,
-                    ExpectedException = new EE(typeof(Exception)){IgnoreExceptionType = true},
+                    ExpectedException = new EE(typeof(Exception)) { IgnoreExceptionType = true },
                     CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { ALG.RsaSha256 })
                     {
                         SigningSignatureProvider = signingSignatureProvider
@@ -923,7 +923,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Fact (Skip = "too long")]
+        [Fact(Skip = "too long")]
         public void ReferenceCountingTest_MultiThreaded()
         {
             var context = new CompareContext($"{this}.ReferenceCountingTest_MultiThreaded");
@@ -1105,7 +1105,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key,
                     KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Alg,
                     KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Enc)
-                    { CryptoProviderFactory = cryptoProviderFactory });
+            { CryptoProviderFactory = cryptoProviderFactory });
 
             JwtPayload payload = new JwtPayload("IssuerName", "Audience", testClaims, DateTime.Now.AddHours(-1), DateTime.Now.AddHours(1), DateTime.Now.AddHours(-1));
             var token = new JwtSecurityToken(header, payload);
@@ -1213,7 +1213,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// <summary>
         /// Thread proc that creates and removes providers.
         /// </summary>
-        /// <param name="obj">func creating providers (signing and verifying)</param>
+        /// <param name="factory">The input to the <paramref name="func"/>.</param>
+        /// <param name="func">func creating providers (signing and verifying).</param>
         private static void ThreadStartProcAddAndRemoveProviders(CryptoProviderFactory factory, CreateProvidersFunc func)
         {
             var cache = factory.CryptoProviderCache as InMemoryCryptoProviderCache;

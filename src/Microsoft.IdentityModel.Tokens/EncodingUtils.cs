@@ -161,7 +161,7 @@ namespace Microsoft.IdentityModel.Tokens
             TX parameter,
             Func<byte[], int, TX, T> action)
         {
-            
+
             int size = encoding.GetMaxByteCount(length);
             byte[] bytes = ArrayPool<byte>.Shared.Rent(size);
             try

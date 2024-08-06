@@ -176,7 +176,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (input == null || input.Length == 0)
                 throw LogHelper.LogArgumentNullException(nameof(input));
 
-            _  = hash ?? throw LogHelper.LogArgumentNullException(nameof(hash));
+            _ = hash ?? throw LogHelper.LogArgumentNullException(nameof(hash));
 
             return _rsa.SignData(input, offset, length, hash);
         }

@@ -4,8 +4,15 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.Serialization;
-using System.Text;
+
+#if NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
 using Microsoft.IdentityModel.Logging;
+#endif
+
+#if !NET8_0_OR_GREATER
+using System.Text;
+#endif
+
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -52,7 +59,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
         /// <param name="context">The contextual information about the source or destination.</param>
 #if NET8_0_OR_GREATER
-        [Obsolete("Formatter-based serialization is obsolete", DiagnosticId = "SYSLIB0051")] 
+        [Obsolete("Formatter-based serialization is obsolete", DiagnosticId = "SYSLIB0051")]
 #endif
         protected SecurityTokenException(SerializationInfo info, StreamingContext context)
             : base(info, context)

@@ -338,7 +338,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                         TestId = "ValidRsa"
                     },
                     new JwkThumbprintTheoryData
-                    { 
+                    {
                         JWK = new JsonWebKey()
                         {
                             Kty = JsonWebAlgorithmsKeyTypes.EllipticCurve,

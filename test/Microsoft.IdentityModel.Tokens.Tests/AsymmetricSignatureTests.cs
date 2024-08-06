@@ -145,7 +145,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     },
                     theoryData);
 
-                 foreach (var certTuple in AsymmetricSignatureTestData.Certificates)
+                foreach (var certTuple in AsymmetricSignatureTestData.Certificates)
                     AsymmetricSignatureTestData.AddRsaPssAlgorithmVariations(new SignatureProviderTheoryData
                     {
                         SigningKey = new RsaSecurityKey(certTuple.Item1.PrivateKey as RSA),

@@ -111,7 +111,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             public override string ToString()
             {
-                    return TestId + ", " + Algorithm + ", " + Key.KeyId;
+                return TestId + ", " + Algorithm + ", " + Key.KeyId;
             }
         }
     }

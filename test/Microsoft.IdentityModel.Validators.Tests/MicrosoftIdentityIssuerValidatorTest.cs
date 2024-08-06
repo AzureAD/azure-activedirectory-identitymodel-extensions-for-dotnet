@@ -816,7 +816,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
                 return ValidatorConstants.AuthorityV1PPE;
             };
-           
+
             var context = new CompareContext();
             var tidClaim = new Claim(ValidatorConstants.ClaimNameTid, ValidatorConstants.TenantIdAsGuid);
 
@@ -826,7 +826,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
             var authority = authorityUrlProvider(authorityVersion);
             var aadIssuerValidator = AadIssuerValidator.GetAadIssuerValidator(authority, _httpClient);
-                        
+
             // set LKG
             var actualIssuer = aadIssuerValidator.Validate(issuer, jwtSecurityToken, new TokenValidationParameters());
             IdentityComparer.AreEqual(issuer, actualIssuer, context);
@@ -893,7 +893,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
             IdentityComparer.AreEqual(v2TokenIssuer, actualIssuer, context);
             TestUtilities.AssertFailIfErrors(context);
-                        
+
             // refresh config to a one with a broken issuer and validate with LKG
             v2ConfigurationManager.RefreshedConfiguration = v2ConfigurationRefreshed;
             v2ConfigurationManager.RequestRefresh();
@@ -907,7 +907,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             var v1JwtSecurityToken = new JwtSecurityToken(issuer: v1TokenIssuer, claims: new[] { issClaim, tidClaim });
 
             // before testing v1 LKG setup v1 LKG for v2 manager for cross version validation
-            _ = aadIssuerValidator.Validate(v1TokenIssuer, v1JwtSecurityToken, new TokenValidationParameters()); 
+            _ = aadIssuerValidator.Validate(v1TokenIssuer, v1JwtSecurityToken, new TokenValidationParameters());
 
             // V1 token and authority behaves like v2 token and authority
             actualIssuer = v1AadIssuerValidator.Validate(v1TokenIssuer, v1JwtSecurityToken, new TokenValidationParameters());

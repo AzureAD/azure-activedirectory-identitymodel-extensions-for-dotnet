@@ -229,7 +229,7 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
     }
-  
+
     // https://datatracker.ietf.org/doc/html/rfc7518#appendix-A.3
     // B.3.  Test Cases for AES_256_CBC_HMAC_SHA_512
     public static class AES_256_CBC_HMAC_SHA_512

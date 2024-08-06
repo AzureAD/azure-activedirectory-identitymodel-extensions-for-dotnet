@@ -1169,7 +1169,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             if (audienceRestriction == null)
                 throw LogArgumentNullException(nameof(audienceRestriction));
-            
+
             // <AudienceRestrictionCondition>
             writer.WriteStartElement(Prefix, SamlConstants.Elements.AudienceRestrictionCondition, SamlConstants.Namespace);
 

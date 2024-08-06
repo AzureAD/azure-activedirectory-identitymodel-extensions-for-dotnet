@@ -73,7 +73,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                         if (propertyName.Equals(JsonWebKeyParameterNames.Keys, StringComparison.OrdinalIgnoreCase))
                             ReadKeys(ref reader, jsonWebKeySet);
                         else
-                            jsonWebKeySet.AdditionalData[propertyName] = JsonSerializerPrimitives.ReadPropertyValueAsObject(ref reader,JsonWebKeyParameterNames.Keys, JsonWebKeySet.ClassName);
+                            jsonWebKeySet.AdditionalData[propertyName] = JsonSerializerPrimitives.ReadPropertyValueAsObject(ref reader, JsonWebKeyParameterNames.Keys, JsonWebKeySet.ClassName);
                     }
                 }
                 // We read a JsonTokenType.StartObject above, exiting and positioning reader at next token.

@@ -8,6 +8,7 @@
     <DelaySign>true</DelaySign>
     <Description>Microsoft.IdentityModel.TestExtensions</Description>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>Microsoft.IdentityModel.TestExtensions</PackageId>
     <SignAssembly>true</SignAssembly>
     <Nullable>enable</Nullable>

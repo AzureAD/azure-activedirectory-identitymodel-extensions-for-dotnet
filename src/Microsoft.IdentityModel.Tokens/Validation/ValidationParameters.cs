@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Claims;
-using System.Threading;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
@@ -116,7 +115,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// If no delegate is set, the default implementation will be used. The default checks the algorithm
         /// against the <see cref="ValidAlgorithms"/> property, if present. If not, it will succeed.
         /// </remarks>
-        public AlgorithmValidatorDelegate AlgorithmValidator {
+        public AlgorithmValidatorDelegate AlgorithmValidator
+        {
             get { return _algorithmValidator; }
             set { _algorithmValidator = value ?? throw new ArgumentNullException(nameof(value), "AlgorithmValidator cannot be null."); }
         }

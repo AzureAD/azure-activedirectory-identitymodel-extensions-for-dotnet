@@ -245,7 +245,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             return json;
         }
 
-        public static void SetAdditionalDataKeysToUpperCase(IDictionary<string,object> additionalData)
+        public static void SetAdditionalDataKeysToUpperCase(IDictionary<string, object> additionalData)
         {
             List<string> keys = [.. additionalData.Keys];
 

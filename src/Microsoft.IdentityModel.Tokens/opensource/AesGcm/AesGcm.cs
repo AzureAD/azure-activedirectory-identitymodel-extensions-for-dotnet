@@ -48,12 +48,12 @@ namespace Microsoft.IdentityModel.Tokens
             AesAead.Decrypt(_keyHandle, nonce, associatedData, ciphertext, tag, plaintext, clearPlaintextOnFailure: true);
         }
 
-#region FOR TESTING ONLY
+        #region FOR TESTING ONLY
         internal void Encrypt(byte[] nonce, byte[] plaintext, byte[] ciphertext, byte[] tag, byte[] associatedData = null)
         {
             AesAead.CheckArgumentsForNull(nonce, plaintext, ciphertext, tag);
             AesAead.Encrypt(_keyHandle, nonce, associatedData, plaintext, ciphertext, tag);
         }
-#endregion
+        #endregion
     }
 }

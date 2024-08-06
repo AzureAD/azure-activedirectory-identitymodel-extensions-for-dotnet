@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
 
                     // read and verify signatures
                     EnvelopedSignatureReader envelopedReader = new EnvelopedSignatureReader(XmlUtilities.CreateDictionaryReader(Encoding.UTF8.GetString(buffer.ToArray())));
-                    while (envelopedReader.Read());
+                    while (envelopedReader.Read()) ;
 
                     envelopedReader.Signature.Verify(theoryData.SigningCredentials.Key, theoryData.SigningCredentials.Key.CryptoProviderFactory);
                     theoryData.ExpectedException.ProcessNoException(context);
@@ -113,12 +113,12 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
                 theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha512Signature, null, SecurityAlgorithms.RsaSha512Signature + "_DigestNULL"));
 
 #if NET_CORE
-               theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSsaPssSha256, null, SecurityAlgorithms.RsaSsaPssSha256 + "_DigestNULL"));
-               theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSsaPssSha256Signature, null, SecurityAlgorithms.RsaSsaPssSha256Signature + "_DigestNULL"));
-               theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSsaPssSha384, null, SecurityAlgorithms.RsaSsaPssSha384 + "_DigestNULL"));
-               theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSsaPssSha384Signature, null, SecurityAlgorithms.RsaSsaPssSha384Signature + "_DigestNULL"));
-               theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSsaPssSha512, null, SecurityAlgorithms.RsaSsaPssSha512 + "_DigestNULL"));
-               theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSsaPssSha512Signature, null, SecurityAlgorithms.RsaSsaPssSha512Signature + "_DigestNULL"));
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSsaPssSha256, null, SecurityAlgorithms.RsaSsaPssSha256 + "_DigestNULL"));
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSsaPssSha256Signature, null, SecurityAlgorithms.RsaSsaPssSha256Signature + "_DigestNULL"));
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSsaPssSha384, null, SecurityAlgorithms.RsaSsaPssSha384 + "_DigestNULL"));
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSsaPssSha384Signature, null, SecurityAlgorithms.RsaSsaPssSha384Signature + "_DigestNULL"));
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSsaPssSha512, null, SecurityAlgorithms.RsaSsaPssSha512 + "_DigestNULL"));
+                theoryData.Add(CreateSignatureTestCase(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSsaPssSha512Signature, null, SecurityAlgorithms.RsaSsaPssSha512Signature + "_DigestNULL"));
 #endif
 
                 // Symmetric

@@ -42,9 +42,9 @@ namespace Microsoft.IdentityModel.Logging.Tests
         public void MarkAsSecurityArtifact_ArgumentIsNull_NoException()
         {
             // Asserting no exception is thrown for a null argument
-             LogHelper.MarkAsSecurityArtifact(null,
-                obj => string.Format(SafeFormat, obj),
-                obj => string.Format(UnsafeFormat, obj));
+            LogHelper.MarkAsSecurityArtifact(null,
+               obj => string.Format(SafeFormat, obj),
+               obj => string.Format(UnsafeFormat, obj));
         }
 
         [Fact]

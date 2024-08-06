@@ -318,16 +318,16 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 new SecurityTokenInvalidSigningKeyException()))
                         },
                     };
-                }
             }
         }
-
-        public class SigningKeyValidationTheoryData: TheoryDataBase
-        {
-            public SecurityKey SecurityKey { get; set; }
-            public SecurityToken SecurityToken { get; set; }
-            public TokenValidationParameters ValidationParameters { get; set; }
-            public BaseConfiguration BaseConfiguration { get; set; }
-            internal SigningKeyValidationResult SigningKeyValidationResult { get; set; }
-        }
     }
+
+    public class SigningKeyValidationTheoryData : TheoryDataBase
+    {
+        public SecurityKey SecurityKey { get; set; }
+        public SecurityToken SecurityToken { get; set; }
+        public TokenValidationParameters ValidationParameters { get; set; }
+        public BaseConfiguration BaseConfiguration { get; set; }
+        internal SigningKeyValidationResult SigningKeyValidationResult { get; set; }
+    }
+}

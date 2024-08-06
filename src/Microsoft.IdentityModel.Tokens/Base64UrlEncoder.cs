@@ -3,11 +3,12 @@
 
 using System;
 using System.Buffers;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.IdentityModel.Logging;
+
+#if NETCOREAPP
+using System.Runtime.CompilerServices;
+#endif
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -159,7 +160,7 @@ namespace Microsoft.IdentityModel.Tokens
                     }
                     break;
 
-                //default or case 0: no further operations are needed.
+                    //default or case 0: no further operations are needed.
             }
 
             return j;

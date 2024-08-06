@@ -43,6 +43,6 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
         /// <param name="context">The contextual information about the source or destination.</param>
         protected WsFederationReadException(SerializationInfo info, StreamingContext context)
             : base(info, context)
-        {}
+        { }
     }
 }

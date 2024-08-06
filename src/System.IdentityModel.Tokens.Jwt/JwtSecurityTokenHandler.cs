@@ -35,7 +35,7 @@ namespace System.IdentityModel.Tokens.Jwt
         private Dictionary<string, string> _outboundAlgorithmMap;
         private static string _shortClaimType = _namespace + "/ShortTypeName";
         private bool _mapInboundClaims = DefaultMapInboundClaims;
-       
+
         /// <summary>
         /// Default claim type mapping for inbound claims.
         /// </summary>
@@ -1268,7 +1268,7 @@ namespace System.IdentityModel.Tokens.Jwt
             var header = jwtToken.EncryptingCredentials == null ? jwtToken.Header : new JwtHeader(jwtToken.SigningCredentials);
             encodedHeader = header.Base64UrlEncode();
             if (jwtToken.SigningCredentials != null)
-                encodedSignature =  JwtTokenUtilities.CreateEncodedSignature(string.Concat(encodedHeader, ".", encodedPayload), jwtToken.SigningCredentials);
+                encodedSignature = JwtTokenUtilities.CreateEncodedSignature(string.Concat(encodedHeader, ".", encodedPayload), jwtToken.SigningCredentials);
 
             if (jwtToken.EncryptingCredentials != null)
                 return EncryptToken(

@@ -415,7 +415,7 @@ namespace Microsoft.IdentityModel.TestUtils
             get => "<{0}{1} {2} = \"{3}\" {4} />";
         }
 
-        public static string TransformXml(string prefix, string attributeName, string algorithm, string @namespace )
+        public static string TransformXml(string prefix, string attributeName, string algorithm, string @namespace)
         {
             return string.Format(TransformTemplate, prefix, XmlSignatureConstants.Elements.Transform, attributeName, algorithm, @namespace);
         }

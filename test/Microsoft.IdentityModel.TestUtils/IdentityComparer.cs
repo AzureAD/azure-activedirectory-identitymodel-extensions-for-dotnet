@@ -1697,7 +1697,7 @@ namespace Microsoft.IdentityModel.TestUtils
             if (str1 == null)
                 localContext.Diffs.Add($"({name1} == null, {name2} == {str2}.");
 
-            if(str2 == null)
+            if (str2 == null)
                 localContext.Diffs.Add($"({name1} == {str1}, {name2} == null.");
 
             if (!string.Equals(str1, str2, context.StringComparison))
@@ -1924,8 +1924,8 @@ namespace Microsoft.IdentityModel.TestUtils
                 bool skipProperty = false;
                 if (context.PropertiesToIgnoreWhenComparing != null && context.PropertiesToIgnoreWhenComparing.TryGetValue(type, out List<string> propertiesToIgnore))
                 {
-                    foreach(var val in propertiesToIgnore)
-                        if(string.Equals(val, propertyInfo.Name, StringComparison.OrdinalIgnoreCase))
+                    foreach (var val in propertiesToIgnore)
+                        if (string.Equals(val, propertyInfo.Name, StringComparison.OrdinalIgnoreCase))
                         {
                             skipProperty = true;
                             break;

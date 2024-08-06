@@ -108,7 +108,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                         LogHelper.MarkAsNonPII(reader.CurrentDepth),
                         LogHelper.MarkAsNonPII(reader.BytesConsumed))));
 
-            while(true)
+            while (true)
             {
                 #region Check property name using ValueTextEquals
                 // common names are tried first
