@@ -2,12 +2,14 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
+using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
@@ -28,7 +30,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         [Fact]
         public async Task FromFile()
         {
-            var context = new CompareContext();
+            var context = new CompareContext
+            {
+                PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+                {
+                    // If the objects being compared are created from the same string and they are equal, the string itself can be ignored.
+                    // The strings may not be equal because of whitespace, but the json they represent is semantically identical.
+                    { typeof(JsonWebKeySet), [ "JsonData" ] },
+                }
+            };
             var configuration = await GetConfigurationAsync(
                 OpenIdConfigData.JsonFile,
                 ExpectedException.NoExceptionExpected,
@@ -52,7 +62,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         [Fact]
         public async Task FromJson()
         {
-            var context = new CompareContext();
+            var context = new CompareContext
+            {
+                PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+                {
+                    // If the objects being compared are created from the same string and they are equal, the string itself can be ignored.
+                    // The strings may not be equal because of whitespace, but the json they represent is semantically identical.
+                    { typeof(JsonWebKeySet), [ "JsonData" ] },
+                }
+            };
             var configuration = await GetConfigurationFromMixedAsync(
                 OpenIdConfigData.OpenIdConnectMetadataPingString,
                 expectedException: ExpectedException.NoExceptionExpected);

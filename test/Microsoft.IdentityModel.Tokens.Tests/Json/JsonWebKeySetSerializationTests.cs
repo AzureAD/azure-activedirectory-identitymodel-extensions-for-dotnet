@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -17,6 +18,12 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
         public void Serialize(JsonWebKeySetTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.Serialize", theoryData);
+            context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+            {
+                // If the objects being compared are created from the same string and they are equal, the string itself can be ignored.
+                // The strings may not be equal because of whitespace, but the json they represent is semantically identical.
+                { typeof(JsonWebKeySet), [ "JsonData" ] },
+            };
 
             try
             {
@@ -29,7 +36,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                 // compare our utf8Reader with expected value
                 if (!IdentityComparer.AreEqual(jsonWebKeySetUtf8Reader, theoryData.JsonWebKeySet, context))
                 {
-                    context.Diffs.Add("jsonWebKeySetUtf8Reader != theoryData.JsonWebKeySet1");
+                    context.Diffs.Add("jsonWebKeySetUtf8Reader != theoryData.JsonWebKeySet");
                     context.Diffs.Add("=========================================");
                 }
             }
@@ -60,6 +67,12 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
         public void Deserialize(JsonWebKeySetTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.Deserialize", theoryData);
+            context.PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+            {
+                // If the objects being compared are created from the same string and they are equal, the string itself can be ignored.
+                // The strings may not be equal because of whitespace, but the json they represent is semantically identical.
+                { typeof(JsonWebKeySet), [ "JsonData" ] },
+            };
 
             try
             {
