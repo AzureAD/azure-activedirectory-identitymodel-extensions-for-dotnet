@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Claims;
+using System.Threading;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
@@ -20,7 +21,10 @@ namespace Microsoft.IdentityModel.Tokens
         private string _nameClaimType = ClaimsIdentity.DefaultNameClaimType;
         private string _roleClaimType = ClaimsIdentity.DefaultRoleClaimType;
         private Dictionary<string, object> _instancePropertyBag;
-        private IList<string> _validTokenTypes = [];
+
+        private IList<string> _validIssuers;
+        private IList<string> _validTokenTypes;
+        private IList<string> _validAudiences;
 
         private AlgorithmValidatorDelegate _algorithmValidator = Validators.ValidateAlgorithm;
         private AudienceValidatorDelegate _audienceValidator = Validators.ValidateAudience;
@@ -88,9 +92,9 @@ namespace Microsoft.IdentityModel.Tokens
             ValidateSignatureLast = other.ValidateSignatureLast;
             ValidateWithLKG = other.ValidateWithLKG;
             ValidAlgorithms = other.ValidAlgorithms;
-            ValidAudiences = other.ValidAudiences;
-            ValidIssuers = other.ValidIssuers;
-            ValidTypes = other.ValidTypes;
+            _validIssuers = other.ValidIssuers;
+            _validAudiences = other.ValidAudiences;
+            _validTokenTypes = other.ValidTypes;
         }
 
         /// <summary>
@@ -272,7 +276,7 @@ namespace Microsoft.IdentityModel.Tokens
         public IssuerSigningKeyValidator IssuerSigningKeyValidator { get; set; }
 
         /// <summary>
-        /// Gets a <see cref="IDictionary{String, Object}"/> that is unique to this instance.
+        /// Gets a <see cref="IDictionary{TKey, TValue}"/> that is unique to this instance.
         /// Calling <see cref="Clone"/> will result in a new instance of this IDictionary.
         /// </summary>
         public IDictionary<string, object> InstancePropertyBag => _instancePropertyBag ??= new Dictionary<string, object>();
@@ -293,7 +297,7 @@ namespace Microsoft.IdentityModel.Tokens
         public IssuerSigningKeyResolver IssuerSigningKeyResolver { get; set; }
 
         /// <summary>
-        /// Gets or sets an <see cref="IList{SecurityKey}"/> used for signature validation.
+        /// Gets or sets an <see cref="IList{T}"/> used for signature validation.
         /// </summary>
         public IList<SecurityKey> IssuerSigningKeys { get; }
 
@@ -366,7 +370,7 @@ namespace Microsoft.IdentityModel.Tokens
         public Func<SecurityToken, string, string> NameClaimTypeRetriever { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="IDictionary{String, Object}"/> that contains a collection of custom key/value pairs.
+        /// Gets or sets the <see cref="IDictionary{TKey, TValue}"/> that contains a collection of custom key/value pairs.
         /// This allows addition of parameters that could be used in custom token validation scenarios.
         /// </summary>
         public IDictionary<string, object> PropertyBag { get; }
@@ -441,7 +445,7 @@ namespace Microsoft.IdentityModel.Tokens
         public ResolveTokenDecryptionKeyDelegate TokenDecryptionKeyResolver { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="IList{SecurityKey}"/> that is to be used for decrypting inbound tokens.
+        /// Gets the <see cref="IList{T}"/> that is to be used for decrypting inbound tokens.
         /// </summary>
         public IList<SecurityKey> TokenDecryptionKeys { get; internal set; }
 
@@ -513,15 +517,22 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Gets the <see cref="IList{T}"/> that contains valid audiences that will be used to check against the token's audience.
-        /// The default is <c>null</c>.
+        /// The default is an empty collection.
         /// </summary>
-        public IList<string> ValidAudiences { get; }
+        public IList<string> ValidAudiences =>
+            _validAudiences ??
+            Interlocked.CompareExchange(ref _validAudiences, [], null) ??
+            _validAudiences;
 
         /// <summary>
         /// Gets the <see cref="IList{T}"/> that contains valid issuers that will be used to check against the token's issuer.
-        /// The default is <c>null</c>.
+        /// The default is an empty collection.
         /// </summary>
-        public IList<string> ValidIssuers { get; }
+        /// <returns>The <see cref="IList{T}"/> that contains valid issuers that will be used to check against the token's 'iss' claim.</returns>
+        public IList<string> ValidIssuers =>
+            _validIssuers ??
+            Interlocked.CompareExchange(ref _validIssuers, [], null) ??
+            _validIssuers;
 
         /// <summary>
         /// Gets the <see cref="IList{T}"/> that contains valid types that will be used to check against the JWT header's 'typ' claim.
@@ -529,19 +540,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// In the case of a JWE, this property will ONLY apply to the inner token header.
         /// The default is an empty collection.
         /// </summary>
-        /// <exception cref="ArgumentNullException">Thrown when the value is set as null.</exception>
         /// <returns>The <see cref="IList{T}"/> that contains valid token types that will be used to check against the token's 'typ' claim.</returns>
-        public IList<string> ValidTypes
-        {
-            get
-            {
-                return _validTokenTypes;
-            }
-            set
-            {
-                _validTokenTypes = value ?? throw new ArgumentNullException(nameof(value));
-            }
-        }
+        public IList<string> ValidTypes =>
+            _validTokenTypes ??
+            Interlocked.CompareExchange(ref _validTokenTypes, [], null) ??
+            _validTokenTypes;
 
         public bool ValidateActor { get; set; }
     }

@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 theoryData.Add(new IssuerValidatorTheoryData
                 {
                     Issuer = null,
-                    ValidationParameters = new TokenValidationParameters(),
+                    ValidationParameters = new ValidationParameters(),
                 });
 
                 return theoryData;
@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
     public class IssuerValidatorTheoryData : TheoryDataBase
     {
         public string Issuer { get; set; }
-        public TokenValidationParameters ValidationParameters { get; set; }
+        internal ValidationParameters ValidationParameters { get; set; }
         public SecurityToken SecurityToken { get; set; }
     }
 }
