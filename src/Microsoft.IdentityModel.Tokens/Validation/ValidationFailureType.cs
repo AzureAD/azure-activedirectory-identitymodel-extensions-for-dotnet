@@ -52,6 +52,12 @@ namespace Microsoft.IdentityModel.Tokens
         private class TokenTypeValidationFailure : ValidationFailureType { internal TokenTypeValidationFailure(string name) : base(name) { } }
 
         /// <summary>
+        /// Defines a type that represents that the token's signature validation failed.
+        /// </summary>
+        public static readonly ValidationFailureType SignatureValidationFailed = new SignatureValidationFailure("SignatureValidationFailed");
+        private class SignatureValidationFailure : ValidationFailureType { internal SignatureValidationFailure(string name) : base(name) { } }
+
+        /// <summary>
         /// Defines a type that represents that signing key validation failed.
         /// </summary>
         public static readonly ValidationFailureType SigningKeyValidationFailed = new SigningKeyValidationFailure("SigningKeyValidationFailed");
