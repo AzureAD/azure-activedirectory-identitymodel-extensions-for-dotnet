@@ -21,52 +21,20 @@ namespace Microsoft.IdentityModel.Tokens.Tests.Validation
         }
 
         [Fact]
-        public void ValidAudiences_GetSet_ValidValue_Success()
+        public void ValidAudiences_Get_ReturnsEmptyList()
         {
             var validationParameters = new ValidationParameters();
-            var validAudiences = new List<string> { "audience1", "audience2" };
 
-            validationParameters.ValidAudiences = validAudiences;
-
-            Assert.Equal(validAudiences, validationParameters.ValidAudiences);
+            Assert.Equal(0, validationParameters.ValidAudiences.Count);
+            Assert.True(validationParameters.ValidAudiences is IList<string>);
         }
 
         [Fact]
-        public void ValidAudiences_SetNull_ThrowsArgumentNullException()
+        public void ValidTypes_Get_ReturnsEmptyList()
         {
             var validationParameters = new ValidationParameters();
-
-            Assert.Throws<ArgumentNullException>(() => validationParameters.ValidAudiences = null);
-        }
-
-        [Fact]
-        public void ValidTypes_Get_ReturnsValidTokenTypes()
-        {
-            var validationParameters = new ValidationParameters();
-            var validTokenTypes = new List<string> { "JWT", "SAML" };
-            validationParameters.ValidTypes = validTokenTypes;
-
-            var result = validationParameters.ValidTypes;
-
-            Assert.Equal(validTokenTypes, result);
-        }
-
-        [Fact]
-        public void ValidTypes_Set_UpdatesValidTokenTypes()
-        {
-            var validationParameters = new ValidationParameters();
-            var validTokenTypes = new List<string> { "JWT", "SAML" };
-
-            validationParameters.ValidTypes = validTokenTypes;
-
-            Assert.Equal(validTokenTypes, validationParameters.ValidTypes);
-        }
-
-        [Fact]
-        public void ValidTypes_Set_Null_ThrowsArgumentNullException()
-        {
-            var validationParameters = new ValidationParameters();
-            Assert.Throws<ArgumentNullException>(() => validationParameters.ValidTypes = null);
+            Assert.Equal(0, validationParameters.ValidTypes.Count);
+            Assert.True(validationParameters.ValidTypes is IList<string>);
         }
     }
 }
