@@ -676,9 +676,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
         public class ConfigurationManagerTheoryData<T> : TheoryDataBase
         {
-            public ConfigurationManagerTheoryData() {}
+            public ConfigurationManagerTheoryData() { }
 
-            public ConfigurationManagerTheoryData(string testId) : base(testId) {}
+            public ConfigurationManagerTheoryData(string testId) : base(testId) { }
 
             public TimeSpan AutomaticRefreshInterval { get; set; }
 

@@ -250,7 +250,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns><c>true</c> if the exception is certain types of exceptions otherwise, <c>false</c>.</returns>
         internal static bool IsRecoverableException(Exception exception)
         {
-            return   exception is SecurityTokenInvalidSignatureException
+            return exception is SecurityTokenInvalidSignatureException
                   || exception is SecurityTokenInvalidIssuerException
                   || exception is SecurityTokenSignatureKeyNotFoundException;
         }

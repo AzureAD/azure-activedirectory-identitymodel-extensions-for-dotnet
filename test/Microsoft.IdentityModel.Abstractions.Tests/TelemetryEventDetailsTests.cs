@@ -112,7 +112,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
                 }
             }
 
-            public override void  SetProperty(
+            public override void SetProperty(
                 string key,
                 string value)
             {

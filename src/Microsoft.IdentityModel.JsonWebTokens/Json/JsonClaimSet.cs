@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             else if (value is double d)
                 claims.Add(new Claim(claimType, d.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Double, issuer, issuer));
             else if (value is DateTime dt)
-                claims.Add(new Claim(claimType, dt.ToString("o",CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, issuer, issuer));
+                claims.Add(new Claim(claimType, dt.ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, issuer, issuer));
             else if (value is float f)
                 claims.Add(new Claim(claimType, f.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Double, issuer, issuer));
             else if (value is decimal m)
@@ -320,7 +320,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             else if (typeof(T) == typeof(Collection<object>))
                 return (T)(object)new Collection<object> { obj };
 
-            else if(typeof(T).IsEnum)
+            else if (typeof(T).IsEnum)
             {
                 return (T)Enum.Parse(typeof(T), obj.ToString(), ignoreCase: true);
             }
@@ -342,7 +342,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (objType == typeof(long))
                     return (T)(object)new long[] { (long)obj };
 
-                if(objType == typeof(int))
+                if (objType == typeof(int))
                     return (T)(object)new long[] { (int)obj };
 
                 if (long.TryParse(obj.ToString(), out long value))
@@ -350,7 +350,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
             else if (typeof(T) == typeof(double))
             {
-                if(double.TryParse(obj.ToString(), out double value))
+                if (double.TryParse(obj.ToString(), out double value))
                     return (T)(object)value;
             }
             else if (typeof(T) == typeof(uint))

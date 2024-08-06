@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.JsonWebTokens.Results;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -135,7 +134,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         new StackFrame()));
 
             StringBuilder exceptionStrings = new();
-            StringBuilder keysAttempted = new ();
+            StringBuilder keysAttempted = new();
 
             PopulateFailedResults(configFailedResult, exceptionStrings, keysAttempted);
             PopulateFailedResults(vpFailedResult, exceptionStrings, keysAttempted);

@@ -265,7 +265,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 new SignatureProviderTheoryData("SymmetricSecurityKey10", ALG.RsaSha256Signature, ALG.RsaSha512Signature, KEY.SymmetricSecurityKey2_256, KEY.SymmetricSecurityKey2_256, EE.NotSupportedException("IDX10634:")),
                 new SignatureProviderTheoryData("SymmetricSecurityKey11", ALG.HmacSha256Signature, ALG.HmacSha256Signature, KEY.DefaultSymmetricSecurityKey_256, KEY.DefaultSymmetricSecurityKey_256),
                 new SignatureProviderTheoryData("SymmetricSecurityKey12",
-                                                ALG.HmacSha256Signature, 
+                                                ALG.HmacSha256Signature,
                                                 ALG.HmacSha256Signature,
                                                 new FaultingSymmetricSecurityKey(Default.SymmetricSigningKey256, new CryptographicException("Inner CryptographicException"), null, null, Default.SymmetricSigningKey256.Key),
                                                 KEY.SymmetricSecurityKey2_256,
@@ -341,7 +341,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
                 expectedException.ProcessNoException();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 expectedException.ProcessException(ex);
             }
@@ -628,7 +628,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             TestUtilities.AssertFailIfErrors(context);
         }
-        
+
         public static TheoryData<SignatureProviderTheoryData> SymmetricVerifySignatureSizeInternalTheoryData
         {
             get
@@ -869,7 +869,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
                 ee.ProcessNoException();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ee.ProcessException(ex);
             }
@@ -943,10 +943,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                Console.WriteLine("OSX is excluded as the SignatureTampering test is slow (~6 minutes).") ;
+                Console.WriteLine("OSX is excluded as the SignatureTampering test is slow (~6 minutes).");
             }
             else
-            { 
+            {
                 TestUtilities.WriteHeader($"{this}.SignatureTampering", theoryData);
                 var copiedSignature = theoryData.Signature.CloneByteArray();
                 for (int i = 0; i < theoryData.Signature.Length; i++)
@@ -1527,7 +1527,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
     public class SignatureProvider2K : SignatureProvider
     {
-        public SignatureProvider2K(SecurityKey key, string algorithm):base(key, algorithm){}
+        public SignatureProvider2K(SecurityKey key, string algorithm) : base(key, algorithm) { }
 
         public override byte[] Sign(byte[] input) => new byte[2048];
 

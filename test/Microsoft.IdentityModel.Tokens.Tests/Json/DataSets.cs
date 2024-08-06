@@ -3,9 +3,7 @@
 
 using System.Collections.Generic;
 
-/// <summary>
-/// Data sets for testing 
-/// </summary>
+// Data sets for testing 
 namespace Microsoft.IdentityModel.Tokens.Json.Tests
 {
     public class DataSets
@@ -292,7 +290,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                 ""use"":""sig""
             }";
 
-        public static JsonWebKey JsonWebKeyBadX509Data 
+        public static JsonWebKey JsonWebKeyBadX509Data
         {
             get
             {

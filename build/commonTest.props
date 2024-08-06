@@ -18,6 +18,7 @@
     <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp2.1'">$(DotNetCoreAppRuntimeVersion)</RuntimeFrameworkVersion>
     <IsPackable>false</IsPackable>
     <LangVersion>12</LangVersion>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' OR '$(TargetFramework)' == 'net6.0' Or '$(TargetFramework)' == 'net8.0' Or '$(TargetFramework)' == 'net9.0'">
@@ -27,6 +28,7 @@
   <PropertyGroup>
     <NoWarn>$(NoWarn);SYSLIB0050</NoWarn>
     <NoWarn>$(NoWarn);SYSLIB0051</NoWarn>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

@@ -3,9 +3,7 @@
 
 using System;
 using System.Linq;
-using System.Web;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
 {

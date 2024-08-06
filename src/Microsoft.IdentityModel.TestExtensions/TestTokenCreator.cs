@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.TestExtensions
     /// In the following code example, generateTokenToTest should be one of the methods from this class.
     /// 
     /// <code>
-    /// internal void AssertValidationException(Func<string> generateTokenToTest, Type innerExceptionType, string innerExceptionMessagePart)
+    /// internal void AssertValidationException(Func{string} generateTokenToTest, Type innerExceptionType, string innerExceptionMessagePart)
     /// {
     ///     try
     ///     {
@@ -159,7 +159,12 @@ namespace Microsoft.IdentityModel.TestExtensions
         {
             var tokenDescriptor = CreateTokenDescriptorWithInstanceOverrides();
             var token = CreateToken(tokenDescriptor);
-            return token.Substring(0, token.LastIndexOf('.')) + ".InvalidSignature";
+
+#if NETCOREAPP
+            return string.Concat(token.AsSpan(0, token.LastIndexOf(value: '.')), ".InvalidSignature");
+#else
+            return token.Substring(0, token.LastIndexOf(value: '.')) + ".InvalidSignature";
+#endif
         }
 
         /// <summary>
@@ -335,7 +340,7 @@ namespace Microsoft.IdentityModel.TestExtensions
         /// <summary>
         /// Creates a default set of claims based on the instance values.
         /// </summary>
-        /// <returns>A <see cref="Dictionary{string, object}"/> representing the claims of a token to create.</returns>
+        /// <returns>A <see cref="Dictionary{TKey, TValue}"/> representing the claims of a token to create.</returns>
         public Dictionary<string, object> CreateClaimsSetWithInstanceOverrides()
         {
             var claims = new Dictionary<string, object>();
@@ -395,12 +400,12 @@ namespace Microsoft.IdentityModel.TestExtensions
         }
 
         /// <summary>
-        /// Creates a token based on the passed <see cref="Dictionary{string, object}"/>.
+        /// Creates a token based on the passed <see cref="Dictionary{TKey, TValue}"/>.
         /// </summary>
-        /// <param name="securityTokenDescriptor">
-        /// The <see cref="Dictionary{string, object}"/> of claims which describe the token to create.
+        /// <param name="claims">
+        /// The <see cref="Dictionary{TKey, TValue}"/> of claims which describe the token to create.
         /// </param>
-        /// <returns>A JWS token described by the passed <see cref="Dictionary{string, object}"/>.</returns>
+        /// <returns>A JWS token described by the passed <see cref="Dictionary{TKey, TValue}"/>.</returns>
         public string CreateToken(Dictionary<string, object> claims)
         {
             var tokenHandler = new JsonWebTokenHandler()
@@ -412,10 +417,10 @@ namespace Microsoft.IdentityModel.TestExtensions
         }
 
         /// <summary>
-        /// Creates a JSON payload based on the passed <see cref="Dictionary{string, object}"/> of claims.
+        /// Creates a JSON payload based on the passed <see cref="IDictionary{TKey, TValue}"/>of claims.
         /// </summary>
         /// <param name="claims">
-        /// The <see cref="Dictionary{string, object}"/> of claims which describe the payload to create.</param>
+        /// The <see cref="Dictionary{TKey, TValue}"/> of claims which describe the payload to create.</param>
         /// <returns>A JSON payload based on the passed <paramref name="claims"/>.</returns>
         public static string CreateJsonPayload(IDictionary<string, object> claims)
         {

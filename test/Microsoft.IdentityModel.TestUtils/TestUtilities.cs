@@ -73,8 +73,6 @@ namespace Microsoft.IdentityModel.TestUtils
         /// <summary>
         /// Gets a named field on an object
         /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="field"></param>
         public static object GetField(object obj, string field)
         {
             Type type = obj.GetType();
@@ -85,8 +83,6 @@ namespace Microsoft.IdentityModel.TestUtils
         /// <summary>
         /// Sets a named field on an object
         /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="field"></param>
         public static void SetField(object obj, string field, object fieldValue)
         {
             Type type = obj.GetType();
@@ -97,9 +93,6 @@ namespace Microsoft.IdentityModel.TestUtils
         /// <summary>
         /// Gets a named property on an object
         /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="property"></param>
-        /// <param name="propertyValue"></param>
         public static object GetProperty(object obj, string property)
         {
             Type type = obj.GetType();
@@ -171,10 +164,6 @@ namespace Microsoft.IdentityModel.TestUtils
         /// <summary>
         /// Gets and sets a named property on an object. Checks: initial value.
         /// </summary>
-        /// <param name="obj"></param>
-        /// <param name="property"></param>
-        /// <param name="initialPropertyValue"></param>
-        /// <param name="setPropertyValue"></param>
         public static void GetSet(object obj, string property, object initialPropertyValue, object[] setPropertyValues, List<string> errors)
         {
             Type type = obj.GetType();
@@ -244,6 +233,7 @@ namespace Microsoft.IdentityModel.TestUtils
         /// <param name="property">the name of the property.</param>
         /// <param name="propertyValue">value to set on the property.</param>
         /// <param name="expectedException">checks that exception is correct.</param>
+        /// <param name="context">The context for this call.</param>
         public static void SetGet(object obj, string property, object propertyValue, ExpectedException expectedException, GetSetContext context)
         {
             if (obj == null)

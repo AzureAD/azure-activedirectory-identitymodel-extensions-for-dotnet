@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static ExpectedException ArgumentNullException(string substringExpected = null, Type inner = null)
         {
-            return new ExpectedException(typeof(ArgumentNullException), substringExpected, inner); 
+            return new ExpectedException(typeof(ArgumentNullException), substringExpected, inner);
         }
 
         public static ExpectedException CryptographicException(string substringExpected = null, Type inner = null, bool ignoreInnerException = false)
@@ -74,8 +74,8 @@ namespace Microsoft.IdentityModel.TestUtils
             return new ExpectedException(typeof(XmlException), substringExpected, inner);
         }
 
-        public static ExpectedException NoExceptionExpected 
-        { 
+        public static ExpectedException NoExceptionExpected
+        {
             get { return new ExpectedException(); }
         }
 
@@ -84,12 +84,12 @@ namespace Microsoft.IdentityModel.TestUtils
             return new ExpectedException(typeof(NotSupportedException), substringExpected, inner);
         }
 
-        public static ExpectedException ObjectDisposedException 
-        { 
-            get 
+        public static ExpectedException ObjectDisposedException
+        {
+            get
             {
-                return new ExpectedException(typeof(ObjectDisposedException)); 
-            } 
+                return new ExpectedException(typeof(ObjectDisposedException));
+            }
         }
 
         public void ProcessException(Exception exception, CompareContext context)
@@ -157,7 +157,7 @@ namespace Microsoft.IdentityModel.TestUtils
             }
 
             if (PropertiesExpected != null && PropertiesExpected.Count > 0)
-            { 
+            {
                 foreach (KeyValuePair<string, object> property in PropertiesExpected)
                 {
                     PropertyInfo propertyInfo = TypeExpected.GetProperty(property.Key);
@@ -175,7 +175,7 @@ namespace Microsoft.IdentityModel.TestUtils
                         HandleError("exception type " + TypeExpected + " does not match the expected property " + property.Key + " type.\nexpected type: " + expectedTypeNonNullable + ", actual type: " + runtimeValue.GetType(), errors);
                     }
 
-                    if (runtimeValue != property.Value && 
+                    if (runtimeValue != property.Value &&
                         ((runtimeValue != null && !runtimeValue.Equals(property.Value)) ||
                          (property.Value != null && !property.Value.Equals(runtimeValue))))
                     {
@@ -205,7 +205,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 context.Diffs.Add("expectedException.TypeExpected != null: " + TypeExpected);
         }
 
-        private static void HandleError(string error, List<string> errors )
+        private static void HandleError(string error, List<string> errors)
         {
             if (errors != null)
                 errors.Add(error);
@@ -278,7 +278,7 @@ namespace Microsoft.IdentityModel.TestUtils
         public static ExpectedException SecurityTokenNoExpirationException(string substringExpected = null, Type innerTypeExpected = null)
         {
             return new ExpectedException(typeof(SecurityTokenNoExpirationException), substringExpected, innerTypeExpected);
-        }                
+        }
 
         public static ExpectedException SecurityTokenNotYetValidException(string substringExpected = null, Type innerTypeExpected = null, Dictionary<string, object> propertiesExpected = null)
         {
@@ -293,7 +293,7 @@ namespace Microsoft.IdentityModel.TestUtils
         public static ExpectedException SecurityTokenReplayDetected(string substringExpected = null, Type innerTypeExpected = null)
         {
             return new ExpectedException(typeof(SecurityTokenReplayDetectedException), substringExpected, innerTypeExpected);
-        }                
+        }
 
         public static ExpectedException SecurityTokenSignatureKeyNotFoundException(string substringExpected = null, Type innerTypeExpected = null)
         {

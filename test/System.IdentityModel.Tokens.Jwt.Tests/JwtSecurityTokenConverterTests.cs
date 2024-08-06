@@ -87,7 +87,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                             Assert.True(token.Header.ContainsKey(header.Type));
                             var otherHeader = token.Header[header.Type];
                             Assert.Equal(header.Value, otherHeader);
-	                    }
+                        }
 
                         foreach (var header in jweToken.InnerToken.Header.Claims((string)Default.PayloadDictionary[JwtRegisteredClaimNames.Iss]))
                         {

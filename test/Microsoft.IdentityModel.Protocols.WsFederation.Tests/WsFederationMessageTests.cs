@@ -187,7 +187,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 QueryString = WsFederationTestUtilities.BuildWaSignInMessage(samlToken, samlSecurityTokenHandler, "saml1" + variation),
                 SecurityToken = samlToken,
                 SecurityTokenHandler = samlSecurityTokenHandler,
-                TestId = "Saml1WriteToken"+variation
+                TestId = "Saml1WriteToken" + variation
             });
 
             theoryData.Add(new WsFederationSigninMessageTheoryData

@@ -25,7 +25,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 var tokenDescriptor = new SecurityTokenDescriptor
                 {
                     SigningCredentials = theoryData.SigningCredentials,
-                    
                 };
                 var tokenHandler = new JsonWebTokenHandler();
                 jsonWebToken = new JsonWebToken(tokenHandler.CreateToken(tokenDescriptor));

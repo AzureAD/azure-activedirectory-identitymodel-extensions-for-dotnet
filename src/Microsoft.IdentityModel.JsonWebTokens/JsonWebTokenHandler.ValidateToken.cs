@@ -485,7 +485,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
             }
 
-            TokenValidationResult tokenValidationResult =  jsonWebToken.IsEncrypted ?
+            TokenValidationResult tokenValidationResult = jsonWebToken.IsEncrypted ?
                 await ValidateJWEAsync(jsonWebToken, validationParameters, currentConfiguration).ConfigureAwait(false) :
                 await ValidateJWSAsync(jsonWebToken, validationParameters, currentConfiguration).ConfigureAwait(false);
 

@@ -24,7 +24,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 if (convertedKey.ConvertedSecurityKey.GetType() != theoryData.SecurityKey.GetType())
                     context.AddDiff($"theoryData.JsonWebKey.RelatedSecurityKey.GetType(): '{theoryData.JsonWebKey.ConvertedSecurityKey.GetType()}' != theoryData.SecurityKey.GetType(): '{theoryData.SecurityKey.GetType()}'.");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex, context);
             }
@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         public static TheoryData<JsonWebKeyConverterTheoryData> ConvertToJsonWebKeyToSecurityKeyTheoryData
         {
-            get 
+            get
             {
                 return ConversionKeyTheoryData;
             }
@@ -159,10 +159,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     SecurityKey = KeyingMaterial.Ecdsa256Key_Public,
                     JsonWebKey = KeyingMaterial.CreateJsonWebKeyEC(
-                        JsonWebKeyECTypes.P256, 
+                        JsonWebKeyECTypes.P256,
                         KeyingMaterial.Ecdsa256Key_Public.KeyId,
                         null,
-                        Base64UrlEncoder.Encode(KeyingMaterial.Ecdsa256Parameters_Public.Q.X), 
+                        Base64UrlEncoder.Encode(KeyingMaterial.Ecdsa256Parameters_Public.Q.X),
                         Base64UrlEncoder.Encode(KeyingMaterial.Ecdsa256Parameters_Public.Q.Y)
                     ),
                     TestId = nameof(KeyingMaterial.Ecdsa256Key_Public)

@@ -76,7 +76,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 expires: (new DateTime(2038, 1, 20)).ToUniversalTime(),
                 signingCredentials: creds);
 
-            Assert.Equal(token.ValidTo, (new DateTime(2038,1,20)).ToUniversalTime());
+            Assert.Equal(token.ValidTo, (new DateTime(2038, 1, 20)).ToUniversalTime());
         }
 
         [Fact]
@@ -380,7 +380,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             if (string.IsNullOrEmpty(jwe))
                 throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(jwe)));
 
-            string[] parts = jwe.Split(new char[] {'.'}, 6);
+            string[] parts = jwe.Split(new char[] { '.' }, 6);
             if (parts.Length != 5)
                 throw new ArgumentException(string.Format("The JWE token must have 5 parts. The JWE {0} has {1} parts.", jwe, parts.Length));
 

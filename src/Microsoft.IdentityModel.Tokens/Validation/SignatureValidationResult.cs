@@ -11,7 +11,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Results
     /// Contains the result of validating a signature.
     /// The <see cref="TokenValidationResult"/> contains a collection of <see cref="ValidationResult"/> for each step in the token validation.
     /// </summary>
-    internal class SignatureValidationResult: ValidationResult
+    internal class SignatureValidationResult : ValidationResult
     {
         private Exception? _exception;
 

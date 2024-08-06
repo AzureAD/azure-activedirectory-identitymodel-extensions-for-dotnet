@@ -8,11 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Tokens;
 
-
-/// <summary>
-/// Derived types to simplify testing.
-/// Helpful when throwing
-/// </summary>
+// Derived types to simplify testing.
+// Helpful when throwing
 namespace Microsoft.IdentityModel.TestUtils
 {
     public class CustomCryptoProvider : ICryptoProvider
@@ -33,7 +30,7 @@ namespace Microsoft.IdentityModel.TestUtils
         public IList<string> AdditionalHashAlgorithms { get; private set; } = new List<string>();
 
         public HashAlgorithm HashAlgorithm { get; set; }
-        
+
         public KeyWrapProvider KeyWrapProvider { get; set; }
 
         public RsaKeyWrapProvider RsaKeyWrapProvider { get; set; }
@@ -49,7 +46,7 @@ namespace Microsoft.IdentityModel.TestUtils
         public object Create(string algorithm, params object[] args)
         {
             CreateCalled = true;
-            
+
             if (IsHashAlgorithm(algorithm))
                 return HashAlgorithm;
             else
@@ -334,8 +331,8 @@ namespace Microsoft.IdentityModel.TestUtils
 
     public class CustomSymmetricSignatureProvider : SymmetricSignatureProvider
     {
-        public CustomSymmetricSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures )
-            :base(key, algorithm, willCreateSignatures)
+        public CustomSymmetricSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures)
+            : base(key, algorithm, willCreateSignatures)
         { }
 
         protected override void Dispose(bool disposing)

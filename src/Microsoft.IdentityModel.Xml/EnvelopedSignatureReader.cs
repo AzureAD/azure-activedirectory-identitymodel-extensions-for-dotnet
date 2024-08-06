@@ -31,7 +31,7 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogArgumentNullException(nameof(reader));
 
             _tokenStreamReader = new XmlTokenStreamReader(CreateDictionaryReader(reader));
-            InnerReader  = _tokenStreamReader;
+            InnerReader = _tokenStreamReader;
         }
 
         /// <summary>

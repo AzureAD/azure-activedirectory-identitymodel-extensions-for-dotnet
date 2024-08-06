@@ -367,15 +367,15 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     new SignedHttpRequestUtilityTheoryData
                     {
                         HttpRequestMessage = SignedHttpRequestTestUtils.CreateHttpRequestMessage(
-                            HttpMethod.Get, 
-                            new Uri("https://www.contoso.com/"), 
+                            HttpMethod.Get,
+                            new Uri("https://www.contoso.com/"),
                             new List<KeyValuePair<string, string>>()
                             {
                                 new KeyValuePair<string, string> ("h1", "value1"),
                                 new KeyValuePair<string, string> ("h2", "value2")
                             },
                             Encoding.UTF8.GetBytes("abcd")
-                        ), 
+                        ),
                         ExpectedHttpRequestData = new HttpRequestData()
                         {
                             Method = "GET",

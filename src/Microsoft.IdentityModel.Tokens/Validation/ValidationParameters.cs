@@ -121,7 +121,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// If no delegate is set, the default implementation will be used. The default checks the algorithm
         /// against the <see cref="ValidAlgorithms"/> property, if present. If not, it will succeed.
         /// </remarks>
-        public AlgorithmValidatorDelegate AlgorithmValidator {
+        public AlgorithmValidatorDelegate AlgorithmValidator
+        {
             get { return _algorithmValidator; }
             set { _algorithmValidator = value ?? throw new ArgumentNullException(nameof(value), "AlgorithmValidator cannot be null."); }
         }
@@ -281,7 +282,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets a <see cref="IDictionary{String, Object}"/> that is unique to this instance.
+        /// Gets a <see cref="IDictionary{TKey, TValue}"/> that is unique to this instance.
         /// Calling <see cref="Clone"/> will result in a new instance of this IDictionary.
         /// </summary>
         public IDictionary<string, object> InstancePropertyBag => _instancePropertyBag ??= new Dictionary<string, object>();
@@ -302,7 +303,7 @@ namespace Microsoft.IdentityModel.Tokens
         public IssuerSigningKeyResolverDelegate IssuerSigningKeyResolver { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="IList{SecurityKey}"/> used for signature validation.
+        /// Gets the <see cref="IList{T}"/> used for signature validation.
         /// </summary>
         public IList<SecurityKey> IssuerSigningKeys =>
             _issuerSigningKeys ??
@@ -378,7 +379,7 @@ namespace Microsoft.IdentityModel.Tokens
         public Func<SecurityToken, string, string> NameClaimTypeRetriever { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="IDictionary{String, Object}"/> that contains a collection of custom key/value pairs.
+        /// Gets or sets the <see cref="IDictionary{TKey, TValue}"/> that contains a collection of custom key/value pairs.
         /// This allows addition of parameters that could be used in custom token validation scenarios.
         /// </summary>
         public IDictionary<string, object> PropertyBag { get; }
@@ -442,13 +443,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// If set, this delegate will be called to validate the signature of the token, instead of default processing.
         /// </remarks>
-        public SignatureValidatorDelegate SignatureValidator {
+        public SignatureValidatorDelegate SignatureValidator
+        {
             get { return _signatureValidator; }
             set { _signatureValidator = value; }
         }
 
         /// <summary>
-        /// Gets or sets a delegate that will be called to retreive a <see cref="SecurityKey"/> used for decryption.
+        /// Gets or sets a delegate that will be called to retrieve a <see cref="SecurityKey"/> used for decryption.
         /// </summary>
         /// <remarks>
         /// This <see cref="SecurityKey"/> will be used to decrypt the token. This can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier.
@@ -456,7 +458,7 @@ namespace Microsoft.IdentityModel.Tokens
         public ResolveTokenDecryptionKeyDelegate TokenDecryptionKeyResolver { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="IList{SecurityKey}"/> that is to be used for decrypting inbound tokens.
+        /// Gets the <see cref="IList{T}"/> that is to be used for decrypting inbound tokens.
         /// </summary>
         public IList<SecurityKey> TokenDecryptionKeys { get; internal set; }
 
@@ -534,7 +536,7 @@ namespace Microsoft.IdentityModel.Tokens
         public IList<string> ValidAlgorithms { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="IList{String}"/> that contains valid audiences that will be used to check against the token's audience.
+        /// Gets the <see cref="IList{T}"/> that contains valid audiences that will be used to check against the token's audience.
         /// The default is an empty collection.
         /// </summary>
         public IList<string> ValidAudiences =>
@@ -543,22 +545,22 @@ namespace Microsoft.IdentityModel.Tokens
             _validAudiences;
 
         /// <summary>
-        /// Gets the <see cref="IList{String}"/> that contains valid issuers that will be used to check against the token's issuer.
+        /// Gets the <see cref="IList{T}"/> that contains valid issuers that will be used to check against the token's issuer.
         /// The default is an empty collection.
         /// </summary>
-        /// <returns>The <see cref="IList{String}"/> that contains valid issuers that will be used to check against the token's 'iss' claim.</returns>
+        /// <returns>The <see cref="IList{T}"/> that contains valid issuers that will be used to check against the token's 'iss' claim.</returns>
         public IList<string> ValidIssuers =>
             _validIssuers ??
             Interlocked.CompareExchange(ref _validIssuers, [], null) ??
             _validIssuers;
 
         /// <summary>
-        /// Gets the <see cref="IList{String}"/> that contains valid types that will be used to check against the JWT header's 'typ' claim.
+        /// Gets the <see cref="IList{T}"/> that contains valid types that will be used to check against the JWT header's 'typ' claim.
         /// If this property is not set, the 'typ' header claim will not be validated and all types will be accepted.
         /// In the case of a JWE, this property will ONLY apply to the inner token header.
         /// The default is an empty collection.
         /// </summary>
-        /// <returns>The <see cref="IList{String}"/> that contains valid token types that will be used to check against the token's 'typ' claim.</returns>
+        /// <returns>The <see cref="IList{T}"/> that contains valid token types that will be used to check against the token's 'typ' claim.</returns>
         public IList<string> ValidTypes =>
             _validTokenTypes ??
             Interlocked.CompareExchange(ref _validTokenTypes, [], null) ??

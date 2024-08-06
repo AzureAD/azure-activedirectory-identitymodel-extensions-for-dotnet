@@ -21,7 +21,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             OpenIdConnectConfiguration configuration = await GetConfigurationFromHttpAsync(OpenIdConfigData.AADCommonUrl, expectedException: ExpectedException.NoExceptionExpected);
             Assert.NotNull(configuration);
-            
+
             await GetConfigurationFromHttpAsync(string.Empty, expectedException: ExpectedException.ArgumentNullException());
             await GetConfigurationFromHttpAsync(OpenIdConfigData.BadUri, expectedException: ExpectedException.ArgumentException("IDX20108:"));
             await GetConfigurationFromHttpAsync(OpenIdConfigData.HttpsBadUri, expectedException: ExpectedException.IOException(inner: typeof(HttpRequestException)));
@@ -220,7 +220,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             return openIdConnectConfiguration;
         }
 
-        private void GetAndCheckConfiguration(string jsonName, string propertyName, CompareContext context, string propertyValue=null)
+        private void GetAndCheckConfiguration(string jsonName, string propertyName, CompareContext context, string propertyValue = null)
         {
             string jsonValue = propertyValue;
             if (jsonValue == null)
@@ -261,7 +261,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 _primaryDocument = primaryDocument;
                 _fallback = fallback;
             }
-            
+
             public Task<string> GetDocumentAsync(string address, CancellationToken cancel)
             {
                 if (string.Equals("primary", address))

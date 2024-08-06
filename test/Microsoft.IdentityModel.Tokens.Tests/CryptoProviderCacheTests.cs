@@ -431,6 +431,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         /// <summary>
         /// Checks that the Dispose() method is properly called on the InMemoryCryptoProviderCache.
+        /// </summary>
         [Fact]
         public void CryptoProviderCacheDispose()
         {
@@ -472,7 +473,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 var cache = CreateCacheForTesting();
 
-                var theoryData =  new TheoryData<CryptoProviderCacheTheoryData>
+                var theoryData = new TheoryData<CryptoProviderCacheTheoryData>
                 {
                     new CryptoProviderCacheTheoryData
                     {
@@ -529,7 +530,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     SignatureProvider = signatureProvider,
                     TestId = "SignatureProviderRemoved"
                 });
-                
+
                 // SignatureProvider was removed above, so should not be found
                 theoryData.Add(new CryptoProviderCacheTheoryData
                 {
@@ -631,7 +632,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     public class InMemoryCryptoProviderCachePublic : InMemoryCryptoProviderCache
     {
         public InMemoryCryptoProviderCachePublic() : base(new CryptoProviderCacheOptions(), TaskCreationOptions.None, 50)
-        {}
+        { }
 
         public bool DisposeCalled { get; set; }
 

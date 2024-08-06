@@ -227,7 +227,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     UserInfoEndpoint = "https://openidconnect.googleapis.com/v1/userinfo",
                 };
 
-                AddToCollection(config.CodeChallengeMethodsSupported, "plain",  "S256");
+                AddToCollection(config.CodeChallengeMethodsSupported, "plain", "S256");
                 AddToCollection(config.ResponseTypesSupported, "code", "id_token", "code id_token");
                 config.SubjectTypesSupported.Add("public");
                 config.IdTokenSigningAlgValuesSupported.Add("RS256");
@@ -448,7 +448,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 "claims_parameter_supported": true,
                 "claims_parameter_Supported": false,
                 "request_parameter_supported": false,
-                {{IssuerClaim }},
+                {{IssuerClaim}},
                 {{JsonData.ObjectClaim}},
                 {{JksUriClaim}},
                 {{JsonData.ArrayClaim}},
@@ -461,7 +461,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             """;
 
         public static OpenIdConnectConfiguration DuplicatesConfig
-        {             get
+        {
+            get
             {
                 OpenIdConnectConfiguration config = new OpenIdConnectConfiguration
                 {

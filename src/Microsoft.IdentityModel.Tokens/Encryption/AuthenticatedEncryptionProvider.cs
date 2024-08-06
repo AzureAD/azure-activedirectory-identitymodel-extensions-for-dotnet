@@ -2,11 +2,13 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
+
+#if NETSTANDARD2_0
+using System.Runtime.InteropServices;
+#endif
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -63,7 +65,7 @@ namespace Microsoft.IdentityModel.Tokens
                     if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                         throw LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10713, LogHelper.MarkAsNonPII(algorithm))));
 #elif NET6_0_OR_GREATER
-                    if(!System.Security.Cryptography.AesGcm.IsSupported)
+                    if (!System.Security.Cryptography.AesGcm.IsSupported)
                         throw LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10713, LogHelper.MarkAsNonPII(algorithm))));
 #endif
                     InitializeUsingAesGcm();

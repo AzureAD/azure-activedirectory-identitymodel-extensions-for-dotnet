@@ -156,7 +156,7 @@ new OpenIdConnectMessageTheoryData("EmptyJsonStringEmptyJobj")
         {
             List<string> errors = new List<string>();
             var message = new OpenIdConnectMessage();
-            
+
             if (message.AcrValues != null)
                 errors.Add("message.ArcValues != null");
 

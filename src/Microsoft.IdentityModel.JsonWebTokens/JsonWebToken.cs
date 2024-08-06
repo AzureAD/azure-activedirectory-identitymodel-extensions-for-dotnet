@@ -225,7 +225,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     if (!_encodedTokenMemory.IsEmpty)
                         _encodedHeader = _encodedTokenMemory.Span.Slice(0, Dot1).ToString();
                     else
-                        _encodedHeader = (_encodedToken is not null) ? _encodedToken.Substring(0, Dot1) :  string.Empty;
+                        _encodedHeader = (_encodedToken is not null) ? _encodedToken.Substring(0, Dot1) : string.Empty;
                 }
 
                 return _encodedHeader;
@@ -324,10 +324,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             get
             {
-               if (_encodedToken is null && !_encodedTokenMemory.IsEmpty)
+                if (_encodedToken is null && !_encodedTokenMemory.IsEmpty)
                     _encodedToken = _encodedTokenMemory.ToString();
 
-               return _encodedToken;
+                return _encodedToken;
             }
         }
 
@@ -395,7 +395,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </remarks>
         public override SecurityKey SigningKey { get; set; }
 
-        internal byte[] MessageBytes{ get; set; }
+        internal byte[] MessageBytes { get; set; }
 
         internal int NumberOfDots { get; set; }
 

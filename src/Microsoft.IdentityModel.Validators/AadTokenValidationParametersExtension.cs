@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Security.Claims;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -75,8 +74,8 @@ namespace Microsoft.IdentityModel.Validators
                 if (string.IsNullOrEmpty(tenantIdFromToken))
                 {
                     if (AppContextSwitches.DontFailOnMissingTid)
-                        return true; 
-                    
+                        return true;
+
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40009));
                 }
 
