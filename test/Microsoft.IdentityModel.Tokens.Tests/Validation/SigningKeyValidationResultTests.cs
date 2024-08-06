@@ -18,7 +18,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.SigningKeyValidationResultTests", theoryData);
 
-            SigningKeyValidationResult signingKeyValidationResult = Validators.ValidateIssuerSecurityKey(
+            SigningKeyValidationResult signingKeyValidationResult = Validators.ValidateIssuerSigningKey(
                 theoryData.SecurityKey,
                 theoryData.SecurityToken,
                 theoryData.ValidationParameters,

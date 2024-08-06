@@ -18,16 +18,14 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="signingKey">The security key to validate.</param>
     /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
     /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
-    /// <param name="callContext"></param>
-    /// <param name="cancellationToken"></param>
+    /// <param name="callContext"></param> The <see cref="CallContext"/> to be used for logging.
     /// <returns>A <see cref="SigningKeyValidationResult"/>that contains the results of validating the issuer.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
-    internal delegate Task<SigningKeyValidationResult> IssuerSecurityKeyValidationDelegate(
+    internal delegate SigningKeyValidationResult IssuerSigningKeyValidatorDelegate(
         SecurityKey signingKey,
         SecurityToken securityToken,
         ValidationParameters validationParameters,
-        CallContext callContext,
-        CancellationToken cancellationToken);
+        CallContext callContext);
 
     /// <summary>
     /// SigningKeyValidation
@@ -45,7 +43,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException"> if 'securityKey' is null and ValidateIssuerSigningKey is true.</exception>
         /// <exception cref="ArgumentNullException"> if 'securityToken' is null and ValidateIssuerSigningKey is true.</exception>
         /// <exception cref="ArgumentNullException"> if 'validationParameters' is null.</exception>
-        internal static SigningKeyValidationResult ValidateIssuerSecurityKey(
+        internal static SigningKeyValidationResult ValidateIssuerSigningKey(
             SecurityKey securityKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
