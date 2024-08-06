@@ -22,6 +22,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 theoryData.SecurityKey,
                 theoryData.SecurityToken,
                 theoryData.ValidationParameters,
+                theoryData.BaseConfiguration,
                 new CallContext());
 
             if (signingKeyValidationResult.Exception != null)

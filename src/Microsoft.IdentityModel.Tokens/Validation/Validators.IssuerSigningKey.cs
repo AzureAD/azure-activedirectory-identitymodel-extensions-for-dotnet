@@ -18,6 +18,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="signingKey">The security key to validate.</param>
     /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
     /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
+    /// <param name="configuration">The <see cref="BaseConfiguration"/> to be used for validation.</param>
     /// <param name="callContext">The <see cref="CallContext"/> to be used for logging.</param> 
     /// <returns>A <see cref="SigningKeyValidationResult"/>that contains the results of validating the issuer.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
@@ -25,6 +26,7 @@ namespace Microsoft.IdentityModel.Tokens
         SecurityKey signingKey,
         SecurityToken securityToken,
         ValidationParameters validationParameters,
+        BaseConfiguration? configuration,
         CallContext? callContext);
 
     /// <summary>
@@ -39,7 +41,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
-        /// <param name="callContext"></param>
+        /// <param name="configuration">The <see cref="BaseConfiguration"/> to be used for validation.</param>
+        /// <param name="callContext">The <see cref="CallContext"/> to be used for logging.</param>
         /// <exception cref="ArgumentNullException"> if 'securityKey' is null and ValidateIssuerSigningKey is true.</exception>
         /// <exception cref="ArgumentNullException"> if 'securityToken' is null and ValidateIssuerSigningKey is true.</exception>
         /// <exception cref="ArgumentNullException"> if 'validationParameters' is null.</exception>
@@ -47,6 +50,9 @@ namespace Microsoft.IdentityModel.Tokens
             SecurityKey securityKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
+#pragma warning disable CA1801 // Review unused parameters
+            BaseConfiguration? configuration,
+#pragma warning restore CA1801 // Review unused parameters
             CallContext? callContext)
         {
             if (validationParameters == null)
