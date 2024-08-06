@@ -25,7 +25,7 @@ namespace Microsoft.IdentityModel.Tokens
     internal delegate Task<SigningKeyValidationResult> IssuerSecurityKeyValidationDelegate(
         SecurityKey signingKey,
         SecurityToken securityToken,
-        TokenValidationParameters validationParameters,
+        ValidationParameters validationParameters,
         CallContext callContext,
         CancellationToken cancellationToken);
 
@@ -40,28 +40,16 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
-        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
+        /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext"></param>
         /// <exception cref="ArgumentNullException"> if 'securityKey' is null and ValidateIssuerSigningKey is true.</exception>
         /// <exception cref="ArgumentNullException"> if 'securityToken' is null and ValidateIssuerSigningKey is true.</exception>
         /// <exception cref="ArgumentNullException"> if 'validationParameters' is null.</exception>
-        internal static SigningKeyValidationResult ValidateIssuerSecurityKey(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters, CallContext callContext)
-        {
-            return ValidateIssuerSecurityKey(securityKey, securityToken, validationParameters, null, callContext);
-        }
-
-        /// <summary>
-        /// Validates the <see cref="SecurityKey"/> that signed a <see cref="SecurityToken"/>.
-        /// </summary>
-        /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
-        /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
-        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
-        /// <param name="configuration">The <see cref="BaseConfiguration"/> required for issuer and signing key validation.</param>
-        /// <param name="callContext"></param>
-        /// <exception cref="ArgumentNullException"> if 'securityKey' is null and ValidateIssuerSigningKey is true.</exception>
-        /// <exception cref="ArgumentNullException"> if 'securityToken' is null and ValidateIssuerSigningKey is true.</exception>
-        /// <exception cref="ArgumentNullException"> if 'validationParameters' is null.</exception>
-        internal static SigningKeyValidationResult ValidateIssuerSecurityKey(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters, BaseConfiguration? configuration, CallContext callContext)
+        internal static SigningKeyValidationResult ValidateIssuerSecurityKey(
+            SecurityKey securityKey,
+            SecurityToken securityToken,
+            ValidationParameters validationParameters,
+            CallContext callContext)
         {
             if (validationParameters == null)
                 return new SigningKeyValidationResult(
@@ -74,28 +62,7 @@ namespace Microsoft.IdentityModel.Tokens
                         typeof(ArgumentNullException),
                         new StackFrame(true)));
 
-            if (validationParameters.IssuerSigningKeyValidatorUsingConfiguration != null)
-            {
-                return ValidateSigningKeyUsingDelegateAndConfiguration(securityKey, securityToken, validationParameters, configuration);
-            }
-
-            if (validationParameters.IssuerSigningKeyValidator != null)
-            {
-                return ValidateSigningKeyUsingDelegateAndConfiguration(securityKey, securityToken, validationParameters, null);
-            }
-
-            if (!validationParameters.ValidateIssuerSigningKey)
-            {
-                LogHelper.LogVerbose(LogMessages.IDX10237);
-                return new SigningKeyValidationResult(securityKey);
-            }
-
-            if (!validationParameters.RequireSignedTokens && securityKey == null)
-            {
-                LogHelper.LogInformation(LogMessages.IDX10252);
-                return new SigningKeyValidationResult(securityKey);
-            }
-            else if (securityKey == null)
+            if (securityKey == null)
             {
                 return new SigningKeyValidationResult(
                     securityKey,
@@ -129,7 +96,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext"></param>
 #pragma warning disable CA1801 // Review unused parameters
-        internal static SigningKeyValidationResult ValidateIssuerSigningKeyLifeTime(SecurityKey securityKey, TokenValidationParameters validationParameters, CallContext callContext)
+        internal static SigningKeyValidationResult ValidateIssuerSigningKeyLifeTime(
+            SecurityKey securityKey,
+            ValidationParameters validationParameters,
+            CallContext callContext)
 #pragma warning restore CA1801 // Review unused parameters
         {
             X509SecurityKey? x509SecurityKey = securityKey as X509SecurityKey;
@@ -175,45 +145,7 @@ namespace Microsoft.IdentityModel.Tokens
             return new SigningKeyValidationResult(securityKey);
         }
 
-        private static SigningKeyValidationResult ValidateSigningKeyUsingDelegateAndConfiguration(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters, BaseConfiguration? configuration)
-        {
-            try
-            {
-                bool success;
-                if (configuration != null)
-                    success = validationParameters.IssuerSigningKeyValidatorUsingConfiguration(securityKey, securityToken, validationParameters, configuration);
-                else
-                    success = validationParameters.IssuerSigningKeyValidator(securityKey, securityToken, validationParameters);
-
-                if (!success)
-                    return new SigningKeyValidationResult(
-                        securityKey,
-                        ValidationFailureType.SigningKeyValidationFailed,
-                        new ExceptionDetail(
-                            new MessageDetail(
-                                LogMessages.IDX10232,
-                                securityKey),
-                            typeof(SecurityTokenInvalidSigningKeyException),
-                            new StackFrame(true)));
-
-                return new SigningKeyValidationResult(securityKey);
-            }
-#pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception exception)
-#pragma warning restore CA1031 // Do not catch general exception types
-            {
-                return new SigningKeyValidationResult(
-                    securityKey,
-                    ValidationFailureType.SigningKeyValidationFailed,
-                    new ExceptionDetail(
-                        new MessageDetail(
-                            LogMessages.IDX10232,
-                            securityKey),
-                        exception.GetType(),
-                        new StackFrame(true),
-                        exception));
-            }
-        }
+        
     }
 }
 #nullable restore
