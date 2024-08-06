@@ -51,8 +51,11 @@ jobs:
       with:
         dotnet-version: 8.0.x
 
+    - name: Restore
+      run: dotnet restore Wilson.sln
+
     - name: Build with .NET 8
-      run: dotnet build  --configuration Release Wilson.sln
+      run: dotnet build --configuration Release -f net8.0 Wilson.sln
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
