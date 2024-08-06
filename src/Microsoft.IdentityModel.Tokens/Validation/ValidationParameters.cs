@@ -21,8 +21,9 @@ namespace Microsoft.IdentityModel.Tokens
         private string _nameClaimType = ClaimsIdentity.DefaultNameClaimType;
         private string _roleClaimType = ClaimsIdentity.DefaultRoleClaimType;
         private Dictionary<string, object> _instancePropertyBag;
-        private IList<string> _validTokenTypes = [];
         private IList<SecurityKey> _issuerSigningKeys;
+        private IList<string> _validTokenTypes;
+        private IList<string> _validAudiences;
 
         private AlgorithmValidatorDelegate _algorithmValidator = Validators.ValidateAlgorithm;
         private AudienceValidatorDelegate _audienceValidator = Validators.ValidateAudience;
@@ -91,9 +92,9 @@ namespace Microsoft.IdentityModel.Tokens
             ValidateSignatureLast = other.ValidateSignatureLast;
             ValidateWithLKG = other.ValidateWithLKG;
             ValidAlgorithms = other.ValidAlgorithms;
-            ValidAudiences = other.ValidAudiences;
+            _validAudiences = other.ValidAudiences;
             ValidIssuers = other.ValidIssuers;
-            ValidTypes = other.ValidTypes;
+            _validTokenTypes = other.ValidTypes;
         }
 
         /// <summary>
@@ -528,9 +529,12 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Gets the <see cref="IList{String}"/> that contains valid audiences that will be used to check against the token's audience.
-        /// The default is <c>null</c>.
+        /// The default is an empty collection.
         /// </summary>
-        public IList<string> ValidAudiences { get; }
+        public IList<string> ValidAudiences =>
+            _validAudiences ??
+            Interlocked.CompareExchange(ref _validAudiences, [], null) ??
+            _validAudiences;
 
         /// <summary>
         /// Gets the <see cref="IList{String}"/> that contains valid issuers that will be used to check against the token's issuer.
@@ -544,19 +548,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// In the case of a JWE, this property will ONLY apply to the inner token header.
         /// The default is an empty collection.
         /// </summary>
-        /// <exception cref="ArgumentNullException">Thrown when the value is set as null.</exception>
         /// <returns>The <see cref="IList{String}"/> that contains valid token types that will be used to check against the token's 'typ' claim.</returns>
-        public IList<string> ValidTypes
-        {
-            get
-            {
-                return _validTokenTypes;
-            }
-            set
-            {
-                _validTokenTypes = value ?? throw new ArgumentNullException(nameof(value));
-            }
-        }
+        public IList<string> ValidTypes =>
+            _validTokenTypes ??
+            Interlocked.CompareExchange(ref _validTokenTypes, [], null) ??
+            _validTokenTypes;
 
         public bool ValidateActor { get; set; }
     }
