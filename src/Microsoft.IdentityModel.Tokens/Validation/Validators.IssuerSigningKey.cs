@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     /// <param name="signingKey">The security key to validate.</param>
     /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
-    /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
+    /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
     /// <param name="callContext"></param> The <see cref="CallContext"/> to be used for logging.
     /// <returns>A <see cref="SigningKeyValidationResult"/>that contains the results of validating the issuer.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
@@ -91,7 +91,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Given a signing key, when it's derived from a certificate, validates that the certificate is already active and non-expired
         /// </summary>
         /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
-        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
+        /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext"></param>
 #pragma warning disable CA1801 // Review unused parameters
         internal static SigningKeyValidationResult ValidateIssuerSigningKeyLifeTime(
