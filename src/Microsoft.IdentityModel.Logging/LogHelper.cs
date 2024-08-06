@@ -340,15 +340,19 @@ namespace Microsoft.IdentityModel.Logging
                 Logger.Log(WriteEntry(eventLogLevel, innerException, message, null));
 
             if (innerException != null)
+            {
                 if (string.IsNullOrEmpty(argumentName))
                     return (T)Activator.CreateInstance(typeof(T), message, innerException);
                 else
                     return (T)Activator.CreateInstance(typeof(T), argumentName, message, innerException);
+            }
             else
+            {
                 if (string.IsNullOrEmpty(argumentName))
-                return (T)Activator.CreateInstance(typeof(T), message);
-            else
-                return (T)Activator.CreateInstance(typeof(T), argumentName, message);
+                    return (T)Activator.CreateInstance(typeof(T), message);
+                else
+                    return (T)Activator.CreateInstance(typeof(T), argumentName, message);
+            }
         }
 
         private static EventLogLevel EventLevelToEventLogLevel(EventLevel eventLevel) =>
