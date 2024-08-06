@@ -18,7 +18,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="signingKey">The security key to validate.</param>
     /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
     /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
-    /// <param name="callContext"></param> The <see cref="CallContext"/> to be used for logging.
+    /// <param name="callContext">The <see cref="CallContext"/> to be used for logging.</param> 
     /// <returns>A <see cref="SigningKeyValidationResult"/>that contains the results of validating the issuer.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
     internal delegate SigningKeyValidationResult IssuerSigningKeyValidatorDelegate(
