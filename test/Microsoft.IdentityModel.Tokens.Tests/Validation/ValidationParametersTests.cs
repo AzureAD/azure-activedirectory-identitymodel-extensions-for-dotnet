@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -21,6 +21,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests.Validation
         }
 
         [Fact]
+        public void ValidIssuers_GetReturnsEmptyList()
+        {
+            var validationParameters = new ValidationParameters();
+
+            Assert.Equal(0, validationParameters.ValidIssuers.Count);
+        }
+
+        [Fact]
         public void ValidAudiences_Get_ReturnsEmptyList()
         {
             var validationParameters = new ValidationParameters();
@@ -33,6 +41,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests.Validation
         public void ValidTypes_Get_ReturnsEmptyList()
         {
             var validationParameters = new ValidationParameters();
+          
             Assert.Equal(0, validationParameters.ValidTypes.Count);
             Assert.True(validationParameters.ValidTypes is IList<string>);
         }
