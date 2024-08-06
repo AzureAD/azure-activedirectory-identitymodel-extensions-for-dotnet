@@ -577,6 +577,213 @@ namespace Microsoft.IdentityModel.Tokens
             _validTokenTypes;
 
         public bool ValidateActor { get; set; }
+
+        #region Builder
+        /// <summary>
+        /// Builder for ValidationParameters. It provides a convenient way to construct instances of
+        /// ValidationParameters class and set various properties of the object using a fluent API.
+        /// </summary>
+        internal class Builder
+        {
+            private ValidationParameters _validationParameters;
+
+            public Builder()
+            {
+                _validationParameters = new ValidationParameters();
+            }
+
+            public Builder WithAlgorithmValidator(AlgorithmValidatorDelegate algorithmValidator)
+            {
+                _validationParameters.AlgorithmValidator = algorithmValidator;
+                return this;
+            }
+
+            public Builder WithAudienceValidator(AudienceValidatorDelegate audienceValidator)
+            {
+                _validationParameters.AudienceValidator = audienceValidator;
+                return this;
+            }
+
+            public Builder WithAuthenticationType(string authenticationType)
+            {
+                _validationParameters.AuthenticationType = authenticationType;
+                return this;
+            }
+
+            public Builder WithClockSkew(TimeSpan clockSkew)
+            {
+                _validationParameters.ClockSkew = clockSkew;
+                return this;
+            }
+
+            public Builder WithConfigurationManager(BaseConfigurationManager configurationManager)
+            {
+                _validationParameters.ConfigurationManager = configurationManager;
+                return this;
+            }
+
+            public Builder WithDebugId(string debugId)
+            {
+                _validationParameters.DebugId = debugId;
+                return this;
+            }
+
+            public Builder WithIgnoreTrailingSlashWhenValidatingAudience(bool ignoreTrailingSlash)
+            {
+                _validationParameters.IgnoreTrailingSlashWhenValidatingAudience = ignoreTrailingSlash;
+                return this;
+            }
+
+            public Builder WithIncludeTokenOnFailedValidation(bool includeToken)
+            {
+                _validationParameters.IncludeTokenOnFailedValidation = includeToken;
+                return this;
+            }
+
+            public Builder WithInstancePropertyBag(IDictionary<string, object> instanceProperties)
+            {
+                _validationParameters._instancePropertyBag = instanceProperties;
+                return this;
+            }
+
+            public Builder WithIssuerSigningKeyValidator(IssuerSigningKeyValidatorDelegate issuerSigningKeyValidator)
+            {
+                _validationParameters.IssuerSigningKeyValidator = issuerSigningKeyValidator;
+                return this;
+            }
+
+            public Builder WithIssuerSigningKeyResolver(IssuerSigningKeyResolver issuerSigningKeyResolver)
+            {
+                _validationParameters.IssuerSigningKeyResolver = issuerSigningKeyResolver;
+                return this;
+            }
+
+            public Builder WithLifetimeValidator(LifetimeValidatorDelegate lifetimeValidator)
+            {
+                _validationParameters.LifetimeValidator = lifetimeValidator;
+                return this;
+            }
+
+            public Builder WithLogTokenId(bool logTokenId)
+            {
+                _validationParameters.LogTokenId = logTokenId;
+                return this;
+            }
+
+            public Builder WithNameClaimType(string nameClaimType)
+            {
+                _validationParameters.NameClaimType = nameClaimType;
+                return this;
+            }
+
+            public Builder WithNameClaimTypeRetriever(ClaimTypeRetrieverDelegate nameClaimTypeRetriever)
+            {
+                _validationParameters.NameClaimTypeRetriever = nameClaimTypeRetriever;
+                return this;
+            }
+
+            public Builder WithPropertyBag(IDictionary<string, object> propertyBag)
+            {
+                _validationParameters.PropertyBag = propertyBag;
+                return this;
+            }
+
+            public Builder WithRefreshBeforeValidation(bool refreshBeforeValidation)
+            {
+                _validationParameters.RefreshBeforeValidation = refreshBeforeValidation;
+                return this;
+            }
+
+            public Builder WithRoleClaimType(string roleClaimType)
+            {
+                _validationParameters.RoleClaimType = roleClaimType;
+                return this;
+            }
+
+            public Builder WithRoleClaimTypeRetriever(ClaimTypeRetrieverDelegate roleClaimTypeRetriever)
+            {
+                _validationParameters.RoleClaimTypeRetriever = roleClaimTypeRetriever;
+                return this;
+            }
+
+            public Builder WithSaveSigninToken(bool saveSigninToken)
+            {
+                _validationParameters.SaveSigninToken = saveSigninToken;
+                return this;
+            }
+
+            public Builder WithSignatureValidator(SignatureValidator signatureValidator)
+            {
+                _validationParameters.SignatureValidator = signatureValidator;
+                return this;
+            }
+
+            public Builder WithTokenDecryptionKeyResolver(ResolveTokenDecryptionKeyDelegate tokenDecryptionKeyResolver)
+            {
+                _validationParameters.TokenDecryptionKeyResolver = tokenDecryptionKeyResolver;
+                return this;
+            }
+
+            public Builder WithTokenReplayCache(ITokenReplayCache tokenReplayCache)
+            {
+                _validationParameters.TokenReplayCache = tokenReplayCache;
+                return this;
+            }
+
+            public Builder WithTokenReplayValidator(TokenReplayValidatorDelegate tokenReplayValidator)
+            {
+                _validationParameters.TokenReplayValidator = tokenReplayValidator;
+                return this;
+            }
+
+            public Builder WithTransformBeforeSignatureValidation(TransformBeforeSignatureValidation transformBeforeSignatureValidation)
+            {
+                _validationParameters.TransformBeforeSignatureValidation = transformBeforeSignatureValidation;
+                return this;
+            }
+
+            public Builder WithTypeValidator(TypeValidatorDelegate typeValidator)
+            {
+                _validationParameters.TypeValidator = typeValidator;
+                return this;
+            }
+
+            public Builder WithValidateActor(bool validateActor)
+            {
+                _validationParameters.ValidateActor = validateActor;
+                return this;
+            }
+
+            public Builder WithValidAlgorithms(IList<string> validAlgorithms)
+            {
+                _validationParameters._validAlgorithms = validAlgorithms;
+                return this;
+            }
+
+            public Builder WithValidAudiences(IList<string> validAudiences)
+            {
+                _validationParameters._validAudiences = validAudiences;
+                return this;
+            }
+
+            public Builder WithValidIssuers(IList<string> validIssuers)
+            {
+                _validationParameters._validIssuers = validIssuers;
+              return this;
+            }
+
+            public Builder WithValidTypes(IList<string> validTypes)
+            {
+                _validationParameters._validTokenTypes = validTypes;
+                return this;
+            }
+
+            public ValidationParameters Build()
+            {
+                return _validationParameters;
+            }
+        }
+        #endregion
     }
 #nullable restore
 }
