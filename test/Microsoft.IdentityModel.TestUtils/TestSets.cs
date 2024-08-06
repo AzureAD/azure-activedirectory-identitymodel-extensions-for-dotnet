@@ -9,7 +9,6 @@ using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Xml;
-using static Microsoft.IdentityModel.Xml.XmlSignatureConstants;
 
 namespace Microsoft.IdentityModel.TestUtils
 {

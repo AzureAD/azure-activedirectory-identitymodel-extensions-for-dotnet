@@ -181,6 +181,9 @@ dotnet_diagnostic.CA1845.severity = warning
 # CA1846: Prefer AsSpan over Substring
 dotnet_diagnostic.CA1846.severity = warning
 
+[{GlobalSuppressions.cs,TrimmingAttributes.cs}]
+dotnet_diagnostic.IDE0073.severity = none
+
 # C++ Files
 [*.{cpp,h,in}]
 curly_bracket_next_line = true
