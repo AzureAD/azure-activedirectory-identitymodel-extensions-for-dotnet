@@ -512,25 +512,25 @@ namespace Microsoft.IdentityModel.Tokens
         public IList<string> ValidAlgorithms { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="IList{String}"/> that contains valid audiences that will be used to check against the token's audience.
+        /// Gets the <see cref="IList{T}"/> that contains valid audiences that will be used to check against the token's audience.
         /// The default is <c>null</c>.
         /// </summary>
         public IList<string> ValidAudiences { get; }
 
         /// <summary>
-        /// Gets the <see cref="IList{String}"/> that contains valid issuers that will be used to check against the token's issuer.
+        /// Gets the <see cref="IList{T}"/> that contains valid issuers that will be used to check against the token's issuer.
         /// The default is <c>null</c>.
         /// </summary>
         public IList<string> ValidIssuers { get; }
 
         /// <summary>
-        /// Gets the <see cref="IList{String}"/> that contains valid types that will be used to check against the JWT header's 'typ' claim.
+        /// Gets the <see cref="IList{T}"/> that contains valid types that will be used to check against the JWT header's 'typ' claim.
         /// If this property is not set, the 'typ' header claim will not be validated and all types will be accepted.
         /// In the case of a JWE, this property will ONLY apply to the inner token header.
         /// The default is an empty collection.
         /// </summary>
         /// <exception cref="ArgumentNullException">Thrown when the value is set as null.</exception>
-        /// <returns>The <see cref="IList{String}"/> that contains valid token types that will be used to check against the token's 'typ' claim.</returns>
+        /// <returns>The <see cref="IList{T}"/> that contains valid token types that will be used to check against the token's 'typ' claim.</returns>
         public IList<string> ValidTypes
         {
             get
