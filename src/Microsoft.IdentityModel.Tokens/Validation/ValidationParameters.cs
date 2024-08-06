@@ -22,6 +22,7 @@ namespace Microsoft.IdentityModel.Tokens
         private string _roleClaimType = ClaimsIdentity.DefaultRoleClaimType;
         private Dictionary<string, object> _instancePropertyBag;
         private IList<SecurityKey> _issuerSigningKeys;
+        private IList<string> _validIssuers;
         private IList<string> _validTokenTypes;
         private IList<string> _validAudiences;
 
@@ -92,8 +93,8 @@ namespace Microsoft.IdentityModel.Tokens
             ValidateSignatureLast = other.ValidateSignatureLast;
             ValidateWithLKG = other.ValidateWithLKG;
             ValidAlgorithms = other.ValidAlgorithms;
+            _validIssuers = other.ValidIssuers;
             _validAudiences = other.ValidAudiences;
-            ValidIssuers = other.ValidIssuers;
             _validTokenTypes = other.ValidTypes;
         }
 
@@ -538,9 +539,13 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Gets the <see cref="IList{String}"/> that contains valid issuers that will be used to check against the token's issuer.
-        /// The default is <c>null</c>.
+        /// The default is an empty collection.
         /// </summary>
-        public IList<string> ValidIssuers { get; }
+        /// <returns>The <see cref="IList{String}"/> that contains valid issuers that will be used to check against the token's 'iss' claim.</returns>
+        public IList<string> ValidIssuers =>
+            _validIssuers ??
+            Interlocked.CompareExchange(ref _validIssuers, [], null) ??
+            _validIssuers;
 
         /// <summary>
         /// Gets the <see cref="IList{String}"/> that contains valid types that will be used to check against the JWT header's 'typ' claim.
