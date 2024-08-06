@@ -21,22 +21,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests.Validation
         }
 
         [Fact]
-        public void ValidIssuers_GetSet_ValidIssuersList()
-        {
-            var validationParameters = new ValidationParameters();
-            var validIssuers = new List<string> { "issuer1", "issuer2" };
-
-            validationParameters.ValidIssuers = validIssuers;
-
-            Assert.Equal(validIssuers, validationParameters.ValidIssuers);
-        }
-
-        [Fact]
-        public void ValidIssuers_SetNull_ThrowsArgumentNullException()
+        public void ValidIssuers_GetReturnsEmptyList()
         {
             var validationParameters = new ValidationParameters();
 
-            Assert.Throws<ArgumentNullException>(() => validationParameters.ValidIssuers = null);
+            Assert.Equal(0, validationParameters.ValidIssuers.Count);
         }
 
         [Fact]

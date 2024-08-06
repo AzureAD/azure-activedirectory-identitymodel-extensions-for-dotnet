@@ -21,29 +21,25 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.IssuerValidatorAsyncTests", theoryData);
 
-            try
-            {
-                IssuerValidationResult issuerValidationResult = await Validators.ValidateIssuerAsync(
-                    theoryData.Issuer,
-                    theoryData.SecurityToken,
-                    theoryData.ValidationParameters,
-                    new CallContext(),
-                    CancellationToken.None).ConfigureAwait(false);
+            if (theoryData.ValidIssuerToAdd != null)
+                theoryData.ValidationParameters.ValidIssuers.Add(theoryData.ValidIssuerToAdd);
 
-                if (issuerValidationResult.Exception != null)
-                    theoryData.ExpectedException.ProcessException(issuerValidationResult.Exception, context);
-                else
-                    theoryData.ExpectedException.ProcessNoException();
+            IssuerValidationResult issuerValidationResult = await Validators.ValidateIssuerAsync(
+                theoryData.Issuer,
+                theoryData.SecurityToken,
+                theoryData.ValidationParameters,
+                new CallContext(),
+                CancellationToken.None).ConfigureAwait(false);
 
-                IdentityComparer.AreIssuerValidationResultsEqual(
-                    issuerValidationResult,
-                    theoryData.IssuerValidationResult,
-                    context);
-            }
-            catch (SecurityTokenInvalidIssuerException ex)
-            {
-                theoryData.ExpectedException.ProcessException(ex, context);
-            }
+            if (issuerValidationResult.Exception != null)
+                theoryData.ExpectedException.ProcessException(issuerValidationResult.Exception, context);
+            else
+                theoryData.ExpectedException.ProcessNoException();
+
+            IdentityComparer.AreIssuerValidationResultsEqual(
+                issuerValidationResult,
+                theoryData.IssuerValidationResult,
+                context);
 
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -141,10 +137,8 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         IssuerValidationResult.ValidationSource.IssuerIsAmongValidIssuers),
                     IsValid = true,
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
-                    ValidationParameters = new ValidationParameters()
-                    {
-                        ValidIssuers = [issClaim]
-                    }
+                    ValidationParameters = new ValidationParameters(),
+                    ValidIssuerToAdd = issClaim
                 });
 
                 theoryData.Add(new IssuerValidationResultsTheoryData("Invalid_Issuer")
@@ -164,7 +158,8 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             new StackFrame(true))),
                     IsValid = false,
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
-                    ValidationParameters = new ValidationParameters { ValidIssuers = [validIssuer] }
+                    ValidationParameters = new ValidationParameters(),
+                    ValidIssuerToAdd = validIssuer
                 });
 
                 return theoryData;
@@ -191,5 +186,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         internal ValidationParameters ValidationParameters { get; set; }
 
         internal ValidationFailureType ValidationFailureType { get; set; }
+        public string ValidIssuerToAdd { get; internal set; }
     }
 }
