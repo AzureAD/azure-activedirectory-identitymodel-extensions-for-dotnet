@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt.Tests;
 using Microsoft.IdentityModel.Logging;
@@ -30,11 +32,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     theoryData.Token = new JsonWebToken(tokenString);
             }
 
-            if (theoryData.TestId == "Invalid_NoKeysProvided")
+            if (theoryData.TokenDecryptionKeysToAdd != null)
             {
-#pragma warning disable CS0219 // Variable is assigned but its value is never used
-                var something = 0;
-#pragma warning restore CS0219 // Variable is assigned but its value is never used
+                foreach (SecurityKey key in theoryData.TokenDecryptionKeysToAdd)
+                    theoryData.ValidationParameters.TokenDecryptionKeys.Add(key);
             }
 
             CompareContext context = TestUtilities.WriteHeader($"{this}.JsonWebTokenHandlerDecryptTokenTests", theoryData);
@@ -144,10 +145,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         TestId = "Valid_Aes128_FromValidationParameters",
                         TokenString = ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims,
-                        ValidationParameters = new ValidationParameters
-                        {
-                            TokenDecryptionKeys = [Default.SymmetricEncryptingCredentials.Key],
-                        },
+                        ValidationParameters = new ValidationParameters(),
+                        TokenDecryptionKeysToAdd = [Default.SymmetricEncryptingCredentials.Key],
                         TokenDecryptionResult = new TokenDecryptionResult(
                             "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwiaWF0IjoiMTQ4OTc3NTYxNyIsIm5iZiI6IjE0ODk3NzU2MTciLCJleHAiOiIyNTM0MDIzMDA3OTkifQ.",
                             new JsonWebToken(ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims)),
@@ -181,9 +180,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Token = ecdsaToken,
                         ValidationParameters = new ValidationParameters
                         {
-                            TokenDecryptionKeys = [new ECDsaSecurityKey(KeyingMaterial.JsonWebKeyP256, true)],
                             EphemeralDecryptionKey = new ECDsaSecurityKey(KeyingMaterial.JsonWebKeyP256, true)
                         },
+                        TokenDecryptionKeysToAdd = [new ECDsaSecurityKey(KeyingMaterial.JsonWebKeyP256, true)],
                         TokenDecryptionResult = new TokenDecryptionResult(
                             "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjI1MzQwMjMwMDgwMCwiaWF0IjowLCJuYmYiOjB9.",
                             ecdsaToken),
@@ -220,6 +219,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public SecurityTokenDescriptor SecurityTokenDescriptor { get; internal set; }
         public string TokenString { get; internal set; }
         internal ValidationParameters ValidationParameters { get; set; }
+        internal IList<SecurityKey> TokenDecryptionKeysToAdd { get; set; }
     }
 
     public class CustomConfiguration : BaseConfiguration

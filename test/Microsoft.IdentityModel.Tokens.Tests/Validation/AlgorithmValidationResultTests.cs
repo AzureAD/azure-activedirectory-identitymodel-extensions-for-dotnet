@@ -3,9 +3,11 @@
 
 using System;
 using System.Diagnostics;
+using System.Collections.Generic;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Logging;
 using Xunit;
+using System.Collections;
 
 namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 {
@@ -15,6 +17,13 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         public void ValidateAlgorithm(AlgorithmTheoryData theoryData)
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.AlgorithmValidationResultTests", theoryData);
+
+            if (theoryData.AlgorithmsToAdd != null)
+            {
+                foreach (var algorithm in theoryData.AlgorithmsToAdd)
+                    theoryData.ValidationParameters.ValidAlgorithms.Add(algorithm);
+            }
+
 
             AlgorithmValidationResult algorithmValidationResult = Validators.ValidateAlgorithm(
                 theoryData.Algorithm,
@@ -69,10 +78,8 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         Algorithm = SecurityAlgorithms.Sha256,
                         SecurityKey = securityKey,
                         SecurityToken = null,
-                        ValidationParameters = new ValidationParameters
-                        {
-                            ValidAlgorithms = new[] { SecurityAlgorithms.HmacSha256 }
-                        },
+                        ValidationParameters = new ValidationParameters(),
+                        AlgorithmsToAdd = [SecurityAlgorithms.HmacSha256],
                         AlgorithmValidationResult = new AlgorithmValidationResult(
                             SecurityAlgorithms.Sha256,
                             ValidationFailureType.AlgorithmValidationFailed,
@@ -86,14 +93,11 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     },
                     new AlgorithmTheoryData
                     {
-                        TestId = "Valid_ValidateAlgorithmWhenValidAlgorithmsIsNull",
+                        TestId = "Valid_ValidateAlgorithmWhenValidAlgorithmsIsEmpty",
                         Algorithm = SecurityAlgorithms.Sha256,
                         SecurityKey = securityKey,
                         SecurityToken = null,
-                        ValidationParameters = new ValidationParameters
-                        {
-                            ValidAlgorithms = null
-                        },
+                        ValidationParameters = new ValidationParameters(),
                         AlgorithmValidationResult = new AlgorithmValidationResult(SecurityAlgorithms.Sha256)
                     },
                     new AlgorithmTheoryData
@@ -102,10 +106,8 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         Algorithm = SecurityAlgorithms.Sha256,
                         SecurityKey = securityKey,
                         SecurityToken = null,
-                        ValidationParameters = new ValidationParameters
-                        {
-                            ValidAlgorithms = new[] { SecurityAlgorithms.HmacSha256, SecurityAlgorithms.Sha256 }
-                        },
+                        ValidationParameters = new ValidationParameters(),
+                        AlgorithmsToAdd = new[] { SecurityAlgorithms.HmacSha256, SecurityAlgorithms.Sha256 },
                         AlgorithmValidationResult = new AlgorithmValidationResult(SecurityAlgorithms.Sha256)
                     }
                 };
@@ -119,7 +121,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             public SecurityKey SecurityKey { get; set; }
 
             public SecurityToken SecurityToken { get; set; }
-
+            public IList<string> AlgorithmsToAdd { get; set; }
             internal ValidationParameters ValidationParameters { get; set; }
 
             internal AlgorithmValidationResult AlgorithmValidationResult { get; set; }
