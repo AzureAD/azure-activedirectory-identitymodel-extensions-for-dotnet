@@ -533,7 +533,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// In the case of a JWE, this property will ONLY apply to the inner token header.
         /// The default is an empty collection.
         /// </summary>
-        /// <exception cref="ArgumentNullException">Thrown when the value is set as null.</exception>
         /// <returns>The <see cref="IList{String}"/> that contains valid token types that will be used to check against the token's 'typ' claim.</returns>
         public IList<string> ValidTypes =>
             _validTokenTypes ??
