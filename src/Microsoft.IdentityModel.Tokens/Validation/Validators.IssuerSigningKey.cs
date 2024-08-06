@@ -25,7 +25,7 @@ namespace Microsoft.IdentityModel.Tokens
         SecurityKey signingKey,
         SecurityToken securityToken,
         ValidationParameters validationParameters,
-        CallContext callContext);
+        CallContext? callContext);
 
     /// <summary>
     /// SigningKeyValidation
@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Tokens
             SecurityKey securityKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
-            CallContext callContext)
+            CallContext? callContext)
         {
             if (validationParameters == null)
                 return new SigningKeyValidationResult(
@@ -97,7 +97,7 @@ namespace Microsoft.IdentityModel.Tokens
         internal static SigningKeyValidationResult ValidateIssuerSigningKeyLifeTime(
             SecurityKey securityKey,
             ValidationParameters validationParameters,
-            CallContext callContext)
+            CallContext? callContext)
 #pragma warning restore CA1801 // Review unused parameters
         {
             X509SecurityKey? x509SecurityKey = securityKey as X509SecurityKey;
