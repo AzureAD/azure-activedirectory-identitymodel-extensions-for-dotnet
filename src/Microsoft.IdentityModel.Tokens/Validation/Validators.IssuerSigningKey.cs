@@ -142,8 +142,6 @@ namespace Microsoft.IdentityModel.Tokens
 
             return new SigningKeyValidationResult(securityKey);
         }
-
-        
     }
 }
 #nullable restore
