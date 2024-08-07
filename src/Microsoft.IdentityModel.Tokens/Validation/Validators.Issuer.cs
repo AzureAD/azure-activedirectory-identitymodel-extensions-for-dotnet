@@ -25,7 +25,7 @@ namespace Microsoft.IdentityModel.Tokens
         SecurityToken securityToken,
         ValidationParameters validationParameters,
         CallContext callContext,
-        CancellationToken cancellationToken);
+        CancellationToken? cancellationToken);
 
     /// <summary>
     /// IssuerValidation
@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Tokens
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext,
-            CancellationToken cancellationToken)
+            CancellationToken? cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(issuer))
             {
@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             BaseConfiguration configuration = null;
             if (validationParameters.ConfigurationManager != null)
-                configuration = await validationParameters.ConfigurationManager.GetBaseConfigurationAsync(cancellationToken).ConfigureAwait(false);
+                configuration = await validationParameters.ConfigurationManager.GetBaseConfigurationAsync(cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
 
             // Return failed IssuerValidationResult if all possible places to validate against are null or empty.
             if (validationParameters.ValidIssuers.Count == 0 && string.IsNullOrWhiteSpace(configuration?.Issuer))

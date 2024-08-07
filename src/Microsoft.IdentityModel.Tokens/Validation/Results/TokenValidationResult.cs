@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.Tokens
         private Dictionary<string, object> _claims;
         private Dictionary<string, object> _propertyBag;
         // TODO - lazy creation of _validationResults
-        private List<ValidationResult> _validationResults = [];
+        private List<ValidationResult> _validationResults;
 
         private Exception _exception;
         private bool _isValid;
@@ -53,10 +53,19 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="tokenHandler"></param>
         /// <param name="validationParameters"></param>
         /// <param name="issuer"></param>
-        internal TokenValidationResult(SecurityToken securityToken, TokenHandler tokenHandler, TokenValidationParameters validationParameters, string issuer)
+        internal TokenValidationResult(
+            SecurityToken securityToken,
+            TokenHandler tokenHandler,
+            TokenValidationParameters validationParameters,
+            string issuer) : this(securityToken, tokenHandler, validationParameters, issuer, null)
+        {
+        }
+
+        internal TokenValidationResult(SecurityToken securityToken, TokenHandler tokenHandler, TokenValidationParameters validationParameters, string issuer, List<ValidationResult> validationResults)
         {
             _validationParameters = validationParameters;
             _tokenHandler = tokenHandler;
+            _validationResults = validationResults;
             Issuer = issuer;
             SecurityToken = securityToken;
         }
@@ -254,7 +263,7 @@ namespace Microsoft.IdentityModel.Tokens
                 if (_validationResults is null)
                     Interlocked.CompareExchange(ref _validationResults, new List<ValidationResult>(), null);
 
-                return _validationResults;
+                return _validationResults.AsReadOnly();
             }
         }
     }
