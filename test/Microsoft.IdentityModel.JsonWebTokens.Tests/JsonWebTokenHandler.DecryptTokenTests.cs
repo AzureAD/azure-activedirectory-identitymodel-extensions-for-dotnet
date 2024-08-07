@@ -195,7 +195,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         TokenString = ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims,
                         ValidationParameters = new ValidationParameters(),
                         ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10609:"),
-                        TokenDecryptionResult = new TokenDecryptionResult( 
+                        TokenDecryptionResult = new TokenDecryptionResult(
                             new JsonWebToken(ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims),
                             ValidationFailureType.TokenDecryptionFailed,
                             new ExceptionDetail(

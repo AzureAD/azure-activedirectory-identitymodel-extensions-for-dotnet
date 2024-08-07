@@ -8,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.IdentityModel.Abstractions;
@@ -104,7 +103,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     }
                 }
             }
-            catch(Exception)
+            catch (Exception)
             {
                 return false;
             }
@@ -649,7 +648,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 var audienceRestriction = new Saml2AudienceRestriction(tokenDescriptor.Audiences);
                 if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
                     audienceRestriction.Audiences.Add(tokenDescriptor.Audience);
-                    conditions.AudienceRestrictions.Add(audienceRestriction);
+                conditions.AudienceRestrictions.Add(audienceRestriction);
             }
             else if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
                 conditions.AudienceRestrictions.Add(new Saml2AudienceRestriction(tokenDescriptor.Audience));
@@ -1044,7 +1043,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
                 ValidateAudience(audienceRestriction.Audiences, samlToken, validationParameters);
             }
-            
+
             if (validationParameters.RequireAudience && !foundAudienceRestriction)
                 throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX13002));
         }
@@ -1078,7 +1077,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             Saml2Attribute actorAttribute = null;
             var claims = new Collection<Claim>();
-            
+
             // search through attribute values to see if the there is an embedded actor.
             foreach (string value in attribute.Values)
             {

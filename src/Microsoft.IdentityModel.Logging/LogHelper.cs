@@ -296,7 +296,7 @@ namespace Microsoft.IdentityModel.Logging
         public static void LogVerbose(string message, params object[] args)
         {
             if (IdentityModelEventSource.Logger.IsEnabled(EventLevel.Verbose, EventKeywords.All))
-                    IdentityModelEventSource.Logger.WriteVerbose(message, args);
+                IdentityModelEventSource.Logger.WriteVerbose(message, args);
 
             if (Logger.IsEnabled(EventLogLevel.Verbose))
                 Logger.Log(WriteEntry(EventLogLevel.Verbose, null, message, args));
@@ -310,7 +310,7 @@ namespace Microsoft.IdentityModel.Logging
         public static void LogWarning(string message, params object[] args)
         {
             if (IdentityModelEventSource.Logger.IsEnabled(EventLevel.Warning, EventKeywords.All))
-                    IdentityModelEventSource.Logger.WriteWarning(message, args);
+                IdentityModelEventSource.Logger.WriteWarning(message, args);
 
             if (Logger.IsEnabled(EventLogLevel.Warning))
                 Logger.Log(WriteEntry(EventLogLevel.Warning, null, message, args));
@@ -324,7 +324,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="innerException">the inner <see cref="Exception"/> to be added to the outer exception.</param>
         /// <param name="format">Format string of the log message.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
-        private static T LogExceptionImpl<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(EventLevel eventLevel, string argumentName, Exception innerException, string format, params object[] args) where T : Exception 
+        private static T LogExceptionImpl<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(EventLevel eventLevel, string argumentName, Exception innerException, string format, params object[] args) where T : Exception
         {
             string message;
             if (args != null)
@@ -339,16 +339,20 @@ namespace Microsoft.IdentityModel.Logging
             if (Logger.IsEnabled(eventLogLevel))
                 Logger.Log(WriteEntry(eventLogLevel, innerException, message, null));
 
-            if (innerException != null) 
+            if (innerException != null)
+            {
                 if (string.IsNullOrEmpty(argumentName))
                     return (T)Activator.CreateInstance(typeof(T), message, innerException);
                 else
                     return (T)Activator.CreateInstance(typeof(T), argumentName, message, innerException);
+            }
             else
+            {
                 if (string.IsNullOrEmpty(argumentName))
                     return (T)Activator.CreateInstance(typeof(T), message);
                 else
                     return (T)Activator.CreateInstance(typeof(T), argumentName, message);
+            }
         }
 
         private static EventLogLevel EventLevelToEventLogLevel(EventLevel eventLevel) =>

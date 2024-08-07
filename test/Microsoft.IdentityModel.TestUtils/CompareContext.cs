@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public void AddDictionaryKeysToIgnoreWhenComparing(params string[] keyValues)
         {
-            foreach(string keyValue in keyValues)
+            foreach (string keyValue in keyValues)
                 DictionaryKeysToIgnoreWhenComparing.Add(keyValue);
         }
 

@@ -1,6 +1,5 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.Collections;
@@ -869,7 +868,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                         return dateTimeValue;
                 }
             }
-            catch(Exception)
+            catch (Exception)
             { }
 #pragma warning restore CA1031 // Do not catch general exception types
 
@@ -1215,7 +1214,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                             LogMessages.IDX11025,
                             LogHelper.MarkAsNonPII(objType.ToString()),
                             LogHelper.MarkAsNonPII(key))));
-    }
+        }
 
         /// <summary>
         /// Writes values into an array.
@@ -1295,23 +1294,23 @@ namespace Microsoft.IdentityModel.Tokens.Json
             else if (obj is decimal d)
                 writer.WriteNumberValue(d);
             else if (obj is float f)
-            // Below net6.0, we have to convert the float to a decimal otherwise values like 1.11 will be serailized as 1.11000001
-            // In failure cases, we will write the float as is.
+                // Below net6.0, we have to convert the float to a decimal otherwise values like 1.11 will be serailized as 1.11000001
+                // In failure cases, we will write the float as is.
 #if NET6_0_OR_GREATER
-            writer.WriteNumberValue(f);
+                writer.WriteNumberValue(f);
 #else
 #pragma warning disable CA1031 // Do not catch general exception types, we have seen TryParse fault.
-            try
-            {
-                if (decimal.TryParse(f.ToString(CultureInfo.InvariantCulture), out decimal dec))
-                    writer.WriteNumberValue(dec);
-                else
+                try
+                {
+                    if (decimal.TryParse(f.ToString(CultureInfo.InvariantCulture), out decimal dec))
+                        writer.WriteNumberValue(dec);
+                    else
+                        writer.WriteNumberValue(f);
+                }
+                catch (Exception)
+                {
                     writer.WriteNumberValue(f);
-            }
-            catch (Exception)
-            {
-                writer.WriteNumberValue(f);
-            }
+                }
 #pragma warning restore CA1031
 #endif
 

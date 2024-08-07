@@ -86,7 +86,7 @@ namespace Microsoft.IdentityModel.Tokens
                             LogHelper.MarkAsNonPII(notBefore.Value),
                             LogHelper.MarkAsNonPII(expires.Value)),
                         typeof(SecurityTokenInvalidLifetimeException),
-                        new StackFrame(true)));                
+                        new StackFrame(true)));
 
             DateTime utcNow = DateTime.UtcNow;
             if (notBefore.HasValue && (notBefore.Value > DateTimeUtil.Add(utcNow, validationParameters.ClockSkew)))

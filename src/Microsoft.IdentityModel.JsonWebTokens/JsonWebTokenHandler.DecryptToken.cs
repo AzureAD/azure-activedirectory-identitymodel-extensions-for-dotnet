@@ -137,7 +137,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     else
                         keys = configurationKeys;
                 }
-                    
+
             }
 
             if (jwtToken.Alg.Equals(JwtConstants.DirectKeyUseAlg, StringComparison.Ordinal)
@@ -205,7 +205,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     typeof(SecurityTokenKeyWrapException),
                     new System.Diagnostics.StackFrame());
                 return (null, exceptionDetail);
-            }               
+            }
         }
 
         /// <summary>
@@ -234,7 +234,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (!string.IsNullOrEmpty(jwtToken.X5t) && validationParameters.TokenDecryptionKeys != null)
             {
-                for(int i = 0; i < validationParameters.TokenDecryptionKeys.Count; i++)
+                for (int i = 0; i < validationParameters.TokenDecryptionKeys.Count; i++)
                 {
                     var key = validationParameters.TokenDecryptionKeys[i];
 

@@ -169,6 +169,21 @@ dotnet_diagnostic.CA1303.severity = none
 dotnet_diagnostic.IDE0073.severity = warning
 file_header_template = Copyright (c) Microsoft Corporation. All rights reserved.\nLicensed under the MIT License.
 
+# IDE0005: Remove unnecessary usings
+dotnet_diagnostic.IDE0005.severity = warning
+
+# IDE0055: All formatting rules
+dotnet_diagnostic.IDE0055.severity = warning
+
+# CA1845: Use span-based 'string.Concat'
+dotnet_diagnostic.CA1845.severity = warning
+
+# CA1846: Prefer AsSpan over Substring
+dotnet_diagnostic.CA1846.severity = warning
+
+[{GlobalSuppressions.cs,TrimmingAttributes.cs}]
+dotnet_diagnostic.IDE0073.severity = none
+
 # C++ Files
 [*.{cpp,h,in}]
 curly_bracket_next_line = true

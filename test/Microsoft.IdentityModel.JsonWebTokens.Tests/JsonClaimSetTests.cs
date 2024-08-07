@@ -122,7 +122,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     Json = header + "." + payload + ".",
                     PropertyName = "b",
                     PropertyType = typeof(Dictionary<string, string[]>),
-                    PropertyValue = new Dictionary<string, string[]> {{"prop1", new string[]{"value1","value2"}}}
+                    PropertyValue = new Dictionary<string, string[]> { { "prop1", new string[] { "value1", "value2" } } }
                 });
 
             theoryData.Add(
@@ -131,7 +131,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     Json = header + "." + payload + ".",
                     PropertyName = "a",
                     PropertyType = typeof(Dictionary<string, string>),
-                    PropertyValue = new Dictionary<string, string> {{"prop1","value1"}}
+                    PropertyValue = new Dictionary<string, string> { { "prop1", "value1" } }
                 });
 
             theoryData.Add(
@@ -167,7 +167,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             public Type PropertyOut { get; set; }
 
-             public Type PropertyType { get; set; }
+            public Type PropertyType { get; set; }
 
             public object PropertyValue { get; set; }
 

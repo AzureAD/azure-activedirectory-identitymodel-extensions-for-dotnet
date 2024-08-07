@@ -163,7 +163,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 CryptoProviderFactory.Default.CreateHashAlgorithm(algorithm);
                 ee.ProcessNoException();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ee.ProcessException(ex);
             }

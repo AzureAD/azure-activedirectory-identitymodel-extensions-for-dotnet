@@ -21,14 +21,19 @@ namespace Microsoft.IdentityModel.Tokens
         private string _nameClaimType = ClaimsIdentity.DefaultNameClaimType;
         private string _roleClaimType = ClaimsIdentity.DefaultRoleClaimType;
         private Dictionary<string, object> _instancePropertyBag;
-        private IList<string> _validTokenTypes = [];
+        private IList<SecurityKey> _issuerSigningKeys;
+        private IList<string> _validIssuers;
+        private IList<string> _validTokenTypes;
+        private IList<string> _validAudiences;
 
         private AlgorithmValidatorDelegate _algorithmValidator = Validators.ValidateAlgorithm;
         private AudienceValidatorDelegate _audienceValidator = Validators.ValidateAudience;
         private IssuerValidationDelegateAsync _issuerValidatorAsync = Validators.ValidateIssuerAsync;
         private LifetimeValidatorDelegate _lifetimeValidator = Validators.ValidateLifetime;
+        private SignatureValidatorDelegate _signatureValidator;
         private TokenReplayValidatorDelegate _tokenReplayValidator = Validators.ValidateTokenReplay;
         private TypeValidatorDelegate _typeValidator = Validators.ValidateTokenType;
+        private IssuerSigningKeyValidatorDelegate _issuerSigningKeyValidator = Validators.ValidateIssuerSigningKey;
 
         /// <summary>
         /// This is the default value of <see cref="ClaimsIdentity.AuthenticationType"/> when creating a <see cref="ClaimsIdentity"/>.
@@ -66,7 +71,7 @@ namespace Microsoft.IdentityModel.Tokens
             IncludeTokenOnFailedValidation = other.IncludeTokenOnFailedValidation;
             IgnoreTrailingSlashWhenValidatingAudience = other.IgnoreTrailingSlashWhenValidatingAudience;
             IssuerSigningKeyResolver = other.IssuerSigningKeyResolver;
-            IssuerSigningKeys = other.IssuerSigningKeys;
+            _issuerSigningKeys = other.IssuerSigningKeys;
             IssuerSigningKeyValidator = other.IssuerSigningKeyValidator;
             IssuerValidatorAsync = other.IssuerValidatorAsync;
             LifetimeValidator = other.LifetimeValidator;
@@ -89,9 +94,9 @@ namespace Microsoft.IdentityModel.Tokens
             ValidateSignatureLast = other.ValidateSignatureLast;
             ValidateWithLKG = other.ValidateWithLKG;
             ValidAlgorithms = other.ValidAlgorithms;
-            ValidAudiences = other.ValidAudiences;
-            ValidIssuers = other.ValidIssuers;
-            ValidTypes = other.ValidTypes;
+            _validIssuers = other.ValidIssuers;
+            _validAudiences = other.ValidAudiences;
+            _validTokenTypes = other.ValidTypes;
         }
 
         /// <summary>
@@ -116,7 +121,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// If no delegate is set, the default implementation will be used. The default checks the algorithm
         /// against the <see cref="ValidAlgorithms"/> property, if present. If not, it will succeed.
         /// </remarks>
-        public AlgorithmValidatorDelegate AlgorithmValidator {
+        public AlgorithmValidatorDelegate AlgorithmValidator
+        {
             get { return _algorithmValidator; }
             set { _algorithmValidator = value ?? throw new ArgumentNullException(nameof(value), "AlgorithmValidator cannot be null."); }
         }
@@ -201,7 +207,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>A <see cref="ClaimsIdentity"/> with Authentication, NameClaimType and RoleClaimType set.</returns>
         public virtual ClaimsIdentity CreateClaimsIdentity(SecurityToken securityToken, string issuer)
         {
-            string nameClaimType = null;
+            string nameClaimType;
             if (NameClaimTypeRetriever != null)
             {
                 nameClaimType = NameClaimTypeRetriever(securityToken, issuer);
@@ -211,7 +217,7 @@ namespace Microsoft.IdentityModel.Tokens
                 nameClaimType = NameClaimType;
             }
 
-            string roleClaimType = null;
+            string roleClaimType;
             if (RoleClaimTypeRetriever != null)
             {
                 roleClaimType = RoleClaimTypeRetriever(securityToken, issuer);
@@ -269,10 +275,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// If both <see cref="IssuerSigningKeyValidatorUsingConfiguration"/> and <see cref="IssuerSigningKeyValidator"/> are set, IssuerSigningKeyResolverUsingConfiguration takes
         /// priority.
         /// </remarks>
-        public IssuerSigningKeyValidator IssuerSigningKeyValidator { get; set; }
+        public IssuerSigningKeyValidatorDelegate IssuerSigningKeyValidator
+        {
+            get => _issuerSigningKeyValidator;
+            set => _issuerSigningKeyValidator = value ?? throw new ArgumentNullException(nameof(value), "IssuerSigningKeyValidator cannot be set as null.");
+        }
 
         /// <summary>
-        /// Gets a <see cref="IDictionary{String, Object}"/> that is unique to this instance.
+        /// Gets a <see cref="IDictionary{TKey, TValue}"/> that is unique to this instance.
         /// Calling <see cref="Clone"/> will result in a new instance of this IDictionary.
         /// </summary>
         public IDictionary<string, object> InstancePropertyBag => _instancePropertyBag ??= new Dictionary<string, object>();
@@ -290,12 +300,15 @@ namespace Microsoft.IdentityModel.Tokens
         /// If both <see cref="IssuerSigningKeyResolverUsingConfiguration"/> and <see cref="IssuerSigningKeyResolver"/> are set, IssuerSigningKeyResolverUsingConfiguration takes
         /// priority.
         /// </remarks>
-        public IssuerSigningKeyResolver IssuerSigningKeyResolver { get; set; }
+        public IssuerSigningKeyResolverDelegate IssuerSigningKeyResolver { get; set; }
 
         /// <summary>
-        /// Gets or sets an <see cref="IList{SecurityKey}"/> used for signature validation.
+        /// Gets the <see cref="IList{T}"/> used for signature validation.
         /// </summary>
-        public IList<SecurityKey> IssuerSigningKeys { get; }
+        public IList<SecurityKey> IssuerSigningKeys =>
+            _issuerSigningKeys ??
+            Interlocked.CompareExchange(ref _issuerSigningKeys, [], null) ??
+            _issuerSigningKeys;
 
         /// <summary>
         /// Allows overriding the delegate that will be used to validate the issuer of the token.
@@ -366,13 +379,13 @@ namespace Microsoft.IdentityModel.Tokens
         public Func<SecurityToken, string, string> NameClaimTypeRetriever { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="IDictionary{String, Object}"/> that contains a collection of custom key/value pairs.
+        /// Gets or sets the <see cref="IDictionary{TKey, TValue}"/> that contains a collection of custom key/value pairs.
         /// This allows addition of parameters that could be used in custom token validation scenarios.
         /// </summary>
         public IDictionary<string, object> PropertyBag { get; }
 
         /// <summary>
-        /// Gets or sets a boolean to control if configuration required to be refreshed before token validation.
+        /// A boolean to control whether configuration should be refreshed before validating a token.
         /// </summary>
         /// <remarks>
         /// The default is <c>false</c>.
@@ -430,10 +443,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// If set, this delegate will be called to validate the signature of the token, instead of default processing.
         /// </remarks>
-        public SignatureValidator SignatureValidator { get; set; }
+        public SignatureValidatorDelegate SignatureValidator
+        {
+            get { return _signatureValidator; }
+            set { _signatureValidator = value; }
+        }
 
         /// <summary>
-        /// Gets or sets a delegate that will be called to retreive a <see cref="SecurityKey"/> used for decryption.
+        /// Gets or sets a delegate that will be called to retrieve a <see cref="SecurityKey"/> used for decryption.
         /// </summary>
         /// <remarks>
         /// This <see cref="SecurityKey"/> will be used to decrypt the token. This can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier.
@@ -441,7 +458,7 @@ namespace Microsoft.IdentityModel.Tokens
         public ResolveTokenDecryptionKeyDelegate TokenDecryptionKeyResolver { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="IList{SecurityKey}"/> that is to be used for decrypting inbound tokens.
+        /// Gets the <see cref="IList{T}"/> that is to be used for decrypting inbound tokens.
         /// </summary>
         public IList<SecurityKey> TokenDecryptionKeys { get; internal set; }
 
@@ -465,6 +482,13 @@ namespace Microsoft.IdentityModel.Tokens
             get { return _tokenReplayValidator; }
             set { _tokenReplayValidator = value ?? throw new ArgumentNullException(nameof(value), "TokenReplayValidator cannot be set as null."); }
         }
+
+        /// <summary>
+        /// If the IssuerSigningKeyResolver is unable to resolve the key when validating the signature of the SecurityToken,
+        /// all available keys will be tried.
+        /// </summary>
+        /// <remarks>Default is false.</remarks>
+        public bool TryAllIssuerSigningKeys { get; set; }
 
         /// <summary>
         /// Allows overriding the delegate that will be used to validate the type of the token.
@@ -512,36 +536,35 @@ namespace Microsoft.IdentityModel.Tokens
         public IList<string> ValidAlgorithms { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="IList{String}"/> that contains valid audiences that will be used to check against the token's audience.
-        /// The default is <c>null</c>.
+        /// Gets the <see cref="IList{T}"/> that contains valid audiences that will be used to check against the token's audience.
+        /// The default is an empty collection.
         /// </summary>
-        public IList<string> ValidAudiences { get; }
+        public IList<string> ValidAudiences =>
+            _validAudiences ??
+            Interlocked.CompareExchange(ref _validAudiences, [], null) ??
+            _validAudiences;
 
         /// <summary>
-        /// Gets the <see cref="IList{String}"/> that contains valid issuers that will be used to check against the token's issuer.
-        /// The default is <c>null</c>.
+        /// Gets the <see cref="IList{T}"/> that contains valid issuers that will be used to check against the token's issuer.
+        /// The default is an empty collection.
         /// </summary>
-        public IList<string> ValidIssuers { get; }
+        /// <returns>The <see cref="IList{T}"/> that contains valid issuers that will be used to check against the token's 'iss' claim.</returns>
+        public IList<string> ValidIssuers =>
+            _validIssuers ??
+            Interlocked.CompareExchange(ref _validIssuers, [], null) ??
+            _validIssuers;
 
         /// <summary>
-        /// Gets the <see cref="IList{String}"/> that contains valid types that will be used to check against the JWT header's 'typ' claim.
+        /// Gets the <see cref="IList{T}"/> that contains valid types that will be used to check against the JWT header's 'typ' claim.
         /// If this property is not set, the 'typ' header claim will not be validated and all types will be accepted.
         /// In the case of a JWE, this property will ONLY apply to the inner token header.
         /// The default is an empty collection.
         /// </summary>
-        /// <exception cref="ArgumentNullException">Thrown when the value is set as null.</exception>
-        /// <returns>The <see cref="IList{String}"/> that contains valid token types that will be used to check against the token's 'typ' claim.</returns>
-        public IList<string> ValidTypes
-        {
-            get
-            {
-                return _validTokenTypes;
-            }
-            set
-            {
-                _validTokenTypes = value ?? throw new ArgumentNullException(nameof(value));
-            }
-        }
+        /// <returns>The <see cref="IList{T}"/> that contains valid token types that will be used to check against the token's 'typ' claim.</returns>
+        public IList<string> ValidTypes =>
+            _validTokenTypes ??
+            Interlocked.CompareExchange(ref _validTokenTypes, [], null) ??
+            _validTokenTypes;
 
         public bool ValidateActor { get; set; }
     }

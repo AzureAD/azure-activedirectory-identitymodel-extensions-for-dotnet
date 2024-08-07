@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens.Json.Tests;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Xunit;
+using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 {
@@ -17,6 +18,12 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         public void ValidateTokenType(TokenTypeTheoryData theoryData)
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.TokenTypeValidationResultTests", theoryData);
+
+            if (theoryData.TokenTypesToAdd != null)
+            {
+                foreach (string tokenType in theoryData.TokenTypesToAdd)
+                    theoryData.ValidationParameters.ValidTypes.Add(tokenType);
+            }
 
             TokenTypeValidationResult tokenTypeValidationResult = Validators.ValidateTokenType(
                 theoryData.Type,
@@ -43,7 +50,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             get
             {
                 String[] validTypesNoJwt = { "ID Token", "Refresh Token", "Access Token" };
-                String[] validTypesWithJwt = { "ID Token", "Refresh Token", "Access Token", "JWT" }; 
+                String[] validTypesWithJwt = { "ID Token", "Refresh Token", "Access Token", "JWT" };
 
                 return new TheoryData<TokenTypeTheoryData>
                 {
@@ -52,10 +59,8 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         TestId = "Valid_DefaultTokenTypeValidation",
                         Type = "JWT",
                         SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Typ, "JWT"),
-                        ValidationParameters = new ValidationParameters
-                        {
-                            ValidTypes = validTypesWithJwt
-                        },
+                        ValidationParameters = new ValidationParameters(),
+                        TokenTypesToAdd = validTypesWithJwt,
                         TokenTypeValidationResult = new TokenTypeValidationResult("JWT")
                     },
                     new TokenTypeTheoryData
@@ -98,10 +103,8 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidTypeException("IDX10256:"),
                         Type = String.Empty,
                         SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Typ, String.Empty),
-                        ValidationParameters = new ValidationParameters
-                        {
-                            ValidTypes = validTypesNoJwt
-                        },
+                        ValidationParameters = new ValidationParameters(),
+                        TokenTypesToAdd = validTypesNoJwt,
                         TokenTypeValidationResult = new TokenTypeValidationResult(
                             string.Empty,
                             ValidationFailureType.TokenTypeValidationFailed,
@@ -118,10 +121,8 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidTypeException("IDX10256:"),
                         Type = null,
                         SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Typ, null),
-                        ValidationParameters = new ValidationParameters
-                        {
-                            ValidTypes = validTypesNoJwt
-                        },
+                        ValidationParameters = new ValidationParameters(),
+                        TokenTypesToAdd = validTypesNoJwt,
                         TokenTypeValidationResult = new TokenTypeValidationResult(
                             null,
                             ValidationFailureType.TokenTypeValidationFailed,
@@ -138,10 +139,8 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidTypeException("IDX10257:"),
                         Type = "JWT",
                         SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Typ, "JWT"),
-                        ValidationParameters = new ValidationParameters
-                        {
-                            ValidTypes = validTypesNoJwt
-                        },
+                        ValidationParameters = new ValidationParameters(),
+                        TokenTypesToAdd = validTypesNoJwt,
                         TokenTypeValidationResult = new TokenTypeValidationResult(
                             "JWT",
                             ValidationFailureType.TokenTypeValidationFailed,
@@ -162,7 +161,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             public string Type { get; set; }
 
             public SecurityToken SecurityToken { get; set; }
-
+            public IList<string> TokenTypesToAdd { get; internal set; }
             internal ValidationParameters ValidationParameters { get; set; }
 
             internal TokenTypeValidationResult TokenTypeValidationResult { get; set; }

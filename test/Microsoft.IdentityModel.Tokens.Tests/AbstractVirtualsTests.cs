@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        #if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER
         [Fact]
         public void SignatureProvider_Sign_Offset()
         {
@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 Assert.Contains("IDX10267: 'public virtual bool Sign(ReadOnlySpan<byte> data, Span<byte> destination, out int bytesWritten)'", ex.Message);
             }
         }
-        #endif
+#endif
 
         [Fact]
         public void SignatureProvider_Verify_Offset()

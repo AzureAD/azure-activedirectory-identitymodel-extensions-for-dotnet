@@ -742,7 +742,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory (Skip = "flaky"), MemberData(nameof(GetPopKeysFromJkuAsyncTheoryData))]
+        [Theory(Skip = "flaky"), MemberData(nameof(GetPopKeysFromJkuAsyncTheoryData))]
         public async Task GetPopKeysFromJkuAsync(ResolvePopKeyTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.GetPopKeysFromJkuAsync", theoryData);

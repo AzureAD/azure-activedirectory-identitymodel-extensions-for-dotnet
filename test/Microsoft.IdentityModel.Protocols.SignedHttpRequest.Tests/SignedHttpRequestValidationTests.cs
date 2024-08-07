@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 
             var signedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
             {
-                ReplayValidatorAsync = (SecurityToken signedHttpRequest, SignedHttpRequestValidationContext validationContext, CancellationToken cancellationToken)  => 
+                ReplayValidatorAsync = (SecurityToken signedHttpRequest, SignedHttpRequestValidationContext validationContext, CancellationToken cancellationToken) =>
                 {
                     var jwtSignedHttpRequest = signedHttpRequest as JsonWebToken;
 
@@ -1472,7 +1472,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                     },
                     new ValidateSignedHttpRequestTheoryData
                     {
-                        SignedHttpRequestToken = signedHttpRequestWithEncryptedAt, 
+                        SignedHttpRequestToken = signedHttpRequestWithEncryptedAt,
                         SignedHttpRequestValidationParameters = new SignedHttpRequestValidationParameters()
                         {
                             ValidateB = false,

@@ -64,7 +64,7 @@ namespace System.IdentityModel.Tokens.Jwt
                     else
                         obj = JsonPrimitives.ReadPropertyValueAsObject(ref reader, propertyName, ClassName);
 
-                     this[propertyName] = obj;
+                    this[propertyName] = obj;
                 }
                 // We read a JsonTokenType.StartObject above, exiting and positioning reader at next token.
                 else if (JsonPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, true))
@@ -104,7 +104,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <param name="signingCredentials"><see cref="SigningCredentials"/> used when creating a JWS Compact JSON.</param>
         /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
-        public JwtHeader(SigningCredentials signingCredentials, IDictionary<string,string> outboundAlgorithmMap)
+        public JwtHeader(SigningCredentials signingCredentials, IDictionary<string, string> outboundAlgorithmMap)
             : this(signingCredentials, outboundAlgorithmMap, null)
         {
         }

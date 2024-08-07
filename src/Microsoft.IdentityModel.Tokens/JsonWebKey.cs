@@ -486,7 +486,7 @@ namespace Microsoft.IdentityModel.Tokens
                 if (string.IsNullOrEmpty(Y))
                     throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10708, LogHelper.MarkAsNonPII(nameof(Y)))));
 
-                return  $@"{kid}" +
+                return $@"{kid}" +
                         $@"""{JsonWebKeyParameterNames.Crv}"":""{Crv}""," +
                         $@"""{JsonWebKeyParameterNames.Kty}"":""{Kty}""," +
                         $@"""{JsonWebKeyParameterNames.X}"":""{X}""," +
@@ -500,7 +500,7 @@ namespace Microsoft.IdentityModel.Tokens
                 if (string.IsNullOrEmpty(N))
                     throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10709, LogHelper.MarkAsNonPII(nameof(N)))));
 
-                return  $@"{kid}" +
+                return $@"{kid}" +
                         $@"""{JsonWebKeyParameterNames.E}"":""{E}""," +
                         $@"""{JsonWebKeyParameterNames.Kty}"":""{Kty}""," +
                         $@"""{JsonWebKeyParameterNames.N}"":""{N}""}}";

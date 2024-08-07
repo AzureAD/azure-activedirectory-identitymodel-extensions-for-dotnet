@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -135,7 +134,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     headerWriter?.Dispose();
                 }
 
-                string  message = encodedHeader + "." + encodedPayload;
+                string message = encodedHeader + "." + encodedPayload;
                 return message + "." + JwtTokenUtilities.CreateEncodedSignature(message, signedHttpRequestDescriptor.SigningCredentials, false);
             }
         }
@@ -315,7 +314,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor.HttpRequestData.Uri));
 
             Uri httpRequestUri = EnsureAbsoluteUri(signedHttpRequestDescriptor.HttpRequestData.Uri);
-            IDictionary<string,string> sanitizedQueryParams = SanitizeQueryParams(httpRequestUri);
+            IDictionary<string, string> sanitizedQueryParams = SanitizeQueryParams(httpRequestUri);
 
             StringBuilder stringBuffer = new StringBuilder();
             try
@@ -355,7 +354,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </remarks>  
         internal void AddHClaim(ref Utf8JsonWriter writer, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
-            IDictionary<string,string> sanitizedHeaders = SanitizeHeaders(signedHttpRequestDescriptor.HttpRequestData.Headers);
+            IDictionary<string, string> sanitizedHeaders = SanitizeHeaders(signedHttpRequestDescriptor.HttpRequestData.Headers);
             StringBuilder stringBuffer = new StringBuilder();
             try
             {
@@ -473,7 +472,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, LogHelper.MarkAsNonPII(ConfirmationClaimTypes.Cnf), e), e));
             }
         }
-#endregion
+        #endregion
 
         #region SignedHttpRequest validation
         /// <summary>
@@ -659,7 +658,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                         if (signatureProvider == null)
                             throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(Tokens.LogMessages.IDX10636, popKey.ToString(), LogHelper.MarkAsNonPII(signedHttpRequest.Alg))));
 
-                        if(EncodingUtils.PerformEncodingDependentOperation<bool, string, int, SignatureProvider>(
+                        if (EncodingUtils.PerformEncodingDependentOperation<bool, string, int, SignatureProvider>(
                             signedHttpRequest.EncodedToken,
                             0,
                             signedHttpRequest.Dot2,
@@ -669,7 +668,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                             signatureProvider,
                             JsonWebTokenHandler.ValidateSignature))
 
-                        return popKey;
+                            return popKey;
                     }
                     finally
                     {
@@ -1047,7 +1046,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 if (validatedAccessToken.TryGetPayloadValue(ConfirmationClaimTypes.Cnf, out string cnf) && cnf != null)
                     return new Cnf(cnf);
             }
-            catch(JsonException ex)
+            catch (JsonException ex)
             {
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidCnfClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(ConfirmationClaimTypes.Cnf)), ex));
             }

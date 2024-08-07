@@ -21,6 +21,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.JsonWebTokens.Results;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.WsFederation;
@@ -1627,6 +1628,69 @@ namespace Microsoft.IdentityModel.TestUtils
             return AreEnumsEqual<SecurityKey>(object1 as IEnumerable<SecurityKey>, object2 as IEnumerable<SecurityKey>, context, AreSecurityKeysEqual);
         }
 
+        public static bool AreSignatureValidationResultsEqual(object object1, object object2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, context))
+                return context.Merge(localContext);
+
+            return AreSignatureValidationResultsEqual(
+                object1 as SignatureValidationResult,
+                object2 as SignatureValidationResult,
+                "SignatureValidationResult1",
+                "SignatureValidationResult2",
+                null,
+                context);
+        }
+
+        internal static bool AreSignatureValidationResultsEqual(
+            SignatureValidationResult signatureValidationResult1,
+            SignatureValidationResult signatureValidationResult2,
+            string name1,
+            string name2,
+            string stackPrefix,
+            CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(signatureValidationResult1, signatureValidationResult2, localContext))
+                return context.Merge(localContext);
+
+            if (signatureValidationResult1.IsValid != signatureValidationResult2.IsValid)
+                localContext.Diffs.Add($"{name1}.IsValid: {signatureValidationResult1.IsValid} != {name2}.IsValid: {signatureValidationResult2.IsValid}");
+
+            if (signatureValidationResult1.ValidationFailureType != signatureValidationResult2.ValidationFailureType)
+                localContext.Diffs.Add($"{name1}.IsValid: {signatureValidationResult1.ValidationFailureType} !=  {name2}.IsValid: {signatureValidationResult2.ValidationFailureType}");
+
+            // true => both are not null.
+            if (ContinueCheckingEquality(signatureValidationResult1.Exception, signatureValidationResult2.Exception, localContext))
+            {
+                AreStringsEqual(
+                    signatureValidationResult1.Exception.Message,
+                    signatureValidationResult2.Exception.Message,
+                    $"({name1}).Exception.Message",
+                    $"({name2}).Exception.Message",
+                    localContext);
+
+                AreStringsEqual(
+                    signatureValidationResult1.Exception.Source,
+                    signatureValidationResult2.Exception.Source,
+                    $"({name1}).Exception.Source",
+                    $"({name2}).Exception.Source",
+                    localContext);
+
+                if (!string.IsNullOrEmpty(stackPrefix))
+                    AreStringPrefixesEqual(
+                        signatureValidationResult1.Exception.StackTrace.Trim(),
+                        signatureValidationResult2.Exception.StackTrace.Trim(),
+                        $"({name1}).Exception.StackTrace",
+                        $"({name2}).Exception.StackTrace",
+                        stackPrefix.Trim(),
+                        localContext);
+            }
+
+            return context.Merge(localContext);
+        }
+
         public static bool AreSignedInfosEqual(SignedInfo signedInfo1, SignedInfo signedInfo2, CompareContext context)
         {
             var localContext = new CompareContext(context);
@@ -1697,7 +1761,7 @@ namespace Microsoft.IdentityModel.TestUtils
             if (str1 == null)
                 localContext.Diffs.Add($"({name1} == null, {name2} == {str2}.");
 
-            if(str2 == null)
+            if (str2 == null)
                 localContext.Diffs.Add($"({name1} == {str1}, {name2} == null.");
 
             if (!string.Equals(str1, str2, context.StringComparison))
@@ -1924,8 +1988,8 @@ namespace Microsoft.IdentityModel.TestUtils
                 bool skipProperty = false;
                 if (context.PropertiesToIgnoreWhenComparing != null && context.PropertiesToIgnoreWhenComparing.TryGetValue(type, out List<string> propertiesToIgnore))
                 {
-                    foreach(var val in propertiesToIgnore)
-                        if(string.Equals(val, propertyInfo.Name, StringComparison.OrdinalIgnoreCase))
+                    foreach (var val in propertiesToIgnore)
+                        if (string.Equals(val, propertyInfo.Name, StringComparison.OrdinalIgnoreCase))
                         {
                             skipProperty = true;
                             break;

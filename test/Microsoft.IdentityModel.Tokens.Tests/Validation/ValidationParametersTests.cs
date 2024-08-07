@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -18,36 +18,33 @@ namespace Microsoft.IdentityModel.Tokens.Tests.Validation
             Assert.Throws<ArgumentNullException>(() => validationParameters.LifetimeValidator = null);
             Assert.Throws<ArgumentNullException>(() => validationParameters.TypeValidator = null);
             Assert.Throws<ArgumentNullException>(() => validationParameters.AudienceValidator = null);
+            Assert.Throws<ArgumentNullException>(() => validationParameters.IssuerSigningKeyValidator = null);
         }
 
         [Fact]
-        public void ValidTypes_Get_ReturnsValidTokenTypes()
+        public void ValidIssuers_GetReturnsEmptyList()
         {
             var validationParameters = new ValidationParameters();
-            var validTokenTypes = new List<string> { "JWT", "SAML" };
-            validationParameters.ValidTypes = validTokenTypes;
 
-            var result = validationParameters.ValidTypes;
-
-            Assert.Equal(validTokenTypes, result);
+            Assert.Equal(0, validationParameters.ValidIssuers.Count);
         }
 
         [Fact]
-        public void ValidTypes_Set_UpdatesValidTokenTypes()
+        public void ValidAudiences_Get_ReturnsEmptyList()
         {
             var validationParameters = new ValidationParameters();
-            var validTokenTypes = new List<string> { "JWT", "SAML" };
 
-            validationParameters.ValidTypes = validTokenTypes;
-
-            Assert.Equal(validTokenTypes, validationParameters.ValidTypes);
+            Assert.Equal(0, validationParameters.ValidAudiences.Count);
+            Assert.True(validationParameters.ValidAudiences is IList<string>);
         }
 
         [Fact]
-        public void ValidTypes_Set_Null_ThrowsArgumentNullException()
+        public void ValidTypes_Get_ReturnsEmptyList()
         {
             var validationParameters = new ValidationParameters();
-            Assert.Throws<ArgumentNullException>(() => validationParameters.ValidTypes = null);
+          
+            Assert.Equal(0, validationParameters.ValidTypes.Count);
+            Assert.True(validationParameters.ValidTypes is IList<string>);
         }
     }
 }

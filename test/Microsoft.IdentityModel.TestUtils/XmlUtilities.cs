@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.TestUtils
         public static XmlTokenStream CreateXmlTokenStream(string xml)
         {
             var xmlTokenStreamReader = new XmlTokenStreamReader(CreateDictionaryReader(xml));
-            while (xmlTokenStreamReader.Read());
+            while (xmlTokenStreamReader.Read()) ;
             return xmlTokenStreamReader.TokenStream;
         }
 

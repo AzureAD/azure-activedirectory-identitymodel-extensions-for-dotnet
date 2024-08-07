@@ -13,7 +13,6 @@ using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
-using static Microsoft.IdentityModel.Validators.AadIssuerValidator;
 
 namespace Microsoft.IdentityModel.Validators
 {
@@ -71,7 +70,7 @@ namespace Microsoft.IdentityModel.Validators
             {
                 if (_configurationManagerV1 == null)
                     _configurationManagerV1 = CreateConfigManager(AadAuthorityV1);
-            
+
                 return _configurationManagerV1;
             }
 
@@ -140,7 +139,7 @@ namespace Microsoft.IdentityModel.Validators
                     AadAuthorityV11 = AadAuthorityV1 + V11EndpointSuffix;
                     AadAuthorityV2 = AadAuthorityV1 + V2EndpointSuffix;
                     break;
-                    
+
                 case ProtocolVersion.V11:
                     AadAuthorityV1 = CreateV1Authority(AadAuthority, V11EndpointSuffix);
                     AadAuthorityV11 = aadAuthority;
@@ -462,11 +461,11 @@ namespace Microsoft.IdentityModel.Validators
         }
 
         private BaseConfigurationManager GetEffectiveConfigurationManager(ProtocolVersion protocolVersion)
-        {        
+        {
             if (_configurationManagerProvider != null)
             {
                 string aadAuthority = GetAuthority(protocolVersion);
-                
+
 
                 var configurationManager = _configurationManagerProvider(aadAuthority);
                 if (configurationManager != null)

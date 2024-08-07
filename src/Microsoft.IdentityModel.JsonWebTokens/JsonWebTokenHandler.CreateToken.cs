@@ -568,7 +568,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             IDictionary<string, object> additionalInnerHeaderClaims,
             string tokenType)
         {
-            using (MemoryStream utf8ByteMemoryStream = new ())
+            using (MemoryStream utf8ByteMemoryStream = new())
             {
                 Utf8JsonWriter writer = null;
                 char[] encodedChars = null;

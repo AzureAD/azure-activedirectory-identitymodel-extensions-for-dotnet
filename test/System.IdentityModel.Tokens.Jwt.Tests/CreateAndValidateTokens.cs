@@ -897,7 +897,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 if (!IdentityComparer.AreEqual(outerToken.Payload, outerToken.InnerToken.Payload, context))
                     context.Diffs.Add("outerToken.Payload != outerToken.InnerToken.Payload");
 
-                foreach(KeyValuePair<string, object> claim in expectedPayload)
+                foreach (KeyValuePair<string, object> claim in expectedPayload)
                 {
                     if (!outerToken.Payload.ContainsKey(claim.Key))
                     {
@@ -983,7 +983,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 handler.CreateEncodedJwt((SecurityTokenDescriptor)null);
                 ee.ProcessNoException(errors);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ee.ProcessException(ex, errors);
             }
@@ -1051,7 +1051,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             string encodedJwt = jwtHandler.WriteToken(new JwtSecurityToken(new JwtHeader(), payload));
             var validationParameters = new TokenValidationParameters
             {
-                IssuerValidator = (issuer, st, tvp) => { return issuer;},
+                IssuerValidator = (issuer, st, tvp) => { return issuer; },
                 RequireSignedTokens = false,
                 ValidateAudience = false,
                 ValidateLifetime = false,
@@ -1066,13 +1066,13 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 JsonClaims.ClaimNamesAsDictionary);
             IdentityComparer.AreEqual(claimsPrincipal.Identity as ClaimsIdentity, expectedIdentity, context);
 
-            jwtToken = new JwtSecurityToken( new JwtHeader(), new JwtPayload(Default.Issuer, null, ClaimSets.EntityAsJsonClaim(Default.Issuer, Default.Issuer), null, null));
+            jwtToken = new JwtSecurityToken(new JwtHeader(), new JwtPayload(Default.Issuer, null, ClaimSets.EntityAsJsonClaim(Default.Issuer, Default.Issuer), null, null));
             encodedJwt = jwtHandler.WriteToken(jwtToken);
             SecurityToken validatedToken;
             var cp = jwtHandler.ValidateToken(encodedJwt, validationParameters, out validatedToken);
             IdentityComparer.AreEqual(
                 cp.FindFirst(typeof(Entity).ToString()),
-                new Claim(typeof(Entity).ToString(), JsonSerializer.Serialize(Entity.Default), JsonClaimValueTypes.Json, Default.Issuer, Default.Issuer, cp.Identity as ClaimsIdentity ),
+                new Claim(typeof(Entity).ToString(), JsonSerializer.Serialize(Entity.Default), JsonClaimValueTypes.Json, Default.Issuer, Default.Issuer, cp.Identity as ClaimsIdentity),
                 context);
             TestUtilities.AssertFailIfErrors(context.Diffs);
         }
@@ -1110,7 +1110,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             CompareContext context = new CompareContext { IgnoreType = true };
             IdentityComparer.AreEqual(principal.Claims, expectedIdentity.Claims, context);
-            TestUtilities.AssertFailIfErrors(GetType().ToString()+".RoleClaims", context.Diffs);
+            TestUtilities.AssertFailIfErrors(GetType().ToString() + ".RoleClaims", context.Diffs);
         }
 
         [Fact]
@@ -1220,8 +1220,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         /// <summary>
         /// First string is expected, others are not.
         /// </summary>
-        /// <param name="names"></param>
-        /// <param name="roles"></param>
         private void CheckNamesAndRole(string[] names, string[] roles, ClaimsPrincipal principal, string expectedNameClaimType = ClaimsIdentity.DefaultNameClaimType, string expectedRoleClaimType = ClaimsIdentity.DefaultRoleClaimType)
         {
             ClaimsIdentity identity = principal.Identity as ClaimsIdentity;
@@ -1243,8 +1241,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         /// <summary>
         /// First role is expected, others are not.
         /// </summary>
-        /// <param name="names"></param>
-        /// <param name="roles"></param>
         private void CheckForRoles(IEnumerable<string> expectedRoles, IEnumerable<string> unexpectedRoles, ClaimsPrincipal principal, string expectedRoleClaimType = ClaimsIdentity.DefaultRoleClaimType)
         {
             ClaimsIdentity identity = principal.Identity as ClaimsIdentity;

@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols;
-using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.TestUtils
@@ -45,6 +44,7 @@ namespace Microsoft.IdentityModel.TestUtils
         /// Initializes an new instance of <see cref="MockConfigurationManager{T}"/> with a Configuration instance.
         /// </summary>
         /// <param name="configuration">Configuration of type OpenIdConnectConfiguration or OpenIdConnectConfiguration.</param>
+        /// <param name="exToThrowOnFirstGet">The exception to throw.</param>
         public MockConfigurationManager(T configuration, Exception exToThrowOnFirstGet)
         {
             if (configuration == null)

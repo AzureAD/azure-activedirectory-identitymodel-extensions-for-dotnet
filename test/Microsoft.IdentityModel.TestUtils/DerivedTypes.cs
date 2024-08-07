@@ -5,9 +5,7 @@ using System;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tokens;
 
-/// <summary>
-/// Contains derived types that are useful across multiple handlers / protocols.
-/// </summary>
+// Contains derived types that are useful across multiple handlers / protocols.
 namespace Microsoft.IdentityModel.TestUtils
 {
     public class DerivedAuthenticatedEncryptionProvider : AuthenticatedEncryptionProvider

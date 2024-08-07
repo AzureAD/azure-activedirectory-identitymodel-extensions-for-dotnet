@@ -88,7 +88,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 theoryData.Add(EcdhEsCurveP256AEnc256KWNullApuApv());
                 theoryData.Add(EcdhEsCurveP384EncA256KW());
                 theoryData.Add(EcdhEsCurveP512EncA256KW());
-                theoryData.Add(EcdhEsCurveP256EncA192KW()); 
+                theoryData.Add(EcdhEsCurveP256EncA192KW());
                 theoryData.Add(EcdhEsCurveP256EncA128KW());
 
                 return theoryData;

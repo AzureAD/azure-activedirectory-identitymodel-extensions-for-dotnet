@@ -308,7 +308,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         [Fact]
         public void EmptyCollectionSerialization()
         {
-            var context = new CompareContext {Title = "EmptyCollectionSerialization"};
+            var context = new CompareContext { Title = "EmptyCollectionSerialization" };
             // Initialize an OpenIdConnectConfiguration object with all collections empty.
             var oidcWithEmptyCollections = new OpenIdConnectConfiguration();
             var oidcWithEmptyCollectionsJson = OpenIdConnectConfiguration.Write(oidcWithEmptyCollections);
@@ -323,7 +323,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             using MemoryStream stream = new();
 
-            var context = new CompareContext {Title = "EmptyCollectionSerialization"};
+            var context = new CompareContext { Title = "EmptyCollectionSerialization" };
             // Initialize an OpenIdConnectConfiguration object with all collections empty.
             var oidcWithEmptyCollections = new OpenIdConnectConfiguration();
             OpenIdConnectConfiguration.Write(oidcWithEmptyCollections, stream);
@@ -405,7 +405,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             OpenIdConnectConfiguration.Write(oidcWithAllCollections, stream);
 
             IdentityComparer.AreBytesEqual(oidcWithAllCollectionsBytes, stream.GetBuffer(), context);
-                
+
             TestUtilities.AssertFailIfErrors(context);
         }
     }

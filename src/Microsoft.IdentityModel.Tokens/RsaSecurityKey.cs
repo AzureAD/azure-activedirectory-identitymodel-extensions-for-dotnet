@@ -128,7 +128,7 @@ namespace Microsoft.IdentityModel.Tokens
                 }
 
                 return _foundPrivateKey;
-            }           
+            }
         }
 
         /// <summary>

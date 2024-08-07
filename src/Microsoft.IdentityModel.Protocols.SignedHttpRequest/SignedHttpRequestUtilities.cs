@@ -75,7 +75,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
         internal static async Task<JsonWebKey> DecryptSymmetricPopKeyAsync(JsonWebTokenHandler jwtTokenHandler, string jwe, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
-            if(string.IsNullOrEmpty(jwe))
+            if (string.IsNullOrEmpty(jwe))
                 throw LogHelper.LogArgumentNullException(nameof(jwe));
 
             var jweJwt = jwtTokenHandler.ReadJsonWebToken(jwe);

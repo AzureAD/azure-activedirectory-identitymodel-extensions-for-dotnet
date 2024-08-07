@@ -30,7 +30,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         private IEqualityComparer<SamlSubject> _samlSubjectEqualityComparer = new SamlSubjectEqualityComparer();
         private SamlSerializer _serializer = new SamlSerializer();
 
-#region fields
+        #region fields
         /// <summary>
         /// Gets a value indicating whether this handler supports validation of tokens
         /// handled by this instance.
@@ -75,7 +75,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         {
             get { return _serializer; }
             set { _serializer = value ?? throw LogHelper.LogArgumentNullException(nameof(value)); }
-        } 
+        }
 
         /// <summary>
         /// Gets the securityToken type supported by this handler.
@@ -87,7 +87,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
         #endregion fields
 
-#region methods
+        #region methods
         /// <summary>
         /// Adds all Actors.
         /// </summary>
@@ -131,7 +131,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 using (var sr = new StringReader(securityToken))
                 {
                     var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit };
-                    using (var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr, settings))) 
+                    using (var reader = XmlDictionaryReader.CreateDictionaryReader(XmlReader.Create(sr, settings)))
                     {
                         return CanReadToken(reader);
                     }
@@ -550,7 +550,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                                 writer.WriteStartElement(Actor);
                                 actorElementWritten = true;
                             }
-                       //     Serializer.WriteAttribute(writer, samlAttribute);
+                            //     Serializer.WriteAttribute(writer, samlAttribute);
                         }
                     }
 
@@ -939,7 +939,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             {
                 if (validationParameters.RequireAudience)
                     throw LogExceptionMessage(new SamlSecurityTokenException(LogMessages.IDX11401));
-               
+
                 return;
             }
 
@@ -982,7 +982,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         protected virtual void ValidateIssuerSecurityKey(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters)
         {
-           Validators.ValidateIssuerSecurityKey(securityKey, securityToken, validationParameters);
+            Validators.ValidateIssuerSecurityKey(securityKey, securityToken, validationParameters);
         }
 
         /// <summary>
@@ -1329,6 +1329,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             Serializer.WriteAssertion(writer, samlToken.Assertion);
         }
 
-#endregion methods
+        #endregion methods
     }
 }

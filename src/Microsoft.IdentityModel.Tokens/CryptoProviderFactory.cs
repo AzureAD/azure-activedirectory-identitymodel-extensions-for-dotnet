@@ -447,43 +447,43 @@ namespace Microsoft.IdentityModel.Tokens
             switch (algorithm)
             {
                 case SecurityAlgorithms.Aes128CbcHmacSha256:
-                {
-                    ValidateKeySize(keyBytes, algorithm, 16);
-                    return new HMACSHA256(keyBytes);
-                }
+                    {
+                        ValidateKeySize(keyBytes, algorithm, 16);
+                        return new HMACSHA256(keyBytes);
+                    }
 
                 case SecurityAlgorithms.Aes192CbcHmacSha384:
-                {
-                    ValidateKeySize(keyBytes, algorithm, 24);
-                    return new HMACSHA384(keyBytes);
-                }
+                    {
+                        ValidateKeySize(keyBytes, algorithm, 24);
+                        return new HMACSHA384(keyBytes);
+                    }
 
                 case SecurityAlgorithms.Aes256CbcHmacSha512:
-                {
-                    ValidateKeySize(keyBytes, algorithm, 32);
-                    return new HMACSHA512(keyBytes);
-                }
+                    {
+                        ValidateKeySize(keyBytes, algorithm, 32);
+                        return new HMACSHA512(keyBytes);
+                    }
 
                 case SecurityAlgorithms.HmacSha256Signature:
                 case SecurityAlgorithms.HmacSha256:
-                {
-                    ValidateKeySize(keyBytes, algorithm, 32);
-                    return new HMACSHA256(keyBytes);
-                }
+                    {
+                        ValidateKeySize(keyBytes, algorithm, 32);
+                        return new HMACSHA256(keyBytes);
+                    }
 
                 case SecurityAlgorithms.HmacSha384Signature:
                 case SecurityAlgorithms.HmacSha384:
-                {
-                    ValidateKeySize(keyBytes, algorithm, 48);
-                    return new HMACSHA384(keyBytes);
-                }
+                    {
+                        ValidateKeySize(keyBytes, algorithm, 48);
+                        return new HMACSHA384(keyBytes);
+                    }
 
                 case SecurityAlgorithms.HmacSha512Signature:
                 case SecurityAlgorithms.HmacSha512:
-                {
-                    ValidateKeySize(keyBytes, algorithm, 64);
-                    return new HMACSHA512(keyBytes);
-                }
+                    {
+                        ValidateKeySize(keyBytes, algorithm, 64);
+                        return new HMACSHA512(keyBytes);
+                    }
 
                 default:
                     throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10666, LogHelper.MarkAsNonPII(algorithm))));
@@ -561,7 +561,7 @@ namespace Microsoft.IdentityModel.Tokens
                         }
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10694, key, ex), ex));
                 }
