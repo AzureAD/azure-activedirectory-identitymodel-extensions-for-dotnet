@@ -87,18 +87,26 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// 
+        /// Initializes a new instance of <see cref="JsonWebToken"/> from a ReadOnlyMemory{char} in JWS or JWE Compact serialized format.
         /// </summary>
-        /// <param name="encodedTokenMemory"></param>
-        /// <param name="readTokenHeaderValueDelegate"></param>
-        /// <param name="readTokenPayloadValueDelegate"></param>
+        /// <param name="encodedTokenMemory">A ReadOnlyMemory{char} containing the JSON Web Token serialized in JWS or JWE Compact format.</param>
+        /// <param name="readTokenHeaderValueDelegate">A custom delegate to be called when each header claim is being read. If null, default implementation is called.</param>
+        /// <param name="readTokenPayloadValueDelegate">A custom delegate to be called when each payload claim is being read. If null, default implementation is called.</param>
         public JsonWebToken(
             ReadOnlyMemory<char> encodedTokenMemory,
             ReadTokenHeaderValueDelegate readTokenHeaderValueDelegate,
-            ReadTokenPayloadValueDelegate readTokenPayloadValueDelegate) : this(encodedTokenMemory)
+            ReadTokenPayloadValueDelegate readTokenPayloadValueDelegate)
         {
-            ReadTokenHeaderValueDelegate = readTokenHeaderValueDelegate;
-            ReadTokenPayloadValueDelegate = readTokenPayloadValueDelegate;
+            if (encodedTokenMemory.IsEmpty)
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(encodedTokenMemory)));
+
+            ReadTokenHeaderValueDelegate = readTokenHeaderValueDelegate ?? ReadTokenHeaderValue;
+            ReadTokenPayloadValueDelegate = readTokenPayloadValueDelegate ?? ReadTokenPayloadValue;
+
+            ReadToken(encodedTokenMemory);
+
+            _encodedTokenMemory = encodedTokenMemory;
+
         }
 
         /// <summary>
@@ -159,12 +167,38 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Called for each claim when token header is being read.
         /// </summary>
+        /// <remarks>
+        /// An example implementation:
+        /// <code>
+        /// object ReadPayloadValueDelegate(ref Utf8JsonReader reader, string claimName) =>
+        /// {
+        ///     if (reader.ValueTextEquals("CustomProp"))
+        ///     {
+        ///         return JsonSerializerPrimitives.ReadString(ref reader, JwtRegisteredClaimNames.CustomProp, ClassName, true);    
+        ///     }
+        ///     return JsonWebToken.ReadTokenHeaderValue(ref reader, claimName);
+        /// }
+        /// </code>
+        /// </remarks>
         internal ReadTokenHeaderValueDelegate ReadTokenHeaderValueDelegate { get; set; } = ReadTokenHeaderValue;
 
 
         /// <summary>
         /// Called for each claim when token payload is being read.
         /// </summary>
+        /// <remarks>
+        /// An example implementation:
+        /// <code>
+        /// object ReadPayloadValueDelegate(ref Utf8JsonReader reader, string claimName) =>
+        /// {
+        ///     if (reader.ValueTextEquals("CustomProp"))
+        ///     {
+        ///         return JsonSerializerPrimitives.ReadString(ref reader, JwtRegisteredClaimNames.CustomProp, ClassName, true);    
+        ///     }
+        ///     return JsonWebToken.ReadTokenPayloadValue(ref reader, claimName);
+        /// }
+        /// </code>
+        /// </remarks>
         internal ReadTokenPayloadValueDelegate ReadTokenPayloadValueDelegate { get; set; } = ReadTokenPayloadValue;
 
         internal string ActualIssuer { get; set; }

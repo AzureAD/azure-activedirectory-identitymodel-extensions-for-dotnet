@@ -13,9 +13,11 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Json;
 using Microsoft.IdentityModel.Tokens.Json.Tests;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -1794,20 +1796,53 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         [Fact]
         public void ReadTokenDelegates_CalledCorrectly()
         {
-            var expectedCustomClaim = "customclaim";
-            var tokenStr = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
+            var tokenSpan = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
             {
                 Issuer = Default.Issuer,
                 Claims = new Dictionary<string, object>
                 {
-                    { "CustomClaim", expectedCustomClaim },
+                    { "CustomPayload", "custom_payload" },
+                },
+                AdditionalHeaderClaims = new Dictionary<string, object>
+                {
+                    { "CustomHeader", "custom_header" }
                 }
-            });
+            }).AsMemory();
 
-            var derivedToken = new CustomJsonWebToken(tokenStr);
+            object ReadHeaderValue(ref Utf8JsonReader reader, string claimName)
+            {
+                if (reader.ValueTextEquals("CustomHeader"u8))
+                {
+                    return new CustomHeaderClaim(JsonSerializerPrimitives.ReadString(ref reader, "CustomHeader", string.Empty, true));
+                }
+                return JsonWebToken.ReadTokenHeaderValue(ref reader, claimName);
+            }
 
-            Assert.Equal(expectedCustomClaim, derivedToken.CustomClaim);
-            Assert.Equal(Default.Issuer, derivedToken.Issuer);
+            object ReadPayloadValue(ref Utf8JsonReader reader, string claimName)
+            {
+                if (reader.ValueTextEquals("CustomPayload"u8))
+                {
+                    return new CustomPayloadClaim(JsonSerializerPrimitives.ReadString(ref reader, "CustomPayload", string.Empty, true));
+                }
+                return JsonWebToken.ReadTokenPayloadValue(ref reader, claimName);
+            }
+
+            var jwt = new JsonWebToken(tokenSpan, ReadHeaderValue, ReadPayloadValue);
+
+            Assert.True(jwt.TryGetHeaderValue<CustomHeaderClaim>("CustomHeader", out var actualHeaderClaim));
+            Assert.True(jwt.TryGetPayloadValue<CustomPayloadClaim>("CustomPayload", out var actualPayloadClaim));
+
+            Assert.Equal("custom_header", actualHeaderClaim.CustomValue);
+            Assert.Equal("custom_payload", actualPayloadClaim.CustomValue);
+        }
+
+        private class CustomHeaderClaim(string customValue)
+        {
+            public string CustomValue { get; set; } = customValue;
+        }
+        private class CustomPayloadClaim(string customValue)
+        {
+            public string CustomValue { get; set; } = customValue;
         }
     }
 

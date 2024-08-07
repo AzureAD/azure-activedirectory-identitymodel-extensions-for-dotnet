@@ -59,11 +59,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// 
+        /// Reads and saves the value of the header claim from the reader.
         /// </summary>
-        /// <param name="reader"></param>
-        /// <param name="claimName"></param>
-        /// <returns></returns>
+        /// <param name="reader">The reader over the JWT.</param>
+        /// <param name="claimName">The claim at the current position of the reader.</param>
+        /// <returns>A claim that was read.</returns>
         public static object ReadTokenHeaderValue(ref Utf8JsonReader reader, string claimName)
         {
 #if NET8_0_OR_GREATER

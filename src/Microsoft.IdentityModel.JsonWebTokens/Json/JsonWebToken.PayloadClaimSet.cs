@@ -57,31 +57,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 #endif
         }
 
-        /*
-         * Custom implemenation
-           ReadPayloadValueDelegate(ref Utf8JsonReader reader, string claimName) => 
-           {
-                if (claimName == JwtRegisteredClaimNames.CustomProp)
-                {
-                    return JsonSerializerPrimitives.ReadLong(ref reader, JwtRegisteredClaimNames.CustomProp, ClassName, true);    
-                }
-                else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.CustomProp))
-                {
-                    return JsonSerializerPrimitives.ReadLong(ref reader, JwtRegisteredClaimNames.CustomProp, ClassName, true);    
-                } else
-                {
-                    return JsonWebToken.ReadPayloadValue(ref reader, claimName);
-                }
-           }
-         */
-        // Default implementation
-        // Read the value of the claimName from the reader into the dictionary.
         /// <summary>
-        /// 
+        /// Reads and saves the value of the payload claim from the reader.
         /// </summary>
-        /// <param name="reader"></param>
-        /// <param name="claimName"></param>
-        /// <returns></returns>
+        /// <param name="reader">The reader over the JWT.</param>
+        /// <param name="claimName">The claim at the current position of the reader.</param>
+        /// <returns>A claim that was read.</returns>
         public static object ReadTokenPayloadValue(ref Utf8JsonReader reader, string claimName)
         {
             if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Aud))
