@@ -126,7 +126,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return result.ToTokenValidationResult();
             }
 
-            if (TokenUtilities.IsRecoverableExceptionType(result.ExceptionDetail.ExceptionType))
+            if (TokenUtilities.IsRecoverableExceptionType(result.ExceptionDetail.Type))
             {
                 // If we were still unable to validate, attempt to refresh the configuration and validate using it
                 // but ONLY if the currentConfiguration is not null. We want to avoid refreshing the configuration on
@@ -158,7 +158,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     validationParameters.RefreshBeforeValidation = false;
                     validationParameters.ValidateWithLKG = true;
-                    Type recoverableExceptionType = result.ExceptionDetail.ExceptionType;
+                    ExceptionDetail.ExceptionType recoverableExceptionType = result.ExceptionDetail.Type;
 
                     BaseConfiguration[] validConfigurations = validationParameters.ConfigurationManager.GetValidLkgConfigurations();
                     for (int i = 0; i < validConfigurations.Length; i++)
