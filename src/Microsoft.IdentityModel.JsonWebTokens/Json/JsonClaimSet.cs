@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Security.Claims;
-using System.Text;
 using System.Text.Json;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -75,7 +74,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 #if NET8_0_OR_GREATER
                 if (kvp.Value is ClaimPosition position)
                 {
-                    string value = Encoding.UTF8.GetString(_tokenAsMemory.Slice(position.StartIndex, position.Length).Span);
+                    if (position.IsEscaped)
+                        EscapeStringBytes(position);
+
+                    string value = System.Text.Encoding.UTF8.GetString(_tokenAsMemory.Slice(position.StartIndex, position.Length).Span);
                     claims.Add(new Claim(kvp.Key, value, ClaimValueTypes.String, issuer, issuer));
                 }
 #endif
@@ -198,7 +200,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
 #if NET8_0_OR_GREATER
                 if (obj is ClaimPosition position)
-                    return Encoding.UTF8.GetString(_tokenAsMemory.Slice(position.StartIndex, position.Length).Span);
+                {
+                    if (position.IsEscaped)
+                        EscapeStringBytes(position);
+
+                    return System.Text.Encoding.UTF8.GetString(_tokenAsMemory.Slice(position.StartIndex, position.Length).Span);
+                }
 #endif
                 return obj.ToString();
             }
@@ -215,10 +222,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     return null;
 
                 if (obj is ClaimPosition position)
+                {
+                    if (position.IsEscaped)
+                        EscapeStringBytes(position);
+
                     return _tokenAsMemory.Slice(position.StartIndex, position.Length).Span;
+                }
             }
 
             return [];
+        }
+
+        private void EscapeStringBytes(ClaimPosition position)
+        {
+            position.Length = new Utf8JsonReader(_tokenAsMemory.Span.Slice(position.StartIndex, position.Length)).CopyString(_tokenAsMemory.Span.Slice(position.StartIndex, position.Length));
+            position.IsEscaped = false;
         }
 #endif
 
@@ -480,7 +498,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 var span = GetStringBytesValue(key);
                 if (!span.IsEmpty)
                 {
-                    value = (T)(object)Encoding.UTF8.GetString(span);
+                    value = (T)(object)System.Text.Encoding.UTF8.GetString(span);
                     return true;
                 }
             }
