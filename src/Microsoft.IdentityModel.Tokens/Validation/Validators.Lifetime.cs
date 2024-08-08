@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII(nameof(validationParameters))),
-                        typeof(ArgumentNullException),
+                        ExceptionDetail.ExceptionType.ArgumentNull,
                         new StackFrame(true)));
 
             if (!expires.HasValue)
@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10225,
                             LogHelper.MarkAsNonPII(securityToken == null ? "null" : securityToken.GetType().ToString())),
-                        typeof(SecurityTokenNoExpirationException),
+                        ExceptionDetail.ExceptionType.SecurityTokenNoExpiration,
                         new StackFrame(true)));
 
             if (notBefore.HasValue && expires.HasValue && (notBefore.Value > expires.Value))
@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.Tokens
                             LogMessages.IDX10224,
                             LogHelper.MarkAsNonPII(notBefore.Value),
                             LogHelper.MarkAsNonPII(expires.Value)),
-                        typeof(SecurityTokenInvalidLifetimeException),
+                        ExceptionDetail.ExceptionType.SecurityTokenInvalidLifetime,
                         new StackFrame(true)));
 
             DateTime utcNow = DateTime.UtcNow;
@@ -99,7 +99,7 @@ namespace Microsoft.IdentityModel.Tokens
                             LogMessages.IDX10222,
                             LogHelper.MarkAsNonPII(notBefore.Value),
                             LogHelper.MarkAsNonPII(utcNow)),
-                        typeof(SecurityTokenNotYetValidException),
+                        ExceptionDetail.ExceptionType.SecurityTokenNotYetValid,
                         new StackFrame(true)));
 
             if (expires.HasValue && (expires.Value < DateTimeUtil.Add(utcNow, validationParameters.ClockSkew.Negate())))
@@ -112,7 +112,7 @@ namespace Microsoft.IdentityModel.Tokens
                             LogMessages.IDX10223,
                             LogHelper.MarkAsNonPII(expires.Value),
                             LogHelper.MarkAsNonPII(utcNow)),
-                        typeof(SecurityTokenExpiredException),
+                        ExceptionDetail.ExceptionType.SecurityTokenExpired,
                         new StackFrame(true)));
 
             // if it reaches here, that means lifetime of the token is valid

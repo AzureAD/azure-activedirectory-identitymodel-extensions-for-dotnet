@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -58,7 +57,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10211,
                             null),
-                        typeof(SecurityTokenInvalidIssuerException),
+                        ExceptionDetail.ExceptionType.SecurityTokenInvalidIssuer,
                         new StackFrame(true),
                         null));
             }
@@ -71,7 +70,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII(nameof(validationParameters))),
-                        typeof(ArgumentNullException),
+                        ExceptionDetail.ExceptionType.ArgumentNull,
                         new StackFrame(true),
                         null));
 
@@ -83,7 +82,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII(nameof(securityToken))),
-                        typeof(ArgumentNullException),
+                        ExceptionDetail.ExceptionType.ArgumentNull,
                         new StackFrame(true),
                         null));
 
@@ -101,7 +100,7 @@ namespace Microsoft.IdentityModel.Tokens
                             new MessageDetail(
                                 LogMessages.IDX10211,
                                 null),
-                            typeof(SecurityTokenInvalidIssuerException),
+                            ExceptionDetail.ExceptionType.SecurityTokenInvalidIssuer,
                             new StackFrame(true)));
             }
 
@@ -152,7 +151,7 @@ namespace Microsoft.IdentityModel.Tokens
                         LogHelper.MarkAsNonPII(issuer),
                         LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers)),
                         LogHelper.MarkAsNonPII(configuration?.Issuer)),
-                    typeof(SecurityTokenInvalidIssuerException),
+                    ExceptionDetail.ExceptionType.SecurityTokenInvalidIssuer,
                     new StackFrame(true)));
         }
     }

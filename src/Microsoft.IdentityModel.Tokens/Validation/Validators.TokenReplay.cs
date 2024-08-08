@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII(nameof(securityToken))),
-                        typeof(ArgumentNullException),
+                        ExceptionDetail.ExceptionType.ArgumentNull,
                         new StackFrame(),
                         null));
 
@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII(nameof(validationParameters))),
-                        typeof(ArgumentNullException),
+                        ExceptionDetail.ExceptionType.ArgumentNull,
                         new StackFrame(),
                         null));
 
@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Tokens
                             new MessageDetail(
                                 LogMessages.IDX10227,
                                 LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
-                            typeof(SecurityTokenReplayDetectedException),
+                            ExceptionDetail.ExceptionType.SecurityTokenReplayDetected,
                             new StackFrame(),
                             null));
 
@@ -90,7 +90,7 @@ namespace Microsoft.IdentityModel.Tokens
                             new MessageDetail(
                                 LogMessages.IDX10228,
                                 LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
-                            typeof(SecurityTokenReplayDetectedException),
+                            ExceptionDetail.ExceptionType.SecurityTokenReplayDetected,
                             new StackFrame(),
                             null));
 
@@ -102,7 +102,7 @@ namespace Microsoft.IdentityModel.Tokens
                             new MessageDetail(
                                 LogMessages.IDX10229,
                                 LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
-                            typeof(SecurityTokenReplayAddFailedException),
+                            ExceptionDetail.ExceptionType.SecurityTokenReplayAddFailed,
                             new StackFrame(),
                             null));
             }
