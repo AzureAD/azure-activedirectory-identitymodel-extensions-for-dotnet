@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         new MessageDetail(
                             TokenLogMessages.IDX10000,
                             LogHelper.MarkAsNonPII(nameof(token))),
-                        typeof(ArgumentNullException),
+                        ExceptionDetail.ExceptionType.ArgumentNull,
                         new System.Diagnostics.StackFrame()));
             }
 
@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     ValidationFailureType.TokenReadingFailed,
                     new ExceptionDetail(
                         new MessageDetail(LogMessages.IDX14107),
-                        ex.GetType(),
+                        ExceptionDetail.ExceptionType.SecurityTokenMalformed,
                         new System.Diagnostics.StackFrame(),
                         ex));
             }

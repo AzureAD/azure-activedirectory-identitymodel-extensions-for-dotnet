@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII(nameof(securityToken))),
-                        typeof(ArgumentNullException),
+                        ExceptionDetail.ExceptionType.ArgumentNull,
                         new StackFrame(true)));
             }
 
@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII(nameof(validationParameters))),
-                        typeof(ArgumentNullException),
+                        ExceptionDetail.ExceptionType.ArgumentNull,
                         new StackFrame(true)));
             }
 
@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10256,
                             LogHelper.MarkAsNonPII(nameof(type))),
-                        typeof(SecurityTokenInvalidTypeException),
+                        ExceptionDetail.ExceptionType.SecurityTokenInvalidType,
                         new StackFrame(true)));
             }
 
@@ -99,7 +99,7 @@ namespace Microsoft.IdentityModel.Tokens
                              LogMessages.IDX10257,
                              LogHelper.MarkAsNonPII(nameof(type)),
                              LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidTypes))),
-                         typeof(SecurityTokenInvalidTypeException),
+                         ExceptionDetail.ExceptionType.SecurityTokenInvalidType,
                          new StackFrame(true)));
             }
 
