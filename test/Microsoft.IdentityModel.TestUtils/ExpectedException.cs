@@ -319,6 +319,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return new ExpectedException(typeof(JsonException), substringExpected, innerTypeExpected);
         }
+
         public static ExpectedException SecurityTokenDecompressionFailedException(string substringExpected = null, Type innerTypeExpected = null)
         {
             return new ExpectedException(typeof(SecurityTokenDecompressionFailedException), substringExpected, innerTypeExpected);
