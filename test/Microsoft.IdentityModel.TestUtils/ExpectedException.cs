@@ -319,6 +319,25 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return new ExpectedException(typeof(JsonException), substringExpected, innerTypeExpected);
         }
+        public static ExpectedException SecurityTokenDecompressionFailedException(string substringExpected = null, Type innerTypeExpected = null)
+        {
+            return new ExpectedException(typeof(SecurityTokenDecompressionFailedException), substringExpected, innerTypeExpected);
+        }
+
+        public static ExpectedException SecurityTokenMalformedException(string substringExpected = null, Type innerTypeExpected = null)
+        {
+            return new ExpectedException(typeof(SecurityTokenMalformedException), substringExpected, innerTypeExpected);
+        }
+
+        public static ExpectedException SecurityTokenReplayDetectedException(string substringExpected = null, Type innerTypeExpected = null)
+        {
+            return new ExpectedException(typeof(SecurityTokenReplayDetectedException), substringExpected, innerTypeExpected);
+        }
+
+        public static ExpectedException SecurityTokenReplayAddFailedException(string substringExpected = null, Type innerTypeExpected = null)
+        {
+            return new ExpectedException(typeof(SecurityTokenReplayAddFailedException), substringExpected, innerTypeExpected);
+        }
 
         public bool IgnoreExceptionType { get; set; }
 

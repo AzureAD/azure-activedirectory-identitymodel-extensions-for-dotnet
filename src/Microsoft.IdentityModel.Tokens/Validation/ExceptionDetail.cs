@@ -95,6 +95,7 @@ namespace Microsoft.IdentityModel.Tokens
             SecurityTokenReplayDetected,
             SecurityTokenReplayAddFailed,
             SecurityTokenSignatureKeyNotFound,
+            ExceptionTypeCount
         }
 
         private Exception ExceptionFromType(ExceptionType exceptionType, Exception innerException)
