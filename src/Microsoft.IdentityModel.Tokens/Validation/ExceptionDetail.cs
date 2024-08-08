@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -19,7 +20,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <paramref name="messageDetail"/> contains information about the exception that is used to generate the exception message.
         /// <paramref name="exceptionType"/> is the type of exception that occurred.
         /// <paramref name="stackFrame"/> contains information about the stack frame where the exception occurred.
-        public ExceptionDetail(MessageDetail messageDetail, Type exceptionType, StackFrame stackFrame)
+        public ExceptionDetail(
+            MessageDetail messageDetail,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type exceptionType,
+            StackFrame stackFrame)
             : this(messageDetail, exceptionType, stackFrame, null)
         {
         }
@@ -31,7 +35,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// <paramref name="exceptionType"/> is the type of exception that occurred.
         /// <paramref name="stackFrame"/> contains information about the stack frame where the exception occurred.
         /// <paramref name="innerException"/> is the inner exception that occurred.
-        public ExceptionDetail(MessageDetail messageDetail, Type exceptionType, StackFrame stackFrame, Exception innerException)
+        public ExceptionDetail(
+            MessageDetail messageDetail,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type exceptionType,
+            StackFrame stackFrame,
+            Exception innerException)
         {
             ExceptionType = exceptionType;
             InnerException = innerException;
@@ -61,6 +69,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the type of exception that occurred.
         /// </summary>
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
         public Type ExceptionType { get; }
 
         /// <summary>
