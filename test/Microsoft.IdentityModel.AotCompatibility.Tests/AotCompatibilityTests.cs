@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.AotCompatibility.Tests
         ///
         /// You can also 'dotnet publish' the 'Microsoft.IdentityModel.AotCompatibility.TestApp.csproj' as well to get the errors.
         /// </summary>
-        [Fact(Skip = "need to adjust timeout")]
+        [Fact]
         public void EnsureAotCompatibility()
         {
             string testAppPath = Path.Combine("..", "..", "..", "..", "Microsoft.IdentityModel.AotCompatibility.TestApp");
@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.AotCompatibility.Tests
             process.Start();
             process.BeginOutputReadLine();
 
-            Assert.True(process.WaitForExit(milliseconds: 180_000), "dotnet publish command timed out after 3 minutes.");
+            Assert.True(process.WaitForExit(milliseconds: 360_000), "dotnet publish command timed out after 6 minutes.");
 
             Assert.True(process.ExitCode == 0, "Publishing the AotCompatibility app failed. See test output for more details.");
         }

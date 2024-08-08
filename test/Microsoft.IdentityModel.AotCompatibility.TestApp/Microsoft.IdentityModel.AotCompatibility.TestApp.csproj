@@ -6,7 +6,7 @@
     <OutputType>Exe</OutputType>
     <PublishTrimmed>true</PublishTrimmed>
     <TrimMode>full</TrimMode>
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -18,15 +18,24 @@
     -->
     <CompatibleReference Include="Microsoft.IdentityModel.Abstractions" FullAnalyze="true" />
     <CompatibleReference Include="Microsoft.IdentityModel.Logging" FullAnalyze="true" />
-    <CompatibleReference Include="Microsoft.IdentityModel.JsonWebTokens" />
-    
+    <CompatibleReference Include="Microsoft.IdentityModel.JsonWebTokens" FullAnalyze="true" />
+    <CompatibleReference Include="Microsoft.IdentityModel.Tokens" FullAnalyze="true" />
+    <CompatibleReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" FullAnalyze="true" />
+    <CompatibleReference Include="Microsoft.IdentityModel.Protocols.SignedHttpRequest" FullAnalyze="true" />
+    <CompatibleReference Include="Microsoft.IdentityModel.Protocols.WsFederation" FullAnalyze="true" />
+    <CompatibleReference Include="Microsoft.IdentityModel.Protocols" FullAnalyze="true" />
+    <CompatibleReference Include="Microsoft.IdentityModel.Tokens.Saml" FullAnalyze="true" />
+    <CompatibleReference Include="Microsoft.IdentityModel.Validators" FullAnalyze="true" />
+    <CompatibleReference Include="Microsoft.IdentityModel.Xml" FullAnalyze="true" />
+    <CompatibleReference Include="System.IdentityModel.Tokens.Jwt" FullAnalyze="true" />
+
     <CompatibleReference Update="@(CompatibleReference)" Path="..\..\src\%(Identity)\%(Identity).csproj" />
   </ItemGroup>
   
   <ItemGroup>
     <ProjectReference Include="@(CompatibleReference->'%(Path)')" />
 
-    <TrimmerRootAssembly Include="@(CompatibleReference->WithMetadataValue('FullAnalyze','true'))"/>
+    <TrimmerRootAssembly Include="@(CompatibleReference->WithMetadataValue('FullAnalyze','true'))" />
   </ItemGroup>
 
 </Project>
