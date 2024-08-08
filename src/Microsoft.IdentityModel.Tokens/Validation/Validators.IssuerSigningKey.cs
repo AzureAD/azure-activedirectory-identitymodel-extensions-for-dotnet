@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII(nameof(validationParameters))),
-                        typeof(ArgumentNullException),
+                        ExceptionDetail.ExceptionType.ArgumentNull,
                         new StackFrame(true)));
 
             if (securityKey == null)
@@ -73,7 +73,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10253,
                             LogHelper.MarkAsNonPII(nameof(securityKey))),
-                        typeof(ArgumentNullException),
+                        ExceptionDetail.ExceptionType.ArgumentNull,
                         new StackFrame(true)));
             }
 
@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII(nameof(securityToken))),
-                        typeof(ArgumentNullException),
+                        ExceptionDetail.ExceptionType.ArgumentNull,
                         new StackFrame(true)));
 
             return ValidateIssuerSigningKeyLifeTime(securityKey, validationParameters, callContext);
@@ -121,7 +121,7 @@ namespace Microsoft.IdentityModel.Tokens
                                     LogMessages.IDX10248,
                                     LogHelper.MarkAsNonPII(notBeforeUtc),
                                     LogHelper.MarkAsNonPII(utcNow))),
-                            typeof(SecurityTokenInvalidSigningKeyException),
+                            ExceptionDetail.ExceptionType.SecurityTokenInvalidSigningKey,
                             new StackFrame(true)));
 
                 if (LogHelper.IsEnabled(EventLogLevel.Informational))
@@ -137,7 +137,7 @@ namespace Microsoft.IdentityModel.Tokens
                                     LogMessages.IDX10249,
                                     LogHelper.MarkAsNonPII(notAfterUtc),
                                     LogHelper.MarkAsNonPII(utcNow))),
-                            typeof(SecurityTokenInvalidSigningKeyException),
+                            ExceptionDetail.ExceptionType.SecurityTokenInvalidSigningKey,
                             new StackFrame(true)));
 
                 if (LogHelper.IsEnabled(EventLogLevel.Informational))

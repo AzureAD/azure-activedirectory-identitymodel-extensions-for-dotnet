@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         new MessageDetail(
                             TokenLogMessages.IDX10000,
                             nameof(validationParameters)),
-                        typeof(ArgumentNullException),
+                        ExceptionDetail.ExceptionType.ArgumentNull,
                         new System.Diagnostics.StackFrame()));
 
             if (decryptionParameters == null)
@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         new MessageDetail(
                             TokenLogMessages.IDX10000,
                             nameof(decryptionParameters)),
-                        typeof(ArgumentNullException),
+                        ExceptionDetail.ExceptionType.ArgumentNull,
                         new System.Diagnostics.StackFrame()));
 
             bool decryptionSucceeded = false;
@@ -142,7 +142,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         new MessageDetail(
                             TokenLogMessages.IDX10679,
                             zipAlgorithm),
-                        typeof(SecurityTokenDecompressionFailedException),
+                        ExceptionDetail.ExceptionType.SecurityTokenDecompressionFailed,
                         new StackFrame(),
                         ex));
             }
