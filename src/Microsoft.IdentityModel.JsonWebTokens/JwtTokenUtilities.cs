@@ -12,7 +12,6 @@ using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
-using System.Security.Claims;
 
 #if !NET45
 using System.IO;
