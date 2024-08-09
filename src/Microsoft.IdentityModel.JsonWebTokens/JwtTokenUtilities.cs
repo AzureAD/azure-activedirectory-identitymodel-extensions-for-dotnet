@@ -11,7 +11,6 @@ using System.Text.RegularExpressions;
 using Microsoft.IdentityModel.Json.Linq;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Json;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 using System.Security.Claims;
 
@@ -538,20 +537,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal static JsonDocument GetJsonDocumentFromBase64UrlEncodedString(string rawString, int startIndex, int length)
         {
             return Base64UrlEncoding.Decode<JsonDocument>(rawString, startIndex, length, ParseDocument);
-        }
-        internal static string GetStringClaimValueType(string str, string claimType)
-        {
-            if (!string.IsNullOrEmpty(claimType) && !AppContextSwitches.TryAllStringClaimsAsDateTime && JsonSerializerPrimitives.IsKnownToNotBeDateTime(claimType))
-                return ClaimValueTypes.String;
-
-            if (DateTime.TryParse(str, out DateTime dateTimeValue))
-            {
-                string dtUniversal = dateTimeValue.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture);
-                if (dtUniversal.Equals(str, StringComparison.Ordinal))
-                    return ClaimValueTypes.DateTime;
-            }
-
-            return ClaimValueTypes.String;
         }
 #endif
     }
