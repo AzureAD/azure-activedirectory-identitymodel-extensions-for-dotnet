@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Validators
                 {
 #if !NET45
                     if (AppContextSwitches.DoNotFailOnMissingTid)
-                        return true; 
+                        return true;
 #endif
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidIssuerException(LogMessages.IDX40009));
                 }
