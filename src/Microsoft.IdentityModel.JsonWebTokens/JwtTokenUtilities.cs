@@ -539,6 +539,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             return Base64UrlEncoding.Decode<JsonDocument>(rawString, startIndex, length, ParseDocument);
         }
+
         internal static string GetStringClaimValueType(string str, string claimType)
         {
             if (!string.IsNullOrEmpty(claimType) && !AppContextSwitches.TryAllStringClaimsAsDateTime && JsonSerializerPrimitives.IsKnownToNotBeDateTime(claimType))
