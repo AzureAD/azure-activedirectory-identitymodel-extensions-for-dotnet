@@ -105,7 +105,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{BC99A01F
 		build\dependenciesTest.props = build\dependenciesTest.props
 		build\targets.props = build\targets.props
 		build\targetsTest.props = build\targetsTest.props
-		build\version.props = build\version.props
 	EndProjectSection
 EndProject
 Global
