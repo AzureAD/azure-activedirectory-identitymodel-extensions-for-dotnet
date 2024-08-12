@@ -581,7 +581,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             string tokenType = Validators.ValidateTokenType(jsonWebToken.Typ, jsonWebToken, validationParameters);
-            return new TokenValidationResult(jsonWebToken, this, validationParameters.Clone(), issuer)
+            return new TokenValidationResult(jsonWebToken, this, validationParameters.Clone(), issuer, null)
             {
                 IsValid = true,
                 TokenType = tokenType
