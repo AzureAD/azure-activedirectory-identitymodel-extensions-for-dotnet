@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.IsType<CaseSensitiveClaimsIdentity>(actualClaimsIdentity);
             Assert.NotNull(((CaseSensitiveClaimsIdentity)actualClaimsIdentity).SecurityToken);
 
-            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, false);
+            AppContextSwitches.ResetAllSwitches();
         }
 #endif
 
@@ -58,6 +58,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             // This will also test mapped claims flow.
             handler.MapInboundClaims = true;
             Assert.IsType<ClaimsIdentity>(handler.CreateClaimsIdentityInternal(jsonWebToken, tokenValidationParameters, Default.Issuer));
+#if !NET452
+            AppContextSwitches.ResetAllSwitches();
+#endif
         }
 
         private class DerivedJsonWebTokenHandler : JsonWebTokenHandler
