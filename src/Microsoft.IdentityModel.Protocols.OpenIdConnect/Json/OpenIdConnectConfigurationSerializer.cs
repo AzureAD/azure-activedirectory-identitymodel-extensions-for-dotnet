@@ -163,7 +163,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                     if (reader.ValueTextEquals(Utf8Bytes.AcrValuesSupported))
                         JsonPrimitives.ReadStrings(ref reader, config.AcrValuesSupported, MetadataName.AcrValuesSupported, ClassName, true);
 
-                    if (reader.ValueTextEquals(Utf8Bytes.AuthorizationDetailsTypesSupported))
+                    else if (reader.ValueTextEquals(Utf8Bytes.AuthorizationDetailsTypesSupported))
                         JsonPrimitives.ReadStrings(ref reader, config.AuthorizationDetailsTypesSupported, MetadataName.AuthorizationDetailsTypesSupported, ClassName, true);
 
                     else if (reader.ValueTextEquals(Utf8Bytes.AuthorizationEndpoint))
@@ -382,7 +382,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                             if (propertyName.Equals(MetadataName.AcrValuesSupported, StringComparison.OrdinalIgnoreCase))
                                 JsonPrimitives.ReadStrings(ref reader, config.AcrValuesSupported, propertyName, ClassName);
 
-                            if (propertyName.Equals(MetadataName.AuthorizationDetailsTypesSupported, StringComparison.OrdinalIgnoreCase))
+                            else if (propertyName.Equals(MetadataName.AuthorizationDetailsTypesSupported, StringComparison.OrdinalIgnoreCase))
                                 JsonPrimitives.ReadStrings(ref reader, config.AuthorizationDetailsTypesSupported, propertyName, ClassName);
 
                             else if (propertyName.Equals(MetadataName.AuthorizationEndpoint, StringComparison.OrdinalIgnoreCase))
