@@ -596,7 +596,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.InvalidHeader))
                 {
                     Token = EncodedJwts.InvalidHeader,
-#if NET45
+#if NET452
                     ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14102:", typeof(JsonReaderException), false ),
 #else
                     ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14102:", typeof(JsonReaderException), true),
@@ -606,7 +606,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.InvalidPayload))
                 {
                     Token = EncodedJwts.InvalidPayload,
-#if NET45
+#if NET452
                     ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14101:", typeof(JsonReaderException), false ),
 #else
                     ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14101:", typeof(JsonReaderException), true),
@@ -616,7 +616,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.JWSEmptyHeader))
                 {
                     Token = EncodedJwts.JWSEmptyHeader,
-#if NET45
+#if NET452
                     ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14102:", typeof(JsonReaderException), false ),
 #else
                     ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14102:", typeof(JsonReaderException), true),
@@ -626,7 +626,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 theoryData.Add(new JwtTheoryData(nameof(EncodedJwts.JWSEmptyPayload))
                 {
                     Token = EncodedJwts.JWSEmptyPayload,
-#if NET45
+#if NET452
                     ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14101:", typeof(JsonReaderException), false ),
 #else
                     ExpectedException = new ExpectedException(typeof(ArgumentException), "IDX14101:", typeof(JsonReaderException), true),

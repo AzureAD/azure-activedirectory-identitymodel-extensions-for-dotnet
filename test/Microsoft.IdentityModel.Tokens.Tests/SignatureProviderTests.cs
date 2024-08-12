@@ -745,7 +745,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Theory, MemberData(nameof(SymmetricSecurityKeySizesVerifyOFFTheoryData))]
         public void SymmetricSecurityKeySizesVerifyOFF(SymmetricSignatureProviderTheoryData theoryData)
         {
-            AppContext.SetSwitch(CryptoProviderFactory._skipValidationOfHmacKeySizes, true);
+            AppContext.SetSwitch(AppContextSwitches.SkipValidationOfHmacKey, true);
             var context = TestUtilities.WriteHeader($"{this}.SymmetricSecurityKeySizes", theoryData);
             try
             {
@@ -759,7 +759,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 theoryData.ExpectedException.ProcessException(ex, context);
             }
 
-            AppContext.SetSwitch(CryptoProviderFactory._skipValidationOfHmacKeySizes, false);
+            AppContext.SetSwitch(AppContextSwitches.SkipValidationOfHmacKey, false);
             TestUtilities.AssertFailIfErrors(context);
         }
 

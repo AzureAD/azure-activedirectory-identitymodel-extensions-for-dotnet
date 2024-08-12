@@ -13,13 +13,13 @@ namespace Microsoft.IdentityModel.Tokens
     {
 #if NET461_OR_GREATER || NETCOREAPP || NETSTANDARD
         /// <summary>
-        /// Enables a fallback to the previous behavior of using <see cref="ClaimsIdentity"/> instead of <see cref="CaseSensitiveClaimsIdentity"/> globally.
+        /// Enables a new behavior of using <see cref="CaseSensitiveClaimsIdentity"/> instead of <see cref="ClaimsIdentity"/> globally.
         /// </summary>
-        internal const string UseClaimsIdentityTypeSwitch = "Microsoft.IdentityModel.Tokens.UseClaimsIdentityType";
+        internal const string UseCaseSensitiveClaimsIdentityTypeSwitch = "Microsoft.IdentityModel.Tokens.UseCaseSensitiveClaimsIdentityType";
 
-        private static bool? _useClaimsIdentityType;
+        private static bool? _useCaseSensitiveClaimsIdentityType;
 
-        internal static bool UseClaimsIdentityType => _useClaimsIdentityType ??= (AppContext.TryGetSwitch(UseClaimsIdentityTypeSwitch, out bool useClaimsIdentityType) && useClaimsIdentityType);
+        internal static bool UseCaseSensitiveClaimsIdentityType => _useCaseSensitiveClaimsIdentityType ??= (AppContext.TryGetSwitch(UseCaseSensitiveClaimsIdentityTypeSwitch, out bool useCaseSensitiveClaimsIdentityType) && useCaseSensitiveClaimsIdentityType);
 
         /// <summary>
         /// When validating the issuer signing key, specifies whether to fail if the 'tid' claim is missing.
@@ -30,16 +30,26 @@ namespace Microsoft.IdentityModel.Tokens
 
         internal static bool DoNotFailOnMissingTid => _doNotFailOnMissingTid ??= (AppContext.TryGetSwitch(DoNotFailOnMissingTidSwitch, out bool doNotFailOnMissingTid) && doNotFailOnMissingTid);
 
+
+        internal const string SkipValidationOfHmacKey = "Switch.Microsoft.IdentityModel.UnsafeRelaxHmacKeySizeValidation";
+
+        private static bool? _skipValidationOfHmacKeySizes;
+
+        internal static bool SkipValidationOfHmacKeySizes => _skipValidationOfHmacKeySizes ??= (AppContext.TryGetSwitch(SkipValidationOfHmacKey, out bool skipValidationOfHmacKeySizes) && skipValidationOfHmacKeySizes);
+
         /// <summary>
         /// Used for testing to reset all switches to its default value.
         /// </summary>
         internal static void ResetAllSwitches()
         {
-            _useClaimsIdentityType = null;
-            AppContext.SetSwitch(UseClaimsIdentityTypeSwitch, false);
+            _useCaseSensitiveClaimsIdentityType = null;
+            AppContext.SetSwitch(UseCaseSensitiveClaimsIdentityTypeSwitch, false);
 
             _doNotFailOnMissingTid = null;
             AppContext.SetSwitch(DoNotFailOnMissingTidSwitch, false);
+
+            _skipValidationOfHmacKeySizes = null;
+            AppContext.SetSwitch(SkipValidationOfHmacKey, false);
         }
 #else
         // .NET 4.5 does not support AppContext switches. Always use ClaimsIdentity.

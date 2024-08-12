@@ -44,15 +44,6 @@ namespace Microsoft.IdentityModel.Validators
             };
         }
 
-#if !NET45
-        internal const string DoNotFailOnMissingTidSwitch = "Switch.Microsoft.IdentityModel.DontFailOnMissingTidValidateIssuerSigning";
-
-        private static bool DontFailOnMissingTid()
-        {
-            return (AppContext.TryGetSwitch(DoNotFailOnMissingTidSwitch, out bool doNotFailOnMissingTid) && doNotFailOnMissingTid);
-        }
-#endif
-
         /// <summary>
         /// Validates the issuer signing key.
         /// </summary>

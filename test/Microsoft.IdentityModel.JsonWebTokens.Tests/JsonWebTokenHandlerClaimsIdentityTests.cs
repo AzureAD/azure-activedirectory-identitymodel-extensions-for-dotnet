@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -13,9 +13,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
     public class JsonWebTokenHandlerClaimsIdentityTests
     {
 
+#if NET46_OR_GREATER || NETCOREAPP || NETSTANDARD
         [Fact]
         public void CreateClaimsIdentity_ReturnsCaseSensitveClaimsIdentity_WithAppContextSwitch()
         {
+            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, true);
+
             var handler = new DerivedJsonWebTokenHandler();
             var jsonWebToken = new JsonWebToken(Default.Jwt(Default.SecurityTokenDescriptor()));
             var tokenValidationParameters = new TokenValidationParameters();
@@ -37,17 +40,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             actualClaimsIdentity = handler.CreateClaimsIdentityInternal(jsonWebToken, tokenValidationParameters, Default.Issuer);
             Assert.IsType<CaseSensitiveClaimsIdentity>(actualClaimsIdentity);
             Assert.NotNull(((CaseSensitiveClaimsIdentity)actualClaimsIdentity).SecurityToken);
-#if !NET452
-            AppContextSwitches.ResetAllSwitches();
-#endif
-        }
 
-#if NET46_OR_GREATER || NETCOREAPP || NETSTANDARD
+            AppContextSwitches.ResetAllSwitches();
+        }
+#endif
+
         [Fact]
         public void CreateClaimsIdentity_ReturnsClaimsIdentity_ByDefault()
         {
-            AppContext.SetSwitch(AppContextSwitches.UseClaimsIdentityTypeSwitch, true);
-
             var handler = new DerivedJsonWebTokenHandler();
             var jsonWebToken = new JsonWebToken(Default.Jwt(Default.SecurityTokenDescriptor()));
             var tokenValidationParameters = new TokenValidationParameters();
@@ -58,10 +58,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             // This will also test mapped claims flow.
             handler.MapInboundClaims = true;
             Assert.IsType<ClaimsIdentity>(handler.CreateClaimsIdentityInternal(jsonWebToken, tokenValidationParameters, Default.Issuer));
-
+#if !NET452
             AppContextSwitches.ResetAllSwitches();
-        }
 #endif
+        }
 
         private class DerivedJsonWebTokenHandler : JsonWebTokenHandler
         {

@@ -19,7 +19,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [InlineData(false)]
         public void Create_FromTokenValidationParameters_ReturnsCorrectClaimsIdentity(bool useCaseSensitiveClaimsIdentity)
         {
-            AppContext.SetSwitch(AppContextSwitches.UseClaimsIdentityTypeSwitch, useCaseSensitiveClaimsIdentity);
+            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, useCaseSensitiveClaimsIdentity);
 
             var jsonWebToken = new JsonWebToken(Default.Jwt(Default.SecurityTokenDescriptor()));
             var tokenValidationParameters = new TokenValidationParameters();
@@ -35,13 +35,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             if (useCaseSensitiveClaimsIdentity)
             {
-                Assert.IsType<ClaimsIdentity>(actualClaimsIdentity);
-            }
-            else
-            {
                 Assert.IsType<CaseSensitiveClaimsIdentity>(actualClaimsIdentity);
                 Assert.NotNull(((CaseSensitiveClaimsIdentity)actualClaimsIdentity).SecurityToken);
                 Assert.Equal(jsonWebToken, ((CaseSensitiveClaimsIdentity)actualClaimsIdentity).SecurityToken);
+            }
+            else
+            {
+                Assert.IsType<ClaimsIdentity>(actualClaimsIdentity);
             }
 
             AppContextSwitches.ResetAllSwitches();
@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [InlineData(false, false)]
         public void Create_FromDerivedTokenValidationParameters_ReturnsCorrectClaimsIdentity(bool tvpReturnsCaseSensitiveClaimsIdentity, bool tvpReturnsCaseSensitiveClaimsIdentityWithToken)
         {
-            AppContext.SetSwitch(AppContextSwitches.UseClaimsIdentityTypeSwitch, true);
+            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, true);
 
             var jsonWebToken = new JsonWebToken(Default.Jwt(Default.SecurityTokenDescriptor()));
             var tokenValidationParameters = new DerivedTokenValidationParameters(tvpReturnsCaseSensitiveClaimsIdentity, tvpReturnsCaseSensitiveClaimsIdentityWithToken);
@@ -87,7 +87,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Equal(tokenValidationParameters.NameClaimType, actualClaimsIdentity.NameClaimType);
             Assert.Equal(tokenValidationParameters.RoleClaimType, actualClaimsIdentity.RoleClaimType);
 
-            AppContext.SetSwitch(AppContextSwitches.UseClaimsIdentityTypeSwitch, false);
+            AppContext.SetSwitch(AppContextSwitches.UseCaseSensitiveClaimsIdentityTypeSwitch, false);
         }
 #endif
 
