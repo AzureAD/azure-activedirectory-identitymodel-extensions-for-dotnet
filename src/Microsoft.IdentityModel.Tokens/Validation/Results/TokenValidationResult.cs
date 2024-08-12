@@ -211,11 +211,39 @@ namespace Microsoft.IdentityModel.Tokens
             get
             {
                 HasValidOrExceptionWasRead = true;
+                if (_exception is null)
+                {
+                    if (ExceptionDetail is not null)
+                        return ExceptionDetail.GetException();
+                }
+
                 return _exception;
             }
             set
             {
                 _exception = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the <see cref="ExceptionDetail"/> for the first failed validation result.
+        /// </summary>
+        private ExceptionDetail ExceptionDetail
+        {
+            get
+            {
+                if (ValidationResults.Count == 0)
+                    return null;
+
+                // Iterate in reverse since the failure should be the last result
+                for (int i = ValidationResults.Count - 1; i >= 0; i--)
+                {
+                    ValidationResult validationResult = ValidationResults[i];
+                    if (validationResult.ExceptionDetail != null)
+                        return validationResult.ExceptionDetail;
+                }
+
+                return null;
             }
         }
 
