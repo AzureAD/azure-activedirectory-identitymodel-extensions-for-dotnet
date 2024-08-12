@@ -759,7 +759,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 theoryData.ExpectedException.ProcessException(ex, context);
             }
 
-            AppContext.SetSwitch(AppContextSwitches.SkipValidationOfHmacKey, false);
+            AppContextSwitches.ResetAllSwitches();
             TestUtilities.AssertFailIfErrors(context);
         }
 
