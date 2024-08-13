@@ -114,7 +114,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     }
                 }
 
+#pragma warning disable RS0030 // Do not used banned APIs
                 return new ClaimsIdentity(AuthenticationType, NameClaimType, RoleClaimType);
+#pragma warning restore RS0030 // Do not used banned APIs
             }
         }
 
