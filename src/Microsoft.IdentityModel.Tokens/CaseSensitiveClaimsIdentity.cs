@@ -7,6 +7,8 @@ using System.Security.Claims;
 
 namespace Microsoft.IdentityModel.Tokens
 {
+#pragma warning disable RS0030 // Do not use banned APIs
+
     /// <summary>
     /// A derived <see cref="ClaimsIdentity"/> where claim retrieval is case-sensitive. The current <see cref="ClaimsIdentity"/> retrieves claims in a case-insensitive manner which is different than querying the underlying <see cref="SecurityToken"/>. The <see cref="CaseSensitiveClaimsIdentity"/> provides consistent retrieval logic between the <see cref="SecurityToken"/> and <see cref="ClaimsIdentity"/>.
     /// </summary>
@@ -119,4 +121,6 @@ namespace Microsoft.IdentityModel.Tokens
                 && claim?.Value.Equals(value, StringComparison.Ordinal) == true);
         }
     }
+
+#pragma warning disable RS0030 // Do not use banned APIs
 }

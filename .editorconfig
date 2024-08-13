@@ -157,6 +157,9 @@ csharp_space_between_square_brackets = false
 dotnet_code_quality.ca1802.api_surface = private, internal
 dotnet_code_quality.CA2208.api_surface = public
 
+# RS0030: Do not used banned APIs
+dotnet_diagnostic.RS0030.severity = error
+
 # Threading analyzers https://github.com/microsoft/vs-threading/blob/main/doc/analyzers/index.md
 
 # Use .ConfigureAwait(bool)
