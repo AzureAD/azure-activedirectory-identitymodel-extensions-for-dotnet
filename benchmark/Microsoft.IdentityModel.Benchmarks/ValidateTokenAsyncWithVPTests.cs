@@ -81,6 +81,6 @@ namespace Microsoft.IdentityModel.Benchmarks
         public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsyncWithVP() => await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, null).ConfigureAwait(false);
 
         [Benchmark]
-        public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsync() => await _jsonWebTokenHandler.ValidateTokenAsync(_jws, _tokenValidationParameters).ConfigureAwait(false);
+        public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsync() => await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _tokenValidationParameters).ConfigureAwait(false);
     }
 }
