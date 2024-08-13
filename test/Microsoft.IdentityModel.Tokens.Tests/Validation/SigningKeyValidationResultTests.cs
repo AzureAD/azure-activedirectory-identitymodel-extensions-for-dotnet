@@ -5,7 +5,6 @@ using System;
 using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 

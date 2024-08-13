@@ -206,5 +206,13 @@ namespace Microsoft.IdentityModel.Tokens
     /// <remarks>This method is not expected to throw.</remarks>
     /// <returns>The validated <see cref="SecurityToken"/>.</returns>
     internal delegate SignatureValidationResult SignatureValidatorDelegate(SecurityToken token, ValidationParameters validationParameters, BaseConfiguration? configuration, CallContext? callContext);
+
+    /// <summary>
+    /// Transforms the security token before signature validation.
+    /// </summary>
+    /// <param name="token">The <see cref="SecurityToken"/> being validated.</param>
+    /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
+    /// <returns>The transformed <see cref="SecurityToken"/>.</returns>
+    internal delegate SecurityToken TransformBeforeSignatureValidationDelegate(SecurityToken token, ValidationParameters validationParameters);
 #nullable restore
 }
