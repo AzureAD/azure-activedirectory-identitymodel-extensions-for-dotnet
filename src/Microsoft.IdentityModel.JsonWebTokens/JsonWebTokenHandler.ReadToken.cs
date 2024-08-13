@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     token,
                     ValidationFailureType.TokenReadingFailed,
                     new ExceptionDetail(
-                        new MessageDetail(LogMessages.IDX14107),
+                        new MessageDetail(LogMessages.IDX14100),
                         ExceptionDetail.ExceptionType.SecurityTokenMalformed,
                         new System.Diagnostics.StackFrame(),
                         ex));

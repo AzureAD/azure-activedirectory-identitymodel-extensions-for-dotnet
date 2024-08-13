@@ -259,7 +259,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     return new SignatureValidationResult(
                         ValidationFailureType.SignatureValidationFailed,
                         new ExceptionDetail(
-                            new MessageDetail(TokenLogMessages.IDX10504),
+                            new MessageDetail(
+                                TokenLogMessages.IDX10500,
+                                LogHelper.MarkAsSecurityArtifact(
+                                    jsonWebToken.EncodedToken,
+                                    JwtTokenUtilities.SafeLogJwtToken)),
                             ExceptionDetail.ExceptionType.SecurityTokenInvalidSignature,
                             new StackFrame()));
             }
@@ -270,7 +274,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return new SignatureValidationResult(
                     ValidationFailureType.SignatureValidationFailed,
                     new ExceptionDetail(
-                        new MessageDetail(TokenLogMessages.IDX10504, ex.ToString()),
+                        new MessageDetail(
+                                TokenLogMessages.IDX10504,
+                                LogHelper.MarkAsSecurityArtifact(
+                                    jsonWebToken.EncodedToken,
+                                    JwtTokenUtilities.SafeLogJwtToken)),
                         ExceptionDetail.ExceptionType.SecurityTokenInvalidSignature,
                         new StackFrame(),
                         ex));
