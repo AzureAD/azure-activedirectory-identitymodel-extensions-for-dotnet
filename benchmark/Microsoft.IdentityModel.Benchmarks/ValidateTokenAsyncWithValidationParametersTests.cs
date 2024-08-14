@@ -11,9 +11,9 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Benchmarks
 {
-    // dotnet run -c release -f net8.0 --filter Microsoft.IdentityModel.Benchmarks.ValidateTokenAsyncWithVPTests*
+    // dotnet run -c release -f net8.0 --filter Microsoft.IdentityModel.Benchmarks.ValidateTokenAsyncWithValidationParametersTests*
 
-    public class ValidateTokenAsyncWithVPTests
+    public class ValidateTokenAsyncWithValidationParametersTests
     {
         private CallContext _callContext;
         private JsonWebTokenHandler _jsonWebTokenHandler;
@@ -21,7 +21,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         private SecurityTokenDescriptor _tokenDescriptorExtendedClaims;
         private string _jws;
         private string _jwsExtendedClaims;
-        private TokenValidationParameters _tokenValidationParameters; //TODO:Add additional test to compare with ValidationParameters also use clone for perf.
+        private TokenValidationParameters _tokenValidationParameters;
         private ValidationParameters _validationParameters;
 
         [GlobalSetup]
@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         }
 
         [Benchmark]
-        public async Task<List<Claim>> JsonWebTokenHandler_ValidateTokenAsyncWithVP_CreateClaims()
+        public async Task<List<Claim>> JsonWebTokenHandler_ValidateTokenAsyncWithValidationParameters_CreateClaims()
         {
             var result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, null).ConfigureAwait(false);
             var claimsIdentity = result.ClaimsIdentity;
@@ -69,7 +69,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         }
 
         [Benchmark]
-        public async Task<List<Claim>> JsonWebTokenHandler_ValidateTokenAsync_CreateClaims()
+        public async Task<List<Claim>> JsonWebTokenHandler_ValidateTokenAsyncWithTokenValidationParameters_CreateClaims()
         {
             var result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _tokenValidationParameters).ConfigureAwait(false);
             var claimsIdentity = result.ClaimsIdentity;
@@ -78,9 +78,19 @@ namespace Microsoft.IdentityModel.Benchmarks
         }
 
         [Benchmark]
-        public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsyncWithVP() => await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, null).ConfigureAwait(false);
+        public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsyncWithValidationParameters() => await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, null).ConfigureAwait(false);
 
         [Benchmark]
-        public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsync() => await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _tokenValidationParameters).ConfigureAwait(false);
+        public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsyncWithTokenValidationParameters() => await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _tokenValidationParameters).ConfigureAwait(false);
+
+        [Benchmark]
+        public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsyncWithTokenValidationParametersUsingClone()
+        {
+            var tokenValidationParameters = _tokenValidationParameters.Clone();
+            tokenValidationParameters.ValidIssuer = "different-issuer";
+            tokenValidationParameters.ValidAudience = "different-audience";
+            tokenValidationParameters.ValidateLifetime = false;
+            return await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, tokenValidationParameters).ConfigureAwait(false);
+        }
     }
 }
