@@ -109,7 +109,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidationFailureType.TokenDecryptionFailed,
                             new ExceptionDetail(
                                 new MessageDetail(TokenLogMessages.IDX10612),
-                                typeof(SecurityTokenException),
+                                ExceptionDetail.ExceptionType.SecurityToken,
                                 new StackFrame(), null)),
                     },
                     new TokenDecryptingTheoryData
@@ -123,7 +123,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidationFailureType.TokenDecryptionFailed,
                             new ExceptionDetail(
                                 new MessageDetail(TokenLogMessages.IDX10000, "jwtToken"),
-                                typeof(ArgumentNullException),
+                                ExceptionDetail.ExceptionType.ArgumentNull,
                                 new StackFrame(true))),
                     },
                     new TokenDecryptingTheoryData
@@ -137,7 +137,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidationFailureType.TokenDecryptionFailed,
                             new ExceptionDetail(
                                 new MessageDetail(TokenLogMessages.IDX10000, "validationParameters"),
-                                typeof(ArgumentNullException),
+                                ExceptionDetail.ExceptionType.ArgumentNull,
                                 new StackFrame(true))),
                     },
                     new TokenDecryptingTheoryData
@@ -204,7 +204,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                     LogHelper.MarkAsSecurityArtifact(
                                         new JsonWebToken(ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims),
                                         JwtTokenUtilities.SafeLogJwtToken)),
-                                typeof(SecurityTokenDecryptionFailedException),
+                                ExceptionDetail.ExceptionType.SecurityTokenDecryptionFailed,
                                 new StackFrame(), null)),
                     }
                 };

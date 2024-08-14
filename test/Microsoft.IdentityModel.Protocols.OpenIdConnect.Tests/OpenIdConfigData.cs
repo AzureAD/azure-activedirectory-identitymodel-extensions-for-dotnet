@@ -170,6 +170,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         public static string OpenIdConnectMetadataBadFormatString = @"{""issuer""::""https://sts.windows.net/d062b2b0-9aca-4ff7-b32a-ba47231a4002/""}";
         public static string OpenIdConnectMetadataPingLabsJWKSString = @"{""jwks_uri"": ""PingLabsJWKS.json""}";
         public static string OpenIdConnectMetatadataBadJson = @"{...";
+
+        public static string OpenIdConnectMetadataEnd2EndAcrValuesLast = "OpenIdConnectMetadataEnd2EndAcrValuesLast.json";
         #endregion
 
         #region WellKnownConfigurationStrings

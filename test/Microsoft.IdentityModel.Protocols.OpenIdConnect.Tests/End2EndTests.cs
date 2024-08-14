@@ -22,6 +22,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             try
             {
                 OpenIdConnectConfiguration configuration = OpenIdConnectConfigurationRetriever.GetAsync(theoryData.OpenIdConnectMetadataFileName, new FileDocumentRetriever(), CancellationToken.None).Result;
+
+                theoryData.AdditionalValidation?.Invoke(configuration);
+
                 JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
                 JwtSecurityToken jwtToken =
                     tokenHandler.CreateJwtSecurityToken(
@@ -102,7 +105,22 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ),
                     ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException(),
                     TestId = "Ecdsa384KeyNotPartOfJWKS"
-                }
+                },
+                new OpenIdConnectTheoryData
+                {
+                    OpenIdConnectMetadataFileName = OpenIdConfigData.OpenIdConnectMetadataEnd2EndAcrValuesLast,
+                    SigningCredentials = new SigningCredentials(
+                            KeyingMaterial.RsaSecurityKey_2048,
+                            SecurityAlgorithms.RsaSha256
+                        ),
+                    TestId = "AcrValuesLast",
+                    AdditionalValidation = (OpenIdConnectConfiguration config) =>
+                    {
+                        Assert.Contains("0", config.AcrValuesSupported);
+                        Assert.Contains("id-simple", config.AcrValuesSupported);
+                        Assert.Contains("id-multifactor", config.AcrValuesSupported);
+                    }
+                },
             };
         }
     }

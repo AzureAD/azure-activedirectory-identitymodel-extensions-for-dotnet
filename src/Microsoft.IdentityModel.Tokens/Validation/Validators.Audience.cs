@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII(nameof(validationParameters))),
-                        typeof(ArgumentNullException),
+                        ExceptionDetail.ExceptionType.ArgumentNull,
                         new StackFrame(true)));
 
             if (tokenAudiences == null)
@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10207,
                             null),
-                        typeof(SecurityTokenInvalidAudienceException),
+                        ExceptionDetail.ExceptionType.SecurityTokenInvalidAudience,
                         new StackFrame(true)));
 
             if (tokenAudiences.Count == 0)
@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10206,
                             null),
-                        typeof(SecurityTokenInvalidAudienceException),
+                        ExceptionDetail.ExceptionType.SecurityTokenInvalidAudience,
                         new StackFrame(true)));
 
             string? validAudience = ValidTokenAudience(tokenAudiences, validationParameters.ValidAudiences, validationParameters.IgnoreTrailingSlashWhenValidatingAudience);
@@ -91,7 +91,7 @@ namespace Microsoft.IdentityModel.Tokens
                             LogMessages.IDX10215,
                             LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(tokenAudiences)),
                             LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences))),
-                        typeof(SecurityTokenInvalidAudienceException),
+                        ExceptionDetail.ExceptionType.SecurityTokenInvalidAudience,
                         new StackFrame(true)));
         }
 

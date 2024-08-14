@@ -66,7 +66,6 @@ namespace Microsoft.IdentityModel.Tokens
             IssuerSigningKeyValidatorUsingConfiguration = other.IssuerSigningKeyValidatorUsingConfiguration;
             IssuerValidator = other.IssuerValidator;
             IssuerValidatorAsync = other.IssuerValidatorAsync;
-            IssuerValidationDelegateAsync = other.IssuerValidationDelegateAsync;
             IssuerValidatorUsingConfiguration = other.IssuerValidatorUsingConfiguration;
             LifetimeValidator = other.LifetimeValidator;
             LogTokenId = other.LogTokenId;
@@ -240,7 +239,11 @@ namespace Microsoft.IdentityModel.Tokens
             if (LogHelper.IsEnabled(EventLogLevel.Informational))
                 LogHelper.LogInformation(LogMessages.IDX10245, securityToken);
 
-            return ClaimsIdentityFactory.Create(authenticationType: AuthenticationType ?? DefaultAuthenticationType, nameType: nameClaimType ?? ClaimsIdentity.DefaultNameClaimType, roleType: roleClaimType ?? ClaimsIdentity.DefaultRoleClaimType, securityToken);
+            return ClaimsIdentityFactory.Create(
+                authenticationType: AuthenticationType ?? DefaultAuthenticationType,
+                nameType: nameClaimType ?? ClaimsIdentity.DefaultNameClaimType,
+                roleType: roleClaimType ?? ClaimsIdentity.DefaultRoleClaimType,
+                securityToken);
         }
 
         /// <summary>

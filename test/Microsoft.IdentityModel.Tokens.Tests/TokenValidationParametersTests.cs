@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class TokenValidationParametersTests
     {
-        int ExpectedPropertyCount = 60;
+        int ExpectedPropertyCount = 59;
 
         [Fact]
         public void Publics()
@@ -71,7 +71,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 IssuerSigningKey = issuerSigningKey,
                 IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, tvp) => { return new List<SecurityKey> { issuerSigningKey }; },
                 IssuerSigningKeys = issuerSigningKeys,
-                IssuerValidationDelegateAsync = Validators.ValidateIssuerAsync,
                 IssuerValidator = ValidationDelegates.IssuerValidatorEcho,
                 LifetimeValidator = ValidationDelegates.LifetimeValidatorReturnsTrue,
                 LogTokenId = true,
@@ -291,7 +290,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParameters.IssuerSigningKeyResolverUsingConfiguration = ValidationDelegates.IssuerSigningKeyResolverUsingConfiguration;
             validationParameters.IssuerSigningKeyValidator = ValidationDelegates.IssuerSigningKeyValidator;
             validationParameters.IssuerSigningKeyValidatorUsingConfiguration = ValidationDelegates.IssuerSigningKeyValidatorUsingConfiguration;
-            validationParameters.IssuerValidationDelegateAsync = Validators.ValidateIssuerAsync;
             validationParameters.IssuerValidator = ValidationDelegates.IssuerValidatorEcho;
             validationParameters.IssuerValidatorAsync = ValidationDelegates.IssuerValidatorInternalAsync;
             validationParameters.IssuerValidatorUsingConfiguration = ValidationDelegates.IssuerValidatorUsingConfigEcho;

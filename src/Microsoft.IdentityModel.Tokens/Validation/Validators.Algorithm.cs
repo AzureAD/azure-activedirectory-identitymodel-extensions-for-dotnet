@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII(nameof(validationParameters))),
-                        typeof(ArgumentNullException),
+                        ExceptionDetail.ExceptionType.ArgumentNull,
                         new StackFrame(true)));
             }
 
@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10696,
                             LogHelper.MarkAsNonPII(algorithm)),
-                        typeof(SecurityTokenInvalidAlgorithmException),
+                        ExceptionDetail.ExceptionType.SecurityTokenInvalidAlgorithm,
                         new StackFrame(true)));
             }
 
