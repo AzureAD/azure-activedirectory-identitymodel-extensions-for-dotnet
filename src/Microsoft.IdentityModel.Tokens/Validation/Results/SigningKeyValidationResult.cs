@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+
 #nullable enable
 namespace Microsoft.IdentityModel.Tokens
 {

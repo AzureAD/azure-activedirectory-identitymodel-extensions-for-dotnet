@@ -104,9 +104,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             if (LogHelper.IsEnabled(EventLogLevel.Informational))
-            {
                 LogHelper.LogInformation(LogMessages.IDX10258, LogHelper.MarkAsNonPII(type));
-            }
 
             return new TokenTypeValidationResult(type);
         }

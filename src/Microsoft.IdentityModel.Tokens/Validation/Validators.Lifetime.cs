@@ -48,7 +48,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>All time comparisons apply <see cref="ValidationParameters.ClockSkew"/>.</remarks>
         /// <remarks>Exceptions are not thrown, but embedded in <see cref="LifetimeValidationResult.Exception"/>.</remarks>
 #pragma warning disable CA1801 // TODO: remove pragma disable once callContext is used for logging
-        internal static LifetimeValidationResult ValidateLifetime(DateTime? notBefore, DateTime? expires, SecurityToken? securityToken, ValidationParameters validationParameters, CallContext callContext)
+        internal static LifetimeValidationResult ValidateLifetime(
+            DateTime? notBefore,
+            DateTime? expires,
+            SecurityToken? securityToken,
+            ValidationParameters validationParameters,
+            CallContext callContext)
 #pragma warning restore CA1801
         {
             if (validationParameters == null)

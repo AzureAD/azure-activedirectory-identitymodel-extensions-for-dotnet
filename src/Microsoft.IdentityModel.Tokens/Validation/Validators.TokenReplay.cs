@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -40,7 +41,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="SecurityTokenReplayDetectedException">If the 'securityToken' is found in the cache.</exception>
         /// <exception cref="SecurityTokenReplayAddFailedException">If the 'securityToken' could not be added to the <see cref="ValidationParameters.TokenReplayCache"/>.</exception>
 #pragma warning disable CA1801 // Review unused parameters
-        internal static ReplayValidationResult ValidateTokenReplay(DateTime? expirationTime, string securityToken, ValidationParameters validationParameters, CallContext callContext)
+        internal static ReplayValidationResult ValidateTokenReplay(
+            DateTime? expirationTime,
+            string securityToken,
+            ValidationParameters validationParameters,
+            CallContext callContext)
 #pragma warning restore CA1801 // Review unused parameters
         {
             if (string.IsNullOrWhiteSpace(securityToken))
@@ -107,8 +112,10 @@ namespace Microsoft.IdentityModel.Tokens
                             null));
             }
 
-            // if it reaches here, that means no token replay is detected.
-            LogHelper.LogInformation(LogMessages.IDX10240);
+            // if we get here no token replay is detected.
+            if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                LogHelper.LogInformation(LogMessages.IDX10240);
+
             return new ReplayValidationResult(expirationTime);
         }
     }

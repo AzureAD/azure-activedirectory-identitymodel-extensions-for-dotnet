@@ -49,10 +49,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (token.Length > MaximumTokenSizeInBytes)
                 return new TokenValidationResult { Exception = LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, LogHelper.MarkAsNonPII(token.Length), LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes)))), IsValid = false };
 
-            TokenReadingResult tokenReadingResult = ReadToken(token, callContext);
-            if (tokenReadingResult.IsValid)
+            TokenReadResult tokenReadResult = ReadToken(token, callContext);
+            if (tokenReadResult.IsValid)
                 return await ValidateTokenAsync(
-                    tokenReadingResult.SecurityToken(),
+                    tokenReadResult.SecurityToken,
                     validationParameters,
                     callContext,
                     cancellationToken)
@@ -60,27 +60,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             return new TokenValidationResult
             {
-                Exception = tokenReadingResult.Exception,
+                Exception = tokenReadResult.Exception,
                 IsValid = false
             };
         }
 
         /// <inheritdoc/>
         internal async Task<TokenValidationResult> ValidateTokenAsync(
-            SecurityToken token,
+            SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext,
             CancellationToken? cancellationToken)
         {
             // These exceptions will be removed once we add ExceptionDetails to TokenValidationResult.
-            if (token is null)
-                throw LogHelper.LogArgumentNullException(nameof(token));
+            if (securityToken is null)
+                throw LogHelper.LogArgumentNullException(nameof(securityToken));
 
             if (validationParameters is null)
                 return new TokenValidationResult { Exception = LogHelper.LogArgumentNullException(nameof(validationParameters)), IsValid = false };
 
-            if (token is not JsonWebToken jwt)
-                return new TokenValidationResult { Exception = LogHelper.LogArgumentException<ArgumentException>(nameof(token), $"{nameof(token)} must be a {nameof(JsonWebToken)}."), IsValid = false };
+            if (securityToken is not JsonWebToken jwt)
+                return new TokenValidationResult { Exception = LogHelper.LogArgumentException<ArgumentException>(nameof(securityToken), $"{nameof(securityToken)} must be a {nameof(JsonWebToken)}."), IsValid = false };
 
             return await InternalValidateTokenAsync(
                 jwt,
@@ -194,11 +194,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (!internalResult.AddResult(decryptionResult))
                 return internalResult;
 
-            TokenReadingResult readingResult = ReadToken(decryptionResult.DecryptedToken(), callContext);
+            TokenReadResult readingResult = ReadToken(decryptionResult.DecryptedToken(), callContext);
             if (!internalResult.AddResult(readingResult))
                 return internalResult;
 
-            JsonWebToken decryptedToken = readingResult.SecurityToken() as JsonWebToken;
+            JsonWebToken decryptedToken = readingResult.SecurityToken as JsonWebToken;
 
             InternalTokenValidationResult jwsResult =
                 await ValidateJWSAsync(decryptedToken, validationParameters, configuration, callContext, cancellationToken)
@@ -251,11 +251,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // actor validation
             if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jsonWebToken.Actor))
             {
-                TokenReadingResult actorReadingResult = ReadToken(jsonWebToken.Actor, callContext);
+                TokenReadResult actorReadingResult = ReadToken(jsonWebToken.Actor, callContext);
                 if (!internalResult.AddResult(actorReadingResult))
                     return internalResult;
 
-                JsonWebToken actorToken = actorReadingResult.SecurityToken() as JsonWebToken;
+                JsonWebToken actorToken = actorReadingResult.SecurityToken as JsonWebToken;
                 ValidationParameters actorParameters = validationParameters.ActorValidationParameters;
                 InternalTokenValidationResult actorValidationResult =
                     await ValidateJWSAsync(actorToken, actorParameters, configuration, callContext, cancellationToken)

@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
 #nullable enable
@@ -70,6 +71,10 @@ namespace Microsoft.IdentityModel.Tokens
                         ExceptionDetail.ExceptionType.SecurityTokenInvalidAlgorithm,
                         new StackFrame(true)));
             }
+
+            // if we get here the algorithm is valid.
+            if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                LogHelper.LogInformation(LogMessages.IDX10268, algorithm);
 
             return new AlgorithmValidationResult(algorithm);
         }

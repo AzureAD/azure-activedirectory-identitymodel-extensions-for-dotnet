@@ -10,34 +10,42 @@ namespace Microsoft.IdentityModel.Tokens
     /// Contains the result of reading a <see cref="SecurityToken"/>.
     /// The <see cref="TokenValidationResult"/> contains a collection of <see cref="ValidationResult"/> for each step in the token validation.
     /// </summary>
-    internal class TokenReadingResult : ValidationResult
+    internal class TokenReadResult : ValidationResult
     {
         private Exception? _exception;
-        private SecurityToken? _securityToken;
 
         /// <summary>
-        /// Creates an instance of <see cref="TokenReadingResult"/>.
+        /// Creates an instance of <see cref="TokenReadResult"/>.
         /// </summary>
-        /// <paramref name="tokenInput"/> is the string from which the <see cref="SecurityToken"/> was created.
+        /// <paramref name="token"/> is the string from which the <see cref="SecurityToken"/> was created.
         /// <paramref name="securityToken"/> is the <see cref="SecurityToken"/> that was created.
-        public TokenReadingResult(SecurityToken securityToken, string tokenInput)
+        public TokenReadResult(string token, SecurityToken securityToken)
             : base(ValidationFailureType.ValidationSucceeded)
         {
-            IsValid = true;
-            TokenInput = tokenInput;
-            _securityToken = securityToken;
+            if (token == null || securityToken == null)
+            {
+                IsValid = false;
+                ValidationFailureType = ValidationFailureType.TokenReadFailed;
+            }
+            else
+            {
+                IsValid = true;
+            }
+
+            Token = token;
+            SecurityToken = securityToken;
         }
 
         /// <summary>
-        /// Creates an instance of <see cref="TokenReadingResult"/>
+        /// Creates an instance of <see cref="TokenReadResult"/>
         /// </summary>
-        /// <paramref name="tokenInput"/> is the string that failed to create a <see cref="SecurityToken"/>.
+        /// <paramref name="token"/> is the string that failed to create a <see cref="SecurityToken"/>.
         /// <paramref name="validationFailure"/> is the <see cref="ValidationFailureType"/> that occurred during reading.
         /// <paramref name="exceptionDetail"/> is the <see cref="ExceptionDetail"/> that occurred during reading.
-        public TokenReadingResult(string? tokenInput, ValidationFailureType validationFailure, ExceptionDetail exceptionDetail)
+        public TokenReadResult(string? token, ValidationFailureType validationFailure, ExceptionDetail exceptionDetail)
             : base(validationFailure, exceptionDetail)
         {
-            TokenInput = tokenInput;
+            Token = token;
             IsValid = false;
         }
 
@@ -46,13 +54,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <exception cref="InvalidOperationException"/> if the <see cref="SecurityToken"/> is null.
         /// <remarks>It is expected that the caller would check <see cref="ValidationResult.IsValid"/> returns true before accessing this.</remarks>
-        public SecurityToken SecurityToken()
-        {
-            if (_securityToken is null)
-                throw new InvalidOperationException("Attempted to retrieve the SecurityToken from a failed TokenReading result.");
-
-            return _securityToken;
-        }
+        public SecurityToken? SecurityToken { get; }
 
         /// <summary>
         /// Gets the <see cref="Exception"/> that occurred during reading.
@@ -80,7 +82,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the string from which the <see cref="SecurityToken"/> was read.
         /// </summary>
-        public string? TokenInput { get; }
+        public string? Token { get; }
     }
 }
 #nullable restore

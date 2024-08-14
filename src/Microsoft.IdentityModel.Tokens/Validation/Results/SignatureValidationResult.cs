@@ -4,9 +4,9 @@
 using System;
 using Microsoft.IdentityModel.Tokens;
 
+#nullable enable
 namespace Microsoft.IdentityModel.JsonWebTokens.Results
 {
-#nullable enable
     /// <summary>
     /// Contains the result of validating a signature.
     /// The <see cref="TokenValidationResult"/> contains a collection of <see cref="ValidationResult"/> for each step in the token validation.
@@ -72,5 +72,5 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Results
             }
         }
     }
-#nullable restore
 }
+#nullable restore

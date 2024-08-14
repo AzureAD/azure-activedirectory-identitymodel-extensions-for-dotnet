@@ -106,6 +106,7 @@ namespace Microsoft.IdentityModel.Tokens
         public ValidationFailureType ValidationFailureType
         {
             get;
+            protected set;
         } = ValidationFailureType.ValidationNotEvaluated;
     }
 }

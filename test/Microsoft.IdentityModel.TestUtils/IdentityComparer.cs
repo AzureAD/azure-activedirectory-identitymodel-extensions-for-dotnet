@@ -1009,67 +1009,67 @@ namespace Microsoft.IdentityModel.TestUtils
             return context.Merge(localContext);
         }
 
-        public static bool AreTokenReadingResultsEqual(object object1, object object2, CompareContext context)
+        public static bool AreTokenReadResultsEqual(object object1, object object2, CompareContext context)
         {
             var localContext = new CompareContext(context);
             if (!ContinueCheckingEquality(object1, object2, context))
                 return context.Merge(localContext);
 
-            return AreTokenReadingResultsEqual(
-                object1 as TokenReadingResult,
-                object2 as TokenReadingResult,
-                "TokenReadingResult1",
-                "TokenReadingResult2",
+            return AreTokenReadResultsEqual(
+                object1 as TokenReadResult,
+                object2 as TokenReadResult,
+                "TokenReadResult1",
+                "TokenReadResult2",
                 null,
                 context);
         }
 
-        internal static bool AreTokenReadingResultsEqual(
-            TokenReadingResult tokenReadingResult1,
-            TokenReadingResult tokenReadingResult2,
+        internal static bool AreTokenReadResultsEqual(
+            TokenReadResult tokenReadResult1,
+            TokenReadResult tokenReadResult2,
             string name1,
             string name2,
             string stackPrefix,
             CompareContext context)
         {
             var localContext = new CompareContext(context);
-            if (!ContinueCheckingEquality(tokenReadingResult1, tokenReadingResult2, localContext))
+            if (!ContinueCheckingEquality(tokenReadResult1, tokenReadResult2, localContext))
                 return context.Merge(localContext);
 
-            if (tokenReadingResult1.IsValid != tokenReadingResult2.IsValid)
-                localContext.Diffs.Add($"TokenReadingResult1.IsValid: {tokenReadingResult1.IsValid} != TokenReadingResult2.IsValid: {tokenReadingResult2.IsValid}");
+            if (tokenReadResult1.IsValid != tokenReadResult2.IsValid)
+                localContext.Diffs.Add($"{nameof(tokenReadResult1)}.IsValid: {tokenReadResult1.IsValid} != {nameof(tokenReadResult2)}.IsValid: {tokenReadResult2.IsValid}");
 
-            if (tokenReadingResult1.TokenInput != tokenReadingResult2.TokenInput)
-                localContext.Diffs.Add($"TokenReadingResult1.TokenInput: '{tokenReadingResult1.TokenInput}' != TokenReadingResult2.TokenInput: '{tokenReadingResult2.TokenInput}'");
+            if (tokenReadResult1.Token != tokenReadResult2.Token)
+                localContext.Diffs.Add($"{nameof(tokenReadResult1)}.TokenInput: '{tokenReadResult1.Token}' != {nameof(tokenReadResult2)}.TokenInput: '{tokenReadResult2.Token}'");
 
             // Only compare the security token if both are valid.
-            if (tokenReadingResult1.IsValid && (tokenReadingResult1.SecurityToken().ToString() != tokenReadingResult2.SecurityToken().ToString()))
-                localContext.Diffs.Add($"TokenReadingResult1.SecurityToken: '{tokenReadingResult1.SecurityToken()}' != TokenReadingResult2.SecurityToken: '{tokenReadingResult2.SecurityToken()}'");
+            if (tokenReadResult1.IsValid && (tokenReadResult1.SecurityToken.ToString() != tokenReadResult2.SecurityToken.ToString()))
+                localContext.Diffs.Add($"{nameof(tokenReadResult1)}.SecurityToken: '{tokenReadResult1.SecurityToken}' != {nameof(tokenReadResult2)}.SecurityToken: '{tokenReadResult2.SecurityToken}'");
 
-            if (tokenReadingResult1.ValidationFailureType != tokenReadingResult2.ValidationFailureType)
-                localContext.Diffs.Add($"TokenReadingResult1.ValidationFailureType: {tokenReadingResult1.ValidationFailureType} != TokenReadingResult2.ValidationFailureType: {tokenReadingResult2.ValidationFailureType}");
+            if (tokenReadResult1.ValidationFailureType != tokenReadResult2.ValidationFailureType)
+                localContext.Diffs.Add($"{nameof(tokenReadResult1)}.ValidationFailureType: {tokenReadResult1.ValidationFailureType} != {nameof(tokenReadResult2)}.ValidationFailureType: {tokenReadResult2.ValidationFailureType}");
 
             // true => both are not null.
-            if (ContinueCheckingEquality(tokenReadingResult1.Exception, tokenReadingResult2.Exception, localContext))
+            if (ContinueCheckingEquality(tokenReadResult1.Exception, tokenReadResult2.Exception, localContext))
             {
                 AreStringsEqual(
-                    tokenReadingResult1.Exception.Message,
-                    tokenReadingResult2.Exception.Message,
+                    tokenReadResult1.Exception.Message,
+                    tokenReadResult2.Exception.Message,
                     $"({name1}).Exception.Message",
                     $"({name2}).Exception.Message",
                     localContext);
 
                 AreStringsEqual(
-                    tokenReadingResult1.Exception.Source,
-                    tokenReadingResult2.Exception.Source,
+                    tokenReadResult1.Exception.Source,
+                    tokenReadResult2.Exception.Source,
                     $"({name1}).Exception.Source",
                     $"({name2}).Exception.Source",
                     localContext);
 
                 if (!string.IsNullOrEmpty(stackPrefix))
                     AreStringPrefixesEqual(
-                        tokenReadingResult1.Exception.StackTrace.Trim(),
-                        tokenReadingResult2.Exception.StackTrace.Trim(),
+                        tokenReadResult1.Exception.StackTrace.Trim(),
+                        tokenReadResult2.Exception.StackTrace.Trim(),
                         $"({name1}).Exception.StackTrace",
                         $"({name2}).Exception.StackTrace",
                         stackPrefix.Trim(),
