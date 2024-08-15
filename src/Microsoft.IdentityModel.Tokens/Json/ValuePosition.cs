@@ -9,7 +9,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
     /// <param name="startIndex">The start index of the claim value (not including the quotes).</param>
     /// <param name="length">The length of the claim value (not including the quotes).</param>
     /// <param name="isEscaped">Indicates if the value bytes are escaped and need to be unescaped before returning the claim value.</param>
-    internal class ClaimPosition(int startIndex, int length, bool isEscaped)
+    internal class ValuePosition(int startIndex, int length, bool isEscaped)
     {
         /// <summary>
         /// The start index of the claim value (not including the quotes).

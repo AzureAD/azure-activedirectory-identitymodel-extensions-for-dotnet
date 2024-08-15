@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 CreateClaimFromObject(claims, kvp.Key, kvp.Value, issuer);
 
 #if NET8_0_OR_GREATER
-                if (kvp.Value is ClaimPosition position)
+                if (kvp.Value is ValuePosition position)
                 {
                     if (position.IsEscaped)
                         EscapeStringBytes(position);
@@ -199,7 +199,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     return null;
 
 #if NET8_0_OR_GREATER
-                if (obj is ClaimPosition position)
+                if (obj is ValuePosition position)
                 {
                     if (position.IsEscaped)
                         EscapeStringBytes(position);
@@ -221,7 +221,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (obj == null)
                     return null;
 
-                if (obj is ClaimPosition position)
+                if (obj is ValuePosition position)
                 {
                     if (position.IsEscaped)
                         EscapeStringBytes(position);
@@ -233,7 +233,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return [];
         }
 
-        private void EscapeStringBytes(ClaimPosition position)
+        private void EscapeStringBytes(ValuePosition position)
         {
             position.Length = new Utf8JsonReader(_tokenAsMemory.Span.Slice(position.StartIndex, position.Length)).CopyString(_tokenAsMemory.Span.Slice(position.StartIndex, position.Length));
             position.IsEscaped = false;
