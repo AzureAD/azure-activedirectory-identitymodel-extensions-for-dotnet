@@ -2,6 +2,7 @@
 
   <Import Project="dependencies.props" />
   <Import Project="targets.props" />
+  <Import Project="version.props" />
 
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
@@ -31,20 +32,6 @@
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
-  <!-- Wilson version  -->
-  <PropertyGroup>
-    <MicrosoftIdentityModelCurrentVersion>8.0.1</MicrosoftIdentityModelCurrentVersion>
-
-    <PreviewVersionSuffix Condition="'$(PreviewVersionSuffix)' == '' and '$(BuildingInsideVisualStudio)' != 'true'">preview-$([System.DateTime]::Now.AddYears(-2019).Year)$([System.DateTime]::Now.ToString("MMddHHmmss"))</PreviewVersionSuffix>
-    <!--VS re-evaluates the variables, so having seconds or minutes creates an infinite loop of package updates-->
-    <PreviewVersionSuffix Condition="'$(PreviewVersionSuffix)' == '' and '$(BuildingInsideVisualStudio)' == 'true'">preview-$([System.DateTime]::Now.AddYears(-2019).Year)$([System.DateTime]::Now.ToString("MMddHH"))</PreviewVersionSuffix>
-    <IsCustomPreview>$(MicrosoftIdentityModelVersion.Contains("-"))</IsCustomPreview>
-    <Version Condition="'$(MicrosoftIdentityModelVersion)' != ''">$(MicrosoftIdentityModelVersion)</Version>
-    <VersionSuffix Condition="'$(MicrosoftIdentityModelVersion)' == ''">$(PreviewVersionSuffix)</VersionSuffix>
-    <VersionPrefix Condition="'$(MicrosoftIdentityModelVersion)' == ''">$(MicrosoftIdentityModelCurrentVersion)</VersionPrefix>
-    <FileVersion Condition="'$(MicrosoftIdentityModelVersion)' != '' and '$(IsCustomPreview)' != 'true' ">$(MicrosoftIdentityModelVersion).$([System.DateTime]::Now.AddYears(-2019).Year)$([System.DateTime]::Now.ToString("MMdd"))</FileVersion>
-    <FileVersion Condition="'$(MicrosoftIdentityModelVersion)' == ''">$(MicrosoftIdentityModelCurrentVersion).$([System.DateTime]::Now.AddYears(-2019).Year)$([System.DateTime]::Now.ToString("MMdd"))</FileVersion>
-  </PropertyGroup>
 
   <PropertyGroup>
     <EnablePackageValidation>false</EnablePackageValidation>
