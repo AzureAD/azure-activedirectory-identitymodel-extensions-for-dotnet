@@ -8,12 +8,13 @@ using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using System;
 
 namespace Microsoft.IdentityModel.Benchmarks
 {
-    // dotnet run -c release -f net8.0 --filter Microsoft.IdentityModel.Benchmarks.ValidateTokenAsyncWithValidationParametersTests*
+    // dotnet run -c release -f net8.0 --filter Microsoft.IdentityModel.Benchmarks.ValidateTokenAsyncWithVPTests*
 
-    public class ValidateTokenAsyncWithValidationParametersTests
+    public class ValidateTokenAsyncWithVPTests
     {
         private CallContext _callContext;
         private JsonWebTokenHandler _jsonWebTokenHandler;
@@ -23,6 +24,8 @@ namespace Microsoft.IdentityModel.Benchmarks
         private string _jwsExtendedClaims;
         private TokenValidationParameters _tokenValidationParameters;
         private ValidationParameters _validationParameters;
+        private TokenValidationParameters _invalidTokenValidationParameters;
+        private ValidationParameters _invalidValidationParameters;
 
         [GlobalSetup]
         public void Setup()
@@ -48,6 +51,10 @@ namespace Microsoft.IdentityModel.Benchmarks
             _validationParameters.ValidIssuers.Add(BenchmarkUtils.Issuer);
             _validationParameters.IssuerSigningKeys.Add(BenchmarkUtils.SigningCredentialsRsaSha256.Key);
 
+            _invalidValidationParameters = new ValidationParameters();
+            _invalidValidationParameters.ValidAudiences.Add(BenchmarkUtils.Audience);
+            _invalidValidationParameters.ValidIssuers.Add(BenchmarkUtils.Issuer);
+
             _callContext = new CallContext();
 
             _tokenValidationParameters = new TokenValidationParameters()
@@ -56,41 +63,110 @@ namespace Microsoft.IdentityModel.Benchmarks
                 ValidateLifetime = true,
                 ValidIssuer = BenchmarkUtils.Issuer,
                 IssuerSigningKey = BenchmarkUtils.SigningCredentialsRsaSha256.Key,
+                ValidateIssuerSigningKey = true,
+                ValidateTokenReplay = true,
+                RequireSignedTokens = true,
+                ValidateSignatureLast = true
+            };
+
+            _invalidTokenValidationParameters = new TokenValidationParameters()
+            {
+                ValidAudience = BenchmarkUtils.Audience,
+                ValidateLifetime = true,
+                ValidIssuer = BenchmarkUtils.Issuer,
+                ValidateIssuerSigningKey = true,
+                ValidateTokenReplay = true,
+                ValidateSignatureLast = true
             };
         }
 
         [Benchmark]
-        public async Task<List<Claim>> JsonWebTokenHandler_ValidateTokenAsyncWithValidationParameters_CreateClaims()
+        public async Task<TokenValidationResult> JsonWebTokenHandler_01_ValidateTokenAsyncWithTVP() => await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _tokenValidationParameters).ConfigureAwait(false);
+
+        [Benchmark]
+        public async Task<TokenValidationResult> JsonWebTokenHandler_02_ValidateTokenAsyncWithTVPUsingClone() => await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _tokenValidationParameters.Clone()).ConfigureAwait(false);
+
+        [Benchmark]
+        public async Task<TokenValidationResult> JsonWebTokenHandler_03_ValidateTokenAsyncWithVP() => await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, null).ConfigureAwait(false);
+
+        [Benchmark]
+        public async Task<TokenValidationResult> JsonWebTokenHandler_04_ValidateTokenAsyncWithTVP_SucceedOnThirdAttempt()
+        {
+            TokenValidationResult result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidTokenValidationParameters).ConfigureAwait(false);
+            result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidTokenValidationParameters).ConfigureAwait(false);
+            result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _tokenValidationParameters).ConfigureAwait(false);
+
+            return result;
+        }
+
+        [Benchmark]
+        public async Task<TokenValidationResult> JsonWebTokenHandler_05_ValidateTokenAsyncWithTVPUsingClone_SucceedOnThirdAttempt()
+        {
+            TokenValidationResult result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidTokenValidationParameters.Clone()).ConfigureAwait(false);
+            result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidTokenValidationParameters.Clone()).ConfigureAwait(false);
+            result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _tokenValidationParameters.Clone()).ConfigureAwait(false);
+
+            return result;
+        }
+
+        [Benchmark]
+        public async Task<TokenValidationResult> JsonWebTokenHandler_06_ValidateTokenAsyncWithVP_SucceedOnThirdAttempt()
+        {
+            var result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidValidationParameters, _callContext, null).ConfigureAwait(false);
+            result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidValidationParameters, _callContext, null).ConfigureAwait(false);
+            return await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, null).ConfigureAwait(false);
+        }
+
+        [Benchmark]
+        public async Task<TokenValidationResult> JsonWebTokenHandler_07_ValidateTokenAsyncWithTVP_SucceedOnFifthAttempt()
+        {
+            TokenValidationResult result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidTokenValidationParameters).ConfigureAwait(false);
+            result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidTokenValidationParameters).ConfigureAwait(false);
+            result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidTokenValidationParameters).ConfigureAwait(false);
+            result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidTokenValidationParameters).ConfigureAwait(false);
+            result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _tokenValidationParameters).ConfigureAwait(false);
+
+            return result;
+        }
+
+        [Benchmark]
+        public async Task<TokenValidationResult> JsonWebTokenHandler_08_ValidateTokenAsyncWithTVPUsingClone_SucceedOnFifthAttempt()
+        {
+            TokenValidationResult result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidTokenValidationParameters.Clone()).ConfigureAwait(false);
+            result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidTokenValidationParameters.Clone()).ConfigureAwait(false);
+            result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidTokenValidationParameters.Clone()).ConfigureAwait(false);
+            result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidTokenValidationParameters.Clone()).ConfigureAwait(false);
+            result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _tokenValidationParameters.Clone()).ConfigureAwait(false);
+
+            return result;
+        }
+
+        [Benchmark]
+        public async Task<TokenValidationResult> JsonWebTokenHandler_09_ValidateTokenAsyncWithVP_SucceedOnFifthAttempt()
+        {
+            var result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidValidationParameters, _callContext, null).ConfigureAwait(false);
+            result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidValidationParameters, _callContext, null).ConfigureAwait(false);
+            result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidValidationParameters, _callContext, null).ConfigureAwait(false);
+            result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidValidationParameters, _callContext, null).ConfigureAwait(false);
+            return await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, null).ConfigureAwait(false);
+        }
+
+        [Benchmark]
+        public async Task<List<Claim>> JsonWebTokenHandler_10_ValidateTokenAsyncWithTVP_CreateClaims()
+        {
+            var result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _tokenValidationParameters.Clone()).ConfigureAwait(false);
+            var claimsIdentity = result.ClaimsIdentity;
+            var claims = claimsIdentity.Claims;
+            return claims.ToList();
+        }
+
+        [Benchmark]
+        public async Task<List<Claim>> JsonWebTokenHandler_11_ValidateTokenAsyncWithVP_CreateClaims()
         {
             var result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, null).ConfigureAwait(false);
             var claimsIdentity = result.ClaimsIdentity;
             var claims = claimsIdentity.Claims;
             return claims.ToList();
-        }
-
-        [Benchmark]
-        public async Task<List<Claim>> JsonWebTokenHandler_ValidateTokenAsyncWithTokenValidationParameters_CreateClaims()
-        {
-            var result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _tokenValidationParameters).ConfigureAwait(false);
-            var claimsIdentity = result.ClaimsIdentity;
-            var claims = claimsIdentity.Claims;
-            return claims.ToList();
-        }
-
-        [Benchmark]
-        public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsyncWithValidationParameters() => await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, null).ConfigureAwait(false);
-
-        [Benchmark]
-        public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsyncWithTokenValidationParameters() => await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _tokenValidationParameters).ConfigureAwait(false);
-
-        [Benchmark]
-        public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsyncWithTokenValidationParametersUsingClone()
-        {
-            var tokenValidationParameters = _tokenValidationParameters.Clone();
-            tokenValidationParameters.ValidIssuer = "different-issuer";
-            tokenValidationParameters.ValidAudience = "different-audience";
-            tokenValidationParameters.ValidateLifetime = false;
-            return await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, tokenValidationParameters).ConfigureAwait(false);
         }
     }
 }
