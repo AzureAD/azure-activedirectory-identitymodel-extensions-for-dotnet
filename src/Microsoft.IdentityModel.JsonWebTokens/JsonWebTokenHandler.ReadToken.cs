@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
@@ -21,7 +22,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <exception cref="ArgumentNullException">returned if <paramref name="token"/> is null or empty.</exception>
         /// <exception cref="SecurityTokenMalformedException">returned if the validationParameters.TokenReader delegate is not able to parse/read the token as a valid <see cref="JsonWebToken"/>.</exception>
         /// <exception cref="SecurityTokenMalformedException">returned if <paramref name="token"/> is not a valid JWT, <see cref="JsonWebToken"/>.</exception>
-        internal static TokenReadingResult ReadToken(
+        internal static Result<SecurityToken, TokenValidationError> ReadToken(
             string token,
 #pragma warning disable CA1801 // TODO: remove pragma disable once callContext is used for logging
             CallContext? callContext)
@@ -29,34 +30,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             if (String.IsNullOrEmpty(token))
             {
-                return new TokenReadingResult(
-                    token,
-                    ValidationFailureType.NullArgument,
-                    new ExceptionDetail(
-                        new MessageDetail(
-                            TokenLogMessages.IDX10000,
-                            LogHelper.MarkAsNonPII(nameof(token))),
-                        ExceptionDetail.ExceptionType.ArgumentNull,
-                        new System.Diagnostics.StackFrame()));
+                return new(new TokenValidationError(
+                    ValidationErrorType.Unknown,
+                    new MessageDetail(
+                        TokenLogMessages.IDX10000,
+                        LogHelper.MarkAsNonPII(nameof(token))),
+                    0x123123));
             }
 
             try
             {
                 JsonWebToken jsonWebToken = new JsonWebToken(token);
-                return new TokenReadingResult(jsonWebToken, token);
+                return new(jsonWebToken);
             }
 #pragma warning disable CA1031 // Do not catch general exception types
-            catch (Exception ex)
+            catch
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                return new TokenReadingResult(
-                    token,
-                    ValidationFailureType.TokenReadingFailed,
-                    new ExceptionDetail(
-                        new MessageDetail(LogMessages.IDX14107),
-                        ExceptionDetail.ExceptionType.SecurityTokenMalformed,
-                        new System.Diagnostics.StackFrame(),
-                        ex));
+                return new(new TokenValidationError(
+                    ValidationErrorType.SecurityTokenMalformed,
+                    new MessageDetail(LogMessages.IDX14107),
+                    Tag: 0x123456));
             }
         }
     }

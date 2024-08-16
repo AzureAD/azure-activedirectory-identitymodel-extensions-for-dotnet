@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -51,8 +50,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII(nameof(securityToken))),
-                        ExceptionDetail.ExceptionType.ArgumentNull,
-                        new StackFrame(),
+                        ValidationErrorType.ArgumentNull,
                         null));
 
             if (validationParameters == null)
@@ -63,8 +61,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII(nameof(validationParameters))),
-                        ExceptionDetail.ExceptionType.ArgumentNull,
-                        new StackFrame(),
+                        ValidationErrorType.ArgumentNull,
                         null));
 
             // check if token if replay cache is set, then there must be an expiration time.
@@ -78,8 +75,7 @@ namespace Microsoft.IdentityModel.Tokens
                             new MessageDetail(
                                 LogMessages.IDX10227,
                                 LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
-                            ExceptionDetail.ExceptionType.SecurityTokenReplayDetected,
-                            new StackFrame(),
+                            ValidationErrorType.SecurityTokenReplayDetected,
                             null));
 
                 if (validationParameters.TokenReplayCache.TryFind(securityToken))
@@ -90,8 +86,7 @@ namespace Microsoft.IdentityModel.Tokens
                             new MessageDetail(
                                 LogMessages.IDX10228,
                                 LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
-                            ExceptionDetail.ExceptionType.SecurityTokenReplayDetected,
-                            new StackFrame(),
+                            ValidationErrorType.SecurityTokenReplayDetected,
                             null));
 
                 if (!validationParameters.TokenReplayCache.TryAdd(securityToken, expirationTime.Value))
@@ -102,13 +97,13 @@ namespace Microsoft.IdentityModel.Tokens
                             new MessageDetail(
                                 LogMessages.IDX10229,
                                 LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
-                            ExceptionDetail.ExceptionType.SecurityTokenReplayAddFailed,
-                            new StackFrame(),
+                            ValidationErrorType.SecurityTokenReplayAddFailed,
                             null));
             }
 
             // if it reaches here, that means no token replay is detected.
-            LogHelper.LogInformation(LogMessages.IDX10240);
+            // TODO: Move to CallContext
+            //LogHelper.LogInformation(LogMessages.IDX10240);
             return new ReplayValidationResult(expirationTime);
         }
     }

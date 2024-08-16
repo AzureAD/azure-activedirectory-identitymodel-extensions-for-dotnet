@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Microsoft.IdentityModel.Abstractions;
+//using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
@@ -47,8 +47,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     ValidationFailureType.TokenDecryptionFailed,
                     new ExceptionDetail(
                         new MessageDetail(TokenLogMessages.IDX10612),
-                        ExceptionDetail.ExceptionType.SecurityToken,
-                        new System.Diagnostics.StackFrame()));
+                        ValidationErrorType.SecurityToken));
 
             var keysOrExceptionDetail = GetContentEncryptionKeys(jwtToken, validationParameters, configuration, callContext);
             if (keysOrExceptionDetail.Item2 != null) // ExceptionDetail returned
@@ -66,8 +65,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         new MessageDetail(
                             TokenLogMessages.IDX10609,
                             LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken)),
-                        ExceptionDetail.ExceptionType.SecurityTokenDecryptionFailed,
-                        new System.Diagnostics.StackFrame()));
+                        ValidationErrorType.SecurityTokenDecryptionFailed));
 
             return JwtTokenUtilities.DecryptJwtToken(
                 jwtToken,
@@ -97,14 +95,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 var key = ResolveTokenDecryptionKey(jwtToken.EncodedToken, jwtToken, validationParameters, callContext);
                 if (key != null)
                 {
-                    if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                        LogHelper.LogInformation(TokenLogMessages.IDX10904, key);
+                    // TODO: Move to CallContext
+                    //if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                    //    LogHelper.LogInformation(TokenLogMessages.IDX10904, key);
                 }
                 else if (configuration != null)
                 {
                     key = ResolveTokenDecryptionKeyFromConfig(jwtToken, configuration);
-                    if (key != null && LogHelper.IsEnabled(EventLogLevel.Informational))
-                        LogHelper.LogInformation(TokenLogMessages.IDX10905, key);
+                    // TODO: Move to CallContext
+                    //if (key != null && LogHelper.IsEnabled(EventLogLevel.Informational))
+                    //    LogHelper.LogInformation(TokenLogMessages.IDX10905, key);
                 }
 
                 if (key != null)
@@ -202,8 +202,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         keysAttempted?.ToString() ?? "",
                         exceptionStrings?.ToString() ?? "",
                         LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken)),
-                    ExceptionDetail.ExceptionType.SecurityTokenKeyWrap,
-                    new System.Diagnostics.StackFrame());
+                    ValidationErrorType.SecurityTokenKeyWrap);
                 return (null, exceptionDetail);
             }
         }

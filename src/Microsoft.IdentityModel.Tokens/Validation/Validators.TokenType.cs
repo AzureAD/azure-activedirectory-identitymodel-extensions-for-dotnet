@@ -2,9 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
 using System.Linq;
-using Microsoft.IdentityModel.Abstractions;
+//using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
 #nullable enable
@@ -53,8 +52,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII(nameof(securityToken))),
-                        ExceptionDetail.ExceptionType.ArgumentNull,
-                        new StackFrame(true)));
+                        ValidationErrorType.ArgumentNull));
             }
 
             if (validationParameters == null)
@@ -66,8 +64,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII(nameof(validationParameters))),
-                        ExceptionDetail.ExceptionType.ArgumentNull,
-                        new StackFrame(true)));
+                        ValidationErrorType.ArgumentNull));
             }
 
             if (validationParameters.ValidTypes.Count == 0)
@@ -85,8 +82,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10256,
                             LogHelper.MarkAsNonPII(nameof(type))),
-                        ExceptionDetail.ExceptionType.SecurityTokenInvalidType,
-                        new StackFrame(true)));
+                        ValidationErrorType.SecurityTokenInvalidType));
             }
 
             if (!validationParameters.ValidTypes.Contains(type, StringComparer.Ordinal))
@@ -99,14 +95,12 @@ namespace Microsoft.IdentityModel.Tokens
                              LogMessages.IDX10257,
                              LogHelper.MarkAsNonPII(nameof(type)),
                              LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidTypes))),
-                         ExceptionDetail.ExceptionType.SecurityTokenInvalidType,
-                         new StackFrame(true)));
+                         ValidationErrorType.SecurityTokenInvalidType));
             }
 
-            if (LogHelper.IsEnabled(EventLogLevel.Informational))
-            {
-                LogHelper.LogInformation(LogMessages.IDX10258, LogHelper.MarkAsNonPII(type));
-            }
+            // TODO: Move to CallContext
+            //if (LogHelper.IsEnabled(EventLogLevel.Informational))
+            //    LogHelper.LogInformation(LogMessages.IDX10258, LogHelper.MarkAsNonPII(type));
 
             return new TokenTypeValidationResult(type);
         }

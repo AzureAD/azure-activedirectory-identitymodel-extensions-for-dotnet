@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
@@ -54,8 +53,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII(nameof(validationParameters))),
-                        ExceptionDetail.ExceptionType.ArgumentNull,
-                        new StackFrame(true)));
+                        ValidationErrorType.ArgumentNull));
 
             if (tokenAudiences == null)
                 return new AudienceValidationResult(
@@ -65,8 +63,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10207,
                             null),
-                        ExceptionDetail.ExceptionType.SecurityTokenInvalidAudience,
-                        new StackFrame(true)));
+                        ValidationErrorType.SecurityTokenInvalidAudience));
 
             if (tokenAudiences.Count == 0)
                 return new AudienceValidationResult(
@@ -76,8 +73,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10206,
                             null),
-                        ExceptionDetail.ExceptionType.SecurityTokenInvalidAudience,
-                        new StackFrame(true)));
+                        ValidationErrorType.SecurityTokenInvalidAudience));
 
             string? validAudience = ValidTokenAudience(tokenAudiences, validationParameters.ValidAudiences, validationParameters.IgnoreTrailingSlashWhenValidatingAudience);
             if (validAudience != null)
@@ -91,8 +87,7 @@ namespace Microsoft.IdentityModel.Tokens
                             LogMessages.IDX10215,
                             LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(tokenAudiences)),
                             LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences))),
-                        ExceptionDetail.ExceptionType.SecurityTokenInvalidAudience,
-                        new StackFrame(true)));
+                        ValidationErrorType.SecurityTokenInvalidAudience));
         }
 
         private static string? ValidTokenAudience(IList<string> tokenAudiences, IList<string> validAudiences, bool ignoreTrailingSlashWhenValidatingAudience)

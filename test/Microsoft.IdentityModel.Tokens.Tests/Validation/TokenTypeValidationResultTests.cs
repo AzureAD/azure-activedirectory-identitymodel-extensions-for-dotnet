@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Json.Tests;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -77,8 +76,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 new MessageDetail(
                                     LogMessages.IDX10000,
                                     LogHelper.MarkAsNonPII("securityToken")),
-                                ExceptionDetail.ExceptionType.ArgumentNull,
-                                new StackFrame(true)))
+                                ExceptionDetail.ExceptionType.ArgumentNull))
                     },
                     new TokenTypeTheoryData
                     {
@@ -94,8 +92,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 new MessageDetail(
                                     LogMessages.IDX10000,
                                     LogHelper.MarkAsNonPII("validationParameters")),
-                                ExceptionDetail.ExceptionType.ArgumentNull,
-                                new StackFrame(true)))
+                                ExceptionDetail.ExceptionType.ArgumentNull))
                     },
                     new TokenTypeTheoryData
                     {
@@ -112,8 +109,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 new MessageDetail(
                                     LogMessages.IDX10256,
                                     LogHelper.MarkAsNonPII("type")),
-                                ExceptionDetail.ExceptionType.SecurityTokenInvalidType,
-                                new StackFrame(true)))
+                                ExceptionDetail.ExceptionType.SecurityTokenInvalidType))
                     },
                     new TokenTypeTheoryData
                     {
@@ -130,8 +126,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 new MessageDetail(
                                     LogMessages.IDX10256,
                                     LogHelper.MarkAsNonPII("type")),
-                                ExceptionDetail.ExceptionType.SecurityTokenInvalidType,
-                                new StackFrame(true)))
+                                ExceptionDetail.ExceptionType.SecurityTokenInvalidType))
                     },
                     new TokenTypeTheoryData
                     {
@@ -149,8 +144,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                      LogMessages.IDX10257,
                                      LogHelper.MarkAsNonPII("type"),
                                      LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validTypesNoJwt))),
-                                 ExceptionDetail.ExceptionType.SecurityTokenInvalidType,
-                                 new StackFrame(true)))
+                                 ExceptionDetail.ExceptionType.SecurityTokenInvalidType))
                     }
                 };
             }

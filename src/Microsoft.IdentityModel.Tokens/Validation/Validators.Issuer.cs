@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Abstractions;
+//using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
+#nullable enable
     /// <summary>
     /// Definition for delegate that will validate the issuer value in a token.
     /// </summary>
@@ -45,7 +45,9 @@ namespace Microsoft.IdentityModel.Tokens
             string issuer,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
-            CallContext callContext,
+#pragma warning disable CA1801 // Review unused parameters
+            CallContext? callContext,
+#pragma warning restore CA1801 // Review unused parameters
             CancellationToken? cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(issuer))
@@ -57,8 +59,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10211,
                             null),
-                        ExceptionDetail.ExceptionType.SecurityTokenInvalidIssuer,
-                        new StackFrame(true),
+                        ValidationErrorType.SecurityTokenInvalidIssuer,
                         null));
             }
 
@@ -70,8 +71,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII(nameof(validationParameters))),
-                        ExceptionDetail.ExceptionType.ArgumentNull,
-                        new StackFrame(true),
+                        ValidationErrorType.ArgumentNull,
                         null));
 
             if (securityToken == null)
@@ -82,11 +82,10 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII(nameof(securityToken))),
-                        ExceptionDetail.ExceptionType.ArgumentNull,
-                        new StackFrame(true),
+                        ValidationErrorType.ArgumentNull,
                         null));
 
-            BaseConfiguration configuration = null;
+            BaseConfiguration? configuration = null;
             if (validationParameters.ConfigurationManager != null)
                 configuration = await validationParameters.ConfigurationManager.GetBaseConfigurationAsync(cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
 
@@ -100,8 +99,7 @@ namespace Microsoft.IdentityModel.Tokens
                             new MessageDetail(
                                 LogMessages.IDX10211,
                                 null),
-                            ExceptionDetail.ExceptionType.SecurityTokenInvalidIssuer,
-                            new StackFrame(true)));
+                            ValidationErrorType.SecurityTokenInvalidIssuer));
             }
 
             if (configuration != null)
@@ -111,8 +109,9 @@ namespace Microsoft.IdentityModel.Tokens
                     // TODO - how and when to log
                     // Logs will have to be passed back to Wilson
                     // so that they can be written to the correct place and in the correct format respecting PII.
-                    if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                        LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer), callContext);
+                    // Add to CallContext
+                    //if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                    //    LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer), callContext);
 
                     return new IssuerValidationResult(issuer,
                         IssuerValidationResult.ValidationSource.IssuerIsConfigurationIssuer);
@@ -125,16 +124,18 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     if (string.IsNullOrEmpty(validationParameters.ValidIssuers[i]))
                     {
-                        if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                            LogHelper.LogInformation(LogMessages.IDX10262);
+                        // TODO: Add to CallContext
+                        //if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                        //    LogHelper.LogInformation(LogMessages.IDX10262);
 
                         continue;
                     }
 
                     if (string.Equals(validationParameters.ValidIssuers[i], issuer))
                     {
-                        if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                            LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer));
+                        // TODO: Add to CallContext
+                        //if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                        //    LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer));
 
                         return new IssuerValidationResult(issuer,
                             IssuerValidationResult.ValidationSource.IssuerIsAmongValidIssuers);
@@ -151,8 +152,8 @@ namespace Microsoft.IdentityModel.Tokens
                         LogHelper.MarkAsNonPII(issuer),
                         LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers)),
                         LogHelper.MarkAsNonPII(configuration?.Issuer)),
-                    ExceptionDetail.ExceptionType.SecurityTokenInvalidIssuer,
-                    new StackFrame(true)));
+                    ValidationErrorType.SecurityTokenInvalidIssuer));
         }
     }
+#nullable restore
 }

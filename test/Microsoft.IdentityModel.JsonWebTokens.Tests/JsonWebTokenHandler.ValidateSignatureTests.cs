@@ -74,8 +74,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 new MessageDetail(
                                     TokenLogMessages.IDX10000,
                                     "jwtToken"),
-                                ExceptionDetail.ExceptionType.ArgumentNull,
-                                new System.Diagnostics.StackFrame()))
+                                ExceptionDetail.ExceptionType.ArgumentNull))
                     },
                     new JsonWebTokenHandlerValidateSignatureTheoryData {
                         TestId = "Invalid_Null_ValidationParameters",
@@ -88,8 +87,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 new MessageDetail(
                                     TokenLogMessages.IDX10000,
                                     "validationParameters"),
-                                ExceptionDetail.ExceptionType.ArgumentNull,
-                                new System.Diagnostics.StackFrame()))
+                                ExceptionDetail.ExceptionType.ArgumentNull))
                     },
                     new JsonWebTokenHandlerValidateSignatureTheoryData {
                         TestId = "Invalid_DelegateReturnsFailure",
@@ -105,8 +103,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 new MessageDetail(
                                     TokenLogMessages.IDX10000,
                                     "fakeParameter"),
-                                ExceptionDetail.ExceptionType.ArgumentNull,
-                                new System.Diagnostics.StackFrame()))
+                                ExceptionDetail.ExceptionType.ArgumentNull))
                     },
                     new JsonWebTokenHandlerValidateSignatureTheoryData
                     {
@@ -120,8 +117,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 new MessageDetail(
                                     TokenLogMessages.IDX10504,
                                     LogHelper.MarkAsSecurityArtifact(unsignedToken, JwtTokenUtilities.SafeLogJwtToken)),
-                                ExceptionDetail.ExceptionType.SecurityTokenInvalidSignature,
-                                new System.Diagnostics.StackFrame()))
+                                ExceptionDetail.ExceptionType.SecurityTokenInvalidSignature))
                     },
                     new JsonWebTokenHandlerValidateSignatureTheoryData
                     {
@@ -190,8 +186,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidationFailureType.SignatureValidationFailed,
                             new ExceptionDetail(
                                 new MessageDetail(TokenLogMessages.IDX10500),
-                                ExceptionDetail.ExceptionType.SecurityTokenSignatureKeyNotFound,
-                                new System.Diagnostics.StackFrame()))
+                                ExceptionDetail.ExceptionType.SecurityTokenSignatureKeyNotFound))
                     },
                     new JsonWebTokenHandlerValidateSignatureTheoryData
                     {
@@ -203,8 +198,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidationFailureType.SignatureValidationFailed,
                             new ExceptionDetail(
                                 new MessageDetail(TokenLogMessages.IDX10500),
-                                ExceptionDetail.ExceptionType.SecurityTokenSignatureKeyNotFound,
-                                new System.Diagnostics.StackFrame()))
+                                ExceptionDetail.ExceptionType.SecurityTokenSignatureKeyNotFound))
                     }
                 };
             }

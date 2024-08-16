@@ -71,8 +71,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 new MessageDetail(
                                     TokenLogMessages.IDX10000,
                                     LogHelper.MarkAsNonPII("token")),
-                                ExceptionDetail.ExceptionType.ArgumentNull,
-                                new System.Diagnostics.StackFrame()))
+                                ExceptionDetail.ExceptionType.ArgumentNull))
                     },
                     new TokenReadingTheoryData
                     {
@@ -86,8 +85,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 new MessageDetail(
                                     TokenLogMessages.IDX10000,
                                     LogHelper.MarkAsNonPII("token")),
-                                ExceptionDetail.ExceptionType.ArgumentNull,
-                                new System.Diagnostics.StackFrame()))
+                                ExceptionDetail.ExceptionType.ArgumentNull))
                     },
                     new TokenReadingTheoryData
                     {
@@ -103,8 +101,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 new MessageDetail(
                                     LogMessages.IDX14107,
                                     LogHelper.MarkAsNonPII("token")),
-                                ExceptionDetail.ExceptionType.SecurityTokenMalformed,
-                                new System.Diagnostics.StackFrame()))
+                                ExceptionDetail.ExceptionType.SecurityTokenMalformed))
                     }
                 };
             }

@@ -8,7 +8,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// Contains information about a message that is used to generate a message for logging or exceptions.
     /// </summary>
-    internal class MessageDetail
+    internal struct MessageDetail
     {
         private string _message;
 

@@ -4,10 +4,9 @@
 using System;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Abstractions;
+//using Microsoft.IdentityModel.Logging;
+//using Microsoft.IdentityModel.Abstractions;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
-using System.Diagnostics;
 
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
@@ -35,8 +34,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         new MessageDetail(
                             TokenLogMessages.IDX10000,
                             nameof(validationParameters)),
-                        ExceptionDetail.ExceptionType.ArgumentNull,
-                        new System.Diagnostics.StackFrame()));
+                        ValidationErrorType.ArgumentNull));
 
             if (decryptionParameters == null)
                 return new TokenDecryptionResult(
@@ -46,8 +44,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         new MessageDetail(
                             TokenLogMessages.IDX10000,
                             nameof(decryptionParameters)),
-                        ExceptionDetail.ExceptionType.ArgumentNull,
-                        new System.Diagnostics.StackFrame()));
+                        ValidationErrorType.ArgumentNull));
 
             bool decryptionSucceeded = false;
             bool algorithmNotSupportedByCryptoProvider = false;
@@ -62,8 +59,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
                 if (cryptoProviderFactory == null)
                 {
-                    if (LogHelper.IsEnabled(EventLogLevel.Warning))
-                        LogHelper.LogWarning(TokenLogMessages.IDX10607, key);
+                    // TODO: Move to CallContext
+                    //if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                    //    LogHelper.LogWarning(TokenLogMessages.IDX10607, key);
 
                     continue;
                 }
@@ -72,8 +70,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     if (!cryptoProviderFactory.IsSupportedAlgorithm(jsonWebToken.Enc, key))
                     {
-                        if (LogHelper.IsEnabled(EventLogLevel.Warning))
-                            LogHelper.LogWarning(TokenLogMessages.IDX10611, LogHelper.MarkAsNonPII(decryptionParameters.Enc), key);
+                        //TODO: Move to CallContext
+                        //if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                        //    LogHelper.LogWarning(TokenLogMessages.IDX10611, LogHelper.MarkAsNonPII(decryptionParameters.Enc), key);
 
                         algorithmNotSupportedByCryptoProvider = true;
                         continue;
@@ -142,8 +141,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         new MessageDetail(
                             TokenLogMessages.IDX10679,
                             zipAlgorithm),
-                        ExceptionDetail.ExceptionType.SecurityTokenDecompressionFailed,
-                        new StackFrame(),
+                        ValidationErrorType.SecurityTokenDecompressionFailed,
                         ex));
             }
         }

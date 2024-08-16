@@ -110,7 +110,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             new ExceptionDetail(
                                 new MessageDetail(TokenLogMessages.IDX10612),
                                 ExceptionDetail.ExceptionType.SecurityToken,
-                                new StackFrame(), null)),
+                                null)),
                     },
                     new TokenDecryptingTheoryData
                     {
@@ -123,8 +123,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidationFailureType.TokenDecryptionFailed,
                             new ExceptionDetail(
                                 new MessageDetail(TokenLogMessages.IDX10000, "jwtToken"),
-                                ExceptionDetail.ExceptionType.ArgumentNull,
-                                new StackFrame(true))),
+                                ExceptionDetail.ExceptionType.ArgumentNull)),
                     },
                     new TokenDecryptingTheoryData
                     {
@@ -137,8 +136,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidationFailureType.TokenDecryptionFailed,
                             new ExceptionDetail(
                                 new MessageDetail(TokenLogMessages.IDX10000, "validationParameters"),
-                                ExceptionDetail.ExceptionType.ArgumentNull,
-                                new StackFrame(true))),
+                                ExceptionDetail.ExceptionType.ArgumentNull)),
                     },
                     new TokenDecryptingTheoryData
                     {
@@ -205,7 +203,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                         new JsonWebToken(ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims),
                                         JwtTokenUtilities.SafeLogJwtToken)),
                                 ExceptionDetail.ExceptionType.SecurityTokenDecryptionFailed,
-                                new StackFrame(), null)),
+                                null)),
                     }
                 };
             }

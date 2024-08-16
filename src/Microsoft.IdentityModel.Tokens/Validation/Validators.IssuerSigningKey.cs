@@ -2,9 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.IdentityModel.Abstractions;
+//using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
 #nullable enable
@@ -61,8 +60,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII(nameof(validationParameters))),
-                        ExceptionDetail.ExceptionType.ArgumentNull,
-                        new StackFrame(true)));
+                        ValidationErrorType.ArgumentNull));
 
             if (securityKey == null)
             {
@@ -73,8 +71,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10253,
                             LogHelper.MarkAsNonPII(nameof(securityKey))),
-                        ExceptionDetail.ExceptionType.ArgumentNull,
-                        new StackFrame(true)));
+                        ValidationErrorType.ArgumentNull));
             }
 
             if (securityToken == null)
@@ -85,8 +82,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII(nameof(securityToken))),
-                        ExceptionDetail.ExceptionType.ArgumentNull,
-                        new StackFrame(true)));
+                        ValidationErrorType.ArgumentNull));
 
             return ValidateIssuerSigningKeyLifeTime(securityKey, validationParameters, callContext);
         }
@@ -121,11 +117,11 @@ namespace Microsoft.IdentityModel.Tokens
                                     LogMessages.IDX10248,
                                     LogHelper.MarkAsNonPII(notBeforeUtc),
                                     LogHelper.MarkAsNonPII(utcNow))),
-                            ExceptionDetail.ExceptionType.SecurityTokenInvalidSigningKey,
-                            new StackFrame(true)));
+                            ValidationErrorType.SecurityTokenInvalidSigningKey));
 
-                if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                    LogHelper.LogInformation(LogMessages.IDX10250, LogHelper.MarkAsNonPII(notBeforeUtc), LogHelper.MarkAsNonPII(utcNow));
+                //TODO: Move to CallContext
+                //if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                //    LogHelper.LogInformation(LogMessages.IDX10250, LogHelper.MarkAsNonPII(notBeforeUtc), LogHelper.MarkAsNonPII(utcNow));
 
                 if (notAfterUtc < DateTimeUtil.Add(utcNow, validationParameters.ClockSkew.Negate()))
                     return new SigningKeyValidationResult(
@@ -137,11 +133,11 @@ namespace Microsoft.IdentityModel.Tokens
                                     LogMessages.IDX10249,
                                     LogHelper.MarkAsNonPII(notAfterUtc),
                                     LogHelper.MarkAsNonPII(utcNow))),
-                            ExceptionDetail.ExceptionType.SecurityTokenInvalidSigningKey,
-                            new StackFrame(true)));
+                            ValidationErrorType.SecurityTokenInvalidSigningKey));
 
-                if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                    LogHelper.LogInformation(LogMessages.IDX10251, LogHelper.MarkAsNonPII(notAfterUtc), LogHelper.MarkAsNonPII(utcNow));
+                // TODO: Move to CallContext
+                //if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                //   LogHelper.LogInformation(LogMessages.IDX10251, LogHelper.MarkAsNonPII(notAfterUtc), LogHelper.MarkAsNonPII(utcNow));
             }
 
             return new SigningKeyValidationResult(securityKey);

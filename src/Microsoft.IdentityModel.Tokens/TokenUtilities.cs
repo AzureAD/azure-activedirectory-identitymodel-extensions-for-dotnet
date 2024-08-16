@@ -258,11 +258,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="exceptionType">The exception type to check.</param>
         /// <returns><c>true</c> if the exception is certain types of exceptions otherwise, <c>false</c>.</returns>
-        internal static bool IsRecoverableExceptionType(ExceptionDetail.ExceptionType exceptionType)
+        internal static bool IsRecoverableExceptionType(ValidationErrorType exceptionType)
         {
-            return exceptionType == ExceptionDetail.ExceptionType.SecurityTokenInvalidSignature
-                  || exceptionType == ExceptionDetail.ExceptionType.SecurityTokenInvalidIssuer
-                  || exceptionType == ExceptionDetail.ExceptionType.SecurityTokenSignatureKeyNotFound;
+            return exceptionType == ValidationErrorType.SecurityTokenInvalidSignature
+                  || exceptionType == ValidationErrorType.SecurityTokenInvalidIssuer
+                  || exceptionType == ValidationErrorType.SecurityTokenSignatureKeyNotFound;
         }
 
         /// <summary>
@@ -289,19 +289,19 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="currentExceptionType">The exception type to check.</param>
         /// <returns><c>true</c> if the configuration is recoverable otherwise, <c>false</c>.</returns>
         internal static bool IsRecoverableConfigurationAndExceptionType(
-            string kid, BaseConfiguration currentConfiguration, BaseConfiguration lkgConfiguration, ExceptionDetail.ExceptionType currentExceptionType)
+            string kid, BaseConfiguration currentConfiguration, BaseConfiguration lkgConfiguration, ValidationErrorType currentExceptionType)
         {
             Lazy<bool> isRecoverableSigningKey = new(() => lkgConfiguration.SigningKeys.Any(signingKey => signingKey.KeyId == kid));
 
-            if (currentExceptionType == ExceptionDetail.ExceptionType.SecurityTokenInvalidIssuer)
+            if (currentExceptionType == ValidationErrorType.SecurityTokenInvalidIssuer)
             {
                 return currentConfiguration.Issuer != lkgConfiguration.Issuer;
             }
-            else if (currentExceptionType == ExceptionDetail.ExceptionType.SecurityTokenSignatureKeyNotFound)
+            else if (currentExceptionType == ValidationErrorType.SecurityTokenSignatureKeyNotFound)
             {
                 return isRecoverableSigningKey.Value;
             }
-            else if (currentExceptionType == ExceptionDetail.ExceptionType.SecurityTokenInvalidSignature)
+            else if (currentExceptionType == ValidationErrorType.SecurityTokenInvalidSignature)
             {
                 SecurityKey currentSigningKey = currentConfiguration.SigningKeys.FirstOrDefault(x => x.KeyId == kid);
                 if (currentSigningKey == null)
@@ -314,16 +314,16 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
 
-        static ExceptionDetail.ExceptionType ExceptionTypeForException(Exception exception)
+        static ValidationErrorType ExceptionTypeForException(Exception exception)
         {
             if (exception is SecurityTokenInvalidSignatureException)
-                return ExceptionDetail.ExceptionType.SecurityTokenInvalidSignature;
+                return ValidationErrorType.SecurityTokenInvalidSignature;
             else if (exception is SecurityTokenInvalidIssuerException)
-                return ExceptionDetail.ExceptionType.SecurityTokenInvalidIssuer;
+                return ValidationErrorType.SecurityTokenInvalidIssuer;
             else if (exception is SecurityTokenSignatureKeyNotFoundException)
-                return ExceptionDetail.ExceptionType.SecurityTokenSignatureKeyNotFound;
+                return ValidationErrorType.SecurityTokenSignatureKeyNotFound;
             else
-                return ExceptionDetail.ExceptionType.Unknown;
+                return ValidationErrorType.Unknown;
         }
     }
 }

@@ -17,8 +17,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var context = TestUtilities.WriteHeader($"{this}.ExceptionDetails", theoryData);
             ExceptionDetail exceptionDetail = new ExceptionDetail(
                 new MessageDetail(""),
-                theoryData.ExceptionType,
-                new System.Diagnostics.StackFrame());
+                theoryData.ExceptionType);
 
             theoryData.ExpectedException.ProcessException(exceptionDetail.GetException(), context);
 
@@ -30,8 +29,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             ExceptionDetail exceptionDetail = new ExceptionDetail(
                 new MessageDetail(""),
-                ExceptionDetail.ExceptionType.Unknown,
-                new System.Diagnostics.StackFrame());
+                ExceptionDetail.ExceptionType.Unknown);
 
             Assert.Throws<ArgumentException>(() => exceptionDetail.GetException());
         }
@@ -176,6 +174,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
     public class ExceptionDetailsTheoryData : TheoryDataBase
     {
-        internal ExceptionDetail.ExceptionType ExceptionType { get; set; }
+        internal ValidationErrorType ExceptionType { get; set; }
     }
 }

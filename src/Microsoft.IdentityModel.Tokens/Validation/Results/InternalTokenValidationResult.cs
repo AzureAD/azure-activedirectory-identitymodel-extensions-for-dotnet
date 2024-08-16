@@ -16,7 +16,7 @@ namespace Microsoft.IdentityModel.Tokens
         private bool _isValid;
         private SecurityToken? _securityToken;
         private TokenHandler _tokenHandler;
-        private List<ValidationResult> _validationResults = [];
+        private List<ValidationResult> _validationResults = new List<ValidationResult>(20);
 
         /// <summary>
         /// Creates a new instance of <see cref="InternalTokenValidationResult"/> to aggregate validation results.
@@ -59,10 +59,9 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationResults == null)
                 throw new ArgumentNullException(nameof(validationResults));
 
-            foreach (var validationResult in validationResults)
-            {
-                _ = AddResult(validationResult);
-            }
+            _validationResults.AddRange(validationResults);
+            for (int i = 0; i < validationResults.Count; i++)
+                _isValid = _isValid && validationResults[i].IsValid;
 
             return IsValid;
         }

@@ -68,8 +68,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             ValidationFailureType.NullArgument,
                             new ExceptionDetail(
                                 new MessageDetail(LogMessages.IDX10253),
-                                ExceptionDetail.ExceptionType.ArgumentNull,
-                                new StackFrame(true)))
+                                ExceptionDetail.ExceptionType.ArgumentNull))
                     },
                     new SigningKeyValidationTheoryData
                     {
@@ -85,8 +84,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 new MessageDetail(
                                     LogMessages.IDX10000,
                                     LogHelper.MarkAsNonPII("securityToken")),
-                                ExceptionDetail.ExceptionType.ArgumentNull,
-                                new StackFrame(true)))
+                                ExceptionDetail.ExceptionType.ArgumentNull))
                     },
                     new SigningKeyValidationTheoryData
                     {
@@ -102,8 +100,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 new MessageDetail(
                                     LogMessages.IDX10000,
                                     LogHelper.MarkAsNonPII("validationParameters")),
-                                ExceptionDetail.ExceptionType.ArgumentNull,
-                                new StackFrame(true)))
+                                ExceptionDetail.ExceptionType.ArgumentNull))
                     },
                     new SigningKeyValidationTheoryData
                     {
@@ -120,8 +117,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                     LogMessages.IDX10249,
                                     LogHelper.MarkAsNonPII(utcExpired),
                                     LogHelper.MarkAsNonPII(utcNow)),
-                                ExceptionDetail.ExceptionType.SecurityTokenInvalidSigningKey,
-                                new StackFrame(true)))
+                                ExceptionDetail.ExceptionType.SecurityTokenInvalidSigningKey))
                     },
                     new SigningKeyValidationTheoryData
                     {
@@ -138,8 +134,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                     LogMessages.IDX10248,
                                     LogHelper.MarkAsNonPII(utcNotYetValid),
                                     LogHelper.MarkAsNonPII(utcNow)),
-                                ExceptionDetail.ExceptionType.SecurityTokenInvalidSigningKey,
-                                new StackFrame(true)))
+                                ExceptionDetail.ExceptionType.SecurityTokenInvalidSigningKey))
                     },
                     new SigningKeyValidationTheoryData
                     {
@@ -153,8 +148,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             ValidationFailureType.NullArgument,
                             new ExceptionDetail(
                                 new MessageDetail(LogMessages.IDX10253),
-                                ExceptionDetail.ExceptionType.ArgumentNull,
-                                new StackFrame(true)))
+                                ExceptionDetail.ExceptionType.ArgumentNull))
                     },
 
                 };

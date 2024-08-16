@@ -83,7 +83,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                     LogMessages.IDX10000,
                                     LogHelper.MarkAsNonPII("securityToken")),
                                 ExceptionDetail.ExceptionType.ArgumentNull,
-                                new StackFrame(),
                                 null))
                     },
                     new TokenReplayTheoryData
@@ -101,7 +100,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                     LogMessages.IDX10000,
                                     LogHelper.MarkAsNonPII("securityToken")),
                                 ExceptionDetail.ExceptionType.ArgumentNull,
-                                new StackFrame(),
                                 null))
                     },
                     new TokenReplayTheoryData
@@ -119,7 +117,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                     LogMessages.IDX10000,
                                     LogHelper.MarkAsNonPII("validationParameters")),
                                 ExceptionDetail.ExceptionType.ArgumentNull,
-                                new StackFrame(),
                                 null))
                     },
                     new TokenReplayTheoryData
@@ -144,7 +141,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                     LogMessages.IDX10227,
                                     LogHelper.MarkAsUnsafeSecurityArtifact("token", t => t.ToString())),
                                 ExceptionDetail.ExceptionType.SecurityTokenReplayDetected,
-                                new StackFrame(),
                                 null))
                     },
                     new TokenReplayTheoryData
@@ -169,7 +165,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                     LogMessages.IDX10228,
                                     LogHelper.MarkAsUnsafeSecurityArtifact("token", t => t.ToString())),
                                 ExceptionDetail.ExceptionType.SecurityTokenReplayDetected,
-                                new StackFrame(),
                                 null))
                     },
                     new TokenReplayTheoryData
@@ -194,7 +189,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                     LogMessages.IDX10229,
                                     LogHelper.MarkAsUnsafeSecurityArtifact("token", t => t.ToString())),
                                 ExceptionDetail.ExceptionType.SecurityTokenReplayDetected,
-                                new StackFrame(),
                                 null))
                     }
                 };

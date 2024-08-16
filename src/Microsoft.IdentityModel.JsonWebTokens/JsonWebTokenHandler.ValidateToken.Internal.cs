@@ -49,18 +49,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (token.Length > MaximumTokenSizeInBytes)
                 return new TokenValidationResult { Exception = LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, LogHelper.MarkAsNonPII(token.Length), LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes)))), IsValid = false };
 
-            TokenReadingResult tokenReadingResult = ReadToken(token, callContext);
-            if (tokenReadingResult.IsValid)
+            Result<SecurityToken, TokenValidationError> result = ReadToken(token, callContext);
+            if (result.IsSuccess)
                 return await ValidateTokenAsync(
-                    tokenReadingResult.SecurityToken(),
+                    result.Unwrap(),
                     validationParameters,
                     callContext,
                     cancellationToken)
                     .ConfigureAwait(false);
 
+            ExceptionDetail exceptionDetail = new ExceptionDetail(result.UnwrapError().MessageDetail, result.UnwrapError().ErrorType);
+
             return new TokenValidationResult
             {
-                Exception = tokenReadingResult.Exception,
+                Exception = exceptionDetail.GetException(),
                 IsValid = false
             };
         }
@@ -158,7 +160,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     validationParameters.RefreshBeforeValidation = false;
                     validationParameters.ValidateWithLKG = true;
-                    ExceptionDetail.ExceptionType recoverableExceptionType = result.ExceptionDetail.Type;
+                    ValidationErrorType recoverableExceptionType = result.ExceptionDetail.Type;
 
                     BaseConfiguration[] validConfigurations = validationParameters.ConfigurationManager.GetValidLkgConfigurations();
                     for (int i = 0; i < validConfigurations.Length; i++)
@@ -194,11 +196,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (!internalResult.AddResult(decryptionResult))
                 return internalResult;
 
-            TokenReadingResult readingResult = ReadToken(decryptionResult.DecryptedToken(), callContext);
-            if (!internalResult.AddResult(readingResult))
+            Result<SecurityToken, TokenValidationError> result = ReadToken(decryptionResult.DecryptedToken(), callContext);
+            if (!result.IsSuccess)
                 return internalResult;
+            //TokenReadingResult readingResult = ReadToken(decryptionResult.DecryptedToken(), callContext);
+            //if (!internalResult.AddResult(readingResult))
+            //    return internalResult;
 
-            JsonWebToken decryptedToken = readingResult.SecurityToken() as JsonWebToken;
+            JsonWebToken decryptedToken = result.Unwrap() as JsonWebToken;
 
             InternalTokenValidationResult jwsResult =
                 await ValidateJWSAsync(decryptedToken, validationParameters, configuration, callContext, cancellationToken)
@@ -251,11 +256,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // actor validation
             if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jsonWebToken.Actor))
             {
-                TokenReadingResult actorReadingResult = ReadToken(jsonWebToken.Actor, callContext);
-                if (!internalResult.AddResult(actorReadingResult))
+                Result<SecurityToken, TokenValidationError> actorReadingResult = ReadToken(jsonWebToken.Actor, callContext);
+                if (!actorReadingResult.IsSuccess)
                     return internalResult;
 
-                JsonWebToken actorToken = actorReadingResult.SecurityToken() as JsonWebToken;
+                JsonWebToken actorToken = actorReadingResult.Unwrap() as JsonWebToken;
                 ValidationParameters actorParameters = validationParameters.ActorValidationParameters;
                 InternalTokenValidationResult actorValidationResult =
                     await ValidateJWSAsync(actorToken, actorParameters, configuration, callContext, cancellationToken)
@@ -293,13 +298,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     currentConfiguration = await validationParameters.ConfigurationManager.GetBaseConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
                 }
 #pragma warning disable CA1031 // Do not catch general exception types
-                catch (Exception ex)
+                catch
 #pragma warning restore CA1031 // Do not catch general exception types
                 {
                     // The exception is tracked and dismissed as the ValidationParameters may have the issuer
                     // and signing key set directly on them, allowing the library to continue with token validation.
-                    if (LogHelper.IsEnabled(EventLogLevel.Warning))
-                        LogHelper.LogWarning(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParameters.ConfigurationManager.MetadataAddress, ex.ToString()));
+                    // TODO: Move to CallContext.
+                    //if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                    //    LogHelper.LogWarning(LogHelper.FormatInvariant(TokenLogMessages.IDX10261, validationParameters.ConfigurationManager.MetadataAddress, ex.ToString()));
                 }
             }
 

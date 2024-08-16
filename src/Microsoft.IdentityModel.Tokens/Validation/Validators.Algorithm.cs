@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
 using System.Linq;
 using Microsoft.IdentityModel.Logging;
 
@@ -54,8 +53,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII(nameof(validationParameters))),
-                        ExceptionDetail.ExceptionType.ArgumentNull,
-                        new StackFrame(true)));
+                        ValidationErrorType.ArgumentNull));
             }
 
             if (validationParameters.ValidAlgorithms != null && validationParameters.ValidAlgorithms.Count > 0 && !validationParameters.ValidAlgorithms.Contains(algorithm, StringComparer.Ordinal))
@@ -67,8 +65,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new MessageDetail(
                             LogMessages.IDX10696,
                             LogHelper.MarkAsNonPII(algorithm)),
-                        ExceptionDetail.ExceptionType.SecurityTokenInvalidAlgorithm,
-                        new StackFrame(true)));
+                        ValidationErrorType.SecurityTokenInvalidAlgorithm));
             }
 
             return new AlgorithmValidationResult(algorithm);

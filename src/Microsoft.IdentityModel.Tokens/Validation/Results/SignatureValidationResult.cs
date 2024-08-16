@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Threading;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.JsonWebTokens.Results
@@ -14,6 +15,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Results
     internal class SignatureValidationResult : ValidationResult
     {
         private Exception? _exception;
+        private static SignatureValidationResult? _successResult;
 
         /// <summary>
         /// Creates an instance of <see cref="SignatureValidationResult"/> representing the successful result of validating a signature.
@@ -38,7 +40,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Results
         /// Creates an instance of <see cref="SignatureValidationResult"/> representing a successful validation.
         /// </summary>
         internal static SignatureValidationResult Success() =>
-            new SignatureValidationResult(true, ValidationFailureType.ValidationSucceeded);
+            _successResult ??
+            Interlocked.CompareExchange(ref _successResult, new SignatureValidationResult(true, ValidationFailureType.ValidationSucceeded), null) ??
+            _successResult;
 
         /// <summary>
         /// Creates an instance of <see cref="SignatureValidationResult"/> representing a failure due to a null parameter.

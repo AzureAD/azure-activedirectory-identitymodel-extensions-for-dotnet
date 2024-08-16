@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -367,8 +366,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         keysAttempted.ToString(),
                         exceptionStrings?.ToString() ?? string.Empty,
                         LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken)),
-                    ExceptionDetail.ExceptionType.SecurityTokenDecryptionFailed,
-                    new StackFrame(true),
+                    ValidationErrorType.SecurityTokenDecryptionFailed,
                     null);
             else if (algorithmNotSupportedByCryptoProvider)
                 return new ExceptionDetail(
@@ -376,16 +374,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         TokenLogMessages.IDX10619,
                         LogHelper.MarkAsNonPII(decryptionParameters.Alg),
                         LogHelper.MarkAsNonPII(decryptionParameters.Enc)),
-                    ExceptionDetail.ExceptionType.SecurityTokenDecryptionFailed,
-                    new StackFrame(true),
+                    ValidationErrorType.SecurityTokenDecryptionFailed,
                     null);
             else
                 return new ExceptionDetail(
                     new MessageDetail(
                         TokenLogMessages.IDX10609,
                         LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken)),
-                    ExceptionDetail.ExceptionType.SecurityTokenDecryptionFailed,
-                    new StackFrame(true),
+                    ValidationErrorType.SecurityTokenDecryptionFailed,
                     null);
         }
 
