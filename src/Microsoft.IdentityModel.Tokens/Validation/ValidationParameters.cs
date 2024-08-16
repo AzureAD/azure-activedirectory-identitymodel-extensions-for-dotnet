@@ -326,7 +326,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets a delegate that will be called to transform a token to a supported format before validation.
         /// </summary>
-        public TransformBeforeSignatureValidation TransformBeforeSignatureValidation { get; set; }
+        public TransformBeforeSignatureValidationDelegate TransformBeforeSignatureValidation { get; set; }
 
         /// <summary>
         /// Allows overriding the delegate that will be used to validate the lifetime of the token
