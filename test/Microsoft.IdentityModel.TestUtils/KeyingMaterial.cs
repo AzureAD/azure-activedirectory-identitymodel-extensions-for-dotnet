@@ -516,7 +516,6 @@ namespace Microsoft.IdentityModel.TestUtils
             DefaultX509Key_256ECDSA = new X509SecurityKey(DefaultCert_256ECDSA);
             DefaultX509Key_256ECDSA_With_KeyId = new X509SecurityKey(DefaultCert_256ECDSA) { KeyId = DefaultX509Key_256ECDSA_KeyId };
 #endif
-
         }
 
 #if NET462

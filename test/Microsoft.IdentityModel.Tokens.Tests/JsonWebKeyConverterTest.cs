@@ -63,9 +63,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 theoryData.ExpectedException.ProcessNoException(context);
                 IdentityComparer.AreEqual(convertedKey, theoryData.JsonWebKey, context);
 
-                //var expectedConvertedKeyType = theoryData.RepresentAsRsaKey == true ? typeof(RsaSecurityKey) : typeof(X509SecurityKey);
-                //if (convertedKey.ConvertedSecurityKey.GetType() != expectedConvertedKeyType)
-                    //context.AddDiff($"convertedKey.ConvertedSecurityKey.GetType(): '{convertedKey.ConvertedSecurityKey.GetType()}' != expectedConvertedKeyType: '{expectedConvertedKeyType}'.");
+                if (!theoryData.RepresentAsRsaKey && convertedKey.ConvertedSecurityKey.GetType() != typeof(X509SecurityKey))
+                    context.AddDiff($"convertedKey.ConvertedSecurityKey.GetType() should be {typeof(X509SecurityKey)}.");
             }
             catch (Exception ex)
             {

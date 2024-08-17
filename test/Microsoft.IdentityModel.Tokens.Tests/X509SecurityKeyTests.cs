@@ -77,6 +77,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+#if NET472 || NET_CORE
         [Fact]
         public void Constructor_WithECDsa()
         {
@@ -93,6 +94,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.NotEmpty(x509SecurityKey.ComputeJwkThumbprint());
             TestUtilities.AssertFailIfErrors(context);
         }
+#endif
 
         [Fact]
         public void CanComputeJwkThumbprint()
