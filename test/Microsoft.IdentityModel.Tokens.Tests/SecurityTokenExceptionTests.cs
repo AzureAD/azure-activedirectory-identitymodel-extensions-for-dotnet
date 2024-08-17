@@ -234,7 +234,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #pragma warning restore CS0618 // Type or member is obsolete
                 };
             }
-        }    
+        }
     }
 
     public class SecurityTokenExceptionTheoryData : TheoryDataBase

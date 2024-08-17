@@ -150,7 +150,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
                 configuration.KeyInfos.Add(keyInfo3);
 
-                foreach(var key in MetadataSigningKeys)
+                foreach (var key in MetadataSigningKeys)
                     configuration.SigningKeys.Add(key);
 
                 return configuration;
@@ -192,7 +192,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 configuration.KeyInfos.Add(keyInfo3);
 
                 foreach (var key in MetadataSigningKeys)
-                    configuration.SigningKeys.Add(key);             
+                    configuration.SigningKeys.Add(key);
 
                 return configuration;
             }
@@ -344,10 +344,10 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             get => new Reference(new EnvelopedSignatureTransform(), new ExclusiveCanonicalizationTransform())
             {
-                    DigestMethod = AADCommonMetadataReferenceDigestMethod,
-                    DigestValue = AADCommonMetadataReferenceDigestValue,
-                    TokenStream = new XmlTokenStream(),
-                    Uri = AADCommonMetadataReferenceURI,
+                DigestMethod = AADCommonMetadataReferenceDigestMethod,
+                DigestValue = AADCommonMetadataReferenceDigestValue,
+                TokenStream = new XmlTokenStream(),
+                Uri = AADCommonMetadataReferenceURI,
             };
         }
 

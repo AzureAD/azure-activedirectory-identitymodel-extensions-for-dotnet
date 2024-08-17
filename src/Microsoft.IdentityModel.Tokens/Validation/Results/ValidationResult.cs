@@ -14,7 +14,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     internal abstract class ValidationResult
     {
-        private bool _isValid = false;
+        private bool _isValid;
 
         /// <summary>
         /// Creates an instance of <see cref="ValidationResult"/>
@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="validationFailureType">The <see cref="ValidationFailureType"/> that occurred during validation.</param>
         /// <param name="exceptionDetail"> The <see cref="ExceptionDetail"/> representing the <see cref="Exception"/> that occurred during validation.</param>
-        protected ValidationResult(ValidationFailureType validationFailureType, ExceptionDetail exceptionDetail)
+        protected ValidationResult(ValidationFailureType validationFailureType, ExceptionDetail? exceptionDetail)
         {
             ValidationFailureType = validationFailureType;
             ExceptionDetail = exceptionDetail;

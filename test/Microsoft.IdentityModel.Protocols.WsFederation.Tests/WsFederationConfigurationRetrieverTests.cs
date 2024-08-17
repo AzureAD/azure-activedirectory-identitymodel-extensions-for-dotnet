@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
         [Theory, MemberData(nameof(ReadMetadataTheoryData))]
         public void ReadMetadata(WsFederationMetadataTheoryData theoryData)
         {
-            var context  = TestUtilities.WriteHeader($"{this}.ReadMetadata", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.ReadMetadata", theoryData);
             var configuration = new WsFederationConfiguration();
 
             try
@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                     var reader = XmlReader.Create(theoryData.MetadataPath);
                     configuration = theoryData.Serializer.ReadMetadata(reader);
                 }
-               
+
                 if (theoryData.SigningKey != null)
                     configuration.Signature.Verify(theoryData.SigningKey, theoryData.SigningKey.CryptoProviderFactory);
 
@@ -663,7 +663,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 return $"TestId: {TestId}, {ExpectedException}";
             }
 
-            public bool UseNullWriter { get; set; } = false;
+            public bool UseNullWriter { get; set; }
         }
 
         private class WsFederationMetadataSerializerPublic : WsFederationMetadataSerializer

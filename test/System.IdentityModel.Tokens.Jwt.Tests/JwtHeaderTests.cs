@@ -242,8 +242,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
     public class JwtHeaderTheoryData : TheoryDataBase
     {
-        public IDictionary<string, string > OutboundAlgorithmMap { get; set; }
+        public IDictionary<string, string> OutboundAlgorithmMap { get; set; }
 
         public SigningCredentials SigningCredentials { get; set; }
-   }
+    }
 }

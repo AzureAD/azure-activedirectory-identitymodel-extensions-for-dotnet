@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class TokenValidationParametersTests
     {
-        int ExpectedPropertyCount = 60;
+        int ExpectedPropertyCount = 59;
 
         [Fact]
         public void Publics()
@@ -71,7 +71,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 IssuerSigningKey = issuerSigningKey,
                 IssuerSigningKeyResolver = (token, securityToken, keyIdentifier, tvp) => { return new List<SecurityKey> { issuerSigningKey }; },
                 IssuerSigningKeys = issuerSigningKeys,
-                IssuerValidationDelegateAsync = Validators.ValidateIssuerAsync,
                 IssuerValidator = ValidationDelegates.IssuerValidatorEcho,
                 LifetimeValidator = ValidationDelegates.LifetimeValidatorReturnsTrue,
                 LogTokenId = true,
@@ -195,7 +194,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     new KeyValuePair<string, List<object>>("ActorValidationParameters", new List<object>{(TokenValidationParameters)null, new TokenValidationParameters(), new TokenValidationParameters()}),
                     new KeyValuePair<string, List<object>>("AuthenticationType", new List<object>{(string)null, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                     new KeyValuePair<string, List<object>>("ClockSkew", new List<object>{TokenValidationParameters.DefaultClockSkew, TimeSpan.FromHours(2), TimeSpan.FromMinutes(1)}),
-                    new KeyValuePair<string, List<object>>("ConfigurationManager", new List<object>{(BaseConfigurationManager)null, new ConfigurationManager<OpenIdConnectConfiguration>("http://someaddress.com", new OpenIdConnectConfigurationRetriever()), new ConfigurationManager<WsFederationConfiguration>("http://someaddress.com", new WsFederationConfigurationRetriever()) }),
+                    new KeyValuePair<string, List<object>>("ConfigurationManager", new List<object>{(BaseConfigurationManager)null, new ConfigurationManager<OpenIdConnectConfiguration>("http://127.0.0.1", new OpenIdConnectConfigurationRetriever()), new ConfigurationManager<WsFederationConfiguration>("http://127.0.0.1", new WsFederationConfigurationRetriever()) }),
                     new KeyValuePair<string, List<object>>("CryptoProviderFactory", new List<object>{(CryptoProviderFactory)null, new CryptoProviderFactory(), new CryptoProviderFactory() }),
                     new KeyValuePair<string, List<object>>("DebugId", new List<object>{(string)null, "DebugId", "DebugId" }),
                     new KeyValuePair<string, List<object>>("IgnoreTrailingSlashWhenValidatingAudience",  new List<object>{true, false, true}),
@@ -265,7 +264,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var compareContext = new CompareContext();
 
             TokenValidationParameters validationParameters = CreateTokenValidationParameters();
-           
+
             compareContext.PropertiesToIgnoreWhenComparing.Add(typeof(TokenValidationParameters), new List<string> { "InstancePropertyBag", "IsClone" });
             TokenValidationParameters validationParametersClone = validationParameters.Clone();
             IdentityComparer.AreEqual(validationParametersClone, validationParameters, compareContext);
@@ -291,7 +290,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             validationParameters.IssuerSigningKeyResolverUsingConfiguration = ValidationDelegates.IssuerSigningKeyResolverUsingConfiguration;
             validationParameters.IssuerSigningKeyValidator = ValidationDelegates.IssuerSigningKeyValidator;
             validationParameters.IssuerSigningKeyValidatorUsingConfiguration = ValidationDelegates.IssuerSigningKeyValidatorUsingConfiguration;
-            validationParameters.IssuerValidationDelegateAsync = Validators.ValidateIssuerAsync;
             validationParameters.IssuerValidator = ValidationDelegates.IssuerValidatorEcho;
             validationParameters.IssuerValidatorAsync = ValidationDelegates.IssuerValidatorInternalAsync;
             validationParameters.IssuerValidatorUsingConfiguration = ValidationDelegates.IssuerValidatorUsingConfigEcho;

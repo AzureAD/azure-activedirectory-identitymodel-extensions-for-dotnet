@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.TestUtils
                     new TestStubTheoryData
                     {
                         First = true,
-                        TestId = "TestStub1"                        
+                        TestId = "TestStub1"
                     }
                 };
             }

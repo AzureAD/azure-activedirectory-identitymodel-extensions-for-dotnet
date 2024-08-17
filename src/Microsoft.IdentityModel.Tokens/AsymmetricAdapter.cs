@@ -22,15 +22,15 @@ namespace Microsoft.IdentityModel.Tokens
     delegate bool VerifyUsingOffsetDelegate(byte[] bytes, int offset, int count, byte[] signature);
 
     /// <summary>
-    /// This adapter abstracts the 'RSA' differences between versions of .Net targets.
+    /// This adapter abstracts the 'RSA' differences between versions of .NET targets.
     /// </summary>
     internal class AsymmetricAdapter : IDisposable
     {
 #if DESKTOP
-        private bool _useRSAOeapPadding = false;
+        private bool _useRSAOeapPadding;
 #endif
-        private bool _disposeCryptoOperators = false;
-        private bool _disposed = false;
+        private bool _disposeCryptoOperators;
+        private bool _disposed;
         private DecryptDelegate _decryptFunction = DecryptFunctionNotFound;
         private EncryptDelegate _encryptFunction = EncryptFunctionNotFound;
         private SignDelegate _signFunction = SignFunctionNotFound;
@@ -102,7 +102,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>
+        /// Calls <see cref="Dispose(bool)"/> and <see cref="GC.SuppressFinalize"/>.
         /// </summary>
         public void Dispose()
         {
@@ -428,7 +428,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 #endif
 
-#region DESKTOP related code
+        #region DESKTOP related code
 #if DESKTOP
         internal byte[] DecryptWithRsaCryptoServiceProviderProxy(byte[] bytes)
         {
@@ -460,9 +460,8 @@ namespace Microsoft.IdentityModel.Tokens
         {
             return RsaCryptoServiceProviderProxy.VerifyDataWithLength(bytes, offset, length, HashAlgorithm, HashAlgorithmName, signature);
         }
-
 #endif
-#endregion
+        #endregion
 
     }
 }

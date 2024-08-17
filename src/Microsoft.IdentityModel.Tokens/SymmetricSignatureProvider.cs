@@ -3,11 +3,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
+
+#if NET6_0_OR_GREATER
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+#endif
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -61,7 +64,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for signature operations.</param>
         /// <param name="algorithm">The signature algorithm to use.</param>
-        /// <param name="willCreateSignatures">indicates if this <see cref="SymmetricSignatureProvider"/> will be used to create signatures.</param>
+        /// <param name="willCreateSignatures">If true, the provider will be used for creating signatures.</param>
         /// <exception cref="ArgumentNullException">'key' is null.</exception>
         /// <exception cref="ArgumentNullException">'algorithm' is null or empty.</exception>
         /// <exception cref="NotSupportedException">If <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
@@ -193,13 +196,11 @@ namespace Microsoft.IdentityModel.Tokens
             catch
             {
                 CryptoProviderCache?.TryRemove(this);
-                Dispose(true);
                 throw;
             }
             finally
             {
-                if (!_disposed)
-                    ReleaseKeyedHashAlgorithm(keyedHashAlgorithm);
+                ReleaseKeyedHashAlgorithm(keyedHashAlgorithm);
             }
         }
 
@@ -225,13 +226,11 @@ namespace Microsoft.IdentityModel.Tokens
             catch
             {
                 CryptoProviderCache?.TryRemove(this);
-                Dispose(true);
                 throw;
             }
             finally
             {
-                if (!_disposed)
-                    ReleaseKeyedHashAlgorithm(keyedHashAlgorithm);
+                ReleaseKeyedHashAlgorithm(keyedHashAlgorithm);
             }
         }
 #endif
@@ -260,13 +259,11 @@ namespace Microsoft.IdentityModel.Tokens
             catch
             {
                 CryptoProviderCache?.TryRemove(this);
-                Dispose(true);
                 throw;
             }
             finally
             {
-                if (!_disposed)
-                    ReleaseKeyedHashAlgorithm(keyedHashAlgorithm);
+                ReleaseKeyedHashAlgorithm(keyedHashAlgorithm);
             }
         }
 
@@ -301,9 +298,6 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
             }
 
-            if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                LogHelper.LogInformation(LogMessages.IDX10643, input);
-
             KeyedHashAlgorithm keyedHashAlgorithm = GetKeyedHashAlgorithm(GetKeyBytes(Key), Algorithm);
             try
             {
@@ -312,13 +306,11 @@ namespace Microsoft.IdentityModel.Tokens
             catch
             {
                 CryptoProviderCache?.TryRemove(this);
-                Dispose(true);
                 throw;
             }
             finally
             {
-                if (!_disposed)
-                    ReleaseKeyedHashAlgorithm(keyedHashAlgorithm);
+                ReleaseKeyedHashAlgorithm(keyedHashAlgorithm);
             }
         }
 
@@ -449,9 +441,6 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
             }
 
-            if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                LogHelper.LogInformation(LogMessages.IDX10643, input);
-
             KeyedHashAlgorithm keyedHashAlgorithm = null;
             try
             {
@@ -465,27 +454,23 @@ namespace Microsoft.IdentityModel.Tokens
 #else
                 hash = keyedHashAlgorithm.ComputeHash(input, inputOffset, inputLength).AsSpan();
 #endif
-
                 return Utility.AreEqual(signature, hash, signatureLength);
             }
             catch
             {
-                Dispose(true);
+                CryptoProviderCache?.TryRemove(this);
                 throw;
             }
             finally
             {
-                if (!_disposed)
-                    ReleaseKeyedHashAlgorithm(keyedHashAlgorithm);
+                ReleaseKeyedHashAlgorithm(keyedHashAlgorithm);
             }
         }
 
-        #region IDisposable Members
-
         /// <summary>
-        /// Disposes of internal components.
+        /// Releases the resources used by the current instance.
         /// </summary>
-        /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
+        /// <param name="disposing">If true, release both managed and unmanaged resources; otherwise, release only unmanaged resources.</param>
         protected override void Dispose(bool disposing)
         {
             if (!_disposed)
@@ -501,6 +486,5 @@ namespace Microsoft.IdentityModel.Tokens
                 }
             }
         }
-        #endregion
     }
 }

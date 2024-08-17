@@ -19,25 +19,23 @@ using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
     /// <summary>
-    /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Json Web Tokens. 
+    /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Json Web Tokens.
     /// See: https://datatracker.ietf.org/doc/html/rfc7519 and http://www.rfc-editor.org/info/rfc7515.
     /// </summary>
     /// <remarks>This partial class is focused on TokenCreation.</remarks>
     public partial class JsonWebTokenHandler : TokenHandler
     {
         /// <summary>
-        /// Creates an unsigned JWS (Json Web Signature).
+        /// Creates an unsigned JSON Web Signature (JWS).
         /// </summary>
         /// <param name="payload">A string containing JSON which represents the JWT token payload.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="payload"/> is null.</exception>
-        /// <returns>A JWS in Compact Serialization Format.</returns>
-        public virtual string CreateToken(
-            string payload)
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="payload"/> is null.</exception>
+        /// <returns>A JWS in Compact Serialization format.</returns>
+        public virtual string CreateToken(string payload)
         {
-            if (string.IsNullOrEmpty(payload))
-                throw LogHelper.LogArgumentNullException(nameof(payload));
+            _ = payload ?? throw LogHelper.LogArgumentNullException(nameof(payload));
 
-                return CreateToken(
+            return CreateToken(
                     payload,
                     null,
                     null,
@@ -48,20 +46,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Creates an unsigned JWS (Json Web Signature).
+        /// Creates an unsigned JSON Web Signature (JWS).
         /// </summary>
         /// <param name="payload">A string containing JSON which represents the JWT token payload.</param>
         /// <param name="additionalHeaderClaims">Defines the dictionary containing any custom header claims that need to be added to the JWT token header.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="payload"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="additionalHeaderClaims"/> is null.</exception>
-        /// <returns>A JWS in Compact Serialization Format.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="payload"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="additionalHeaderClaims"/> is null.</exception>
+        /// <returns>A JWS in Compact Serialization format.</returns>
         public virtual string CreateToken(
             string payload,
             IDictionary<string, object> additionalHeaderClaims)
         {
-            if (string.IsNullOrEmpty(payload))
-                throw LogHelper.LogArgumentNullException(nameof(payload));
-
+            _ = payload ?? throw LogHelper.LogArgumentNullException(nameof(payload));
             _ = additionalHeaderClaims ?? throw LogHelper.LogArgumentNullException(nameof(additionalHeaderClaims));
 
             return CreateToken(payload,
@@ -74,20 +70,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Creates a JWS (Json Web Signature).
+        /// Creates a JSON Web Signature (JWS).
         /// </summary>
         /// <param name="payload">A string containing JSON which represents the JWT token payload.</param>
         /// <param name="signingCredentials">Defines the security key and algorithm that will be used to sign the JWS.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="payload"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="signingCredentials"/> is null.</exception>
-        /// <returns>A JWS in Compact Serialization Format.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="payload"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="signingCredentials"/> is null.</exception>
+        /// <returns>A JWS in Compact Serialization format.</returns>
         public virtual string CreateToken(
             string payload,
             SigningCredentials signingCredentials)
         {
-            if (string.IsNullOrEmpty(payload))
-                throw LogHelper.LogArgumentNullException(nameof(payload));
-
+            _ = payload ?? throw LogHelper.LogArgumentNullException(nameof(payload));
             _ = signingCredentials ?? throw LogHelper.LogArgumentNullException(nameof(signingCredentials));
 
             return CreateToken(
@@ -101,26 +95,24 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Creates a JWS (Json Web Signature).
+        /// Creates a JSON Web Signature (JWS).
         /// </summary>
         /// <param name="payload">A string containing JSON which represents the JWT token payload.</param>
         /// <param name="signingCredentials">Defines the security key and algorithm that will be used to sign the JWS.</param>
         /// <param name="additionalHeaderClaims">Defines the dictionary containing any custom header claims that need to be added to the JWT token header.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="payload"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="signingCredentials"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="additionalHeaderClaims"/> is null.</exception>
-        /// <exception cref="SecurityTokenException">if <see cref="JwtHeaderParameterNames.Alg"/>, <see cref="JwtHeaderParameterNames.Kid"/>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="payload"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="signingCredentials"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="additionalHeaderClaims"/> is null.</exception>
+        /// <exception cref="SecurityTokenException">Thrown if <see cref="JwtHeaderParameterNames.Alg"/>, <see cref="JwtHeaderParameterNames.Kid"/>
         /// <see cref="JwtHeaderParameterNames.X5t"/>, <see cref="JwtHeaderParameterNames.Enc"/>, and/or <see cref="JwtHeaderParameterNames.Zip"/>
         /// are present inside of <paramref name="additionalHeaderClaims"/>.</exception>
-        /// <returns>A JWS in Compact Serialization Format.</returns>
+        /// <returns>A JWS in Compact Serialization format.</returns>
         public virtual string CreateToken(
             string payload,
             SigningCredentials signingCredentials,
             IDictionary<string, object> additionalHeaderClaims)
         {
-            if (string.IsNullOrEmpty(payload))
-                throw LogHelper.LogArgumentNullException(nameof(payload));
-
+            _ = payload ?? throw LogHelper.LogArgumentNullException(nameof(payload));
             _ = signingCredentials ?? throw LogHelper.LogArgumentNullException(nameof(signingCredentials));
             _ = additionalHeaderClaims ?? throw LogHelper.LogArgumentNullException(nameof(additionalHeaderClaims));
 
@@ -135,10 +127,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Creates a JWt that can be a JWS or JWE.
+        /// Creates a JWT that can be a JWS or JWE.
         /// </summary>
         /// <param name="tokenDescriptor">A <see cref="SecurityTokenDescriptor"/> that contains details of contents of the token.</param>
-        /// <returns>A JWT in Compact Serialization Format.</returns>
+        /// <returns>A JWT in Compact Serialization format.</returns>
         public virtual string CreateToken(SecurityTokenDescriptor tokenDescriptor)
         {
             _ = tokenDescriptor ?? throw LogHelper.LogArgumentNullException(nameof(tokenDescriptor));
@@ -287,18 +279,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Creates a JWE (Json Web Encryption).
+        /// Creates a JSON Web Encryption (JWE).
         /// </summary>
         /// <param name="payload">A string containing JSON which represents the JWT token payload.</param>
         /// <param name="encryptingCredentials">Defines the security key and algorithm that will be used to encrypt the JWT.</param>
-        /// <returns>A JWE in compact serialization format.</returns>
+        /// <returns>A JWE in Compact Serialization format.</returns>
         public virtual string CreateToken(
             string payload,
             EncryptingCredentials encryptingCredentials)
         {
-            if (string.IsNullOrEmpty(payload))
-                throw LogHelper.LogArgumentNullException(nameof(payload));
-
+            _ = payload ?? throw LogHelper.LogArgumentNullException(nameof(payload));
             _ = encryptingCredentials ?? throw LogHelper.LogArgumentNullException(nameof(encryptingCredentials));
 
             return CreateToken(
@@ -312,26 +302,24 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Creates a JWE (Json Web Encryption).
+        /// Creates a JSON Web Encryption (JWE).
         /// </summary>
         /// <param name="payload">A string containing JSON which represents the JWT token payload.</param>
         /// <param name="encryptingCredentials">Defines the security key and algorithm that will be used to encrypt the JWT.</param>
         /// <param name="additionalHeaderClaims">Defines the dictionary containing any custom header claims that need to be added to the outer JWT token header.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="payload"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="encryptingCredentials"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="additionalHeaderClaims"/> is null.</exception>
-        /// <exception cref="SecurityTokenException">if <see cref="JwtHeaderParameterNames.Alg"/>, <see cref="JwtHeaderParameterNames.Kid"/>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="payload"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="encryptingCredentials"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="additionalHeaderClaims"/> is null.</exception>
+        /// <exception cref="SecurityTokenException">Thrown if <see cref="JwtHeaderParameterNames.Alg"/>, <see cref="JwtHeaderParameterNames.Kid"/>
         /// <see cref="JwtHeaderParameterNames.X5t"/>, <see cref="JwtHeaderParameterNames.Enc"/>, and/or <see cref="JwtHeaderParameterNames.Zip"/>
         /// are present inside of <paramref name="additionalHeaderClaims"/>.</exception>
-        /// <returns>A JWS in Compact Serialization Format.</returns>
+        /// <returns>A JWS in Compact Serialization format.</returns>
         public virtual string CreateToken(
             string payload,
             EncryptingCredentials encryptingCredentials,
             IDictionary<string, object> additionalHeaderClaims)
         {
-            if (string.IsNullOrEmpty(payload))
-                throw LogHelper.LogArgumentNullException(nameof(payload));
-
+            _ = payload ?? throw LogHelper.LogArgumentNullException(nameof(payload));
             _ = encryptingCredentials ?? throw LogHelper.LogArgumentNullException(nameof(encryptingCredentials));
             _ = additionalHeaderClaims ?? throw LogHelper.LogArgumentNullException(nameof(additionalHeaderClaims));
 
@@ -346,23 +334,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Creates a JWE (Json Web Encryption).
+        /// Creates a JSON Web Encryption (JWE).
         /// </summary>
         /// <param name="payload">A string containing JSON which represents the JWT token payload.</param>
         /// <param name="signingCredentials">Defines the security key and algorithm that will be used to sign the JWT.</param>
         /// <param name="encryptingCredentials">Defines the security key and algorithm that will be used to encrypt the JWT.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="payload"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="signingCredentials"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="encryptingCredentials"/> is null.</exception>
-        /// <returns>A JWE in compact serialization format.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="payload"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="signingCredentials"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="encryptingCredentials"/> is null.</exception>
+        /// <returns>A JWE in Compact Serialization format.</returns>
         public virtual string CreateToken(
             string payload,
             SigningCredentials signingCredentials,
             EncryptingCredentials encryptingCredentials)
         {
-            if (string.IsNullOrEmpty(payload))
-                throw LogHelper.LogArgumentNullException(nameof(payload));
-
+            _ = payload ?? throw LogHelper.LogArgumentNullException(nameof(payload));
             _ = signingCredentials ?? throw LogHelper.LogArgumentNullException(nameof(signingCredentials));
             _ = encryptingCredentials ?? throw LogHelper.LogArgumentNullException(nameof(encryptingCredentials));
 
@@ -377,29 +363,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Creates a JWE (Json Web Encryption).
+        /// Creates a JSON Web Encryption (JWE).
         /// </summary>
         /// <param name="payload">A string containing JSON which represents the JWT token payload.</param>
         /// <param name="signingCredentials">Defines the security key and algorithm that will be used to sign the JWT.</param>
         /// <param name="encryptingCredentials">Defines the security key and algorithm that will be used to encrypt the JWT.</param>
         /// <param name="additionalHeaderClaims">Defines the dictionary containing any custom header claims that need to be added to the outer JWT token header.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="payload"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="signingCredentials"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="encryptingCredentials"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="additionalHeaderClaims"/> is null.</exception>
-        /// <exception cref="SecurityTokenException">if <see cref="JwtHeaderParameterNames.Alg"/>, <see cref="JwtHeaderParameterNames.Kid"/>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="payload"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="signingCredentials"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="encryptingCredentials"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="additionalHeaderClaims"/> is null.</exception>
+        /// <exception cref="SecurityTokenException">Thrown if <see cref="JwtHeaderParameterNames.Alg"/>, <see cref="JwtHeaderParameterNames.Kid"/>
         /// <see cref="JwtHeaderParameterNames.X5t"/>, <see cref="JwtHeaderParameterNames.Enc"/>, and/or <see cref="JwtHeaderParameterNames.Zip"/>
         /// are present inside of <paramref name="additionalHeaderClaims"/>.</exception>
-        /// <returns>A JWE in compact serialization format.</returns>
+        /// <returns>A JWE in Compact Serialization format.</returns>
         public virtual string CreateToken(
             string payload,
             SigningCredentials signingCredentials,
             EncryptingCredentials encryptingCredentials,
             IDictionary<string, object> additionalHeaderClaims)
         {
-            if (string.IsNullOrEmpty(payload))
-                throw LogHelper.LogArgumentNullException(nameof(payload));
-
+            _ = payload ?? throw LogHelper.LogArgumentNullException(nameof(payload));
             _ = signingCredentials ?? throw LogHelper.LogArgumentNullException(nameof(signingCredentials));
             _ = encryptingCredentials ?? throw LogHelper.LogArgumentNullException(nameof(encryptingCredentials));
             _ = additionalHeaderClaims ?? throw LogHelper.LogArgumentNullException(nameof(additionalHeaderClaims));
@@ -415,19 +399,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Creates a JWE (Json Web Encryption).
+        /// Creates a JSON Web Encryption (JWE).
         /// </summary>
         /// <param name="payload">A string containing JSON which represents the JWT token payload.</param>
-        /// <param name="encryptingCredentials">Defines the security key and algorithm that will be used to encrypt the JWT.</param>
-        /// <param name="compressionAlgorithm">Defines the compression algorithm that will be used to compress the JWT token payload.</param>
-        /// <returns>A JWE in compact serialization format.</returns>
+        /// <param name="encryptingCredentials">The security key and algorithm that will be used to encrypt the JWT.</param>
+        /// <param name="compressionAlgorithm">The compression algorithm that will be used to compress the JWT token payload.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="payload"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="encryptingCredentials"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="compressionAlgorithm"/> is null or empty.</exception>
+        /// <returns>A JWE in Compact Serialization format.</returns>
         public virtual string CreateToken(
             string payload,
             EncryptingCredentials encryptingCredentials,
             string compressionAlgorithm)
         {
-            if (string.IsNullOrEmpty(payload))
-                throw LogHelper.LogArgumentNullException(nameof(payload));
+            _ = payload ?? throw LogHelper.LogArgumentNullException(nameof(payload));
 
             if (string.IsNullOrEmpty(compressionAlgorithm))
                 throw LogHelper.LogArgumentNullException(nameof(compressionAlgorithm));
@@ -445,24 +431,24 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Creates a JWE (Json Web Encryption).
+        /// Creates a JSON Web Encryption (JWE).
         /// </summary>
         /// <param name="payload">A string containing JSON which represents the JWT token payload.</param>
         /// <param name="signingCredentials">Defines the security key and algorithm that will be used to sign the JWT.</param>
         /// <param name="encryptingCredentials">Defines the security key and algorithm that will be used to encrypt the JWT.</param>
         /// <param name="compressionAlgorithm">Defines the compression algorithm that will be used to compress the JWT token payload.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="payload"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="signingCredentials"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="encryptingCredentials"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="compressionAlgorithm"/> is null.</exception>
-        /// <returns>A JWE in compact serialization format.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="payload"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="signingCredentials"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="encryptingCredentials"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="compressionAlgorithm"/> is null.</exception>
+        /// <returns>A JWE in Compact Serialization format.</returns>
         public virtual string CreateToken(
             string payload,
             SigningCredentials signingCredentials,
             EncryptingCredentials encryptingCredentials,
             string compressionAlgorithm)
         {
-            if (string.IsNullOrEmpty(payload))
+            if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
             if (string.IsNullOrEmpty(compressionAlgorithm))
@@ -482,23 +468,23 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Creates a JWE (Json Web Encryption).
+        /// Creates a JSON Web Encryption (JWE).
         /// </summary>
         /// <param name="payload">A string containing JSON which represents the JWT token payload.</param>
         /// <param name="signingCredentials">Defines the security key and algorithm that will be used to sign the JWT.</param>
         /// <param name="encryptingCredentials">Defines the security key and algorithm that will be used to encrypt the JWT.</param>
-        /// <param name="compressionAlgorithm">Defines the compression algorithm that will be used to compress the JWT token payload.</param>       
+        /// <param name="compressionAlgorithm">Defines the compression algorithm that will be used to compress the JWT token payload.</param>
         /// <param name="additionalHeaderClaims">Defines the dictionary containing any custom header claims that need to be added to the outer JWT token header.</param>
         /// <param name="additionalInnerHeaderClaims">Defines the dictionary containing any custom header claims that need to be added to the inner JWT token header.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="payload"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="signingCredentials"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="encryptingCredentials"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="compressionAlgorithm"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="additionalHeaderClaims"/> is null.</exception>
-        /// <exception cref="SecurityTokenException">if <see cref="JwtHeaderParameterNames.Alg"/>, <see cref="JwtHeaderParameterNames.Kid"/>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="payload"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="signingCredentials"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="encryptingCredentials"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="compressionAlgorithm"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="additionalHeaderClaims"/> is null.</exception>
+        /// <exception cref="SecurityTokenException">Thrown if <see cref="JwtHeaderParameterNames.Alg"/>, <see cref="JwtHeaderParameterNames.Kid"/>
         /// <see cref="JwtHeaderParameterNames.X5t"/>, <see cref="JwtHeaderParameterNames.Enc"/>, and/or <see cref="JwtHeaderParameterNames.Zip"/>
         /// are present inside of <paramref name="additionalHeaderClaims"/>.</exception>
-        /// <returns>A JWE in compact serialization format.</returns>
+        /// <returns>A JWE in Compact Serialization format.</returns>
         public virtual string CreateToken(
             string payload,
             SigningCredentials signingCredentials,
@@ -507,7 +493,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             IDictionary<string, object> additionalHeaderClaims,
             IDictionary<string, object> additionalInnerHeaderClaims)
         {
-            if (string.IsNullOrEmpty(payload))
+            if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
             if (string.IsNullOrEmpty(compressionAlgorithm))
@@ -529,22 +515,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Creates a JWE (Json Web Encryption).
+        /// Creates a JSON Web Encryption (JWE).
         /// </summary>
         /// <param name="payload">A string containing JSON which represents the JWT token payload.</param>
         /// <param name="signingCredentials">Defines the security key and algorithm that will be used to sign the JWT.</param>
         /// <param name="encryptingCredentials">Defines the security key and algorithm that will be used to encrypt the JWT.</param>
-        /// <param name="compressionAlgorithm">Defines the compression algorithm that will be used to compress the JWT token payload.</param>       
+        /// <param name="compressionAlgorithm">Defines the compression algorithm that will be used to compress the JWT token payload.</param>
         /// <param name="additionalHeaderClaims">Defines the dictionary containing any custom header claims that need to be added to the outer JWT token header.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="payload"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="signingCredentials"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="encryptingCredentials"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="compressionAlgorithm"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="additionalHeaderClaims"/> is null.</exception>
-        /// <exception cref="SecurityTokenException">if <see cref="JwtHeaderParameterNames.Alg"/>, <see cref="JwtHeaderParameterNames.Kid"/>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="payload"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="signingCredentials"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="encryptingCredentials"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="compressionAlgorithm"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="additionalHeaderClaims"/> is null.</exception>
+        /// <exception cref="SecurityTokenException">Thrown if <see cref="JwtHeaderParameterNames.Alg"/>, <see cref="JwtHeaderParameterNames.Kid"/>
         /// <see cref="JwtHeaderParameterNames.X5t"/>, <see cref="JwtHeaderParameterNames.Enc"/>, and/or <see cref="JwtHeaderParameterNames.Zip"/>
         /// are present inside of <paramref name="additionalHeaderClaims"/>.</exception>
-        /// <returns>A JWE in compact serialization format.</returns>
+        /// <returns>A JWE in Compact Serialization format.</returns>
         public virtual string CreateToken(
             string payload,
             SigningCredentials signingCredentials,
@@ -552,7 +538,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             string compressionAlgorithm,
             IDictionary<string, object> additionalHeaderClaims)
         {
-            if (string.IsNullOrEmpty(payload))
+            if (payload == null)
                 throw LogHelper.LogArgumentNullException(nameof(payload));
 
             if (string.IsNullOrEmpty(compressionAlgorithm))
@@ -582,7 +568,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             IDictionary<string, object> additionalInnerHeaderClaims,
             string tokenType)
         {
-            using (MemoryStream utf8ByteMemoryStream = new ())
+            using (MemoryStream utf8ByteMemoryStream = new())
             {
                 Utf8JsonWriter writer = null;
                 char[] encodedChars = null;
@@ -712,14 +698,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (tokenDescriptor.Audiences.Count > 0)
             {
-                if (!tokenDescriptor.Audience.IsNullOrEmpty())
+                if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
                     JsonPrimitives.WriteStrings(ref writer, JwtPayloadUtf8Bytes.Aud, tokenDescriptor.Audiences, tokenDescriptor.Audience);
                 else
                     JsonPrimitives.WriteStrings(ref writer, JwtPayloadUtf8Bytes.Aud, tokenDescriptor.Audiences);
 
                 audienceSet = true;
             }
-            else if (!tokenDescriptor.Audience.IsNullOrEmpty())
+            else if (!string.IsNullOrEmpty(tokenDescriptor.Audience))
             {
                 writer.WritePropertyName(JwtPayloadUtf8Bytes.Aud);
                 writer.WriteStringValue(tokenDescriptor.Audience);
@@ -1060,8 +1046,32 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     writer.WriteString(JwtHeaderUtf8Bytes.Alg, encryptingCredentials.Alg);
                     writer.WriteString(JwtHeaderUtf8Bytes.Enc, encryptingCredentials.Enc);
 
-                    if (encryptingCredentials.Key.KeyId != null)
-                        writer.WriteString(JwtHeaderUtf8Bytes.Kid, encryptingCredentials.Key.KeyId);
+                    // Since developers may have already worked around this issue, implicitly taking a dependency on the
+                    // old behavior, we guard the new behavior behind an AppContext switch. The new/RFC-conforming behavior
+                    // is treated as opt-in. When the library is at the point where it is able to make breaking changes
+                    // (such as the next major version update) we should consider whether or not this app-compat switch
+                    // needs to be maintained.
+                    if (AppContextSwitches.UseRfcDefinitionOfEpkAndKid)
+                    {
+                        if (encryptingCredentials.KeyExchangePublicKey.KeyId != null)
+                            writer.WriteString(JwtHeaderUtf8Bytes.Kid, encryptingCredentials.KeyExchangePublicKey.KeyId);
+
+                        if (SupportedAlgorithms.EcdsaWrapAlgorithms.Contains(encryptingCredentials.Alg))
+                        {
+                            writer.WritePropertyName(JwtHeaderUtf8Bytes.Epk);
+                            string publicJwk = JsonWebKeyConverter.ConvertFromSecurityKey(encryptingCredentials.Key).RepresentAsAsymmetricPublicJwk();
+#if NET6_0_OR_GREATER
+                            writer.WriteRawValue(publicJwk);
+#else
+                            JsonPrimitives.WriteAsJsonElement(ref writer, publicJwk);
+#endif
+                        }
+                    }
+                    else
+                    {
+                        if (encryptingCredentials.Key.KeyId != null)
+                            writer.WriteString(JwtHeaderUtf8Bytes.Kid, encryptingCredentials.Key.KeyId);
+                    }
 
                     if (!string.IsNullOrEmpty(compressionAlgorithm))
                         writer.WriteString(JwtHeaderUtf8Bytes.Zip, compressionAlgorithm);
@@ -1116,15 +1126,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Encrypts a JWS.
         /// </summary>
-        /// <param name="innerJwt">A 'JSON Web Token' (JWT) in JWS Compact Serialization Format.</param>
+        /// <param name="innerJwt">A JSON Web Token (JWT) in JWS Compact Serialization format.</param>
         /// <param name="encryptingCredentials">Defines the security key and algorithm that will be used to encrypt the <paramref name="innerJwt"/>.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="innerJwt"/> is null or empty.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="encryptingCredentials"/> is null.</exception>
-        /// <exception cref="ArgumentException">if both <see cref="EncryptingCredentials.CryptoProviderFactory"/> and <see cref="EncryptingCredentials.Key"/>.<see cref="CryptoProviderFactory"/> are null.</exception>
-        /// <exception cref="SecurityTokenEncryptionFailedException">if the CryptoProviderFactory being used does not support the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
-        /// <exception cref="SecurityTokenEncryptionFailedException">if unable to create a token encryption provider for the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
-        /// <exception cref="SecurityTokenEncryptionFailedException">if encryption fails using the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
-        /// <exception cref="SecurityTokenEncryptionFailedException">if not using one of the supported content encryption key (CEK) algorithms: 128, 384 or 512 AesCbcHmac (this applies in the case of key wrap only, not direct encryption).</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="innerJwt"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="encryptingCredentials"/> is null.</exception>
+        /// <exception cref="ArgumentException">Thrown if both <see cref="EncryptingCredentials.CryptoProviderFactory"/> and <see cref="EncryptingCredentials.Key"/> are null.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if the CryptoProviderFactory being used does not support the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if unable to create a token encryption provider for the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if encryption fails using the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if not using one of the supported content encryption key (CEK) algorithms: 128, 384 or 512 AesCbcHmac (this applies in the case of key wrap only, not direct encryption).</exception>
         public string EncryptToken(string innerJwt, EncryptingCredentials encryptingCredentials)
         {
             if (string.IsNullOrEmpty(innerJwt))
@@ -1139,17 +1149,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Encrypts a JWS.
         /// </summary>
-        /// <param name="innerJwt">A 'JSON Web Token' (JWT) in JWS Compact Serialization Format.</param>
+        /// <param name="innerJwt">A JSON Web Token (JWT) in JWS Compact Serialization format.</param>
         /// <param name="encryptingCredentials">Defines the security key and algorithm that will be used to encrypt the <paramref name="innerJwt"/>.</param>
         /// <param name="additionalHeaderClaims">Defines the dictionary containing any custom header claims that need to be added to the outer JWT token header.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="innerJwt"/> is null or empty.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="encryptingCredentials"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="additionalHeaderClaims"/> is null.</exception>
-        /// <exception cref="ArgumentException">if both <see cref="EncryptingCredentials.CryptoProviderFactory"/> and <see cref="EncryptingCredentials.Key"/>.<see cref="CryptoProviderFactory"/> are null.</exception>
-        /// <exception cref="SecurityTokenEncryptionFailedException">if the CryptoProviderFactory being used does not support the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
-        /// <exception cref="SecurityTokenEncryptionFailedException">if unable to create a token encryption provider for the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
-        /// <exception cref="SecurityTokenEncryptionFailedException">if encryption fails using the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
-        /// <exception cref="SecurityTokenEncryptionFailedException">if not using one of the supported content encryption key (CEK) algorithms: 128, 384 or 512 AesCbcHmac (this applies in the case of key wrap only, not direct encryption).</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="innerJwt"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="encryptingCredentials"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="additionalHeaderClaims"/> is null.</exception>
+        /// <exception cref="ArgumentException">Thrown if both <see cref="EncryptingCredentials.CryptoProviderFactory"/> and <see cref="EncryptingCredentials.Key"/> are null.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if the CryptoProviderFactory being used does not support the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if unable to create a token encryption provider for the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if encryption fails using the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if not using one of the supported content encryption key (CEK) algorithms: 128, 384 or 512 AesCbcHmac (this applies in the case of key wrap only, not direct encryption).</exception>
         public string EncryptToken(
             string innerJwt,
             EncryptingCredentials encryptingCredentials,
@@ -1170,18 +1180,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Encrypts a JWS.
         /// </summary>
-        /// <param name="innerJwt">A 'JSON Web Token' (JWT) in JWS Compact Serialization Format.</param>
+        /// <param name="innerJwt">A JSON Web Token (JWT) in JWS Compact Serialization format.</param>
         /// <param name="encryptingCredentials">Defines the security key and algorithm that will be used to encrypt the <paramref name="innerJwt"/>.</param>
-        /// <param name="algorithm">Defines the compression algorithm that will be used to compress the 'innerJwt'.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="innerJwt"/> is null or empty.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="encryptingCredentials"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="algorithm"/> is null or empty.</exception>
-        /// <exception cref="ArgumentException">if both <see cref="EncryptingCredentials.CryptoProviderFactory"/> and <see cref="EncryptingCredentials.Key"/>.<see cref="CryptoProviderFactory"/> are null.</exception>
-        /// <exception cref="SecurityTokenEncryptionFailedException">if the CryptoProviderFactory being used does not support the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
-        /// <exception cref="SecurityTokenEncryptionFailedException">if unable to create a token encryption provider for the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
-        /// <exception cref="SecurityTokenCompressionFailedException">if compression using <paramref name="algorithm"/> fails.</exception>
-        /// <exception cref="SecurityTokenEncryptionFailedException">if encryption fails using the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
-        /// <exception cref="SecurityTokenEncryptionFailedException">if not using one of the supported content encryption key (CEK) algorithms: 128, 384 or 512 AesCbcHmac (this applies in the case of key wrap only, not direct encryption).</exception>
+        /// <param name="algorithm">Defines the compression algorithm that will be used to compress the <paramref name="innerJwt"/>.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="innerJwt"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="encryptingCredentials"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="algorithm"/> is null or empty.</exception>
+        /// <exception cref="ArgumentException">Thrown if both <see cref="EncryptingCredentials.CryptoProviderFactory"/> and <see cref="EncryptingCredentials.Key"/> are null.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if the CryptoProviderFactory being used does not support the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if unable to create a token encryption provider for the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
+        /// <exception cref="SecurityTokenCompressionFailedException">Thrown if compression using <paramref name="algorithm"/> fails.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if encryption fails using the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if not using one of the supported content encryption key (CEK) algorithms: 128, 384 or 512 AesCbcHmac (this applies in the case of key wrap only, not direct encryption).</exception>
         public string EncryptToken(
             string innerJwt,
             EncryptingCredentials encryptingCredentials,
@@ -1202,20 +1212,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Encrypts a JWS.
         /// </summary>
-        /// <param name="innerJwt">A 'JSON Web Token' (JWT) in JWS Compact Serialization Format.</param>
+        /// <param name="innerJwt">A JSON Web Token (JWT) in JWS Compact Serialization format.</param>
         /// <param name="encryptingCredentials">Defines the security key and algorithm that will be used to encrypt the <paramref name="innerJwt"/>.</param>
         /// <param name="algorithm">Defines the compression algorithm that will be used to compress the <paramref name="innerJwt"/></param>
         /// <param name="additionalHeaderClaims">Defines the dictionary containing any custom header claims that need to be added to the outer JWT token header.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="innerJwt"/> is null or empty.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="encryptingCredentials"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="algorithm"/> is null or empty.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="additionalHeaderClaims"/> is null or empty.</exception>
-        /// <exception cref="ArgumentException">if both <see cref="EncryptingCredentials.CryptoProviderFactory"/> and <see cref="EncryptingCredentials.Key"/>.<see cref="CryptoProviderFactory"/> are null.</exception>
-        /// <exception cref="SecurityTokenEncryptionFailedException">if the CryptoProviderFactory being used does not support the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
-        /// <exception cref="SecurityTokenEncryptionFailedException">if unable to create a token encryption provider for the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
-        /// <exception cref="SecurityTokenCompressionFailedException">if compression using 'algorithm' fails.</exception>
-        /// <exception cref="SecurityTokenEncryptionFailedException">if encryption fails using the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
-        /// <exception cref="SecurityTokenEncryptionFailedException">if not using one of the supported content encryption key (CEK) algorithms: 128, 384 or 512 AesCbcHmac (this applies in the case of key wrap only, not direct encryption).</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="innerJwt"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="encryptingCredentials"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="algorithm"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="additionalHeaderClaims"/> is null or empty.</exception>
+        /// <exception cref="ArgumentException">Thrown if both <see cref="EncryptingCredentials.CryptoProviderFactory"/> and <see cref="EncryptingCredentials.Key"/> are null.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if the CryptoProviderFactory being used does not support the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if unable to create a token encryption provider for the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
+        /// <exception cref="SecurityTokenCompressionFailedException">Thrown if compression using 'algorithm' fails.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if encryption fails using the <see cref="EncryptingCredentials.Enc"/> (algorithm), <see cref="EncryptingCredentials.Key"/> pair.</exception>
+        /// <exception cref="SecurityTokenEncryptionFailedException">Thrown if not using one of the supported content encryption key (CEK) algorithms: 128, 384 or 512 AesCbcHmac (this applies in the case of key wrap only, not direct encryption).</exception>
         public string EncryptToken(
             string innerJwt,
             EncryptingCredentials encryptingCredentials,
@@ -1323,14 +1333,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     if (LogHelper.IsEnabled(EventLogLevel.Informational))
                         LogHelper.LogInformation(TokenLogMessages.IDX10904, key);
-                } 
+                }
                 else if (configuration != null)
                 {
                     key = ResolveTokenDecryptionKeyFromConfig(jwtToken, configuration);
                     if (key != null && LogHelper.IsEnabled(EventLogLevel.Informational))
                         LogHelper.LogInformation(TokenLogMessages.IDX10905, key);
                 }
-                    
+
                 if (key != null)
                     keys = [key];
             }
@@ -1365,10 +1375,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 #if NET472 || NET6_0_OR_GREATER
                     if (SupportedAlgorithms.EcdsaWrapAlgorithms.Contains(jwtToken.Alg))
                     {
-                        // on decryption we get the public key from the EPK value see: https://datatracker.ietf.org/doc/html/rfc7518#appendix-C
+                        ECDsaSecurityKey publicKey;
+
+                        // Since developers may have already worked around this issue, implicitly taking a dependency on the
+                        // old behavior, we guard the new behavior behind an AppContext switch. The new/RFC-conforming behavior
+                        // is treated as opt-in. When the library is at the point where it is able to make breaking changes
+                        // (such as the next major version update) we should consider whether or not this app-compat switch
+                        // needs to be maintained.
+                        if (AppContextSwitches.UseRfcDefinitionOfEpkAndKid)
+                        {
+                            // on decryption we get the public key from the EPK value see: https://datatracker.ietf.org/doc/html/rfc7518#appendix-C
+                            jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Epk, out string epk);
+                            publicKey = new ECDsaSecurityKey(new JsonWebKey(epk), false);
+                        }
+                        else
+                        {
+                            publicKey = validationParameters.TokenDecryptionKey as ECDsaSecurityKey;
+                        }
+
                         var ecdhKeyExchangeProvider = new EcdhKeyExchangeProvider(
                             key as ECDsaSecurityKey,
-                            validationParameters.TokenDecryptionKey as ECDsaSecurityKey,
+                            publicKey,
                             jwtToken.Alg,
                             jwtToken.Enc);
                         jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Apu, out string apu);

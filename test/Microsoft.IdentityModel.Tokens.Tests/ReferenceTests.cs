@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             // assert
             // compare KDFs are the same and they're matching with expected
-            if (!Utility.AreEqual(((SymmetricSecurityKey)aliceCek).Key, ((SymmetricSecurityKey)bobCek).Key)) 
+            if (!Utility.AreEqual(((SymmetricSecurityKey)aliceCek).Key, ((SymmetricSecurityKey)bobCek).Key))
                 context.AddDiff($"!Utility.AreEqual(aliceCek, bobCek)");
             if (!Utility.AreEqual(((SymmetricSecurityKey)aliceCek).Key, ECDH_ES.DerivedKeyBytes))
                 context.AddDiff($"!Utility.AreEqual(aliceCek, ECDH_ES.DerivedKeyBytes)");

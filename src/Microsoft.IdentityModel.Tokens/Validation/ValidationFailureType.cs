@@ -34,10 +34,28 @@ namespace Microsoft.IdentityModel.Tokens
         private class IssuerValidationFailure : ValidationFailureType { internal IssuerValidationFailure(string name) : base(name) { } }
 
         /// <summary>
+        /// Defines a type that represents an algorithm validation failed.
+        /// </summary>
+        public static readonly ValidationFailureType AlgorithmValidationFailed = new AlgorithmValidationFailure("AlgorithmValidationFailed");
+        private class AlgorithmValidationFailure : ValidationFailureType { internal AlgorithmValidationFailure(string name) : base(name) { } }
+
+        /// <summary>
         /// Defines a type that represents that audience validation failed.
         /// </summary>
         public static readonly ValidationFailureType AudienceValidationFailed = new AudienceValidationFailure("AudienceValidationFailed");
         private class AudienceValidationFailure : ValidationFailureType { internal AudienceValidationFailure(string name) : base(name) { } }
+
+        /// <summary>
+        /// Defines a type that represents that token type validation failed.
+        /// </summary>
+        public static readonly ValidationFailureType TokenTypeValidationFailed = new TokenTypeValidationFailure("TokenTypeValidationFailed");
+        private class TokenTypeValidationFailure : ValidationFailureType { internal TokenTypeValidationFailure(string name) : base(name) { } }
+
+        /// <summary>
+        /// Defines a type that represents that the token's signature validation failed.
+        /// </summary>
+        public static readonly ValidationFailureType SignatureValidationFailed = new SignatureValidationFailure("SignatureValidationFailed");
+        private class SignatureValidationFailure : ValidationFailureType { internal SignatureValidationFailure(string name) : base(name) { } }
 
         /// <summary>
         /// Defines a type that represents that signing key validation failed.
@@ -48,8 +66,26 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Defines a type that represents that lifetime validation failed.
         /// </summary>
-        public static readonly ValidationFailureType LifetimeValidationFailed = new LifetimeValidationFailure("LifetimeValidationFailure");
+        public static readonly ValidationFailureType LifetimeValidationFailed = new LifetimeValidationFailure("LifetimeValidationFailed");
         private class LifetimeValidationFailure : ValidationFailureType { internal LifetimeValidationFailure(string name) : base(name) { } }
+
+        /// <summary>
+        /// Defines a type that represents that token replay validation failed.
+        /// </summary>
+        public static readonly ValidationFailureType TokenReplayValidationFailed = new TokenReplayValidationFailure("TokenReplayValidationFailed");
+        private class TokenReplayValidationFailure : ValidationFailureType { internal TokenReplayValidationFailure(string name) : base(name) { } }
+
+        /// <summary>
+        /// Defines a type that represents that a token could not be read.
+        /// </summary>
+        public static readonly ValidationFailureType TokenReadingFailed = new TokenReadingFailure("TokenReadingFailed");
+        private class TokenReadingFailure : ValidationFailureType { internal TokenReadingFailure(string name) : base(name) { } }
+
+        /// <summary>
+        /// Defines a type that represents that a JWE could not be decrypted.
+        /// </summary>
+        public static readonly ValidationFailureType TokenDecryptionFailed = new TokenDecryptionFailure("TokenDecryptionFailed");
+        private class TokenDecryptionFailure : ValidationFailureType { internal TokenDecryptionFailure(string name) : base(name) { } }
 
         /// <summary>
         /// Defines a type that represents that no evaluation has taken place.

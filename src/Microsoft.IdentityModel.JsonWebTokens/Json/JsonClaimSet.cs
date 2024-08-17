@@ -26,7 +26,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal readonly Dictionary<string, object> _jsonClaims;
         private List<Claim> _claims;
 
-        internal JsonClaimSet() { _jsonClaims = new Dictionary<string, object>(); }
+        internal JsonClaimSet()
+        {
+            _jsonClaims = new Dictionary<string, object>();
+        }
 
         internal JsonClaimSet(Dictionary<string, object> jsonClaims)
         {
@@ -71,7 +74,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             else if (value is double d)
                 claims.Add(new Claim(claimType, d.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Double, issuer, issuer));
             else if (value is DateTime dt)
-                claims.Add(new Claim(claimType, dt.ToString("o",CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, issuer, issuer));
+                claims.Add(new Claim(claimType, dt.ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, issuer, issuer));
             else if (value is float f)
                 claims.Add(new Claim(claimType, f.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Double, issuer, issuer));
             else if (value is decimal m)
@@ -185,16 +188,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// The goal here is return types that are expected in a JWT token.
-        /// The 5 basic types: number, string, true / false, nil, array (of basic types).
-        /// This is not a general purpose translation layer for complex types.
+        /// Retrieves a value of the specified type associated with the given claim from a JWT token.
+        /// The 5 basic types: number, string, true/false, nil, array (of basic types).
+        /// This method is not designed to handle complex types.
         /// For that we would need to provide a way to hook a JsonConverter to for complex types.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="key"></param>
-        /// <param name="throwEx">if this is called from TryGetValue then we don't want to throw.</param>
-        /// <param name="found"></param>
-        /// <returns></returns>
+        /// <typeparam name="T">The type of the value to retrieve.</typeparam>
+        /// <param name="key">The key associated with the claim to retrieve.</param>
+        /// <param name="throwEx">Indicates whether to throw an exception if the key is not found.</param>
+        /// <param name="found">Outputs a boolean indicating whether the key was found.</param>
+        /// <returns>The value associated with the specified key.</returns>
         internal T GetValue<T>(string key, bool throwEx, out bool found)
         {
             found = _jsonClaims.TryGetValue(key, out object obj);
@@ -317,7 +320,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             else if (typeof(T) == typeof(Collection<object>))
                 return (T)(object)new Collection<object> { obj };
 
-            else if(typeof(T).IsEnum)
+            else if (typeof(T).IsEnum)
             {
                 return (T)Enum.Parse(typeof(T), obj.ToString(), ignoreCase: true);
             }
@@ -339,7 +342,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (objType == typeof(long))
                     return (T)(object)new long[] { (long)obj };
 
-                if(objType == typeof(int))
+                if (objType == typeof(int))
                     return (T)(object)new long[] { (int)obj };
 
                 if (long.TryParse(obj.ToString(), out long value))
@@ -347,7 +350,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
             else if (typeof(T) == typeof(double))
             {
-                if(double.TryParse(obj.ToString(), out double value))
+                if (double.TryParse(obj.ToString(), out double value))
                     return (T)(object)value;
             }
             else if (typeof(T) == typeof(uint))
@@ -412,14 +415,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         /// <summary>
         /// The return types that are expected in a JWT token.
-        /// The 5 basic types: number, string, true / false, nil, array (of basic types).
+        /// The 5 basic types: number, string, true/false, nil, array (of basic types).
         /// This is not a general purpose translation layer for complex types.
-        /// For that we would need to provide a way to hook a JsonConverter to for complex types.
+        /// For that, we would need to provide a way to hook a JsonConverter for complex types.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="key"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
+        /// <typeparam name="T">The type of the value to retrieve.</typeparam>
+        /// <param name="key">The key associated with the value to retrieve.</param>
+        /// <param name="value">The retrieved value associated with the specified key, if found.</param>
+        /// <returns><see langword="true"/> if the key was found; otherwise, <see langword="false"/>.</returns>
         internal bool TryGetValue<T>(string key, out T value)
         {
             value = GetValue<T>(key, false, out bool found);

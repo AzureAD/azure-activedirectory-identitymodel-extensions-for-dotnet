@@ -23,7 +23,7 @@ namespace Microsoft.IdentityModel.Benchmarks
                 .WithOrderer(new DefaultOrderer(SummaryOrderPolicy.Method))
                 .HideColumns(Column.WarmupCount, Column.Type, Column.Job)
                 .AddDiagnoser(MemoryDiagnoser.Default); // https://benchmarkdotnet.org/articles/configs/diagnosers.html
-                //.AddDiagnoser(new EtwProfiler()) // Uncomment to generate traces / flame graphs. Doc: https://adamsitnik.com/ETW-Profiler/
+                                                        //.AddDiagnoser(new EtwProfiler()) // Uncomment to generate traces / flame graphs. Doc: https://adamsitnik.com/ETW-Profiler/
         }
     }
 }

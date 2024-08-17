@@ -69,7 +69,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 else if (JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, true))
                     break;
                 else if (!reader.Read())
-                        break;
+                    break;
             }
         }
 
@@ -83,6 +83,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         public string Jku { get; set; }
 
         [JsonPropertyName("jwk")]
-        public JsonWebKey JsonWebKey{ get; set; }
-    } 
+        public JsonWebKey JsonWebKey { get; set; }
+    }
 }

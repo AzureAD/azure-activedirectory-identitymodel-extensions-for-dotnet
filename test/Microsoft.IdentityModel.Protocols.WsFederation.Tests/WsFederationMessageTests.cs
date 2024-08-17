@@ -187,7 +187,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 QueryString = WsFederationTestUtilities.BuildWaSignInMessage(samlToken, samlSecurityTokenHandler, "saml1" + variation),
                 SecurityToken = samlToken,
                 SecurityTokenHandler = samlSecurityTokenHandler,
-                TestId = "Saml1WriteToken"+variation
+                TestId = "Saml1WriteToken" + variation
             });
 
             theoryData.Add(new WsFederationSigninMessageTheoryData
@@ -248,7 +248,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 IssuedAt = Default.IssueInstant,
                 Issuer = Default.Issuer,
                 SigningCredentials = Default.AsymmetricSigningCredentials,
-                Subject = new ClaimsIdentity(claims)
+                Subject = new CaseSensitiveClaimsIdentity(claims)
             };
 
             var token = samlTokenHandler.CreateToken(tokenDescriptor) as SamlSecurityToken;
@@ -267,7 +267,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 IssuedAt = Default.IssueInstant,
                 Issuer = Default.Issuer,
                 SigningCredentials = Default.AsymmetricSigningCredentials,
-                Subject = new ClaimsIdentity(claims)
+                Subject = new CaseSensitiveClaimsIdentity(claims)
             };
 
             var token = saml2TokenHandler.CreateToken(tokenDescriptor) as Saml2SecurityToken;

@@ -19,7 +19,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
     {
         // Used for formatting a message for testing with one parameter.
         private const string TestMessageOneParam = "This is the parameter: '{0}'.";
-        
+
         [Fact]
         public void LogSecurityArtifactTest()
         {
@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var jwsTokenDescriptor = new SecurityTokenDescriptor
             {
                 SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
-                Subject = new ClaimsIdentity(Default.PayloadClaims)
+                Subject = new CaseSensitiveClaimsIdentity(Default.PayloadClaims)
             };
 
             string stringJwe = new JsonWebTokenHandler().CreateToken(jweTokenDescriptor);

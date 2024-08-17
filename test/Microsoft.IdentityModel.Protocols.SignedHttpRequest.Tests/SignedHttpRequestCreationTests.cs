@@ -981,7 +981,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 var handler = new SignedHttpRequestHandler();
                 var signedHttpRequestDescriptor = theoryData.BuildSignedHttpRequestDescriptor();
 
-                var payloadString =  handler.CreateHttpRequestPayload(signedHttpRequestDescriptor, theoryData.CallContext);
+                var payloadString = handler.CreateHttpRequestPayload(signedHttpRequestDescriptor, theoryData.CallContext);
                 var payload = JObject.Parse(payloadString);
 
                 if (signedHttpRequestDescriptor.AdditionalPayloadClaims != null)

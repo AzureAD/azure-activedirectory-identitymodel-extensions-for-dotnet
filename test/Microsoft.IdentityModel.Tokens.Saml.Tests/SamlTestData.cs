@@ -21,7 +21,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     TokenDescriptor = new SecurityTokenDescriptor
                     {
                         Audience = Default.Audience,
-                        Subject = new ClaimsIdentity(Default.SamlClaims),
+                        Subject = new CaseSensitiveClaimsIdentity(Default.SamlClaims),
                         Expires = DateTime.UtcNow.Subtract(new TimeSpan(0, 10, 0)),
                         IssuedAt = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
                         NotBefore = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     TokenDescriptor = new SecurityTokenDescriptor
                     {
                         Audience = Default.Audience,
-                        Subject = new ClaimsIdentity(Default.SamlClaims),
+                        Subject = new CaseSensitiveClaimsIdentity(Default.SamlClaims),
                         SigningCredentials = Default.AsymmetricSigningCredentials,
                         Issuer = Default.Issuer,
                     },
@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     TokenDescriptor = new SecurityTokenDescriptor
                     {
                         Audience = Default.Audience,
-                        Subject = new ClaimsIdentity(Default.SamlClaims),
+                        Subject = new CaseSensitiveClaimsIdentity(Default.SamlClaims),
                         Expires = DateTime.UtcNow.Subtract(new TimeSpan(0, 10, 0)),
                         IssuedAt = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
                         NotBefore = DateTime.UtcNow.Subtract(new TimeSpan(1, 0, 0)),
@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     TokenDescriptor = new SecurityTokenDescriptor
                     {
                         Audience = Default.Audience,
-                        Subject = new ClaimsIdentity(Default.SamlClaims),
+                        Subject = new CaseSensitiveClaimsIdentity(Default.SamlClaims),
                         SigningCredentials = Default.AsymmetricSigningCredentials,
                         Issuer = Default.Issuer,
                     },

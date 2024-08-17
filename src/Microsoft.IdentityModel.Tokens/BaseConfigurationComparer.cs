@@ -6,10 +6,16 @@ using System.Collections.Generic;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Comparison class for a <see cref="BaseConfiguration"/>.
+    /// Compares instances of <see cref="BaseConfiguration"/> for equality.
     /// </summary>
     internal class BaseConfigurationComparer : IEqualityComparer<BaseConfiguration>
     {
+        /// <summary>
+        /// Determines whether the specified objects are equal.
+        /// </summary>
+        /// <param name="config1">The first <see cref="BaseConfiguration"/> to compare.</param>
+        /// <param name="config2">The second <see cref="BaseConfiguration"/> to compare.</param>
+        /// <returns>true if the specified objects are equal; otherwise, false.</returns>
         public bool Equals(BaseConfiguration config1, BaseConfiguration config2)
         {
             if (config1 == null && config2 == null)
@@ -36,13 +42,18 @@ namespace Microsoft.IdentityModel.Tokens
 
         private static bool ContainsKeyWithInternalId(BaseConfiguration config, string internalId)
         {
-            foreach(var key in config.SigningKeys)
+            foreach (var key in config.SigningKeys)
                 if (key.InternalId == internalId)
                     return true;
 
             return false;
         }
 
+        /// <summary>
+        /// Returns a hash code for the specified object.
+        /// </summary>
+        /// <param name="config">The <see cref="BaseConfiguration"/> for which a hash code is to be returned.</param>
+        /// <returns>A hash code for the specified object.</returns>
         public int GetHashCode(BaseConfiguration config)
         {
             int defaultHash = string.Empty.GetHashCode();

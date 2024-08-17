@@ -1,6 +1,5 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 #if NET8_0_OR_GREATER
@@ -38,6 +37,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         OpenIdProviderMetadataNamesUpperCase = new HashSet<string>
         {
             "ACR_VALUES_SUPPORTED",
+            "AUTHORIZATION_DETAILS_TYPES_SUPPORTED",
             "AUTHORIZATION_ENDPOINT",
             "AUTHORIZATION_ENCRYPTION_ALG_VALUES_SUPPORTED",
             "AUTHORIZATION_ENCRYPTION_ENC_VALUES_SUPPORTED",
@@ -162,6 +162,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                     // JsonPrimitives.Read(...) passes 'true' to advance reader to next token.
                     if (reader.ValueTextEquals(Utf8Bytes.AcrValuesSupported))
                         JsonPrimitives.ReadStrings(ref reader, config.AcrValuesSupported, MetadataName.AcrValuesSupported, ClassName, true);
+
+                    else if (reader.ValueTextEquals(Utf8Bytes.AuthorizationDetailsTypesSupported))
+                        JsonPrimitives.ReadStrings(ref reader, config.AuthorizationDetailsTypesSupported, MetadataName.AuthorizationDetailsTypesSupported, ClassName, true);
 
                     else if (reader.ValueTextEquals(Utf8Bytes.AuthorizationEndpoint))
                         config.AuthorizationEndpoint = JsonPrimitives.ReadString(ref reader, MetadataName.AuthorizationEndpoint, ClassName, true);
@@ -378,6 +381,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                         {
                             if (propertyName.Equals(MetadataName.AcrValuesSupported, StringComparison.OrdinalIgnoreCase))
                                 JsonPrimitives.ReadStrings(ref reader, config.AcrValuesSupported, propertyName, ClassName);
+
+                            else if (propertyName.Equals(MetadataName.AuthorizationDetailsTypesSupported, StringComparison.OrdinalIgnoreCase))
+                                JsonPrimitives.ReadStrings(ref reader, config.AuthorizationDetailsTypesSupported, propertyName, ClassName);
 
                             else if (propertyName.Equals(MetadataName.AuthorizationEndpoint, StringComparison.OrdinalIgnoreCase))
                                 config.AuthorizationEndpoint = JsonPrimitives.ReadString(ref reader, propertyName, ClassName);
@@ -610,12 +616,29 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             }
         }
 
+        public static void Write(OpenIdConnectConfiguration OpenIdConnectConfiguration, Stream stream)
+        {
+            Utf8JsonWriter writer = null;
+            try
+            {
+                writer = new Utf8JsonWriter(stream, new JsonWriterOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
+                Write(ref writer, OpenIdConnectConfiguration);
+            }
+            finally
+            {
+                writer?.Dispose();
+            }
+        }
+
         public static void Write(ref Utf8JsonWriter writer, OpenIdConnectConfiguration config)
         {
             writer.WriteStartObject();
 
             if (config.AcrValuesSupported.Count > 0)
                 JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.AcrValuesSupported, config.AcrValuesSupported);
+
+            if (config.AuthorizationDetailsTypesSupported.Count > 0)
+                JsonPrimitives.WriteStrings(ref writer, Utf8Bytes.AuthorizationDetailsTypesSupported, config.AuthorizationDetailsTypesSupported);
 
             if (!string.IsNullOrEmpty(config.AuthorizationEndpoint))
                 writer.WriteString(Utf8Bytes.AuthorizationEndpoint, config.AuthorizationEndpoint);

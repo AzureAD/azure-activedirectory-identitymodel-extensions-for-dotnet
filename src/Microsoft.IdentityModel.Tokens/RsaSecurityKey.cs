@@ -14,7 +14,7 @@ namespace Microsoft.IdentityModel.Tokens
     {
         private bool? _hasPrivateKey;
 
-        private bool _foundPrivateKeyDetermined = false;
+        private bool _foundPrivateKeyDetermined;
 
         private PrivateKeyStatus _foundPrivateKey;
 
@@ -128,7 +128,7 @@ namespace Microsoft.IdentityModel.Tokens
                 }
 
                 return _foundPrivateKey;
-            }           
+            }
         }
 
         /// <summary>

@@ -21,29 +21,25 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.IssuerValidatorAsyncTests", theoryData);
 
-            try
-            {
-                IssuerValidationResult issuerValidationResult = await Validators.ValidateIssuerAsync(
-                    theoryData.Issuer,
-                    theoryData.SecurityToken,
-                    theoryData.ValidationParameters,
-                    new CallContext(),
-                    CancellationToken.None).ConfigureAwait(false);
+            if (theoryData.ValidIssuerToAdd != null)
+                theoryData.ValidationParameters.ValidIssuers.Add(theoryData.ValidIssuerToAdd);
 
-                if (issuerValidationResult.Exception != null)
-                    theoryData.ExpectedException.ProcessException(issuerValidationResult.Exception, context);
-                else
-                    theoryData.ExpectedException.ProcessNoException();
+            IssuerValidationResult issuerValidationResult = await Validators.ValidateIssuerAsync(
+                theoryData.Issuer,
+                theoryData.SecurityToken,
+                theoryData.ValidationParameters,
+                new CallContext(),
+                CancellationToken.None).ConfigureAwait(false);
 
-                IdentityComparer.AreIssuerValidationResultsEqual(
-                    issuerValidationResult,
-                    theoryData.IssuerValidationResult,
-                    context);
-            }
-            catch (SecurityTokenInvalidIssuerException ex)
-            {
-                theoryData.ExpectedException.ProcessException(ex, context);
-            }
+            if (issuerValidationResult.Exception != null)
+                theoryData.ExpectedException.ProcessException(issuerValidationResult.Exception, context);
+            else
+                theoryData.ExpectedException.ProcessNoException();
+
+            IdentityComparer.AreIssuerValidationResultsEqual(
+                issuerValidationResult,
+                theoryData.IssuerValidationResult,
+                context);
 
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -56,26 +52,8 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
                 string validIssuer = Guid.NewGuid().ToString();
                 string issClaim = Guid.NewGuid().ToString();
-                theoryData.Add(new IssuerValidationResultsTheoryData("Invalid_Issuer")
-                {
-                    ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10205:"),
-                    Issuer = issClaim,
-                    IssuerValidationResult = new IssuerValidationResult(
-                        issClaim,
-                        ValidationFailureType.IssuerValidationFailed,
-                        new ExceptionDetail(
-                            new MessageDetail(
-                                LogMessages.IDX10205,
-                                LogHelper.MarkAsNonPII(issClaim),
-                                LogHelper.MarkAsNonPII(validIssuer),
-                                LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(null)),
-                                LogHelper.MarkAsNonPII(null)),
-                            typeof(SecurityTokenInvalidIssuerException),
-                            new StackFrame(true))),
-                    IsValid = false,
-                    SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
-                    ValidationParameters = new TokenValidationParameters { ValidIssuer = validIssuer }
-                });
+                var validConfig = new OpenIdConnectConfiguration() { Issuer = issClaim };
+                string[] validIssuers = new string[] { validIssuer };
 
                 theoryData.Add(new IssuerValidationResultsTheoryData("NULL_Issuer")
                 {
@@ -90,11 +68,11 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII(validIssuer),
                                 LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(null)),
                                 LogHelper.MarkAsNonPII(null)),
-                            typeof(SecurityTokenInvalidIssuerException),
+                            ExceptionDetail.ExceptionType.SecurityTokenInvalidIssuer,
                             new StackFrame(true))),
                     IsValid = false,
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
-                    ValidationParameters = new TokenValidationParameters(),
+                    ValidationParameters = new ValidationParameters()
                 });
 
                 theoryData.Add(new IssuerValidationResultsTheoryData("NULL_ValidationParameters")
@@ -108,7 +86,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII("validationParameters")),
-                        typeof(ArgumentNullException),
+                        ExceptionDetail.ExceptionType.ArgumentNull,
                         new StackFrame(true),
                         null)),
                     IsValid = false,
@@ -127,15 +105,14 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII("securityToken")),
-                        typeof(ArgumentNullException),
+                        ExceptionDetail.ExceptionType.ArgumentNull,
                         new StackFrame(true),
                         null)),
                     IsValid = false,
                     SecurityToken = null,
-                    ValidationParameters = new TokenValidationParameters()
+                    ValidationParameters = new ValidationParameters()
                 });
 
-                var validConfig = new OpenIdConnectConfiguration() { Issuer = issClaim };
                 theoryData.Add(new IssuerValidationResultsTheoryData("Valid_FromConfig")
                 {
                     ExpectedException = ExpectedException.NoExceptionExpected,
@@ -145,24 +122,9 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         IssuerValidationResult.ValidationSource.IssuerIsConfigurationIssuer),
                     IsValid = true,
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
-                    ValidationParameters = new TokenValidationParameters()
+                    ValidationParameters = new ValidationParameters()
                     {
                         ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(validConfig)
-                    }
-                });
-
-                theoryData.Add(new IssuerValidationResultsTheoryData("Valid_FromValidationParametersValidIssuer")
-                {
-                    ExpectedException = ExpectedException.NoExceptionExpected,
-                    Issuer = issClaim,
-                    IssuerValidationResult = new IssuerValidationResult(
-                        issClaim,
-                        IssuerValidationResult.ValidationSource.IssuerIsValidIssuer),
-                    IsValid = true,
-                    SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
-                    ValidationParameters = new TokenValidationParameters()
-                    {
-                        ValidIssuer = issClaim
                     }
                 });
 
@@ -175,10 +137,29 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         IssuerValidationResult.ValidationSource.IssuerIsAmongValidIssuers),
                     IsValid = true,
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
-                    ValidationParameters = new TokenValidationParameters()
-                    {
-                        ValidIssuers = [issClaim]
-                    }
+                    ValidationParameters = new ValidationParameters(),
+                    ValidIssuerToAdd = issClaim
+                });
+
+                theoryData.Add(new IssuerValidationResultsTheoryData("Invalid_Issuer")
+                {
+                    ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10212:"),
+                    Issuer = issClaim,
+                    IssuerValidationResult = new IssuerValidationResult(
+                        issClaim,
+                        ValidationFailureType.IssuerValidationFailed,
+                        new ExceptionDetail(
+                            new MessageDetail(
+                                LogMessages.IDX10212,
+                                LogHelper.MarkAsNonPII(issClaim),
+                                LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validIssuers)),
+                                LogHelper.MarkAsNonPII(null)),
+                            ExceptionDetail.ExceptionType.SecurityTokenInvalidIssuer,
+                            new StackFrame(true))),
+                    IsValid = false,
+                    SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
+                    ValidationParameters = new ValidationParameters(),
+                    ValidIssuerToAdd = validIssuer
                 });
 
                 return theoryData;
@@ -202,8 +183,9 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
         public SecurityToken SecurityToken { get; set; }
 
-        public TokenValidationParameters ValidationParameters { get; set; }
+        internal ValidationParameters ValidationParameters { get; set; }
 
         internal ValidationFailureType ValidationFailureType { get; set; }
+        public string ValidIssuerToAdd { get; internal set; }
     }
 }

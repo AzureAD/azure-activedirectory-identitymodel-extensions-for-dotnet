@@ -133,10 +133,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     SecurityKey = KeyingMaterial.Ecdsa256Key_Public,
                     JsonWebKey = KeyingMaterial.CreateJsonWebKeyEC(
-                        JsonWebKeyECTypes.P256, 
+                        JsonWebKeyECTypes.P256,
                         KeyingMaterial.Ecdsa256Key_Public.KeyId,
                         null,
-                        Base64UrlEncoder.Encode(KeyingMaterial.Ecdsa256Parameters_Public.Q.X), 
+                        Base64UrlEncoder.Encode(KeyingMaterial.Ecdsa256Parameters_Public.Q.X),
                         Base64UrlEncoder.Encode(KeyingMaterial.Ecdsa256Parameters_Public.Q.Y)
                     ),
                     TestId = nameof(KeyingMaterial.Ecdsa256Key_Public)
@@ -259,7 +259,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
         // related to ConvertX509SecurityKeyToJsonWebKeyTheoryData
-        public bool RepresentAsRsaKey { get; set; } = false;
+        public bool RepresentAsRsaKey { get; set; }
     }
 }
 

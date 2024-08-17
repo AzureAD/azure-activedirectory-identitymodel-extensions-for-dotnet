@@ -19,8 +19,9 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
-using System.Xml.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.JsonWebTokens.Results;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols.WsFederation;
@@ -45,6 +46,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 { typeof(CanonicalizingTransfrom).ToString(), CompareAllPublicProperties },
                 { typeof(Claim).ToString(), CompareAllPublicProperties },
                 { typeof(ClaimsIdentity).ToString(), CompareAllPublicProperties },
+                { typeof(CaseSensitiveClaimsIdentity).ToString(), CompareAllPublicProperties },
                 { typeof(ClaimsPrincipal).ToString(), CompareAllPublicProperties },
                 { typeof(Collection<SecurityKey>).ToString(), ContinueCheckingEquality },
                 { typeof(DateTime).ToString(), AreDateTimesEqual },
@@ -55,6 +57,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 { typeof(IDictionary<string, string>).ToString(), AreStringDictionariesEqual},
                 { typeof(IEnumerable<Claim>).ToString(), AreClaimsEnumsEqual },
                 { typeof(IEnumerable<ClaimsIdentity>).ToString(), AreClaimsIdentitiesEnumsEqual },
+                { typeof(IEnumerable<CaseSensitiveClaimsIdentity>).ToString(), AreClaimsIdentitiesEnumsEqual },
                 { typeof(IEnumerable<object>).ToString(), AreObjectEnumsEqual },
                 { typeof(IEnumerable<SecurityKey>).ToString(), AreSecurityKeyEnumsEqual },
                 { typeof(IEnumerable<string>).ToString(), AreStringEnumsEqual },
@@ -155,6 +158,73 @@ namespace Microsoft.IdentityModel.TestUtils
             };
 
         // Keep methods in alphabetical order
+
+        public static bool AreAlgorithmValidationResultsEqual(object object1, object object2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, context))
+                return context.Merge(localContext);
+
+            return AreAlgorithmValidationResultsEqual(
+                object1 as AlgorithmValidationResult,
+                object2 as AlgorithmValidationResult,
+                "AlgorithmValidationResult1",
+                "AlgorithmValidationResult2",
+                null,
+                context);
+        }
+
+        internal static bool AreAlgorithmValidationResultsEqual(
+            AlgorithmValidationResult algorithmValidationResult1,
+            AlgorithmValidationResult algorithmValidationResult2,
+            string name1,
+            string name2,
+            string stackPrefix,
+            CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(algorithmValidationResult1, algorithmValidationResult2, localContext))
+                return context.Merge(localContext);
+
+            if (algorithmValidationResult1.Algorithm != algorithmValidationResult2.Algorithm)
+                localContext.Diffs.Add($"AlgorithmValidationResult1.Algorithm: '{algorithmValidationResult1.Algorithm}' != AlgorithmValidationResult2.Algorithm: '{algorithmValidationResult2.Algorithm}'");
+
+            if (algorithmValidationResult1.IsValid != algorithmValidationResult2.IsValid)
+                localContext.Diffs.Add($"AlgorithmValidationResult1.IsValid: {algorithmValidationResult1.IsValid} != AlgorithmValidationResult2.IsValid: {algorithmValidationResult2.IsValid}");
+
+            if (algorithmValidationResult1.ValidationFailureType != algorithmValidationResult2.ValidationFailureType)
+                localContext.Diffs.Add($"AlgorithmValidationResult1.ValidationFailureType: {algorithmValidationResult1.ValidationFailureType} != AlgorithmValidationResult2.ValidationFailureType: {algorithmValidationResult2.ValidationFailureType}");
+
+            // true => both are not null.
+            if (ContinueCheckingEquality(algorithmValidationResult1.Exception, algorithmValidationResult2.Exception, localContext))
+            {
+                AreStringsEqual(
+                    algorithmValidationResult1.Exception.Message,
+                    algorithmValidationResult2.Exception.Message,
+                    $"({name1}).Exception.Message",
+                    $"({name2}).Exception.Message",
+                    localContext);
+
+                AreStringsEqual(
+                    algorithmValidationResult1.Exception.Source,
+                    algorithmValidationResult2.Exception.Source,
+                    $"({name1}).Exception.Source",
+                    $"({name2}).Exception.Source",
+                    localContext);
+
+                if (!string.IsNullOrEmpty(stackPrefix))
+                    AreStringPrefixesEqual(
+                        algorithmValidationResult1.Exception.StackTrace.Trim(),
+                        algorithmValidationResult2.Exception.StackTrace.Trim(),
+                        $"({name1}).Exception.StackTrace",
+                        $"({name2}).Exception.StackTrace",
+                        stackPrefix.Trim(),
+                        localContext);
+            }
+
+            return context.Merge(localContext);
+        }
+
         public static bool AreBoolsEqual(object object1, object object2, CompareContext context)
         {
             return AreBoolsEqual(object1, object2, "bool1", "bool2", context);
@@ -687,7 +757,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null,
                 context);
         }
-      
+
         internal static bool AreSigningKeyValidationResultsEqual(
             SigningKeyValidationResult signingKeyValidationResult1,
             SigningKeyValidationResult signingKeyValidationResult2,
@@ -734,10 +804,10 @@ namespace Microsoft.IdentityModel.TestUtils
                         stackPrefix.Trim(),
                         localContext);
             }
-          
+
             return context.Merge(localContext);
         }
-      
+
         public static bool AreLifetimeValidationResultsEqual(object object1, object object2, CompareContext context)
         {
             var localContext = new CompareContext(context);
@@ -765,10 +835,10 @@ namespace Microsoft.IdentityModel.TestUtils
             if (!ContinueCheckingEquality(lifetimeValidationResult1, lifetimeValidationResult2, localContext))
                 return context.Merge(localContext);
 
-            if (lifetimeValidationResult1.NotBefore != lifetimeValidationResult2.NotBefore)
+            if (!AreDatesEqualWithEpsilon(lifetimeValidationResult1.NotBefore, lifetimeValidationResult2.NotBefore, 1))
                 localContext.Diffs.Add($"LifetimeValidationResult1.NotBefore: '{lifetimeValidationResult1.NotBefore}' != LifetimeValidationResult2.NotBefore: '{lifetimeValidationResult2.NotBefore}'");
 
-            if (lifetimeValidationResult1.Expires != lifetimeValidationResult2.Expires)
+            if (!AreDatesEqualWithEpsilon(lifetimeValidationResult1.Expires, lifetimeValidationResult2.Expires, 1))
                 localContext.Diffs.Add($"LifetimeValidationResult1.Expires: '{lifetimeValidationResult1.Expires}' != LifetimeValidationResult2.Expires: '{lifetimeValidationResult2.Expires}'");
 
             if (lifetimeValidationResult1.IsValid != lifetimeValidationResult2.IsValid)
@@ -800,6 +870,283 @@ namespace Microsoft.IdentityModel.TestUtils
                         lifetimeValidationResult2.Exception.StackTrace.Trim(),
                         $"({name1})lifetimeValidationResult1.Exception.StackTrace",
                         $"({name2})lifetimeValidationResult2.Exception.StackTrace",
+                        stackPrefix.Trim(),
+                        localContext);
+            }
+
+            return context.Merge(localContext);
+        }
+
+        public static bool AreTokenReplayValidationResultsEqual(object object1, object object2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, context))
+                return context.Merge(localContext);
+
+            return AreTokenReplayValidationResultsEqual(
+                object1 as ReplayValidationResult,
+                object2 as ReplayValidationResult,
+                "ReplayValidationResult1",
+                "ReplayValidationResult2",
+                null,
+                context);
+        }
+
+        internal static bool AreTokenReplayValidationResultsEqual(
+            ReplayValidationResult replayValidationResult1,
+            ReplayValidationResult replayValidationResult2,
+            string name1,
+            string name2,
+            string stackPrefix,
+            CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(replayValidationResult1, replayValidationResult2, localContext))
+                return context.Merge(localContext);
+
+            if (replayValidationResult1.ExpirationTime != replayValidationResult2.ExpirationTime)
+                localContext.Diffs.Add($"ReplayValidationResult1.ExpirationTime: '{replayValidationResult1.ExpirationTime}' != ReplayValidationResult2.ExpirationTime: '{replayValidationResult2.ExpirationTime}'");
+
+            if (replayValidationResult1.IsValid != replayValidationResult2.IsValid)
+                localContext.Diffs.Add($"ReplayValidationResult1.IsValid: {replayValidationResult1.IsValid} != ReplayValidationResult2.IsValid: {replayValidationResult2.IsValid}");
+
+            if (replayValidationResult1.ValidationFailureType != replayValidationResult2.ValidationFailureType)
+                localContext.Diffs.Add($"ReplayValidationResult1.ValidationFailureType: {replayValidationResult1.ValidationFailureType} != ReplayValidationResult2.ValidationFailureType: {replayValidationResult2.ValidationFailureType}");
+
+            // true => both are not null.
+            if (ContinueCheckingEquality(replayValidationResult1.Exception, replayValidationResult2.Exception, localContext))
+            {
+                AreStringsEqual(
+                    replayValidationResult1.Exception.Message,
+                    replayValidationResult2.Exception.Message,
+                    $"({name1}).Exception.Message",
+                    $"({name2}).Exception.Message",
+                    localContext);
+
+                AreStringsEqual(
+                    replayValidationResult1.Exception.Source,
+                    replayValidationResult2.Exception.Source,
+                    $"({name1}).Exception.Source",
+                    $"({name2}).Exception.Source",
+                    localContext);
+
+                if (!string.IsNullOrEmpty(stackPrefix))
+                    AreStringPrefixesEqual(
+                        replayValidationResult1.Exception.StackTrace.Trim(),
+                        replayValidationResult2.Exception.StackTrace.Trim(),
+                        $"({name1}).Exception.StackTrace",
+                        $"({name2}).Exception.StackTrace",
+                        stackPrefix.Trim(),
+                        localContext);
+            }
+
+            return context.Merge(localContext);
+        }
+
+        public static bool AreTokenTypeValidationResultsEqual(object object1, object object2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, context))
+                return context.Merge(localContext);
+
+            return AreTokenTypeValidationResultsEqual(
+                object1 as TokenTypeValidationResult,
+                object2 as TokenTypeValidationResult,
+                "TokenTypeValidationResult1",
+                "TokenTypeValidationResult2",
+                null,
+                context);
+        }
+
+        internal static bool AreTokenTypeValidationResultsEqual(
+            TokenTypeValidationResult tokenTypeValidationResult1,
+            TokenTypeValidationResult tokenTypeValidationResult2,
+            string name1,
+            string name2,
+            string stackPrefix,
+            CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(tokenTypeValidationResult1, tokenTypeValidationResult2, localContext))
+                return context.Merge(localContext);
+
+            if (tokenTypeValidationResult1.Type != tokenTypeValidationResult2.Type)
+                localContext.Diffs.Add($"TokenTypeValidationResult1.Type: '{tokenTypeValidationResult1.Type}' != TokenTypeValidationResult2.Type: '{tokenTypeValidationResult2.Type}'");
+
+            if (tokenTypeValidationResult1.IsValid != tokenTypeValidationResult2.IsValid)
+                localContext.Diffs.Add($"TokenTypeValidationResult1.IsValid: {tokenTypeValidationResult1.IsValid} != TokenTypeValidationResult2.IsValid: {tokenTypeValidationResult2.IsValid}");
+
+            if (tokenTypeValidationResult1.ValidationFailureType != tokenTypeValidationResult2.ValidationFailureType)
+                localContext.Diffs.Add($"TokenTypeValidationResult1.ValidationFailureType: {tokenTypeValidationResult1.ValidationFailureType} != TokenTypeValidationResult2.ValidationFailureType: {tokenTypeValidationResult2.ValidationFailureType}");
+
+            // true => both are not null.
+            if (ContinueCheckingEquality(tokenTypeValidationResult1.Exception, tokenTypeValidationResult2.Exception, localContext))
+            {
+                AreStringsEqual(
+                    tokenTypeValidationResult1.Exception.Message,
+                    tokenTypeValidationResult2.Exception.Message,
+                    $"({name1}).Exception.Message",
+                    $"({name2}).Exception.Message",
+                    localContext);
+
+                AreStringsEqual(
+                    tokenTypeValidationResult1.Exception.Source,
+                    tokenTypeValidationResult2.Exception.Source,
+                    $"({name1}).Exception.Source",
+                    $"({name2}).Exception.Source",
+                    localContext);
+
+                if (!string.IsNullOrEmpty(stackPrefix))
+                    AreStringPrefixesEqual(
+                        tokenTypeValidationResult1.Exception.StackTrace.Trim(),
+                        tokenTypeValidationResult2.Exception.StackTrace.Trim(),
+                        $"({name1}).Exception.StackTrace",
+                        $"({name2}).Exception.StackTrace",
+                        stackPrefix.Trim(),
+                        localContext);
+            }
+
+            return context.Merge(localContext);
+        }
+
+        public static bool AreTokenReadingResultsEqual(object object1, object object2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, context))
+                return context.Merge(localContext);
+
+            return AreTokenReadingResultsEqual(
+                object1 as TokenReadingResult,
+                object2 as TokenReadingResult,
+                "TokenReadingResult1",
+                "TokenReadingResult2",
+                null,
+                context);
+        }
+
+        internal static bool AreTokenReadingResultsEqual(
+            TokenReadingResult tokenReadingResult1,
+            TokenReadingResult tokenReadingResult2,
+            string name1,
+            string name2,
+            string stackPrefix,
+            CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(tokenReadingResult1, tokenReadingResult2, localContext))
+                return context.Merge(localContext);
+
+            if (tokenReadingResult1.IsValid != tokenReadingResult2.IsValid)
+                localContext.Diffs.Add($"TokenReadingResult1.IsValid: {tokenReadingResult1.IsValid} != TokenReadingResult2.IsValid: {tokenReadingResult2.IsValid}");
+
+            if (tokenReadingResult1.TokenInput != tokenReadingResult2.TokenInput)
+                localContext.Diffs.Add($"TokenReadingResult1.TokenInput: '{tokenReadingResult1.TokenInput}' != TokenReadingResult2.TokenInput: '{tokenReadingResult2.TokenInput}'");
+
+            // Only compare the security token if both are valid.
+            if (tokenReadingResult1.IsValid && (tokenReadingResult1.SecurityToken().ToString() != tokenReadingResult2.SecurityToken().ToString()))
+                localContext.Diffs.Add($"TokenReadingResult1.SecurityToken: '{tokenReadingResult1.SecurityToken()}' != TokenReadingResult2.SecurityToken: '{tokenReadingResult2.SecurityToken()}'");
+
+            if (tokenReadingResult1.ValidationFailureType != tokenReadingResult2.ValidationFailureType)
+                localContext.Diffs.Add($"TokenReadingResult1.ValidationFailureType: {tokenReadingResult1.ValidationFailureType} != TokenReadingResult2.ValidationFailureType: {tokenReadingResult2.ValidationFailureType}");
+
+            // true => both are not null.
+            if (ContinueCheckingEquality(tokenReadingResult1.Exception, tokenReadingResult2.Exception, localContext))
+            {
+                AreStringsEqual(
+                    tokenReadingResult1.Exception.Message,
+                    tokenReadingResult2.Exception.Message,
+                    $"({name1}).Exception.Message",
+                    $"({name2}).Exception.Message",
+                    localContext);
+
+                AreStringsEqual(
+                    tokenReadingResult1.Exception.Source,
+                    tokenReadingResult2.Exception.Source,
+                    $"({name1}).Exception.Source",
+                    $"({name2}).Exception.Source",
+                    localContext);
+
+                if (!string.IsNullOrEmpty(stackPrefix))
+                    AreStringPrefixesEqual(
+                        tokenReadingResult1.Exception.StackTrace.Trim(),
+                        tokenReadingResult2.Exception.StackTrace.Trim(),
+                        $"({name1}).Exception.StackTrace",
+                        $"({name2}).Exception.StackTrace",
+                        stackPrefix.Trim(),
+                        localContext);
+            }
+
+            return context.Merge(localContext);
+        }
+
+        public static bool AreTokenDecryptingResultsEqual(object object1, object object2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, context))
+                return context.Merge(localContext);
+
+            return AreTokenDecryptingResultsEqual(
+                object1 as TokenDecryptionResult,
+                object2 as TokenDecryptionResult,
+                "TokenDecryptingResult1",
+                "TokenDecryptingResult2",
+                null,
+                context);
+        }
+
+        internal static bool AreTokenDecryptingResultsEqual(
+            TokenDecryptionResult tokenDecryptingResult1,
+            TokenDecryptionResult tokenDecryptingResult2,
+            string name1,
+            string name2,
+            string stackPrefix,
+            CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(tokenDecryptingResult1, tokenDecryptingResult2, localContext))
+                return context.Merge(localContext);
+
+            if (tokenDecryptingResult1.IsValid != tokenDecryptingResult2.IsValid)
+                localContext.Diffs.Add($"TokenDecryptingResult1.IsValid: {tokenDecryptingResult1.IsValid} != TokenDecryptingResult2.IsValid: {tokenDecryptingResult2.IsValid}");
+
+            if (tokenDecryptingResult1.SecurityToken == null || tokenDecryptingResult2.SecurityToken == null)
+            {
+                if (tokenDecryptingResult1.SecurityToken != tokenDecryptingResult2.SecurityToken)
+                    localContext.Diffs.Add($"TokenDecryptingResult1.SecurityToken: '{tokenDecryptingResult1.SecurityToken}' != TokenDecryptingResult2.SecurityToken: '{tokenDecryptingResult2.SecurityToken}'");
+            }
+            else if (tokenDecryptingResult1.SecurityToken.ToString() != tokenDecryptingResult2.SecurityToken.ToString())
+                localContext.Diffs.Add($"TokenDecryptingResult1.SecurityToken: '{tokenDecryptingResult1.SecurityToken}' != TokenDecryptingResult2.SecurityToken: '{tokenDecryptingResult2.SecurityToken}'");
+
+            // Only compare the decrypted token if both results are valid.
+            if (tokenDecryptingResult1.IsValid && (tokenDecryptingResult1.DecryptedToken().ToString() != tokenDecryptingResult2.DecryptedToken().ToString()))
+                localContext.Diffs.Add($"TokenDecryptingResult1.DecryptedToken: '{tokenDecryptingResult1.DecryptedToken()}' != TokenDecryptingResult2.DecryptedToken: '{tokenDecryptingResult2.DecryptedToken()}'");
+
+            if (tokenDecryptingResult1.ValidationFailureType != tokenDecryptingResult2.ValidationFailureType)
+                localContext.Diffs.Add($"TokenDecryptingResult1.ValidationFailureType: {tokenDecryptingResult1.ValidationFailureType} != TokenDecryptingResult1.ValidationFailureType: {tokenDecryptingResult2.ValidationFailureType}");
+
+            // true => both are not null.
+            if (ContinueCheckingEquality(tokenDecryptingResult1.Exception, tokenDecryptingResult2.Exception, localContext))
+            {
+                AreStringsEqual(
+                    tokenDecryptingResult1.Exception.Message,
+                    tokenDecryptingResult2.Exception.Message,
+                    $"({name1}).Exception.Message",
+                    $"({name2}).Exception.Message",
+                    localContext);
+
+                AreStringsEqual(
+                    tokenDecryptingResult1.Exception.Source,
+                    tokenDecryptingResult2.Exception.Source,
+                    $"({name1}).Exception.Source",
+                    $"({name2}).Exception.Source",
+                    localContext);
+
+                if (!string.IsNullOrEmpty(stackPrefix))
+                    AreStringPrefixesEqual(
+                        tokenDecryptingResult1.Exception.StackTrace.Trim(),
+                        tokenDecryptingResult2.Exception.StackTrace.Trim(),
+                        $"({name1}).Exception.StackTrace",
+                        $"({name2}).Exception.StackTrace",
                         stackPrefix.Trim(),
                         localContext);
             }
@@ -1281,6 +1628,69 @@ namespace Microsoft.IdentityModel.TestUtils
             return AreEnumsEqual<SecurityKey>(object1 as IEnumerable<SecurityKey>, object2 as IEnumerable<SecurityKey>, context, AreSecurityKeysEqual);
         }
 
+        public static bool AreSignatureValidationResultsEqual(object object1, object object2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, context))
+                return context.Merge(localContext);
+
+            return AreSignatureValidationResultsEqual(
+                object1 as SignatureValidationResult,
+                object2 as SignatureValidationResult,
+                "SignatureValidationResult1",
+                "SignatureValidationResult2",
+                null,
+                context);
+        }
+
+        internal static bool AreSignatureValidationResultsEqual(
+            SignatureValidationResult signatureValidationResult1,
+            SignatureValidationResult signatureValidationResult2,
+            string name1,
+            string name2,
+            string stackPrefix,
+            CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(signatureValidationResult1, signatureValidationResult2, localContext))
+                return context.Merge(localContext);
+
+            if (signatureValidationResult1.IsValid != signatureValidationResult2.IsValid)
+                localContext.Diffs.Add($"{name1}.IsValid: {signatureValidationResult1.IsValid} != {name2}.IsValid: {signatureValidationResult2.IsValid}");
+
+            if (signatureValidationResult1.ValidationFailureType != signatureValidationResult2.ValidationFailureType)
+                localContext.Diffs.Add($"{name1}.IsValid: {signatureValidationResult1.ValidationFailureType} !=  {name2}.IsValid: {signatureValidationResult2.ValidationFailureType}");
+
+            // true => both are not null.
+            if (ContinueCheckingEquality(signatureValidationResult1.Exception, signatureValidationResult2.Exception, localContext))
+            {
+                AreStringsEqual(
+                    signatureValidationResult1.Exception.Message,
+                    signatureValidationResult2.Exception.Message,
+                    $"({name1}).Exception.Message",
+                    $"({name2}).Exception.Message",
+                    localContext);
+
+                AreStringsEqual(
+                    signatureValidationResult1.Exception.Source,
+                    signatureValidationResult2.Exception.Source,
+                    $"({name1}).Exception.Source",
+                    $"({name2}).Exception.Source",
+                    localContext);
+
+                if (!string.IsNullOrEmpty(stackPrefix))
+                    AreStringPrefixesEqual(
+                        signatureValidationResult1.Exception.StackTrace.Trim(),
+                        signatureValidationResult2.Exception.StackTrace.Trim(),
+                        $"({name1}).Exception.StackTrace",
+                        $"({name2}).Exception.StackTrace",
+                        stackPrefix.Trim(),
+                        localContext);
+            }
+
+            return context.Merge(localContext);
+        }
+
         public static bool AreSignedInfosEqual(SignedInfo signedInfo1, SignedInfo signedInfo2, CompareContext context)
         {
             var localContext = new CompareContext(context);
@@ -1331,6 +1741,8 @@ namespace Microsoft.IdentityModel.TestUtils
             return AreStringsEqual(object1, object2, "str1", "str2", context);
         }
 
+        private static readonly Regex timestampRegex = new Regex(@"\d{1,2}:\d{2}:\d{2}", RegexOptions.Compiled);
+
         public static bool AreStringsEqual(object object1, object object2, string name1, string name2, CompareContext context)
         {
             var localContext = new CompareContext(context);
@@ -1349,15 +1761,41 @@ namespace Microsoft.IdentityModel.TestUtils
             if (str1 == null)
                 localContext.Diffs.Add($"({name1} == null, {name2} == {str2}.");
 
-            if(str2 == null)
+            if (str2 == null)
                 localContext.Diffs.Add($"({name1} == {str1}, {name2} == null.");
 
             if (!string.Equals(str1, str2, context.StringComparison))
             {
-                localContext.Diffs.Add($"'{name1}' != '{name2}', StringComparison: '{context.StringComparison}'");
-                localContext.Diffs.Add($"'{str1}'");
-                localContext.Diffs.Add($"!=");
-                localContext.Diffs.Add($"'{str2}'");
+                // Try to find timestamps in the strings which might differ due to skew and compare them with epsilon.
+                MatchCollection match1 = timestampRegex.Matches(str1);
+                MatchCollection match2 = timestampRegex.Matches(str2);
+                int matched = 0;
+                // Check that at least one timestamp matched and both strings matched the same number of timestamps.
+                if (match1.Count != 0 && match1.Count == match2.Count)
+                {
+                    for (int i = 0; i < match1.Count; i++)
+                    {
+                        string time1 = match1[i].Value;
+                        string time2 = match2[i].Value;
+                        // If the matches match string-wise exactly or are parseable DateTimes and are equal within epsilon count as matched.
+                        if (time1 == time2 ||
+                            (DateTime.TryParse(time1, out DateTime datetime1) &&
+                            DateTime.TryParse(time2, out DateTime datetime2) &&
+                            AreDatesEqualWithEpsilon(datetime1, datetime2, 1)))
+                        {
+                            matched++;
+                        }
+                    }
+                }
+
+                // If no fancy timestamp comparison happened or some timestamps didn't match add the diff.
+                if (matched == 0 || matched != match1.Count)
+                {
+                    localContext.Diffs.Add($"'{name1}' != '{name2}', StringComparison: '{context.StringComparison}'");
+                    localContext.Diffs.Add($"'{str1}'");
+                    localContext.Diffs.Add($"!=");
+                    localContext.Diffs.Add($"'{str2}'");
+                }
             }
 
             return context.Merge(localContext);
@@ -1550,8 +1988,8 @@ namespace Microsoft.IdentityModel.TestUtils
                 bool skipProperty = false;
                 if (context.PropertiesToIgnoreWhenComparing != null && context.PropertiesToIgnoreWhenComparing.TryGetValue(type, out List<string> propertiesToIgnore))
                 {
-                    foreach(var val in propertiesToIgnore)
-                        if(string.Equals(val, propertyInfo.Name, StringComparison.OrdinalIgnoreCase))
+                    foreach (var val in propertiesToIgnore)
+                        if (string.Equals(val, propertyInfo.Name, StringComparison.OrdinalIgnoreCase))
                         {
                             skipProperty = true;
                             break;
@@ -1570,6 +2008,12 @@ namespace Microsoft.IdentityModel.TestUtils
                             continue;
 
                         if (context.IgnoreProperties && propertyInfo.Name == "Properties")
+                            continue;
+                    }
+
+                    if (type == typeof(CaseSensitiveClaimsIdentity))
+                    {
+                        if (propertyInfo.Name == "SecurityToken")
                             continue;
                     }
 
@@ -1668,6 +2112,14 @@ namespace Microsoft.IdentityModel.TestUtils
 
             else
                 return string.Format(CultureInfo.InvariantCulture, "{0}", (str ?? "null"));
+        }
+
+        public static bool AreDatesEqualWithEpsilon(DateTime? dateTime1, DateTime? dateTime2, int epsilon)
+        {
+            if (dateTime1 is DateTime date1 && dateTime2 is DateTime date2)
+                return Math.Abs((date1 - date2).TotalSeconds) <= epsilon;
+
+            return dateTime1 == dateTime2;
         }
     }
 }

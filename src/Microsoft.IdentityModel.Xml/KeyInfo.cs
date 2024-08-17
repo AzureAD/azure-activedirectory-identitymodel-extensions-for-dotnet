@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Xml
                 // Obtain parameters from the RSA if the rsaKey does not contain a valid value for RSAParameters
                 if (rsaKey.Parameters.Equals(default(RSAParameters)))
                     rsaParameters = rsaKey.Rsa.ExportParameters(false);
-        
+
                 RSAKeyValue = new RSAKeyValue(Convert.ToBase64String(rsaParameters.Modulus), Convert.ToBase64String(rsaParameters.Exponent));
             }
         }

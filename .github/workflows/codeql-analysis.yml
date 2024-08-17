@@ -1,25 +1,15 @@
 name: "CodeQL"
 
 on:
-  push:   
-    paths-ignore:
-      - 'test/Microsoft.IdentityModel.KeyVaultExtensions.Tests/**'
-      - 'test/Microsoft.IdentityModel.ManagedKeyVaultSecurityKey.Tests/**'
-      - '/src/Microsoft.IdentityModel.KeyVaultExtensions/**'
-      - '/src/Microsoft.IdentityModel.ManagedKeyVaultSecurityKey/**'      
-    branches: [ "dev", "dev6x", "dev7x"]
+  push:       
+    branches: [ "dev" ]
   pull_request:
-   paths-ignore:
-      - 'test/Microsoft.IdentityModel.KeyVaultExtensions.Tests/**'
-      - 'test/Microsoft.IdentityModel.ManagedKeyVaultSecurityKey.Tests/**'
-      - '/src/Microsoft.IdentityModel.KeyVaultExtensions/**'
-      - '/src/Microsoft.IdentityModel.ManagedKeyVaultSecurityKey/**'
     types:
       - opened
       - synchronize
       - reopened
       - ready_for_review
-    branches: [ "dev", "dev6x", "dev7x"]
+    branches: [ "dev" ]
 
 jobs:
   analyze:

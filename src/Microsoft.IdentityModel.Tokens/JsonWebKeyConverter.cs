@@ -281,7 +281,7 @@ namespace Microsoft.IdentityModel.Tokens
                 key = new SymmetricSecurityKey(webKey);
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 if (LogHelper.IsEnabled(EventLogLevel.Error))
                     LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10813, LogHelper.MarkAsNonPII(typeof(SymmetricSecurityKey)), webKey, ex), ex));
