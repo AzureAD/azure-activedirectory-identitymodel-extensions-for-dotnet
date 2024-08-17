@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <AspNetCoreMinSupportedVersion>2.1.1</AspNetCoreMinSupportedVersion>
+    <BannedApiAnalyzersVersion>3.3.4</BannedApiAnalyzersVersion>
     <MicrosoftCSharpVersion>4.5.0</MicrosoftCSharpVersion>
     <MicrosoftSourceLinkGitHubVersion>1.0.0</MicrosoftSourceLinkGitHubVersion>
     <NetStandardVersion>2.0.3</NetStandardVersion>
