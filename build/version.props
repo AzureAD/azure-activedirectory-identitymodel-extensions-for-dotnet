@@ -1,6 +1,6 @@
 <!-- This file may be overwritten by automation. Only values allowed here are VersionPrefix and VersionSuffix.  -->
 <Project>
-<!-- Wilson version  -->
+<!-- MicrosoftIdentityModelVersion  -->
   <PropertyGroup>
     <MicrosoftIdentityModelCurrentVersion>8.0.1</MicrosoftIdentityModelCurrentVersion>
 

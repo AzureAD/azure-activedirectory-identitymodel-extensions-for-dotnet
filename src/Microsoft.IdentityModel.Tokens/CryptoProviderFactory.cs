@@ -16,7 +16,6 @@ namespace Microsoft.IdentityModel.Tokens
     {
         private static CryptoProviderFactory _default;
         private static readonly ConcurrentDictionary<string, string> _typeToAlgorithmMap = new ConcurrentDictionary<string, string>();
-        private static readonly object _cacheLock = new object();
         private static int _defaultSignatureProviderObjectPoolCacheSize = Environment.ProcessorCount * 4;
         private static string _typeofAsymmetricSignatureProvider = typeof(AsymmetricSignatureProvider).ToString();
         private static string _typeofSymmetricSignatureProvider = typeof(SymmetricSignatureProvider).ToString();
@@ -591,25 +590,23 @@ namespace Microsoft.IdentityModel.Tokens
                     return signatureProvider;
                 }
 
-                lock (_cacheLock)
-                {
-                    if (CryptoProviderCache.TryGetSignatureProvider(key, algorithm, typeofSignatureProvider, willCreateSignatures, out signatureProvider))
-                    {
-                        signatureProvider.AddRef();
-                        return signatureProvider;
-                    }
+                if (!IsSupportedAlgorithm(algorithm, key))
+                    throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10634, LogHelper.MarkAsNonPII(algorithm), key)));
 
-                    if (!IsSupportedAlgorithm(algorithm, key))
-                        throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10634, LogHelper.MarkAsNonPII(algorithm), key)));
+                if (createAsymmetric)
+                    signatureProvider = new AsymmetricSignatureProvider(key, algorithm, willCreateSignatures, this);
+                else
+                    signatureProvider = new SymmetricSignatureProvider(key, algorithm, willCreateSignatures);
 
-                    if (createAsymmetric)
-                        signatureProvider = new AsymmetricSignatureProvider(key, algorithm, willCreateSignatures, this);
-                    else
-                        signatureProvider = new SymmetricSignatureProvider(key, algorithm, willCreateSignatures);
-
-                    if (ShouldCacheSignatureProvider(signatureProvider))
-                        signatureProvider.IsCached = CryptoProviderCache.TryAdd(signatureProvider);
-                }
+                if (ShouldCacheSignatureProvider(signatureProvider))
+                    // CryptoProviderCache.TryAdd will return false if unable to add the SignatureProvider.
+                    // One possibility is the SignatureProvider was added between when we called TryGetSignatureProvider and here.
+                    // SignatureProvider.IsCached will be false and CryptoProviderFactory.Release will dispose the SignatureProvider.
+                    // Since the SignatueProvider, was never added to the cache, TryGetSignatureProvider will not return this instance, we can dispose.
+                    // This will result in sometimes (rarely) creating a SignatureProvider that is never cached.
+                    // The alternative is to use a lock after the call to TryGetSignatureProvider, and then check again: { TryGet, lock, TryGet }.
+                    // This will result in excesive locking for different keys, which is common in POP scenarios.
+                    signatureProvider.IsCached = CryptoProviderCache.TryAdd(signatureProvider);
             }
             else
             {
