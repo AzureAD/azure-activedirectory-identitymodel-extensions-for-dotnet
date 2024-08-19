@@ -4,8 +4,8 @@ steps:
 - script: echo $(BuildConfiguration)
   displayName: 'display Build Configuration'
 
-- script: echo $(WilsonVersion)
-  displayName: 'display WilsonVersion'
+- script: echo $(MicrosoftIdentityModelVersion)
+  displayName: 'display MicrosoftIdentityModelVersion'
 
 - task: UseDotNet@2
   displayName: 'Use .NET Core sdk 2.x'
@@ -187,7 +187,7 @@ steps:
 
 - task: NuGetCommand@2
   displayName: 'Upload NuGet Package to VSTS NuGet'
-  condition: eq(variables['WilsonVersion'], '')
+  condition: eq(variables['MicrosoftIdentityModelVersion'], '')
   inputs:
     command: push
     packagesToPush: '$(Build.Repository.LocalPath)\artifacts\*.nupkg'
