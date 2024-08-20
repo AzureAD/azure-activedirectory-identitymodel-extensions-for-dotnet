@@ -13,5 +13,5 @@ Console.WriteLine("Size of list: " + list.Capacity);
 
 for (int i = 0; i < 1000; i++)
 {
-    test.JsonWebTokenHandler_03_ValidateTokenAsyncWithVP();
+    await test.JsonWebTokenHandler_03_ValidateTokenAsyncWithVP();
 }
