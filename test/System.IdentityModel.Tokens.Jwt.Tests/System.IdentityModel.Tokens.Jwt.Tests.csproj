@@ -10,6 +10,7 @@
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <PackageId>System.IdentityModel.Tokens.Jwt.Tests</PackageId>
     <SignAssembly>true</SignAssembly>
+    <NoWarn>$(NoWarn);SYSLIB0057</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

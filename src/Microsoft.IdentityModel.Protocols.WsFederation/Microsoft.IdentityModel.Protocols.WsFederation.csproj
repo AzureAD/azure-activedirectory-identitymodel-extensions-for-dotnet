@@ -10,6 +10,7 @@
     <PackageTags>.NET;Windows;Authentication;Identity;WsFederation</PackageTags>
     <Nullable>enable</Nullable>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <NoWarn>$(NoWarn);SYSLIB0057</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">

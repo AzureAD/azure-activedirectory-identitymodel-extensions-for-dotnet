@@ -9,6 +9,7 @@
     <PackageId>Microsoft.IdentityModel.Tokens.Saml</PackageId>
     <PackageTags>.NET;Windows;Authentication;Identity;SamlTokens;Saml Token;Saml2 Token</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <NoWarn>$(NoWarn);SYSLIB0057</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">

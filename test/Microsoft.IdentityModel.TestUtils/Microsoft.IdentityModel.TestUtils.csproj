@@ -11,6 +11,7 @@
     <PackageId>Microsoft.IdentityModel.TestUtils</PackageId>
     <SignAssembly>true</SignAssembly>
     <IsTestProject>false</IsTestProject>
+    <NoWarn>$(NoWarn);SYSLIB0057</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
