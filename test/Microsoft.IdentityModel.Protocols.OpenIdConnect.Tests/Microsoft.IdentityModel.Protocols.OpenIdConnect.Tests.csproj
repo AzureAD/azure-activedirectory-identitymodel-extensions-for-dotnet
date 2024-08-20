@@ -9,7 +9,6 @@
     <PackageId>Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests</PackageId>
     <SignAssembly>true</SignAssembly>
     <DelaySign>true</DelaySign>
-    <NoWarn>$(NoWarn);SYSLIB0057</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

@@ -9,7 +9,6 @@
     <PackageId>Microsoft.IdentityModel.Xml</PackageId>
     <PackageTags>.NET;Windows;Authentication;Identity;Reading XML;Writing XML;Enveloped Signatures</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <NoWarn>$(NoWarn);SYSLIB0057</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
