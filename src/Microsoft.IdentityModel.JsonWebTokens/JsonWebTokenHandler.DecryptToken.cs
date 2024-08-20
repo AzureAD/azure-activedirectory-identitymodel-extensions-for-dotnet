@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-//using Microsoft.IdentityModel.Abstractions;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
@@ -23,49 +23,38 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="configuration">The <see cref="BaseConfiguration"/> to be used for validating the token.</param>
         /// <param name="callContext"></param>
         /// <returns>The decoded / cleartext contents of the JWE.</returns>
-        /// <exception cref="ArgumentNullException">Returned inside <see cref="TokenDecryptionResult.Exception"/> if <paramref name="jwtToken"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">Returned inside <see cref="TokenDecryptionResult.Exception"/> if <paramref name="validationParameters"/> is null.</exception>
-        /// <exception cref="SecurityTokenException">Returned inside <see cref="TokenDecryptionResult.Exception"/> if <see cref="JsonWebToken.Enc"/> is null or empty.</exception>
-        /// <exception cref="SecurityTokenDecompressionFailedException">Returned inside <see cref="TokenDecryptionResult.Exception"/> if the decompression failed.</exception>
-        /// <exception cref="SecurityTokenEncryptionKeyNotFoundException">Returned inside <see cref="TokenDecryptionResult.Exception"/> if <see cref="JsonWebToken.Kid"/> is not null AND the decryption fails.</exception>
-        /// <exception cref="SecurityTokenDecryptionFailedException">Returned inside <see cref="TokenDecryptionResult.Exception"/> if the JWE was not able to be decrypted.</exception>
-        internal TokenDecryptionResult DecryptToken(
+        internal Result<string, ITokenValidationError> DecryptToken(
             JsonWebToken jwtToken,
             ValidationParameters validationParameters,
             BaseConfiguration configuration,
             CallContext? callContext)
         {
             if (jwtToken == null)
-                return TokenDecryptionResult.NullParameterFailure(jwtToken, nameof(jwtToken));
+                return new(TokenValidationErrorCommon.NullParameter(nameof(jwtToken), 0x123123));
 
             if (validationParameters == null)
-                return TokenDecryptionResult.NullParameterFailure(jwtToken, nameof(validationParameters));
+                return new(TokenValidationErrorCommon.NullParameter(nameof(validationParameters), 0x123124));
 
             if (string.IsNullOrEmpty(jwtToken.Enc))
-                return new TokenDecryptionResult(
-                    jwtToken,
-                    ValidationFailureType.TokenDecryptionFailed,
-                    new ExceptionDetail(
-                        new MessageDetail(TokenLogMessages.IDX10612),
-                        ValidationErrorType.SecurityToken));
+                return new(new TokenValidationError(
+                    ValidationErrorType.SecurityTokenDecryptionFailed,
+                    new MessageDetail(TokenLogMessages.IDX10612),
+                    Tag: 0x123125,
+                    null));
 
             var keysOrExceptionDetail = GetContentEncryptionKeys(jwtToken, validationParameters, configuration, callContext);
-            if (keysOrExceptionDetail.Item2 != null) // ExceptionDetail returned
-                return new TokenDecryptionResult(
-                    jwtToken,
-                    ValidationFailureType.TokenDecryptionFailed,
-                    keysOrExceptionDetail.Item2);
+            if (keysOrExceptionDetail.Item2 != null) // TokenValidationError returned
+                return new(keysOrExceptionDetail.Item2);
 
             var keys = keysOrExceptionDetail.Item1;
             if (keys == null)
-                return new TokenDecryptionResult(
-                    jwtToken,
-                    ValidationFailureType.TokenDecryptionFailed,
-                    new ExceptionDetail(
-                        new MessageDetail(
-                            TokenLogMessages.IDX10609,
-                            LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken)),
-                        ValidationErrorType.SecurityTokenDecryptionFailed));
+                return new(new TokenValidationError(
+                    ValidationErrorType.SecurityTokenKeyWrap,
+                    new MessageDetail(
+                        TokenLogMessages.IDX10609,
+                        LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken)),
+                    Tag: 0x123126,
+                    null));
 
             return JwtTokenUtilities.DecryptJwtToken(
                 jwtToken,
@@ -79,7 +68,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 callContext);
         }
 
-        internal (IList<SecurityKey>?, ExceptionDetail?) GetContentEncryptionKeys(JsonWebToken jwtToken, ValidationParameters validationParameters, BaseConfiguration configuration, CallContext? callContext)
+        internal (IList<SecurityKey>?, TokenValidationError?) GetContentEncryptionKeys(JsonWebToken jwtToken, ValidationParameters validationParameters, BaseConfiguration configuration, CallContext? callContext)
         {
             IList<SecurityKey>? keys = null;
 
@@ -196,14 +185,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return (unwrappedKeys, null);
             else
             {
-                ExceptionDetail exceptionDetail = new(
+                TokenValidationError tokenValidationError = new(
+                    ValidationErrorType.SecurityTokenKeyWrap,
                     new MessageDetail(
                         TokenLogMessages.IDX10618,
                         keysAttempted?.ToString() ?? "",
                         exceptionStrings?.ToString() ?? "",
                         LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken)),
-                    ValidationErrorType.SecurityTokenKeyWrap);
-                return (null, exceptionDetail);
+                    Tag: 0x123126,
+                    null);
+
+                return (null, tokenValidationError);
             }
         }
 

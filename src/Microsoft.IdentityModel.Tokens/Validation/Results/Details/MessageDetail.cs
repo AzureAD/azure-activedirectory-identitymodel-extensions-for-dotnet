@@ -8,7 +8,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// Contains information about a message that is used to generate a message for logging or exceptions.
     /// </summary>
-    internal struct MessageDetail
+    internal class MessageDetail
     {
         private string _message;
 
@@ -25,6 +25,9 @@ namespace Microsoft.IdentityModel.Tokens
             FormatString = formatString;
             Parameters = parameters;
         }
+
+        public static MessageDetail NullParameter(string parameterName)
+            => new MessageDetail(LogMessages.IDX10000, LogHelper.MarkAsNonPII(parameterName));
 
         /// <summary>
         /// Gets the formatted message.

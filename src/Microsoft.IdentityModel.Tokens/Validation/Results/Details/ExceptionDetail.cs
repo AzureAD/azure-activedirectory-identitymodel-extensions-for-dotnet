@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -40,12 +39,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// Creates an instance of an <see cref="Exception"/> using <see cref="ExceptionDetail"/>
         /// </summary>
         /// <returns>An instantance of an Exception.</returns>
-        public Exception GetException() => ExceptionFromType(Type, InnerException);
+        public Exception GetException() => ExceptionFromType(Type, MessageDetail, InnerException);
 
         internal static ExceptionDetail NullParameter(string parameterName) => new ExceptionDetail(
-            new MessageDetail(
-                LogMessages.IDX10000,
-                LogHelper.MarkAsNonPII(parameterName)),
+            MessageDetail.NullParameter(parameterName),
             ValidationErrorType.ArgumentNull);
 
         /// <summary>
@@ -68,50 +65,55 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public IList<StackFrame> StackFrames { get; } = [];
 
-        public Exception ExceptionFromType(ValidationErrorType exceptionType, Exception innerException)
+        public static Exception ExceptionFromType(
+            ValidationErrorType exceptionType,
+            MessageDetail messageDetail,
+            Exception innerException)
         {
             switch (exceptionType)
             {
                 case ValidationErrorType.ArgumentNull:
-                    return new ArgumentNullException(MessageDetail.Message, innerException);
+                    return new ArgumentNullException(messageDetail.Message, innerException);
+                case ValidationErrorType.InvalidArgument:
+                    return new ArgumentException(messageDetail.Message, innerException);
                 case ValidationErrorType.InvalidOperation:
-                    return new InvalidOperationException(MessageDetail.Message, innerException);
+                    return new InvalidOperationException(messageDetail.Message, innerException);
                 case ValidationErrorType.SecurityToken:
-                    return new SecurityTokenException(MessageDetail.Message, innerException);
+                    return new SecurityTokenException(messageDetail.Message, innerException);
                 case ValidationErrorType.SecurityTokenDecompressionFailed:
-                    return new SecurityTokenDecompressionFailedException(MessageDetail.Message, innerException);
+                    return new SecurityTokenDecompressionFailedException(messageDetail.Message, innerException);
                 case ValidationErrorType.SecurityTokenDecryptionFailed:
-                    return new SecurityTokenDecryptionFailedException(MessageDetail.Message, innerException);
+                    return new SecurityTokenDecryptionFailedException(messageDetail.Message, innerException);
                 case ValidationErrorType.SecurityTokenExpired:
-                    return new SecurityTokenExpiredException(MessageDetail.Message, innerException);
+                    return new SecurityTokenExpiredException(messageDetail.Message, innerException);
                 case ValidationErrorType.SecurityTokenInvalidAudience:
-                    return new SecurityTokenInvalidAudienceException(MessageDetail.Message, innerException);
+                    return new SecurityTokenInvalidAudienceException(messageDetail.Message, innerException);
                 case ValidationErrorType.SecurityTokenInvalidAlgorithm:
-                    return new SecurityTokenInvalidAlgorithmException(MessageDetail.Message, innerException);
+                    return new SecurityTokenInvalidAlgorithmException(messageDetail.Message, innerException);
                 case ValidationErrorType.SecurityTokenInvalidIssuer:
-                    return new SecurityTokenInvalidIssuerException(MessageDetail.Message, innerException);
+                    return new SecurityTokenInvalidIssuerException(messageDetail.Message, innerException);
                 case ValidationErrorType.SecurityTokenInvalidLifetime:
-                    return new SecurityTokenInvalidLifetimeException(MessageDetail.Message, innerException);
+                    return new SecurityTokenInvalidLifetimeException(messageDetail.Message, innerException);
                 case ValidationErrorType.SecurityTokenInvalidSignature:
-                    return new SecurityTokenInvalidSignatureException(MessageDetail.Message, innerException);
+                    return new SecurityTokenInvalidSignatureException(messageDetail.Message, innerException);
                 case ValidationErrorType.SecurityTokenInvalidSigningKey:
-                    return new SecurityTokenInvalidSigningKeyException(MessageDetail.Message, innerException);
+                    return new SecurityTokenInvalidSigningKeyException(messageDetail.Message, innerException);
                 case ValidationErrorType.SecurityTokenInvalidType:
-                    return new SecurityTokenInvalidTypeException(MessageDetail.Message, innerException);
+                    return new SecurityTokenInvalidTypeException(messageDetail.Message, innerException);
                 case ValidationErrorType.SecurityTokenKeyWrap:
-                    return new SecurityTokenKeyWrapException(MessageDetail.Message, innerException);
+                    return new SecurityTokenKeyWrapException(messageDetail.Message, innerException);
                 case ValidationErrorType.SecurityTokenMalformed:
-                    return new SecurityTokenMalformedException(MessageDetail.Message, innerException);
+                    return new SecurityTokenMalformedException(messageDetail.Message, innerException);
                 case ValidationErrorType.SecurityTokenNoExpiration:
-                    return new SecurityTokenNoExpirationException(MessageDetail.Message, innerException);
+                    return new SecurityTokenNoExpirationException(messageDetail.Message, innerException);
                 case ValidationErrorType.SecurityTokenNotYetValid:
-                    return new SecurityTokenNotYetValidException(MessageDetail.Message, innerException);
+                    return new SecurityTokenNotYetValidException(messageDetail.Message, innerException);
                 case ValidationErrorType.SecurityTokenReplayDetected:
-                    return new SecurityTokenReplayDetectedException(MessageDetail.Message, innerException);
+                    return new SecurityTokenReplayDetectedException(messageDetail.Message, innerException);
                 case ValidationErrorType.SecurityTokenReplayAddFailed:
-                    return new SecurityTokenReplayAddFailedException(MessageDetail.Message, innerException);
+                    return new SecurityTokenReplayAddFailedException(messageDetail.Message, innerException);
                 case ValidationErrorType.SecurityTokenSignatureKeyNotFound:
-                    return new SecurityTokenSignatureKeyNotFoundException(MessageDetail.Message, innerException);
+                    return new SecurityTokenSignatureKeyNotFoundException(messageDetail.Message, innerException);
                 default:
                     throw new ArgumentException("Invalid ExceptionType.");
             }

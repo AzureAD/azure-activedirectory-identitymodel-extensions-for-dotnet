@@ -250,19 +250,21 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns><c>true</c> if the exception is certain types of exceptions otherwise, <c>false</c>.</returns>
         internal static bool IsRecoverableException(Exception exception)
         {
-            return IsRecoverableExceptionType(ExceptionTypeForException(exception));
+            return IsRecoverableErrorType(ErrorTypeForException(exception));
         }
 
         /// <summary>
         /// Check whether the given exception type is recoverable by LKG.
         /// </summary>
-        /// <param name="exceptionType">The exception type to check.</param>
+        /// <param name="errorType">The exception type to check.</param>
         /// <returns><c>true</c> if the exception is certain types of exceptions otherwise, <c>false</c>.</returns>
-        internal static bool IsRecoverableExceptionType(ValidationErrorType exceptionType)
+        internal static bool IsRecoverableErrorType(ValidationErrorType? errorType)
         {
-            return exceptionType == ValidationErrorType.SecurityTokenInvalidSignature
-                  || exceptionType == ValidationErrorType.SecurityTokenInvalidIssuer
-                  || exceptionType == ValidationErrorType.SecurityTokenSignatureKeyNotFound;
+            ValidationErrorType typeToCheck = errorType ?? ValidationErrorType.Unknown;
+
+            return typeToCheck == ValidationErrorType.SecurityTokenInvalidSignature
+                  || typeToCheck == ValidationErrorType.SecurityTokenInvalidIssuer
+                  || typeToCheck == ValidationErrorType.SecurityTokenSignatureKeyNotFound;
         }
 
         /// <summary>
@@ -277,7 +279,7 @@ namespace Microsoft.IdentityModel.Tokens
             string kid, BaseConfiguration currentConfiguration, BaseConfiguration lkgConfiguration, Exception currentException)
         {
             return IsRecoverableConfigurationAndExceptionType(
-                kid, currentConfiguration, lkgConfiguration, ExceptionTypeForException(currentException));
+                kid, currentConfiguration, lkgConfiguration, ErrorTypeForException(currentException));
         }
 
         /// <summary>
@@ -314,7 +316,7 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
 
-        static ValidationErrorType ExceptionTypeForException(Exception exception)
+        static ValidationErrorType ErrorTypeForException(Exception exception)
         {
             if (exception is SecurityTokenInvalidSignatureException)
                 return ValidationErrorType.SecurityTokenInvalidSignature;

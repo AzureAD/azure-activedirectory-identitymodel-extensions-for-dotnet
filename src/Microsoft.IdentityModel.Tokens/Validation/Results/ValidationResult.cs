@@ -1,89 +1,53 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-
 #nullable enable
+using System;
+
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
     /// Contains results of a single step in validating a <see cref="SecurityToken"/>.
     /// A <see cref="TokenValidationResult"/> maintains a list of <see cref="ValidationResult"/> for each step in the token validation.
     /// </summary>
-    internal abstract class ValidationResult
+    internal class ValidationResult
     {
-        private bool _isValid;
-
         /// <summary>
         /// Creates an instance of <see cref="ValidationResult"/>
         /// </summary>
-        protected ValidationResult()
+        /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
+        /// <param name="tokenHandler">The <see cref="TokenHandler"/> that is being used to validate the token.</param>
+        /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
+        internal ValidationResult(
+            SecurityToken securityToken,
+            TokenHandler tokenHandler,
+            ValidationParameters validationParameters)
         {
-            ValidationFailureType = ValidationFailureType.ValidationNotEvaluated;
+            TokenHandler = tokenHandler ?? throw new ArgumentNullException("TokenHandler cannot be null.");
+            SecurityToken = securityToken;
+            ValidationParameters = validationParameters;
+            IsValid = true;
         }
 
-        /// <summary>
-        /// Creates an instance of <see cref="ValidationResult"/>
-        /// </summary>
-        /// <param name="validationFailureType">The <see cref="ValidationFailureType"/> that occurred during validation.</param>
-        protected ValidationResult(ValidationFailureType validationFailureType)
+        public ValidationResult(
+            SecurityToken? securityToken,
+            TokenHandler tokenHandler,
+            ValidationParameters? validationParameters,
+            ITokenValidationError tokenValidationError)
         {
-            ValidationFailureType = validationFailureType;
+            TokenHandler = tokenHandler ?? throw new ArgumentNullException("TokenHandler cannot be null.");
+            SecurityToken = securityToken;
+            ValidationParameters = validationParameters;
+            TokenValidationError = tokenValidationError;
+            IsValid = false;
         }
-
-        /// <summary>
-        /// Creates an instance of <see cref="ValidationResult"/>
-        /// </summary>
-        /// <param name="validationFailureType">The <see cref="ValidationFailureType"/> that occurred during validation.</param>
-        /// <param name="exceptionDetail"> The <see cref="ExceptionDetail"/> representing the <see cref="Exception"/> that occurred during validation.</param>
-        protected ValidationResult(ValidationFailureType validationFailureType, ExceptionDetail? exceptionDetail)
-        {
-            ValidationFailureType = validationFailureType;
-            ExceptionDetail = exceptionDetail;
-        }
-
-        /// <summary>
-        /// Adds a new stack frame to the exception details.
-        /// </summary>
-        /// <param name="stackFrame"></param>
-        public void AddStackFrame(StackFrame stackFrame)
-        {
-            ExceptionDetail?.StackFrames.Add(stackFrame);
-        }
-
-        /// <summary>
-        /// Gets the <see cref="Exception"/> that occurred during validation.
-        /// </summary>
-        public abstract Exception? Exception { get; }
-
-        /// <summary>
-        /// Gets the <see cref="ExceptionDetail"/> that occurred during validation.
-        /// </summary>
-        public ExceptionDetail? ExceptionDetail { get; }
 
         /// <summary>
         /// True if the token was successfully validated, false otherwise.
         /// </summary>
-        public bool IsValid
-        {
-            get
-            {
-                HasValidOrExceptionWasRead = true;
-                return _isValid;
-            }
-            set
-            {
-                _isValid = value;
-            }
-        }
+        public bool IsValid { get; private set; }
 
-        // TODO - HasValidOrExceptionWasRead, IsValid, Exception are temporary and will be removed when TokenValidationResult derives from ValidationResult.
-        /// <summary>
-        /// Gets or sets a boolean recording if IsValid or Exception was called.
-        /// </summary>
-        protected bool HasValidOrExceptionWasRead { get; set; }
+        public ITokenValidationError? TokenValidationError { get; private set; }
 
         /// <summary>
         /// Logs the validation result.
@@ -95,18 +59,23 @@ namespace Microsoft.IdentityModel.Tokens
             // TODO - Do we need this, how will it work?
         }
 
-        /// <summary>
-        /// Contains any logs that would have been written.
-        /// </summary>
-        public IList<LogDetail> LogDetails { get; } = new List<LogDetail>();
+        public SecurityToken? SecurityToken { get; private set; }
 
-        /// <summary>
-        /// Gets the <see cref="ValidationFailureType"/> indicating why the validation was not satisfied.
-        /// </summary>
-        public ValidationFailureType ValidationFailureType
-        {
-            get;
-        } = ValidationFailureType.ValidationNotEvaluated;
+        public TokenHandler TokenHandler { get; private set; }
+
+        public ValidationParameters? ValidationParameters { get; private set; }
+
+        #region Validation Results
+        public ValidationResult? ActorValidationResult { get; internal set; }
+        public string? ValidatedAudience { get; internal set; }
+        public ValidatedIssuer ValidatedIssuer { get; internal set; }
+        public ValidatedLifetime? ValidatedLifetime { get; internal set; }
+        public DateTime? ValidatedTokenReplayExpirationTime { get; internal set; }
+        public ValidatedTokenType? ValidatedTokenType { get; internal set; }
+        public SecurityKey? ValidatedSigningKey { get; internal set; }
+        public ValidatedSigningKeyLifetime? ValidatedSigningKeyLifetime { get; internal set; }
+        #endregion
+
     }
 }
 #nullable disable

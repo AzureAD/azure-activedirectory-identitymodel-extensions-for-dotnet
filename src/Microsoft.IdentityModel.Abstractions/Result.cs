@@ -82,13 +82,9 @@ namespace Microsoft.IdentityModel.Abstractions
         public override int GetHashCode()
         {
             if (IsSuccess)
-            {
                 return _result!.GetHashCode();
-            }
             else
-            {
                 return _error!.GetHashCode();
-            }
         }
 
         /// <summary>
