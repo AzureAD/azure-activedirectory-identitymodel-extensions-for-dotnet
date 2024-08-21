@@ -69,28 +69,34 @@ namespace Microsoft.IdentityModel.Protocols.Tests
         }
 
         [Fact]
-        public void ConfigurationManagerUsingCustomClass()
+        public async Task ConfigurationManagerUsingCustomClass()
         {
             var docRetriever = new FileDocumentRetriever();
             var configManager = new ConfigurationManager<IssuerMetadata>("IssuerMetadata.json", new IssuerConfigurationRetriever(), docRetriever);
-            var context = new CompareContext($"{this}.GetConfiguration");
+            var context = new CompareContext($"{this}.ConfigurationManagerUsingCustomClass");
 
             var configuration = configManager.GetConfigurationAsync().Result;
             configManager.MetadataAddress = "IssuerMetadata.json";
             var configuration2 = configManager.GetConfigurationAsync().Result;
-            if (!IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer))
+            if (!IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer, context))
                 context.Diffs.Add("!IdentityComparer.AreEqual(configuration, configuration2)");
 
             // AutomaticRefreshInterval should pick up new bits.
             configManager = new ConfigurationManager<IssuerMetadata>("IssuerMetadata.json", new IssuerConfigurationRetriever(), docRetriever);
             configManager.RequestRefresh();
             configuration = configManager.GetConfigurationAsync().Result;
-            TestUtilities.SetField(configManager, "_lastRefresh", DateTimeOffset.UtcNow - TimeSpan.FromHours(1));
+            TestUtilities.SetField(configManager, "_lastRequestRefresh", DateTimeOffset.UtcNow - TimeSpan.FromHours(1));
             configManager.MetadataAddress = "IssuerMetadata2.json";
             configManager.RequestRefresh();
-            configuration2 = configManager.GetConfigurationAsync().Result;
-            if (IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer))
-                context.Diffs.Add("IdentityComparer.AreEqual(configuration, configuration2)");
+
+            // Wait for the refresh to complete.
+            await Task.Delay(250).ContinueWith(_ =>
+            {
+
+                configuration2 = configManager.GetConfigurationAsync().GetAwaiter().GetResult();
+                if (IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer))
+                    context.Diffs.Add("IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer)");
+            });
 
             TestUtilities.AssertFailIfErrors(context);
         }

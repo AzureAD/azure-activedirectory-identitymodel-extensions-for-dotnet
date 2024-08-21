@@ -2483,7 +2483,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var tokenValidationResult = theoryData.JsonWebTokenHandler.ValidateTokenAsync(jwtString, theoryData.ValidationParameters).Result;
             var validatedToken = tokenValidationResult.SecurityToken as JsonWebToken;
             var claimsIdentity = tokenValidationResult.ClaimsIdentity;
-            IdentityComparer.AreEqual(new ClaimsIdentity("AuthenticationTypes.Federation"), claimsIdentity, context);
+            IdentityComparer.AreEqual(new CaseSensitiveClaimsIdentity("AuthenticationTypes.Federation"), claimsIdentity, context);
             IdentityComparer.AreEqual("", Base64UrlEncoder.Decode(validatedToken.EncodedPayload), context);
 
             TestUtilities.AssertFailIfErrors(context);

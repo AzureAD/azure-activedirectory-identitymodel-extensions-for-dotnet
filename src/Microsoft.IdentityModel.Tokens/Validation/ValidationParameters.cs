@@ -231,7 +231,9 @@ namespace Microsoft.IdentityModel.Tokens
             //if (LogHelper.IsEnabled(EventLogLevel.Informational))
             //    LogHelper.LogInformation(LogMessages.IDX10245, securityToken);
 
+#pragma warning disable RS0030 // Do not use banned APIs
             return new ClaimsIdentity(authenticationType: AuthenticationType ?? DefaultAuthenticationType, nameType: nameClaimType ?? ClaimsIdentity.DefaultNameClaimType, roleType: roleClaimType ?? ClaimsIdentity.DefaultRoleClaimType);
+#pragma warning disable RS0030 // Do not use banned APIs
         }
 
         /// <summary>

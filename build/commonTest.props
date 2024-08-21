@@ -29,6 +29,7 @@
     <NoWarn>$(NoWarn);SYSLIB0050</NoWarn>
     <NoWarn>$(NoWarn);SYSLIB0051</NoWarn>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <NoWarn>$(NoWarn);SYSLIB0057</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -39,4 +40,12 @@
     <PackageReference Include="xunit" Version="$(XunitVersion)" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="$(BannedApiAnalyzersVersion)">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)..\BannedSymbols.txt" />
+  </ItemGroup>
+  
 </Project>
