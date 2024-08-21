@@ -4,6 +4,8 @@
 #nullable enable
 
 using System;
+//using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -11,17 +13,34 @@ namespace Microsoft.IdentityModel.Tokens
     {
         ValidationErrorType ErrorType { get; }
         MessageDetail MessageDetail { get; }
-        int Tag { get; }
-
         Exception? InnerException { get; }
     }
 
-    internal record struct TokenValidationError(
-        ValidationErrorType ErrorType,
-        MessageDetail MessageDetail,
-        int Tag,
-        Exception? InnerException) : ITokenValidationError
+    internal struct TokenValidationError : ITokenValidationError
     {
+        public ValidationErrorType ErrorType { get; }
+        public MessageDetail MessageDetail { get; }
+        public Exception? InnerException { get; }
+        public string CallerFilePath { get; }
+        public int CallerLineNumber { get; }
+
+        //private StackFrame? _stackFrame;
+
+        public TokenValidationError(
+            ValidationErrorType errorType,
+            MessageDetail messageDetail,
+            Exception? innerException,
+            [CallerFilePath] string callerFilePath = "",
+            [CallerLineNumber] int callerLineNumber = 0)
+        {
+            ErrorType = errorType;
+            MessageDetail = messageDetail;
+            InnerException = innerException;
+            CallerFilePath = callerFilePath;
+            CallerLineNumber = callerLineNumber;
+
+            //_stackFrame = new StackFrame();
+        }
     }
 
     /// <summary>
@@ -33,10 +52,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// 
         /// </summary>
         /// <param name="parameterName"></param>
-        /// <param name="tag"></param>
         /// <returns></returns>
-        internal static TokenValidationError NullParameter(string parameterName, int tag)
-            => new(ValidationErrorType.ArgumentNull, MessageDetail.NullParameter(parameterName), tag, null);
+        internal static TokenValidationError NullParameter(
+            string parameterName,
+#pragma warning disable CS1573 // Parameter has no matching param tag in the XML comment (but other parameters do)
+            [CallerFilePath] string callerFilePath = "",
+            [CallerLineNumber] int callerLineNumber = 0)
+#pragma warning restore CS1573 // Parameter has no matching param tag in the XML comment (but other parameters do)
+            => new(ValidationErrorType.ArgumentNull, MessageDetail.NullParameter(parameterName), null, callerFilePath, callerLineNumber);
     }
 
     internal enum ValidationErrorType

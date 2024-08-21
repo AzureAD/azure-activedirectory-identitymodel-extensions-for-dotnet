@@ -27,10 +27,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             CallContext callContext)
         {
             if (validationParameters == null)
-                return new(TokenValidationErrorCommon.NullParameter(nameof(validationParameters), 0x123141));
+                return TokenValidationErrorCommon.NullParameter(nameof(validationParameters));
 
             if (decryptionParameters == null)
-                return new(TokenValidationErrorCommon.NullParameter(nameof(decryptionParameters), 0x123142));
+                return TokenValidationErrorCommon.NullParameter(nameof(decryptionParameters));
 
             bool decryptionSucceeded = false;
             bool algorithmNotSupportedByCryptoProvider = false;
@@ -96,12 +96,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             if (!decryptionSucceeded)
-                return new(GetDecryptionError(
+                return GetDecryptionError(
                     decryptionParameters,
                     algorithmNotSupportedByCryptoProvider,
                     exceptionStrings,
                     keysAttempted,
-                    callContext));
+                    callContext);
 
             try
             {
@@ -111,17 +111,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 else
                     decodedString = decryptionParameters.DecompressionFunction(decryptedTokenBytes, zipAlgorithm, decryptionParameters.MaximumDeflateSize);
 
-                return new(decodedString);
+                return decodedString;
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                return new(new TokenValidationError(
+                return new TokenValidationError(
                     ValidationErrorType.SecurityTokenDecompressionFailed,
                     new MessageDetail(TokenLogMessages.IDX10679, zipAlgorithm),
-                    0x123123,
-                    ex));
+                    ex);
             }
         }
     }

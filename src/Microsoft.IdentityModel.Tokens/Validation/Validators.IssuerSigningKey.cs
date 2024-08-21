@@ -57,19 +57,18 @@ namespace Microsoft.IdentityModel.Tokens
             CallContext? callContext)
         {
             if (validationParameters == null)
-                return new(TokenValidationErrorCommon.NullParameter(nameof(validationParameters), 0x123123));
+                return TokenValidationErrorCommon.NullParameter(nameof(validationParameters));
 
             if (securityKey == null)
-                return new(new TokenValidationError(
+                return new TokenValidationError(
                     ValidationErrorType.ArgumentNull,
                     new MessageDetail(
                         LogMessages.IDX10253,
                         nameof(securityKey)),
-                    0x123123,
-                    null));
+                    null);
 
             if (securityToken == null)
-                return new(TokenValidationErrorCommon.NullParameter(nameof(securityToken), 0x123123));
+                return TokenValidationErrorCommon.NullParameter(nameof(securityToken));
 
             return ValidateIssuerSigningKeyLifeTime(securityKey, validationParameters, callContext);
         }
@@ -98,35 +97,33 @@ namespace Microsoft.IdentityModel.Tokens
                 notAfterUtc = cert.NotAfter.ToUniversalTime();
 
                 if (notBeforeUtc > DateTimeUtil.Add(utcNow, validationParameters.ClockSkew))
-                    return new(new TokenValidationError(
+                    return new TokenValidationError(
                         ValidationErrorType.SecurityTokenInvalidSigningKey,
                         new MessageDetail(
                             LogMessages.IDX10248,
                             LogHelper.MarkAsNonPII(notBeforeUtc),
                             LogHelper.MarkAsNonPII(utcNow)),
-                        0x123123,
-                        null));
+                        null);
 
                 //TODO: Move to CallContext
                 //if (LogHelper.IsEnabled(EventLogLevel.Informational))
                 //    LogHelper.LogInformation(LogMessages.IDX10250, LogHelper.MarkAsNonPII(notBeforeUtc), LogHelper.MarkAsNonPII(utcNow));
 
                 if (notAfterUtc < DateTimeUtil.Add(utcNow, validationParameters.ClockSkew.Negate()))
-                    return new(new TokenValidationError(
+                    return new TokenValidationError(
                         ValidationErrorType.SecurityTokenInvalidSigningKey,
                         new MessageDetail(
                             LogMessages.IDX10249,
                             LogHelper.MarkAsNonPII(notAfterUtc),
                             LogHelper.MarkAsNonPII(utcNow)),
-                        0x123123,
-                        null));
+                        null);
 
                 // TODO: Move to CallContext
                 //if (LogHelper.IsEnabled(EventLogLevel.Informational))
                 //   LogHelper.LogInformation(LogMessages.IDX10251, LogHelper.MarkAsNonPII(notAfterUtc), LogHelper.MarkAsNonPII(utcNow));
             }
 
-            return new(new ValidatedSigningKeyLifetime(notBeforeUtc, notAfterUtc, utcNow));
+            return new ValidatedSigningKeyLifetime(notBeforeUtc, notAfterUtc, utcNow);
         }
     }
 }

@@ -27,22 +27,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 #pragma warning disable CA1801 // TODO: remove pragma disable once callContext is used for logging
         {
             if (String.IsNullOrEmpty(token))
-                return new(TokenValidationErrorCommon.NullParameter(nameof(token), 0x123123));
+                return TokenValidationErrorCommon.NullParameter(nameof(token));
 
             try
             {
                 JsonWebToken jsonWebToken = new JsonWebToken(token);
-                return new(jsonWebToken);
+                return jsonWebToken;
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                return new(new TokenValidationError(
+                return new TokenValidationError(
                     ValidationErrorType.SecurityTokenMalformed,
                     new MessageDetail(LogMessages.IDX14107),
-                    Tag: 0x123456,
-                    null));
+                    null);
             }
         }
     }

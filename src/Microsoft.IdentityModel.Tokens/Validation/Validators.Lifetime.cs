@@ -57,53 +57,49 @@ namespace Microsoft.IdentityModel.Tokens
 #pragma warning restore CA1801
         {
             if (validationParameters == null)
-                return new(TokenValidationErrorCommon.NullParameter(nameof(validationParameters), 0x123123));
+                return TokenValidationErrorCommon.NullParameter(nameof(validationParameters));
 
             if (!expires.HasValue)
-                return new(new TokenValidationError(
+                return new TokenValidationError(
                     ValidationErrorType.SecurityTokenNoExpiration,
                     new MessageDetail(
                         LogMessages.IDX10225,
                         LogHelper.MarkAsNonPII(securityToken == null ? "null" : securityToken.GetType().ToString())),
-                    0x123123,
-                    null));
+                    null);
 
             if (notBefore.HasValue && expires.HasValue && (notBefore.Value > expires.Value))
-                return new(new TokenValidationError(
+                return new TokenValidationError(
                     ValidationErrorType.SecurityTokenInvalidLifetime,
                     new MessageDetail(
                         LogMessages.IDX10224,
                         LogHelper.MarkAsNonPII(notBefore.Value),
                         LogHelper.MarkAsNonPII(expires.Value)),
-                    0x123123,
-                    null));
+                    null);
 
             DateTime utcNow = DateTime.UtcNow;
             if (notBefore.HasValue && (notBefore.Value > DateTimeUtil.Add(utcNow, validationParameters.ClockSkew)))
-                return new(new TokenValidationError(
+                return new TokenValidationError(
                     ValidationErrorType.SecurityTokenNotYetValid,
                     new MessageDetail(
                         LogMessages.IDX10222,
                         LogHelper.MarkAsNonPII(notBefore.Value),
                         LogHelper.MarkAsNonPII(utcNow)),
-                    0x123123,
-                    null));
+                    null);
 
             if (expires.HasValue && (expires.Value < DateTimeUtil.Add(utcNow, validationParameters.ClockSkew.Negate())))
-                return new(new TokenValidationError(
+                return new TokenValidationError(
                     ValidationErrorType.SecurityTokenExpired,
                     new MessageDetail(
                         LogMessages.IDX10223,
                         LogHelper.MarkAsNonPII(expires.Value),
                         LogHelper.MarkAsNonPII(utcNow)),
-                    0x123123,
-                    null));
+                    null);
 
             // if it reaches here, that means lifetime of the token is valid
             if (LogHelper.IsEnabled(EventLogLevel.Informational))
                 LogHelper.LogInformation(LogMessages.IDX10239);
 
-            return new(new ValidatedLifetime(notBefore, expires));
+            return new ValidatedLifetime(notBefore, expires);
         }
     }
 }

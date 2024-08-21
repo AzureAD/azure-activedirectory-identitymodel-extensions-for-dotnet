@@ -63,17 +63,16 @@ namespace Microsoft.IdentityModel.Tokens
             CancellationToken? cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(issuer))
-                return new(new TokenValidationError(
+                return new TokenValidationError(
                     ValidationErrorType.SecurityTokenInvalidIssuer,
                     new MessageDetail(LogMessages.IDX10211),
-                    0x123123,
-                    null));
+                    null);
 
             if (validationParameters == null)
-                return new(TokenValidationErrorCommon.NullParameter(nameof(validationParameters), 0x123123));
+                return TokenValidationErrorCommon.NullParameter(nameof(validationParameters));
 
             if (securityToken == null)
-                return new(TokenValidationErrorCommon.NullParameter(nameof(securityToken), 0x123123));
+                return TokenValidationErrorCommon.NullParameter(nameof(securityToken));
 
             BaseConfiguration? configuration = null;
             if (validationParameters.ConfigurationManager != null)
@@ -81,11 +80,10 @@ namespace Microsoft.IdentityModel.Tokens
 
             // Return failed IssuerValidationResult if all possible places to validate against are null or empty.
             if (validationParameters.ValidIssuers.Count == 0 && string.IsNullOrWhiteSpace(configuration?.Issuer))
-                return new(new TokenValidationError(
+                return new TokenValidationError(
                     ValidationErrorType.SecurityTokenInvalidIssuer,
                     new MessageDetail(LogMessages.IDX10211),
-                    0x123123,
-                    null));
+                    null);
 
             if (configuration != null)
             {
@@ -99,7 +97,7 @@ namespace Microsoft.IdentityModel.Tokens
                     //    LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer), callContext);
 
 
-                    return new(new ValidatedIssuer(issuer, IssuerValidationSource.IssuerIsConfigurationIssuer));
+                    return new ValidatedIssuer(issuer, IssuerValidationSource.IssuerIsConfigurationIssuer);
                 }
             }
 
@@ -122,20 +120,19 @@ namespace Microsoft.IdentityModel.Tokens
                         //if (LogHelper.IsEnabled(EventLogLevel.Informational))
                         //    LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer));
 
-                        return new(new ValidatedIssuer(issuer, IssuerValidationSource.IssuerIsAmongValidIssuers));
+                        return new ValidatedIssuer(issuer, IssuerValidationSource.IssuerIsAmongValidIssuers);
                     }
                 }
             }
 
-            return new(new TokenValidationError(
+            return new TokenValidationError(
                 ValidationErrorType.SecurityTokenInvalidIssuer,
                 new MessageDetail(
                     LogMessages.IDX10212,
                     LogHelper.MarkAsNonPII(issuer),
                     LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers)),
                     LogHelper.MarkAsNonPII(configuration?.Issuer)),
-                0x123123,
-                null));
+                null);
         }
     }
 #nullable restore

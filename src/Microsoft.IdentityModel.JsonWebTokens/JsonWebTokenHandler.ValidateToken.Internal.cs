@@ -45,14 +45,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     null,
                     this,
                     validationParameters,
-                    TokenValidationErrorCommon.NullParameter(nameof(token), tag: 0x121211));
+                    TokenValidationErrorCommon.NullParameter(nameof(token)));
 
             if (validationParameters is null)
                 return new ValidationResult(
                     null,
                     this,
                     validationParameters,
-                    TokenValidationErrorCommon.NullParameter(nameof(validationParameters), tag: 0x121212));
+                    TokenValidationErrorCommon.NullParameter(nameof(validationParameters)));
 
             if (token.Length > MaximumTokenSizeInBytes)
                 return new ValidationResult(
@@ -62,13 +62,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     new TokenValidationError(
                         ValidationErrorType.InvalidArgument,
                         new MessageDetail(TokenLogMessages.IDX10209, LogHelper.MarkAsNonPII(token.Length), LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes)),
-                        Tag: 0x121213,
                         null));
 
             Result<SecurityToken, ITokenValidationError> result = ReadToken(token, callContext);
             if (result.IsSuccess)
                 return await ValidateTokenAsync(
-                    result.Unwrap(),
+                    result.UnwrapResult(),
                     validationParameters,
                     callContext,
                     cancellationToken)
@@ -93,14 +92,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     token,
                     this,
                     validationParameters,
-                    TokenValidationErrorCommon.NullParameter(nameof(token), tag: 0x121211));
+                    TokenValidationErrorCommon.NullParameter(nameof(token)));
 
             if (validationParameters is null)
                 return new ValidationResult(
                     token,
                     this,
                     validationParameters,
-                    TokenValidationErrorCommon.NullParameter(nameof(validationParameters), tag: 0x121212));
+                    TokenValidationErrorCommon.NullParameter(nameof(validationParameters)));
 
             if (token is not JsonWebToken jwt)
                 return new ValidationResult(
@@ -110,7 +109,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     new TokenValidationError(
                         ValidationErrorType.InvalidArgument,
                         new MessageDetail(TokenLogMessages.IDX10001, nameof(token), nameof(JsonWebToken)),
-                        Tag: 0x121214,
                         null));
 
             return await InternalValidateTokenAsync(
@@ -225,12 +223,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (!decryptionResult.IsSuccess)
                 return new ValidationResult(jwtToken, this, validationParameters, decryptionResult.UnwrapError());
 
-            Result<SecurityToken, ITokenValidationError> readResult = ReadToken(decryptionResult.Unwrap(), callContext);
+            Result<SecurityToken, ITokenValidationError> readResult = ReadToken(decryptionResult.UnwrapResult(), callContext);
 
             if (!readResult.IsSuccess)
                 return new ValidationResult(jwtToken, this, validationParameters, readResult.UnwrapError());
 
-            JsonWebToken decryptedToken = readResult.Unwrap() as JsonWebToken;
+            JsonWebToken decryptedToken = readResult.UnwrapResult() as JsonWebToken;
 
             ValidationResult validationResult =
                 await ValidateJWSAsync(decryptedToken, validationParameters, configuration, callContext, cancellationToken)
@@ -270,7 +268,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (!audienceValidationResult.IsSuccess)
                 return new ValidationResult(jsonWebToken, this, validationParameters, audienceValidationResult.UnwrapError())
                 {
-                    ValidatedLifetime = lifetimeValidationResult.Unwrap()
+                    ValidatedLifetime = lifetimeValidationResult.UnwrapResult()
                 };
 
             Result<ValidatedIssuer, ITokenValidationError> issuerValidationResult = await validationParameters.IssuerValidatorAsync(
@@ -280,8 +278,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (!issuerValidationResult.IsSuccess)
                 return new ValidationResult(jsonWebToken, this, validationParameters, issuerValidationResult.UnwrapError())
                 {
-                    ValidatedLifetime = lifetimeValidationResult.Unwrap(),
-                    ValidatedAudience = audienceValidationResult.Unwrap()
+                    ValidatedLifetime = lifetimeValidationResult.UnwrapResult(),
+                    ValidatedAudience = audienceValidationResult.UnwrapResult()
                 };
 
             Result<DateTime?, ITokenValidationError> replayValidationResult = validationParameters.TokenReplayValidator(
@@ -290,9 +288,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (!replayValidationResult.IsSuccess)
                 return new ValidationResult(jsonWebToken, this, validationParameters, replayValidationResult.UnwrapError())
                 {
-                    ValidatedLifetime = lifetimeValidationResult.Unwrap(),
-                    ValidatedAudience = audienceValidationResult.Unwrap(),
-                    ValidatedIssuer = issuerValidationResult.Unwrap()
+                    ValidatedLifetime = lifetimeValidationResult.UnwrapResult(),
+                    ValidatedAudience = audienceValidationResult.UnwrapResult(),
+                    ValidatedIssuer = issuerValidationResult.UnwrapResult()
                 };
 
             ValidationResult actorValidationResult = null;
@@ -303,13 +301,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (!actorReadingResult.IsSuccess)
                     return new ValidationResult(jsonWebToken, this, validationParameters, actorReadingResult.UnwrapError())
                     {
-                        ValidatedLifetime = lifetimeValidationResult.Unwrap(),
-                        ValidatedAudience = audienceValidationResult.Unwrap(),
-                        ValidatedIssuer = issuerValidationResult.Unwrap(),
-                        ValidatedTokenReplayExpirationTime = replayValidationResult.Unwrap()
+                        ValidatedLifetime = lifetimeValidationResult.UnwrapResult(),
+                        ValidatedAudience = audienceValidationResult.UnwrapResult(),
+                        ValidatedIssuer = issuerValidationResult.UnwrapResult(),
+                        ValidatedTokenReplayExpirationTime = replayValidationResult.UnwrapResult()
                     };
 
-                JsonWebToken actorToken = actorReadingResult.Unwrap() as JsonWebToken;
+                JsonWebToken actorToken = actorReadingResult.UnwrapResult() as JsonWebToken;
                 ValidationParameters actorParameters = validationParameters.ActorValidationParameters;
                 actorValidationResult =
                     await ValidateJWSAsync(actorToken, actorParameters, configuration, callContext, cancellationToken)
@@ -320,10 +318,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (!actorValidationResult.IsValid)
                     return new ValidationResult(jsonWebToken, this, validationParameters, actorValidationResult.TokenValidationError)
                     {
-                        ValidatedLifetime = lifetimeValidationResult.Unwrap(),
-                        ValidatedAudience = audienceValidationResult.Unwrap(),
-                        ValidatedIssuer = issuerValidationResult.Unwrap(),
-                        ValidatedTokenReplayExpirationTime = replayValidationResult.Unwrap(),
+                        ValidatedLifetime = lifetimeValidationResult.UnwrapResult(),
+                        ValidatedAudience = audienceValidationResult.UnwrapResult(),
+                        ValidatedIssuer = issuerValidationResult.UnwrapResult(),
+                        ValidatedTokenReplayExpirationTime = replayValidationResult.UnwrapResult(),
                         ActorValidationResult = actorValidationResult
                     };
             }
@@ -334,10 +332,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (!typeValidationResult.IsSuccess)
                 return new ValidationResult(jsonWebToken, this, validationParameters, typeValidationResult.UnwrapError())
                 {
-                    ValidatedLifetime = lifetimeValidationResult.Unwrap(),
-                    ValidatedAudience = audienceValidationResult.Unwrap(),
-                    ValidatedIssuer = issuerValidationResult.Unwrap(),
-                    ValidatedTokenReplayExpirationTime = replayValidationResult.Unwrap(),
+                    ValidatedLifetime = lifetimeValidationResult.UnwrapResult(),
+                    ValidatedAudience = audienceValidationResult.UnwrapResult(),
+                    ValidatedIssuer = issuerValidationResult.UnwrapResult(),
+                    ValidatedTokenReplayExpirationTime = replayValidationResult.UnwrapResult(),
                     ActorValidationResult = actorValidationResult
                 };
 
@@ -348,39 +346,39 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (!signatureValidationResult.IsSuccess)
                 return new ValidationResult(jsonWebToken, this, validationParameters, signatureValidationResult.UnwrapError())
                 {
-                    ValidatedLifetime = lifetimeValidationResult.Unwrap(),
-                    ValidatedAudience = audienceValidationResult.Unwrap(),
-                    ValidatedIssuer = issuerValidationResult.Unwrap(),
-                    ValidatedTokenReplayExpirationTime = replayValidationResult.Unwrap(),
+                    ValidatedLifetime = lifetimeValidationResult.UnwrapResult(),
+                    ValidatedAudience = audienceValidationResult.UnwrapResult(),
+                    ValidatedIssuer = issuerValidationResult.UnwrapResult(),
+                    ValidatedTokenReplayExpirationTime = replayValidationResult.UnwrapResult(),
                     ActorValidationResult = actorValidationResult,
-                    ValidatedTokenType = typeValidationResult.Unwrap()
+                    ValidatedTokenType = typeValidationResult.UnwrapResult()
                 };
 
             Result<ValidatedSigningKeyLifetime, ITokenValidationError> issuerSigningKeyValidationResult = validationParameters.IssuerSigningKeyValidator(
-                signatureValidationResult.Unwrap(), jsonWebToken, validationParameters, configuration, callContext);
+                signatureValidationResult.UnwrapResult(), jsonWebToken, validationParameters, configuration, callContext);
 
             if (!issuerSigningKeyValidationResult.IsSuccess)
                 return new ValidationResult(jsonWebToken, this, validationParameters, issuerSigningKeyValidationResult.UnwrapError())
                 {
-                    ValidatedLifetime = lifetimeValidationResult.Unwrap(),
-                    ValidatedAudience = audienceValidationResult.Unwrap(),
-                    ValidatedIssuer = issuerValidationResult.Unwrap(),
-                    ValidatedTokenReplayExpirationTime = replayValidationResult.Unwrap(),
+                    ValidatedLifetime = lifetimeValidationResult.UnwrapResult(),
+                    ValidatedAudience = audienceValidationResult.UnwrapResult(),
+                    ValidatedIssuer = issuerValidationResult.UnwrapResult(),
+                    ValidatedTokenReplayExpirationTime = replayValidationResult.UnwrapResult(),
                     ActorValidationResult = actorValidationResult,
-                    ValidatedTokenType = typeValidationResult.Unwrap(),
-                    ValidatedSigningKey = signatureValidationResult.Unwrap()
+                    ValidatedTokenType = typeValidationResult.UnwrapResult(),
+                    ValidatedSigningKey = signatureValidationResult.UnwrapResult()
                 };
 
             return new(jsonWebToken, this, validationParameters)
             {
-                ValidatedLifetime = lifetimeValidationResult.Unwrap(),
-                ValidatedAudience = audienceValidationResult.Unwrap(),
-                ValidatedIssuer = issuerValidationResult.Unwrap(),
-                ValidatedTokenReplayExpirationTime = replayValidationResult.Unwrap(),
+                ValidatedLifetime = lifetimeValidationResult.UnwrapResult(),
+                ValidatedAudience = audienceValidationResult.UnwrapResult(),
+                ValidatedIssuer = issuerValidationResult.UnwrapResult(),
+                ValidatedTokenReplayExpirationTime = replayValidationResult.UnwrapResult(),
                 ActorValidationResult = actorValidationResult,
-                ValidatedTokenType = typeValidationResult.Unwrap(),
-                ValidatedSigningKey = signatureValidationResult.Unwrap(),
-                ValidatedSigningKeyLifetime = issuerSigningKeyValidationResult.Unwrap()
+                ValidatedTokenType = typeValidationResult.UnwrapResult(),
+                ValidatedSigningKey = signatureValidationResult.UnwrapResult(),
+                ValidatedSigningKeyLifetime = issuerSigningKeyValidationResult.UnwrapResult()
             };
         }
 

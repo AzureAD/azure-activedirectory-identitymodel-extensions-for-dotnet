@@ -44,46 +44,43 @@ namespace Microsoft.IdentityModel.Tokens
 #pragma warning restore CA1801 // Review unused parameters
         {
             if (string.IsNullOrWhiteSpace(securityToken))
-                return new(TokenValidationErrorCommon.NullParameter(nameof(securityToken), 0x123123));
+                return TokenValidationErrorCommon.NullParameter(nameof(securityToken));
 
             if (validationParameters == null)
-                return new(TokenValidationErrorCommon.NullParameter(nameof(validationParameters), 0x123123));
+                return TokenValidationErrorCommon.NullParameter(nameof(validationParameters));
 
             // check if token if replay cache is set, then there must be an expiration time.
             if (validationParameters.TokenReplayCache != null)
             {
                 if (expirationTime == null)
-                    return new(new TokenValidationError(
+                    return new TokenValidationError(
                         ValidationErrorType.SecurityTokenReplayDetected,
                         new MessageDetail(
                             LogMessages.IDX10227,
                             LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
-                        0x123123,
-                        null));
+                        null);
 
                 if (validationParameters.TokenReplayCache.TryFind(securityToken))
-                    return new(new TokenValidationError(
+                    return new TokenValidationError(
                         ValidationErrorType.SecurityTokenReplayDetected,
                         new MessageDetail(
                             LogMessages.IDX10228,
                             LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
-                        0x123123,
-                        null));
+                        null);
 
                 if (!validationParameters.TokenReplayCache.TryAdd(securityToken, expirationTime.Value))
-                    return new(new TokenValidationError(
+                    return new TokenValidationError(
                         ValidationErrorType.SecurityTokenReplayAddFailed,
                         new MessageDetail(
                             LogMessages.IDX10229,
                             LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
-                        0x123123,
-                        null));
+                        null);
             }
 
             // if it reaches here, that means no token replay is detected.
             // TODO: Move to CallContext
             //LogHelper.LogInformation(LogMessages.IDX10240);
-            return new(expirationTime);
+            return expirationTime;
         }
     }
 }

@@ -371,7 +371,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         keysAttempted.ToString(),
                         exceptionStrings?.ToString() ?? string.Empty,
                         LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken)),
-                    Tag: 0x123456,
                     null);
             else if (algorithmNotSupportedByCryptoProvider)
                 return new TokenValidationError(
@@ -380,7 +379,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         TokenLogMessages.IDX10619,
                         LogHelper.MarkAsNonPII(decryptionParameters.Alg),
                         LogHelper.MarkAsNonPII(decryptionParameters.Enc)),
-                    Tag: 0x123456,
                     null);
             else
                 return new TokenValidationError(
@@ -388,7 +386,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     new MessageDetail(
                         TokenLogMessages.IDX10609,
                         LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken)),
-                    Tag: 0x123456,
                     null);
         }
 

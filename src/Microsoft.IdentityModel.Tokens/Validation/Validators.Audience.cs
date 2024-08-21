@@ -46,30 +46,28 @@ namespace Microsoft.IdentityModel.Tokens
 #pragma warning restore CA1801
         {
             if (validationParameters == null)
-                return new(TokenValidationErrorCommon.NullParameter(nameof(validationParameters), 0x123123));
+                return TokenValidationErrorCommon.NullParameter(nameof(validationParameters));
 
             if (tokenAudiences == null)
-                return new(TokenValidationErrorCommon.NullParameter(nameof(tokenAudiences), 0x123123));
+                return TokenValidationErrorCommon.NullParameter(nameof(tokenAudiences));
 
             if (tokenAudiences.Count == 0)
-                return new(new TokenValidationError(
+                return new TokenValidationError(
                     ValidationErrorType.SecurityTokenInvalidAudience,
                     new MessageDetail(LogMessages.IDX10206),
-                    0x123123,
-                    null));
+                    null);
 
             string? validAudience = ValidTokenAudience(tokenAudiences, validationParameters.ValidAudiences, validationParameters.IgnoreTrailingSlashWhenValidatingAudience);
             if (validAudience != null)
-                return new(validAudience);
+                return validAudience;
 
-            return new(new TokenValidationError(
+            return new TokenValidationError(
                 ValidationErrorType.SecurityTokenInvalidAudience,
                 new MessageDetail(
                     LogMessages.IDX10215,
                     LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(tokenAudiences)),
                     LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences))),
-                0x123123,
-                null));
+                null);
         }
 
         private static string? ValidTokenAudience(IList<string> tokenAudiences, IList<string> validAudiences, bool ignoreTrailingSlashWhenValidatingAudience)

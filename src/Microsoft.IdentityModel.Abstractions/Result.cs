@@ -39,6 +39,18 @@ namespace Microsoft.IdentityModel.Abstractions
         }
 
         /// <summary>
+        /// Creates a successful result implicitly from the value.
+        /// </summary>
+        /// <param name="result">The value to be stored in the result.</param>
+        public static implicit operator Result<TResult, TError>(TResult result) => new(result);
+
+        /// <summary>
+        /// Creates an error result implicitly from the error value.
+        /// </summary>
+        /// <param name="error">The error to be stored in the result.</param>
+        public static implicit operator Result<TResult, TError>(TError error) => new(error);
+
+        /// <summary>
         /// Gets a value indicating whether the result is successful.
         /// </summary>
         readonly public bool IsSuccess { get; }
@@ -49,7 +61,7 @@ namespace Microsoft.IdentityModel.Abstractions
         /// <returns>The wrapped result value.</returns>
         /// <remarks>This method is only valid if the result type is successful.</remarks>
         /// <exception cref="InvalidOperationException">Thrown if attempted to unwrap the value from a failed result.</exception>
-        public TResult Unwrap() => IsSuccess ? _result! : throw new InvalidOperationException("Cannot unwrap error result");
+        public TResult UnwrapResult() => IsSuccess ? _result! : throw new InvalidOperationException("Cannot unwrap error result");
 
         /// <summary>
         /// Unwraps the error.
@@ -123,6 +135,16 @@ namespace Microsoft.IdentityModel.Abstractions
                 return _result!.Equals(other._result);
             else
                 return _error!.Equals(other._error);
+        }
+
+        /// <summary>
+        /// Casts the result to a <see cref="Result{TResult, TError}"/>.
+        /// </summary>#
+        /// <remarks>Required for compatibility, see CA2225 for more information</remarks>
+        /// <returns>The existing instance.</returns>
+        public Result<TResult, TError> ToResult()
+        {
+            return this;
         }
     }
 }

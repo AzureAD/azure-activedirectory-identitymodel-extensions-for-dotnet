@@ -30,31 +30,30 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             CallContext? callContext)
         {
             if (jwtToken == null)
-                return new(TokenValidationErrorCommon.NullParameter(nameof(jwtToken), 0x123123));
+                return TokenValidationErrorCommon.NullParameter(nameof(jwtToken));
 
             if (validationParameters == null)
-                return new(TokenValidationErrorCommon.NullParameter(nameof(validationParameters), 0x123124));
+                return TokenValidationErrorCommon.NullParameter(nameof(validationParameters));
 
             if (string.IsNullOrEmpty(jwtToken.Enc))
-                return new(new TokenValidationError(
+                return new TokenValidationError(
                     ValidationErrorType.SecurityTokenDecryptionFailed,
                     new MessageDetail(TokenLogMessages.IDX10612),
-                    Tag: 0x123125,
-                    null));
+                    null);
 
-            var keysOrExceptionDetail = GetContentEncryptionKeys(jwtToken, validationParameters, configuration, callContext);
-            if (keysOrExceptionDetail.Item2 != null) // TokenValidationError returned
-                return new(keysOrExceptionDetail.Item2);
+            (IList<SecurityKey>? contentEncryptionKeys, TokenValidationError? validationError) result =
+                GetContentEncryptionKeys(jwtToken, validationParameters, configuration, callContext);
 
-            var keys = keysOrExceptionDetail.Item1;
-            if (keys == null)
-                return new(new TokenValidationError(
+            if (result.validationError != null)
+                return result.validationError;
+
+            if (result.contentEncryptionKeys == null)
+                return new TokenValidationError(
                     ValidationErrorType.SecurityTokenKeyWrap,
                     new MessageDetail(
                         TokenLogMessages.IDX10609,
                         LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken)),
-                    Tag: 0x123126,
-                    null));
+                    null);
 
             return JwtTokenUtilities.DecryptJwtToken(
                 jwtToken,
@@ -62,7 +61,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 new JwtTokenDecryptionParameters
                 {
                     DecompressionFunction = JwtTokenUtilities.DecompressToken,
-                    Keys = keys,
+                    Keys = result.contentEncryptionKeys,
                     MaximumDeflateSize = MaximumTokenSizeInBytes
                 },
                 callContext);
@@ -192,7 +191,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         keysAttempted?.ToString() ?? "",
                         exceptionStrings?.ToString() ?? "",
                         LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken)),
-                    Tag: 0x123126,
                     null);
 
                 return (null, tokenValidationError);

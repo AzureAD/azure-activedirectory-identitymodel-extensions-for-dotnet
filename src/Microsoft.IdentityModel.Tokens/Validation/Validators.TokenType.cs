@@ -47,41 +47,39 @@ namespace Microsoft.IdentityModel.Tokens
 #pragma warning restore CA1801 // TODO: remove pragma disable once callContext is used for logging
         {
             if (securityToken == null)
-                return new(TokenValidationErrorCommon.NullParameter(nameof(securityToken), 0x123123));
+                return TokenValidationErrorCommon.NullParameter(nameof(securityToken));
 
             if (validationParameters == null)
-                return new(TokenValidationErrorCommon.NullParameter(nameof(validationParameters), 0x123123));
+                return TokenValidationErrorCommon.NullParameter(nameof(validationParameters));
 
             if (validationParameters.ValidTypes.Count == 0)
             {
                 LogHelper.LogVerbose(LogMessages.IDX10255);
-                return new(new ValidatedTokenType(type ?? "null", validationParameters.ValidTypes.Count));
+                return new ValidatedTokenType(type ?? "null", validationParameters.ValidTypes.Count);
             }
 
             if (string.IsNullOrEmpty(type))
-                return new(new TokenValidationError(
+                return new TokenValidationError(
                     ValidationErrorType.SecurityTokenInvalidType,
                     new MessageDetail(LogMessages.IDX10256),
-                    0x123123,
-                    null));
+                    null);
 
             if (!validationParameters.ValidTypes.Contains(type, StringComparer.Ordinal))
             {
-                return new(new TokenValidationError(
+                return new TokenValidationError(
                     ValidationErrorType.SecurityTokenInvalidType,
                     new MessageDetail(
                         LogMessages.IDX10257,
                         LogHelper.MarkAsNonPII(type),
                         LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidTypes))),
-                    0x123123,
-                    null));
+                    null);
             }
 
             // TODO: Move to CallContext
             //if (LogHelper.IsEnabled(EventLogLevel.Informational))
             //    LogHelper.LogInformation(LogMessages.IDX10258, LogHelper.MarkAsNonPII(type));
 
-            return new(new ValidatedTokenType(type!, validationParameters.ValidTypes.Count));
+            return new ValidatedTokenType(type!, validationParameters.ValidTypes.Count);
         }
     }
 }
