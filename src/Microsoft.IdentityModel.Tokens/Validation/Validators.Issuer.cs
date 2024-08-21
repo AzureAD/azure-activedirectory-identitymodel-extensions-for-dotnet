@@ -15,7 +15,6 @@ namespace Microsoft.IdentityModel.Tokens
     {
         NotValidated = 0,
         IssuerIsConfigurationIssuer,
-        IssuerIsValidIssuer,
         IssuerIsAmongValidIssuers
     }
 
