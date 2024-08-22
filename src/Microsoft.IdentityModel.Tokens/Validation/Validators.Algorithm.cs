@@ -19,7 +19,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="callContext"></param>
     /// <returns>A <see cref="Result{TResult, TError}"/>that contains the results of validating the algorithm.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
-    internal delegate Result<string, ITokenValidationError> AlgorithmValidatorDelegate(
+    internal delegate Result<string, TokenValidationError> AlgorithmValidatorDelegate(
         string algorithm,
         SecurityKey securityKey,
         SecurityToken securityToken,
@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters"><see cref="ValidationParameters"/> required for validation.</param>
         /// <param name="callContext"></param>
 #pragma warning disable CA1801 // TODO: remove pragma disable once callContext is used for logging
-        internal static Result<string, ITokenValidationError> ValidateAlgorithm(
+        internal static Result<string, TokenValidationError> ValidateAlgorithm(
             string algorithm,
             SecurityKey securityKey,
             SecurityToken securityToken,

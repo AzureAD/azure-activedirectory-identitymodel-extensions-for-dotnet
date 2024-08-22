@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Tokens
             SecurityToken? securityToken,
             TokenHandler tokenHandler,
             ValidationParameters? validationParameters,
-            ITokenValidationError tokenValidationError)
+            TokenValidationError tokenValidationError)
         {
             TokenHandler = tokenHandler ?? throw new ArgumentNullException("TokenHandler cannot be null.");
             SecurityToken = securityToken;
@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public bool IsValid { get; private set; }
 
-        public ITokenValidationError? TokenValidationError { get; private set; }
+        public TokenValidationError? TokenValidationError { get; private set; }
 
         /// <summary>
         /// Logs the validation result.

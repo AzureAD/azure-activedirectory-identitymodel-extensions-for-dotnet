@@ -25,7 +25,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     theoryData.ValidationParameters.ValidAudiences.Add(audience);
             }
 
-            Result<string, ITokenValidationError> result = Validators.ValidateAudience(
+            Result<string, TokenValidationError> result = Validators.ValidateAudience(
                 theoryData.Audiences,
                 theoryData.SecurityToken,
                 theoryData.ValidationParameters,
@@ -47,9 +47,9 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     theoryData.ExpectedException.ProcessException(result.UnwrapError().InnerException);
                 else
                     theoryData.ExpectedException.ProcessNoException();
-
-                TestUtilities.AssertFailIfErrors(context);
             }
+
+            TestUtilities.AssertFailIfErrors(context);
         }
 
         public static TheoryData<AudienceValidationTheoryData> ValidateAudienceTestCases
@@ -377,7 +377,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
             public List<string> AudiencesToAdd { get; internal set; }
 
-            internal Result<string, ITokenValidationError> Result { get; set; }
+            internal Result<string, TokenValidationError> Result { get; set; }
         }
 
 

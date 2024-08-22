@@ -30,7 +30,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="cancellationToken"></param>
     /// <returns>An <see cref="Result{TResult, TError}"/>that contains the results of validating the issuer.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
-    internal delegate Task<Result<ValidatedIssuer, ITokenValidationError>> IssuerValidationDelegateAsync(
+    internal delegate Task<Result<ValidatedIssuer, TokenValidationError>> IssuerValidationDelegateAsync(
         string issuer,
         SecurityToken securityToken,
         ValidationParameters validationParameters,
@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="cancellationToken"></param>
         /// <returns>An <see cref="Result{TResult, TError}"/> that contains either the issuer that was validated or an error.</returns>
         /// <remarks>An EXACT match is required.</remarks>
-        internal static async Task<Result<ValidatedIssuer, ITokenValidationError>> ValidateIssuerAsync(
+        internal static async Task<Result<ValidatedIssuer, TokenValidationError>> ValidateIssuerAsync(
             string issuer,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
@@ -62,10 +62,12 @@ namespace Microsoft.IdentityModel.Tokens
             CancellationToken? cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(issuer))
+            {
                 return new TokenValidationError(
                     ValidationErrorType.SecurityTokenInvalidIssuer,
                     new MessageDetail(LogMessages.IDX10211),
                     null);
+            }
 
             if (validationParameters == null)
                 return TokenValidationErrorCommon.NullParameter(nameof(validationParameters));

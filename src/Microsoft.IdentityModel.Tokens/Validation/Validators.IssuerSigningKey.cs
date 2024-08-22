@@ -23,7 +23,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="callContext">The <see cref="CallContext"/> to be used for logging.</param> 
     /// <returns>A <see cref="Result{TResult, TError}"/>that contains the results of validating the issuer.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
-    internal delegate Result<ValidatedSigningKeyLifetime, ITokenValidationError> IssuerSigningKeyValidatorDelegate(
+    internal delegate Result<ValidatedSigningKeyLifetime, TokenValidationError> IssuerSigningKeyValidatorDelegate(
         SecurityKey signingKey,
         SecurityToken securityToken,
         ValidationParameters validationParameters,
@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException"> if 'securityKey' is null and ValidateIssuerSigningKey is true.</exception>
         /// <exception cref="ArgumentNullException"> if 'securityToken' is null and ValidateIssuerSigningKey is true.</exception>
         /// <exception cref="ArgumentNullException"> if 'validationParameters' is null.</exception>
-        internal static Result<ValidatedSigningKeyLifetime, ITokenValidationError> ValidateIssuerSigningKey(
+        internal static Result<ValidatedSigningKeyLifetime, TokenValidationError> ValidateIssuerSigningKey(
             SecurityKey securityKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext"></param>
 #pragma warning disable CA1801 // Review unused parameters
-        internal static Result<ValidatedSigningKeyLifetime, ITokenValidationError> ValidateIssuerSigningKeyLifeTime(
+        internal static Result<ValidatedSigningKeyLifetime, TokenValidationError> ValidateIssuerSigningKeyLifeTime(
             SecurityKey securityKey,
             ValidationParameters validationParameters,
             CallContext? callContext)

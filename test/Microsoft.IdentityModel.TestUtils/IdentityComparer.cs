@@ -504,6 +504,21 @@ namespace Microsoft.IdentityModel.TestUtils
             return context.Merge(localContext);
         }
 
+        public static bool AreDateTimesEqualWithEpsilon(object object1, object object2, int epsilon, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, localContext))
+                return context.Merge(localContext);
+
+            DateTime dateTime1 = (DateTime)object1;
+            DateTime dateTime2 = (DateTime)object2;
+
+            if (!AreDatesEqualWithEpsilon(dateTime1, dateTime2, epsilon))
+                localContext.Diffs.Add($"dateTime1 != dateTime2. '{dateTime1}' != '{dateTime2}'.");
+
+            return context.Merge(localContext);
+        }
+
         public static bool AreEqual(object object1, object object2)
         {
             return AreEqual(object1, object2, CompareContext.Default);
@@ -1213,7 +1228,72 @@ namespace Microsoft.IdentityModel.TestUtils
             return context.Merge(localContext);
         }
 
-        internal static bool AreTokenValidationErrorsEqual(ITokenValidationError tokenValidationError1, ITokenValidationError tokenValidationError2, CompareContext context)
+        internal static bool AreValidatedIssuersEqual(ValidatedIssuer validatedIssuer1, ValidatedIssuer validatedIssuer2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+
+            AreStringsEqual(
+                validatedIssuer1.Issuer,
+                validatedIssuer2.Issuer,
+                "validatedIssuer1.Issuer",
+                "validatedIssuer2.Issuer",
+                localContext);
+
+            AreIntsEqual(
+                (int)validatedIssuer1.ValidationSource,
+                (int)validatedIssuer2.ValidationSource,
+                "validatedIssuer1.ValidationSource",
+                "validatedIssuer2.ValidationSource",
+                localContext);
+
+            return context.Merge(localContext);
+        }
+
+        internal static bool AreValidatedLifetimesEqual(ValidatedLifetime validatedLifetime1, ValidatedLifetime validatedLifetime2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+
+            AreDateTimesEqualWithEpsilon(
+                validatedLifetime1.NotBefore,
+                validatedLifetime2.NotBefore,
+                1,
+                localContext);
+
+            AreDateTimesEqualWithEpsilon(
+                validatedLifetime1.Expires,
+                validatedLifetime2.Expires,
+                1,
+                localContext);
+
+            return context.Merge(localContext);
+        }
+
+        internal static bool AreValidatedSigningKeyLifetimesEqual(ValidatedSigningKeyLifetime validatedSigningKeyLifetime1, ValidatedSigningKeyLifetime validatedSigningKeyLifetime2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+
+            AreDateTimesEqualWithEpsilon(
+                validatedSigningKeyLifetime1.ValidFrom,
+                validatedSigningKeyLifetime2.ValidFrom,
+                1,
+                localContext);
+
+            AreDateTimesEqualWithEpsilon(
+                validatedSigningKeyLifetime1.ValidTo,
+                validatedSigningKeyLifetime2.ValidTo,
+                1,
+                localContext);
+
+            AreDateTimesEqualWithEpsilon(
+                validatedSigningKeyLifetime1.ValidationTime,
+                validatedSigningKeyLifetime2.ValidationTime,
+                1,
+                localContext);
+
+            return context.Merge(localContext);
+        }
+
+        internal static bool AreTokenValidationErrorsEqual(TokenValidationError tokenValidationError1, TokenValidationError tokenValidationError2, CompareContext context)
         {
             var localContext = new CompareContext(context);
 

@@ -16,7 +16,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="callContext"></param>
     /// <returns>A <see cref="Result{TResult, TError}"/>that contains the results of validating the token.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
-    internal delegate Result<DateTime?, ITokenValidationError> TokenReplayValidatorDelegate(
+    internal delegate Result<DateTime?, TokenValidationError> TokenReplayValidatorDelegate(
         DateTime? expirationTime,
         string securityToken,
         ValidationParameters validationParameters,
@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="SecurityTokenReplayDetectedException">If the 'securityToken' is found in the cache.</exception>
         /// <exception cref="SecurityTokenReplayAddFailedException">If the 'securityToken' could not be added to the <see cref="ValidationParameters.TokenReplayCache"/>.</exception>
 #pragma warning disable CA1801 // Review unused parameters
-        internal static Result<DateTime?, ITokenValidationError> ValidateTokenReplay(DateTime? expirationTime, string securityToken, ValidationParameters validationParameters, CallContext callContext)
+        internal static Result<DateTime?, TokenValidationError> ValidateTokenReplay(DateTime? expirationTime, string securityToken, ValidationParameters validationParameters, CallContext callContext)
 #pragma warning restore CA1801 // Review unused parameters
         {
             if (string.IsNullOrWhiteSpace(securityToken))

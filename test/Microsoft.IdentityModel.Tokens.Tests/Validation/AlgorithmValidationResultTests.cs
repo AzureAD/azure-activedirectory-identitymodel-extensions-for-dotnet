@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.AlgorithmValidationResultTests", theoryData);
 
-            Result<string, ITokenValidationError> result = Validators.ValidateAlgorithm(
+            Result<string, TokenValidationError> result = Validators.ValidateAlgorithm(
                 theoryData.Algorithm,
                 theoryData.SecurityKey,
                 theoryData.SecurityToken,

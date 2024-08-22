@@ -20,7 +20,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="callContext"></param>
     /// <returns>A <see cref="Result{TResult, TError}"/>that contains the results of validating the issuer.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
-    internal delegate Result<ValidatedLifetime, ITokenValidationError> LifetimeValidatorDelegate(
+    internal delegate Result<ValidatedLifetime, TokenValidationError> LifetimeValidatorDelegate(
         DateTime? notBefore,
         DateTime? expires,
         SecurityToken? securityToken,
@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="SecurityTokenExpiredException">If 'expires' is &lt; DateTime.UtcNow.</exception>
         /// <remarks>All time comparisons apply <see cref="ValidationParameters.ClockSkew"/>.</remarks>
 #pragma warning disable CA1801 // TODO: remove pragma disable once callContext is used for logging
-        internal static Result<ValidatedLifetime, ITokenValidationError> ValidateLifetime(
+        internal static Result<ValidatedLifetime, TokenValidationError> ValidateLifetime(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,

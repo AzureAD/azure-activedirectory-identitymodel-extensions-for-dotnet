@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
@@ -17,22 +17,32 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.SigningKeyValidationResultTests", theoryData);
 
-            SigningKeyValidationResult signingKeyValidationResult = Validators.ValidateIssuerSigningKey(
+            Result<ValidatedSigningKeyLifetime, TokenValidationError> result = Validators.ValidateIssuerSigningKey(
                 theoryData.SecurityKey,
                 theoryData.SecurityToken,
                 theoryData.ValidationParameters,
                 theoryData.BaseConfiguration,
                 new CallContext());
 
-            if (signingKeyValidationResult.Exception != null)
-                theoryData.ExpectedException.ProcessException(signingKeyValidationResult.Exception);
+            if (result.IsSuccess)
+            {
+                IdentityComparer.AreValidatedSigningKeyLifetimesEqual(
+                    theoryData.Result.UnwrapResult(),
+                    result.UnwrapResult(),
+                    context);
+            }
             else
-                theoryData.ExpectedException.ProcessNoException();
+            {
+                IdentityComparer.AreTokenValidationErrorsEqual(
+                    result.UnwrapError(),
+                    theoryData.Result.UnwrapError(),
+                    context);
 
-            IdentityComparer.AreSigningKeyValidationResultsEqual(
-                signingKeyValidationResult,
-                theoryData.SigningKeyValidationResult,
-                context);
+                if (result.UnwrapError().InnerException is not null)
+                    theoryData.ExpectedException.ProcessException(result.UnwrapError().InnerException);
+                else
+                    theoryData.ExpectedException.ProcessNoException();
+            }
 
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -50,91 +60,75 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     new SigningKeyValidationTheoryData
                     {
                         TestId = "Valid_SecurityTokenIsPresent",
-                        ExpectedException = ExpectedException.NoExceptionExpected,
                         SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
                         SecurityToken = new JwtSecurityToken(),
                         ValidationParameters = new ValidationParameters(),
-                        SigningKeyValidationResult = new SigningKeyValidationResult(KeyingMaterial.SymmetricSecurityKey2_256)
+                        Result = new ValidatedSigningKeyLifetime(null, null, utcNow)
                     },
                     new SigningKeyValidationTheoryData
                     {
                         TestId = "Invalid_SecurityKeyIsNull",
-                        ExpectedException = ExpectedException.ArgumentNullException(substringExpected: "IDX10253:"),
                         SecurityKey = null,
                         SecurityToken = new JwtSecurityToken(),
                         ValidationParameters = new ValidationParameters(),
-                        SigningKeyValidationResult = new SigningKeyValidationResult(
-                            null, // SecurityKey
-                            ValidationFailureType.NullArgument,
-                            new ExceptionDetail(
-                                new MessageDetail(LogMessages.IDX10253),
-                                ExceptionDetail.ExceptionType.ArgumentNull))
+                        Result = new TokenValidationError(
+                            ValidationErrorType.ArgumentNull,
+                            new MessageDetail(LogMessages.IDX10253),
+                            null),
                     },
                     new SigningKeyValidationTheoryData
                     {
                         TestId = "Invalid_SecurityTokenIsNull",
-                        ExpectedException = ExpectedException.ArgumentNullException(),
                         SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
                         SecurityToken = null,
                         ValidationParameters = new ValidationParameters (),
-                        SigningKeyValidationResult = new SigningKeyValidationResult(
-                            KeyingMaterial.SymmetricSecurityKey2_256,
-                            ValidationFailureType.NullArgument,
-                            new ExceptionDetail(
-                                new MessageDetail(
-                                    LogMessages.IDX10000,
-                                    LogHelper.MarkAsNonPII("securityToken")),
-                                ExceptionDetail.ExceptionType.ArgumentNull))
+                        Result = new TokenValidationError(
+                            ValidationErrorType.ArgumentNull,
+                            new MessageDetail(
+                                LogMessages.IDX10000,
+                                LogHelper.MarkAsNonPII("securityToken")),
+                            null),
                     },
                     new SigningKeyValidationTheoryData
                     {
                         TestId = "Invalid_ValidationParametersIsNull",
-                        ExpectedException = ExpectedException.ArgumentNullException(),
                         SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
                         SecurityToken = new JwtSecurityToken(),
                         ValidationParameters = null,
-                        SigningKeyValidationResult = new SigningKeyValidationResult(
-                            KeyingMaterial.SymmetricSecurityKey2_256,
-                            ValidationFailureType.NullArgument,
-                            new ExceptionDetail(
-                                new MessageDetail(
-                                    LogMessages.IDX10000,
-                                    LogHelper.MarkAsNonPII("validationParameters")),
-                                ExceptionDetail.ExceptionType.ArgumentNull))
+                        Result = new TokenValidationError(
+                            ValidationErrorType.ArgumentNull,
+                            new MessageDetail(
+                                LogMessages.IDX10000,
+                                LogHelper.MarkAsNonPII("validationParameters")),
+                            null),
                     },
                     new SigningKeyValidationTheoryData
                     {
                         TestId = "Invalid_SecurityKeyIsExpired",
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException(substringExpected: "IDX10249:"),
                         SecurityKey = KeyingMaterial.ExpiredX509SecurityKey_Public,
                         SecurityToken = new JwtSecurityToken(),
                         ValidationParameters = new ValidationParameters (),
-                        SigningKeyValidationResult = new SigningKeyValidationResult(
-                            KeyingMaterial.ExpiredX509SecurityKey_Public,
-                            ValidationFailureType.SigningKeyValidationFailed,
-                            new ExceptionDetail(
-                                new MessageDetail(
-                                    LogMessages.IDX10249,
-                                    LogHelper.MarkAsNonPII(utcExpired),
-                                    LogHelper.MarkAsNonPII(utcNow)),
-                                ExceptionDetail.ExceptionType.SecurityTokenInvalidSigningKey))
+                        Result = new TokenValidationError(
+                            ValidationErrorType.SecurityTokenInvalidSigningKey,
+                            new MessageDetail(
+                                LogMessages.IDX10249,
+                                LogHelper.MarkAsNonPII(utcExpired),
+                                LogHelper.MarkAsNonPII(utcNow)),
+                            null),
                     },
                     new SigningKeyValidationTheoryData
                     {
                         TestId = "Invalid_SecurityKeyIsNotYetValid",
-                        ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException(substringExpected: "IDX10248:"),
                         SecurityKey = KeyingMaterial.NotYetValidX509SecurityKey_Public,
                         SecurityToken = new JwtSecurityToken(),
                         ValidationParameters = new ValidationParameters (),
-                        SigningKeyValidationResult = new SigningKeyValidationResult(
-                            KeyingMaterial.NotYetValidX509SecurityKey_Public,
-                            ValidationFailureType.SigningKeyValidationFailed,
-                            new ExceptionDetail(
-                                new MessageDetail(
-                                    LogMessages.IDX10248,
-                                    LogHelper.MarkAsNonPII(utcNotYetValid),
-                                    LogHelper.MarkAsNonPII(utcNow)),
-                                ExceptionDetail.ExceptionType.SecurityTokenInvalidSigningKey))
+                        Result = new TokenValidationError(
+                            ValidationErrorType.SecurityTokenInvalidSigningKey,
+                            new MessageDetail(
+                                LogMessages.IDX10248,
+                                LogHelper.MarkAsNonPII(utcNotYetValid),
+                                LogHelper.MarkAsNonPII(utcNow)),
+                            null),
                     },
                     new SigningKeyValidationTheoryData
                     {
@@ -143,12 +137,10 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         SecurityKey = null,
                         SecurityToken = new JwtSecurityToken(),
                         ValidationParameters = new ValidationParameters (),
-                        SigningKeyValidationResult = new SigningKeyValidationResult(
-                            null,
-                            ValidationFailureType.NullArgument,
-                            new ExceptionDetail(
-                                new MessageDetail(LogMessages.IDX10253),
-                                ExceptionDetail.ExceptionType.ArgumentNull))
+                        Result = new TokenValidationError(
+                            ValidationErrorType.ArgumentNull,
+                            new MessageDetail(LogMessages.IDX10253),
+                            null),
                     },
 
                 };
@@ -162,6 +154,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         public SecurityToken SecurityToken { get; set; }
         internal ValidationParameters ValidationParameters { get; set; }
         public BaseConfiguration BaseConfiguration { get; set; }
-        internal SigningKeyValidationResult SigningKeyValidationResult { get; set; }
+        internal Result<ValidatedSigningKeyLifetime, TokenValidationError> Result { get; set; }
     }
 }

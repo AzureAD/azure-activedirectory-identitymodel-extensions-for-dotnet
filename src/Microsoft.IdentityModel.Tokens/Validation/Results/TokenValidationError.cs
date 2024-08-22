@@ -4,19 +4,12 @@
 #nullable enable
 
 using System;
-//using System.Diagnostics;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-    internal interface ITokenValidationError
-    {
-        ValidationErrorType ErrorType { get; }
-        MessageDetail MessageDetail { get; }
-        Exception? InnerException { get; }
-    }
-
-    internal struct TokenValidationError : ITokenValidationError
+    internal class TokenValidationError
     {
         public ValidationErrorType ErrorType { get; }
         public MessageDetail MessageDetail { get; }
@@ -24,14 +17,15 @@ namespace Microsoft.IdentityModel.Tokens
         public string CallerFilePath { get; }
         public int CallerLineNumber { get; }
 
-        //private StackFrame? _stackFrame;
+        private StackFrame? _stackFrame;
 
         public TokenValidationError(
             ValidationErrorType errorType,
             MessageDetail messageDetail,
             Exception? innerException,
             [CallerFilePath] string callerFilePath = "",
-            [CallerLineNumber] int callerLineNumber = 0)
+            [CallerLineNumber] int callerLineNumber = 0
+            )
         {
             ErrorType = errorType;
             MessageDetail = messageDetail;
@@ -39,7 +33,10 @@ namespace Microsoft.IdentityModel.Tokens
             CallerFilePath = callerFilePath;
             CallerLineNumber = callerLineNumber;
 
-            //_stackFrame = new StackFrame();
+            if (AppContextSwitches.DontFailOnMissingTid)
+                CallerLineNumber = 123;
+
+            _stackFrame = new StackFrame();
         }
     }
 

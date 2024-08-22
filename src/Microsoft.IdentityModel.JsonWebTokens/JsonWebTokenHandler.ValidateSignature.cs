@@ -27,7 +27,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <exception cref="SecurityTokenInvalidSignatureException">Returned by the default implementation if the token is not signed, or if the validation fails.</exception>
         /// <exception cref="SecurityTokenInvalidAlgorithmException">Returned if the algorithm is not supported by the key.</exception>
         /// <exception cref="SecurityTokenSignatureKeyNotFoundException">Returned if the key cannot be resolved.</exception>
-        internal static Result<SecurityKey, ITokenValidationError> ValidateSignature(
+        internal static Result<SecurityKey, TokenValidationError> ValidateSignature(
             JsonWebToken jwtToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,
@@ -91,7 +91,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     null);
         }
 
-        private static Result<SecurityKey, ITokenValidationError> ValidateSignatureUsingAllKeys(
+        private static Result<SecurityKey, TokenValidationError> ValidateSignatureUsingAllKeys(
             JsonWebToken jwtToken,
             ValidationParameters
             validationParameters, BaseConfiguration? configuration,
@@ -101,22 +101,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // 1. User specified delegate: IssuerSigningKeyResolver returned null
             // 2. ResolveIssuerSigningKey returned null
             // Try all the keys. This is the degenerate case, not concerned about perf.
-            (Result<SecurityKey, ITokenValidationError>? configResult, bool configKidMatched, KeyMatchFailedResult? configFailedResult) = ValidateUsingKeys(
+            (Result<SecurityKey, TokenValidationError>? configResult, bool configKidMatched, KeyMatchFailedResult? configFailedResult) = ValidateUsingKeys(
                 jwtToken,
                 validationParameters,
                 configuration?.SigningKeys,
                 callContext);
 
-            if (configResult is Result<SecurityKey, ITokenValidationError> unwrappedConfigResult)
+            if (configResult is Result<SecurityKey, TokenValidationError> unwrappedConfigResult)
                 return unwrappedConfigResult;
 
-            (Result<SecurityKey, ITokenValidationError>? vpResult, bool vpKidMatched, KeyMatchFailedResult? vpFailedResult) = ValidateUsingKeys(
+            (Result<SecurityKey, TokenValidationError>? vpResult, bool vpKidMatched, KeyMatchFailedResult? vpFailedResult) = ValidateUsingKeys(
                 jwtToken,
                 validationParameters,
                 validationParameters.IssuerSigningKeys,
                 callContext);
 
-            if (vpResult is Result<SecurityKey, ITokenValidationError> unwrappedVpResult)
+            if (vpResult is Result<SecurityKey, TokenValidationError> unwrappedVpResult)
                 return unwrappedVpResult;
 
             if (vpFailedResult is null && configFailedResult is null) // No keys were attempted
@@ -145,7 +145,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 kidMatched);
         }
 
-        private static (Result<SecurityKey, ITokenValidationError>? validResult, bool KidMatched, KeyMatchFailedResult? failedResult) ValidateUsingKeys(
+        private static (Result<SecurityKey, TokenValidationError>? validResult, bool KidMatched, KeyMatchFailedResult? failedResult) ValidateUsingKeys(
             JsonWebToken jwtToken,
             ValidationParameters validationParameters,
             ICollection<SecurityKey>? keys,
@@ -160,12 +160,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             bool kidExists = !string.IsNullOrEmpty(jwtToken.Kid);
             bool kidMatched = false;
             IList<SecurityKey>? keysAttempted = null;
-            IList<ITokenValidationError>? errors = null;
+            IList<TokenValidationError>? errors = null;
 
             for (int i = 0; i < keysList.Count; i++)
             {
                 SecurityKey key = keysList[i];
-                Result<SecurityKey, ITokenValidationError> result = ValidateSignatureWithKey(jwtToken, key, validationParameters, callContext);
+                Result<SecurityKey, TokenValidationError> result = ValidateSignatureWithKey(jwtToken, key, validationParameters, callContext);
                 if (result.IsSuccess)
                 {
                     jwtToken.SigningKey = key;
@@ -189,7 +189,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return (null, kidMatched, null);
         }
 
-        private static Result<SecurityKey, ITokenValidationError> ValidateSignatureWithKey(
+        private static Result<SecurityKey, TokenValidationError> ValidateSignatureWithKey(
             JsonWebToken jsonWebToken,
             SecurityKey key,
             ValidationParameters validationParameters,
@@ -207,7 +207,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     null);
             }
 
-            Result<string, ITokenValidationError> result = validationParameters.AlgorithmValidator(
+            Result<string, TokenValidationError> result = validationParameters.AlgorithmValidator(
                 jsonWebToken.Alg,
                 key,
                 jsonWebToken,
@@ -345,10 +345,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         private struct KeyMatchFailedResult(
-            IList<ITokenValidationError> failedResults,
+            IList<TokenValidationError> failedResults,
             IList<SecurityKey> keysAttempted)
         {
-            public IList<ITokenValidationError> FailedResults = failedResults;
+            public IList<TokenValidationError> FailedResults = failedResults;
             public IList<SecurityKey> KeysAttempted = keysAttempted;
         }
     }

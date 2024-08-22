@@ -20,7 +20,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <exception cref="ArgumentNullException">returned if <paramref name="token"/> is null or empty.</exception>
         /// <exception cref="SecurityTokenMalformedException">returned if the validationParameters.TokenReader delegate is not able to parse/read the token as a valid <see cref="JsonWebToken"/>.</exception>
         /// <exception cref="SecurityTokenMalformedException">returned if <paramref name="token"/> is not a valid JWT, <see cref="JsonWebToken"/>.</exception>
-        internal static Result<SecurityToken, ITokenValidationError> ReadToken(
+        internal static Result<SecurityToken, TokenValidationError> ReadToken(
             string token,
 #pragma warning disable CA1801 // TODO: remove pragma disable once callContext is used for logging
             CallContext? callContext)

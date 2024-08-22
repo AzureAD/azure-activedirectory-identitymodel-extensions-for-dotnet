@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         new MessageDetail(TokenLogMessages.IDX10209, LogHelper.MarkAsNonPII(token.Length), LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes)),
                         null));
 
-            Result<SecurityToken, ITokenValidationError> result = ReadToken(token, callContext);
+            Result<SecurityToken, TokenValidationError> result = ReadToken(token, callContext);
             if (result.IsSuccess)
                 return await ValidateTokenAsync(
                     result.UnwrapResult(),
@@ -217,13 +217,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             CallContext callContext,
             CancellationToken? cancellationToken)
         {
-            Result<string, ITokenValidationError> decryptionResult = DecryptToken(
+            Result<string, TokenValidationError> decryptionResult = DecryptToken(
                 jwtToken, validationParameters, configuration, callContext);
 
             if (!decryptionResult.IsSuccess)
                 return new ValidationResult(jwtToken, this, validationParameters, decryptionResult.UnwrapError());
 
-            Result<SecurityToken, ITokenValidationError> readResult = ReadToken(decryptionResult.UnwrapResult(), callContext);
+            Result<SecurityToken, TokenValidationError> readResult = ReadToken(decryptionResult.UnwrapResult(), callContext);
 
             if (!readResult.IsSuccess)
                 return new ValidationResult(jwtToken, this, validationParameters, readResult.UnwrapError());
@@ -253,7 +253,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             DateTime? expires = jsonWebToken.HasPayloadClaim(JwtRegisteredClaimNames.Exp) ? jsonWebToken.ValidTo : null;
             DateTime? notBefore = jsonWebToken.HasPayloadClaim(JwtRegisteredClaimNames.Nbf) ? jsonWebToken.ValidFrom : null;
 
-            Result<ValidatedLifetime, ITokenValidationError> lifetimeValidationResult = validationParameters.LifetimeValidator(
+            Result<ValidatedLifetime, TokenValidationError> lifetimeValidationResult = validationParameters.LifetimeValidator(
                 notBefore, expires, jsonWebToken, validationParameters, callContext);
 
             if (!lifetimeValidationResult.IsSuccess)
@@ -262,7 +262,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (jsonWebToken.Audiences is not IList<string> tokenAudiences)
                 tokenAudiences = jsonWebToken.Audiences.ToList();
 
-            Result<string, ITokenValidationError> audienceValidationResult = validationParameters.AudienceValidator(
+            Result<string, TokenValidationError> audienceValidationResult = validationParameters.AudienceValidator(
                 tokenAudiences, jsonWebToken, validationParameters, callContext);
 
             if (!audienceValidationResult.IsSuccess)
@@ -271,7 +271,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     ValidatedLifetime = lifetimeValidationResult.UnwrapResult()
                 };
 
-            Result<ValidatedIssuer, ITokenValidationError> issuerValidationResult = await validationParameters.IssuerValidatorAsync(
+            Result<ValidatedIssuer, TokenValidationError> issuerValidationResult = await validationParameters.IssuerValidatorAsync(
                 jsonWebToken.Issuer, jsonWebToken, validationParameters, callContext, cancellationToken)
                 .ConfigureAwait(false);
 
@@ -282,7 +282,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     ValidatedAudience = audienceValidationResult.UnwrapResult()
                 };
 
-            Result<DateTime?, ITokenValidationError> replayValidationResult = validationParameters.TokenReplayValidator(
+            Result<DateTime?, TokenValidationError> replayValidationResult = validationParameters.TokenReplayValidator(
                 expires, jsonWebToken.EncodedToken, validationParameters, callContext);
 
             if (!replayValidationResult.IsSuccess)
@@ -297,7 +297,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // actor validation
             if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jsonWebToken.Actor))
             {
-                Result<SecurityToken, ITokenValidationError> actorReadingResult = ReadToken(jsonWebToken.Actor, callContext);
+                Result<SecurityToken, TokenValidationError> actorReadingResult = ReadToken(jsonWebToken.Actor, callContext);
                 if (!actorReadingResult.IsSuccess)
                     return new ValidationResult(jsonWebToken, this, validationParameters, actorReadingResult.UnwrapError())
                     {
@@ -326,7 +326,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     };
             }
 
-            Result<ValidatedTokenType, ITokenValidationError> typeValidationResult = validationParameters.TypeValidator(
+            Result<ValidatedTokenType, TokenValidationError> typeValidationResult = validationParameters.TypeValidator(
                 jsonWebToken.Typ, jsonWebToken, validationParameters, callContext);
 
             if (!typeValidationResult.IsSuccess)
@@ -340,7 +340,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 };
 
             // The signature validation delegate is yet to be migrated to ValidationParameters.
-            Result<SecurityKey, ITokenValidationError> signatureValidationResult = ValidateSignature(
+            Result<SecurityKey, TokenValidationError> signatureValidationResult = ValidateSignature(
                 jsonWebToken, validationParameters, configuration, callContext);
 
             if (!signatureValidationResult.IsSuccess)
@@ -354,7 +354,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     ValidatedTokenType = typeValidationResult.UnwrapResult()
                 };
 
-            Result<ValidatedSigningKeyLifetime, ITokenValidationError> issuerSigningKeyValidationResult = validationParameters.IssuerSigningKeyValidator(
+            Result<ValidatedSigningKeyLifetime, TokenValidationError> issuerSigningKeyValidationResult = validationParameters.IssuerSigningKeyValidator(
                 signatureValidationResult.UnwrapResult(), jsonWebToken, validationParameters, configuration, callContext);
 
             if (!issuerSigningKeyValidationResult.IsSuccess)

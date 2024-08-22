@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
@@ -16,22 +16,34 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.LifetimeValidatorTests", theoryData);
 
-            LifetimeValidationResult lifetimeValidationResult = Validators.ValidateLifetime(
+            Result<ValidatedLifetime, TokenValidationError> result = Validators.ValidateLifetime(
                 theoryData.NotBefore,
                 theoryData.Expires,
                 theoryData.SecurityToken,
                 theoryData.ValidationParameters,
                 new CallContext());
 
-            if (lifetimeValidationResult.Exception == null)
-                theoryData.ExpectedException.ProcessNoException();
+            if (result.IsSuccess)
+            {
+                IdentityComparer.AreValidatedLifetimesEqual(
+                    theoryData.Result.UnwrapResult(),
+                    result.UnwrapResult(),
+                    context);
+            }
             else
-                theoryData.ExpectedException.ProcessException(lifetimeValidationResult.Exception, context);
+            {
+                IdentityComparer.AreTokenValidationErrorsEqual(
+                    result.UnwrapError(),
+                    theoryData.Result.UnwrapError(),
+                    context);
 
-            IdentityComparer.AreLifetimeValidationResultsEqual(
-                lifetimeValidationResult,
-                theoryData.LifetimeValidationResult,
-                context);
+                if (result.UnwrapError().InnerException is not null)
+                    theoryData.ExpectedException.ProcessException(result.UnwrapError().InnerException);
+                else
+                    theoryData.ExpectedException.ProcessNoException();
+
+                TestUtilities.AssertFailIfErrors(context);
+            }
 
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -57,14 +69,14 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     {
                         Expires = oneHourFromNow,
                         NotBefore = oneHourAgo,
-                        LifetimeValidationResult = new LifetimeValidationResult(oneHourAgo, oneHourFromNow),
+                        Result = new ValidatedLifetime(oneHourAgo, oneHourFromNow),
                         ValidationParameters = new ValidationParameters()
                     },
                     new ValidateLifetimeTheoryData("Valid_NotBeforeIsNull")
                     {
                         Expires = oneHourFromNow,
                         NotBefore = null,
-                        LifetimeValidationResult = new LifetimeValidationResult(null, oneHourFromNow),
+                        Result = new ValidatedLifetime(null, oneHourFromNow),
                         ValidationParameters = new ValidationParameters()
                     },
                     new ValidateLifetimeTheoryData("Valid_SkewForward")
@@ -72,137 +84,98 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         Expires = oneHourFromNow,
                         NotBefore = twoMinutesFromNow,
                         ValidationParameters = new ValidationParameters { ClockSkew = TimeSpan.FromMinutes(5) },
-                        LifetimeValidationResult = new LifetimeValidationResult(twoMinutesFromNow, oneHourFromNow),
+                        Result = new ValidatedLifetime(twoMinutesFromNow, oneHourFromNow),
                     },
                     new ValidateLifetimeTheoryData("Valid_SkewBackward")
                     {
                         Expires = oneMinuteAgo,
                         NotBefore = twoMinutesAgo,
                         ValidationParameters = new ValidationParameters { ClockSkew = TimeSpan.FromMinutes(5) },
-                        LifetimeValidationResult = new LifetimeValidationResult(twoMinutesAgo, oneMinuteAgo),
+                        Result = new ValidatedLifetime(twoMinutesAgo, oneMinuteAgo),
                     },
                     new ValidateLifetimeTheoryData("Invalid_ValidationParametersIsNull")
                     {
                         Expires = oneHourFromNow,
                         NotBefore = oneHourAgo,
                         ValidationParameters = null,
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
-                        LifetimeValidationResult = new LifetimeValidationResult(
-                            oneHourAgo,
-                            oneHourFromNow,
-                            ValidationFailureType.NullArgument,
-                            new ExceptionDetail(
-                                new MessageDetail(
-                                    LogMessages.IDX10000,
-                                    "validationParameters"),
-                                ExceptionDetail.ExceptionType.ArgumentNull,
-                                null)),
+                        Result = new TokenValidationError(
+                            ValidationErrorType.ArgumentNull,
+                            new MessageDetail(LogMessages.IDX10000, "validationParameters"),
+                            null),
                     },
                     new ValidateLifetimeTheoryData("Invalid_ExpiresIsNull")
                     {
                         NotBefore = oneHourAgo,
                         ValidationParameters = new ValidationParameters(),
-                        ExpectedException = ExpectedException.SecurityTokenNoExpirationException("IDX10225:"),
-                        LifetimeValidationResult = new LifetimeValidationResult(
-                            oneHourAgo,
-                            null,
-                            ValidationFailureType.LifetimeValidationFailed,
-                            new ExceptionDetail(
-                                new MessageDetail(
-                                    LogMessages.IDX10225,
-                                    "null"),
-                                ExceptionDetail.ExceptionType.SecurityTokenNoExpiration,
-                                null)),
+                        Result = new TokenValidationError(
+                            ValidationErrorType.SecurityTokenNoExpiration,
+                            new MessageDetail(LogMessages.IDX10225, "null"),
+                            null),
                     },
                     new ValidateLifetimeTheoryData("Invalid_NotBeforeIsAfterExpires")
                     {
                         Expires = oneHourAgo,
                         NotBefore = oneHourFromNow,
                         ValidationParameters = new ValidationParameters(),
-                        ExpectedException = ExpectedException.SecurityTokenInvalidLifetimeException("IDX10224:"),
-                        LifetimeValidationResult = new LifetimeValidationResult(
-                            oneHourFromNow, // notBefore
-                            oneHourAgo, // expires
-                            ValidationFailureType.LifetimeValidationFailed,
-                            new ExceptionDetail(
-                                new MessageDetail(
-                                    LogMessages.IDX10224,
-                                    LogHelper.MarkAsNonPII(oneHourFromNow),
-                                    LogHelper.MarkAsNonPII(oneHourAgo)),
-                                ExceptionDetail.ExceptionType.SecurityTokenInvalidLifetime,
-                                null)),
+                        Result = new TokenValidationError(
+                            ValidationErrorType.SecurityTokenInvalidLifetime,
+                            new MessageDetail(
+                                LogMessages.IDX10224,
+                                LogHelper.MarkAsNonPII(oneHourFromNow),
+                                LogHelper.MarkAsNonPII(oneHourAgo)),
+                            null),
                     },
                     new ValidateLifetimeTheoryData("Invalid_NotYetValid")
                     {
                         Expires = twoHoursFromNow,
                         NotBefore = oneHourFromNow,
                         ValidationParameters = new ValidationParameters(),
-                        ExpectedException = ExpectedException.SecurityTokenNotYetValidException("IDX10222:"),
-                        LifetimeValidationResult = new LifetimeValidationResult(
-                            oneHourFromNow,
-                            twoHoursFromNow,
-                            ValidationFailureType.LifetimeValidationFailed,
-                            new ExceptionDetail(
-                                new MessageDetail(
-                                    LogMessages.IDX10222,
-                                    LogHelper.MarkAsNonPII(oneHourFromNow),
-                                    LogHelper.MarkAsNonPII(now)),
-                                ExceptionDetail.ExceptionType.SecurityTokenNotYetValid,
-                                null)),
+                        Result = new TokenValidationError(
+                            ValidationErrorType.SecurityTokenNotYetValid,
+                            new MessageDetail(
+                                LogMessages.IDX10222,
+                                LogHelper.MarkAsNonPII(oneHourFromNow),
+                                LogHelper.MarkAsNonPII(now)),
+                            null),
                     },
                     new ValidateLifetimeTheoryData("Invalid_Expired")
                     {
                         Expires = oneHourAgo,
                         NotBefore = twoHoursAgo,
                         ValidationParameters = new ValidationParameters(),
-                        ExpectedException = ExpectedException.SecurityTokenExpiredException("IDX10223:"),
-                        LifetimeValidationResult = new LifetimeValidationResult(
-                            twoHoursAgo,
-                            oneHourAgo,
-                            ValidationFailureType.LifetimeValidationFailed,
-                            new ExceptionDetail(
-                                new MessageDetail(
-                                    LogMessages.IDX10223,
-                                    LogHelper.MarkAsNonPII(oneHourAgo),
-                                    LogHelper.MarkAsNonPII(now)),
-                                ExceptionDetail.ExceptionType.SecurityTokenExpired,
-                                null)),
+                        Result = new TokenValidationError(
+                            ValidationErrorType.SecurityTokenExpired,
+                            new MessageDetail(
+                                LogMessages.IDX10223,
+                                LogHelper.MarkAsNonPII(oneHourAgo),
+                                LogHelper.MarkAsNonPII(now)),
+                            null),
                     },
                     new ValidateLifetimeTheoryData("Invalid_NotYetValid_SkewForward")
                     {
                         Expires = oneHourFromNow,
                         NotBefore = sixMinutesFromNow,
                         ValidationParameters = new ValidationParameters { ClockSkew = TimeSpan.FromMinutes(5) },
-                        ExpectedException = ExpectedException.SecurityTokenNotYetValidException("IDX10222:"),
-                        LifetimeValidationResult = new LifetimeValidationResult(
-                            sixMinutesFromNow,
-                            oneHourFromNow,
-                            ValidationFailureType.LifetimeValidationFailed,
-                            new ExceptionDetail(
-                                new MessageDetail(
-                                    LogMessages.IDX10222,
-                                    LogHelper.MarkAsNonPII(sixMinutesFromNow),
-                                    LogHelper.MarkAsNonPII(now)),
-                                ExceptionDetail.ExceptionType.SecurityTokenNotYetValid,
-                                null)),
+                        Result = new TokenValidationError(
+                            ValidationErrorType.SecurityTokenNotYetValid,
+                            new MessageDetail(
+                                LogMessages.IDX10222,
+                                LogHelper.MarkAsNonPII(sixMinutesFromNow),
+                                LogHelper.MarkAsNonPII(now)),
+                            null),
                     },
                     new ValidateLifetimeTheoryData("Invalid_Expired_SkewBackward")
                     {
                         Expires = sixMinutesAgo,
                         NotBefore = twoHoursAgo,
                         ValidationParameters = new ValidationParameters { ClockSkew = TimeSpan.FromMinutes(5) },
-                        ExpectedException = ExpectedException.SecurityTokenExpiredException("IDX10223:"),
-                        LifetimeValidationResult = new LifetimeValidationResult(
-                            twoHoursAgo,
-                            sixMinutesAgo,
-                            ValidationFailureType.LifetimeValidationFailed,
-                            new ExceptionDetail(
-                                new MessageDetail(
-                                    LogMessages.IDX10223,
-                                    LogHelper.MarkAsNonPII(sixMinutesAgo),
-                                    LogHelper.MarkAsNonPII(now)),
-                                ExceptionDetail.ExceptionType.SecurityTokenExpired,
-                                null)),
+                        Result = new TokenValidationError(
+                            ValidationErrorType.SecurityTokenExpired,
+                            new MessageDetail(
+                                LogMessages.IDX10223,
+                                LogHelper.MarkAsNonPII(sixMinutesAgo),
+                                LogHelper.MarkAsNonPII(now)),
+                            null),
                     }
                 };
             }
@@ -223,7 +196,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
         internal ValidationParameters ValidationParameters { get; set; }
 
-        internal LifetimeValidationResult LifetimeValidationResult { get; set; }
+        internal Result<ValidatedLifetime, TokenValidationError> Result { get; set; }
 
         internal ValidationFailureType ValidationFailureType { get; set; }
     }

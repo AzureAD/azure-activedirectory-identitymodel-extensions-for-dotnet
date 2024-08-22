@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens
         // TODO - lazy creation of _validationResults
         private List<ValidationResult> _validationResults;
 
-        private ITokenValidationError _tokenValidationError;
+        private TokenValidationError _tokenValidationError;
         private Exception _exception;
         private bool _isValid;
 
@@ -87,7 +87,7 @@ namespace Microsoft.IdentityModel.Tokens
             ValidationParameters validationParameters,
             string issuer,
             List<ValidationResult> validationResults,
-            ITokenValidationError tokenValidationError)
+            TokenValidationError tokenValidationError)
         {
             _validationParameters = validationParameters;
             _tokenHandler = tokenHandler;
@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.Tokens
         internal TokenValidationResult(
             TokenHandler tokenHandler,
             ValidationParameters validationParameters,
-            ITokenValidationError tokenValidationError)
+            TokenValidationError tokenValidationError)
         {
             _tokenHandler = tokenHandler;
             _tokenValidationError = tokenValidationError;
