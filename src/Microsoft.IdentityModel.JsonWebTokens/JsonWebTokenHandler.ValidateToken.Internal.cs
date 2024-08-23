@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
-            CancellationToken? cancellationToken)
+            CancellationToken cancellationToken)
         {
             // These exceptions will be removed once we add ExceptionDetails to TokenValidationResult.
             if (string.IsNullOrEmpty(token))
@@ -99,7 +99,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext,
-            CancellationToken? cancellationToken)
+            CancellationToken cancellationToken)
         {
             if (token is null)
                 return new ValidationResult(
@@ -151,7 +151,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             JsonWebToken jsonWebToken,
             ValidationParameters validationParameters,
             CallContext callContext,
-            CancellationToken? cancellationToken)
+            CancellationToken cancellationToken)
         {
             BaseConfiguration currentConfiguration =
                 await GetCurrentConfigurationAsync(validationParameters)
@@ -233,7 +233,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             ValidationParameters validationParameters,
             BaseConfiguration configuration,
             CallContext callContext,
-            CancellationToken? cancellationToken)
+            CancellationToken cancellationToken)
         {
             Result<string, ExceptionDetail> decryptionResult = DecryptToken(
                 jwtToken, validationParameters, configuration, callContext);
@@ -266,7 +266,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             ValidationParameters validationParameters,
             BaseConfiguration configuration,
             CallContext callContext,
-            CancellationToken? cancellationToken)
+            CancellationToken cancellationToken)
         {
             DateTime? expires = jsonWebToken.HasPayloadClaim(JwtRegisteredClaimNames.Exp) ? jsonWebToken.ValidTo : null;
             DateTime? notBefore = jsonWebToken.HasPayloadClaim(JwtRegisteredClaimNames.Nbf) ? jsonWebToken.ValidFrom : null;
