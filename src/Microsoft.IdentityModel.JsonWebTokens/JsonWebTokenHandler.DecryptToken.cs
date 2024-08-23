@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (string.IsNullOrEmpty(jwtToken.Enc))
                 return new ExceptionDetail(
                     new MessageDetail(TokenLogMessages.IDX10612),
-                    ValidationErrorType.SecurityTokenDecryptionFailed,
+                    ValidationErrorType.SecurityToken,
                     new StackFrame(true));
 
             (IList<SecurityKey>? contentEncryptionKeys, ExceptionDetail? exceptionDetail) result =
@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     new MessageDetail(
                         TokenLogMessages.IDX10609,
                         LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken)),
-                    ValidationErrorType.SecurityTokenKeyWrap,
+                    ValidationErrorType.SecurityTokenDecryptionFailed,
                     new StackFrame(true));
 
             return JwtTokenUtilities.DecryptJwtToken(

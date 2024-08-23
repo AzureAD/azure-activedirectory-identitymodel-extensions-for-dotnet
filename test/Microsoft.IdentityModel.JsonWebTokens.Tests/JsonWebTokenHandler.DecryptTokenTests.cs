@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt.Tests;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
@@ -30,29 +30,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     theoryData.Token = new JsonWebToken(tokenString);
             }
 
-            if (theoryData.TestId == "Invalid_NoKeysProvided")
-            {
-#pragma warning disable CS0219 // Variable is assigned but its value is never used
-                var something = 0;
-#pragma warning restore CS0219 // Variable is assigned but its value is never used
-            }
-
             CompareContext context = TestUtilities.WriteHeader($"{this}.JsonWebTokenHandlerDecryptTokenTests", theoryData);
-            TokenDecryptionResult tokenDecryptionResult = jsonWebTokenHandler.DecryptToken(
+            Result<string, ExceptionDetail> result = jsonWebTokenHandler.DecryptToken(
                 theoryData.Token,
                 theoryData.ValidationParameters,
                 theoryData.Configuration,
                 new CallContext());
 
-            if (tokenDecryptionResult.Exception != null)
-                theoryData.ExpectedException.ProcessException(tokenDecryptionResult.Exception);
-            else
-                theoryData.ExpectedException.ProcessNoException();
+            if (result.IsSuccess)
+            {
+                IdentityComparer.AreStringsEqual(
+                    result.UnwrapResult(),
+                    theoryData.Result.UnwrapResult(),
+                    context);
 
-            IdentityComparer.AreTokenDecryptingResultsEqual(
-                tokenDecryptionResult,
-                theoryData.TokenDecryptionResult,
-                context);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            else
+            {
+                Exception exception = result.UnwrapError().GetException();
+                theoryData.ExpectedException.ProcessException(exception, context);
+            }
 
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -61,13 +59,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public void DecryptToken_ThrowsIfAccessingSecurityTokenOnFailedRead()
         {
             JsonWebTokenHandler jsonWebTokenHandler = new JsonWebTokenHandler();
-            TokenDecryptionResult tokenDecryptionResult = jsonWebTokenHandler.DecryptToken(
+            Result<string, ExceptionDetail> tokenDecryptionResult = jsonWebTokenHandler.DecryptToken(
                 null,
                 null,
                 null,
                 new CallContext());
 
-            Assert.Throws<InvalidOperationException>(() => tokenDecryptionResult.DecryptedToken());
+            Assert.Throws<InvalidOperationException>(() => tokenDecryptionResult.UnwrapResult());
         }
 
         public static TheoryData<TokenDecryptingTheoryData> JsonWebTokenHandlerDecryptTokenTestCases
@@ -104,13 +102,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Token = token,
                         ValidationParameters = new ValidationParameters(),
                         ExpectedException = ExpectedException.SecurityTokenException("IDX10612:"),
-                        TokenDecryptionResult = new TokenDecryptionResult(
-                            token,
-                            ValidationFailureType.TokenDecryptionFailed,
-                            new ExceptionDetail(
-                                new MessageDetail(TokenLogMessages.IDX10612),
-                                ExceptionDetail.ExceptionType.SecurityToken,
-                                null)),
+                        Result = new ExceptionDetail(
+                            new MessageDetail(TokenLogMessages.IDX10612),
+                            ValidationErrorType.SecurityToken,
+                            null,
+                            null),
                     },
                     new TokenDecryptingTheoryData
                     {
@@ -118,12 +114,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Token = null,
                         ValidationParameters = new ValidationParameters(),
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
-                        TokenDecryptionResult = new TokenDecryptionResult(
-                            null,
-                            ValidationFailureType.TokenDecryptionFailed,
-                            new ExceptionDetail(
+                        Result = new ExceptionDetail(
                                 new MessageDetail(TokenLogMessages.IDX10000, "jwtToken"),
-                                ExceptionDetail.ExceptionType.ArgumentNull)),
+                                ValidationErrorType.ArgumentNull,
+                                null,
+                                null),
                     },
                     new TokenDecryptingTheoryData
                     {
@@ -131,12 +126,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Token = token,
                         ValidationParameters = null,
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
-                        TokenDecryptionResult = new TokenDecryptionResult(
-                            token,
-                            ValidationFailureType.TokenDecryptionFailed,
-                            new ExceptionDetail(
-                                new MessageDetail(TokenLogMessages.IDX10000, "validationParameters"),
-                                ExceptionDetail.ExceptionType.ArgumentNull)),
+                        Result = new ExceptionDetail(
+                            new MessageDetail(TokenLogMessages.IDX10000, "validationParameters"),
+                            ValidationErrorType.ArgumentNull,
+                            null,
+                            null),
                     },
                     new TokenDecryptingTheoryData
                     {
@@ -146,9 +140,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             TokenDecryptionKeys = [Default.SymmetricEncryptingCredentials.Key],
                         },
-                        TokenDecryptionResult = new TokenDecryptionResult(
-                            "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwiaWF0IjoiMTQ4OTc3NTYxNyIsIm5iZiI6IjE0ODk3NzU2MTciLCJleHAiOiIyNTM0MDIzMDA3OTkifQ.",
-                            new JsonWebToken(ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims)),
+                        Result = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwiaWF0IjoiMTQ4OTc3NTYxNyIsIm5iZiI6IjE0ODk3NzU2MTciLCJleHAiOiIyNTM0MDIzMDA3OTkifQ.",
                     },
                     new TokenDecryptingTheoryData
                     {
@@ -158,9 +150,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             TokenDecryptionKeyResolver = (tokenString, token, kid, validationParameters, callContext) => [Default.SymmetricEncryptingCredentials.Key]
                         },
-                        TokenDecryptionResult = new TokenDecryptionResult(
-                            "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwiaWF0IjoiMTQ4OTc3NTYxNyIsIm5iZiI6IjE0ODk3NzU2MTciLCJleHAiOiIyNTM0MDIzMDA3OTkifQ.",
-                            new JsonWebToken(ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims)),
+                        Result = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwiaWF0IjoiMTQ4OTc3NTYxNyIsIm5iZiI6IjE0ODk3NzU2MTciLCJleHAiOiIyNTM0MDIzMDA3OTkifQ.",
                     },
                     new TokenDecryptingTheoryData
                     {
@@ -168,9 +158,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         TokenString = ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims,
                         ValidationParameters = new ValidationParameters(),
                         Configuration = new CustomConfiguration(Default.SymmetricEncryptingCredentials.Key),
-                        TokenDecryptionResult = new TokenDecryptionResult(
-                            "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwiaWF0IjoiMTQ4OTc3NTYxNyIsIm5iZiI6IjE0ODk3NzU2MTciLCJleHAiOiIyNTM0MDIzMDA3OTkifQ.",
-                            new JsonWebToken(ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims)),
+                        Result = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJlbWFpbCI6IkJvYkBjb250b3NvLmNvbSIsImdpdmVuX25hbWUiOiJCb2IiLCJpc3MiOiJodHRwOi8vRGVmYXVsdC5Jc3N1ZXIuY29tIiwiYXVkIjoiaHR0cDovL0RlZmF1bHQuQXVkaWVuY2UuY29tIiwiaWF0IjoiMTQ4OTc3NTYxNyIsIm5iZiI6IjE0ODk3NzU2MTciLCJleHAiOiIyNTM0MDIzMDA3OTkifQ.",
                     },
 #if NET472 || NET6_0_OR_GREATER
                     new TokenDecryptingTheoryData
@@ -182,9 +170,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             TokenDecryptionKeys = [new ECDsaSecurityKey(KeyingMaterial.JsonWebKeyP256, true)],
                             EphemeralDecryptionKey = new ECDsaSecurityKey(KeyingMaterial.JsonWebKeyP256, true)
                         },
-                        TokenDecryptionResult = new TokenDecryptionResult(
-                            "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjI1MzQwMjMwMDgwMCwiaWF0IjowLCJuYmYiOjB9.",
-                            ecdsaToken),
+                        Result = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjI1MzQwMjMwMDgwMCwiaWF0IjowLCJuYmYiOjB9."
                     },
 #endif
                     new TokenDecryptingTheoryData
@@ -193,17 +179,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         TokenString = ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims,
                         ValidationParameters = new ValidationParameters(),
                         ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10609:"),
-                        TokenDecryptionResult = new TokenDecryptionResult(
-                            new JsonWebToken(ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims),
-                            ValidationFailureType.TokenDecryptionFailed,
-                            new ExceptionDetail(
-                                new MessageDetail(
-                                    TokenLogMessages.IDX10609,
-                                    LogHelper.MarkAsSecurityArtifact(
-                                        new JsonWebToken(ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims),
-                                        JwtTokenUtilities.SafeLogJwtToken)),
-                                ExceptionDetail.ExceptionType.SecurityTokenDecryptionFailed,
-                                null)),
+                        Result = new ExceptionDetail(
+                            new MessageDetail(
+                                TokenLogMessages.IDX10609,
+                                LogHelper.MarkAsSecurityArtifact(
+                                    new JsonWebToken(ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims),
+                                    JwtTokenUtilities.SafeLogJwtToken)),
+                                ValidationErrorType.SecurityTokenDecryptionFailed,
+                                null,
+                                null),
                     }
                 };
             }
@@ -213,7 +197,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
     public class TokenDecryptingTheoryData : TheoryDataBase
     {
         public JsonWebToken Token { get; set; }
-        internal TokenDecryptionResult TokenDecryptionResult { get; set; }
+        internal Result<string, ExceptionDetail> Result { get; set; }
         public BaseConfiguration Configuration { get; internal set; }
         public SecurityTokenDescriptor SecurityTokenDescriptor { get; internal set; }
         public string TokenString { get; internal set; }

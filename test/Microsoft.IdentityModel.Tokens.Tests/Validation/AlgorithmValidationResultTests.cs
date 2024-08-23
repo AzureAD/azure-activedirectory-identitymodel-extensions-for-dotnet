@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             else
             {
                 Exception exception = result.UnwrapError().GetException();
-                theoryData.ExpectedException.ProcessException(exception);
+                theoryData.ExpectedException.ProcessException(exception, context);
             }
 
             TestUtilities.AssertFailIfErrors(context);

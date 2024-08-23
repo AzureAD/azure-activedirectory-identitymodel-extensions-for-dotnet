@@ -24,7 +24,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             if (theoryData.ValidIssuerToAdd != null)
                 theoryData.ValidationParameters.ValidIssuers.Add(theoryData.ValidIssuerToAdd);
 
-            Result<ValidatedIssuer, TokenValidationError> result = await Validators.ValidateIssuerAsync(
+            Result<ValidatedIssuer, ExceptionDetail> result = await Validators.ValidateIssuerAsync(
                 theoryData.Issuer,
                 theoryData.SecurityToken,
                 theoryData.ValidationParameters,
@@ -37,18 +37,13 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     theoryData.Result.UnwrapResult(),
                     result.UnwrapResult(),
                     context);
+
+                theoryData.ExpectedException.ProcessNoException(context);
             }
             else
             {
-                IdentityComparer.AreTokenValidationErrorsEqual(
-                    result.UnwrapError(),
-                    theoryData.Result.UnwrapError(),
-                    context);
-
-                if (result.UnwrapError().InnerException is not null)
-                    theoryData.ExpectedException.ProcessException(result.UnwrapError().InnerException);
-                else
-                    theoryData.ExpectedException.ProcessNoException();
+                Exception exception = result.UnwrapError().GetException();
+                theoryData.ExpectedException.ProcessException(exception, context);
             }
 
             TestUtilities.AssertFailIfErrors(context);
@@ -67,14 +62,16 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
                 theoryData.Add(new IssuerValidationResultsTheoryData("NULL_Issuer")
                 {
-                    Result = new TokenValidationError(
-                        ValidationErrorType.SecurityTokenInvalidIssuer,
+                    ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10211:"),
+                    Result = new ExceptionDetail(
                         new MessageDetail(
                             LogMessages.IDX10211,
                             LogHelper.MarkAsNonPII(null),
                             LogHelper.MarkAsNonPII(validIssuer),
                             LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(null)),
                             LogHelper.MarkAsNonPII(null)),
+                        ValidationErrorType.SecurityTokenInvalidIssuer,
+                        null,
                         null),
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
                     ValidationParameters = new ValidationParameters()
@@ -82,12 +79,14 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
                 theoryData.Add(new IssuerValidationResultsTheoryData("NULL_ValidationParameters")
                 {
+                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                     Issuer = issClaim,
-                    Result = new TokenValidationError(
-                        ValidationErrorType.ArgumentNull,
+                    Result = new ExceptionDetail(
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII("validationParameters")),
+                        ValidationErrorType.ArgumentNull,
+                        null,
                         null),
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
                     ValidationParameters = null
@@ -95,12 +94,14 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
                 theoryData.Add(new IssuerValidationResultsTheoryData("NULL_SecurityToken")
                 {
+                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                     Issuer = issClaim,
-                    Result = new TokenValidationError(
-                        ValidationErrorType.ArgumentNull,
+                    Result = new ExceptionDetail(
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII("securityToken")),
+                        ValidationErrorType.ArgumentNull,
+                        null,
                         null),
                     SecurityToken = null,
                     ValidationParameters = new ValidationParameters()
@@ -128,14 +129,16 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
                 theoryData.Add(new IssuerValidationResultsTheoryData("Invalid_Issuer")
                 {
+                    ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10212:"),
                     Issuer = issClaim,
-                    Result = new TokenValidationError(
-                        ValidationErrorType.SecurityTokenInvalidIssuer,
+                    Result = new ExceptionDetail(
                         new MessageDetail(
                             LogMessages.IDX10212,
                             LogHelper.MarkAsNonPII(issClaim),
                             LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validIssuers)),
                             LogHelper.MarkAsNonPII(null)),
+                        ValidationErrorType.SecurityTokenInvalidIssuer,
+                        null,
                         null),
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
                     ValidationParameters = new ValidationParameters(),
@@ -157,7 +160,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
         public string Issuer { get; set; }
 
-        internal Result<ValidatedIssuer, TokenValidationError> Result { get; set; }
+        internal Result<ValidatedIssuer, ExceptionDetail> Result { get; set; }
 
         public SecurityToken SecurityToken { get; set; }
 

@@ -20,6 +20,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -1288,6 +1289,27 @@ namespace Microsoft.IdentityModel.TestUtils
                 validatedSigningKeyLifetime1.ValidationTime,
                 validatedSigningKeyLifetime2.ValidationTime,
                 1,
+                localContext);
+
+            return context.Merge(localContext);
+        }
+
+        internal static bool AreValidatedTokenTypesEqual(ValidatedTokenType validatedTokenType1, ValidatedTokenType validatedTokenType2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+
+            AreStringsEqual(
+                validatedTokenType1.Type,
+                validatedTokenType2.Type,
+                "validatedTokenType1.Type",
+                "validatedTokenType2.Type",
+                localContext);
+
+            AreIntsEqual(
+                validatedTokenType1.ValidTypeCount,
+                validatedTokenType2.ValidTypeCount,
+                "validatedTokenType1.ValidTypeCount",
+                "validatedTokenType2.ValidTypeCount",
                 localContext);
 
             return context.Merge(localContext);

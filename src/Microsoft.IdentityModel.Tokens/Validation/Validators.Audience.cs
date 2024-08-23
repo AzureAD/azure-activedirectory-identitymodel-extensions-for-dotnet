@@ -52,8 +52,9 @@ namespace Microsoft.IdentityModel.Tokens
                     new StackFrame(true));
 
             if (tokenAudiences == null)
-                return ExceptionDetail.NullParameter(
-                    nameof(tokenAudiences),
+                return new ExceptionDetail(
+                    new MessageDetail(LogMessages.IDX10207),
+                    ValidationErrorType.SecurityTokenInvalidAudience,
                     new StackFrame(true));
 
             if (tokenAudiences.Count == 0)
