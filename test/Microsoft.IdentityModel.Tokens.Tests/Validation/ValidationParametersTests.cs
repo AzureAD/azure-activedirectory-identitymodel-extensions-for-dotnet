@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests.Validation
         public void ValidTypes_Get_ReturnsEmptyList()
         {
             var validationParameters = new ValidationParameters();
-          
+
             Assert.Equal(0, validationParameters.ValidTypes.Count);
             Assert.True(validationParameters.ValidTypes is IList<string>);
         }

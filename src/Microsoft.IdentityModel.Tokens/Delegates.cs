@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.JsonWebTokens.Results;
+using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -205,7 +205,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="callContext">The <see cref="CallContext"/> to be used for logging.</param>
     /// <remarks>This method is not expected to throw.</remarks>
     /// <returns>The validated <see cref="SecurityToken"/>.</returns>
-    internal delegate SignatureValidationResult SignatureValidatorDelegate(SecurityToken token, ValidationParameters validationParameters, BaseConfiguration? configuration, CallContext? callContext);
+    internal delegate Result<SecurityKey, ExceptionDetail> SignatureValidatorDelegate(SecurityToken token, ValidationParameters validationParameters, BaseConfiguration? configuration, CallContext? callContext);
 
     /// <summary>
     /// Transforms the security token before signature validation.

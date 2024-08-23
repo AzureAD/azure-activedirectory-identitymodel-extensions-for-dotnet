@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Microsoft.IdentityModel.Abstractions;
@@ -23,51 +24,41 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="configuration">The <see cref="BaseConfiguration"/> to be used for validating the token.</param>
         /// <param name="callContext"></param>
         /// <returns>The decoded / cleartext contents of the JWE.</returns>
-        /// <exception cref="ArgumentNullException">Returned inside <see cref="TokenDecryptionResult.Exception"/> if <paramref name="jwtToken"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">Returned inside <see cref="TokenDecryptionResult.Exception"/> if <paramref name="validationParameters"/> is null.</exception>
-        /// <exception cref="SecurityTokenException">Returned inside <see cref="TokenDecryptionResult.Exception"/> if <see cref="JsonWebToken.Enc"/> is null or empty.</exception>
-        /// <exception cref="SecurityTokenDecompressionFailedException">Returned inside <see cref="TokenDecryptionResult.Exception"/> if the decompression failed.</exception>
-        /// <exception cref="SecurityTokenEncryptionKeyNotFoundException">Returned inside <see cref="TokenDecryptionResult.Exception"/> if <see cref="JsonWebToken.Kid"/> is not null AND the decryption fails.</exception>
-        /// <exception cref="SecurityTokenDecryptionFailedException">Returned inside <see cref="TokenDecryptionResult.Exception"/> if the JWE was not able to be decrypted.</exception>
-        internal TokenDecryptionResult DecryptToken(
+        internal Result<string, ExceptionDetail> DecryptToken(
             JsonWebToken jwtToken,
             ValidationParameters validationParameters,
             BaseConfiguration configuration,
             CallContext? callContext)
         {
             if (jwtToken == null)
-                return TokenDecryptionResult.NullParameterFailure(jwtToken, nameof(jwtToken));
+                return ExceptionDetail.NullParameter(
+                    nameof(jwtToken),
+                    new StackFrame(true));
 
             if (validationParameters == null)
-                return TokenDecryptionResult.NullParameterFailure(jwtToken, nameof(validationParameters));
+                return ExceptionDetail.NullParameter(
+                    nameof(validationParameters),
+                    new StackFrame(true));
 
             if (string.IsNullOrEmpty(jwtToken.Enc))
-                return new TokenDecryptionResult(
-                    jwtToken,
-                    ValidationFailureType.TokenDecryptionFailed,
-                    new ExceptionDetail(
-                        new MessageDetail(TokenLogMessages.IDX10612),
-                        ExceptionDetail.ExceptionType.SecurityToken,
-                        new System.Diagnostics.StackFrame()));
+                return new ExceptionDetail(
+                    new MessageDetail(TokenLogMessages.IDX10612),
+                    ValidationErrorType.SecurityToken,
+                    new StackFrame(true));
 
-            var keysOrExceptionDetail = GetContentEncryptionKeys(jwtToken, validationParameters, configuration, callContext);
-            if (keysOrExceptionDetail.Item2 != null) // ExceptionDetail returned
-                return new TokenDecryptionResult(
-                    jwtToken,
-                    ValidationFailureType.TokenDecryptionFailed,
-                    keysOrExceptionDetail.Item2);
+            (IList<SecurityKey>? contentEncryptionKeys, ExceptionDetail? exceptionDetail) result =
+                GetContentEncryptionKeys(jwtToken, validationParameters, configuration, callContext);
 
-            var keys = keysOrExceptionDetail.Item1;
-            if (keys == null)
-                return new TokenDecryptionResult(
-                    jwtToken,
-                    ValidationFailureType.TokenDecryptionFailed,
-                    new ExceptionDetail(
-                        new MessageDetail(
-                            TokenLogMessages.IDX10609,
-                            LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken)),
-                        ExceptionDetail.ExceptionType.SecurityTokenDecryptionFailed,
-                        new System.Diagnostics.StackFrame()));
+            if (result.exceptionDetail != null)
+                return result.exceptionDetail;
+
+            if (result.contentEncryptionKeys == null)
+                return new ExceptionDetail(
+                    new MessageDetail(
+                        TokenLogMessages.IDX10609,
+                        LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken)),
+                    ValidationErrorType.SecurityTokenDecryptionFailed,
+                    new StackFrame(true));
 
             return JwtTokenUtilities.DecryptJwtToken(
                 jwtToken,
@@ -75,7 +66,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 new JwtTokenDecryptionParameters
                 {
                     DecompressionFunction = JwtTokenUtilities.DecompressToken,
-                    Keys = keys,
+                    Keys = result.contentEncryptionKeys,
                     MaximumDeflateSize = MaximumTokenSizeInBytes
                 },
                 callContext);
@@ -97,14 +88,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 var key = ResolveTokenDecryptionKey(jwtToken.EncodedToken, jwtToken, validationParameters, callContext);
                 if (key != null)
                 {
-                    if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                        LogHelper.LogInformation(TokenLogMessages.IDX10904, key);
+                    // TODO: Move to CallContext
+                    //if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                    //    LogHelper.LogInformation(TokenLogMessages.IDX10904, key);
                 }
                 else if (configuration != null)
                 {
                     key = ResolveTokenDecryptionKeyFromConfig(jwtToken, configuration);
-                    if (key != null && LogHelper.IsEnabled(EventLogLevel.Informational))
-                        LogHelper.LogInformation(TokenLogMessages.IDX10905, key);
+                    // TODO: Move to CallContext
+                    //if (key != null && LogHelper.IsEnabled(EventLogLevel.Informational))
+                    //    LogHelper.LogInformation(TokenLogMessages.IDX10905, key);
                 }
 
                 if (key != null)
@@ -202,8 +195,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         keysAttempted?.ToString() ?? "",
                         exceptionStrings?.ToString() ?? "",
                         LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken)),
-                    ExceptionDetail.ExceptionType.SecurityTokenKeyWrap,
-                    new System.Diagnostics.StackFrame());
+                    ValidationErrorType.SecurityTokenKeyWrap,
+                    new System.Diagnostics.StackFrame(),
+                    null);
+
                 return (null, exceptionDetail);
             }
         }

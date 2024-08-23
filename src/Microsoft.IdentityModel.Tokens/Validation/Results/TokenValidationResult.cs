@@ -37,6 +37,7 @@ namespace Microsoft.IdentityModel.Tokens
         // TODO - lazy creation of _validationResults
         private List<ValidationResult> _validationResults;
 
+        private TokenValidationError _tokenValidationError;
         private Exception _exception;
         private bool _isValid;
 
@@ -78,31 +79,39 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters"></param>
         /// <param name="issuer"></param>
         /// <param name="validationResults"></param>
+        /// <param name="tokenValidationError"></param>
         /// <remarks>This constructor is used by JsonWebTokenHandler as part of delaying creation of ClaimsIdentity.</remarks>
         internal TokenValidationResult(
             SecurityToken securityToken,
             TokenHandler tokenHandler,
             ValidationParameters validationParameters,
             string issuer,
-            List<ValidationResult> validationResults)
+            List<ValidationResult> validationResults,
+            TokenValidationError tokenValidationError)
         {
             _validationParameters = validationParameters;
             _tokenHandler = tokenHandler;
             _validationResults = validationResults;
             Issuer = issuer;
             SecurityToken = securityToken;
+            _tokenValidationError = tokenValidationError;
         }
 
         /// <summary>
-        /// Adds a <see cref="ValidationResult"/> to the list of <see cref="ValidationResults"/>.
+        /// Initializes a new instance of <see cref="TokenValidationResult"/> using <see cref="ValidationParameters"/>.
         /// </summary>
-        /// <param name="validationResult"> the <see cref="ValidationResult"/> associated with one of the validation steps. For example <see cref="IssuerValidationResult"/>.</param>
-        internal void AddValidationResult(ValidationResult validationResult)
+        /// <param name="tokenHandler"></param>
+        /// <param name="tokenValidationError"></param>
+        /// <param name="validationParameters"></param>
+        /// <remarks>This constructor is used by JsonWebTokenHandler as part of delaying creation of ClaimsIdentity.</remarks>
+        internal TokenValidationResult(
+            TokenHandler tokenHandler,
+            ValidationParameters validationParameters,
+            TokenValidationError tokenValidationError)
         {
-            if (validationResult is null)
-                throw LogHelper.LogArgumentNullException(nameof(validationResult));
-
-            _validationResults.Add(validationResult);
+            _tokenHandler = tokenHandler;
+            _tokenValidationError = tokenValidationError;
+            _validationParameters = validationParameters;
         }
 
         /// <summary>
@@ -211,39 +220,17 @@ namespace Microsoft.IdentityModel.Tokens
             get
             {
                 HasValidOrExceptionWasRead = true;
-                if (_exception is null)
-                {
-                    if (ExceptionDetail is not null)
-                        return ExceptionDetail.GetException();
-                }
+                if (_exception is null && _tokenValidationError is not null)
+                    return ExceptionDetail.ExceptionFromType(
+                        _tokenValidationError.ErrorType,
+                        _tokenValidationError.MessageDetail,
+                        null);
 
                 return _exception;
             }
             set
             {
                 _exception = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets the <see cref="ExceptionDetail"/> for the first failed validation result.
-        /// </summary>
-        private ExceptionDetail ExceptionDetail
-        {
-            get
-            {
-                if (ValidationResults.Count == 0)
-                    return null;
-
-                // Iterate in reverse since the failure should be the last result
-                for (int i = ValidationResults.Count - 1; i >= 0; i--)
-                {
-                    ValidationResult validationResult = ValidationResults[i];
-                    if (validationResult.ExceptionDetail != null)
-                        return validationResult.ExceptionDetail;
-                }
-
-                return null;
             }
         }
 
@@ -306,19 +293,5 @@ namespace Microsoft.IdentityModel.Tokens
         /// (e.g for a JSON Web Token, from the "typ" header). 
         /// </summary>
         public string TokenType { get; set; }
-
-        /// <summary>
-        /// Gets the list of <see cref="ValidationResult"/> that contains the result of validating the token.
-        /// </summary>
-        internal IReadOnlyList<ValidationResult> ValidationResults
-        {
-            get
-            {
-                if (_validationResults is null)
-                    Interlocked.CompareExchange(ref _validationResults, new List<ValidationResult>(), null);
-
-                return _validationResults.AsReadOnly();
-            }
-        }
     }
 }
