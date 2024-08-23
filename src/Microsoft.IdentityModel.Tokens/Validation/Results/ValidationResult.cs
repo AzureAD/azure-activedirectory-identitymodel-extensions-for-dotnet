@@ -3,6 +3,7 @@
 
 #nullable enable
 using System;
+using System.Diagnostics;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -33,21 +34,25 @@ namespace Microsoft.IdentityModel.Tokens
             SecurityToken? securityToken,
             TokenHandler tokenHandler,
             ValidationParameters? validationParameters,
-            TokenValidationError tokenValidationError)
+            ExceptionDetail exceptionDetail,
+            StackFrame? stackFrame = null)
         {
             TokenHandler = tokenHandler ?? throw new ArgumentNullException("TokenHandler cannot be null.");
             SecurityToken = securityToken;
             ValidationParameters = validationParameters;
-            TokenValidationError = tokenValidationError;
+            ExceptionDetail = exceptionDetail;
             IsValid = false;
+
+            if (stackFrame != null)
+                ExceptionDetail.StackFrames.Add(stackFrame);
         }
+
+        public ExceptionDetail? ExceptionDetail { get; private set; }
 
         /// <summary>
         /// True if the token was successfully validated, false otherwise.
         /// </summary>
         public bool IsValid { get; private set; }
-
-        public TokenValidationError? TokenValidationError { get; private set; }
 
         /// <summary>
         /// Logs the validation result.

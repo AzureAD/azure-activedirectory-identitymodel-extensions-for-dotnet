@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
@@ -16,7 +17,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="callContext"></param>
     /// <returns>A <see cref="Result{TResult, TError}"/>that contains the results of validating the token.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
-    internal delegate Result<DateTime?, TokenValidationError> TokenReplayValidatorDelegate(
+    internal delegate Result<DateTime?, ExceptionDetail> TokenReplayValidatorDelegate(
         DateTime? expirationTime,
         string securityToken,
         ValidationParameters validationParameters,
@@ -40,41 +41,45 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="SecurityTokenReplayDetectedException">If the 'securityToken' is found in the cache.</exception>
         /// <exception cref="SecurityTokenReplayAddFailedException">If the 'securityToken' could not be added to the <see cref="ValidationParameters.TokenReplayCache"/>.</exception>
 #pragma warning disable CA1801 // Review unused parameters
-        internal static Result<DateTime?, TokenValidationError> ValidateTokenReplay(DateTime? expirationTime, string securityToken, ValidationParameters validationParameters, CallContext callContext)
+        internal static Result<DateTime?, ExceptionDetail> ValidateTokenReplay(DateTime? expirationTime, string securityToken, ValidationParameters validationParameters, CallContext callContext)
 #pragma warning restore CA1801 // Review unused parameters
         {
             if (string.IsNullOrWhiteSpace(securityToken))
-                return TokenValidationErrorCommon.NullParameter(nameof(securityToken));
+                return ExceptionDetail.NullParameter(
+                    nameof(securityToken),
+                    new StackFrame(true));
 
             if (validationParameters == null)
-                return TokenValidationErrorCommon.NullParameter(nameof(validationParameters));
+                return ExceptionDetail.NullParameter(
+                    nameof(validationParameters),
+                    new StackFrame(true));
 
             // check if token if replay cache is set, then there must be an expiration time.
             if (validationParameters.TokenReplayCache != null)
             {
                 if (expirationTime == null)
-                    return new TokenValidationError(
-                        ValidationErrorType.SecurityTokenReplayDetected,
+                    return new ExceptionDetail(
                         new MessageDetail(
                             LogMessages.IDX10227,
                             LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
-                        null);
+                        ValidationErrorType.SecurityTokenReplayDetected,
+                        new StackFrame(true));
 
                 if (validationParameters.TokenReplayCache.TryFind(securityToken))
-                    return new TokenValidationError(
-                        ValidationErrorType.SecurityTokenReplayDetected,
+                    return new ExceptionDetail(
                         new MessageDetail(
                             LogMessages.IDX10228,
                             LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
-                        null);
+                        ValidationErrorType.SecurityTokenReplayDetected,
+                        new StackFrame(true));
 
                 if (!validationParameters.TokenReplayCache.TryAdd(securityToken, expirationTime.Value))
-                    return new TokenValidationError(
-                        ValidationErrorType.SecurityTokenReplayAddFailed,
+                    return new ExceptionDetail(
                         new MessageDetail(
                             LogMessages.IDX10229,
                             LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
-                        null);
+                        ValidationErrorType.SecurityTokenReplayAddFailed,
+                        new StackFrame(true));
             }
 
             // if it reaches here, that means no token replay is detected.

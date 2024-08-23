@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
@@ -19,7 +20,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="callContext"></param>
     /// <returns>A <see cref="Result{TResult, TError}"/>that contains the results of validating the algorithm.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
-    internal delegate Result<string, TokenValidationError> AlgorithmValidatorDelegate(
+    internal delegate Result<string, ExceptionDetail> AlgorithmValidatorDelegate(
         string algorithm,
         SecurityKey securityKey,
         SecurityToken securityToken,
@@ -37,7 +38,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters"><see cref="ValidationParameters"/> required for validation.</param>
         /// <param name="callContext"></param>
 #pragma warning disable CA1801 // TODO: remove pragma disable once callContext is used for logging
-        internal static Result<string, TokenValidationError> ValidateAlgorithm(
+        internal static Result<string, ExceptionDetail> ValidateAlgorithm(
             string algorithm,
             SecurityKey securityKey,
             SecurityToken securityToken,
@@ -46,15 +47,19 @@ namespace Microsoft.IdentityModel.Tokens
 #pragma warning restore CA1801 // TODO: remove pragma disable once callContext is used for logging
         {
             if (validationParameters == null)
-                return TokenValidationErrorCommon.NullParameter(nameof(validationParameters));
+                return ExceptionDetail.NullParameter(
+                    nameof(validationParameters),
+                    new StackFrame(true));
 
-            if (validationParameters.ValidAlgorithms != null && validationParameters.ValidAlgorithms.Count > 0 && !validationParameters.ValidAlgorithms.Contains(algorithm, StringComparer.Ordinal))
-                return new TokenValidationError(
-                    ValidationErrorType.SecurityTokenInvalidAlgorithm,
+            if (validationParameters.ValidAlgorithms != null &&
+                validationParameters.ValidAlgorithms.Count > 0 &&
+                !validationParameters.ValidAlgorithms.Contains(algorithm, StringComparer.Ordinal))
+                return new ExceptionDetail(
                     new MessageDetail(
                         LogMessages.IDX10696,
                         LogHelper.MarkAsNonPII(algorithm)),
-                    null);
+                    ValidationErrorType.SecurityTokenInvalidAlgorithm,
+                    new StackFrame(true));
 
             return algorithm;
         }

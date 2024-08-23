@@ -15,35 +15,48 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Creates an instance of <see cref="ExceptionDetail"/>
         /// </summary>
-        /// <paramref name="messageDetail"/> contains information about the exception that is used to generate the exception message.
-        /// <paramref name="exceptionType"/> is the type of exception that occurred.
-        public ExceptionDetail(MessageDetail messageDetail, ValidationErrorType exceptionType)
-            : this(messageDetail, exceptionType, null)
+        /// <param name="messageDetail"/> contains information about the exception that is used to generate the exception message.
+        /// <param name="exceptionType"/> is the type of exception that occurred.
+        /// <param name="stackFrame"/> is the stack frame where the exception occurred.
+        public ExceptionDetail(MessageDetail messageDetail, ValidationErrorType exceptionType, StackFrame stackFrame)
+            : this(messageDetail, exceptionType, stackFrame, null)
         {
         }
 
         /// <summary>
         /// Creates an instance of <see cref="ExceptionDetail"/>
         /// </summary>
-        /// <paramref name="messageDetail"/> contains information about the exception that is used to generate the exception message.
-        /// <paramref name="exceptionType"/> is the type of exception that occurred.
-        /// <paramref name="innerException"/> is the inner exception that occurred.
-        public ExceptionDetail(MessageDetail messageDetail, ValidationErrorType exceptionType, Exception innerException)
+        /// <param name="messageDetail"/> contains information about the exception that is used to generate the exception message.
+        /// <param name="exceptionType"/> is the type of exception that occurred.
+        /// <param name="stackFrame"/> is the stack frame where the exception occurred.
+        /// <param name="innerException"/> is the inner exception that occurred.
+        public ExceptionDetail(MessageDetail messageDetail, ValidationErrorType exceptionType, StackFrame stackFrame, Exception innerException)
         {
             Type = exceptionType;
             InnerException = innerException;
             MessageDetail = messageDetail;
+            StackFrames = new List<StackFrame>(4)
+            {
+                stackFrame
+            };
         }
 
         /// <summary>
         /// Creates an instance of an <see cref="Exception"/> using <see cref="ExceptionDetail"/>
         /// </summary>
         /// <returns>An instantance of an Exception.</returns>
-        public Exception GetException() => ExceptionFromType(Type, MessageDetail, InnerException);
+        public Exception GetException()
+        {
+            Exception exception = ExceptionFromType(Type, MessageDetail, InnerException);
+            if (exception is SecurityTokenException securityTokenException)
+                securityTokenException.ExceptionDetail = this;
 
-        internal static ExceptionDetail NullParameter(string parameterName) => new ExceptionDetail(
+            return exception;
+        }
+
+        internal static ExceptionDetail NullParameter(string parameterName, StackFrame stackFrame) => new ExceptionDetail(
             MessageDetail.NullParameter(parameterName),
-            ValidationErrorType.ArgumentNull);
+            ValidationErrorType.ArgumentNull, stackFrame);
 
         /// <summary>
         /// Gets the type of exception that occurred.
@@ -63,7 +76,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the stack frames where the exception occurred.
         /// </summary>
-        public IList<StackFrame> StackFrames { get; } = [];
+        public IList<StackFrame> StackFrames { get; }
 
         public static Exception ExceptionFromType(
             ValidationErrorType exceptionType,

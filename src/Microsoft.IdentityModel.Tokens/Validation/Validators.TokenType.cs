@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.IdentityModel.Abstractions;
 
@@ -21,7 +22,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="callContext"></param>
     /// <returns> A <see cref="Result{TResult, TError}"/>that contains the results of validating the token type.</returns>
     /// <remarks>An EXACT match is required. <see cref="StringComparison.Ordinal"/> (case sensitive) is used for comparing <paramref name="type"/> against <see cref="ValidationParameters.ValidTypes"/>.</remarks>
-    internal delegate Result<ValidatedTokenType, TokenValidationError> TypeValidatorDelegate(
+    internal delegate Result<ValidatedTokenType, ExceptionDetail> TypeValidatorDelegate(
         string? type,
         SecurityToken? securityToken,
         ValidationParameters validationParameters,
@@ -39,7 +40,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns> A <see cref="Result{TResult, TError}"/>that contains the results of validating the token type.</returns>
         /// <remarks>An EXACT match is required. <see cref="StringComparison.Ordinal"/> (case sensitive) is used for comparing <paramref name="type"/> against <see cref="ValidationParameters.ValidTypes"/>.</remarks>
 #pragma warning disable CA1801 // TODO: remove pragma disable once callContext is used for logging
-        internal static Result<ValidatedTokenType, TokenValidationError> ValidateTokenType(
+        internal static Result<ValidatedTokenType, ExceptionDetail> ValidateTokenType(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -47,10 +48,14 @@ namespace Microsoft.IdentityModel.Tokens
 #pragma warning restore CA1801 // TODO: remove pragma disable once callContext is used for logging
         {
             if (securityToken == null)
-                return TokenValidationErrorCommon.NullParameter(nameof(securityToken));
+                return ExceptionDetail.NullParameter(
+                    nameof(securityToken),
+                    new StackFrame(true));
 
             if (validationParameters == null)
-                return TokenValidationErrorCommon.NullParameter(nameof(validationParameters));
+                return ExceptionDetail.NullParameter(
+                    nameof(validationParameters),
+                    new StackFrame(true));
 
             if (validationParameters.ValidTypes.Count == 0)
             {
@@ -59,20 +64,20 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             if (string.IsNullOrEmpty(type))
-                return new TokenValidationError(
-                    ValidationErrorType.SecurityTokenInvalidType,
+                return new ExceptionDetail(
                     new MessageDetail(LogMessages.IDX10256),
-                    null);
+                    ValidationErrorType.SecurityTokenInvalidType,
+                    new StackFrame(true));
 
             if (!validationParameters.ValidTypes.Contains(type, StringComparer.Ordinal))
             {
-                return new TokenValidationError(
-                    ValidationErrorType.SecurityTokenInvalidType,
+                return new ExceptionDetail(
                     new MessageDetail(
                         LogMessages.IDX10257,
                         LogHelper.MarkAsNonPII(type),
                         LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidTypes))),
-                    null);
+                    ValidationErrorType.SecurityTokenInvalidType,
+                    new StackFrame(true));
             }
 
             // TODO: Move to CallContext

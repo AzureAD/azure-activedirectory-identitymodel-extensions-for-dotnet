@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Tokens;
 
@@ -20,14 +21,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <exception cref="ArgumentNullException">returned if <paramref name="token"/> is null or empty.</exception>
         /// <exception cref="SecurityTokenMalformedException">returned if the validationParameters.TokenReader delegate is not able to parse/read the token as a valid <see cref="JsonWebToken"/>.</exception>
         /// <exception cref="SecurityTokenMalformedException">returned if <paramref name="token"/> is not a valid JWT, <see cref="JsonWebToken"/>.</exception>
-        internal static Result<SecurityToken, TokenValidationError> ReadToken(
+        internal static Result<SecurityToken, ExceptionDetail> ReadToken(
             string token,
 #pragma warning disable CA1801 // TODO: remove pragma disable once callContext is used for logging
             CallContext? callContext)
 #pragma warning disable CA1801 // TODO: remove pragma disable once callContext is used for logging
         {
             if (String.IsNullOrEmpty(token))
-                return TokenValidationErrorCommon.NullParameter(nameof(token));
+                return ExceptionDetail.NullParameter(
+                    nameof(token),
+                    new StackFrame(true));
 
             try
             {
@@ -35,13 +38,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return jsonWebToken;
             }
 #pragma warning disable CA1031 // Do not catch general exception types
-            catch
+            catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                return new TokenValidationError(
-                    ValidationErrorType.SecurityTokenMalformed,
+                return new ExceptionDetail(
                     new MessageDetail(LogMessages.IDX14107),
-                    null);
+                    ValidationErrorType.SecurityTokenMalformed,
+                    new StackFrame(true),
+                    ex);
             }
         }
     }

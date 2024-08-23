@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (AppContextSwitches.DontFailOnMissingTid)
                 CallerLineNumber = 123;
 
-            _stackFrame = new StackFrame();
+            _stackFrame = new StackFrame(true);
         }
     }
 

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 //using Microsoft.IdentityModel.Logging;
@@ -20,17 +21,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="decryptionParameters">The decryption parameters container.</param>
         /// <param name="callContext">The call context used for logging.</param>
         /// <returns>The decrypted, and if the 'zip' claim is set, decompressed string representation of the token.</returns>
-        internal static Result<string, TokenValidationError> DecryptJwtToken(
+        internal static Result<string, ExceptionDetail> DecryptJwtToken(
             JsonWebToken jsonWebToken,
             ValidationParameters validationParameters,
             JwtTokenDecryptionParameters decryptionParameters,
             CallContext callContext)
         {
             if (validationParameters == null)
-                return TokenValidationErrorCommon.NullParameter(nameof(validationParameters));
+                return ExceptionDetail.NullParameter(
+                    nameof(validationParameters),
+                    new StackFrame(true));
 
             if (decryptionParameters == null)
-                return TokenValidationErrorCommon.NullParameter(nameof(decryptionParameters));
+                return ExceptionDetail.NullParameter(
+                    nameof(decryptionParameters),
+                    new StackFrame(true));
 
             bool decryptionSucceeded = false;
             bool algorithmNotSupportedByCryptoProvider = false;
@@ -64,7 +69,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         continue;
                     }
 
-                    Result<string, TokenValidationError> result = validationParameters.AlgorithmValidator(zipAlgorithm, key, jsonWebToken, validationParameters, callContext);
+                    Result<string, ExceptionDetail> result = validationParameters.AlgorithmValidator(zipAlgorithm, key, jsonWebToken, validationParameters, callContext);
                     if (!result.IsSuccess)
                     {
                         (exceptionStrings ??= new StringBuilder()).AppendLine(result.UnwrapError().MessageDetail.Message);
@@ -117,9 +122,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                return new TokenValidationError(
-                    ValidationErrorType.SecurityTokenDecompressionFailed,
+                return new ExceptionDetail(
                     new MessageDetail(TokenLogMessages.IDX10679, zipAlgorithm),
+                    ValidationErrorType.SecurityTokenDecompressionFailed,
+                    new StackFrame(true),
                     ex);
             }
         }

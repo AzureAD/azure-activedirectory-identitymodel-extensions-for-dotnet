@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Abstractions;
@@ -30,7 +31,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="cancellationToken"></param>
     /// <returns>An <see cref="Result{TResult, TError}"/>that contains the results of validating the issuer.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
-    internal delegate Task<Result<ValidatedIssuer, TokenValidationError>> IssuerValidationDelegateAsync(
+    internal delegate Task<Result<ValidatedIssuer, ExceptionDetail>> IssuerValidationDelegateAsync(
         string issuer,
         SecurityToken securityToken,
         ValidationParameters validationParameters,
@@ -52,7 +53,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="cancellationToken"></param>
         /// <returns>An <see cref="Result{TResult, TError}"/> that contains either the issuer that was validated or an error.</returns>
         /// <remarks>An EXACT match is required.</remarks>
-        internal static async Task<Result<ValidatedIssuer, TokenValidationError>> ValidateIssuerAsync(
+        internal static async Task<Result<ValidatedIssuer, ExceptionDetail>> ValidateIssuerAsync(
             string issuer,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
@@ -63,17 +64,21 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (string.IsNullOrWhiteSpace(issuer))
             {
-                return new TokenValidationError(
-                    ValidationErrorType.SecurityTokenInvalidIssuer,
+                return new ExceptionDetail(
                     new MessageDetail(LogMessages.IDX10211),
-                    null);
+                    ValidationErrorType.SecurityTokenInvalidIssuer,
+                    new StackFrame(true));
             }
 
             if (validationParameters == null)
-                return TokenValidationErrorCommon.NullParameter(nameof(validationParameters));
+                return ExceptionDetail.NullParameter(
+                    nameof(validationParameters),
+                    new StackFrame(true));
 
             if (securityToken == null)
-                return TokenValidationErrorCommon.NullParameter(nameof(securityToken));
+                return ExceptionDetail.NullParameter(
+                    nameof(securityToken),
+                    new StackFrame(true));
 
             BaseConfiguration? configuration = null;
             if (validationParameters.ConfigurationManager != null)
@@ -81,10 +86,10 @@ namespace Microsoft.IdentityModel.Tokens
 
             // Return failed IssuerValidationResult if all possible places to validate against are null or empty.
             if (validationParameters.ValidIssuers.Count == 0 && string.IsNullOrWhiteSpace(configuration?.Issuer))
-                return new TokenValidationError(
-                    ValidationErrorType.SecurityTokenInvalidIssuer,
+                return new ExceptionDetail(
                     new MessageDetail(LogMessages.IDX10211),
-                    null);
+                    ValidationErrorType.SecurityTokenInvalidIssuer,
+                    new StackFrame(true));
 
             if (configuration != null)
             {
@@ -126,14 +131,14 @@ namespace Microsoft.IdentityModel.Tokens
                 }
             }
 
-            return new TokenValidationError(
-                ValidationErrorType.SecurityTokenInvalidIssuer,
+            return new ExceptionDetail(
                 new MessageDetail(
                     LogMessages.IDX10212,
                     LogHelper.MarkAsNonPII(issuer),
                     LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers)),
                     LogHelper.MarkAsNonPII(configuration?.Issuer)),
-                null);
+                ValidationErrorType.SecurityTokenInvalidIssuer,
+                new StackFrame(true));
         }
     }
 #nullable restore

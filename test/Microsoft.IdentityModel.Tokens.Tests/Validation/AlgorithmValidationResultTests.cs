@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Logging;
 using Xunit;
 using Microsoft.IdentityModel.Abstractions;
+using System;
 
 namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 {
@@ -15,7 +16,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.AlgorithmValidationResultTests", theoryData);
 
-            Result<string, TokenValidationError> result = Validators.ValidateAlgorithm(
+            Result<string, ExceptionDetail> result = Validators.ValidateAlgorithm(
                 theoryData.Algorithm,
                 theoryData.SecurityKey,
                 theoryData.SecurityToken,
@@ -23,21 +24,18 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 new CallContext());
 
             if (result.IsSuccess)
+            {
                 IdentityComparer.AreStringsEqual(
                     result.UnwrapResult(),
                     theoryData.Result.UnwrapResult(),
                     context);
+
+                theoryData.ExpectedException.ProcessNoException();
+            }
             else
             {
-                IdentityComparer.AreTokenValidationErrorsEqual(
-                    result.UnwrapError(),
-                    theoryData.Result.UnwrapError(),
-                    context);
-
-                if (result.UnwrapError().InnerException is not null)
-                    theoryData.ExpectedException.ProcessException(result.UnwrapError().InnerException);
-                else
-                    theoryData.ExpectedException.ProcessNoException();
+                Exception exception = result.UnwrapError().GetException();
+                theoryData.ExpectedException.ProcessException(exception);
             }
 
             TestUtilities.AssertFailIfErrors(context);
@@ -55,32 +53,36 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     {
                         TestId = "Invalid_ValidationParametersAreNull",
                         Algorithm = null,
+                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                         SecurityKey = null,
                         SecurityToken = null,
                         ValidationParameters = null,
-                        Result = new TokenValidationError(
-                            ValidationErrorType.ArgumentNull,
+                        Result = new ExceptionDetail(
                             new MessageDetail(
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("validationParameters")),
-                            null)
+                            ValidationErrorType.ArgumentNull,
+                            null, // StackFrame
+                            null) // InnerException
                     },
                     new AlgorithmTheoryData
                     {
                         TestId = "Invalid_ValidateAlgorithmNotAValidAlgorithm",
                         Algorithm = SecurityAlgorithms.Sha256,
+                        ExpectedException = ExpectedException.SecurityTokenInvalidAlgorithmException("IDX10696:"),
                         SecurityKey = securityKey,
                         SecurityToken = null,
                         ValidationParameters = new ValidationParameters
                         {
                             ValidAlgorithms = new[] { SecurityAlgorithms.HmacSha256 }
                         },
-                        Result = new TokenValidationError(
-                            ValidationErrorType.ArgumentNull,
+                        Result = new ExceptionDetail(
                             new MessageDetail(
                                 LogMessages.IDX10696,
                                 LogHelper.MarkAsNonPII(SecurityAlgorithms.Sha256)),
-                            null),
+                            ValidationErrorType.SecurityTokenInvalidAlgorithm,
+                            null, // StackFrame
+                            null),// InnerException
                     },
                     new AlgorithmTheoryData
                     {
@@ -120,7 +122,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
             internal ValidationParameters ValidationParameters { get; set; }
 
-            internal Result<string, TokenValidationError> Result { get; set; }
+            internal Result<string, ExceptionDetail> Result { get; set; }
         }
     }
 }
