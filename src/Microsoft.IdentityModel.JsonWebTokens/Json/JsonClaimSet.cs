@@ -75,7 +75,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (kvp.Value is ValuePosition position)
                 {
                     if (position.IsEscaped)
-                        EscapeStringBytes(position);
+                        EscapeStringBytesInPlace(position);
 
                     string value = System.Text.Encoding.UTF8.GetString(_tokenAsMemory.Slice(position.StartIndex, position.Length).Span);
                     claims.Add(new Claim(kvp.Key, value, ClaimValueTypes.String, issuer, issuer));
@@ -202,7 +202,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (obj is ValuePosition position)
                 {
                     if (position.IsEscaped)
-                        EscapeStringBytes(position);
+                        EscapeStringBytesInPlace(position);
 
                     return System.Text.Encoding.UTF8.GetString(_tokenAsMemory.Slice(position.StartIndex, position.Length).Span);
                 }
@@ -224,7 +224,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (obj is ValuePosition position)
                 {
                     if (position.IsEscaped)
-                        EscapeStringBytes(position);
+                        EscapeStringBytesInPlace(position);
 
                     return _tokenAsMemory.Slice(position.StartIndex, position.Length).Span;
                 }
@@ -233,9 +233,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return [];
         }
 
-        private void EscapeStringBytes(ValuePosition position)
+        /// <summary>
+        /// Unescapes the bytes of a string claim value in-place in the token bytes Memory instance.
+        /// After escaping, updates the length of the claim value to reflect the unescaped bytes.
+        /// </summary>
+        /// <remarks>The start position and length provided to the Utf8JsonReader has to be adjusted to include double quotes.</remarks>
+        /// <param name="position">Position of the claim value.</param>
+        private void EscapeStringBytesInPlace(ValuePosition position)
         {
-            position.Length = new Utf8JsonReader(_tokenAsMemory.Span.Slice(position.StartIndex, position.Length)).CopyString(_tokenAsMemory.Span.Slice(position.StartIndex, position.Length));
+            var reader = new Utf8JsonReader(_tokenAsMemory.Span.Slice(position.StartIndex - 1, position.Length + 2));
+            reader.Read();
+            position.Length = reader.CopyString(_tokenAsMemory.Span.Slice(position.StartIndex, position.Length));
             position.IsEscaped = false;
         }
 #endif
@@ -302,8 +310,19 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     if (list.Count == 1)
                         return (T)((object)(list[0]));
                 }
+#if NET8_0_OR_GREATER
+                else if (obj is ValuePosition position)
+                {
+                    if (position.IsEscaped)
+                        EscapeStringBytesInPlace(position);
+
+                    return (T)(object)System.Text.Encoding.UTF8.GetString(_tokenAsMemory.Slice(position.StartIndex, position.Length).Span);
+                }
+#endif
                 else
+                {
                     return (T)((object)obj.ToString());
+                }
             }
             else if (typeof(T) == typeof(bool))
             {

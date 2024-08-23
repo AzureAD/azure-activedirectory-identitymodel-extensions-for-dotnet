@@ -1545,11 +1545,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
 #if NET8_0_OR_GREATER
         [Fact]
-        public void ParseToken_WithByteProperties()
+        public void ParseToken_EscapedAndUnescaped_PropertiesCorrectlySet()
         {
-            var escapedAzp = "azp\u0027azp";
-            var unescapedAzp = "azp'azp";
+            var unescapedAzp = "AA\\AA";
+            var unknownClaimName = "unknown_claim_name";
+            var unknownClaimValue = "unknown_claim_value";
 
+            // CreateToken uses Utf8JsonWriter which correctly escapes strings.
             var tokenStr = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
             {
                 TokenType = JwtHeaderParameterNames.Jwk,
@@ -1560,23 +1562,31 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(Default.IssueInstant) },
                     { JwtRegisteredClaimNames.Iss, Default.Issuer },
                     { JwtRegisteredClaimNames.Aud, Default.Audience },
-                    { JwtRegisteredClaimNames.Azp, escapedAzp },
+                    { JwtRegisteredClaimNames.Azp, unescapedAzp },
                     { JwtRegisteredClaimNames.Jti, Default.Jti },
-                    { "unknown_claim", "unknown_claim_value" },
+                    { unknownClaimName, unknownClaimValue },
                 }
             });
 
             var jwt = new JsonWebToken(tokenStr);
 
+            // Check known claim that doesn't need to be escaped.
             Assert.True(jwt.TryGetPayloadValue(JwtRegisteredClaimNames.Iss, out string issuerFromPayload));
             Assert.Equal(Default.Issuer, issuerFromPayload);
             Assert.Equal(Default.Issuer, jwt.Issuer);
+            Assert.Equal(Default.Issuer, jwt.GetPayloadValue<string>(JwtRegisteredClaimNames.Iss));
             Assert.True(jwt.IssuerBytes.SequenceEqual(Encoding.UTF8.GetBytes(Default.Issuer)));
 
+            // Check known claim that needs to be escaped.
             Assert.True(jwt.TryGetPayloadValue(JwtRegisteredClaimNames.Azp, out string azpFromPayload));
             Assert.Equal(unescapedAzp, azpFromPayload);
             Assert.Equal(unescapedAzp, jwt.Azp);
+            Assert.Equal(unescapedAzp, jwt.GetPayloadValue<string>(JwtRegisteredClaimNames.Azp));
             Assert.True(jwt.AzpBytes.SequenceEqual(Encoding.UTF8.GetBytes(unescapedAzp)));
+
+            // Check unknown claim that doesn't need to be escaped.
+            Assert.True(jwt.TryGetPayloadValue(unknownClaimName, out string unknownClaimValueFromPayload));
+            Assert.Equal(unknownClaimValue, unknownClaimValueFromPayload);
         }
 #endif
 
