@@ -8,6 +8,8 @@
     <NewtonsoftVersion>13.0.3</NewtonsoftVersion>
     <SystemSecurityClaimsVersion>4.3.0</SystemSecurityClaimsVersion>
     <SystemTextJson>8.0.4</SystemTextJson>
-    <XunitVersion>2.4.0</XunitVersion>
+    <XunitRunnerConsoleVersion>2.9.0</XunitRunnerConsoleVersion>
+    <XunitRunnerVisualStudioVersion>2.8.2</XunitRunnerVisualStudioVersion>
+    <XunitVersion>2.9.0</XunitVersion>
   </PropertyGroup>
 </Project>
