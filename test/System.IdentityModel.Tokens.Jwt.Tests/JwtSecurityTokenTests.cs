@@ -88,7 +88,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             foreach (Claim c in jwt.Claims)
             {
-                Assert.True(false, "claims.Count != 0");
+                Assert.Fail("claims.Count != 0");
                 break;
             }
 
@@ -96,7 +96,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.NotNull(jwt.Audiences);
             foreach (string aud in jwt.Audiences)
             {
-                Assert.True(false, "jwt.Audiences should be empty");
+                Assert.Fail("jwt.Audiences should be empty");
             }
             Assert.Null(jwt.Id);
             Assert.Null(jwt.Issuer);
@@ -234,7 +234,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
             catch (Exception ex)
             {
-                Assert.True(false, string.Format("Testcase: {0}. UnExpected when getting a properties: '{1}'", outerTokenVariation.Name, ex.ToString()));
+                Assert.Fail(string.Format("Testcase: {0}. UnExpected when getting a properties: '{1}'", outerTokenVariation.Name, ex.ToString()));
             }
 
             try
@@ -252,7 +252,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
             catch (Exception ex)
             {
-                Assert.True(false, string.Format("Testcase: {0}. UnExpected when getting a properties: '{1}'", testId, ex.ToString()));
+                Assert.Fail(string.Format("Testcase: {0}. UnExpected when getting a properties: '{1}'", testId, ex.ToString()));
             }
 
             try
@@ -267,7 +267,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
             catch (Exception ex)
             {
-                Assert.True(false, string.Format("Testcase: {0}. Unexpected inequality between outer and inner token properties: '{1}'", testId, ex.ToString()));
+                Assert.Fail(string.Format("Testcase: {0}. Unexpected inequality between outer and inner token properties: '{1}'", testId, ex.ToString()));
             }
 
         }
@@ -419,7 +419,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
             catch (Exception ex)
             {
-                Assert.True(false, string.Format("Testcase: {0}. UnExpected when getting a properties: '{1}'", variation.Name, ex.ToString()));
+                Assert.Fail(string.Format("Testcase: {0}. UnExpected when getting a properties: '{1}'", variation.Name, ex.ToString()));
             }
         }
 

@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             try
             {
                 if (theoryData.CanRead != theoryData.Handler.CanReadToken(theoryData.Token))
-                    Assert.False(true, $"Expected CanRead != CanRead, token: {theoryData.Token}");
+                    Assert.Fail($"Expected CanRead != CanRead, token: {theoryData.Token}");
 
                 theoryData.ExpectedException.ProcessNoException(context);
             }

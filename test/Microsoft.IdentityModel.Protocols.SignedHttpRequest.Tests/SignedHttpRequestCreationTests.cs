@@ -7,6 +7,7 @@ using System.IO;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
@@ -18,7 +19,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
     public class SignedHttpRequestCreationTests
     {
         [Fact]
-        public void CreateSignedHttpRequest()
+        public async Task CreateSignedHttpRequest()
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateSignedHttpRequest", "", true);
 
@@ -45,7 +46,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 IssuerSigningKey = SignedHttpRequestTestUtils.DefaultSigningCredentials.Key
             };
 
-            var result = new JsonWebTokenHandler().ValidateTokenAsync(signedHttpRequestString, tvp).Result;
+            var result = await new JsonWebTokenHandler().ValidateTokenAsync(signedHttpRequestString, tvp);
             if (result.IsValid == false)
                 context.AddDiff($"Not able to create and validate signed http request token");
 
@@ -53,7 +54,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         }
 
         [Fact]
-        public void CreateSignedHttpRequestWithAdditionalHeaderClaims()
+        public async Task CreateSignedHttpRequestWithAdditionalHeaderClaims()
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateSignedHttpRequestWithAdditionalHeaderClaims", "", true);
 
@@ -83,7 +84,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 IssuerSigningKey = SignedHttpRequestTestUtils.DefaultSigningCredentials.Key
             };
 
-            var result = new JsonWebTokenHandler().ValidateTokenAsync(signedHttpRequestString, tvp).Result;
+            var result = await new JsonWebTokenHandler().ValidateTokenAsync(signedHttpRequestString, tvp);
 
             if (result.IsValid == false)
                 context.AddDiff($"Not able to create and validate signed http request token");
@@ -185,7 +186,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             {
                 writer = theoryData.GetWriter();
                 theoryData.Handler.AddAtClaim(ref writer, theoryData.BuildSignedHttpRequestDescriptor());
-                CheckClaimValue(ref writer, theoryData, context); theoryData.ExpectedException.ProcessNoException(context);
+                CheckClaimValue(ref writer, theoryData, context);
+                theoryData.ExpectedException.ProcessNoException(context);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)

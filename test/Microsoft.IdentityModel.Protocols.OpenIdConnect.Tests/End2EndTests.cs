@@ -4,6 +4,7 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
@@ -16,12 +17,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     public class End2EndTests
     {
         [Theory, MemberData(nameof(OpenIdConnectTheoryData))]
-        public void OpenIdConnect(OpenIdConnectTheoryData theoryData)
+        public async Task OpenIdConnect(OpenIdConnectTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.OpenIdConnect", theoryData);
             try
             {
-                OpenIdConnectConfiguration configuration = OpenIdConnectConfigurationRetriever.GetAsync(theoryData.OpenIdConnectMetadataFileName, new FileDocumentRetriever(), CancellationToken.None).Result;
+                OpenIdConnectConfiguration configuration = await OpenIdConnectConfigurationRetriever.GetAsync(theoryData.OpenIdConnectMetadataFileName, new FileDocumentRetriever(), CancellationToken.None);
 
                 theoryData.AdditionalValidation?.Invoke(configuration);
 

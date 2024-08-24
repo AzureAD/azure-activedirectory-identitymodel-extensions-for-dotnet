@@ -49,12 +49,12 @@ namespace Microsoft.IdentityModel.Protocols.Tests
     public class ExtensibilityTests
     {
         [Theory, MemberData(nameof(GetMetadataTheoryData))]
-        public void GetMetadataTest(DocumentRetrieverTheoryData theoryData)
+        public async Task GetMetadataTest(DocumentRetrieverTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.GetMetadataTest", theoryData);
             try
             {
-                string doc = theoryData.DocumentRetriever.GetDocumentAsync(theoryData.Address, CancellationToken.None).Result;
+                string doc = await theoryData.DocumentRetriever.GetDocumentAsync(theoryData.Address, CancellationToken.None);
                 Assert.NotNull(doc);
                 theoryData.ExpectedException.ProcessNoException();
             }
@@ -75,25 +75,25 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             var configManager = new ConfigurationManager<IssuerMetadata>("IssuerMetadata.json", new IssuerConfigurationRetriever(), docRetriever);
             var context = new CompareContext($"{this}.ConfigurationManagerUsingCustomClass");
 
-            var configuration = configManager.GetConfigurationAsync().Result;
+            var configuration = await configManager.GetConfigurationAsync();
             configManager.MetadataAddress = "IssuerMetadata.json";
-            var configuration2 = configManager.GetConfigurationAsync().Result;
+            var configuration2 = await configManager.GetConfigurationAsync();
             if (!IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer, context))
                 context.Diffs.Add("!IdentityComparer.AreEqual(configuration, configuration2)");
 
             // AutomaticRefreshInterval should pick up new bits.
             configManager = new ConfigurationManager<IssuerMetadata>("IssuerMetadata.json", new IssuerConfigurationRetriever(), docRetriever);
             configManager.RequestRefresh();
-            configuration = configManager.GetConfigurationAsync().Result;
+            configuration = await configManager.GetConfigurationAsync();
             TestUtilities.SetField(configManager, "_lastRequestRefresh", DateTimeOffset.UtcNow - TimeSpan.FromHours(1));
             configManager.MetadataAddress = "IssuerMetadata2.json";
             configManager.RequestRefresh();
 
             // Wait for the refresh to complete.
-            await Task.Delay(250).ContinueWith(_ =>
+            await Task.Delay(250).ContinueWith(async _ =>
             {
 
-                configuration2 = configManager.GetConfigurationAsync().GetAwaiter().GetResult();
+                configuration2 = await configManager.GetConfigurationAsync();
                 if (IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer))
                     context.Diffs.Add("IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer)");
             });

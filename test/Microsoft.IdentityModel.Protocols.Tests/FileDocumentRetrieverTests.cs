@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -15,12 +16,12 @@ namespace Microsoft.IdentityModel.Protocols.Tests
     {
 
         [Theory, MemberData(nameof(GetMetadataTheoryData))]
-        public void GetMetadataTest(DocumentRetrieverTheoryData theoryData)
+        public async Task GetMetadataTest(DocumentRetrieverTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.GetMetadataTest", theoryData);
             try
             {
-                string doc = theoryData.DocumentRetriever.GetDocumentAsync(theoryData.Address, CancellationToken.None).Result;
+                string doc = await theoryData.DocumentRetriever.GetDocumentAsync(theoryData.Address, CancellationToken.None);
                 Assert.NotNull(doc);
                 theoryData.ExpectedException.ProcessNoException();
             }

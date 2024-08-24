@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 
 
                 var signedHttpRequestValidationContext = new SignedHttpRequestValidationContext(signedHttpRequest, theoryData.HttpRequestData, theoryData.TokenValidationParameters, theoryData.SignedHttpRequestValidationParameters);
-                var result = await handler.ValidateSignedHttpRequestAsync(signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
+                var result = await handler.ValidateSignedHttpRequestAsync(signedHttpRequestValidationContext, CancellationToken.None);
                 if (cryptoProviderFactory.CryptoProviderCache.TryGetSignatureProvider(
                     signedHttpRequestDescriptor.SigningCredentials.Key,
                     signedHttpRequestDescriptor.SigningCredentials.Algorithm,

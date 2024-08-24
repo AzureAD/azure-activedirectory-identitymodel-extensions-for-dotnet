@@ -11,7 +11,6 @@ using System.Net;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration;
 using Microsoft.IdentityModel.TestUtils;
@@ -176,7 +175,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
 
         [Fact]
-        public void FetchMetadataFailureTest()
+        public async Task FetchMetadataFailureTest()
         {
             var context = new CompareContext($"{this}.FetchMetadataFailureTest");
 
@@ -186,7 +185,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // First time to fetch metadata
             try
             {
-                var configuration = configManager.GetConfigurationAsync().Result;
+                var configuration = await configManager.GetConfigurationAsync();
             }
             catch (Exception firstFetchMetadataFailure)
             {
@@ -196,7 +195,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 // Fetch metadata again during refresh interval, the exception should be same from above
                 try
                 {
-                    var configuration = configManager.GetConfigurationAsync().Result;
+                    var configuration = await configManager.GetConfigurationAsync();
                 }
                 catch (Exception secondFetchMetadataFailure)
                 {
@@ -211,7 +210,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
 
         [Fact]
-        public void BootstrapRefreshIntervalTest()
+        public async Task BootstrapRefreshIntervalTest()
         {
             var context = new CompareContext($"{this}.BootstrapRefreshIntervalTest");
 
@@ -221,7 +220,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // First time to fetch metadata.
             try
             {
-                var configuration = configManager.GetConfigurationAsync().Result;
+                var configuration = await configManager.GetConfigurationAsync();
             }
             catch (Exception firstFetchMetadataFailure)
             {
@@ -237,7 +236,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 try
                 {
                     configManager.RequestRefresh();
-                    var configuration = configManager.GetConfigurationAsync().Result;
+                    var configuration = await configManager.GetConfigurationAsync();
                 }
                 catch (Exception secondFetchMetadataFailure)
                 {
@@ -267,7 +266,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             Type type = typeof(ConfigurationManager<OpenIdConnectConfiguration>);
             PropertyInfo[] properties = type.GetProperties();
             if (properties.Length != ExpectedPropertyCount)
-                Assert.True(false, $"Number of properties has changed from {ExpectedPropertyCount} to: " + properties.Length + ", adjust tests");
+                Assert.Fail($"Number of properties has changed from {ExpectedPropertyCount} to: " + properties.Length + ", adjust tests");
 
             var defaultAutomaticRefreshInterval = ConfigurationManager<OpenIdConnectConfiguration>.DefaultAutomaticRefreshInterval;
             var defaultRefreshInterval = ConfigurationManager<OpenIdConnectConfiguration>.DefaultRefreshInterval;
@@ -299,15 +298,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             try
             {
 
-                var configuration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
+                var configuration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
                 IdentityComparer.AreEqual(configuration, theoryData.ExpectedConfiguration, context);
 
                 theoryData.ConfigurationManager.MetadataAddress = theoryData.UpdatedMetadataAddress;
                 TestUtilities.SetField(theoryData.ConfigurationManager, "_syncAfter", theoryData.SyncAfter);
-                var updatedConfiguration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
+                var updatedConfiguration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
                 // we wait 50 ms here to make the task is finished.
                 Thread.Sleep(50);
-                updatedConfiguration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
+                updatedConfiguration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
                 IdentityComparer.AreEqual(updatedConfiguration, theoryData.ExpectedUpdatedConfiguration, context);
 
                 theoryData.ExpectedException.ProcessNoException(context);
@@ -374,7 +373,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             var context = new CompareContext($"{this}.RequestRefresh");
 
-            var configuration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
+            var configuration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
             IdentityComparer.AreEqual(configuration, theoryData.ExpectedConfiguration, context);
 
             // the first call to RequestRefresh will trigger a refresh with ConfigurationManager.RefreshInterval being ignored.
@@ -382,7 +381,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             if (theoryData.RequestRefresh)
             {
                 theoryData.ConfigurationManager.RequestRefresh();
-                configuration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
+                configuration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
             }
 
             theoryData.ConfigurationManager.RefreshInterval = theoryData.RefreshInterval;
@@ -395,7 +394,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             if (theoryData.SleepTimeInMs > 0)
                 Thread.Sleep(theoryData.SleepTimeInMs);
 
-            var updatedConfiguration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
+            var updatedConfiguration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
 
             IdentityComparer.AreEqual(updatedConfiguration, theoryData.ExpectedUpdatedConfiguration, context);
 
@@ -461,7 +460,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             try
             {
-                _ = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
+                _ = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -518,11 +517,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             // Unable to obtain a new configuration, but _currentConfiguration is not null so it should be returned.
             configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
-            var configuration = await configManager.GetConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
+            var configuration = await configManager.GetConfigurationAsync(CancellationToken.None);
             TestUtilities.SetField(configManager, "_lastRequestRefresh", DateTimeOffset.UtcNow - TimeSpan.FromHours(1));
             configManager.RequestRefresh();
             configManager.MetadataAddress = "http://127.0.0.1";
-            var configuration2 = await configManager.GetConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
+            var configuration2 = await configManager.GetConfigurationAsync(CancellationToken.None);
             IdentityComparer.AreEqual(configuration, configuration2, context);
             if (!object.ReferenceEquals(configuration, configuration2))
                 context.Diffs.Add("!object.ReferenceEquals(configuration, configuration2)");
@@ -614,7 +613,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
 
         [Theory, MemberData(nameof(ValidateOpenIdConnectConfigurationTestCases), DisableDiscoveryEnumeration = true)]
-        public void ValidateOpenIdConnectConfigurationTests(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData)
+        public async Task ValidateOpenIdConnectConfigurationTests(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateOpenIdConnectConfigurationTests");
             var context = new CompareContext();
@@ -628,7 +627,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             {
                 //create a listener and enable it for logs
                 var listener = TestUtils.SampleListener.CreateLoggerListener(EventLevel.Warning);
-                configuration = configurationManager.GetConfigurationAsync().Result;
+                configuration = await configurationManager.GetConfigurationAsync();
 
                 // we need to sleep here to make sure the task that updates configuration has finished.
                 Thread.Sleep(250);

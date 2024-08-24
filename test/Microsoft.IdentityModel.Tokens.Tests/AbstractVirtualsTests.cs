@@ -15,13 +15,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     {
         #region BaseConfigurationManager
         [Fact]
-        public void BaseConfigurationManager_GetBaseConfigurationAsync()
+        public async Task BaseConfigurationManager_GetBaseConfigurationAsync()
         {
             TestUtilities.WriteHeader($"{this}.BaseConfigurationManager_GetBaseConfigurationAsync");
 
             try
             {
-                new DerivedBaseConfigurationManager().GetBaseConfigurationAsync(default).GetAwaiter().GetResult();
+                await new DerivedBaseConfigurationManager().GetBaseConfigurationAsync(default);
             }
             catch (Exception ex)
             {
@@ -116,7 +116,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             try
             {
-                await new DerivedTokenHandler().ValidateTokenAsync("token", new TokenValidationParameters()).ConfigureAwait(false);
+                await new DerivedTokenHandler().ValidateTokenAsync("token", new TokenValidationParameters());
             }
             catch (Exception ex)
             {
@@ -131,7 +131,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             try
             {
-                await new DerivedTokenHandler().ValidateTokenAsync(new DerivedSecurityToken(), new TokenValidationParameters()).ConfigureAwait(false);
+                await new DerivedTokenHandler().ValidateTokenAsync(new DerivedSecurityToken(), new TokenValidationParameters());
             }
             catch (Exception ex)
             {

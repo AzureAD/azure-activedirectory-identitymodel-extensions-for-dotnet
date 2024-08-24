@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
                 if (theoryData.ExpectSignature)
                 {
                     if (envelopedReader.Signature == null)
-                        Assert.False(true, "theoryData.ExpectSignature == true && envelopedReader.ExpectSignature == null");
+                        Assert.Fail("theoryData.ExpectSignature == true && envelopedReader.ExpectSignature == null");
 
                     envelopedReader.Signature.Verify(theoryData.SecurityKey, theoryData.SecurityKey.CryptoProviderFactory);
                 }
@@ -97,7 +97,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
                 if (theoryData.ExpectSignature)
                 {
                     if (envelopedReader.Signature == null)
-                        Assert.False(true, "theoryData.ExpectSignature == true && envelopedReader.Signature == null");
+                        Assert.Fail("theoryData.ExpectSignature == true && envelopedReader.Signature == null");
 
                     envelopedReader.Signature.Verify(theoryData.SecurityKey, theoryData.CryptoProviderFactory);
                 }

@@ -259,7 +259,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
         // Tests for expected differences between the JwtSecurityTokenHandler and the JsonWebTokenHandler.
         [Theory, MemberData(nameof(CreateJWEUsingSecurityTokenDescriptorTheoryData))]
-        public void CheckExpectedDifferenceInAudClaimUsingSecurityTokenDescriptor(CreateTokenTheoryData theoryData)
+        public async Task CheckExpectedDifferenceInAudClaimUsingSecurityTokenDescriptor(CreateTokenTheoryData theoryData)
         {
             if (theoryData.TokenDescriptor == null)
                 return;
@@ -295,7 +295,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 string jweFromJsonHandler = theoryData.JsonWebTokenHandler.CreateToken(theoryData.TokenDescriptor);
 
                 ClaimsPrincipal claimsPrincipalJwtHandler = theoryData.JwtSecurityTokenHandler.ValidateToken(tokenFromJwtHandler, theoryData.ValidationParameters, out SecurityToken validatedTokenFromJwtHandler);
-                TokenValidationResult validationResultJsonHandler = theoryData.JsonWebTokenHandler.ValidateTokenAsync(jweFromJsonHandler, theoryData.ValidationParameters).Result;
+                TokenValidationResult validationResultJsonHandler = await theoryData.JsonWebTokenHandler.ValidateTokenAsync(jweFromJsonHandler, theoryData.ValidationParameters);
 
                 int expectedAudClaimCount = 0;
                 int additionalAudClaimsForJwtHandler = 0;
@@ -340,7 +340,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                                 Assert.True(expectedAudClaimCount == enumerable.Count());
                                 break;
                             default:
-                                Assert.True(false, "Unexpected type for 'aud' claim.");
+                                Assert.Fail("Unexpected type for 'aud' claim.");
                                 break;
                         }
                     }
@@ -384,7 +384,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         // Tests checks to make sure that the token string created by the JwtSecurityTokenHandler is consistent with the 
         // token string created by the JsonWebTokenHandler.
         [Theory, MemberData(nameof(CreateJWEUsingSecurityTokenDescriptorTheoryData))]
-        public void CreateJWEUsingSecurityTokenDescriptor(CreateTokenTheoryData theoryData)
+        public async Task CreateJWEUsingSecurityTokenDescriptor(CreateTokenTheoryData theoryData)
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.CreateJWEUsingSecurityTokenDescriptor", theoryData);
             theoryData.ValidationParameters.ValidateLifetime = false;
@@ -403,7 +403,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 string jweFromJsonHandler = theoryData.JsonWebTokenHandler.CreateToken(theoryData.TokenDescriptor);
 
                 var claimsPrincipalJwt = theoryData.JwtSecurityTokenHandler.ValidateToken(tokenFromTokenDescriptor, theoryData.ValidationParameters, out SecurityToken validatedTokenFromJwtHandler);
-                var validationResultJson = theoryData.JsonWebTokenHandler.ValidateTokenAsync(jweFromJsonHandler, theoryData.ValidationParameters).Result;
+                var validationResultJson = await theoryData.JsonWebTokenHandler.ValidateTokenAsync(jweFromJsonHandler, theoryData.ValidationParameters);
 
                 if (validationResultJson.Exception != null && validationResultJson.IsValid)
                     context.Diffs.Add("validationResultJsonHandler.IsValid, validationResultJsonHandler.Exception != null");
@@ -411,7 +411,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 IdentityComparer.AreEqual(validationResultJson.IsValid, theoryData.IsValid, context);
 
                 var validatedTokenFromJsonHandler = validationResultJson.SecurityToken;
-                var validationResult2 = theoryData.JsonWebTokenHandler.ValidateTokenAsync(tokenFromTokenDescriptor, theoryData.ValidationParameters).Result;
+                var validationResult2 = await theoryData.JsonWebTokenHandler.ValidateTokenAsync(tokenFromTokenDescriptor, theoryData.ValidationParameters);
 
                 if (validationResult2.Exception != null && validationResult2.IsValid)
                 {
@@ -1136,7 +1136,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             handler = new JwtSecurityTokenHandler();
 
             // Make sure that we don't populate the InboundClaimTypeMap if DefaultMapInboundClaims was previously set to false.
-            Assert.Equal(0, handler.InboundClaimTypeMap.Count);
+            Assert.Empty(handler.InboundClaimTypeMap);
 
             var claims = new List<Claim>
             {
@@ -1331,7 +1331,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             {
                 var handler = new JwtSecurityTokenHandler();
                 CompressionProviderFactory.Default = theoryData.CompressionProviderFactory;
-                var validationResult = await handler.ValidateTokenAsync(theoryData.JWECompressionString, theoryData.ValidationParameters).ConfigureAwait(false);
+                var validationResult = await handler.ValidateTokenAsync(theoryData.JWECompressionString, theoryData.ValidationParameters);
                 theoryData.ExpectedException.ProcessException(validationResult.Exception, context);
             }
             catch (Exception ex)
@@ -2433,7 +2433,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
 
         [Theory, MemberData(nameof(ValidateJwsWithLastKnownGoodTheoryData))]
-        public void ValidateJWSWithLastKnownGood(JwtTheoryData theoryData)
+        public async Task ValidateJWSWithLastKnownGood(JwtTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateJWSWithLastKnownGood", theoryData);
 
@@ -2457,7 +2457,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     var previousValidateWithLKG = theoryData.ValidationParameters.ValidateWithLKG;
                     theoryData.ValidationParameters.ValidateWithLKG = false;
 
-                    var setupValidationResult = handler.ValidateTokenAsync(theoryData.Token, theoryData.ValidationParameters).Result;
+                    var setupValidationResult = await handler.ValidateTokenAsync(theoryData.Token, theoryData.ValidationParameters);
 
                     theoryData.ValidationParameters.ValidateWithLKG = previousValidateWithLKG;
 
@@ -2484,7 +2484,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         public static TheoryData<JwtTheoryData> ValidateJwsWithLastKnownGoodTheoryData => JwtTestDatasets.ValidateJwsWithLastKnownGoodTheoryData;
 
         [Theory, MemberData(nameof(ValidateJWEWithLastKnownGoodTheoryData))]
-        public void ValidateJWEWithLastKnownGood(JwtTheoryData theoryData)
+        public async Task ValidateJWEWithLastKnownGood(JwtTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateJWEWithLastKnownGood", theoryData);
 
@@ -2508,7 +2508,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     var previousValidateWithLKG = theoryData.ValidationParameters.ValidateWithLKG;
                     theoryData.ValidationParameters.ValidateWithLKG = false;
 
-                    var setupValidationResult = handler.ValidateTokenAsync(theoryData.Token, theoryData.ValidationParameters).Result;
+                    var setupValidationResult = await handler.ValidateTokenAsync(theoryData.Token, theoryData.ValidationParameters);
 
                     theoryData.ValidationParameters.ValidateWithLKG = previousValidateWithLKG;
 
