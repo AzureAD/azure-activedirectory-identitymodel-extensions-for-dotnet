@@ -132,4 +132,31 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
     }
+
+    internal enum ValidationErrorType
+    {
+        Unknown = -1,
+        ArgumentNull,
+        InvalidArgument,
+        InvalidOperation,
+        SecurityToken,
+        SecurityTokenDecompressionFailed,
+        SecurityTokenDecryptionFailed,
+        SecurityTokenExpired,
+        SecurityTokenInvalidAudience,
+        SecurityTokenInvalidAlgorithm,
+        SecurityTokenInvalidIssuer,
+        SecurityTokenInvalidLifetime,
+        SecurityTokenInvalidSigningKey,
+        SecurityTokenInvalidSignature,
+        SecurityTokenInvalidType,
+        SecurityTokenKeyWrap,
+        SecurityTokenMalformed,
+        SecurityTokenNoExpiration,
+        SecurityTokenNotYetValid,
+        SecurityTokenReplayDetected,
+        SecurityTokenReplayAddFailed,
+        SecurityTokenSignatureKeyNotFound,
+        ExceptionTypeCount
+    }
 }

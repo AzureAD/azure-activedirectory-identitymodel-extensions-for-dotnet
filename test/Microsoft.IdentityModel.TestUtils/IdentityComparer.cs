@@ -1315,23 +1315,6 @@ namespace Microsoft.IdentityModel.TestUtils
             return context.Merge(localContext);
         }
 
-        internal static bool AreTokenValidationErrorsEqual(TokenValidationError tokenValidationError1, TokenValidationError tokenValidationError2, CompareContext context)
-        {
-            var localContext = new CompareContext(context);
-
-            AreIntsEqual(
-                tokenValidationError1.ErrorType,
-                tokenValidationError2.ErrorType,
-                localContext);
-
-            AreStringsEqual(
-                tokenValidationError1.MessageDetail.Message,
-                tokenValidationError2.MessageDetail.Message,
-                localContext);
-
-            return context.Merge(localContext);
-        }
-
         private static bool AreValueCollectionsEqual(Object object1, Object object2, CompareContext context)
         {
             Dictionary<string, object>.ValueCollection vc1 = (Dictionary<string, object>.ValueCollection)object1;

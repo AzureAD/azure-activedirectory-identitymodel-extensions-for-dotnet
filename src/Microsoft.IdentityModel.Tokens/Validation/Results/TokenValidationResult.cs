@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens
         // TODO - lazy creation of _validationResults
         private List<ValidationResult> _validationResults;
 
-        private TokenValidationError _tokenValidationError;
+        private ExceptionDetail _exceptionDetail;
         private Exception _exception;
         private bool _isValid;
 
@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters"></param>
         /// <param name="issuer"></param>
         /// <param name="validationResults"></param>
-        /// <param name="tokenValidationError"></param>
+        /// <param name="exceptionDetail"></param>
         /// <remarks>This constructor is used by JsonWebTokenHandler as part of delaying creation of ClaimsIdentity.</remarks>
         internal TokenValidationResult(
             SecurityToken securityToken,
@@ -87,30 +87,30 @@ namespace Microsoft.IdentityModel.Tokens
             ValidationParameters validationParameters,
             string issuer,
             List<ValidationResult> validationResults,
-            TokenValidationError tokenValidationError)
+            ExceptionDetail exceptionDetail)
         {
             _validationParameters = validationParameters;
             _tokenHandler = tokenHandler;
             _validationResults = validationResults;
             Issuer = issuer;
             SecurityToken = securityToken;
-            _tokenValidationError = tokenValidationError;
+            _exceptionDetail = exceptionDetail;
         }
 
         /// <summary>
         /// Initializes a new instance of <see cref="TokenValidationResult"/> using <see cref="ValidationParameters"/>.
         /// </summary>
         /// <param name="tokenHandler"></param>
-        /// <param name="tokenValidationError"></param>
+        /// <param name="exceptionDetail"></param>
         /// <param name="validationParameters"></param>
         /// <remarks>This constructor is used by JsonWebTokenHandler as part of delaying creation of ClaimsIdentity.</remarks>
         internal TokenValidationResult(
             TokenHandler tokenHandler,
             ValidationParameters validationParameters,
-            TokenValidationError tokenValidationError)
+            ExceptionDetail exceptionDetail)
         {
             _tokenHandler = tokenHandler;
-            _tokenValidationError = tokenValidationError;
+            _exceptionDetail = exceptionDetail;
             _validationParameters = validationParameters;
         }
 
@@ -220,11 +220,8 @@ namespace Microsoft.IdentityModel.Tokens
             get
             {
                 HasValidOrExceptionWasRead = true;
-                if (_exception is null && _tokenValidationError is not null)
-                    return ExceptionDetail.ExceptionFromType(
-                        _tokenValidationError.ErrorType,
-                        _tokenValidationError.MessageDetail,
-                        null);
+                if (_exception is null && _exceptionDetail is not null)
+                    return _exceptionDetail.GetException();
 
                 return _exception;
             }
