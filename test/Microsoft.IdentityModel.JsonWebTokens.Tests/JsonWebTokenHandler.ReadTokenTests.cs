@@ -71,7 +71,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             new MessageDetail(
                                 TokenLogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("token")),
-                            ValidationErrorType.ArgumentNull,
+                            ExceptionType.ArgumentNull,
                             null,
                             null)
                     },
@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             new MessageDetail(
                                 TokenLogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("token")),
-                            ValidationErrorType.ArgumentNull,
+                            ExceptionType.ArgumentNull,
                             null,
                             null)
                     },
@@ -99,7 +99,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             new MessageDetail(
                                 LogMessages.IDX14107,
                                 LogHelper.MarkAsNonPII("token")),
-                            ValidationErrorType.SecurityTokenMalformed,
+                            ExceptionType.SecurityTokenMalformed,
                             null,
                             new SecurityTokenMalformedException()),
                     }

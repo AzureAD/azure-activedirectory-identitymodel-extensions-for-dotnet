@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             TokenLogMessages.IDX10209,
                             LogHelper.MarkAsNonPII(token.Length),
                             LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes)),
-                        ValidationErrorType.InvalidArgument,
+                        ExceptionType.InvalidArgument,
                         new StackFrame(true)));
 
             Result<SecurityToken, ExceptionDetail> result = ReadToken(token, callContext);
@@ -126,7 +126,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     validationParameters,
                     new ExceptionDetail(
                         new MessageDetail(TokenLogMessages.IDX10001, nameof(token), nameof(JsonWebToken)),
-                        ValidationErrorType.InvalidArgument,
+                        ExceptionType.InvalidArgument,
                         new StackFrame(true)));
 
             return await InternalValidateTokenAsync(
@@ -205,7 +205,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     validationParameters.RefreshBeforeValidation = false;
                     validationParameters.ValidateWithLKG = true;
-                    ValidationErrorType recoverableExceptionType = result.ExceptionDetail?.Type ?? ValidationErrorType.Unknown;
+                    ExceptionType recoverableExceptionType = result.ExceptionDetail?.Type ?? ExceptionType.Unknown;
 
                     BaseConfiguration[] validConfigurations = validationParameters.ConfigurationManager.GetValidLkgConfigurations();
                     for (int i = 0; i < validConfigurations.Length; i++)

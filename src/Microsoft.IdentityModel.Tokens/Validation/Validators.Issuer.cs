@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 return new ExceptionDetail(
                     new MessageDetail(LogMessages.IDX10211),
-                    ValidationErrorType.SecurityTokenInvalidIssuer,
+                    ExceptionType.SecurityTokenInvalidIssuer,
                     new StackFrame(true));
             }
 
@@ -88,7 +88,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters.ValidIssuers.Count == 0 && string.IsNullOrWhiteSpace(configuration?.Issuer))
                 return new ExceptionDetail(
                     new MessageDetail(LogMessages.IDX10211),
-                    ValidationErrorType.SecurityTokenInvalidIssuer,
+                    ExceptionType.SecurityTokenInvalidIssuer,
                     new StackFrame(true));
 
             if (configuration != null)
@@ -137,7 +137,7 @@ namespace Microsoft.IdentityModel.Tokens
                     LogHelper.MarkAsNonPII(issuer),
                     LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers)),
                     LogHelper.MarkAsNonPII(configuration?.Issuer)),
-                ValidationErrorType.SecurityTokenInvalidIssuer,
+                ExceptionType.SecurityTokenInvalidIssuer,
                 new StackFrame(true));
         }
     }

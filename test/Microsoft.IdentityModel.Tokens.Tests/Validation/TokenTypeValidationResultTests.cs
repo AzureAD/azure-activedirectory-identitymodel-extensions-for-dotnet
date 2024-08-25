@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             new MessageDetail(
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("securityToken")),
-                            ValidationErrorType.ArgumentNull,
+                            ExceptionType.ArgumentNull,
                             null,
                             null)
                     },
@@ -94,7 +94,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             new MessageDetail(
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("validationParameters")),
-                            ValidationErrorType.ArgumentNull,
+                            ExceptionType.ArgumentNull,
                             null,
                             null)
                     },
@@ -110,7 +110,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             new MessageDetail(
                                 LogMessages.IDX10256,
                                 LogHelper.MarkAsNonPII("type")),
-                            ValidationErrorType.SecurityTokenInvalidType,
+                            ExceptionType.SecurityTokenInvalidType,
                             null,
                             null)
                     },
@@ -126,7 +126,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             new MessageDetail(
                                 LogMessages.IDX10256,
                                 LogHelper.MarkAsNonPII("type")),
-                            ValidationErrorType.SecurityTokenInvalidType,
+                            ExceptionType.SecurityTokenInvalidType,
                             null,
                             null)
                     },
@@ -143,7 +143,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogMessages.IDX10257,
                                 LogHelper.MarkAsNonPII("type"),
                                 LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validTypesNoJwt))),
-                            ValidationErrorType.SecurityTokenInvalidType,
+                            ExceptionType.SecurityTokenInvalidType,
                             null,
                             null)
                     }

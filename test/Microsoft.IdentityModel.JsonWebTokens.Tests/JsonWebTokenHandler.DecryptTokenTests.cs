@@ -104,7 +104,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ExpectedException = ExpectedException.SecurityTokenException("IDX10612:"),
                         Result = new ExceptionDetail(
                             new MessageDetail(TokenLogMessages.IDX10612),
-                            ValidationErrorType.SecurityToken,
+                            ExceptionType.SecurityToken,
                             null,
                             null),
                     },
@@ -116,7 +116,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                         Result = new ExceptionDetail(
                                 new MessageDetail(TokenLogMessages.IDX10000, "jwtToken"),
-                                ValidationErrorType.ArgumentNull,
+                                ExceptionType.ArgumentNull,
                                 null,
                                 null),
                     },
@@ -128,7 +128,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                         Result = new ExceptionDetail(
                             new MessageDetail(TokenLogMessages.IDX10000, "validationParameters"),
-                            ValidationErrorType.ArgumentNull,
+                            ExceptionType.ArgumentNull,
                             null,
                             null),
                     },
@@ -185,7 +185,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 LogHelper.MarkAsSecurityArtifact(
                                     new JsonWebToken(ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims),
                                     JwtTokenUtilities.SafeLogJwtToken)),
-                                ValidationErrorType.SecurityTokenDecryptionFailed,
+                                ExceptionType.SecurityTokenDecryptionFailed,
                                 null,
                                 null),
                     }

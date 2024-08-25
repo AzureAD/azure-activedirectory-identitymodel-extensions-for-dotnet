@@ -124,7 +124,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 return new ExceptionDetail(
                     new MessageDetail(TokenLogMessages.IDX10679, zipAlgorithm),
-                    ValidationErrorType.SecurityTokenDecompressionFailed,
+                    ExceptionType.SecurityTokenDecompressionFailed,
                     new StackFrame(true),
                     ex);
             }
