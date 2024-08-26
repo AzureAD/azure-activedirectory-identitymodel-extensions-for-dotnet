@@ -86,21 +86,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             else
             {
                 var key = ResolveTokenDecryptionKey(jwtToken.EncodedToken, jwtToken, validationParameters, callContext);
-                if (key != null)
-                {
-                    // TODO: Move to CallContext
-                    //if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                    //    LogHelper.LogInformation(TokenLogMessages.IDX10904, key);
-                }
-                else if (configuration != null)
+                //if (key is not null)
+                //{
+                // TODO: Move to CallContext or return decryption key source as part of result
+                //if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                //    LogHelper.LogInformation(TokenLogMessages.IDX10904, key);
+                //}
+                //else
+                if (key is null && configuration is not null)
                 {
                     key = ResolveTokenDecryptionKeyFromConfig(jwtToken, configuration);
-                    // TODO: Move to CallContext
+                    // TODO: Move to CallContext or return decryption key source as part of result
                     //if (key != null && LogHelper.IsEnabled(EventLogLevel.Informational))
                     //    LogHelper.LogInformation(TokenLogMessages.IDX10905, key);
                 }
 
-                if (key != null)
+                if (key is not null)
                     keys = [key];
             }
 
