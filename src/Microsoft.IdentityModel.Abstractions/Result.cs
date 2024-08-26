@@ -39,6 +39,14 @@ namespace Microsoft.IdentityModel.Abstractions
         }
 
         /// <summary>
+        /// Empty constructor implementation to prevent creating an empty result.
+        /// </summary>
+        /// <remarks>Throws an <see cref="InvalidOperationException"/> when called as this should never be used. Always initialize Result with either a value or error.</remarks>
+        /// <exception cref="InvalidOperationException">Thrown when called.</exception>
+        [Obsolete("Cannot create an empty result", true)]
+        public Result() => throw new InvalidOperationException("Cannot create an empty result");
+
+        /// <summary>
         /// Creates a successful result implicitly from the value.
         /// </summary>
         /// <param name="result">The value to be stored in the result.</param>
