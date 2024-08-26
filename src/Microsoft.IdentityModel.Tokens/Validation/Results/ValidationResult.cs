@@ -28,34 +28,9 @@ namespace Microsoft.IdentityModel.Tokens
             ValidationParameters validationParameters)
         {
             TokenHandler = tokenHandler ?? throw new ArgumentNullException("TokenHandler cannot be null.");
-            SecurityToken = securityToken;
-            ValidationParameters = validationParameters;
-            IsValid = true;
+            SecurityToken = securityToken ?? throw new ArgumentNullException("SecurityToken cannot be null.");
+            ValidationParameters = validationParameters ?? throw new ArgumentNullException("ValidationParameters cannot be null."); ;
         }
-
-        public ValidationResult(
-            SecurityToken? securityToken,
-            TokenHandler tokenHandler,
-            ValidationParameters? validationParameters,
-            ExceptionDetail exceptionDetail,
-            StackFrame? stackFrame = null)
-        {
-            TokenHandler = tokenHandler ?? throw new ArgumentNullException("TokenHandler cannot be null.");
-            SecurityToken = securityToken;
-            ValidationParameters = validationParameters;
-            ExceptionDetail = exceptionDetail;
-            IsValid = false;
-
-            if (stackFrame != null)
-                ExceptionDetail.StackFrames.Add(stackFrame);
-        }
-
-        public ExceptionDetail? ExceptionDetail { get; private set; }
-
-        /// <summary>
-        /// True if the token was successfully validated, false otherwise.
-        /// </summary>
-        public bool IsValid { get; private set; }
 
         /// <summary>
         /// Logs the validation result.
@@ -67,16 +42,16 @@ namespace Microsoft.IdentityModel.Tokens
             // TODO - Do we need this, how will it work?
         }
 
-        public SecurityToken? SecurityToken { get; private set; }
+        public SecurityToken SecurityToken { get; private set; }
 
         public TokenHandler TokenHandler { get; private set; }
 
-        public ValidationParameters? ValidationParameters { get; private set; }
+        public ValidationParameters ValidationParameters { get; private set; }
 
         #region Validation Results
         public ValidationResult? ActorValidationResult { get; internal set; }
         public string? ValidatedAudience { get; internal set; }
-        public ValidatedIssuer ValidatedIssuer { get; internal set; }
+        public ValidatedIssuer? ValidatedIssuer { get; internal set; }
         public ValidatedLifetime? ValidatedLifetime { get; internal set; }
         public DateTime? ValidatedTokenReplayExpirationTime { get; internal set; }
         public ValidatedTokenType? ValidatedTokenType { get; internal set; }
@@ -102,11 +77,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// The <see cref="Dictionary{String, Object}"/> created from the validated security token.
         /// </summary>
-        public IDictionary<string, object>? Claims
+        public IDictionary<string, object> Claims
         {
             get
             {
-                if (_claims is null && ClaimsIdentity is not null)
+                if (_claims is null)
                 {
                     Interlocked.CompareExchange(ref _claims, TokenUtilities.CreateDictionaryFromClaims(ClaimsIdentity.Claims), null);
                 }
@@ -156,11 +131,7 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     Debug.Assert(_claimsIdentity is null);
 
-                    if (IsValid)
-                    {
-                        _claimsIdentity = TokenHandler.CreateClaimsIdentityInternal(SecurityToken, ValidationParameters, ValidatedIssuer.Issuer);
-                    }
-
+                    _claimsIdentity = TokenHandler.CreateClaimsIdentityInternal(SecurityToken, ValidationParameters, ValidatedIssuer?.Issuer);
                     _claimsIdentityInitialized = true;
                 }
 

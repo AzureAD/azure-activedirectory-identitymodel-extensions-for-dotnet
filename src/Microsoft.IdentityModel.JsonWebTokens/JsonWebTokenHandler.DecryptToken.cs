@@ -27,7 +27,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal Result<string, ExceptionDetail> DecryptToken(
             JsonWebToken jwtToken,
             ValidationParameters validationParameters,
-            BaseConfiguration configuration,
+            BaseConfiguration? configuration,
             CallContext? callContext)
         {
             if (jwtToken == null)
@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 callContext);
         }
 
-        internal (IList<SecurityKey>?, ExceptionDetail?) GetContentEncryptionKeys(JsonWebToken jwtToken, ValidationParameters validationParameters, BaseConfiguration configuration, CallContext? callContext)
+        internal (IList<SecurityKey>?, ExceptionDetail?) GetContentEncryptionKeys(JsonWebToken jwtToken, ValidationParameters validationParameters, BaseConfiguration? configuration, CallContext? callContext)
         {
             IList<SecurityKey>? keys = null;
 

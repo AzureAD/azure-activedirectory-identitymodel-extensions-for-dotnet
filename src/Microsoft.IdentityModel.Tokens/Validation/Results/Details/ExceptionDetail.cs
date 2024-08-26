@@ -78,6 +78,17 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public IList<StackFrame> StackFrames { get; }
 
+        /// <summary>
+        /// Adds a stack frame to the list of stack frames and returns the updated object.
+        /// </summary>
+        /// <param name="stackFrame">The <see cref="StackFrame"/> to be added.</param>
+        /// <returns></returns>
+        public ExceptionDetail AddStackFrame(StackFrame stackFrame)
+        {
+            StackFrames.Add(stackFrame);
+            return this;
+        }
+
         private Exception ExceptionFromType(ExceptionType exceptionType, Exception innerException)
         {
             switch (exceptionType)
