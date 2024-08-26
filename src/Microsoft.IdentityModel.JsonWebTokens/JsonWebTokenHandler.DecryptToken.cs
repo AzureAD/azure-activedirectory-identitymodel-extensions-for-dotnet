@@ -31,34 +31,49 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             CallContext? callContext)
         {
             if (jwtToken == null)
+            {
+                StackFrame tokenNullStackFrame = StackFrames.DecryptionTokenNull ??= new StackFrame();
                 return ExceptionDetail.NullParameter(
                     nameof(jwtToken),
-                    new StackFrame(true));
+                    tokenNullStackFrame);
+            }
 
             if (validationParameters == null)
+            {
+                StackFrame validationParametersNullStackFrame = StackFrames.DecryptionValidationParametersNull ??= new StackFrame();
                 return ExceptionDetail.NullParameter(
                     nameof(validationParameters),
-                    new StackFrame(true));
+                    validationParametersNullStackFrame);
+            }
 
             if (string.IsNullOrEmpty(jwtToken.Enc))
+            {
+                StackFrame headerMissingStackFrame = StackFrames.DecryptionHeaderMissing ??= new StackFrame();
                 return new ExceptionDetail(
                     new MessageDetail(TokenLogMessages.IDX10612),
                     ExceptionType.SecurityToken,
-                    new StackFrame(true));
+                    headerMissingStackFrame);
+            }
 
             (IList<SecurityKey>? contentEncryptionKeys, ExceptionDetail? exceptionDetail) result =
                 GetContentEncryptionKeys(jwtToken, validationParameters, configuration, callContext);
 
             if (result.exceptionDetail != null)
-                return result.exceptionDetail;
+            {
+                StackFrame decryptionGetKeysStackFrame = StackFrames.DecryptionGetEncryptionKeys ??= new StackFrame();
+                return result.exceptionDetail.AddStackFrame(decryptionGetKeysStackFrame);
+            }
 
             if (result.contentEncryptionKeys == null)
+            {
+                StackFrame noKeysTriedStackFrame = StackFrames.DecryptionNoKeysTried ??= new StackFrame();
                 return new ExceptionDetail(
                     new MessageDetail(
                         TokenLogMessages.IDX10609,
                         LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken)),
                     ExceptionType.SecurityTokenDecryptionFailed,
-                    new StackFrame(true));
+                    noKeysTriedStackFrame);
+            }
 
             return JwtTokenUtilities.DecryptJwtToken(
                 jwtToken,

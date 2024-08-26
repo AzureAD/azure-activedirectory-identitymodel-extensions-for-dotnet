@@ -28,9 +28,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 #pragma warning disable CA1801 // TODO: remove pragma disable once callContext is used for logging
         {
             if (String.IsNullOrEmpty(token))
+            {
+                StackFrame nullTokenStackFrame = StackFrames.ReadTokenNullOrEmpty ?? new StackFrame(true);
                 return ExceptionDetail.NullParameter(
                     nameof(token),
-                    new StackFrame(true));
+                    nullTokenStackFrame);
+            }
 
             try
             {
@@ -41,10 +44,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
+                StackFrame malformedTokenStackFrame = StackFrames.ReadTokenMalformed ?? new StackFrame(true);
                 return new ExceptionDetail(
                     new MessageDetail(LogMessages.IDX14107),
                     ExceptionType.SecurityTokenMalformed,
-                    new StackFrame(true),
+                    malformedTokenStackFrame,
                     ex);
             }
         }

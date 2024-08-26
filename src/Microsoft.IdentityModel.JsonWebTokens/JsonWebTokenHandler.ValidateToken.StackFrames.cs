@@ -39,6 +39,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             internal static StackFrame? TypeValidationFailed;
             internal static StackFrame? SignatureValidationFailed;
             internal static StackFrame? IssuerSigningKeyValidationFailed;
+            // DecryptToken
+            internal static StackFrame? DecryptionTokenNull;
+            internal static StackFrame? DecryptionValidationParametersNull;
+            internal static StackFrame? DecryptionHeaderMissing;
+            internal static StackFrame? DecryptionGetEncryptionKeys;
+            internal static StackFrame? DecryptionNoKeysTried;
+            // ReadToken
+            internal static StackFrame? ReadTokenNullOrEmpty;
+            internal static StackFrame? ReadTokenMalformed;
         }
     }
 }
