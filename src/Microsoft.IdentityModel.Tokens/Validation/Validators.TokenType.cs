@@ -5,8 +5,6 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using Microsoft.IdentityModel.Abstractions;
-
-//using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
 #nullable enable

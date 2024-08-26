@@ -5,7 +5,6 @@ using System;
 using System.Diagnostics;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-//using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Abstractions;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
