@@ -34,7 +34,13 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             }
             else
             {
-                Exception exception = result.UnwrapError().GetException();
+                ExceptionDetail exceptionDetail = result.UnwrapError();
+                IdentityComparer.AreStringsEqual(
+                    exceptionDetail.FailureType.Name,
+                    theoryData.Result.UnwrapError().FailureType.Name,
+                    context);
+
+                Exception exception = exceptionDetail.GetException();
                 theoryData.ExpectedException.ProcessException(exception, context);
             }
 
@@ -61,6 +67,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             new MessageDetail(
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("validationParameters")),
+                            ValidationFailureType.NullArgument,
                             ExceptionType.ArgumentNull,
                             null, // StackFrame
                             null) // InnerException
@@ -80,6 +87,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             new MessageDetail(
                                 LogMessages.IDX10696,
                                 LogHelper.MarkAsNonPII(SecurityAlgorithms.Sha256)),
+                            ValidationFailureType.AlgorithmValidationFailed,
                             ExceptionType.SecurityTokenInvalidAlgorithm,
                             null, // StackFrame
                             null),// InnerException

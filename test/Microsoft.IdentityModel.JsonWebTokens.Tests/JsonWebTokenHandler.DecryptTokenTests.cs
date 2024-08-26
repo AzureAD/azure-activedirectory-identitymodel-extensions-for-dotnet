@@ -48,7 +48,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
             else
             {
-                Exception exception = result.UnwrapError().GetException();
+                ExceptionDetail exceptionDetail = result.UnwrapError();
+                IdentityComparer.AreStringsEqual(
+                    exceptionDetail.FailureType.Name,
+                    theoryData.Result.UnwrapError().FailureType.Name,
+                    context);
+
+                Exception exception = exceptionDetail.GetException();
                 theoryData.ExpectedException.ProcessException(exception, context);
             }
 
@@ -104,6 +110,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ExpectedException = ExpectedException.SecurityTokenException("IDX10612:"),
                         Result = new ExceptionDetail(
                             new MessageDetail(TokenLogMessages.IDX10612),
+                            ValidationFailureType.TokenDecryptionFailed,
                             ExceptionType.SecurityToken,
                             null,
                             null),
@@ -115,10 +122,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ValidationParameters = new ValidationParameters(),
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                         Result = new ExceptionDetail(
-                                new MessageDetail(TokenLogMessages.IDX10000, "jwtToken"),
-                                ExceptionType.ArgumentNull,
-                                null,
-                                null),
+                            new MessageDetail(TokenLogMessages.IDX10000, "jwtToken"),
+                            ValidationFailureType.NullArgument,
+                            ExceptionType.ArgumentNull,
+                            null,
+                            null),
                     },
                     new TokenDecryptingTheoryData
                     {
@@ -128,6 +136,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                         Result = new ExceptionDetail(
                             new MessageDetail(TokenLogMessages.IDX10000, "validationParameters"),
+                            ValidationFailureType.NullArgument,
                             ExceptionType.ArgumentNull,
                             null,
                             null),
@@ -185,9 +194,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 LogHelper.MarkAsSecurityArtifact(
                                     new JsonWebToken(ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims),
                                     JwtTokenUtilities.SafeLogJwtToken)),
-                                ExceptionType.SecurityTokenDecryptionFailed,
-                                null,
-                                null),
+                            ValidationFailureType.TokenDecryptionFailed,
+                            ExceptionType.SecurityTokenDecryptionFailed,
+                            null,
+                            null),
                     }
                 };
             }

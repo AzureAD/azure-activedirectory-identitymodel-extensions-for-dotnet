@@ -42,7 +42,13 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             }
             else
             {
-                Exception exception = result.UnwrapError().GetException();
+                ExceptionDetail exceptionDetail = result.UnwrapError();
+                IdentityComparer.AreStringsEqual(
+                    exceptionDetail.FailureType.Name,
+                    theoryData.Result.UnwrapError().FailureType.Name,
+                    context);
+
+                Exception exception = exceptionDetail.GetException();
                 theoryData.ExpectedException.ProcessException(exception, context);
             }
 
@@ -70,6 +76,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             LogHelper.MarkAsNonPII(validIssuer),
                             LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(null)),
                             LogHelper.MarkAsNonPII(null)),
+                        ValidationFailureType.IssuerValidationFailed,
                         ExceptionType.SecurityTokenInvalidIssuer,
                         null,
                         null),
@@ -85,6 +92,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII("validationParameters")),
+                        ValidationFailureType.NullArgument,
                         ExceptionType.ArgumentNull,
                         null,
                         null),
@@ -100,6 +108,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII("securityToken")),
+                        ValidationFailureType.NullArgument,
                         ExceptionType.ArgumentNull,
                         null,
                         null),
@@ -137,6 +146,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             LogHelper.MarkAsNonPII(issClaim),
                             LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validIssuers)),
                             LogHelper.MarkAsNonPII(null)),
+                        ValidationFailureType.IssuerValidationFailed,
                         ExceptionType.SecurityTokenInvalidIssuer,
                         null,
                         null),

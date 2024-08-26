@@ -35,7 +35,13 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             }
             else
             {
-                Exception exception = result.UnwrapError().GetException();
+                ExceptionDetail exceptionDetail = result.UnwrapError();
+                IdentityComparer.AreStringsEqual(
+                    exceptionDetail.FailureType.Name,
+                    theoryData.Result.UnwrapError().FailureType.Name,
+                    context);
+
+                Exception exception = exceptionDetail.GetException();
                 theoryData.ExpectedException.ProcessException(exception, context);
             }
 
@@ -69,6 +75,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ValidationParameters = new ValidationParameters(),
                         Result = new ExceptionDetail(
                             new MessageDetail(LogMessages.IDX10253),
+                            ValidationFailureType.SigningKeyValidationFailed,
                             ExceptionType.ArgumentNull,
                             null,
                             null),
@@ -84,6 +91,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             new MessageDetail(
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("securityToken")),
+                            ValidationFailureType.NullArgument,
                             ExceptionType.ArgumentNull,
                             null,
                             null),
@@ -99,6 +107,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             new MessageDetail(
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("validationParameters")),
+                            ValidationFailureType.NullArgument,
                             ExceptionType.ArgumentNull,
                             null,
                             null),
@@ -115,6 +124,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogMessages.IDX10249,
                                 LogHelper.MarkAsNonPII(utcExpired),
                                 LogHelper.MarkAsNonPII(utcNow)),
+                            ValidationFailureType.SigningKeyValidationFailed,
                             ExceptionType.SecurityTokenInvalidSigningKey,
                             null,
                             null),
@@ -131,6 +141,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogMessages.IDX10248,
                                 LogHelper.MarkAsNonPII(utcNotYetValid),
                                 LogHelper.MarkAsNonPII(utcNow)),
+                            ValidationFailureType.SigningKeyValidationFailed,
                             ExceptionType.SecurityTokenInvalidSigningKey,
                             null,
                             null),
@@ -144,6 +155,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ValidationParameters = new ValidationParameters (),
                         Result = new ExceptionDetail(
                             new MessageDetail(LogMessages.IDX10253),
+                            ValidationFailureType.SigningKeyValidationFailed,
                             ExceptionType.ArgumentNull,
                             null,
                             null),

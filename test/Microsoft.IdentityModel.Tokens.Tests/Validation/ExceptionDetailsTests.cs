@@ -17,6 +17,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var context = TestUtilities.WriteHeader($"{this}.ExceptionDetails", theoryData);
             ExceptionDetail exceptionDetail = new ExceptionDetail(
                 new MessageDetail(""),
+                ValidationFailureType.NullArgument,
                 theoryData.ExceptionType,
                 null);
 
@@ -30,6 +31,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             ExceptionDetail exceptionDetail = new ExceptionDetail(
                 new MessageDetail(""),
+                ValidationFailureType.NullArgument,
                 ExceptionType.Unknown,
                 null);
 

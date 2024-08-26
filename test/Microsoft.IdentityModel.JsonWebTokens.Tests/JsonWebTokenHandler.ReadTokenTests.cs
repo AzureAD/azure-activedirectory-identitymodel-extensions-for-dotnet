@@ -32,7 +32,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
             else
             {
-                Exception exception = result.UnwrapError().GetException();
+                ExceptionDetail exceptionDetail = result.UnwrapError();
+                IdentityComparer.AreStringsEqual(
+                    exceptionDetail.FailureType.Name,
+                    theoryData.Result.UnwrapError().FailureType.Name,
+                    context);
+
+                Exception exception = exceptionDetail.GetException();
                 theoryData.ExpectedException.ProcessException(exception, context);
             }
 
@@ -71,6 +77,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             new MessageDetail(
                                 TokenLogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("token")),
+                            ValidationFailureType.NullArgument,
                             ExceptionType.ArgumentNull,
                             null,
                             null)
@@ -84,6 +91,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             new MessageDetail(
                                 TokenLogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("token")),
+                            ValidationFailureType.NullArgument,
                             ExceptionType.ArgumentNull,
                             null,
                             null)
@@ -99,6 +107,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             new MessageDetail(
                                 LogMessages.IDX14107,
                                 LogHelper.MarkAsNonPII("token")),
+                            ValidationFailureType.TokenReadingFailed,
                             ExceptionType.SecurityTokenMalformed,
                             null,
                             new SecurityTokenMalformedException()),

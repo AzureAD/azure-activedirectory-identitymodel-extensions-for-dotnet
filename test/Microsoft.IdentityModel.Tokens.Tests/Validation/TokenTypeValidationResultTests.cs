@@ -42,7 +42,13 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             }
             else
             {
-                Exception exception = result.UnwrapError().GetException();
+                ExceptionDetail exceptionDetail = result.UnwrapError();
+                IdentityComparer.AreStringsEqual(
+                    exceptionDetail.FailureType.Name,
+                    theoryData.Result.UnwrapError().FailureType.Name,
+                    context);
+
+                Exception exception = exceptionDetail.GetException();
                 theoryData.ExpectedException.ProcessException(exception, context);
             }
 
@@ -79,6 +85,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             new MessageDetail(
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("securityToken")),
+                            ValidationFailureType.NullArgument,
                             ExceptionType.ArgumentNull,
                             null,
                             null)
@@ -94,6 +101,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             new MessageDetail(
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("validationParameters")),
+                            ValidationFailureType.NullArgument,
                             ExceptionType.ArgumentNull,
                             null,
                             null)
@@ -110,6 +118,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             new MessageDetail(
                                 LogMessages.IDX10256,
                                 LogHelper.MarkAsNonPII("type")),
+                            ValidationFailureType.TokenTypeValidationFailed,
                             ExceptionType.SecurityTokenInvalidType,
                             null,
                             null)
@@ -126,6 +135,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             new MessageDetail(
                                 LogMessages.IDX10256,
                                 LogHelper.MarkAsNonPII("type")),
+                            ValidationFailureType.TokenTypeValidationFailed,
                             ExceptionType.SecurityTokenInvalidType,
                             null,
                             null)
@@ -143,6 +153,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogMessages.IDX10257,
                                 LogHelper.MarkAsNonPII("type"),
                                 LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validTypesNoJwt))),
+                            ValidationFailureType.TokenTypeValidationFailed,
                             ExceptionType.SecurityTokenInvalidType,
                             null,
                             null)
