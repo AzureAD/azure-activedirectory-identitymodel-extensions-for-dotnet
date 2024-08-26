@@ -92,11 +92,11 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             // Wait for the refresh to complete.
             await Task.Delay(250).ContinueWith(async _ =>
             {
-
                 configuration2 = await configManager.GetConfigurationAsync();
-                if (IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer))
-                    context.Diffs.Add("IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer)");
             });
+
+            if (IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer))
+                context.Diffs.Add("IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer)");
 
             TestUtilities.AssertFailIfErrors(context);
         }
