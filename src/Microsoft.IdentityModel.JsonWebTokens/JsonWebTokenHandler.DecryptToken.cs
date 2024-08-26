@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             if (jwtToken == null)
             {
-                StackFrame tokenNullStackFrame = StackFrames.DecryptionTokenNull ??= new StackFrame();
+                StackFrame tokenNullStackFrame = StackFrames.DecryptionTokenNull ??= new StackFrame(true);
                 return ExceptionDetail.NullParameter(
                     nameof(jwtToken),
                     tokenNullStackFrame);
@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (validationParameters == null)
             {
-                StackFrame validationParametersNullStackFrame = StackFrames.DecryptionValidationParametersNull ??= new StackFrame();
+                StackFrame validationParametersNullStackFrame = StackFrames.DecryptionValidationParametersNull ??= new StackFrame(true);
                 return ExceptionDetail.NullParameter(
                     nameof(validationParameters),
                     validationParametersNullStackFrame);
@@ -48,9 +48,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (string.IsNullOrEmpty(jwtToken.Enc))
             {
-                StackFrame headerMissingStackFrame = StackFrames.DecryptionHeaderMissing ??= new StackFrame();
+                StackFrame headerMissingStackFrame = StackFrames.DecryptionHeaderMissing ??= new StackFrame(true);
                 return new ExceptionDetail(
                     new MessageDetail(TokenLogMessages.IDX10612),
+                    ValidationFailureType.TokenDecryptionFailed,
                     ExceptionType.SecurityToken,
                     headerMissingStackFrame);
             }
@@ -60,17 +61,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (result.exceptionDetail != null)
             {
-                StackFrame decryptionGetKeysStackFrame = StackFrames.DecryptionGetEncryptionKeys ??= new StackFrame();
+                StackFrame decryptionGetKeysStackFrame = StackFrames.DecryptionGetEncryptionKeys ??= new StackFrame(true);
                 return result.exceptionDetail.AddStackFrame(decryptionGetKeysStackFrame);
             }
 
             if (result.contentEncryptionKeys == null)
             {
-                StackFrame noKeysTriedStackFrame = StackFrames.DecryptionNoKeysTried ??= new StackFrame();
+                StackFrame noKeysTriedStackFrame = StackFrames.DecryptionNoKeysTried ??= new StackFrame(true);
                 return new ExceptionDetail(
                     new MessageDetail(
                         TokenLogMessages.IDX10609,
                         LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken)),
+                    ValidationFailureType.TokenDecryptionFailed,
                     ExceptionType.SecurityTokenDecryptionFailed,
                     noKeysTriedStackFrame);
             }
@@ -205,14 +207,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return (unwrappedKeys, null);
             else
             {
+                StackFrame decryptionKeyUnwrapFailedStackFrame = StackFrames.DecryptionKeyUnwrapFailed ??= new StackFrame(true);
                 ExceptionDetail exceptionDetail = new(
                     new MessageDetail(
                         TokenLogMessages.IDX10618,
                         keysAttempted?.ToString() ?? "",
                         exceptionStrings?.ToString() ?? "",
                         LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken)),
+                    ValidationFailureType.TokenDecryptionFailed,
                     ExceptionType.SecurityTokenKeyWrap,
-                    new System.Diagnostics.StackFrame(),
+                    decryptionKeyUnwrapFailedStackFrame,
                     null);
 
                 return (null, exceptionDetail);

@@ -64,6 +64,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(type))
                 return new ExceptionDetail(
                     new MessageDetail(LogMessages.IDX10256),
+                    ValidationFailureType.TokenTypeValidationFailed,
                     ExceptionType.SecurityTokenInvalidType,
                     new StackFrame(true));
 
@@ -74,6 +75,7 @@ namespace Microsoft.IdentityModel.Tokens
                         LogMessages.IDX10257,
                         LogHelper.MarkAsNonPII(type),
                         LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidTypes))),
+                    ValidationFailureType.TokenTypeValidationFailed,
                     ExceptionType.SecurityTokenInvalidType,
                     new StackFrame(true));
             }

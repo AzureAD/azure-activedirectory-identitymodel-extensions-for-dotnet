@@ -67,6 +67,7 @@ namespace Microsoft.IdentityModel.Tokens
                     new MessageDetail(
                         LogMessages.IDX10225,
                         LogHelper.MarkAsNonPII(securityToken == null ? "null" : securityToken.GetType().ToString())),
+                    ValidationFailureType.LifetimeValidationFailed,
                     ExceptionType.SecurityTokenNoExpiration,
                     new StackFrame(true));
 
@@ -76,6 +77,7 @@ namespace Microsoft.IdentityModel.Tokens
                         LogMessages.IDX10224,
                         LogHelper.MarkAsNonPII(notBefore.Value),
                         LogHelper.MarkAsNonPII(expires.Value)),
+                    ValidationFailureType.LifetimeValidationFailed,
                     ExceptionType.SecurityTokenInvalidLifetime,
                     new StackFrame(true));
 
@@ -86,6 +88,7 @@ namespace Microsoft.IdentityModel.Tokens
                         LogMessages.IDX10222,
                         LogHelper.MarkAsNonPII(notBefore.Value),
                         LogHelper.MarkAsNonPII(utcNow)),
+                    ValidationFailureType.LifetimeValidationFailed,
                     ExceptionType.SecurityTokenNotYetValid,
                     new StackFrame(true));
 
@@ -95,6 +98,7 @@ namespace Microsoft.IdentityModel.Tokens
                         LogMessages.IDX10223,
                         LogHelper.MarkAsNonPII(expires.Value),
                         LogHelper.MarkAsNonPII(utcNow)),
+                    ValidationFailureType.LifetimeValidationFailed,
                     ExceptionType.SecurityTokenExpired,
                     new StackFrame(true));
 

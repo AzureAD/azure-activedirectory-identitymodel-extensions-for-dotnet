@@ -54,12 +54,14 @@ namespace Microsoft.IdentityModel.Tokens
             if (tokenAudiences == null)
                 return new ExceptionDetail(
                     new MessageDetail(LogMessages.IDX10207),
+                    ValidationFailureType.AudienceValidationFailed,
                     ExceptionType.SecurityTokenInvalidAudience,
                     new StackFrame(true));
 
             if (tokenAudiences.Count == 0)
                 return new ExceptionDetail(
                     new MessageDetail(LogMessages.IDX10206),
+                    ValidationFailureType.AudienceValidationFailed,
                     ExceptionType.SecurityTokenInvalidAudience,
                     new StackFrame(true));
 
@@ -72,6 +74,7 @@ namespace Microsoft.IdentityModel.Tokens
                     LogMessages.IDX10215,
                     LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(tokenAudiences)),
                     LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences))),
+                ValidationFailureType.AudienceValidationFailed,
                 ExceptionType.SecurityTokenInvalidAudience,
                 new StackFrame(true));
         }

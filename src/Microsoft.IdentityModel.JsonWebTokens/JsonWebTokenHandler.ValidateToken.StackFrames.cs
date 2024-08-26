@@ -45,6 +45,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             internal static StackFrame? DecryptionHeaderMissing;
             internal static StackFrame? DecryptionGetEncryptionKeys;
             internal static StackFrame? DecryptionNoKeysTried;
+            internal static StackFrame? DecryptionKeyUnwrapFailed;
             // ReadToken
             internal static StackFrame? ReadTokenNullOrEmpty;
             internal static StackFrame? ReadTokenMalformed;

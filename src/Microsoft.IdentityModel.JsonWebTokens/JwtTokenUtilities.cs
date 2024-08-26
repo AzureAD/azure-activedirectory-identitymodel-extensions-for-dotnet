@@ -371,6 +371,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         keysAttempted.ToString(),
                         exceptionStrings?.ToString() ?? string.Empty,
                         LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken)),
+                    ValidationFailureType.TokenDecryptionFailed,
                     ExceptionType.SecurityTokenDecryptionFailed,
                     new StackFrame(true),
                     null);
@@ -380,6 +381,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         TokenLogMessages.IDX10619,
                         LogHelper.MarkAsNonPII(decryptionParameters.Alg),
                         LogHelper.MarkAsNonPII(decryptionParameters.Enc)),
+                    ValidationFailureType.TokenDecryptionFailed,
                     ExceptionType.SecurityTokenDecryptionFailed,
                     new StackFrame(true));
             else
@@ -387,6 +389,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     new MessageDetail(
                         TokenLogMessages.IDX10609,
                         LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken)),
+                    ValidationFailureType.TokenDecryptionFailed,
                     ExceptionType.SecurityTokenDecryptionFailed,
                     new StackFrame(true));
         }

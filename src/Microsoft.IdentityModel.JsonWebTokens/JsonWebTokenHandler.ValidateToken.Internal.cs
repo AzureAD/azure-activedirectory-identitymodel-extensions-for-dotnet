@@ -66,6 +66,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             TokenLogMessages.IDX10209,
                             LogHelper.MarkAsNonPII(token.Length),
                             LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes)),
+                        ValidationFailureType.InvalidSecurityToken,
                         ExceptionType.InvalidArgument,
                         invalidTokenLengthStackFrame);
             }
@@ -119,6 +120,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 StackFrame notJwtStackFrame = StackFrames.TokenNotJWT ??= new StackFrame(true);
                 return new ExceptionDetail(
                     new MessageDetail(TokenLogMessages.IDX10001, nameof(token), nameof(JsonWebToken)),
+                    ValidationFailureType.InvalidSecurityToken,
                     ExceptionType.InvalidArgument,
                     notJwtStackFrame);
             }

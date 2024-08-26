@@ -63,6 +63,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (securityKey == null)
                 return new ExceptionDetail(
                     new MessageDetail(LogMessages.IDX10253, nameof(securityKey)),
+                    ValidationFailureType.SigningKeyValidationFailed,
                     ExceptionType.ArgumentNull,
                     new StackFrame(true));
 
@@ -103,6 +104,7 @@ namespace Microsoft.IdentityModel.Tokens
                             LogMessages.IDX10248,
                             LogHelper.MarkAsNonPII(notBeforeUtc),
                             LogHelper.MarkAsNonPII(utcNow)),
+                        ValidationFailureType.SigningKeyValidationFailed,
                         ExceptionType.SecurityTokenInvalidSigningKey,
                         new StackFrame(true));
 
@@ -116,6 +118,7 @@ namespace Microsoft.IdentityModel.Tokens
                             LogMessages.IDX10249,
                             LogHelper.MarkAsNonPII(notAfterUtc),
                             LogHelper.MarkAsNonPII(utcNow)),
+                        ValidationFailureType.SigningKeyValidationFailed,
                         ExceptionType.SecurityTokenInvalidSigningKey,
                         new StackFrame(true));
 
