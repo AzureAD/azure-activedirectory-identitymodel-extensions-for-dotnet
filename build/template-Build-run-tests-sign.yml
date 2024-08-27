@@ -68,7 +68,7 @@ steps:
   inputs:
     targetType: filePath
     filePath: ./$(WilsonSourceDirectory)runTests.ps1
-    arguments: '-buildType $(BuildConfiguration)'
+    arguments: '-buildType $(BuildConfiguration) -runningInCI $True'
 
 - task: PublishTestResults@2
   condition: succeededOrFailed()

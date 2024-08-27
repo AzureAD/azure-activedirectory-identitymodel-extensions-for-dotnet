@@ -1,4 +1,9 @@
-param([string]$buildType="Debug", [string]$dotnetDir="c:\Program Files\dotnet", [string]$root=$PSScriptRoot, [string]$failBuildOnTest="YES")
+param(
+    [string]$buildType="Debug",
+    [string]$dotnetDir="c:\Program Files\dotnet",
+    [string]$root=$PSScriptRoot,
+    [string]$failBuildOnTest="YES",
+    [bool]$runningInCI=$false)
 
 ################################################# Functions ############################################################
 
@@ -31,6 +36,7 @@ Write-Host "dotnetDir:       " $dotnetDir
 Write-Host "root:            " $root;
 Write-Host "failBuildOnTest: " $failBuildOnTest;
 Write-Host "slnFile:         " $slnFile;
+Write-Host "runningInCI:     " $runningInCI;
 
 $runSettingsPath = $PSScriptRoot + "\build\CodeCoverage.runsettings"
 [xml]$buildConfiguration = Get-Content $PSScriptRoot\buildConfiguration.xml
@@ -41,6 +47,13 @@ Write-Host "PSScriptRoot:   " $PSScriptRoot;
 Write-Host "dotnetexe:      " $dotnetexe;
 
 $ErrorActionPreference = "Stop"
+
+$tempToUse = $env:TEMP;
+
+if ($runningInCI) {
+    # Temp dir used in ADO
+    $tempToUse = "C:\__w\_temp";
+}
 
 $testProjects = $buildConfiguration.SelectNodes("root/projects/test/project")
 foreach ($testProject in $testProjects)
@@ -53,8 +66,8 @@ foreach ($testProject in $testProjects)
         Write-Host ">>> Set-Location $root\test\$name"
         Push-Location
         Set-Location $root\test\$name
-        Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'test $name.csproj' --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -v n -c $buildType --collect ""Code Coverage"" --settings ""$runSettingsPath"" --logger trx --results-directory ""$(Agent.TempDirectory)"""
-        $p = Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "test $name.csproj --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -v n -c $buildType --collect ""Code Coverage"" --settings ""$runSettingsPath"" --logger trx --results-directory ""$(Agent.TempDirectory)"""
+        Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'test $name.csproj' --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -v n -c $buildType --collect ""Code Coverage"" --settings ""$runSettingsPath"" --logger trx --results-directory ""$tempToUse"""
+        $p = Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "test $name.csproj --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -v n -c $buildType --collect ""Code Coverage"" --settings ""$runSettingsPath"" --logger trx --results-directory ""$tempToUse"""
 
         if($p.ExitCode -ne 0)
         {
