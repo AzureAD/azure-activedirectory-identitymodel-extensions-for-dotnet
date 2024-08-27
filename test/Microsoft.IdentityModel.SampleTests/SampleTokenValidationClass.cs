@@ -4,6 +4,9 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
@@ -33,12 +36,18 @@ namespace Microsoft.IdentityModel.SampleTests
                 ValidIssuer = "http://Default.Issuer.com",
                 IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key
             };
+            ValidationParameters = new ValidationParameters();
+            ValidationParameters.ValidAudiences.Add("http://Default.Audience.com");
+            ValidationParameters.ValidIssuers.Add("http://Default.Issuer.com");
+            ValidationParameters.IssuerSigningKeys.Add(KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key);
         }
 
         /// <summary>
         /// Gets or sets the <see cref="TokenValidationParameters"/> used for the validation operations.
         /// </summary>
         public TokenValidationParameters TokenValidationParameters { get; set; }
+
+        public ValidationParameters ValidationParameters { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="JsonWebTokenHandler"/> instance used for the validation operations.
@@ -59,6 +68,11 @@ namespace Microsoft.IdentityModel.SampleTests
             ValidateTokenShim(token, TokenValidationParameters);
         }
 
+        public async Task<Result<ValidationResult, ExceptionDetail>> ValidateTokenShimWithNewPath(string token)
+        {
+            return await ValidateTokenShimWithNewPath(token, ValidationParameters);
+        }
+
         /// <summary>
         /// Validates the passed token using the instance of the deprecated <see cref="JwtSecurityTokenHandler"/>.
         /// </summary>
@@ -75,14 +89,22 @@ namespace Microsoft.IdentityModel.SampleTests
         /// <param name="tokenValidationParameters">
         /// The <see cref="TokenValidationParameters"/> to use instead of the instance's value.
         /// </param>
-        public void ValidateTokenShim(string token, TokenValidationParameters tokenValidationParameters)
+        public TokenValidationResult ValidateTokenShim(string token, TokenValidationParameters tokenValidationParameters)
         {
             var result = JsonWebTokenHandler.ValidateTokenAsync(token, tokenValidationParameters).Result;
 
             if (!result.IsValid)
-            {
                 throw new SampleTestTokenValidationException("Validation Issue Encountered", result.Exception);
-            }
+
+            return result;
+        }
+
+        internal async Task<Result<ValidationResult, ExceptionDetail>> ValidateTokenShimWithNewPath(string token, ValidationParameters validationParameters)
+        {
+            CallContext callContext = new CallContext();
+            var result = await JsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, CancellationToken.None);
+
+            return result;
         }
 
         /// <summary>

@@ -101,11 +101,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         TestId = "Invalid_MalformedToken",
                         Token = "malformed-token",
                         ExpectedException = ExpectedException.SecurityTokenMalformedTokenException(
-                            "IDX14107:",
+                            "IDX14100:",
                             typeof(SecurityTokenMalformedException)),
                         Result = new ExceptionDetail(
                             new MessageDetail(
-                                LogMessages.IDX14107,
+                                LogMessages.IDX14100,
                                 LogHelper.MarkAsNonPII("token")),
                             ValidationFailureType.TokenReadingFailed,
                             ExceptionType.SecurityTokenMalformed,

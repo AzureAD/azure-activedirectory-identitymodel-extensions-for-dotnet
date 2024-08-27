@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.TestExtensions;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
@@ -215,6 +216,218 @@ namespace Microsoft.IdentityModel.SampleTests
         public void TokenWithMissingSecurityCredentials()
         {
             TestWithGeneratedToken(
+                testTokenCreator.CreateTokenWithMissingKey,
+                typeof(SecurityTokenInvalidSignatureException),
+                "IDX10504");
+        }
+        #endregion
+
+        #region New Model Token Validation Tests
+        /// <summary>
+        /// Tests how the class under test handles a valid token.
+        /// </summary>
+        [Fact]
+        public async void ValidToken_NewPath()
+        {
+            SampleTokenValidationClass classUnderTest = new SampleTokenValidationClass();
+            await classUnderTest.ValidateTokenShimWithNewPath(testTokenCreator.CreateDefaultValidToken());
+        }
+
+        /// <summary>
+        /// Tests how the class under test handles a bogus token; one that in no way conforms to the expected JWS format.
+        /// </summary>
+        [Fact]
+        public void BogusToken_NewPath()
+        {
+            TestWithGeneratedToken_NewPath(
+                () => "InvalidToken",
+                typeof(SecurityTokenMalformedException),
+                "IDX14100");
+        }
+
+        /// <summary>
+        /// Tests how the class under test handles a token with a missing signature.
+        /// </summary>
+        [Fact]
+        public void TokenWithoutSignature_NewPath()
+        {
+            TestWithGeneratedToken_NewPath(
+                testTokenCreator.CreateTokenWithNoSignature,
+                typeof(SecurityTokenInvalidSignatureException),
+                "IDX10504:");
+        }
+
+        /// <summary>
+        /// Tests how the class under test handles a token with a malformed signature.
+        /// </summary>
+        [Fact]
+        public void TokenWithBadSignature_NewPath()
+        {
+            TestWithGeneratedToken_NewPath(
+                testTokenCreator.CreateTokenWithInvalidSignature,
+                typeof(SecurityTokenInvalidSignatureException),
+                "IDX10500:"); // 10500 indicates no signature key was found. Current path returns 10511 which indicates a bad signature and provides the list of keys attempted
+        }
+
+        /// <summary>
+        /// Tests how the class under test handles a token which is expired.
+        /// </summary>
+        [Fact]
+        public void ExpiredToken_NewPath()
+        {
+            TestWithGeneratedToken_NewPath(
+                testTokenCreator.CreateExpiredToken,
+                typeof(SecurityTokenExpiredException),
+                "IDX10223");
+        }
+
+        /// <summary>
+        /// Tests how the class under test handles a token which is not yet valid
+        /// </summary>
+        [Fact]
+        public void NetYetValidToken_NewPath()
+        {
+            TestWithGeneratedToken_NewPath(
+                testTokenCreator.CreateNotYetValidToken,
+                typeof(SecurityTokenNotYetValidException),
+                "IDX10222");
+        }
+
+        /// <summary>
+        /// Tests how the class under test handles a token with an issuer that doesn't match expectations.
+        /// </summary>
+        [Fact]
+        public void TokenWithWrongIssuer_NewPath()
+        {
+            TestWithGeneratedToken_NewPath(
+                testTokenCreator.CreateTokenWithBadIssuer,
+                typeof(SecurityTokenInvalidIssuerException),
+                "IDX10212");
+            // Current path returns IDX10205 which contains Issuer, ValidIssuer, and ValidIssuers.
+            // This is a new error code that drops ValidIssuer as it is no longer used.
+        }
+
+        /// <summary>
+        /// Tests how the class under test handles a token with an audience that doesn't match expectations.
+        /// </summary>
+        [Fact]
+        public void TokenWithWrongAudience_NewPath()
+        {
+            TestWithGeneratedToken_NewPath(
+                testTokenCreator.CreateTokenWithBadAudience,
+                typeof(SecurityTokenInvalidAudienceException),
+                "IDX10215");
+            // Current path returns IDX10214 which contains Audience, ValidAudience, and ValidAudiences.
+            // This is a new error code that drops ValidAudience as it is no longer used.
+        }
+
+        /// <summary>
+        /// Tests how the class under test handles a token signed with a key different than the one expected.
+        /// </summary>
+        [Fact]
+        public void TokenWithBadSignatureKey_NewPath()
+        {
+            TestWithGeneratedToken_NewPath(
+                testTokenCreator.CreateTokenWithBadSignatureKey,
+                typeof(SecurityTokenSignatureKeyNotFoundException),
+                "IDX10500"); // By default, the new path defaults to not trying all signing keys.
+        }
+
+        /// <summary>
+        /// Tests how the class under test handles a token signed with a key different than the one expected.
+        /// </summary>
+        [Fact]
+        public void TokenWithBadSignatureKey_NewPath_TryAllKeys()
+        {
+            Action<ValidationParameters> updateParameters = (validationParameters) =>
+                validationParameters.TryAllIssuerSigningKeys = true;
+
+            TestWithGeneratedToken_NewPath(
+                testTokenCreator.CreateTokenWithBadSignatureKey,
+                typeof(SecurityTokenSignatureKeyNotFoundException),
+                "IDX10503",
+                updateParameters);
+        }
+
+        /// <summary>
+        /// Tests how the class under test handles a token missing the iss claim.
+        /// </summary>
+        [Fact]
+        public void TokenWithMissingIssuer_NewPath()
+        {
+            TestWithGeneratedToken_NewPath(
+                testTokenCreator.CreateTokenWithMissingIssuer,
+                typeof(SecurityTokenInvalidIssuerException),
+                "IDX10211");
+        }
+
+        /// <summary>
+        /// Tests how the class under test handles a token missing the aud claim.
+        /// </summary>
+        [Fact]
+        public void TokenWithMissingAudience_NewPath()
+        {
+            TestWithGeneratedToken_NewPath(
+                testTokenCreator.CreateTokenWithMissingAudience,
+                typeof(SecurityTokenInvalidAudienceException),
+                "IDX10206");
+        }
+
+        /// <summary>
+        /// Tests how the class under test handles a token with a iat claim indicating it has not yet been issued.
+        /// </summary>
+        [Fact]
+        public async void TokenWithFutureIssuedAt_NewPath()
+        {
+            // NOTE: This is not currently validated and there's no way to enforce its presence.
+            //       It may be enforceable in the future, in which case this will be updated with proper checks.
+            SampleTokenValidationClass classUnderTest = new SampleTokenValidationClass();
+            await classUnderTest.ValidateTokenShimWithNewPath(testTokenCreator.CreateTokenWithFutureIssuedAt());
+        }
+
+        /// <summary>
+        /// Tests how the class under test handles a token missing the iat claim.
+        /// </summary>
+        [Fact]
+        public async void TokenWithMissingIssuedAt_NewPath()
+        {
+            // NOTE: This is not currently validated and there's no way to enforce its presence.
+            //       It may be enforceable in the future, in which case this will be updated with proper checks.
+            SampleTokenValidationClass classUnderTest = new SampleTokenValidationClass();
+            await classUnderTest.ValidateTokenShimWithNewPath(testTokenCreator.CreateTokenWithMissingIssuedAt());
+        }
+
+        /// <summary>
+        /// Tests how the class under test handles a token missing the nbf claim.
+        /// </summary>
+        [Fact]
+        public async void TokenWithMissingNotBefore_NewPath()
+        {
+            // NOTE: This is not currently validated and there's no way to enforce its presence.
+            //       It may be enforceable in the future, in which case this will be updated with proper checks.
+            SampleTokenValidationClass classUnderTest = new SampleTokenValidationClass();
+            await classUnderTest.ValidateTokenShimWithNewPath(testTokenCreator.CreateTokenWithMissingNotBefore());
+        }
+
+        /// <summary>
+        /// Tests how the class under test handles a token missing the exp claim.
+        /// </summary>
+        [Fact]
+        public void TokenWithMissingExpires_NewPath()
+        {
+            TestWithGeneratedToken_NewPath(
+                testTokenCreator.CreateTokenWithMissingExpires,
+                typeof(SecurityTokenNoExpirationException),
+                "IDX10225");
+        }
+
+        /// <summary>
+        /// Test how the class under test handles a token without a signing key (i.e. alg=none, no signature).
+        /// </summary>
+        [Fact]
+        public void TokenWithMissingSecurityCredentials_NewPath()
+        {
+            TestWithGeneratedToken_NewPath(
                 testTokenCreator.CreateTokenWithMissingKey,
                 typeof(SecurityTokenInvalidSignatureException),
                 "IDX10504");
@@ -451,6 +664,32 @@ namespace Microsoft.IdentityModel.SampleTests
                 expectedInnerExceptionMessagePart);
         }
 
+        internal async void TestWithGeneratedToken_NewPath(
+            Func<string> generateTokenToTest,
+            Type expectedInnerExceptionType,
+            string expectedInnerExceptionMessagePart,
+            Action<ValidationParameters> modifyValidationParameters = null)
+        {
+            SampleTokenValidationClass classUnderTest = new SampleTokenValidationClass();
+            if (modifyValidationParameters != null)
+                modifyValidationParameters(classUnderTest.ValidationParameters);
+
+            string token = generateTokenToTest();
+            Result<ValidationResult, ExceptionDetail> result = await classUnderTest.ValidateTokenShimWithNewPath(token);
+
+            if (!result.IsSuccess)
+                AssertException(expectedInnerExceptionType, expectedInnerExceptionMessagePart, result.UnwrapError().GetException());
+            else
+            {
+                if (expectedInnerExceptionType != null || !string.IsNullOrEmpty(expectedInnerExceptionMessagePart))
+                    throw new TestException(
+                        string.Format(
+                            "Expected an exception of type '{0}' containing '{1}' in the message.",
+                            expectedInnerExceptionType,
+                            expectedInnerExceptionMessagePart));
+            }
+        }
+
         /// <summary>
         /// Calls a passed <paramref name="validate"/> action with a generated token and validates the outcome.
         /// </summary>
@@ -494,13 +733,16 @@ namespace Microsoft.IdentityModel.SampleTests
             catch (Exception e)
             {
                 Assert.Equal(typeof(SampleTestTokenValidationException), e.GetType());
-                Assert.Equal(innerExceptionType, e.InnerException.GetType());
-
-                if (!string.IsNullOrEmpty(innerExceptionMessagePart))
-                {
-                    Assert.Contains(innerExceptionMessagePart, e.InnerException.Message);
-                }
+                AssertException(innerExceptionType, innerExceptionMessagePart, e.InnerException);
             }
+        }
+
+        private static void AssertException(Type exceptionType, string exceptionMessagePart, Exception exception)
+        {
+            Assert.Equal(exceptionType, exception.GetType());
+
+            if (!string.IsNullOrEmpty(exceptionMessagePart))
+                Assert.Contains(exceptionMessagePart, exception.Message);
         }
     }
 }
