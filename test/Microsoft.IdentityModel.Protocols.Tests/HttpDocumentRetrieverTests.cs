@@ -65,21 +65,17 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                 Assert.NotNull(doc);
                 theoryData.ExpectedException.ProcessNoException();
             }
-            catch (AggregateException aex)
+            catch (Exception ex)
             {
-                aex.Handle((x) =>
+                if (ex.Data.Count > 0)
                 {
-                    if (x.Data.Count > 0)
-                    {
-                        if (!x.Data.Contains(HttpDocumentRetriever.StatusCode))
-                            context.AddDiff("!x.Data.Contains(HttpResponseConstants.StatusCode)");
-                        if (!x.Data.Contains(HttpDocumentRetriever.ResponseContent))
-                            context.AddDiff("!x.Data.Contains(HttpResponseConstants.ResponseContent)");
-                        IdentityComparer.AreEqual(x.Data[HttpDocumentRetriever.StatusCode], theoryData.ExpectedStatusCode, context);
-                    }
-                    theoryData.ExpectedException.ProcessException(x);
-                    return true;
-                });
+                    if (!ex.Data.Contains(HttpDocumentRetriever.StatusCode))
+                        context.AddDiff("!x.Data.Contains(HttpResponseConstants.StatusCode)");
+                    if (!ex.Data.Contains(HttpDocumentRetriever.ResponseContent))
+                        context.AddDiff("!x.Data.Contains(HttpResponseConstants.ResponseContent)");
+                    IdentityComparer.AreEqual(ex.Data[HttpDocumentRetriever.StatusCode], theoryData.ExpectedStatusCode, context);
+                }
+                theoryData.ExpectedException.ProcessException(ex);
             }
 
             TestUtilities.AssertFailIfErrors(context);

@@ -58,13 +58,9 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                 Assert.NotNull(doc);
                 theoryData.ExpectedException.ProcessNoException();
             }
-            catch (AggregateException aex)
+            catch (Exception ex)
             {
-                aex.Handle((x) =>
-                {
-                    theoryData.ExpectedException.ProcessException(x);
-                    return true;
-                });
+                theoryData.ExpectedException.ProcessException(ex);
             }
         }
 

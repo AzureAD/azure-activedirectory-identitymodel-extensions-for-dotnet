@@ -340,16 +340,16 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 // AutomaticRefreshInterval interval should return same config.
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>("AutomaticRefreshIntervalNotHit")
-               {
-                   ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+                {
+                    ConfigurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
                        "AADCommonV1Json",
                        new OpenIdConnectConfigurationRetriever(),
                        InMemoryDocumentRetriever),
-                   ExpectedConfiguration = OpenIdConfigData.AADCommonV1Config,
-                   ExpectedUpdatedConfiguration = OpenIdConfigData.AADCommonV1Config,
-                   SyncAfter = DateTime.UtcNow + TimeSpan.FromDays(2),
-                   UpdatedMetadataAddress = "AADCommonV2Json"
-               });
+                    ExpectedConfiguration = OpenIdConfigData.AADCommonV1Config,
+                    ExpectedUpdatedConfiguration = OpenIdConfigData.AADCommonV1Config,
+                    SyncAfter = DateTime.UtcNow + TimeSpan.FromDays(2),
+                    UpdatedMetadataAddress = "AADCommonV2Json"
+                });
 
                 // AutomaticRefreshInterval should pick up new bits.
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>("AutomaticRefreshIntervalHit")
@@ -637,16 +637,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.ExpectedException.ProcessNoException(context);
             }
-            catch (AggregateException ex)
+            catch (Exception ex)
             {
                 // this should throw, because last configuration retrieved was null
-                Assert.Throws<AggregateException>(() => configuration = configurationManager.GetConfigurationAsync().Result);
+                await Assert.ThrowsAsync<InvalidOperationException>(async () => configuration = await configurationManager.GetConfigurationAsync());
 
-                ex.Handle((x) =>
-                {
-                    theoryData.ExpectedException.ProcessException(x, context);
-                    return true;
-                });
+                theoryData.ExpectedException.ProcessException(ex, context);
             }
 
             TestUtilities.AssertFailIfErrors(context);
@@ -771,9 +767,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             public ConfigurationManager<T> ConfigurationManager { get; set; }
 
-            public ConfigurationManagerTheoryData() {}
+            public ConfigurationManagerTheoryData() { }
 
-            public ConfigurationManagerTheoryData(string testId) : base(testId) {}
+            public ConfigurationManagerTheoryData(string testId) : base(testId) { }
 
             public TimeSpan AutomaticRefreshInterval { get; set; }
 
@@ -810,7 +806,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 return $"{TestId}, {MetadataAddress}, {ExpectedException}";
             }
 
-             public string UpdatedMetadataAddress { get; set; }
+            public string UpdatedMetadataAddress { get; set; }
         }
     }
 }
