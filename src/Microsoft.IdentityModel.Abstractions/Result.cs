@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Abstractions
         /// <summary>
         /// Gets a value indicating whether the result is successful.
         /// </summary>
-        readonly public bool IsSuccess { get; }
+        public readonly bool IsSuccess { get; }
 
         /// <summary>
         /// Unwraps the result.
