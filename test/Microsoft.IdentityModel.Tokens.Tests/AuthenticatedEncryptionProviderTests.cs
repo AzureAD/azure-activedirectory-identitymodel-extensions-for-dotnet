@@ -109,7 +109,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #endif
 
         [Theory, MemberData(nameof(AEPConstructorTheoryData))]
-        public void Constructors(string testId, SymmetricSecurityKey key, string algorithm, ExpectedException ee)
+        public void Constructors(string testId, SecurityKey key, string algorithm, ExpectedException ee)
         {
             TestUtilities.WriteHeader("Constructors - " + testId, true);
             try

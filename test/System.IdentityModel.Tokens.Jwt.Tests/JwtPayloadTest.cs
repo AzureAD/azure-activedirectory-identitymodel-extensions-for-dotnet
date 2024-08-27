@@ -30,19 +30,19 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             foreach (Claim c in jwtPayload.Claims)
             {
-                Assert.True(false, "jwtPayload.Claims should be empty");
+                Assert.Fail("jwtPayload.Claims should be empty");
             }
 
             Assert.True(jwtPayload.Aud != null, "jwtPayload.Aud should not be null");
             foreach (string audience in jwtPayload.Aud)
             {
-                Assert.True(false, "jwtPayload.Aud should be empty");
+                Assert.Fail("jwtPayload.Aud should be empty");
             }
 
             Assert.True(jwtPayload.Amr != null, "jwtPayload.Amr should not be null");
             foreach (string audience in jwtPayload.Amr)
             {
-                Assert.True(false, "jwtPayload.Amr should be empty");
+                Assert.Fail("jwtPayload.Amr should be empty");
             }
 
             Assert.True(jwtPayload.ValidFrom == DateTime.MinValue, "jwtPayload.ValidFrom != DateTime.MinValue");
@@ -60,10 +60,10 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             PropertyInfo[] properties = type.GetProperties();
 #if NET9_0_OR_GREATER
             if (properties.Length != 26) //Additional inherited "Capacity" property from Dictionary is added in .NET 9 
-                Assert.True(false, "Number of properties has changed from 26 to: " + properties.Length + ", adjust tests");
+                Assert.Fail("Number of properties has changed from 26 to: " + properties.Length + ", adjust tests");
 #else
             if (properties.Length != 25)
-                Assert.True(false, "Number of properties has changed from 25 to: " + properties.Length + ", adjust tests");
+                Assert.Fail("Number of properties has changed from 25 to: " + properties.Length + ", adjust tests");
 #endif
             GetSetContext context =
                 new GetSetContext
@@ -165,7 +165,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
 
             if (!claimFound)
-                Assert.True(false, "Claim with expected type: nullClaim is not found");
+                Assert.Fail("Claim with expected type: nullClaim is not found");
 
             Assert.Equal(payload.SerializeToJson(), compareTo);
         }

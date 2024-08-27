@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).ConfigurationManagerV1 = theoryData.TokenValidationParameters.ConfigurationManager;
                 theoryData.TokenValidationParameters.EnableAadSigningKeyIssuerValidation();
 
-                var validationResult = await handler.ValidateTokenAsync(jwt, theoryData.TokenValidationParameters).ConfigureAwait(false);
+                var validationResult = await handler.ValidateTokenAsync(jwt, theoryData.TokenValidationParameters);
                 theoryData.ExpectedException.ProcessNoException(context);
                 Assert.NotNull(theoryData.TokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration);
                 Assert.True(validationResult.IsValid);

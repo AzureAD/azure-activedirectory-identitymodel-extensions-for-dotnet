@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests.Validation
         {
             var validationParameters = new ValidationParameters();
 
-            Assert.Equal(0, validationParameters.ValidIssuers.Count);
+            Assert.Empty(validationParameters.ValidIssuers);
         }
 
         [Fact]
@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests.Validation
         {
             var validationParameters = new ValidationParameters();
 
-            Assert.Equal(0, validationParameters.ValidAudiences.Count);
+            Assert.Empty(validationParameters.ValidAudiences);
             Assert.True(validationParameters.ValidAudiences is IList<string>);
         }
 
@@ -42,8 +42,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests.Validation
         public void ValidTypes_Get_ReturnsEmptyList()
         {
             var validationParameters = new ValidationParameters();
-          
-            Assert.Equal(0, validationParameters.ValidTypes.Count);
+
+            Assert.Empty(validationParameters.ValidTypes);
             Assert.True(validationParameters.ValidTypes is IList<string>);
         }
     }

@@ -21,7 +21,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
     public class SignedHttpRequestValidationTests
     {
         [Fact]
-        public async void SignedHttpRequestReplayValidation()
+        public async Task SignedHttpRequestReplayValidation()
         {
             HashSet<string> nonceCache = new HashSet<string>();
 
@@ -53,15 +53,15 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             };
 
             var signedHttpRequestValidationContext1 = new SignedHttpRequestValidationContext(signedHttpRequest1, new HttpRequestData(), SignedHttpRequestTestUtils.DefaultTokenValidationParameters, signedHttpRequestValidationParameters);
-            var result1 = await handler.ValidateSignedHttpRequestAsync(signedHttpRequestValidationContext1, CancellationToken.None).ConfigureAwait(false);
+            var result1 = await handler.ValidateSignedHttpRequestAsync(signedHttpRequestValidationContext1, CancellationToken.None);
             Assert.True(result1.IsValid);
 
             var signedHttpRequestValidationContext2 = new SignedHttpRequestValidationContext(signedHttpRequest2, new HttpRequestData(), SignedHttpRequestTestUtils.DefaultTokenValidationParameters, signedHttpRequestValidationParameters);
-            var result2 = await handler.ValidateSignedHttpRequestAsync(signedHttpRequestValidationContext2, CancellationToken.None).ConfigureAwait(false);
+            var result2 = await handler.ValidateSignedHttpRequestAsync(signedHttpRequestValidationContext2, CancellationToken.None);
             Assert.True(result2.IsValid);
 
             var signedHttpRequestValidationContext3 = new SignedHttpRequestValidationContext(signedHttpRequest3, new HttpRequestData(), SignedHttpRequestTestUtils.DefaultTokenValidationParameters, signedHttpRequestValidationParameters);
-            var result3 = await handler.ValidateSignedHttpRequestAsync(signedHttpRequestValidationContext3, CancellationToken.None).ConfigureAwait(false);
+            var result3 = await handler.ValidateSignedHttpRequestAsync(signedHttpRequestValidationContext3, CancellationToken.None);
             Assert.False(result3.IsValid);
             Assert.IsType<InvalidOperationException>(result3.Exception);
             Assert.Equal("Replay detected", result3.Exception.Message);
@@ -925,7 +925,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
 
             var handler = new SignedHttpRequestHandlerPublic();
-            var signedHttpRequest = await handler.ValidateSignedHttpRequestPayloadAsync(theoryData.SignedHttpRequestToken, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
+            var signedHttpRequest = await handler.ValidateSignedHttpRequestPayloadAsync(theoryData.SignedHttpRequestToken, signedHttpRequestValidationContext, CancellationToken.None);
 
             var methodCalledStatus = (bool)signedHttpRequestValidationContext.CallContext.PropertyBag["onlyTrack_ValidateTsClaimCall"];
             if (methodCalledStatus != signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.ValidateTs &&
@@ -1267,7 +1267,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             {
                 var handler = new SignedHttpRequestHandler();
                 var signedHttpRequestValidationContext = theoryData.BuildSignedHttpRequestValidationContext();
-                var signingKey = await handler.ValidateSignatureAsync(theoryData.SignedHttpRequestToken, theoryData.PopKey, signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
+                var signingKey = await handler.ValidateSignatureAsync(theoryData.SignedHttpRequestToken, theoryData.PopKey, signedHttpRequestValidationContext, CancellationToken.None);
                 IdentityComparer.AreSecurityKeysEqual(signingKey, theoryData.ExpectedPopKey, context);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
@@ -1375,7 +1375,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                 if (signedHttpRequestValidationContext.CallContext.PropertyBag != null && signedHttpRequestValidationContext.CallContext.PropertyBag.ContainsKey("makeSignedHttpRequestValidationContextNull"))
                     signedHttpRequestValidationContext = null;
 
-                var result = await handler.ValidateSignedHttpRequestAsync(signedHttpRequestValidationContext, CancellationToken.None).ConfigureAwait(false);
+                var result = await handler.ValidateSignedHttpRequestAsync(signedHttpRequestValidationContext, CancellationToken.None);
 
                 if (result.Exception != null)
                 {

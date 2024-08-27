@@ -130,7 +130,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Type type = typeof(CryptoProviderFactory);
             PropertyInfo[] properties = type.GetProperties();
             if (properties.Length != 7)
-                Assert.True(false, "Number of public fields has changed from 7 to: " + properties.Length + ", adjust tests");
+                Assert.Fail("Number of public fields has changed from 7 to: " + properties.Length + ", adjust tests");
 
             CustomCryptoProvider customCryptoProvider = new CustomCryptoProvider();
             GetSetContext getSetContext =
@@ -924,7 +924,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
         [Fact(Skip = "too long")]
-        public void ReferenceCountingTest_MultiThreaded()
+        public async Task ReferenceCountingTest_MultiThreaded()
         {
             var context = new CompareContext($"{this}.ReferenceCountingTest_MultiThreaded");
             var cryptoProviderFactory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting());
@@ -957,7 +957,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 });
             }
 
-            Task.WaitAll(tasks);
+            await Task.WhenAll(tasks);
 
             cryptoProviderFactory.CacheSignatureProviders = false;
 

@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Security.Claims;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
@@ -22,7 +21,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Type type = typeof(TokenValidationResult);
             PropertyInfo[] properties = type.GetProperties();
             if (properties.Length != 10)
-                Assert.True(false, "Number of public fields has changed from 10 to: " + properties.Length + ", adjust tests");
+                Assert.Fail("Number of public fields has changed from 10 to: " + properties.Length + ", adjust tests");
 
             GetSetContext context =
                 new GetSetContext

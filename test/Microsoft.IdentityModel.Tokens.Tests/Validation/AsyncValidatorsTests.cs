@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         theoryData.SecurityToken,
                         theoryData.ValidationParameters,
                         null,
-                        CancellationToken.None).ConfigureAwait(false);
+                        CancellationToken.None);
                 Exception exception = result.Exception;
                 context.Diffs.Add("Exception: " + exception.ToString());
             }

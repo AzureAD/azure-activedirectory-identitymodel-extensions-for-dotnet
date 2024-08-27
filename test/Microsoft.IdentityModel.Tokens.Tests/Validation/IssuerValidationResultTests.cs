@@ -29,7 +29,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 theoryData.SecurityToken,
                 theoryData.ValidationParameters,
                 new CallContext(),
-                CancellationToken.None).ConfigureAwait(false);
+                CancellationToken.None);
 
             if (issuerValidationResult.Exception != null)
                 theoryData.ExpectedException.ProcessException(issuerValidationResult.Exception, context);
