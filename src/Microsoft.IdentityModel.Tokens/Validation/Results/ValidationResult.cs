@@ -27,9 +27,9 @@ namespace Microsoft.IdentityModel.Tokens
             TokenHandler tokenHandler,
             ValidationParameters validationParameters)
         {
-            TokenHandler = tokenHandler ?? throw new ArgumentNullException("TokenHandler cannot be null.");
-            SecurityToken = securityToken ?? throw new ArgumentNullException("SecurityToken cannot be null.");
-            ValidationParameters = validationParameters ?? throw new ArgumentNullException("ValidationParameters cannot be null."); ;
+            TokenHandler = tokenHandler ?? throw new ArgumentNullException(nameof(tokenHandler));
+            SecurityToken = securityToken ?? throw new ArgumentNullException(nameof(securityToken));
+            ValidationParameters = validationParameters ?? throw new ArgumentNullException(nameof(validationParameters));
         }
 
         /// <summary>
