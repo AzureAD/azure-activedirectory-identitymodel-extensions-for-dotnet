@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -159,7 +160,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
         }
 
         [Fact]
-        public void SigningKeysExtensibility()
+        public async Task SigningKeysExtensibility()
         {
             var context = new CompareContext($"{this}.SigningKeysExtensibility");
             TestUtilities.WriteHeader($"{this}.SigningKeysExtensibility");
@@ -180,7 +181,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                     ValidateLifetime = false,
                 };
 
-                var tokenValidationResult = new JsonWebTokens.JsonWebTokenHandler().ValidateTokenAsync(Default.AsymmetricJwt, tokenValidationParameters).Result;
+                var tokenValidationResult = await new JsonWebTokens.JsonWebTokenHandler().ValidateTokenAsync(Default.AsymmetricJwt, tokenValidationParameters);
 
                 if (tokenValidationResult.IsValid != true)
                     context.Diffs.Add("tokenValidationResult.IsValid != true");

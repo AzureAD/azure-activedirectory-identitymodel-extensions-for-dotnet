@@ -71,7 +71,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
             mock.Object.SetProperty("key1", "value");
             mock.Object.SetProperty("key1", false);
 
-            Assert.Equal(1, mock.Object.Properties.Count);
+            Assert.Single(mock.Object.Properties);
             Assert.False((bool)mock.Object.Properties["key1"]);
         }
 
@@ -81,7 +81,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
             CustomTelemetryEventDetails eventDetails = new CustomTelemetryEventDetails();
             eventDetails.SetProperty("foo", new Foo() { Bar = "bar" });
 
-            Assert.Equal(1, eventDetails.Properties.Count);
+            Assert.Single(eventDetails.Properties);
             Assert.Equal("bar", (eventDetails.Properties["foo"] as Foo)?.Bar);
         }
 

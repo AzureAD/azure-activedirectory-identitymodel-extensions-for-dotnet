@@ -7,6 +7,7 @@ using System.IO;
 using System.Net;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -55,30 +56,26 @@ namespace Microsoft.IdentityModel.Protocols.Tests
         }
 
         [Theory, MemberData(nameof(GetMetadataTheoryData))]
-        public void GetMetadataTest(DocumentRetrieverTheoryData theoryData)
+        public async Task GetMetadataTest(DocumentRetrieverTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.GetMetadataTest", theoryData);
             try
             {
-                string doc = theoryData.DocumentRetriever.GetDocumentAsync(theoryData.Address, CancellationToken.None).Result;
+                string doc = await theoryData.DocumentRetriever.GetDocumentAsync(theoryData.Address, CancellationToken.None);
                 Assert.NotNull(doc);
                 theoryData.ExpectedException.ProcessNoException();
             }
-            catch (AggregateException aex)
+            catch (Exception ex)
             {
-                aex.Handle((x) =>
+                if (ex.Data.Count > 0)
                 {
-                    if (x.Data.Count > 0)
-                    {
-                        if (!x.Data.Contains(HttpDocumentRetriever.StatusCode))
-                            context.AddDiff("!x.Data.Contains(HttpResponseConstants.StatusCode)");
-                        if (!x.Data.Contains(HttpDocumentRetriever.ResponseContent))
-                            context.AddDiff("!x.Data.Contains(HttpResponseConstants.ResponseContent)");
-                        IdentityComparer.AreEqual(x.Data[HttpDocumentRetriever.StatusCode], theoryData.ExpectedStatusCode, context);
-                    }
-                    theoryData.ExpectedException.ProcessException(x);
-                    return true;
-                });
+                    if (!ex.Data.Contains(HttpDocumentRetriever.StatusCode))
+                        context.AddDiff("!x.Data.Contains(HttpResponseConstants.StatusCode)");
+                    if (!ex.Data.Contains(HttpDocumentRetriever.ResponseContent))
+                        context.AddDiff("!x.Data.Contains(HttpResponseConstants.ResponseContent)");
+                    IdentityComparer.AreEqual(ex.Data[HttpDocumentRetriever.StatusCode], theoryData.ExpectedStatusCode, context);
+                }
+                theoryData.ExpectedException.ProcessException(ex);
             }
 
             TestUtilities.AssertFailIfErrors(context);

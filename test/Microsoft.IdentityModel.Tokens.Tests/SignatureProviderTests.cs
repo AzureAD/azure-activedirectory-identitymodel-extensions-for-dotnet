@@ -337,7 +337,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 else if (testCase.StartsWith("Dispose"))
                     provider.Dispose();
                 else
-                    Assert.True(false, "Test case does not match any scenario");
+                    Assert.Fail("Test case does not match any scenario");
 
                 expectedException.ProcessNoException();
             }
