@@ -70,6 +70,18 @@ steps:
     filePath: ./$(WilsonSourceDirectory)runTests.ps1
     arguments: '-buildType $(BuildConfiguration)'
 
+- task: PublishTestResults@2
+  condition: succeededOrFailed()
+  inputs:
+    testResultsFormat: 'XUnit'
+    testResultsFiles: '**/*.trx'
+    searchFolder: '$(Agent.TempDirectory)'
+
+- task: PublishCodeCoverageResults@2
+  condition: succeededOrFailed()
+  inputs:
+    summaryFileLocation: '$(Agent.TempDirectory)/**/*.cobertura.xml'
+
 - task: CopyFiles@2
   displayName: 'Copy Files to: [staging]\ProductBinaries'
   inputs:
@@ -174,7 +186,7 @@ steps:
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-uploadtotsa.TSAUpload@2
   displayName: 'TSA upload to Codebase: WILSON Stamp: Azure'
   inputs:
-    GdnPublishTsaOnboard: false 
+    GdnPublishTsaOnboard: false
     GdnPublishTsaConfigFile: '$(Build.SourcesDirectory)/build/tsaConfig.json'
   continueOnError: true
   condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))

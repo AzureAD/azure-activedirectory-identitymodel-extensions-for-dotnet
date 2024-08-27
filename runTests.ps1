@@ -32,6 +32,7 @@ Write-Host "root:            " $root;
 Write-Host "failBuildOnTest: " $failBuildOnTest;
 Write-Host "slnFile:         " $slnFile;
 
+$runSettingsPath = $PSScriptRoot + "\build\CodeCoverage.runsettings"
 [xml]$buildConfiguration = Get-Content $PSScriptRoot\buildConfiguration.xml
 $dotnetexe = "$dotnetDir\dotnet.exe";
 $startTime = Get-Date
@@ -50,10 +51,10 @@ foreach ($testProject in $testProjects)
 
         $name = $testProject.name;
         Write-Host ">>> Set-Location $root\test\$name"
-        pushd
+        Push-Location
         Set-Location $root\test\$name
-        Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'test $name.csproj' --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -v n -c $buildType"
-        $p = Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "test $name.csproj --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -v n -c $buildType"
+        Write-Host ">>> Start-Process -Wait -PassThru -NoNewWindow $dotnetexe 'test $name.csproj' --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -v n -c $buildType --collect ""Code Coverage"" --settings ""$runSettingsPath"" --logger trx --results-directory ""$(Agent.TempDirectory)"""
+        $p = Start-Process -Wait -PassThru -NoNewWindow $dotnetexe "test $name.csproj --filter category!=nonwindowstests --no-build --no-restore -nodereuse:false -v n -c $buildType --collect ""Code Coverage"" --settings ""$runSettingsPath"" --logger trx --results-directory ""$(Agent.TempDirectory)"""
 
         if($p.ExitCode -ne 0)
         {
@@ -68,7 +69,7 @@ foreach ($testProject in $testProjects)
         }
         $testExitCode = $p.ExitCode + $testExitCode
 
-        popd
+        Pop-Location
 
         WriteSectionFooter("End Test");
     }
