@@ -3,7 +3,6 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.JsonWebTokens

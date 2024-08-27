@@ -4,14 +4,14 @@
 using System;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Abstractions
+namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
     /// Represents a result that can be either successful or unsuccessful.
     /// </summary>
     /// <typeparam name="TResult"></typeparam>
     /// <typeparam name="TError"></typeparam>
-    public readonly struct Result<TResult, TError> : IEquatable<Result<TResult, TError>>
+    internal readonly struct Result<TResult, TError> : IEquatable<Result<TResult, TError>>
     {
         readonly TResult? _result;
         readonly TError? _error;

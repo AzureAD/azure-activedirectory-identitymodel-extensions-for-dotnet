@@ -3,7 +3,6 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
