@@ -89,10 +89,9 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             await Task.Delay(250).ContinueWith(_ =>
             {
                 configuration2 = configManager.GetConfigurationAsync().GetAwaiter().GetResult();
+                if (IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer))
+                    context.Diffs.Add("IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer)");
             });
-
-            if (IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer))
-                context.Diffs.Add("IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer)");
 
             TestUtilities.AssertFailIfErrors(context);
         }
