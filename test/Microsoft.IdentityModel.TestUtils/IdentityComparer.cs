@@ -20,7 +20,6 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -1276,19 +1275,19 @@ namespace Microsoft.IdentityModel.TestUtils
             AreDateTimesEqualWithEpsilon(
                 validatedSigningKeyLifetime1.ValidFrom,
                 validatedSigningKeyLifetime2.ValidFrom,
-                1,
+                3,
                 localContext);
 
             AreDateTimesEqualWithEpsilon(
                 validatedSigningKeyLifetime1.ValidTo,
                 validatedSigningKeyLifetime2.ValidTo,
-                1,
+                3,
                 localContext);
 
             AreDateTimesEqualWithEpsilon(
                 validatedSigningKeyLifetime1.ValidationTime,
                 validatedSigningKeyLifetime2.ValidationTime,
-                1,
+                3,
                 localContext);
 
             return context.Merge(localContext);

@@ -8,7 +8,6 @@ using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Json.Tests;
 using Xunit;
 using System.Collections.Generic;
-using Microsoft.IdentityModel.Abstractions;
 
 namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 {

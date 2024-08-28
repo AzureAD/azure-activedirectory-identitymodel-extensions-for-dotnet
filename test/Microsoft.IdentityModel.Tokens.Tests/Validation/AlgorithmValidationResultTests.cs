@@ -4,7 +4,6 @@
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Logging;
 using Xunit;
-using Microsoft.IdentityModel.Abstractions;
 using System;
 
 namespace Microsoft.IdentityModel.Tokens.Validation.Tests
