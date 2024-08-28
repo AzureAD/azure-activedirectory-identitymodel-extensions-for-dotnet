@@ -14,6 +14,7 @@ namespace Microsoft.IdentityModel.Tokens
 #pragma warning disable 1591
         // general
         public const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object. ";
+        public const string IDX10001 = "IDX10001: Invalid argument '{0}'. Argument must be of type '{1}'.";
 
         // properties, configuration 
         public const string IDX10101 = "IDX10101: MaximumTokenSizeInBytes must be greater than zero. value: '{0}'";

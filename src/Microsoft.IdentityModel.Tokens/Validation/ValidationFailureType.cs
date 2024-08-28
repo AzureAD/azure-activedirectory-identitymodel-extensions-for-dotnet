@@ -88,16 +88,9 @@ namespace Microsoft.IdentityModel.Tokens
         private class TokenDecryptionFailure : ValidationFailureType { internal TokenDecryptionFailure(string name) : base(name) { } }
 
         /// <summary>
-        /// Defines a type that represents that no evaluation has taken place.
+        /// Defines a type that represents that a token is invalid.
         /// </summary>
-        public static readonly ValidationFailureType ValidationNotEvaluated = new NotEvaluated("NotEvaluated");
-        private class NotEvaluated : ValidationFailureType { internal NotEvaluated(string name) : base(name) { } }
-
-        /// <summary>
-        /// Defines a type that represents that no evaluation has taken place.
-        /// </summary>
-        public static readonly ValidationFailureType ValidationSucceeded = new Succeeded("Succeeded");
-        private class Succeeded : ValidationFailureType { internal Succeeded(string name) : base(name) { } }
-
+        public static readonly ValidationFailureType InvalidSecurityToken = new InvalidSecurityTokenFailure("InvalidSecurityToken");
+        private class InvalidSecurityTokenFailure : ValidationFailureType { internal InvalidSecurityTokenFailure(string name) : base(name) { } }
     }
 }

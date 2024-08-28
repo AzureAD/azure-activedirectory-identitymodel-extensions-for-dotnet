@@ -14,9 +14,9 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="securityToken">The security token that is being validated.</param>
     /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
     /// <param name="callContext"></param>
-    /// <returns>A <see cref="ReplayValidationResult"/>that contains the results of validating the token.</returns>
+    /// <returns>A <see cref="Result{TResult, TError}"/>that contains the results of validating the token.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
-    internal delegate ReplayValidationResult TokenReplayValidatorDelegate(
+    internal delegate Result<DateTime?, ExceptionDetail> TokenReplayValidatorDelegate(
         DateTime? expirationTime,
         string securityToken,
         ValidationParameters validationParameters,
@@ -40,76 +40,54 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="SecurityTokenReplayDetectedException">If the 'securityToken' is found in the cache.</exception>
         /// <exception cref="SecurityTokenReplayAddFailedException">If the 'securityToken' could not be added to the <see cref="ValidationParameters.TokenReplayCache"/>.</exception>
 #pragma warning disable CA1801 // Review unused parameters
-        internal static ReplayValidationResult ValidateTokenReplay(DateTime? expirationTime, string securityToken, ValidationParameters validationParameters, CallContext callContext)
+        internal static Result<DateTime?, ExceptionDetail> ValidateTokenReplay(DateTime? expirationTime, string securityToken, ValidationParameters validationParameters, CallContext callContext)
 #pragma warning restore CA1801 // Review unused parameters
         {
             if (string.IsNullOrWhiteSpace(securityToken))
-                return new ReplayValidationResult(
-                    expirationTime,
-                    ValidationFailureType.NullArgument,
-                    new ExceptionDetail(
-                        new MessageDetail(
-                            LogMessages.IDX10000,
-                            LogHelper.MarkAsNonPII(nameof(securityToken))),
-                        ExceptionDetail.ExceptionType.ArgumentNull,
-                        new StackFrame(),
-                        null));
+                return ExceptionDetail.NullParameter(
+                    nameof(securityToken),
+                    new StackFrame(true));
 
             if (validationParameters == null)
-                return new ReplayValidationResult(
-                    expirationTime,
-                    ValidationFailureType.NullArgument,
-                    new ExceptionDetail(
-                        new MessageDetail(
-                            LogMessages.IDX10000,
-                            LogHelper.MarkAsNonPII(nameof(validationParameters))),
-                        ExceptionDetail.ExceptionType.ArgumentNull,
-                        new StackFrame(),
-                        null));
+                return ExceptionDetail.NullParameter(
+                    nameof(validationParameters),
+                    new StackFrame(true));
 
             // check if token if replay cache is set, then there must be an expiration time.
             if (validationParameters.TokenReplayCache != null)
             {
                 if (expirationTime == null)
-                    return new ReplayValidationResult(
-                        expirationTime,
+                    return new ExceptionDetail(
+                        new MessageDetail(
+                            LogMessages.IDX10227,
+                            LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
                         ValidationFailureType.TokenReplayValidationFailed,
-                        new ExceptionDetail(
-                            new MessageDetail(
-                                LogMessages.IDX10227,
-                                LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
-                            ExceptionDetail.ExceptionType.SecurityTokenReplayDetected,
-                            new StackFrame(),
-                            null));
+                        ExceptionType.SecurityTokenReplayDetected,
+                        new StackFrame(true));
 
                 if (validationParameters.TokenReplayCache.TryFind(securityToken))
-                    return new ReplayValidationResult(
-                        expirationTime,
+                    return new ExceptionDetail(
+                        new MessageDetail(
+                            LogMessages.IDX10228,
+                            LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
                         ValidationFailureType.TokenReplayValidationFailed,
-                        new ExceptionDetail(
-                            new MessageDetail(
-                                LogMessages.IDX10228,
-                                LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
-                            ExceptionDetail.ExceptionType.SecurityTokenReplayDetected,
-                            new StackFrame(),
-                            null));
+                        ExceptionType.SecurityTokenReplayDetected,
+                        new StackFrame(true));
 
                 if (!validationParameters.TokenReplayCache.TryAdd(securityToken, expirationTime.Value))
-                    return new ReplayValidationResult(
-                        expirationTime,
+                    return new ExceptionDetail(
+                        new MessageDetail(
+                            LogMessages.IDX10229,
+                            LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
                         ValidationFailureType.TokenReplayValidationFailed,
-                        new ExceptionDetail(
-                            new MessageDetail(
-                                LogMessages.IDX10229,
-                                LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
-                            ExceptionDetail.ExceptionType.SecurityTokenReplayAddFailed,
-                            new StackFrame(),
-                            null));
+                        ExceptionType.SecurityTokenReplayAddFailed,
+                        new StackFrame(true));
             }
 
             // if it reaches here, that means no token replay is detected.
-            LogHelper.LogInformation(LogMessages.IDX10240);
-            return new ReplayValidationResult(expirationTime);
+            // TODO: Move to CallContext
+            //LogHelper.LogInformation(LogMessages.IDX10240);
+            return expirationTime;
         }
     }
 }

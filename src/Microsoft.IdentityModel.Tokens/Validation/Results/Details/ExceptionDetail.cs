@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -16,41 +15,62 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Creates an instance of <see cref="ExceptionDetail"/>
         /// </summary>
-        /// <paramref name="messageDetail"/> contains information about the exception that is used to generate the exception message.
-        /// <paramref name="exceptionType"/> is the type of exception that occurred.
-        /// <paramref name="stackFrame"/> contains information about the stack frame where the exception occurred.
-        public ExceptionDetail(MessageDetail messageDetail, ExceptionType exceptionType, StackFrame stackFrame)
-            : this(messageDetail, exceptionType, stackFrame, null)
+        /// <param name="MessageDetail"/> contains information about the exception that is used to generate the exception message.
+        /// <param name="failureType"/> is the type of validation failure that occurred.
+        /// <param name="exceptionType"/> is the type of exception that occurred.
+        /// <param name="stackFrame"/> is the stack frame where the exception occurred.
+        public ExceptionDetail(MessageDetail MessageDetail, ValidationFailureType failureType, ExceptionType exceptionType, StackFrame stackFrame)
+            : this(MessageDetail, failureType, exceptionType, stackFrame, null)
         {
         }
 
         /// <summary>
         /// Creates an instance of <see cref="ExceptionDetail"/>
         /// </summary>
-        /// <paramref name="messageDetail"/> contains information about the exception that is used to generate the exception message.
-        /// <paramref name="exceptionType"/> is the type of exception that occurred.
-        /// <paramref name="stackFrame"/> contains information about the stack frame where the exception occurred.
-        /// <paramref name="innerException"/> is the inner exception that occurred.
-        public ExceptionDetail(MessageDetail messageDetail, ExceptionType exceptionType, StackFrame stackFrame, Exception innerException)
+        /// <param name="messageDetail"/> contains information about the exception that is used to generate the exception message.
+        /// <param name="failureType"/> is the type of validation failure that occurred.
+        /// <param name="exceptionType"/> is the type of exception that occurred.
+        /// <param name="stackFrame"/> is the stack frame where the exception occurred.
+        /// <param name="innerException"/> is the inner exception that occurred.
+        public ExceptionDetail(
+            MessageDetail messageDetail,
+            ValidationFailureType failureType,
+            ExceptionType exceptionType,
+            StackFrame stackFrame,
+            Exception innerException)
         {
             Type = exceptionType;
             InnerException = innerException;
             MessageDetail = messageDetail;
-            StackFrames.Add(stackFrame);
+            FailureType = failureType;
+            StackFrames = new List<StackFrame>(4)
+            {
+                stackFrame
+            };
         }
 
         /// <summary>
         /// Creates an instance of an <see cref="Exception"/> using <see cref="ExceptionDetail"/>
         /// </summary>
         /// <returns>An instantance of an Exception.</returns>
-        public Exception GetException() => ExceptionFromType(Type, InnerException);
+        public Exception GetException()
+        {
+            Exception exception = ExceptionFromType(Type, InnerException);
+            if (exception is SecurityTokenException securityTokenException)
+                securityTokenException.ExceptionDetail = this;
 
-        internal static ExceptionDetail NullParameter(string parameterName) => new ExceptionDetail(
-            new MessageDetail(
-                LogMessages.IDX10000,
-                LogHelper.MarkAsNonPII(parameterName)),
-            ExceptionType.ArgumentNull,
-            new StackFrame());
+            return exception;
+        }
+
+        internal static ExceptionDetail NullParameter(string parameterName, StackFrame stackFrame) => new ExceptionDetail(
+            MessageDetail.NullParameter(parameterName),
+            ValidationFailureType.NullArgument,
+            ExceptionType.ArgumentNull, stackFrame);
+
+        /// <summary>
+        /// Gets the type of validation failure that occurred.
+        /// </summary>
+        public ValidationFailureType FailureType { get; }
 
         /// <summary>
         /// Gets the type of exception that occurred.
@@ -70,32 +90,17 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the stack frames where the exception occurred.
         /// </summary>
-        public IList<StackFrame> StackFrames { get; } = [];
+        public IList<StackFrame> StackFrames { get; }
 
-        public enum ExceptionType
+        /// <summary>
+        /// Adds a stack frame to the list of stack frames and returns the updated object.
+        /// </summary>
+        /// <param name="stackFrame">The <see cref="StackFrame"/> to be added.</param>
+        /// <returns></returns>
+        public ExceptionDetail AddStackFrame(StackFrame stackFrame)
         {
-            Unknown = -1,
-            ArgumentNull,
-            InvalidOperation,
-            SecurityToken,
-            SecurityTokenDecompressionFailed,
-            SecurityTokenDecryptionFailed,
-            SecurityTokenExpired,
-            SecurityTokenInvalidAudience,
-            SecurityTokenInvalidAlgorithm,
-            SecurityTokenInvalidIssuer,
-            SecurityTokenInvalidLifetime,
-            SecurityTokenInvalidSigningKey,
-            SecurityTokenInvalidSignature,
-            SecurityTokenInvalidType,
-            SecurityTokenKeyWrap,
-            SecurityTokenMalformed,
-            SecurityTokenNoExpiration,
-            SecurityTokenNotYetValid,
-            SecurityTokenReplayDetected,
-            SecurityTokenReplayAddFailed,
-            SecurityTokenSignatureKeyNotFound,
-            ExceptionTypeCount
+            StackFrames.Add(stackFrame);
+            return this;
         }
 
         private Exception ExceptionFromType(ExceptionType exceptionType, Exception innerException)
@@ -104,6 +109,8 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 case ExceptionType.ArgumentNull:
                     return new ArgumentNullException(MessageDetail.Message, innerException);
+                case ExceptionType.InvalidArgument:
+                    return new ArgumentException(MessageDetail.Message, innerException);
                 case ExceptionType.InvalidOperation:
                     return new InvalidOperationException(MessageDetail.Message, innerException);
                 case ExceptionType.SecurityToken:
@@ -146,5 +153,32 @@ namespace Microsoft.IdentityModel.Tokens
                     throw new ArgumentException("Invalid ExceptionType.");
             }
         }
+    }
+
+    internal enum ExceptionType
+    {
+        Unknown = -1,
+        ArgumentNull,
+        InvalidArgument,
+        InvalidOperation,
+        SecurityToken,
+        SecurityTokenDecompressionFailed,
+        SecurityTokenDecryptionFailed,
+        SecurityTokenExpired,
+        SecurityTokenInvalidAudience,
+        SecurityTokenInvalidAlgorithm,
+        SecurityTokenInvalidIssuer,
+        SecurityTokenInvalidLifetime,
+        SecurityTokenInvalidSigningKey,
+        SecurityTokenInvalidSignature,
+        SecurityTokenInvalidType,
+        SecurityTokenKeyWrap,
+        SecurityTokenMalformed,
+        SecurityTokenNoExpiration,
+        SecurityTokenNotYetValid,
+        SecurityTokenReplayDetected,
+        SecurityTokenReplayAddFailed,
+        SecurityTokenSignatureKeyNotFound,
+        ExceptionTypeCount
     }
 }
