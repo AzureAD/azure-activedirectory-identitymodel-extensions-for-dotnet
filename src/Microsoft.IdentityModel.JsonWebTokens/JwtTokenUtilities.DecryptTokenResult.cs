@@ -123,7 +123,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return new ExceptionDetail(
                     new MessageDetail(TokenLogMessages.IDX10679, zipAlgorithm),
                     ValidationFailureType.TokenDecryptionFailed,
-                    ExceptionType.SecurityTokenDecompressionFailed,
+                    typeof(SecurityTokenDecompressionFailedException),
                     new StackFrame(true),
                     ex);
             }

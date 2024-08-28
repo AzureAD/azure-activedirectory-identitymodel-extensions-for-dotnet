@@ -77,7 +77,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 TokenLogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("token")),
                             ValidationFailureType.NullArgument,
-                            ExceptionType.ArgumentNull,
+                            typeof(ArgumentNullException),
                             null,
                             null)
                     },
@@ -91,7 +91,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 TokenLogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("token")),
                             ValidationFailureType.NullArgument,
-                            ExceptionType.ArgumentNull,
+                            typeof(ArgumentNullException),
                             null,
                             null)
                     },
@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 LogMessages.IDX14107,
                                 LogHelper.MarkAsNonPII("token")),
                             ValidationFailureType.TokenReadingFailed,
-                            ExceptionType.SecurityTokenMalformed,
+                            typeof(SecurityTokenMalformedException),
                             null,
                             new SecurityTokenMalformedException()),
                     }

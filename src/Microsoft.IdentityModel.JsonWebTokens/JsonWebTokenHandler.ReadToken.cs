@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return new ExceptionDetail(
                     new MessageDetail(LogMessages.IDX14107),
                     ValidationFailureType.TokenReadingFailed,
-                    ExceptionType.SecurityTokenMalformed,
+                    typeof(SecurityTokenMalformedException),
                     malformedTokenStackFrame,
                     ex);
             }
