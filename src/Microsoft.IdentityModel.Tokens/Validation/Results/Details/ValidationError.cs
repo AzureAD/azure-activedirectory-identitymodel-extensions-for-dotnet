@@ -113,6 +113,16 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public ValidationFailureType FailureType { get; }
 
+        internal static ExceptionDetail NullParameter(string parameterName, StackFrame stackFrame) => new ExceptionDetail(
+            MessageDetail.NullParameter(parameterName),
+            ValidationFailureType.NullArgument,
+            ExceptionType.ArgumentNull, stackFrame);
+
+        /// <summary>
+        /// Gets the type of validation failure that occurred.
+        /// </summary>
+        public ValidationFailureType FailureType { get; }
+
         /// <summary>
         /// Gets the type of exception that occurred.
         /// </summary>
@@ -148,5 +158,32 @@ namespace Microsoft.IdentityModel.Tokens
             StackFrames.Add(stackFrame);
             return this;
         }
+    }
+
+    internal enum ExceptionType
+    {
+        Unknown = -1,
+        ArgumentNull,
+        InvalidArgument,
+        InvalidOperation,
+        SecurityToken,
+        SecurityTokenDecompressionFailed,
+        SecurityTokenDecryptionFailed,
+        SecurityTokenExpired,
+        SecurityTokenInvalidAudience,
+        SecurityTokenInvalidAlgorithm,
+        SecurityTokenInvalidIssuer,
+        SecurityTokenInvalidLifetime,
+        SecurityTokenInvalidSigningKey,
+        SecurityTokenInvalidSignature,
+        SecurityTokenInvalidType,
+        SecurityTokenKeyWrap,
+        SecurityTokenMalformed,
+        SecurityTokenNoExpiration,
+        SecurityTokenNotYetValid,
+        SecurityTokenReplayDetected,
+        SecurityTokenReplayAddFailed,
+        SecurityTokenSignatureKeyNotFound,
+        ExceptionTypeCount
     }
 }

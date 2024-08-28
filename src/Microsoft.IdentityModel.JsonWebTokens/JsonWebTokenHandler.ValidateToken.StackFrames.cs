@@ -5,6 +5,7 @@ using System.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
 
 #nullable enable
+
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
     public partial class JsonWebTokenHandler : TokenHandler

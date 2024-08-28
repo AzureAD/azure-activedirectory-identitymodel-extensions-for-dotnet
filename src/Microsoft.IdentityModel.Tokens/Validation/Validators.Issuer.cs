@@ -141,5 +141,6 @@ namespace Microsoft.IdentityModel.Tokens
                 new StackFrame(true));
         }
     }
+#nullable restore
 }
 #nullable restore
