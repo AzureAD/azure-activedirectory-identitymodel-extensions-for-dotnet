@@ -87,7 +87,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 TokenLogMessages.IDX10000,
                                 "jwtToken"),
                             ValidationFailureType.NullArgument,
-                            ExceptionType.ArgumentNull,
+                            typeof(ArgumentNullException),
                             null,
                             null)
                     },
@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 TokenLogMessages.IDX10000,
                                 "validationParameters"),
                             ValidationFailureType.NullArgument,
-                            ExceptionType.ArgumentNull,
+                            typeof(ArgumentNullException),
                             null,
                             null)
                     },
@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 TokenLogMessages.IDX10000,
                                 "fakeParameter"),
                             ValidationFailureType.NullArgument,
-                            ExceptionType.ArgumentNull,
+                            typeof(ArgumentNullException),
                             null,
                             null)
                     },
@@ -133,7 +133,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 TokenLogMessages.IDX10504,
                                 LogHelper.MarkAsSecurityArtifact(unsignedToken, JwtTokenUtilities.SafeLogJwtToken)),
                             ValidationFailureType.SignatureValidationFailed,
-                            ExceptionType.SecurityTokenInvalidSignature,
+                            typeof(SecurityTokenInvalidSignatureException),
                             null,
                             null)
                     },
@@ -203,7 +203,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Result = new ExceptionDetail(
                             new MessageDetail(TokenLogMessages.IDX10500),
                             ValidationFailureType.SignatureValidationFailed,
-                            ExceptionType.SecurityTokenSignatureKeyNotFound,
+                            typeof(SecurityTokenSignatureKeyNotFoundException),
                             null,
                             null)
                     },
@@ -216,7 +216,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Result = new ExceptionDetail(
                             new MessageDetail(TokenLogMessages.IDX10500),
                             ValidationFailureType.SignatureValidationFailed,
-                            ExceptionType.SecurityTokenSignatureKeyNotFound,
+                            typeof(SecurityTokenSignatureKeyNotFoundException),
                             null,
                             null)
                     }

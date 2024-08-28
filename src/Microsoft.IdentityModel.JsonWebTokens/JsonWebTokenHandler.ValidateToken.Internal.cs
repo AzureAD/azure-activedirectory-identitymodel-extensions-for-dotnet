@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             LogHelper.MarkAsNonPII(token.Length),
                             LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes)),
                         ValidationFailureType.InvalidSecurityToken,
-                        ExceptionType.InvalidArgument,
+                        typeof(ArgumentException),
                         invalidTokenLengthStackFrame);
             }
 
@@ -120,7 +120,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return new ExceptionDetail(
                     new MessageDetail(TokenLogMessages.IDX10001, nameof(token), nameof(JsonWebToken)),
                     ValidationFailureType.InvalidSecurityToken,
-                    ExceptionType.InvalidArgument,
+                    typeof(ArgumentException),
                     notJwtStackFrame);
             }
 
@@ -182,7 +182,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     validationParameters.RefreshBeforeValidation = false;
                     validationParameters.ValidateWithLKG = true;
-                    ExceptionType recoverableExceptionType = result.UnwrapError().Type;
+                    Type recoverableExceptionType = result.UnwrapError().Type;
 
                     BaseConfiguration[] validConfigurations = validationParameters.ConfigurationManager.GetValidLkgConfigurations();
                     for (int i = 0; i < validConfigurations.Length; i++)

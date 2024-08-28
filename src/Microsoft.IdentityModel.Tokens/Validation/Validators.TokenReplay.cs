@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Tokens
                             LogMessages.IDX10227,
                             LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
                         ValidationFailureType.TokenReplayValidationFailed,
-                        ExceptionType.SecurityTokenReplayDetected,
+                        typeof(SecurityTokenReplayDetectedException),
                         new StackFrame(true));
 
                 if (validationParameters.TokenReplayCache.TryFind(securityToken))
@@ -71,7 +71,7 @@ namespace Microsoft.IdentityModel.Tokens
                             LogMessages.IDX10228,
                             LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
                         ValidationFailureType.TokenReplayValidationFailed,
-                        ExceptionType.SecurityTokenReplayDetected,
+                        typeof(SecurityTokenReplayDetectedException),
                         new StackFrame(true));
 
                 if (!validationParameters.TokenReplayCache.TryAdd(securityToken, expirationTime.Value))
@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Tokens
                             LogMessages.IDX10229,
                             LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
                         ValidationFailureType.TokenReplayValidationFailed,
-                        ExceptionType.SecurityTokenReplayAddFailed,
+                        typeof(SecurityTokenReplayAddFailedException),
                         new StackFrame(true));
             }
 

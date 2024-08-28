@@ -111,7 +111,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Result = new ExceptionDetail(
                             new MessageDetail(TokenLogMessages.IDX10612),
                             ValidationFailureType.TokenDecryptionFailed,
-                            ExceptionType.SecurityToken,
+                            typeof(SecurityTokenException),
                             null,
                             null),
                     },
@@ -124,7 +124,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Result = new ExceptionDetail(
                             new MessageDetail(TokenLogMessages.IDX10000, "jwtToken"),
                             ValidationFailureType.NullArgument,
-                            ExceptionType.ArgumentNull,
+                            typeof(ArgumentNullException),
                             null,
                             null),
                     },
@@ -137,7 +137,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Result = new ExceptionDetail(
                             new MessageDetail(TokenLogMessages.IDX10000, "validationParameters"),
                             ValidationFailureType.NullArgument,
-                            ExceptionType.ArgumentNull,
+                            typeof(ArgumentNullException),
                             null,
                             null),
                     },
@@ -195,7 +195,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                     new JsonWebToken(ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims),
                                     JwtTokenUtilities.SafeLogJwtToken)),
                             ValidationFailureType.TokenDecryptionFailed,
-                            ExceptionType.SecurityTokenDecryptionFailed,
+                            typeof(SecurityTokenDecryptionFailedException),
                             null,
                             null),
                     }

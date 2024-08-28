@@ -100,7 +100,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         Result = new ExceptionDetail(
                             new MessageDetail(LogMessages.IDX10000, "validationParameters"),
                             ValidationFailureType.NullArgument,
-                            ExceptionType.ArgumentNull,
+                            typeof(ArgumentNullException),
                             null),
                     },
                     new ValidateLifetimeTheoryData("Invalid_ExpiresIsNull")
@@ -111,7 +111,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         Result = new ExceptionDetail(
                             new MessageDetail(LogMessages.IDX10225, "null"),
                             ValidationFailureType.LifetimeValidationFailed,
-                            ExceptionType.SecurityTokenNoExpiration,
+                            typeof(SecurityTokenNoExpirationException),
                             null),
                     },
                     new ValidateLifetimeTheoryData("Invalid_NotBeforeIsAfterExpires")
@@ -126,7 +126,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII(oneHourFromNow),
                                 LogHelper.MarkAsNonPII(oneHourAgo)),
                             ValidationFailureType.LifetimeValidationFailed,
-                            ExceptionType.SecurityTokenInvalidLifetime,
+                            typeof(SecurityTokenInvalidLifetimeException),
                             null),
                     },
                     new ValidateLifetimeTheoryData("Invalid_NotYetValid")
@@ -141,7 +141,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII(oneHourFromNow),
                                 LogHelper.MarkAsNonPII(now)),
                             ValidationFailureType.LifetimeValidationFailed,
-                            ExceptionType.SecurityTokenNotYetValid,
+                            typeof(SecurityTokenNotYetValidException),
                             null),
                     },
                     new ValidateLifetimeTheoryData("Invalid_Expired")
@@ -156,7 +156,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII(oneHourAgo),
                                 LogHelper.MarkAsNonPII(now)),
                             ValidationFailureType.LifetimeValidationFailed,
-                            ExceptionType.SecurityTokenExpired,
+                            typeof(SecurityTokenExpiredException),
                             null),
                     },
                     new ValidateLifetimeTheoryData("Invalid_NotYetValid_SkewForward")
@@ -171,7 +171,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII(sixMinutesFromNow),
                                 LogHelper.MarkAsNonPII(now)),
                             ValidationFailureType.LifetimeValidationFailed,
-                            ExceptionType.SecurityTokenNotYetValid,
+                            typeof(SecurityTokenNotYetValidException),
                             null),
                     },
                     new ValidateLifetimeTheoryData("Invalid_Expired_SkewBackward")
@@ -186,7 +186,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII(sixMinutesAgo),
                                 LogHelper.MarkAsNonPII(now)),
                             ValidationFailureType.LifetimeValidationFailed,
-                            ExceptionType.SecurityTokenExpired,
+                            typeof(SecurityTokenExpiredException),
                             null),
                     }
                 };

@@ -250,21 +250,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns><c>true</c> if the exception is certain types of exceptions otherwise, <c>false</c>.</returns>
         internal static bool IsRecoverableException(Exception exception)
         {
-            return IsRecoverableErrorType(ErrorTypeForException(exception));
-        }
-
-        /// <summary>
-        /// Check whether the given exception type is recoverable by LKG.
-        /// </summary>
-        /// <param name="errorType">The exception type to check.</param>
-        /// <returns><c>true</c> if the exception is certain types of exceptions otherwise, <c>false</c>.</returns>
-        internal static bool IsRecoverableErrorType(ExceptionType? errorType)
-        {
-            ExceptionType typeToCheck = errorType ?? ExceptionType.Unknown;
-
-            return typeToCheck == ExceptionType.SecurityTokenInvalidSignature
-                  || typeToCheck == ExceptionType.SecurityTokenInvalidIssuer
-                  || typeToCheck == ExceptionType.SecurityTokenSignatureKeyNotFound;
+            Type exceptionType = exception.GetType();
+            return exceptionType == typeof(SecurityTokenInvalidSignatureException) ||
+                exceptionType == typeof(SecurityTokenInvalidIssuerException) ||
+                exceptionType == typeof(SecurityTokenSignatureKeyNotFoundException);
         }
 
         /// <summary>
@@ -278,32 +267,18 @@ namespace Microsoft.IdentityModel.Tokens
         internal static bool IsRecoverableConfiguration(
             string kid, BaseConfiguration currentConfiguration, BaseConfiguration lkgConfiguration, Exception currentException)
         {
-            return IsRecoverableConfigurationAndExceptionType(
-                kid, currentConfiguration, lkgConfiguration, ErrorTypeForException(currentException));
-        }
-
-        /// <summary>
-        /// Check whether the given configuration is recoverable by LKG.
-        /// </summary>
-        /// <param name="kid">The kid from token."/></param>
-        /// <param name="currentConfiguration">The <see cref="BaseConfiguration"/> to check.</param>
-        /// <param name="lkgConfiguration">The last known good configuration to check.</param>
-        /// <param name="currentExceptionType">The exception type to check.</param>
-        /// <returns><c>true</c> if the configuration is recoverable otherwise, <c>false</c>.</returns>
-        internal static bool IsRecoverableConfigurationAndExceptionType(
-            string kid, BaseConfiguration currentConfiguration, BaseConfiguration lkgConfiguration, ExceptionType currentExceptionType)
-        {
+            Type currentExceptionType = currentException.GetType();
             Lazy<bool> isRecoverableSigningKey = new(() => lkgConfiguration.SigningKeys.Any(signingKey => signingKey.KeyId == kid));
 
-            if (currentExceptionType == ExceptionType.SecurityTokenInvalidIssuer)
+            if (currentExceptionType == typeof(SecurityTokenInvalidIssuerException))
             {
                 return currentConfiguration.Issuer != lkgConfiguration.Issuer;
             }
-            else if (currentExceptionType == ExceptionType.SecurityTokenSignatureKeyNotFound)
+            else if (currentExceptionType == typeof(SecurityTokenSignatureKeyNotFoundException))
             {
                 return isRecoverableSigningKey.Value;
             }
-            else if (currentExceptionType == ExceptionType.SecurityTokenInvalidSignature)
+            else if (currentExceptionType == typeof(SecurityTokenInvalidSignatureException))
             {
                 SecurityKey currentSigningKey = currentConfiguration.SigningKeys.FirstOrDefault(x => x.KeyId == kid);
                 if (currentSigningKey == null)
@@ -314,18 +289,6 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             return false;
-        }
-
-        static ExceptionType ErrorTypeForException(Exception exception)
-        {
-            if (exception is SecurityTokenInvalidSignatureException)
-                return ExceptionType.SecurityTokenInvalidSignature;
-            else if (exception is SecurityTokenInvalidIssuerException)
-                return ExceptionType.SecurityTokenInvalidIssuer;
-            else if (exception is SecurityTokenSignatureKeyNotFoundException)
-                return ExceptionType.SecurityTokenSignatureKeyNotFound;
-            else
-                return ExceptionType.Unknown;
         }
     }
 }
