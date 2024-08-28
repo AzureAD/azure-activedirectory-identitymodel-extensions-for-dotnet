@@ -150,7 +150,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return result;
             }
 
-            if (TokenUtilities.IsRecoverableErrorType(result.UnwrapError().Type))
+            if (TokenUtilities.IsRecoverableExceptionType(result.UnwrapError().Type))
             {
                 // If we were still unable to validate, attempt to refresh the configuration and validate using it
                 // but ONLY if the currentConfiguration is not null. We want to avoid refreshing the configuration on
