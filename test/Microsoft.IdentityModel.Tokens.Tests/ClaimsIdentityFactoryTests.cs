@@ -12,6 +12,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     [Collection(nameof(ClaimsIdentityFactoryTests))]
     public class ClaimsIdentityFactoryTests
     {
+        public ClaimsIdentityFactoryTests()
+        {
+            AppContextSwitches.ResetAllSwitches();
+        }
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]

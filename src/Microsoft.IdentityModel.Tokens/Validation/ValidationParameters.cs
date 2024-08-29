@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Claims;
 using System.Threading;
-using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -227,8 +226,9 @@ namespace Microsoft.IdentityModel.Tokens
                 roleClaimType = RoleClaimType;
             }
 
-            if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                LogHelper.LogInformation(LogMessages.IDX10245, securityToken);
+            // TODO: Add to CallContext
+            //if (LogHelper.IsEnabled(EventLogLevel.Informational))
+            //    LogHelper.LogInformation(LogMessages.IDX10245, securityToken);
 
 #pragma warning disable RS0030 // Do not use banned APIs
             return new ClaimsIdentity(authenticationType: AuthenticationType ?? DefaultAuthenticationType, nameType: nameClaimType ?? ClaimsIdentity.DefaultNameClaimType, roleType: roleClaimType ?? ClaimsIdentity.DefaultRoleClaimType);
@@ -494,7 +494,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Allows overriding the delegate that will be used to validate the type of the token.
-        /// If the token type cannot be validated, a <see cref="TokenTypeValidationResult"/> MUST be returned by the delegate.
+        /// If the token type cannot be validated, a <see cref="Result{TResult, TError}"/> MUST be returned by the delegate.
         /// Note: the 'type' parameter may be null if it couldn't be extracted from its usual location.
         /// Implementations that need to resolve it from a different location can use the 'token' parameter.
         /// </summary>

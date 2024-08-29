@@ -263,7 +263,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             var context = TestUtilities.WriteHeader($"{this}.ToHttpRequestDataAsync", theoryData);
             try
             {
-                var httpRequestData = await SignedHttpRequestUtilities.ToHttpRequestDataAsync(theoryData.HttpRequestMessage).ConfigureAwait(false);
+                var httpRequestData = await SignedHttpRequestUtilities.ToHttpRequestDataAsync(theoryData.HttpRequestMessage);
                 IdentityComparer.AreStringsEqual(httpRequestData.Method, theoryData.ExpectedHttpRequestData.Method, context);
                 IdentityComparer.AreUrisEqual(httpRequestData.Uri, theoryData.ExpectedHttpRequestData.Uri, context);
                 IdentityComparer.AreBytesEqual(httpRequestData.Body, theoryData.ExpectedHttpRequestData.Body, context);
