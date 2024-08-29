@@ -261,7 +261,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 else
                     return new ExceptionDetail(
                         new MessageDetail(
-                            TokenLogMessages.IDX10500),
+                            TokenLogMessages.IDX10504,
+                            LogHelper.MarkAsSecurityArtifact(
+                                jsonWebToken.EncodedToken,
+                                JwtTokenUtilities.SafeLogJwtToken)),
                         ValidationFailureType.SignatureValidationFailed,
                         ExceptionType.SecurityTokenInvalidSignature,
                         new StackFrame(true));
