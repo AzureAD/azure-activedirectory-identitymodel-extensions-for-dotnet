@@ -24,7 +24,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     theoryData.ValidationParameters.ValidAudiences.Add(audience);
             }
 
-            Result<string, ExceptionDetail> result = Validators.ValidateAudience(
+            Result<string> result = Validators.ValidateAudience(
                 theoryData.Audiences,
                 theoryData.SecurityToken,
                 theoryData.ValidationParameters,
@@ -430,7 +430,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
             public List<string> AudiencesToAdd { get; internal set; }
 
-            internal Result<string, ExceptionDetail> Result { get; set; }
+            internal Result<string> Result { get; set; }
         }
 
 

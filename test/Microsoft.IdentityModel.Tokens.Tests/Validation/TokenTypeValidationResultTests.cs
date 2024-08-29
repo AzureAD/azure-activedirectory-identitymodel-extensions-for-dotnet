@@ -24,7 +24,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     theoryData.ValidationParameters.ValidTypes.Add(tokenType);
             }
 
-            Result<ValidatedTokenType, ExceptionDetail> result = Validators.ValidateTokenType(
+            Result<ValidatedTokenType> result = Validators.ValidateTokenType(
                 theoryData.Type,
                 theoryData.SecurityToken,
                 theoryData.ValidationParameters,
@@ -168,7 +168,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             public SecurityToken SecurityToken { get; set; }
             public IList<string> TokenTypesToAdd { get; internal set; }
             internal ValidationParameters ValidationParameters { get; set; }
-            internal Result<ValidatedTokenType, ExceptionDetail> Result { get; set; }
+            internal Result<ValidatedTokenType> Result { get; set; }
         }
     }
 }

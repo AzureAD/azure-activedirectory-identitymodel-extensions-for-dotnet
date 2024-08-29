@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.AlgorithmValidationResultTests", theoryData);
 
-            Result<string, ExceptionDetail> result = Validators.ValidateAlgorithm(
+            Result<string> result = Validators.ValidateAlgorithm(
                 theoryData.Algorithm,
                 theoryData.SecurityKey,
                 theoryData.SecurityToken,
@@ -129,7 +129,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
             internal ValidationParameters ValidationParameters { get; set; }
 
-            internal Result<string, ExceptionDetail> Result { get; set; }
+            internal Result<string> Result { get; set; }
         }
     }
 }

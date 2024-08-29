@@ -25,7 +25,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">A <see cref="CallContext"/> that contains useful information for logging.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the asynchronous operation.</param>
-        /// <returns>A <see cref="Result{TResult, TError}"/> with either a <see cref="ValidationResult"/> if the token was validated or an <see cref="ExceptionDetail"/> with the failure information and exception otherwise.</returns>
+        /// <returns>A <see cref="Result{TResult}"/> with either a <see cref="ValidationResult"/> if the token was validated or an <see cref="ExceptionDetail"/> with the failure information and exception otherwise.</returns>
         /// <remarks>
         /// <para>ExceptionDetail.GetException() will return one of the following exceptions if the <paramref name="token"/> is invalid.</para>
         /// </remarks>
@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <exception cref="ArgumentException">Returned if 'token.Length' is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
         /// <exception cref="SecurityTokenMalformedException">Returned if <paramref name="token"/> is not a valid <see cref="JsonWebToken"/>, <see cref="ReadToken(string, CallContext)"/></exception>
         /// <exception cref="SecurityTokenMalformedException">Returned if the validationParameters.TokenReader delegate is not able to parse/read the token as a valid <see cref="JsonWebToken"/>, <see cref="ReadToken(string, CallContext)"/></exception>
-        internal async Task<Result<ValidationResult, ExceptionDetail>> ValidateTokenAsync(
+        internal async Task<Result<ValidationResult>> ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -70,10 +70,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         invalidTokenLengthStackFrame);
             }
 
-            Result<SecurityToken, ExceptionDetail> readResult = ReadToken(token, callContext);
+            Result<SecurityToken> readResult = ReadToken(token, callContext);
             if (readResult.IsSuccess)
             {
-                Result<ValidationResult, ExceptionDetail> validationResult = await ValidateTokenAsync(
+                Result<ValidationResult> validationResult = await ValidateTokenAsync(
                     readResult.UnwrapResult(),
                     validationParameters,
                     callContext,
@@ -92,7 +92,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <inheritdoc/>
-        internal async Task<Result<ValidationResult, ExceptionDetail>> ValidateTokenAsync(
+        internal async Task<Result<ValidationResult>> ValidateTokenAsync(
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -128,7 +128,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 await GetCurrentConfigurationAsync(validationParameters)
                 .ConfigureAwait(false);
 
-            Result<ValidationResult, ExceptionDetail> result = jsonWebToken.IsEncrypted ?
+            Result<ValidationResult> result = jsonWebToken.IsEncrypted ?
                 await ValidateJWEAsync(jsonWebToken, validationParameters, currentConfiguration, callContext, cancellationToken).ConfigureAwait(false) :
                 await ValidateJWSAsync(jsonWebToken, validationParameters, currentConfiguration, callContext, cancellationToken).ConfigureAwait(false);
 
@@ -207,14 +207,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return result.UnwrapError().AddStackFrame(stackFrame);
         }
 
-        private async ValueTask<Result<ValidationResult, ExceptionDetail>> ValidateJWEAsync(
+        private async ValueTask<Result<ValidationResult>> ValidateJWEAsync(
             JsonWebToken jwtToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,
             CallContext callContext,
             CancellationToken cancellationToken)
         {
-            Result<string, ExceptionDetail> decryptionResult = DecryptToken(
+            Result<string> decryptionResult = DecryptToken(
                 jwtToken, validationParameters, configuration, callContext);
             if (!decryptionResult.IsSuccess)
             {
@@ -222,7 +222,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return decryptionResult.UnwrapError().AddStackFrame(decryptionFailureStackFrame);
             }
 
-            Result<SecurityToken, ExceptionDetail> readResult = ReadToken(decryptionResult.UnwrapResult(), callContext);
+            Result<SecurityToken> readResult = ReadToken(decryptionResult.UnwrapResult(), callContext);
             if (!readResult.IsSuccess)
             {
                 StackFrame readFailureStackFrame = StackFrames.DecryptedReadFailed ??= new StackFrame(true);
@@ -230,7 +230,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             JsonWebToken decryptedToken = (readResult.UnwrapResult() as JsonWebToken)!;
-            Result<ValidationResult, ExceptionDetail> validationResult =
+            Result<ValidationResult> validationResult =
                 await ValidateJWSAsync(decryptedToken!, validationParameters, configuration, callContext, cancellationToken)
                 .ConfigureAwait(false);
 
@@ -248,7 +248,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return validationResult;
         }
 
-        private async ValueTask<Result<ValidationResult, ExceptionDetail>> ValidateJWSAsync(
+        private async ValueTask<Result<ValidationResult>> ValidateJWSAsync(
             JsonWebToken jsonWebToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,
@@ -258,7 +258,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             DateTime? expires = jsonWebToken.HasPayloadClaim(JwtRegisteredClaimNames.Exp) ? jsonWebToken.ValidTo : null;
             DateTime? notBefore = jsonWebToken.HasPayloadClaim(JwtRegisteredClaimNames.Nbf) ? jsonWebToken.ValidFrom : null;
 
-            Result<ValidatedLifetime, ExceptionDetail> lifetimeValidationResult = validationParameters.LifetimeValidator(
+            Result<ValidatedLifetime> lifetimeValidationResult = validationParameters.LifetimeValidator(
                 notBefore, expires, jsonWebToken, validationParameters, callContext);
 
             if (!lifetimeValidationResult.IsSuccess)
@@ -270,7 +270,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (jsonWebToken.Audiences is not IList<string> tokenAudiences)
                 tokenAudiences = jsonWebToken.Audiences.ToList();
 
-            Result<string, ExceptionDetail> audienceValidationResult = validationParameters.AudienceValidator(
+            Result<string> audienceValidationResult = validationParameters.AudienceValidator(
                 tokenAudiences, jsonWebToken, validationParameters, callContext);
 
             if (!audienceValidationResult.IsSuccess)
@@ -279,7 +279,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return audienceValidationResult.UnwrapError().AddStackFrame(audienceValidationFailureStackFrame);
             }
 
-            Result<ValidatedIssuer, ExceptionDetail> issuerValidationResult = await validationParameters.IssuerValidatorAsync(
+            Result<ValidatedIssuer> issuerValidationResult = await validationParameters.IssuerValidatorAsync(
                 jsonWebToken.Issuer, jsonWebToken, validationParameters, callContext, cancellationToken)
                 .ConfigureAwait(false);
 
@@ -289,7 +289,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return issuerValidationResult.UnwrapError().AddStackFrame(issuerValidationFailureStackFrame);
             }
 
-            Result<DateTime?, ExceptionDetail> replayValidationResult = validationParameters.TokenReplayValidator(
+            Result<DateTime?> replayValidationResult = validationParameters.TokenReplayValidator(
                 expires, jsonWebToken.EncodedToken, validationParameters, callContext);
 
             if (!replayValidationResult.IsSuccess)
@@ -298,11 +298,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return replayValidationResult.UnwrapError().AddStackFrame(replayValidationFailureStackFrame);
             }
 
-            Result<ValidationResult, ExceptionDetail>? actorValidationResult = null;
+            Result<ValidationResult>? actorValidationResult = null;
             // actor validation
             if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jsonWebToken.Actor))
             {
-                Result<SecurityToken, ExceptionDetail> actorReadingResult = ReadToken(jsonWebToken.Actor, callContext);
+                Result<SecurityToken> actorReadingResult = ReadToken(jsonWebToken.Actor, callContext);
                 if (!actorReadingResult.IsSuccess)
                 {
                     StackFrame actorReadingFailureStackFrame = StackFrames.ActorReadFailed ??= new StackFrame(true);
@@ -311,7 +311,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 JsonWebToken actorToken = (actorReadingResult.UnwrapResult() as JsonWebToken)!;
                 ValidationParameters actorParameters = validationParameters.ActorValidationParameters;
-                Result<ValidationResult, ExceptionDetail> innerActorValidationResult =
+                Result<ValidationResult> innerActorValidationResult =
                     await ValidateJWSAsync(actorToken, actorParameters, configuration, callContext, cancellationToken)
                     .ConfigureAwait(false);
 
@@ -324,7 +324,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 actorValidationResult = innerActorValidationResult;
             }
 
-            Result<ValidatedTokenType, ExceptionDetail> typeValidationResult = validationParameters.TypeValidator(
+            Result<ValidatedTokenType> typeValidationResult = validationParameters.TypeValidator(
                 jsonWebToken.Typ, jsonWebToken, validationParameters, callContext);
             if (!typeValidationResult.IsSuccess)
             {
@@ -333,7 +333,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             // The signature validation delegate is yet to be migrated to ValidationParameters.
-            Result<SecurityKey, ExceptionDetail> signatureValidationResult = ValidateSignature(
+            Result<SecurityKey> signatureValidationResult = ValidateSignature(
                 jsonWebToken, validationParameters, configuration, callContext);
             if (!signatureValidationResult.IsSuccess)
             {
@@ -341,7 +341,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return signatureValidationResult.UnwrapError().AddStackFrame(signatureValidationFailureStackFrame);
             }
 
-            Result<ValidatedSigningKeyLifetime, ExceptionDetail> issuerSigningKeyValidationResult =
+            Result<ValidatedSigningKeyLifetime> issuerSigningKeyValidationResult =
                 validationParameters.IssuerSigningKeyValidator(
                     signatureValidationResult.UnwrapResult(), jsonWebToken, validationParameters, configuration, callContext);
             if (!issuerSigningKeyValidationResult.IsSuccess)

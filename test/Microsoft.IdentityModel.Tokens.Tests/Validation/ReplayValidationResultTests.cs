@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.TokenReplayValidationResultTests", theoryData);
 
-            Result<DateTime?, ExceptionDetail> result = Validators.ValidateTokenReplay(
+            Result<DateTime?> result = Validators.ValidateTokenReplay(
                 theoryData.ExpirationTime,
                 theoryData.SecurityToken,
                 theoryData.ValidationParameters,
@@ -208,6 +208,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
         internal ValidationParameters ValidationParameters { get; set; }
 
-        internal Result<DateTime?, ExceptionDetail> Result { get; set; }
+        internal Result<DateTime?> Result { get; set; }
     }
 }
