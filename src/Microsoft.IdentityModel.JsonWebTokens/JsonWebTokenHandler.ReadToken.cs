@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 StackFrame malformedTokenStackFrame = StackFrames.ReadTokenMalformed ?? new StackFrame(true);
                 return new ExceptionDetail(
-                    new MessageDetail(LogMessages.IDX14107),
+                    new MessageDetail(LogMessages.IDX14100),
                     ValidationFailureType.TokenReadingFailed,
                     ExceptionType.SecurityTokenMalformed,
                     malformedTokenStackFrame,
