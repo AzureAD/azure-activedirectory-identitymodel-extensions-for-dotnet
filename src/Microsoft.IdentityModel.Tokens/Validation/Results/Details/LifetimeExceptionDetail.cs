@@ -1,0 +1,74 @@
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+using System;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+
+#nullable enable
+
+namespace Microsoft.IdentityModel.Tokens
+{
+    internal class LifetimeExceptionDetail : ExceptionDetail
+    {
+        internal record struct AdditionalInformation(
+            DateTime? NotBeforeDate,
+            DateTime? ExpirationDate);
+
+        private AdditionalInformation _additionalInformation;
+
+        public LifetimeExceptionDetail(
+            MessageDetail messageDetail,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type exceptionType,
+            StackFrame stackFrame)
+            : base(messageDetail, ValidationFailureType.LifetimeValidationFailed, exceptionType, stackFrame)
+        {
+        }
+
+        public LifetimeExceptionDetail(
+            MessageDetail messageDetail,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type exceptionType,
+            StackFrame stackFrame,
+            AdditionalInformation? additionalInformation)
+            : base(messageDetail, ValidationFailureType.LifetimeValidationFailed, exceptionType, stackFrame)
+        {
+            if (additionalInformation.HasValue)
+                _additionalInformation = additionalInformation.Value;
+        }
+
+        public LifetimeExceptionDetail(
+            MessageDetail messageDetail,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type exceptionType,
+            StackFrame stackFrame,
+            Exception innerException,
+            AdditionalInformation? additionalInformation)
+            : base(messageDetail, ValidationFailureType.LifetimeValidationFailed, exceptionType, stackFrame, innerException)
+        {
+            if (additionalInformation.HasValue)
+                _additionalInformation = additionalInformation.Value;
+        }
+
+        protected override void AddAdditionalInformation(Exception exception)
+        {
+            if (exception is SecurityTokenExpiredException expiredException &&
+                _additionalInformation.ExpirationDate.HasValue)
+            {
+                expiredException.Expires = _additionalInformation.ExpirationDate.Value;
+            }
+            else if (exception is SecurityTokenNotYetValidException notYetValidException &&
+                _additionalInformation.NotBeforeDate.HasValue)
+            {
+                notYetValidException.NotBefore = _additionalInformation.NotBeforeDate.Value;
+            }
+            else if (exception is SecurityTokenInvalidLifetimeException invalidLifetimeException)
+            {
+                if (_additionalInformation.NotBeforeDate.HasValue)
+                    invalidLifetimeException.NotBefore = _additionalInformation.NotBeforeDate.Value;
+
+                if (_additionalInformation.ExpirationDate.HasValue)
+                    invalidLifetimeException.Expires = _additionalInformation.ExpirationDate.Value;
+            }
+        }
+    }
+}
+#nullable restore

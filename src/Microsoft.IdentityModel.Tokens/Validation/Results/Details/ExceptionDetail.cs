@@ -72,7 +72,14 @@ namespace Microsoft.IdentityModel.Tokens
             if (exception is SecurityTokenException securityTokenException)
                 securityTokenException.ExceptionDetail = this;
 
+            AddAdditionalInformation(exception);
+
             return exception;
+        }
+
+        protected virtual void AddAdditionalInformation(Exception exception)
+        {
+            // base implementation is no-op. Derived classes can override to add additional information to the exception.
         }
 
         internal static ExceptionDetail NullParameter(string parameterName, StackFrame stackFrame) => new ExceptionDetail(
