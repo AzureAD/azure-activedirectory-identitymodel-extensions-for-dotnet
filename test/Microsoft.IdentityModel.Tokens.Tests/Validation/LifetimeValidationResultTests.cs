@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.LifetimeValidatorTests", theoryData);
 
-            Result<ValidatedLifetime, ExceptionDetail> result = Validators.ValidateLifetime(
+            Result<ValidatedLifetime> result = Validators.ValidateLifetime(
                 theoryData.NotBefore,
                 theoryData.Expires,
                 theoryData.SecurityToken,
@@ -208,7 +208,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
         internal ValidationParameters ValidationParameters { get; set; }
 
-        internal Result<ValidatedLifetime, ExceptionDetail> Result { get; set; }
+        internal Result<ValidatedLifetime> Result { get; set; }
 
         internal ValidationFailureType ValidationFailureType { get; set; }
     }

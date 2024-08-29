@@ -17,9 +17,9 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
     /// <param name="validationParameters"><see cref="ValidationParameters"/> required for validation.</param>
     /// <param name="callContext"></param>
-    /// <returns> A <see cref="Result{TResult, TError}"/>that contains the results of validating the token type.</returns>
+    /// <returns> A <see cref="Result{TResult}"/>that contains the results of validating the token type.</returns>
     /// <remarks>An EXACT match is required. <see cref="StringComparison.Ordinal"/> (case sensitive) is used for comparing <paramref name="type"/> against <see cref="ValidationParameters.ValidTypes"/>.</remarks>
-    internal delegate Result<ValidatedTokenType, ExceptionDetail> TypeValidatorDelegate(
+    internal delegate Result<ValidatedTokenType> TypeValidatorDelegate(
         string? type,
         SecurityToken? securityToken,
         ValidationParameters validationParameters,
@@ -34,10 +34,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
         /// <param name="validationParameters"><see cref="ValidationParameters"/> required for validation.</param>
         /// <param name="callContext"></param>
-        /// <returns> A <see cref="Result{TResult, TError}"/>that contains the results of validating the token type.</returns>
+        /// <returns> A <see cref="Result{TResult}"/>that contains the results of validating the token type.</returns>
         /// <remarks>An EXACT match is required. <see cref="StringComparison.Ordinal"/> (case sensitive) is used for comparing <paramref name="type"/> against <see cref="ValidationParameters.ValidTypes"/>.</remarks>
 #pragma warning disable CA1801 // TODO: remove pragma disable once callContext is used for logging
-        internal static Result<ValidatedTokenType, ExceptionDetail> ValidateTokenType(
+        internal static Result<ValidatedTokenType> ValidateTokenType(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,

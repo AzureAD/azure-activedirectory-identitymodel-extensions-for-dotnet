@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public void ReadToken(TokenReadingTheoryData theoryData)
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.JsonWebTokenHandlerReadTokenTests", theoryData);
-            Result<SecurityToken, ExceptionDetail> result = JsonWebTokenHandler.ReadToken(
+            Result<SecurityToken> result = JsonWebTokenHandler.ReadToken(
                 theoryData.Token,
                 new CallContext());
 
@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         [Fact]
         public void ReadToken_ThrowsIfAccessingSecurityTokenOnFailedRead()
         {
-            Result<SecurityToken, ExceptionDetail> result = JsonWebTokenHandler.ReadToken(
+            Result<SecurityToken> result = JsonWebTokenHandler.ReadToken(
                 null,
                 new CallContext());
 
@@ -119,6 +119,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
     public class TokenReadingTheoryData : TheoryDataBase
     {
         public string Token { get; set; }
-        internal Result<SecurityToken, ExceptionDetail> Result { get; set; }
+        internal Result<SecurityToken> Result { get; set; }
     }
 }

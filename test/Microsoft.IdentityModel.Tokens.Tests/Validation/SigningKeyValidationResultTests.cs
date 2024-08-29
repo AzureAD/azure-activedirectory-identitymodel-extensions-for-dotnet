@@ -16,7 +16,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.SigningKeyValidationResultTests", theoryData);
 
-            Result<ValidatedSigningKeyLifetime, ExceptionDetail> result = Validators.ValidateIssuerSigningKey(
+            Result<ValidatedSigningKeyLifetime> result = Validators.ValidateIssuerSigningKey(
                 theoryData.SecurityKey,
                 theoryData.SecurityToken,
                 theoryData.ValidationParameters,
@@ -171,6 +171,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         public SecurityToken SecurityToken { get; set; }
         internal ValidationParameters ValidationParameters { get; set; }
         public BaseConfiguration BaseConfiguration { get; set; }
-        internal Result<ValidatedSigningKeyLifetime, ExceptionDetail> Result { get; set; }
+        internal Result<ValidatedSigningKeyLifetime> Result { get; set; }
     }
 }
