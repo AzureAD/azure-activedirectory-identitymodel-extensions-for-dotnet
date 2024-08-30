@@ -19,6 +19,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         static internal class SignatureStackFrames
         {
             // Test StackFrame to validate caching solution. Need to add all the possible stack frames.
+            static internal StackFrame? KidNotMatchedNoTryAll;
             static internal StackFrame? NoKeysProvided;
         }
         /// <summary>
@@ -96,12 +97,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return ValidateSignatureUsingAllKeys(jwtToken, validationParameters, configuration, callContext);
             else
             {
-                StackFrame stackFrame = SignatureStackFrames.NoKeysProvided ??= new StackFrame(true);
+                if (!string.IsNullOrEmpty(jwtToken.Kid))
+                {
+                    StackFrame kidNotMatchedNoTryAllStackFrame = SignatureStackFrames.KidNotMatchedNoTryAll ??= new StackFrame(true);
+                    return new ExceptionDetail(
+                        new MessageDetail(
+                            TokenLogMessages.IDX10502,
+                            LogHelper.MarkAsNonPII(jwtToken.Kid),
+                            LogHelper.MarkAsNonPII(validationParameters.IssuerSigningKeys.Count),
+                            LogHelper.MarkAsNonPII(configuration?.SigningKeys.Count ?? 0),
+                            LogHelper.MarkAsSecurityArtifact(jwtToken.EncodedToken, JwtTokenUtilities.SafeLogJwtToken)),
+                        ValidationFailureType.SignatureValidationFailed,
+                        ExceptionType.SecurityTokenSignatureKeyNotFound,
+                        kidNotMatchedNoTryAllStackFrame);
+                }
+
+                StackFrame noKeysProvidedStackFrame = SignatureStackFrames.NoKeysProvided ??= new StackFrame(true);
                 return new ExceptionDetail(
                     new MessageDetail(TokenLogMessages.IDX10500),
                     ValidationFailureType.SignatureValidationFailed,
                     ExceptionType.SecurityTokenSignatureKeyNotFound,
-                    stackFrame);
+                    noKeysProvidedStackFrame);
             }
         }
 
