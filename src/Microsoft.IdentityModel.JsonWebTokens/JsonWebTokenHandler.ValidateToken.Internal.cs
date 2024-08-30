@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             LogHelper.MarkAsNonPII(token.Length),
                             LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes)),
                         ValidationFailureType.InvalidSecurityToken,
-                        ExceptionType.InvalidArgument,
+                        typeof(ArgumentException),
                         invalidTokenLengthStackFrame);
             }
 
@@ -120,7 +120,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return new ExceptionDetail(
                     new MessageDetail(TokenLogMessages.IDX10001, nameof(token), nameof(JsonWebToken)),
                     ValidationFailureType.InvalidSecurityToken,
-                    ExceptionType.InvalidArgument,
+                    typeof(ArgumentException),
                     notJwtStackFrame);
             }
 
@@ -150,7 +150,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return result;
             }
 
-            if (TokenUtilities.IsRecoverableErrorType(result.UnwrapError().Type))
+            if (TokenUtilities.IsRecoverableException(result.UnwrapError().GetException()))
             {
                 // If we were still unable to validate, attempt to refresh the configuration and validate using it
                 // but ONLY if the currentConfiguration is not null. We want to avoid refreshing the configuration on
@@ -182,13 +182,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     validationParameters.RefreshBeforeValidation = false;
                     validationParameters.ValidateWithLKG = true;
-                    ExceptionType recoverableExceptionType = result.UnwrapError().Type;
+                    Exception recoverableExceptionType = result.UnwrapError().GetException();
 
                     BaseConfiguration[] validConfigurations = validationParameters.ConfigurationManager.GetValidLkgConfigurations();
                     for (int i = 0; i < validConfigurations.Length; i++)
                     {
                         BaseConfiguration lkgConfiguration = validConfigurations[i];
-                        if (TokenUtilities.IsRecoverableConfigurationAndExceptionType(
+                        if (TokenUtilities.IsRecoverableConfiguration(
                             jsonWebToken.Kid, currentConfiguration, lkgConfiguration, recoverableExceptionType))
                         {
                             result = jsonWebToken.IsEncrypted ?

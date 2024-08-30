@@ -3,7 +3,6 @@
 
 
 using System;
-using System.Linq;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -26,25 +25,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Fact]
-        public void ExceptionDetails_UnknownType_Throws()
-        {
-            ExceptionDetail exceptionDetail = new ExceptionDetail(
-                new MessageDetail(""),
-                ValidationFailureType.NullArgument,
-                ExceptionType.Unknown,
-                null);
-
-            Assert.Throws<ArgumentException>(() => exceptionDetail.GetException());
-        }
-
-        [Fact]
-        public void All_ExceptionDetails_HaveTests()
-        {
-            // If this test fails, we are missing a test for a new ExceptionType
-            Assert.Equal(((int)ExceptionType.ExceptionTypeCount), ExceptionDetailsTestCases.Count());
-        }
-
         public static TheoryData<ExceptionDetailsTheoryData> ExceptionDetailsTestCases
         {
             get
@@ -54,127 +34,127 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     new ExceptionDetailsTheoryData
                     {
                         TestId = "ArgumentNull",
-                        ExceptionType = ExceptionType.ArgumentNull,
+                        ExceptionType = typeof(ArgumentNullException),
                         ExpectedException = ExpectedException.ArgumentNullException(),
                     },
                     new ExceptionDetailsTheoryData
                     {
                         TestId = "InvalidArgument",
-                        ExceptionType = ExceptionType.InvalidArgument,
+                        ExceptionType = typeof(ArgumentException),
                         ExpectedException = ExpectedException.ArgumentException(),
                     },
                     new ExceptionDetailsTheoryData
                     {
                         TestId = "InvalidOperation",
-                        ExceptionType = ExceptionType.InvalidOperation,
+                        ExceptionType = typeof(InvalidOperationException),
                         ExpectedException = ExpectedException.InvalidOperationException(),
                     },
                     new ExceptionDetailsTheoryData
                     {
                         TestId = "SecurityToken",
-                        ExceptionType = ExceptionType.SecurityToken,
+                        ExceptionType = typeof(SecurityTokenException),
                         ExpectedException = ExpectedException.SecurityTokenException(),
                     },
                     new ExceptionDetailsTheoryData
                     {
                         TestId = "SecurityTokenDecompressionFailed",
-                        ExceptionType = ExceptionType.SecurityTokenDecompressionFailed,
+                        ExceptionType = typeof(SecurityTokenDecompressionFailedException),
                         ExpectedException = ExpectedException.SecurityTokenDecompressionFailedException(),
                     },
                     new ExceptionDetailsTheoryData
                     {
                         TestId = "SecurityTokenDecryptionFailed",
-                        ExceptionType = ExceptionType.SecurityTokenDecryptionFailed,
+                        ExceptionType = typeof(SecurityTokenDecryptionFailedException),
                         ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException(),
                     },
                     new ExceptionDetailsTheoryData
                     {
                         TestId = "SecurityTokenExpired",
-                        ExceptionType = ExceptionType.SecurityTokenExpired,
+                        ExceptionType = typeof(SecurityTokenExpiredException),
                         ExpectedException = ExpectedException.SecurityTokenExpiredException(),
                     },
                     new ExceptionDetailsTheoryData
                     {
                         TestId = "SecurityTokenInvalidAudience",
-                        ExceptionType = ExceptionType.SecurityTokenInvalidAudience,
+                        ExceptionType = typeof(SecurityTokenInvalidAudienceException),
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException(),
                     },
                     new ExceptionDetailsTheoryData
                     {
                         TestId = "SecurityTokenInvalidAlgorithm",
-                        ExceptionType = ExceptionType.SecurityTokenInvalidAlgorithm,
+                        ExceptionType = typeof(SecurityTokenInvalidAlgorithmException),
                         ExpectedException = ExpectedException.SecurityTokenInvalidAlgorithmException(),
                     },
                     new ExceptionDetailsTheoryData
                     {
                         TestId = "SecurityTokenInvalidIssuer",
-                        ExceptionType = ExceptionType.SecurityTokenInvalidIssuer,
+                        ExceptionType = typeof(SecurityTokenInvalidIssuerException),
                         ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException(),
                     },
                     new ExceptionDetailsTheoryData
                     {
                         TestId = "SecurityTokenInvalidLifetime",
-                        ExceptionType = ExceptionType.SecurityTokenInvalidLifetime,
+                        ExceptionType = typeof(SecurityTokenInvalidLifetimeException),
                         ExpectedException = ExpectedException.SecurityTokenInvalidLifetimeException(),
                     },
                     new ExceptionDetailsTheoryData
                     {
                         TestId = "SecurityTokenInvalidSigningKey",
-                        ExceptionType = ExceptionType.SecurityTokenInvalidSigningKey,
+                        ExceptionType = typeof(SecurityTokenInvalidSigningKeyException),
                         ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException(),
                     },
                     new ExceptionDetailsTheoryData
                     {
                         TestId = "SecurityTokenInvalidSignature",
-                        ExceptionType = ExceptionType.SecurityTokenInvalidSignature,
+                        ExceptionType = typeof(SecurityTokenInvalidSignatureException),
                         ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException(),
                     },
                     new ExceptionDetailsTheoryData
                     {
                         TestId = "SecurityTokenInvalidType",
-                        ExceptionType = ExceptionType.SecurityTokenInvalidType,
+                        ExceptionType = typeof(SecurityTokenInvalidTypeException),
                         ExpectedException = ExpectedException.SecurityTokenInvalidTypeException(),
                     },
                     new ExceptionDetailsTheoryData
                     {
                         TestId = "SecurityTokenKeyWrap",
-                        ExceptionType = ExceptionType.SecurityTokenKeyWrap,
+                        ExceptionType = typeof(SecurityTokenKeyWrapException),
                         ExpectedException = ExpectedException.SecurityTokenKeyWrapException(),
                     },
                     new ExceptionDetailsTheoryData
                     {
                         TestId = "SecurityTokenMalformed",
-                        ExceptionType = ExceptionType.SecurityTokenMalformed,
+                        ExceptionType = typeof(SecurityTokenMalformedException),
                         ExpectedException = ExpectedException.SecurityTokenMalformedException(),
                     },
                     new ExceptionDetailsTheoryData
                     {
                         TestId = "SecurityTokenNoExpiration",
-                        ExceptionType = ExceptionType.SecurityTokenNoExpiration,
+                        ExceptionType = typeof(SecurityTokenNoExpirationException),
                         ExpectedException = ExpectedException.SecurityTokenNoExpirationException(),
                     },
                     new ExceptionDetailsTheoryData
                     {
                         TestId = "SecurityTokenNotYetValid",
-                        ExceptionType = ExceptionType.SecurityTokenNotYetValid,
+                        ExceptionType = typeof(SecurityTokenNotYetValidException),
                         ExpectedException = ExpectedException.SecurityTokenNotYetValidException(),
                     },
                     new ExceptionDetailsTheoryData
                     {
                         TestId = "SecurityTokenReplayDetected",
-                        ExceptionType = ExceptionType.SecurityTokenReplayDetected,
+                        ExceptionType = typeof(SecurityTokenReplayDetectedException),
                         ExpectedException = ExpectedException.SecurityTokenReplayDetectedException(),
                     },
                     new ExceptionDetailsTheoryData
                     {
                         TestId = "SecurityTokenReplayAddFailed",
-                        ExceptionType = ExceptionType.SecurityTokenReplayAddFailed,
+                        ExceptionType = typeof(SecurityTokenReplayAddFailedException),
                         ExpectedException = ExpectedException.SecurityTokenReplayAddFailedException(),
                     },
                     new ExceptionDetailsTheoryData
                     {
                         TestId = "SecurityTokenSignatureKeyNotFound",
-                        ExceptionType = ExceptionType.SecurityTokenSignatureKeyNotFound,
+                        ExceptionType = typeof(SecurityTokenSignatureKeyNotFoundException),
                         ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException(),
                     },
                 };
@@ -184,6 +164,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
     public class ExceptionDetailsTheoryData : TheoryDataBase
     {
-        internal ExceptionType ExceptionType { get; set; }
+        internal Type ExceptionType { get; set; }
     }
 }

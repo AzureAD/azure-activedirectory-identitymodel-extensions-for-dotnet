@@ -3,14 +3,15 @@
 
 using System;
 using System.Security.Claims;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
-namespace Microsoft.IdentityModel.JsonWebTokens.Tests
+namespace Microsoft.IdentityModel.JsonWebTokenHandlerTests
 {
-    [Collection(nameof(JsonWebTokenHandlerClaimsIdentityTests))]
-    public class JsonWebTokenHandlerClaimsIdentityTests
+    [Collection(nameof(ClaimsIdentityTests))]
+    public class ClaimsIdentityTests
     {
         [Fact]
         public void CreateClaimsIdentity_ReturnsCaseSensitveClaimsIdentity_ByDefault()

@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("securityToken")),
                             ValidationFailureType.NullArgument,
-                            ExceptionType.ArgumentNull,
+                            typeof(ArgumentNullException),
                             null,
                             null)
                     },
@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("validationParameters")),
                             ValidationFailureType.NullArgument,
-                            ExceptionType.ArgumentNull,
+                            typeof(ArgumentNullException),
                             null,
                             null)
                     },
@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogMessages.IDX10256,
                                 LogHelper.MarkAsNonPII("type")),
                             ValidationFailureType.TokenTypeValidationFailed,
-                            ExceptionType.SecurityTokenInvalidType,
+                            typeof(SecurityTokenInvalidTypeException),
                             null,
                             null)
                     },
@@ -135,7 +135,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogMessages.IDX10256,
                                 LogHelper.MarkAsNonPII("type")),
                             ValidationFailureType.TokenTypeValidationFailed,
-                            ExceptionType.SecurityTokenInvalidType,
+                            typeof(SecurityTokenInvalidTypeException),
                             null,
                             null)
                     },
@@ -153,7 +153,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII("type"),
                                 LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validTypesNoJwt))),
                             ValidationFailureType.TokenTypeValidationFailed,
-                            ExceptionType.SecurityTokenInvalidType,
+                            typeof(SecurityTokenInvalidTypeException),
                             null,
                             null)
                     }

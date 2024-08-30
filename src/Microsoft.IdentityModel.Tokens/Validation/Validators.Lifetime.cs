@@ -68,7 +68,7 @@ namespace Microsoft.IdentityModel.Tokens
                         LogMessages.IDX10225,
                         LogHelper.MarkAsNonPII(securityToken == null ? "null" : securityToken.GetType().ToString())),
                     ValidationFailureType.LifetimeValidationFailed,
-                    ExceptionType.SecurityTokenNoExpiration,
+                    typeof(SecurityTokenNoExpirationException),
                     new StackFrame(true));
 
             if (notBefore.HasValue && expires.HasValue && (notBefore.Value > expires.Value))
@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Tokens
                         LogHelper.MarkAsNonPII(notBefore.Value),
                         LogHelper.MarkAsNonPII(expires.Value)),
                     ValidationFailureType.LifetimeValidationFailed,
-                    ExceptionType.SecurityTokenInvalidLifetime,
+                    typeof(SecurityTokenInvalidLifetimeException),
                     new StackFrame(true));
 
             DateTime utcNow = DateTime.UtcNow;
@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.Tokens
                         LogHelper.MarkAsNonPII(notBefore.Value),
                         LogHelper.MarkAsNonPII(utcNow)),
                     ValidationFailureType.LifetimeValidationFailed,
-                    ExceptionType.SecurityTokenNotYetValid,
+                    typeof(SecurityTokenNotYetValidException),
                     new StackFrame(true));
 
             if (expires.HasValue && (expires.Value < DateTimeUtil.Add(utcNow, validationParameters.ClockSkew.Negate())))
@@ -99,7 +99,7 @@ namespace Microsoft.IdentityModel.Tokens
                         LogHelper.MarkAsNonPII(expires.Value),
                         LogHelper.MarkAsNonPII(utcNow)),
                     ValidationFailureType.LifetimeValidationFailed,
-                    ExceptionType.SecurityTokenExpired,
+                    typeof(SecurityTokenExpiredException),
                     new StackFrame(true));
 
             // if it reaches here, that means lifetime of the token is valid

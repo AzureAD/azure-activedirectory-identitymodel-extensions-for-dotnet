@@ -54,6 +54,18 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="SecurityTokenException"/> class with a specified error message
+        /// and a reference to the inner exception that is the cause of this exception.
+        /// </summary>
+        /// <param name="exceptionDetail">The error message that explains the reason for the exception.</param>
+        /// <param name="innerException">The <see cref="Exception"/> that is the cause of the current exception, or a null reference if no inner exception is specified.</param>
+        internal SecurityTokenException(ExceptionDetail exceptionDetail, Exception innerException)
+            : base(string.Empty, innerException)
+        {
+            ExceptionDetail = exceptionDetail;
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="SecurityTokenException"/> class.
         /// </summary>
         /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
@@ -95,6 +107,18 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
+        /// <inheritdoc/>
+        public override string Message
+        {
+            get
+            {
+                if (ExceptionDetail == null)
+                    return base.Message;
+
+                return ExceptionDetail.MessageDetail.Message;
+            }
+        }
+
         /// <summary>
         /// Gets or sets the source of the exception.
         /// </summary>
@@ -106,7 +130,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         internal ExceptionDetail ExceptionDetail
         {
-            get; set;
+            get;
         }
 
 #if NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER

@@ -3,17 +3,18 @@
 
 using System;
 using System.IdentityModel.Tokens.Jwt.Tests;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
-namespace Microsoft.IdentityModel.JsonWebTokens.Tests
+namespace Microsoft.IdentityModel.JsonWebTokenHandlerTests
 {
-    public class JsonWebTokenHandlerReadTokenTests
+    public class ReadTokenTests
     {
-        [Theory, MemberData(nameof(JsonWebTokenHandlerReadTokenTestCases), DisableDiscoveryEnumeration = true)]
+        [Theory, MemberData(nameof(ReadTokenTestCases), DisableDiscoveryEnumeration = true)]
         public void ReadToken(TokenReadingTheoryData theoryData)
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.JsonWebTokenHandlerReadTokenTests", theoryData);
@@ -44,17 +45,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Fact]
-        public void ReadToken_ThrowsIfAccessingSecurityTokenOnFailedRead()
-        {
-            Result<SecurityToken, ExceptionDetail> result = JsonWebTokenHandler.ReadToken(
-                null,
-                new CallContext());
-
-            Assert.Throws<InvalidOperationException>(() => result.UnwrapResult());
-        }
-
-        public static TheoryData<TokenReadingTheoryData> JsonWebTokenHandlerReadTokenTestCases
+        public static TheoryData<TokenReadingTheoryData> ReadTokenTestCases
         {
             get
             {
@@ -77,7 +68,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 TokenLogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("token")),
                             ValidationFailureType.NullArgument,
-                            ExceptionType.ArgumentNull,
+                            typeof(ArgumentNullException),
                             null,
                             null)
                     },
@@ -91,7 +82,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 TokenLogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("token")),
                             ValidationFailureType.NullArgument,
-                            ExceptionType.ArgumentNull,
+                            typeof(ArgumentNullException),
                             null,
                             null)
                     },
@@ -104,21 +95,31 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             typeof(SecurityTokenMalformedException)),
                         Result = new ExceptionDetail(
                             new MessageDetail(
-                                LogMessages.IDX14107,
+                                JsonWebTokens.LogMessages.IDX14107,
                                 LogHelper.MarkAsNonPII("token")),
                             ValidationFailureType.TokenReadingFailed,
-                            ExceptionType.SecurityTokenMalformed,
+                            typeof(SecurityTokenMalformedException),
                             null,
                             new SecurityTokenMalformedException()),
                     }
                 };
             }
         }
-    }
 
-    public class TokenReadingTheoryData : TheoryDataBase
-    {
-        public string Token { get; set; }
-        internal Result<SecurityToken, ExceptionDetail> Result { get; set; }
+        [Fact]
+        public void ReadToken_ThrowsIfAccessingSecurityTokenOnFailedRead()
+        {
+            Result<SecurityToken, ExceptionDetail> result = JsonWebTokenHandler.ReadToken(
+                null,
+                new CallContext());
+
+            Assert.Throws<InvalidOperationException>(() => result.UnwrapResult());
+        }
+
+        public class TokenReadingTheoryData : TheoryDataBase
+        {
+            public string Token { get; set; }
+            internal Result<SecurityToken, ExceptionDetail> Result { get; set; }
+        }
     }
 }

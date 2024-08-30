@@ -3,18 +3,18 @@
 
 using System;
 using System.IdentityModel.Tokens.Jwt.Tests;
-using Microsoft.IdentityModel.Abstractions;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
-namespace Microsoft.IdentityModel.JsonWebTokens.Tests
+namespace Microsoft.IdentityModel.JsonWebTokenHandlerTests
 {
-    public class JsonWebTokenHandlerDecryptTokenTests
+    public class DecryptTokenTests
     {
-        [Theory, MemberData(nameof(JsonWebTokenHandlerDecryptTokenTestCases), DisableDiscoveryEnumeration = false)]
+        [Theory, MemberData(nameof(DecryptTokenTestCases), DisableDiscoveryEnumeration = true)]
         public void DecryptToken(TokenDecryptingTheoryData theoryData)
         {
             JsonWebTokenHandler jsonWebTokenHandler = new JsonWebTokenHandler();
@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.Throws<InvalidOperationException>(() => tokenDecryptionResult.UnwrapResult());
         }
 
-        public static TheoryData<TokenDecryptingTheoryData> JsonWebTokenHandlerDecryptTokenTestCases
+        public static TheoryData<TokenDecryptingTheoryData> DecryptTokenTestCases
         {
             get
             {
@@ -111,7 +111,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Result = new ExceptionDetail(
                             new MessageDetail(TokenLogMessages.IDX10612),
                             ValidationFailureType.TokenDecryptionFailed,
-                            ExceptionType.SecurityToken,
+                            typeof(SecurityTokenException),
                             null,
                             null),
                     },
@@ -124,7 +124,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Result = new ExceptionDetail(
                             new MessageDetail(TokenLogMessages.IDX10000, "jwtToken"),
                             ValidationFailureType.NullArgument,
-                            ExceptionType.ArgumentNull,
+                            typeof(ArgumentNullException),
                             null,
                             null),
                     },
@@ -137,7 +137,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Result = new ExceptionDetail(
                             new MessageDetail(TokenLogMessages.IDX10000, "validationParameters"),
                             ValidationFailureType.NullArgument,
-                            ExceptionType.ArgumentNull,
+                            typeof(ArgumentNullException),
                             null,
                             null),
                     },
@@ -195,30 +195,29 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                     new JsonWebToken(ReferenceTokens.JWEDirectEncryptionUnsignedInnerJWTWithAdditionalHeaderClaims),
                                     JwtTokenUtilities.SafeLogJwtToken)),
                             ValidationFailureType.TokenDecryptionFailed,
-                            ExceptionType.SecurityTokenDecryptionFailed,
+                            typeof(SecurityTokenDecryptionFailedException),
                             null,
                             null),
                     }
                 };
             }
         }
-    }
-
-    public class TokenDecryptingTheoryData : TheoryDataBase
-    {
-        public JsonWebToken Token { get; set; }
-        internal Result<string, ExceptionDetail> Result { get; set; }
-        public BaseConfiguration Configuration { get; internal set; }
-        public SecurityTokenDescriptor SecurityTokenDescriptor { get; internal set; }
-        public string TokenString { get; internal set; }
-        internal ValidationParameters ValidationParameters { get; set; }
-    }
-
-    public class CustomConfiguration : BaseConfiguration
-    {
-        public CustomConfiguration(SecurityKey tokenDecryptionKey) : base()
+        public class TokenDecryptingTheoryData : TheoryDataBase
         {
-            TokenDecryptionKeys.Add(tokenDecryptionKey);
+            public JsonWebToken Token { get; set; }
+            internal Result<string, ExceptionDetail> Result { get; set; }
+            public BaseConfiguration Configuration { get; internal set; }
+            public SecurityTokenDescriptor SecurityTokenDescriptor { get; internal set; }
+            public string TokenString { get; internal set; }
+            internal ValidationParameters ValidationParameters { get; set; }
+        }
+
+        public class CustomConfiguration : BaseConfiguration
+        {
+            public CustomConfiguration(SecurityKey tokenDecryptionKey) : base()
+            {
+                TokenDecryptionKeys.Add(tokenDecryptionKey);
+            }
         }
     }
 }

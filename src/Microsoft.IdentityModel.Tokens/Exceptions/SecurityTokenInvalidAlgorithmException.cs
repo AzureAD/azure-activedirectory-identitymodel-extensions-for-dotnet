@@ -51,6 +51,16 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="SecurityTokenInvalidAlgorithmException"/> class.
+        /// </summary>
+        /// <param name="exceptionDetail">Additional information to be included in the exception and displayed to user.</param>
+        /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
+        internal SecurityTokenInvalidAlgorithmException(ExceptionDetail exceptionDetail, Exception innerException)
+            : base(exceptionDetail, innerException)
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="SecurityTokenInvalidTypeException"/> class.
         /// </summary>
         /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
