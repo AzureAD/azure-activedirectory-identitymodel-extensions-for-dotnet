@@ -2,8 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
-using Microsoft.IdentityModel.Logging;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using System.Threading;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -15,6 +17,7 @@ namespace Microsoft.IdentityModel.Tokens
         private CryptoProviderFactory _cryptoProviderFactory;
         private object _internalIdLock = new object();
         private string _internalId;
+        private IDictionary<string, object> _propertyBag;
 
         internal SecurityKey(SecurityKey key)
         {
@@ -79,6 +82,15 @@ namespace Microsoft.IdentityModel.Tokens
                 _cryptoProviderFactory = value ?? throw LogHelper.LogArgumentNullException(nameof(value));
             }
         }
+
+        /// <summary>
+        /// Gets or sets the <see cref="IDictionary{String, Object}"/> that contains a collection of custom key/value pairs. This allows addition of data that could be used in custom scenarios. This uses <see cref="StringComparer.Ordinal"/> for case-sensitive comparison of keys.
+        /// </summary>
+        [JsonIgnore]
+        public IDictionary<string, object> PropertyBag =>
+            _propertyBag ??
+            Interlocked.CompareExchange(ref _propertyBag, new Dictionary<string, object>(StringComparer.Ordinal), null) ??
+            _propertyBag;
 
         /// <summary>
         /// Returns the formatted string: GetType(), KeyId: 'value', InternalId: 'value'.

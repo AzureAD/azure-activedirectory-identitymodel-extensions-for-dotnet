@@ -46,6 +46,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public const string IntrospectionEndpointAuthSigningAlgValuesSupported = "introspection_endpoint_auth_signing_alg_values_supported";
         public const string JwksUri = "jwks_uri";
         public const string Issuer = "issuer";
+        public const string CloudInstanceName = "cloud_instance_name";
         public const string LogoutSessionSupported = "logout_session_supported";
         public const string MicrosoftMultiRefreshToken = "microsoft_multi_refresh_token";
         public const string OpPolicyUri = "op_policy_uri";
