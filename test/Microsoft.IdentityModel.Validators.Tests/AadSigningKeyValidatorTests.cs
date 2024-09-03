@@ -20,8 +20,8 @@ namespace Microsoft.IdentityModel.Validators.Tests
     [Collection(nameof(AadSigningKeyValidatorTests))]
     public class AadSigningKeyValidatorTests
     {
-        [Theory, MemberData(nameof(EnableAadSigningKeyValidationTestCases))]
-        public async Task EnableAadSigningKeyValidationTests(EnableAadSigningKeyValidationTheoryData theoryData)
+        [Theory, MemberData(nameof(EnableEntraIdSigningKeyValidationTestCases))]
+        public async Task EnableEntraIdSigningKeyValidationTests(EnableAadSigningKeyValidationTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.EnableAadSigningKeyValidationTests", theoryData);
             try
@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
                 var handler = new JsonWebTokenHandler();
                 AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).ConfigurationManagerV1 = theoryData.TokenValidationParameters.ConfigurationManager;
-                theoryData.TokenValidationParameters.EnableAadSigningKeyValidation(theoryData.ServiceCloudInstanceName);
+                theoryData.TokenValidationParameters.EnableEntraIdSigningKeyValidation(theoryData.ServiceCloudInstanceName);
 
                 var validationResult = await handler.ValidateTokenAsync(theoryData.Token, theoryData.TokenValidationParameters);
                 theoryData.ExpectedException.ProcessNoException(context);
@@ -59,7 +59,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<EnableAadSigningKeyValidationTheoryData> EnableAadSigningKeyValidationTestCases()
+        public static TheoryData<EnableAadSigningKeyValidationTheoryData> EnableEntraIdSigningKeyValidationTestCases()
         {
             var signingKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
             signingKeysConfig.SigningKeys.Add(KeyingMaterial.DefaultX509Key_2048);
@@ -538,10 +538,9 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
             try
             {
-                var result = AadTokenValidationParametersExtension.StoreValidateSigningKeyCloudInstanceName(
+                AadTokenValidationParametersExtension.ValidateSigningKeyCloudInstanceName(
                     theoryData.SecurityKey, theoryData.OpenIdConnectConfiguration, theoryData.ServiceCloudInstanceName);
                 theoryData.ExpectedException.ProcessNoException(context);
-                Assert.True(result);
             }
             catch (Exception ex)
             {

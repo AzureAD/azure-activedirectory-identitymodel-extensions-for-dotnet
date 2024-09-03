@@ -10,7 +10,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// This exception is thrown when specific cloud instance was not matched with cloud instance of signing key.
     /// </summary>
     [Serializable]
-    public class SecurityTokenInvalidCloudInstanceException : SecurityTokenValidationException
+    public class SecurityTokenInvalidCloudInstanceException : SecurityTokenInvalidSigningKeyException
     {
         [NonSerialized]
         const string _Prefix = "Microsoft.IdentityModel." + nameof(SecurityTokenInvalidCloudInstanceException) + ".";
