@@ -10,9 +10,9 @@ using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
+#nullable enable
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
-#nullable enable
     public partial class JsonWebTokenHandler : TokenHandler
     {
         /// <summary>
@@ -23,7 +23,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="configuration">The <see cref="BaseConfiguration"/> to be used for validating the token.</param>
         /// <param name="callContext"></param>
         /// <returns>The decoded / cleartext contents of the JWE.</returns>
-        internal Result<string, ExceptionDetail> DecryptToken(
+        internal Result<string> DecryptToken(
             JsonWebToken jwtToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,
@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return new ExceptionDetail(
                     new MessageDetail(TokenLogMessages.IDX10612),
                     ValidationFailureType.TokenDecryptionFailed,
-                    ExceptionType.SecurityToken,
+                    typeof(SecurityTokenException),
                     headerMissingStackFrame);
             }
 
@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         TokenLogMessages.IDX10609,
                         LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken)),
                     ValidationFailureType.TokenDecryptionFailed,
-                    ExceptionType.SecurityTokenDecryptionFailed,
+                    typeof(SecurityTokenDecryptionFailedException),
                     noKeysTriedStackFrame);
             }
 
@@ -214,7 +214,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         exceptionStrings?.ToString() ?? "",
                         LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken)),
                     ValidationFailureType.TokenDecryptionFailed,
-                    ExceptionType.SecurityTokenKeyWrap,
+                    typeof(SecurityTokenKeyWrapException),
                     decryptionKeyUnwrapFailedStackFrame,
                     null);
 
@@ -263,6 +263,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             return null;
         }
-#nullable restore
     }
 }
+#nullable restore

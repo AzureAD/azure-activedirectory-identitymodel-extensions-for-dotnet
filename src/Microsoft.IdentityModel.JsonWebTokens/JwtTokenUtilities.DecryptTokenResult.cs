@@ -19,7 +19,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="decryptionParameters">The decryption parameters container.</param>
         /// <param name="callContext">The call context used for logging.</param>
         /// <returns>The decrypted, and if the 'zip' claim is set, decompressed string representation of the token.</returns>
-        internal static Result<string, ExceptionDetail> DecryptJwtToken(
+        internal static Result<string> DecryptJwtToken(
             JsonWebToken jsonWebToken,
             ValidationParameters validationParameters,
             JwtTokenDecryptionParameters decryptionParameters,
@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         continue;
                     }
 
-                    Result<string, ExceptionDetail> result = validationParameters.AlgorithmValidator(zipAlgorithm, key, jsonWebToken, validationParameters, callContext);
+                    Result<string> result = validationParameters.AlgorithmValidator(zipAlgorithm, key, jsonWebToken, validationParameters, callContext);
                     if (!result.IsSuccess)
                     {
                         (exceptionStrings ??= new StringBuilder()).AppendLine(result.UnwrapError().MessageDetail.Message);
@@ -123,7 +123,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return new ExceptionDetail(
                     new MessageDetail(TokenLogMessages.IDX10679, zipAlgorithm),
                     ValidationFailureType.TokenDecryptionFailed,
-                    ExceptionType.SecurityTokenDecompressionFailed,
+                    typeof(SecurityTokenDecompressionFailedException),
                     new StackFrame(true),
                     ex);
             }
