@@ -39,11 +39,10 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 }
 
                 var handler = new JsonWebTokenHandler();
-                var jwt = handler.ReadJsonWebToken(Default.AsymmetricJws);
                 AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).ConfigurationManagerV1 = theoryData.TokenValidationParameters.ConfigurationManager;
                 theoryData.TokenValidationParameters.EnableAadSigningKeyValidation(theoryData.ServiceCloudInstanceName);
 
-                var validationResult = await handler.ValidateTokenAsync(jwt, theoryData.TokenValidationParameters);
+                var validationResult = await handler.ValidateTokenAsync(theoryData.Token, theoryData.TokenValidationParameters);
                 theoryData.ExpectedException.ProcessNoException(context);
                 Assert.NotNull(theoryData.TokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration);
                 Assert.Equal(theoryData.ExpectedValidationResult, validationResult.IsValid);
@@ -76,12 +75,14 @@ namespace Microsoft.IdentityModel.Validators.Tests
             theoryData.Add(new EnableAadSigningKeyValidationTheoryData
             {
                 TestId = "IssuerSigningKeyValidatorUsingConfiguration_Delegate_IsSetByWilson",
+                Token = Default.AsymmetricJws,
                 TokenValidationParameters = validationParameters,
                 ExpectedValidationResult = true,
             });
             theoryData.Add(new EnableAadSigningKeyValidationTheoryData
             {
                 TestId = "IssuerSigningKeyValidatorUsingConfiguration_Delegate_IsSetByDeveloper",
+                Token = Default.AsymmetricJws,
                 TokenValidationParameters = validationParameters,
                 SetDelegateUsingConfig = true,
                 ExpectedValidationResult = true,
@@ -89,50 +90,96 @@ namespace Microsoft.IdentityModel.Validators.Tests
             theoryData.Add(new EnableAadSigningKeyValidationTheoryData
             {
                 TestId = "IssuerSigningKeyValidator_Delegate_IsSetByDeveloper",
+                Token = Default.AsymmetricJws,
                 TokenValidationParameters = validationParameters,
                 SetDelegateWithoutConfig = true,
                 ExpectedValidationResult = true,
             });
 
-            signingKeysConfig = SetupOpenIdConnectConfigurationMock();
             var jwk = KeyingMaterial.JsonWebKeyX509_2048;
             jwk.AdditionalData.Add(OpenIdProviderMetadataNames.CloudInstanceName, Default.CloudInstanceName);
-            signingKeysConfig.JsonWebKeySet.Keys.Add(jwk);
+            signingKeysConfig = SetupOpenIdConnectConfigurationMock(jwk);
             theoryData.Add(new EnableAadSigningKeyValidationTheoryData
             {
                 TestId = "IssuerSigningKeyValidatorUsingConfiguration_CloudInstanceNamePassed_CloudInstanceNameIsMatched_ValidationSuccess",
+                Token = Default.AsymmetricJws,
                 TokenValidationParameters = SetupTokenValidationParametersMock(signingKeysConfig),
                 ServiceCloudInstanceName = Default.CloudInstanceName,
                 ExpectedValidationResult = true,
             });
 
-            signingKeysConfig = SetupOpenIdConnectConfigurationMock();
             jwk = KeyingMaterial.JsonWebKeyX509_2048;
             jwk.AdditionalData.Add(OpenIdProviderMetadataNames.CloudInstanceName, Default.CloudInstanceName);
-            signingKeysConfig.JsonWebKeySet.Keys.Add(jwk);
+            signingKeysConfig = SetupOpenIdConnectConfigurationMock(jwk);
             theoryData.Add(new EnableAadSigningKeyValidationTheoryData
             {
                 TestId = "IssuerSigningKeyValidatorUsingConfiguration_CloudInstanceNamePassed_CloudInstanceNameIsNotMatched_ValidationFailed",
+                Token = Default.AsymmetricJws,
                 TokenValidationParameters = SetupTokenValidationParametersMock(signingKeysConfig),
                 ServiceCloudInstanceName = "microsoftonline.us",
                 ExpectedValidationResult = false,
             });
 
-            signingKeysConfig = SetupOpenIdConnectConfigurationMock();
-            signingKeysConfig.JsonWebKeySet.Keys.Add(KeyingMaterial.JsonWebKeyX509_2048);
+            signingKeysConfig = SetupOpenIdConnectConfigurationMock(KeyingMaterial.JsonWebKeyX509_2048);
             theoryData.Add(new EnableAadSigningKeyValidationTheoryData
             {
                 TestId = "IssuerSigningKeyValidatorUsingConfiguration_CloudInstanceNamePassed_SecurityKeyCloudInstanceAbsent_ValidationSuccess",
+                Token = Default.AsymmetricJws,
                 TokenValidationParameters = SetupTokenValidationParametersMock(signingKeysConfig),
                 ServiceCloudInstanceName = "microsoftonline.us",
                 ExpectedValidationResult = true,
             });
 
-            OpenIdConnectConfiguration SetupOpenIdConnectConfigurationMock()
+            var tidClaim = new Claim(ValidatorConstants.ClaimNameTid, ValidatorConstants.TenantIdAsGuid);
+            var issClaim = new Claim(ValidatorConstants.ClaimNameIss, ValidatorConstants.AadIssuer);
+            jwk = KeyingMaterial.CreateJsonWebKeyEC(JsonWebKeyECTypes.P256, Default.SymmetricSigningKey.KeyId, KeyingMaterial.P256_D, KeyingMaterial.P256_X, KeyingMaterial.P256_Y);
+            jwk.AdditionalData.Add(OpenIdProviderMetadataNames.Issuer, ValidatorConstants.AadIssuer);
+            signingKeysConfig = SetupOpenIdConnectConfigurationMock(jwk);
+            signingKeysConfig.Issuer = ValidatorConstants.AadIssuer;
+            theoryData.Add(new EnableAadSigningKeyValidationTheoryData
+            {
+                TestId = "IssuerSigningKeyValidatorUsingConfiguration_IssuerMatched_ValidationSuccess",
+                Token = Default.Jwt(Default.SecurityTokenDescriptor(KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2, new List<Claim> { issClaim, tidClaim })),
+                TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(signingKeysConfig),
+                    IssuerSigningKey = Default.SymmetricSigningKey,
+                    ValidateIssuerSigningKey = true,
+                    ValidateAudience = false,
+                    ValidateLifetime = false
+                },
+                ExpectedValidationResult = true,
+            });
+
+            issClaim = new Claim(ValidatorConstants.ClaimNameIss, "different issue");
+            jwk = KeyingMaterial.CreateJsonWebKeyEC(JsonWebKeyECTypes.P256, Default.SymmetricSigningKey.KeyId, KeyingMaterial.P256_D, KeyingMaterial.P256_X, KeyingMaterial.P256_Y);
+            jwk.AdditionalData.Add(OpenIdProviderMetadataNames.Issuer, ValidatorConstants.AadIssuer);
+            signingKeysConfig = SetupOpenIdConnectConfigurationMock(jwk);
+            signingKeysConfig.Issuer = ValidatorConstants.AadIssuer;
+            theoryData.Add(new EnableAadSigningKeyValidationTheoryData
+            {
+                TestId = "IssuerSigningKeyValidatorUsingConfiguration_IssuerNotMatched_ValidationFailed",
+                Token = Default.Jwt(Default.SecurityTokenDescriptor(KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2, new List<Claim> { issClaim, tidClaim })),
+                TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(signingKeysConfig),
+                    IssuerSigningKey = Default.SymmetricSigningKey,
+                    ValidateIssuerSigningKey = true,
+                    ValidateAudience = false,
+                    ValidateLifetime = false
+                },
+                ExpectedValidationResult = false,
+            });
+
+            OpenIdConnectConfiguration SetupOpenIdConnectConfigurationMock(JsonWebKey jsonWebKey = null)
             {
                 OpenIdConnectConfiguration config = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
                 config.SigningKeys.Add(KeyingMaterial.DefaultX509Key_2048);
                 config.JsonWebKeySet = new JsonWebKeySet();
+                if (jsonWebKey != null)
+                {
+                    config.JsonWebKeySet.Keys.Add(jsonWebKey);
+                }
                 return config;
             };
 
@@ -491,7 +538,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
             try
             {
-                var result = AadTokenValidationParametersExtension.ValidateSigningKeyCloudInstanceName(
+                var result = AadTokenValidationParametersExtension.StoreValidateSigningKeyCloudInstanceName(
                     theoryData.SecurityKey, theoryData.OpenIdConnectConfiguration, theoryData.ServiceCloudInstanceName);
                 theoryData.ExpectedException.ProcessNoException(context);
                 Assert.True(result);
@@ -612,6 +659,8 @@ namespace Microsoft.IdentityModel.Validators.Tests
         public class EnableAadSigningKeyValidationTheoryData : TheoryDataBase
         {
             public TokenValidationParameters TokenValidationParameters { get; set; }
+
+            public string Token { get; set; }
 
             public string ServiceCloudInstanceName { get; set; }
 

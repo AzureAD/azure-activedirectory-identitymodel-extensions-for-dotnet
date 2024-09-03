@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.Validators
 
             tokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration = (securityKey, securityToken, tvp, config) =>
             {
-                ValidateSigningKeyCloudInstanceName(securityKey, config, cloudInstanceName);
+                StoreValidateSigningKeyCloudInstanceName(securityKey, config, cloudInstanceName);
                 ValidateSigningKeyIssuer(securityKey, securityToken, config);
 
                 // preserve and run provided logic
@@ -139,13 +139,13 @@ namespace Microsoft.IdentityModel.Validators
         }
 
         /// <summary>
-        /// Validates the cloud instance name signing key.
+        /// Stores the cloud instance name of the signing key in a property bag and validates it.
         /// </summary>
         /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
         /// <param name="configuration">The <see cref="BaseConfiguration"/> provided.</param>
         /// <param name="cloudInstanceName">The cloud instance name to validate against.</param>
         /// <returns><c>true</c> if the cloud instance name of the signing key is valid; otherwise, <c>false</c>.</returns>
-        internal static bool ValidateSigningKeyCloudInstanceName(SecurityKey securityKey, BaseConfiguration configuration, string cloudInstanceName)
+        internal static bool StoreValidateSigningKeyCloudInstanceName(SecurityKey securityKey, BaseConfiguration configuration, string cloudInstanceName)
         {
             if (securityKey == null)
                 return true;
