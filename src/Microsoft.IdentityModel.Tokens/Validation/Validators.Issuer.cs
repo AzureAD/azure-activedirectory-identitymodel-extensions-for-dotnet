@@ -6,9 +6,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 
+#nullable enable
 namespace Microsoft.IdentityModel.Tokens
 {
-#nullable enable
     internal enum IssuerValidationSource
     {
         NotValidated = 0,
@@ -141,5 +141,5 @@ namespace Microsoft.IdentityModel.Tokens
                 new StackFrame(true));
         }
     }
-#nullable restore
 }
+#nullable restore

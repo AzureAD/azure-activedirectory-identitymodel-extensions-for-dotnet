@@ -6,9 +6,9 @@ using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Logging;
 
+#nullable enable
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
-#nullable enable
     public partial class JsonWebTokenHandler
     {
         /// <summary>
@@ -141,5 +141,5 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return identity;
         }
     }
-#nullable restore
 }
+#nullable restore

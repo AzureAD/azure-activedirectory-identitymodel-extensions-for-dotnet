@@ -10,9 +10,9 @@ using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
+#nullable enable
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
-#nullable enable
     public partial class JsonWebTokenHandler : TokenHandler
     {
         /// <summary>
@@ -263,6 +263,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             return null;
         }
-#nullable restore
     }
 }
+#nullable restore

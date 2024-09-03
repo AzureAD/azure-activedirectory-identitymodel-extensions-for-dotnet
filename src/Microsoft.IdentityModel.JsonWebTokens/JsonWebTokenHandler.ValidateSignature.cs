@@ -10,9 +10,9 @@ using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
+#nullable enable
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
-#nullable enable
     /// <remarks>This partial class contains methods and logic related to the validation of tokens' signatures.</remarks>
     public partial class JsonWebTokenHandler : TokenHandler
     {
@@ -375,5 +375,5 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             public IList<SecurityKey> KeysAttempted = keysAttempted;
         }
     }
-#nullable restore
 }
+#nullable restore

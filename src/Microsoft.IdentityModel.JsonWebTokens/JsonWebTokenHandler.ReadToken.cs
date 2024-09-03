@@ -5,12 +5,12 @@ using System;
 using System.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
 
+#nullable enable
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
     /// <remarks>This partial class contains methods and logic related to the validation of tokens.</remarks>
     public partial class JsonWebTokenHandler : TokenHandler
     {
-#nullable enable
         /// <summary>
         /// Converts a string into an instance of <see cref="JsonWebToken"/>, returned inside of a <see cref="Result{TResult}"/>.
         /// </summary>

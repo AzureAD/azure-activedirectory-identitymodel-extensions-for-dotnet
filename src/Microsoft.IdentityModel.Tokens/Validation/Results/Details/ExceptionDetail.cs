@@ -96,7 +96,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the type of exception that occurred.
         /// </summary>
-        public Type Type => _exceptionType;
+        public Type ExceptionType => _exceptionType;
 
         /// <summary>
         /// Gets the inner exception that occurred.

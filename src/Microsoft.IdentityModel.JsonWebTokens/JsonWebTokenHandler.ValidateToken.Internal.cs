@@ -125,8 +125,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             BaseConfiguration? currentConfiguration =
-                await GetCurrentConfigurationAsync(validationParameters)
-                .ConfigureAwait(false);
+                await GetCurrentConfigurationAsync(validationParameters).ConfigureAwait(false);
 
             Result<ValidationResult> result = jsonWebToken.IsEncrypted ?
                 await ValidateJWEAsync(jsonWebToken, validationParameters, currentConfiguration, callContext, cancellationToken).ConfigureAwait(false) :
@@ -150,7 +149,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return result;
             }
 
-            if (TokenUtilities.IsRecoverableExceptionType(result.UnwrapError().Type))
+            if (TokenUtilities.IsRecoverableExceptionType(result.UnwrapError().ExceptionType))
             {
                 // If we were still unable to validate, attempt to refresh the configuration and validate using it
                 // but ONLY if the currentConfiguration is not null. We want to avoid refreshing the configuration on
@@ -182,7 +181,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     validationParameters.RefreshBeforeValidation = false;
                     validationParameters.ValidateWithLKG = true;
-                    Type recoverableExceptionType = result.UnwrapError().Type;
+                    Type recoverableExceptionType = result.UnwrapError().ExceptionType;
 
                     BaseConfiguration[] validConfigurations = validationParameters.ConfigurationManager.GetValidLkgConfigurations();
                     for (int i = 0; i < validConfigurations.Length; i++)
@@ -192,8 +191,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             jsonWebToken.Kid, currentConfiguration, lkgConfiguration, recoverableExceptionType))
                         {
                             result = jsonWebToken.IsEncrypted ?
-                                await ValidateJWEAsync(jsonWebToken, validationParameters, currentConfiguration, callContext, cancellationToken).ConfigureAwait(false) :
-                                await ValidateJWSAsync(jsonWebToken, validationParameters, currentConfiguration, callContext, cancellationToken).ConfigureAwait(false);
+                                await ValidateJWEAsync(jsonWebToken, validationParameters, lkgConfiguration, callContext, cancellationToken).ConfigureAwait(false) :
+                                await ValidateJWSAsync(jsonWebToken, validationParameters, lkgConfiguration, callContext, cancellationToken).ConfigureAwait(false);
 
                             if (result.IsSuccess)
                                 return result;
