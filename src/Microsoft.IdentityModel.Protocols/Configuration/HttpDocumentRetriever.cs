@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -76,6 +77,18 @@ namespace Microsoft.IdentityModel.Protocols
         public bool RequireHttps { get; set; } = true;
 
         /// <summary>
+        /// If set specifies the protocol version to use when sending HTTP requests.
+        /// </summary>
+        public Version HttpVersion { get; set; }
+
+#if NET6_0_OR_GREATER
+        /// <summary>
+        /// If set specifies the protocol version policy to use when sending HTTP requests.
+        /// </summary>
+        public HttpVersionPolicy? HttpVersionPolicy { get; set; }
+#endif
+
+        /// <summary>
         /// Returns a task which contains a string converted from remote document when completed, by using the provided address.
         /// </summary>
         /// <param name="address">Location of document</param>
@@ -132,6 +145,32 @@ namespace Microsoft.IdentityModel.Protocols
             throw LogHelper.LogExceptionMessage(unsuccessfulHttpResponseException);
         }
 
+        /// <summary>
+        /// Applies the HTTP version and version policy to the <see cref="HttpRequestMessage"/>.
+        /// </summary>
+        /// <param name="httpClient">The <see cref="HttpClient"/> used to obtain the default values.</param>
+        /// <param name="message">The <see cref="HttpRequestMessage"/> where to apply the version and policy.</param>
+        [SuppressMessage("Usage", "CA1801:Review unused parameters", Justification = "Parameter is only used for .NET 6")]
+        private void ApplyHttpVersionAndPolicy(HttpClient httpClient, HttpRequestMessage message)
+        {
+            // either use explicit or default version from HttpClient
+            if (HttpVersion != null)
+            {
+                message.Version = HttpVersion;
+            }
+            else
+            {
+#if NET6_0_OR_GREATER
+                message.Version = httpClient.DefaultRequestVersion;
+#endif
+            }
+
+#if NET6_0_OR_GREATER
+            // either use explicit or default version policy from HttpClient
+            message.VersionPolicy = HttpVersionPolicy.GetValueOrDefault(httpClient.DefaultVersionPolicy);
+#endif
+        }
+
         private async Task<HttpResponseMessage> SendAndRetryOnNetworkErrorAsync(HttpClient httpClient, Uri uri)
         {
             int maxAttempt = 2;
@@ -141,6 +180,8 @@ namespace Microsoft.IdentityModel.Protocols
                 // need to create a new message each time since you cannot send the same message twice
                 using (var message = new HttpRequestMessage(HttpMethod.Get, uri))
                 {
+                    ApplyHttpVersionAndPolicy(httpClient, message);
+
                     if (SendAdditionalHeaderData)
                         IdentityModelTelemetryUtil.SetTelemetryData(message, AdditionalHeaderData);
 
