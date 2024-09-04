@@ -61,11 +61,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 theoryData.ExpectedException.ProcessException(tokenValidationResult.Exception, context);
 
-                // If there is a special case for the ValidationParameters path, use that.
-                if (theoryData.ExpectedExceptionValidationParameters != null)
-                    theoryData.ExpectedExceptionValidationParameters.ProcessException(result.UnwrapError().GetException(), context);
-                else
-                    theoryData.ExpectedException.ProcessException(result.UnwrapError().GetException(), context);
+                if (!result.IsSuccess)
+                {
+                    // If there is a special case for the ValidationParameters path, use that.
+                    if (theoryData.ExpectedExceptionValidationParameters != null)
+                        theoryData.ExpectedExceptionValidationParameters.ProcessException(result.UnwrapError().GetException(), context);
+                    else
+                        theoryData.ExpectedException.ProcessException(result.UnwrapError().GetException(), context);
+                }
             }
 
             TestUtilities.AssertFailIfErrors(context);
@@ -108,7 +111,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ExpectedIsValid = false,
                         ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10205:"),
                         // ValidateTokenAsync with ValidationParameters returns a different error message to account for the
-                        // removalof the ValidIssuer property from the ValidationParameters class.
+                        // removal of the ValidIssuer property from the ValidationParameters class.
                         ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidIssuerException("IDX10212:"),
                     },
                     new JsonWebTokenHandlerValidationParametersTheoryData
@@ -122,7 +125,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ExpectedIsValid = false,
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
                         // ValidateTokenAsync with ValidationParameters returns a different error message to account for the
-                        // removalof the ValidAudience property from the ValidationParameters class.
+                        // removal of the ValidAudience property from the ValidationParameters class.
                         ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidAudienceException("IDX10215:"),
                     },
                     new JsonWebTokenHandlerValidationParametersTheoryData
@@ -138,24 +141,58 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     },
                     new JsonWebTokenHandlerValidationParametersTheoryData
                     {
-                        TestId = "Invalid_TokenSignedWithDifferentKey",
+                        TestId = "Invalid_TokenSignedWithDifferentKey_KeyIdPresent_TryAllKeysFalse",
                         TokenValidationParameters = CreateTokenValidationParameters(
                             Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
                         ValidationParameters = CreateValidationParameters(
                             Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         ExpectedIsValid = false,
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10503:"),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10500:"),
                         // ValidateTokenAsync with ValidationParameters returns a different error message in the case where a
                         // key is not found in the IssuerSigningKeys collection and TryAllKeys is false.
                         ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10502:"),
+                    },
+                    new JsonWebTokenHandlerValidationParametersTheoryData
+                    {
+                        TestId = "Invalid_TokenSignedWithDifferentKey_KeyIdPresent_TryAllKeysTrue",
+                        TokenValidationParameters = CreateTokenValidationParameters(
+                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey, tryAllKeys: true),
+                        ValidationParameters = CreateValidationParameters(
+                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey, tryAllKeys: true),
+                        SigningCredentials = Default.SymmetricSigningCredentials,
+                        ExpectedIsValid = false,
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10503:"),
+                    },
+                    new JsonWebTokenHandlerValidationParametersTheoryData
+                    {
+                        TestId = "Invalid_TokenSignedWithDifferentKey_KeyIdNotPresent_TryAllKeysFalse",
+                        TokenValidationParameters = CreateTokenValidationParameters(
+                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
+                        ValidationParameters = CreateValidationParameters(
+                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
+                        SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2_NoKeyId,
+                        ExpectedIsValid = false,
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10500:"),
+                    },
+                    new JsonWebTokenHandlerValidationParametersTheoryData
+                    {
+                        TestId = "Invalid_TokenSignedWithDifferentKey_KeyIdNotPresent_TryAllKeysTrue",
+                        TokenValidationParameters = CreateTokenValidationParameters(
+                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey, tryAllKeys: true),
+                        ValidationParameters = CreateValidationParameters(
+                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey, tryAllKeys: true),
+                        SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2_NoKeyId,
+                        ExpectedIsValid = false,
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10517:"),
                     },
                 };
 
                 static TokenValidationParameters CreateTokenValidationParameters(
                     string issuer,
                     List<string> audiences,
-                    SecurityKey issuerSigningKey) => new TokenValidationParameters
+                    SecurityKey issuerSigningKey,
+                    bool tryAllKeys = false) => new TokenValidationParameters
                     {
                         ValidateAudience = true,
                         ValidateIssuer = true,
@@ -165,17 +202,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         IssuerSigningKey = issuerSigningKey,
                         ValidAudiences = audiences,
                         ValidIssuer = issuer,
+                        TryAllIssuerSigningKeys = tryAllKeys,
                     };
 
                 static ValidationParameters CreateValidationParameters(
                     string issuer,
                     List<string> audiences,
-                    SecurityKey issuerSigningKey)
+                    SecurityKey issuerSigningKey,
+                    bool tryAllKeys = false)
                 {
                     ValidationParameters validationParameters = new ValidationParameters();
                     validationParameters.ValidIssuers.Add(issuer);
                     audiences.ForEach(audience => validationParameters.ValidAudiences.Add(audience));
                     validationParameters.IssuerSigningKeys.Add(issuerSigningKey);
+                    validationParameters.TryAllIssuerSigningKeys = tryAllKeys;
 
                     return validationParameters;
                 }
