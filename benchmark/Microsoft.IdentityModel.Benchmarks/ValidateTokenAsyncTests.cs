@@ -1,6 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+#if NET8_0_OR_GREATER
+using System;
+#endif
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -27,9 +30,25 @@ namespace Microsoft.IdentityModel.Benchmarks
         private string _jws;
         private string _jwsExtendedClaims;
         private TokenValidationParameters _tokenValidationParameters;
+        private TokenValidationParameters _tokenValidationParametersValidateStringIssuer;
+        private TokenValidationParameters _tokenValidationParametersValidateBytesIssuer;
         private TokenValidationParameters _invalidTokenValidationParameters;
         private ValidationParameters _validationParameters;
         private ValidationParameters _invalidValidationParameters;
+
+        private static ValueTask<string> IssuerValidatorCompareString(string issuer, SecurityToken token, TokenValidationParameters validationParameters)
+        {
+            var isValid = string.Equals(((JsonWebToken)token).Issuer, validationParameters.ValidIssuer);
+            return new ValueTask<string>(issuer);
+        }
+
+        private static ValueTask<string> IssuerValidatorCompareBytes(string issuer, SecurityToken token, TokenValidationParameters validationParameters)
+        {
+#if NET8_0_OR_GREATER
+            var isValid = ((JsonWebToken)token).IssuerBytes.SequenceEqual(validationParameters.ValidIssuerBytes.Span);
+#endif
+            return new ValueTask<string>(issuer);
+        }
 
         [GlobalSetup]
         public void Setup()
@@ -61,6 +80,24 @@ namespace Microsoft.IdentityModel.Benchmarks
                 IssuerSigningKey = BenchmarkUtils.SigningCredentialsRsaSha256.Key,
             };
 
+            _tokenValidationParametersValidateStringIssuer = new TokenValidationParameters()
+            {
+                ValidAudience = BenchmarkUtils.Audience,
+                ValidateLifetime = true,
+                ValidIssuer = BenchmarkUtils.Issuer,
+                IssuerSigningKey = BenchmarkUtils.SigningCredentialsRsaSha256.Key,
+                IssuerValidatorAsync = IssuerValidatorCompareString,
+            };
+
+            _tokenValidationParametersValidateBytesIssuer = new TokenValidationParameters()
+            {
+                ValidAudience = BenchmarkUtils.Audience,
+                ValidateLifetime = true,
+                ValidIssuer = BenchmarkUtils.Issuer,
+                IssuerSigningKey = BenchmarkUtils.SigningCredentialsRsaSha256.Key,
+                IssuerValidatorAsync = IssuerValidatorCompareBytes,
+            };
+
             _validationParameters = new ValidationParameters();
             _validationParameters.ValidAudiences.Add(BenchmarkUtils.Audience);
             _validationParameters.ValidIssuers.Add(BenchmarkUtils.Issuer);
@@ -83,13 +120,19 @@ namespace Microsoft.IdentityModel.Benchmarks
             _callContext = new CallContext();
         }
 
-        [BenchmarkCategory("ValidateTokenAsync_Success"), Benchmark]
+        [Benchmark(Baseline = true)]
+        public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsyncCompareStringIssuer() => await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _tokenValidationParametersValidateStringIssuer).ConfigureAwait(false);
+
+        [Benchmark]
+        public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsyncCompareByteIssuer() => await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _tokenValidationParametersValidateBytesIssuer).ConfigureAwait(false);
+
+        //[BenchmarkCategory("ValidateTokenAsync_Success"), Benchmark]
         public async Task<TokenValidationResult> JwtSecurityTokenHandler_ValidateTokenAsync() => await _jwtSecurityTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _tokenValidationParameters).ConfigureAwait(false);
 
-        [BenchmarkCategory("ValidateTokenAsync_Success"), Benchmark(Baseline = true)]
+        //[BenchmarkCategory("ValidateTokenAsync_Success"), Benchmark(Baseline = true)]
         public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsyncWithTVP() => await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _tokenValidationParameters).ConfigureAwait(false);
 
-        [BenchmarkCategory("ValidateTokenAsync_Success"), Benchmark]
+        //[BenchmarkCategory("ValidateTokenAsync_Success"), Benchmark]
         public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsyncWithTVPUsingModifiedClone()
         {
             var tokenValidationParameters = _tokenValidationParameters.Clone();
@@ -99,7 +142,7 @@ namespace Microsoft.IdentityModel.Benchmarks
             return await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, tokenValidationParameters).ConfigureAwait(false);
         }
 
-        [BenchmarkCategory("ValidateTokenAsync_Success"), Benchmark]
+        //[BenchmarkCategory("ValidateTokenAsync_Success"), Benchmark]
         public async Task<bool> JsonWebTokenHandler_ValidateTokenAsyncWithVP()
         {
             // Because ValidationResult is an internal type, we cannot return it in the benchmark.
@@ -108,7 +151,7 @@ namespace Microsoft.IdentityModel.Benchmarks
             return result.IsSuccess;
         }
 
-        [BenchmarkCategory("ValidateTokenAsync_FailTwiceBeforeSuccess"), Benchmark(Baseline = true)]
+        //[BenchmarkCategory("ValidateTokenAsync_FailTwiceBeforeSuccess"), Benchmark(Baseline = true)]
         public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsyncWithTVP_SucceedOnThirdAttempt()
         {
             TokenValidationResult result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidTokenValidationParameters).ConfigureAwait(false);
@@ -118,7 +161,7 @@ namespace Microsoft.IdentityModel.Benchmarks
             return result;
         }
 
-        [BenchmarkCategory("ValidateTokenAsync_FailTwiceBeforeSuccess"), Benchmark]
+        //[BenchmarkCategory("ValidateTokenAsync_FailTwiceBeforeSuccess"), Benchmark]
         public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsyncWithTVPUsingClone_SucceedOnThirdAttempt()
         {
             TokenValidationResult result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidTokenValidationParameters.Clone()).ConfigureAwait(false);
@@ -128,7 +171,7 @@ namespace Microsoft.IdentityModel.Benchmarks
             return result;
         }
 
-        [BenchmarkCategory("ValidateTokenAsync_FailTwiceBeforeSuccess"), Benchmark]
+        //[BenchmarkCategory("ValidateTokenAsync_FailTwiceBeforeSuccess"), Benchmark]
         public async Task<bool> JsonWebTokenHandler_ValidateTokenAsyncWithVP_SucceedOnThirdAttempt()
         {
             Result<ValidationResult, ExceptionDetail> result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidValidationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
@@ -138,7 +181,7 @@ namespace Microsoft.IdentityModel.Benchmarks
             return result.IsSuccess;
         }
 
-        [BenchmarkCategory("ValidateTokenAsync_FailFourTimesBeforeSuccess"), Benchmark(Baseline = true)]
+        //[BenchmarkCategory("ValidateTokenAsync_FailFourTimesBeforeSuccess"), Benchmark(Baseline = true)]
         public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsyncWithTVP_SucceedOnFifthAttempt()
         {
             TokenValidationResult result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidTokenValidationParameters).ConfigureAwait(false);
@@ -150,7 +193,7 @@ namespace Microsoft.IdentityModel.Benchmarks
             return result;
         }
 
-        [BenchmarkCategory("ValidateTokenAsync_FailFourTimesBeforeSuccess"), Benchmark]
+        //[BenchmarkCategory("ValidateTokenAsync_FailFourTimesBeforeSuccess"), Benchmark]
         public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsyncWithTVPUsingClone_SucceedOnFifthAttempt()
         {
             TokenValidationResult result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidTokenValidationParameters.Clone()).ConfigureAwait(false);
@@ -162,7 +205,7 @@ namespace Microsoft.IdentityModel.Benchmarks
             return result;
         }
 
-        [BenchmarkCategory("ValidateTokenAsync_FailFourTimesBeforeSuccess"), Benchmark]
+        //[BenchmarkCategory("ValidateTokenAsync_FailFourTimesBeforeSuccess"), Benchmark]
         public async Task<bool> JsonWebTokenHandler_ValidateTokenAsyncWithVP_SucceedOnFifthAttempt()
         {
             Result<ValidationResult, ExceptionDetail> result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidValidationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
@@ -174,7 +217,7 @@ namespace Microsoft.IdentityModel.Benchmarks
             return result.IsSuccess;
         }
 
-        [BenchmarkCategory("ValidateTokenAsyncClaimAccess"), Benchmark(Baseline = true)]
+        //[BenchmarkCategory("ValidateTokenAsyncClaimAccess"), Benchmark(Baseline = true)]
         public async Task<List<Claim>> JsonWebTokenHandler_ValidateTokenAsyncWithTVP_CreateClaims()
         {
             var result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _tokenValidationParameters).ConfigureAwait(false);
@@ -183,7 +226,7 @@ namespace Microsoft.IdentityModel.Benchmarks
             return claims.ToList();
         }
 
-        [BenchmarkCategory("ValidateTokenAsyncClaimAccess"), Benchmark]
+        //[BenchmarkCategory("ValidateTokenAsyncClaimAccess"), Benchmark]
         public async Task<List<Claim>> JsonWebTokenHandler_ValidateTokenAsyncWithVP_CreateClaims()
         {
             Result<ValidationResult, ExceptionDetail> result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
