@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
 
             TokenValidationResult tokenValidationResult = await jsonWebTokenHandler.ValidateTokenAsync(jwtString, theoryData.TokenValidationParameters);
-            Result<ValidationResult, ExceptionDetail> result = await jsonWebTokenHandler.ValidateTokenAsync(jwtString, theoryData.ValidationParameters, new CallContext(), CancellationToken.None);
+            Result<ValidationResult> result = await jsonWebTokenHandler.ValidateTokenAsync(jwtString, theoryData.ValidationParameters, new CallContext(), CancellationToken.None);
 
             if (tokenValidationResult.IsValid != theoryData.ExpectedIsValid)
                 context.AddDiff($"tokenValidationResult.IsValid != theoryData.ExpectedIsValid");

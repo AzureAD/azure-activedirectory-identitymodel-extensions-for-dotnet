@@ -108,7 +108,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             LogHelper.MarkAsNonPII(configuration?.SigningKeys.Count ?? 0),
                             LogHelper.MarkAsSecurityArtifact(jwtToken.EncodedToken, JwtTokenUtilities.SafeLogJwtToken)),
                         ValidationFailureType.SignatureValidationFailed,
-                        ExceptionType.SecurityTokenSignatureKeyNotFound,
+                        typeof(SecurityTokenSignatureKeyNotFoundException),
                         kidNotMatchedNoTryAllStackFrame);
                 }
 
