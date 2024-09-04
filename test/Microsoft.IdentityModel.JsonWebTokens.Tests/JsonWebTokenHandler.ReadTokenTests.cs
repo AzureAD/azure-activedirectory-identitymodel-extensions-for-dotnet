@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public void ReadToken(TokenReadingTheoryData theoryData)
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.JsonWebTokenHandlerReadTokenTests", theoryData);
-            Result<SecurityToken, ExceptionDetail> result = JsonWebTokenHandler.ReadToken(
+            Result<SecurityToken> result = JsonWebTokenHandler.ReadToken(
                 theoryData.Token,
                 new CallContext());
 
@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         [Fact]
         public void ReadToken_ThrowsIfAccessingSecurityTokenOnFailedRead()
         {
-            Result<SecurityToken, ExceptionDetail> result = JsonWebTokenHandler.ReadToken(
+            Result<SecurityToken> result = JsonWebTokenHandler.ReadToken(
                 null,
                 new CallContext());
 
@@ -77,7 +77,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 TokenLogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("token")),
                             ValidationFailureType.NullArgument,
-                            ExceptionType.ArgumentNull,
+                            typeof(ArgumentNullException),
                             null,
                             null)
                     },
@@ -91,7 +91,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 TokenLogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("token")),
                             ValidationFailureType.NullArgument,
-                            ExceptionType.ArgumentNull,
+                            typeof(ArgumentNullException),
                             null,
                             null)
                     },
@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 LogMessages.IDX14107,
                                 LogHelper.MarkAsNonPII("token")),
                             ValidationFailureType.TokenReadingFailed,
-                            ExceptionType.SecurityTokenMalformed,
+                            typeof(SecurityTokenMalformedException),
                             null,
                             new SecurityTokenMalformedException()),
                     }
@@ -119,6 +119,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
     public class TokenReadingTheoryData : TheoryDataBase
     {
         public string Token { get; set; }
-        internal Result<SecurityToken, ExceptionDetail> Result { get; set; }
+        internal Result<SecurityToken> Result { get; set; }
     }
 }

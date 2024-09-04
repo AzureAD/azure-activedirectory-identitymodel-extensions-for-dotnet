@@ -10,9 +10,9 @@ using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
+#nullable enable
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
-#nullable enable
     /// <remarks>This partial class contains methods and logic related to the validation of tokens' signatures.</remarks>
     public partial class JsonWebTokenHandler : TokenHandler
     {
@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <exception cref="SecurityTokenInvalidSignatureException">Returned by the default implementation if the token is not signed, or if the validation fails.</exception>
         /// <exception cref="SecurityTokenInvalidAlgorithmException">Returned if the algorithm is not supported by the key.</exception>
         /// <exception cref="SecurityTokenSignatureKeyNotFoundException">Returned if the key cannot be resolved.</exception>
-        internal static Result<SecurityKey, ExceptionDetail> ValidateSignature(
+        internal static Result<SecurityKey> ValidateSignature(
             JsonWebToken jwtToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,
@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             jwtToken.EncodedToken,
                             JwtTokenUtilities.SafeLogJwtToken)),
                     ValidationFailureType.SignatureValidationFailed,
-                    ExceptionType.SecurityTokenInvalidSignature,
+                    typeof(SecurityTokenInvalidSignatureException),
                     new StackFrame(true));
 
             SecurityKey? key = null;
@@ -116,12 +116,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return new ExceptionDetail(
                     new MessageDetail(TokenLogMessages.IDX10500),
                     ValidationFailureType.SignatureValidationFailed,
-                    ExceptionType.SecurityTokenSignatureKeyNotFound,
+                    typeof(SecurityTokenSignatureKeyNotFoundException),
                     noKeysProvidedStackFrame);
             }
         }
 
-        private static Result<SecurityKey, ExceptionDetail> ValidateSignatureUsingAllKeys(
+        private static Result<SecurityKey> ValidateSignatureUsingAllKeys(
             JsonWebToken jwtToken,
             ValidationParameters
             validationParameters, BaseConfiguration? configuration,
@@ -131,29 +131,29 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // 1. User specified delegate: IssuerSigningKeyResolver returned null
             // 2. ResolveIssuerSigningKey returned null
             // Try all the keys. This is the degenerate case, not concerned about perf.
-            (Result<SecurityKey, ExceptionDetail>? configResult, bool configKidMatched, KeyMatchFailedResult? configFailedResult) = ValidateUsingKeys(
+            (Result<SecurityKey>? configResult, bool configKidMatched, KeyMatchFailedResult? configFailedResult) = ValidateUsingKeys(
                 jwtToken,
                 validationParameters,
                 configuration?.SigningKeys,
                 callContext);
 
-            if (configResult is Result<SecurityKey, ExceptionDetail> unwrappedConfigResult)
+            if (configResult is Result<SecurityKey> unwrappedConfigResult)
                 return unwrappedConfigResult;
 
-            (Result<SecurityKey, ExceptionDetail>? vpResult, bool vpKidMatched, KeyMatchFailedResult? vpFailedResult) = ValidateUsingKeys(
+            (Result<SecurityKey>? vpResult, bool vpKidMatched, KeyMatchFailedResult? vpFailedResult) = ValidateUsingKeys(
                 jwtToken,
                 validationParameters,
                 validationParameters.IssuerSigningKeys,
                 callContext);
 
-            if (vpResult is Result<SecurityKey, ExceptionDetail> unwrappedVpResult)
+            if (vpResult is Result<SecurityKey> unwrappedVpResult)
                 return unwrappedVpResult;
 
             if (vpFailedResult is null && configFailedResult is null) // No keys were attempted
                 return new ExceptionDetail(
                     new MessageDetail(TokenLogMessages.IDX10500),
                     ValidationFailureType.SignatureValidationFailed,
-                    ExceptionType.SecurityTokenSignatureKeyNotFound,
+                    typeof(SecurityTokenSignatureKeyNotFoundException),
                     new StackFrame(true));
 
             StringBuilder exceptionStrings = new();
@@ -176,7 +176,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 kidMatched);
         }
 
-        private static (Result<SecurityKey, ExceptionDetail>? validResult, bool KidMatched, KeyMatchFailedResult? failedResult) ValidateUsingKeys(
+        private static (Result<SecurityKey>? validResult, bool KidMatched, KeyMatchFailedResult? failedResult) ValidateUsingKeys(
             JsonWebToken jwtToken,
             ValidationParameters validationParameters,
             ICollection<SecurityKey>? keys,
@@ -196,7 +196,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             for (int i = 0; i < keysList.Count; i++)
             {
                 SecurityKey key = keysList[i];
-                Result<SecurityKey, ExceptionDetail> result = ValidateSignatureWithKey(jwtToken, key, validationParameters, callContext);
+                Result<SecurityKey> result = ValidateSignatureWithKey(jwtToken, key, validationParameters, callContext);
                 if (result.IsSuccess)
                 {
                     jwtToken.SigningKey = key;
@@ -220,7 +220,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return (null, kidMatched, null);
         }
 
-        private static Result<SecurityKey, ExceptionDetail> ValidateSignatureWithKey(
+        private static Result<SecurityKey> ValidateSignatureWithKey(
             JsonWebToken jsonWebToken,
             SecurityKey key,
             ValidationParameters validationParameters,
@@ -235,11 +235,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         LogHelper.MarkAsNonPII(jsonWebToken.Alg),
                         key),
                     ValidationFailureType.SignatureValidationFailed,
-                    ExceptionType.SecurityTokenInvalidAlgorithm,
+                    typeof(SecurityTokenInvalidAlgorithmException),
                     new StackFrame(true));
             }
 
-            Result<string, ExceptionDetail> result = validationParameters.AlgorithmValidator(
+            Result<string> result = validationParameters.AlgorithmValidator(
                 jsonWebToken.Alg,
                 key,
                 jsonWebToken,
@@ -259,7 +259,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             key?.ToString() ?? "Null",
                             LogHelper.MarkAsNonPII(jsonWebToken.Alg)),
                         ValidationFailureType.SignatureValidationFailed,
-                        ExceptionType.InvalidOperation,
+                        typeof(InvalidOperationException),
                         new StackFrame(true));
 
                 bool valid = EncodingUtils.PerformEncodingDependentOperation<bool, string, int, SignatureProvider>(
@@ -282,7 +282,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                                 jsonWebToken.EncodedToken,
                                 JwtTokenUtilities.SafeLogJwtToken)),
                         ValidationFailureType.SignatureValidationFailed,
-                        ExceptionType.SecurityTokenInvalidSignature,
+                        typeof(SecurityTokenInvalidSignatureException),
                         new StackFrame(true));
             }
 #pragma warning disable CA1031 // Do not catch general exception types
@@ -296,7 +296,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             jsonWebToken.EncodedToken,
                             JwtTokenUtilities.SafeLogJwtToken)),
                     ValidationFailureType.SignatureValidationFailed,
-                    ExceptionType.SecurityTokenInvalidSignature,
+                    typeof(SecurityTokenInvalidSignatureException),
                     new StackFrame(true),
                     ex);
             }
@@ -337,7 +337,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         exceptionStrings.ToString(),
                         LogHelper.MarkAsSecurityArtifact(jwtToken.EncodedToken, JwtTokenUtilities.SafeLogJwtToken)),
                     ValidationFailureType.SignatureValidationFailed,
-                    ExceptionType.SecurityTokenSignatureKeyNotFound,
+                    typeof(SecurityTokenSignatureKeyNotFoundException),
                     new StackFrame(true));
             }
 
@@ -352,7 +352,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         exceptionStrings.ToString(),
                         LogHelper.MarkAsSecurityArtifact(jwtToken.EncodedToken, JwtTokenUtilities.SafeLogJwtToken)),
                     ValidationFailureType.SignatureValidationFailed,
-                    ExceptionType.SecurityTokenSignatureKeyNotFound,
+                    typeof(SecurityTokenSignatureKeyNotFoundException),
                     new StackFrame(true));
 
             return new ExceptionDetail(
@@ -364,7 +364,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     exceptionStrings.ToString(),
                     LogHelper.MarkAsSecurityArtifact(jwtToken.EncodedToken, JwtTokenUtilities.SafeLogJwtToken)),
                 ValidationFailureType.SignatureValidationFailed,
-                ExceptionType.SecurityTokenSignatureKeyNotFound,
+                typeof(SecurityTokenSignatureKeyNotFoundException),
                 new StackFrame(true));
         }
 
@@ -391,5 +391,5 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             public IList<SecurityKey> KeysAttempted = keysAttempted;
         }
     }
-#nullable restore
 }
+#nullable restore

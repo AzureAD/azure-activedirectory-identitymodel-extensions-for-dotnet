@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             if (theoryData.ValidationParameters is not null && theoryData.KeyToAddToValidationParameters is not null)
                 theoryData.ValidationParameters.IssuerSigningKeys.Add(theoryData.KeyToAddToValidationParameters);
 
-            Result<SecurityKey, ExceptionDetail> result = JsonWebTokenHandler.ValidateSignature(
+            Result<SecurityKey> result = JsonWebTokenHandler.ValidateSignature(
                 jsonWebToken,
                 theoryData.ValidationParameters,
                 theoryData.Configuration,
@@ -87,7 +87,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 TokenLogMessages.IDX10000,
                                 "jwtToken"),
                             ValidationFailureType.NullArgument,
-                            ExceptionType.ArgumentNull,
+                            typeof(ArgumentNullException),
                             null,
                             null)
                     },
@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 TokenLogMessages.IDX10000,
                                 "validationParameters"),
                             ValidationFailureType.NullArgument,
-                            ExceptionType.ArgumentNull,
+                            typeof(ArgumentNullException),
                             null,
                             null)
                     },
@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 TokenLogMessages.IDX10000,
                                 "fakeParameter"),
                             ValidationFailureType.NullArgument,
-                            ExceptionType.ArgumentNull,
+                            typeof(ArgumentNullException),
                             null,
                             null)
                     },
@@ -133,7 +133,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 TokenLogMessages.IDX10504,
                                 LogHelper.MarkAsSecurityArtifact(unsignedToken, JwtTokenUtilities.SafeLogJwtToken)),
                             ValidationFailureType.SignatureValidationFailed,
-                            ExceptionType.SecurityTokenInvalidSignature,
+                            typeof(SecurityTokenInvalidSignatureException),
                             null,
                             null)
                     },
@@ -203,7 +203,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Result = new ExceptionDetail(
                             new MessageDetail(TokenLogMessages.IDX10500),
                             ValidationFailureType.SignatureValidationFailed,
-                            ExceptionType.SecurityTokenSignatureKeyNotFound,
+                            typeof(SecurityTokenSignatureKeyNotFoundException),
                             null,
                             null)
                     },
@@ -216,7 +216,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Result = new ExceptionDetail(
                             new MessageDetail(TokenLogMessages.IDX10500),
                             ValidationFailureType.SignatureValidationFailed,
-                            ExceptionType.SecurityTokenSignatureKeyNotFound,
+                            typeof(SecurityTokenSignatureKeyNotFoundException),
                             null,
                             null)
                     }
@@ -232,7 +232,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public SigningCredentials SigningCredentials { get; internal set; }
         public SecurityKey KeyToAddToConfiguration { get; internal set; }
         public SecurityKey KeyToAddToValidationParameters { get; internal set; }
-        internal Result<SecurityKey, ExceptionDetail> Result { get; set; }
+        internal Result<SecurityKey> Result { get; set; }
         internal ValidationParameters ValidationParameters { get; set; }
     }
 }

@@ -7,12 +7,9 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
-using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests

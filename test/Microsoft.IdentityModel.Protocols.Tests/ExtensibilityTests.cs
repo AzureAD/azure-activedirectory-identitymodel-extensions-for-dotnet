@@ -83,16 +83,23 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             configuration = await configManager.GetConfigurationAsync();
             TestUtilities.SetField(configManager, "_lastRequestRefresh", DateTimeOffset.UtcNow - TimeSpan.FromHours(1));
             configManager.MetadataAddress = "IssuerMetadata2.json";
-            configManager.RequestRefresh();
 
             // Wait for the refresh to complete.
-            await Task.Delay(250).ContinueWith(_ =>
+            await Task.Delay(500);
+
+            for (int i = 0; i < 5; i++)
             {
-                configuration2 = configManager.GetConfigurationAsync().GetAwaiter().GetResult();
-            });
+                configManager.RequestRefresh();
+                configuration2 = await configManager.GetConfigurationAsync();
+
+                if (IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer))
+                    await Task.Delay(1000);
+                else
+                    break;
+            }
 
             if (IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer))
-                context.Diffs.Add("IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer)");
+                context.Diffs.Add($"Expected: {configuration.Issuer}, to be different from: {configuration2.Issuer}");
 
             TestUtilities.AssertFailIfErrors(context);
         }

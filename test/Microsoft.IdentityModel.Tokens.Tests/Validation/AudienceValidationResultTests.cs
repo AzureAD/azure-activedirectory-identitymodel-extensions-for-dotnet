@@ -24,7 +24,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     theoryData.ValidationParameters.ValidAudiences.Add(audience);
             }
 
-            Result<string, ExceptionDetail> result = Validators.ValidateAudience(
+            Result<string> result = Validators.ValidateAudience(
                 theoryData.Audiences,
                 theoryData.SecurityToken,
                 theoryData.ValidationParameters,
@@ -86,7 +86,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("validationParameters")),
                             ValidationFailureType.NullArgument,
-                            ExceptionType.ArgumentNull,
+                            typeof(ArgumentNullException),
                             null,
                             null)
                     },
@@ -98,7 +98,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         Result = new ExceptionDetail(
                             new MessageDetail(LogMessages.IDX10207),
                             ValidationFailureType.AudienceValidationFailed,
-                            ExceptionType.SecurityTokenInvalidAudience,
+                            typeof(SecurityTokenInvalidAudienceException),
                             null,
                             null)
                     },
@@ -113,7 +113,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogMessages.IDX10206,
                                 null),
                             ValidationFailureType.AudienceValidationFailed,
-                            ExceptionType.SecurityTokenInvalidAudience,
+                            typeof(SecurityTokenInvalidAudienceException),
                             null,
                             null)
                     },
@@ -130,7 +130,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII("audience1"),
                                 LogHelper.MarkAsNonPII(String.Empty)),
                             ValidationFailureType.AudienceValidationFailed,
-                            ExceptionType.SecurityTokenInvalidAudience,
+                            typeof(SecurityTokenInvalidAudienceException),
                             null,
                             null)
                     },
@@ -147,7 +147,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII("audience1"),
                                 LogHelper.MarkAsNonPII("    ")),
                             ValidationFailureType.AudienceValidationFailed,
-                            ExceptionType.SecurityTokenInvalidAudience,
+                            typeof(SecurityTokenInvalidAudienceException),
                             null,
                             null)
                     },
@@ -174,7 +174,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII(commaAudience1),
                                 LogHelper.MarkAsNonPII(audience2)),
                             ValidationFailureType.AudienceValidationFailed,
-                            ExceptionType.SecurityTokenInvalidAudience,
+                            typeof(SecurityTokenInvalidAudienceException),
                             null,
                             null)
                     },
@@ -192,7 +192,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII(commaAudience1),
                                 LogHelper.MarkAsNonPII(audience2Slash)),
                             ValidationFailureType.AudienceValidationFailed,
-                            ExceptionType.SecurityTokenInvalidAudience,
+                            typeof(SecurityTokenInvalidAudienceException),
                             null,
                             null)
                     },
@@ -209,7 +209,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII(commaAudience2Slash),
                                 LogHelper.MarkAsNonPII(audience1)),
                             ValidationFailureType.AudienceValidationFailed,
-                            ExceptionType.SecurityTokenInvalidAudience,
+                            typeof(SecurityTokenInvalidAudienceException),
                             null,
                             null)
                     },
@@ -226,7 +226,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII(commaAudience1),
                                 LogHelper.MarkAsNonPII(audience1Slash)),
                             ValidationFailureType.AudienceValidationFailed,
-                            ExceptionType.SecurityTokenInvalidAudience,
+                            typeof(SecurityTokenInvalidAudienceException),
                             null)
                     },
                     new AudienceValidationTheoryData
@@ -250,7 +250,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII(commaAudience1),
                                 LogHelper.MarkAsNonPII(commaAudience1Slash)),
                             ValidationFailureType.AudienceValidationFailed,
-                            ExceptionType.SecurityTokenInvalidAudience,
+                            typeof(SecurityTokenInvalidAudienceException),
                             null,
                             null)
                     },
@@ -275,7 +275,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII(commaAudience1),
                                 LogHelper.MarkAsNonPII(audience1 + "A")),
                             ValidationFailureType.AudienceValidationFailed,
-                            ExceptionType.SecurityTokenInvalidAudience,
+                            typeof(SecurityTokenInvalidAudienceException),
                             null,
                             null)
                     },
@@ -292,7 +292,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII(commaAudience1),
                                 LogHelper.MarkAsNonPII(audience1 + "//")),
                             ValidationFailureType.AudienceValidationFailed,
-                            ExceptionType.SecurityTokenInvalidAudience,
+                            typeof(SecurityTokenInvalidAudienceException),
                             null,
                             null)
                     },
@@ -309,7 +309,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII(commaAudience1),
                                 LogHelper.MarkAsNonPII(commaAudience1 + "//")),
                             ValidationFailureType.AudienceValidationFailed,
-                            ExceptionType.SecurityTokenInvalidAudience,
+                            typeof(SecurityTokenInvalidAudienceException),
                             null,
                             null)
                     },
@@ -326,7 +326,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII(commaAudience1Slash),
                                 LogHelper.MarkAsNonPII(audience1)),
                             ValidationFailureType.AudienceValidationFailed,
-                            ExceptionType.SecurityTokenInvalidAudience,
+                            typeof(SecurityTokenInvalidAudienceException),
                             null,
                             null)
                     },
@@ -351,7 +351,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII(commaAudience2Slash),
                                 LogHelper.MarkAsNonPII(audience1)),
                             ValidationFailureType.AudienceValidationFailed,
-                            ExceptionType.SecurityTokenInvalidAudience,
+                            typeof(SecurityTokenInvalidAudienceException),
                             null,
                             null)
                     },
@@ -368,7 +368,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII(commaAudience1Slash),
                                 LogHelper.MarkAsNonPII(audience1)),
                             ValidationFailureType.AudienceValidationFailed,
-                            ExceptionType.SecurityTokenInvalidAudience,
+                            typeof(SecurityTokenInvalidAudienceException),
                             null,
                             null)
                     },
@@ -393,7 +393,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII(commaAudience1Slash),
                                 LogHelper.MarkAsNonPII(commaAudience2)),
                             ValidationFailureType.AudienceValidationFailed,
-                            ExceptionType.SecurityTokenInvalidAudience,
+                            typeof(SecurityTokenInvalidAudienceException),
                             null,
                             null)
                     },
@@ -410,7 +410,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII(commaAudience1 + "//"),
                                 LogHelper.MarkAsNonPII(audience1)),
                             ValidationFailureType.AudienceValidationFailed,
-                            ExceptionType.SecurityTokenInvalidAudience,
+                            typeof(SecurityTokenInvalidAudienceException),
                             null,
                             null)
                     }
@@ -430,7 +430,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
             public List<string> AudiencesToAdd { get; internal set; }
 
-            internal Result<string, ExceptionDetail> Result { get; set; }
+            internal Result<string> Result { get; set; }
         }
 
 

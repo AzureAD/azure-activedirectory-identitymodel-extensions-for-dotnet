@@ -384,10 +384,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 configuration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
             }
 
-            theoryData.ConfigurationManager.RefreshInterval = theoryData.RefreshInterval;
-            theoryData.ConfigurationManager.MetadataAddress = theoryData.UpdatedMetadataAddress;
             if (theoryData.SleepTimeInMs > 0)
                 Thread.Sleep(theoryData.SleepTimeInMs);
+
+            theoryData.ConfigurationManager.RefreshInterval = theoryData.RefreshInterval;
+            theoryData.ConfigurationManager.MetadataAddress = theoryData.UpdatedMetadataAddress;
 
             theoryData.ConfigurationManager.RequestRefresh();
 
@@ -433,6 +434,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ExpectedUpdatedConfiguration = OpenIdConfigData.AADCommonV1Config,
                     RefreshInterval = TimeSpan.MaxValue,
                     RequestRefresh = true,
+                    SleepTimeInMs = 1000,
                     UpdatedMetadataAddress = "AADCommonV2Json"
                 });
 
