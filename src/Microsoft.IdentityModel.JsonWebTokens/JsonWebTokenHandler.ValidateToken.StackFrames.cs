@@ -48,6 +48,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // ReadToken
             internal static StackFrame? ReadTokenNullOrEmpty;
             internal static StackFrame? ReadTokenMalformed;
+            // ValidateSignature
+            internal static StackFrame? KidNotMatchedNoTryAll;
+            internal static StackFrame? NoKeysProvided;
         }
     }
 }
