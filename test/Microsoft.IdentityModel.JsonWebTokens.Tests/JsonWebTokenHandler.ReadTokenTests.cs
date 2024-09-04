@@ -78,7 +78,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 LogHelper.MarkAsNonPII("token")),
                             ValidationFailureType.NullArgument,
                             typeof(ArgumentNullException),
-                            null,
                             null)
                     },
                     new TokenReadingTheoryData
@@ -92,7 +91,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 LogHelper.MarkAsNonPII("token")),
                             ValidationFailureType.NullArgument,
                             typeof(ArgumentNullException),
-                            null,
                             null)
                     },
                     new TokenReadingTheoryData

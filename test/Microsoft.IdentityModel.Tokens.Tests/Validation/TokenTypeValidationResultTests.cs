@@ -86,7 +86,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII("securityToken")),
                             ValidationFailureType.NullArgument,
                             typeof(ArgumentNullException),
-                            null,
                             null)
                     },
                     new TokenTypeTheoryData
@@ -102,7 +101,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII("validationParameters")),
                             ValidationFailureType.NullArgument,
                             typeof(ArgumentNullException),
-                            null,
                             null)
                     },
                     new TokenTypeTheoryData
@@ -119,7 +117,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII("type")),
                             ValidationFailureType.TokenTypeValidationFailed,
                             typeof(SecurityTokenInvalidTypeException),
-                            null,
                             null)
                     },
                     new TokenTypeTheoryData
@@ -136,7 +133,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII("type")),
                             ValidationFailureType.TokenTypeValidationFailed,
                             typeof(SecurityTokenInvalidTypeException),
-                            null,
                             null)
                     },
                     new TokenTypeTheoryData
@@ -154,7 +150,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validTypesNoJwt))),
                             ValidationFailureType.TokenTypeValidationFailed,
                             typeof(SecurityTokenInvalidTypeException),
-                            null,
                             null)
                     }
                 };

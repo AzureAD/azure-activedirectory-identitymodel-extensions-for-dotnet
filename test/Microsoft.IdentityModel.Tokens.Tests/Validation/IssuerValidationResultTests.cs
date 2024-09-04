@@ -77,7 +77,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             LogHelper.MarkAsNonPII(null)),
                         ValidationFailureType.IssuerValidationFailed,
                         typeof(SecurityTokenInvalidIssuerException),
-                        null,
                         null),
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
                     ValidationParameters = new ValidationParameters()
@@ -93,7 +92,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             LogHelper.MarkAsNonPII("validationParameters")),
                         ValidationFailureType.NullArgument,
                         typeof(ArgumentNullException),
-                        null,
                         null),
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
                     ValidationParameters = null
@@ -109,7 +107,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             LogHelper.MarkAsNonPII("securityToken")),
                         ValidationFailureType.NullArgument,
                         typeof(ArgumentNullException),
-                        null,
                         null),
                     SecurityToken = null,
                     ValidationParameters = new ValidationParameters()
@@ -147,7 +144,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             LogHelper.MarkAsNonPII(null)),
                         ValidationFailureType.IssuerValidationFailed,
                         typeof(SecurityTokenInvalidIssuerException),
-                        null,
                         null),
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
                     ValidationParameters = new ValidationParameters(),

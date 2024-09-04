@@ -76,7 +76,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             new MessageDetail(LogMessages.IDX10253),
                             ValidationFailureType.SigningKeyValidationFailed,
                             typeof(ArgumentNullException),
-                            null,
                             null),
                     },
                     new SigningKeyValidationTheoryData
@@ -92,7 +91,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII("securityToken")),
                             ValidationFailureType.NullArgument,
                             typeof(ArgumentNullException),
-                            null,
                             null),
                     },
                     new SigningKeyValidationTheoryData
@@ -108,7 +106,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII("validationParameters")),
                             ValidationFailureType.NullArgument,
                             typeof(ArgumentNullException),
-                            null,
                             null),
                     },
                     new SigningKeyValidationTheoryData
@@ -125,7 +122,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII(utcNow)),
                             ValidationFailureType.SigningKeyValidationFailed,
                             typeof(SecurityTokenInvalidSigningKeyException),
-                            null,
                             null),
                     },
                     new SigningKeyValidationTheoryData
@@ -142,7 +138,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogHelper.MarkAsNonPII(utcNow)),
                             ValidationFailureType.SigningKeyValidationFailed,
                             typeof(SecurityTokenInvalidSigningKeyException),
-                            null,
                             null),
                     },
                     new SigningKeyValidationTheoryData
@@ -156,7 +151,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             new MessageDetail(LogMessages.IDX10253),
                             ValidationFailureType.SigningKeyValidationFailed,
                             typeof(ArgumentNullException),
-                            null,
                             null),
                     },
 

@@ -16,11 +16,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// <remarks>This partial class contains methods and logic related to the validation of tokens' signatures.</remarks>
     public partial class JsonWebTokenHandler : TokenHandler
     {
-        static internal class SignatureStackFrames
-        {
-            // Test StackFrame to validate caching solution. Need to add all the possible stack frames.
-            static internal StackFrame? NoKeysProvided;
-        }
         /// <summary>
         /// Validates the JWT signature.
         /// </summary>
@@ -96,12 +91,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return ValidateSignatureUsingAllKeys(jwtToken, validationParameters, configuration, callContext);
             else
             {
-                StackFrame stackFrame = SignatureStackFrames.NoKeysProvided ??= new StackFrame(true);
+                if (!string.IsNullOrEmpty(jwtToken.Kid))
+                {
+                    StackFrame kidNotMatchedNoTryAllStackFrame = StackFrames.KidNotMatchedNoTryAll ??= new StackFrame(true);
+                    return new ExceptionDetail(
+                        new MessageDetail(
+                            TokenLogMessages.IDX10502,
+                            LogHelper.MarkAsNonPII(jwtToken.Kid),
+                            LogHelper.MarkAsNonPII(validationParameters.IssuerSigningKeys.Count),
+                            LogHelper.MarkAsNonPII(configuration?.SigningKeys.Count ?? 0),
+                            LogHelper.MarkAsSecurityArtifact(jwtToken.EncodedToken, JwtTokenUtilities.SafeLogJwtToken)),
+                        ValidationFailureType.SignatureValidationFailed,
+                        typeof(SecurityTokenSignatureKeyNotFoundException),
+                        kidNotMatchedNoTryAllStackFrame);
+                }
+
+                StackFrame noKeysProvidedStackFrame = StackFrames.NoKeysProvided ??= new StackFrame(true);
                 return new ExceptionDetail(
                     new MessageDetail(TokenLogMessages.IDX10500),
                     ValidationFailureType.SignatureValidationFailed,
                     typeof(SecurityTokenSignatureKeyNotFoundException),
-                    stackFrame);
+                    noKeysProvidedStackFrame);
             }
         }
 

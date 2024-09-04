@@ -373,8 +373,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken)),
                     ValidationFailureType.TokenDecryptionFailed,
                     typeof(SecurityTokenDecryptionFailedException),
-                    new StackFrame(true),
-                    null);
+                    new StackFrame(true));
             else if (algorithmNotSupportedByCryptoProvider)
                 return new ExceptionDetail(
                     new MessageDetail(

@@ -215,8 +215,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken)),
                     ValidationFailureType.TokenDecryptionFailed,
                     typeof(SecurityTokenKeyWrapException),
-                    decryptionKeyUnwrapFailedStackFrame,
-                    null);
+                    decryptionKeyUnwrapFailedStackFrame);
 
                 return (null, exceptionDetail);
             }
