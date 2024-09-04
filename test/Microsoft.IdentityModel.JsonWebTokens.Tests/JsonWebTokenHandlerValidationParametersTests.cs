@@ -41,31 +41,42 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 jwtString = jsonWebTokenHandler.CreateToken(securityTokenDescriptor);
             }
 
-            TokenValidationResult tokenValidationResult = await jsonWebTokenHandler.ValidateTokenAsync(jwtString, theoryData.TokenValidationParameters);
-            Result<ValidationResult> result = await jsonWebTokenHandler.ValidateTokenAsync(jwtString, theoryData.ValidationParameters, new CallContext(), CancellationToken.None);
+            TokenValidationResult tokenValidationParametersResult =
+                await jsonWebTokenHandler.ValidateTokenAsync(jwtString, theoryData.TokenValidationParameters);
+            Result<ValidationResult> validationParametersResult =
+                await jsonWebTokenHandler.ValidateTokenAsync(
+                    jwtString, theoryData.ValidationParameters, new CallContext(), CancellationToken.None);
 
-            if (tokenValidationResult.IsValid != theoryData.ExpectedIsValid)
+            if (tokenValidationParametersResult.IsValid != theoryData.ExpectedIsValid)
                 context.AddDiff($"tokenValidationResult.IsValid != theoryData.ExpectedIsValid");
 
-            if (result.IsSuccess != theoryData.ExpectedIsValid)
+            if (validationParametersResult.IsSuccess != theoryData.ExpectedIsValid)
                 context.AddDiff($"result.IsSuccess != theoryData.ExpectedIsValid");
 
             if (theoryData.ExpectedIsValid)
             {
-                IdentityComparer.AreEqual(tokenValidationResult.ClaimsIdentity, result.UnwrapResult().ClaimsIdentity, context);
-                IdentityComparer.AreEqual(tokenValidationResult.Claims, result.UnwrapResult().Claims, context);
+                IdentityComparer.AreEqual(
+                    tokenValidationParametersResult.ClaimsIdentity,
+                    validationParametersResult.UnwrapResult().ClaimsIdentity,
+                    context);
+                IdentityComparer.AreEqual(
+                    tokenValidationParametersResult.Claims,
+                    validationParametersResult.UnwrapResult().Claims,
+                    context);
             }
             else
             {
-                theoryData.ExpectedException.ProcessException(tokenValidationResult.Exception, context);
+                theoryData.ExpectedException.ProcessException(tokenValidationParametersResult.Exception, context);
 
-                if (!result.IsSuccess)
+                if (!validationParametersResult.IsSuccess)
                 {
                     // If there is a special case for the ValidationParameters path, use that.
                     if (theoryData.ExpectedExceptionValidationParameters != null)
-                        theoryData.ExpectedExceptionValidationParameters.ProcessException(result.UnwrapError().GetException(), context);
+                        theoryData.ExpectedExceptionValidationParameters
+                            .ProcessException(validationParametersResult.UnwrapError().GetException(), context);
                     else
-                        theoryData.ExpectedException.ProcessException(result.UnwrapError().GetException(), context);
+                        theoryData.ExpectedException
+                            .ProcessException(validationParametersResult.UnwrapError().GetException(), context);
                 }
             }
 
