@@ -48,10 +48,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     jwtString, theoryData.ValidationParameters, new CallContext(), CancellationToken.None);
 
             if (tokenValidationParametersResult.IsValid != theoryData.ExpectedIsValid)
-                context.AddDiff($"tokenValidationResult.IsValid != theoryData.ExpectedIsValid");
+                context.AddDiff($"tokenValidationParametersResult.IsValid != theoryData.ExpectedIsValid");
 
             if (validationParametersResult.IsSuccess != theoryData.ExpectedIsValid)
-                context.AddDiff($"result.IsSuccess != theoryData.ExpectedIsValid");
+                context.AddDiff($"validationParametersResult.IsSuccess != theoryData.ExpectedIsValid");
 
             if (theoryData.ExpectedIsValid)
             {
