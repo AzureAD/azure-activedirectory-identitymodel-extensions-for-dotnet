@@ -23,7 +23,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
     public class AadTokenValidationParametersExtensionTests
     {
         [Theory, MemberData(nameof(EnableEntraIdSigningKeyValidationTestCases))]
-        public async Task EnableEntraIdSigningKeyValidationTests(EnableAadSigningKeyValidationTheoryData theoryData)
+        public async Task EnableEntraIdSigningKeyValidationTests(EnableEntraIdSigningKeyValidationTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.EnableAadSigningKeyValidationTests", theoryData);
             try
@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<EnableAadSigningKeyValidationTheoryData> EnableEntraIdSigningKeyValidationTestCases()
+        public static TheoryData<EnableEntraIdSigningKeyValidationTheoryData> EnableEntraIdSigningKeyValidationTestCases()
         {
             var signingKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
             signingKeysConfig.SigningKeys.Add(KeyingMaterial.DefaultX509Key_2048);
@@ -73,15 +73,15 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 ValidateLifetime = false
             };
 
-            var theoryData = new TheoryData<EnableAadSigningKeyValidationTheoryData>();
-            theoryData.Add(new EnableAadSigningKeyValidationTheoryData
+            var theoryData = new TheoryData<EnableEntraIdSigningKeyValidationTheoryData>();
+            theoryData.Add(new EnableEntraIdSigningKeyValidationTheoryData
             {
                 TestId = "IssuerSigningKeyValidatorUsingConfiguration_Delegate_IsSetByWilson",
                 Token = Default.AsymmetricJws,
                 TokenValidationParameters = validationParameters,
                 ExpectedValidationResult = true,
             });
-            theoryData.Add(new EnableAadSigningKeyValidationTheoryData
+            theoryData.Add(new EnableEntraIdSigningKeyValidationTheoryData
             {
                 TestId = "IssuerSigningKeyValidatorUsingConfiguration_Delegate_IsSetByDeveloper",
                 Token = Default.AsymmetricJws,
@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 SetDelegateUsingConfig = true,
                 ExpectedValidationResult = true,
             });
-            theoryData.Add(new EnableAadSigningKeyValidationTheoryData
+            theoryData.Add(new EnableEntraIdSigningKeyValidationTheoryData
             {
                 TestId = "IssuerSigningKeyValidator_Delegate_IsSetByDeveloper",
                 Token = Default.AsymmetricJws,
@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             var jwk = KeyingMaterial.JsonWebKeyX509_2048;
             jwk.AdditionalData.Add(OpenIdProviderMetadataNames.CloudInstanceName, Default.CloudInstanceName);
             signingKeysConfig = SetupOpenIdConnectConfigurationMock(jwk);
-            theoryData.Add(new EnableAadSigningKeyValidationTheoryData
+            theoryData.Add(new EnableEntraIdSigningKeyValidationTheoryData
             {
                 TestId = "IssuerSigningKeyValidatorUsingConfiguration_CloudInstanceNamePassed_CloudInstanceNameIsMatched_ValidationSuccess",
                 Token = Default.AsymmetricJws,
@@ -113,7 +113,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             jwk = KeyingMaterial.JsonWebKeyX509_2048;
             jwk.AdditionalData.Add(OpenIdProviderMetadataNames.CloudInstanceName, Default.CloudInstanceName);
             signingKeysConfig = SetupOpenIdConnectConfigurationMock(jwk);
-            theoryData.Add(new EnableAadSigningKeyValidationTheoryData
+            theoryData.Add(new EnableEntraIdSigningKeyValidationTheoryData
             {
                 TestId = "IssuerSigningKeyValidatorUsingConfiguration_CloudInstanceNamePassed_CloudInstanceNameIsNotMatched_ValidationFailed",
                 Token = Default.AsymmetricJws,
@@ -123,7 +123,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             });
 
             signingKeysConfig = SetupOpenIdConnectConfigurationMock(KeyingMaterial.JsonWebKeyX509_2048);
-            theoryData.Add(new EnableAadSigningKeyValidationTheoryData
+            theoryData.Add(new EnableEntraIdSigningKeyValidationTheoryData
             {
                 TestId = "IssuerSigningKeyValidatorUsingConfiguration_CloudInstanceNamePassed_SecurityKeyCloudInstanceAbsent_ValidationSuccess",
                 Token = Default.AsymmetricJws,
@@ -138,7 +138,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             jwk.AdditionalData.Add(OpenIdProviderMetadataNames.Issuer, ValidatorConstants.AadIssuer);
             signingKeysConfig = SetupOpenIdConnectConfigurationMock(jwk);
             signingKeysConfig.Issuer = ValidatorConstants.AadIssuer;
-            theoryData.Add(new EnableAadSigningKeyValidationTheoryData
+            theoryData.Add(new EnableEntraIdSigningKeyValidationTheoryData
             {
                 TestId = "IssuerSigningKeyValidatorUsingConfiguration_IssuerMatched_ValidationSuccess",
                 Token = Default.Jwt(Default.SecurityTokenDescriptor(KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2, new List<Claim> { issClaim, tidClaim })),
@@ -158,7 +158,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             jwk.AdditionalData.Add(OpenIdProviderMetadataNames.Issuer, ValidatorConstants.AadIssuer);
             signingKeysConfig = SetupOpenIdConnectConfigurationMock(jwk);
             signingKeysConfig.Issuer = ValidatorConstants.AadIssuer;
-            theoryData.Add(new EnableAadSigningKeyValidationTheoryData
+            theoryData.Add(new EnableEntraIdSigningKeyValidationTheoryData
             {
                 TestId = "IssuerSigningKeyValidatorUsingConfiguration_IssuerNotMatched_ValidationFailed",
                 Token = Default.Jwt(Default.SecurityTokenDescriptor(KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2, new List<Claim> { issClaim, tidClaim })),
@@ -199,7 +199,9 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
         [Theory, MemberData(nameof(EnableAadSigningKeyIssuerValidationTestCases))]
         [Obsolete("The 'EnableAadSigningKeyIssuerValidation' extension method is obsolete.")]
-        public async Task EnableAadSigningKeyIssuerValidationTests(EnableAadSigningKeyValidationTheoryData theoryData)
+#pragma warning disable CS0618 // Type or member is obsolete
+        public async Task EnableAadSigningKeyIssuerValidationTests(EnableEntraIdSigningKeyValidationTheoryData theoryData)
+#pragma warning restore CS0618 // Type or member is obsolete
         {
             var context = TestUtilities.WriteHeader($"{this}.EnableAadSigningKeyIssuerValidationTests", theoryData);
             try
@@ -238,7 +240,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<EnableAadSigningKeyValidationTheoryData> EnableAadSigningKeyIssuerValidationTestCases()
+        public static TheoryData<EnableEntraIdSigningKeyValidationTheoryData> EnableAadSigningKeyIssuerValidationTestCases()
         {
             var signingKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
             signingKeysConfig.SigningKeys.Add(KeyingMaterial.DefaultX509Key_2048);
@@ -250,20 +252,20 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 ValidateLifetime = false
             };
 
-            var theoryData = new TheoryData<EnableAadSigningKeyValidationTheoryData>
+            var theoryData = new TheoryData<EnableEntraIdSigningKeyValidationTheoryData>
             {
-                new EnableAadSigningKeyValidationTheoryData
+                new EnableEntraIdSigningKeyValidationTheoryData
                 {
                     TestId = "IssuerSigningKeyValidatorUsingConfiguration_Delegate_IsSetByWilson",
                     TokenValidationParameters = validationParameters
                 },
-                new EnableAadSigningKeyValidationTheoryData
+                new EnableEntraIdSigningKeyValidationTheoryData
                 {
                     TestId = "IssuerSigningKeyValidatorUsingConfiguration_Delegate_IsSetByDeveloper",
                     TokenValidationParameters = validationParameters,
                     SetDelegateUsingConfig = true,
                 },
-                new EnableAadSigningKeyValidationTheoryData
+                new EnableEntraIdSigningKeyValidationTheoryData
                 {
                     TestId = "IssuerSigningKeyValidator_Delegate_IsSetByDeveloper",
                     TokenValidationParameters = validationParameters,
@@ -734,7 +736,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             }
         }
 
-        public class EnableAadSigningKeyValidationTheoryData : TheoryDataBase
+        public class EnableEntraIdSigningKeyValidationTheoryData : TheoryDataBase
         {
             public TokenValidationParameters TokenValidationParameters { get; set; }
 

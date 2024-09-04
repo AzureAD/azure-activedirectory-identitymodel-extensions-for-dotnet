@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Validators
         /// Enables the validation of the issuer of the signing keys used by the Microsoft identity platform (AAD) against the issuer of the token.
         /// </summary>
         /// <param name="tokenValidationParameters">The <see cref="TokenValidationParameters"/> that are used to validate the token.</param>
-        [Obsolete("Use EnableAadSigningKeyValidation(TokenValidationParameters, string) instead.")]
+        [Obsolete("Use EnableEntraIdSigningKeyValidation(TokenValidationParameters, string) instead.")]
         public static void EnableAadSigningKeyIssuerValidation(this TokenValidationParameters tokenValidationParameters)
         {
             if (tokenValidationParameters == null)
