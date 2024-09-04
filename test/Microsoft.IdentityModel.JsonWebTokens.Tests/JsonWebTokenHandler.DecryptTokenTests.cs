@@ -3,7 +3,6 @@
 
 using System;
 using System.IdentityModel.Tokens.Jwt.Tests;
-using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
@@ -112,7 +111,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             new MessageDetail(TokenLogMessages.IDX10612),
                             ValidationFailureType.TokenDecryptionFailed,
                             typeof(SecurityTokenException),
-                            null,
                             null),
                     },
                     new TokenDecryptingTheoryData
@@ -125,7 +123,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             new MessageDetail(TokenLogMessages.IDX10000, "jwtToken"),
                             ValidationFailureType.NullArgument,
                             typeof(ArgumentNullException),
-                            null,
                             null),
                     },
                     new TokenDecryptingTheoryData
@@ -138,7 +135,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             new MessageDetail(TokenLogMessages.IDX10000, "validationParameters"),
                             ValidationFailureType.NullArgument,
                             typeof(ArgumentNullException),
-                            null,
                             null),
                     },
                     new TokenDecryptingTheoryData
@@ -196,7 +192,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                     JwtTokenUtilities.SafeLogJwtToken)),
                             ValidationFailureType.TokenDecryptionFailed,
                             typeof(SecurityTokenDecryptionFailedException),
-                            null,
                             null),
                     }
                 };
