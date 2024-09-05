@@ -186,14 +186,33 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ExpectedIsValid = false,
                         ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10517:"),
                     },
+                    new JsonWebTokenHandlerValidationParametersTheoryData
+                    {
+                        // Token is signed with HmacSha256 but only sha256 is considered valid for this test's purposes
+                        TestId = "Invalid_TokenSignedWithInvalidAlgorithm",
+                        TokenValidationParameters = CreateTokenValidationParameters(
+                            Default.Issuer, [Default.Audience], KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
+                            validAlgorithms: [SecurityAlgorithms.Sha256]),
+                        ValidationParameters = CreateValidationParameters(
+                            Default.Issuer, [Default.Audience], KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
+                            validAlgorithms: [SecurityAlgorithms.Sha256]),
+                        SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
+                        ExpectedIsValid = false,
+                        ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10511:"),
+                        ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidSignatureException(
+                            "IDX10518:",
+                            innerTypeExpected: typeof(SecurityTokenInvalidAlgorithmException))
+                    },
                 };
 
                 static TokenValidationParameters CreateTokenValidationParameters(
                     string issuer,
                     List<string> audiences,
                     SecurityKey issuerSigningKey,
+                    List<string> validAlgorithms = null,
                     bool tryAllKeys = false) => new TokenValidationParameters
                     {
+                        ValidAlgorithms = validAlgorithms,
                         ValidateAudience = true,
                         ValidateIssuer = true,
                         ValidateLifetime = true,
@@ -209,6 +228,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     string issuer,
                     List<string> audiences,
                     SecurityKey issuerSigningKey,
+                    List<string> validAlgorithms = null,
                     bool tryAllKeys = false)
                 {
                     ValidationParameters validationParameters = new ValidationParameters();
@@ -216,6 +236,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     audiences.ForEach(audience => validationParameters.ValidAudiences.Add(audience));
                     validationParameters.IssuerSigningKeys.Add(issuerSigningKey);
                     validationParameters.TryAllIssuerSigningKeys = tryAllKeys;
+                    if (validAlgorithms is not null)
+                        validationParameters.ValidAlgorithms = validAlgorithms;
 
                     return validationParameters;
                 }
