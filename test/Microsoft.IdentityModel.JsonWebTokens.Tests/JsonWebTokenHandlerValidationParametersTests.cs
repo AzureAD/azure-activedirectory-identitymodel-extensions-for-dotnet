@@ -186,10 +186,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ExpectedIsValid = false,
                         ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10517:"),
                     },
-                    new JsonWebTokenHandlerValidationParametersTheoryData
+                    new JsonWebTokenHandlerValidationParametersTheoryData("Invalid_TokenSignedWithInvalidAlgorithm")
                     {
                         // Token is signed with HmacSha256 but only sha256 is considered valid for this test's purposes
-                        TestId = "Invalid_TokenSignedWithInvalidAlgorithm",
                         TokenValidationParameters = CreateTokenValidationParameters(
                             Default.Issuer, [Default.Audience], KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
                             validAlgorithms: [SecurityAlgorithms.Sha256]),
