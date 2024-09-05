@@ -58,6 +58,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Bcl.TimeProvider" Version="$(MicrosoftBclTimeProviderVersion)" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <Compile Include="..\Common\TrimmingAttributes.cs" LinkBase="Common" Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'" />
   </ItemGroup>
 

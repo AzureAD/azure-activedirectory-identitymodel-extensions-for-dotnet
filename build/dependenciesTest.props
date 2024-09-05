@@ -3,6 +3,7 @@
     <BannedApiAnalyzersVersion>3.3.4</BannedApiAnalyzersVersion>
     <DotNetCoreAppRuntimeVersion>2.1.30</DotNetCoreAppRuntimeVersion>
     <MicrosoftAzureKeyVaultCryptographyVersion>2.0.5</MicrosoftAzureKeyVaultCryptographyVersion>
+    <MicrosoftExtensionsTimeProviderTestingVersion>8.8.0</MicrosoftExtensionsTimeProviderTestingVersion>
     <MicrosoftNETTestSdkVersion>17.11.0</MicrosoftNETTestSdkVersion>
     <NetStandardVersion>2.0.3</NetStandardVersion>
     <NewtonsoftVersion>13.0.3</NewtonsoftVersion>
