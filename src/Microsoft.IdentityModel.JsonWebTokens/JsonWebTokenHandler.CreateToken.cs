@@ -1422,7 +1422,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 (keysAttempted ??= new StringBuilder()).AppendLine(key.ToString());
             }
 
-            if (unwrappedKeys.Count > 0 && exceptionStrings is null)
+            if (unwrappedKeys.Count > 0 || exceptionStrings is null)
                 return unwrappedKeys;
             else
                 throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(LogHelper.FormatInvariant(TokenLogMessages.IDX10618, (object)keysAttempted ?? "", (object)exceptionStrings ?? "", jwtToken)));
