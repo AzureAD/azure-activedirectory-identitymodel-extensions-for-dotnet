@@ -455,7 +455,6 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the time provider.
         /// </summary>
-        /// <remarks>
         internal TimeProvider TimeProvider { get; set; } = TimeProvider.System;
 
         /// <summary>
