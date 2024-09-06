@@ -241,7 +241,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 callContext);
 
             if (!result.IsSuccess)
-                return new(result.UnwrapError()); // Because we return an interface type, we need to explicitly create the Result.
+                return new ExceptionDetail(
+                    new MessageDetail(
+                        TokenLogMessages.IDX10518,
+                        result.UnwrapError().MessageDetail.Message),
+                    ValidationFailureType.SignatureValidationFailed,
+                    typeof(SecurityTokenInvalidSignatureException),
+                    new StackFrame(true),
+                    result.UnwrapError());
 
             SignatureProvider signatureProvider = cryptoProviderFactory.CreateForVerifying(key, jsonWebToken.Alg);
             try

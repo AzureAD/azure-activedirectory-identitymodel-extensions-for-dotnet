@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.Tokens
             ValidationFailureType failureType,
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type exceptionType,
             StackFrame stackFrame)
-            : this(MessageDetail, failureType, exceptionType, stackFrame, null)
+            : this(MessageDetail, failureType, exceptionType, stackFrame, innerException: null)
         {
         }
 
@@ -57,6 +57,23 @@ namespace Microsoft.IdentityModel.Tokens
             };
         }
 
+        public ExceptionDetail(
+            MessageDetail messageDetail,
+            ValidationFailureType failureType,
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type exceptionType,
+            StackFrame stackFrame,
+            ExceptionDetail innerExceptionDetail)
+        {
+            InnerExceptionDetail = innerExceptionDetail;
+            MessageDetail = messageDetail;
+            _exceptionType = exceptionType;
+            FailureType = failureType;
+            StackFrames = new List<StackFrame>(4)
+            {
+                stackFrame
+            };
+        }
+
         /// <summary>
         /// Creates an instance of an <see cref="Exception"/> using <see cref="ExceptionDetail"/>
         /// </summary>
@@ -64,10 +81,13 @@ namespace Microsoft.IdentityModel.Tokens
         public Exception GetException()
         {
             Exception exception;
-            if (InnerException == null)
+            if (InnerException == null && InnerExceptionDetail == null)
                 exception = Activator.CreateInstance(_exceptionType, MessageDetail.Message) as Exception;
             else
-                exception = Activator.CreateInstance(_exceptionType, MessageDetail.Message, InnerException) as Exception;
+                exception = Activator.CreateInstance(
+                    _exceptionType,
+                    MessageDetail.Message,
+                    InnerException ?? InnerExceptionDetail.GetException()) as Exception;
 
             if (exception is SecurityTokenException securityTokenException)
                 securityTokenException.ExceptionDetail = this;
@@ -102,6 +122,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets the inner exception that occurred.
         /// </summary>
         public Exception InnerException { get; }
+
+        /// <summary>
+        /// Gets the details for the inner exception that occurred.
+        /// </summary>
+        public ExceptionDetail InnerExceptionDetail { get; }
 
         /// <summary>
         /// Gets the message details that are used to generate the exception message.
