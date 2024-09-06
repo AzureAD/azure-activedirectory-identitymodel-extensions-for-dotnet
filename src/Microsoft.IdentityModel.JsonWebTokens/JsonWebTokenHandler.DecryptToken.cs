@@ -202,7 +202,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 (keysAttempted ??= new StringBuilder()).AppendLine(key.ToString());
             }
 
-            if (unwrappedKeys.Count > 0 && exceptionStrings is null)
+            if (unwrappedKeys.Count > 0 || exceptionStrings is null)
                 return (unwrappedKeys, null);
             else
             {
