@@ -35,9 +35,9 @@ namespace Microsoft.IdentityModel.Tokens
         private Dictionary<string, object> _claims;
         private Dictionary<string, object> _propertyBag;
         // TODO - lazy creation of _validationResults
-        private List<ValidationResult> _validationResults;
+        private List<ValidatedToken> _validationResults;
 
-        private ExceptionDetail _exceptionDetail;
+        private ValidationError _validationError;
         private Exception _exception;
         private bool _isValid;
 
@@ -62,7 +62,7 @@ namespace Microsoft.IdentityModel.Tokens
             TokenHandler tokenHandler,
             TokenValidationParameters tokenValidationParameters,
             string issuer,
-            List<ValidationResult> validationResults)
+            List<ValidatedToken> validationResults)
         {
             _tokenValidationParameters = tokenValidationParameters;
             _tokenHandler = tokenHandler;
@@ -79,38 +79,38 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters"></param>
         /// <param name="issuer"></param>
         /// <param name="validationResults"></param>
-        /// <param name="exceptionDetail"></param>
+        /// <param name="validationError"></param>
         /// <remarks>This constructor is used by JsonWebTokenHandler as part of delaying creation of ClaimsIdentity.</remarks>
         internal TokenValidationResult(
             SecurityToken securityToken,
             TokenHandler tokenHandler,
             ValidationParameters validationParameters,
             string issuer,
-            List<ValidationResult> validationResults,
-            ExceptionDetail exceptionDetail)
+            List<ValidatedToken> validationResults,
+            ValidationError validationError)
         {
             _validationParameters = validationParameters;
             _tokenHandler = tokenHandler;
             _validationResults = validationResults;
             Issuer = issuer;
             SecurityToken = securityToken;
-            _exceptionDetail = exceptionDetail;
+            _validationError = validationError;
         }
 
         /// <summary>
         /// Initializes a new instance of <see cref="TokenValidationResult"/> using <see cref="ValidationParameters"/>.
         /// </summary>
         /// <param name="tokenHandler"></param>
-        /// <param name="exceptionDetail"></param>
+        /// <param name="validationError"></param>
         /// <param name="validationParameters"></param>
         /// <remarks>This constructor is used by JsonWebTokenHandler as part of delaying creation of ClaimsIdentity.</remarks>
         internal TokenValidationResult(
             TokenHandler tokenHandler,
             ValidationParameters validationParameters,
-            ExceptionDetail exceptionDetail)
+            ValidationError validationError)
         {
             _tokenHandler = tokenHandler;
-            _exceptionDetail = exceptionDetail;
+            _validationError = validationError;
             _validationParameters = validationParameters;
         }
 
@@ -220,8 +220,8 @@ namespace Microsoft.IdentityModel.Tokens
             get
             {
                 HasValidOrExceptionWasRead = true;
-                if (_exception is null && _exceptionDetail is not null)
-                    return _exceptionDetail.GetException();
+                if (_exception is null && _validationError is not null)
+                    return _validationError.GetException();
 
                 return _exception;
             }

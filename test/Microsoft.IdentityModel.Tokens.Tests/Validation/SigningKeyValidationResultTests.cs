@@ -16,7 +16,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.SigningKeyValidationResultTests", theoryData);
 
-            Result<ValidatedSigningKeyLifetime> result = Validators.ValidateIssuerSigningKey(
+            ValidationResult<ValidatedSigningKeyLifetime> result = Validators.ValidateIssuerSigningKey(
                 theoryData.SecurityKey,
                 theoryData.SecurityToken,
                 theoryData.ValidationParameters,
@@ -34,13 +34,13 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             }
             else
             {
-                ExceptionDetail exceptionDetail = result.UnwrapError();
+                ValidationError validationError = result.UnwrapError();
                 IdentityComparer.AreStringsEqual(
-                    exceptionDetail.FailureType.Name,
+                    validationError.FailureType.Name,
                     theoryData.Result.UnwrapError().FailureType.Name,
                     context);
 
-                Exception exception = exceptionDetail.GetException();
+                Exception exception = validationError.GetException();
                 theoryData.ExpectedException.ProcessException(exception, context);
             }
 
@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         SecurityKey = null,
                         SecurityToken = new JwtSecurityToken(),
                         ValidationParameters = new ValidationParameters(),
-                        Result = new ExceptionDetail(
+                        Result = new ValidationError(
                             new MessageDetail(LogMessages.IDX10253),
                             ValidationFailureType.SigningKeyValidationFailed,
                             typeof(ArgumentNullException),
@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
                         SecurityToken = null,
                         ValidationParameters = new ValidationParameters (),
-                        Result = new ExceptionDetail(
+                        Result = new ValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("securityToken")),
@@ -100,7 +100,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
                         SecurityToken = new JwtSecurityToken(),
                         ValidationParameters = null,
-                        Result = new ExceptionDetail(
+                        Result = new ValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("validationParameters")),
@@ -115,7 +115,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         SecurityKey = KeyingMaterial.ExpiredX509SecurityKey_Public,
                         SecurityToken = new JwtSecurityToken(),
                         ValidationParameters = new ValidationParameters (),
-                        Result = new ExceptionDetail(
+                        Result = new ValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10249,
                                 LogHelper.MarkAsNonPII(utcExpired),
@@ -131,7 +131,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         SecurityKey = KeyingMaterial.NotYetValidX509SecurityKey_Public,
                         SecurityToken = new JwtSecurityToken(),
                         ValidationParameters = new ValidationParameters (),
-                        Result = new ExceptionDetail(
+                        Result = new ValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10248,
                                 LogHelper.MarkAsNonPII(utcNotYetValid),
@@ -147,7 +147,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         SecurityKey = null,
                         SecurityToken = new JwtSecurityToken(),
                         ValidationParameters = new ValidationParameters (),
-                        Result = new ExceptionDetail(
+                        Result = new ValidationError(
                             new MessageDetail(LogMessages.IDX10253),
                             ValidationFailureType.SigningKeyValidationFailed,
                             typeof(ArgumentNullException),
@@ -165,6 +165,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         public SecurityToken SecurityToken { get; set; }
         internal ValidationParameters ValidationParameters { get; set; }
         public BaseConfiguration BaseConfiguration { get; set; }
-        internal Result<ValidatedSigningKeyLifetime> Result { get; set; }
+        internal ValidationResult<ValidatedSigningKeyLifetime> Result { get; set; }
     }
 }

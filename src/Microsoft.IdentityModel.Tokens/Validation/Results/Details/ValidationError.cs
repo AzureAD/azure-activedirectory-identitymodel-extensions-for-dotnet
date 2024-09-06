@@ -11,19 +11,19 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// Contains information so that Exceptions can be logged or thrown written as required.
     /// </summary>
-    internal class ExceptionDetail
+    internal class ValidationError
     {
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
         private Type _exceptionType;
 
         /// <summary>
-        /// Creates an instance of <see cref="ExceptionDetail"/>
+        /// Creates an instance of <see cref="ValidationError"/>
         /// </summary>
         /// <param name="MessageDetail"/> contains information about the exception that is used to generate the exception message.
         /// <param name="exceptionType"/> is the type of exception that occurred.
         /// <param name="failureType"/> is the type of validation failure that occurred.
         /// <param name="stackFrame"/> is the stack frame where the exception occurred.
-        public ExceptionDetail(
+        public ValidationError(
             MessageDetail MessageDetail,
             ValidationFailureType failureType,
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type exceptionType,
@@ -33,14 +33,14 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Creates an instance of <see cref="ExceptionDetail"/>
+        /// Creates an instance of <see cref="ValidationError"/>
         /// </summary>
         /// <param name="messageDetail"/> contains information about the exception that is used to generate the exception message.
         /// <param name="exceptionType"/> is the type of exception that occurred.
         /// <param name="failureType"/> is the type of validation failure that occurred.
         /// <param name="stackFrame"/> is the stack frame where the exception occurred.
         /// <param name="innerException"/> is the inner exception that occurred.
-        public ExceptionDetail(
+        public ValidationError(
             MessageDetail messageDetail,
             ValidationFailureType failureType,
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type exceptionType,
@@ -57,14 +57,14 @@ namespace Microsoft.IdentityModel.Tokens
             };
         }
 
-        public ExceptionDetail(
+        public ValidationError(
             MessageDetail messageDetail,
             ValidationFailureType failureType,
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type exceptionType,
             StackFrame stackFrame,
-            ExceptionDetail innerExceptionDetail)
+            ValidationError innerValidationError)
         {
-            InnerExceptionDetail = innerExceptionDetail;
+            InnerValidationError = innerValidationError;
             MessageDetail = messageDetail;
             _exceptionType = exceptionType;
             FailureType = failureType;
@@ -75,22 +75,22 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Creates an instance of an <see cref="Exception"/> using <see cref="ExceptionDetail"/>
+        /// Creates an instance of an <see cref="Exception"/> using <see cref="ValidationError"/>
         /// </summary>
         /// <returns>An instantance of an Exception.</returns>
         public Exception GetException()
         {
             Exception exception;
-            if (InnerException == null && InnerExceptionDetail == null)
+            if (InnerException == null && InnerValidationError == null)
                 exception = Activator.CreateInstance(_exceptionType, MessageDetail.Message) as Exception;
             else
                 exception = Activator.CreateInstance(
                     _exceptionType,
                     MessageDetail.Message,
-                    InnerException ?? InnerExceptionDetail.GetException()) as Exception;
+                    InnerException ?? InnerValidationError.GetException()) as Exception;
 
             if (exception is SecurityTokenException securityTokenException)
-                securityTokenException.ExceptionDetail = this;
+                securityTokenException.ValidationError = this;
 
             AddAdditionalInformation(exception);
 
@@ -102,7 +102,7 @@ namespace Microsoft.IdentityModel.Tokens
             // base implementation is no-op. Derived classes can override to add additional information to the exception.
         }
 
-        internal static ExceptionDetail NullParameter(string parameterName, StackFrame stackFrame) => new ExceptionDetail(
+        internal static ValidationError NullParameter(string parameterName, StackFrame stackFrame) => new ValidationError(
             MessageDetail.NullParameter(parameterName),
             ValidationFailureType.NullArgument,
             typeof(ArgumentNullException),
@@ -126,7 +126,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the details for the inner exception that occurred.
         /// </summary>
-        public ExceptionDetail InnerExceptionDetail { get; }
+        public ValidationError InnerValidationError { get; }
 
         /// <summary>
         /// Gets the message details that are used to generate the exception message.
@@ -143,7 +143,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="stackFrame">The <see cref="StackFrame"/> to be added.</param>
         /// <returns></returns>
-        public ExceptionDetail AddStackFrame(StackFrame stackFrame)
+        public ValidationError AddStackFrame(StackFrame stackFrame)
         {
             StackFrames.Add(stackFrame);
             return this;
