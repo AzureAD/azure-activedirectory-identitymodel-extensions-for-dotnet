@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return result.exceptionDetail.AddStackFrame(decryptionGetKeysStackFrame);
             }
 
-            if (result.contentEncryptionKeys == null)
+            if (result.contentEncryptionKeys == null || result.contentEncryptionKeys.Count == 0)
             {
                 StackFrame noKeysTriedStackFrame = StackFrames.DecryptionNoKeysTried ??= new StackFrame(true);
                 return new ExceptionDetail(
