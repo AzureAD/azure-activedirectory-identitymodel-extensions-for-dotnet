@@ -170,18 +170,38 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 #if NET472 || NET6_0_OR_GREATER
                     if (SupportedAlgorithms.EcdsaWrapAlgorithms.Contains(jwtToken.Alg))
                     {
-                        // on decryption we get the public key from the EPK value see: https://datatracker.ietf.org/doc/html/rfc7518#appendix-C
-                        var ecdhKeyExchangeProvider = new EcdhKeyExchangeProvider(
-                            key as ECDsaSecurityKey,
-                            validationParameters.EphemeralDecryptionKey as ECDsaSecurityKey,
-                            jwtToken.Alg,
-                            jwtToken.Enc);
-                        jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Apu, out string apu);
-                        jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Apv, out string apv);
-                        SecurityKey kdf = ecdhKeyExchangeProvider.GenerateKdf(apu, apv);
-                        var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(kdf, ecdhKeyExchangeProvider.GetEncryptionAlgorithm());
-                        var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.EncryptedKey));
-                        unwrappedKeys.Add(new SymmetricSecurityKey(unwrappedKey));
+                        ECDsaSecurityKey? publicKey;
+
+                        // Since developers may have already worked around this issue, implicitly taking a dependency on the
+                        // old behavior, we guard the new behavior behind an AppContext switch. The new/RFC-conforming behavior
+                        // is treated as opt-in. When the library is at the point where it is able to make breaking changes
+                        // (such as the next major version update) we should consider whether or not this app-compat switch
+                        // needs to be maintained.
+                        if (AppContextSwitches.UseRfcDefinitionOfEpkAndKid)
+                        {
+                            // on decryption we get the public key from the EPK value see: https://datatracker.ietf.org/doc/html/rfc7518#appendix-C
+                            jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Epk, out string epk);
+                            publicKey = new ECDsaSecurityKey(new JsonWebKey(epk), false);
+                        }
+                        else
+                        {
+                            publicKey = validationParameters.EphemeralDecryptionKey as ECDsaSecurityKey;
+                        }
+
+                        if (publicKey is not null)
+                        {
+                            var ecdhKeyExchangeProvider = new EcdhKeyExchangeProvider(
+                                key as ECDsaSecurityKey,
+                                publicKey,
+                                jwtToken.Alg,
+                                jwtToken.Enc);
+                            jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Apu, out string apu);
+                            jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Apv, out string apv);
+                            SecurityKey kdf = ecdhKeyExchangeProvider.GenerateKdf(apu, apv);
+                            var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(kdf, ecdhKeyExchangeProvider.GetEncryptionAlgorithm());
+                            var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.EncryptedKey));
+                            unwrappedKeys.Add(new SymmetricSecurityKey(unwrappedKey));
+                        }
                     }
                     else
 #endif
