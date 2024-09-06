@@ -220,6 +220,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             Default.Issuer, [Default.Audience], KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
                             tokenDecryptionKey: KeyingMaterial.DefaultX509Key_2048),
                     },
+#if NET472 || NET6_0_OR_GREATER
                     new JsonWebTokenHandlerValidationParametersTheoryData("Valid_JWE_EcdhEs")
                     {
                         EncryptingCredentials = new EncryptingCredentials(
@@ -239,6 +240,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             tokenDecryptionKey: new ECDsaSecurityKey(KeyingMaterial.JsonWebKeyP521, true),
                             ephemeralDecryptionKey: new ECDsaSecurityKey(KeyingMaterial.JsonWebKeyP521, true)),
                     },
+#endif
                     new JsonWebTokenHandlerValidationParametersTheoryData("Invalid_JWE_NoDecryptionKeys")
                     {
                         EncryptingCredentials = new EncryptingCredentials(
