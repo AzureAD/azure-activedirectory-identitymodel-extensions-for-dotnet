@@ -16,6 +16,9 @@ namespace Microsoft.IdentityModel.Tokens
         private string? _stackTrace;
         private ValidationError? _validationError;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SecurityTokenArgumentNullException"/> class.
+        /// </summary>
         public SecurityTokenArgumentNullException()
             : base()
         {
@@ -41,11 +44,20 @@ namespace Microsoft.IdentityModel.Tokens
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SecurityTokenArgumentNullException"/> class with a specified null parameter and an error message.
+        /// </summary>
+        /// <param name="paramName">The name of the null parameter that triggered the exception.</param>
+        /// <param name="message">The error message that explains the reason for the exception.</param>
         public SecurityTokenArgumentNullException(string? paramName, string? message)
             : base(paramName, message)
         {
         }
 
+        /// <summary>
+        /// Sets the <see cref="ValidationError"/> that is associated with the exception.
+        /// </summary>
+        /// <param name="validationError">The validation error to associate with the exception.</param>
         public void SetValidationError(ValidationError validationError)
         {
             _validationError = validationError;
