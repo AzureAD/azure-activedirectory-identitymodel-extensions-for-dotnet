@@ -16,11 +16,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// <remarks>This partial class contains methods and logic related to the validation of tokens' signatures.</remarks>
     public partial class JsonWebTokenHandler : TokenHandler
     {
-        static internal class SignatureStackFrames
-        {
-            // Test StackFrame to validate caching solution. Need to add all the possible stack frames.
-            static internal StackFrame? NoKeysProvided;
-        }
         /// <summary>
         /// Validates the JWT signature.
         /// </summary>
@@ -115,8 +110,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return new ValidationError(
                     new MessageDetail(TokenLogMessages.IDX10500),
                     ValidationFailureType.SignatureValidationFailed,
-                    ExceptionType.SecurityTokenSignatureKeyNotFound,
-                    stackFrame);
+                    typeof(SecurityTokenSignatureKeyNotFoundException),
+                    noKeysProvidedStackFrame);
             }
         }
 

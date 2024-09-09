@@ -18,6 +18,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal JsonClaimSet CreatePayloadClaimSet(Memory<byte> tokenPayloadAsMemory)
         {
+            if (tokenPayloadAsMemory.Length == 0)
+                return new JsonClaimSet([]);
+
             Utf8JsonReader reader = new(tokenPayloadAsMemory.Span);
             if (!JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, true))
                 throw LogHelper.LogExceptionMessage(
@@ -37,8 +40,46 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
-                    string claimName = reader.GetString();
-                    claims[claimName] = ReadTokenPayloadValueDelegate(ref reader, claimName);
+#if NET8_0_OR_GREATER
+                    if (ReadBytesForPayload)
+                    {
+                        if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Iss))
+                        {
+                            _issuerPosition = JsonSerializerPrimitives.ReadStringBytesLocation(ref reader, JwtRegisteredClaimNames.Iss, ClassName, true);
+                        }
+                        //else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.IdTyp))
+                        //{
+                        //    _idtypPosition = JsonSerializerPrimitives.ReadStringBytesLocation(ref reader, JwtRegisteredClaimNames.Idtyp, ClassName, true);
+                        //}
+                        //else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Appid))
+                        //{
+                        //    _appidPosition = JsonSerializerPrimitives.ReadStringBytesLocation(ref reader, JwtRegisteredClaimNames.Appid, ClassName, true);
+                        //}
+                        //else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Tid))
+                        //{
+                        //    _tidPosition = JsonSerializerPrimitives.ReadStringBytesLocation(ref reader, JwtRegisteredClaimNames.Tid, ClassName, true);
+                        //}
+                        //else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Azpacr))
+                        //{
+                        //    _azpacrPosition = JsonSerializerPrimitives.ReadStringBytesLocation(ref reader, JwtRegisteredClaimNames.Azpacr, ClassName, true);
+                        //}
+                        //else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Ver))
+                        //{
+                        //    _verPosition = JsonSerializerPrimitives.ReadStringBytesLocation(ref reader, JwtRegisteredClaimNames.Ver, ClassName, true);
+                        //}
+                        else
+                        {
+                            // aud - will require reading an array
+                            string claimName = reader.GetString();
+                            claims[claimName] = ReadTokenPayloadValueDelegate(ref reader, claimName);
+                        }
+                    }
+                    else
+#endif
+                    {
+                        string claimName = reader.GetString();
+                        claims[claimName] = ReadTokenPayloadValueDelegate(ref reader, claimName);
+                    }
                 }
                 // We read a JsonTokenType.StartObject above, exiting and positioning reader at next token.
                 else if (JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, false))
@@ -81,11 +122,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
             else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Azp))
             {
-#if NET8_0_OR_GREATER
-                return JsonSerializerPrimitives.ReadStringBytesLocation(ref reader, JwtRegisteredClaimNames.Azp, ClassName, true);
-#else
                 return JsonSerializerPrimitives.ReadString(ref reader, JwtRegisteredClaimNames.Azp, ClassName, true);
-#endif
             }
             else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Exp))
             {
@@ -97,19 +134,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
             else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Iss))
             {
-#if NET8_0_OR_GREATER
-                return JsonSerializerPrimitives.ReadStringBytesLocation(ref reader, JwtRegisteredClaimNames.Iss, ClassName, true);
-#else
                 return JsonSerializerPrimitives.ReadString(ref reader, JwtRegisteredClaimNames.Iss, ClassName, true);
-#endif
             }
             else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Jti))
             {
-#if NET8_0_OR_GREATER
-                return JsonSerializerPrimitives.ReadStringBytesLocation(ref reader, JwtRegisteredClaimNames.Jti, ClassName, true);
-#else
                 return JsonSerializerPrimitives.ReadString(ref reader, JwtRegisteredClaimNames.Jti, ClassName, true);
-#endif
             }
             else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Nbf))
             {

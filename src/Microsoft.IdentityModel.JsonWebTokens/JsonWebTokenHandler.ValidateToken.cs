@@ -397,8 +397,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="token"/> is null or empty.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="validationParameters"/> is null.</exception>
         /// <exception cref="ArgumentException">Thrown if 'token.Length' is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
-        /// <exception cref="SecurityTokenMalformedException">Thrown if <paramref name="token"/> is not a valid <see cref="JsonWebToken"/>, <see cref="ReadToken(string, TokenValidationParameters)"/></exception>
-        /// <exception cref="SecurityTokenMalformedException">Thrown if the validationParameters.TokenReader delegate is not able to parse/read the token as a valid <see cref="JsonWebToken"/>, <see cref="ReadToken(string, TokenValidationParameters)"/></exception>
+        /// <exception cref="SecurityTokenMalformedException">Thrown if <paramref name="token"/> is not a valid <see cref="JsonWebToken"/>, <see cref="ReadToken(string, TokenValidationParameters, bool)"/></exception>
+        /// <exception cref="SecurityTokenMalformedException">Thrown if the validationParameters.TokenReader delegate is not able to parse/read the token as a valid <see cref="JsonWebToken"/>, <see cref="ReadToken(string, TokenValidationParameters, bool)"/></exception>
         public override async Task<TokenValidationResult> ValidateTokenAsync(string token, TokenValidationParameters validationParameters)
         {
             if (string.IsNullOrEmpty(token))
@@ -412,7 +412,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             try
             {
-                TokenValidationResult result = ReadToken(token, validationParameters);
+                TokenValidationResult result = ReadToken(token, validationParameters, ReadBytesForPayload);
                 if (result.IsValid)
                     return await ValidateTokenAsync(result.SecurityToken, validationParameters).ConfigureAwait(false);
 

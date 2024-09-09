@@ -12,10 +12,13 @@ namespace Microsoft.IdentityModel.Benchmarks
 {
     public class BenchmarkUtils
     {
-        public const string Issuer = "http://www.contoso.com";
-
+        public const string Appid = "4B87B611-3190-4E14-B9D4-673798957253";
+        public const string Azpacr = "2";
         public const string Audience = "http://www.contoso.com/protected";
-
+        public const string Issuer = "http://www.contoso.com";
+        public const string Idtyp = "1";
+        public const string Tid = "D37D96BC-63C7-48B6-A1B1-E162A1B2903E";
+        public const string Ver = "ver2.0";
         public readonly static IList<string> Audiences = new string[] {
             "http://www.contoso.com/protected",
             "http://www.contoso.com/protected1",
@@ -116,16 +119,18 @@ namespace Microsoft.IdentityModel.Benchmarks
                     { "aio", Guid.NewGuid().ToString() },
                     { "amr", new List<string>() { "pwd", "mfa" } },
                     { "app_displayname", "MyApp" },
+                    { "appid", Appid },
                     { "appidacr", 0 },
-                    { "azpacr", 0 },
+                    { "azpacr", Azpacr },
                     { "azp", Guid.NewGuid().ToString() },
+                    { "idtyp", Idtyp },
                     { "groups", new List<string>() { "group1", "group2" } },
                     { "name", "Bob" },
                     { "oid", Guid.NewGuid().ToString() },
                     { "rh", Guid.NewGuid().ToString() },
                     { "scp", "access_as_user" },
                     { JwtRegisteredClaimNames.Sub, Guid.NewGuid().ToString() },
-                    { "tid", Guid.NewGuid().ToString() },
+                    { "tid", Tid },
                     { "family_name", "Smith" },
                     { "ver", "2.0" },
                     { "wids", new List<string>() { Guid.NewGuid().ToString() } },

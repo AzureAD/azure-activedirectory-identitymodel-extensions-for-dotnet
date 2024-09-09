@@ -40,6 +40,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public const string Amr = "amr";
 
         /// <summary>
+        /// AAD type
+        /// </summary>
+        public const string Appid = "appid";
+
+        /// <summary>
         /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7519#section-4"/>.
         /// </summary>
         public const string Aud = "aud";
@@ -53,6 +58,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// See: <see href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken"/>.
         /// </summary>
         public const string Azp = "azp";
+
+        /// <summary>
+        /// AAD type
+        /// </summary>
+        public const string Azpacr = "azpacr";
 
         /// <summary>
         /// See: <see href="https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims"/>.
@@ -103,6 +113,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7519#section-4"/>.
         /// </summary>
         public const string Iat = "iat";
+
+        /// <summary>
+        /// AAD type
+        /// </summary>
+        public const string Idtyp = "idtyp";
 
         /// <summary>
         /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7519#section-4"/>.
@@ -188,6 +203,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public const string Sub = "sub";
 
         /// <summary>
+        /// AAD
+        /// </summary>
+        public const string Tid = "tid";
+
+        /// <summary>
         /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7519#section-5"/>.
         /// </summary>
         public const string Typ = "typ";
@@ -200,6 +220,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// See: <see href="https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims"/>.
         /// </summary>
         public const string UpdatedAt = "updated_at";
+
+        /// <summary>
+        /// AAD
+        /// </summary>
+        public const string Ver = "ver";
 
         /// <summary>
         /// See: <see href="https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims"/>.
@@ -223,10 +248,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public static ReadOnlySpan<byte> Actort => "actort"u8;
         public static ReadOnlySpan<byte> Acr => "acr"u8;
         public static ReadOnlySpan<byte> Amr => "amr"u8;
+        public static ReadOnlySpan<byte> Appid => "appid"u8;
         public static ReadOnlySpan<byte> AtHash => "at_hash"u8;
         public static ReadOnlySpan<byte> Aud => "aud"u8;
         public static ReadOnlySpan<byte> AuthTime => "auth_time"u8;
         public static ReadOnlySpan<byte> Azp => "azp"u8;
+        public static ReadOnlySpan<byte> Azpacr => "azpacr"u8;
         public static ReadOnlySpan<byte> Birthdate => "birthdate"u8;
         public static ReadOnlySpan<byte> CHash => "c_hash"u8;
         public static ReadOnlySpan<byte> Email => "email"u8;
@@ -235,6 +262,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public static ReadOnlySpan<byte> FamilyName => "family_name"u8;
         public static ReadOnlySpan<byte> GivenName => "given_name"u8;
         public static ReadOnlySpan<byte> Iat => "iat"u8;
+        public static ReadOnlySpan<byte> IdTyp => "idtyp"u8;
         public static ReadOnlySpan<byte> Iss => "iss"u8;
         public static ReadOnlySpan<byte> Jti => "jti"u8;
         public static ReadOnlySpan<byte> Name => "name"u8;
@@ -246,8 +274,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public static ReadOnlySpan<byte> Prn => "prn"u8;
         public static ReadOnlySpan<byte> Sid => "sid"u8;
         public static ReadOnlySpan<byte> Sub => "sub"u8;
+        public static ReadOnlySpan<byte> Tid => "tid"u8;
         public static ReadOnlySpan<byte> Typ => "typ"u8;
         public static ReadOnlySpan<byte> UniqueName => "unique_name"u8;
+        public static ReadOnlySpan<byte> Ver => "ver"u8;
         public static ReadOnlySpan<byte> Website => "website"u8;
     }
 }

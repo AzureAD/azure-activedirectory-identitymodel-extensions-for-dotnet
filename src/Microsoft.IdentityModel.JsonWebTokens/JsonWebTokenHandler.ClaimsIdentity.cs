@@ -12,6 +12,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     public partial class JsonWebTokenHandler
     {
         /// <summary>
+        /// 
+        /// </summary>
+        public bool ReadBytesForPayload { get; set; }
+
+        /// <summary>
         /// Creates a <see cref="ClaimsIdentity"/> from a <see cref="JsonWebToken"/>.
         /// </summary>
         /// <param name="jwtToken">The <see cref="JsonWebToken"/> to use as a <see cref="Claim"/> source.</param>

@@ -122,9 +122,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             ValidationFailureType.NullArgument,
                             typeof(ArgumentNullException),
                             null),
-                                ExceptionDetail.ExceptionType.ArgumentNull,
-                                new StackFrame(),
-                                null))
                     },
                     new TokenReplayTheoryData
                     {
@@ -147,9 +144,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             ValidationFailureType.TokenReplayValidationFailed,
                             typeof(SecurityTokenReplayDetectedException),
                             null),
-                                ExceptionDetail.ExceptionType.SecurityTokenReplayDetected,
-                                new StackFrame(),
-                                null))
                     },
                     new TokenReplayTheoryData
                     {
@@ -172,9 +166,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             ValidationFailureType.TokenReplayValidationFailed,
                             typeof(SecurityTokenReplayDetectedException),
                             null),
-                                ExceptionDetail.ExceptionType.SecurityTokenReplayDetected,
-                                new StackFrame(),
-                                null))
                     },
                     new TokenReplayTheoryData
                     {
@@ -197,9 +188,6 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             ValidationFailureType.TokenReplayValidationFailed,
                             typeof(SecurityTokenReplayDetectedException),
                             null),
-                                ExceptionDetail.ExceptionType.SecurityTokenReplayDetected,
-                                new StackFrame(),
-                                null))
                     }
                 };
             }
@@ -211,7 +199,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         public DateTime? ExpirationTime { get; set; }
 
         public string SecurityToken { get; set; }
-        internal Result<DateTime?> Result { get; set; }
+
         internal ValidationParameters ValidationParameters { get; set; }
 
         internal ValidationResult<DateTime?> Result { get; set; }

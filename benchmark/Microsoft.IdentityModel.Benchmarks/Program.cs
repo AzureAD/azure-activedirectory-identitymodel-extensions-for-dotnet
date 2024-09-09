@@ -24,6 +24,11 @@ namespace Microsoft.IdentityModel.Benchmarks
         }
         private static void DebugThroughTests()
         {
+            IsInRole isInRole = new IsInRole();
+            isInRole.Setup();
+            TokenValidationResult result = isInRole.ValidateBytes().Result;
+            result = isInRole.ValidateStrings().Result;
+
             ReadJWETokenTests readTokenTests = new ReadJWETokenTests();
             readTokenTests.Setup();
             readTokenTests.ReadJWE_FromMemory();

@@ -1301,17 +1301,17 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 writer.WriteNumberValue(f);
 #else
 #pragma warning disable CA1031 // Do not catch general exception types, we have seen TryParse fault.
-            try
-            {
-                if (decimal.TryParse(f.ToString(CultureInfo.InvariantCulture), out decimal dec))
-                    writer.WriteNumberValue(dec);
-                else
+                try
+                {
+                    if (decimal.TryParse(f.ToString(CultureInfo.InvariantCulture), out decimal dec))
+                        writer.WriteNumberValue(dec);
+                    else
+                        writer.WriteNumberValue(f);
+                }
+                catch (Exception)
+                {
                     writer.WriteNumberValue(f);
-            }
-            catch (Exception)
-            {
-                writer.WriteNumberValue(f);
-            }
+                }
 #pragma warning restore CA1031
 #endif
 

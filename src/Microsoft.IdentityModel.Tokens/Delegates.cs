@@ -214,5 +214,23 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
     /// <returns>The transformed <see cref="SecurityToken"/>.</returns>
     internal delegate SecurityToken TransformBeforeSignatureValidationDelegate(SecurityToken token, ValidationParameters validationParameters);
+
+    /// <summary>
+    /// Definition for ReadTokenHeaderValueDelegate.
+    /// Called for each claim when token header is being read.
+    /// </summary>
+    /// <param name="reader">Reader for the underlying token bytes.</param>
+    /// <param name="claimName">The name of the claim being read.</param>
+    /// <returns></returns>
+    public delegate object ReadTokenHeaderValueDelegate(ref Utf8JsonReader reader, string claimName);
+
+    /// <summary>
+    /// Definition for ReadTokenPayloadValueDelegate.
+    /// Called for each claim when token payload is being read.
+    /// </summary>
+    /// <param name="reader">Reader for the underlying token bytes.</param>
+    /// <param name="claimName">The name of the claim being read.</param>
+    /// <returns></returns>
+    public delegate object ReadTokenPayloadValueDelegate(ref Utf8JsonReader reader, string claimName);
 #nullable restore
 }

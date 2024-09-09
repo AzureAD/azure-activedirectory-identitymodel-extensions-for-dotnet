@@ -9,6 +9,9 @@ using System.Threading;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 
+#if NET8_0_OR_GREATER
+using Microsoft.IdentityModel.Tokens.Json;
+#endif
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
     /// <summary>
@@ -30,6 +33,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         private string _encodedToken;
         private string _encryptedKey;
         private string _initializationVector;
+#if NET8_0_OR_GREATER
+        private ValuePosition _issuerPosition;
+        //private ValuePosition _idtypPosition;
+        //private ValuePosition _appidPosition;
+        //private ValuePosition _tidPosition;
+        //private ValuePosition _azpacrPosition;
+        //private ValuePosition _verPosition;
+#endif
         private List<string> _audiences;
         private readonly ReadOnlyMemory<char> _encodedTokenMemory;
 
@@ -80,6 +91,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (string.IsNullOrEmpty(jwtEncodedString))
                 throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(jwtEncodedString)));
 
+            ReadToken(jwtEncodedString.AsMemory());
+
+            _encodedToken = jwtEncodedString;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="jwtEncodedString"></param>
+        /// <param name="readBytes"></param>
+        public JsonWebToken(string jwtEncodedString, bool readBytes)
+        {
+            if (string.IsNullOrEmpty(jwtEncodedString))
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(jwtEncodedString)));
+
+            ReadBytesForPayload = readBytes;
             ReadToken(jwtEncodedString.AsMemory());
 
             _encodedToken = jwtEncodedString;
@@ -181,6 +208,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </remarks>
         internal ReadTokenHeaderValueDelegate ReadTokenHeaderValueDelegate { get; set; } = ReadTokenHeaderValue;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool ReadBytesForPayload { get; set; }
 
         /// <summary>
         /// Called for each claim when token payload is being read.
@@ -1225,10 +1256,35 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public ReadOnlySpan<byte> IdBytes => Payload.GetStringBytesValue(JwtRegisteredClaimNames.Jti);
 
         /// <inheritdoc cref="Issuer" />
-        public ReadOnlySpan<byte> IssuerBytes => Payload.GetStringBytesValue(JwtRegisteredClaimNames.Iss);
+        //public ReadOnlySpan<byte> IssuerBytes => Payload._tokenAsMemory.Slice(_issuerPositionStruct.StartIndex, _issuerPositionStruct.Length).Span;
+        public ReadOnlySpan<byte> IssuerBytes => Payload._tokenAsMemory.Slice(_issuerPosition.StartIndex, _issuerPosition.Length).Span;
+#if never
+        /// <summary>
+        /// 
+        /// </summary>
+        public ReadOnlySpan<byte> IdTypBytes => Payload._tokenAsMemory.Slice(_idtypPosition.StartIndex, _idtypPosition.Length).Span;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public ReadOnlySpan<byte> AppidBytes => Payload._tokenAsMemory.Slice(_appidPosition.StartIndex, _appidPosition.Length).Span;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public ReadOnlySpan<byte> VerBytes => Payload._tokenAsMemory.Slice(_verPosition.StartIndex, _verPosition.Length).Span;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public ReadOnlySpan<byte> TidBytes => Payload._tokenAsMemory.Slice(_tidPosition.StartIndex, _tidPosition.Length).Span;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public ReadOnlySpan<byte> AzpacrBytes => Payload._tokenAsMemory.Slice(_azpacrPosition.StartIndex, _azpacrPosition.Length).Span;
+#endif
         #endregion
-
 #endif
     }
 }

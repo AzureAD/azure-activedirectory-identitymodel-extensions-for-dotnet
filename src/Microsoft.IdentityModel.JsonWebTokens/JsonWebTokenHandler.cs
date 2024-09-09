@@ -493,10 +493,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <param name="token">A JSON Web Token (JWT) in JWS or JWE Compact Serialization format.</param>
         /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> whose TokenReader, if set, will be used to read a JWT.</param>
+        /// <param name="readBytesForPayload"></param>
         /// <returns>A <see cref="TokenValidationResult"/>.</returns>
         /// <exception cref="SecurityTokenMalformedException">Thrown if the validationParameters.TokenReader delegate is not able to parse/read the token as a valid <see cref="JsonWebToken"/>.</exception>
         /// <exception cref="SecurityTokenMalformedException">Thrown if <paramref name="token"/> is not a valid JWT, <see cref="JsonWebToken"/>.</exception>
-        private static TokenValidationResult ReadToken(string token, TokenValidationParameters validationParameters)
+        private static TokenValidationResult ReadToken(string token, TokenValidationParameters validationParameters, bool readBytesForPayload = false)
         {
             JsonWebToken jsonWebToken = null;
             if (validationParameters.TokenReader != null)
@@ -514,7 +515,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 #pragma warning disable CA1031 // Do not catch general exception types
                 try
                 {
-                    jsonWebToken = new JsonWebToken(token);
+                    jsonWebToken = new JsonWebToken(token, readBytesForPayload);
                 }
                 catch (Exception ex)
                 {

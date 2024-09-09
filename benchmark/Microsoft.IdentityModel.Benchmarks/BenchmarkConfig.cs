@@ -15,8 +15,8 @@ namespace Microsoft.IdentityModel.Benchmarks
         public BenchmarkConfig()
         {
             AddJob(Job.MediumRun
-                .WithLaunchCount(4)
-                .WithMaxAbsoluteError(TimeInterval.FromMilliseconds(10)))
+                .WithLaunchCount(1)
+                .WithMaxAbsoluteError(TimeInterval.FromMicroseconds(10)))
                 // uncomment to disable validation to enable debugging through benchmarks
                 //.WithOption(ConfigOptions.DisableOptimizationsValidator, true)
                 .AddColumn(StatisticColumn.P90, StatisticColumn.P95, StatisticColumn.P100)

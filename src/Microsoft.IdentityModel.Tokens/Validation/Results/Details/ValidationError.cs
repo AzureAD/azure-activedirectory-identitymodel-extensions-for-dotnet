@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -13,7 +12,6 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     internal class ValidationError
     {
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
         private Type _exceptionType;
 
         /// <summary>
@@ -26,7 +24,7 @@ namespace Microsoft.IdentityModel.Tokens
         public ValidationError(
             MessageDetail MessageDetail,
             ValidationFailureType failureType,
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type exceptionType,
+            Type exceptionType,
             StackFrame stackFrame)
             : this(MessageDetail, failureType, exceptionType, stackFrame, innerException: null)
         {
@@ -43,7 +41,7 @@ namespace Microsoft.IdentityModel.Tokens
         public ValidationError(
             MessageDetail messageDetail,
             ValidationFailureType failureType,
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type exceptionType,
+            Type exceptionType,
             StackFrame stackFrame,
             Exception innerException)
         {
@@ -60,7 +58,7 @@ namespace Microsoft.IdentityModel.Tokens
         public ValidationError(
             MessageDetail messageDetail,
             ValidationFailureType failureType,
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type exceptionType,
+            Type exceptionType,
             StackFrame stackFrame,
             ValidationError innerValidationError)
         {
@@ -107,16 +105,6 @@ namespace Microsoft.IdentityModel.Tokens
             ValidationFailureType.NullArgument,
             typeof(ArgumentNullException),
             stackFrame);
-
-        /// <summary>
-        /// Gets the type of validation failure that occurred.
-        /// </summary>
-        public ValidationFailureType FailureType { get; }
-
-        internal static ExceptionDetail NullParameter(string parameterName, StackFrame stackFrame) => new ExceptionDetail(
-            MessageDetail.NullParameter(parameterName),
-            ValidationFailureType.NullArgument,
-            ExceptionType.ArgumentNull, stackFrame);
 
         /// <summary>
         /// Gets the type of validation failure that occurred.
