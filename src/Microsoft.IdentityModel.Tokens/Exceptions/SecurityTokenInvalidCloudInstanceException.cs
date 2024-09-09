@@ -7,7 +7,7 @@ using System.Runtime.Serialization;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// This exception is thrown when specific cloud instance was not matched with cloud instance of signing key.
+    /// This exception is thrown when the cloud instance name of the signing key was not matched with the cloud instance name from configuration.
     /// </summary>
     [Serializable]
     public class SecurityTokenInvalidCloudInstanceException : SecurityTokenInvalidSigningKeyException
@@ -16,12 +16,20 @@ namespace Microsoft.IdentityModel.Tokens
         const string _Prefix = "Microsoft.IdentityModel." + nameof(SecurityTokenInvalidCloudInstanceException) + ".";
 
         [NonSerialized]
-        const string _InvalidCloudInstanceKey = _Prefix + nameof(InvalidCloudInstance);
+        const string _SigningKeyCloudInstanceNameKey = _Prefix + nameof(SigningKeyCloudInstanceName);
+
+        [NonSerialized]
+        const string _ConfigurationCloudInstanceNameKey = _Prefix + nameof(ConfigurationCloudInstanceName);
 
         /// <summary>
-        /// Gets or sets the invalid cloud instance that created the validation exception.
+        /// Gets or sets the cloud instance name of the signing key that created the validation exception.
         /// </summary>
-        public string InvalidCloudInstance { get; set; }
+        public string SigningKeyCloudInstanceName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the cloud instance name from the configuration that did not match the cloud instance name of the signing key.
+        /// </summary>
+        public string ConfigurationCloudInstanceName { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SecurityTokenInvalidCloudInstanceException"/> class.
@@ -66,8 +74,12 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 switch (enumerator.Name)
                 {
-                    case _InvalidCloudInstanceKey:
-                        InvalidCloudInstance = info.GetString(_InvalidCloudInstanceKey);
+                    case _SigningKeyCloudInstanceNameKey:
+                        SigningKeyCloudInstanceName = info.GetString(_SigningKeyCloudInstanceNameKey);
+                        break;
+
+                    case _ConfigurationCloudInstanceNameKey:
+                        ConfigurationCloudInstanceName = info.GetString(_ConfigurationCloudInstanceNameKey);
                         break;
 
                     default:
@@ -85,8 +97,11 @@ namespace Microsoft.IdentityModel.Tokens
         {
             base.GetObjectData(info, context);
 
-            if (!string.IsNullOrEmpty(InvalidCloudInstance))
-                info.AddValue(_InvalidCloudInstanceKey, InvalidCloudInstance);
+            if (!string.IsNullOrEmpty(SigningKeyCloudInstanceName))
+                info.AddValue(_SigningKeyCloudInstanceNameKey, SigningKeyCloudInstanceName);
+
+            if (!string.IsNullOrEmpty(ConfigurationCloudInstanceName))
+                info.AddValue(_ConfigurationCloudInstanceNameKey, ConfigurationCloudInstanceName);
         }
     }
 }

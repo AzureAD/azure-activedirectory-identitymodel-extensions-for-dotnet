@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.IdentityModel.Tokens.Jwt.Tests;
 using Microsoft.IdentityModel.JsonWebTokens.Results;
 using Microsoft.IdentityModel.Logging;

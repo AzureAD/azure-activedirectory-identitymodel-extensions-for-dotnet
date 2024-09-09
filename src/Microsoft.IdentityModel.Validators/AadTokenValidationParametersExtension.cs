@@ -18,11 +18,10 @@ namespace Microsoft.IdentityModel.Validators
     public static class AadTokenValidationParametersExtension
     {
         /// <summary>
-        /// Enables validation of Microsoft Entra ID token signing keys.
+        /// Enables validation of the cloud instance name of the Microsoft Entra ID token signing keys.
         /// </summary>
         /// <param name="tokenValidationParameters">The <see cref="TokenValidationParameters"/> that are used to validate the token.</param>
-        /// <param name="cloudInstanceName">The optional cloud instance name to validate against.</param>
-        public static void EnableEntraIdSigningKeyValidation(this TokenValidationParameters tokenValidationParameters, string cloudInstanceName = null)
+        public static void EnableEntraIdSigningKeyCloudInstanceNameValidation(this TokenValidationParameters tokenValidationParameters)
         {
             if (tokenValidationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenValidationParameters));
@@ -32,9 +31,6 @@ namespace Microsoft.IdentityModel.Validators
 
             tokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration = (securityKey, securityToken, tvp, config) =>
             {
-                ValidateSigningKeyCloudInstanceName(securityKey, config, cloudInstanceName);
-                ValidateSigningKeyIssuer(securityKey, securityToken, config);
-
                 // preserve and run provided logic
                 if (userProvidedIssuerSigningKeyValidatorUsingConfiguration != null)
                     return userProvidedIssuerSigningKeyValidatorUsingConfiguration(securityKey, securityToken, tvp, config);
@@ -42,7 +38,8 @@ namespace Microsoft.IdentityModel.Validators
                 if (userProvidedIssuerSigningKeyValidator != null)
                     return userProvidedIssuerSigningKeyValidator(securityKey, securityToken, tvp);
 
-                return ValidateIssuerSigningKeyCertificate(securityKey, tvp);
+                ValidateSigningKeyCloudInstanceName(securityKey, config);
+                return true;
             };
         }
 
@@ -50,7 +47,6 @@ namespace Microsoft.IdentityModel.Validators
         /// Enables the validation of the issuer of the signing keys used by the Microsoft identity platform (AAD) against the issuer of the token.
         /// </summary>
         /// <param name="tokenValidationParameters">The <see cref="TokenValidationParameters"/> that are used to validate the token.</param>
-        [Obsolete("Use EnableEntraIdSigningKeyValidation(TokenValidationParameters, string) instead.")]
         public static void EnableAadSigningKeyIssuerValidation(this TokenValidationParameters tokenValidationParameters)
         {
             if (tokenValidationParameters == null)
@@ -139,12 +135,11 @@ namespace Microsoft.IdentityModel.Validators
         }
 
         /// <summary>
-        /// Validates the cloud instance name of the signing key in a property bag.
+        /// Validates the cloud instance name of the signing key.
         /// </summary>
         /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
         /// <param name="configuration">The <see cref="BaseConfiguration"/> provided.</param>
-        /// <param name="cloudInstanceName">The cloud instance name to validate against.</param>
-        internal static void ValidateSigningKeyCloudInstanceName(SecurityKey securityKey, BaseConfiguration configuration, string cloudInstanceName)
+        internal static void ValidateSigningKeyCloudInstanceName(SecurityKey securityKey, BaseConfiguration configuration)
         {
             if (securityKey == null)
                 return;
@@ -152,26 +147,23 @@ namespace Microsoft.IdentityModel.Validators
             if (configuration is not OpenIdConnectConfiguration openIdConnectConfiguration)
                 return;
 
+            const string CloudInstanceNameKey = "cloud_instance_name";
             JsonWebKey matchedKeyFromConfig = openIdConnectConfiguration.JsonWebKeySet?.Keys.FirstOrDefault(x => x != null && x.Kid == securityKey.KeyId);
-            if (matchedKeyFromConfig != null && matchedKeyFromConfig.AdditionalData.TryGetValue(OpenIdProviderMetadataNames.CloudInstanceName, out object value))
+            if (matchedKeyFromConfig != null && matchedKeyFromConfig.AdditionalData.TryGetValue(CloudInstanceNameKey, out object value))
             {
-                string signingKeyCloudInstance = value as string;
-                if (string.IsNullOrWhiteSpace(signingKeyCloudInstance))
-                    return;
-
-                // Store the cloud instance name in the security key's property bag.
-                securityKey.PropertyBag[OpenIdProviderMetadataNames.CloudInstanceName] = signingKeyCloudInstance;
-
-                if (cloudInstanceName == null)
-                    return;
-
-                if (!string.Equals(signingKeyCloudInstance, cloudInstanceName, StringComparison.Ordinal))
-                    throw LogHelper.LogExceptionMessage(
-                        new SecurityTokenInvalidCloudInstanceException(LogHelper.FormatInvariant(LogMessages.IDX40012, LogHelper.MarkAsNonPII(cloudInstanceName), LogHelper.MarkAsNonPII(signingKeyCloudInstance)))
-                        {
-                            InvalidCloudInstance = cloudInstanceName,
-                            SigningKey = securityKey,
-                        });
+                string signingKeyCloudInstanceName = value as string;
+                if (!string.IsNullOrWhiteSpace(signingKeyCloudInstanceName) && openIdConnectConfiguration.AdditionalData.TryGetValue(CloudInstanceNameKey, out object configurationCloudInstanceNameObjectValue))
+                {
+                    string configurationCloudInstanceName = configurationCloudInstanceNameObjectValue as string;
+                    if (!string.Equals(signingKeyCloudInstanceName, configurationCloudInstanceName, StringComparison.Ordinal))
+                        throw LogHelper.LogExceptionMessage(
+                            new SecurityTokenInvalidCloudInstanceException(LogHelper.FormatInvariant(LogMessages.IDX40012, LogHelper.MarkAsNonPII(signingKeyCloudInstanceName), LogHelper.MarkAsNonPII(configurationCloudInstanceName)))
+                            {
+                                ConfigurationCloudInstanceName = configurationCloudInstanceName,
+                                SigningKeyCloudInstanceName = signingKeyCloudInstanceName,
+                                SigningKey = securityKey,
+                            });
+                }
             }
         }
 
