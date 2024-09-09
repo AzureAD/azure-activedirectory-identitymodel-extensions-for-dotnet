@@ -152,9 +152,15 @@ namespace Microsoft.IdentityModel.Validators
             if (matchedKeyFromConfig != null && matchedKeyFromConfig.AdditionalData.TryGetValue(CloudInstanceNameKey, out object value))
             {
                 string signingKeyCloudInstanceName = value as string;
-                if (!string.IsNullOrWhiteSpace(signingKeyCloudInstanceName) && openIdConnectConfiguration.AdditionalData.TryGetValue(CloudInstanceNameKey, out object configurationCloudInstanceNameObjectValue))
+                if (string.IsNullOrWhiteSpace(signingKeyCloudInstanceName))
+                    return;
+
+                if (openIdConnectConfiguration.AdditionalData.TryGetValue(CloudInstanceNameKey, out object configurationCloudInstanceNameObjectValue))
                 {
                     string configurationCloudInstanceName = configurationCloudInstanceNameObjectValue as string;
+                    if (string.IsNullOrWhiteSpace(configurationCloudInstanceName))
+                        return;
+
                     if (!string.Equals(signingKeyCloudInstanceName, configurationCloudInstanceName, StringComparison.Ordinal))
                         throw LogHelper.LogExceptionMessage(
                             new SecurityTokenInvalidCloudInstanceException(LogHelper.FormatInvariant(LogMessages.IDX40012, LogHelper.MarkAsNonPII(signingKeyCloudInstanceName), LogHelper.MarkAsNonPII(configurationCloudInstanceName)))
