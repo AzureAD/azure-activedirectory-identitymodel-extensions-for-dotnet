@@ -2,6 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
+#if NET472_OR_GREATER || NET6_0_OR_GREATER
+using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
+#endif
 using System.IdentityModel.Tokens.Jwt.Tests;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
@@ -93,10 +97,29 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     Expires = DateTime.MaxValue,
                     NotBefore = DateTime.MinValue,
                     IssuedAt = DateTime.MinValue,
+                    AdditionalHeaderClaims = AdditionalEcdhEsHeaderParameters(KeyingMaterial.JsonWebKeyP256_Public),
                 };
 
                 var jsonWebTokenHandler = new JsonWebTokenHandler();
                 var ecdsaToken = new JsonWebToken(jsonWebTokenHandler.CreateToken(ecdsaTokenDescriptor));
+
+                static Dictionary<string, object> AdditionalEcdhEsHeaderParameters(JsonWebKey publicKeySender)
+                {
+                    var epkJObject = new JObject();
+                    epkJObject.Add(JsonWebKeyParameterNames.Kty, publicKeySender.Kty);
+                    epkJObject.Add(JsonWebKeyParameterNames.Crv, publicKeySender.Crv);
+                    epkJObject.Add(JsonWebKeyParameterNames.X, publicKeySender.X);
+                    epkJObject.Add(JsonWebKeyParameterNames.Y, publicKeySender.Y);
+
+                    Dictionary<string, object> additionalHeaderParams = new Dictionary<string, object>()
+                    {
+                        { JsonWebTokens.JwtHeaderParameterNames.Apu, Guid.NewGuid().ToString() },
+                        { JsonWebTokens.JwtHeaderParameterNames.Apv, Guid.NewGuid().ToString() },
+                        { JsonWebTokens.JwtHeaderParameterNames.Epk, epkJObject.ToString(Newtonsoft.Json.Formatting.None) }
+                    };
+
+                    return additionalHeaderParams;
+                }
 #endif
 
                 return new TheoryData<TokenDecryptingTheoryData>
@@ -173,7 +196,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ValidationParameters = new ValidationParameters
                         {
                             TokenDecryptionKeys = [new ECDsaSecurityKey(KeyingMaterial.JsonWebKeyP256, true)],
-                            EphemeralDecryptionKey = new ECDsaSecurityKey(KeyingMaterial.JsonWebKeyP256, true)
                         },
                         Result = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJleHAiOjI1MzQwMjMwMDgwMCwiaWF0IjowLCJuYmYiOjB9."
                     },

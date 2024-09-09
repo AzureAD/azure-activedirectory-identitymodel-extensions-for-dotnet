@@ -1,14 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+#if NET472_OR_GREATER || NET6_0_OR_GREATER
 using System;
+using Newtonsoft.Json.Linq;
+#endif
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace Microsoft.IdentityModel.JsonWebTokens.Tests
@@ -237,8 +239,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             tokenDecryptionKey: new ECDsaSecurityKey(KeyingMaterial.JsonWebKeyP521, true)),
                         ValidationParameters = CreateValidationParameters(
                             Default.Issuer, [Default.Audience], KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
-                            tokenDecryptionKey: new ECDsaSecurityKey(KeyingMaterial.JsonWebKeyP521, true),
-                            ephemeralDecryptionKey: new ECDsaSecurityKey(KeyingMaterial.JsonWebKeyP521, true)),
+                            tokenDecryptionKey: new ECDsaSecurityKey(KeyingMaterial.JsonWebKeyP521, true)),
                     },
 #endif
                     new JsonWebTokenHandlerValidationParametersTheoryData("Invalid_JWE_NoDecryptionKeys")
@@ -318,7 +319,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     List<string> audiences,
                     SecurityKey issuerSigningKey,
                     SecurityKey tokenDecryptionKey = null,
-                    SecurityKey ephemeralDecryptionKey = null,
                     List<string> validAlgorithms = null,
                     bool tryAllKeys = false)
                 {
@@ -331,12 +331,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         validationParameters.ValidAlgorithms = validAlgorithms;
                     if (tokenDecryptionKey is not null)
                         validationParameters.TokenDecryptionKeys = [tokenDecryptionKey];
-                    if (ephemeralDecryptionKey is not null)
-                        validationParameters.EphemeralDecryptionKey = ephemeralDecryptionKey;
 
                     return validationParameters;
                 }
 
+#if NET472 || NET6_0_OR_GREATER
                 static Dictionary<string, object> AdditionalEcdhEsHeaderParameters(JsonWebKey publicKeySender)
                 {
                     var epkJObject = new JObject();
@@ -354,6 +353,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
                     return additionalHeaderParams;
                 }
+#endif
             }
         }
 
