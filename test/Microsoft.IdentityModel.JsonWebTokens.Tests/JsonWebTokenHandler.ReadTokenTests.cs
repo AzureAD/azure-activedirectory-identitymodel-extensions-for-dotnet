@@ -71,26 +71,26 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         TestId = "Invalid_NullToken",
                         Token = null,
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                        ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
                         Result = new ValidationError(
                             new MessageDetail(
                                 TokenLogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("token")),
                             ValidationFailureType.NullArgument,
-                            typeof(ArgumentNullException),
+                            typeof(SecurityTokenArgumentNullException),
                             null)
                     },
                     new TokenReadingTheoryData
                     {
                         TestId = "Invalid_EmptyToken",
                         Token = string.Empty,
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                        ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
                         Result = new ValidationError(
                             new MessageDetail(
                                 TokenLogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("token")),
                             ValidationFailureType.NullArgument,
-                            typeof(ArgumentNullException),
+                            typeof(SecurityTokenArgumentNullException),
                             null)
                     },
                     new TokenReadingTheoryData

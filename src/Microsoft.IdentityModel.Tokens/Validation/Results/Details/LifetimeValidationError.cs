@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Tokens
                 _additionalInformation = additionalInformation.Value;
         }
 
-        protected override void AddAdditionalInformation(Exception exception)
+        internal override void AddAdditionalInformation(ISecurityTokenException exception)
         {
             if (exception is SecurityTokenExpiredException expiredException &&
                 _additionalInformation.ExpirationDate.HasValue)

@@ -81,26 +81,26 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new JsonWebTokenHandlerValidateSignatureTheoryData {
                         TestId = "Invalid_Null_JWT",
                         JWT = null,
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                        ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
                         Result = new ValidationError(
                             new MessageDetail(
                                 TokenLogMessages.IDX10000,
                                 "jwtToken"),
                             ValidationFailureType.NullArgument,
-                            typeof(ArgumentNullException),
+                            typeof(SecurityTokenArgumentNullException),
                             null)
                     },
                     new JsonWebTokenHandlerValidateSignatureTheoryData {
                         TestId = "Invalid_Null_ValidationParameters",
                         JWT = new JsonWebToken(EncodedJwts.LiveJwt),
                         ValidationParameters = null,
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                        ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
                         Result = new ValidationError(
                             new MessageDetail(
                                 TokenLogMessages.IDX10000,
                                 "validationParameters"),
                             ValidationFailureType.NullArgument,
-                            typeof(ArgumentNullException),
+                            typeof(SecurityTokenArgumentNullException),
                             null)
                     },
                     new JsonWebTokenHandlerValidateSignatureTheoryData {
@@ -110,13 +110,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             SignatureValidator = (token, parameters, configuration, callContext) => ValidationError.NullParameter("fakeParameter", null)
                         },
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                        ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
                         Result = new ValidationError(
                             new MessageDetail(
                                 TokenLogMessages.IDX10000,
                                 "fakeParameter"),
                             ValidationFailureType.NullArgument,
-                            typeof(ArgumentNullException),
+                            typeof(SecurityTokenArgumentNullException),
                             null)
                     },
                     new JsonWebTokenHandlerValidateSignatureTheoryData

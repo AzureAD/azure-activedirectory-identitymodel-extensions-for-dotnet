@@ -68,20 +68,20 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     new SigningKeyValidationTheoryData
                     {
                         TestId = "Invalid_SecurityKeyIsNull",
-                        ExpectedException = ExpectedException.ArgumentNullException(substringExpected: "IDX10253:"),
+                        ExpectedException = ExpectedException.SecurityTokenArgumentNullException(substringExpected: "IDX10253:"),
                         SecurityKey = null,
                         SecurityToken = new JwtSecurityToken(),
                         ValidationParameters = new ValidationParameters(),
                         Result = new ValidationError(
                             new MessageDetail(LogMessages.IDX10253),
                             ValidationFailureType.SigningKeyValidationFailed,
-                            typeof(ArgumentNullException),
+                            typeof(SecurityTokenArgumentNullException),
                             null),
                     },
                     new SigningKeyValidationTheoryData
                     {
                         TestId = "Invalid_SecurityTokenIsNull",
-                        ExpectedException = ExpectedException.ArgumentNullException(substringExpected: "IDX10000:"),
+                        ExpectedException = ExpectedException.SecurityTokenArgumentNullException(substringExpected: "IDX10000:"),
                         SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
                         SecurityToken = null,
                         ValidationParameters = new ValidationParameters (),
@@ -90,13 +90,13 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("securityToken")),
                             ValidationFailureType.NullArgument,
-                            typeof(ArgumentNullException),
+                            typeof(SecurityTokenArgumentNullException),
                             null),
                     },
                     new SigningKeyValidationTheoryData
                     {
                         TestId = "Invalid_ValidationParametersIsNull",
-                        ExpectedException = ExpectedException.ArgumentNullException(substringExpected: "IDX10000:"),
+                        ExpectedException = ExpectedException.SecurityTokenArgumentNullException(substringExpected: "IDX10000:"),
                         SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
                         SecurityToken = new JwtSecurityToken(),
                         ValidationParameters = null,
@@ -105,7 +105,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("validationParameters")),
                             ValidationFailureType.NullArgument,
-                            typeof(ArgumentNullException),
+                            typeof(SecurityTokenArgumentNullException),
                             null),
                     },
                     new SigningKeyValidationTheoryData
@@ -143,14 +143,14 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     new SigningKeyValidationTheoryData
                     {
                         TestId = "Invalid_SecurityKeyIsNull",
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10253:"),
+                        ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10253:"),
                         SecurityKey = null,
                         SecurityToken = new JwtSecurityToken(),
                         ValidationParameters = new ValidationParameters (),
                         Result = new ValidationError(
                             new MessageDetail(LogMessages.IDX10253),
                             ValidationFailureType.SigningKeyValidationFailed,
-                            typeof(ArgumentNullException),
+                            typeof(SecurityTokenArgumentNullException),
                             null),
                     },
 

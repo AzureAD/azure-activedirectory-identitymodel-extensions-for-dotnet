@@ -49,12 +49,19 @@ namespace Microsoft.IdentityModel.Tokens
 
         #region Validated Properties
         public ValidatedToken? ActorValidationResult { get; internal set; }
+
         public string? ValidatedAudience { get; internal set; }
+
         public ValidatedIssuer? ValidatedIssuer { get; internal set; }
+
         public ValidatedLifetime? ValidatedLifetime { get; internal set; }
+
         public DateTime? ValidatedTokenReplayExpirationTime { get; internal set; }
+
         public ValidatedTokenType? ValidatedTokenType { get; internal set; }
+
         public SecurityKey? ValidatedSigningKey { get; internal set; }
+
         public ValidatedSigningKeyLifetime? ValidatedSigningKeyLifetime { get; internal set; }
         #endregion
 

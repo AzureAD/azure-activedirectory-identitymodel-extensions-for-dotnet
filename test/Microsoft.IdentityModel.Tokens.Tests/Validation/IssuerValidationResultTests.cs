@@ -84,14 +84,14 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
                 theoryData.Add(new IssuerValidationResultsTheoryData("NULL_ValidationParameters")
                 {
-                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
                     Issuer = issClaim,
                     Result = new ValidationError(
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII("validationParameters")),
                         ValidationFailureType.NullArgument,
-                        typeof(ArgumentNullException),
+                        typeof(SecurityTokenArgumentNullException),
                         null),
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
                     ValidationParameters = null
@@ -99,14 +99,14 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
                 theoryData.Add(new IssuerValidationResultsTheoryData("NULL_SecurityToken")
                 {
-                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
                     Issuer = issClaim,
                     Result = new ValidationError(
                         new MessageDetail(
                             LogMessages.IDX10000,
                             LogHelper.MarkAsNonPII("securityToken")),
                         ValidationFailureType.NullArgument,
-                        typeof(ArgumentNullException),
+                        typeof(SecurityTokenArgumentNullException),
                         null),
                     SecurityToken = null,
                     ValidationParameters = new ValidationParameters()

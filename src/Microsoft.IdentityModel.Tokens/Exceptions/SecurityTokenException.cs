@@ -20,10 +20,12 @@ namespace Microsoft.IdentityModel.Tokens
     /// Represents a security token exception.
     /// </summary>
     [Serializable]
-    public class SecurityTokenException : Exception
+    public class SecurityTokenException : Exception, ISecurityTokenException
     {
         [NonSerialized]
         private string _stackTrace;
+
+        private ValidationError _validationError;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SecurityTokenException"/> class.
@@ -51,6 +53,9 @@ namespace Microsoft.IdentityModel.Tokens
         public SecurityTokenException(string message, Exception innerException)
             : base(message, innerException)
         {
+            Nullable<string> something;
+            something.HasValue();
+            something.Value;
         }
 
         /// <summary>
@@ -67,6 +72,15 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="validationError"></param>
+        public void SetValidationError(ValidationError validationError)
+        {
+            _validationError = validationError;
+        }
+
+        /// <summary>
         /// Gets the stack trace that is captured when the exception is created.
         /// </summary>
         public override string StackTrace
@@ -75,13 +89,13 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (_stackTrace == null)
                 {
-                    if (ValidationError == null)
+                    if (_validationError == null)
                         return base.StackTrace;
 #if NET8_0_OR_GREATER
-                    _stackTrace = new StackTrace(ValidationError.StackFrames).ToString();
+                    _stackTrace = new StackTrace(_validationError.StackFrames).ToString();
 #else
                     StringBuilder sb = new();
-                    foreach (StackFrame frame in ValidationError.StackFrames)
+                    foreach (StackFrame frame in _validationError.StackFrames)
                     {
                         sb.Append(frame.ToString());
                         sb.Append(Environment.NewLine);
@@ -102,11 +116,6 @@ namespace Microsoft.IdentityModel.Tokens
         {
             get => base.Source;
             set => base.Source = value;
-        }
-
-        internal ValidationError ValidationError
-        {
-            get; set;
         }
 
 #if NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
