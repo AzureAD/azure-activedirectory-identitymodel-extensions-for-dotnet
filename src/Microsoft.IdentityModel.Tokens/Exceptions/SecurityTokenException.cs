@@ -53,9 +53,6 @@ namespace Microsoft.IdentityModel.Tokens
         public SecurityTokenException(string message, Exception innerException)
             : base(message, innerException)
         {
-            Nullable<string> something;
-            something.HasValue();
-            something.Value;
         }
 
         /// <summary>
