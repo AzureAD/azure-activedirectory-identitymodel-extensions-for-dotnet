@@ -332,14 +332,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (!decryptionSucceeded)
             {
-                ExceptionDetail exceptionDetail = GetDecryptionError(
+                ValidationError validationError = GetDecryptionError(
                     decryptionParameters,
                     algorithmNotSupportedByCryptoProvider,
                     exceptionStrings,
                     keysAttempted,
                     null);
 
-                throw LogHelper.LogExceptionMessage(exceptionDetail.GetException());
+                throw LogHelper.LogExceptionMessage(validationError.GetException());
             }
 
             try
@@ -355,7 +355,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
 
-        private static ExceptionDetail GetDecryptionError(
+        private static ValidationError GetDecryptionError(
             JwtTokenDecryptionParameters decryptionParameters,
             bool algorithmNotSupportedByCryptoProvider,
             StringBuilder exceptionStrings,
@@ -365,7 +365,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 #pragma warning restore CA1801 // Review unused parameters
         {
             if (keysAttempted is not null)
-                return new ExceptionDetail(
+                return new ValidationError(
                     new MessageDetail(
                         TokenLogMessages.IDX10603,
                         keysAttempted.ToString(),
@@ -375,7 +375,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     typeof(SecurityTokenDecryptionFailedException),
                     new StackFrame(true));
             else if (algorithmNotSupportedByCryptoProvider)
-                return new ExceptionDetail(
+                return new ValidationError(
                     new MessageDetail(
                         TokenLogMessages.IDX10619,
                         LogHelper.MarkAsNonPII(decryptionParameters.Alg),
@@ -384,7 +384,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     typeof(SecurityTokenDecryptionFailedException),
                     new StackFrame(true));
             else
-                return new ExceptionDetail(
+                return new ValidationError(
                     new MessageDetail(
                         TokenLogMessages.IDX10609,
                         LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken)),

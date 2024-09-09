@@ -18,9 +18,9 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
     /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
     /// <param name="callContext"></param>
-    /// <returns>A <see cref="Result{TResult}"/>that contains the results of validating the issuer.</returns>
+    /// <returns>A <see cref="ValidationResult{TResult}"/>that contains the results of validating the issuer.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
-    internal delegate Result<ValidatedLifetime> LifetimeValidatorDelegate(
+    internal delegate ValidationResult<ValidatedLifetime> LifetimeValidatorDelegate(
         DateTime? notBefore,
         DateTime? expires,
         SecurityToken? securityToken,
@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext"></param>
-        /// <returns>A <see cref="Result{TResult}"/> indicating whether validation was successful, and providing a <see cref="SecurityTokenInvalidLifetimeException"/> if it was not.</returns>
+        /// <returns>A <see cref="ValidationResult{TResult}"/> indicating whether validation was successful, and providing a <see cref="SecurityTokenInvalidLifetimeException"/> if it was not.</returns>
         /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
         /// <exception cref="SecurityTokenNoExpirationException">If 'expires.HasValue' is false.</exception>
         /// <exception cref="SecurityTokenInvalidLifetimeException">If 'notBefore' is &gt; 'expires'.</exception>
@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="SecurityTokenExpiredException">If 'expires' is &lt; DateTime.UtcNow.</exception>
         /// <remarks>All time comparisons apply <see cref="ValidationParameters.ClockSkew"/>.</remarks>
 #pragma warning disable CA1801 // TODO: remove pragma disable once callContext is used for logging
-        internal static Result<ValidatedLifetime> ValidateLifetime(
+        internal static ValidationResult<ValidatedLifetime> ValidateLifetime(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -57,12 +57,12 @@ namespace Microsoft.IdentityModel.Tokens
 #pragma warning restore CA1801
         {
             if (validationParameters == null)
-                return ExceptionDetail.NullParameter(
+                return ValidationError.NullParameter(
                     nameof(validationParameters),
                     new StackFrame(true));
 
             if (!expires.HasValue)
-                return new LifetimeExceptionDetail(
+                return new LifetimeValidationError(
                     new MessageDetail(
                         LogMessages.IDX10225,
                         LogHelper.MarkAsNonPII(securityToken == null ? "null" : securityToken.GetType().ToString())),
@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.Tokens
                     new StackFrame(true));
 
             if (notBefore.HasValue && expires.HasValue && (notBefore.Value > expires.Value))
-                return new LifetimeExceptionDetail(
+                return new LifetimeValidationError(
                     new MessageDetail(
                         LogMessages.IDX10224,
                         LogHelper.MarkAsNonPII(notBefore.Value),
@@ -81,7 +81,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             DateTime utcNow = DateTime.UtcNow;
             if (notBefore.HasValue && (notBefore.Value > DateTimeUtil.Add(utcNow, validationParameters.ClockSkew)))
-                return new LifetimeExceptionDetail(
+                return new LifetimeValidationError(
                     new MessageDetail(
                         LogMessages.IDX10222,
                         LogHelper.MarkAsNonPII(notBefore.Value),
@@ -91,7 +91,7 @@ namespace Microsoft.IdentityModel.Tokens
                     new(NotBeforeDate: notBefore, ExpirationDate: expires));
 
             if (expires.HasValue && (expires.Value < DateTimeUtil.Add(utcNow, validationParameters.ClockSkew.Negate())))
-                return new LifetimeExceptionDetail(
+                return new LifetimeValidationError(
                     new MessageDetail(
                         LogMessages.IDX10223,
                         LogHelper.MarkAsNonPII(expires.Value),

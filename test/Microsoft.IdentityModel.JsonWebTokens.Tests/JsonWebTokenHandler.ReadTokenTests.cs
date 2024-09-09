@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public void ReadToken(TokenReadingTheoryData theoryData)
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.JsonWebTokenHandlerReadTokenTests", theoryData);
-            Result<SecurityToken> result = JsonWebTokenHandler.ReadToken(
+            ValidationResult<SecurityToken> result = JsonWebTokenHandler.ReadToken(
                 theoryData.Token,
                 new CallContext());
 
@@ -31,13 +31,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
             else
             {
-                ExceptionDetail exceptionDetail = result.UnwrapError();
+                ValidationError validationError = result.UnwrapError();
                 IdentityComparer.AreStringsEqual(
-                    exceptionDetail.FailureType.Name,
+                    validationError.FailureType.Name,
                     theoryData.Result.UnwrapError().FailureType.Name,
                     context);
 
-                Exception exception = exceptionDetail.GetException();
+                Exception exception = validationError.GetException();
                 theoryData.ExpectedException.ProcessException(exception, context);
             }
 
@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         [Fact]
         public void ReadToken_ThrowsIfAccessingSecurityTokenOnFailedRead()
         {
-            Result<SecurityToken> result = JsonWebTokenHandler.ReadToken(
+            ValidationResult<SecurityToken> result = JsonWebTokenHandler.ReadToken(
                 null,
                 new CallContext());
 
@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         TestId = "Invalid_NullToken",
                         Token = null,
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
-                        Result = new ExceptionDetail(
+                        Result = new ValidationError(
                             new MessageDetail(
                                 TokenLogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("token")),
@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         TestId = "Invalid_EmptyToken",
                         Token = string.Empty,
                         ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
-                        Result = new ExceptionDetail(
+                        Result = new ValidationError(
                             new MessageDetail(
                                 TokenLogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("token")),
@@ -100,7 +100,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ExpectedException = ExpectedException.SecurityTokenMalformedTokenException(
                             "IDX14107:",
                             typeof(SecurityTokenMalformedException)),
-                        Result = new ExceptionDetail(
+                        Result = new ValidationError(
                             new MessageDetail(
                                 LogMessages.IDX14107,
                                 LogHelper.MarkAsNonPII("token")),
@@ -117,6 +117,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
     public class TokenReadingTheoryData : TheoryDataBase
     {
         public string Token { get; set; }
-        internal Result<SecurityToken> Result { get; set; }
+        internal ValidationResult<SecurityToken> Result { get; set; }
     }
 }
