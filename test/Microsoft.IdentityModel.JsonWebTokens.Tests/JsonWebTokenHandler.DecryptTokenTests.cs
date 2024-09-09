@@ -223,7 +223,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         {
                             TokenDecryptionKeys = new List<SecurityKey>(){ KeyingMaterial.DefaultSymmetricSecurityKey_256 },
                         },
-                        Result = new ExceptionDetail(
+                        Result = new ValidationError(
                             new MessageDetail(
                                 TokenLogMessages.IDX10609,
                                 LogHelper.MarkAsSecurityArtifact(
