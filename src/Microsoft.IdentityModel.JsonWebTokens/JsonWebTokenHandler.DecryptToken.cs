@@ -64,7 +64,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return result.exceptionDetail.AddStackFrame(decryptionGetKeysStackFrame);
             }
 
-            if (result.contentEncryptionKeys == null)
+            if (result.contentEncryptionKeys == null || result.contentEncryptionKeys.Count == 0)
             {
                 StackFrame noKeysTriedStackFrame = StackFrames.DecryptionNoKeysTried ??= new StackFrame(true);
                 return new ExceptionDetail(
@@ -202,7 +202,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 (keysAttempted ??= new StringBuilder()).AppendLine(key.ToString());
             }
 
-            if (unwrappedKeys.Count > 0 && exceptionStrings is null)
+            if (unwrappedKeys.Count > 0 || exceptionStrings is null)
                 return (unwrappedKeys, null);
             else
             {
