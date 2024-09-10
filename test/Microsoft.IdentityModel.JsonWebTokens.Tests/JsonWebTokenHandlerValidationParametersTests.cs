@@ -254,10 +254,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ValidationParameters = CreateValidationParameters(
                             Default.Issuer, [Default.Audience], KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key),
                         ExpectedIsValid = false,
-                        // TVP path returns a key wrap exception listing the 0 keys tried in the same way as if there had been more
-                        // while VP path returns a decryption failed exception stating that no keys were tried.
-                        ExpectedException = ExpectedException.SecurityTokenKeyWrapException("IDX10618:"),
-                        ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenDecryptionFailedException("IDX10609:"),
+                        ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10609:"),
                     },
                     new JsonWebTokenHandlerValidationParametersTheoryData("Invalid_JWE_WrongDecryptionKey")
                     {
