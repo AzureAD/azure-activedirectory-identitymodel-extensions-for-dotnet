@@ -135,6 +135,8 @@ namespace Microsoft.IdentityModel.Tokens
                     exception = new SecurityTokenInvalidAlgorithmException(MessageDetail.Message);
                 else if (exceptionType == typeof(SecurityTokenException))
                     exception = new SecurityTokenException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenKeyWrapException))
+                    exception = new SecurityTokenKeyWrapException(MessageDetail.Message);
             }
             else
             {
@@ -182,6 +184,8 @@ namespace Microsoft.IdentityModel.Tokens
                     exception = new SecurityTokenInvalidAlgorithmException(MessageDetail.Message, actualException);
                 else if (exceptionType == typeof(SecurityTokenException))
                     exception = new SecurityTokenException(MessageDetail.Message, actualException);
+                else if (exceptionType == typeof(SecurityTokenKeyWrapException))
+                    exception = new SecurityTokenKeyWrapException(MessageDetail.Message, actualException);
             }
 
             return exception;
