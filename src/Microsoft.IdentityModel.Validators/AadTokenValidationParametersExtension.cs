@@ -31,6 +31,8 @@ namespace Microsoft.IdentityModel.Validators
 
             tokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration = (securityKey, securityToken, tvp, config) =>
             {
+                ValidateSigningKeyCloudInstanceName(securityKey, config);
+
                 // preserve and run provided logic
                 if (userProvidedIssuerSigningKeyValidatorUsingConfiguration != null)
                     return userProvidedIssuerSigningKeyValidatorUsingConfiguration(securityKey, securityToken, tvp, config);
@@ -38,7 +40,6 @@ namespace Microsoft.IdentityModel.Validators
                 if (userProvidedIssuerSigningKeyValidator != null)
                     return userProvidedIssuerSigningKeyValidator(securityKey, securityToken, tvp);
 
-                ValidateSigningKeyCloudInstanceName(securityKey, config);
                 return true;
             };
         }

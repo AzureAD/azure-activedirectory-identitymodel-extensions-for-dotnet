@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 Assert.Equal(theoryData.ExpectedValidationResult, validationResult.IsValid);
 
                 // verify delegates were executed
-                if (theoryData.SetDelegateUsingConfig || theoryData.SetDelegateWithoutConfig)
+                if (theoryData.ExpectedValidationResult && (theoryData.SetDelegateUsingConfig || theoryData.SetDelegateWithoutConfig))
                     Assert.True(delegateSet);
             }
             catch (Exception ex)
@@ -114,6 +114,16 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 Token = Default.AsymmetricJws,
                 TokenValidationParameters = SetupTokenValidationParametersMock(signingKeysConfig),
                 ExpectedValidationResult = false,
+            });
+
+            signingKeysConfig = SetupOpenIdConnectConfigurationMock(configurationCloudInstanceName: "microsoftonline.com", siginingKeyCloudInstanceName: "microsoftonline.us");
+            theoryData.Add(new EnableEntraIdSigningKeyValidationTheoryData
+            {
+                TestId = "IssuerSigningKeyValidatorUsingConfiguration_CloudInstanceNameIsNotMatched_CustomDelegateIsSet_ValidationFailed",
+                Token = Default.AsymmetricJws,
+                TokenValidationParameters = SetupTokenValidationParametersMock(signingKeysConfig),
+                ExpectedValidationResult = false,
+                SetDelegateUsingConfig = true,
             });
 
             signingKeysConfig = SetupOpenIdConnectConfigurationMock(configurationCloudInstanceName: Default.CloudInstanceName, siginingKeyCloudInstanceName: null);
