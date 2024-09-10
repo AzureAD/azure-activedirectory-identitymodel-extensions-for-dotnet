@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -18,7 +17,6 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class ValidationError
     {
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
         private Type _exceptionType;
 
         /// <summary>
@@ -31,7 +29,7 @@ namespace Microsoft.IdentityModel.Tokens
         internal ValidationError(
             MessageDetail MessageDetail,
             ValidationFailureType failureType,
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type exceptionType,
+            Type exceptionType,
             StackFrame stackFrame)
             : this(MessageDetail, failureType, exceptionType, stackFrame, innerException: null)
         {
@@ -48,7 +46,7 @@ namespace Microsoft.IdentityModel.Tokens
         internal ValidationError(
             MessageDetail messageDetail,
             ValidationFailureType failureType,
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type exceptionType,
+            Type exceptionType,
             StackFrame stackFrame,
             Exception innerException)
         {
@@ -65,7 +63,7 @@ namespace Microsoft.IdentityModel.Tokens
         internal ValidationError(
             MessageDetail messageDetail,
             ValidationFailureType failureType,
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type exceptionType,
+            Type exceptionType,
             StackFrame stackFrame,
             ValidationError innerValidationError)
         {
@@ -82,17 +80,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Creates an instance of an <see cref="Exception"/> using <see cref="ValidationError"/>
         /// </summary>
-        /// <returns>An instantance of an Exception.</returns>
+        /// <returns>An instance of an Exception.</returns>
         public Exception GetException()
         {
-            Exception exception;
-            if (InnerException == null && InnerValidationError == null)
-                exception = Activator.CreateInstance(_exceptionType, MessageDetail.Message) as Exception;
-            else
-                exception = Activator.CreateInstance(
-                    _exceptionType,
-                    MessageDetail.Message,
-                    InnerException ?? InnerValidationError.GetException()) as Exception;
+            Exception exception = GetException(ExceptionType, InnerException);
 
             if (exception is ISecurityTokenException securityTokenException)
             {
@@ -103,10 +94,106 @@ namespace Microsoft.IdentityModel.Tokens
             return exception;
         }
 
-        /// <summary>
-        /// Allows derived classes to add additional information to the exception after instantiating it.
-        /// </summary>
-        /// <param name="exception">The newly instantiated exception.</param>
+        private Exception GetException(Type exceptionType, Exception innerException)
+        {
+            Exception exception = null;
+
+            if (innerException == null && InnerValidationError == null)
+            {
+                if (exceptionType == typeof(SecurityTokenInvalidAudienceException))
+                    exception = new SecurityTokenInvalidAudienceException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenInvalidIssuerException))
+                    exception = new SecurityTokenInvalidIssuerException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenInvalidLifetimeException))
+                    exception = new SecurityTokenInvalidLifetimeException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenReplayDetectedException))
+                    exception = new SecurityTokenReplayDetectedException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenReplayAddFailedException))
+                    exception = new SecurityTokenReplayAddFailedException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenInvalidSigningKeyException))
+                    exception = new SecurityTokenInvalidSigningKeyException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenInvalidTypeException))
+                    exception = new SecurityTokenInvalidTypeException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenReplayDetectedException))
+                    exception = new SecurityTokenReplayDetectedException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenExpiredException))
+                    exception = new SecurityTokenExpiredException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenNotYetValidException))
+                    exception = new SecurityTokenNotYetValidException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenInvalidLifetimeException))
+                    exception = new SecurityTokenInvalidLifetimeException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenNoExpirationException))
+                    exception = new SecurityTokenNoExpirationException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenInvalidIssuerException))
+                    exception = new SecurityTokenInvalidIssuerException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenSignatureKeyNotFoundException))
+                    exception = new SecurityTokenSignatureKeyNotFoundException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenDecryptionFailedException))
+                    exception = new SecurityTokenDecryptionFailedException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenMalformedException))
+                    exception = new SecurityTokenMalformedException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenInvalidSignatureException))
+                    exception = new SecurityTokenInvalidSignatureException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenArgumentNullException))
+                    exception = new SecurityTokenArgumentNullException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenInvalidAlgorithmException))
+                    exception = new SecurityTokenInvalidAlgorithmException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenInvalidAlgorithmException))
+                    exception = new SecurityTokenInvalidAlgorithmException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenException))
+                    exception = new SecurityTokenException(MessageDetail.Message);
+            }
+            else
+            {
+                Exception actualException = innerException ?? InnerValidationError.GetException();
+
+                if (exceptionType == typeof(SecurityTokenInvalidAudienceException))
+                    exception = new SecurityTokenInvalidAudienceException(MessageDetail.Message, actualException);
+                else if (exceptionType == typeof(SecurityTokenInvalidIssuerException))
+                    exception = new SecurityTokenInvalidIssuerException(MessageDetail.Message, actualException);
+                else if (exceptionType == typeof(SecurityTokenInvalidLifetimeException))
+                    exception = new SecurityTokenInvalidLifetimeException(MessageDetail.Message, actualException);
+                else if (exceptionType == typeof(SecurityTokenReplayDetectedException))
+                    exception = new SecurityTokenReplayDetectedException(MessageDetail.Message, actualException);
+                else if (exceptionType == typeof(SecurityTokenReplayAddFailedException))
+                    exception = new SecurityTokenReplayAddFailedException(MessageDetail.Message, actualException);
+                else if (exceptionType == typeof(SecurityTokenInvalidSigningKeyException))
+                    exception = new SecurityTokenInvalidSigningKeyException(MessageDetail.Message, actualException);
+                else if (exceptionType == typeof(SecurityTokenInvalidTypeException))
+                    exception = new SecurityTokenInvalidTypeException(MessageDetail.Message, actualException);
+                else if (exceptionType == typeof(SecurityTokenReplayDetectedException))
+                    exception = new SecurityTokenReplayDetectedException(MessageDetail.Message, actualException);
+                else if (exceptionType == typeof(SecurityTokenExpiredException))
+                    exception = new SecurityTokenExpiredException(MessageDetail.Message, actualException);
+                else if (exceptionType == typeof(SecurityTokenNotYetValidException))
+                    exception = new SecurityTokenNotYetValidException(MessageDetail.Message, actualException);
+                else if (exceptionType == typeof(SecurityTokenInvalidLifetimeException))
+                    exception = new SecurityTokenInvalidLifetimeException(MessageDetail.Message, actualException);
+                else if (exceptionType == typeof(SecurityTokenNoExpirationException))
+                    exception = new SecurityTokenNoExpirationException(MessageDetail.Message, actualException);
+                else if (exceptionType == typeof(SecurityTokenInvalidIssuerException))
+                    exception = new SecurityTokenInvalidIssuerException(MessageDetail.Message, actualException);
+                else if (exceptionType == typeof(SecurityTokenSignatureKeyNotFoundException))
+                    exception = new SecurityTokenSignatureKeyNotFoundException(MessageDetail.Message, actualException);
+                else if (exceptionType == typeof(SecurityTokenDecryptionFailedException))
+                    exception = new SecurityTokenDecryptionFailedException(MessageDetail.Message, actualException);
+                else if (exceptionType == typeof(SecurityTokenMalformedException))
+                    exception = new SecurityTokenMalformedException(MessageDetail.Message, actualException);
+                else if (exceptionType == typeof(SecurityTokenInvalidSignatureException))
+                    exception = new SecurityTokenInvalidSignatureException(MessageDetail.Message, actualException);
+                else if (exceptionType == typeof(SecurityTokenArgumentNullException))
+                    exception = new SecurityTokenArgumentNullException(MessageDetail.Message, actualException);
+                else if (exceptionType == typeof(SecurityTokenInvalidAlgorithmException))
+                    exception = new SecurityTokenInvalidAlgorithmException(MessageDetail.Message, actualException);
+                else if (exceptionType == typeof(SecurityTokenInvalidAlgorithmException))
+                    exception = new SecurityTokenInvalidAlgorithmException(MessageDetail.Message, actualException);
+                else if (exceptionType == typeof(SecurityTokenException))
+                    exception = new SecurityTokenException(MessageDetail.Message, actualException);
+            }
+
+            return exception;
+        }
+
         internal virtual void AddAdditionalInformation(ISecurityTokenException exception)
         {
             // base implementation is no-op. Derived classes can override to add additional information to the exception.

@@ -3,7 +3,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 
 #nullable enable
 namespace Microsoft.IdentityModel.Tokens
@@ -18,7 +17,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         public LifetimeValidationError(
             MessageDetail messageDetail,
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type exceptionType,
+            Type exceptionType,
             StackFrame stackFrame)
             : base(messageDetail, ValidationFailureType.LifetimeValidationFailed, exceptionType, stackFrame)
         {
@@ -26,7 +25,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         public LifetimeValidationError(
             MessageDetail messageDetail,
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type exceptionType,
+            Type exceptionType,
             StackFrame stackFrame,
             AdditionalInformation? additionalInformation)
             : base(messageDetail, ValidationFailureType.LifetimeValidationFailed, exceptionType, stackFrame)
@@ -37,7 +36,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         public LifetimeValidationError(
             MessageDetail messageDetail,
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type exceptionType,
+            Type exceptionType,
             StackFrame stackFrame,
             Exception innerException,
             AdditionalInformation? additionalInformation)
