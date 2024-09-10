@@ -75,13 +75,13 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (_stackTrace == null)
                 {
-                    if (ExceptionDetail == null)
+                    if (ValidationError == null)
                         return base.StackTrace;
 #if NET8_0_OR_GREATER
-                    _stackTrace = new StackTrace(ExceptionDetail.StackFrames).ToString();
+                    _stackTrace = new StackTrace(ValidationError.StackFrames).ToString();
 #else
                     StringBuilder sb = new();
-                    foreach (StackFrame frame in ExceptionDetail.StackFrames)
+                    foreach (StackFrame frame in ValidationError.StackFrames)
                     {
                         sb.Append(frame.ToString());
                         sb.Append(Environment.NewLine);
@@ -104,7 +104,7 @@ namespace Microsoft.IdentityModel.Tokens
             set => base.Source = value;
         }
 
-        internal ExceptionDetail ExceptionDetail
+        internal ValidationError ValidationError
         {
             get; set;
         }

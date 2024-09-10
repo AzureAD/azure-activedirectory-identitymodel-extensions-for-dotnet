@@ -24,7 +24,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     theoryData.ValidationParameters.ValidTypes.Add(tokenType);
             }
 
-            Result<ValidatedTokenType> result = Validators.ValidateTokenType(
+            ValidationResult<ValidatedTokenType> result = Validators.ValidateTokenType(
                 theoryData.Type,
                 theoryData.SecurityToken,
                 theoryData.ValidationParameters,
@@ -41,13 +41,13 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             }
             else
             {
-                ExceptionDetail exceptionDetail = result.UnwrapError();
+                ValidationError validationError = result.UnwrapError();
                 IdentityComparer.AreStringsEqual(
-                    exceptionDetail.FailureType.Name,
+                    validationError.FailureType.Name,
                     theoryData.Result.UnwrapError().FailureType.Name,
                     context);
 
-                Exception exception = exceptionDetail.GetException();
+                Exception exception = validationError.GetException();
                 theoryData.ExpectedException.ProcessException(exception, context);
             }
 
@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         Type = "JWT",
                         SecurityToken = null,
                         ValidationParameters = null,
-                        Result = new ExceptionDetail(
+                        Result = new ValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("securityToken")),
@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         Type = "JWT",
                         SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Typ, "JWT"),
                         ValidationParameters = null,
-                        Result = new ExceptionDetail(
+                        Result = new ValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("validationParameters")),
@@ -111,7 +111,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Typ, String.Empty),
                         ValidationParameters = new ValidationParameters(),
                         TokenTypesToAdd = validTypesNoJwt,
-                        Result = new ExceptionDetail(
+                        Result = new ValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10256,
                                 LogHelper.MarkAsNonPII("type")),
@@ -127,7 +127,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Typ, null),
                         ValidationParameters = new ValidationParameters(),
                         TokenTypesToAdd = validTypesNoJwt,
-                        Result = new ExceptionDetail(
+                        Result = new ValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10256,
                                 LogHelper.MarkAsNonPII("type")),
@@ -143,7 +143,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Typ, "JWT"),
                         ValidationParameters = new ValidationParameters(),
                         TokenTypesToAdd = validTypesNoJwt,
-                        Result = new ExceptionDetail(
+                        Result = new ValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10257,
                                 LogHelper.MarkAsNonPII("type"),
@@ -163,7 +163,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             public SecurityToken SecurityToken { get; set; }
             public IList<string> TokenTypesToAdd { get; internal set; }
             internal ValidationParameters ValidationParameters { get; set; }
-            internal Result<ValidatedTokenType> Result { get; set; }
+            internal ValidationResult<ValidatedTokenType> Result { get; set; }
         }
     }
 }

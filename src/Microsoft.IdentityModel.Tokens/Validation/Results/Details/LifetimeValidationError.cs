@@ -3,12 +3,11 @@
 
 using System;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 
 #nullable enable
 namespace Microsoft.IdentityModel.Tokens
 {
-    internal class LifetimeExceptionDetail : ExceptionDetail
+    internal class LifetimeValidationError : ValidationError
     {
         internal record struct AdditionalInformation(
             DateTime? NotBeforeDate,
@@ -16,17 +15,17 @@ namespace Microsoft.IdentityModel.Tokens
 
         private AdditionalInformation _additionalInformation;
 
-        public LifetimeExceptionDetail(
+        public LifetimeValidationError(
             MessageDetail messageDetail,
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type exceptionType,
+            Type exceptionType,
             StackFrame stackFrame)
             : base(messageDetail, ValidationFailureType.LifetimeValidationFailed, exceptionType, stackFrame)
         {
         }
 
-        public LifetimeExceptionDetail(
+        public LifetimeValidationError(
             MessageDetail messageDetail,
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type exceptionType,
+            Type exceptionType,
             StackFrame stackFrame,
             AdditionalInformation? additionalInformation)
             : base(messageDetail, ValidationFailureType.LifetimeValidationFailed, exceptionType, stackFrame)
@@ -35,9 +34,9 @@ namespace Microsoft.IdentityModel.Tokens
                 _additionalInformation = additionalInformation.Value;
         }
 
-        public LifetimeExceptionDetail(
+        public LifetimeValidationError(
             MessageDetail messageDetail,
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] Type exceptionType,
+            Type exceptionType,
             StackFrame stackFrame,
             Exception innerException,
             AdditionalInformation? additionalInformation)

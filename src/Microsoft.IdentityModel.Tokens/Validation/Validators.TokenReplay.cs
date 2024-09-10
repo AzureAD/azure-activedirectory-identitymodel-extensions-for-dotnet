@@ -14,9 +14,9 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="securityToken">The security token that is being validated.</param>
     /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
     /// <param name="callContext"></param>
-    /// <returns>A <see cref="Result{TResult}"/>that contains the results of validating the token.</returns>
+    /// <returns>A <see cref="ValidationResult{TResult}"/>that contains the results of validating the token.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
-    internal delegate Result<DateTime?> TokenReplayValidatorDelegate(
+    internal delegate ValidationResult<DateTime?> TokenReplayValidatorDelegate(
         DateTime? expirationTime,
         string securityToken,
         ValidationParameters validationParameters,
@@ -40,16 +40,16 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="SecurityTokenReplayDetectedException">If the 'securityToken' is found in the cache.</exception>
         /// <exception cref="SecurityTokenReplayAddFailedException">If the 'securityToken' could not be added to the <see cref="ValidationParameters.TokenReplayCache"/>.</exception>
 #pragma warning disable CA1801 // Review unused parameters
-        internal static Result<DateTime?> ValidateTokenReplay(DateTime? expirationTime, string securityToken, ValidationParameters validationParameters, CallContext callContext)
+        internal static ValidationResult<DateTime?> ValidateTokenReplay(DateTime? expirationTime, string securityToken, ValidationParameters validationParameters, CallContext callContext)
 #pragma warning restore CA1801 // Review unused parameters
         {
             if (string.IsNullOrWhiteSpace(securityToken))
-                return ExceptionDetail.NullParameter(
+                return ValidationError.NullParameter(
                     nameof(securityToken),
                     new StackFrame(true));
 
             if (validationParameters == null)
-                return ExceptionDetail.NullParameter(
+                return ValidationError.NullParameter(
                     nameof(validationParameters),
                     new StackFrame(true));
 
@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters.TokenReplayCache != null)
             {
                 if (expirationTime == null)
-                    return new ExceptionDetail(
+                    return new ValidationError(
                         new MessageDetail(
                             LogMessages.IDX10227,
                             LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new StackFrame(true));
 
                 if (validationParameters.TokenReplayCache.TryFind(securityToken))
-                    return new ExceptionDetail(
+                    return new ValidationError(
                         new MessageDetail(
                             LogMessages.IDX10228,
                             LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
@@ -75,7 +75,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new StackFrame(true));
 
                 if (!validationParameters.TokenReplayCache.TryAdd(securityToken, expirationTime.Value))
-                    return new ExceptionDetail(
+                    return new ValidationError(
                         new MessageDetail(
                             LogMessages.IDX10229,
                             LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
