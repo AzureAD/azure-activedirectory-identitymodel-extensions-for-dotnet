@@ -164,7 +164,7 @@ namespace Microsoft.IdentityModel.Validators
 
                     if (!string.Equals(signingKeyCloudInstanceName, configurationCloudInstanceName, StringComparison.Ordinal))
                         throw LogHelper.LogExceptionMessage(
-                            new SecurityTokenInvalidCloudInstanceException(LogHelper.FormatInvariant(LogMessages.IDX40012, LogHelper.MarkAsNonPII(signingKeyCloudInstanceName), LogHelper.MarkAsNonPII(configurationCloudInstanceName)))
+                            new SecurityTokenInvalidCloudInstanceNameException(LogHelper.FormatInvariant(LogMessages.IDX40012, LogHelper.MarkAsNonPII(signingKeyCloudInstanceName), LogHelper.MarkAsNonPII(configurationCloudInstanceName)))
                             {
                                 ConfigurationCloudInstanceName = configurationCloudInstanceName,
                                 SigningKeyCloudInstanceName = signingKeyCloudInstanceName,

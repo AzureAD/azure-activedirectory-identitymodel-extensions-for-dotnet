@@ -252,7 +252,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static ExpectedException SecurityTokenInvalidCloudInstanceNameException(string substringExpected = null, Type innerTypeExpected = null, Dictionary<string, object> propertiesExpected = null)
         {
-            return new ExpectedException(typeof(SecurityTokenInvalidCloudInstanceException), substringExpected, innerTypeExpected, propertiesExpected: propertiesExpected);
+            return new ExpectedException(typeof(SecurityTokenInvalidCloudInstanceNameException), substringExpected, innerTypeExpected, propertiesExpected: propertiesExpected);
         }
 
         public static ExpectedException SecurityTokenKeyWrapException(string substringExpected = null, Type innerTypeExpected = null, Dictionary<string, object> propertiesExpected = null)
