@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -17,6 +16,8 @@ namespace Microsoft.IdentityModel.Validators
     /// </summary>
     public static class AadTokenValidationParametersExtension
     {
+        private const string CloudInstanceNameKey = "cloud_instance_name";
+
         /// <summary>
         /// Enables validation of the cloud instance name of the Microsoft Entra ID token signing keys.
         /// </summary>
@@ -89,7 +90,7 @@ namespace Microsoft.IdentityModel.Validators
             if (configuration is not OpenIdConnectConfiguration openIdConnectConfiguration)
                 return true;
 
-            JsonWebKey matchedKeyFromConfig = openIdConnectConfiguration.JsonWebKeySet?.Keys.FirstOrDefault(x => x != null && x.Kid == securityKey.KeyId);
+            JsonWebKey matchedKeyFromConfig = GetJsonWebKeyBySecurityKey(openIdConnectConfiguration, securityKey);
             if (matchedKeyFromConfig != null && matchedKeyFromConfig.AdditionalData.TryGetValue(OpenIdProviderMetadataNames.Issuer, out object value))
             {
                 string signingKeyIssuer = value as string;
@@ -148,8 +149,7 @@ namespace Microsoft.IdentityModel.Validators
             if (configuration is not OpenIdConnectConfiguration openIdConnectConfiguration)
                 return;
 
-            const string CloudInstanceNameKey = "cloud_instance_name";
-            JsonWebKey matchedKeyFromConfig = openIdConnectConfiguration.JsonWebKeySet?.Keys.FirstOrDefault(x => x != null && x.Kid == securityKey.KeyId);
+            JsonWebKey matchedKeyFromConfig = GetJsonWebKeyBySecurityKey(openIdConnectConfiguration, securityKey);
             if (matchedKeyFromConfig != null && matchedKeyFromConfig.AdditionalData.TryGetValue(CloudInstanceNameKey, out object value))
             {
                 string signingKeyCloudInstanceName = value as string;
@@ -172,6 +172,20 @@ namespace Microsoft.IdentityModel.Validators
                             });
                 }
             }
+        }
+
+        private static JsonWebKey GetJsonWebKeyBySecurityKey(OpenIdConnectConfiguration configuration, SecurityKey securityKey)
+        {
+            if (configuration.JsonWebKeySet == null)
+                return null;
+
+            foreach (JsonWebKey key in configuration.JsonWebKeySet.Keys)
+            {
+                if (key.Kid == securityKey.KeyId)
+                    return key;
+            }
+
+            return null;
         }
 
         private static string GetTid(SecurityToken securityToken)
