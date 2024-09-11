@@ -69,7 +69,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// 
+        /// Sets the <see cref="ValidationError"/> that caused the exception.
         /// </summary>
         /// <param name="validationError"></param>
         public void SetValidationError(ValidationError validationError)
