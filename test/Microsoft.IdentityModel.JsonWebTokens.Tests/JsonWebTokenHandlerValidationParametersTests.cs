@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 
 #if NET472_OR_GREATER || NET6_0_OR_GREATER
-using System;
 using Newtonsoft.Json.Linq;
 #endif
+using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading;
@@ -12,6 +12,8 @@ using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
+
+#nullable enable
 
 namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
@@ -23,6 +25,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var context = TestUtilities.WriteHeader($"{this}.ValidateTokenAsync", theoryData);
 
             JsonWebTokenHandler jsonWebTokenHandler = new JsonWebTokenHandler();
+            jsonWebTokenHandler.SetDefaultTimesOnTokenCreation = theoryData.SetDefaultValuesOnTokenCreation;
 
             string jwtString;
 
@@ -39,7 +42,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     EncryptingCredentials = theoryData.EncryptingCredentials,
                     AdditionalHeaderClaims = theoryData.AdditionalHeaderParams,
                     Audience = theoryData.Audience,
+                    Expires = theoryData.Expires,
+                    IssuedAt = theoryData.IssuedAt,
                     Issuer = theoryData.Issuer,
+                    NotBefore = theoryData.NotBefore,
+                    TokenType = theoryData.TokenType,
                 };
 
                 jwtString = jsonWebTokenHandler.CreateToken(securityTokenDescriptor);
@@ -49,7 +56,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 await jsonWebTokenHandler.ValidateTokenAsync(jwtString, theoryData.TokenValidationParameters);
             ValidationResult<ValidatedToken> validationParametersResult =
                 await jsonWebTokenHandler.ValidateTokenAsync(
-                    jwtString, theoryData.ValidationParameters, theoryData.CallContext, CancellationToken.None);
+                    jwtString, theoryData.ValidationParameters!, theoryData.CallContext, CancellationToken.None);
 
             if (tokenValidationParametersResult.IsValid != theoryData.ExpectedIsValid)
                 context.AddDiff($"tokenValidationParametersResult.IsValid != theoryData.ExpectedIsValid");
@@ -102,6 +109,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ValidationParameters = CreateValidationParameters(
                             Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
                     },
+                    new JsonWebTokenHandlerValidationParametersTheoryData("Invalid_ValidationParametersNull")
+                    {
+                        ExpectedIsValid = false,
+                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    },
                     new JsonWebTokenHandlerValidationParametersTheoryData("Invalid_MalformedToken")
                     {
                         TokenString = "malformedToken",
@@ -138,6 +150,111 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         // ValidateTokenAsync with ValidationParameters returns a different error message to account for the
                         // removal of the ValidAudience property from the ValidationParameters class.
                         ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidAudienceException("IDX10215:"),
+                    },
+                    new JsonWebTokenHandlerValidationParametersTheoryData("Valid_WithinFiveMinutesOfExpiration")
+                    {
+                        // Token expired 4 minutes ago, but the clock skew is 5 minutes.
+                        TokenValidationParameters = CreateTokenValidationParameters(
+                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
+                        ValidationParameters = CreateValidationParameters(
+                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
+                        IssuedAt = DateTime.UtcNow - TimeSpan.FromHours(2),
+                        NotBefore = DateTime.UtcNow - TimeSpan.FromHours(2),
+                        Expires = DateTime.UtcNow - TimeSpan.FromMinutes(4),
+                    },
+                    new JsonWebTokenHandlerValidationParametersTheoryData("Valid_WithinFiveMinutesOfNotBefore")
+                    {
+                        // Token is not yet valid for another 4 minutes, but the clock skew is 5 minutes.
+                        TokenValidationParameters = CreateTokenValidationParameters(
+                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
+                        ValidationParameters = CreateValidationParameters(
+                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
+                        IssuedAt = DateTime.UtcNow,
+                        NotBefore = DateTime.UtcNow + TimeSpan.FromMinutes(4),
+                        Expires = DateTime.UtcNow + TimeSpan.FromHours(2),
+                    },
+                    new JsonWebTokenHandlerValidationParametersTheoryData("Invalid_Expired")
+                    {
+                        TokenValidationParameters = CreateTokenValidationParameters(
+                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
+                        ValidationParameters = CreateValidationParameters(
+                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
+                        IssuedAt = DateTime.UtcNow - TimeSpan.FromDays(2),
+                        NotBefore = DateTime.UtcNow - TimeSpan.FromDays(2),
+                        Expires = DateTime.UtcNow - TimeSpan.FromDays(1),
+                        ExpectedIsValid = false,
+                        ExpectedException = ExpectedException.SecurityTokenExpiredException("IDX10223:"),
+                    },
+                    new JsonWebTokenHandlerValidationParametersTheoryData("Invalid_NotYetValid")
+                    {
+                        TokenValidationParameters = CreateTokenValidationParameters(
+                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
+                        ValidationParameters = CreateValidationParameters(
+                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
+                        IssuedAt = DateTime.UtcNow + TimeSpan.FromDays(1),
+                        NotBefore = DateTime.UtcNow + TimeSpan.FromDays(1),
+                        Expires = DateTime.UtcNow + TimeSpan.FromDays(2),
+                        ExpectedIsValid = false,
+                        ExpectedException = ExpectedException.SecurityTokenNotYetValidException("IDX10222:"),
+                    },
+                    new JsonWebTokenHandlerValidationParametersTheoryData("Invalid_NoExpiration")
+                    {
+                        TokenValidationParameters = CreateTokenValidationParameters(
+                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
+                        ValidationParameters = CreateValidationParameters(
+                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
+                        Expires = null,
+                        NotBefore = DateTime.UtcNow,
+                        IssuedAt = DateTime.UtcNow,
+                        ExpectedIsValid = false,
+                        SetDefaultValuesOnTokenCreation = false,
+                        ExpectedException = ExpectedException.SecurityTokenNoExpirationException("IDX10225:"),
+                    },
+                    new JsonWebTokenHandlerValidationParametersTheoryData("Invalid_InvalidLifetime")
+                                        {
+                        TokenValidationParameters = CreateTokenValidationParameters(
+                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
+                        ValidationParameters = CreateValidationParameters(
+                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
+                        IssuedAt = DateTime.UtcNow + TimeSpan.FromDays(2),
+                        NotBefore = DateTime.UtcNow + TimeSpan.FromDays(2),
+                        Expires = DateTime.UtcNow + TimeSpan.FromDays(1),
+                        ExpectedIsValid = false,
+                        ExpectedException = ExpectedException.SecurityTokenInvalidLifetimeException("IDX10224:"),
+                    },
+                    new JsonWebTokenHandlerValidationParametersTheoryData("Invalid_TokenTypeNotSupported")
+                    {
+                        // Token Type is 'JWT' but only 'none' is considered valid for this test's purposes
+                        TokenValidationParameters = CreateTokenValidationParameters(
+                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey,
+                            validTokenTypes: ["none"]),
+                        ValidationParameters = CreateValidationParameters(
+                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey,
+                            validTokenTypes: ["none"]),
+                        ExpectedIsValid = false,
+                        ExpectedException = ExpectedException.SecurityTokenInvalidTypeException("IDX10257:"),
+                    },
+                    new JsonWebTokenHandlerValidationParametersTheoryData("Invalid_TokenReplayDetected_TokenFoundInCache")
+                    {
+                        TokenValidationParameters = CreateTokenValidationParameters(
+                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey,
+                            tokenReplayCache: new TestTokenReplayCache(false, true)),
+                        ValidationParameters = CreateValidationParameters(
+                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey,
+                            tokenReplayCache: new TestTokenReplayCache(false, true)),
+                        ExpectedIsValid = false,
+                        ExpectedException = ExpectedException.SecurityTokenReplayDetectedException("IDX10228:"),
+                    },
+                    new JsonWebTokenHandlerValidationParametersTheoryData("Invalid_TokenReplayDetected_AddToCacheFailed")
+                    {
+                        TokenValidationParameters = CreateTokenValidationParameters(
+                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey,
+                            tokenReplayCache: new TestTokenReplayCache(false, false)),
+                        ValidationParameters = CreateValidationParameters(
+                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey,
+                            tokenReplayCache: new TestTokenReplayCache(false, false)),
+                        ExpectedIsValid = false,
+                        ExpectedException = ExpectedException.SecurityTokenReplayAddFailedException("IDX10229:"),
                     },
                     new JsonWebTokenHandlerValidationParametersTheoryData("Invalid_TokenNotSigned")
                     {
@@ -291,11 +408,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 };
 
                 static TokenValidationParameters CreateTokenValidationParameters(
-                    string issuer,
-                    List<string> audiences,
-                    SecurityKey issuerSigningKey,
-                    SecurityKey tokenDecryptionKey = null,
-                    List<string> validAlgorithms = null,
+                    string? issuer,
+                    List<string>? audiences,
+                    SecurityKey? issuerSigningKey,
+                    SecurityKey? tokenDecryptionKey = null,
+                    List<string>? validAlgorithms = null,
+                    List<string>? validTokenTypes = null,
+                    ITokenReplayCache? tokenReplayCache = null,
                     bool tryAllKeys = false) => new TokenValidationParameters
                     {
                         ValidAlgorithms = validAlgorithms,
@@ -309,21 +428,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ValidAudiences = audiences,
                         ValidIssuer = issuer,
                         TryAllIssuerSigningKeys = tryAllKeys,
+                        ValidTypes = validTokenTypes,
+                        TokenReplayCache = tokenReplayCache,
                     };
 
                 static ValidationParameters CreateValidationParameters(
-                    string issuer,
-                    List<string> audiences,
-                    SecurityKey issuerSigningKey,
-                    SecurityKey tokenDecryptionKey = null,
-                    List<string> validAlgorithms = null,
+                    string? issuer,
+                    List<string>? audiences,
+                    SecurityKey? issuerSigningKey,
+                    SecurityKey? tokenDecryptionKey = null,
+                    List<string>? validAlgorithms = null,
+                    List<string>? validTokenTypes = null,
+                    ITokenReplayCache? tokenReplayCache = null,
                     bool tryAllKeys = false)
                 {
                     ValidationParameters validationParameters = new ValidationParameters();
                     validationParameters.ValidIssuers.Add(issuer);
-                    audiences.ForEach(audience => validationParameters.ValidAudiences.Add(audience));
+                    audiences?.ForEach(audience => validationParameters.ValidAudiences.Add(audience));
+                    validTokenTypes?.ForEach(tokenType => validationParameters.ValidTypes.Add(tokenType));
                     validationParameters.IssuerSigningKeys.Add(issuerSigningKey);
                     validationParameters.TryAllIssuerSigningKeys = tryAllKeys;
+                    validationParameters.TokenReplayCache = tokenReplayCache;
                     if (validAlgorithms is not null)
                         validationParameters.ValidAlgorithms = validAlgorithms;
                     if (tokenDecryptionKey is not null)
@@ -354,22 +479,48 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
         }
 
+        private class TestTokenReplayCache : ITokenReplayCache
+        {
+            private bool _onAddReturnValue;
+            private bool _onFindReturnValue;
+            public TestTokenReplayCache(bool onAddReturnValue, bool onFindReturnValue)
+            {
+                _onAddReturnValue = onAddReturnValue;
+                _onFindReturnValue = onFindReturnValue;
+            }
+            public bool TryAdd(string securityToken, DateTime expirationTime)
+            {
+                return _onAddReturnValue;
+            }
+
+            public bool TryFind(string securityToken)
+            {
+                return _onFindReturnValue;
+            }
+        }
+
         public class JsonWebTokenHandlerValidationParametersTheoryData : TheoryDataBase
         {
             public JsonWebTokenHandlerValidationParametersTheoryData(string testId) : base(testId) { }
-            public string TokenString { get; internal set; } = null;
-            public SigningCredentials SigningCredentials { get; internal set; } = Default.AsymmetricSigningCredentials;
-            public EncryptingCredentials EncryptingCredentials { get; internal set; }
-            public IDictionary<string, object> AdditionalHeaderParams { get; internal set; }
-            public ClaimsIdentity Subject { get; internal set; } = Default.ClaimsIdentity;
+            public string? TokenString { get; internal set; } = null;
+            public bool SetDefaultValuesOnTokenCreation { get; internal set; } = true;
+            public SigningCredentials? SigningCredentials { get; internal set; } = Default.AsymmetricSigningCredentials;
+            public EncryptingCredentials? EncryptingCredentials { get; internal set; }
+            public IDictionary<string, object>? AdditionalHeaderParams { get; internal set; }
+            public ClaimsIdentity? Subject { get; internal set; } = Default.ClaimsIdentity;
             public string Audience { get; internal set; } = Default.Audience;
             public string Issuer { get; internal set; } = Default.Issuer;
+            public DateTime? IssuedAt { get; internal set; }
+            public DateTime? NotBefore { get; internal set; }
+            public DateTime? Expires { get; internal set; }
             internal bool ExpectedIsValid { get; set; } = true;
-            internal TokenValidationParameters TokenValidationParameters { get; set; }
-            internal ValidationParameters ValidationParameters { get; set; }
+            public string? TokenType { get; internal set; }
+            internal TokenValidationParameters? TokenValidationParameters { get; set; }
+            internal ValidationParameters? ValidationParameters { get; set; }
 
             // only set if we expect a different message on this path
-            internal ExpectedException ExpectedExceptionValidationParameters { get; set; } = null;
+            internal ExpectedException? ExpectedExceptionValidationParameters { get; set; } = null;
         }
     }
 }
+#nullable restore
