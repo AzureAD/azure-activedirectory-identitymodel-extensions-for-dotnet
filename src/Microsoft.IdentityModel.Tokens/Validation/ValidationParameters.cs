@@ -252,11 +252,6 @@ namespace Microsoft.IdentityModel.Tokens
         public string DebugId { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="SecurityKey"/> representing the ephemeral decryption key used for decryption by certain algorithms.
-        /// </summary>
-        public SecurityKey EphemeralDecryptionKey { get; set; }
-
-        /// <summary>
         /// Gets or sets a boolean that controls if a '/' is significant at the end of the audience.
         /// The default is <c>true</c>.
         /// </summary>

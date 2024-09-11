@@ -171,17 +171,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     if (SupportedAlgorithms.EcdsaWrapAlgorithms.Contains(jwtToken.Alg))
                     {
                         // on decryption we get the public key from the EPK value see: https://datatracker.ietf.org/doc/html/rfc7518#appendix-C
-                        var ecdhKeyExchangeProvider = new EcdhKeyExchangeProvider(
-                            key as ECDsaSecurityKey,
-                            validationParameters.EphemeralDecryptionKey as ECDsaSecurityKey,
-                            jwtToken.Alg,
-                            jwtToken.Enc);
-                        jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Apu, out string apu);
-                        jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Apv, out string apv);
-                        SecurityKey kdf = ecdhKeyExchangeProvider.GenerateKdf(apu, apv);
-                        var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(kdf, ecdhKeyExchangeProvider.GetEncryptionAlgorithm());
-                        var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.EncryptedKey));
-                        unwrappedKeys.Add(new SymmetricSecurityKey(unwrappedKey));
+                        jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Epk, out string epk);
+                        ECDsaSecurityKey? publicKey = new ECDsaSecurityKey(new JsonWebKey(epk), false);
+                        if (publicKey is not null)
+                        {
+                            var ecdhKeyExchangeProvider = new EcdhKeyExchangeProvider(
+                                key as ECDsaSecurityKey,
+                                publicKey,
+                                jwtToken.Alg,
+                                jwtToken.Enc);
+                            jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Apu, out string apu);
+                            jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Apv, out string apv);
+                            SecurityKey kdf = ecdhKeyExchangeProvider.GenerateKdf(apu, apv);
+                            var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(kdf, ecdhKeyExchangeProvider.GetEncryptionAlgorithm());
+                            var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.EncryptedKey));
+                            unwrappedKeys.Add(new SymmetricSecurityKey(unwrappedKey));
+                        }
                     }
                     else
 #endif
