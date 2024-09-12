@@ -27,16 +27,19 @@ namespace Microsoft.IdentityModel.Validators
             if (tokenValidationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenValidationParameters));
 
+            IssuerSigningKeyValidatorUsingConfiguration userProvidedIssuerSigningKeyValidatorUsingConfiguration = tokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration;
+            IssuerSigningKeyValidator userProvidedIssuerSigningKeyValidator = tokenValidationParameters.IssuerSigningKeyValidator;
+
             tokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration = (securityKey, securityToken, tvp, config) =>
             {
                 ValidateSigningKeyCloudInstance(securityKey, config);
 
                 // preserve and run provided logic
-                if (tokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration != null)
-                    return tokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration(securityKey, securityToken, tvp, config);
+                if (userProvidedIssuerSigningKeyValidatorUsingConfiguration != null)
+                    return userProvidedIssuerSigningKeyValidatorUsingConfiguration(securityKey, securityToken, tvp, config);
 
-                if (tokenValidationParameters.IssuerSigningKeyValidator != null)
-                    return tokenValidationParameters.IssuerSigningKeyValidator(securityKey, securityToken, tvp);
+                if (userProvidedIssuerSigningKeyValidator != null)
+                    return userProvidedIssuerSigningKeyValidator(securityKey, securityToken, tvp);
 
                 return true;
             };
