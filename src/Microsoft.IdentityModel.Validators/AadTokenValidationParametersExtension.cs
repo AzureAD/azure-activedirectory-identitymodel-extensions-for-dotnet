@@ -56,7 +56,7 @@ namespace Microsoft.IdentityModel.Validators
 
             tokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration = (securityKey, securityToken, tvp, config) =>
             {
-                ValidateSigningKeyIssuer(securityKey, securityToken, config);
+                ValidateIssuerSigningKey(securityKey, securityToken, config);
 
                 // preserve and run provided logic
                 if (userProvidedIssuerSigningKeyValidatorUsingConfiguration != null)
@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Validators
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated, could be a JwtSecurityToken or JsonWebToken.</param>
         /// <param name="configuration">The <see cref="BaseConfiguration"/> provided.</param>
         /// <returns><c>true</c> if the issuer of the signing key is valid; otherwise, <c>false</c>.</returns>
-        internal static bool ValidateSigningKeyIssuer(SecurityKey securityKey, SecurityToken securityToken, BaseConfiguration configuration)
+        internal static bool ValidateIssuerSigningKey(SecurityKey securityKey, SecurityToken securityToken, BaseConfiguration configuration)
         {
             if (securityKey == null)
                 return true;

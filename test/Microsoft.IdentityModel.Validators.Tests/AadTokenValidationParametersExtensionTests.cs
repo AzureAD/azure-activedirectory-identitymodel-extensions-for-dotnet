@@ -416,14 +416,14 @@ namespace Microsoft.IdentityModel.Validators.Tests
         }
 
         [Theory, MemberData(nameof(ValidateIssuerSigningKeyTestCases))]
-        public void ValidateSigningKeyIssuerTests(AadSigningKeyTheoryData theoryData)
+        public void ValidateIssuerSigningKeyTests(AadSigningKeyTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateIssuerSigningKeyTests", theoryData);
 
             try
             {
                 theoryData.SetupAction?.Invoke();
-                var result = AadTokenValidationParametersExtension.ValidateSigningKeyIssuer(theoryData.SecurityKey, theoryData.SecurityToken, theoryData.OpenIdConnectConfiguration);
+                var result = AadTokenValidationParametersExtension.ValidateIssuerSigningKey(theoryData.SecurityKey, theoryData.SecurityToken, theoryData.OpenIdConnectConfiguration);
                 theoryData.ExpectedException.ProcessNoException(context);
                 Assert.True(result);
             }
