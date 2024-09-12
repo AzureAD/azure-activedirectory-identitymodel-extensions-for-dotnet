@@ -22,8 +22,8 @@ namespace Microsoft.IdentityModel.Validators.Tests
     [Collection(nameof(AadTokenValidationParametersExtensionTests))]
     public class AadTokenValidationParametersExtensionTests
     {
-        [Theory, MemberData(nameof(EnableEntraIdSigningKeyCloudInstanceNameValidationTestCases))]
-        public async Task EnableEntraIdSigningKeyCloudInstanceNameValidationTests(EnableEntraIdSigningKeyValidationTheoryData theoryData)
+        [Theory, MemberData(nameof(EnableEntraIdSigningKeyCloudInstanceValidationTestCases))]
+        public async Task EnableEntraIdSigningKeyCloudInstanceValidationTests(EnableEntraIdSigningKeyValidationTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.EnableAadSigningKeyValidationTests", theoryData);
             try
@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
                 var handler = new JsonWebTokenHandler();
                 AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).ConfigurationManagerV1 = theoryData.TokenValidationParameters.ConfigurationManager;
-                theoryData.TokenValidationParameters.EnableEntraIdSigningKeyCloudInstanceNameValidation();
+                theoryData.TokenValidationParameters.EnableEntraIdSigningKeyCloudInstanceValidation();
 
                 var validationResult = await handler.ValidateTokenAsync(theoryData.Token, theoryData.TokenValidationParameters);
                 theoryData.ExpectedException.ProcessNoException(context);
@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        public static TheoryData<EnableEntraIdSigningKeyValidationTheoryData> EnableEntraIdSigningKeyCloudInstanceNameValidationTestCases()
+        public static TheoryData<EnableEntraIdSigningKeyValidationTheoryData> EnableEntraIdSigningKeyCloudInstanceValidationTestCases()
         {
             var signingKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
             signingKeysConfig.SigningKeys.Add(KeyingMaterial.DefaultX509Key_2048);
@@ -258,7 +258,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
             try
             {
-                AadTokenValidationParametersExtension.ValidateSigningKeyCloudInstanceName(theoryData.SecurityKey, theoryData.OpenIdConnectConfiguration);
+                AadTokenValidationParametersExtension.ValidateSigningKeyCloudInstance(theoryData.SecurityKey, theoryData.OpenIdConnectConfiguration);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -324,7 +324,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 {
                     TestId = "CloudInstanceNameNotMatched",
                     SecurityKey = KeyingMaterial.JsonWebKeyP384,
-                    ExpectedException = ExpectedException.SecurityTokenInvalidCloudInstanceNameException("IDX40012"),
+                    ExpectedException = ExpectedException.SecurityTokenInvalidCloudInstanceException("IDX40012"),
                     OpenIdConnectConfiguration = GetConfigurationMock(configurationCloudInstanceName: "microsoftonline.com", siginingKeyCloudInstanceName: "microsoftonline.us"),
                 });
 

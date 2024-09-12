@@ -19,27 +19,24 @@ namespace Microsoft.IdentityModel.Validators
         private const string CloudInstanceNameKey = "cloud_instance_name";
 
         /// <summary>
-        /// Enables validation of the cloud instance name of the Microsoft Entra ID token signing keys.
+        /// Enables validation of the cloud instance of the Microsoft Entra ID token signing keys.
         /// </summary>
         /// <param name="tokenValidationParameters">The <see cref="TokenValidationParameters"/> that are used to validate the token.</param>
-        public static void EnableEntraIdSigningKeyCloudInstanceNameValidation(this TokenValidationParameters tokenValidationParameters)
+        public static void EnableEntraIdSigningKeyCloudInstanceValidation(this TokenValidationParameters tokenValidationParameters)
         {
             if (tokenValidationParameters == null)
                 throw LogHelper.LogArgumentNullException(nameof(tokenValidationParameters));
 
-            IssuerSigningKeyValidatorUsingConfiguration userProvidedIssuerSigningKeyValidatorUsingConfiguration = tokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration;
-            IssuerSigningKeyValidator userProvidedIssuerSigningKeyValidator = tokenValidationParameters.IssuerSigningKeyValidator;
-
             tokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration = (securityKey, securityToken, tvp, config) =>
             {
-                ValidateSigningKeyCloudInstanceName(securityKey, config);
+                ValidateSigningKeyCloudInstance(securityKey, config);
 
                 // preserve and run provided logic
-                if (userProvidedIssuerSigningKeyValidatorUsingConfiguration != null)
-                    return userProvidedIssuerSigningKeyValidatorUsingConfiguration(securityKey, securityToken, tvp, config);
+                if (tokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration != null)
+                    return tokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration(securityKey, securityToken, tvp, config);
 
-                if (userProvidedIssuerSigningKeyValidator != null)
-                    return userProvidedIssuerSigningKeyValidator(securityKey, securityToken, tvp);
+                if (tokenValidationParameters.IssuerSigningKeyValidator != null)
+                    return tokenValidationParameters.IssuerSigningKeyValidator(securityKey, securityToken, tvp);
 
                 return true;
             };
@@ -137,11 +134,11 @@ namespace Microsoft.IdentityModel.Validators
         }
 
         /// <summary>
-        /// Validates the cloud instance name of the signing key.
+        /// Validates the cloud instance of the signing key.
         /// </summary>
         /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
         /// <param name="configuration">The <see cref="BaseConfiguration"/> provided.</param>
-        internal static void ValidateSigningKeyCloudInstanceName(SecurityKey securityKey, BaseConfiguration configuration)
+        internal static void ValidateSigningKeyCloudInstance(SecurityKey securityKey, BaseConfiguration configuration)
         {
             if (securityKey == null)
                 return;
@@ -164,7 +161,7 @@ namespace Microsoft.IdentityModel.Validators
 
                     if (!string.Equals(signingKeyCloudInstanceName, configurationCloudInstanceName, StringComparison.Ordinal))
                         throw LogHelper.LogExceptionMessage(
-                            new SecurityTokenInvalidCloudInstanceNameException(LogHelper.FormatInvariant(LogMessages.IDX40012, LogHelper.MarkAsNonPII(signingKeyCloudInstanceName), LogHelper.MarkAsNonPII(configurationCloudInstanceName)))
+                            new SecurityTokenInvalidCloudInstanceException(LogHelper.FormatInvariant(LogMessages.IDX40012, LogHelper.MarkAsNonPII(signingKeyCloudInstanceName), LogHelper.MarkAsNonPII(configurationCloudInstanceName)))
                             {
                                 ConfigurationCloudInstanceName = configurationCloudInstanceName,
                                 SigningKeyCloudInstanceName = signingKeyCloudInstanceName,

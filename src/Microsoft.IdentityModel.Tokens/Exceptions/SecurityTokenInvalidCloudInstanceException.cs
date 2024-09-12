@@ -7,13 +7,13 @@ using System.Runtime.Serialization;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// This exception is thrown when the cloud instance name of the signing key was not matched with the cloud instance name from configuration.
+    /// This exception is thrown when the cloud instance of the signing key was not matched with the cloud instance from configuration.
     /// </summary>
     [Serializable]
-    public class SecurityTokenInvalidCloudInstanceNameException : SecurityTokenInvalidSigningKeyException
+    public class SecurityTokenInvalidCloudInstanceException : SecurityTokenInvalidSigningKeyException
     {
         [NonSerialized]
-        const string _Prefix = "Microsoft.IdentityModel." + nameof(SecurityTokenInvalidCloudInstanceNameException) + ".";
+        const string _Prefix = "Microsoft.IdentityModel." + nameof(SecurityTokenInvalidCloudInstanceException) + ".";
 
         [NonSerialized]
         const string _SigningKeyCloudInstanceNameKey = _Prefix + nameof(SigningKeyCloudInstanceName);
@@ -32,41 +32,41 @@ namespace Microsoft.IdentityModel.Tokens
         public string ConfigurationCloudInstanceName { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SecurityTokenInvalidCloudInstanceNameException"/> class.
+        /// Initializes a new instance of the <see cref="SecurityTokenInvalidCloudInstanceException"/> class.
         /// </summary>
-        public SecurityTokenInvalidCloudInstanceNameException()
+        public SecurityTokenInvalidCloudInstanceException()
             : base()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SecurityTokenInvalidCloudInstanceNameException"/> class.
+        /// Initializes a new instance of the <see cref="SecurityTokenInvalidCloudInstanceException"/> class.
         /// </summary>
         /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
-        public SecurityTokenInvalidCloudInstanceNameException(string message)
+        public SecurityTokenInvalidCloudInstanceException(string message)
             : base(message)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SecurityTokenInvalidCloudInstanceNameException"/> class.
+        /// Initializes a new instance of the <see cref="SecurityTokenInvalidCloudInstanceException"/> class.
         /// </summary>
         /// <param name="message">Addtional information to be included in the exception and displayed to user.</param>
         /// <param name="innerException">A <see cref="Exception"/> that represents the root cause of the exception.</param>
-        public SecurityTokenInvalidCloudInstanceNameException(string message, Exception innerException)
+        public SecurityTokenInvalidCloudInstanceException(string message, Exception innerException)
             : base(message, innerException)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SecurityTokenInvalidCloudInstanceNameException"/> class.
+        /// Initializes a new instance of the <see cref="SecurityTokenInvalidCloudInstanceException"/> class.
         /// </summary>
         /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
         /// <param name="context">The contextual information about the source or destination.</param>
 #if NET8_0_OR_GREATER
         [Obsolete("Formatter-based serialization is obsolete", DiagnosticId = "SYSLIB0051")]
 #endif
-        protected SecurityTokenInvalidCloudInstanceNameException(SerializationInfo info, StreamingContext context)
+        protected SecurityTokenInvalidCloudInstanceException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
             SerializationInfoEnumerator enumerator = info.GetEnumerator();
