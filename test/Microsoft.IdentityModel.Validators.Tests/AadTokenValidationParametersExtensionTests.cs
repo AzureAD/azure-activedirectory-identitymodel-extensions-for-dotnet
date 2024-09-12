@@ -65,27 +65,20 @@ namespace Microsoft.IdentityModel.Validators.Tests
         {
             var signingKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
             signingKeysConfig.SigningKeys.Add(KeyingMaterial.DefaultX509Key_2048);
-            var validationParameters = new TokenValidationParameters()
-            {
-                ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(signingKeysConfig),
-                ValidateIssuerSigningKey = true,
-                ValidateAudience = false,
-                ValidateLifetime = false
-            };
 
             var theoryData = new TheoryData<EnableEntraIdSigningKeyValidationTheoryData>();
             theoryData.Add(new EnableEntraIdSigningKeyValidationTheoryData
             {
                 TestId = "IssuerSigningKeyValidatorUsingConfiguration_Delegate_IsSetByWilson",
                 Token = Default.AsymmetricJws,
-                TokenValidationParameters = validationParameters,
+                TokenValidationParameters = SetupTokenValidationParametersMock(signingKeysConfig),
                 ExpectedValidationResult = true,
             });
             theoryData.Add(new EnableEntraIdSigningKeyValidationTheoryData
             {
                 TestId = "IssuerSigningKeyValidatorUsingConfiguration_Delegate_IsSetByDeveloper",
                 Token = Default.AsymmetricJws,
-                TokenValidationParameters = validationParameters,
+                TokenValidationParameters = SetupTokenValidationParametersMock(signingKeysConfig),
                 SetDelegateUsingConfig = true,
                 ExpectedValidationResult = true,
             });
@@ -93,7 +86,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
             {
                 TestId = "IssuerSigningKeyValidator_Delegate_IsSetByDeveloper",
                 Token = Default.AsymmetricJws,
-                TokenValidationParameters = validationParameters,
+                TokenValidationParameters = SetupTokenValidationParametersMock(signingKeysConfig),
                 SetDelegateWithoutConfig = true,
                 ExpectedValidationResult = true,
             });
@@ -163,15 +156,6 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 return config;
             };
 
-            TokenValidationParameters SetupTokenValidationParametersMock(OpenIdConnectConfiguration configuration) =>
-            new TokenValidationParameters()
-            {
-                ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(configuration),
-                ValidateIssuerSigningKey = true,
-                ValidateAudience = false,
-                ValidateLifetime = false
-            };
-
             return theoryData;
         }
 
@@ -219,31 +203,24 @@ namespace Microsoft.IdentityModel.Validators.Tests
         {
             var signingKeysConfig = new OpenIdConnectConfiguration() { TokenEndpoint = Default.Issuer + "oauth/token", Issuer = Default.Issuer };
             signingKeysConfig.SigningKeys.Add(KeyingMaterial.DefaultX509Key_2048);
-            var validationParameters = new TokenValidationParameters()
-            {
-                ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(signingKeysConfig),
-                ValidateIssuerSigningKey = true,
-                ValidateAudience = false,
-                ValidateLifetime = false
-            };
 
             var theoryData = new TheoryData<EnableEntraIdSigningKeyValidationTheoryData>
             {
                 new EnableEntraIdSigningKeyValidationTheoryData
                 {
                     TestId = "IssuerSigningKeyValidatorUsingConfiguration_Delegate_IsSetByWilson",
-                    TokenValidationParameters = validationParameters
+                    TokenValidationParameters = SetupTokenValidationParametersMock(signingKeysConfig),
                 },
                 new EnableEntraIdSigningKeyValidationTheoryData
                 {
                     TestId = "IssuerSigningKeyValidatorUsingConfiguration_Delegate_IsSetByDeveloper",
-                    TokenValidationParameters = validationParameters,
+                    TokenValidationParameters = SetupTokenValidationParametersMock(signingKeysConfig),
                     SetDelegateUsingConfig = true,
                 },
                 new EnableEntraIdSigningKeyValidationTheoryData
                 {
                     TestId = "IssuerSigningKeyValidator_Delegate_IsSetByDeveloper",
-                    TokenValidationParameters = validationParameters,
+                    TokenValidationParameters = SetupTokenValidationParametersMock(signingKeysConfig),
                     SetDelegateWithoutConfig = true,
                 }
             };
@@ -684,6 +661,17 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
                 return theoryData;
             }
+        }
+
+        private static TokenValidationParameters SetupTokenValidationParametersMock(OpenIdConnectConfiguration openIdConnectConfiguration)
+        {
+            return new TokenValidationParameters()
+            {
+                ConfigurationManager = new StaticConfigurationManager<OpenIdConnectConfiguration>(openIdConnectConfiguration),
+                ValidateIssuerSigningKey = true,
+                ValidateAudience = false,
+                ValidateLifetime = false
+            };
         }
 
         public class EnableEntraIdSigningKeyValidationTheoryData : TheoryDataBase
