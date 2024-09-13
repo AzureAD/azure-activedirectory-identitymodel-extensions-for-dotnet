@@ -42,9 +42,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="configuration">The <see cref="BaseConfiguration"/> to be used for validation.</param>
         /// <param name="callContext">The <see cref="CallContext"/> to be used for logging.</param>
-        /// <exception cref="ArgumentNullException"> if 'securityKey' is null and ValidateIssuerSigningKey is true.</exception>
-        /// <exception cref="ArgumentNullException"> if 'securityToken' is null and ValidateIssuerSigningKey is true.</exception>
-        /// <exception cref="ArgumentNullException"> if 'validationParameters' is null.</exception>
+        /// <exception cref="SecurityTokenArgumentNullException"> if 'securityKey' is null and ValidateIssuerSigningKey is true.</exception>
+        /// <exception cref="SecurityTokenArgumentNullException"> if 'securityToken' is null and ValidateIssuerSigningKey is true.</exception>
+        /// <exception cref="SecurityTokenArgumentNullException"> if 'validationParameters' is null.</exception>
         internal static ValidationResult<ValidatedSigningKeyLifetime> ValidateIssuerSigningKey(
             SecurityKey securityKey,
             SecurityToken securityToken,
@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return new ValidationError(
                     new MessageDetail(LogMessages.IDX10253, nameof(securityKey)),
                     ValidationFailureType.SigningKeyValidationFailed,
-                    typeof(ArgumentNullException),
+                    typeof(SecurityTokenArgumentNullException),
                     new StackFrame(true));
 
             if (securityToken == null)

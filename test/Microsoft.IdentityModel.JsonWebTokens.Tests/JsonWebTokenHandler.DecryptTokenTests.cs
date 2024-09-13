@@ -142,11 +142,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         TestId = "Invalid_SecurityTokenIsNull",
                         Token = null,
                         ValidationParameters = new ValidationParameters(),
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                        ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
                         Result = new ValidationError(
                             new MessageDetail(TokenLogMessages.IDX10000, "jwtToken"),
                             ValidationFailureType.NullArgument,
-                            typeof(ArgumentNullException),
+                            typeof(SecurityTokenArgumentNullException),
                             null),
                     },
                     new TokenDecryptingTheoryData
@@ -154,11 +154,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         TestId = "Invalid_ValidationParametersIsNull",
                         Token = token,
                         ValidationParameters = null,
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                        ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
                         Result = new ValidationError(
                             new MessageDetail(TokenLogMessages.IDX10000, "validationParameters"),
                             ValidationFailureType.NullArgument,
-                            typeof(ArgumentNullException),
+                            typeof(SecurityTokenArgumentNullException),
                             null),
                     },
                     new TokenDecryptingTheoryData

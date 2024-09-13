@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     {
                         TestId = "Invalid_ValidationParametersAreNull",
                         Algorithm = null,
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                        ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
                         SecurityKey = null,
                         SecurityToken = null,
                         ValidationParameters = null,
@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("validationParameters")),
                             ValidationFailureType.NullArgument,
-                            typeof(ArgumentNullException),
+                            typeof(SecurityTokenArgumentNullException),
                             null) // StackFrame
                     },
                     new AlgorithmTheoryData

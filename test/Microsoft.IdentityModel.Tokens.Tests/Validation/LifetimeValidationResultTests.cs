@@ -93,14 +93,14 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     },
                     new ValidateLifetimeTheoryData("Invalid_ValidationParametersIsNull")
                     {
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                        ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
                         Expires = oneHourFromNow,
                         NotBefore = oneHourAgo,
                         ValidationParameters = null,
                         Result = new ValidationError(
                             new MessageDetail(LogMessages.IDX10000, "validationParameters"),
                             ValidationFailureType.NullArgument,
-                            typeof(ArgumentNullException),
+                            typeof(SecurityTokenArgumentNullException),
                             null),
                     },
                     new ValidateLifetimeTheoryData("Invalid_ExpiresIsNull")

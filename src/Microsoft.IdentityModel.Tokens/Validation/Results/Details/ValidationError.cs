@@ -7,10 +7,15 @@ using System.Diagnostics;
 
 namespace Microsoft.IdentityModel.Tokens
 {
+    internal interface ISecurityTokenException
+    {
+        void SetValidationError(ValidationError validationError);
+    }
+
     /// <summary>
     /// Contains information so that Exceptions can be logged or thrown written as required.
     /// </summary>
-    internal class ValidationError
+    public class ValidationError
     {
         private Type _exceptionType;
 
@@ -21,7 +26,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="exceptionType"/> is the type of exception that occurred.
         /// <param name="failureType"/> is the type of validation failure that occurred.
         /// <param name="stackFrame"/> is the stack frame where the exception occurred.
-        public ValidationError(
+        internal ValidationError(
             MessageDetail MessageDetail,
             ValidationFailureType failureType,
             Type exceptionType,
@@ -38,7 +43,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="failureType"/> is the type of validation failure that occurred.
         /// <param name="stackFrame"/> is the stack frame where the exception occurred.
         /// <param name="innerException"/> is the inner exception that occurred.
-        public ValidationError(
+        internal ValidationError(
             MessageDetail messageDetail,
             ValidationFailureType failureType,
             Type exceptionType,
@@ -55,7 +60,7 @@ namespace Microsoft.IdentityModel.Tokens
             };
         }
 
-        public ValidationError(
+        internal ValidationError(
             MessageDetail messageDetail,
             ValidationFailureType failureType,
             Type exceptionType,
@@ -79,10 +84,12 @@ namespace Microsoft.IdentityModel.Tokens
         public Exception GetException()
         {
             Exception exception = GetException(ExceptionType, InnerException);
-            if (exception is SecurityTokenException securityTokenException)
-                securityTokenException.ValidationError = this;
 
-            AddAdditionalInformation(exception);
+            if (exception is ISecurityTokenException securityTokenException)
+            {
+                securityTokenException.SetValidationError(this);
+                AddAdditionalInformation(securityTokenException);
+            }
 
             return exception;
         }
@@ -127,8 +134,8 @@ namespace Microsoft.IdentityModel.Tokens
                     exception = new SecurityTokenMalformedException(MessageDetail.Message);
                 else if (exceptionType == typeof(SecurityTokenInvalidSignatureException))
                     exception = new SecurityTokenInvalidSignatureException(MessageDetail.Message);
-                else if (exceptionType == typeof(ArgumentNullException))
-                    exception = new ArgumentNullException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenArgumentNullException))
+                    exception = new SecurityTokenArgumentNullException(MessageDetail.Message);
                 else if (exceptionType == typeof(SecurityTokenInvalidAlgorithmException))
                     exception = new SecurityTokenInvalidAlgorithmException(MessageDetail.Message);
                 else if (exceptionType == typeof(SecurityTokenInvalidAlgorithmException))
@@ -176,8 +183,8 @@ namespace Microsoft.IdentityModel.Tokens
                     exception = new SecurityTokenMalformedException(MessageDetail.Message, actualException);
                 else if (exceptionType == typeof(SecurityTokenInvalidSignatureException))
                     exception = new SecurityTokenInvalidSignatureException(MessageDetail.Message, actualException);
-                else if (exceptionType == typeof(ArgumentNullException))
-                    exception = new ArgumentNullException(MessageDetail.Message, actualException);
+                else if (exceptionType == typeof(SecurityTokenArgumentNullException))
+                    exception = new SecurityTokenArgumentNullException(MessageDetail.Message, actualException);
                 else if (exceptionType == typeof(SecurityTokenInvalidAlgorithmException))
                     exception = new SecurityTokenInvalidAlgorithmException(MessageDetail.Message, actualException);
                 else if (exceptionType == typeof(SecurityTokenInvalidAlgorithmException))
@@ -191,21 +198,21 @@ namespace Microsoft.IdentityModel.Tokens
             return exception;
         }
 
-        protected virtual void AddAdditionalInformation(Exception exception)
+        internal virtual void AddAdditionalInformation(ISecurityTokenException exception)
         {
             // base implementation is no-op. Derived classes can override to add additional information to the exception.
         }
 
-        internal static ValidationError NullParameter(string parameterName, StackFrame stackFrame) => new ValidationError(
+        internal static ValidationError NullParameter(string parameterName, StackFrame stackFrame) => new(
             MessageDetail.NullParameter(parameterName),
             ValidationFailureType.NullArgument,
-            typeof(ArgumentNullException),
+            typeof(SecurityTokenArgumentNullException),
             stackFrame);
 
         /// <summary>
         /// Gets the type of validation failure that occurred.
         /// </summary>
-        public ValidationFailureType FailureType { get; }
+        internal ValidationFailureType FailureType { get; }
 
         /// <summary>
         /// Gets the type of exception that occurred.
@@ -225,7 +232,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the message details that are used to generate the exception message.
         /// </summary>
-        public MessageDetail MessageDetail { get; }
+        internal MessageDetail MessageDetail { get; }
 
         /// <summary>
         /// Gets the stack frames where the exception occurred.

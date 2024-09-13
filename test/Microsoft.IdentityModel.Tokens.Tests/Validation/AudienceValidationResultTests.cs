@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     new AudienceValidationTheoryData
                     {
                         Audiences = new List<string> { "audience1" },
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                        ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
                         TestId = "Invalid_ValidationParametersIsNull",
                         ValidationParameters = null,
                         Result = new ValidationError(
@@ -86,7 +86,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("validationParameters")),
                             ValidationFailureType.NullArgument,
-                            typeof(ArgumentNullException),
+                            typeof(SecurityTokenArgumentNullException),
                             null)
                     },
                     new AudienceValidationTheoryData

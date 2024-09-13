@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     new TokenTypeTheoryData
                     {
                         TestId = "Invalid_SecurityTokenIsNull",
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                        ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
                         Type = "JWT",
                         SecurityToken = null,
                         ValidationParameters = null,
@@ -85,13 +85,13 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("securityToken")),
                             ValidationFailureType.NullArgument,
-                            typeof(ArgumentNullException),
+                            typeof(SecurityTokenArgumentNullException),
                             null)
                     },
                     new TokenTypeTheoryData
                     {
                         TestId = "Invalid_ValidationParametersAreNull",
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                        ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
                         Type = "JWT",
                         SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Typ, "JWT"),
                         ValidationParameters = null,
@@ -100,7 +100,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("validationParameters")),
                             ValidationFailureType.NullArgument,
-                            typeof(ArgumentNullException),
+                            typeof(SecurityTokenArgumentNullException),
                             null)
                     },
                     new TokenTypeTheoryData
