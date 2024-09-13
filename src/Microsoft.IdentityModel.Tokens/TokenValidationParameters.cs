@@ -732,11 +732,11 @@ namespace Microsoft.IdentityModel.Tokens
             set
             {
                 _validIssuer = value;
-                ValidIssuerBytes = value != null ? Encoding.UTF8.GetBytes(value) : null;
+                ValidIssuerBytes = value != null ? Encoding.UTF8.GetBytes(value) : ReadOnlyMemory<byte>.Empty;
             }
         }
 
-        internal ReadOnlyMemory<byte> ValidIssuerBytes { get; private set; }
+        internal ReadOnlyMemory<byte> ValidIssuerBytes { get; private set; } = ReadOnlyMemory<byte>.Empty;
 
         /// <summary>
         /// Gets or sets the <see cref="IEnumerable{String}"/> that contains valid issuers that will be used to check against the token's issuer.
