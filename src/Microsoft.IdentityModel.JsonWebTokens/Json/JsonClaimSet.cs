@@ -25,35 +25,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal object _claimsLock = new();
         internal readonly Dictionary<string, object> _jsonClaims;
 
-#if NET8_0_OR_GREATER
-        internal readonly Memory<byte> _tokenAsMemory;
-#endif
-
         private List<Claim> _claims;
 
         internal JsonClaimSet()
         {
             _jsonClaims = [];
-
-#if NET8_0_OR_GREATER
-            _tokenAsMemory = Memory<byte>.Empty;
-#endif
         }
 
         internal JsonClaimSet(Dictionary<string, object> jsonClaims)
         {
             _jsonClaims = jsonClaims;
         }
-
-#if NET8_0_OR_GREATER
-        internal JsonClaimSet(
-            Dictionary<string, object> jsonClaims,
-            Memory<byte> tokenAsMemory)
-        {
-            _jsonClaims = jsonClaims;
-            _tokenAsMemory = tokenAsMemory;
-        }
-#endif
 
         internal List<Claim> Claims(string issuer)
         {
@@ -72,12 +54,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 CreateClaimFromObject(claims, kvp.Key, kvp.Value, issuer);
 
 #if NET8_0_OR_GREATER
-                if (kvp.Value is ValuePosition position)
+                if (kvp.Value is Memory<byte> bytes)
                 {
-                    if (position.IsEscaped)
-                        EscapeStringBytesInPlace(position);
-
-                    string value = System.Text.Encoding.UTF8.GetString(_tokenAsMemory.Slice(position.StartIndex, position.Length).Span);
+                    string value = System.Text.Encoding.UTF8.GetString(bytes.Span);
                     claims.Add(new Claim(kvp.Key, value, ClaimValueTypes.String, issuer, issuer));
                 }
 #endif
@@ -199,13 +178,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     return null;
 
 #if NET8_0_OR_GREATER
-                if (obj is ValuePosition position)
-                {
-                    if (position.IsEscaped)
-                        EscapeStringBytesInPlace(position);
-
-                    return System.Text.Encoding.UTF8.GetString(_tokenAsMemory.Slice(position.StartIndex, position.Length).Span);
-                }
+                if (obj is Memory<byte> bytes)
+                    return System.Text.Encoding.UTF8.GetString(bytes.Span);
 #endif
                 return obj.ToString();
             }
@@ -221,30 +195,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (obj == null)
                     return null;
 
-                if (obj is ValuePosition position)
-                {
-                    if (position.IsEscaped)
-                        EscapeStringBytesInPlace(position);
-
-                    return _tokenAsMemory.Slice(position.StartIndex, position.Length).Span;
-                }
+                if (obj is Memory<byte> bytes)
+                    return bytes.Span;
             }
 
             return [];
-        }
-
-        /// <summary>
-        /// Unescapes the bytes of a string claim value in-place in the token bytes Memory instance.
-        /// After escaping, updates the length of the claim value to reflect the unescaped bytes.
-        /// </summary>
-        /// <remarks>The start position and length provided to the Utf8JsonReader has to be adjusted to include double quotes.</remarks>
-        /// <param name="position">Position of the claim value.</param>
-        private void EscapeStringBytesInPlace(ValuePosition position)
-        {
-            var reader = new Utf8JsonReader(_tokenAsMemory.Span.Slice(position.StartIndex - 1, position.Length + 2));
-            reader.Read();
-            position.Length = reader.CopyString(_tokenAsMemory.Span.Slice(position.StartIndex, position.Length));
-            position.IsEscaped = false;
         }
 #endif
 
@@ -311,12 +266,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         return (T)((object)(list[0]));
                 }
 #if NET8_0_OR_GREATER
-                else if (obj is ValuePosition position)
+                else if (obj is Memory<byte> bytes)
                 {
-                    if (position.IsEscaped)
-                        EscapeStringBytesInPlace(position);
-
-                    return (T)(object)System.Text.Encoding.UTF8.GetString(_tokenAsMemory.Slice(position.StartIndex, position.Length).Span);
+                    return (T)(object)System.Text.Encoding.UTF8.GetString(bytes.Span);
                 }
 #endif
                 else

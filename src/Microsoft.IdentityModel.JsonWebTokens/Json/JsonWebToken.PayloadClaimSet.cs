@@ -13,15 +13,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     {
         internal JsonClaimSet CreatePayloadClaimSet(byte[] bytes, int length)
         {
-            return CreatePayloadClaimSet(bytes.AsMemory(0, length));
+            return CreatePayloadClaimSet(bytes.AsSpan(0, length));
         }
 
-        internal JsonClaimSet CreatePayloadClaimSet(Memory<byte> tokenPayloadAsMemory)
+        internal JsonClaimSet CreatePayloadClaimSet(ReadOnlySpan<byte> byteSpan)
         {
-            if (tokenPayloadAsMemory.Length == 0)
+            if (byteSpan.Length == 0)
                 return new JsonClaimSet([]);
 
-            Utf8JsonReader reader = new(tokenPayloadAsMemory.Span);
+            Utf8JsonReader reader = new(byteSpan);
             if (!JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, true))
                 throw LogHelper.LogExceptionMessage(
                     new JsonException(
@@ -50,11 +50,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     break;
             };
 
-#if NET8_0_OR_GREATER
-            return new JsonClaimSet(claims, tokenPayloadAsMemory);
-#else
             return new JsonClaimSet(claims);
-#endif
         }
 
         /// <summary>
@@ -85,7 +81,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Azp))
             {
 #if NET8_0_OR_GREATER
-                return JsonSerializerPrimitives.ReadStringBytesLocation(ref reader, JwtRegisteredClaimNames.Azp, ClassName, true);
+                return JsonSerializerPrimitives.ReadStringBytes(ref reader, JwtRegisteredClaimNames.Azp, ClassName, true);
 #else
                 return JsonSerializerPrimitives.ReadString(ref reader, JwtRegisteredClaimNames.Azp, ClassName, true);
 #endif
@@ -101,7 +97,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Iss))
             {
 #if NET8_0_OR_GREATER
-                return JsonSerializerPrimitives.ReadStringBytesLocation(ref reader, JwtRegisteredClaimNames.Iss, ClassName, true);
+                return JsonSerializerPrimitives.ReadStringBytes(ref reader, JwtRegisteredClaimNames.Iss, ClassName, true);
 #else
                 return JsonSerializerPrimitives.ReadString(ref reader, JwtRegisteredClaimNames.Iss, ClassName, true);
 #endif
@@ -109,7 +105,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Jti))
             {
 #if NET8_0_OR_GREATER
-                return JsonSerializerPrimitives.ReadStringBytesLocation(ref reader, JwtRegisteredClaimNames.Jti, ClassName, true);
+                return JsonSerializerPrimitives.ReadStringBytes(ref reader, JwtRegisteredClaimNames.Jti, ClassName, true);
 #else
                 return JsonSerializerPrimitives.ReadString(ref reader, JwtRegisteredClaimNames.Jti, ClassName, true);
 #endif

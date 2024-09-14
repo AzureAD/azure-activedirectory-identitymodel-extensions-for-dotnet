@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text;
@@ -561,7 +562,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 try
                 {
-                    Header = CreateHeaderClaimSet(Base64UrlEncoder.Decode(headerSpan).AsMemory());
+                    Header = CreateHeaderClaimSet(Base64UrlEncoder.Decode(headerSpan).AsSpan());
                 }
                 catch (Exception ex)
                 {
@@ -628,9 +629,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             int outputSize = Base64UrlEncoding.ValidateAndGetOutputSize(strSpan, startIndex, length);
 
-            byte[] output = new byte[outputSize];
-            Base64UrlEncoder.Decode(strSpan.Slice(startIndex, length), output);
-            return createHeaderClaimSet ? CreateHeaderClaimSet(output.AsMemory()) : CreatePayloadClaimSet(output.AsMemory());
+            byte[] output = ArrayPool<byte>.Shared.Rent(outputSize);
+            try
+            {
+                Base64UrlEncoder.Decode(strSpan.Slice(startIndex, length), output);
+                return createHeaderClaimSet ? CreateHeaderClaimSet(output.AsSpan()) : CreatePayloadClaimSet(output.AsSpan());
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(output, true);
+            }
         }
 
         /// <summary>

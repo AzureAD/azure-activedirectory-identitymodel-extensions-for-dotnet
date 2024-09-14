@@ -13,17 +13,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     {
         internal JsonClaimSet CreateHeaderClaimSet(byte[] bytes)
         {
-            return CreateHeaderClaimSet(bytes.AsMemory());
+            return CreateHeaderClaimSet(bytes.AsSpan());
         }
 
         internal JsonClaimSet CreateHeaderClaimSet(byte[] bytes, int length)
         {
-            return CreateHeaderClaimSet(bytes.AsMemory(0, length));
+            return CreateHeaderClaimSet(bytes.AsSpan(0, length));
         }
 
-        internal JsonClaimSet CreateHeaderClaimSet(Memory<byte> tokenHeaderAsMemory)
+        internal JsonClaimSet CreateHeaderClaimSet(ReadOnlySpan<byte> byteSpan)
         {
-            Utf8JsonReader reader = new(tokenHeaderAsMemory.Span);
+            Utf8JsonReader reader = new(byteSpan);
             if (!JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, true))
                 throw LogHelper.LogExceptionMessage(
                     new JsonException(
@@ -51,11 +51,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     break;
             };
 
-#if NET8_0_OR_GREATER
-            return new JsonClaimSet(claims, tokenHeaderAsMemory);
-#else
             return new JsonClaimSet(claims);
-#endif
         }
 
         /// <summary>
@@ -69,27 +65,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 #if NET8_0_OR_GREATER
             if (reader.ValueTextEquals(JwtHeaderUtf8Bytes.Alg))
             {
-                return JsonSerializerPrimitives.ReadStringBytesLocation(ref reader, JwtHeaderParameterNames.Alg, ClassName, true);
+                return JsonSerializerPrimitives.ReadStringBytes(ref reader, JwtHeaderParameterNames.Alg, ClassName, true);
             }
             else if (reader.ValueTextEquals(JwtHeaderUtf8Bytes.Cty))
             {
-                return JsonSerializerPrimitives.ReadStringBytesLocation(ref reader, JwtHeaderParameterNames.Cty, ClassName, true);
+                return JsonSerializerPrimitives.ReadStringBytes(ref reader, JwtHeaderParameterNames.Cty, ClassName, true);
             }
             else if (reader.ValueTextEquals(JwtHeaderUtf8Bytes.Kid))
             {
-                return JsonSerializerPrimitives.ReadStringBytesLocation(ref reader, JwtHeaderParameterNames.Kid, ClassName, true);
+                return JsonSerializerPrimitives.ReadStringBytes(ref reader, JwtHeaderParameterNames.Kid, ClassName, true);
             }
             else if (reader.ValueTextEquals(JwtHeaderUtf8Bytes.Typ))
             {
-                return JsonSerializerPrimitives.ReadStringBytesLocation(ref reader, JwtHeaderParameterNames.Typ, ClassName, true);
+                return JsonSerializerPrimitives.ReadStringBytes(ref reader, JwtHeaderParameterNames.Typ, ClassName, true);
             }
             else if (reader.ValueTextEquals(JwtHeaderUtf8Bytes.X5t))
             {
-                return JsonSerializerPrimitives.ReadStringBytesLocation(ref reader, JwtHeaderParameterNames.X5t, ClassName, true);
+                return JsonSerializerPrimitives.ReadStringBytes(ref reader, JwtHeaderParameterNames.X5t, ClassName, true);
             }
             else if (reader.ValueTextEquals(JwtHeaderUtf8Bytes.Zip))
             {
-                return JsonSerializerPrimitives.ReadStringBytesLocation(ref reader, JwtHeaderParameterNames.Zip, ClassName, true);
+                return JsonSerializerPrimitives.ReadStringBytes(ref reader, JwtHeaderParameterNames.Zip, ClassName, true);
             }
 #else
             if (reader.ValueTextEquals(JwtHeaderUtf8Bytes.Alg))

@@ -656,7 +656,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
 #if NET8_0_OR_GREATER
         // Mostly the same as ReadString, but this method returns the position of the claim value in the token bytes.
         // This method does not unescape the value. The JsonWebToken GetValue, etc. methods are responsible for unescaping the value.
-        internal static ValuePosition ReadStringBytesLocation(
+        internal static Memory<byte>? ReadStringBytes(
             ref Utf8JsonReader reader,
             string propertyName,
             string className,
@@ -670,12 +670,14 @@ namespace Microsoft.IdentityModel.Tokens.Json
                 throw LogHelper.LogExceptionMessage(
                     CreateJsonReaderExceptionInvalidType(ref reader, "JsonTokenType.StartArray", className, propertyName));
 
-            var claimPosition = new ValuePosition((int)reader.TokenStartIndex + 1, reader.ValueSpan.Length, reader.ValueIsEscaped);
+
+            var stringBytes = new Memory<byte>(new byte[reader.ValueSpan.Length]);
+            reader.CopyString(stringBytes.Span);
 
             // Move to next token
             reader.Read();
 
-            return claimPosition;
+            return stringBytes;
         }
 #endif
 
