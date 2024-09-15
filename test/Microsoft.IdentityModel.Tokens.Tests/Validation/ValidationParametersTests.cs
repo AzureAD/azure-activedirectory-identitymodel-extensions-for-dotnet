@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using Xunit;
 
-namespace Microsoft.IdentityModel.Tokens.Tests.Validation
+namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 {
     public class ValidationParametersTests
     {
