@@ -382,18 +382,38 @@ namespace Microsoft.IdentityModel.Validators
             }
         }
 
-        private static bool IsValidIssuer(string validIssuerTemplate, string tenantId, string actualIssuer)
+        internal static bool IsValidIssuer(string issuerTemplate, string tenantId, string tokenIssuer)
         {
-            if (string.IsNullOrEmpty(validIssuerTemplate))
+            if (string.IsNullOrEmpty(issuerTemplate) || string.IsNullOrEmpty(tenantId) || string.IsNullOrEmpty(tokenIssuer))
                 return false;
 
-            if (validIssuerTemplate.Contains(TenantIdTemplate))
+            ReadOnlySpan<char> issuerTemplateSpan = issuerTemplate.AsSpan();
+            ReadOnlySpan<char> tokenIssuerSpan = tokenIssuer.AsSpan();
+            int templateTenantIdPosition = issuerTemplate.IndexOf(TenantIdTemplate, StringComparison.Ordinal);
+
+            // If the template contains the tenantIdTemplate, ensure the actual issuer matches the template with the tenantId replaced.
+            if (templateTenantIdPosition >= 0 && tokenIssuer.Length > templateTenantIdPosition)
             {
-                return validIssuerTemplate.Replace(TenantIdTemplate, tenantId) == actualIssuer;
+                // Ensure the prefix of the issuer template matches the token issuer's prefix
+                if (!issuerTemplateSpan.Slice(0, templateTenantIdPosition).SequenceEqual(tokenIssuerSpan.Slice(0, templateTenantIdPosition)))
+                    return false;
+
+                // Ensure tokenIssuer is atleast as long as issuerTemplate with tenantIdTemplate replaced
+                if (tokenIssuer.Length <= templateTenantIdPosition + tenantId.Length)
+                    return false;
+
+                // Ensure the tenant ID in the token issuer matches the expected tenant ID
+                if (!tokenIssuerSpan.Slice(templateTenantIdPosition, tenantId.Length).SequenceEqual(tenantId.AsSpan()))
+                    return false;
+
+                // Ensure the suffixes of both issuer template and token issuer match
+                return issuerTemplateSpan.Slice(templateTenantIdPosition + TenantIdTemplate.Length)
+                    .SequenceEqual(tokenIssuerSpan.Slice(templateTenantIdPosition + tenantId.Length));
             }
             else
             {
-                return validIssuerTemplate == actualIssuer;
+                // If no tenant ID template exists, directly compare issuerTemplate and tokenIssuer
+                return issuerTemplateSpan.SequenceEqual(tokenIssuerSpan);
             }
         }
 
