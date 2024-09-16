@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Xunit;
+using Microsoft.IdentityModel.TestUtils;
 
 namespace Microsoft.IdentityModel.Tokens.Tests.Validation
 {
@@ -45,6 +46,26 @@ namespace Microsoft.IdentityModel.Tokens.Tests.Validation
 
             Assert.Empty(validationParameters.ValidTypes);
             Assert.True(validationParameters.ValidTypes is IList<string>);
+        }
+
+        [Fact]
+        public void Valid_Set_TimeProvider()
+        {
+            TimeProvider timeProvider = new MockTimeProvider();
+            var validationParameters = new ValidationParameters()
+            {
+                TimeProvider = timeProvider
+            };
+
+            Assert.Equal(validationParameters.TimeProvider, timeProvider);
+        }
+
+        [Fact]
+        public void Valid_NotNull_TimeProvider()
+        {
+            var validationParameters = new ValidationParameters();
+
+            Assert.NotNull(validationParameters.TimeProvider);
         }
     }
 }
