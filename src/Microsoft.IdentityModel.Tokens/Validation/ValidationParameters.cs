@@ -253,11 +253,6 @@ namespace Microsoft.IdentityModel.Tokens
         public string DebugId { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="SecurityKey"/> representing the ephemeral decryption key used for decryption by certain algorithms.
-        /// </summary>
-        public SecurityKey EphemeralDecryptionKey { get; set; }
-
-        /// <summary>
         /// Gets or sets a boolean that controls if a '/' is significant at the end of the audience.
         /// The default is <c>true</c>.
         /// </summary>
@@ -500,7 +495,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Allows overriding the delegate that will be used to validate the type of the token.
-        /// If the token type cannot be validated, a <see cref="Result{TResult}"/> MUST be returned by the delegate.
+        /// If the token type cannot be validated, a <see cref="ValidationResult{TResult}"/> MUST be returned by the delegate.
         /// Note: the 'type' parameter may be null if it couldn't be extracted from its usual location.
         /// Implementations that need to resolve it from a different location can use the 'token' parameter.
         /// </summary>

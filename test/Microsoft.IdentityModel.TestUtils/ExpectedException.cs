@@ -213,6 +213,11 @@ namespace Microsoft.IdentityModel.TestUtils
                 throw new TestException($"List<string> errors == null, error in test: {error}.");
         }
 
+        public static ExpectedException SecurityTokenArgumentNullException(string substringExpected = null, Type inner = null)
+        {
+            return new ExpectedException(typeof(SecurityTokenArgumentNullException), substringExpected, inner);
+        }
+
         public static ExpectedException SecurityTokenEncryptionKeyNotFoundException(string substringExpected = null, Type innerTypeExpected = null)
         {
             return new ExpectedException(typeof(SecurityTokenEncryptionKeyNotFoundException), substringExpected, innerTypeExpected);

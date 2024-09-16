@@ -17,9 +17,9 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
     /// <param name="validationParameters"><see cref="ValidationParameters"/> required for validation.</param>
     /// <param name="callContext"></param>
-    /// <returns> A <see cref="Result{TResult}"/>that contains the results of validating the token type.</returns>
+    /// <returns> A <see cref="ValidationResult{TResult}"/>that contains the results of validating the token type.</returns>
     /// <remarks>An EXACT match is required. <see cref="StringComparison.Ordinal"/> (case sensitive) is used for comparing <paramref name="type"/> against <see cref="ValidationParameters.ValidTypes"/>.</remarks>
-    internal delegate Result<ValidatedTokenType> TypeValidatorDelegate(
+    internal delegate ValidationResult<ValidatedTokenType> TypeValidatorDelegate(
         string? type,
         SecurityToken? securityToken,
         ValidationParameters validationParameters,
@@ -34,10 +34,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
         /// <param name="validationParameters"><see cref="ValidationParameters"/> required for validation.</param>
         /// <param name="callContext"></param>
-        /// <returns> A <see cref="Result{TResult}"/>that contains the results of validating the token type.</returns>
+        /// <returns> A <see cref="ValidationResult{TResult}"/>that contains the results of validating the token type.</returns>
         /// <remarks>An EXACT match is required. <see cref="StringComparison.Ordinal"/> (case sensitive) is used for comparing <paramref name="type"/> against <see cref="ValidationParameters.ValidTypes"/>.</remarks>
 #pragma warning disable CA1801 // TODO: remove pragma disable once callContext is used for logging
-        internal static Result<ValidatedTokenType> ValidateTokenType(
+        internal static ValidationResult<ValidatedTokenType> ValidateTokenType(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -45,12 +45,12 @@ namespace Microsoft.IdentityModel.Tokens
 #pragma warning restore CA1801 // TODO: remove pragma disable once callContext is used for logging
         {
             if (securityToken == null)
-                return ExceptionDetail.NullParameter(
+                return ValidationError.NullParameter(
                     nameof(securityToken),
                     new StackFrame(true));
 
             if (validationParameters == null)
-                return ExceptionDetail.NullParameter(
+                return ValidationError.NullParameter(
                     nameof(validationParameters),
                     new StackFrame(true));
 
@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             if (string.IsNullOrEmpty(type))
-                return new ExceptionDetail(
+                return new ValidationError(
                     new MessageDetail(LogMessages.IDX10256),
                     ValidationFailureType.TokenTypeValidationFailed,
                     typeof(SecurityTokenInvalidTypeException),
@@ -69,7 +69,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (!validationParameters.ValidTypes.Contains(type, StringComparer.Ordinal))
             {
-                return new ExceptionDetail(
+                return new ValidationError(
                     new MessageDetail(
                         LogMessages.IDX10257,
                         LogHelper.MarkAsNonPII(type),

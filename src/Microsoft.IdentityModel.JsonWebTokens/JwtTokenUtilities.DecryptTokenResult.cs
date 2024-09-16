@@ -19,19 +19,19 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="decryptionParameters">The decryption parameters container.</param>
         /// <param name="callContext">The call context used for logging.</param>
         /// <returns>The decrypted, and if the 'zip' claim is set, decompressed string representation of the token.</returns>
-        internal static Result<string> DecryptJwtToken(
+        internal static ValidationResult<string> DecryptJwtToken(
             JsonWebToken jsonWebToken,
             ValidationParameters validationParameters,
             JwtTokenDecryptionParameters decryptionParameters,
             CallContext callContext)
         {
             if (validationParameters == null)
-                return ExceptionDetail.NullParameter(
+                return ValidationError.NullParameter(
                     nameof(validationParameters),
                     new StackFrame(true));
 
             if (decryptionParameters == null)
-                return ExceptionDetail.NullParameter(
+                return ValidationError.NullParameter(
                     nameof(decryptionParameters),
                     new StackFrame(true));
 
@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         continue;
                     }
 
-                    Result<string> result = validationParameters.AlgorithmValidator(zipAlgorithm, key, jsonWebToken, validationParameters, callContext);
+                    ValidationResult<string> result = validationParameters.AlgorithmValidator(zipAlgorithm, key, jsonWebToken, validationParameters, callContext);
                     if (!result.IsSuccess)
                     {
                         (exceptionStrings ??= new StringBuilder()).AppendLine(result.UnwrapError().MessageDetail.Message);
@@ -120,7 +120,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
             {
-                return new ExceptionDetail(
+                return new ValidationError(
                     new MessageDetail(TokenLogMessages.IDX10679, zipAlgorithm),
                     ValidationFailureType.TokenDecryptionFailed,
                     typeof(SecurityTokenDecompressionFailedException),

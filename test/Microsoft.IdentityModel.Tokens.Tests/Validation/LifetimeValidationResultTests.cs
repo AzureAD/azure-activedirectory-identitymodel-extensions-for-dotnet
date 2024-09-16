@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.LifetimeValidatorTests", theoryData);
 
-            Result<ValidatedLifetime> result = Validators.ValidateLifetime(
+            ValidationResult<ValidatedLifetime> result = Validators.ValidateLifetime(
                 theoryData.NotBefore,
                 theoryData.Expires,
                 theoryData.SecurityToken,
@@ -33,13 +33,13 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             }
             else
             {
-                ExceptionDetail exceptionDetail = result.UnwrapError();
+                ValidationError validationError = result.UnwrapError();
                 IdentityComparer.AreStringsEqual(
-                    exceptionDetail.FailureType.Name,
+                    validationError.FailureType.Name,
                     theoryData.Result.UnwrapError().FailureType.Name,
                     context);
 
-                Exception exception = exceptionDetail.GetException();
+                Exception exception = validationError.GetException();
                 theoryData.ExpectedException.ProcessException(exception, context);
             }
 
@@ -100,14 +100,14 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     },
                     new ValidateLifetimeTheoryData("Invalid_ValidationParametersIsNull")
                     {
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                        ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
                         Expires = oneHourFromNow,
                         NotBefore = oneHourAgo,
                         ValidationParameters = null,
-                        Result = new ExceptionDetail(
+                        Result = new ValidationError(
                             new MessageDetail(LogMessages.IDX10000, "validationParameters"),
                             ValidationFailureType.NullArgument,
-                            typeof(ArgumentNullException),
+                            typeof(SecurityTokenArgumentNullException),
                             null),
                     },
                     new ValidateLifetimeTheoryData("Invalid_ExpiresIsNull")
@@ -115,7 +115,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.SecurityTokenNoExpirationException("IDX10225:"),
                         NotBefore = oneHourAgo,
                         ValidationParameters = new ValidationParameters() { TimeProvider = timeProvider },
-                        Result = new ExceptionDetail(
+                        Result = new ValidationError(
                             new MessageDetail(LogMessages.IDX10225, "null"),
                             ValidationFailureType.LifetimeValidationFailed,
                             typeof(SecurityTokenNoExpirationException),
@@ -127,7 +127,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         Expires = oneHourAgo,
                         NotBefore = oneHourFromNow,
                         ValidationParameters = new ValidationParameters() { TimeProvider = timeProvider },
-                        Result = new ExceptionDetail(
+                        Result = new ValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10224,
                                 LogHelper.MarkAsNonPII(oneHourFromNow),
@@ -142,7 +142,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         Expires = twoHoursFromNow,
                         NotBefore = oneHourFromNow,
                         ValidationParameters = new ValidationParameters() { TimeProvider = timeProvider },
-                        Result = new ExceptionDetail(
+                        Result = new ValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10222,
                                 LogHelper.MarkAsNonPII(oneHourFromNow),
@@ -157,7 +157,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         Expires = oneHourAgo,
                         NotBefore = twoHoursAgo,
                         ValidationParameters = new ValidationParameters() { TimeProvider = timeProvider },
-                        Result = new ExceptionDetail(
+                        Result = new ValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10223,
                                 LogHelper.MarkAsNonPII(oneHourAgo),
@@ -175,7 +175,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             ClockSkew = TimeSpan.FromMinutes(5),
                             TimeProvider = timeProvider
                         },
-                        Result = new ExceptionDetail(
+                        Result = new ValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10222,
                                 LogHelper.MarkAsNonPII(sixMinutesFromNow),
@@ -193,7 +193,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             ClockSkew = TimeSpan.FromMinutes(5),
                             TimeProvider = timeProvider
                         },
-                        Result = new ExceptionDetail(
+                        Result = new ValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10223,
                                 LogHelper.MarkAsNonPII(sixMinutesAgo),
@@ -221,7 +221,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
         internal ValidationParameters ValidationParameters { get; set; }
 
-        internal Result<ValidatedLifetime> Result { get; set; }
+        internal ValidationResult<ValidatedLifetime> Result { get; set; }
 
         internal ValidationFailureType ValidationFailureType { get; set; }
     }

@@ -104,7 +104,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         {
             // Because ValidationResult is an internal type, we cannot return it in the benchmark.
             // We return a boolean instead until the type is made public.
-            Result<ValidationResult> result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
+            ValidationResult<ValidatedToken> result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
             return result.IsSuccess;
         }
 
@@ -131,7 +131,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         [BenchmarkCategory("ValidateTokenAsync_FailTwiceBeforeSuccess"), Benchmark]
         public async Task<bool> JsonWebTokenHandler_ValidateTokenAsyncWithVP_SucceedOnThirdAttempt()
         {
-            Result<ValidationResult> result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidValidationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
+            ValidationResult<ValidatedToken> result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidValidationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
             result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidValidationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
             result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
 
@@ -165,7 +165,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         [BenchmarkCategory("ValidateTokenAsync_FailFourTimesBeforeSuccess"), Benchmark]
         public async Task<bool> JsonWebTokenHandler_ValidateTokenAsyncWithVP_SucceedOnFifthAttempt()
         {
-            Result<ValidationResult> result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidValidationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
+            ValidationResult<ValidatedToken> result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidValidationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
             result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidValidationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
             result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidValidationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
             result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidValidationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
@@ -186,7 +186,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         [BenchmarkCategory("ValidateTokenAsyncClaimAccess"), Benchmark]
         public async Task<List<Claim>> JsonWebTokenHandler_ValidateTokenAsyncWithVP_CreateClaims()
         {
-            Result<ValidationResult> result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
+            ValidationResult<ValidatedToken> result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
             var claimsIdentity = result.UnwrapResult().ClaimsIdentity;
             var claims = claimsIdentity.Claims;
             return claims.ToList();

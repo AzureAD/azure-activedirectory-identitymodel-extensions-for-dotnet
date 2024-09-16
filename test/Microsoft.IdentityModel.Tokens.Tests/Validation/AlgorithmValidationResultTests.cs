@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.AlgorithmValidationResultTests", theoryData);
 
-            Result<string> result = Validators.ValidateAlgorithm(
+            ValidationResult<string> result = Validators.ValidateAlgorithm(
                 theoryData.Algorithm,
                 theoryData.SecurityKey,
                 theoryData.SecurityToken,
@@ -33,13 +33,13 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
             }
             else
             {
-                ExceptionDetail exceptionDetail = result.UnwrapError();
+                ValidationError validationError = result.UnwrapError();
                 IdentityComparer.AreStringsEqual(
-                    exceptionDetail.FailureType.Name,
+                    validationError.FailureType.Name,
                     theoryData.Result.UnwrapError().FailureType.Name,
                     context);
 
-                Exception exception = exceptionDetail.GetException();
+                Exception exception = validationError.GetException();
                 theoryData.ExpectedException.ProcessException(exception, context);
             }
 
@@ -58,16 +58,16 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     {
                         TestId = "Invalid_ValidationParametersAreNull",
                         Algorithm = null,
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                        ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
                         SecurityKey = null,
                         SecurityToken = null,
                         ValidationParameters = null,
-                        Result = new ExceptionDetail(
+                        Result = new ValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10000,
                                 LogHelper.MarkAsNonPII("validationParameters")),
                             ValidationFailureType.NullArgument,
-                            typeof(ArgumentNullException),
+                            typeof(SecurityTokenArgumentNullException),
                             null) // StackFrame
                     },
                     new AlgorithmTheoryData
@@ -81,7 +81,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         {
                             ValidAlgorithms = new[] { SecurityAlgorithms.HmacSha256 }
                         },
-                        Result = new ExceptionDetail(
+                        Result = new ValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10696,
                                 LogHelper.MarkAsNonPII(SecurityAlgorithms.Sha256)),
@@ -127,7 +127,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 
             internal ValidationParameters ValidationParameters { get; set; }
 
-            internal Result<string> Result { get; set; }
+            internal ValidationResult<string> Result { get; set; }
         }
     }
 }
