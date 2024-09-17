@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.Tokens
             : base(webKey)
         {
 #if NET9_0_OR_GREATER
-            Certificate = new X509CertificateLoader.LoadCertificate(Convert.FromBase64String(webKey.X5c[0]));
+            Certificate = X509CertificateLoader.LoadCertificate(Convert.FromBase64String(webKey.X5c[0]));
 #else
             Certificate = new X509Certificate2(Convert.FromBase64String(webKey.X5c[0]));
 #endif
