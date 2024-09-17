@@ -51,7 +51,8 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         {
             get
             {
-                DateTime utcNow = DateTime.UtcNow;
+                MockTimeProvider timeProvider = new MockTimeProvider();
+                DateTime utcNow = timeProvider.GetUtcNow().UtcDateTime;
                 DateTime utcExpired = KeyingMaterial.ExpiredX509SecurityKey_Public.Certificate.NotAfter.ToUniversalTime();
                 DateTime utcNotYetValid = KeyingMaterial.NotYetValidX509SecurityKey_Public.Certificate.NotBefore.ToUniversalTime();
 
@@ -62,7 +63,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         TestId = "Valid_SecurityTokenIsPresent",
                         SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
                         SecurityToken = new JwtSecurityToken(),
-                        ValidationParameters = new ValidationParameters(),
+                        ValidationParameters = new ValidationParameters(){ TimeProvider = timeProvider },
                         Result = new ValidatedSigningKeyLifetime(null, null, utcNow)
                     },
                     new SigningKeyValidationTheoryData
@@ -71,7 +72,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.SecurityTokenArgumentNullException(substringExpected: "IDX10253:"),
                         SecurityKey = null,
                         SecurityToken = new JwtSecurityToken(),
-                        ValidationParameters = new ValidationParameters(),
+                        ValidationParameters = new ValidationParameters(){ TimeProvider = timeProvider },
                         Result = new ValidationError(
                             new MessageDetail(LogMessages.IDX10253),
                             ValidationFailureType.SigningKeyValidationFailed,
@@ -84,7 +85,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.SecurityTokenArgumentNullException(substringExpected: "IDX10000:"),
                         SecurityKey = KeyingMaterial.SymmetricSecurityKey2_256,
                         SecurityToken = null,
-                        ValidationParameters = new ValidationParameters (),
+                        ValidationParameters = new ValidationParameters() { TimeProvider = timeProvider },
                         Result = new ValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10000,
@@ -114,7 +115,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException(substringExpected: "IDX10249:"),
                         SecurityKey = KeyingMaterial.ExpiredX509SecurityKey_Public,
                         SecurityToken = new JwtSecurityToken(),
-                        ValidationParameters = new ValidationParameters (),
+                        ValidationParameters = new ValidationParameters() { TimeProvider = timeProvider },
                         Result = new ValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10249,
@@ -130,7 +131,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidSigningKeyException(substringExpected: "IDX10248:"),
                         SecurityKey = KeyingMaterial.NotYetValidX509SecurityKey_Public,
                         SecurityToken = new JwtSecurityToken(),
-                        ValidationParameters = new ValidationParameters (),
+                        ValidationParameters = new ValidationParameters() { TimeProvider = timeProvider },
                         Result = new ValidationError(
                             new MessageDetail(
                                 LogMessages.IDX10248,
@@ -146,7 +147,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10253:"),
                         SecurityKey = null,
                         SecurityToken = new JwtSecurityToken(),
-                        ValidationParameters = new ValidationParameters (),
+                        ValidationParameters = new ValidationParameters() { TimeProvider = timeProvider },
                         Result = new ValidationError(
                             new MessageDetail(LogMessages.IDX10253),
                             ValidationFailureType.SigningKeyValidationFailed,

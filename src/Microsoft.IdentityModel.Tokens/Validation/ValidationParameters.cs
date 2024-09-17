@@ -83,6 +83,7 @@ namespace Microsoft.IdentityModel.Tokens
             RoleClaimTypeRetriever = other.RoleClaimTypeRetriever;
             SaveSigninToken = other.SaveSigninToken;
             SignatureValidator = other.SignatureValidator;
+            TimeProvider = other.TimeProvider;
             TokenDecryptionKeyResolver = other.TokenDecryptionKeyResolver;
             TokenDecryptionKeys = other.TokenDecryptionKeys;
             TokenReplayCache = other.TokenReplayCache;
@@ -445,6 +446,11 @@ namespace Microsoft.IdentityModel.Tokens
             get { return _signatureValidator; }
             set { _signatureValidator = value; }
         }
+
+        /// <summary>
+        /// Gets or sets the time provider.
+        /// </summary>
+        internal TimeProvider TimeProvider { get; set; } = TimeProvider.System;
 
         /// <summary>
         /// Gets or sets a delegate that will be called to retrieve a <see cref="SecurityKey"/> used for decryption.

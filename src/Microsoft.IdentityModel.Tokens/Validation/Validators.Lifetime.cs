@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Tokens
                     new StackFrame(true),
                     new(NotBeforeDate: notBefore, ExpirationDate: expires));
 
-            DateTime utcNow = DateTime.UtcNow;
+            DateTime utcNow = validationParameters.TimeProvider.GetUtcNow().UtcDateTime;
             if (notBefore.HasValue && (notBefore.Value > DateTimeUtil.Add(utcNow, validationParameters.ClockSkew)))
                 return new LifetimeValidationError(
                     new MessageDetail(
