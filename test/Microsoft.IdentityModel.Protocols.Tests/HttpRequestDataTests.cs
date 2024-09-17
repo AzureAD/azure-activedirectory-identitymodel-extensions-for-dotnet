@@ -17,7 +17,12 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             Assert.NotNull(httpRequestData.ClientCertificates);
             Assert.Empty(httpRequestData.ClientCertificates);
 
-            var cert = new X509Certificate2(Convert.FromBase64String(KeyingMaterial.AADCertData));
+            X509Certificate2 cert;
+#if NET9_0_OR_GREATER
+            cert = X509CertificateLoader.LoadCertificate(Convert.FromBase64String(KeyingMaterial.AADCertData));
+#else
+            cert = new X509Certificate2(Convert.FromBase64String(KeyingMaterial.AADCertData));
+#endif
             httpRequestData.ClientCertificates.Add(cert);
 
             Assert.Single(httpRequestData.ClientCertificates);

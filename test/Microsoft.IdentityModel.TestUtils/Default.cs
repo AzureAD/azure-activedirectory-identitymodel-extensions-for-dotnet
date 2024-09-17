@@ -195,7 +195,17 @@ namespace Microsoft.IdentityModel.TestUtils
             get => "http://www.w3.org/";
         }
 
-        public static X509Certificate2 Certificate => new X509Certificate2(Convert.FromBase64String(CertificateData));
+        public static X509Certificate2 Certificate
+        {
+            get
+            {
+#if NET9_0_OR_GREATER
+                return X509CertificateLoader.LoadCertificate(Convert.FromBase64String(CertificateData));
+#else
+                return new X509Certificate2(Convert.FromBase64String(CertificateData));
+#endif
+            }
+        }
 
         public static string CertificateData
         {
@@ -267,7 +277,13 @@ namespace Microsoft.IdentityModel.TestUtils
             get
             {
                 var keyInfo = new KeyInfo();
-                keyInfo.X509Data.Add(new X509Data(new X509Certificate2(Convert.FromBase64String(CertificateData))));
+                X509Certificate2 cert;
+#if NET9_0_OR_GREATER
+                cert = X509CertificateLoader.LoadCertificate(Convert.FromBase64String(CertificateData));
+#else
+                cert = new X509Certificate2(Convert.FromBase64String(CertificateData));
+#endif
+                keyInfo.X509Data.Add(new X509Data(cert));
                 return keyInfo;
             }
         }
