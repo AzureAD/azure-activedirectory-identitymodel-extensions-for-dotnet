@@ -100,7 +100,12 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
                             {
                                 foreach (var certificate in data.Certificates)
                                 {
-                                    var cert = new X509Certificate2(Convert.FromBase64String(certificate));
+                                    X509Certificate2 cert;
+#if NET9_0_OR_GREATER
+                                    cert = X509CertificateLoader.LoadCertificate(Convert.FromBase64String(certificate));
+#else
+                                    cert = new X509Certificate2(Convert.FromBase64String(certificate));
+#endif
                                     configuration.SigningKeys.Add(new X509SecurityKey(cert));
                                 }
                             }
