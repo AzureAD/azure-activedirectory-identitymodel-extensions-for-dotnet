@@ -429,7 +429,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
 
             return new X509SecurityKey(
 #if NET9_0_OR_GREATER
-                X509CertificateLoader.LoadCertificate(Convert.FromBase64String(webKey.X5c[0]));
+                X509CertificateLoader.LoadCertificate(Convert.FromBase64String(webKey.X5c[0])))
 #else
                 new X509Certificate2(Convert.FromBase64String(webKey.X5c[0])))
 #endif

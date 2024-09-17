@@ -18,19 +18,19 @@ namespace Microsoft.IdentityModel.TestUtils
             {
                 new X509SecurityKey(
 #if NET9_0_OR_GREATER
-                    new X509CertificateLoader.LoadCertificate(Convert.FromBase64String(X509CertificateData1)));
+                    X509CertificateLoader.LoadCertificate(Convert.FromBase64String(X509CertificateData1))),
 #else
                     new X509Certificate2(Convert.FromBase64String(X509CertificateData1))),
 #endif
                 new X509SecurityKey(
 #if NET9_0_OR_GREATER
-                    new X509CertificateLoader.LoadCertificate(Convert.FromBase64String(X509CertificateData2)));
+                    X509CertificateLoader.LoadCertificate(Convert.FromBase64String(X509CertificateData2))),
 #else
                     new X509Certificate2(Convert.FromBase64String(X509CertificateData2))),
 #endif
                 new X509SecurityKey(
 #if NET9_0_OR_GREATER
-                    new X509CertificateLoader.LoadCertificate(Convert.FromBase64String(X509CertificateData3)));
+                    X509CertificateLoader.LoadCertificate(Convert.FromBase64String(X509CertificateData3))),
 #else
                     new X509Certificate2(Convert.FromBase64String(X509CertificateData3))),
 #endif
@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             get => new X509SecurityKey(
 #if NET9_0_OR_GREATER
-                new X509CertificateLoader.LoadCertificate(Convert.FromBase64String(X509CertificateData1)));
+                X509CertificateLoader.LoadCertificate(Convert.FromBase64String(X509CertificateData1)));
 #else
                 new X509Certificate2(Convert.FromBase64String(X509CertificateData1)));
 #endif
@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             get => new X509SecurityKey(
 #if NET9_0_OR_GREATER
-                new X509CertificateLoader.LoadCertificate(Convert.FromBase64String(X509CertificateDataAdfsV2)));
+                X509CertificateLoader.LoadCertificate(Convert.FromBase64String(X509CertificateDataAdfsV2)));
 #else
                 new X509Certificate2(Convert.FromBase64String(X509CertificateDataAdfsV2)));
 #endif
@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             get => new X509SecurityKey(
 #if NET9_0_OR_GREATER
-                new X509CertificateLoader.LoadCertificate(Convert.FromBase64String(X509CertificateDataAdfsV3)));
+                X509CertificateLoader.LoadCertificate(Convert.FromBase64String(X509CertificateDataAdfsV3)));
 #else
                 new X509Certificate2(Convert.FromBase64String(X509CertificateDataAdfsV3)));
 #endif
@@ -71,7 +71,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             get => new X509SecurityKey(
 #if NET9_0_OR_GREATER
-                new X509CertificateLoader.LoadCertificate(Convert.FromBase64String(X509CertificateDataAdfsV4)));
+                X509CertificateLoader.LoadCertificate(Convert.FromBase64String(X509CertificateDataAdfsV4)));
 #else
                 new X509Certificate2(Convert.FromBase64String(X509CertificateDataAdfsV4)));
 #endif
@@ -81,7 +81,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             get =>
 #if NET9_0_OR_GREATER
-                new X509CertificateLoader.LoadCertificate(Convert.FromBase64String(X509CertificateData1));
+                X509CertificateLoader.LoadCertificate(Convert.FromBase64String(X509CertificateData1));
 #else
                 new X509Certificate2(Convert.FromBase64String(X509CertificateData1));
 #endif
@@ -91,7 +91,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             get =>
 #if NET9_0_OR_GREATER
-                new X509CertificateLoader.LoadCertificate(Convert.FromBase64String(X509CertificateData2));
+                X509CertificateLoader.LoadCertificate(Convert.FromBase64String(X509CertificateData2));
 #else
                 new X509Certificate2(Convert.FromBase64String(X509CertificateData2));
 #endif
@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             get =>
 #if NET9_0_OR_GREATER
-                new X509CertificateLoader.LoadCertificate(Convert.FromBase64String(X509CertificateData3));
+                X509CertificateLoader.LoadCertificate(Convert.FromBase64String(X509CertificateData3));
 #else
                 new X509Certificate2(Convert.FromBase64String(X509CertificateData3));
 #endif
@@ -111,7 +111,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             get =>
 #if NET9_0_OR_GREATER
-                new X509CertificateLoader.LoadCertificate(Convert.FromBase64String(X509CertificateDataAdfsV2));
+                X509CertificateLoader.LoadCertificate(Convert.FromBase64String(X509CertificateDataAdfsV2));
 #else
                 new X509Certificate2(Convert.FromBase64String(X509CertificateDataAdfsV2));
 #endif
@@ -121,7 +121,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             get =>
 #if NET9_0_OR_GREATER
-                new X509CertificateLoader.LoadCertificate(Convert.FromBase64String(X509CertificateDataAdfsV3));
+                X509CertificateLoader.LoadCertificate(Convert.FromBase64String(X509CertificateDataAdfsV3));
 #else
                 new X509Certificate2(Convert.FromBase64String(X509CertificateDataAdfsV3));
 #endif
@@ -131,7 +131,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             get =>
 #if NET9_0_OR_GREATER
-                new X509CertificateLoader.LoadCertificate(Convert.FromBase64String(X509CertificateDataAdfsV4));
+                X509CertificateLoader.LoadCertificate(Convert.FromBase64String(X509CertificateDataAdfsV4));
 #else
                 new X509Certificate2(Convert.FromBase64String(X509CertificateDataAdfsV4));
 #endif
