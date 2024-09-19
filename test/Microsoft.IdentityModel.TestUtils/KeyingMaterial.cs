@@ -23,17 +23,11 @@ namespace Microsoft.IdentityModel.TestUtils
             get => X509CertificateHelper.Load(Convert.FromBase64String(AADCertData));
         }
 
-        public static string SelfSigned1024_SHA256_PasswordString = "SelfSigned1024_SHA256";
-        public static string SelfSigned2048_SHA256_PasswordString = "SelfSigned2048_SHA256";
-        public static string SelfSigned2048_SHA256_2_PasswordString = "SelfSigned2048_SHA256_2";
-        public static string SelfSigned2048_SHA384_PasswordString = "SelfSigned2048_SHA384";
-        public static string SelfSigned2048_SHA512_PasswordString = "SelfSigned2048_SHA512";
-
-        public static SecureString SelfSigned1024_SHA256_Password = ConvertToSecureString(SelfSigned1024_SHA256_PasswordString);
-        public static SecureString SelfSigned2048_SHA256_Password = ConvertToSecureString(SelfSigned2048_SHA256_PasswordString);
-        public static SecureString SelfSigned2048_SHA256_2_Password = ConvertToSecureString(SelfSigned2048_SHA256_2_PasswordString);
-        public static SecureString SelfSigned2048_SHA384_Password = ConvertToSecureString(SelfSigned2048_SHA384_PasswordString);
-        public static SecureString SelfSigned2048_SHA512_Password = ConvertToSecureString(SelfSigned2048_SHA512_PasswordString);
+        public static SecureString SelfSigned1024_SHA256_Password = ConvertToSecureString("SelfSigned1024_SHA256");
+        public static SecureString SelfSigned2048_SHA256_Password = ConvertToSecureString("SelfSigned2048_SHA256");
+        public static SecureString SelfSigned2048_SHA256_2_Password = ConvertToSecureString("SelfSigned2048_SHA256_2");
+        public static SecureString SelfSigned2048_SHA384_Password = ConvertToSecureString("SelfSigned2048_SHA384");
+        public static SecureString SelfSigned2048_SHA512_Password = ConvertToSecureString("SelfSigned2048_SHA512");
 
         // .../Certs/SelfSigned1024_SHA256.pfx
         // password: SelfSigned1024_SHA256
@@ -80,8 +74,7 @@ namespace Microsoft.IdentityModel.TestUtils
         public static SigningCredentials X509SigningCreds_SelfSigned2048_SHA512 = new SigningCredentials(X509SecurityKeySelfSigned2048_SHA512, SecurityAlgorithms.RsaSha512);
 
         // all asymmetric material has private key unless public is included in variable name
-        public static string CertPasswordString = "abcd";
-        public static SecureString CertPassword = ConvertToSecureString(CertPasswordString);
+        public static SecureString CertPassword = ConvertToSecureString("abcd");
         public const string X509Data_AAD_Public = @"MIIDPjCCAiqgAwIBAgIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAMC0xKzApBgNVBAMTImFjY291bnRzLmFjY2Vzc2NvbnRyb2wud2luZG93cy5uZXQwHhcNMTIwNjA3MDcwMDAwWhcNMTQwNjA3MDcwMDAwWjAtMSswKQYDVQQDEyJhY2NvdW50cy5hY2Nlc3Njb250cm9sLndpbmRvd3MubmV0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArCz8Sn3GGXmikH2MdTeGY1D711EORX/lVXpr+ecGgqfUWF8MPB07XkYuJ54DAuYT318+2XrzMjOtqkT94VkXmxv6dFGhG8YZ8vNMPd4tdj9c0lpvWQdqXtL1TlFRpD/P6UMEigfN0c9oWDg9U7Ilymgei0UXtf1gtcQbc5sSQU0S4vr9YJp2gLFIGK11Iqg4XSGdcI0QWLLkkC6cBukhVnd6BCYbLjTYy3fNs4DzNdemJlxGl8sLexFytBF6YApvSdus3nFXaMCtBGx16HzkK9ne3lobAwL2o79bP4imEGqg+ibvyNmbrwFGnQrBc1jTF9LyQX9q+louxVfHs6ZiVwIDAQABo2IwYDBeBgNVHQEEVzBVgBCxDDsLd8xkfOLKm4Q/SzjtoS8wLTErMCkGA1UEAxMiYWNjb3VudHMuYWNjZXNzY29udHJvbC53aW5kb3dzLm5ldIIQVWmXY/+9RqFA/OG9kFulHDAJBgUrDgMCHQUAA4IBAQAkJtxxm/ErgySlNk69+1odTMP8Oy6L0H17z7XGG3w4TqvTUSWaxD4hSFJ0e7mHLQLQD7oV/erACXwSZn2pMoZ89MBDjOMQA+e6QzGB7jmSzPTNmQgMLA8fWCfqPrz6zgH+1F1gNp8hJY57kfeVPBiyjuBmlTEBsBlzolY9dd/55qqfQk6cgSeCbHCy/RU/iep0+UsRMlSgPNNmqhj5gmN2AFVCN96zF694LwuPae5CeR2ZcVknexOWHYjFM0MgUSw0ubnGl0h9AJgGyhvNGcjQqu9vd1xkupFgaN+f7P3p3EVN5csBg5H94jEcQZT7EKeTiZ6bTrpDAnrr8tDCy8ng";
         public static X509Certificate2 Cert_AAD_Public = X509CertificateHelper.Load(Convert.FromBase64String(X509Data_AAD_Public));
         public static X509SecurityKey X509SecurityKey_AAD_Public = new X509SecurityKey(Cert_AAD_Public);
