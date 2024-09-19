@@ -40,6 +40,13 @@ namespace Microsoft.IdentityModel.Validators.Tests
                     TenantIdClaim = ValidatorConstants.TenantIdAsGuid,
                     ExpectedResult = true,
                 },
+                new AadIssuerValidatorTheoryData("IssuerTemplate_WithTenantId_TokenIssuer_Match_Success")
+                {
+                    TemplatedIssuer = ValidatorConstants.AadIssuer,
+                    TokenIssuer = ValidatorConstants.AadIssuer,
+                    TenantIdClaim = ValidatorConstants.TenantIdAsGuid,
+                    ExpectedResult = true,
+                },
 
                 // Failure cases
                 new AadIssuerValidatorTheoryData("V1_Template_With_V2_Issuer_Failure")
@@ -83,7 +90,14 @@ namespace Microsoft.IdentityModel.Validators.Tests
                     TokenIssuer = "https://login.microsoftonline.com/{tenantid}/v2.0",
                     TenantIdClaim = ValidatorConstants.TenantIdAsGuid,
                     ExpectedResult = false,
-                }
+                },
+                new AadIssuerValidatorTheoryData("IssuerTemplate_WithTenantId_TokenIssuer_NoMatch_Failure")
+                {
+                    TemplatedIssuer = ValidatorConstants.AadIssuerPPE,
+                    TokenIssuer = ValidatorConstants.AadIssuer,
+                    TenantIdClaim = ValidatorConstants.TenantIdAsGuid,
+                    ExpectedResult = false,
+                },
             };
 
             return theoryData;
