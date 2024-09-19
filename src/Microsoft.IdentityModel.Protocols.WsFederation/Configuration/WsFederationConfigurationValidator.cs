@@ -147,11 +147,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 
                     try
                     {
-#if NET9_0_OR_GREATER
-                        cert = X509CertificateLoader.LoadCertificate(Convert.FromBase64String(signatureCertData.Current));
-#else
-                        cert = new X509Certificate2(Convert.FromBase64String(signatureCertData.Current));
-#endif
+                        cert = X509CertificateHelper.Load(Convert.FromBase64String(signatureCertData.Current));
                         signingKeyId = cert.Thumbprint;
                     }
                     catch (CryptographicException)

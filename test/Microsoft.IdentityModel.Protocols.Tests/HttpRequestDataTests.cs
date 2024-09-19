@@ -4,6 +4,7 @@
 using System;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.TestUtils;
+using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.Tests
@@ -17,12 +18,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             Assert.NotNull(httpRequestData.ClientCertificates);
             Assert.Empty(httpRequestData.ClientCertificates);
 
-            X509Certificate2 cert;
-#if NET9_0_OR_GREATER
-            cert = X509CertificateLoader.LoadCertificate(Convert.FromBase64String(KeyingMaterial.AADCertData));
-#else
-            cert = new X509Certificate2(Convert.FromBase64String(KeyingMaterial.AADCertData));
-#endif
+            X509Certificate2 cert = X509CertificateHelper.Load(Convert.FromBase64String(KeyingMaterial.AADCertData));
             httpRequestData.ClientCertificates.Add(cert);
 
             Assert.Single(httpRequestData.ClientCertificates);

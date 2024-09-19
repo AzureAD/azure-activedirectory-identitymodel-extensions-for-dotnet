@@ -146,12 +146,7 @@ namespace Microsoft.IdentityModel.Xml
                 foreach (var certificate in data.Certificates)
                 {
                     // depending on the target, X509Certificate2 may be disposable
-                    X509Certificate2 cert;
-#if NET9_0_OR_GREATER
-                    cert = X509CertificateLoader.LoadCertificate(Convert.FromBase64String(certificate));
-#else
-                    cert = new X509Certificate2(Convert.FromBase64String(certificate));
-#endif
+                    X509Certificate2 cert = X509CertificateHelper.Load(Convert.FromBase64String(certificate));
                     try
                     {
                         if (cert.Equals(key.Certificate))
@@ -202,24 +197,14 @@ namespace Microsoft.IdentityModel.Xml
             foreach (var x5c in key.X5c)
             {
                 // depending on the target, X509Certificate2 may be disposable
-                X509Certificate2 certToMatch;
-#if NET9_0_OR_GREATER
-                certToMatch = X509CertificateLoader.LoadCertificate(Convert.FromBase64String(x5c));
-#else
-                certToMatch = new X509Certificate2(Convert.FromBase64String(x5c));
-#endif
+                X509Certificate2 certToMatch = X509CertificateHelper.Load(Convert.FromBase64String(x5c));
                 try
                 {
                     foreach (var data in X509Data)
                     {
                         foreach (var certificate in data.Certificates)
                         {
-                            X509Certificate2 cert;
-#if NET9_0_OR_GREATER
-                            cert = X509CertificateLoader.LoadCertificate(Convert.FromBase64String(certificate));
-#else
-                            cert = new X509Certificate2(Convert.FromBase64String(certificate));
-#endif
+                            X509Certificate2 cert = X509CertificateHelper.Load(Convert.FromBase64String(certificate));
                             try
                             {
                                 if (cert.Equals(certToMatch))
