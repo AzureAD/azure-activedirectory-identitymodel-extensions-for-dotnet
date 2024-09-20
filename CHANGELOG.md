@@ -1,5 +1,38 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+8.0.3
+=====
+### Performance improvements
+- Improves performance during issuer validation by replacing string comparison with span comparison. See PR [#2826](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2826).
+
+### New features
+- Add optional check to prevent using keys that are shared across multiple clouds. See PR [#2804](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2804) for details.
+
+### Bug fixes
+- JsonWebTokenHandler would only return unwrapped keys if there was no errors. This change is to align with the behavior in JwtSecurityTokenHandler, that is it returns the keys that were able to be unwrapped, and only throw if no keys were able to be unwrapped. See issue [#2695](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2695) for details.
+
+### Fundamentals
+- Fix flaky tests. See [#2793](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2793) for details.
+- Update XUnit versoin and fix test warnings due to new XUnit analyzers. See PR [#2796](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2796) for details.
+- Onhboard to code coverage in ADO. See PR [#2798](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2798).
+- Use `IsTargetFrameworkCompatible(*)` so AOT is forward-compatible with .NET 9 and beyond. See PR [#2790](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2790) for details.
+- Fix a merge conflict impacting dev. See PR [#2819](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2819).
+- Defining the following attribute in multiple assemblies (.Tokens, .Logging) causes an internal error.
+[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]. See PR [#2820](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2820).
+- Remove perl dependency. See PR [#2830](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2830).
+
+### Work relating to [#2711](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2711)
+- [#2794](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2794)
+- [#2800](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2800)
+- [#2810](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2810)
+- [#2811](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2811)
+- [#2816](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2816)
+- [#2822](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2822)
+- [#2815](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2815)
+- [#2818](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2818)
+- [#2813](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2813)
+- [#2827](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2827)
+- 
 8.0.2
 =====
 
