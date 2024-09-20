@@ -292,6 +292,11 @@ namespace Microsoft.IdentityModel.TestUtils
             get => "http://Default.Issuer.com";
         }
 
+        public static string CloudInstanceName
+        {
+            get => "microsoftonline.com";
+        }
+
         public static IEnumerable<string> Issuers
         {
             get => new List<string> {
