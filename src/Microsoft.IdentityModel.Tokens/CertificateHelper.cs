@@ -8,7 +8,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// Helper class to load X509Certificate2 from byte array.
     /// </summary>
-    internal class X509CertificateHelper
+    internal class CertificateHelper
     {
         public static X509Certificate2 Load(byte[] data)
         {

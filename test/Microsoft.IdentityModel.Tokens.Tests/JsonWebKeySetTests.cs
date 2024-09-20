@@ -426,7 +426,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
         {
             var webKey = (webKeySet.Keys as List<JsonWebKey>)[keyIndex];
 
-            return new X509SecurityKey(X509CertificateHelper.Load(Convert.FromBase64String(webKey.X5c[0])))
+            return new X509SecurityKey(CertificateHelper.Load(Convert.FromBase64String(webKey.X5c[0])))
             {
                 KeyId = webKey.KeyId
             };

@@ -3,14 +3,14 @@
 
 using System.Security.Cryptography.X509Certificates;
 
-namespace Microsoft.IdentityModel.Tokens.Xml.Tests
+namespace Microsoft.IdentityModel.TestUtils
 {
     /// <summary>
     /// Helper class to load X509Certificate2 from byte array.
     /// </summary>
-    internal class X509CertificateHelper
+    public class CertificateHelper
     {
-        public static X509Certificate2 Load(byte[] data)
+        public static X509Certificate2 LoadX509Certificate(byte[] data)
         {
 #if NET9_0_OR_GREATER
             return X509CertificateLoader.LoadCertificate(data);

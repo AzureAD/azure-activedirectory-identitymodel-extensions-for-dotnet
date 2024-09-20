@@ -197,7 +197,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static X509Certificate2 Certificate
         {
-            get => X509CertificateHelper.Load(Convert.FromBase64String(CertificateData));
+            get => CertificateHelper.Load(Convert.FromBase64String(CertificateData));
         }
 
         public static string CertificateData
@@ -270,7 +270,7 @@ namespace Microsoft.IdentityModel.TestUtils
             get
             {
                 var keyInfo = new KeyInfo();
-                X509Certificate2 cert = X509CertificateHelper.Load(Convert.FromBase64String(CertificateData));
+                X509Certificate2 cert = CertificateHelper.Load(Convert.FromBase64String(CertificateData));
                 keyInfo.X509Data.Add(new X509Data(cert));
                 return keyInfo;
             }
