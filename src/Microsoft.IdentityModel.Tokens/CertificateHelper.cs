@@ -10,7 +10,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     internal class CertificateHelper
     {
-        public static X509Certificate2 Load(byte[] data)
+        public static X509Certificate2 LoadX509Certificate(byte[] data)
         {
 #if NET9_0_OR_GREATER
             return X509CertificateLoader.LoadCertificate(data);

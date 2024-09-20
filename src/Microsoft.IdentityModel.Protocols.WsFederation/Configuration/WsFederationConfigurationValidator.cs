@@ -147,7 +147,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation
 
                     try
                     {
-                        cert = CertificateHelper.Load(Convert.FromBase64String(signatureCertData.Current));
+                        cert = CertificateHelper.LoadX509Certificate(Convert.FromBase64String(signatureCertData.Current));
                         signingKeyId = cert.Thumbprint;
                     }
                     catch (CryptographicException)
