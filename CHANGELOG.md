@@ -6,7 +6,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 - Improves performance during issuer validation by replacing string comparison with span comparison. See PR [#2826](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2826).
 
 ### New features
-- Add optional check to prevent using keys that are shared across multiple clouds. See PR [#2804](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2804) for details.
+- Add optional check to prevent using keys that are shared across multiple clouds. See issue [#2832](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2832) for details.
 
 ### Bug fixes
 - JsonWebTokenHandler would only return unwrapped keys if there was no errors. This change is to align with the behavior in JwtSecurityTokenHandler, that is it returns the keys that were able to be unwrapped, and only throw if no keys were able to be unwrapped. See issue [#2695](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2695) for details.
