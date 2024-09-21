@@ -142,7 +142,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
                 {
                     TokenValidationParameters = new TokenValidationParameters
                     {
-                        IssuerSigningKey = new X509SecurityKey(TestUtils.CertificateHelper.LoadX509Certificate(Convert.FromBase64String(_x509DataADFS))),
+                        IssuerSigningKey = new X509SecurityKey(TestUtils.CertificateHelper.LoadX509Certificate(_x509DataADFS)),
                         ValidIssuer = "http://sts.sub2.fracas365.msftonlinerepro.com/adfs/services/trust",
                         ValidAudience = "https://app1.sub2.fracas365.msftonlinerepro.com/sampapp/",
                         ValidateLifetime = false,

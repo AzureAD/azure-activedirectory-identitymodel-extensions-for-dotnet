@@ -646,8 +646,8 @@ namespace Microsoft.IdentityModel.TestUtils
             TestUtilities.WriteHeader($"{this}.CompareX509Certificate2", true);
 
             var context = new CompareContext($"{this}.CompareX509Certificate2");
-            var certificate = CertificateHelper.LoadX509Certificate(Convert.FromBase64String(KeyingMaterial.DefaultX509Data_2048_Public));
-            var certificateSame = CertificateHelper.LoadX509Certificate(Convert.FromBase64String(KeyingMaterial.DefaultX509Data_2048_Public));
+            var certificate = CertificateHelper.LoadX509Certificate(KeyingMaterial.DefaultX509Data_2048_Public);
+            var certificateSame = CertificateHelper.LoadX509Certificate(KeyingMaterial.DefaultX509Data_2048_Public);
             var certificateDifferent = KeyingMaterial.CertSelfSigned1024_SHA256;
 
             IdentityComparer.AreEqual(certificate, certificateSame, context);
