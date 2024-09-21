@@ -12,7 +12,7 @@
     <SystemTextJson>8.0.4</SystemTextJson>
     <SystemTextRegularExpressions>4.3.1</SystemTextRegularExpressions>
     <XunitRunnerConsoleVersion>2.9.0</XunitRunnerConsoleVersion>
-    <XunitRunnerVisualStudioVersion>2.8.2</XunitRunnerVisualStudioVersion>
+    <XunitRunnerVisualStudioVersion>3.0.0-pre.30</XunitRunnerVisualStudioVersion>
     <XunitVersion>2.9.0</XunitVersion>
   </PropertyGroup>
 </Project>
