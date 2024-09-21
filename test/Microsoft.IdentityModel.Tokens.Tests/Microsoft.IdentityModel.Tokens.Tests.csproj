@@ -21,6 +21,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.KeyVault.Cryptography" Version="$(MicrosoftAzureKeyVaultCryptographyVersion)" />
+    <PackageReference Include="System.Text.RegularExpressions" Version="$(SystemTextRegularExpressions)"/>
+    <PackageReference Include="Microsoft.Rest.ClientRuntime" Version="$(MicrosoftRestClientRuntime)"/>
   </ItemGroup>
 
   <ItemGroup>
