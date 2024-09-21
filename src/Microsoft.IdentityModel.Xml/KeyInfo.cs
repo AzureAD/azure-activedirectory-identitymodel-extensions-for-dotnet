@@ -146,7 +146,7 @@ namespace Microsoft.IdentityModel.Xml
                 foreach (var certificate in data.Certificates)
                 {
                     // depending on the target, X509Certificate2 may be disposable
-                    X509Certificate2 cert = CertificateHelper.LoadX509Certificate(Convert.FromBase64String(certificate));
+                    X509Certificate2 cert = CertificateHelper.LoadX509Certificate(certificate);
                     try
                     {
                         if (cert.Equals(key.Certificate))
@@ -197,14 +197,14 @@ namespace Microsoft.IdentityModel.Xml
             foreach (var x5c in key.X5c)
             {
                 // depending on the target, X509Certificate2 may be disposable
-                X509Certificate2 certToMatch = CertificateHelper.LoadX509Certificate(Convert.FromBase64String(x5c));
+                X509Certificate2 certToMatch = CertificateHelper.LoadX509Certificate(x5c);
                 try
                 {
                     foreach (var data in X509Data)
                     {
                         foreach (var certificate in data.Certificates)
                         {
-                            X509Certificate2 cert = CertificateHelper.LoadX509Certificate(Convert.FromBase64String(certificate));
+                            X509Certificate2 cert = CertificateHelper.LoadX509Certificate(certificate);
                             try
                             {
                                 if (cert.Equals(certToMatch))
