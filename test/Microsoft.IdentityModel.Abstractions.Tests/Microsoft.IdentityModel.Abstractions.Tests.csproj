@@ -20,8 +20,9 @@
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Abstractions\Microsoft.IdentityModel.Abstractions.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <Reference Include="System.Net.Http" />
+  <ItemGroup>
+    <PackageReference Include="System.Text.RegularExpressions" Version="$(SystemTextRegularExpressions)" />
+    <PackageReference Include="System.Net.Http" Version="$(SystemNetHttp)" />
   </ItemGroup>
 
 </Project>

@@ -19,8 +19,10 @@
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Validators\Microsoft.IdentityModel.Validators.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <Reference Include="System.Net.Http" />
+  <ItemGroup>
+    <PackageReference Include="System.Text.RegularExpressions" Version="$(SystemTextRegularExpressions)"/>
+    <PackageReference Include="System.Net.Http" Version="$(SystemNetHttp)"/>
+    <PackageReference Include="Microsoft.Rest.ClientRuntime" Version="$(MicrosoftRestClientRuntime)"/>
   </ItemGroup>
 
   <ItemGroup>
