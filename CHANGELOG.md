@@ -1,6 +1,6 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
-8.0.3
+8.1.0
 =====
 ### Performance improvements
 - Improves performance during issuer validation by replacing string comparison with span comparison. See PR [#2826](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2826).
