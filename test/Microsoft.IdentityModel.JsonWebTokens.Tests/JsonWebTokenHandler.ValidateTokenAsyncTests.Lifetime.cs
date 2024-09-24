@@ -3,7 +3,6 @@
 
 #nullable enable
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
@@ -18,62 +17,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateTokenAsync_Lifetime", theoryData);
 
-            JsonWebTokenHandler jsonWebTokenHandler = new JsonWebTokenHandler();
-            jsonWebTokenHandler.SetDefaultTimesOnTokenCreation = false; // Allow for null values to be passed in to validate.
+            string jwtString = CreateToken(theoryData.IssuedAt, theoryData.NotBefore, theoryData.Expires);
 
-            SecurityTokenDescriptor securityTokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = Default.ClaimsIdentity,
-                SigningCredentials = Default.AsymmetricSigningCredentials,
-                Audience = Default.Audience,
-                Issuer = Default.Issuer,
-                IssuedAt = theoryData.IssuedAt,
-                NotBefore = theoryData.NotBefore,
-                Expires = theoryData.Expires,
-            };
-
-            string jwtString = jsonWebTokenHandler.CreateToken(securityTokenDescriptor);
-
-            TokenValidationResult tokenValidationParametersResult =
-                    await jsonWebTokenHandler.ValidateTokenAsync(jwtString, theoryData.TokenValidationParameters);
-            ValidationResult<ValidatedToken> validationParametersResult =
-                await jsonWebTokenHandler.ValidateTokenAsync(
-                    jwtString, theoryData.ValidationParameters!, theoryData.CallContext, CancellationToken.None);
-
-            if (tokenValidationParametersResult.IsValid != theoryData.ExpectedIsValid)
-                context.AddDiff($"tokenValidationParametersResult.IsValid != theoryData.ExpectedIsValid");
-
-            if (validationParametersResult.IsSuccess != theoryData.ExpectedIsValid)
-                context.AddDiff($"validationParametersResult.IsSuccess != theoryData.ExpectedIsValid");
-
-            if (theoryData.ExpectedIsValid &&
-                tokenValidationParametersResult.IsValid &&
-                validationParametersResult.IsSuccess)
-            {
-                IdentityComparer.AreEqual(
-                    tokenValidationParametersResult.ClaimsIdentity,
-                    validationParametersResult.UnwrapResult().ClaimsIdentity,
-                    context);
-                IdentityComparer.AreEqual(
-                    tokenValidationParametersResult.Claims,
-                    validationParametersResult.UnwrapResult().Claims,
-                    context);
-            }
-            else
-            {
-                theoryData.ExpectedException.ProcessException(tokenValidationParametersResult.Exception, context);
-
-                if (!validationParametersResult.IsSuccess)
-                {
-                    // If there is a special case for the ValidationParameters path, use that.
-                    if (theoryData.ExpectedExceptionValidationParameters != null)
-                        theoryData.ExpectedExceptionValidationParameters
-                            .ProcessException(validationParametersResult.UnwrapError().GetException(), context);
-                    else
-                        theoryData.ExpectedException
-                            .ProcessException(validationParametersResult.UnwrapError().GetException(), context);
-                }
-            }
+            await ValidateAndCompareResults(jwtString, theoryData, context);
 
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -195,7 +141,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
         }
 
-        public class ValidateTokenAsyncLifetimeTheoryData : TheoryDataBase
+        public class ValidateTokenAsyncLifetimeTheoryData : ValidateTokenAsyncBaseTheoryData
         {
             public ValidateTokenAsyncLifetimeTheoryData(string testId) : base(testId) { }
 
@@ -204,15 +150,25 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             public DateTime? NotBefore { get; set; }
 
             public DateTime? Expires { get; set; }
+        }
 
-            internal bool ExpectedIsValid { get; set; } = true;
+        private static string CreateToken(DateTime? issuedAt, DateTime? notBefore, DateTime? expires)
+        {
+            JsonWebTokenHandler jsonWebTokenHandler = new JsonWebTokenHandler();
+            jsonWebTokenHandler.SetDefaultTimesOnTokenCreation = false; // Allow for null values to be passed in to validate.
 
-            internal TokenValidationParameters? TokenValidationParameters { get; set; }
+            SecurityTokenDescriptor securityTokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = Default.ClaimsIdentity,
+                SigningCredentials = Default.AsymmetricSigningCredentials,
+                Audience = Default.Audience,
+                Issuer = Default.Issuer,
+                IssuedAt = issuedAt,
+                NotBefore = notBefore,
+                Expires = expires,
+            };
 
-            internal ValidationParameters? ValidationParameters { get; set; }
-
-            // only set if we expect a different message on this path
-            internal ExpectedException? ExpectedExceptionValidationParameters { get; set; } = null;
+            return jsonWebTokenHandler.CreateToken(securityTokenDescriptor);
         }
     }
 }
