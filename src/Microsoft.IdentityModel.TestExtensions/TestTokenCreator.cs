@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.TestExtensions
     /// The example imagines a class, ClassWithMicrosoftIdentityModelDependency, which exposes ValidateToken, a method calling the
     /// Microsoft.IdentityModel library and GetTokenValidationParameters which retrieves the <see cref="TokenValidationParameters"/>
     /// the code under test actually uses. Note that it's important to use the real <see cref="TokenValidationParameters"/> since that
-    /// will allow the unit tests to actually confirm if there's a hole in the validation (e.g. certain important validation is disabled,
+    /// will allow the unit tests to actually confirm if there's a gap in the validation (e.g. certain important validation is disabled,
     /// <see cref="TokenValidationParameters.ValidateAudience"/>, <see cref="TokenValidationParameters.ValidateIssuer"/>, etc.)
     ///
     /// In the following code example, generateTokenToTest should be one of the methods from this class.
