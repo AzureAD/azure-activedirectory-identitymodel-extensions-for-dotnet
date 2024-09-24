@@ -36,7 +36,12 @@ namespace Microsoft.IdentityModel.Tokens
                     Expires = expires
                 });
 
-            DateTime utcNow = DateTime.UtcNow;
+            DateTime utcNow =
+#if SUPPORTS_TIME_PROVIDER
+                validationParameters.TimeProvider?.GetUtcNow().UtcDateTime ??
+#endif
+                DateTime.UtcNow;
+
             if (notBefore.HasValue && (notBefore.Value > DateTimeUtil.Add(utcNow, validationParameters.ClockSkew)))
                 throw LogHelper.LogExceptionMessage(new SecurityTokenNotYetValidException(LogHelper.FormatInvariant(LogMessages.IDX10222, LogHelper.MarkAsNonPII(notBefore.Value), LogHelper.MarkAsNonPII(utcNow)))
                 {

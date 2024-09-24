@@ -88,11 +88,29 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             string nonce = Convert.ToBase64String(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString() + Guid.NewGuid().ToString()));
             if (RequireTimeStampInNonce)
             {
-                return DateTime.UtcNow.Ticks.ToString(CultureInfo.InvariantCulture) + "." + nonce;
+                DateTime utcNow =
+#if SUPPORTS_TIME_PROVIDER
+                    TimeProvider?.GetUtcNow().UtcDateTime ??
+#endif
+                    DateTime.UtcNow;
+
+                return utcNow.Ticks.ToString(CultureInfo.InvariantCulture) + "." + nonce;
             }
 
             return nonce;
         }
+
+#if SUPPORTS_TIME_PROVIDER
+#nullable enable
+        /// <summary>
+        /// Gets or sets the time provider.
+        /// </summary>
+        /// <remarks>
+        /// If not set, fall back to using the <see cref="DateTime"/> class to obtain the current time.
+        /// </remarks>
+        public TimeProvider? TimeProvider { get; set; }
+#nullable restore
+#endif
 
         /// <summary>
         /// Gets the algorithm mapping between OpenIdConnect and .Net for Hash algorithms.
@@ -658,7 +676,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
                     throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21327, LogHelper.MarkAsNonPII(timestamp), LogHelper.MarkAsNonPII(DateTime.MinValue.Ticks.ToString(CultureInfo.InvariantCulture)), LogHelper.MarkAsNonPII(DateTime.MaxValue.Ticks.ToString(CultureInfo.InvariantCulture))), ex));
                 }
 
-                DateTime utcNow = DateTime.UtcNow;
+                DateTime utcNow =
+#if SUPPORTS_TIME_PROVIDER
+                    TimeProvider?.GetUtcNow().UtcDateTime ??
+#endif
+                    DateTime.UtcNow;
+
                 if (nonceTime + NonceLifetime < utcNow)
                     throw LogHelper.LogExceptionMessage(new OpenIdConnectProtocolInvalidNonceException(LogHelper.FormatInvariant(LogMessages.IDX21324, nonceFoundInJwt, LogHelper.MarkAsNonPII(nonceTime.ToString(CultureInfo.InvariantCulture)), LogHelper.MarkAsNonPII(utcNow.ToString(CultureInfo.InvariantCulture)), LogHelper.MarkAsNonPII(NonceLifetime.ToString("c", CultureInfo.InvariantCulture)))));
             }

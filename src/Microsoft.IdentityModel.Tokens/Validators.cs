@@ -404,7 +404,12 @@ namespace Microsoft.IdentityModel.Tokens
             X509SecurityKey x509SecurityKey = securityKey as X509SecurityKey;
             if (x509SecurityKey?.Certificate is X509Certificate2 cert)
             {
-                DateTime utcNow = DateTime.UtcNow;
+                DateTime utcNow =
+#if SUPPORTS_TIME_PROVIDER
+                    validationParameters.TimeProvider?.GetUtcNow().UtcDateTime ??
+#endif
+                    DateTime.UtcNow;
+
                 var notBeforeUtc = cert.NotBefore.ToUniversalTime();
                 var notAfterUtc = cert.NotAfter.ToUniversalTime();
 

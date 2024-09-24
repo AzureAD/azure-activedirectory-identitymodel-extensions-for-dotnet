@@ -190,8 +190,14 @@ namespace Microsoft.IdentityModel.Protocols
                                         result.ErrorMessage)));
                     }
 
+                    DateTimeOffset utcNow =
+#if SUPPORTS_TIME_PROVIDER
+                        TimeProvider?.GetUtcNow() ??
+#endif
+                        DateTimeOffset.UtcNow;
+
                     // Add a random amount between 0 and 5% of AutomaticRefreshInterval jitter to avoid spike traffic to IdentityProvider.
-                    _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval +
+                    _syncAfter = DateTimeUtil.Add(utcNow.UtcDateTime, AutomaticRefreshInterval +
                         TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 20)));
 
                     _currentConfiguration = configuration;
@@ -199,6 +205,12 @@ namespace Microsoft.IdentityModel.Protocols
                 catch (Exception ex)
                 {
                     fetchMetadataFailure = ex;
+
+                    DateTime utcNow =
+#if SUPPORTS_TIME_PROVIDER
+                            TimeProvider?.GetUtcNow().UtcDateTime ??
+#endif
+                        DateTime.UtcNow;
 
                     // In this case configuration was never obtained.
                     if (_currentConfiguration == null)
@@ -208,12 +220,12 @@ namespace Microsoft.IdentityModel.Protocols
                             // Adopt exponential backoff for bootstrap refresh interval with a decorrelated jitter if it is not longer than the refresh interval.
                             TimeSpan _bootstrapRefreshIntervalWithJitter = TimeSpan.FromSeconds(new Random().Next((int)_bootstrapRefreshInterval.TotalSeconds));
                             _bootstrapRefreshInterval += _bootstrapRefreshInterval;
-                            _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, _bootstrapRefreshIntervalWithJitter);
+                            _syncAfter = DateTimeUtil.Add(utcNow, _bootstrapRefreshIntervalWithJitter);
                         }
                         else
                         {
                             _syncAfter = DateTimeUtil.Add(
-                                DateTime.UtcNow,
+                                utcNow,
                                 AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
                         }
 
@@ -229,7 +241,7 @@ namespace Microsoft.IdentityModel.Protocols
                     else
                     {
                         _syncAfter = DateTimeUtil.Add(
-                            DateTime.UtcNow,
+                            utcNow,
                             AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
 
                         LogHelper.LogExceptionMessage(

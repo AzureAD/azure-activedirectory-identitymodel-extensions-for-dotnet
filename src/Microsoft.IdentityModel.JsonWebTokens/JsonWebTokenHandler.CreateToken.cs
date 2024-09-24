@@ -835,7 +835,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // By default we set these three properties only if they haven't been detected before.
             if (setDefaultTimesOnTokenCreation && !(expSet && iatSet && nbfSet))
             {
-                DateTime now = DateTime.UtcNow;
+                DateTime now =
+#if SUPPORTS_TIME_PROVIDER
+                    tokenDescriptor.TimeProvider?.GetUtcNow().UtcDateTime ??
+#endif
+                    DateTime.UtcNow;
 
                 if (!expSet)
                 {
