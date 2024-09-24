@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 #nullable enable
-
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -211,5 +210,4 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         }
     }
 }
-
 #nullable restore
