@@ -21,7 +21,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]. See PR [#2820](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2820).
 - Remove perl dependency. See PR [#2830](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2830).
 
-### Work relating to [#2711](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2711)
+### Work related to redesign of IdentityModel's token validation logic [#2711](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2711)
 - [#2794](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2794)
 - [#2800](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2800)
 - [#2810](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2810)
