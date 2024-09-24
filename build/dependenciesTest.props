@@ -15,4 +15,7 @@
     <XunitRunnerVisualStudioVersion>2.8.2</XunitRunnerVisualStudioVersion>
     <XunitVersion>2.9.0</XunitVersion>
   </PropertyGroup>
+  <PropertyGroup  Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))">
+    <XunitRunnerVisualStudioVersion>3.0.0-pre.35</XunitRunnerVisualStudioVersion>
+  </PropertyGroup>
 </Project>
