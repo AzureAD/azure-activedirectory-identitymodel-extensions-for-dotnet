@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="System.Security.Claims" Version="$(SystemSecurityClaimsVersion)" />
+    <PackageReference Include="System.Net.Http" Version="$(SystemNetHttp)"/>
   </ItemGroup>
 
   <ItemGroup>
@@ -26,10 +27,6 @@
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Tokens.Saml\Microsoft.IdentityModel.Tokens.Saml.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Xml\Microsoft.IdentityModel.Xml.csproj" />
     <ProjectReference Include="..\..\src\System.IdentityModel.Tokens.Jwt\System.IdentityModel.Tokens.Jwt.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
-      <Reference Include="System.Net.Http" />
   </ItemGroup>
 
   <ItemGroup>
