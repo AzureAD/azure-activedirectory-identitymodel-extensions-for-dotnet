@@ -20,7 +20,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="callContext"></param>
     /// <returns>A <see cref="ValidationResult{TResult}"/>that contains the results of validating the issuer.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
-    internal delegate ValidationResult<ValidatedLifetime> LifetimeValidatorDelegate(
+    internal delegate ValidationResult<ValidatedLifetime> LifetimeValidationDelegate(
         DateTime? notBefore,
         DateTime? expires,
         SecurityToken? securityToken,
