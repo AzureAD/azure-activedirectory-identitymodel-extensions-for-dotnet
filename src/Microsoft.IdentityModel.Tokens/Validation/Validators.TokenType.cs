@@ -19,7 +19,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="callContext"></param>
     /// <returns> A <see cref="ValidationResult{TResult}"/>that contains the results of validating the token type.</returns>
     /// <remarks>An EXACT match is required. <see cref="StringComparison.Ordinal"/> (case sensitive) is used for comparing <paramref name="type"/> against <see cref="ValidationParameters.ValidTypes"/>.</remarks>
-    internal delegate ValidationResult<ValidatedTokenType> TypeValidatorDelegate(
+    internal delegate ValidationResult<ValidatedTokenType> TokenTypeValidationDelegate(
         string? type,
         SecurityToken? securityToken,
         ValidationParameters validationParameters,
