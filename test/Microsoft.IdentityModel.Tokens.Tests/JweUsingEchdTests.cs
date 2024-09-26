@@ -16,7 +16,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class JweUsingEcdhEsTests
     {
-        [Theory, MemberData(nameof(CreateEcdhEsTestCases), DisableDiscoveryEnumeration = true)]
+        [Theory, MemberData(nameof(CreateEcdhEsTestcases), DisableDiscoveryEnumeration = true)]
         public async Task CreateJweEcdhEsTests(CreateEcdhEsTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateJweEcdhEsTests", theoryData);
