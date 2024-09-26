@@ -88,7 +88,6 @@ namespace Microsoft.IdentityModel.Tokens
             TokenDecryptionKeys = other.TokenDecryptionKeys;
             TokenReplayCache = other.TokenReplayCache;
             TokenReplayValidator = other.TokenReplayValidator;
-            TransformBeforeSignatureValidation = other.TransformBeforeSignatureValidation;
             TypeValidator = other.TypeValidator;
             ValidateActor = other.ValidateActor;
             ValidateSignatureLast = other.ValidateSignatureLast;
@@ -318,11 +317,6 @@ namespace Microsoft.IdentityModel.Tokens
             get { return _issuerValidatorAsync; }
             set { _issuerValidatorAsync = value ?? throw new ArgumentNullException(nameof(value), "IssuerValidatorAsync cannot be set as null."); }
         }
-
-        /// <summary>
-        /// Gets or sets a delegate that will be called to transform a token to a supported format before validation.
-        /// </summary>
-        public TransformBeforeSignatureValidationDelegate TransformBeforeSignatureValidation { get; set; }
 
         /// <summary>
         /// Allows overriding the delegate that will be used to validate the lifetime of the token
