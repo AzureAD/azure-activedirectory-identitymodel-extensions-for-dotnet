@@ -11,7 +11,7 @@ namespace Microsoft.IdentityModel.Tokens
 {
     public static partial class Validators
     {
-        internal static AlgorithmValidatorDelegate SkipAlgorithmValidation = delegate (
+        internal static AlgorithmValidationDelegate SkipAlgorithmValidation = delegate (
             string algorithm,
             SecurityKey securityKey,
             SecurityToken securityToken,
@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.Tokens
             return algorithm;
         };
 
-        internal static AudienceValidatorDelegate SkipAudienceValidation = delegate (
+        internal static AudienceValidationDelegate SkipAudienceValidation = delegate (
             IList<string> audiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Tokens
                 new ValidatedIssuer(issuer, IssuerValidationSource.NotValidated)));
         };
 
-        internal static IssuerSigningKeyValidatorDelegate SkipIssuerSigningKeyValidation = delegate (
+        internal static IssuerSigningKeyValidationDelegate SkipIssuerSigningKeyValidation = delegate (
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Tokens
                 null);// ValidationTime
         };
 
-        internal static LifetimeValidatorDelegate SkipLifetimeValidation = delegate (
+        internal static LifetimeValidationDelegate SkipLifetimeValidation = delegate (
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.Tokens
             return new ValidatedLifetime(notBefore, expires);
         };
 
-        internal static SignatureValidatorDelegate SkipSignatureValidation = delegate (
+        internal static SignatureValidationDelegate SkipSignatureValidation = delegate (
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,
@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Tokens
             return new(result: new JsonWebKey());
         };
 
-        internal static TokenReplayValidatorDelegate SkipTokenReplayValidation = delegate (
+        internal static TokenReplayValidationDelegate SkipTokenReplayValidation = delegate (
             DateTime? expirationTime,
             string securityToken,
             ValidationParameters validationParameters,
@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.Tokens
             return expirationTime;
         };
 
-        internal static TypeValidatorDelegate SkipTypeValidation = delegate (
+        internal static TokenTypeValidationDelegate SkipTokenTypeValidation = delegate (
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
