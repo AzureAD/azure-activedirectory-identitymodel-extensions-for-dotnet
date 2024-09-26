@@ -16,7 +16,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         [Theory, MemberData(nameof(ValidateTokenAsync_AudienceTestCases))]
         public async Task ValidateTokenAsync_Audience(ValidateTokenAsyncAudienceTheoryData theoryData)
         {
-            var context = TestUtilities.WriteHeader($"{this}.ValidateTokenAsync", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.ValidateTokenAsync_Audience", theoryData);
 
             string jwtString = CreateToken(theoryData.Audience);
 
