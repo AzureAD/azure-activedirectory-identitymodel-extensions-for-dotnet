@@ -19,7 +19,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="callContext"></param>
     /// <returns>A <see cref="ValidationResult{TResult}"/>that contains the results of validating the issuer.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
-    internal delegate ValidationResult<string> AudienceValidatorDelegate(
+    internal delegate ValidationResult<string> AudienceValidationDelegate(
         IList<string> audiences,
         SecurityToken? securityToken,
         ValidationParameters validationParameters,
