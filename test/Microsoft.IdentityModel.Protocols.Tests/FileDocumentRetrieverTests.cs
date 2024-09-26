@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
     public class FileDocumentRetrieverTests
     {
 
-        [Theory, MemberData(nameof(GetMetadataTheoryData))]
+        [Theory, MemberData(nameof(GetMetadataTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task GetMetadataTest(DocumentRetrieverTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.GetMetadataTest", theoryData);

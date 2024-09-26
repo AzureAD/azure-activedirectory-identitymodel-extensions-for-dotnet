@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
-        [Theory, MemberData(nameof(KeyInfoDataComparisonData))]
+        [Theory, MemberData(nameof(KeyInfoDataComparisonData), DisableDiscoveryEnumeration = true)]
         public void KeyInfo_HashCodeTests(KeyInfoComparisonTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.${nameof(KeyInfo_HashCodeTests)}", theoryData);
@@ -98,7 +98,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
         }
 
 
-        [Theory, MemberData(nameof(KeyInfoDataComparisonData))]
+        [Theory, MemberData(nameof(KeyInfoDataComparisonData), DisableDiscoveryEnumeration = true)]
         public void KeyInfo_EqualsTests(KeyInfoComparisonTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.{nameof(KeyInfo_EqualsTests)}", theoryData);

@@ -19,7 +19,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class SecurityTokenExceptionTests
     {
-        [Theory, MemberData(nameof(ExceptionTestData))]
+        [Theory, MemberData(nameof(ExceptionTestData), DisableDiscoveryEnumeration = true)]
         public void SecurityTokenExceptionSerializationTests(SecurityTokenExceptionTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.{nameof(SecurityTokenExceptionSerializationTests)}", theoryData);

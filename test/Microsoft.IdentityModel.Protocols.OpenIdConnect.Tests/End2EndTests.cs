@@ -16,7 +16,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     /// </summary>
     public class End2EndTests
     {
-        [Theory, MemberData(nameof(OpenIdConnectTheoryData))]
+        [Theory, MemberData(nameof(OpenIdConnectTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task OpenIdConnect(OpenIdConnectTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.OpenIdConnect", theoryData);

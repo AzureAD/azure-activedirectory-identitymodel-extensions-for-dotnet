@@ -180,7 +180,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 });
         }
 
-        [Theory, MemberData(nameof(EmbeddedTokenConstructorData))]
+        [Theory, MemberData(nameof(EmbeddedTokenConstructorData), DisableDiscoveryEnumeration = true)]
         public void EmbeddedTokenConstructor1(string testId, JwtSecurityTokenTestVariation outerTokenVariation, JwtSecurityTokenTestVariation innerTokenVariation, string jwt, ExpectedException ee)
         {
             JwtSecurityToken outerJwt = null;
@@ -434,7 +434,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 expires: variation.Expires);
         }
 
-        [Theory, MemberData(nameof(JwtSegmentTheoryData))]
+        [Theory, MemberData(nameof(JwtSegmentTheoryData), DisableDiscoveryEnumeration = true)]
         public void JwtSegment(JwtTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.JwtSegment", theoryData);
