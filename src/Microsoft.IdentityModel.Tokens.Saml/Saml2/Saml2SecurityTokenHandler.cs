@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// <summary>
     /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Saml2 Tokens. See: http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf
     /// </summary>
-    public class Saml2SecurityTokenHandler : SecurityTokenHandler
+    public partial class Saml2SecurityTokenHandler : SecurityTokenHandler
     {
         private const string _actor = "Actor";
         private const string _className = "Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler";
@@ -209,7 +209,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             }
         }
 
-
         /// <summary>
         /// Reads and validates a <see cref="Saml2SecurityToken"/>.
         /// </summary>
@@ -388,7 +387,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (validationParameters == null)
                 throw LogArgumentNullException(nameof(validationParameters));
 
-            if (validationParameters.SignatureValidator != null)
+            if (validationParameters.SignatureValidator != null) //Have a single validation first. Ex:Audience.
             {
                 var validatedSamlToken = validationParameters.SignatureValidator(token, validationParameters);
                 if (validatedSamlToken == null)
