@@ -19,7 +19,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
     /// </summary>
     public class WsFederationConfigurationRetrieverTests
     {
-        [Theory, MemberData(nameof(ReadMetadataTheoryData))]
+        [Theory, MemberData(nameof(ReadMetadataTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReadMetadata(WsFederationMetadataTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadMetadata", theoryData);
@@ -326,7 +326,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ReadEntityDescriptorTheoryData))]
+        [Theory, MemberData(nameof(ReadEntityDescriptorTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReadEntityDescriptor(WsFederationMetadataTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadEntityDescriptor", theoryData);
@@ -366,7 +366,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ReadKeyDescriptorForSigningTheoryData))]
+        [Theory, MemberData(nameof(ReadKeyDescriptorForSigningTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReadKeyDescriptorForSigning(WsFederationMetadataTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadKeyDescriptorForSigning", theoryData);
@@ -401,7 +401,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ReadKeyDescriptorForSigningKeyUseTheoryData))]
+        [Theory, MemberData(nameof(ReadKeyDescriptorForSigningKeyUseTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReadKeyDescriptorForSigningKeyUse(WsFederationMetadataTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadKeyDescriptorForSigningKeyUse", theoryData);
@@ -446,7 +446,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ReadSecurityTokenServiceTypeRoleDescriptorTheoryData))]
+        [Theory, MemberData(nameof(ReadSecurityTokenServiceTypeRoleDescriptorTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReadSecurityTokenServiceTypeRoleDescriptor(WsFederationMetadataTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadSecurityTokenServiceTypeRoleDescriptor", theoryData);
@@ -486,7 +486,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ReadSecurityTokenEndpointTheoryData))]
+        [Theory, MemberData(nameof(ReadSecurityTokenEndpointTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReadSecurityTokenEndpoint(WsFederationMetadataTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadSecurityTokenEndpoint", theoryData);
@@ -539,7 +539,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        [Theory, MemberData(nameof(WriteMetadataTheoryData))]
+        [Theory, MemberData(nameof(WriteMetadataTheoryData), DisableDiscoveryEnumeration = true)]
         public void WriteMetadata(WsFederationMetadataTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.WriteMetadata", theoryData);

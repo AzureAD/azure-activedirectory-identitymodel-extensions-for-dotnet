@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
             TestUtilities.AssertFailIfErrors($"{this}.GetSets", context.Errors);
         }
 
-        [Theory, MemberData(nameof(ConstructorTheoryData))]
+        [Theory, MemberData(nameof(ConstructorTheoryData), DisableDiscoveryEnumeration = true)]
         public void Constructor(EnvelopedSignatureTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.Constructor", theoryData);
@@ -83,7 +83,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ReadSignedXmlTheoryData))]
+        [Theory, MemberData(nameof(ReadSignedXmlTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReadSignedXml(EnvelopedSignatureTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadSignedXml", theoryData);
@@ -163,7 +163,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ReadXmlElementsTheoryData))]
+        [Theory, MemberData(nameof(ReadXmlElementsTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReadXmlElements(EnvelopedSignatureTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadXmlElements", theoryData);

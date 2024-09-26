@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             TestUtilities.AssertFailIfErrors("HttpDocumentRetrieverTests_GetSets", context.Errors);
         }
 
-        [Theory, MemberData(nameof(GetMetadataTheoryData))]
+        [Theory, MemberData(nameof(GetMetadataTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task GetMetadataTest(DocumentRetrieverTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.GetMetadataTest", theoryData);

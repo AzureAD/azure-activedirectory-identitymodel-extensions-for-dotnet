@@ -1466,7 +1466,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
         // Time values can be floats, ints, or strings.
         // This test checks to make sure that parsing does not fault in any of the above cases.
-        [Theory, MemberData(nameof(ParseTimeValuesTheoryData))]
+        [Theory, MemberData(nameof(ParseTimeValuesTheoryData), DisableDiscoveryEnumeration = true)]
         public void ParseTimeValues(ParseTimeValuesTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ParseTimeValues", theoryData);
@@ -1544,7 +1544,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         // Test ensures that we only try to populate a JsonWebToken from a string if it is a properly formatted JWT.
         // More specifically, we only want to try and decode
         // a JWT token if it has the correct number of (JWE or JWS) token parts.
-        [Theory, MemberData(nameof(ParseTokenTheoryData))]
+        [Theory, MemberData(nameof(ParseTokenTheoryData), DisableDiscoveryEnumeration = true)]
         public void ParseToken(JwtTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ParseToken", theoryData);
@@ -1721,7 +1721,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         }
 
         // Test to verify equality between JsonWebTokens created from a string and an equivalent span
-        [Theory, MemberData(nameof(ParseTokenTheoryData))]
+        [Theory, MemberData(nameof(ParseTokenTheoryData), DisableDiscoveryEnumeration = true)]
         public void StringAndMemoryConstructors_CreateEquivalentTokens(JwtTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CompareJsonWebToken", theoryData);

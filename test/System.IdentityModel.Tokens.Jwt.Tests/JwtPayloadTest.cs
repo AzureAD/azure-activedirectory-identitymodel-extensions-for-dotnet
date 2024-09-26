@@ -191,7 +191,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.True(DateTime.MaxValue == expirationTime, "EpochTime.DateTime( time ) != jwtPayload.ValidTo");
         }
 
-        [Theory, MemberData(nameof(PayloadDataSet))]
+        [Theory, MemberData(nameof(PayloadDataSet), DisableDiscoveryEnumeration = true)]
 #pragma warning disable xUnit1026 // Theory methods should use all of their parameters
         public void RoundTrip(string name, List<Claim> claims, JwtPayload payloadDirect, JwtPayload payloadUsingNewtonsoft)
 #pragma warning restore xUnit1026 // Theory methods should use all of their parameters

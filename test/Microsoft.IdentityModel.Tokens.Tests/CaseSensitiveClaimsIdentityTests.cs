@@ -25,7 +25,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             [JwtRegisteredClaimNames.Aud] = Default.Audience,
         };
 
-        [Theory, MemberData(nameof(GetCaseSensitiveClaimsIdentityTheoryData))]
+        [Theory, MemberData(nameof(GetCaseSensitiveClaimsIdentityTheoryData), DisableDiscoveryEnumeration = true)]
         public void FindAll_DoesCaseSensitiveSearch(CaseSensitiveClaimsIdentityTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.FindAll_DoesCaseSensitiveSearch", theoryData);
@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Theory, MemberData(nameof(GetCaseSensitiveClaimsIdentityTheoryData))]
+        [Theory, MemberData(nameof(GetCaseSensitiveClaimsIdentityTheoryData), DisableDiscoveryEnumeration = true)]
         public void FindFirst_DoesCaseSensitiveSearch(CaseSensitiveClaimsIdentityTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.FindFirst_DoesCaseSensitiveSearch", theoryData);
@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Theory, MemberData(nameof(GetCaseSensitiveClaimsIdentityTheoryData))]
+        [Theory, MemberData(nameof(GetCaseSensitiveClaimsIdentityTheoryData), DisableDiscoveryEnumeration = true)]
         public void HasClaim_DoesCaseSensitiveSearch(CaseSensitiveClaimsIdentityTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.HasClaim_DoesCaseSensitiveSearch", theoryData);
