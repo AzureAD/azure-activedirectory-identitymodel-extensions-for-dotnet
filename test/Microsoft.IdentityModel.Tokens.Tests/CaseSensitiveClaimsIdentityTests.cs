@@ -1,10 +1,13 @@
-﻿// Copyright (c) Microsoft Corporation.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
 using Newtonsoft.Json.Linq;
@@ -212,6 +215,33 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     },
                 };
             }
+        }
+
+        [Fact]
+        public void CaseSensitiveClaimsIdentity_IsSerializableTest()
+        {
+            // arrange
+            CaseSensitiveClaimsIdentity claimsIdentity = (CaseSensitiveClaimsIdentity)CreateCaseSensitiveClaimsIdentity(new JObject
+            {
+                [UpperCaseClaimName] = LowerCaseClaimValue,
+            });
+            CaseSensitiveClaimsIdentity deserializedClaimsIdentity;
+
+            // act
+            var memoryStream = new MemoryStream();
+            var serializerOptions = new JsonSerializerOptions()
+            {
+                ReferenceHandler = ReferenceHandler.IgnoreCycles
+            };
+
+            JsonSerializer.Serialize(memoryStream, claimsIdentity, typeof(CaseSensitiveClaimsIdentity), serializerOptions);
+            memoryStream.Seek(0, SeekOrigin.Begin);
+            deserializedClaimsIdentity = (CaseSensitiveClaimsIdentity)JsonSerializer.Deserialize(memoryStream, typeof(CaseSensitiveClaimsIdentity), serializerOptions);
+
+            // assert
+            Assert.NotNull(deserializedClaimsIdentity);
+            Assert.Equal(claimsIdentity.NameClaimType, deserializedClaimsIdentity.NameClaimType);
+            Assert.Equal(claimsIdentity.RoleClaimType, deserializedClaimsIdentity.RoleClaimType);
         }
 
         public class CaseSensitiveClaimsIdentityTheoryData(string testId) : TheoryDataBase(testId)
