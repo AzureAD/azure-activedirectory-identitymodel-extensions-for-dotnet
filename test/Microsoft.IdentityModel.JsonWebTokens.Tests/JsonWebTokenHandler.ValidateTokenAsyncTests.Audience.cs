@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
+using TokenValidators = Microsoft.IdentityModel.Tokens.Validators;
 using Xunit;
 
 namespace Microsoft.IdentityModel.JsonWebTokens.Tests
@@ -115,16 +116,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     List<string>? audiences,
                     bool ignoreTrailingSlashWhenValidatingAudience = false) =>
 
+                    // Only validate the audience.
                     new TokenValidationParameters
                     {
                         ValidateAudience = true,
-                        ValidateIssuer = true,
-                        ValidateLifetime = true,
-                        ValidateTokenReplay = true,
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = Default.AsymmetricSigningKey,
+                        ValidateIssuer = false,
+                        ValidateLifetime = false,
+                        ValidateTokenReplay = false,
+                        ValidateIssuerSigningKey = false,
+                        RequireSignedTokens = false,
                         ValidAudiences = audiences,
-                        ValidIssuer = Default.Issuer,
                         IgnoreTrailingSlashWhenValidatingAudience = ignoreTrailingSlashWhenValidatingAudience,
                     };
 
@@ -133,10 +134,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     bool ignoreTrailingSlashWhenValidatingAudience = false)
                 {
                     ValidationParameters validationParameters = new ValidationParameters();
-                    validationParameters.ValidIssuers.Add(Default.Issuer);
                     audiences?.ForEach(audience => validationParameters.ValidAudiences.Add(audience));
-                    validationParameters.IssuerSigningKeys.Add(Default.AsymmetricSigningKey);
                     validationParameters.IgnoreTrailingSlashWhenValidatingAudience = ignoreTrailingSlashWhenValidatingAudience;
+
+                    // Skip all validations except audience
+                    validationParameters.AlgorithmValidator = TokenValidators.SkipAlgorithmValidation;
+                    validationParameters.IssuerValidatorAsync = TokenValidators.SkipIssuerValidation;
+                    validationParameters.IssuerSigningKeyValidator = TokenValidators.SkipIssuerSigningKeyValidation;
+                    validationParameters.LifetimeValidator = TokenValidators.SkipLifetimeValidation;
+                    validationParameters.SignatureValidator = TokenValidators.SkipSignatureValidation;
 
                     return validationParameters;
                 }
@@ -157,9 +163,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             SecurityTokenDescriptor securityTokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = Default.ClaimsIdentity,
-                SigningCredentials = Default.AsymmetricSigningCredentials,
                 Audience = audience,
-                Issuer = Default.Issuer,
             };
 
             return jsonWebTokenHandler.CreateToken(securityTokenDescriptor);
