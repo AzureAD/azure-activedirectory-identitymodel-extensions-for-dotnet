@@ -23,7 +23,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #endif
         }
 
-        [Theory, MemberData(nameof(CompareJwkThumbprintsTestCases))]
+        [Theory, MemberData(nameof(CompareJwkThumbprintsTestCases), DisableDiscoveryEnumeration = true)]
         public void CompareJwkThumbprints(JsonWebKeyConverterTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CompareJwkThumbprints", theoryData);
@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CreateInternalIdsTestCases))]
+        [Theory, MemberData(nameof(CreateInternalIdsTestCases), DisableDiscoveryEnumeration = true)]
         public void CreateInternalIds(SecurityKeyTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateInternalIds", theoryData);

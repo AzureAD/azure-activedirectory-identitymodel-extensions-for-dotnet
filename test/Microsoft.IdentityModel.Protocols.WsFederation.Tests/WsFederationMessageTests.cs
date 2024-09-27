@@ -56,7 +56,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             TestUtilities.AssertFailIfErrors($"{this}.GetSets", context.Errors);
         }
 
-        [Theory, MemberData(nameof(MessageTheoryData))]
+        [Theory, MemberData(nameof(MessageTheoryData), DisableDiscoveryEnumeration = true)]
         public void ConstructorTest(WsFederationMessageTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ConstructorTest", theoryData);
@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        [Theory, MemberData(nameof(WaSignInTheoryData))]
+        [Theory, MemberData(nameof(WaSignInTheoryData), DisableDiscoveryEnumeration = true)]
         public void WaSignIn(WsFederationSigninMessageTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WaSignIn", theoryData);
@@ -275,7 +275,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
 
         }
 
-        [Theory, MemberData(nameof(GetTokenTheoryData))]
+        [Theory, MemberData(nameof(GetTokenTheoryData), DisableDiscoveryEnumeration = true)]
         public void GetTokenTest(WsFederationMessageTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.GetTokenTest", theoryData);
@@ -381,7 +381,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        [Theory, MemberData(nameof(GetTokenParsingStringData))]
+        [Theory, MemberData(nameof(GetTokenParsingStringData), DisableDiscoveryEnumeration = true)]
         public void GetTokenParsingString(WsFederationMessageTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.GetTokenParsingString", theoryData);
@@ -507,7 +507,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        [Theory, MemberData(nameof(GetTokenAspWsFedHandlerTestTheoryData))]
+        [Theory, MemberData(nameof(GetTokenAspWsFedHandlerTestTheoryData), DisableDiscoveryEnumeration = true)]
         public void GetTokenAspWsFedHandlerTest(WsFederationMessageTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.GetTokenAspWsFedHandlerTest", theoryData);
@@ -546,7 +546,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        [Theory, MemberData(nameof(GetTokenNegativeTestTheoryData))]
+        [Theory, MemberData(nameof(GetTokenNegativeTestTheoryData), DisableDiscoveryEnumeration = true)]
         public void GetTokenNegativeTest(WsFederationMessageTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.GetTokenNegativeTest", theoryData);
@@ -634,7 +634,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        [Theory, MemberData(nameof(MessageTheoryData))]
+        [Theory, MemberData(nameof(MessageTheoryData), DisableDiscoveryEnumeration = true)]
         public void ParametersTest(WsFederationMessageTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ParametersTest", theoryData);
@@ -713,7 +713,7 @@ namespace Microsoft.IdentityModel.Protocols.WsFederation.Tests
             }
         }
 
-        [Theory, MemberData(nameof(QueryStringTheoryData))]
+        [Theory, MemberData(nameof(QueryStringTheoryData), DisableDiscoveryEnumeration = true)]
         public void QueryStringTest(WsFederationMessageTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.QueryStringTest", theoryData);

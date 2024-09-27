@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(HasPrivateKeyTheoryData))]
+        [Theory, MemberData(nameof(HasPrivateKeyTheoryData), DisableDiscoveryEnumeration = true)]
         public void HasPrivateKey(string testId, RsaSecurityKey key, bool expected)
         {
             if (expected)

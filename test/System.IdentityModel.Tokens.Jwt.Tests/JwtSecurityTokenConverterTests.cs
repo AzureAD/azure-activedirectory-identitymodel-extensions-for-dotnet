@@ -20,7 +20,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.Throws<ArgumentNullException>(() => JwtSecurityTokenConverter.Convert(null));
         }
 
-        [Theory, MemberData(nameof(ConverterTheoryData))]
+        [Theory, MemberData(nameof(ConverterTheoryData), DisableDiscoveryEnumeration = true)]
         public void JsonWebTokenToJwtSecurityTokenConversions(JwtSecurityTokenConverterTheoryData theoryData)
         {
             var output = JwtSecurityTokenConverter.Convert(theoryData.InputToken);

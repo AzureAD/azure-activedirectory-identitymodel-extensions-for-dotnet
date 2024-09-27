@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
     public class JsonWebTokenHandlerValidationParametersTests
     {
-        [Theory, MemberData(nameof(JsonWebTokenHandlerValidationParametersTestCases))]
+        [Theory, MemberData(nameof(JsonWebTokenHandlerValidationParametersTestCases), DisableDiscoveryEnumeration = true)]
         public async Task ValidateTokenAsync(JsonWebTokenHandlerValidationParametersTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateTokenAsync", theoryData);

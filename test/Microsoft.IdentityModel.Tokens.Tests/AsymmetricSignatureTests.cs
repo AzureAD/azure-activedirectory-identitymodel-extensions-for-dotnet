@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Theory, MemberData(nameof(SignVerifyTheoryData))]
+        [Theory, MemberData(nameof(SignVerifyTheoryData), DisableDiscoveryEnumeration = true)]
         public void SignVerify(SignatureProviderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.SignVerify", theoryData);
@@ -273,7 +273,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ValidateAsymmetricKeySizeTheoryData))]
+        [Theory, MemberData(nameof(ValidateAsymmetricKeySizeTheoryData), DisableDiscoveryEnumeration = true)]
         public void VerifyAsymmetricKeySize(AsymmetricSignatureProviderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.VerifyAsymmetricKeySize", theoryData);
@@ -376,7 +376,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// This test ensures that if every algorithm in SupportedAlgorithms has a value in our maps that validate key sizes
         /// </summary>
         /// <param name="theoryData"></param>
-        [Theory, MemberData(nameof(VerifyAlgorithmsInDefaultMinimumAsymmetricKeySizeTests))]
+        [Theory, MemberData(nameof(VerifyAlgorithmsInDefaultMinimumAsymmetricKeySizeTests), DisableDiscoveryEnumeration = true)]
         public void VerifyAlgorithmsInDefaultMinimumAsymmetricKeySize(AsymmetricSignatureProviderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.VerifyAlgorithmsInDefaultMinimumAsymmetricKeySize", theoryData);
