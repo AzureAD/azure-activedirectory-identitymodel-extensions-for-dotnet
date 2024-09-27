@@ -5,11 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Tokens;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.TestUtils
 {
-    public static partial class Validators
+    public static class SkipValidationDelegates
     {
         internal static AlgorithmValidationDelegate SkipAlgorithmValidation = delegate (
             string algorithm,

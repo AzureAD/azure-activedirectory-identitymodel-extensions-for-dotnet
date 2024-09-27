@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
-using TokenValidators = Microsoft.IdentityModel.Tokens.Validators;
 using Xunit;
 
 namespace Microsoft.IdentityModel.JsonWebTokens.Tests
@@ -138,11 +137,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     validationParameters.IgnoreTrailingSlashWhenValidatingAudience = ignoreTrailingSlashWhenValidatingAudience;
 
                     // Skip all validations except audience
-                    validationParameters.AlgorithmValidator = TokenValidators.SkipAlgorithmValidation;
-                    validationParameters.IssuerValidatorAsync = TokenValidators.SkipIssuerValidation;
-                    validationParameters.IssuerSigningKeyValidator = TokenValidators.SkipIssuerSigningKeyValidation;
-                    validationParameters.LifetimeValidator = TokenValidators.SkipLifetimeValidation;
-                    validationParameters.SignatureValidator = TokenValidators.SkipSignatureValidation;
+                    validationParameters.AlgorithmValidator = SkipValidationDelegates.SkipAlgorithmValidation;
+                    validationParameters.IssuerValidatorAsync = SkipValidationDelegates.SkipIssuerValidation;
+                    validationParameters.IssuerSigningKeyValidator = SkipValidationDelegates.SkipIssuerSigningKeyValidation;
+                    validationParameters.LifetimeValidator = SkipValidationDelegates.SkipLifetimeValidation;
+                    validationParameters.SignatureValidator = SkipValidationDelegates.SkipSignatureValidation;
 
                     return validationParameters;
                 }
