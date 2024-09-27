@@ -10,7 +10,7 @@ namespace Microsoft.IdentityModel.Tokens
 {
     internal class AudienceValidationError : ValidationError
     {
-        private string? _invalidAudience;
+        private IList<string>? _invalidAudiences;
 
         public AudienceValidationError(
             MessageDetail messageDetail,
@@ -19,13 +19,13 @@ namespace Microsoft.IdentityModel.Tokens
             IList<string>? invalidAudiences)
             : base(messageDetail, ValidationFailureType.AudienceValidationFailed, exceptionType, stackFrame)
         {
-            _invalidAudience = Utility.SerializeAsSingleCommaDelimitedString(invalidAudiences);
+            _invalidAudiences = invalidAudiences;
         }
 
         internal override void AddAdditionalInformation(ISecurityTokenException exception)
         {
             if (exception is SecurityTokenInvalidAudienceException invalidAudienceException)
-                invalidAudienceException.InvalidAudience = _invalidAudience;
+                invalidAudienceException.InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(_invalidAudiences);
         }
     }
 }
