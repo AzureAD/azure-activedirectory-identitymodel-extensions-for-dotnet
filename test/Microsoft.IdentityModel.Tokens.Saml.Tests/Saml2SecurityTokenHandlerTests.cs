@@ -497,6 +497,44 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
             Assert.NotEqual(DateTime.MinValue, saml2SecurityToken.ValidTo);
         }
 
+        [Theory, MemberData(nameof(ValidateAudienceWithValidationParametersTheoryData))]
+        public void ValidateAudienceWithValidationParameters(Saml2TheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.ValidateAudience", theoryData);
+            var context = new CompareContext($"{this}.ValidateAudience, {theoryData}");
+            CallContext callContext = new CallContext();
+
+            try
+            {
+                (theoryData.Handler as Saml2SecurityTokenHandlerPublic).ValidateAudienceWithValidationParametersPublic(theoryData.Audiences, theoryData.SecurityToken, theoryData.ValidationParameters);
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<Saml2TheoryData> ValidateAudienceWithValidationParametersTheoryData
+        {
+            get
+            {
+                var tokenTheoryData = new List<TokenTheoryData>();
+                var theoryData = new TheoryData<Saml2TheoryData>();
+
+                ValidateTheoryData.AddValidateAudienceTheoryData(tokenTheoryData);
+                foreach (var item in tokenTheoryData)
+                    theoryData.Add(new Saml2TheoryData(item)
+                    {
+                        Handler = new Saml2SecurityTokenHandlerPublic()
+                    });
+
+                return theoryData;
+            }
+        }
+
         [Theory, MemberData(nameof(ValidateAudienceTheoryData))]
         public void ValidateAudience(Saml2TheoryData theoryData)
         {
@@ -1439,6 +1477,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
         public void ValidateAudiencePublic(IEnumerable<string> audiences, SecurityToken token, TokenValidationParameters validationParameters)
         {
             base.ValidateAudience(audiences, token, validationParameters);
+        }
+        internal static ValidationResult<string> ValidateAudienceWithValidationParametersPublic(IList<string> audiences, SecurityToken token, ValidationParameters validationParameters, CallContext callContext)
+        {
+            return Saml2SecurityTokenHandler.ValidateAudience(audiences, token, validationParameters, callContext);
         }
     }
 

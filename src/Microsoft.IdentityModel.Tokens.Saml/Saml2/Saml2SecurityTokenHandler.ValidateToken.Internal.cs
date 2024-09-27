@@ -58,7 +58,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             //NOTE: do we want to update SAML such that it can understand configuration manager?
             validationParameters = await SamlTokenUtilities.PopulateValidationParametersWithCurrentConfigurationAsync(validationParameters).ConfigureAwait(false);
 
-            var samlToken = ValidateSignature(token, validationParameters, callContext, cancellationToken);
+            ValidationResult<ValidatedToken> signatureValidationResult = ValidateSignature(token, validationParameters, callContext, cancellationToken);
+            ValidatedToken samlToken = signatureValidationResult.UnwrapResult();
 
             if (samlToken == null)
             {
@@ -73,24 +74,20 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                             LogHelper.MarkAsNonPII(typeof(Saml2SecurityToken)))));
             }
 
-            /*            var claimsPrincipal = ValidateToken(samlToken, token, validationParameters, out var validatedToken);
-                        ValidationResult<ValidatedToken> result = ValidateToken(samlToken, token, validationParameters, out var validatedToken);
-                        return new TokenValidationResult
-                        {
-                            SecurityToken = validatedToken,
-                            ClaimsIdentity = claimsPrincipal?.Identities.First(),
-                            IsValid = true,
-                        };
-
-                        StackFrame stackFrame = StackFrames.TokenValidationFailed ??= new StackFrame(true);
-                        return result.UnwrapError().AddStackFrame(stackFrame);
-            */
+            //NOTE: Why do we do this?
+            /*        var claimsPrincipal = ValidateToken(samlToken, token, validationParameters, out var validatedToken); 
+                    return new TokenValidationResult
+                    {
+                        SecurityToken = validatedToken,
+                        ClaimsIdentity = claimsPrincipal?.Identities.First(),
+                        IsValid = true,
+                    };*/
 
             StackFrame mockTokenStackFrame = StackFrames.TokenStringNull ??= new StackFrame(true); // TODO: fix this, not the right stack frame
             return ValidationError.NullParameter(nameof(token), mockTokenStackFrame); //TODO: fix this, not the right return value
         }
 
-        internal virtual Saml2SecurityToken ValidateSignature(string token, ValidationParameters validationParameters, CallContext callContext, CancellationToken cancellationToken)
+        internal static ValidationResult<ValidatedToken> ValidateSignature(string token, ValidationParameters validationParameters, CallContext callContext, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(token))
             {
@@ -121,10 +118,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogExceptionMessage(
                     new SecurityTokenValidationException(FormatInvariant(TokenLogMessages.IDX10254, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII("ValidateSignature"), LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII("ReadSaml2Token"), LogHelper.MarkAsNonPII(typeof(Saml2SecurityToken)))));
 
-            return ValidateSignature(samlToken, token, validationParameters, callContext, cancellationToken);
+            return ValidateSignatureAsync(samlToken, token, validationParameters, callContext, cancellationToken);
         }
 
-        private Saml2SecurityToken ValidateSignature(Saml2SecurityToken samlToken, string token, ValidationParameters validationParameters, CallContext callContext, CancellationToken cancellationToken)
+        private async ValueTask<ValidationResult<ValidatedToken>> ValidateSignatureAsync(Saml2SecurityToken samlToken, string token, ValidationParameters validationParameters, CallContext callContext, CancellationToken cancellationToken)
         {
             //TODO: Check if we need to re-include this check in VP?
             /*            if (samlToken.Assertion.Signature == null)
@@ -136,19 +133,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             bool keyMatched = false;
             IEnumerable<SecurityKey>? keys = null;
 
-            if (validationParameters.IssuerSigningKeyResolver != null)
+            //NOTE: This delegate is still in TBD state will need to re-add this check once a direction is decided.
+            /*            if (validationParameters.IssuerSigningKeyResolver != null)
+                        {
+                            keys = validationParameters.IssuerSigningKeyResolver(token, samlToken, samlToken.Assertion.Signature.KeyInfo?.Id, validationParameters);
+                        }*/
+
+            var singleKey = ResolveIssuerSigningKey(token, samlToken, validationParameters);
+            if (singleKey != null)
             {
-                keys = validationParameters.IssuerSigningKeyResolver(token, samlToken, samlToken.Assertion.Signature.KeyInfo?.Id, validationParameters);
-            }
-            else
-            {
-                var key = ResolveIssuerSigningKey(token, samlToken, validationParameters);
-                if (key != null)
-                {
-                    // remember that key was matched for throwing exception SecurityTokenSignatureKeyNotFoundException
-                    keyMatched = true;
-                    keys = [key];
-                }
+                // remember that key was matched for throwing exception SecurityTokenSignatureKeyNotFoundException
+                keyMatched = true;
+                keys = [singleKey];
             }
 
             if (keys == null && validationParameters.TryAllIssuerSigningKeys)
@@ -171,7 +167,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 {
                     try
                     {
-                        Validators.ValidateAlgorithm(samlToken.Assertion.Signature.SignedInfo.SignatureMethod, key, samlToken, validationParameters);
+                        //TODO: Re-enable this once we migrate ValidateAlgorithm to the new model
+                        //Validators.ValidateAlgorithm(samlToken.Assertion.Signature.SignedInfo.SignatureMethod, key, samlToken, validationParameters);
 
                         samlToken.Assertion.Signature.Verify(key, validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory);
 
@@ -179,18 +176,20 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                             LogHelper.LogInformation(TokenLogMessages.IDX10242, token);
 
                         samlToken.SigningKey = key;
-                        return samlToken;
+                        return new ValidationResult<ValidatedToken>(new ValidatedToken(samlToken));
                     }
+#pragma warning disable CA1031 // Do not catch general exception types
                     catch (Exception ex)
                     {
                         exceptionStrings.AppendLine(ex.ToString());
                     }
+#pragma warning restore CA1031 // Do not catch general exception types
 
                     if (key != null)
                     {
                         keysAttempted.Append(key.ToString()).Append(" , KeyId: ").AppendLine(key.KeyId);
                         if (canMatchKey && !keyMatched && key.KeyId != null)
-                            keyMatched = samlToken.Assertion.Signature.KeyInfo.MatchesKey(key);
+                            keyMatched = samlToken.Assertion.Signature.KeyInfo!.MatchesKey(key);
                     }
                 }
             }
@@ -200,8 +199,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (keyMatched)
                     throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10514, keysAttempted, samlToken.Assertion.Signature.KeyInfo, exceptionStrings, samlToken)));
 
+                //TODO: Re-enable this once we migrate ValidateIssuer to the new model
                 //ValidateIssuer(samlToken.Issuer, samlToken, validationParameters);
-                ValidateConditions(samlToken, validationParameters, callContext);
+                ValidationResult<ValidatedToken> validationResult = await ValidateConditions(samlToken, validationParameters, callContext).ConfigureAwait(false);
             }
 
             if (keysAttempted.Length > 0)
@@ -210,72 +210,68 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             throw LogHelper.LogExceptionMessage(new SecurityTokenSignatureKeyNotFoundException(TokenLogMessages.IDX10500));
         }
 
-    }
-
-    protected virtual SecurityKey ResolveIssuerSigningKey(string token, Saml2SecurityToken samlToken, ValidationParameters validationParameters)
-    {
-        if (samlToken == null)
-            throw LogArgumentNullException(nameof(samlToken));
-
-        if (validationParameters == null)
-            throw LogArgumentNullException(nameof(validationParameters));
-
-        if (samlToken.Assertion == null)
-            throw LogArgumentNullException(nameof(samlToken.Assertion));
-
-        return SamlTokenUtilities.ResolveTokenSigningKey(samlToken.Assertion.Signature.KeyInfo, validationParameters);
-    }
-
-    protected virtual void ValidateConditions(Saml2SecurityToken samlToken, ValidationParameters validationParameters, CallContext callContext)
-    {
-        if (samlToken == null)
-            throw LogArgumentNullException(nameof(samlToken));
-
-        if (validationParameters == null)
-            throw LogArgumentNullException(nameof(validationParameters));
-
-        if (samlToken.Assertion == null)
-            throw LogArgumentNullException(nameof(samlToken.Assertion));
-
-        if (samlToken.Assertion.Conditions == null)
+        internal virtual SecurityKey ResolveIssuerSigningKey(string token, Saml2SecurityToken samlToken, ValidationParameters validationParameters)
         {
-            if (validationParameters.RequireAudience)
-                throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX13002));
+            if (samlToken == null)
+                throw LogArgumentNullException(nameof(samlToken));
 
-            return;
+            if (validationParameters == null)
+                throw LogArgumentNullException(nameof(validationParameters));
+
+            if (samlToken.Assertion == null)
+                throw LogArgumentNullException(nameof(samlToken.Assertion));
+
+            return SamlTokenUtilities.ResolveTokenSigningKey(samlToken.Assertion.Signature.KeyInfo, validationParameters);
         }
 
-        //TODO: Re-enable lifetime validation once we point to the new delegates.
-        //ValidateLifetime(samlToken.Assertion.Conditions.NotBefore, samlToken.Assertion.Conditions.NotOnOrAfter, samlToken, validationParameters);
-
-        /*        if (samlToken.Assertion.Conditions.OneTimeUse)
-                    ValidateOneTimeUseCondition(samlToken, validationParameters);*/
-
-        if (samlToken.Assertion.Conditions.ProxyRestriction != null)
-            throw LogExceptionMessage(new SecurityTokenValidationException(LogMessages.IDX13511));
-
-        var foundAudienceRestriction = false;
-        foreach (var audienceRestriction in samlToken.Assertion.Conditions.AudienceRestrictions)
+        internal ValueTask<ValidationResult<ValidatedToken>> ValidateConditionsAsync(Saml2SecurityToken samlToken, ValidationParameters validationParameters, CallContext callContext)
         {
+            if (samlToken == null)
+                throw LogArgumentNullException(nameof(samlToken));
+
+            if (validationParameters == null)
+                throw LogArgumentNullException(nameof(validationParameters));
+
+            if (samlToken.Assertion == null)
+                throw LogArgumentNullException(nameof(samlToken.Assertion));
+
+
+            //TODO: Check if we still need this?
+            /*        if (samlToken.Assertion.Conditions == null)
+                    {
+                        if (validationParameters.RequireAudience)
+                            throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX13002));
+
+                        return;
+                    }*/
+
+            //TODO: Re-enable lifetime validation once we point to the new delegates.
+            //ValidateLifetime(samlToken.Assertion.Conditions.NotBefore, samlToken.Assertion.Conditions.NotOnOrAfter, samlToken, validationParameters);
+
+            //TODO: Check why do we need this?
+            /*        if (samlToken.Assertion.Conditions.OneTimeUse)
+                        ValidateOneTimeUseCondition(samlToken, validationParameters);*/
+
+            if (samlToken.Assertion.Conditions.ProxyRestriction != null)
+                throw LogExceptionMessage(new SecurityTokenValidationException(LogMessages.IDX13511));
+
+            var foundAudienceRestriction = false;
+            foreach (var audienceRestriction in samlToken.Assertion.Conditions.AudienceRestrictions)
+            {
+                if (!foundAudienceRestriction)
+                    foundAudienceRestriction = true;
+
+                ValidationResult<string> audienceResultValidation = ValidateAudience((IList<string>)audienceRestriction.Audiences, samlToken, validationParameters, callContext);
+            }
+
             if (!foundAudienceRestriction)
-                foundAudienceRestriction = true;
-
-           ValidateAudience(audienceRestriction.Audiences, samlToken, validationParameters, callContext);
+                throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX13002));
         }
 
-        if (validationParameters.RequireAudience && !foundAudienceRestriction)
-            throw LogExceptionMessage(new Saml2SecurityTokenException(LogMessages.IDX13002));
-    }
-
-    protected virtual ValidationResult<string> ValidateAudience(IList<string> audiences, SecurityToken securityToken, ValidationParameters validationParameters, CallContext callContext)
-    {
-        ValidationResult<string> audienceValidationResult = validationParameters.AudienceValidator(
-            audiences,
-            securityToken,
-            validationParameters,
-            callContext);
-
-        return audienceValidationResult;
+        internal static ValidationResult<string> ValidateAudience(IList<string> audiences, SecurityToken securityToken, ValidationParameters validationParameters, CallContext callContext)
+        {
+            return Validators.ValidateAudience(audiences, securityToken, validationParameters, callContext);
+        }
     }
 }
 #nullable restore

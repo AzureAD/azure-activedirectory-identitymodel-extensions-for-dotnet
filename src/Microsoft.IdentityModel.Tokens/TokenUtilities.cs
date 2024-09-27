@@ -219,6 +219,39 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Returns all <see cref="SecurityKey"/> provided in <paramref name="configuration"/> and <paramref name="validationParameters"/>.
+        /// </summary>
+        /// <param name="configuration">The <see cref="BaseConfiguration"/> that contains signing keys used for validation.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
+        /// <returns>Returns all <see cref="SecurityKey"/> provided in provided in <paramref name="configuration"/> and <paramref name="validationParameters"/>.</returns>
+        internal static IEnumerable<SecurityKey> GetAllSigningKeys(BaseConfiguration configuration = null, ValidationParameters validationParameters = null)
+        {
+            if (configuration is not null)
+            {
+                if (validationParameters is not null)
+                {
+                    LogHelper.LogInformation(TokenLogMessages.IDX10264);
+                }
+
+                LogHelper.LogInformation(TokenLogMessages.IDX10265);
+
+                if (configuration?.SigningKeys != null)
+                    foreach (SecurityKey key in configuration.SigningKeys)
+                        yield return key;
+            }
+
+            // TODO - do not use yield
+            if (validationParameters is not null)
+            {
+                LogHelper.LogInformation(TokenLogMessages.IDX10243);
+
+                if (validationParameters.IssuerSigningKeys != null)
+                    foreach (SecurityKey key in validationParameters.IssuerSigningKeys)
+                        yield return key;
+            }
+        }
+
+        /// <summary>
         /// Merges claims. If a claim with same type exists in both <paramref name="claims"/> and <paramref name="subjectClaims"/>, the one in claims will be kept.
         /// </summary>
         /// <param name="claims"> Collection of <see cref="Claim"/>'s.</param>
