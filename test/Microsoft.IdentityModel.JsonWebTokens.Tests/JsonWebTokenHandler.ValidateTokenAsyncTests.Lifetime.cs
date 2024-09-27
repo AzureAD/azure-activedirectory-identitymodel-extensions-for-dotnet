@@ -12,7 +12,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
     public partial class JsonWebTokenHandlerValidateTokenAsyncTests
     {
-        [Theory, MemberData(nameof(ValidateTokenAsync_LifetimeTestCases))]
+        [Theory, MemberData(nameof(ValidateTokenAsync_LifetimeTestCases), DisableDiscoveryEnumeration = true)]
         public async Task ValidateTokenAsync_Lifetime(ValidateTokenAsyncLifetimeTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateTokenAsync_Lifetime", theoryData);
