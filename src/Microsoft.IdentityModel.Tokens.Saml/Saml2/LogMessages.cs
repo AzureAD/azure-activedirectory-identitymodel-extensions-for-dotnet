@@ -12,6 +12,15 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     internal static class LogMessages
     {
 #pragma warning disable 1591
+
+        // general
+        internal const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object. "; //Q: Should we just use one set of validation errors?
+
+        // Audience validation errors
+        internal const string IDX10206 = "IDX10206: Unable to validate audience. The 'audiences' parameter is empty.";
+        internal const string IDX10207 = "IDX10207: Unable to validate audience. The 'audiences' parameter is null.";
+        internal const string IDX10215 = "IDX10215: Audience validation failed. Audiences: '{0}'. Did not match: validationParameters.ValidAudiences: '{1}'.";
+
         // token validation
         internal const string IDX13400 = "IDX13400: The '{0}', can only process SecurityTokens of type: '{1}'. The SecurityToken received is of type: '{2}'.";
         internal const string IDX13001 = "IDX13001: A SAML2 assertion that specifies an AuthenticationContext DeclarationReference is not supported.To handle DeclarationReference, extend the Saml2SecurityTokenHandler and override ProcessAuthenticationStatement.";

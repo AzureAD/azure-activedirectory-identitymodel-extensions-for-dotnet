@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using Microsoft.IdentityModel.TestUtils;
-using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 {
@@ -16,14 +15,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 Audiences = new List<string>(),
                 First = true,
                 ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
-                TestId = "TokenValidationParameters null",
+                TestId = "TokenValidationParameters_Null",
                 ValidationParameters = null,
             });
 
             theoryData.Add(new TokenTheoryData
             {
                 Audiences = new List<string>(),
-                TestId = "ValidateAudience = false",
+                TestId = "ValidateAudience_Equals_False",
                 ValidationParameters = new TokenValidationParameters
                 {
                     ValidateAudience = false,
@@ -34,7 +33,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             {
                 Audiences = new List<string>(),
                 ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10208:"),
-                TestId = "no audiences in validationParameters",
+                TestId = "No_Audiences_In_TokenValidationParameters",
                 ValidationParameters = new TokenValidationParameters
                 {
                     ValidateAudience = true,
@@ -45,7 +44,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             {
                 Audiences = new List<string> { "John" },
                 ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10208:"),
-                TestId = "audience has value, tvp has no values",
+                TestId = "Audience_Has_Value_TVP_Has_No_Values",
                 ValidationParameters = new TokenValidationParameters
                 {
                     ValidateAudience = true,
@@ -56,7 +55,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             {
                 Audiences = new List<string> { "John" },
                 ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
-                TestId = "audience not matched",
+                TestId = "Audience_Not_Matched",
                 ValidationParameters = new TokenValidationParameters
                 {
                     ValidateAudience = true,
@@ -67,7 +66,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             theoryData.Add(new TokenTheoryData
             {
                 Audiences = new List<string> { "John" },
-                TestId = "AudienceValidator returns true",
+                TestId = "AudienceValidator_Returns_True",
                 ValidationParameters = new TokenValidationParameters
                 {
                     AudienceValidator = (aud, token, type) =>
@@ -83,7 +82,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             {
                 Audiences = new List<string> { "John" },
                 ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException(),
-                TestId = "AudienceValidator throws, validateAudience false",
+                TestId = "AudienceValidator_Throws_ValidateAudience_False",
                 ValidationParameters = new TokenValidationParameters
                 {
                     AudienceValidator = ValidationDelegates.AudienceValidatorThrows,
@@ -100,13 +99,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                 First = true,
                 Issuer = "bob",
-                TestId = "ValidationParameters null",
+                TestId = "TokenValidationParameters_Null",
                 ValidationParameters = null,
             });
 
             theoryData.Add(new TokenTheoryData
             {
-                TestId = "ValidateIssuer == false",
+                TestId = "ValidateIssuer_Equals_False",
                 ValidationParameters = new TokenValidationParameters { ValidateIssuer = false },
             });
 
@@ -114,14 +113,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10205:"),
                 Issuer = "bob",
-                TestId = "Issuer not matched",
+                TestId = "Issuer_Not_Matched",
                 ValidationParameters = new TokenValidationParameters { ValidIssuer = "frank" }
             });
 
             theoryData.Add(new TokenTheoryData
             {
                 Issuer = "bob",
-                TestId = "Issuer matched",
+                TestId = "Issuer_Matched",
                 ValidationParameters = new TokenValidationParameters
                 {
                     ValidateAudience = false,
@@ -133,7 +132,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             {
                 ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException(substringExpected: "IDX10205:"),
                 Issuer = "bob",
-                TestId = "ValidIssuers set but not matched",
+                TestId = "ValidIssuers_Set_But_Not_Matched",
                 ValidationParameters = new TokenValidationParameters
                 {
                     ValidateAudience = false,
@@ -144,7 +143,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             theoryData.Add(new TokenTheoryData
             {
                 Issuer = "bob",
-                TestId = "IssuerValidator - echo",
+                TestId = "IssuerValidator_Echo",
                 ValidationParameters = new TokenValidationParameters
                 {
                     IssuerValidator = ValidationDelegates.IssuerValidatorEcho,
