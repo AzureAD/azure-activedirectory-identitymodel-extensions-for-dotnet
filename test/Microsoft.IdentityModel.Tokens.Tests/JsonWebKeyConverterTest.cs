@@ -11,7 +11,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class JsonWebKeyConverterTest
     {
-        [Theory, MemberData(nameof(ConversionKeyTheoryData))]
+        [Theory, MemberData(nameof(ConversionKeyTheoryData), DisableDiscoveryEnumeration = true)]
         public void ConvertSecurityKeyToJsonWebKey(JsonWebKeyConverterTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ConvertSecurityKeyToJsonWebKey", theoryData);
@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Theory, MemberData(nameof(ConversionKeyTheoryData))]
+        [Theory, MemberData(nameof(ConversionKeyTheoryData), DisableDiscoveryEnumeration = true)]
         public void ConvertJsonWebKeyToSecurityKey(JsonWebKeyConverterTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ConvertJsonWebKeyToSecurityKey", theoryData);
@@ -52,7 +52,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Theory, MemberData(nameof(ConvertX509SecurityKeyToJsonWebKeyTheoryData))]
+        [Theory, MemberData(nameof(ConvertX509SecurityKeyToJsonWebKeyTheoryData), DisableDiscoveryEnumeration = true)]
         public void ConvertX509SecurityKeyAsRsaSecurityKeyToJsonWebKey(JsonWebKeyConverterTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ConvertX509SecurityKeyToJsonWebKeyTheoryData", theoryData);

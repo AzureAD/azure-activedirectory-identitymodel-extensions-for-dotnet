@@ -4,8 +4,9 @@
 using System;
 using System.Collections.Generic;
 using Xunit;
+using Microsoft.IdentityModel.TestUtils;
 
-namespace Microsoft.IdentityModel.Tokens.Tests.Validation
+namespace Microsoft.IdentityModel.Tokens.Validation.Tests
 {
     public class ValidationParametersTests
     {
@@ -26,7 +27,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests.Validation
         {
             var validationParameters = new ValidationParameters();
 
-            Assert.Equal(0, validationParameters.ValidIssuers.Count);
+            Assert.Empty(validationParameters.ValidIssuers);
         }
 
         [Fact]
@@ -34,7 +35,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests.Validation
         {
             var validationParameters = new ValidationParameters();
 
-            Assert.Equal(0, validationParameters.ValidAudiences.Count);
+            Assert.Empty(validationParameters.ValidAudiences);
             Assert.True(validationParameters.ValidAudiences is IList<string>);
         }
 
@@ -42,9 +43,29 @@ namespace Microsoft.IdentityModel.Tokens.Tests.Validation
         public void ValidTypes_Get_ReturnsEmptyList()
         {
             var validationParameters = new ValidationParameters();
-          
-            Assert.Equal(0, validationParameters.ValidTypes.Count);
+
+            Assert.Empty(validationParameters.ValidTypes);
             Assert.True(validationParameters.ValidTypes is IList<string>);
+        }
+
+        [Fact]
+        public void Valid_Set_TimeProvider()
+        {
+            TimeProvider timeProvider = new MockTimeProvider();
+            var validationParameters = new ValidationParameters()
+            {
+                TimeProvider = timeProvider
+            };
+
+            Assert.Equal(validationParameters.TimeProvider, timeProvider);
+        }
+
+        [Fact]
+        public void Valid_NotNull_TimeProvider()
+        {
+            var validationParameters = new ValidationParameters();
+
+            Assert.NotNull(validationParameters.TimeProvider);
         }
     }
 }

@@ -2,111 +2,157 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 
 #nullable enable
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Contains results of a single step in validating a <see cref="SecurityToken"/>.
-    /// A <see cref="TokenValidationResult"/> maintains a list of <see cref="ValidationResult"/> for each step in the token validation.
+    /// Represents a validation result that can be either successful or unsuccessful.
     /// </summary>
-    internal abstract class ValidationResult
+    /// <typeparam name="TResult"></typeparam>
+    internal readonly struct ValidationResult<TResult> : IEquatable<ValidationResult<TResult>>
     {
-        private bool _isValid;
+        readonly TResult? _result;
+        readonly ValidationError? _error;
 
         /// <summary>
-        /// Creates an instance of <see cref="ValidationResult"/>
+        /// Creates a successful validation result.
         /// </summary>
-        protected ValidationResult()
+        /// <param name="result">The value associated with the success.</param>
+        public ValidationResult(TResult result)
         {
-            ValidationFailureType = ValidationFailureType.ValidationNotEvaluated;
+            _result = result;
+            _error = null;
+            IsSuccess = true;
         }
 
         /// <summary>
-        /// Creates an instance of <see cref="ValidationResult"/>
+        /// Creates an error validation result.
         /// </summary>
-        /// <param name="validationFailureType">The <see cref="ValidationFailureType"/> that occurred during validation.</param>
-        protected ValidationResult(ValidationFailureType validationFailureType)
+        /// <param name="error">The error associated with the failure.</param>
+        public ValidationResult(ValidationError error)
         {
-            ValidationFailureType = validationFailureType;
+            _result = default;
+            _error = error;
+            IsSuccess = false;
         }
 
         /// <summary>
-        /// Creates an instance of <see cref="ValidationResult"/>
+        /// Empty constructor implementation to prevent creating an empty result.
         /// </summary>
-        /// <param name="validationFailureType">The <see cref="ValidationFailureType"/> that occurred during validation.</param>
-        /// <param name="exceptionDetail"> The <see cref="ExceptionDetail"/> representing the <see cref="Exception"/> that occurred during validation.</param>
-        protected ValidationResult(ValidationFailureType validationFailureType, ExceptionDetail? exceptionDetail)
+        /// <remarks>Throws an <see cref="InvalidOperationException"/> when called as this should never be used. Always initialize Result with either a value or error.</remarks>
+        /// <exception cref="InvalidOperationException">Thrown when called.</exception>
+        [Obsolete("Cannot create an empty validation result", true)]
+        public ValidationResult() => throw new InvalidOperationException("Cannot create an empty validation result");
+
+        /// <summary>
+        /// Creates a successful result implicitly from the value.
+        /// </summary>
+        /// <param name="result">The value to be stored in the result.</param>
+        public static implicit operator ValidationResult<TResult>(TResult result) => new(result);
+
+        /// <summary>
+        /// Creates an error result implicitly from the error value.
+        /// </summary>
+        /// <param name="error">The error to be stored in the result.</param>
+        public static implicit operator ValidationResult<TResult>(ValidationError error) => new(error);
+
+        /// <summary>
+        /// Gets a value indicating whether the result is successful.
+        /// </summary>
+        public readonly bool IsSuccess { get; }
+
+        /// <summary>
+        /// Unwraps the result.
+        /// </summary>
+        /// <returns>The wrapped result value.</returns>
+        /// <remarks>This method is only valid if the result type is successful.</remarks>
+        /// <exception cref="InvalidOperationException">Thrown if attempted to unwrap the value from a failed result.</exception>
+        public TResult UnwrapResult() => IsSuccess ? _result! : throw new InvalidOperationException("Cannot unwrap error result");
+
+        /// <summary>
+        /// Unwraps the error.
+        /// </summary>
+        /// <returns>The wrapped error value.</returns>
+        /// <remarks>This method is only valid if the result type is unsuccessful.</remarks>
+        /// <exception cref="InvalidOperationException">Thrown if attempted to unwrap an error from a successful result.</exception>
+        public ValidationError UnwrapError() => IsSuccess ? throw new InvalidOperationException("Cannot unwrap success result") : _error!;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public override bool Equals(object? obj)
         {
-            ValidationFailureType = validationFailureType;
-            ExceptionDetail = exceptionDetail;
-        }
-
-        /// <summary>
-        /// Adds a new stack frame to the exception details.
-        /// </summary>
-        /// <param name="stackFrame"></param>
-        public void AddStackFrame(StackFrame stackFrame)
-        {
-            ExceptionDetail?.StackFrames.Add(stackFrame);
-        }
-
-        /// <summary>
-        /// Gets the <see cref="Exception"/> that occurred during validation.
-        /// </summary>
-        public abstract Exception? Exception { get; }
-
-        /// <summary>
-        /// Gets the <see cref="ExceptionDetail"/> that occurred during validation.
-        /// </summary>
-        public ExceptionDetail? ExceptionDetail { get; }
-
-        /// <summary>
-        /// True if the token was successfully validated, false otherwise.
-        /// </summary>
-        public bool IsValid
-        {
-            get
+            if (obj is ValidationResult<TResult> other)
             {
-                HasValidOrExceptionWasRead = true;
-                return _isValid;
+                return Equals(other);
             }
-            set
-            {
-                _isValid = value;
-            }
-        }
 
-        // TODO - HasValidOrExceptionWasRead, IsValid, Exception are temporary and will be removed when TokenValidationResult derives from ValidationResult.
-        /// <summary>
-        /// Gets or sets a boolean recording if IsValid or Exception was called.
-        /// </summary>
-        protected bool HasValidOrExceptionWasRead { get; set; }
-
-        /// <summary>
-        /// Logs the validation result.
-        /// </summary>
-#pragma warning disable CA1822 // Mark members as static
-        public void Log()
-#pragma warning restore CA1822 // Mark members as static
-        {
-            // TODO - Do we need this, how will it work?
+            return false;
         }
 
         /// <summary>
-        /// Contains any logs that would have been written.
+        /// 
         /// </summary>
-        public IList<LogDetail> LogDetails { get; } = new List<LogDetail>();
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public override int GetHashCode()
+        {
+            if (IsSuccess)
+                return _result!.GetHashCode();
+            else
+                return _error!.GetHashCode();
+        }
 
         /// <summary>
-        /// Gets the <see cref="ValidationFailureType"/> indicating why the validation was not satisfied.
+        /// 
         /// </summary>
-        public ValidationFailureType ValidationFailureType
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static bool operator ==(ValidationResult<TResult> left, ValidationResult<TResult> right)
         {
-            get;
-        } = ValidationFailureType.ValidationNotEvaluated;
+            return left.Equals(right);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static bool operator !=(ValidationResult<TResult> left, ValidationResult<TResult> right)
+        {
+            return !(left == right);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public bool Equals(ValidationResult<TResult> other)
+        {
+            if (other.IsSuccess != IsSuccess)
+                return false;
+
+            if (IsSuccess)
+                return _result!.Equals(other._result);
+            else
+                return _error!.Equals(other._error);
+        }
+
+        /// <summary>
+        /// Casts the result to a <see cref="ValidationResult{TResult}"/>.
+        /// </summary>#
+        /// <remarks>Required for compatibility, see CA2225 for more information</remarks>
+        /// <returns>The existing instance.</returns>
+        public ValidationResult<TResult> ToResult()
+        {
+            return this;
+        }
     }
 }
-#nullable disable
+#nullable restore

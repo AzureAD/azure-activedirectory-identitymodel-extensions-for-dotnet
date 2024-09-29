@@ -360,7 +360,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
         [Fact(Skip = "Large test meant to be run manually.")]
-        public void CacheOverflowTestMultithreaded()
+        public async Task CacheOverflowTestMultithreaded()
         {
             TestUtilities.WriteHeader($"{this}.CacheOverflowTestMultithreaded");
             var context = new CompareContext($"{this}.CacheOverflowTestMultithreaded");
@@ -376,7 +376,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 }));
             }
 
-            Task.WaitAll(taskList.ToArray());
+            await Task.WhenAll(taskList.ToArray());
             cache.WaitForProcessing();
 
             // Cache size should be less than the capacity (somewhere between 800 - 1000 items).

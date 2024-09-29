@@ -165,7 +165,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             TestUtilities.AssertFailIfErrors(context.Diffs);
         }
 
-        [Theory, MemberData(nameof(RoundTripTokensUsingCacheTheoryData))]
+        [Theory, MemberData(nameof(RoundTripTokensUsingCacheTheoryData), DisableDiscoveryEnumeration = true)]
         public void RoundTripTokensUsingCache(JwtTheoryData theoryData)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -390,7 +390,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
 
 
-        [Theory, MemberData(nameof(RoundTripTokensTheoryData))]
+        [Theory, MemberData(nameof(RoundTripTokensTheoryData), DisableDiscoveryEnumeration = true)]
         public void RoundTripTokens(JwtTheoryData theoryData)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -636,7 +636,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             return theoryData;
         }
 
-        [Theory, MemberData(nameof(SerializeDeserializeJwtTokensTheoryData))]
+        [Theory, MemberData(nameof(SerializeDeserializeJwtTokensTheoryData), DisableDiscoveryEnumeration = true)]
         public void SerializeDeserializeJwtTokens(JwtTheoryData theoryData)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -679,7 +679,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
         }
 
-        [Theory, MemberData(nameof(RoundTripJWEParams))]
+        [Theory, MemberData(nameof(RoundTripJWEParams), DisableDiscoveryEnumeration = true)]
         public void RoundTripJWETokens(string testId, SecurityTokenDescriptor tokenDescriptor, TokenValidationParameters validationParameters, ExpectedException ee)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -875,7 +875,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             return theoryData;
         }
 
-        [Theory, MemberData(nameof(CreationJWEParams))]
+        [Theory, MemberData(nameof(CreationJWEParams), DisableDiscoveryEnumeration = true)]
         public void CreateJWETokens(string testId, string jweToken, TokenValidationParameters validationParameters, JwtPayload expectedPayload, ExpectedException ee)
         {
             var handler = new JwtSecurityTokenHandler();

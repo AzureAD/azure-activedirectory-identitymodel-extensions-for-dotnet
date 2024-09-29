@@ -250,19 +250,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns><c>true</c> if the exception is certain types of exceptions otherwise, <c>false</c>.</returns>
         internal static bool IsRecoverableException(Exception exception)
         {
-            return IsRecoverableExceptionType(ExceptionTypeForException(exception));
-        }
-
-        /// <summary>
-        /// Check whether the given exception type is recoverable by LKG.
-        /// </summary>
-        /// <param name="exceptionType">The exception type to check.</param>
-        /// <returns><c>true</c> if the exception is certain types of exceptions otherwise, <c>false</c>.</returns>
-        internal static bool IsRecoverableExceptionType(ExceptionDetail.ExceptionType exceptionType)
-        {
-            return exceptionType == ExceptionDetail.ExceptionType.SecurityTokenInvalidSignature
-                  || exceptionType == ExceptionDetail.ExceptionType.SecurityTokenInvalidIssuer
-                  || exceptionType == ExceptionDetail.ExceptionType.SecurityTokenSignatureKeyNotFound;
+            return exception is SecurityTokenInvalidSignatureException
+                  || exception is SecurityTokenInvalidIssuerException
+                  || exception is SecurityTokenSignatureKeyNotFoundException;
         }
 
         /// <summary>
@@ -273,35 +263,19 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="lkgConfiguration">The LKG exception to check.</param>
         /// <param name="currentException">The exception to check.</param>
         /// <returns><c>true</c> if the configuration is recoverable otherwise, <c>false</c>.</returns>
-        internal static bool IsRecoverableConfiguration(
-            string kid, BaseConfiguration currentConfiguration, BaseConfiguration lkgConfiguration, Exception currentException)
+        internal static bool IsRecoverableConfiguration(string kid, BaseConfiguration currentConfiguration, BaseConfiguration lkgConfiguration, Exception currentException)
         {
-            return IsRecoverableConfigurationAndExceptionType(
-                kid, currentConfiguration, lkgConfiguration, ExceptionTypeForException(currentException));
-        }
+            Lazy<bool> isRecoverableSigningKey = new Lazy<bool>(() => lkgConfiguration.SigningKeys.Any(signingKey => signingKey.KeyId == kid));
 
-        /// <summary>
-        /// Check whether the given configuration is recoverable by LKG.
-        /// </summary>
-        /// <param name="kid">The kid from token."/></param>
-        /// <param name="currentConfiguration">The <see cref="BaseConfiguration"/> to check.</param>
-        /// <param name="lkgConfiguration">The last known good configuration to check.</param>
-        /// <param name="currentExceptionType">The exception type to check.</param>
-        /// <returns><c>true</c> if the configuration is recoverable otherwise, <c>false</c>.</returns>
-        internal static bool IsRecoverableConfigurationAndExceptionType(
-            string kid, BaseConfiguration currentConfiguration, BaseConfiguration lkgConfiguration, ExceptionDetail.ExceptionType currentExceptionType)
-        {
-            Lazy<bool> isRecoverableSigningKey = new(() => lkgConfiguration.SigningKeys.Any(signingKey => signingKey.KeyId == kid));
-
-            if (currentExceptionType == ExceptionDetail.ExceptionType.SecurityTokenInvalidIssuer)
+            if (currentException is SecurityTokenInvalidIssuerException)
             {
                 return currentConfiguration.Issuer != lkgConfiguration.Issuer;
             }
-            else if (currentExceptionType == ExceptionDetail.ExceptionType.SecurityTokenSignatureKeyNotFound)
+            else if (currentException is SecurityTokenSignatureKeyNotFoundException)
             {
                 return isRecoverableSigningKey.Value;
             }
-            else if (currentExceptionType == ExceptionDetail.ExceptionType.SecurityTokenInvalidSignature)
+            else if (currentException is SecurityTokenInvalidSignatureException)
             {
                 SecurityKey currentSigningKey = currentConfiguration.SigningKeys.FirstOrDefault(x => x.KeyId == kid);
                 if (currentSigningKey == null)
@@ -314,16 +288,50 @@ namespace Microsoft.IdentityModel.Tokens
             return false;
         }
 
-        static ExceptionDetail.ExceptionType ExceptionTypeForException(Exception exception)
+        /// <summary>
+        /// Check whether the given exception type is recoverable by LKG.
+        /// </summary>
+        /// <param name="exceptionType">The exception type to check</param>
+        /// <returns><c>true</c> if the exception is certain types of exceptions otherwise, <c>false</c>.</returns>
+        internal static bool IsRecoverableExceptionType(Type exceptionType)
         {
-            if (exception is SecurityTokenInvalidSignatureException)
-                return ExceptionDetail.ExceptionType.SecurityTokenInvalidSignature;
-            else if (exception is SecurityTokenInvalidIssuerException)
-                return ExceptionDetail.ExceptionType.SecurityTokenInvalidIssuer;
-            else if (exception is SecurityTokenSignatureKeyNotFoundException)
-                return ExceptionDetail.ExceptionType.SecurityTokenSignatureKeyNotFound;
-            else
-                return ExceptionDetail.ExceptionType.Unknown;
+            return exceptionType == typeof(SecurityTokenInvalidSignatureException) ||
+                exceptionType == typeof(SecurityTokenInvalidIssuerException) ||
+                exceptionType == typeof(SecurityTokenSignatureKeyNotFoundException);
+        }
+
+        /// <summary>
+        /// Check whether the given configuration is recoverable by LKG.
+        /// </summary>
+        /// <param name="kid">The kid from token."/></param>
+        /// <param name="currentConfiguration">The <see cref="BaseConfiguration"/> to check.</param>
+        /// <param name="lkgConfiguration">The LKG exception to check.</param>
+        /// <param name="currentExceptionType">The exception type to check.</param>
+        /// <returns><c>true</c> if the configuration is recoverable otherwise, <c>false</c>.</returns>
+        internal static bool IsRecoverableConfigurationAndExceptionType(
+            string kid, BaseConfiguration currentConfiguration, BaseConfiguration lkgConfiguration, Type currentExceptionType)
+        {
+            Lazy<bool> isRecoverableSigningKey = new(() => lkgConfiguration.SigningKeys.Any(signingKey => signingKey.KeyId == kid));
+
+            if (currentExceptionType == typeof(SecurityTokenInvalidIssuerException))
+            {
+                return currentConfiguration.Issuer != lkgConfiguration.Issuer;
+            }
+            else if (currentExceptionType == typeof(SecurityTokenSignatureKeyNotFoundException))
+            {
+                return isRecoverableSigningKey.Value;
+            }
+            else if (currentExceptionType == typeof(SecurityTokenInvalidSignatureException))
+            {
+                SecurityKey currentSigningKey = currentConfiguration.SigningKeys.FirstOrDefault(x => x.KeyId == kid);
+                if (currentSigningKey == null)
+                    return isRecoverableSigningKey.Value;
+
+                SecurityKey lkgSigningKey = lkgConfiguration.SigningKeys.FirstOrDefault(signingKey => signingKey.KeyId == kid);
+                return lkgSigningKey != null && currentSigningKey.InternalId != lkgSigningKey.InternalId;
+            }
+
+            return false;
         }
     }
 }

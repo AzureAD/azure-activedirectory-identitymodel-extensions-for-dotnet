@@ -29,7 +29,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// <summary>
         /// This test checks that SignatureProviders are properly created and released when CryptoProviderFactory.CacheSignatureProviders = false.
         /// </summary>
-        [Theory, MemberData(nameof(CreateAndReleaseSignatureProvidersTheoryData))]
+        [Theory, MemberData(nameof(CreateAndReleaseSignatureProvidersTheoryData), DisableDiscoveryEnumeration = true)]
         public void CreateAndReleaseSignatureProviders(SignatureProviderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateAndReleaseSignatureProvidersTheoryData", theoryData);
@@ -130,7 +130,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Type type = typeof(CryptoProviderFactory);
             PropertyInfo[] properties = type.GetProperties();
             if (properties.Length != 7)
-                Assert.True(false, "Number of public fields has changed from 7 to: " + properties.Length + ", adjust tests");
+                Assert.Fail("Number of public fields has changed from 7 to: " + properties.Length + ", adjust tests");
 
             CustomCryptoProvider customCryptoProvider = new CustomCryptoProvider();
             GetSetContext getSetContext =
@@ -185,7 +185,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// Tests that SymmetricSignatureProviders that fault will be removed from cache
         /// </summary>
         /// <param name="theoryData"></param>
-        [Theory, MemberData(nameof(FaultingAsymmetricSignatureProvidersTheoryData))]
+        [Theory, MemberData(nameof(FaultingAsymmetricSignatureProvidersTheoryData), DisableDiscoveryEnumeration = true)]
         public void FaultingAsymmetricSignatureProviders(SignatureProviderTheoryData theoryData)
         {
             IdentityModelEventSource.ShowPII = true;
@@ -303,7 +303,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// Tests that SymmetricSignatureProviders that fault will be removed from cache
         /// </summary>
         /// <param name="theoryData"></param>
-        [Theory, MemberData(nameof(FaultingSymmetricSignatureProvidersTheoryData))]
+        [Theory, MemberData(nameof(FaultingSymmetricSignatureProvidersTheoryData), DisableDiscoveryEnumeration = true)]
         public void FaultingSymmetricSignatureProviders(SignatureProviderTheoryData theoryData)
         {
             IdentityModelEventSource.ShowPII = true;
@@ -547,7 +547,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ReleaseSignatureProvidersTheoryData))]
+        [Theory, MemberData(nameof(ReleaseSignatureProvidersTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReleaseSignatureProviders(SignatureProviderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReleaseSignatureProviders", theoryData);
@@ -636,7 +636,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ReleaseHashAlgorithmsTheoryData))]
+        [Theory, MemberData(nameof(ReleaseHashAlgorithmsTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReleaseHashAlgorithms(CryptoProviderFactoryTheoryData theoryData)
         {
             IdentityModelEventSource.ShowPII = true;
@@ -691,7 +691,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ReleaseKeyWrapProvidersTheoryData))]
+        [Theory, MemberData(nameof(ReleaseKeyWrapProvidersTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReleaseKeyWrapProviders(CryptoProviderFactoryTheoryData theoryData)
         {
             IdentityModelEventSource.ShowPII = true;
@@ -748,7 +748,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ReleaseRsaKeyWrapProvidersTheoryData))]
+        [Theory, MemberData(nameof(ReleaseRsaKeyWrapProvidersTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReleaseRsaKeyWrapProviders(CryptoProviderFactoryTheoryData theoryData)
         {
             IdentityModelEventSource.ShowPII = true;
@@ -924,7 +924,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
 
         [Fact(Skip = "too long")]
-        public void ReferenceCountingTest_MultiThreaded()
+        public async Task ReferenceCountingTest_MultiThreaded()
         {
             var context = new CompareContext($"{this}.ReferenceCountingTest_MultiThreaded");
             var cryptoProviderFactory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting());
@@ -957,7 +957,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 });
             }
 
-            Task.WaitAll(tasks);
+            await Task.WhenAll(tasks);
 
             cryptoProviderFactory.CacheSignatureProviders = false;
 

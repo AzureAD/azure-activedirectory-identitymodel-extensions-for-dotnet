@@ -195,7 +195,10 @@ namespace Microsoft.IdentityModel.TestUtils
             get => "http://www.w3.org/";
         }
 
-        public static X509Certificate2 Certificate => new X509Certificate2(Convert.FromBase64String(CertificateData));
+        public static X509Certificate2 Certificate
+        {
+            get => CertificateHelper.LoadX509Certificate(CertificateData);
+        }
 
         public static string CertificateData
         {
@@ -267,7 +270,8 @@ namespace Microsoft.IdentityModel.TestUtils
             get
             {
                 var keyInfo = new KeyInfo();
-                keyInfo.X509Data.Add(new X509Data(new X509Certificate2(Convert.FromBase64String(CertificateData))));
+                X509Certificate2 cert = CertificateHelper.LoadX509Certificate(CertificateData);
+                keyInfo.X509Data.Add(new X509Data(cert));
                 return keyInfo;
             }
         }
@@ -290,6 +294,11 @@ namespace Microsoft.IdentityModel.TestUtils
         public static string Issuer
         {
             get => "http://Default.Issuer.com";
+        }
+
+        public static string CloudInstanceName
+        {
+            get => "microsoftonline.com";
         }
 
         public static IEnumerable<string> Issuers

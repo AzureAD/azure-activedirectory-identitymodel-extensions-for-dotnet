@@ -26,6 +26,9 @@ namespace Microsoft.IdentityModel.Tokens
             Parameters = parameters;
         }
 
+        public static MessageDetail NullParameter(string parameterName)
+            => new MessageDetail(LogMessages.IDX10000, LogHelper.MarkAsNonPII(parameterName));
+
         /// <summary>
         /// Gets the formatted message.
         /// </summary>

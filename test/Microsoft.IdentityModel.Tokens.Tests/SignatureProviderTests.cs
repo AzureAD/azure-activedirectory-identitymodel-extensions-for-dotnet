@@ -25,7 +25,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     /// </summary>
     public class SignatureProviderTests
     {
-        [Theory, MemberData(nameof(SignatureProviderConstructorParamsTheoryData))]
+        [Theory, MemberData(nameof(SignatureProviderConstructorParamsTheoryData), DisableDiscoveryEnumeration = true)]
         public void CryptoProviderFactoryConstructorParams(CryptoProviderFactoryTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CryptoProviderFactoryConstructorParams", theoryData);
@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Theory, MemberData(nameof(SignatureProviderConstructorParamsTheoryData))]
+        [Theory, MemberData(nameof(SignatureProviderConstructorParamsTheoryData), DisableDiscoveryEnumeration = true)]
         public void AsymmetricSignatureProviderConstructorParams(SignatureProviderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.AsymmetricSignatureProviderConstructorParams", theoryData);
@@ -65,7 +65,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Theory, MemberData(nameof(SignatureProviderConstructorParamsTheoryData))]
+        [Theory, MemberData(nameof(SignatureProviderConstructorParamsTheoryData), DisableDiscoveryEnumeration = true)]
         public void SymmetricSignatureProviderConstructorParams(SignatureProviderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.SymmetricSignatureProviderConstructorParams", theoryData);
@@ -117,7 +117,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// Tests Asymmetric SecurityKeys
         /// </summary>
         /// <param name="theoryData"></param>
-        [Theory, MemberData(nameof(AsymmetricSignAndVerifyTheoryData))]
+        [Theory, MemberData(nameof(AsymmetricSignAndVerifyTheoryData), DisableDiscoveryEnumeration = true)]
         public void AsymmetricSignAndVerify(SignatureProviderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.AsymmetricSignAndVerify", theoryData);
@@ -209,7 +209,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             };
         }
 
-        [Theory, MemberData(nameof(SymmetricSignAndVerifyTheoryData))]
+        [Theory, MemberData(nameof(SymmetricSignAndVerifyTheoryData), DisableDiscoveryEnumeration = true)]
         public void SymmetricSignAndVerify(SignatureProviderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.SignAndVerify", theoryData);
@@ -337,7 +337,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 else if (testCase.StartsWith("Dispose"))
                     provider.Dispose();
                 else
-                    Assert.True(false, "Test case does not match any scenario");
+                    Assert.Fail("Test case does not match any scenario");
 
                 expectedException.ProcessNoException();
             }
@@ -406,7 +406,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         }
 
-        [Theory, MemberData(nameof(AsymmetricSignatureProviderVerifyParameterChecksTheoryData))]
+        [Theory, MemberData(nameof(AsymmetricSignatureProviderVerifyParameterChecksTheoryData), DisableDiscoveryEnumeration = true)]
         public void AsymmetricSignatureProviderVerifyParameterChecks(SignatureProviderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.AsymmetricSignatureProviderVerifyParameterChecks", theoryData);
@@ -466,7 +466,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(SymmetricSignatureProviderVerifyParameterChecksTheoryData))]
+        [Theory, MemberData(nameof(SymmetricSignatureProviderVerifyParameterChecksTheoryData), DisableDiscoveryEnumeration = true)]
         public void SymmetricSignatureProviderVerifyParameterChecks(SignatureProviderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.SymmetricSignatureProviderVerifyParameterChecks", theoryData);
@@ -526,7 +526,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(SymmetricVerifySignatureSizeTheoryData))]
+        [Theory, MemberData(nameof(SymmetricVerifySignatureSizeTheoryData), DisableDiscoveryEnumeration = true)]
         public void SymmetricVerify1Tests(SignatureProviderTheoryData theoryData)
         {
             // verifies: public bool Verify(byte[] input, byte[] signature)
@@ -544,7 +544,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Theory, MemberData(nameof(SymmetricVerifySignatureSizeTheoryData))]
+        [Theory, MemberData(nameof(SymmetricVerifySignatureSizeTheoryData), DisableDiscoveryEnumeration = true)]
         public void SymmetricVerify2Tests(SignatureProviderTheoryData theoryData)
         {
             // verifies: public bool Verify(byte[] input, byte[] signature, int length)
@@ -562,7 +562,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Theory, MemberData(nameof(SymmetricVerifySignatureSizeTheoryData))]
+        [Theory, MemberData(nameof(SymmetricVerifySignatureSizeTheoryData), DisableDiscoveryEnumeration = true)]
         public void SymmetricVerify3Tests(SignatureProviderTheoryData theoryData)
         {
             // verifies: public override bool Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength)
@@ -611,7 +611,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(SymmetricVerifySignatureSizeInternalTheoryData))]
+        [Theory, MemberData(nameof(SymmetricVerifySignatureSizeInternalTheoryData), DisableDiscoveryEnumeration = true)]
         public void SymmetricVerify4Tests(SignatureProviderTheoryData theoryData)
         {
             // verifies: internal bool Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength, string algorithm)
@@ -698,7 +698,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(SymmetricSecurityKeySizesTheoryData))]
+        [Theory, MemberData(nameof(SymmetricSecurityKeySizesTheoryData), DisableDiscoveryEnumeration = true)]
         public void SymmetricSecurityKeySizesSign(SymmetricSignatureProviderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.SymmetricSecurityKeySizes", theoryData);
@@ -717,7 +717,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Theory, MemberData(nameof(SymmetricSecurityKeySizesTheoryData))]
+        [Theory, MemberData(nameof(SymmetricSecurityKeySizesTheoryData), DisableDiscoveryEnumeration = true)]
         public void SymmetricSecurityKeySizesVerify(SymmetricSignatureProviderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.SymmetricSecurityKeySizes", theoryData);
@@ -819,7 +819,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(KeyDisposeData))]
+        [Theory, MemberData(nameof(KeyDisposeData), DisableDiscoveryEnumeration = true)]
         public void SignatureProviderDispose_Test(string testId, SecurityKey securityKey, string algorithm, ExpectedException ee)
         {
             try
@@ -938,7 +938,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             return theoryData;
         }
 
-        [Theory, MemberData(nameof(SignatureTheoryData))]
+        [Theory, MemberData(nameof(SignatureTheoryData), DisableDiscoveryEnumeration = true)]
         public void SignatureTampering(SignatureProviderTheoryData theoryData)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
@@ -970,7 +970,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(SignatureTheoryData))]
+        [Theory, MemberData(nameof(SignatureTheoryData), DisableDiscoveryEnumeration = true)]
         public void SignatureTruncation(SignatureProviderTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.SignatureTruncation", theoryData);

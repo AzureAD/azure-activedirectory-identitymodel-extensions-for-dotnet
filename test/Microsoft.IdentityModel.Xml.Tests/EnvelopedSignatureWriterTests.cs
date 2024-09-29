@@ -18,7 +18,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
 {
     public class EnvelopedSignatureWriterTests
     {
-        [Theory, MemberData(nameof(ConstructorTestCases))]
+        [Theory, MemberData(nameof(ConstructorTestCases), DisableDiscoveryEnumeration = true)]
         public void Constructor(EnvelopedSignatureTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.Constructor", theoryData);
@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CreateSignatureWithoutSpecifyingDigestTestCases))]
+        [Theory, MemberData(nameof(CreateSignatureWithoutSpecifyingDigestTestCases), DisableDiscoveryEnumeration = true)]
         public void CreateSignatureWithoutSpecifyingDigest(EnvelopedSignatureTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateSignatureWithoutSpecifyingDigest", theoryData);
@@ -149,7 +149,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
             };
         }
 
-        [Theory, MemberData(nameof(RoundTripSaml2TestCases))]
+        [Theory, MemberData(nameof(RoundTripSaml2TestCases), DisableDiscoveryEnumeration = true)]
         public void RoundTripSaml2(EnvelopedSignatureTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.RoundTripSaml2", theoryData);
@@ -202,7 +202,7 @@ namespace Microsoft.IdentityModel.Tokens.Xml.Tests
             }
         }
 
-        [Theory, MemberData(nameof(RoundTripWsMetadataTestCases))]
+        [Theory, MemberData(nameof(RoundTripWsMetadataTestCases), DisableDiscoveryEnumeration = true)]
         public void RoundTripWsMetadata(EnvelopedSignatureTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.RoundTripWsMetadata", theoryData);

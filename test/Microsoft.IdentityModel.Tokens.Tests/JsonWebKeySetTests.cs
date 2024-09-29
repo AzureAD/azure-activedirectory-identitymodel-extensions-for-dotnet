@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -13,7 +13,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
 {
     public class JsonWebKeySetTests
     {
-        [Theory, MemberData(nameof(ConstructorDataSet))]
+        [Theory, MemberData(nameof(ConstructorDataSet), DisableDiscoveryEnumeration = true)]
         public void Constructors(JsonWebKeySetTheoryData theoryData)
         {
             var context = new CompareContext(theoryData);
@@ -159,7 +159,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
         }
 
         [Fact]
-        public void SigningKeysExtensibility()
+        public async Task SigningKeysExtensibility()
         {
             var context = new CompareContext($"{this}.SigningKeysExtensibility");
             TestUtilities.WriteHeader($"{this}.SigningKeysExtensibility");
@@ -180,7 +180,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                     ValidateLifetime = false,
                 };
 
-                var tokenValidationResult = new JsonWebTokens.JsonWebTokenHandler().ValidateTokenAsync(Default.AsymmetricJwt, tokenValidationParameters).Result;
+                var tokenValidationResult = await new JsonWebTokens.JsonWebTokenHandler().ValidateTokenAsync(Default.AsymmetricJwt, tokenValidationParameters);
 
                 if (tokenValidationResult.IsValid != true)
                     context.Diffs.Add("tokenValidationResult.IsValid != true");
@@ -219,7 +219,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             return null;
         }
 
-        [Theory, MemberData(nameof(GetSigningKeysTheoryData))]
+        [Theory, MemberData(nameof(GetSigningKeysTheoryData), DisableDiscoveryEnumeration = true)]
         public void GetSigningKeys(JsonWebKeySetTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.GetSigningKeys", theoryData);
@@ -426,7 +426,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
         {
             var webKey = (webKeySet.Keys as List<JsonWebKey>)[keyIndex];
 
-            return new X509SecurityKey(new X509Certificate2(Convert.FromBase64String(webKey.X5c[0])))
+            return new X509SecurityKey(CertificateHelper.LoadX509Certificate(webKey.X5c[0]))
             {
                 KeyId = webKey.KeyId
             };

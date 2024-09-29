@@ -17,9 +17,9 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
     /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
     /// <param name="callContext"></param>
-    /// <returns>A <see cref="AlgorithmValidationResult"/>that contains the results of validating the algorithm.</returns>
+    /// <returns>A <see cref="ValidationResult{TResult}"/>that contains the results of validating the algorithm.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
-    internal delegate AlgorithmValidationResult AlgorithmValidatorDelegate(
+    internal delegate ValidationResult<string> AlgorithmValidationDelegate(
         string algorithm,
         SecurityKey securityKey,
         SecurityToken securityToken,
@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters"><see cref="ValidationParameters"/> required for validation.</param>
         /// <param name="callContext"></param>
 #pragma warning disable CA1801 // TODO: remove pragma disable once callContext is used for logging
-        internal static AlgorithmValidationResult ValidateAlgorithm(
+        internal static ValidationResult<string> ValidateAlgorithm(
             string algorithm,
             SecurityKey securityKey,
             SecurityToken securityToken,
@@ -46,32 +46,22 @@ namespace Microsoft.IdentityModel.Tokens
 #pragma warning restore CA1801 // TODO: remove pragma disable once callContext is used for logging
         {
             if (validationParameters == null)
-            {
-                return new AlgorithmValidationResult(
-                    algorithm,
-                    ValidationFailureType.NullArgument,
-                    new ExceptionDetail(
-                        new MessageDetail(
-                            LogMessages.IDX10000,
-                            LogHelper.MarkAsNonPII(nameof(validationParameters))),
-                        ExceptionDetail.ExceptionType.ArgumentNull,
-                        new StackFrame(true)));
-            }
+                return ValidationError.NullParameter(
+                    nameof(validationParameters),
+                    new StackFrame(true));
 
-            if (validationParameters.ValidAlgorithms != null && validationParameters.ValidAlgorithms.Count > 0 && !validationParameters.ValidAlgorithms.Contains(algorithm, StringComparer.Ordinal))
-            {
-                return new AlgorithmValidationResult(
-                    algorithm,
+            if (validationParameters.ValidAlgorithms != null &&
+                validationParameters.ValidAlgorithms.Count > 0 &&
+                !validationParameters.ValidAlgorithms.Contains(algorithm, StringComparer.Ordinal))
+                return new ValidationError(
+                    new MessageDetail(
+                        LogMessages.IDX10696,
+                        LogHelper.MarkAsNonPII(algorithm)),
                     ValidationFailureType.AlgorithmValidationFailed,
-                    new ExceptionDetail(
-                        new MessageDetail(
-                            LogMessages.IDX10696,
-                            LogHelper.MarkAsNonPII(algorithm)),
-                        ExceptionDetail.ExceptionType.SecurityTokenInvalidAlgorithm,
-                        new StackFrame(true)));
-            }
+                    typeof(SecurityTokenInvalidAlgorithmException),
+                    new StackFrame(true));
 
-            return new AlgorithmValidationResult(algorithm);
+            return algorithm;
         }
     }
 }

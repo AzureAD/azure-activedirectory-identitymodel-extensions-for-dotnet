@@ -4,8 +4,8 @@ steps:
 - script: echo $(BuildConfiguration)
   displayName: 'display Build Configuration'
 
-- script: echo $(WilsonVersion)
-  displayName: 'display WilsonVersion'
+- script: echo $(MicrosoftIdentityModelVersion)
+  displayName: 'display MicrosoftIdentityModelVersion'
 
 - task: UseDotNet@2
   displayName: 'Use .NET Core sdk 2.x'
@@ -28,7 +28,7 @@ steps:
 - task: UseDotNet@2
   displayName: 'Use .Net Core SDK 9.x'
   inputs:
-    version: 9.0.100-preview.4.24267.66
+    version: 9.0.100-rc.1.24452.12
     includePreviewVersions: true
   condition: eq(variables['TargetNet9'], 'True')
 
@@ -39,18 +39,9 @@ steps:
     custom: '--list-sdks'
 
 - task: PowerShell@2
-  displayName: "Install Strawberry Perl"
-  inputs:
-    targetType: filePath
-    filePath: $(Build.SourcesDirectory)\$(WilsonSourceDirectory)build\install-strawberry-perl.ps1
-    arguments: >
-      -ci_path "$(Build.SourcesDirectory)"
-      -debug
-  condition: and(succeeded(), eq(variables['PipelineType'], 'onebranch'))
-
-- powershell: |
-      perl "$(Build.SourcesDirectory)\$(WilsonSourceDirectory)src\VerifyResourceUsage.pl"
   displayName: 'Verify error messages are all used.'
+  inputs:
+    filePath: $(Build.SourcesDirectory)\$(WilsonSourceDirectory)Tools\VerifyResourceUsage.ps1
 
 - powershell: |
     regedit /s .\build\strongNameBypass.reg
@@ -68,7 +59,19 @@ steps:
   inputs:
     targetType: filePath
     filePath: ./$(WilsonSourceDirectory)runTests.ps1
-    arguments: '-buildType $(BuildConfiguration)'
+    arguments: '-buildType $(BuildConfiguration) -runningInCI $True'
+
+- task: PublishTestResults@2
+  condition: succeededOrFailed()
+  inputs:
+    testResultsFormat: 'XUnit'
+    testResultsFiles: '**/*.trx'
+    searchFolder: '$(Agent.TempDirectory)'
+
+- task: PublishCodeCoverageResults@2
+  condition: succeededOrFailed()
+  inputs:
+    summaryFileLocation: '$(Agent.TempDirectory)/**/*.cobertura.xml'
 
 - task: CopyFiles@2
   displayName: 'Copy Files to: [staging]\ProductBinaries'
@@ -174,7 +177,7 @@ steps:
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-uploadtotsa.TSAUpload@2
   displayName: 'TSA upload to Codebase: WILSON Stamp: Azure'
   inputs:
-    GdnPublishTsaOnboard: false 
+    GdnPublishTsaOnboard: false
     GdnPublishTsaConfigFile: '$(Build.SourcesDirectory)/build/tsaConfig.json'
   continueOnError: true
   condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
@@ -187,7 +190,7 @@ steps:
 
 - task: NuGetCommand@2
   displayName: 'Upload NuGet Package to VSTS NuGet'
-  condition: eq(variables['WilsonVersion'], '')
+  condition: eq(variables['MicrosoftIdentityModelVersion'], '')
   inputs:
     command: push
     packagesToPush: '$(Build.Repository.LocalPath)\artifacts\*.nupkg'

@@ -12,7 +12,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class ValidatorsTests
     {
-        [Theory, MemberData(nameof(ValidateAudienceParametersTheoryData))]
+        [Theory, MemberData(nameof(ValidateAudienceParametersTheoryData), DisableDiscoveryEnumeration = true)]
         public void ValidateAudienceParameters(AudienceValidationTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateAudienceParameters", theoryData);
@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ValidateAudienceTheoryData))]
+        [Theory, MemberData(nameof(ValidateAudienceTheoryData), DisableDiscoveryEnumeration = true)]
         public void ValidateAudience(AudienceValidationTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateAudience", theoryData);
@@ -280,7 +280,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(IssuerDataSet))]
+        [Theory, MemberData(nameof(IssuerDataSet), DisableDiscoveryEnumeration = true)]
         public void Issuer(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters, BaseConfiguration configuration, ExpectedException ee)
         {
             try
@@ -319,7 +319,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(LifeTimeDataSet))]
+        [Theory, MemberData(nameof(LifeTimeDataSet), DisableDiscoveryEnumeration = true)]
         public void Lifetime(DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters, ExpectedException ee)
         {
             try
@@ -374,7 +374,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(SecurityKeyDataSet))]
+        [Theory, MemberData(nameof(SecurityKeyDataSet), DisableDiscoveryEnumeration = true)]
         public void SecurityKey(SecurityKey securityKey, SecurityToken securityToken, TokenValidationParameters validationParameters, ExpectedException ee)
         {
             try
@@ -410,7 +410,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(TokenReplayDataSet))]
+        [Theory, MemberData(nameof(TokenReplayDataSet), DisableDiscoveryEnumeration = true)]
         public void TokenReplay(string securityToken, DateTime? expirationTime, TokenValidationParameters validationParameters, ExpectedException ee)
         {
             try
@@ -444,7 +444,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         // Each TokenReplayValidator in this test checks that the expiration parameter passed into it is equal to the expiration time of the token.
         // If they're not equal, the test will fail.
-        [Theory, MemberData(nameof(CheckParametersForTokenReplayTheoryData))]
+        [Theory, MemberData(nameof(CheckParametersForTokenReplayTheoryData), DisableDiscoveryEnumeration = true)]
         public void CheckParametersForTokenReplay(TokenReplayTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.CheckParametersForTokenReplay", theoryData);

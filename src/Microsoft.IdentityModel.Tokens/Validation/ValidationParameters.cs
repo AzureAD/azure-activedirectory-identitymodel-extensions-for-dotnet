@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Claims;
 using System.Threading;
-using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -26,14 +25,14 @@ namespace Microsoft.IdentityModel.Tokens
         private IList<string> _validTokenTypes;
         private IList<string> _validAudiences;
 
-        private AlgorithmValidatorDelegate _algorithmValidator = Validators.ValidateAlgorithm;
-        private AudienceValidatorDelegate _audienceValidator = Validators.ValidateAudience;
+        private AlgorithmValidationDelegate _algorithmValidator = Validators.ValidateAlgorithm;
+        private AudienceValidationDelegate _audienceValidator = Validators.ValidateAudience;
         private IssuerValidationDelegateAsync _issuerValidatorAsync = Validators.ValidateIssuerAsync;
-        private LifetimeValidatorDelegate _lifetimeValidator = Validators.ValidateLifetime;
-        private SignatureValidatorDelegate _signatureValidator;
-        private TokenReplayValidatorDelegate _tokenReplayValidator = Validators.ValidateTokenReplay;
-        private TypeValidatorDelegate _typeValidator = Validators.ValidateTokenType;
-        private IssuerSigningKeyValidatorDelegate _issuerSigningKeyValidator = Validators.ValidateIssuerSigningKey;
+        private LifetimeValidationDelegate _lifetimeValidator = Validators.ValidateLifetime;
+        private SignatureValidationDelegate _signatureValidator;
+        private TokenReplayValidationDelegate _tokenReplayValidator = Validators.ValidateTokenReplay;
+        private TokenTypeValidationDelegate _tokenTypeValidator = Validators.ValidateTokenType;
+        private IssuerSigningKeyValidationDelegate _issuerSigningKeyValidator = Validators.ValidateIssuerSigningKey;
 
         /// <summary>
         /// This is the default value of <see cref="ClaimsIdentity.AuthenticationType"/> when creating a <see cref="ClaimsIdentity"/>.
@@ -84,11 +83,11 @@ namespace Microsoft.IdentityModel.Tokens
             RoleClaimTypeRetriever = other.RoleClaimTypeRetriever;
             SaveSigninToken = other.SaveSigninToken;
             SignatureValidator = other.SignatureValidator;
+            TimeProvider = other.TimeProvider;
             TokenDecryptionKeyResolver = other.TokenDecryptionKeyResolver;
             TokenDecryptionKeys = other.TokenDecryptionKeys;
             TokenReplayCache = other.TokenReplayCache;
             TokenReplayValidator = other.TokenReplayValidator;
-            TransformBeforeSignatureValidation = other.TransformBeforeSignatureValidation;
             TypeValidator = other.TypeValidator;
             ValidateActor = other.ValidateActor;
             ValidateSignatureLast = other.ValidateSignatureLast;
@@ -121,7 +120,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// If no delegate is set, the default implementation will be used. The default checks the algorithm
         /// against the <see cref="ValidAlgorithms"/> property, if present. If not, it will succeed.
         /// </remarks>
-        public AlgorithmValidatorDelegate AlgorithmValidator
+        public AlgorithmValidationDelegate AlgorithmValidator
         {
             get { return _algorithmValidator; }
             set { _algorithmValidator = value ?? throw new ArgumentNullException(nameof(value), "AlgorithmValidator cannot be null."); }
@@ -135,8 +134,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// This means that no default 'audience' validation will occur.
         /// </remarks>
         /// <exception cref="ArgumentNullException">Thrown when the value is set as null.</exception>
-        /// <returns>The <see cref="AudienceValidatorDelegate"/> used to validate the issuer of a token</returns>
-        public AudienceValidatorDelegate AudienceValidator
+        /// <returns>The <see cref="AudienceValidationDelegate"/> used to validate the issuer of a token</returns>
+        public AudienceValidationDelegate AudienceValidator
         {
             get { return _audienceValidator; }
             set { _audienceValidator = value ?? throw new ArgumentNullException(nameof(value), "AudienceValidator cannot be set as null."); }
@@ -227,8 +226,9 @@ namespace Microsoft.IdentityModel.Tokens
                 roleClaimType = RoleClaimType;
             }
 
-            if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                LogHelper.LogInformation(LogMessages.IDX10245, securityToken);
+            // TODO: Add to CallContext
+            //if (LogHelper.IsEnabled(EventLogLevel.Informational))
+            //    LogHelper.LogInformation(LogMessages.IDX10245, securityToken);
 
 #pragma warning disable RS0030 // Do not use banned APIs
             return new ClaimsIdentity(authenticationType: AuthenticationType ?? DefaultAuthenticationType, nameType: nameClaimType ?? ClaimsIdentity.DefaultNameClaimType, roleType: roleClaimType ?? ClaimsIdentity.DefaultRoleClaimType);
@@ -252,11 +252,6 @@ namespace Microsoft.IdentityModel.Tokens
         public string DebugId { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="SecurityKey"/> representing the ephemeral decryption key used for decryption by certain algorithms.
-        /// </summary>
-        public SecurityKey EphemeralDecryptionKey { get; set; }
-
-        /// <summary>
         /// Gets or sets a boolean that controls if a '/' is significant at the end of the audience.
         /// The default is <c>true</c>.
         /// </summary>
@@ -277,7 +272,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// If both <see cref="IssuerSigningKeyValidatorUsingConfiguration"/> and <see cref="IssuerSigningKeyValidator"/> are set, IssuerSigningKeyResolverUsingConfiguration takes
         /// priority.
         /// </remarks>
-        public IssuerSigningKeyValidatorDelegate IssuerSigningKeyValidator
+        public IssuerSigningKeyValidationDelegate IssuerSigningKeyValidator
         {
             get => _issuerSigningKeyValidator;
             set => _issuerSigningKeyValidator = value ?? throw new ArgumentNullException(nameof(value), "IssuerSigningKeyValidator cannot be set as null.");
@@ -324,16 +319,11 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Gets or sets a delegate that will be called to transform a token to a supported format before validation.
-        /// </summary>
-        public TransformBeforeSignatureValidationDelegate TransformBeforeSignatureValidation { get; set; }
-
-        /// <summary>
         /// Allows overriding the delegate that will be used to validate the lifetime of the token
         /// </summary>
         /// <exception cref="ArgumentNullException">Thrown when the value is set as null.</exception>
-        /// <returns>The <see cref="LifetimeValidatorDelegate"/> used to validate the lifetime of a token</returns>
-        public LifetimeValidatorDelegate LifetimeValidator
+        /// <returns>The <see cref="LifetimeValidationDelegate"/> used to validate the lifetime of a token</returns>
+        public LifetimeValidationDelegate LifetimeValidator
         {
             get { return _lifetimeValidator; }
             set { _lifetimeValidator = value ?? throw new ArgumentNullException(nameof(value), "LifetimeValidator cannot be set as null."); }
@@ -445,11 +435,16 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// If set, this delegate will be called to validate the signature of the token, instead of default processing.
         /// </remarks>
-        public SignatureValidatorDelegate SignatureValidator
+        public SignatureValidationDelegate SignatureValidator
         {
             get { return _signatureValidator; }
             set { _signatureValidator = value; }
         }
+
+        /// <summary>
+        /// Gets or sets the time provider.
+        /// </summary>
+        internal TimeProvider TimeProvider { get; set; } = TimeProvider.System;
 
         /// <summary>
         /// Gets or sets a delegate that will be called to retrieve a <see cref="SecurityKey"/> used for decryption.
@@ -478,8 +473,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// This means no default token replay validation will occur.
         /// </remarks>
         /// <exception cref="ArgumentNullException">Thrown when the value is set as null.</exception>
-        /// <returns>The <see cref="TokenReplayValidatorDelegate"/> used to validate the token replay of the token.</returns>
-        public TokenReplayValidatorDelegate TokenReplayValidator
+        /// <returns>The <see cref="TokenReplayValidationDelegate"/> used to validate the token replay of the token.</returns>
+        public TokenReplayValidationDelegate TokenReplayValidator
         {
             get { return _tokenReplayValidator; }
             set { _tokenReplayValidator = value ?? throw new ArgumentNullException(nameof(value), "TokenReplayValidator cannot be set as null."); }
@@ -494,7 +489,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Allows overriding the delegate that will be used to validate the type of the token.
-        /// If the token type cannot be validated, a <see cref="TokenTypeValidationResult"/> MUST be returned by the delegate.
+        /// If the token type cannot be validated, a <see cref="ValidationResult{TResult}"/> MUST be returned by the delegate.
         /// Note: the 'type' parameter may be null if it couldn't be extracted from its usual location.
         /// Implementations that need to resolve it from a different location can use the 'token' parameter.
         /// </summary>
@@ -503,11 +498,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// against the <see cref="ValidTypes"/> property, if the type is present then, it will succeed.
         /// </remarks>
         /// <exception cref="ArgumentNullException">Thrown when the value is set as null.</exception>
-        /// <returns>The <see cref="TypeValidatorDelegate"/> used to validate the token type of a token</returns>
-        public TypeValidatorDelegate TypeValidator
+        /// <returns>The <see cref="TokenTypeValidationDelegate"/> used to validate the token type of a token</returns>
+        public TokenTypeValidationDelegate TypeValidator
         {
-            get { return _typeValidator; }
-            set { _typeValidator = value ?? throw new ArgumentNullException(nameof(value), "TypeValidator cannot be set as null."); }
+            get { return _tokenTypeValidator; }
+            set { _tokenTypeValidator = value ?? throw new ArgumentNullException(nameof(value), "TypeValidator cannot be set as null."); }
         }
 
         /// <summary>
