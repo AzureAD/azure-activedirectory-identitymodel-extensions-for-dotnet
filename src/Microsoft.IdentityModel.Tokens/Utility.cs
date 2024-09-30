@@ -192,13 +192,16 @@ namespace Microsoft.IdentityModel.Tokens
                 b = b.Slice(0, length);
             }
 
+#if NETCOREAPP
+            return System.Security.Cryptography.CryptographicOperations.FixedTimeEquals(a, b);
+#else
             int result = 0;
             for (int i = 0; i < a.Length; i++)
             {
                 result |= a[i] ^ b[i];
             }
-
             return result == 0;
+#endif
         }
 
         internal static byte[] ConvertToBigEndian(long i)
