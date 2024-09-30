@@ -151,13 +151,16 @@ namespace Microsoft.IdentityModel.Tokens
                 a2 = b.AsSpan();
             }
 
+#if NETCOREAPP
+            return System.Security.Cryptography.CryptographicOperations.FixedTimeEquals(a1, a2);
+#else
             int result = 0;
             for (int i = 0; i < a1.Length; i++)
             {
                 result |= a1[i] ^ a2[i];
             }
-
             return result == 0;
+#endif
         }
 
         /// <summary>
