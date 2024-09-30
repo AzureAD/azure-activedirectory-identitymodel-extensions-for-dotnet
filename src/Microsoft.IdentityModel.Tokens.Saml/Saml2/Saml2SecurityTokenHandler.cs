@@ -1052,7 +1052,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         // ValidatedConditions is basically a named tuple but using a record struct better expresses the intent.
         internal record struct ValidatedConditions(string? ValidatedAudience, ValidatedLifetime? ValidatedLifetime);
 
-        internal ValidationResult<ValidatedConditions> ValidateConditions(Saml2SecurityToken samlToken, ValidationParameters validationParameters, CallContext callContext)
+        internal virtual ValidationResult<ValidatedConditions> ValidateConditions(Saml2SecurityToken samlToken, ValidationParameters validationParameters, CallContext callContext)
         {
             if (samlToken == null)
                 return ValidationError.NullParameter(nameof(samlToken), new System.Diagnostics.StackFrame(true));
