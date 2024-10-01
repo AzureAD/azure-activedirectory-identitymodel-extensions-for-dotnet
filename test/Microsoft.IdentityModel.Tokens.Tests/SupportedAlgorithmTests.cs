@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// 2. Our default algorithms are supported.
         /// </summary>
         /// <param name="theoryData"></param>
-        [Theory, MemberData(nameof(IsSupportedAlgorithmAndKeyTestCases))]
+        [Theory, MemberData(nameof(IsSupportedAlgorithmAndKeyTestCases), DisableDiscoveryEnumeration = true)]
         public void IsSupportedAlgorithmAndKey(SupportedAlgorithmTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.IsSupportedAlgorithm", theoryData);
@@ -174,7 +174,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(IsSymmetricKeyWrapSupportedTests))]
+        [Theory, MemberData(nameof(IsSymmetricKeyWrapSupportedTests), DisableDiscoveryEnumeration = true)]
         public void IsSymmetricKeyWrapSupported(SupportedAlgorithmTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.IsSymmetricKeyWrapSupported", theoryData);
@@ -215,7 +215,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(GetDigestFromSignatureAlgorithmTests))]
+        [Theory, MemberData(nameof(GetDigestFromSignatureAlgorithmTests), DisableDiscoveryEnumeration = true)]
         public void GetDigestFromSignatureAlgorithm(SupportedAlgorithmTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.GetDigestFromSignatureAlgorithm", theoryData);

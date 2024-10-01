@@ -16,7 +16,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="callContext"></param>
     /// <returns>A <see cref="ValidationResult{TResult}"/>that contains the results of validating the token.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
-    internal delegate ValidationResult<DateTime?> TokenReplayValidatorDelegate(
+    internal delegate ValidationResult<DateTime?> TokenReplayValidationDelegate(
         DateTime? expirationTime,
         string securityToken,
         ValidationParameters validationParameters,

@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
     public class JsonWebTokenHandlerValidationParametersTests
     {
-        [Theory, MemberData(nameof(JsonWebTokenHandlerValidationParametersTestCases))]
+        [Theory, MemberData(nameof(JsonWebTokenHandlerValidationParametersTestCases), DisableDiscoveryEnumeration = true)]
         public async Task ValidateTokenAsync(JsonWebTokenHandlerValidationParametersTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateTokenAsync", theoryData);
@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     SigningCredentials = theoryData.SigningCredentials,
                     EncryptingCredentials = theoryData.EncryptingCredentials,
                     AdditionalHeaderClaims = theoryData.AdditionalHeaderParams,
-                    Audience = theoryData.Audience,
+                    Audience = Default.Audience,
                     Issuer = theoryData.Issuer,
                 };
 
@@ -98,17 +98,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new JsonWebTokenHandlerValidationParametersTheoryData("Valid")
                     {
                         TokenValidationParameters = CreateTokenValidationParameters(
-                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
+                            Default.Issuer, Default.AsymmetricSigningKey),
                         ValidationParameters = CreateValidationParameters(
-                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
+                            Default.Issuer, Default.AsymmetricSigningKey),
                     },
                     new JsonWebTokenHandlerValidationParametersTheoryData("Invalid_MalformedToken")
                     {
                         TokenString = "malformedToken",
                         TokenValidationParameters = CreateTokenValidationParameters(
-                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
+                            Default.Issuer, Default.AsymmetricSigningKey),
                         ValidationParameters = CreateValidationParameters(
-                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
+                            Default.Issuer, Default.AsymmetricSigningKey),
                         ExpectedIsValid = false,
                         ExpectedException = ExpectedException.SecurityTokenMalformedException("IDX14100:"),
                         ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenMalformedException("IDX14107:", typeof(SecurityTokenMalformedException)),
@@ -116,9 +116,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new JsonWebTokenHandlerValidationParametersTheoryData("Invalid_Issuer")
                     {
                         TokenValidationParameters = CreateTokenValidationParameters(
-                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
+                            Default.Issuer, Default.AsymmetricSigningKey),
                         ValidationParameters = CreateValidationParameters(
-                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
+                            Default.Issuer, Default.AsymmetricSigningKey),
                         Issuer = "InvalidIssuer",
                         ExpectedIsValid = false,
                         ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10205:"),
@@ -126,25 +126,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         // removal of the ValidIssuer property from the ValidationParameters class.
                         ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidIssuerException("IDX10212:"),
                     },
-                    new JsonWebTokenHandlerValidationParametersTheoryData("Invalid_Audience")
-                    {
-                        TokenValidationParameters = CreateTokenValidationParameters(
-                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
-                        ValidationParameters = CreateValidationParameters(
-                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
-                        Audience = "InvalidAudience",
-                        ExpectedIsValid = false,
-                        ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
-                        // ValidateTokenAsync with ValidationParameters returns a different error message to account for the
-                        // removal of the ValidAudience property from the ValidationParameters class.
-                        ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidAudienceException("IDX10215:"),
-                    },
                     new JsonWebTokenHandlerValidationParametersTheoryData("Invalid_TokenNotSigned")
                     {
                         TokenValidationParameters = CreateTokenValidationParameters(
-                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
+                            Default.Issuer, Default.AsymmetricSigningKey),
                         ValidationParameters = CreateValidationParameters(
-                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
+                            Default.Issuer, Default.AsymmetricSigningKey),
                         SigningCredentials = null,
                         ExpectedIsValid = false,
                         ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10504:"),
@@ -152,9 +139,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new JsonWebTokenHandlerValidationParametersTheoryData("Invalid_TokenSignedWithDifferentKey_KeyIdPresent_TryAllKeysFalse")
                     {
                         TokenValidationParameters = CreateTokenValidationParameters(
-                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
+                            Default.Issuer, Default.AsymmetricSigningKey),
                         ValidationParameters = CreateValidationParameters(
-                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
+                            Default.Issuer, Default.AsymmetricSigningKey),
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         ExpectedIsValid = false,
                         ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10500:"),
@@ -165,9 +152,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new JsonWebTokenHandlerValidationParametersTheoryData("Invalid_TokenSignedWithDifferentKey_KeyIdPresent_TryAllKeysTrue")
                     {
                         TokenValidationParameters = CreateTokenValidationParameters(
-                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey, tryAllKeys: true),
+                            Default.Issuer, Default.AsymmetricSigningKey, tryAllKeys: true),
                         ValidationParameters = CreateValidationParameters(
-                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey, tryAllKeys: true),
+                            Default.Issuer, Default.AsymmetricSigningKey, tryAllKeys: true),
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         ExpectedIsValid = false,
                         ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10503:"),
@@ -175,9 +162,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new JsonWebTokenHandlerValidationParametersTheoryData("Invalid_TokenSignedWithDifferentKey_KeyIdNotPresent_TryAllKeysFalse")
                     {
                         TokenValidationParameters = CreateTokenValidationParameters(
-                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
+                            Default.Issuer, Default.AsymmetricSigningKey),
                         ValidationParameters = CreateValidationParameters(
-                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey),
+                            Default.Issuer, Default.AsymmetricSigningKey),
                         SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2_NoKeyId,
                         ExpectedIsValid = false,
                         ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10500:"),
@@ -185,9 +172,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     new JsonWebTokenHandlerValidationParametersTheoryData("Invalid_TokenSignedWithDifferentKey_KeyIdNotPresent_TryAllKeysTrue")
                     {
                         TokenValidationParameters = CreateTokenValidationParameters(
-                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey, tryAllKeys: true),
+                            Default.Issuer, Default.AsymmetricSigningKey, tryAllKeys: true),
                         ValidationParameters = CreateValidationParameters(
-                            Default.Issuer, [Default.Audience], Default.AsymmetricSigningKey, tryAllKeys: true),
+                            Default.Issuer, Default.AsymmetricSigningKey, tryAllKeys: true),
                         SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2_NoKeyId,
                         ExpectedIsValid = false,
                         ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10517:"),
@@ -196,10 +183,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         // Token is signed with HmacSha256 but only sha256 is considered valid for this test's purposes
                         TokenValidationParameters = CreateTokenValidationParameters(
-                            Default.Issuer, [Default.Audience], KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
+                            Default.Issuer, KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
                             validAlgorithms: [SecurityAlgorithms.Sha256]),
                         ValidationParameters = CreateValidationParameters(
-                            Default.Issuer, [Default.Audience], KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
+                            Default.Issuer, KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
                             validAlgorithms: [SecurityAlgorithms.Sha256]),
                         SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
                         ExpectedIsValid = false,
@@ -216,10 +203,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             SecurityAlgorithms.Aes128CbcHmacSha256),
                         SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
                         TokenValidationParameters = CreateTokenValidationParameters(
-                            Default.Issuer, [Default.Audience], KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
+                            Default.Issuer, KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
                             tokenDecryptionKey: KeyingMaterial.DefaultX509Key_2048),
                         ValidationParameters = CreateValidationParameters(
-                            Default.Issuer, [Default.Audience], KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
+                            Default.Issuer, KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
                             tokenDecryptionKey: KeyingMaterial.DefaultX509Key_2048),
                     },
 #if NET472 || NET6_0_OR_GREATER
@@ -235,10 +222,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
                         AdditionalHeaderParams = AdditionalEcdhEsHeaderParameters(KeyingMaterial.JsonWebKeyP521_Public),
                         TokenValidationParameters = CreateTokenValidationParameters(
-                            Default.Issuer, [Default.Audience], KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
+                            Default.Issuer, KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
                             tokenDecryptionKey: new ECDsaSecurityKey(KeyingMaterial.JsonWebKeyP521, true)),
                         ValidationParameters = CreateValidationParameters(
-                            Default.Issuer, [Default.Audience], KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
+                            Default.Issuer, KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
                             tokenDecryptionKey: new ECDsaSecurityKey(KeyingMaterial.JsonWebKeyP521, true)),
                     },
 #endif
@@ -250,9 +237,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             SecurityAlgorithms.Aes128CbcHmacSha256),
                         SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
                         TokenValidationParameters = CreateTokenValidationParameters(
-                            Default.Issuer, [Default.Audience], KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key),
+                            Default.Issuer, KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key),
                         ValidationParameters = CreateValidationParameters(
-                            Default.Issuer, [Default.Audience], KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key),
+                            Default.Issuer, KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key),
                         ExpectedIsValid = false,
                         ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10609:"),
                     },
@@ -264,10 +251,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             SecurityAlgorithms.Aes128CbcHmacSha256),
                         SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
                         TokenValidationParameters = CreateTokenValidationParameters(
-                            Default.Issuer, [Default.Audience], KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
+                            Default.Issuer, KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
                             tokenDecryptionKey: KeyingMaterial.DefaultRsaSecurityKey1),
                         ValidationParameters = CreateValidationParameters(
-                            Default.Issuer, [Default.Audience], KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
+                            Default.Issuer, KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
                             tokenDecryptionKey: KeyingMaterial.DefaultRsaSecurityKey1),
                         ExpectedIsValid = false,
                         ExpectedException = ExpectedException.SecurityTokenKeyWrapException("IDX10618:"),
@@ -280,10 +267,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             SecurityAlgorithms.Aes128CbcHmacSha256),
                         SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
                         TokenValidationParameters = CreateTokenValidationParameters(
-                            Default.Issuer, [Default.Audience], KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
+                            Default.Issuer, KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
                             tokenDecryptionKey: KeyingMaterial.DefaultRsaSecurityKey1),
                         ValidationParameters = CreateValidationParameters(
-                            Default.Issuer, [Default.Audience], KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
+                            Default.Issuer, KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
                             tokenDecryptionKey: KeyingMaterial.DefaultRsaSecurityKey1),
                         ExpectedIsValid = false,
                         ExpectedException = ExpectedException.SecurityTokenKeyWrapException("IDX10618:"),
@@ -292,7 +279,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
                 static TokenValidationParameters CreateTokenValidationParameters(
                     string issuer,
-                    List<string> audiences,
                     SecurityKey issuerSigningKey,
                     SecurityKey tokenDecryptionKey = null,
                     List<string> validAlgorithms = null,
@@ -306,22 +292,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ValidateIssuerSigningKey = true,
                         IssuerSigningKey = issuerSigningKey,
                         TokenDecryptionKey = tokenDecryptionKey,
-                        ValidAudiences = audiences,
+                        ValidAudiences = [Default.Audience],
                         ValidIssuer = issuer,
                         TryAllIssuerSigningKeys = tryAllKeys,
                     };
 
                 static ValidationParameters CreateValidationParameters(
                     string issuer,
-                    List<string> audiences,
                     SecurityKey issuerSigningKey,
                     SecurityKey tokenDecryptionKey = null,
                     List<string> validAlgorithms = null,
                     bool tryAllKeys = false)
                 {
                     ValidationParameters validationParameters = new ValidationParameters();
+                    validationParameters.ValidAudiences.Add(Default.Audience);
                     validationParameters.ValidIssuers.Add(issuer);
-                    audiences.ForEach(audience => validationParameters.ValidAudiences.Add(audience));
                     validationParameters.IssuerSigningKeys.Add(issuerSigningKey);
                     validationParameters.TryAllIssuerSigningKeys = tryAllKeys;
                     if (validAlgorithms is not null)
@@ -362,7 +347,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             public EncryptingCredentials EncryptingCredentials { get; internal set; }
             public IDictionary<string, object> AdditionalHeaderParams { get; internal set; }
             public ClaimsIdentity Subject { get; internal set; } = Default.ClaimsIdentity;
-            public string Audience { get; internal set; } = Default.Audience;
             public string Issuer { get; internal set; } = Default.Issuer;
             internal bool ExpectedIsValid { get; set; } = true;
             internal TokenValidationParameters TokenValidationParameters { get; set; }

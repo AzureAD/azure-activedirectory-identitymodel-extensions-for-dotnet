@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             TestUtilities.AssertFailIfErrors($"{this}.Publics", context.Errors);
         }
 
-        [Theory, MemberData(nameof(ConstructorTheoryData))]
+        [Theory, MemberData(nameof(ConstructorTheoryData), DisableDiscoveryEnumeration = true)]
         public void Constructor(SignatureTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.Constructor", theoryData);
@@ -97,7 +97,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             }
         }
 
-        [Theory, MemberData(nameof(VerifyTheoryData))]
+        [Theory, MemberData(nameof(VerifyTheoryData), DisableDiscoveryEnumeration = true)]
         public void Verify(SignatureTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.Verify", theoryData);

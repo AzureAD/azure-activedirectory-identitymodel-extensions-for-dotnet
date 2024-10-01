@@ -35,7 +35,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             Assert.Equal("PoP abcd", SignedHttpRequestUtilities.CreateSignedHttpRequestHeader("abcd"));
         }
 
-        [Theory, MemberData(nameof(AppendHeadersTheoryData))]
+        [Theory, MemberData(nameof(AppendHeadersTheoryData), DisableDiscoveryEnumeration = true)]
         public void AppendHeaders(SignedHttpRequestUtilityTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.AppendHeaders", theoryData);
@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Theory, MemberData(nameof(CreateJwkClaimTheoryData))]
+        [Theory, MemberData(nameof(CreateJwkClaimTheoryData), DisableDiscoveryEnumeration = true)]
         public void CreateJwkClaim(SignedHttpRequestUtilityTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateJwkClaim", theoryData);
@@ -257,7 +257,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ToHttpRequestDataAsyncTheoryData))]
+        [Theory, MemberData(nameof(ToHttpRequestDataAsyncTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task ToHttpRequestDataAsync(SignedHttpRequestUtilityTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ToHttpRequestDataAsync", theoryData);
