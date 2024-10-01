@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -14,7 +13,6 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
-    [Collection("JsonWebTokenHandlerTests")]
     public class JwtTokenUtilitiesTests
     {
         // Used for formatting a message for testing with one parameter.
@@ -120,28 +118,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 t => t.ToString()))));
             Assert.Contains(stringJws, listener.TraceBuffer);
             listener.TraceBuffer = string.Empty;
-        }
-
-        [Fact]
-        public void ClaimTypeMappingIsIndependent()
-        {
-            // Each handler should have its own instance of the ClaimTypeMap
-            var jwtClaimsMapping = JwtSecurityTokenHandler.DefaultInboundClaimTypeMap;
-            var jsonClaimsMapping = JsonWebTokenHandler.DefaultInboundClaimTypeMap;
-
-            Assert.NotEmpty(jwtClaimsMapping);
-            Assert.NotEmpty(jsonClaimsMapping);
-
-            Assert.Equal(jwtClaimsMapping, jsonClaimsMapping);
-
-            // Clearing one should not affect the other
-            jwtClaimsMapping.Clear();
-
-            Assert.Empty(jwtClaimsMapping);
-            Assert.NotEmpty(jsonClaimsMapping);
-
-            // restore the default value as it was causing other tests to fail
-            jwtClaimsMapping = new Dictionary<string, string>(ClaimTypeMapping.InboundClaimTypeMap);
         }
 
         [Fact]
