@@ -108,16 +108,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
                 static TokenValidationParameters CreateTokenValidationParameters(TimeSpan? clockSkew = null)
                 {
+                    // only validate the lifetime
                     var tokenValidationParameters = new TokenValidationParameters
                     {
-                        ValidateAudience = true,
-                        ValidateIssuer = true,
+                        ValidateAudience = false,
+                        ValidateIssuer = false,
                         ValidateLifetime = true,
-                        ValidateTokenReplay = true,
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = Default.AsymmetricSigningKey,
-                        ValidAudiences = [Default.Audience],
-                        ValidIssuer = Default.Issuer,
+                        ValidateTokenReplay = false,
+                        ValidateIssuerSigningKey = false,
+                        RequireSignedTokens = false,
                     };
 
                     if (clockSkew is not null)
@@ -129,12 +128,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 static ValidationParameters CreateValidationParameters(TimeSpan? clockSkew = null)
                 {
                     ValidationParameters validationParameters = new ValidationParameters();
-                    validationParameters.ValidIssuers.Add(Default.Issuer);
-                    validationParameters.ValidAudiences.Add(Default.Audience);
-                    validationParameters.IssuerSigningKeys.Add(Default.AsymmetricSigningKey);
 
                     if (clockSkew is not null)
                         validationParameters.ClockSkew = clockSkew.Value;
+
+                    // Skip all validations except lifetime
+                    validationParameters.AlgorithmValidator = SkipValidationDelegates.SkipAlgorithmValidation;
+                    validationParameters.AudienceValidator = SkipValidationDelegates.SkipAudienceValidation;
+                    validationParameters.IssuerValidatorAsync = SkipValidationDelegates.SkipIssuerValidation;
+                    validationParameters.IssuerSigningKeyValidator = SkipValidationDelegates.SkipIssuerSigningKeyValidation;
+                    validationParameters.SignatureValidator = SkipValidationDelegates.SkipSignatureValidation;
 
                     return validationParameters;
                 }
@@ -160,9 +163,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             SecurityTokenDescriptor securityTokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = Default.ClaimsIdentity,
-                SigningCredentials = Default.AsymmetricSigningCredentials,
-                Audience = Default.Audience,
-                Issuer = Default.Issuer,
                 IssuedAt = issuedAt,
                 NotBefore = notBefore,
                 Expires = expires,
