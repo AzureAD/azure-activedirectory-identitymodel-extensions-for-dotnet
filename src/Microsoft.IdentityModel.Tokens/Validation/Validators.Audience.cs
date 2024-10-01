@@ -52,31 +52,31 @@ namespace Microsoft.IdentityModel.Tokens
                     new StackFrame(true));
 
             if (tokenAudiences == null)
-                return new ValidationError(
+                return new AudienceValidationError(
                     new MessageDetail(LogMessages.IDX10207),
-                    ValidationFailureType.AudienceValidationFailed,
                     typeof(SecurityTokenInvalidAudienceException),
-                    new StackFrame(true));
+                    new StackFrame(true),
+                    tokenAudiences);
 
             if (tokenAudiences.Count == 0)
-                return new ValidationError(
+                return new AudienceValidationError(
                     new MessageDetail(LogMessages.IDX10206),
-                    ValidationFailureType.AudienceValidationFailed,
                     typeof(SecurityTokenInvalidAudienceException),
-                    new StackFrame(true));
+                    new StackFrame(true),
+                    tokenAudiences);
 
             string? validAudience = ValidTokenAudience(tokenAudiences, validationParameters.ValidAudiences, validationParameters.IgnoreTrailingSlashWhenValidatingAudience);
             if (validAudience != null)
                 return validAudience;
 
-            return new ValidationError(
+            return new AudienceValidationError(
                 new MessageDetail(
                     LogMessages.IDX10215,
                     LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(tokenAudiences)),
                     LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences))),
-                ValidationFailureType.AudienceValidationFailed,
                 typeof(SecurityTokenInvalidAudienceException),
-                new StackFrame(true));
+                new StackFrame(true),
+                tokenAudiences);
         }
 
         private static string? ValidTokenAudience(IList<string> tokenAudiences, IList<string> validAudiences, bool ignoreTrailingSlashWhenValidatingAudience)
