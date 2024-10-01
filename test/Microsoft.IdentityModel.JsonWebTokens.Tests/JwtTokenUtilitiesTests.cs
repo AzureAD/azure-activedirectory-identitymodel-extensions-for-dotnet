@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Security.Claims;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
@@ -15,6 +14,7 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
+    [Collection("JsonWebTokenHandlerTests")]
     public class JwtTokenUtilitiesTests
     {
         // Used for formatting a message for testing with one parameter.
@@ -140,6 +140,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.Empty(jwtClaimsMapping);
             Assert.NotEmpty(jsonClaimsMapping);
 
+            // restore the default value as it was causing other tests to fail
+            jwtClaimsMapping = new Dictionary<string, string>(ClaimTypeMapping.InboundClaimTypeMap);
         }
 
         [Fact]

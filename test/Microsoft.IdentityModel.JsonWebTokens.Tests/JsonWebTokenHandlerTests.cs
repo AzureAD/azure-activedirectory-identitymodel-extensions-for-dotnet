@@ -25,6 +25,7 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
+    [Collection("JsonWebTokenHandlerTests")]
     public class JsonWebTokenHandlerTests
     {
         [Fact]
