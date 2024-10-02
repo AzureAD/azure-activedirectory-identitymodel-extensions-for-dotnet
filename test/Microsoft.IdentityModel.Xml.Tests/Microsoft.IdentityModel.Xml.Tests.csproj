@@ -14,6 +14,11 @@
     <ProjectReference Include="..\Microsoft.IdentityModel.TestUtils\Microsoft.IdentityModel.TestUtils.csproj" />
     <ProjectReference Include="..\Microsoft.IdentityModel.Tokens.Tests\Microsoft.IdentityModel.Tokens.Tests.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="System.Text.RegularExpressions" Version="$(SystemTextRegularExpressions)"/>
+    <PackageReference Include="Microsoft.Rest.ClientRuntime" Version="$(MicrosoftRestClientRuntime)"/>
+  </ItemGroup>
 
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />

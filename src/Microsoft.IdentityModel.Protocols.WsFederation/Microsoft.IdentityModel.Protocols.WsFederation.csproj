@@ -30,6 +30,10 @@
     <ProjectReference Include="..\Microsoft.IdentityModel.Xml\Microsoft.IdentityModel.Xml.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\Microsoft.IdentityModel.Tokens\CertificateHelper.cs" Link="CertificateHelper.cs" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Reference Include="System.Net.Http" />
   </ItemGroup>

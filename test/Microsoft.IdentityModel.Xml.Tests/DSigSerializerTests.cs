@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             TestUtilities.AssertFailIfErrors("DSigSerializerTests_GetSets", context.Errors);
         }
 
-        [Theory, MemberData(nameof(ReadKeyInfoTheoryData))]
+        [Theory, MemberData(nameof(ReadKeyInfoTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReadKeyInfo(DSigSerializerTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadKeyInfo", theoryData);
@@ -100,7 +100,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             }
         }
 
-        [Theory, MemberData(nameof(WriteKeyInfoTheoryData))]
+        [Theory, MemberData(nameof(WriteKeyInfoTheoryData), DisableDiscoveryEnumeration = true)]
         public void WriteKeyInfo(DSigSerializerTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.WriteKeyInfo", theoryData);
@@ -148,7 +148,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             };
         }
 
-        [Theory, MemberData(nameof(ReadSignatureTheoryData))]
+        [Theory, MemberData(nameof(ReadSignatureTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReadSignature(DSigSerializerTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadSignature", theoryData);
@@ -236,7 +236,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             }
         }
 
-        [Theory, MemberData(nameof(WriteSignatureTheoryData))]
+        [Theory, MemberData(nameof(WriteSignatureTheoryData), DisableDiscoveryEnumeration = true)]
         public void WriteSignature(DSigSerializerTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.WriteSignature", theoryData);
@@ -287,7 +287,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             };
         }
 
-        [Theory, MemberData(nameof(ReadSignedInfoTheoryData))]
+        [Theory, MemberData(nameof(ReadSignedInfoTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReadSignedInfo(DSigSerializerTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadSignedInfo", theoryData);
@@ -337,7 +337,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             }
         }
 
-        [Theory, MemberData(nameof(WriteSignedInfoTheoryData))]
+        [Theory, MemberData(nameof(WriteSignedInfoTheoryData), DisableDiscoveryEnumeration = true)]
         public void WriteSignedInfo(DSigSerializerTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WriteSignedInfo", theoryData);
@@ -387,7 +387,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             };
         }
 
-        [Theory, MemberData(nameof(ReadReferenceTheoryData))]
+        [Theory, MemberData(nameof(ReadReferenceTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReadReference(DSigSerializerTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadReference", theoryData);
@@ -433,7 +433,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             };
         }
 
-        [Theory, MemberData(nameof(ReadTransformsTheoryData))]
+        [Theory, MemberData(nameof(ReadTransformsTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReadTransforms(DSigSerializerTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadTransform", theoryData);
@@ -506,7 +506,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             };
         }
 
-        [Theory, MemberData(nameof(ReadTransformTheoryData))]
+        [Theory, MemberData(nameof(ReadTransformTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReadTransform(DSigSerializerTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadTransforms", theoryData);
@@ -553,7 +553,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             };
         }
 
-        [Theory, MemberData(nameof(WriteReferenceTheoryData))]
+        [Theory, MemberData(nameof(WriteReferenceTheoryData), DisableDiscoveryEnumeration = true)]
         public void WriteReference(DSigSerializerTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WriteReference", theoryData);

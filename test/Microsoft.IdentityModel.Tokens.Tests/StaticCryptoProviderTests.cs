@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests.Static
         /// Tests that we can set the default <see cref="CompressionProviderFactory"/>.
         /// </summary>
         /// <param name="theoryData"></param>
-        [Theory, MemberData(nameof(CompressionFactoryTestsTheoryData))]
+        [Theory, MemberData(nameof(CompressionFactoryTestsTheoryData), DisableDiscoveryEnumeration = true)]
         public void CompressionFactoryTests(CompressionProviderFactoryTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CompressionFactoryTests", theoryData);

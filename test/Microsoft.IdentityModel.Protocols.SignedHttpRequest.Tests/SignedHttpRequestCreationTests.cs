@@ -93,7 +93,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         }
 
 
-        [Theory, MemberData(nameof(CreateClaimCallsTheoryData))]
+        [Theory, MemberData(nameof(CreateClaimCallsTheoryData), DisableDiscoveryEnumeration = true)]
         public void CreateClaimCalls(CreateSignedHttpRequestTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateClaimCalls", theoryData);
@@ -177,7 +177,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CreateAtClaimTheoryData))]
+        [Theory, MemberData(nameof(CreateAtClaimTheoryData), DisableDiscoveryEnumeration = true)]
         public void CreateAtClaim(CreateSignedHttpRequestTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateAtClaimTheoryData", theoryData);
@@ -217,7 +217,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory(Skip = "This test failed on build server due to some EpochTime changes, should be fixed later"), MemberData(nameof(CreateTsClaimTheoryData))]
+        [Theory(Skip = "This test failed on build server due to some EpochTime changes, should be fixed later"), MemberData(nameof(CreateTsClaimTheoryData), DisableDiscoveryEnumeration = true)]
         public void CreateTsClaim(CreateSignedHttpRequestTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateTsClaim", theoryData);
@@ -269,7 +269,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CreateMClaimTheoryData))]
+        [Theory, MemberData(nameof(CreateMClaimTheoryData), DisableDiscoveryEnumeration = true)]
         public void CreateMClaim(CreateSignedHttpRequestTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateMClaim", theoryData);
@@ -320,7 +320,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CreateUClaimTheoryData))]
+        [Theory, MemberData(nameof(CreateUClaimTheoryData), DisableDiscoveryEnumeration = true)]
         public void CreateUClaim(CreateSignedHttpRequestTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateUClaim", theoryData);
@@ -389,7 +389,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CreatePClaimTheoryData))]
+        [Theory, MemberData(nameof(CreatePClaimTheoryData), DisableDiscoveryEnumeration = true)]
         public void CreatePClaim(CreateSignedHttpRequestTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreatePClaim", theoryData);
@@ -470,7 +470,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CreateQClaimTheoryData))]
+        [Theory, MemberData(nameof(CreateQClaimTheoryData), DisableDiscoveryEnumeration = true)]
         public void CreateQClaim(CreateSignedHttpRequestTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateQClaim", theoryData);
@@ -607,7 +607,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CreateHClaimTheoryData))]
+        [Theory, MemberData(nameof(CreateHClaimTheoryData), DisableDiscoveryEnumeration = true)]
         public void CreateHClaim(CreateSignedHttpRequestTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateHClaim", theoryData);
@@ -784,7 +784,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CreateBClaimTheoryData))]
+        [Theory, MemberData(nameof(CreateBClaimTheoryData), DisableDiscoveryEnumeration = true)]
         public void CreateBClaim(CreateSignedHttpRequestTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateBClaim", theoryData);
@@ -836,7 +836,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CreateCnfClaimTheoryData))]
+        [Theory, MemberData(nameof(CreateCnfClaimTheoryData), DisableDiscoveryEnumeration = true)]
         public void CreateCnfClaim(CreateSignedHttpRequestTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateCnfClaim", theoryData);
@@ -929,7 +929,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CreateNonceClaimTheoryData))]
+        [Theory, MemberData(nameof(CreateNonceClaimTheoryData), DisableDiscoveryEnumeration = true)]
         public void CreateNonceClaim(CreateSignedHttpRequestTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateNonceClaim", theoryData);
@@ -974,7 +974,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CreateAdditionalClaimTheoryData))]
+        [Theory, MemberData(nameof(CreateAdditionalClaimTheoryData), DisableDiscoveryEnumeration = true)]
         public void CreateAdditionalClaim(CreateSignedHttpRequestTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateAdditionalClaim", theoryData);

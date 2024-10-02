@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             return handler.CreateSignedHttpRequest(descriptor);
         }
 
-        [Theory, MemberData(nameof(ValidateTsClaimTheoryData))]
+        [Theory, MemberData(nameof(ValidateTsClaimTheoryData), DisableDiscoveryEnumeration = true)]
         public void ValidateTsClaim(ValidateSignedHttpRequestTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateTsClaim", theoryData);
@@ -142,7 +142,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ValidateMClaimTheoryData))]
+        [Theory, MemberData(nameof(ValidateMClaimTheoryData), DisableDiscoveryEnumeration = true)]
         public void ValidateMClaim(ValidateSignedHttpRequestTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateMClaim", theoryData);
@@ -224,7 +224,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ValidateUClaimTheoryData))]
+        [Theory, MemberData(nameof(ValidateUClaimTheoryData), DisableDiscoveryEnumeration = true)]
         public void ValidateUClaim(ValidateSignedHttpRequestTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateUClaim", theoryData);
@@ -318,7 +318,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ValidatePClaimTheoryData))]
+        [Theory, MemberData(nameof(ValidatePClaimTheoryData), DisableDiscoveryEnumeration = true)]
         public void ValidatePClaim(ValidateSignedHttpRequestTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidatePClaim", theoryData);
@@ -429,7 +429,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ValidateHClaimTheoryData))]
+        [Theory, MemberData(nameof(ValidateHClaimTheoryData), DisableDiscoveryEnumeration = true)]
         public void ValidateHClaim(ValidateSignedHttpRequestTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateHClaim", theoryData);
@@ -680,7 +680,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ValidateQClaimTheoryData))]
+        [Theory, MemberData(nameof(ValidateQClaimTheoryData), DisableDiscoveryEnumeration = true)]
         public void ValidateQClaim(ValidateSignedHttpRequestTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateQClaim", theoryData);
@@ -855,7 +855,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ValidateBClaimTheoryData))]
+        [Theory, MemberData(nameof(ValidateBClaimTheoryData), DisableDiscoveryEnumeration = true)]
         public void ValidateBClaim(ValidateSignedHttpRequestTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateBClaim", theoryData);
@@ -913,7 +913,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ValidateSignedHttpRequestCallsTheoryData))]
+        [Theory, MemberData(nameof(ValidateSignedHttpRequestCallsTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task ValidateSignedHttpRequestCalls(ValidateSignedHttpRequestTheoryData theoryData)
         {
             var containsClaim = new Func<SignedHttpRequestValidationParameters, string, bool>((validationParams, claim) =>
@@ -1259,7 +1259,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ValidateSignedHttpRequestSignatureTheoryData))]
+        [Theory, MemberData(nameof(ValidateSignedHttpRequestSignatureTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task ValidateSignedHttpRequestSignature(ValidateSignedHttpRequestTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateSignedHttpRequestSignature", theoryData);
@@ -1363,7 +1363,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ValidateSignedHttpRequestTheoryData))]
+        [Theory, MemberData(nameof(ValidateSignedHttpRequestTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task ValidateSignedHttpRequest(ValidateSignedHttpRequestTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateSignedHttpRequest", theoryData);

@@ -21,7 +21,7 @@ namespace Microsoft.IdentityModel.Tokens
         internal X509SecurityKey(JsonWebKey webKey)
             : base(webKey)
         {
-            Certificate = new X509Certificate2(Convert.FromBase64String(webKey.X5c[0]));
+            Certificate = CertificateHelper.LoadX509Certificate(webKey.X5c[0]);
             X5t = Base64UrlEncoder.Encode(Certificate.GetCertHash());
             webKey.ConvertedSecurityKey = this;
         }

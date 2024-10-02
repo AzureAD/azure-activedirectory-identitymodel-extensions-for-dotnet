@@ -8,7 +8,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
 {
     public class AadIssuerValidatorTests
     {
-        [Theory, MemberData(nameof(AadIssuerValidationTestCases))]
+        [Theory, MemberData(nameof(AadIssuerValidationTestCases), DisableDiscoveryEnumeration = true)]
         public static void IsValidIssuer_ValidatesIssuersCorrectly(AadIssuerValidatorTheoryData theoryData)
         {
             // Act

@@ -41,7 +41,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.True(jwtHeader.Comparer.GetType() == StringComparer.Ordinal.GetType(), "jwtHeader.Comparer.GetType() != StringComparer.Ordinal.GetType()");
         }
 
-        [Theory, MemberData(nameof(ConstructorTheoryData))]
+        [Theory, MemberData(nameof(ConstructorTheoryData), DisableDiscoveryEnumeration = true)]
         public void Constructors(JwtHeaderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.Constructors", theoryData);

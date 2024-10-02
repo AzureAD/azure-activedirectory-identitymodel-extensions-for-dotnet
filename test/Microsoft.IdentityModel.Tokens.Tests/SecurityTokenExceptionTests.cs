@@ -5,11 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
-#if NET8_0_OR_GREATER
 using System.Text.Json;
-#else
-using System.Runtime.Serialization.Formatters.Binary;
-#endif
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -19,7 +15,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class SecurityTokenExceptionTests
     {
-        [Theory, MemberData(nameof(ExceptionTestData))]
+        [Theory, MemberData(nameof(ExceptionTestData), DisableDiscoveryEnumeration = true)]
         public void SecurityTokenExceptionSerializationTests(SecurityTokenExceptionTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.{nameof(SecurityTokenExceptionSerializationTests)}", theoryData);
@@ -31,27 +27,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
                 var memoryStream = new MemoryStream();
 
-#if NET8_0_OR_GREATER
                 var serializerOptions = new JsonSerializerOptions();
                 serializerOptions.Converters.Add(new SecurityKeyConverterWithTypeDiscriminator());
 
                 JsonSerializer.Serialize(memoryStream, exception, theoryData.ExceptionType, serializerOptions);
                 memoryStream.Seek(0, SeekOrigin.Begin);
                 var serializedException = JsonSerializer.Deserialize(memoryStream, theoryData.ExceptionType, serializerOptions);
-#else
-                BinaryFormatter formatter = new BinaryFormatter();
-#pragma warning disable SYSLIB0011 // Type or member is obsolete
-                formatter.Serialize(memoryStream, exception);
-#pragma warning restore SYSLIB0011 // Type or member is obsolete
 
-                memoryStream.Seek(0, SeekOrigin.Begin);
-
-                formatter.Binder = new ExceptionSerializationBinder();
-#pragma warning disable SYSLIB0011 // Type or member is obsolete
-                var serializedException = formatter.Deserialize(memoryStream);
-#pragma warning restore SYSLIB0011 // Type or member is obsolete
-
-#endif
                 theoryData.ExpectedException.ProcessNoException(context);
 
                 IdentityComparer.AreEqual(exception, serializedException, context);

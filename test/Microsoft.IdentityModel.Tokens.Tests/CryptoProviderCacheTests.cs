@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// Tests that a cache key generated from a <see cref="SignatureProvider"/> or a set of components are equal.
         /// </summary>
         /// <param name="theoryData"></param>
-        [Theory, MemberData(nameof(GetCacheKeyTheoryData))]
+        [Theory, MemberData(nameof(GetCacheKeyTheoryData), DisableDiscoveryEnumeration = true)]
         public void GetCacheKey(CryptoProviderCacheTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.GetCacheKey", theoryData);
@@ -165,7 +165,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(TryAddTheoryData))]
+        [Theory, MemberData(nameof(TryAddTheoryData), DisableDiscoveryEnumeration = true)]
         public void TryAdd(CryptoProviderCacheTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.TryAdd", theoryData);
@@ -296,7 +296,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// Tests that a cache key generated from a <see cref="SignatureProvider"/> or a set of components are equal.
         /// </summary>
         /// <param name="theoryData"></param>
-        [Theory, MemberData(nameof(TryGetSignatureProviderTheoryData))]
+        [Theory, MemberData(nameof(TryGetSignatureProviderTheoryData), DisableDiscoveryEnumeration = true)]
         public void TryGetSignatureProvider(CryptoProviderCacheTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.TryGetSignatureProvider", theoryData);
@@ -447,7 +447,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Theory, MemberData(nameof(TryRemoveTheoryData))]
+        [Theory, MemberData(nameof(TryRemoveTheoryData), DisableDiscoveryEnumeration = true)]
         public void TryRemove(CryptoProviderCacheTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.TryRemove", theoryData);
