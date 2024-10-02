@@ -3,7 +3,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 8.1.1
 =====
 ### Bug fixes
-- Fixed a bug where ConfigurationManager was updating keys too frequently.
+- Fix bug where ConfigurationManager was updating keys too frequently. See [2866](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2866) for details. 
 
 8.1.0
 =====
