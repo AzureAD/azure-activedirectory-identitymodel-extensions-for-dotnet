@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.TestUtils
         public static XmlTokenStream CreateXmlTokenStream(string xml)
         {
             var xmlTokenStreamReader = new XmlTokenStreamReader(CreateDictionaryReader(xml));
-            while (xmlTokenStreamReader.Read());
+            while (xmlTokenStreamReader.Read()) ;
             return xmlTokenStreamReader.TokenStream;
         }
 
@@ -65,6 +65,18 @@ namespace Microsoft.IdentityModel.TestUtils
             {
                 var transform = new ExclusiveCanonicalizationTransform(includeComments);
                 return transform.ProcessAndDigest(CreateXmlTokenStream(xml), Default.HashAlgorithm);
+            }
+        }
+
+        public static byte[] CreateNonTransformedDigestBytes(string xml)
+        {
+            using (var stream = new MemoryStream())
+            using (var writer = XmlWriter.Create(stream))
+            using (var dictionaryWriter = XmlDictionaryWriter.CreateDictionaryWriter(writer))
+            {
+                CreateXmlTokenStream(xml).WriteTo(dictionaryWriter);
+                dictionaryWriter.Flush();
+                return Default.HashAlgorithm.ComputeHash(stream.ToArray());
             }
         }
 

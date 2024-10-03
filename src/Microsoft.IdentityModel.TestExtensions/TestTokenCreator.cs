@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -27,13 +28,13 @@ namespace Microsoft.IdentityModel.TestExtensions
     /// The example imagines a class, ClassWithMicrosoftIdentityModelDependency, which exposes ValidateToken, a method calling the
     /// Microsoft.IdentityModel library and GetTokenValidationParameters which retrieves the <see cref="TokenValidationParameters"/>
     /// the code under test actually uses. Note that it's important to use the real <see cref="TokenValidationParameters"/> since that
-    /// will allow the unit tests to actually confirm if there's a hole in the validation (e.g. certain important validation is disabled,
+    /// will allow the unit tests to actually confirm if there's a gap in the validation (e.g. certain important validation is disabled,
     /// <see cref="TokenValidationParameters.ValidateAudience"/>, <see cref="TokenValidationParameters.ValidateIssuer"/>, etc.)
     ///
     /// In the following code example, generateTokenToTest should be one of the methods from this class.
     /// 
     /// <code>
-    /// internal void AssertValidationException(Func<string> generateTokenToTest, Type innerExceptionType, string innerExceptionMessagePart)
+    /// internal void AssertValidationException(Func{string} generateTokenToTest, Type innerExceptionType, string innerExceptionMessagePart)
     /// {
     ///     try
     ///     {
@@ -103,9 +104,9 @@ namespace Microsoft.IdentityModel.TestExtensions
             new Claim(JwtRegisteredClaimNames.GivenName, "Bob", ClaimValueTypes.String, _defaultTestIssuer, _defaultTestIssuer),
             new Claim(JwtRegisteredClaimNames.Iss, _defaultTestIssuer, ClaimValueTypes.String, _defaultTestIssuer, _defaultTestIssuer),
             new Claim(JwtRegisteredClaimNames.Aud, _defaultTestAudience, ClaimValueTypes.String, _defaultTestIssuer, _defaultTestIssuer),
-            new Claim(JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(_defaultIssuedAtNotBefore).ToString(), ClaimValueTypes.String, _defaultTestIssuer, _defaultTestIssuer),
-            new Claim(JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(_defaultIssuedAtNotBefore).ToString(), ClaimValueTypes.String, _defaultTestIssuer, _defaultTestIssuer),
-            new Claim(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(_defaultExpirationTime).ToString(), ClaimValueTypes.String, _defaultTestIssuer, _defaultTestIssuer),
+            new Claim(JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(_defaultIssuedAtNotBefore).ToString(CultureInfo.InvariantCulture), ClaimValueTypes.String, _defaultTestIssuer, _defaultTestIssuer),
+            new Claim(JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(_defaultIssuedAtNotBefore).ToString(CultureInfo.InvariantCulture), ClaimValueTypes.String, _defaultTestIssuer, _defaultTestIssuer),
+            new Claim(JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(_defaultExpirationTime).ToString(CultureInfo.InvariantCulture), ClaimValueTypes.String, _defaultTestIssuer, _defaultTestIssuer),
         };
 
         /// <summary>
@@ -158,7 +159,12 @@ namespace Microsoft.IdentityModel.TestExtensions
         {
             var tokenDescriptor = CreateTokenDescriptorWithInstanceOverrides();
             var token = CreateToken(tokenDescriptor);
-            return token.Substring(0, token.LastIndexOf('.')) + ".InvalidSignature";
+
+#if NETCOREAPP
+            return string.Concat(token.AsSpan(0, token.LastIndexOf(value: '.')), ".InvalidSignature");
+#else
+            return token.Substring(0, token.LastIndexOf(value: '.')) + ".InvalidSignature";
+#endif
         }
 
         /// <summary>
@@ -334,7 +340,7 @@ namespace Microsoft.IdentityModel.TestExtensions
         /// <summary>
         /// Creates a default set of claims based on the instance values.
         /// </summary>
-        /// <returns>A <see cref="Dictionary{string, object}"/> representing the claims of a token to create.</returns>
+        /// <returns>A <see cref="Dictionary{TKey, TValue}"/> representing the claims of a token to create.</returns>
         public Dictionary<string, object> CreateClaimsSetWithInstanceOverrides()
         {
             var claims = new Dictionary<string, object>();
@@ -357,7 +363,7 @@ namespace Microsoft.IdentityModel.TestExtensions
         {
             var securityTokenDescriptor = new SecurityTokenDescriptor()
             {
-                Subject = new ClaimsIdentity(_payloadClaims),
+                Subject = ClaimsIdentityFactory.Create(_payloadClaims),
             };
 
             if (!string.IsNullOrEmpty(Issuer))
@@ -394,12 +400,12 @@ namespace Microsoft.IdentityModel.TestExtensions
         }
 
         /// <summary>
-        /// Creates a token based on the passed <see cref="Dictionary{string, object}"/>.
+        /// Creates a token based on the passed <see cref="Dictionary{TKey, TValue}"/>.
         /// </summary>
-        /// <param name="securityTokenDescriptor">
-        /// The <see cref="Dictionary{string, object}"/> of claims which describe the token to create.
+        /// <param name="claims">
+        /// The <see cref="Dictionary{TKey, TValue}"/> of claims which describe the token to create.
         /// </param>
-        /// <returns>A JWS token described by the passed <see cref="Dictionary{string, object}"/>.</returns>
+        /// <returns>A JWS token described by the passed <see cref="Dictionary{TKey, TValue}"/>.</returns>
         public string CreateToken(Dictionary<string, object> claims)
         {
             var tokenHandler = new JsonWebTokenHandler()
@@ -411,10 +417,10 @@ namespace Microsoft.IdentityModel.TestExtensions
         }
 
         /// <summary>
-        /// Creates a JSON payload based on the passed <see cref="Dictionary{string, object}"/> of claims.
+        /// Creates a JSON payload based on the passed <see cref="IDictionary{TKey, TValue}"/>of claims.
         /// </summary>
         /// <param name="claims">
-        /// The <see cref="Dictionary{string, object}"/> of claims which describe the payload to create.</param>
+        /// The <see cref="Dictionary{TKey, TValue}"/> of claims which describe the payload to create.</param>
         /// <returns>A JSON payload based on the passed <paramref name="claims"/>.</returns>
         public static string CreateJsonPayload(IDictionary<string, object> claims)
         {

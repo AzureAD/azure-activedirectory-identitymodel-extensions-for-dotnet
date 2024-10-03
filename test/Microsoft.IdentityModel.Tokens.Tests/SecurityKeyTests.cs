@@ -14,11 +14,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void ComputeJwkThumbprint()
         {
-            var exception = Assert.Throws<NotSupportedException>(() => new ManagedKeyVaultSecurityKey.ManagedKeyVaultSecurityKey("keyid").ComputeJwkThumbprint());
-            Assert.Contains("IDX10710", exception.Message);
-
-#if NET461 || NET462
-            exception = Assert.Throws<PlatformNotSupportedException>(() => new ECDsaSecurityKey(KeyingMaterial.JsonWebKeyP256, false).ComputeJwkThumbprint());
+#if NET462
+            var exception = Assert.Throws<PlatformNotSupportedException>(() => new ECDsaSecurityKey(KeyingMaterial.JsonWebKeyP256, false).ComputeJwkThumbprint());
             Assert.Contains("IDX10695", exception.Message);
 #else
             var ex = Record.Exception(() => new ECDsaSecurityKey(KeyingMaterial.JsonWebKeyP256, false).ComputeJwkThumbprint());
@@ -26,7 +23,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 #endif
         }
 
-        [Theory, MemberData(nameof(CompareJwkThumbprintsTestCases))]
+        [Theory, MemberData(nameof(CompareJwkThumbprintsTestCases), DisableDiscoveryEnumeration = true)]
         public void CompareJwkThumbprints(JsonWebKeyConverterTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CompareJwkThumbprints", theoryData);
@@ -110,7 +107,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CreateInternalIdsTestCases))]
+        [Theory, MemberData(nameof(CreateInternalIdsTestCases), DisableDiscoveryEnumeration = true)]
         public void CreateInternalIds(SecurityKeyTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateInternalIds", theoryData);

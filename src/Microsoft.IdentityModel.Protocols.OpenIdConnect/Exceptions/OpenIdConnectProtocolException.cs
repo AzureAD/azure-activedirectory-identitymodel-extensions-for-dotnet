@@ -6,7 +6,6 @@ using System.Runtime.Serialization;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
-
     /// <summary>
     /// This exception is thrown when an OpenIdConnect protocol handler encounters a protocol error.
     /// </summary>
@@ -39,14 +38,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         {
         }
 
-       /// <summary>
-       /// Initializes a new instance of the <see cref="OpenIdConnectProtocolException"/> class.
-       /// </summary>
-       /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
-       /// <param name="context">The contextual information about the source or destination.</param>
-       protected OpenIdConnectProtocolException(SerializationInfo info, StreamingContext context)
-           : base(info, context)
-       {
-       }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OpenIdConnectProtocolException"/> class.
+        /// </summary>
+        /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
+        /// <param name="context">The contextual information about the source or destination.</param>
+        protected OpenIdConnectProtocolException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+        }
     }
 }

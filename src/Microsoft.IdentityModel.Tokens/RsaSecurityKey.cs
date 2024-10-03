@@ -14,7 +14,7 @@ namespace Microsoft.IdentityModel.Tokens
     {
         private bool? _hasPrivateKey;
 
-        private bool _foundPrivateKeyDetermined = false;
+        private bool _foundPrivateKeyDetermined;
 
         private PrivateKeyStatus _foundPrivateKey;
 
@@ -76,14 +76,7 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         // imitate signing
                         byte[] hash = new byte[20];
-#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
                         Rsa.SignData(hash, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-#else
-                        if (Rsa is RSACryptoServiceProvider rsaCryptoServiceProvider)
-                            rsaCryptoServiceProvider.SignData(hash, SecurityAlgorithms.Sha256);
-                        else
-                            Rsa.DecryptValue(hash);
-#endif
                         _hasPrivateKey = true;
                     }
                     catch (CryptographicException)
@@ -135,7 +128,7 @@ namespace Microsoft.IdentityModel.Tokens
                 }
 
                 return _foundPrivateKey;
-            }           
+            }
         }
 
         /// <summary>

@@ -104,7 +104,6 @@ namespace Microsoft.IdentityModel.Tokens
             SecurityAlgorithms.EcdhEsA256kw
         };
 
-#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
         /// <summary>
         /// Creating a Signature requires the use of a <see cref="HashAlgorithm"/>.
         /// This method returns the <see cref="HashAlgorithmName"/>
@@ -148,7 +147,6 @@ namespace Microsoft.IdentityModel.Tokens
 
             throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(algorithm), LogHelper.FormatInvariant(LogMessages.IDX10652, LogHelper.MarkAsNonPII(algorithm))));
         }
-#endif
 
         /// <summary>
         /// Creating a Signature requires the use of a <see cref="HashAlgorithm"/>.
@@ -358,5 +356,46 @@ namespace Microsoft.IdentityModel.Tokens
                 || SymmetricKeyWrapAlgorithms.Contains(algorithm)
                 || SymmetricSigningAlgorithms.Contains(algorithm);
         }
+
+        /// <summary>
+        /// Returns the maximum size in bytes for a supported signature algorithms.
+        /// The key size affects the signature size for asymmetric algorithms.
+        /// </summary>
+        /// <param name="algorithm">The security algorithm to find the maximum size.</param>
+        /// <returns>Set size for known algorithms, 2K default.</returns>
+        internal static int GetMaxByteCount(string algorithm) => algorithm switch
+        {
+            SecurityAlgorithms.HmacSha256 or
+            SecurityAlgorithms.HmacSha256Signature => 32,
+
+            SecurityAlgorithms.HmacSha384 or
+            SecurityAlgorithms.HmacSha384Signature => 48,
+
+            SecurityAlgorithms.HmacSha512 or
+            SecurityAlgorithms.HmacSha512Signature => 64,
+
+            SecurityAlgorithms.EcdsaSha256 or
+            SecurityAlgorithms.EcdsaSha256Signature or
+            SecurityAlgorithms.EcdsaSha384 or
+            SecurityAlgorithms.EcdsaSha384Signature or
+            SecurityAlgorithms.RsaSha256 or
+            SecurityAlgorithms.RsaSha256Signature or
+            SecurityAlgorithms.RsaSsaPssSha256 or
+            SecurityAlgorithms.RsaSsaPssSha256Signature or
+            SecurityAlgorithms.RsaSha384 or
+            SecurityAlgorithms.RsaSsaPssSha384 or
+            SecurityAlgorithms.RsaSsaPssSha384Signature or
+            SecurityAlgorithms.RsaSha384Signature => 512,
+
+            SecurityAlgorithms.EcdsaSha512 or
+            SecurityAlgorithms.EcdsaSha512Signature or
+            SecurityAlgorithms.RsaSha512 or
+            SecurityAlgorithms.RsaSsaPssSha512 or
+            SecurityAlgorithms.RsaSsaPssSha512Signature or
+            SecurityAlgorithms.RsaSha512Signature => 1024,
+
+            // if we don't know the algorithm, report 2K twice as big as any known algorithm.
+            _ => 2048,
+        };
     }
 }

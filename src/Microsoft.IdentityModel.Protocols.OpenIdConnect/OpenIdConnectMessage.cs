@@ -13,7 +13,7 @@ using JsonPrimitives = Microsoft.IdentityModel.Tokens.Json.JsonSerializerPrimiti
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
 {
     /// <summary>
-    /// Provides access to common OpenIdConnect parameters.
+    /// Provides access to common OpenID Connect parameters.
     /// </summary>
     public class OpenIdConnectMessage : AuthenticationProtocolMessage
     {
@@ -25,7 +25,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         public OpenIdConnectMessage() { }
 
         /// <summary>
-        /// Initializes an instance of <see cref="OpenIdConnectMessage"/> class with a json string.
+        /// Initializes a new instance of <see cref="OpenIdConnectMessage"/> class with a json string.
         /// </summary>
         public OpenIdConnectMessage(string json)
         {
@@ -40,14 +40,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             {
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX21106, json)));
             }
-
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="OpenIdConnectMessage"/> class.
         /// </summary>
         /// <param name="other"> an <see cref="OpenIdConnectMessage"/> to copy.</param>
-        /// <exception cref="ArgumentNullException">If 'other' is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="other"/> is null.</exception>
         protected OpenIdConnectMessage(OpenIdConnectMessage other)
         {
             if (other == null)
@@ -111,18 +110,48 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         private void SetJsonParameters(string json)
         {
             Utf8JsonReader reader = new(Encoding.UTF8.GetBytes(json).AsSpan());
+            if (!JsonPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, true))
+                throw LogHelper.LogExceptionMessage(
+                    new JsonException(
+                        LogHelper.FormatInvariant(
+                        Tokens.LogMessages.IDX11023,
+                        LogHelper.MarkAsNonPII("JsonTokenType.StartObject"),
+                        LogHelper.MarkAsNonPII(reader.TokenType),
+                        LogHelper.MarkAsNonPII(ClassName),
+                        LogHelper.MarkAsNonPII(reader.TokenStartIndex),
+                        LogHelper.MarkAsNonPII(reader.CurrentDepth),
+                        LogHelper.MarkAsNonPII(reader.BytesConsumed))));
 
-            while (reader.Read())
+            while (true)
             {
+                // propertyValue is set to match 6.x
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
                     string propertyName = JsonPrimitives.ReadPropertyName(ref reader, ClassName, true);
                     string propertyValue = null;
                     if (reader.TokenType == JsonTokenType.String)
                         propertyValue = JsonPrimitives.ReadString(ref reader, propertyName, ClassName);
+                    else if (reader.TokenType == JsonTokenType.Number)
+                        propertyValue = (JsonPrimitives.ReadNumber(ref reader)).ToString();
+                    else if ((reader.TokenType == JsonTokenType.True) || (reader.TokenType == JsonTokenType.False))
+                        propertyValue = JsonPrimitives.ReadBoolean(ref reader, propertyName, ClassName, false).ToString();
+                    else if (reader.TokenType == JsonTokenType.Null)
+                    {
+                        propertyValue = "";
+                        reader.Read();
+                    }
+                    else if (reader.TokenType == JsonTokenType.StartArray)
+                        propertyValue = JsonPrimitives.ReadJsonElement(ref reader).GetRawText();
+                    else if (reader.TokenType == JsonTokenType.StartObject)
+                        propertyValue = JsonPrimitives.ReadJsonElement(ref reader).GetRawText();
 
                     SetParameter(propertyName, propertyValue);
                 }
+                // We read a JsonTokenType.StartObject above, exiting and positioning reader at next token.
+                else if (JsonPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, true))
+                    break;
+                else if (!reader.Read())
+                    break;
             }
         }
 
@@ -190,7 +219,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <summary>
         /// Gets or sets 'acr_values'.
         /// </summary>
-        public string AcrValues 
+        public string AcrValues
         {
             get { return GetParameter(OpenIdConnectParameterNames.AcrValues); }
             set { SetParameter(OpenIdConnectParameterNames.AcrValues, value); }
@@ -364,7 +393,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
         /// <summary>
         /// Gets or sets 'login_hint'.
         /// </summary>
-        [property: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707")]  
+        [property: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1707")]
         public string LoginHint
         {
             get { return GetParameter(OpenIdConnectParameterNames.LoginHint); }
@@ -479,7 +508,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             get { return GetParameter(OpenIdConnectParameterNames.Resource); }
             set { SetParameter(OpenIdConnectParameterNames.Resource, value); }
         }
-        
+
         /// <summary>
         /// Gets or sets 'scope'.
         /// </summary>
@@ -561,7 +590,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect
             get { return GetParameter(OpenIdConnectParameterNames.UserId); }
             set { SetParameter(OpenIdConnectParameterNames.UserId, value); }
         }
-        
+
         /// <summary>
         /// Gets or sets 'username'.
         /// </summary>

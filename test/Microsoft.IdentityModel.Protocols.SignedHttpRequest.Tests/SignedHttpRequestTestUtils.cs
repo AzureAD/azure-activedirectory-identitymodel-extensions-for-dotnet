@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
 
         internal static string DefaultEncodedAccessTokenWithCnfThumprint = CreateAt(DefaultCnfJwkThumprint, false);
 
-        internal static SigningCredentials DefaultSigningCredentials => new SigningCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256){ CryptoProviderFactory = new CryptoProviderFactory()};
+        internal static SigningCredentials DefaultSigningCredentials => new SigningCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaSha256, SecurityAlgorithms.Sha256) { CryptoProviderFactory = new CryptoProviderFactory() };
 
         internal static EncryptingCredentials DefaultEncryptingCredentials => KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2;
 
@@ -103,7 +103,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             Kid = Base64UrlEncoder.Encode(new JsonWebKey(DefaultJwkEcdsa.ToString(Formatting.None)).ComputeJwkThumbprint())
         };
 
-#if NET461 || NET462
+#if NET462
         internal static JObject DefaultJwkEcdsa => new JObject
         {
             { "kty", "EC" },
@@ -153,8 +153,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
         {
             { JwtHeaderParameterNames.Kid, KeyingMaterial.RsaSecurityKey_2048.KeyId }
         };
-
-
 
         internal static JObject DefaultSignedHttpRequestHeader => new JObject
         {
@@ -237,7 +235,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             using (var client = new HttpClient())
             {
                 var headers = client.DefaultRequestHeaders;
-                foreach(var headerKeyValuePair in headerKeyValuePairs)
+                foreach (var headerKeyValuePair in headerKeyValuePairs)
                     headers.Add(headerKeyValuePair.Key, headerKeyValuePair.Value);
 
                 return headers;
@@ -259,7 +257,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
             }
 
             foreach (var header in headers)
-            { 
+            {
                 message.Headers.Add(header.Key, header.Value);
             }
 

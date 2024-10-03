@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
@@ -19,10 +20,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     /// </summary>
     public class CrossTokenTests
     {
-        [Theory, MemberData(nameof(CrossTokenValidateTokenTheoryData))]
+        [Theory, MemberData(nameof(CrossTokenValidateTokenTheoryData), DisableDiscoveryEnumeration = true)]
         public void CrossTokenValidateToken(CrossTokenTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CrossTokenValidateToken", theoryData);
+
             try
             {
                 var samlToken = IdentityUtilities.CreateEncodedSaml(theoryData.SecurityTokenDescriptor, theoryData.SamlTokenHandler);
@@ -79,7 +81,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CanReadTokenTheoryData))]
+        [Theory, MemberData(nameof(CanReadTokenTheoryData), DisableDiscoveryEnumeration = true)]
         public void CanReadToken(TokenHandlerTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CanReadToken", theoryData);

@@ -23,7 +23,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <summary>
         /// Indicates whether the log message header (contains library version, date/time, and PII debugging information) has been written.
         /// </summary>
-        private static bool _isHeaderWritten = false;
+        private static bool _isHeaderWritten;
 
         /// <summary>
         /// The log message that is shown when PII is off.
@@ -296,7 +296,7 @@ namespace Microsoft.IdentityModel.Logging
         public static void LogVerbose(string message, params object[] args)
         {
             if (IdentityModelEventSource.Logger.IsEnabled(EventLevel.Verbose, EventKeywords.All))
-                    IdentityModelEventSource.Logger.WriteVerbose(message, args);
+                IdentityModelEventSource.Logger.WriteVerbose(message, args);
 
             if (Logger.IsEnabled(EventLogLevel.Verbose))
                 Logger.Log(WriteEntry(EventLogLevel.Verbose, null, message, args));
@@ -310,7 +310,7 @@ namespace Microsoft.IdentityModel.Logging
         public static void LogWarning(string message, params object[] args)
         {
             if (IdentityModelEventSource.Logger.IsEnabled(EventLevel.Warning, EventKeywords.All))
-                    IdentityModelEventSource.Logger.WriteWarning(message, args);
+                IdentityModelEventSource.Logger.WriteWarning(message, args);
 
             if (Logger.IsEnabled(EventLogLevel.Warning))
                 Logger.Log(WriteEntry(EventLogLevel.Warning, null, message, args));
@@ -324,7 +324,7 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="innerException">the inner <see cref="Exception"/> to be added to the outer exception.</param>
         /// <param name="format">Format string of the log message.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
-        private static T LogExceptionImpl<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(EventLevel eventLevel, string argumentName, Exception innerException, string format, params object[] args) where T : Exception 
+        private static T LogExceptionImpl<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(EventLevel eventLevel, string argumentName, Exception innerException, string format, params object[] args) where T : Exception
         {
             string message;
             if (args != null)
@@ -339,16 +339,20 @@ namespace Microsoft.IdentityModel.Logging
             if (Logger.IsEnabled(eventLogLevel))
                 Logger.Log(WriteEntry(eventLogLevel, innerException, message, null));
 
-            if (innerException != null) 
+            if (innerException != null)
+            {
                 if (string.IsNullOrEmpty(argumentName))
                     return (T)Activator.CreateInstance(typeof(T), message, innerException);
                 else
                     return (T)Activator.CreateInstance(typeof(T), argumentName, message, innerException);
+            }
             else
+            {
                 if (string.IsNullOrEmpty(argumentName))
                     return (T)Activator.CreateInstance(typeof(T), message);
                 else
                     return (T)Activator.CreateInstance(typeof(T), argumentName, message);
+            }
         }
 
         private static EventLogLevel EventLevelToEventLogLevel(EventLevel eventLevel) =>
@@ -384,7 +388,17 @@ namespace Microsoft.IdentityModel.Logging
 
             if (IdentityModelEventSource.LogCompleteSecurityArtifact && arg is ISafeLogSecurityArtifact)
                 return (arg as ISafeLogSecurityArtifact).UnsafeToString();
+            else if (arg is ISafeLogSecurityArtifact)
+            {
+                // We may later add a further flag which would log a best effort scrubbing of an artifact. E.g. JsonWebToken tries to remove the signature
+                // in the current implementation. Another flag may be added in the future to allow this middle path but for now, LogCompleteSecurityArtifact
+                // must be logged to emit any token part (other than specific claim values).
+                return string.Format(CultureInfo.InvariantCulture, IdentityModelEventSource.HiddenSecurityArtifactString, arg?.GetType().ToString() ?? "Null");
+            }
 
+            // If it's not a ISafeLogSecurityArtifact then just return the object which will be converted to string.
+            // It's possible a raw string will contain a security artifact and be exposed here but the alternative is to scrub all objects
+            // which defeats the purpose of the ShowPII flag.
             return arg;
         }
 
@@ -424,9 +438,46 @@ namespace Microsoft.IdentityModel.Logging
         /// <param name="arg">A log message argument to be marked as SecurityArtifact.</param>
         /// <param name="callback">A callback function to log the security artifact safely.</param>
         /// <returns>An argument marked as SecurityArtifact.</returns>
+        /// <remarks>
+        /// Since even the payload may sometimes contain security artifacts, naïve disarm algorithms such as removing signatures
+        /// will not work. For now the <paramref name="callback"/> will only be leveraged if
+        /// <see cref="IdentityModelEventSource.LogCompleteSecurityArtifact"/> is set and no unsafe callback is provided. Future changes
+        /// may introduce a support for best effort disarm logging.
+        /// </remarks>
         public static object MarkAsSecurityArtifact(object arg, Func<object, string> callback)
         {
             return new SecurityArtifact(arg, callback);
+        }
+
+        /// <summary>
+        /// Marks a log message argument (<paramref name="arg"/>) as SecurityArtifact.
+        /// </summary>
+        /// <param name="arg">A log message argument to be marked as SecurityArtifact.</param>
+        /// <param name="callback">A callback function to log the security artifact safely.</param>
+        /// <param name="callbackUnsafe">A callback function to log the security artifact without scrubbing.</param>
+        /// <returns>An argument marked as SecurityArtifact.</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="callback"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">if <paramref name="callbackUnsafe"/> is null.</exception>
+        /// <remarks>
+        /// Since even the payload may sometimes contain security artifacts, naïve disarm algorithms such as removing signatures
+        /// will not work. For now the <paramref name="callback"/> is currently unused. Future changes
+        /// may introduce a support for best effort disarm logging which will leverage <paramref name="callback"/>.
+        /// </remarks>
+        public static object MarkAsSecurityArtifact(object arg, Func<object, string> callback, Func<object, string> callbackUnsafe)
+        {
+            return new SecurityArtifact(arg, callback, callbackUnsafe);
+        }
+
+        /// <summary>
+        /// Marks a log message argument (<paramref name="arg"/>) as SecurityArtifact.
+        /// </summary>
+        /// <param name="arg">A log message argument to be marked as SecurityArtifact.</param>
+        /// <param name="callbackUnsafe">A callback function to log the security artifact without scrubbing.</param>
+        /// <returns>An argument marked as SecurityArtifact.</returns>
+        /// <exception cref="ArgumentNullException">if <paramref name="callbackUnsafe"/> is null.</exception>
+        public static object MarkAsUnsafeSecurityArtifact(object arg, Func<object, string> callbackUnsafe)
+        {
+            return new SecurityArtifact(arg, SecurityArtifact.UnknownSafeTokenCallback, callbackUnsafe);
         }
 
         /// <summary>

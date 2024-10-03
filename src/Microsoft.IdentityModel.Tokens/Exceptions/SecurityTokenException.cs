@@ -2,18 +2,31 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
 using System.Runtime.Serialization;
+
+#if NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
 using Microsoft.IdentityModel.Logging;
+#endif
+
+#if !NET8_0_OR_GREATER
+using System.Text;
+#endif
+
 
 namespace Microsoft.IdentityModel.Tokens
 {
-
     /// <summary>
     /// Represents a security token exception.
     /// </summary>
     [Serializable]
-    public class SecurityTokenException : Exception
+    public class SecurityTokenException : Exception, ISecurityTokenException
     {
+        [NonSerialized]
+        private string _stackTrace;
+
+        private ValidationError _validationError;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="SecurityTokenException"/> class.
         /// </summary>
@@ -48,11 +61,58 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="info">the <see cref="SerializationInfo"/> that holds the serialized object data.</param>
         /// <param name="context">The contextual information about the source or destination.</param>
 #if NET8_0_OR_GREATER
-        [Obsolete("Formatter-based serialization is obsolete", DiagnosticId = "SYSLIB0051")] 
+        [Obsolete("Formatter-based serialization is obsolete", DiagnosticId = "SYSLIB0051")]
 #endif
         protected SecurityTokenException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
+        }
+
+        /// <summary>
+        /// Sets the <see cref="ValidationError"/> that caused the exception.
+        /// </summary>
+        /// <param name="validationError"></param>
+        public void SetValidationError(ValidationError validationError)
+        {
+            _validationError = validationError;
+        }
+
+        /// <summary>
+        /// Gets the stack trace that is captured when the exception is created.
+        /// </summary>
+        public override string StackTrace
+        {
+            get
+            {
+                if (_stackTrace == null)
+                {
+                    if (_validationError == null)
+                        return base.StackTrace;
+#if NET8_0_OR_GREATER
+                    _stackTrace = new StackTrace(_validationError.StackFrames).ToString();
+#else
+                    StringBuilder sb = new();
+                    foreach (StackFrame frame in _validationError.StackFrames)
+                    {
+                        sb.Append(frame.ToString());
+                        sb.Append(Environment.NewLine);
+                    }
+
+                    _stackTrace = sb.ToString();
+#endif
+                }
+
+                return _stackTrace;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the source of the exception.
+        /// </summary>
+        public override string Source
+        {
+            get => base.Source;
+            set => base.Source = value;
         }
 
 #if NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER

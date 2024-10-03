@@ -215,7 +215,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 // will move to next element
                 // <ds:Signature> 0-1 read by EnvelopedSignatureReader
                 envelopeReader.Read();
-               
+
                 // <Issuer> 1
                 assertion.Issuer = ReadIssuer(envelopeReader);
 
@@ -1381,7 +1381,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 // No declaration, or declaring that this is just a "BaseID", is invalid since statement is abstract
                 if (declaredType == null
                     || XmlUtil.EqualsQName(declaredType, Saml2Constants.Types.BaseIDAbstractType, Saml2Constants.Namespace))
-                    throw LogReadException(LogMessages.IDX13103, Saml2Constants.Elements.BaseID, declaredType, GetType(), "ReadSubjectId" );
+                    throw LogReadException(LogMessages.IDX13103, Saml2Constants.Elements.BaseID, declaredType, GetType(), "ReadSubjectId");
 
                 // If it's NameID we can handle it
                 if (XmlUtil.EqualsQName(declaredType, Saml2Constants.Types.NameIDType, Saml2Constants.Namespace))
@@ -1610,7 +1610,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 writer.WriteAttributeString(Saml2Constants.Attributes.FriendlyName, attribute.FriendlyName);
 
             // @OriginalIssuer - optional
-            if (attribute.OriginalIssuer != null )
+            if (attribute.OriginalIssuer != null)
                 writer.WriteAttributeString(Saml2Constants.Attributes.OriginalIssuer, Saml2Constants.ClaimType2009Namespace, attribute.OriginalIssuer);
 
             string xsiTypePrefix = null;
@@ -1809,7 +1809,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogArgumentNullException(nameof(statement));
 
             if (statement.Actions.Count == 0)
-                throw LogWriteException(LogMessages.IDX13901, statement.GetType(), "Actions" );
+                throw LogWriteException(LogMessages.IDX13901, statement.GetType(), "Actions");
 
             if (string.IsNullOrEmpty(statement.Decision))
                 throw LogWriteException(LogMessages.IDX13900, Saml2Constants.Attributes.Decision, nameof(statement.Decision));
@@ -1900,8 +1900,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogArgumentNullException(nameof(evidence));
 
             if (evidence.AssertionIdReferences.Count == 0
-            &&  evidence.Assertions.Count == 0
-            &&  evidence.AssertionUriReferences.Count == 0 )
+            && evidence.Assertions.Count == 0
+            && evidence.AssertionUriReferences.Count == 0)
                 throw LogWriteException(LogMessages.IDX13902);
 
             // <Evidence>
@@ -2088,7 +2088,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 throw LogArgumentNullException(nameof(subject));
 
             // If there's no ID, there has to be a SubjectConfirmation
-            if (subject.NameId  == null && 0 == subject.SubjectConfirmations.Count)
+            if (subject.NameId == null && 0 == subject.SubjectConfirmations.Count)
                 throw LogExceptionMessage(new Saml2SecurityTokenException(FormatInvariant(LogMessages.IDX13305, subject)));
 
             // <Subject>

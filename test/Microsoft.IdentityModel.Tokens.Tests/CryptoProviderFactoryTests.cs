@@ -29,7 +29,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// <summary>
         /// This test checks that SignatureProviders are properly created and released when CryptoProviderFactory.CacheSignatureProviders = false.
         /// </summary>
-        [Theory, MemberData(nameof(CreateAndReleaseSignatureProvidersTheoryData))]
+        [Theory, MemberData(nameof(CreateAndReleaseSignatureProvidersTheoryData), DisableDiscoveryEnumeration = true)]
         public void CreateAndReleaseSignatureProviders(SignatureProviderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateAndReleaseSignatureProvidersTheoryData", theoryData);
@@ -47,13 +47,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 {
                     var disposeCalled = GetSignatureProviderIsDisposedByReflect(signatureProvider);
                     if (!disposeCalled)
-                        context.Diffs.Add("Dispose wasn't called on the AsymmetricSignatureProvider.");
+                        context.Diffs.Add("Dispose was supposed to be called on the AsymmetricSignatureProvider.");
                 }
                 else // signatureProvider.GetType().Equals(typeof(SymmetricSignatureProvider))
                 {
                     var disposeCalled = GetSignatureProviderIsDisposedByReflect(signatureProvider);
                     if (!disposeCalled)
-                        context.Diffs.Add("Dispose wasn't called on the SymmetricSignatureProvider.");
+                        context.Diffs.Add("Dispose was supposed to be called on the SymmetricSignatureProvider.");
                 }
             }
             catch (Exception ex)
@@ -130,7 +130,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Type type = typeof(CryptoProviderFactory);
             PropertyInfo[] properties = type.GetProperties();
             if (properties.Length != 7)
-                Assert.True(false, "Number of public fields has changed from 7 to: " + properties.Length + ", adjust tests");
+                Assert.Fail("Number of public fields has changed from 7 to: " + properties.Length + ", adjust tests");
 
             CustomCryptoProvider customCryptoProvider = new CustomCryptoProvider();
             GetSetContext getSetContext =
@@ -185,7 +185,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// Tests that SymmetricSignatureProviders that fault will be removed from cache
         /// </summary>
         /// <param name="theoryData"></param>
-        [Theory, MemberData(nameof(FaultingAsymmetricSignatureProvidersTheoryData))]
+        [Theory, MemberData(nameof(FaultingAsymmetricSignatureProvidersTheoryData), DisableDiscoveryEnumeration = true)]
         public void FaultingAsymmetricSignatureProviders(SignatureProviderTheoryData theoryData)
         {
             IdentityModelEventSource.ShowPII = true;
@@ -279,7 +279,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 theoryData.Add(new SignatureProviderTheoryData
                 {
                     First = true,
-                    ExpectedException = new EE(typeof(Exception)){IgnoreExceptionType = true},
+                    ExpectedException = new EE(typeof(Exception)) { IgnoreExceptionType = true },
                     CryptoProviderFactory = new CustomCryptoProviderFactory(new string[] { ALG.RsaSha256 })
                     {
                         SigningSignatureProvider = signingSignatureProvider
@@ -303,7 +303,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// Tests that SymmetricSignatureProviders that fault will be removed from cache
         /// </summary>
         /// <param name="theoryData"></param>
-        [Theory, MemberData(nameof(FaultingSymmetricSignatureProvidersTheoryData))]
+        [Theory, MemberData(nameof(FaultingSymmetricSignatureProvidersTheoryData), DisableDiscoveryEnumeration = true)]
         public void FaultingSymmetricSignatureProviders(SignatureProviderTheoryData theoryData)
         {
             IdentityModelEventSource.ShowPII = true;
@@ -315,7 +315,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 var signingSignatureProvider = theoryData.CryptoProviderFactory.CreateForSigning(theoryData.SigningKey, theoryData.SigningAlgorithm) as SymmetricSignatureProvider;
                 var signedBytes = signingSignatureProvider.Sign(bytes);
                 var verifyingSignatureProvider = theoryData.CryptoProviderFactory.CreateForVerifying(theoryData.VerifyKey, theoryData.VerifyAlgorithm) as SymmetricSignatureProvider;
-                if (theoryData.VerifySpecifyingLength)
+                if (theoryData.VerifyUsingLength)
                     verifyingSignatureProvider.Verify(bytes, signedBytes);
                 else
                     verifyingSignatureProvider.Verify(bytes, signedBytes, signedBytes.Length);
@@ -426,7 +426,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     VerifyAlgorithm = ALG.HmacSha256,
                     VerifyKey = Default.SymmetricSigningKey256,
                     VerifySignatureProviderType = typeof(CustomSymmetricSignatureProvider).ToString(),
-                    VerifySpecifyingLength = true
+                    VerifyUsingLength = true
                 });
 
                 // Symmetric disposed signing
@@ -496,7 +496,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     VerifyAlgorithm = ALG.HmacSha256,
                     VerifyKey = Default.SymmetricSigningKey256,
                     VerifySignatureProviderType = typeof(CustomSymmetricSignatureProvider).ToString(),
-                    VerifySpecifyingLength = true
+                    VerifyUsingLength = true
                 });
 
                 // Symmetric signing verifying succeed
@@ -518,7 +518,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     VerifyAlgorithm = ALG.HmacSha256,
                     VerifyKey = Default.SymmetricSigningKey256,
                     VerifySignatureProviderType = typeof(CustomSymmetricSignatureProvider).ToString(),
-                    VerifySpecifyingLength = false
+                    VerifyUsingLength = false
                 });
 
                 // Symmetric signing verifying (specifying length) succeed
@@ -540,14 +540,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     VerifyAlgorithm = ALG.HmacSha256,
                     VerifyKey = Default.SymmetricSigningKey256,
                     VerifySignatureProviderType = typeof(CustomSymmetricSignatureProvider).ToString(),
-                    VerifySpecifyingLength = true
+                    VerifyUsingLength = true
                 });
 
                 return theoryData;
             }
         }
 
-        [Theory, MemberData(nameof(ReleaseSignatureProvidersTheoryData))]
+        [Theory, MemberData(nameof(ReleaseSignatureProvidersTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReleaseSignatureProviders(SignatureProviderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReleaseSignatureProviders", theoryData);
@@ -636,7 +636,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ReleaseHashAlgorithmsTheoryData))]
+        [Theory, MemberData(nameof(ReleaseHashAlgorithmsTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReleaseHashAlgorithms(CryptoProviderFactoryTheoryData theoryData)
         {
             IdentityModelEventSource.ShowPII = true;
@@ -691,7 +691,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ReleaseKeyWrapProvidersTheoryData))]
+        [Theory, MemberData(nameof(ReleaseKeyWrapProvidersTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReleaseKeyWrapProviders(CryptoProviderFactoryTheoryData theoryData)
         {
             IdentityModelEventSource.ShowPII = true;
@@ -748,7 +748,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ReleaseRsaKeyWrapProvidersTheoryData))]
+        [Theory, MemberData(nameof(ReleaseRsaKeyWrapProvidersTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReleaseRsaKeyWrapProviders(CryptoProviderFactoryTheoryData theoryData)
         {
             IdentityModelEventSource.ShowPII = true;
@@ -917,14 +917,14 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             cryptoProviderFactory.ReleaseSignatureProvider(signing);
 
-            if (!GetSignatureProviderIsDisposedByReflect(signing))
-                context.AddDiff($"{nameof(signing2)} should have been disposed");
+            if (GetSignatureProviderIsDisposedByReflect(signing))
+                context.AddDiff($"{nameof(signing)} should not have been disposed");
 
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Fact (Skip = "too long")]
-        public void ReferenceCountingTest_MultiThreaded()
+        [Fact(Skip = "too long")]
+        public async Task ReferenceCountingTest_MultiThreaded()
         {
             var context = new CompareContext($"{this}.ReferenceCountingTest_MultiThreaded");
             var cryptoProviderFactory = new CryptoProviderFactory(CryptoProviderCacheTests.CreateCacheForTesting());
@@ -957,7 +957,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 });
             }
 
-            Task.WaitAll(tasks);
+            await Task.WhenAll(tasks);
 
             cryptoProviderFactory.CacheSignatureProviders = false;
 
@@ -1105,7 +1105,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Key,
                     KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Alg,
                     KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2.Enc)
-                    { CryptoProviderFactory = cryptoProviderFactory });
+            { CryptoProviderFactory = cryptoProviderFactory });
 
             JwtPayload payload = new JwtPayload("IssuerName", "Audience", testClaims, DateTime.Now.AddHours(-1), DateTime.Now.AddHours(1), DateTime.Now.AddHours(-1));
             var token = new JwtSecurityToken(header, payload);
@@ -1213,7 +1213,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// <summary>
         /// Thread proc that creates and removes providers.
         /// </summary>
-        /// <param name="obj">func creating providers (signing and verifying)</param>
+        /// <param name="factory">The input to the <paramref name="func"/>.</param>
+        /// <param name="func">func creating providers (signing and verifying).</param>
         private static void ThreadStartProcAddAndRemoveProviders(CryptoProviderFactory factory, CreateProvidersFunc func)
         {
             var cache = factory.CryptoProviderCache as InMemoryCryptoProviderCache;

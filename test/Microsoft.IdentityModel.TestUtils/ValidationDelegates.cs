@@ -87,7 +87,7 @@ namespace Microsoft.IdentityModel.TestUtils
             return issuer;
         }
 
-        public static ValueTask<string> IssuerValidatorAsync(string issuer, SecurityToken token, TokenValidationParameters validationParameters)
+        public static ValueTask<string> IssuerValidatorInternalAsync(string issuer, SecurityToken token, TokenValidationParameters validationParameters)
         {
             return new ValueTask<string>(issuer);
         }
@@ -216,7 +216,7 @@ namespace Microsoft.IdentityModel.TestUtils
             if (expires == null)
                 return false;
 
-            var samlToken = (SamlSecurityToken) new SamlSecurityTokenHandler().ReadToken(token);
+            var samlToken = (SamlSecurityToken)new SamlSecurityTokenHandler().ReadToken(token);
             return samlToken.Assertion.Conditions.NotOnOrAfter == expires;
         }
 
@@ -225,7 +225,7 @@ namespace Microsoft.IdentityModel.TestUtils
             if (expires == null)
                 return false;
 
-            var saml2Token = (Saml2SecurityToken) new Saml2SecurityTokenHandler().ReadToken(token);
+            var saml2Token = (Saml2SecurityToken)new Saml2SecurityTokenHandler().ReadToken(token);
             return saml2Token.Assertion.Conditions.NotOnOrAfter == expires;
         }
 

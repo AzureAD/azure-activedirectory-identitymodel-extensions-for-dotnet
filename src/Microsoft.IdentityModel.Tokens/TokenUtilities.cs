@@ -83,7 +83,7 @@ namespace Microsoft.IdentityModel.Tokens
             return payload;
         }
 
-        internal static IDictionary<string, object> CreateDictionaryFromClaims(
+        internal static Dictionary<string, object> CreateDictionaryFromClaims(
             IEnumerable<Claim> claims,
             SecurityTokenDescriptor tokenDescriptor,
             bool audienceSet,
@@ -186,7 +186,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Returns all <see cref="SecurityKey"/> provided in <paramref name="configuration"/> and <paramref name="validationParameters"/>.
         /// </summary>
         /// <param name="configuration">The <see cref="BaseConfiguration"/> that contains signing keys used for validation.</param>
-        /// <param name="validationParameters">A <see cref="TokenValidationParameters"/> required for validation.</param>
+        /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
         /// <returns>Returns all <see cref="SecurityKey"/> provided in provided in <paramref name="configuration"/> and <paramref name="validationParameters"/>.</returns>
         internal static IEnumerable<SecurityKey> GetAllSigningKeys(BaseConfiguration configuration = null, TokenValidationParameters validationParameters = null)
         {
@@ -250,7 +250,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns><c>true</c> if the exception is certain types of exceptions otherwise, <c>false</c>.</returns>
         internal static bool IsRecoverableException(Exception exception)
         {
-            return   exception is SecurityTokenInvalidSignatureException
+            return exception is SecurityTokenInvalidSignatureException
                   || exception is SecurityTokenInvalidIssuerException
                   || exception is SecurityTokenSignatureKeyNotFoundException;
         }
@@ -276,6 +276,52 @@ namespace Microsoft.IdentityModel.Tokens
                 return isRecoverableSigningKey.Value;
             }
             else if (currentException is SecurityTokenInvalidSignatureException)
+            {
+                SecurityKey currentSigningKey = currentConfiguration.SigningKeys.FirstOrDefault(x => x.KeyId == kid);
+                if (currentSigningKey == null)
+                    return isRecoverableSigningKey.Value;
+
+                SecurityKey lkgSigningKey = lkgConfiguration.SigningKeys.FirstOrDefault(signingKey => signingKey.KeyId == kid);
+                return lkgSigningKey != null && currentSigningKey.InternalId != lkgSigningKey.InternalId;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Check whether the given exception type is recoverable by LKG.
+        /// </summary>
+        /// <param name="exceptionType">The exception type to check</param>
+        /// <returns><c>true</c> if the exception is certain types of exceptions otherwise, <c>false</c>.</returns>
+        internal static bool IsRecoverableExceptionType(Type exceptionType)
+        {
+            return exceptionType == typeof(SecurityTokenInvalidSignatureException) ||
+                exceptionType == typeof(SecurityTokenInvalidIssuerException) ||
+                exceptionType == typeof(SecurityTokenSignatureKeyNotFoundException);
+        }
+
+        /// <summary>
+        /// Check whether the given configuration is recoverable by LKG.
+        /// </summary>
+        /// <param name="kid">The kid from token."/></param>
+        /// <param name="currentConfiguration">The <see cref="BaseConfiguration"/> to check.</param>
+        /// <param name="lkgConfiguration">The LKG exception to check.</param>
+        /// <param name="currentExceptionType">The exception type to check.</param>
+        /// <returns><c>true</c> if the configuration is recoverable otherwise, <c>false</c>.</returns>
+        internal static bool IsRecoverableConfigurationAndExceptionType(
+            string kid, BaseConfiguration currentConfiguration, BaseConfiguration lkgConfiguration, Type currentExceptionType)
+        {
+            Lazy<bool> isRecoverableSigningKey = new(() => lkgConfiguration.SigningKeys.Any(signingKey => signingKey.KeyId == kid));
+
+            if (currentExceptionType == typeof(SecurityTokenInvalidIssuerException))
+            {
+                return currentConfiguration.Issuer != lkgConfiguration.Issuer;
+            }
+            else if (currentExceptionType == typeof(SecurityTokenSignatureKeyNotFoundException))
+            {
+                return isRecoverableSigningKey.Value;
+            }
+            else if (currentExceptionType == typeof(SecurityTokenInvalidSignatureException))
             {
                 SecurityKey currentSigningKey = currentConfiguration.SigningKeys.FirstOrDefault(x => x.KeyId == kid);
                 if (currentSigningKey == null)

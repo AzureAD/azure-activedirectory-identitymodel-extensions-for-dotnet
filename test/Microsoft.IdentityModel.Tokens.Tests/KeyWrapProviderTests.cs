@@ -29,7 +29,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     /// </summary>
     public class KeyWrapProviderTests
     {
-        [Theory, MemberData(nameof(KeyWrapConstructorTestCases))]
+        [Theory, MemberData(nameof(KeyWrapConstructorTestCases), DisableDiscoveryEnumeration = true)]
         public void Constructors(SupportedAlgorithmTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.Constructors", theoryData);
@@ -109,7 +109,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.True(provider.GetSymmetricAlgorithmCalled);
         }
 
-        [Theory, MemberData(nameof(WrapUnwrapTheoryData))]
+        [Theory, MemberData(nameof(WrapUnwrapTheoryData), DisableDiscoveryEnumeration = true)]
         public void WrapUnwrapKey(KeyWrapTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WrapUnwrapKey", theoryData);
@@ -171,7 +171,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
         }
 
-        [Theory, MemberData(nameof(UnwrapTamperedTheoryData))]
+        [Theory, MemberData(nameof(UnwrapTamperedTheoryData), DisableDiscoveryEnumeration = true)]
         public void UnwrapTamperedData(KeyWrapTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.UnwrapTamperedData", theoryData);
@@ -217,7 +217,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
         }
 
-        [Theory, MemberData(nameof(UnwrapMismatchTheoryData))]
+        [Theory, MemberData(nameof(UnwrapMismatchTheoryData), DisableDiscoveryEnumeration = true)]
         public void UnwrapMismatch(KeyWrapTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.UnwrapMismatch", theoryData);
@@ -262,7 +262,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             });
         }
 
-        [Theory, MemberData(nameof(UnwrapTheoryData))]
+        [Theory, MemberData(nameof(UnwrapTheoryData), DisableDiscoveryEnumeration = true)]
         public void UnwrapParameterCheck(KeyWrapTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.UnwrapParameterCheck", theoryData);

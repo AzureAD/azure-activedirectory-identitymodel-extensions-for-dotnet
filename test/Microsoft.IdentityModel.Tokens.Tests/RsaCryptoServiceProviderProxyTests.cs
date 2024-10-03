@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-#if NET461 || NET462 || NET472
+#if NET462 || NET472
 using System.Security.Cryptography.X509Certificates;
 #endif
 
-#if NET461 || NET462 || NET472
+#if NET462 || NET472
 
 using System;
 using System.Security.Cryptography;
@@ -18,7 +18,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class RsaCryptoServiceProviderProxyTests
     {
-        [Theory, MemberData(nameof(RSADecryptTheoryData))]
+        [Theory, MemberData(nameof(RSADecryptTheoryData), DisableDiscoveryEnumeration = true)]
         public void RSADecrypt(RSACryptoServiceProviderProxyTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.RSADecrypt", theoryData);
@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Theory, MemberData(nameof(RSADecryptTheoryData))]
+        [Theory, MemberData(nameof(RSADecryptTheoryData), DisableDiscoveryEnumeration = true)]
         public void RSADecryptValue(RSACryptoServiceProviderProxyTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.RSADecryptValue", theoryData);
@@ -59,7 +59,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
-#if NET461 || NET462 || NET472
+#if NET462 || NET472
                 var rsaCsp = new RSACryptoServiceProvider();
                 rsaCsp.ImportParameters(KeyingMaterial.RsaParameters_2048);
 #else
@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(RSAEncryptDecryptTheoryData))]
+        [Theory, MemberData(nameof(RSAEncryptDecryptTheoryData), DisableDiscoveryEnumeration = true)]
         public void RSAEncryptDecrypt(RSACryptoServiceProviderProxyTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.RSAEncryptDecrypt", theoryData);
@@ -111,7 +111,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
-#if NET461 || NET462 || NET472
+#if NET462 || NET472
                 var rsaFromX509Cert = new RSACryptoServiceProvider();
                 var rsaCng = KeyingMaterial.DefaultCert_2048.GetRSAPrivateKey() as RSACng;
                 var parameters = rsaCng.ExportParameters(true);
@@ -158,7 +158,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(RSAEncryptDecryptValueTheoryData))]
+        [Theory, MemberData(nameof(RSAEncryptDecryptValueTheoryData), DisableDiscoveryEnumeration = true)]
         public void RSAEncryptDecryptValue(RSACryptoServiceProviderProxyTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.RSAEncryptDecryptValue", theoryData);
@@ -185,7 +185,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
-#if NET461 || NET462 || NET472
+#if NET462 || NET472
                 var rsaCsp = new RSACryptoServiceProvider();
                 rsaCsp.ImportParameters(KeyingMaterial.RsaParameters_2048);
 #else
@@ -224,7 +224,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(RSASignVerifyDataTheoryData))]
+        [Theory, MemberData(nameof(RSASignVerifyDataTheoryData), DisableDiscoveryEnumeration = true)]
         public void RSASignVerifyData(RSACryptoServiceProviderProxyTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.RSASignVerifyData", theoryData);
@@ -254,7 +254,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
-#if NET461 || NET462 || NET472
+#if NET462 || NET472
                 var rsaCsp = new RSACryptoServiceProvider();
                 rsaCsp.ImportParameters(KeyingMaterial.RsaParameters_2048);
 #else
@@ -304,7 +304,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(RSAVerifyDataTheoryData))]
+        [Theory, MemberData(nameof(RSAVerifyDataTheoryData), DisableDiscoveryEnumeration = true)]
         public void RSAVerifyData(RSACryptoServiceProviderProxyTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.RSAVerifyData", theoryData);
@@ -328,7 +328,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         {
             get
             {
-#if NET461 || NET462 || NET472
+#if NET462 || NET472
                 var rsaCsp = new RSACryptoServiceProvider();
                 rsaCsp.ImportParameters(KeyingMaterial.RsaParameters_2048);
 #else

@@ -84,6 +84,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     {
         private TimeSpan _signedHttpRequestLifetime = DefaultSignedHttpRequestLifetime;
         private TokenHandler _tokenHandler = new JsonWebTokenHandler();
+        private ICollection<string> _allowedDomainsForJkuRetrieval;
 
         /// <summary>
         /// Gets or sets a value indicating whether the unsigned query parameters are accepted or not.
@@ -96,6 +97,26 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </summary>
         /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-5.1</remarks>
         public bool AcceptUnsignedHeaders { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether PoP key can be resolved from 'jku' claim.
+        /// If you set this property to true, you must set values in <see cref="AllowedDomainsForJkuRetrieval"/>.
+        /// </summary>
+        /// <remarks>https://datatracker.ietf.org/doc/html/rfc7800#section-3.5</remarks>
+        public bool AllowResolvingPopKeyFromJku { get; set; }
+
+        /// <summary>
+        /// Gets or sets a list of allowed domains for 'jku' claim retrieval.
+        /// The domains are not directly compared with the 'jku' claim. Allowed domain would be
+        /// deemed valid if the host specified in the 'jku' claim ends with the domain value.
+        /// </summary>
+        /// <remarks>
+        /// Domains should be provided in the following format:
+        /// "contoso.com"
+        /// "abc.fabrikam.com"
+        /// </remarks>
+        public ICollection<string> AllowedDomainsForJkuRetrieval => _allowedDomainsForJkuRetrieval ??
+            Interlocked.CompareExchange(ref _allowedDomainsForJkuRetrieval, new List<string>(), null) ?? _allowedDomainsForJkuRetrieval;
 
         /// <summary>
         /// Gets or sets the claims to validate if present.
@@ -224,19 +245,19 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// Gets or sets a value indicating whether the <see cref="SignedHttpRequestClaimTypes.Q"/> claim should be validated or not.
         /// </summary>
         /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
-        public bool ValidateQ { get; set; } = false;
+        public bool ValidateQ { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="SignedHttpRequestClaimTypes.H"/> claim should be validated or not.
         /// </summary>
         /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
-        public bool ValidateH { get; set; } = false;
+        public bool ValidateH { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the <see cref="SignedHttpRequestClaimTypes.B"/> claim should be validated or not.
         /// </summary>
         /// <remarks>https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3</remarks>  
-        public bool ValidateB { get; set; } = false;
+        public bool ValidateB { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether claims in <see cref="ClaimsToValidateWhenPresent"/> should be validated if present.
@@ -244,6 +265,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <remarks>
         /// Allows for validation of a claim if present, even if the validation option for the claim is set to <c>false</c>.
         /// </remarks>
-        public bool ValidatePresentClaims { get; set; } = false;
+        public bool ValidatePresentClaims { get; set; }
     }
 }

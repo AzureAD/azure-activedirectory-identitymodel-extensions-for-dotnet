@@ -1,6 +1,5 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 
 using System;
 using System.IO;
@@ -46,7 +45,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
         /// <returns>A <see cref="JsonWebKeySet"/>.</returns>
         public static JsonWebKeySet Read(ref Utf8JsonReader reader, JsonWebKeySet jsonWebKeySet)
         {
-            if (!JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, false))
+            if (!JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, true))
                 throw LogHelper.LogExceptionMessage(
                     new JsonException(
                         LogHelper.FormatInvariant(
@@ -58,7 +57,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
                         LogHelper.MarkAsNonPII(reader.CurrentDepth),
                         LogHelper.MarkAsNonPII(reader.BytesConsumed))));
 
-            while (reader.Read())
+            while (true)
             {
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
@@ -73,13 +72,14 @@ namespace Microsoft.IdentityModel.Tokens.Json
                         if (propertyName.Equals(JsonWebKeyParameterNames.Keys, StringComparison.OrdinalIgnoreCase))
                             ReadKeys(ref reader, jsonWebKeySet);
                         else
-                            jsonWebKeySet.AdditionalData[propertyName] = JsonSerializerPrimitives.ReadPropertyValueAsObject(ref reader,JsonWebKeyParameterNames.Keys, JsonWebKeySet.ClassName);
+                            jsonWebKeySet.AdditionalData[propertyName] = JsonSerializerPrimitives.ReadPropertyValueAsObject(ref reader, JsonWebKeyParameterNames.Keys, JsonWebKeySet.ClassName);
                     }
                 }
+                // We read a JsonTokenType.StartObject above, exiting and positioning reader at next token.
                 else if (JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, true))
-                {
                     break;
-                }
+                else if (!reader.Read())
+                    break;
             }
 
             return jsonWebKeySet;
@@ -87,7 +87,7 @@ namespace Microsoft.IdentityModel.Tokens.Json
 
         public static void ReadKeys(ref Utf8JsonReader reader, JsonWebKeySet jsonWebKeySet)
         {
-            if (!JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartArray, false))
+            if (!JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartArray, true))
                 throw LogHelper.LogExceptionMessage(
                     JsonSerializerPrimitives.CreateJsonReaderExceptionInvalidType(
                         ref reader,
@@ -95,11 +95,14 @@ namespace Microsoft.IdentityModel.Tokens.Json
                         JsonWebKeyParameterNames.KeyOps,
                         JsonWebKeySet.ClassName));
 
-            while (reader.Read())
+            while (true)
             {
                 if (reader.TokenType == JsonTokenType.StartObject)
                     jsonWebKeySet.Keys.Add(JsonWebKeySerializer.Read(ref reader, new JsonWebKey()));
-                else if (JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndArray, false))
+                // We read a JsonTokenType.StartArray above, exiting and positioning reader at next token.
+                else if (JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndArray, true))
+                    break;
+                else if (!reader.Read())
                     break;
             }
         }

@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Saml.Tests;
 using Microsoft.IdentityModel.Xml;
@@ -52,7 +54,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
             TestUtilities.AssertFailIfErrors("Saml2SecurityTokenHandlerTests_GetSets", context.Errors);
         }
 
-        [Theory, MemberData(nameof(CanReadTokenTheoryData))]
+        [Theory, MemberData(nameof(CanReadTokenTheoryData), DisableDiscoveryEnumeration = true)]
         public void CanReadToken(Saml2TheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.CanReadToken", theoryData);
@@ -61,7 +63,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
             {
                 // TODO - need to pass actual Saml2Token
                 if (theoryData.CanRead != theoryData.Handler.CanReadToken(theoryData.Token))
-                    Assert.False(true, $"Expected CanRead != CanRead, token: {theoryData.Token}");
+                    Assert.Fail($"Expected CanRead != CanRead, token: {theoryData.Token}");
 
                 theoryData.ExpectedException.ProcessNoException(context);
             }
@@ -109,7 +111,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
             };
         }
 
-        [Theory, MemberData(nameof(ConsolidateAttributesTheoryData))]
+        [Theory, MemberData(nameof(ConsolidateAttributesTheoryData), DisableDiscoveryEnumeration = true)]
         public void ConsolidateAttributes(Saml2TheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ConsolidateAttributes", theoryData);
@@ -231,7 +233,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
             return context.Merge(localContext);
         }
 
-        [Theory, MemberData(nameof(ReadTokenTheoryData))]
+        [Theory, MemberData(nameof(ReadTokenTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReadToken(Saml2TheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadToken", theoryData);
@@ -285,7 +287,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
             }
         }
 
-        [Theory, MemberData(nameof(RoundTripActorTheoryData))]
+        [Theory, MemberData(nameof(RoundTripActorTheoryData), DisableDiscoveryEnumeration = true)]
         public void RoundTripActor(Saml2TheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.RoundTripActor", theoryData);
@@ -295,7 +297,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
             var actor = handler.CreateActorStringPublic(theoryData.TokenDescriptor.Subject);
         }
 
-        [Theory, MemberData(nameof(WriteTokenTheoryData))]
+        [Theory, MemberData(nameof(WriteTokenTheoryData), DisableDiscoveryEnumeration = true)]
         public void WriteToken(Saml2TheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WriteToken", theoryData);
@@ -340,7 +342,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                     Expires = Default.Expires,
                     Issuer = Default.Issuer,
                     SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
-                    Subject = new ClaimsIdentity(Default.SamlClaims),
+                    Subject = new CaseSensitiveClaimsIdentity(Default.SamlClaims),
                 };
 
                 var validationParameters = new TokenValidationParameters
@@ -485,7 +487,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                 Issuer = Default.Issuer,
                 Audience = Default.Audience,
                 SigningCredentials = Default.AsymmetricSigningCredentials,
-                Subject = new ClaimsIdentity()
+                Subject = new CaseSensitiveClaimsIdentity()
             };
 
             var token = tokenHandler.CreateToken(descriptorNoTimeValues);
@@ -495,7 +497,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
             Assert.NotEqual(DateTime.MinValue, saml2SecurityToken.ValidTo);
         }
 
-        [Theory, MemberData(nameof(ValidateAudienceTheoryData))]
+        [Theory, MemberData(nameof(ValidateAudienceTheoryData), DisableDiscoveryEnumeration = true)]
         public void ValidateAudience(Saml2TheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateAudience", theoryData);
@@ -531,7 +533,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ValidateIssuerTheoryData))]
+        [Theory, MemberData(nameof(ValidateIssuerTheoryData), DisableDiscoveryEnumeration = true)]
         public void ValidateIssuer(Saml2TheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateIssuer", theoryData);
@@ -567,7 +569,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ValidateTokenTheoryData))]
+        [Theory, MemberData(nameof(ValidateTokenTheoryData), DisableDiscoveryEnumeration = true)]
         public void ValidateToken(Saml2TheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ValidateToken", theoryData);
@@ -671,6 +673,63 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                         ExpectedException = new ExpectedException(typeof(Saml2SecurityTokenReadException), "IDX13138:"),
                         Token = ReferenceTokens.Saml2Token_NoAttributes,
                         ValidationParameters = new TokenValidationParameters(),
+                    },
+                    new Saml2TheoryData("ReferenceTokens_Saml2Token_Valid_Issuer_ConfigurationManager")
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10500:"),
+                        Token = ReferenceTokens.Saml2Token_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new StaticConfigurationManager<BaseConfiguration>(new WsFederationConfiguration()
+                            {
+                                Issuer = "https://sts.windows.net/add29489-7269-41f4-8841-b63c95564420/",
+                            }),
+                            ValidateIssuerSigningKey = false,
+                            ValidateIssuer = true,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new Saml2TheoryData("ReferenceTokens_Saml2Token_Valid_IssuerSigningKey_ConfigurationManager")
+                    {
+                        Token = ReferenceTokens.Saml2Token_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new StaticConfigurationManager<BaseConfiguration>(new WsFederationConfiguration()
+                            {
+                                SigningKeys = { KeyingMaterial.DefaultAADSigningKey },
+                            }),
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new Saml2TheoryData("ReferenceTokens_Saml2Token_Valid_IssuerSigningKey_and_Issuer_ConfigurationManager")
+                    {
+                        Token = ReferenceTokens.Saml2Token_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new StaticConfigurationManager<BaseConfiguration>(new WsFederationConfiguration()
+                            {
+                                Issuer = "https://sts.windows.net/add29489-7269-41f4-8841-b63c95564420/",
+                                SigningKeys = { KeyingMaterial.DefaultAADSigningKey },
+                            }),
+                            ValidateIssuer = true,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
+                    },
+                    new Saml2TheoryData("ReferenceTokens_Saml2Token_Valid_NoSigningKey_ConfigurationManager")
+                    {
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10500:"),
+                        Token = ReferenceTokens.Saml2Token_Valid,
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ConfigurationManager = new StaticConfigurationManager<BaseConfiguration>(new WsFederationConfiguration()),
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ValidateLifetime = false,
+                        }
                     },
                     new Saml2TheoryData("ReferenceTokens_Saml2Token_Valid_IssuerSigningKey_set")
                     {
@@ -1024,7 +1083,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CreateSaml2TokenUsingTokenDescriptorTheoryData))]
+        [Theory, MemberData(nameof(CreateSaml2TokenUsingTokenDescriptorTheoryData), DisableDiscoveryEnumeration = true)]
         public void CreateSaml2TokenUsingTokenDescriptor(CreateTokenTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.CreateSaml2TokenUsingTokenDescriptor", theoryData);
@@ -1033,6 +1092,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                 { typeof(Saml2Assertion), new List<string> { "IssueInstant", "InclusiveNamespacesPrefixList", "Signature", "SigningCredentials", "CanonicalString" } },
                 { typeof(Saml2SecurityToken), new List<string> { "SigningKey" } },
             };
+
+            if (!theoryData.AudiencesForSecurityTokenDescriptor.IsNullOrEmpty())
+            {
+                foreach (var audience in theoryData.AudiencesForSecurityTokenDescriptor)
+                    theoryData.TokenDescriptor.Audiences.Add(audience);
+            }
 
             try
             {
@@ -1064,8 +1129,87 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                     ValidateLifetime = false,
                     IssuerSigningKey = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256
                 };
+                var validationParametersWithAudiences = new TokenValidationParameters
+                {
+                    AuthenticationType = "Federation",
+                    ValidateAudience = true,
+                    ValidateIssuer = false,
+                    ValidateLifetime = false,
+                    IssuerSigningKey = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256,
+                    ValidAudiences = Default.Audiences
+                };
+                var invalidAudience = "http://NotValid.Audience.com";
+                var invalidAudiences = new List<string> { invalidAudience, "http://NotValid.Audience2.com" };
                 return new TheoryData<CreateTokenTheoryData>
                 {
+                    new CreateTokenTheoryData
+                    {
+                        First = true,
+                        TestId = "ValidAudiences",
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            NotBefore = Default.NotBefore,
+                            Expires = Default.Expires,
+                            Issuer = Default.Issuer,
+                            SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
+                            EncryptingCredentials = null,
+                            Subject = new CaseSensitiveClaimsIdentity(Default.SamlClaims)
+                        },
+                        Saml2SecurityTokenHandler = new Saml2SecurityTokenHandler(),
+                        ValidationParameters = validationParametersWithAudiences,
+                        AudiencesForSecurityTokenDescriptor = Default.Audiences
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "InvalidAudiences",
+                        ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            NotBefore = Default.NotBefore,
+                            Expires = Default.Expires,
+                            Issuer = Default.Issuer,
+                            SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
+                            EncryptingCredentials = null,
+                            Subject = new CaseSensitiveClaimsIdentity(Default.SamlClaims)
+                        },
+                        Saml2SecurityTokenHandler = new Saml2SecurityTokenHandler(),
+                        ValidationParameters = validationParametersWithAudiences,
+                        AudiencesForSecurityTokenDescriptor = invalidAudiences
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "UsingAudienceAndAudiences_OnlyAudienceValid",
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            Audience = Default.Audience,
+                            NotBefore = Default.NotBefore,
+                            Expires = Default.Expires,
+                            Issuer = Default.Issuer,
+                            SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
+                            EncryptingCredentials = null,
+                            Subject = new CaseSensitiveClaimsIdentity(Default.SamlClaims)
+                        },
+                        Saml2SecurityTokenHandler = new Saml2SecurityTokenHandler(),
+                        ValidationParameters = validationParametersWithAudiences,
+                        AudiencesForSecurityTokenDescriptor = invalidAudiences
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "UsingAudienceAndAudiences_OnlyAudiencesValid",
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            Audience = invalidAudience,
+                            NotBefore = Default.NotBefore,
+                            Expires = Default.Expires,
+                            Issuer = Default.Issuer,
+                            SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
+                            EncryptingCredentials = null,
+                            Subject = new CaseSensitiveClaimsIdentity(Default.SamlClaims)
+                        },
+                        Saml2SecurityTokenHandler = new Saml2SecurityTokenHandler(),
+                        ValidationParameters = validationParametersWithAudiences,
+                        AudiencesForSecurityTokenDescriptor = Default.Audiences
+                    },
                     new CreateTokenTheoryData
                     {
                         TestId = "NotSupportedClaimValue",
@@ -1088,7 +1232,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                     },
                     new CreateTokenTheoryData
                     {
-                        First = true,
                         TestId = "OnlySubjectClaims",
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
@@ -1098,7 +1241,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                             Issuer = Default.Issuer,
                             SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
                             EncryptingCredentials = null,
-                            Subject = new ClaimsIdentity(Default.SamlClaims)
+                            Subject = new CaseSensitiveClaimsIdentity(Default.SamlClaims)
                         },
                         Saml2SecurityTokenHandler = new Saml2SecurityTokenHandler(),
                         ValidationParameters = validationParameters
@@ -1115,7 +1258,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                             SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
                             EncryptingCredentials = null,
                             Claims = Default.SamlClaimsDictionary,
-                            Subject = new ClaimsIdentity(Default.SamlClaims)
+                            Subject = new CaseSensitiveClaimsIdentity(Default.SamlClaims)
                         },
                         Saml2SecurityTokenHandler = new Saml2SecurityTokenHandler(),
                         ValidationParameters = validationParameters
@@ -1132,7 +1275,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                             SigningCredentials = new SigningCredentials(KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256, SecurityAlgorithms.RsaSha256Signature, SecurityAlgorithms.Sha256Digest),
                             EncryptingCredentials = null,
                             Claims = Default.SamlClaimsDictionary,
-                            Subject = new ClaimsIdentity
+                            Subject = new CaseSensitiveClaimsIdentity
                             (
                                 new List<Claim>
                                 {
@@ -1162,7 +1305,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                                 { ClaimTypes.GivenName, "Bob" },
                                 { ClaimTypes.Role, "HR" }
                             },
-                            Subject = new ClaimsIdentity(Default.SamlClaims)
+                            Subject = new CaseSensitiveClaimsIdentity(Default.SamlClaims)
                         },
                         Saml2SecurityTokenHandler = new Saml2SecurityTokenHandler(),
                         ValidationParameters = validationParameters
@@ -1184,7 +1327,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                                 { ClaimTypes.GivenName, "Alice" },
                                 { ClaimTypes.Role, "HR" }
                             },
-                            Subject = new ClaimsIdentity
+                            Subject = new CaseSensitiveClaimsIdentity
                             (
                                 new List<Claim>
                                 {
@@ -1201,7 +1344,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
             }
         }
 
-        [Theory, MemberData(nameof(CreateValidateActorClaimProcessing))]
+        [Theory, MemberData(nameof(CreateValidateActorClaimProcessing), DisableDiscoveryEnumeration = true)]
         public void ValidateActorClaimProcessing(Saml2TheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateActorClaimProcessing", theoryData);
@@ -1245,7 +1388,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
             }
         }
 
-        [Theory, MemberData(nameof(SecurityKeyNotFoundExceptionTestTheoryData))]
+        [Theory, MemberData(nameof(SecurityKeyNotFoundExceptionTestTheoryData), DisableDiscoveryEnumeration = true)]
         public void Saml2SecurityKeyNotFoundExceptionTest(CreateTokenTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.SecurityKeyNotFoundExceptionTest", theoryData);

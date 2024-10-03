@@ -84,34 +84,26 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Initializes a new instance of the <see cref="AsymmetricSignatureProvider"/> class used to create and verify signatures.
         /// </summary>
-        /// <param name="key">The <see cref="SecurityKey"/> that will be used for signature operations.<see cref="SecurityKey"/></param>
-        /// <param name="algorithm">The signature algorithm to apply.</param>
+        /// <param name="key">The <see cref="SecurityKey"/> that will be used for signature operations.</param>
+        /// <param name="algorithm">The signature algorithm to be used.</param>
         public AsymmetricSignatureProvider(SecurityKey key, string algorithm)
             : this(key, algorithm, false)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AsymmetricSignatureProvider"/> class used to create and verify signatures.
+        /// Initializes a new instance of the <see cref="AsymmetricSignatureProvider"/> class used for creating and verifying signatures.
         /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for signature operations.</param>
-        /// <param name="algorithm">The signature algorithm to apply.</param>
-        /// <param name="willCreateSignatures">If this <see cref="AsymmetricSignatureProvider"/> is required to create signatures then set this to true.</param>
-        /// <para>
-        /// Creating signatures requires that the <see cref="SecurityKey"/> has access to a private key.
-        /// Verifying signatures (the default), does not require access to the private key.
-        /// </para>
-        /// <exception cref="ArgumentNullException"><paramref name="key"/>is null.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="algorithm"/>is null or empty.</exception>
-        /// <exception cref="InvalidOperationException"><paramref name="willCreateSignatures"/>is true and there is no private key.</exception>
-        /// <exception cref="NotSupportedException">If <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// willCreateSignatures is true and <see cref="SecurityKey"/>.KeySize is less than the size corresponding to the given algorithm in <see cref="AsymmetricSignatureProvider.MinimumAsymmetricKeySizeInBitsForSigningMap"/>.
-        /// </exception>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// <see cref="SecurityKey"/>.KeySize is less than the size corresponding to the algorithm in <see cref="AsymmetricSignatureProvider.MinimumAsymmetricKeySizeInBitsForVerifyingMap"/>. Note: this is always checked.
-        /// </exception>
-        /// <exception cref="InvalidOperationException">If the runtime is unable to create a suitable cryptographic provider.</exception>
+        /// <param name="algorithm">The signature algorithm to be used.</param>
+        /// <param name="willCreateSignatures">If true, the provider will be used for creating signatures; otherwise, it will be used for verifying signatures.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="key"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="algorithm"/> is null or empty.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if <paramref name="willCreateSignatures"/> is true and there is no private key available.</exception>
+        /// <exception cref="NotSupportedException">Thrown if the <see cref="SecurityKey"/> and algorithm pair are not supported.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="willCreateSignatures"/> is true and <see cref="SecurityKey.KeySize"/> is less than the required size for signing.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if <see cref="SecurityKey.KeySize"/> is less than the required size for verifying signatures.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if the runtime is unable to create a suitable cryptographic provider.</exception>
         public AsymmetricSignatureProvider(SecurityKey key, string algorithm, bool willCreateSignatures)
             : base(key, algorithm)
         {
@@ -167,8 +159,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="algorithm">The SignatureAlgorithm in use.</param>
         /// <returns>The <see cref="HashAlgorithmName"/> to use.</returns>
-        /// <exception cref="ArgumentNullException">if <paramref name="algorithm"/> is null or whitespace.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">if <paramref name="algorithm"/> is not supported.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="algorithm"/> is null or whitespace.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="algorithm"/> is not supported.</exception>
         protected virtual HashAlgorithmName GetHashAlgorithmName(string algorithm)
         {
             if (string.IsNullOrWhiteSpace(algorithm))
@@ -194,14 +186,45 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         internal override int ObjectPoolSize => _asymmetricAdapterObjectPool.Size;
 
+#if NET6_0_OR_GREATER
+        /// <inheritdoc/>
+        public override bool Sign(ReadOnlySpan<byte> input, Span<byte> signature, out int bytesWritten)
+        {
+            if (input.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(input));
+
+            if (_disposed)
+            {
+                CryptoProviderCache?.TryRemove(this);
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
+            }
+
+            AsymmetricAdapter asym = null;
+            try
+            {
+                asym = _asymmetricAdapterObjectPool.Allocate();
+                return asym.SignUsingSpan(input, signature, out bytesWritten);
+            }
+            catch
+            {
+                CryptoProviderCache?.TryRemove(this);
+                throw;
+            }
+            finally
+            {
+                if (asym != null)
+                    _asymmetricAdapterObjectPool.Free(asym);
+            }
+        }
+#endif
+
         /// <summary>
         /// Produces a signature over the 'input' using the <see cref="AsymmetricSecurityKey"/> and algorithm passed to <see cref="AsymmetricSignatureProvider( SecurityKey, string, bool )"/>.
         /// </summary>
         /// <param name="input">The bytes to be signed.</param>
         /// <returns>A signature over the input.</returns>
-        /// <exception cref="ArgumentNullException">if <paramref name="input"/> is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="input"/>.Length == 0.</exception>
-        /// <exception cref="ObjectDisposedException">If <see cref="AsymmetricSignatureProvider.Dispose(bool)"/> has been called. </exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="input"/> is null or has length of 0.</exception>
+        /// <exception cref="ObjectDisposedException">Thrown If <see cref="AsymmetricSignatureProvider.Dispose(bool)"/> has been called.</exception>
         /// <remarks>Sign is thread safe.</remarks>
         public override byte[] Sign(byte[] input)
         {
@@ -223,12 +246,41 @@ namespace Microsoft.IdentityModel.Tokens
             catch
             {
                 CryptoProviderCache?.TryRemove(this);
-                Dispose(true);
                 throw;
             }
             finally
             {
-                if (!_disposed)
+                if (asym != null)
+                    _asymmetricAdapterObjectPool.Free(asym);
+            }
+        }
+
+        /// <inheritdoc/>
+        public override byte[] Sign(byte[] input, int offset, int count)
+        {
+            if (input == null || input.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(input));
+
+            if (_disposed)
+            {
+                CryptoProviderCache?.TryRemove(this);
+                throw LogHelper.LogExceptionMessage(new ObjectDisposedException(GetType().ToString()));
+            }
+
+            AsymmetricAdapter asym = null;
+            try
+            {
+                asym = _asymmetricAdapterObjectPool.Allocate();
+                return asym.SignUsingOffset(input, offset, count);
+            }
+            catch
+            {
+                CryptoProviderCache?.TryRemove(this);
+                throw;
+            }
+            finally
+            {
+                if (asym != null)
                     _asymmetricAdapterObjectPool.Free(asym);
             }
         }
@@ -237,12 +289,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// Validates that an asymmetric key size is of sufficient size for a SignatureAlgorithm.
         /// </summary>
         /// <param name="key">The asymmetric key to validate.</param>
-        /// <param name="algorithm">Algorithm for which this key will be used.</param>
-        /// <param name="willCreateSignatures">Whether they key will be used for creating signatures.</param>
-        /// <exception cref="ArgumentNullException">if <paramref name="key"/>is null.</exception>
-        /// <exception cref="ArgumentNullException">if <paramref name="algorithm"/>is null or empty.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">if <paramref name="key"/>.KeySize is less than the minimum
-        /// acceptable size.</exception>
+        /// <param name="algorithm">The algorithm for which this key will be used.</param>
+        /// <param name="willCreateSignatures">If true, the provider will be used for creating signatures.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="key"/>is null.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="algorithm"/> is null or empty.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="key.KeySize"/> is less than the minimum acceptable size.</exception>
         /// <remarks>
         /// <seealso cref="MinimumAsymmetricKeySizeInBitsForSigningMap"/> for minimum signing sizes.
         /// <seealso cref="MinimumAsymmetricKeySizeInBitsForVerifyingMap"/> for minimum verifying sizes.
@@ -294,9 +345,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="input">The bytes to generate the signature over.</param>
         /// <param name="signature">The value to verify against.</param>
         /// <returns>true if signature matches, false otherwise.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="input"/> is null or has length == 0.</exception>
-        /// <exception cref="ArgumentNullException"><paramref name="signature"/> is null or has length == 0.</exception>
-        /// <exception cref="ObjectDisposedException">If <see cref="AsymmetricSignatureProvider.Dispose(bool)"/> has been called. </exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="input"/> is null or has length of 0.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="signature"/> is null or has length of 0.</exception>
+        /// <exception cref="ObjectDisposedException">Thrown if <see cref="AsymmetricSignatureProvider.Dispose(bool)"/> has been called.</exception>
         /// <remarks>Verify is thread safe.</remarks>
         public override bool Verify(byte[] input, byte[] signature)
         {
@@ -325,12 +376,11 @@ namespace Microsoft.IdentityModel.Tokens
             catch
             {
                 CryptoProviderCache?.TryRemove(this);
-                Dispose(true);
                 throw;
             }
             finally
             {
-                if (!_disposed)
+                if (asym != null)
                     _asymmetricAdapterObjectPool.Free(asym);
             }
         }
@@ -406,7 +456,7 @@ namespace Microsoft.IdentityModel.Tokens
                 asym = _asymmetricAdapterObjectPool.Allocate();
                 if (signature.Length == signatureLength)
                 {
-                    return asym.Verify(input, inputOffset, inputLength, signature);
+                    return asym.VerifyUsingOffset(input, inputOffset, inputLength, signature);
                 }
                 else
                 {
@@ -414,26 +464,25 @@ namespace Microsoft.IdentityModel.Tokens
                     // Having the logic here, handles EC and RSA. We can revisit when we start using spans in 3.1+.
                     byte[] signatureBytes = new byte[signatureLength];
                     Array.Copy(signature, 0, signatureBytes, 0, signatureLength);
-                    return asym.Verify(input, inputOffset, inputLength, signatureBytes);
+                    return asym.VerifyUsingOffset(input, inputOffset, inputLength, signatureBytes);
                 }
             }
             catch
             {
-                Dispose(true);
+                CryptoProviderCache?.TryRemove(this);
                 throw;
             }
             finally
             {
-                if (!_disposed)
+                if (asym != null)
                     _asymmetricAdapterObjectPool.Free(asym);
             }
-
         }
 
         /// <summary>
-        /// Calls to release managed resources.
+        /// Releases the resources used by the current instance.
         /// </summary>
-        /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
+        /// <param name="disposing">If true, release both managed and unmanaged resources; otherwise, release only unmanaged resources.</param>
         protected override void Dispose(bool disposing)
         {
             if (!_disposed)

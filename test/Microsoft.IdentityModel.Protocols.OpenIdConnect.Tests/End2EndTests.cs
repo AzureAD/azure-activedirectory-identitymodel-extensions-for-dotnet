@@ -4,11 +4,10 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 {
@@ -17,13 +16,16 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     /// </summary>
     public class End2EndTests
     {
-        [Theory, MemberData(nameof(OpenIdConnectTheoryData))]
-        public void OpenIdConnect(OpenIdConnectTheoryData theoryData)
+        [Theory, MemberData(nameof(OpenIdConnectTheoryData), DisableDiscoveryEnumeration = true)]
+        public async Task OpenIdConnect(OpenIdConnectTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.OpenIdConnect", theoryData);
             try
             {
-                OpenIdConnectConfiguration configuration = OpenIdConnectConfigurationRetriever.GetAsync(theoryData.OpenIdConnectMetadataFileName, new FileDocumentRetriever(), CancellationToken.None).Result;
+                OpenIdConnectConfiguration configuration = await OpenIdConnectConfigurationRetriever.GetAsync(theoryData.OpenIdConnectMetadataFileName, new FileDocumentRetriever(), CancellationToken.None);
+
+                theoryData.AdditionalValidation?.Invoke(configuration);
+
                 JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
                 JwtSecurityToken jwtToken =
                     tokenHandler.CreateJwtSecurityToken(
@@ -104,16 +106,23 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         ),
                     ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException(),
                     TestId = "Ecdsa384KeyNotPartOfJWKS"
-                }
+                },
+                new OpenIdConnectTheoryData
+                {
+                    OpenIdConnectMetadataFileName = OpenIdConfigData.OpenIdConnectMetadataEnd2EndAcrValuesLast,
+                    SigningCredentials = new SigningCredentials(
+                            KeyingMaterial.RsaSecurityKey_2048,
+                            SecurityAlgorithms.RsaSha256
+                        ),
+                    TestId = "AcrValuesLast",
+                    AdditionalValidation = (OpenIdConnectConfiguration config) =>
+                    {
+                        Assert.Contains("0", config.AcrValuesSupported);
+                        Assert.Contains("id-simple", config.AcrValuesSupported);
+                        Assert.Contains("id-multifactor", config.AcrValuesSupported);
+                    }
+                },
             };
         }
     }
-
-    public class OpenIdConnectTheoryData : TheoryDataBase
-    {
-        public string OpenIdConnectMetadataFileName { get; set; }
-
-        public SigningCredentials SigningCredentials { get; set; }
-    }
 }
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

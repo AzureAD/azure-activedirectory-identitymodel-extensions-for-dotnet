@@ -9,6 +9,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Json;
 using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Tokens.Saml2;
 using Microsoft.IdentityModel.Xml;
@@ -194,7 +195,10 @@ namespace Microsoft.IdentityModel.TestUtils
             get => "http://www.w3.org/";
         }
 
-        public static X509Certificate2 Certificate => new X509Certificate2(Convert.FromBase64String(CertificateData));
+        public static X509Certificate2 Certificate
+        {
+            get => CertificateHelper.LoadX509Certificate(CertificateData);
+        }
 
         public static string CertificateData
         {
@@ -208,7 +212,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static ClaimsIdentity ClaimsIdentity
         {
-            get => new ClaimsIdentity(Claims, AuthenticationType);
+            get => new CaseSensitiveClaimsIdentity(Claims, AuthenticationType);
         }
 
         public static string ClaimsIdentityLabel
@@ -266,7 +270,8 @@ namespace Microsoft.IdentityModel.TestUtils
             get
             {
                 var keyInfo = new KeyInfo();
-                keyInfo.X509Data.Add(new X509Data(new X509Certificate2(Convert.FromBase64String(CertificateData))));
+                X509Certificate2 cert = CertificateHelper.LoadX509Certificate(CertificateData);
+                keyInfo.X509Data.Add(new X509Data(cert));
                 return keyInfo;
             }
         }
@@ -289,6 +294,11 @@ namespace Microsoft.IdentityModel.TestUtils
         public static string Issuer
         {
             get => "http://Default.Issuer.com";
+        }
+
+        public static string CloudInstanceName
+        {
+            get => "microsoftonline.com";
         }
 
         public static IEnumerable<string> Issuers
@@ -404,6 +414,22 @@ namespace Microsoft.IdentityModel.TestUtils
             }.ToString(Formatting.None);
         }
 
+        public static string PayloadStringMultipleAudiences
+        {
+            get => new JObject()
+            {
+                { JwtRegisteredClaimNames.Aud, JArray.FromObject(Audiences) },
+                { JwtRegisteredClaimNames.Azp, Azp },
+                { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
+                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Expires).ToString() },
+                { JwtRegisteredClaimNames.GivenName, "Bob" },
+                { JwtRegisteredClaimNames.Iss, Issuer },
+                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(IssueInstant).ToString() },
+                { JwtRegisteredClaimNames.Jti, Jti },
+                { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(NotBefore).ToString()},
+            }.ToString(Formatting.None);
+        }
+
         public static List<Claim> PayloadClaims
         {
             get => new List<Claim>()
@@ -480,7 +506,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static ClaimsIdentity PayloadClaimsIdentity
         {
-            get => new ClaimsIdentity(PayloadClaims, "AuthenticationTypes.Federation");
+            get => new CaseSensitiveClaimsIdentity(PayloadClaims, "AuthenticationTypes.Federation");
         }
 
         public static Dictionary<string, object> PayloadDictionary
@@ -488,6 +514,22 @@ namespace Microsoft.IdentityModel.TestUtils
             get => new Dictionary<string, object>()
             {
                 { JwtRegisteredClaimNames.Aud, Audience },
+                { JwtRegisteredClaimNames.Azp, Azp },
+                { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
+                { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Expires).ToString() },
+                { JwtRegisteredClaimNames.GivenName, "Bob" },
+                { JwtRegisteredClaimNames.Iss, Issuer },
+                { JwtRegisteredClaimNames.Iat, EpochTime.GetIntDate(IssueInstant).ToString() },
+                { JwtRegisteredClaimNames.Jti, Jti },
+                { JwtRegisteredClaimNames.Nbf, EpochTime.GetIntDate(NotBefore).ToString()},
+            };
+        }
+
+        public static Dictionary<string, object> PayloadDictionaryMultipleAudiences
+        {
+            get => new Dictionary<string, object>()
+            {
+                { JwtRegisteredClaimNames.Aud, JsonSerializerPrimitives.CreateJsonElement(Default.Audiences) },
                 { JwtRegisteredClaimNames.Azp, Azp },
                 { JwtRegisteredClaimNames.Email, "Bob@contoso.com" },
                 { JwtRegisteredClaimNames.Exp, EpochTime.GetIntDate(Expires).ToString() },
@@ -618,6 +660,31 @@ namespace Microsoft.IdentityModel.TestUtils
                 TokenStream = XmlUtilities.CreateXmlTokenStream(OuterXml),
                 Type = ReferenceType,
                 Uri = ReferenceUriWithPrefix
+            };
+        }
+
+        public static Reference ReferenceWithoutTransform
+        {
+            get => new Reference()
+            {
+                DigestMethod = ReferenceDigestMethod,
+                DigestValue = Convert.ToBase64String(XmlUtilities.CreateNonTransformedDigestBytes(OuterXml)),
+                TokenStream = XmlUtilities.CreateXmlTokenStream(OuterXml),
+                Type = ReferenceType,
+                Uri = ReferenceUriWithOutPrefix
+            };
+        }
+
+        public static Reference ReferenceWithOnlyCanonicalizingTransform
+        {
+            get => new Reference()
+            {
+                CanonicalizingTransfrom = new ExclusiveCanonicalizationTransform(),
+                DigestMethod = ReferenceDigestMethod,
+                DigestValue = _referenceDigestValue,
+                TokenStream = XmlUtilities.CreateXmlTokenStream(OuterXml),
+                Type = ReferenceType,
+                Uri = ReferenceUriWithOutPrefix
             };
         }
 
@@ -848,7 +915,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static ClaimsIdentity SamlClaimsIdentity
         {
-            get => new ClaimsIdentity(SamlClaims, AuthenticationType);
+            get => new CaseSensitiveClaimsIdentity(SamlClaims, AuthenticationType);
         }
 
         public static SamlConditions SamlConditionsSingleCondition
@@ -900,7 +967,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 IssuedAt = DateTime.UtcNow,
                 NotBefore = DateTime.UtcNow,
                 SigningCredentials = signingCredentials,
-                Subject = claims == null ? ClaimsIdentity : new ClaimsIdentity(claims)
+                Subject = claims == null ? ClaimsIdentity : new CaseSensitiveClaimsIdentity(claims)
             };
         }
 
@@ -915,7 +982,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 IssuedAt = DateTime.UtcNow,
                 NotBefore = DateTime.UtcNow,
                 SigningCredentials = signingCredentials,
-                Subject = claims == null ? ClaimsIdentity : new ClaimsIdentity(claims),
+                Subject = claims == null ? ClaimsIdentity : new CaseSensitiveClaimsIdentity(claims),
             };
 
             if (securityTokenDescriptor.Claims == null)
@@ -940,7 +1007,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 IssuedAt = DateTime.UtcNow,
                 NotBefore = DateTime.UtcNow,
                 SigningCredentials = signingCredentials,
-                Subject = claims == null ? ClaimsIdentity : new ClaimsIdentity(claims)
+                Subject = claims == null ? ClaimsIdentity : new CaseSensitiveClaimsIdentity(claims)
             };
         }
 

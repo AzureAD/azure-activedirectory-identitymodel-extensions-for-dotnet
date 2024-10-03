@@ -25,8 +25,8 @@ namespace Microsoft.IdentityModel.Tokens
         private const int PROV_RSA_FULL = 1;
         private const int PROV_RSA_SCHANNEL = 12;
 
-        private bool _disposed = false;
-        private bool _disposeRsa = false;
+        private bool _disposed;
+        private bool _disposeRsa;
 
         // Only dispose of the RsaCryptoServiceProvider object if we created a new instance that supports SHA-256,
         // otherwise do not disposed of the referenced RsaCryptoServiceProvider
@@ -171,6 +171,16 @@ namespace Microsoft.IdentityModel.Tokens
             return _rsa.SignData(input, hash);
         }
 
+        internal byte[] SignData(byte[] input, int offset, int length, object hash)
+        {
+            if (input == null || input.Length == 0)
+                throw LogHelper.LogArgumentNullException(nameof(input));
+
+            _ = hash ?? throw LogHelper.LogArgumentNullException(nameof(hash));
+
+            return _rsa.SignData(input, offset, length, hash);
+        }
+
         /// <summary>
         /// Verifies that a digital signature is valid by determining the hash value in the signature using the provided public key and comparing it to the hash value of the provided data.
         /// </summary>
@@ -195,7 +205,7 @@ namespace Microsoft.IdentityModel.Tokens
             return _rsa.VerifyData(input, hash, signature);
         }
 
-#if NET461 || NET462 || NET472 || NETSTANDARD2_0
+#if NET462 || NET472 || NETSTANDARD2_0
         /// <summary>
         /// Verifies that a digital signature is valid by determining the hash value in the signature using the provided public key and comparing it to the hash value of the provided data.
         /// </summary>
@@ -273,9 +283,9 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Calls to release managed resources.
+        /// Releases the resources used by the current instance.
         /// </summary>
-        /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer.</param>
+        /// <param name="disposing">If true, release both managed and unmanaged resources; otherwise, release only unmanaged resources.</param>
         protected override void Dispose(bool disposing)
         {
             if (!_disposed)

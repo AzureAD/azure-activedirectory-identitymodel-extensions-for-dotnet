@@ -2,26 +2,26 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
-using Newtonsoft.Json;
+using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 {
     public class OpenIdConnectConfigurationRetrieverTests
     {
-
         [Fact]
         public async Task FromNetwork()
         {
             OpenIdConnectConfiguration configuration = await GetConfigurationFromHttpAsync(OpenIdConfigData.AADCommonUrl, expectedException: ExpectedException.NoExceptionExpected);
             Assert.NotNull(configuration);
-            
+
             await GetConfigurationFromHttpAsync(string.Empty, expectedException: ExpectedException.ArgumentNullException());
             await GetConfigurationFromHttpAsync(OpenIdConfigData.BadUri, expectedException: ExpectedException.ArgumentException("IDX20108:"));
             await GetConfigurationFromHttpAsync(OpenIdConfigData.HttpsBadUri, expectedException: ExpectedException.IOException(inner: typeof(HttpRequestException)));
@@ -30,7 +30,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         [Fact]
         public async Task FromFile()
         {
-            var context = new CompareContext();
+            var context = new CompareContext
+            {
+                PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+                {
+                    // If the objects being compared are created from the same string and they are equal, the string itself can be ignored.
+                    // The strings may not be equal because of whitespace, but the json they represent is semantically identical.
+                    { typeof(JsonWebKeySet), [ "JsonData" ] },
+                }
+            };
             var configuration = await GetConfigurationAsync(
                 OpenIdConfigData.JsonFile,
                 ExpectedException.NoExceptionExpected,
@@ -54,7 +62,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         [Fact]
         public async Task FromJson()
         {
-            var context = new CompareContext();
+            var context = new CompareContext
+            {
+                PropertiesToIgnoreWhenComparing = new Dictionary<Type, List<string>>
+                {
+                    // If the objects being compared are created from the same string and they are equal, the string itself can be ignored.
+                    // The strings may not be equal because of whitespace, but the json they represent is semantically identical.
+                    { typeof(JsonWebKeySet), [ "JsonData" ] },
+                }
+            };
             var configuration = await GetConfigurationFromMixedAsync(
                 OpenIdConfigData.OpenIdConnectMetadataPingString,
                 expectedException: ExpectedException.NoExceptionExpected);
@@ -204,7 +220,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             return openIdConnectConfiguration;
         }
 
-        private void GetAndCheckConfiguration(string jsonName, string propertyName, CompareContext context, string propertyValue=null)
+        private void GetAndCheckConfiguration(string jsonName, string propertyName, CompareContext context, string propertyValue = null)
         {
             string jsonValue = propertyValue;
             if (jsonValue == null)
@@ -245,7 +261,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 _primaryDocument = primaryDocument;
                 _fallback = fallback;
             }
-            
+
             public Task<string> GetDocumentAsync(string address, CancellationToken cancel)
             {
                 if (string.Equals("primary", address))

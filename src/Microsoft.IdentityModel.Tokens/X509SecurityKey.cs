@@ -21,7 +21,7 @@ namespace Microsoft.IdentityModel.Tokens
         internal X509SecurityKey(JsonWebKey webKey)
             : base(webKey)
         {
-            Certificate = new X509Certificate2(Convert.FromBase64String(webKey.X5c[0]));
+            Certificate = CertificateHelper.LoadX509Certificate(webKey.X5c[0]);
             X5t = Base64UrlEncoder.Encode(Certificate.GetCertHash());
             webKey.ConvertedSecurityKey = this;
         }
@@ -78,11 +78,8 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         if (!_privateKeyAvailabilityDetermined)
                         {
-#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
                             _privateKey = RSACertificateExtensions.GetRSAPrivateKey(Certificate);
-#else
-                            _privateKey = Certificate.PrivateKey;
-#endif
+
                             _privateKeyAvailabilityDetermined = true;
                         }
                     }
@@ -105,11 +102,7 @@ namespace Microsoft.IdentityModel.Tokens
                     {
                         if (_publicKey == null)
                         {
-#if NET461 || NET462 || NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
                             _publicKey = RSACertificateExtensions.GetRSAPublicKey(Certificate);
-#else
-                            _publicKey = Certificate.PublicKey.Key;
-#endif
                         }
                     }
                 }

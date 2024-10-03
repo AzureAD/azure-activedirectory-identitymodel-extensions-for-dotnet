@@ -2,8 +2,6 @@
   <dotnetArchitecture>x64</dotnetArchitecture>
   <nugetVersion>3.5.0-rc-1285</nugetVersion>
   <runtimes>net461,netstandard2.0</runtimes>
-  <assemblyVersion>7.0.1</assemblyVersion>
-  <nugetSuffix></nugetSuffix>
   <projects>
     <src>
       <project name="Microsoft.IdentityModel.Logging" />
@@ -16,8 +14,6 @@
       <project name="Microsoft.IdentityModel.Protocols.WsFederation" />
       <project name="Microsoft.IdentityModel.Protocols.OpenIdConnect" />
       <project name="Microsoft.IdentityModel.Protocols.SignedHttpRequest" />
-      <project name="Microsoft.IdentityModel.KeyVaultExtensions" />
-      <project name="Microsoft.IdentityModel.ManagedKeyVaultSecurityKey" />
       <project name="Microsoft.IdentityModel.Validators" />
       <project name="Microsoft.IdentityModel.Abstractions" />
       <project name="Microsoft.IdentityModel.TestExtensions" />
@@ -35,8 +31,6 @@
       <project name="Microsoft.IdentityModel.Protocols.WsFederation.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests" test="yes" />
-      <project name="Microsoft.IdentityModel.KeyVaultExtensions.Tests" test="yes" />
-      <project name="Microsoft.IdentityModel.ManagedKeyVaultSecurityKey.Tests" test="yes" />
       <project name="Microsoft.IdentityModel.Validators.Tests" test="yes" />
       <!-- <project name="Microsoft.IdentityModel.AotCompatibility.Tests" test="yes" /> -->
     </test>

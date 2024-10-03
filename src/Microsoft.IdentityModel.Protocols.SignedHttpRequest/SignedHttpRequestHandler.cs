@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -37,7 +36,15 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         };
 
         private readonly Uri _baseUriHelper = new Uri("http://localhost", UriKind.Absolute);
-        private readonly HttpClient _defaultHttpClient = new HttpClient();
+        internal readonly HttpClient _defaultHttpClient = new HttpClient();
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="SignedHttpRequestHandler"/>.
+        /// </summary>
+        public SignedHttpRequestHandler()
+        {
+            _defaultHttpClient.Timeout = TimeSpan.FromSeconds(10);
+        }
 
         #region SignedHttpRequest creation
         /// <summary>
@@ -127,7 +134,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     headerWriter?.Dispose();
                 }
 
-                string  message = encodedHeader + "." + encodedPayload;
+                string message = encodedHeader + "." + encodedPayload;
                 return message + "." + JwtTokenUtilities.CreateEncodedSignature(message, signedHttpRequestDescriptor.SigningCredentials, false);
             }
         }
@@ -307,7 +314,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestDescriptor.HttpRequestData.Uri));
 
             Uri httpRequestUri = EnsureAbsoluteUri(signedHttpRequestDescriptor.HttpRequestData.Uri);
-            IDictionary<string,string> sanitizedQueryParams = SanitizeQueryParams(httpRequestUri);
+            IDictionary<string, string> sanitizedQueryParams = SanitizeQueryParams(httpRequestUri);
 
             StringBuilder stringBuffer = new StringBuilder();
             try
@@ -318,7 +325,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 foreach (var queryParam in sanitizedQueryParams)
                 {
                     if (!firstQueryParam)
-                        stringBuffer.Append("&");
+                        stringBuffer.Append('&');
 
                     stringBuffer.Append(queryParam.Key).Append('=').Append(queryParam.Value);
                     firstQueryParam = false;
@@ -347,7 +354,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </remarks>  
         internal void AddHClaim(ref Utf8JsonWriter writer, SignedHttpRequestDescriptor signedHttpRequestDescriptor)
         {
-            IDictionary<string,string> sanitizedHeaders = SanitizeHeaders(signedHttpRequestDescriptor.HttpRequestData.Headers);
+            IDictionary<string, string> sanitizedHeaders = SanitizeHeaders(signedHttpRequestDescriptor.HttpRequestData.Headers);
             StringBuilder stringBuffer = new StringBuilder();
             try
             {
@@ -465,7 +472,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, LogHelper.MarkAsNonPII(ConfirmationClaimTypes.Cnf), e), e));
             }
         }
-#endregion
+        #endregion
 
         #region SignedHttpRequest validation
         /// <summary>
@@ -651,7 +658,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                         if (signatureProvider == null)
                             throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(Tokens.LogMessages.IDX10636, popKey.ToString(), LogHelper.MarkAsNonPII(signedHttpRequest.Alg))));
 
-                        if(EncodingUtils.PerformEncodingDependentOperation<bool, string, int, SignatureProvider>(
+                        if (EncodingUtils.PerformEncodingDependentOperation<bool, string, int, SignatureProvider>(
                             signedHttpRequest.EncodedToken,
                             0,
                             signedHttpRequest.Dot2,
@@ -661,7 +668,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                             signatureProvider,
                             JsonWebTokenHandler.ValidateSignature))
 
-                        return popKey;
+                            return popKey;
                     }
                     finally
                     {
@@ -675,7 +682,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidSignatureException(LogHelper.FormatInvariant(LogMessages.IDX23009, ex.ToString()), ex));
             }
 
-            throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidSignatureException(LogHelper.FormatInvariant(LogMessages.IDX23034, signedHttpRequest.EncodedToken)));
+            throw LogHelper.LogExceptionMessage(
+                new SignedHttpRequestInvalidSignatureException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX23034,
+                        LogHelper.MarkAsUnsafeSecurityArtifact(signedHttpRequest.EncodedToken, t => t.ToString()))));
         }
 
         /// <summary>
@@ -864,7 +875,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     else
                     {
                         if (!firstQueryParam)
-                            stringBuffer.Append("&");
+                            stringBuffer.Append('&');
 
                         stringBuffer.Append((string)queryParamName).Append('=').Append(queryParamsValue);
                         firstQueryParam = false;
@@ -1035,7 +1046,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 if (validatedAccessToken.TryGetPayloadValue(ConfirmationClaimTypes.Cnf, out string cnf) && cnf != null)
                     return new Cnf(cnf);
             }
-            catch(JsonException ex)
+            catch (JsonException ex)
             {
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidCnfClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(ConfirmationClaimTypes.Cnf)), ex));
             }
@@ -1117,6 +1128,17 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// <returns>A resolved PoP <see cref="SecurityKey"/>.</returns>
         internal virtual async Task<SecurityKey> ResolvePopKeyFromJkuAsync(string jkuSetUrl, Cnf cnf, SignedHttpRequestValidationContext signedHttpRequestValidationContext, CancellationToken cancellationToken)
         {
+            if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AllowResolvingPopKeyFromJku == false)
+            {
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23037)));
+            }
+
+            if (!IsJkuUriInListOfAllowedDomains(jkuSetUrl, signedHttpRequestValidationContext))
+            {
+                var allowedDomains = string.Join(", ", signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AllowedDomainsForJkuRetrieval ?? new List<string>());
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23038, jkuSetUrl, allowedDomains)));
+            }
+
             var popKeys = await GetPopKeysFromJkuAsync(jkuSetUrl, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
 
             if (popKeys == null || popKeys.Count == 0)
@@ -1275,6 +1297,18 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
 
                 return absoluteUri;
             }
+        }
+
+        private static bool IsJkuUriInListOfAllowedDomains(string jkuSetUrl, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
+        {
+            if (string.IsNullOrEmpty(jkuSetUrl))
+                return false;
+
+            if (signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AllowedDomainsForJkuRetrieval.Count == 0)
+                return false;
+
+            var uri = new Uri(jkuSetUrl, UriKind.RelativeOrAbsolute);
+            return signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.AllowedDomainsForJkuRetrieval.Any(domain => uri.Host.EndsWith(domain, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>

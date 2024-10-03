@@ -62,6 +62,13 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             theoryData.Add(new JwtTheoryData
             {
                 CanRead = false,
+                ExpectedException = ExpectedException.SecurityTokenMalformedTokenException(errorStrings[0]),
+                TestId = "a.",
+                Token = "a."
+            });
+            theoryData.Add(new JwtTheoryData
+            {
+                CanRead = false,
                 ExpectedException = ExpectedException.SecurityTokenMalformedTokenException(errorStrings[1]),
                 TestId = "a.b",
                 Token = "a.b"
@@ -211,7 +218,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             theoryData.Add(new JwtTheoryData
             {
                 CanRead = false,
-                TestId =  "'invalidRegEx: first position'",
+                TestId = "'invalidRegEx: first position'",
                 Token = invalidRegEx + "." + validRegEx + "." + validRegEx + "." + validRegEx + "." + validRegEx,
                 ExpectedException = ExpectedException.SecurityTokenMalformedTokenException(errorString)
             });

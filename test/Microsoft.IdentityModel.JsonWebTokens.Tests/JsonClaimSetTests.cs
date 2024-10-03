@@ -9,6 +9,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using Microsoft.IdentityModel.TestUtils;
+using Microsoft.IdentityModel.Tokens.Json.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
@@ -33,7 +34,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             new Claim("dateTimeIso8061", _dateTime.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, "LOCAL AUTHORITY", "LOCAL AUTHORITY"),
         };
 
-        [Theory, MemberData(nameof(DirectClaimSetTestCases))]
+        [Theory, MemberData(nameof(DirectClaimSetTestCases), DisableDiscoveryEnumeration = true)]
         public void DirectClaimSetTests(JsonClaimSetTheoryData theoryData)
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.ClaimSetTests", theoryData);
@@ -77,7 +78,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             return theoryData;
         }
 
-        [Theory, MemberData(nameof(GetClaimAsTypeTheoryData))]
+        [Theory, MemberData(nameof(GetClaimAsTypeTheoryData), DisableDiscoveryEnumeration = true)]
         public void GetClaimAsType(JsonClaimSetTheoryData theoryData)
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.GetClaimAsType", theoryData);
@@ -121,7 +122,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     Json = header + "." + payload + ".",
                     PropertyName = "b",
                     PropertyType = typeof(Dictionary<string, string[]>),
-                    PropertyValue = new Dictionary<string, string[]> {{"prop1", new string[]{"value1","value2"}}}
+                    PropertyValue = new Dictionary<string, string[]> { { "prop1", new string[] { "value1", "value2" } } }
                 });
 
             theoryData.Add(
@@ -130,9 +131,26 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     Json = header + "." + payload + ".",
                     PropertyName = "a",
                     PropertyType = typeof(Dictionary<string, string>),
-                    PropertyValue = new Dictionary<string, string> {{"prop1","value1"}}
+                    PropertyValue = new Dictionary<string, string> { { "prop1", "value1" } }
                 });
 
+            theoryData.Add(
+                new JsonClaimSetTheoryData("ArrayOfObjects")
+                {
+                    Json = header + "." + Base64UrlEncoder.Encode(JsonData.ArrayOfObjectsObject) + ".",
+                    PropertyName = JsonData.ArrayProperty,
+                    PropertyType = typeof(JsonElement),
+                    PropertyValue = JsonUtilities.CreateJsonElement(JsonData.ArrayOfObjectsValue)
+                });
+
+            theoryData.Add(
+                new JsonClaimSetTheoryData("ObjectOfObjects")
+                {
+                    Json = header + "." + Base64UrlEncoder.Encode("{" + JsonData.ObjectClaim + "}") + ".",
+                    PropertyName = JsonData.ObjectProperty,
+                    PropertyType = typeof(JsonElement),
+                    PropertyValue = JsonUtilities.CreateJsonElement(JsonData.ObjectValue)
+                });
 
             return theoryData;
         }
@@ -149,7 +167,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             public Type PropertyOut { get; set; }
 
-             public Type PropertyType { get; set; }
+            public Type PropertyType { get; set; }
 
             public object PropertyValue { get; set; }
 

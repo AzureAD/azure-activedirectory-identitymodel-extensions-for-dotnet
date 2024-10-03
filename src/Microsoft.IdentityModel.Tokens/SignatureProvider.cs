@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Microsoft.IdentityModel.Logging;
 using System;
 using System.Threading;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Initializes a new instance of the <see cref="SignatureProvider"/> class used to create and verify signatures.
         /// </summary>
         /// <param name="key">The <see cref="SecurityKey"/> that will be used for signature operations.</param>
-        /// <param name="algorithm">The signature algorithm to apply.</param>
+        /// <param name="algorithm">The signature algorithm to be used.</param>
         /// <exception cref="ArgumentNullException"><paramref name="key"/> is null.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="algorithm"/> is null or empty.</exception>
         protected SignatureProvider(SecurityKey key, string algorithm)
@@ -68,6 +68,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="disposing">true, if called from Dispose(), false, if invoked inside a finalizer</param>
         protected abstract void Dispose(bool disposing);
 
+        internal bool IsCached { get; set; }
+
         /// <summary>
         /// Gets the <see cref="SecurityKey"/>.
         /// </summary>
@@ -95,9 +97,47 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>signed bytes</returns>
         public abstract byte[] Sign(byte[] input);
 
+        /// <summary>
+        /// Produces a signature over the specified region of the <paramref name="input"/>.
+        /// </summary>
+        /// <param name="input">The bytes to produce a signature over.</param>
+        /// <param name="offset">The offset to specify the beginning of the region.</param>
+        /// <param name="count">The count to specify the end of the region.</param>
+        /// <returns>The signature bytes.</returns>
+        public virtual byte[] Sign(byte[] input, int offset, int count)
+        {
+            throw LogHelper.LogExceptionMessage(
+                new NotImplementedException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10267,
+                        LogHelper.MarkAsNonPII("public virtual byte[] Sign(byte[] input, int offset, int count)"),
+                        LogHelper.MarkAsNonPII(GetType().FullName))));
+
+        }
+
+#if NET6_0_OR_GREATER
+        /// <summary>
+        /// Produces a signature over the <paramref name="data"/> and writes it to <paramref name="destination"/>.
+        /// </summary>
+        /// <param name="data">The bytes to produce a signature over.</param>
+        /// <param name="destination">The pre-allocated span where signature bytes will be placed.</param>
+        /// <param name="bytesWritten">The number of bytes written into the signature span.</param>         
+        /// <returns>returns <see langword="true"/> if creation of signature succeeded, <see langword="false"/> otherwise.</returns>
+        public virtual bool Sign(ReadOnlySpan<byte> data, Span<byte> destination, out int bytesWritten)
+        {
+            throw LogHelper.LogExceptionMessage(
+                new NotImplementedException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10267,
+                        LogHelper.MarkAsNonPII("public virtual bool Sign(ReadOnlySpan<byte> data, Span<byte> destination, out int bytesWritten)"),
+                        LogHelper.MarkAsNonPII(GetType().FullName))));
+        }
+#endif
+        /// <summary>
         /// Verifies that the <paramref name="signature"/> over <paramref name="input"/> using the
         /// <see cref="SecurityKey"/> and <see cref="SignatureProvider.Algorithm"/> specified by this
         /// <see cref="SignatureProvider"/> are consistent.
+        /// </summary>
         /// <param name="input">the bytes that were signed.</param>
         /// <param name="signature">signature to compare against.</param>
         /// <returns>true if the computed signature matches the signature parameter, false otherwise.</returns>
@@ -122,7 +162,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ObjectDisposedException"><see cref="Dispose(bool)"/> has been called.</exception>
         public virtual bool Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength)
         {
-            throw LogHelper.LogExceptionMessage(new NotImplementedException());
+            throw LogHelper.LogExceptionMessage(
+                new NotImplementedException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX10267,
+                        LogHelper.MarkAsNonPII("public virtual bool Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength)"),
+                        LogHelper.MarkAsNonPII(GetType().FullName))));
         }
 
         /// <summary>

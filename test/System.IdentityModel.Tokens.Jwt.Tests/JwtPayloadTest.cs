@@ -30,19 +30,19 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             foreach (Claim c in jwtPayload.Claims)
             {
-                Assert.True(false, "jwtPayload.Claims should be empty");
+                Assert.Fail("jwtPayload.Claims should be empty");
             }
 
             Assert.True(jwtPayload.Aud != null, "jwtPayload.Aud should not be null");
             foreach (string audience in jwtPayload.Aud)
             {
-                Assert.True(false, "jwtPayload.Aud should be empty");
+                Assert.Fail("jwtPayload.Aud should be empty");
             }
 
             Assert.True(jwtPayload.Amr != null, "jwtPayload.Amr should not be null");
             foreach (string audience in jwtPayload.Amr)
             {
-                Assert.True(false, "jwtPayload.Amr should be empty");
+                Assert.Fail("jwtPayload.Amr should be empty");
             }
 
             Assert.True(jwtPayload.ValidFrom == DateTime.MinValue, "jwtPayload.ValidFrom != DateTime.MinValue");
@@ -58,9 +58,13 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             JwtPayload jwtPayload = new JwtPayload();
             Type type = typeof(JwtPayload);
             PropertyInfo[] properties = type.GetProperties();
+#if NET9_0_OR_GREATER
+            if (properties.Length != 26) //Additional inherited "Capacity" property from Dictionary is added in .NET 9 
+                Assert.Fail("Number of properties has changed from 26 to: " + properties.Length + ", adjust tests");
+#else
             if (properties.Length != 25)
-                Assert.True(false, "Number of properties has changed from 25 to: " + properties.Length + ", adjust tests");
-
+                Assert.Fail("Number of properties has changed from 25 to: " + properties.Length + ", adjust tests");
+#endif
             GetSetContext context =
                 new GetSetContext
                 {
@@ -161,7 +165,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
 
             if (!claimFound)
-                Assert.True(false, "Claim with expected type: nullClaim is not found");
+                Assert.Fail("Claim with expected type: nullClaim is not found");
 
             Assert.Equal(payload.SerializeToJson(), compareTo);
         }
@@ -187,7 +191,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.True(DateTime.MaxValue == expirationTime, "EpochTime.DateTime( time ) != jwtPayload.ValidTo");
         }
 
-        [Theory, MemberData(nameof(PayloadDataSet))]
+        [Theory, MemberData(nameof(PayloadDataSet), DisableDiscoveryEnumeration = true)]
 #pragma warning disable xUnit1026 // Theory methods should use all of their parameters
         public void RoundTrip(string name, List<Claim> claims, JwtPayload payloadDirect, JwtPayload payloadUsingNewtonsoft)
 #pragma warning restore xUnit1026 // Theory methods should use all of their parameters
@@ -256,8 +260,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     new List<Claim>
                     {
                         new Claim("ClaimValueTypes.String", "ClaimValueTypes.String.Value", ClaimValueTypes.String),
-                        new Claim("ClaimValueTypes.Boolean.true", "True", ClaimValueTypes.Boolean),
-                        new Claim("ClaimValueTypes.Boolean.false", "False", ClaimValueTypes.Boolean),
+                        new Claim("ClaimValueTypes.Boolean.true", "true", ClaimValueTypes.Boolean),
+                        new Claim("ClaimValueTypes.Boolean.false", "false", ClaimValueTypes.Boolean),
                         new Claim("ClaimValueTypes.Double", "123.4", ClaimValueTypes.Double),
                         new Claim("ClaimValueTypes.int.MaxValue", intMaxValue, ClaimValueTypes.Integer32),
                         new Claim("ClaimValueTypes.int.MinValue", intMinValue, ClaimValueTypes.Integer32),
@@ -300,8 +304,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                         new Claim("ClaimValueTypes", longValue, ClaimValueTypes.Integer64),
                         new Claim("ClaimValueTypes", "132.64", ClaimValueTypes.Double),
                         new Claim("ClaimValueTypes", "-132.64", ClaimValueTypes.Double),
-                        new Claim("ClaimValueTypes", "True", ClaimValueTypes.Boolean),
-                        new Claim("ClaimValueTypes", "False", ClaimValueTypes.Boolean),
+                        new Claim("ClaimValueTypes", "true", ClaimValueTypes.Boolean),
+                        new Claim("ClaimValueTypes", "false", ClaimValueTypes.Boolean),
                         new Claim("ClaimValueTypes", "2019-11-15T14:31:21.6101326Z", ClaimValueTypes.DateTime),
                         new Claim("ClaimValueTypes", "2019-11-15", ClaimValueTypes.String),
                         new Claim("ClaimValueTypes", @"{""name3.1"":""value3.1""}", JsonClaimValueTypes.Json),
@@ -520,6 +524,16 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             jwtPayload[JwtRegisteredClaimNames.Iss] = null;
             var issuer = jwtPayload.Iss;
             Assert.True(issuer == null);
+        }
+
+        [Fact]
+        public void TestGuidClaim()
+        {
+            JwtPayload jwtPayload = new JwtPayload();
+            Guid guid = Guid.NewGuid();
+            string expected = $"{{\"appid\":\"{guid}\"}}";
+            jwtPayload.Add("appid", guid);
+            Assert.Equal(expected, jwtPayload.SerializeToJson());
         }
     }
 }

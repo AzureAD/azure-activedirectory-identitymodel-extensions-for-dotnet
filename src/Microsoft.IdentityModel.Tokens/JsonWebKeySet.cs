@@ -20,6 +20,7 @@ namespace Microsoft.IdentityModel.Tokens
     {
         internal const string ClassName = "Microsoft.IdentityModel.Tokens.JsonWebKeySet";
         private Dictionary<string, object> _additionalData;
+        private string _jsonData = string.Empty;
 
         /// <summary>
         /// Returns a new instance of <see cref="JsonWebKeySet"/>.
@@ -54,6 +55,8 @@ namespace Microsoft.IdentityModel.Tokens
             if (string.IsNullOrEmpty(json))
                 throw LogHelper.LogArgumentNullException(nameof(json));
 
+            _jsonData = json;
+
             try
             {
                 if (LogHelper.IsEnabled(EventLogLevel.Verbose))
@@ -79,7 +82,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets the <see cref="IList{JsonWebKey}"/>.
         /// </summary>
         [JsonPropertyName(JsonWebKeySetParameterNames.Keys)]
-        public IList<JsonWebKey> Keys { get; } = new List<JsonWebKey>();
+#if NET8_0_OR_GREATER
+        [JsonObjectCreationHandling(JsonObjectCreationHandling.Populate)]
+#endif
+        public IList<JsonWebKey> Keys { get; internal set; } = new List<JsonWebKey>();
 
         /// <summary>
         /// Default value for the flag that controls whether unresolved JsonWebKeys will be included in the resulting collection of <see cref="GetSigningKeys"/> method.
@@ -93,6 +99,22 @@ namespace Microsoft.IdentityModel.Tokens
         [DefaultValue(true)]
         [JsonIgnore]
         public bool SkipUnresolvedJsonWebKeys { get; set; } = DefaultSkipUnresolvedJsonWebKeys;
+
+        /// <summary>
+        /// The original string used to create this instance if a string was provided.
+        /// </summary>
+        [JsonIgnore]
+        internal string JsonData
+        {
+            get
+            {
+                return _jsonData;
+            }
+            set
+            {
+                _jsonData = value;
+            }
+        }
 
         /// <summary>
         /// Returns the JsonWebKeys as a <see cref="IList{SecurityKey}"/>.

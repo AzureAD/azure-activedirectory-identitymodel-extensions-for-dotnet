@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
+using System.Threading;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -12,10 +13,19 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class SecurityTokenDescriptor
     {
+        private List<string> _audiences;
+
         /// <summary>
-        /// Gets or sets the value of the 'audience' claim.
+        /// Gets or sets the value of the {"": audience} claim. Will be combined with <see cref="Audiences"/> and any "Aud" claims in
+        /// <see cref="Claims"/> or <see cref="Subject"/> when creating a token.
         /// </summary>
         public string Audience { get; set; }
+
+        /// <summary>
+        /// Gets the list audiences to include in the token's 'Aud' claim. Will be combined with <see cref="Audiences"/> and any
+        /// "Aud" claims in <see cref="Claims"/> or <see cref="Subject"/> when creating a token.
+        /// </summary>
+        public IList<string> Audiences => _audiences ?? Interlocked.CompareExchange(ref _audiences, [], null) ?? _audiences;
 
         /// <summary>
         /// Defines the compression algorithm that will be used to compress the JWT token payload.
@@ -57,7 +67,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Gets or sets the <see cref="Dictionary{TKey, TValue}"/> which represents the claims that will be used when creating a security token.
-        /// If both <cref see="Claims"/> and <see cref="Subject"/> are set, the claim values in Subject will be combined with the values
+        /// If both <see cref="Claims"/> and <see cref="Subject"/> are set, the claim values in Subject will be combined with the values
         /// in Claims. The values found in Claims take precedence over those found in Subject, so any duplicate
         /// values will be overridden.
         /// </summary>
@@ -90,7 +100,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Gets or sets the <see cref="ClaimsIdentity"/>.
-        /// If both <cref see="Claims"/> and <see cref="Subject"/> are set, the claim values in Subject will be combined with the values
+        /// If both <see cref="Claims"/> and <see cref="Subject"/> are set, the claim values in Subject will be combined with the values
         /// in Claims. The values found in Claims take precedence over those found in Subject, so any duplicate
         /// values will be overridden.
         /// </summary>

@@ -2,8 +2,11 @@
 // Licensed under the MIT License.
 
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Threading;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
@@ -13,6 +16,52 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 {
     public class JwtSecurityTokenTests
     {
+        [Fact]
+        public void ByteArrayClaimsEncodedAsExpected()
+        {
+            var value = new byte[] { 0x21, 0x62, 0x36, 0x34 };
+            var tokenPayload = new JwtPayload
+            {
+                ["byteArray"] = value,
+            };
+
+            var token = new JwtSecurityToken(new JwtHeader(), tokenPayload);
+
+            var handler = new JwtSecurityTokenHandler();
+
+            var tokenString = handler.WriteToken(token);
+            var parsedToken = new JwtSecurityToken(tokenString);
+            var expectedValue = System.Text.Json.JsonSerializer.Serialize(value).Trim('"');
+
+            // Will throw if can't find.
+            var testClaim = parsedToken.Claims.First(c => c.Type == "byteArray");
+            Assert.Equal(expectedValue, testClaim.Value);
+        }
+
+        [Fact]
+        public void BoolClaimsEncodedAsExpected()
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(new string('a', 128)));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[] { new Claim("testClaim", "true", ClaimValueTypes.Boolean), new Claim("testClaim2", "True", ClaimValueTypes.Boolean) };
+            var token = new JwtSecurityToken(
+                issuer: "issuer.contoso.com",
+                audience: "audience.contoso.com",
+                claims: claims,
+                expires: (new DateTime(2038, 1, 20)).ToUniversalTime(),
+                signingCredentials: creds);
+
+            var claimSet = token.Claims;
+
+            // Will throw if can't find.
+            var testClaim = claimSet.First(c => c.Type == "testClaim");
+            Assert.Equal("true", testClaim.Value);
+
+            var testClaim2 = claimSet.First(c => c.Type == "testClaim2");
+            Assert.Equal("true", testClaim2.Value);
+        }
+
         [Fact]
         public void DateTime2038Issue()
         {
@@ -27,7 +76,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 expires: (new DateTime(2038, 1, 20)).ToUniversalTime(),
                 signingCredentials: creds);
 
-            Assert.Equal(token.ValidTo, (new DateTime(2038,1,20)).ToUniversalTime());
+            Assert.Equal(token.ValidTo, (new DateTime(2038, 1, 20)).ToUniversalTime());
         }
 
         [Fact]
@@ -39,7 +88,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             foreach (Claim c in jwt.Claims)
             {
-                Assert.True(false, "claims.Count != 0");
+                Assert.Fail("claims.Count != 0");
                 break;
             }
 
@@ -47,7 +96,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             Assert.NotNull(jwt.Audiences);
             foreach (string aud in jwt.Audiences)
             {
-                Assert.True(false, "jwt.Audiences should be empty");
+                Assert.Fail("jwt.Audiences should be empty");
             }
             Assert.Null(jwt.Id);
             Assert.Null(jwt.Issuer);
@@ -131,7 +180,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 });
         }
 
-        [Theory, MemberData(nameof(EmbeddedTokenConstructorData))]
+        [Theory, MemberData(nameof(EmbeddedTokenConstructorData), DisableDiscoveryEnumeration = true)]
         public void EmbeddedTokenConstructor1(string testId, JwtSecurityTokenTestVariation outerTokenVariation, JwtSecurityTokenTestVariation innerTokenVariation, string jwt, ExpectedException ee)
         {
             JwtSecurityToken outerJwt = null;
@@ -185,7 +234,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
             catch (Exception ex)
             {
-                Assert.True(false, string.Format("Testcase: {0}. UnExpected when getting a properties: '{1}'", outerTokenVariation.Name, ex.ToString()));
+                Assert.Fail(string.Format("Testcase: {0}. UnExpected when getting a properties: '{1}'", outerTokenVariation.Name, ex.ToString()));
             }
 
             try
@@ -203,7 +252,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
             catch (Exception ex)
             {
-                Assert.True(false, string.Format("Testcase: {0}. UnExpected when getting a properties: '{1}'", testId, ex.ToString()));
+                Assert.Fail(string.Format("Testcase: {0}. UnExpected when getting a properties: '{1}'", testId, ex.ToString()));
             }
 
             try
@@ -218,7 +267,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
             catch (Exception ex)
             {
-                Assert.True(false, string.Format("Testcase: {0}. Unexpected inequality between outer and inner token properties: '{1}'", testId, ex.ToString()));
+                Assert.Fail(string.Format("Testcase: {0}. Unexpected inequality between outer and inner token properties: '{1}'", testId, ex.ToString()));
             }
 
         }
@@ -331,7 +380,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             if (string.IsNullOrEmpty(jwe))
                 throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(jwe)));
 
-            string[] parts = jwe.Split(new char[] {'.'}, 6);
+            string[] parts = jwe.Split(new char[] { '.' }, 6);
             if (parts.Length != 5)
                 throw new ArgumentException(string.Format("The JWE token must have 5 parts. The JWE {0} has {1} parts.", jwe, parts.Length));
 
@@ -370,7 +419,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
             catch (Exception ex)
             {
-                Assert.True(false, string.Format("Testcase: {0}. UnExpected when getting a properties: '{1}'", variation.Name, ex.ToString()));
+                Assert.Fail(string.Format("Testcase: {0}. UnExpected when getting a properties: '{1}'", variation.Name, ex.ToString()));
             }
         }
 
@@ -385,7 +434,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 expires: variation.Expires);
         }
 
-        [Theory, MemberData(nameof(JwtSegmentTheoryData))]
+        [Theory, MemberData(nameof(JwtSegmentTheoryData), DisableDiscoveryEnumeration = true)]
         public void JwtSegment(JwtTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.JwtSegment", theoryData);
@@ -427,6 +476,39 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 return theoryData;
             }
 
+        }
+
+        [Fact]
+        public void DifferentCultureJwtSecurityToken()
+        {
+            string numericClaim = string.Empty;
+            List<Claim> numericList = null;
+
+            var thread = new Thread(() =>
+            {
+                CultureInfo.CurrentCulture = new CultureInfo("fr-FR");
+
+                var handler = new JwtSecurityTokenHandler();
+                var token = handler.CreateJwtSecurityToken(new SecurityTokenDescriptor
+                {
+                    Claims = new Dictionary<string, object>
+                    {
+                        { "numericClaim", 10.9d },
+                        { "numericList", new List<object> { 12.2, 11.1 } }
+                    }
+                });
+
+                var claim = token.Claims.First(c => c.Type == "numericClaim");
+                numericClaim = claim.Value;
+                numericList = token.Claims.Where(c => c.Type == "numericList").ToList();
+            });
+
+            thread.Start();
+            thread.Join();
+
+            Assert.Equal("10.9", numericClaim);
+            Assert.Equal("12.2", numericList[0].Value);
+            Assert.Equal("11.1", numericList[1].Value);
         }
     }
 }

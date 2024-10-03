@@ -3,20 +3,17 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Text.Json;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
-using Newtonsoft.Json;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Json.Tests
 {
     public class JsonWebKeySetTests
     {
-        [Theory, MemberData(nameof(ConstructorDataSet))]
+        [Theory, MemberData(nameof(ConstructorDataSet), DisableDiscoveryEnumeration = true)]
         public void Constructors(JsonWebKeySetTheoryData theoryData)
         {
             var context = new CompareContext(theoryData);
@@ -26,7 +23,11 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             {
                 var jsonWebKeys = new JsonWebKeySet(theoryData.Json);
                 var keys = jsonWebKeys.GetSigningKeys();
+                var originalString = jsonWebKeys.JsonData;
                 theoryData.ExpectedException.ProcessNoException(context);
+
+                IdentityComparer.AreStringsEqual(originalString, theoryData.Json, context);
+
                 if (theoryData.JsonWebKeySet != null)
                     IdentityComparer.AreEqual(jsonWebKeys, theoryData.JsonWebKeySet, context);
 
@@ -65,13 +66,6 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                     {
                         ExpectedException = ExpectedException.ArgumentException(substringExpected: "IDX10805:", inner: typeof(System.Text.Json.JsonException)),
                         Json = DataSets.JsonWebKeySetBadFormatingString
-                    });
-
-                theoryData.Add(
-                    new JsonWebKeySetTheoryData("GoogleCertsExpected")
-                    {
-                        Json = File.ReadAllText(DataSets.GoogleCertsFile),
-                        JsonWebKeySet = DataSets.GoogleCertsExpected
                     });
 
                 theoryData.Add(
@@ -165,7 +159,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
         }
 
         [Fact]
-        public void SigningKeysExtensibility()
+        public async Task SigningKeysExtensibility()
         {
             var context = new CompareContext($"{this}.SigningKeysExtensibility");
             TestUtilities.WriteHeader($"{this}.SigningKeysExtensibility");
@@ -186,7 +180,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                     ValidateLifetime = false,
                 };
 
-                var tokenValidationResult = new JsonWebTokens.JsonWebTokenHandler().ValidateTokenAsync(Default.AsymmetricJwt, tokenValidationParameters).Result;
+                var tokenValidationResult = await new JsonWebTokens.JsonWebTokenHandler().ValidateTokenAsync(Default.AsymmetricJwt, tokenValidationParameters);
 
                 if (tokenValidationResult.IsValid != true)
                     context.Diffs.Add("tokenValidationResult.IsValid != true");
@@ -225,7 +219,7 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             return null;
         }
 
-        [Theory, MemberData(nameof(GetSigningKeysTheoryData))]
+        [Theory, MemberData(nameof(GetSigningKeysTheoryData), DisableDiscoveryEnumeration = true)]
         public void GetSigningKeys(JsonWebKeySetTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.GetSigningKeys", theoryData);
@@ -417,11 +411,22 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             }
         }
 
+#if NET8_0_OR_GREATER
+        [Fact]
+        public void JsonDeserialize()
+        {
+            var json = DataSets.JsonWebKeySetEvoString;
+            var jsonWebKeys = System.Text.Json.JsonSerializer.Deserialize<JsonWebKeySet>(json);
+            Assert.NotNull(jsonWebKeys);
+            Assert.NotEmpty(jsonWebKeys.Keys);
+        }
+#endif
+
         private static X509SecurityKey CreateX509SecurityKey(JsonWebKeySet webKeySet, int keyIndex)
         {
             var webKey = (webKeySet.Keys as List<JsonWebKey>)[keyIndex];
 
-            return new X509SecurityKey(new X509Certificate2(Convert.FromBase64String(webKey.X5c[0])))
+            return new X509SecurityKey(CertificateHelper.LoadX509Certificate(webKey.X5c[0]))
             {
                 KeyId = webKey.KeyId
             };

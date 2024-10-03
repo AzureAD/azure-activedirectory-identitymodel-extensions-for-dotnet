@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.Json;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.IdentityModel.Tokens.Json.Tests
@@ -78,59 +80,11 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             return jsonWebKey;
         }
 
-        public static JsonWebKey6x FullyPopulatedJsonWebKey6x()
-        {
-            JsonWebKey6x jsonWebKey = new JsonWebKey6x
-            {
-                Alg = SecurityAlgorithms.Sha256,
-                Crv = "CRV",
-                D = P256_D,
-                DP = DP,
-                DQ = DQ,
-                E = Exponent,
-                K = "K",
-                KeyId = "NGTFvdK-fythEuLwjpwAJOM9n-A",
-                Kid = "NGTFvdK-fythEuLwjpwAJOM9n-A",
-                Kty = "RSA",
-                N = Modulus,
-                P = P,
-                Q = Q,
-                QI = InverseQ,
-                Use = "sig",
-                X = P256_X,
-                X5t = "NGTFvdK-fythEuLwjpwAJOM9n-A",
-                X5tS256 = "x5t256",
-                X5u = "https://jsonkeyurl",
-                Y = P256_Y
-            };
-
-            jsonWebKey.X5c.Add(X5C);
-            jsonWebKey.KeyOps.Add("keyOps");
-            jsonWebKey.Oth = new List<string>
-            {
-                "oth1",
-                "oth2"
-            };
-
-            SetAdditionalData6x(jsonWebKey.AdditionalData);
-
-            return jsonWebKey;
-        }
-
         public static JsonWebKeySet FullyPopulatedJsonWebKeySet()
         {
             JsonWebKeySet jsonWebKeySet = new JsonWebKeySet();
             jsonWebKeySet.Keys.Add(FullyPopulatedJsonWebKey());
             SetAdditionalData(jsonWebKeySet.AdditionalData);
-
-            return jsonWebKeySet;
-        }
-
-        public static JsonWebKeySet6x FullyPopulatedJsonWebKeySet6x()
-        {
-            JsonWebKeySet6x jsonWebKeySet = new JsonWebKeySet6x();
-            jsonWebKeySet.Keys.Add(FullyPopulatedJsonWebKey6x());
-            SetAdditionalData6x(jsonWebKeySet.AdditionalData);
 
             return jsonWebKeySet;
         }
@@ -168,7 +122,22 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
             dictionary["true"] = true;
         }
 
+        public static JsonWebToken CreateUnsignedJsonWebToken(string key, object value)
+        {
+            return new JsonWebToken(CreateUnsignedToken(key, value));
+        }
+
         public static string CreateUnsignedToken(string key, object value)
+        {
+            return EmptyHeader + "." + CreateEncodedJson(key, value) + ".";
+        }
+
+        public static string CreateUnsignedToken(string headerKey, object headerValue, string payloadKey, object payloadValue)
+        {
+            return CreateEncodedJson(headerKey, headerValue) + "." + CreateEncodedJson(payloadKey, payloadValue) + ".";
+        }
+
+        public static string CreateEncodedJson(string key, object value)
         {
             Utf8JsonWriter writer = null;
             using (MemoryStream memoryStream = new MemoryStream())
@@ -183,12 +152,108 @@ namespace Microsoft.IdentityModel.Tokens.Json.Tests
                     writer.WriteEndObject();
                     writer.Flush();
 
-                    return EmptyHeader + "." + Base64UrlEncoder.Encode(memoryStream.GetBuffer(), 0, (int)memoryStream.Length) + ".";
+                    return Base64UrlEncoder.Encode(memoryStream.GetBuffer(), 0, (int)memoryStream.Length);
                 }
                 finally
                 {
                     writer?.Dispose();
                 }
+            }
+        }
+
+        public static string SetPropertiesToUpperCase(string json)
+        {
+            Utf8JsonReader reader = new Utf8JsonReader(System.Text.Encoding.UTF8.GetBytes(json));
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonTokenType.PropertyName)
+                {
+                    string propertyName = reader.GetString();
+                    if (propertyName != null)
+                    {
+                        json = json.Replace("\"" + propertyName + "\":", "\"" + propertyName.ToUpperInvariant() + "\":");
+                    }
+                }
+            }
+
+            return json;
+        }
+
+        /// <summary>
+        /// json is used in a test to create the OpenIdConnectConfiguration, all values found in the json that match keys in AdditionalData are set to upper case.
+        /// </summary>
+        /// <param name="json"></param>
+        /// <param name="configuration"></param>
+        /// <returns></returns>
+        public static string SetAdditionalDataKeysToUpperCase(string json, OpenIdConnectConfiguration configuration)
+        {
+            foreach (string key in configuration.AdditionalData.Keys)
+                json = json.Replace("\"" + key + "\":", "\"" + key.ToUpperInvariant() + "\":");
+
+            return json;
+        }
+
+        public static OpenIdConnectConfiguration SetAdditionalDataKeysToUpperCase(OpenIdConnectConfiguration configuration)
+        {
+            SetAdditionalDataKeysToUpperCase(configuration.AdditionalData);
+            return configuration;
+        }
+
+        public static JsonWebKeySet SetAdditionalDataKeysToUpperCase(JsonWebKeySet jsonWebKeySet)
+        {
+            SetAdditionalDataKeysToUpperCase(jsonWebKeySet.AdditionalData);
+            foreach (JsonWebKey jsonWebKey in jsonWebKeySet.Keys)
+                SetAdditionalDataKeysToUpperCase(jsonWebKey);
+
+            return jsonWebKeySet;
+        }
+
+        public static JsonWebKey SetAdditionalDataKeysToUpperCase(JsonWebKey jsonWebKey)
+        {
+            SetAdditionalDataKeysToUpperCase(jsonWebKey.AdditionalData);
+            return jsonWebKey;
+        }
+
+        /// <summary>
+        /// json is used to create the JsonWebKeySet, all values found in the json that match keys in AdditionalData are set to upper case.
+        /// </summary>
+        /// <param name="json"></param>
+        /// <param name="jsonWebKeySet"></param>
+        /// <returns></returns>
+        public static string SetAdditionalDataKeysToUpperCase(string json, JsonWebKeySet jsonWebKeySet)
+        {
+            foreach (string key in jsonWebKeySet.AdditionalData.Keys)
+                json = json.Replace("\"" + key + "\":", "\"" + key.ToUpperInvariant() + "\":");
+
+            foreach (JsonWebKey jsonWebKey in jsonWebKeySet.Keys)
+                json = SetAdditionalDataKeysToUpperCase(json, jsonWebKey);
+
+            return json;
+        }
+
+        /// <summary>
+        /// json is used to create the JsonWebKey, all values found in the json that match keys in AdditionalData are set to upper case.
+        /// </summary>
+        /// <param name="json"></param>
+        /// <param name="jsonWebKey"></param>
+        /// <returns></returns>
+        public static string SetAdditionalDataKeysToUpperCase(string json, JsonWebKey jsonWebKey)
+        {
+            foreach (string key in jsonWebKey.AdditionalData.Keys)
+                json = json.Replace("\"" + key + "\":", "\"" + key.ToUpperInvariant() + "\":");
+
+            return json;
+        }
+
+        public static void SetAdditionalDataKeysToUpperCase(IDictionary<string, object> additionalData)
+        {
+            List<string> keys = [.. additionalData.Keys];
+
+            for (int i = 0; i < keys.Count; i++)
+            {
+                string key = keys[i];
+                additionalData[key.ToUpperInvariant()] = additionalData[key];
+                additionalData.Remove(key);
             }
         }
     }

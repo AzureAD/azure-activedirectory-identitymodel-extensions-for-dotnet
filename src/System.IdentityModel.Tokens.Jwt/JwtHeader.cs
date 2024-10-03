@@ -15,7 +15,7 @@ using JsonPrimitives = Microsoft.IdentityModel.Tokens.Json.JsonSerializerPrimiti
 namespace System.IdentityModel.Tokens.Jwt
 {
     /// <summary>
-    /// Initializes a new instance of <see cref="JwtHeader"/> which contains JSON objects representing the cryptographic operations applied to the JWT and optionally any additional properties of the JWT. 
+    /// Initializes a new instance of <see cref="JwtHeader"/> which contains JSON objects representing the cryptographic operations applied to the JWT and optionally any additional properties of the JWT.
     /// The member names within the JWT Header are referred to as Header Parameter Names.
     /// <para>These names MUST be unique and the values must be <see cref="string"/>(s). The corresponding values are referred to as Header Parameter Values.</para>
     /// </summary>
@@ -41,7 +41,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
             Utf8JsonReader reader = new(Encoding.UTF8.GetBytes(json));
 
-            if (!JsonPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, false))
+            if (!JsonPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.StartObject, true))
                 throw LogHelper.LogExceptionMessage(
                     new JsonException(
                         LogHelper.FormatInvariant(
@@ -53,7 +53,7 @@ namespace System.IdentityModel.Tokens.Jwt
                         LogHelper.MarkAsNonPII(reader.CurrentDepth),
                         LogHelper.MarkAsNonPII(reader.BytesConsumed))));
 
-            while (reader.Read())
+            while (true)
             {
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
@@ -64,8 +64,13 @@ namespace System.IdentityModel.Tokens.Jwt
                     else
                         obj = JsonPrimitives.ReadPropertyValueAsObject(ref reader, propertyName, ClassName);
 
-                     this[propertyName] = obj;
+                    this[propertyName] = obj;
                 }
+                // We read a JsonTokenType.StartObject above, exiting and positioning reader at next token.
+                else if (JsonPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, true))
+                    break;
+                else if (!reader.Read())
+                    break;
             }
         }
 
@@ -99,7 +104,7 @@ namespace System.IdentityModel.Tokens.Jwt
         /// </summary>
         /// <param name="signingCredentials"><see cref="SigningCredentials"/> used when creating a JWS Compact JSON.</param>
         /// <param name="outboundAlgorithmMap">provides a mapping for the 'alg' value so that values are within the JWT namespace.</param>
-        public JwtHeader(SigningCredentials signingCredentials, IDictionary<string,string> outboundAlgorithmMap)
+        public JwtHeader(SigningCredentials signingCredentials, IDictionary<string, string> outboundAlgorithmMap)
             : this(signingCredentials, outboundAlgorithmMap, null)
         {
         }
@@ -209,8 +214,25 @@ namespace System.IdentityModel.Tokens.Jwt
             else
                 Enc = encryptingCredentials.Enc;
 
-            if (!string.IsNullOrEmpty(encryptingCredentials.Key.KeyId))
-                Kid = encryptingCredentials.Key.KeyId;
+            // Since developers may have already worked around this issue, implicitly taking a dependency on the
+            // old behavior, we guard the new behavior behind an AppContext switch. The new/RFC-conforming behavior
+            // is treated as opt-in. When the library is at the point where it is able to make breaking changes
+            // (such as the next major version update) we should consider whether or not this app-compat switch
+            // needs to be maintained.
+            if (AppContextSwitches.UseRfcDefinitionOfEpkAndKid)
+            {
+                if (!string.IsNullOrEmpty(encryptingCredentials.KeyExchangePublicKey.KeyId))
+                    Kid = encryptingCredentials.KeyExchangePublicKey.KeyId;
+
+                // Parameter MUST be present [...] when [key agreement] algorithms are used: https://www.rfc-editor.org/rfc/rfc7518#section-4.6.1.1
+                if (SupportedAlgorithms.EcdsaWrapAlgorithms.Contains(encryptingCredentials.Alg))
+                    Add(JwtHeaderParameterNames.Epk, JsonWebKeyConverter.ConvertFromSecurityKey(encryptingCredentials.Key).RepresentAsAsymmetricPublicJwk());
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(encryptingCredentials.Key.KeyId))
+                    Kid = encryptingCredentials.Key.KeyId;
+            }
 
             if (string.IsNullOrEmpty(tokenType))
                 Typ = JwtConstants.HeaderType;
@@ -341,19 +363,19 @@ namespace System.IdentityModel.Tokens.Jwt
                 return GetStandardClaim(JwtHeaderParameterNames.X5t);
             }
         }
-        
+
         /// <summary>
         /// Gets the certificate used to sign the token
         /// </summary>
-        /// <remarks>If the 'x5c' claim is not found, null is returned.</remarks>   
+        /// <remarks>If the 'x5c' claim is not found, null is returned.</remarks>
         public string X5c => GetStandardClaim(JwtHeaderParameterNames.X5c);
 
         /// <summary>
         /// Gets the 'value' of the 'zip' claim { zip, 'value' }.
         /// </summary>
-        /// <remarks>If the 'zip' claim is not found, null is returned.</remarks>   
+        /// <remarks>If the 'zip' claim is not found, null is returned.</remarks>
         public string Zip => GetStandardClaim(JwtHeaderParameterNames.Zip);
-         
+
         /// <summary>
         /// Deserializes Base64UrlEncoded JSON into a <see cref="JwtHeader"/> instance.
         /// </summary>
@@ -390,6 +412,36 @@ namespace System.IdentityModel.Tokens.Jwt
 
                 if (value is string str)
                     return str;
+
+                if (value is JsonElement jsonElement)
+                    return jsonElement.ToString();
+                else if (value is IList<string> list)
+                {
+                    JsonElement json = JsonPrimitives.CreateJsonElement(list);
+                    return json.ToString();
+                }
+                else if (value is IList<object> objectList)
+                {
+                    var stringList = new List<string>(objectList.Count);
+                    foreach (object item in objectList)
+                    {
+                        if (item is string strItem)
+                            stringList.Add(strItem);
+                        else
+                        {
+                            // It isn't safe to ToString() an arbitrary object, so we throw here.
+                            // We could end up with a string that doesn't represent the object's value, for example a collection type.
+                            throw LogHelper.LogExceptionMessage(
+                                new JsonException(
+                                    LogHelper.FormatInvariant(
+                                    Microsoft.IdentityModel.Tokens.LogMessages.IDX11026,
+                                    LogHelper.MarkAsNonPII(claimType),
+                                    LogHelper.MarkAsNonPII(item.GetType()))));
+                        }
+                    }
+                    JsonElement json = JsonPrimitives.CreateJsonElement(stringList);
+                    return json.ToString();
+                }
 
                 // TODO - review dev
                 return string.Empty;

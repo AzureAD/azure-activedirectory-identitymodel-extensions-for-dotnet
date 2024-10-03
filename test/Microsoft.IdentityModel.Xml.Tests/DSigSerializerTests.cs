@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             TestUtilities.AssertFailIfErrors("DSigSerializerTests_GetSets", context.Errors);
         }
 
-        [Theory, MemberData(nameof(ReadKeyInfoTheoryData))]
+        [Theory, MemberData(nameof(ReadKeyInfoTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReadKeyInfo(DSigSerializerTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadKeyInfo", theoryData);
@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 {
                     //KeyInfoTest(KeyInfoTestSet.MalformedCertificate, new ExpectedException(typeof(XmlReadException), "IDX30017:", typeof(FormatException)), true),
                     KeyInfoTest(KeyInfoTestSet.KeyInfoFullyPopulated),
-                    KeyInfoTest(KeyInfoTestSet.MultipleCertificates), 
+                    KeyInfoTest(KeyInfoTestSet.MultipleCertificates),
                     KeyInfoTest(KeyInfoTestSet.MultipleIssuerSerial, new ExpectedException(typeof(XmlReadException), "IDX30015:")),
                     KeyInfoTest(KeyInfoTestSet.MultipleSKI, new ExpectedException(typeof(XmlReadException), "IDX30015:")),
                     KeyInfoTest(KeyInfoTestSet.MultipleSubjectName, new ExpectedException(typeof(XmlReadException), "IDX30015:")),
@@ -100,7 +100,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             }
         }
 
-        [Theory, MemberData(nameof(WriteKeyInfoTheoryData))]
+        [Theory, MemberData(nameof(WriteKeyInfoTheoryData), DisableDiscoveryEnumeration = true)]
         public void WriteKeyInfo(DSigSerializerTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.WriteKeyInfo", theoryData);
@@ -148,7 +148,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             };
         }
 
-        [Theory, MemberData(nameof(ReadSignatureTheoryData))]
+        [Theory, MemberData(nameof(ReadSignatureTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReadSignature(DSigSerializerTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadSignature", theoryData);
@@ -236,7 +236,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             }
         }
 
-        [Theory, MemberData(nameof(WriteSignatureTheoryData))]
+        [Theory, MemberData(nameof(WriteSignatureTheoryData), DisableDiscoveryEnumeration = true)]
         public void WriteSignature(DSigSerializerTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.WriteSignature", theoryData);
@@ -280,14 +280,14 @@ namespace Microsoft.IdentityModel.Xml.Tests
             return new DSigSerializerTheoryData
             {
                 ExpectedException = expectedException ?? ExpectedException.NoExceptionExpected,
-                First = first,                
+                First = first,
                 Signature = testSet.Signature,
                 TestId = testSet.TestId ?? nameof(testSet),
                 Xml = testSet.Xml,
             };
         }
 
-        [Theory, MemberData(nameof(ReadSignedInfoTheoryData))]
+        [Theory, MemberData(nameof(ReadSignedInfoTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReadSignedInfo(DSigSerializerTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadSignedInfo", theoryData);
@@ -337,7 +337,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             }
         }
 
-        [Theory, MemberData(nameof(WriteSignedInfoTheoryData))]
+        [Theory, MemberData(nameof(WriteSignedInfoTheoryData), DisableDiscoveryEnumeration = true)]
         public void WriteSignedInfo(DSigSerializerTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WriteSignedInfo", theoryData);
@@ -369,7 +369,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 // ExpectedException.DefaultVerbose = true;
 
                 return new TheoryData<DSigSerializerTheoryData>
-                { 
+                {
                     SignedInfoTest(SignedInfoTestSet.SignedInfoFullyPopulated)
                 };
             }
@@ -387,7 +387,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             };
         }
 
-        [Theory, MemberData(nameof(ReadReferenceTheoryData))]
+        [Theory, MemberData(nameof(ReadReferenceTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReadReference(DSigSerializerTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadReference", theoryData);
@@ -433,7 +433,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             };
         }
 
-        [Theory, MemberData(nameof(ReadTransformsTheoryData))]
+        [Theory, MemberData(nameof(ReadTransformsTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReadTransforms(DSigSerializerTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ReadTransform", theoryData);
@@ -506,7 +506,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             };
         }
 
-        [Theory, MemberData(nameof(ReadTransformTheoryData))]
+        [Theory, MemberData(nameof(ReadTransformTheoryData), DisableDiscoveryEnumeration = true)]
         public void ReadTransform(DSigSerializerTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.ReadTransforms", theoryData);
@@ -553,7 +553,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
             };
         }
 
-        [Theory, MemberData(nameof(WriteReferenceTheoryData))]
+        [Theory, MemberData(nameof(WriteReferenceTheoryData), DisableDiscoveryEnumeration = true)]
         public void WriteReference(DSigSerializerTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.WriteReference", theoryData);
@@ -570,7 +570,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
 
                 theoryData.ExpectedException.ProcessNoException();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex);
             }

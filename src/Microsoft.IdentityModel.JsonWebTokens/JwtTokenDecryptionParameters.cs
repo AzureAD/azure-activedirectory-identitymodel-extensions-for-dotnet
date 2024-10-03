@@ -8,7 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
     /// <summary>
-    /// Represents the parameters needed to decrypt a JSON Web Token
+    /// Represents the parameters needed to decrypt a JSON Web Token.
     /// The JwtSecurityTokenHandler uses this as a helper when decrypting a JwtSecurityToken, the JsonWebTokenHandler sets the JsonWebToken property. 
     /// </summary>
     internal class JwtTokenDecryptionParameters
@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Gets or sets the function used to attempt decompression with.
         /// </summary>
-        public Func<byte[], string, string> DecompressionFunction { get; set; }
+        public Func<byte[], string, int, string> DecompressionFunction { get; set; }
 
         /// <summary>
         /// Gets or sets the encryption algorithm (Enc) of the token.
@@ -67,7 +67,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public IEnumerable<SecurityKey> Keys { get; set; }
 
         /// <summary>
-        /// Gets or sets the 'value' of the 'zip' claim.
+        /// Gets and sets the maximum deflate size in chars that will be processed.
+        /// </summary>
+        public int MaximumDeflateSize { get; set; } = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
+
+        /// <summary>
+        /// Gets or sets the value of the 'zip' claim.
         /// </summary>
         public string Zip { get; set; }
     }

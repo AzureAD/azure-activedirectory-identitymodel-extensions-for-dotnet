@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using System.Text.Json;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace System.IdentityModel.Tokens.Jwt.Tests
@@ -42,8 +41,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                     ValidateLifetime = false,
                 };
 
-            SecurityToken validatedSecurityToken = null;
-            var cp = handler.ValidateToken(jwt, validationParameters, out validatedSecurityToken);
+            handler.ValidateToken(jwt, validationParameters, out var validatedSecurityToken);
 
             JwtSecurityToken validatedJwt = validatedSecurityToken as JwtSecurityToken;
             object x5csInHeader = validatedJwt.Header[JwtHeaderParameterNames.X5c];
@@ -62,16 +60,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 int num = 0;
                 foreach (var str in list)
                 {
-                    var value = str as JValue;
-                    if (value != null)
-                    {
-                        string aud = value.Value as string;
-                        if (aud != null)
-                        {
-
-                        }
-                    }
-                    else if (!(str is string))
+                    if (!(str is string))
                     {
                         errors.Add("3: str is not string, is: " + str.GetType());
                         errors.Add("token : " + validatedJwt.ToString());
@@ -85,20 +74,28 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 }
             }
 
+            var serializedX5cs = JsonSerializer.Serialize(x5cs);
+            if (header.X5c != serializedX5cs)
+            {
+                errors.Add("5: header.X5c != serializedX5Cs");
+            }
+
             X509SecurityKey signingKey = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256;
             X509SecurityKey validateKey = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA256_Public;
 
             // make sure we can still validate with existing logic.
             var signingCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.RsaSha256Signature);
-            header = new JwtHeader(signingCredentials);
-            header.Add(JwtHeaderParameterNames.X5c, x5cs);
+            header = new JwtHeader(signingCredentials)
+            {
+                { JwtHeaderParameterNames.X5c, x5cs }
+            };
+
             jwtToken = new JwtSecurityToken(header, payload);
             jwt = handler.WriteToken(jwtToken);
 
             validationParameters.IssuerSigningKey = validateKey;
             validationParameters.RequireSignedTokens = true;
-            validatedSecurityToken = null;
-            cp = handler.ValidateToken(jwt, validationParameters, out validatedSecurityToken);
+            handler.ValidateToken(jwt, validationParameters, out _);
 
             TestUtilities.AssertFailIfErrors("CreateAndValidateTokens_MultipleX5C", errors);
         }
@@ -139,7 +136,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             validateKey = KeyingMaterial.X509SecurityKeySelfSigned2048_SHA384_Public;
             validationParameters.IssuerSigningKey = validateKey;
 
-            ExpectedException expectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10503:");
+            ExpectedException expectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10517:");
             try
             {
                 cp = handler.ValidateToken(jwt, validationParameters, out validatedSecurityToken);
@@ -168,7 +165,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             TestUtilities.AssertFailIfErrors(context.Diffs);
         }
 
-        [Theory, MemberData(nameof(RoundTripTokensUsingCacheTheoryData))]
+        [Theory, MemberData(nameof(RoundTripTokensUsingCacheTheoryData), DisableDiscoveryEnumeration = true)]
         public void RoundTripTokensUsingCache(JwtTheoryData theoryData)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -393,7 +390,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         }
 
 
-        [Theory, MemberData(nameof(RoundTripTokensTheoryData))]
+        [Theory, MemberData(nameof(RoundTripTokensTheoryData), DisableDiscoveryEnumeration = true)]
         public void RoundTripTokens(JwtTheoryData theoryData)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -614,7 +611,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ValidationParameters = Default.SymmetricEncryptSignTokenValidationParameters
             });
 
-#if NET461 || NET462 || NET_CORE
+#if NET462 || NET_CORE
             // RsaPss is not supported on .NET < 4.6
             var rsaPssSigningCredentials = new SigningCredentials(Default.AsymmetricSigningKey, SecurityAlgorithms.RsaSsaPssSha256);
             theoryData.Add(new JwtTheoryData
@@ -639,7 +636,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             return theoryData;
         }
 
-        [Theory, MemberData(nameof(SerializeDeserializeJwtTokensTheoryData))]
+        [Theory, MemberData(nameof(SerializeDeserializeJwtTokensTheoryData), DisableDiscoveryEnumeration = true)]
         public void SerializeDeserializeJwtTokens(JwtTheoryData theoryData)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -682,7 +679,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             }
         }
 
-        [Theory, MemberData(nameof(RoundTripJWEParams))]
+        [Theory, MemberData(nameof(RoundTripJWEParams), DisableDiscoveryEnumeration = true)]
         public void RoundTripJWETokens(string testId, SecurityTokenDescriptor tokenDescriptor, TokenValidationParameters validationParameters, ExpectedException ee)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -878,7 +875,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             return theoryData;
         }
 
-        [Theory, MemberData(nameof(CreationJWEParams))]
+        [Theory, MemberData(nameof(CreationJWEParams), DisableDiscoveryEnumeration = true)]
         public void CreateJWETokens(string testId, string jweToken, TokenValidationParameters validationParameters, JwtPayload expectedPayload, ExpectedException ee)
         {
             var handler = new JwtSecurityTokenHandler();
@@ -900,7 +897,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 if (!IdentityComparer.AreEqual(outerToken.Payload, outerToken.InnerToken.Payload, context))
                     context.Diffs.Add("outerToken.Payload != outerToken.InnerToken.Payload");
 
-                foreach(KeyValuePair<string, object> claim in expectedPayload)
+                foreach (KeyValuePair<string, object> claim in expectedPayload)
                 {
                     if (!outerToken.Payload.ContainsKey(claim.Key))
                     {
@@ -986,7 +983,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 handler.CreateEncodedJwt((SecurityTokenDescriptor)null);
                 ee.ProcessNoException(errors);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ee.ProcessException(ex, errors);
             }
@@ -1054,7 +1051,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             string encodedJwt = jwtHandler.WriteToken(new JwtSecurityToken(new JwtHeader(), payload));
             var validationParameters = new TokenValidationParameters
             {
-                IssuerValidator = (issuer, st, tvp) => { return issuer;},
+                IssuerValidator = (issuer, st, tvp) => { return issuer; },
                 RequireSignedTokens = false,
                 ValidateAudience = false,
                 ValidateLifetime = false,
@@ -1069,13 +1066,13 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 JsonClaims.ClaimNamesAsDictionary);
             IdentityComparer.AreEqual(claimsPrincipal.Identity as ClaimsIdentity, expectedIdentity, context);
 
-            jwtToken = new JwtSecurityToken( new JwtHeader(), new JwtPayload(Default.Issuer, null, ClaimSets.EntityAsJsonClaim(Default.Issuer, Default.Issuer), null, null));
+            jwtToken = new JwtSecurityToken(new JwtHeader(), new JwtPayload(Default.Issuer, null, ClaimSets.EntityAsJsonClaim(Default.Issuer, Default.Issuer), null, null));
             encodedJwt = jwtHandler.WriteToken(jwtToken);
             SecurityToken validatedToken;
             var cp = jwtHandler.ValidateToken(encodedJwt, validationParameters, out validatedToken);
             IdentityComparer.AreEqual(
                 cp.FindFirst(typeof(Entity).ToString()),
-                new Claim(typeof(Entity).ToString(), JsonSerializer.Serialize(Entity.Default), JsonClaimValueTypes.Json, Default.Issuer, Default.Issuer, cp.Identity as ClaimsIdentity ),
+                new Claim(typeof(Entity).ToString(), JsonSerializer.Serialize(Entity.Default), JsonClaimValueTypes.Json, Default.Issuer, Default.Issuer, cp.Identity as ClaimsIdentity),
                 context);
             TestUtilities.AssertFailIfErrors(context.Diffs);
         }
@@ -1093,14 +1090,14 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             DateTime utcNow = DateTime.UtcNow;
             DateTime expire = utcNow + TimeSpan.FromHours(1);
-            ClaimsIdentity subject = new ClaimsIdentity(claims: ClaimSets.GetDefaultRoleClaims(null));
+            ClaimsIdentity subject = new CaseSensitiveClaimsIdentity(claims: ClaimSets.GetDefaultRoleClaims(null));
             JwtSecurityToken jwtToken = handler.CreateJwtSecurityToken(Default.Issuer, Default.Audience, subject, utcNow, expire, utcNow);
 
             SecurityToken securityToken;
             ClaimsPrincipal principal = handler.ValidateToken(jwtToken.RawData, validationParameters, out securityToken);
             CheckForRoles(ClaimSets.GetDefaultRoles(), new string[] { Guid.NewGuid().ToString(), Guid.NewGuid().ToString() }, principal);
             ClaimsIdentity expectedIdentity =
-                new ClaimsIdentity(
+                new CaseSensitiveClaimsIdentity(
                     authenticationType: "Federation",
                     claims: ClaimSets.GetDefaultRoleClaims(handler)
                     );
@@ -1113,7 +1110,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             CompareContext context = new CompareContext { IgnoreType = true };
             IdentityComparer.AreEqual(principal.Claims, expectedIdentity.Claims, context);
-            TestUtilities.AssertFailIfErrors(GetType().ToString()+".RoleClaims", context.Diffs);
+            TestUtilities.AssertFailIfErrors(GetType().ToString() + ".RoleClaims", context.Diffs);
         }
 
         [Fact]
@@ -1182,7 +1179,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             };
 
             ClaimsIdentity subject =
-                new ClaimsIdentity(
+                new CaseSensitiveClaimsIdentity(
                     new List<Claim>
                     {   new Claim(_nameClaimTypeForDelegate, delegateName),
                         new Claim(validationParametersNameClaimType, validationParameterName),
@@ -1223,8 +1220,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         /// <summary>
         /// First string is expected, others are not.
         /// </summary>
-        /// <param name="names"></param>
-        /// <param name="roles"></param>
         private void CheckNamesAndRole(string[] names, string[] roles, ClaimsPrincipal principal, string expectedNameClaimType = ClaimsIdentity.DefaultNameClaimType, string expectedRoleClaimType = ClaimsIdentity.DefaultRoleClaimType)
         {
             ClaimsIdentity identity = principal.Identity as ClaimsIdentity;
@@ -1246,8 +1241,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         /// <summary>
         /// First role is expected, others are not.
         /// </summary>
-        /// <param name="names"></param>
-        /// <param name="roles"></param>
         private void CheckForRoles(IEnumerable<string> expectedRoles, IEnumerable<string> unexpectedRoles, ClaimsPrincipal principal, string expectedRoleClaimType = ClaimsIdentity.DefaultRoleClaimType)
         {
             ClaimsIdentity identity = principal.Identity as ClaimsIdentity;

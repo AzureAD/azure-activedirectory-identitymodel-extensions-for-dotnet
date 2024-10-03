@@ -2,17 +2,23 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
+
+#if NET462 || NETSTANDARD2_0
+using System.Runtime.InteropServices;
+#endif
+
+#if NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
+using System.Runtime.CompilerServices;
+#endif
 
 namespace Microsoft.IdentityModel.Tokens
 {
     delegate ECDsa CreateECDsaDelegate(JsonWebKey jsonWebKey, bool usePrivateKey);
 
     /// <summary>
-    /// This adapter abstracts the <see cref="ECDsa"/> differences between versions of .Net targets.
+    /// This adapter abstracts the <see cref="ECDsa"/> differences between versions of .NET targets.
     /// </summary>
     internal class ECDsaAdapter
     {
@@ -32,12 +38,10 @@ namespace Microsoft.IdentityModel.Tokens
             CreateECDsaFunction = CreateECDsaUsingECParams;
 #elif NETSTANDARD2_0
             // Although NETSTANDARD2_0 specifies that ECParameters are supported, we still need to call SupportsECParameters()
-            // as NET461 is listed as supporting NETSTANDARD2_0, but DOES NOT support ECParameters.
+            // as NET462 is listed as supporting NETSTANDARD2_0, but DOES NOT support ECParameters.
             // See: https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.ecparameters?view=netstandard-2.0
-            if (SupportsECParameters())
-                CreateECDsaFunction = CreateECDsaUsingECParams;
-            else
-                CreateECDsaFunction = CreateECDsaUsingCNGKey;
+            if (SupportsECParameters()) CreateECDsaFunction = CreateECDsaUsingECParams;
+            else CreateECDsaFunction = CreateECDsaUsingCNGKey;
 #else
             CreateECDsaFunction = CreateECDsaUsingCNGKey;
 #endif
@@ -51,7 +55,7 @@ namespace Microsoft.IdentityModel.Tokens
             return CreateECDsaFunction(jsonWebKey, usePrivateKey);
         }
 
-#if NET461 || NET462 || NETSTANDARD2_0
+#if NET462 || NETSTANDARD2_0
         /// <summary>
         /// Creates an ECDsa object using the <paramref name="jsonWebKey"/> and <paramref name="usePrivateKey"/>.
         /// 'ECParameters' structure is available in .NET Framework 4.7+, .NET Standard 1.6+, and .NET Core 1.0+.
@@ -150,10 +154,10 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Returns the size of key in bytes
+        /// Determines the key size in bytes based on the specified ECDSA curve identifier.
         /// </summary>
-        /// <param name="curveId">Represents ecdsa curve -P256, P384, P521</param>
-        /// <returns>Size of the key in bytes</returns>
+        /// <param name="curveId">The identifier of the ECDSA curve (P256, P384, P521).</param>
+        /// <returns>The size of the key in bytes.</returns>
         private static uint GetKeyByteCount(string curveId)
         {
             if (string.IsNullOrEmpty(curveId))
@@ -175,11 +179,12 @@ namespace Microsoft.IdentityModel.Tokens
                 default:
                     throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10645, LogHelper.MarkAsNonPII(curveId))));
             }
+
             return keyByteCount;
         }
 
         /// <summary>
-        /// Magic numbers identifying ECDSA blob types
+        /// Magic numbers identifying ECDSA blob types.
         /// </summary>
         private enum KeyBlobMagicNumber : uint
         {
@@ -192,11 +197,11 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Returns the magic value representing the curve corresponding to the curve id.
+        /// Returns the magic value representing the curve corresponding to the curve identifier.
         /// </summary>
-        /// <param name="curveId">Represents ecdsa curve -P256, P384, P512</param>
-        /// <param name="willCreateSignatures">Whether the provider will create signatures or not</param>
-        /// <returns>Uint representing the magic number</returns>
+        /// <param name="curveId">The identifier of the ECDSA curve (P256, P384, P521).</param>
+        /// <param name="willCreateSignatures">If true, the provider will be used for creating signatures.</param>
+        /// <returns>A <see langword="uint"/> representing the magic number.</returns>
         private static uint GetMagicValue(string curveId, bool willCreateSignatures)
         {
             if (string.IsNullOrEmpty(curveId))
@@ -230,32 +235,12 @@ namespace Microsoft.IdentityModel.Tokens
             return (uint)magicNumber;
         }
 
-        /// <summary>
-        /// Tests if user's runtime platform supports operations using <see cref="CngKey"/>.
-        /// </summary>
-        /// <returns>True if operations using <see cref="CngKey"/> are supported on user's runtime platform, false otherwise.</returns>
-        [MethodImpl(MethodImplOptions.NoOptimization)]
-        private static bool SupportsCNGKey()
-        {
-            try
-            {
-#pragma warning disable CA1416 // Validate platform compatibility
-                _ = CngKeyBlobFormat.EccPrivateBlob;
-#pragma warning restore CA1416 // Validate platform compatibility
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
 #if NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
         /// <summary>
         /// Creates an ECDsa object using the <paramref name="jsonWebKey"/> and <paramref name="usePrivateKey"/>.
         /// 'ECParameters' structure is available in .NET Framework 4.7+, .NET Standard 1.6+, and .NET Core 1.0+.
         /// </summary>
-        private ECDsa CreateECDsaUsingECParams(JsonWebKey jsonWebKey, bool usePrivateKey)
+        private static ECDsa CreateECDsaUsingECParams(JsonWebKey jsonWebKey, bool usePrivateKey)
         {
             if (jsonWebKey == null)
                 throw LogHelper.LogArgumentNullException(nameof(jsonWebKey));
@@ -294,9 +279,9 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Returns the elliptic curve corresponding to the curve id.
+        /// Returns the elliptic curve corresponding to the curve identifier.
         /// </summary>
-        /// <param name="curveId">Represents ecdsa curve -P256, P384, P512</param>
+        /// <param name="curveId">The identifier of the ECDSA curve (P256, P384, P521).</param>
         private static ECCurve GetNamedECCurve(string curveId)
         {
             if (string.IsNullOrEmpty(curveId))
@@ -330,12 +315,12 @@ namespace Microsoft.IdentityModel.Tokens
             else
                 throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10645, (curve.Oid.Value ?? curve.Oid.FriendlyName) ?? "null")));
         }
-            
+
 
         /// <summary>
-        /// Tests if user application's runtime supports <see cref="ECParameters"/> structure.
+        /// Determines whether user application's runtime supports <see cref="ECParameters"/> structure.
         /// </summary>
-        /// <returns>True if <see cref="ECParameters"/> structure is supported, false otherwise.</returns>
+        /// <returns><see langword="true"/> if <see cref="ECParameters"/> structure is supported; Otherwise <see langword="false"/>.</returns>
         internal static bool SupportsECParameters()
         {
 #if NET472 || NET6_0_OR_GREATER

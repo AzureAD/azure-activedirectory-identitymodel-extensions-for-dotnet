@@ -13,11 +13,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     {
         /// <summary>
         /// This test ensures that:
-        /// 1. CryptoProviderFactory.IsSupportedAlgorithm && SecurityKey.IsSupportedAlgorithm have same logic.
+        /// 1. CryptoProviderFactory.IsSupportedAlgorithm &amp;&amp; SecurityKey.IsSupportedAlgorithm have same logic.
         /// 2. Our default algorithms are supported.
         /// </summary>
         /// <param name="theoryData"></param>
-        [Theory, MemberData(nameof(IsSupportedAlgorithmAndKeyTestCases))]
+        [Theory, MemberData(nameof(IsSupportedAlgorithmAndKeyTestCases), DisableDiscoveryEnumeration = true)]
         public void IsSupportedAlgorithmAndKey(SupportedAlgorithmTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.IsSupportedAlgorithm", theoryData);
@@ -29,7 +29,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
                 theoryData.ExpectedException.ProcessNoException(context);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex, context);
             }
@@ -131,7 +131,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     theoryData);
 
                 // SymmetricSecurityKey
-                foreach(var alg in SupportedAlgorithms.SymmetricEncryptionAlgorithms)
+                foreach (var alg in SupportedAlgorithms.SymmetricEncryptionAlgorithms)
                     SupportedAlgorithmTheoryData.AddTestCase(alg, KeyingMaterial.DefaultSymmetricSecurityKey_256, true, $"Symmetric_{alg}", theoryData);
 
                 foreach (var alg in SupportedAlgorithms.SymmetricKeyWrapAlgorithms)
@@ -174,7 +174,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(IsSymmetricKeyWrapSupportedTests))]
+        [Theory, MemberData(nameof(IsSymmetricKeyWrapSupportedTests), DisableDiscoveryEnumeration = true)]
         public void IsSymmetricKeyWrapSupported(SupportedAlgorithmTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.IsSymmetricKeyWrapSupported", theoryData);
@@ -215,7 +215,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(GetDigestFromSignatureAlgorithmTests))]
+        [Theory, MemberData(nameof(GetDigestFromSignatureAlgorithmTests), DisableDiscoveryEnumeration = true)]
         public void GetDigestFromSignatureAlgorithm(SupportedAlgorithmTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.GetDigestFromSignatureAlgorithm", theoryData);

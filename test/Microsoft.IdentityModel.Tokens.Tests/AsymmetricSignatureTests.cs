@@ -21,7 +21,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var context = new CompareContext("UnsupportedRSATypes");
             TestUtilities.WriteHeader($"{this}.UnsupportedRSATypes");
 
-#if NET461 || NET462 || NET472 || NET_CORE
+#if NET462 || NET472 || NET_CORE
             var expectedException = ExpectedException.NoExceptionExpected;
 #endif
             try
@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 expectedException.ProcessException(ex, context);
             }
 
-#if NET461 || NET462 || NET472 || NET_CORE
+#if NET462 || NET472 || NET_CORE
             expectedException = ExpectedException.NoExceptionExpected;
 #endif
 
@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Theory, MemberData(nameof(SignVerifyTheoryData))]
+        [Theory, MemberData(nameof(SignVerifyTheoryData), DisableDiscoveryEnumeration = true)]
         public void SignVerify(SignatureProviderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.SignVerify", theoryData);
@@ -107,7 +107,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     },
                     theoryData);
 
-#if NET461 || NET462 || NET472 || NET_CORE
+#if NET462 || NET472 || NET_CORE
                 theoryData.Add(new SignatureProviderTheoryData()
                 {
                     SigningAlgorithm = SecurityAlgorithms.RsaSsaPssSha512,
@@ -145,13 +145,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     },
                     theoryData);
 
-                 foreach (var certTuple in AsymmetricSignatureTestData.Certificates)
+                foreach (var certTuple in AsymmetricSignatureTestData.Certificates)
                     AsymmetricSignatureTestData.AddRsaPssAlgorithmVariations(new SignatureProviderTheoryData
                     {
                         SigningKey = new RsaSecurityKey(certTuple.Item1.PrivateKey as RSA),
                         TestId = "CapiCapi" + certTuple.Item3,
                         VerifyKey = new RsaSecurityKey(certTuple.Item2.PublicKey.Key as RSA),
-#if NET461 || NET462 || NET472
+#if NET462 || NET472
                         ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
 #elif NET_CORE
                         ExpectedException = ExpectedException.NoExceptionExpected,
@@ -165,7 +165,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         SigningKey = new RsaSecurityKey(certTuple.Item1.PrivateKey as RSA),
                         TestId = "CapiCng" + certTuple.Item3,
                         VerifyKey = new RsaSecurityKey(certTuple.Item2.GetRSAPublicKey()),
-#if NET461 || NET462 || NET472
+#if NET462 || NET472
                         ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
 #elif NET_CORE
                         ExpectedException = ExpectedException.NoExceptionExpected,
@@ -179,7 +179,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         SigningKey = new RsaSecurityKey(certTuple.Item1.GetRSAPrivateKey()),
                         TestId = "CngCapi" + certTuple.Item3,
                         VerifyKey = new RsaSecurityKey(certTuple.Item2.PublicKey.Key as RSA),
-#if NET461 || NET462 || NET472
+#if NET462 || NET472
                         ExpectedException = ExpectedException.NotSupportedException("IDX10634:"),
 #elif NET_CORE
                         ExpectedException = ExpectedException.NoExceptionExpected,
@@ -273,7 +273,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ValidateAsymmetricKeySizeTheoryData))]
+        [Theory, MemberData(nameof(ValidateAsymmetricKeySizeTheoryData), DisableDiscoveryEnumeration = true)]
         public void VerifyAsymmetricKeySize(AsymmetricSignatureProviderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.VerifyAsymmetricKeySize", theoryData);
@@ -376,7 +376,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         /// This test ensures that if every algorithm in SupportedAlgorithms has a value in our maps that validate key sizes
         /// </summary>
         /// <param name="theoryData"></param>
-        [Theory, MemberData(nameof(VerifyAlgorithmsInDefaultMinimumAsymmetricKeySizeTests))]
+        [Theory, MemberData(nameof(VerifyAlgorithmsInDefaultMinimumAsymmetricKeySizeTests), DisableDiscoveryEnumeration = true)]
         public void VerifyAlgorithmsInDefaultMinimumAsymmetricKeySize(AsymmetricSignatureProviderTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.VerifyAlgorithmsInDefaultMinimumAsymmetricKeySize", theoryData);

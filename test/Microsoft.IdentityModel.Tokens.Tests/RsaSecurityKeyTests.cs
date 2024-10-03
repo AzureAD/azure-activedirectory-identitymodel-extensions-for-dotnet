@@ -54,8 +54,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
         }
 
-        [Theory, MemberData(nameof(HasPrivateKeyTheoryData))]
-        public void HasPrivateKey(string testId, AsymmetricSecurityKey key, bool expected)
+        [Theory, MemberData(nameof(HasPrivateKeyTheoryData), DisableDiscoveryEnumeration = true)]
+        public void HasPrivateKey(string testId, RsaSecurityKey key, bool expected)
         {
             if (expected)
                 Assert.True(key.PrivateKeyStatus == PrivateKeyStatus.Exists, testId);
@@ -63,10 +63,10 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 Assert.True(key.PrivateKeyStatus != PrivateKeyStatus.Exists, testId);
         }
 
-        public static TheoryData<string, SecurityKey, bool> HasPrivateKeyTheoryData()
+        public static TheoryData<string, RsaSecurityKey, bool> HasPrivateKeyTheoryData()
         {
-            var theoryData = new TheoryData<string, SecurityKey, bool>();
-#if NET461 || NET462
+            var theoryData = new TheoryData<string, RsaSecurityKey, bool>();
+#if NET462
             theoryData.Add(
                 "KeyingMaterial.RsaSecurityKeyWithCspProvider_2048",
                 KeyingMaterial.RsaSecurityKeyWithCspProvider_2048,
@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             );
 #endif
 
-#if NET461 || NET462
+#if NET462
 
             theoryData.Add(
                 "KeyingMaterial.RsaSecurityKeyWithCngProvider_2048",
