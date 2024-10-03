@@ -103,7 +103,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
         internal bool ExpectedIsValid { get; set; } = true;
 
-        //internal TokenValidationParameters? TokenValidationParameters { get; set; }
+        internal TokenValidationParameters? TokenValidationParameters { get; set; }
 
         internal ValidationParameters? ValidationParameters { get; set; }
 
