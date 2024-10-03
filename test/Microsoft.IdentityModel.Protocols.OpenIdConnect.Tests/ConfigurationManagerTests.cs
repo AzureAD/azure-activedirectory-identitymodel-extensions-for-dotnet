@@ -214,20 +214,27 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             var context = new CompareContext($"{this}.BootstrapRefreshIntervalTest");
 
-            var documentRetriever = new HttpDocumentRetriever(HttpResponseMessageUtils.SetupHttpClientThatReturns("OpenIdConnectMetadata.json", HttpStatusCode.NotFound));
-            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), documentRetriever) { RefreshInterval = TimeSpan.FromSeconds(2) };
+            var documentRetriever = new HttpDocumentRetriever(
+                HttpResponseMessageUtils.SetupHttpClientThatReturns("OpenIdConnectMetadata.json", HttpStatusCode.NotFound));
 
-            // First time to fetch metadata.
+            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+                "OpenIdConnectMetadata.json",
+                new OpenIdConnectConfigurationRetriever(),
+                documentRetriever)
+            { RefreshInterval = TimeSpan.FromSeconds(2) };
+
+            // ConfigurationManager._syncAfter is set to DateTimeOffset.MinValue on startup
+            // If obtaining the metadata fails due to error, the value should not change
             try
             {
                 var configuration = await configManager.GetConfigurationAsync();
             }
             catch (Exception firstFetchMetadataFailure)
             {
-                // Refresh interval is BootstrapRefreshInterval
-                var syncAfter = configManager.GetType().GetField("_syncAfter", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(configManager);
-                if ((DateTimeOffset)syncAfter > DateTime.UtcNow + TimeSpan.FromSeconds(2))
-                    context.AddDiff($"Expected the refresh interval is longer than 2 seconds.");
+                // _syncAfter should not have been changed, because the fetch failed.
+                var syncAfter = TestUtilities.GetField(configManager, "_syncAfter");
+                if ((DateTimeOffset)syncAfter != DateTimeOffset.MinValue)
+                    context.AddDiff($"ConfigurationManager._syncAfter: '{syncAfter}' should equal '{DateTimeOffset.MinValue}'.");
 
                 if (firstFetchMetadataFailure.InnerException == null)
                     context.AddDiff($"Expected exception to contain inner exception for fetch metadata failure.");
@@ -243,11 +250,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     if (secondFetchMetadataFailure.InnerException == null)
                         context.AddDiff($"Expected exception to contain inner exception for fetch metadata failure.");
 
-                    syncAfter = configManager.GetType().GetField("_syncAfter", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(configManager);
-
-                    // Refresh interval is RefreshInterval
-                    if ((DateTimeOffset)syncAfter > DateTime.UtcNow + configManager.RefreshInterval)
-                        context.AddDiff($"Expected the refresh interval is longer than 2 seconds.");
+                    // _syncAfter should not have been changed, because the fetch failed.
+                    syncAfter = TestUtilities.GetField(configManager, "_syncAfter");
+                    if ((DateTimeOffset)syncAfter != DateTimeOffset.MinValue)
+                        context.AddDiff($"ConfigurationManager._syncAfter: '{syncAfter}' should equal '{DateTimeOffset.MinValue}'.");
 
                     IdentityComparer.AreEqual(firstFetchMetadataFailure, secondFetchMetadataFailure, context);
                 }
