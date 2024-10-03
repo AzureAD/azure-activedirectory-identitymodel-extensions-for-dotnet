@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -32,6 +33,11 @@ namespace Microsoft.IdentityModel.Protocols
         /// Gets or sets the http request body.
         /// </summary>
         public byte[] Body { get; set; }
+
+        /// <summary>
+        /// Gets or sets the IP address of the client.
+        /// </summary>
+        public IPAddress ClientIpAddress { get; set; }
 
         /// <summary>
         /// Gets or sets the collection of http request headers.
