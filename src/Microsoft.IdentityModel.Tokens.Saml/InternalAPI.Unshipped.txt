@@ -216,6 +216,13 @@ Microsoft.IdentityModel.Tokens.Saml2.Saml2AttributeKeyComparer.AttributeKey.Orig
 Microsoft.IdentityModel.Tokens.Saml2.Saml2AttributeKeyComparer.AttributeKey.ValueType.get -> string
 Microsoft.IdentityModel.Tokens.Saml2.Saml2AttributeKeyComparer.Equals(Microsoft.IdentityModel.Tokens.Saml2.Saml2AttributeKeyComparer.AttributeKey x, Microsoft.IdentityModel.Tokens.Saml2.Saml2AttributeKeyComparer.AttributeKey y) -> bool
 Microsoft.IdentityModel.Tokens.Saml2.Saml2AttributeKeyComparer.GetHashCode(Microsoft.IdentityModel.Tokens.Saml2.Saml2AttributeKeyComparer.AttributeKey obj) -> int
+Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.ValidatedConditions
+Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.ValidatedConditions.ValidatedAudience.get -> string
+Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.ValidatedConditions.ValidatedAudience.set -> void
+Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.ValidatedConditions.ValidatedConditions() -> void
+Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.ValidatedConditions.ValidatedConditions(string ValidatedAudience, Microsoft.IdentityModel.Tokens.ValidatedLifetime? ValidatedLifetime) -> void
+Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.ValidatedConditions.ValidatedLifetime.get -> Microsoft.IdentityModel.Tokens.ValidatedLifetime?
+Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.ValidatedConditions.ValidatedLifetime.set -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2Subject.Saml2Subject() -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SubjectLocality.Saml2SubjectLocality() -> void
 override Microsoft.IdentityModel.Tokens.Saml.SamlSubjectEqualityComparer.Equals(Microsoft.IdentityModel.Tokens.Saml.SamlSubject subject1, Microsoft.IdentityModel.Tokens.Saml.SamlSubject subject2) -> bool
@@ -251,3 +258,5 @@ static Microsoft.IdentityModel.Tokens.Saml2.Saml2Serializer.ReadSimpleNCNameElem
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2Serializer.ReadSimpleUriElement(System.Xml.XmlDictionaryReader reader, string element, System.UriKind kind, bool requireUri) -> System.Uri
 static readonly Microsoft.IdentityModel.Tokens.Saml2.Saml2AttributeKeyComparer.Instance -> Microsoft.IdentityModel.Tokens.Saml2.Saml2AttributeKeyComparer
 static readonly Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthorizationDecisionStatement.EmptyResource -> System.Uri
+virtual Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.ValidateConditions(Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityToken samlToken, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.ValidationResult<Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.ValidatedConditions>
+virtual Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.ValidateProxyRestriction(Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityToken samlToken, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.ValidationError

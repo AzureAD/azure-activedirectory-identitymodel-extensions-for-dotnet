@@ -44,8 +44,11 @@ Microsoft.IdentityModel.Protocols.WsFederation.KeyValueAccumulator.Result.get ->
 Microsoft.IdentityModel.Protocols.WsFederation.LogMessages
 Microsoft.IdentityModel.Protocols.WsFederation.QueryHelper
 Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConstants.Prefixes
+Microsoft.IdentityModel.Tokens.CertificateHelper
+Microsoft.IdentityModel.Tokens.CertificateHelper.CertificateHelper() -> void
 static Microsoft.IdentityModel.Protocols.WsFederation.QueryHelper.ParseNullableQuery(string queryString) -> System.Collections.Generic.IDictionary<string, System.Collections.Generic.IList<string>>
 static Microsoft.IdentityModel.Protocols.WsFederation.QueryHelper.ParseQuery(string queryString) -> System.Collections.Generic.IDictionary<string, System.Collections.Generic.IList<string>>
 static Microsoft.IdentityModel.Protocols.WsFederation.WsFederationConstants.Xmlns -> string
 static Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMessage.GetToken(string wresult) -> string
 static Microsoft.IdentityModel.Protocols.WsFederation.WsFederationMetadataSerializer.Trim(string stringToTrim) -> string
+static Microsoft.IdentityModel.Tokens.CertificateHelper.LoadX509Certificate(string data) -> System.Security.Cryptography.X509Certificates.X509Certificate2
