@@ -171,7 +171,7 @@ namespace Microsoft.IdentityModel.Tokens
         // public const string IDX10656 = "IDX10656:";
         public const string IDX10657 = "IDX10657: The SecurityKey provided for the symmetric key wrap algorithm cannot be converted to byte array. Type is: '{0}'.";
         public const string IDX10658 = "IDX10658: WrapKey failed, exception from cryptographic operation: '{0}'";
-        public const string IDX10659 = "IDX10659: UnwrapKey failed, exception from cryptographic operation: '{0}'";
+        public const string IDX10659 = "IDX10659: UnwrapKey failed, exception from cryptographic operation: '{0}'. If token encryption is being used, ensure the certificates are the same. See https://aka.ms/token-encryption/tutorial";
         // public const string IDX10660 = "IDX10660:";
         public const string IDX10661 = "IDX10661: Unable to create the KeyWrapProvider.\nKeyWrapAlgorithm: '{0}', SecurityKey: '{1}'\n is not supported.";
         public const string IDX10662 = "IDX10662: The KeyWrap algorithm '{0}' requires a key size of '{1}' bits. Key '{2}', is of size:'{3}'.";
