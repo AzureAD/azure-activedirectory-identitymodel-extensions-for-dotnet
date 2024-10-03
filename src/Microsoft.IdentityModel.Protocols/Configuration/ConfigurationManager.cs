@@ -313,7 +313,7 @@ namespace Microsoft.IdentityModel.Protocols
             }
             finally
             {
-                _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
+                _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval);
                 Interlocked.Exchange(ref _configurationRetrieverState, ConfigurationRetrieverIdle);
             }
 #pragma warning restore CA1031 // Do not catch general exception types
