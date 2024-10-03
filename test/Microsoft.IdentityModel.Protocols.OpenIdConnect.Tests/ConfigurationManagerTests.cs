@@ -529,8 +529,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // force a refresh by setting internal field
             TestUtilities.SetField(configManager, "_syncAfter", DateTimeOffset.UtcNow - TimeSpan.FromHours(1));
             configuration = await configManager.GetConfigurationAsync(CancellationToken.None);
-            // wait 100ms here because update of config is run as a new task.
-            Thread.Sleep(100);
+            // wait 1000ms here because update of config is run as a new task.
+            Thread.Sleep(1000);
 
             // check that _syncAfter is greater than DateTimeOffset.UtcNow + AutomaticRefreshInterval
             DateTimeOffset syncAfter = (DateTimeOffset)TestUtilities.GetField(configManager, "_syncAfter");
@@ -541,8 +541,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // force a refresh by setting internal field
             TestUtilities.SetField(configManager, "_lastRequestRefresh", DateTimeOffset.UtcNow - TimeSpan.FromHours(1));
             configManager.RequestRefresh();
-            // wait 100ms here because update of config is run as a new task.
-            Thread.Sleep(100);
+            // wait 1000ms here because update of config is run as a new task.
+            Thread.Sleep(1000);
 
             // check that _syncAfter is greater than DateTimeOffset.UtcNow + AutomaticRefreshInterval
             syncAfter = (DateTimeOffset)TestUtilities.GetField(configManager, "_syncAfter");
