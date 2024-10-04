@@ -511,6 +511,48 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
 
         [Fact]
+        public async Task CheckSyncAfter()
+        {
+            // This test checks that the _syncAfter field is set correctly after a refresh.
+            var context = new CompareContext($"{this}.CheckSyncAfter");
+
+            var docRetriever = new FileDocumentRetriever();
+            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
+
+            // This is the minimum time that should pass before an automatic refresh occurs
+            // stored in advance to avoid any time drift issues.
+            DateTimeOffset minimumRefreshInterval = DateTimeOffset.UtcNow + configManager.AutomaticRefreshInterval;
+
+            // get the first configuration, internal _syncAfter should be set to a time greater than UtcNow + AutomaticRefreshInterval.
+            var configuration = await configManager.GetConfigurationAsync(CancellationToken.None);
+
+            // force a refresh by setting internal field
+            TestUtilities.SetField(configManager, "_syncAfter", DateTimeOffset.UtcNow - TimeSpan.FromHours(1));
+            configuration = await configManager.GetConfigurationAsync(CancellationToken.None);
+            // wait 1000ms here because update of config is run as a new task.
+            Thread.Sleep(1000);
+
+            // check that _syncAfter is greater than DateTimeOffset.UtcNow + AutomaticRefreshInterval
+            DateTimeOffset syncAfter = (DateTimeOffset)TestUtilities.GetField(configManager, "_syncAfter");
+            if (syncAfter < minimumRefreshInterval)
+                context.Diffs.Add($"(AutomaticRefreshInterval) syncAfter '{syncAfter}' < DateTimeOffset.UtcNow + configManager.AutomaticRefreshInterval: '{minimumRefreshInterval}'.");
+
+            // make same check for RequestRefresh
+            // force a refresh by setting internal field
+            TestUtilities.SetField(configManager, "_lastRequestRefresh", DateTimeOffset.UtcNow - TimeSpan.FromHours(1));
+            configManager.RequestRefresh();
+            // wait 1000ms here because update of config is run as a new task.
+            Thread.Sleep(1000);
+
+            // check that _syncAfter is greater than DateTimeOffset.UtcNow + AutomaticRefreshInterval
+            syncAfter = (DateTimeOffset)TestUtilities.GetField(configManager, "_syncAfter");
+            if (syncAfter < minimumRefreshInterval)
+                context.Diffs.Add($"(RequestRefresh) syncAfter '{syncAfter}' < DateTimeOffset.UtcNow + configManager.AutomaticRefreshInterval: '{minimumRefreshInterval}'.");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
         public async Task GetConfigurationAsync()
         {
             var docRetriever = new FileDocumentRetriever();
@@ -520,6 +562,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // Unable to obtain a new configuration, but _currentConfiguration is not null so it should be returned.
             configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
             var configuration = await configManager.GetConfigurationAsync(CancellationToken.None);
+
             TestUtilities.SetField(configManager, "_lastRequestRefresh", DateTimeOffset.UtcNow - TimeSpan.FromHours(1));
             configManager.RequestRefresh();
             configManager.MetadataAddress = "http://127.0.0.1";
