@@ -190,7 +190,7 @@ namespace Microsoft.IdentityModel.Protocols
                                         result.ErrorMessage)));
                     }
 
-                    ValidConfigurationObtained(configuration);
+                    UpdateConfiguration(configuration);
                 }
                 catch (Exception ex)
                 {
@@ -249,7 +249,7 @@ namespace Microsoft.IdentityModel.Protocols
 
                 if (_configValidator == null)
                 {
-                    ValidConfigurationObtained(configuration);
+                    UpdateConfiguration(configuration);
                 }
                 else
                 {
@@ -262,7 +262,7 @@ namespace Microsoft.IdentityModel.Protocols
                                     LogMessages.IDX20810,
                                     result.ErrorMessage)));
                     else
-                        ValidConfigurationObtained(configuration);
+                        UpdateConfiguration(configuration);
                 }
             }
             catch (Exception ex)
@@ -282,7 +282,7 @@ namespace Microsoft.IdentityModel.Protocols
 #pragma warning restore CA1031 // Do not catch general exception types
         }
 
-        private void ValidConfigurationObtained(T configuration)
+        private void UpdateConfiguration(T configuration)
         {
             _currentConfiguration = configuration;
             _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval +
