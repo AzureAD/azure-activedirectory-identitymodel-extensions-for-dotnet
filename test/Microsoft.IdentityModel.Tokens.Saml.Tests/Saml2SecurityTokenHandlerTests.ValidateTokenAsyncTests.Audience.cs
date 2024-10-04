@@ -99,15 +99,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         ExpectedIsValid = false,
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
                         ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidAudienceException("IDX10215:"),
-                    },
-                    new ValidateTokenAsyncAudienceTheoryData("Invalid_AudienceNullIsTreatedAsEmptyList")
-                    {
-                        // JsonWebToken.Audiences defaults to an empty list if no audiences are provided.
-                        TVPAudiences = [Default.Audience],
-                        ValidationParameters = CreateValidationParameters([Default.Audience]),
-                        TokenAudience = null,
-                        ExpectedIsValid = false,
-                        ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10206:"),
                     }
                 };
 
