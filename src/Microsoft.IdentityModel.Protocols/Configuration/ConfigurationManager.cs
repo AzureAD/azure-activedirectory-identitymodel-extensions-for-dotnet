@@ -212,7 +212,7 @@ namespace Microsoft.IdentityModel.Protocols
             }
             else
             {
-                if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverIdle, ConfigurationRetrieverRunning) != ConfigurationRetrieverRunning)
+                if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
                 {
                     _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
                 }
@@ -302,8 +302,9 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
-        /// Requests that then next call to <see cref="GetConfigurationAsync()"/> obtain new configuration.
-        /// <para>If it is a first force refresh or the last refresh was greater than <see cref="BaseConfigurationManager.RefreshInterval"/> then the next call to <see cref="GetConfigurationAsync()"/> will retrieve new configuration.</para>
+        /// Triggers updating metadata when:
+        /// <para>1. Called the first time.</para>
+        /// <para>2. The time between when this method was called and DateTimeOffset.Now is greater than <see cref="BaseConfigurationManager.RefreshInterval"/>.</para>
         /// <para>If <see cref="BaseConfigurationManager.RefreshInterval"/> == <see cref="TimeSpan.MaxValue"/> then this method does nothing.</para>
         /// </summary>
         public override void RequestRefresh()
@@ -313,10 +314,10 @@ namespace Microsoft.IdentityModel.Protocols
             if (now >= DateTimeUtil.Add(_lastRequestRefresh.UtcDateTime, RefreshInterval) || _isFirstRefreshRequest)
             {
                 _isFirstRefreshRequest = false;
-                _lastRequestRefresh = now;
-                if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverIdle, ConfigurationRetrieverRunning) != ConfigurationRetrieverRunning)
+                if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
                 {
                     _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
+                    _lastRequestRefresh = now;
                 }
             }
         }
