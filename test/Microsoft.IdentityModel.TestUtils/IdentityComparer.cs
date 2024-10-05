@@ -491,6 +491,12 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static bool AreDateTimesEqual(object object1, object object2, CompareContext context)
         {
+            return AreDateTimesEqual(object1, object2, "dateTime1", "dateTime2", context);
+        }
+
+        public static bool AreDateTimesEqual(
+            object object1, object object2, string name1, string name2, CompareContext context)
+        {
             var localContext = new CompareContext(context);
             if (!ContinueCheckingEquality(object1, object2, localContext))
                 return context.Merge(localContext);
@@ -499,7 +505,7 @@ namespace Microsoft.IdentityModel.TestUtils
             DateTime dateTime2 = (DateTime)object2;
 
             if (dateTime1 != dateTime2)
-                localContext.Diffs.Add($"dateTime1 != dateTime2. '{dateTime1}' != '{dateTime2}'.");
+                localContext.Diffs.Add($"{name1} != {name2}. '{dateTime1}' != '{dateTime2}'.");
 
             return context.Merge(localContext);
         }
@@ -1032,6 +1038,92 @@ namespace Microsoft.IdentityModel.TestUtils
         public static bool AreSecurityKeyEnumsEqual(object object1, object object2, CompareContext context)
         {
             return AreEnumsEqual<SecurityKey>(object1 as IEnumerable<SecurityKey>, object2 as IEnumerable<SecurityKey>, context, AreSecurityKeysEqual);
+        }
+
+        public static bool AreSecurityTokenExceptionsEqual(object object1, object object2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(object1, object2, localContext))
+                return context.Merge(localContext);
+
+            if (object1 is SecurityTokenExpiredException securityTokenExpiredException1 &&
+                object2 is SecurityTokenExpiredException securityTokenExpiredException2)
+            {
+                AreDateTimesEqual(securityTokenExpiredException1.Expires,
+                    securityTokenExpiredException2.Expires,
+                    "SecurityTokenExpiredException1.Expires",
+                    "SecurityTokenExpiredException2.Expires",
+                    localContext);
+            }
+            else if (object1 is SecurityTokenInvalidAlgorithmException securityTokenInvalidAlgorithmException1 &&
+                object2 is SecurityTokenInvalidAlgorithmException securityTokenInvalidAlgorithmException2)
+            {
+                AreStringsEqual(securityTokenInvalidAlgorithmException1.InvalidAlgorithm,
+                    securityTokenInvalidAlgorithmException2.InvalidAlgorithm,
+                    "SecurityTokenInvalidAlgorithmException1.InvalidAlgorithm",
+                    "SecurityTokenInvalidAlgorithmException2.InvalidAlgorithm",
+                    localContext);
+            }
+            else if (object1 is SecurityTokenInvalidAudienceException securityTokenInvalidAudienceException1 &&
+                object2 is SecurityTokenInvalidAudienceException securityTokenInvalidAudienceException2)
+            {
+                AreStringsEqual(securityTokenInvalidAudienceException1.InvalidAudience,
+                    securityTokenInvalidAudienceException2.InvalidAudience,
+                    "SecurityTokenInvalidAudienceException1.InvalidAudience",
+                    "SecurityTokenInvalidAudienceException2.InvalidAudience",
+                    localContext);
+            }
+            else if (object1 is SecurityTokenInvalidIssuerException securityTokenInvalidIssuerException1 &&
+                object2 is SecurityTokenInvalidIssuerException securityTokenInvalidIssuerException2)
+            {
+                AreStringsEqual(securityTokenInvalidIssuerException1.InvalidIssuer,
+                    securityTokenInvalidIssuerException2.InvalidIssuer,
+                    "SecurityTokenInvalidIssuerException1.InvalidIssuer",
+                    "SecurityTokenInvalidIssuerException2.InvalidIssuer",
+                    localContext);
+            }
+            else if (object1 is SecurityTokenInvalidSigningKeyException securityTokenInvalidSigningKeyException1 &&
+                object2 is SecurityTokenInvalidSigningKeyException securityTokenInvalidSigningKeyException2)
+            {
+                AreSecurityKeysEqual(securityTokenInvalidSigningKeyException1.SigningKey,
+                    securityTokenInvalidSigningKeyException2.SigningKey,
+                    localContext);
+            }
+            else if (object1 is SecurityTokenInvalidLifetimeException securityTokenInvalidLifetimeException1 &&
+                object2 is SecurityTokenInvalidLifetimeException securityTokenInvalidLifetimeException2)
+            {
+                AreDateTimesEqual(securityTokenInvalidLifetimeException1.Expires,
+                    securityTokenInvalidLifetimeException2.Expires,
+                    "SecurityTokenInvalidLifetimeException1.Expires",
+                    "SecurityTokenInvalidLifetimeException2.Expires",
+                    localContext);
+
+                AreDateTimesEqual(securityTokenInvalidLifetimeException1.NotBefore,
+                    securityTokenInvalidLifetimeException2.NotBefore,
+                    "SecurityTokenInvalidLifetimeException1.NotBefore",
+                    "SecurityTokenInvalidLifetimeException2.NotBefore",
+                    localContext);
+            }
+            else if (object1 is SecurityTokenInvalidTypeException securityTokenInvalidTypeException1 &&
+                    object2 is SecurityTokenInvalidTypeException securityTokenInvalidTypeException2)
+            {
+                AreStringsEqual(securityTokenInvalidTypeException1.InvalidType,
+                    securityTokenInvalidTypeException2.InvalidType,
+                    "SecurityTokenInvalidTypeException1.InvalidType",
+                    "SecurityTokenInvalidTypeException2.InvalidType",
+                    localContext);
+            }
+            else if (object1 is SecurityTokenNotYetValidException securityTokenNotYetValidException1 &&
+                object2 is SecurityTokenNotYetValidException securityTokenNotYetValidException2)
+            {
+                AreDateTimesEqual(securityTokenNotYetValidException1.NotBefore,
+                    securityTokenNotYetValidException2.NotBefore,
+                    "SecurityTokenNotYetValidException1.NotBefore",
+                    "SecurityTokenNotYetValidException2.NotBefore",
+                    localContext);
+            }
+
+            return context.Merge(localContext);
         }
 
         public static bool AreSignedInfosEqual(SignedInfo signedInfo1, SignedInfo signedInfo2, CompareContext context)
