@@ -83,11 +83,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 value = DateTimeUtil.ToUniversalTime(value);
 
                 // NotBefore must be earlier than NotOnOrAfter
-                if (value != null && NotBefore.HasValue)
-                {
-                    if (value.Value <= NotBefore.Value)
-                        throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13514, MarkAsNonPII(value), MarkAsNonPII(NotBefore))));
-                }
+                /*                if (value != null && NotBefore.HasValue)
+                                {
+                                    if (value.Value <= NotBefore.Value)
+                                        throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13514, MarkAsNonPII(value), MarkAsNonPII(NotBefore))));
+                                }*/ //TODO: Clarify why do we do this check? It is check as a condition when we call Validators.ValidateLifetime
 
                 _notOnOrAfter = value;
             }

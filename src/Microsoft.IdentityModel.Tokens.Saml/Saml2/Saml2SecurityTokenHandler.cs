@@ -638,8 +638,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             else if (SetDefaultTimesOnTokenCreation)
                 conditions.NotBefore = DateTime.UtcNow;
 
-            if (tokenDescriptor.Expires.HasValue)
-                conditions.NotOnOrAfter = tokenDescriptor.Expires.Value;
+            if (tokenDescriptor.Expires.HasValue || tokenDescriptor.Expires == null)
+            {
+                if (tokenDescriptor.Expires.HasValue)
+                    conditions.NotOnOrAfter = tokenDescriptor.Expires.Value;
+                else
+                    conditions.NotOnOrAfter = null;
+            }
             else if (SetDefaultTimesOnTokenCreation)
                 conditions.NotOnOrAfter = DateTime.UtcNow + TimeSpan.FromMinutes(TokenLifetimeInMinutes);
 
