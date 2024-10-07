@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Claims;
+using System.Text;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
@@ -450,6 +451,16 @@ namespace Microsoft.IdentityModel.Tokens
         public IDictionary<string, object> PropertyBag { get; set; }
 
         /// <summary>
+        /// Gets or sets a delegate that will be called when reading token payload claims.
+        /// </summary>
+        public ReadTokenHeaderValueDelegate ReadTokenHeaderValue { get; set; }
+
+        /// <summary>
+        /// Gets or sets a delegate that will be called when reading token payload claims.
+        /// </summary>
+        public ReadTokenPayloadValueDelegate ReadTokenPayloadValue { get; set; }
+
+        /// <summary>
         /// Gets or sets a boolean to control if configuration required to be refreshed before token validation.
         /// </summary>
         /// <remarks>
@@ -709,11 +720,23 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public IEnumerable<string> ValidAudiences { get; set; }
 
+        private string _validIssuer;
+
         /// <summary>
         /// Gets or sets a <see cref="string"/> that represents a valid issuer that will be used to check against the token's issuer.
         /// The default is <c>null</c>.
         /// </summary>
-        public string ValidIssuer { get; set; }
+        public string ValidIssuer
+        {
+            get => _validIssuer;
+            set
+            {
+                _validIssuer = value;
+                ValidIssuerBytes = value != null ? Encoding.UTF8.GetBytes(value) : ReadOnlyMemory<byte>.Empty;
+            }
+        }
+
+        internal ReadOnlyMemory<byte> ValidIssuerBytes { get; private set; } = ReadOnlyMemory<byte>.Empty;
 
         /// <summary>
         /// Gets or sets the <see cref="IEnumerable{String}"/> that contains valid issuers that will be used to check against the token's issuer.

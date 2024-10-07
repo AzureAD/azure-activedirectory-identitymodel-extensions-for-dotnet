@@ -24,11 +24,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal object _claimsLock = new();
         internal readonly Dictionary<string, object> _jsonClaims;
+
         private List<Claim> _claims;
 
         internal JsonClaimSet()
         {
-            _jsonClaims = new Dictionary<string, object>();
+            _jsonClaims = [];
         }
 
         internal JsonClaimSet(Dictionary<string, object> jsonClaims)
@@ -49,8 +50,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             var claims = new List<Claim>(_jsonClaims.Count);
             foreach (KeyValuePair<string, object> kvp in _jsonClaims)
+            {
                 CreateClaimFromObject(claims, kvp.Key, kvp.Value, issuer);
 
+#if NET8_0_OR_GREATER
+                if (kvp.Value is Memory<byte> bytes)
+                {
+                    string value = System.Text.Encoding.UTF8.GetString(bytes.Span);
+                    claims.Add(new Claim(kvp.Key, value, ClaimValueTypes.String, issuer, issuer));
+                }
+#endif
+            }
             return claims;
         }
 
@@ -167,11 +177,31 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (obj == null)
                     return null;
 
+#if NET8_0_OR_GREATER
+                if (obj is Memory<byte> bytes)
+                    return System.Text.Encoding.UTF8.GetString(bytes.Span);
+#endif
                 return obj.ToString();
             }
-
             return string.Empty;
         }
+
+#if NET8_0_OR_GREATER
+        // Similar to GetStringValue but returns the bytes directly.
+        internal ReadOnlySpan<byte> GetStringBytesValue(string key)
+        {
+            if (_jsonClaims.TryGetValue(key, out object obj))
+            {
+                if (obj == null)
+                    return null;
+
+                if (obj is Memory<byte> bytes)
+                    return bytes.Span;
+            }
+
+            return [];
+        }
+#endif
 
         internal DateTime GetDateTime(string key)
         {
@@ -235,8 +265,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     if (list.Count == 1)
                         return (T)((object)(list[0]));
                 }
+#if NET8_0_OR_GREATER
+                else if (obj is Memory<byte> bytes)
+                {
+                    return (T)(object)System.Text.Encoding.UTF8.GetString(bytes.Span);
+                }
+#endif
                 else
+                {
                     return (T)((object)obj.ToString());
+                }
             }
             else if (typeof(T) == typeof(bool))
             {
@@ -425,13 +463,24 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <returns><see langword="true"/> if the key was found; otherwise, <see langword="false"/>.</returns>
         internal bool TryGetValue<T>(string key, out T value)
         {
+#if NET8_0_OR_GREATER
+            if (typeof(T) == typeof(string))
+            {
+                var span = GetStringBytesValue(key);
+                if (!span.IsEmpty)
+                {
+                    value = (T)(object)System.Text.Encoding.UTF8.GetString(span);
+                    return true;
+                }
+            }
+#endif
             value = GetValue<T>(key, false, out bool found);
             return found;
         }
 
         internal bool HasClaim(string claimName)
         {
-            return _jsonClaims.TryGetValue(claimName, out _);
+            return _jsonClaims.ContainsKey(claimName);
         }
     }
 }

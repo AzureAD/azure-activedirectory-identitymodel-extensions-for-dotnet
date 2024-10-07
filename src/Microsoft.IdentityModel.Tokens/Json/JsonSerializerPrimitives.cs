@@ -653,6 +653,34 @@ namespace Microsoft.IdentityModel.Tokens.Json
             return retval;
         }
 
+#if NET8_0_OR_GREATER
+        // Mostly the same as ReadString, but this method returns the position of the claim value in the token bytes.
+        // This method does not unescape the value. The JsonWebToken GetValue, etc. methods are responsible for unescaping the value.
+        internal static Memory<byte>? ReadStringBytes(
+            ref Utf8JsonReader reader,
+            string propertyName,
+            string className,
+            bool read = false)
+        {
+            // returning null keeps the same logic as JsonSerialization.ReadObject
+            if (IsReaderPositionedOnNull(ref reader, read, true))
+                return null;
+
+            if (!IsReaderAtTokenType(ref reader, JsonTokenType.String, false))
+                throw LogHelper.LogExceptionMessage(
+                    CreateJsonReaderExceptionInvalidType(ref reader, "JsonTokenType.StartArray", className, propertyName));
+
+
+            var stringBytes = new Memory<byte>(new byte[reader.ValueSpan.Length]);
+            reader.CopyString(stringBytes.Span);
+
+            // Move to next token
+            reader.Read();
+
+            return stringBytes;
+        }
+#endif
+
         internal static string ReadStringAsBool(ref Utf8JsonReader reader, string propertyName, string className, bool read = false)
         {
             // The parameter 'read' can be used by callers reader position the reader to the next token.
