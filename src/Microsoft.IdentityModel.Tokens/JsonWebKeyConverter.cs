@@ -97,9 +97,16 @@ namespace Microsoft.IdentityModel.Tokens
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
+            var kty = key.PublicKey switch
+            {
+                RSA => JsonWebAlgorithmsKeyTypes.RSA,
+                ECDsa => JsonWebAlgorithmsKeyTypes.EllipticCurve,
+                _ => throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10674, LogHelper.MarkAsNonPII(key.GetType().FullName))))
+            };
+
             var jsonWebKey = new JsonWebKey
             {
-                Kty = JsonWebAlgorithmsKeyTypes.RSA,
+                Kty = kty,
                 Kid = key.KeyId,
                 X5t = key.X5t,
                 ConvertedSecurityKey = key
@@ -123,19 +130,37 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException">if <paramref name="key"/>is null.</exception>
         public static JsonWebKey ConvertFromX509SecurityKey(X509SecurityKey key, bool representAsRsaKey)
         {
-            if (!representAsRsaKey)
-                return ConvertFromX509SecurityKey(key);
-
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
-            RSA rsaKey;
-            if (key.PrivateKeyStatus == PrivateKeyStatus.Exists)
-                rsaKey = key.PrivateKey as RSA;
-            else
-                rsaKey = key.PublicKey as RSA;
+            if (!representAsRsaKey)
+                return ConvertFromX509SecurityKey(key);
 
-            return ConvertFromRSASecurityKey(new RsaSecurityKey(rsaKey) { KeyId = key.KeyId });
+            if (key.PrivateKeyStatus == PrivateKeyStatus.Exists)
+            {
+                if (key.PrivateKey is RSA rsaPrivateKey)
+                {
+                    return ConvertFromRSASecurityKey(new RsaSecurityKey(rsaPrivateKey) { KeyId = key.KeyId });
+                }
+#if NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
+                else if (key.PrivateKey is ECDsa ecdsaPrivateKey)
+                {
+                    return ConvertFromECDsaSecurityKey(new ECDsaSecurityKey(ecdsaPrivateKey) { KeyId = key.KeyId });
+                }
+#endif
+            }
+            else if (key.PublicKey is RSA rsaPublicKey)
+            {
+                return ConvertFromRSASecurityKey(new RsaSecurityKey(rsaPublicKey) { KeyId = key.KeyId });
+            }
+#if NET472 || NETSTANDARD2_0 || NET6_0_OR_GREATER
+            else if (key.PublicKey is ECDsa ecdsaPublicKey)
+            {
+                return ConvertFromECDsaSecurityKey(new ECDsaSecurityKey(ecdsaPublicKey) { KeyId = key.KeyId });
+            }
+#endif
+
+            throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10674, LogHelper.MarkAsNonPII(key.GetType().FullName))));
         }
 
         /// <summary>
@@ -167,14 +192,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// <exception cref="ArgumentNullException">if <paramref name="key"/>is null.</exception>
         public static JsonWebKey ConvertFromECDsaSecurityKey(ECDsaSecurityKey key)
         {
-            if (!ECDsaAdapter.SupportsECParameters())
-                throw LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogMessages.IDX10695));
-
             if (key == null)
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
             if (key.ECDsa == null)
                 throw LogHelper.LogArgumentNullException(nameof(key.ECDsa));
+
+            if (!ECDsaAdapter.SupportsECParameters())
+                throw LogHelper.LogExceptionMessage(new PlatformNotSupportedException(LogMessages.IDX10695));
 
             ECParameters parameters;
             try
