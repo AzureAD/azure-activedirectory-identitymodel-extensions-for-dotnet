@@ -28,4 +28,9 @@
     <ProjectReference Include="..\Microsoft.IdentityModel.Xml\Microsoft.IdentityModel.Xml.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AdditionalFiles Include="InternalAPI.Shipped.txt" />
+    <AdditionalFiles Include="InternalAPI.Unshipped.txt" />
+  </ItemGroup>
+
 </Project>

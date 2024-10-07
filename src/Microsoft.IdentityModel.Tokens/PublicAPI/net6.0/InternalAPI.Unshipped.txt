@@ -1,0 +1,3 @@
+﻿static readonly Microsoft.IdentityModel.Tokens.Json.JsonWebKeySerializer.JsonWebKeyParameterNamesUpperCase -> System.Collections.Generic.HashSet<string>
+Microsoft.IdentityModel.Tokens.EcdhKeyExchangeProvider.GetEncryptionAlgorithm() -> string
+Microsoft.IdentityModel.Tokens.SignUsingSpanDelegate
