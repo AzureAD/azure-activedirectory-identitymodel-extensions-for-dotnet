@@ -41,7 +41,12 @@ namespace Microsoft.IdentityModel.Tokens
             { SecurityAlgorithms.RsaSsaPssSha512, 1040 },
             { SecurityAlgorithms.RsaSsaPssSha256Signature, 528 },
             { SecurityAlgorithms.RsaSsaPssSha384Signature, 784 },
-            { SecurityAlgorithms.RsaSsaPssSha512Signature, 1040 }
+            { SecurityAlgorithms.RsaSsaPssSha512Signature, 1040 },
+            { SecurityAlgorithms.EddsaEd25519Signature, 256 },
+            { SecurityAlgorithms.EddsaEd25519Sha512Signature, 256 },
+            { SecurityAlgorithms.EddsaEd25519WithContextSignature, 256 },
+            { SecurityAlgorithms.EddsaEd448Signature, 456 },
+            { SecurityAlgorithms.EddsaEd25519Shake256Signature, 456 },
         };
 
         /// <summary>
@@ -66,7 +71,12 @@ namespace Microsoft.IdentityModel.Tokens
             { SecurityAlgorithms.RsaSsaPssSha512, 1040 },
             { SecurityAlgorithms.RsaSsaPssSha256Signature, 528 },
             { SecurityAlgorithms.RsaSsaPssSha384Signature, 784 },
-            { SecurityAlgorithms.RsaSsaPssSha512Signature, 1040 }
+            { SecurityAlgorithms.RsaSsaPssSha512Signature, 1040 },
+            { SecurityAlgorithms.EddsaEd25519Signature, 256 },
+            { SecurityAlgorithms.EddsaEd25519Sha512Signature, 256 },
+            { SecurityAlgorithms.EddsaEd25519WithContextSignature, 256 },
+            { SecurityAlgorithms.EddsaEd448Signature, 456 },
+            { SecurityAlgorithms.EddsaEd25519Shake256Signature, 456 },
         };
 
         internal AsymmetricSignatureProvider(SecurityKey key, string algorithm, CryptoProviderFactory cryptoProviderFactory)
