@@ -3,6 +3,7 @@
 
 #nullable enable
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
@@ -12,14 +13,52 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
     public partial class JsonWebTokenHandlerValidateTokenAsyncTests
     {
+        /// <summary>
+        /// Compares the results of ValidateTokenAsync and ValidateTokenAsync using the old and new call graphs.
+        /// For Audience.
+        /// </summary>
+        /// <param name="theoryData"></param>
+        /// <returns></returns>
         [Theory, MemberData(nameof(ValidateTokenAsync_AudienceTestCases), DisableDiscoveryEnumeration = true)]
-        public async Task ValidateTokenAsync_Audience(ValidateTokenAsyncAudienceTheoryData theoryData)
+        public async Task ValidateTokenAsync_AudienceComparison(ValidateTokenAsyncAudienceTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateTokenAsync_Audience", theoryData);
 
             string jwtString = CreateToken(theoryData.Audience);
+            JsonWebTokenHandler jsonWebTokenHandler = new JsonWebTokenHandler();
 
-            await ValidateAndCompareResults(jwtString, theoryData, context);
+            // Validate the token using TokenValidationParameters
+            TokenValidationResult tokenValidationResult =
+                await jsonWebTokenHandler.ValidateTokenAsync(jwtString, theoryData.TokenValidationParameters);
+
+            // Validate the token using ValidationParameters
+            ValidationResult<ValidatedToken> validationResult =
+                await jsonWebTokenHandler.ValidateTokenAsync(
+                    jwtString, theoryData.ValidationParameters!, theoryData.CallContext, CancellationToken.None);
+
+            // Ensure the validity of the results match the expected result
+            if (tokenValidationResult.IsValid != validationResult.IsSuccess)
+            {
+                context.AddDiff($"tokenValidationResult.IsValid != validationResult.IsSuccess");
+                theoryData.ExpectedExceptionValidationParameters.ProcessException(validationResult.UnwrapError().GetException(), context);
+                theoryData.ExpectedException.ProcessException(tokenValidationResult.Exception, context);
+            }
+            else
+            {
+                if (tokenValidationResult.IsValid)
+                {
+                    ValidatedToken validatedToken = validationResult.UnwrapResult();
+                    IdentityComparer.AreEqual(validatedToken.SecurityToken, tokenValidationResult.SecurityToken, context);
+                }
+                else
+                {
+                    // Verify the exception provided by the TokenValidationParameters path
+                    var tokenValidationResultException = tokenValidationResult.Exception;
+                    theoryData.ExpectedException.ProcessException(tokenValidationResult.Exception, context);
+                    var validationResultException = validationResult.UnwrapError().GetException();
+                    theoryData.ExpectedExceptionValidationParameters.ProcessException(validationResult.UnwrapError().GetException(), context);
+                }
+            }
 
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -97,6 +136,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Audience = null,
                         ExpectedIsValid = false,
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10206:"),
+                        ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidAudienceException("IDX10206:"),
                     },
                     new ValidateTokenAsyncAudienceTheoryData("Invalid_ValidAudiencesIsNull")
                     {

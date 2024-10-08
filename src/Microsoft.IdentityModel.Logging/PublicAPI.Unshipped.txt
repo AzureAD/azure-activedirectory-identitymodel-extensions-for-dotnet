@@ -1,4 +1,4 @@
-﻿Microsoft.IdentityModel.Logging.IdentityModelEventSource
+Microsoft.IdentityModel.Logging.IdentityModelEventSource
 Microsoft.IdentityModel.Logging.IdentityModelEventSource.LogLevel.get -> System.Diagnostics.Tracing.EventLevel
 Microsoft.IdentityModel.Logging.IdentityModelEventSource.LogLevel.set -> void
 Microsoft.IdentityModel.Logging.IdentityModelEventSource.Write(System.Diagnostics.Tracing.EventLevel level, System.Exception innerException, string message) -> void

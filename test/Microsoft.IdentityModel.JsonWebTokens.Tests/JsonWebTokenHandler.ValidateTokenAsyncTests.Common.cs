@@ -19,74 +19,74 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             JsonWebTokenHandler jsonWebTokenHandler = new JsonWebTokenHandler();
 
             // Validate the token using TokenValidationParameters
-            TokenValidationResult legacyTokenValidationParametersResult =
+            TokenValidationResult tokenValidationResult =
                 await jsonWebTokenHandler.ValidateTokenAsync(jwtString, theoryData.TokenValidationParameters);
 
             // Validate the token using ValidationParameters
-            ValidationResult<ValidatedToken> validationParametersResult =
+            ValidationResult<ValidatedToken> validationResult =
                 await jsonWebTokenHandler.ValidateTokenAsync(
                     jwtString, theoryData.ValidationParameters!, theoryData.CallContext, CancellationToken.None);
 
             // Ensure the validity of the results match the expected result
-            if (legacyTokenValidationParametersResult.IsValid != theoryData.ExpectedIsValid)
+            if (tokenValidationResult.IsValid != theoryData.ExpectedIsValid)
                 context.AddDiff($"tokenValidationParametersResult.IsValid != theoryData.ExpectedIsValid");
 
-            if (validationParametersResult.IsSuccess != theoryData.ExpectedIsValid)
+            if (validationResult.IsSuccess != theoryData.ExpectedIsValid)
                 context.AddDiff($"validationParametersResult.IsSuccess != theoryData.ExpectedIsValid");
 
             if (theoryData.ExpectedIsValid &&
-                legacyTokenValidationParametersResult.IsValid &&
-                validationParametersResult.IsSuccess)
+                tokenValidationResult.IsValid &&
+                validationResult.IsSuccess)
             {
                 // Compare the ClaimsPrincipal and ClaimsIdentity from one result against the other
                 IdentityComparer.AreEqual(
-                    legacyTokenValidationParametersResult.ClaimsIdentity,
-                    validationParametersResult.UnwrapResult().ClaimsIdentity,
+                    tokenValidationResult.ClaimsIdentity,
+                    validationResult.UnwrapResult().ClaimsIdentity,
                     context);
                 IdentityComparer.AreEqual(
-                    legacyTokenValidationParametersResult.Claims,
-                    validationParametersResult.UnwrapResult().Claims,
+                    tokenValidationResult.Claims,
+                    validationResult.UnwrapResult().Claims,
                     context);
             }
             else
             {
                 // Verify the exception provided by the TokenValidationParameters path
-                theoryData.ExpectedException.ProcessException(legacyTokenValidationParametersResult.Exception, context);
+                theoryData.ExpectedException.ProcessException(tokenValidationResult.Exception, context);
 
-                if (!validationParametersResult.IsSuccess)
+                if (!validationResult.IsSuccess)
                 {
                     // Verify the exception provided by the ValidationParameters path
                     if (theoryData.ExpectedExceptionValidationParameters is not null)
                     {
                         // If there is a special case for the ValidationParameters path, use that.
                         theoryData.ExpectedExceptionValidationParameters
-                            .ProcessException(validationParametersResult.UnwrapError().GetException(), context);
+                            .ProcessException(validationResult.UnwrapError().GetException(), context);
                     }
                     else
                     {
                         theoryData.ExpectedException
-                            .ProcessException(validationParametersResult.UnwrapError().GetException(), context);
+                            .ProcessException(validationResult.UnwrapError().GetException(), context);
 
                         // If the expected exception is the same in both paths, verify the message matches
                         IdentityComparer.AreStringsEqual(
-                            legacyTokenValidationParametersResult.Exception.Message,
-                            validationParametersResult.UnwrapError().GetException().Message,
+                            tokenValidationResult.Exception.Message,
+                            validationResult.UnwrapError().GetException().Message,
                             context);
                     }
                 }
 
                 // Verify that the exceptions are of the same type.
                 IdentityComparer.AreEqual(
-                    legacyTokenValidationParametersResult.Exception.GetType(),
-                    validationParametersResult.UnwrapError().GetException().GetType(),
+                    tokenValidationResult.Exception.GetType(),
+                    validationResult.UnwrapError().GetException().GetType(),
                     context);
 
-                if (legacyTokenValidationParametersResult.Exception is SecurityTokenException)
+                if (tokenValidationResult.Exception is SecurityTokenException)
                 {
                     // Verify that the custom properties are the same.
                     IdentityComparer.AreSecurityTokenExceptionsEqual(
-                        legacyTokenValidationParametersResult.Exception,
-                        validationParametersResult.UnwrapError().GetException(),
+                        tokenValidationResult.Exception,
+                        validationResult.UnwrapError().GetException(),
                         context);
                 }
             }
@@ -104,7 +104,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         internal ValidationParameters? ValidationParameters { get; set; }
 
         // only set if we expect a different message on this path
-        internal ExpectedException? ExpectedExceptionValidationParameters { get; set; } = null;
+        internal ExpectedException ExpectedExceptionValidationParameters { get; set; } = ExpectedException.NoExceptionExpected;
     }
 }
 #nullable restore
