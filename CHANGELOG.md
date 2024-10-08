@@ -1,5 +1,14 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+8.1.2
+=====
+### Bug fixes
+- CaseSensitiveClaimsIdentity.Clone() now returns a `CaseSensitiveClaimsIdentity` as expected. See [2879](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2879)
+- Multiple unused and unusable (for the moment) public APIs were removed. These were introduced by mistake leaking from the work done on logging and exception handling. See [2888](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2888). No major version changed needed as these APIs were not usable per se.
+
+### Fundamentals
+- Enabled PublicApiAnalyzers to better understand and trace changes to the public API. See[2782](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2782)
+
 8.1.1
 =====
 ### Bug fixes
