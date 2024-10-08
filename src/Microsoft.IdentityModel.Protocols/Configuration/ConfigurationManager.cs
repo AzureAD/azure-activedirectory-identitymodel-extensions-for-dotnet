@@ -27,7 +27,6 @@ namespace Microsoft.IdentityModel.Protocols
         private readonly IConfigurationRetriever<T> _configRetriever;
         private readonly IConfigurationValidator<T> _configValidator;
         private T _currentConfiguration;
-        private TimeSpan _bootstrapRefreshInterval = TimeSpan.FromSeconds(1);
 
         // task states are used to ensure the call to 'update config' (UpdateCurrentConfiguration) is a singleton. Uses Interlocked.CompareExchange.
         // metadata is not being obtained
@@ -169,6 +168,7 @@ namespace Microsoft.IdentityModel.Protocols
                     return _currentConfiguration;
                 }
 
+#pragma warning disable CA1031 // Do not catch general exception types
                 try
                 {
                     // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
@@ -190,65 +190,29 @@ namespace Microsoft.IdentityModel.Protocols
                                         result.ErrorMessage)));
                     }
 
-                    // Add a random amount between 0 and 5% of AutomaticRefreshInterval jitter to avoid spike traffic to IdentityProvider.
-                    _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval +
-                        TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 20)));
-
-                    _currentConfiguration = configuration;
+                    UpdateConfiguration(configuration);
                 }
                 catch (Exception ex)
                 {
                     fetchMetadataFailure = ex;
 
-                    // In this case configuration was never obtained.
-                    if (_currentConfiguration == null)
-                    {
-                        if (_bootstrapRefreshInterval < RefreshInterval)
-                        {
-                            // Adopt exponential backoff for bootstrap refresh interval with a decorrelated jitter if it is not longer than the refresh interval.
-                            TimeSpan _bootstrapRefreshIntervalWithJitter = TimeSpan.FromSeconds(new Random().Next((int)_bootstrapRefreshInterval.TotalSeconds));
-                            _bootstrapRefreshInterval += _bootstrapRefreshInterval;
-                            _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, _bootstrapRefreshIntervalWithJitter);
-                        }
-                        else
-                        {
-                            _syncAfter = DateTimeUtil.Add(
-                                DateTime.UtcNow,
-                                AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
-                        }
-
-                        throw LogHelper.LogExceptionMessage(
-                            new InvalidOperationException(
-                                LogHelper.FormatInvariant(
-                                    LogMessages.IDX20803,
-                                    LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
-                                    LogHelper.MarkAsNonPII(_syncAfter),
-                                    LogHelper.MarkAsNonPII(ex)),
-                                ex));
-                    }
-                    else
-                    {
-                        _syncAfter = DateTimeUtil.Add(
-                            DateTime.UtcNow,
-                            AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
-
-                        LogHelper.LogExceptionMessage(
-                            new InvalidOperationException(
-                                LogHelper.FormatInvariant(
-                                    LogMessages.IDX20806,
-                                    LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
-                                    LogHelper.MarkAsNonPII(ex)),
-                                ex));
-                    }
+                    LogHelper.LogExceptionMessage(
+                        new InvalidOperationException(
+                             LogHelper.FormatInvariant(
+                                LogMessages.IDX20806,
+                                LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
+                                LogHelper.MarkAsNonPII(ex)),
+                            ex));
                 }
                 finally
                 {
                     _configurationNullLock.Release();
                 }
+#pragma warning restore CA1031 // Do not catch general exception types
             }
             else
             {
-                if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverIdle, ConfigurationRetrieverRunning) != ConfigurationRetrieverRunning)
+                if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
                 {
                     _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
                 }
@@ -285,7 +249,7 @@ namespace Microsoft.IdentityModel.Protocols
 
                 if (_configValidator == null)
                 {
-                    _currentConfiguration = configuration;
+                    UpdateConfiguration(configuration);
                 }
                 else
                 {
@@ -298,7 +262,7 @@ namespace Microsoft.IdentityModel.Protocols
                                     LogMessages.IDX20810,
                                     result.ErrorMessage)));
                     else
-                        _currentConfiguration = configuration;
+                        UpdateConfiguration(configuration);
                 }
             }
             catch (Exception ex)
@@ -313,10 +277,16 @@ namespace Microsoft.IdentityModel.Protocols
             }
             finally
             {
-                _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
                 Interlocked.Exchange(ref _configurationRetrieverState, ConfigurationRetrieverIdle);
             }
 #pragma warning restore CA1031 // Do not catch general exception types
+        }
+
+        private void UpdateConfiguration(T configuration)
+        {
+            _currentConfiguration = configuration;
+            _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval +
+                TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 20)));
         }
 
         /// <summary>
@@ -332,8 +302,9 @@ namespace Microsoft.IdentityModel.Protocols
         }
 
         /// <summary>
-        /// Requests that then next call to <see cref="GetConfigurationAsync()"/> obtain new configuration.
-        /// <para>If it is a first force refresh or the last refresh was greater than <see cref="BaseConfigurationManager.RefreshInterval"/> then the next call to <see cref="GetConfigurationAsync()"/> will retrieve new configuration.</para>
+        /// Triggers updating metadata when:
+        /// <para>1. Called the first time.</para>
+        /// <para>2. The time between when this method was called and DateTimeOffset.Now is greater than <see cref="BaseConfigurationManager.RefreshInterval"/>.</para>
         /// <para>If <see cref="BaseConfigurationManager.RefreshInterval"/> == <see cref="TimeSpan.MaxValue"/> then this method does nothing.</para>
         /// </summary>
         public override void RequestRefresh()
@@ -343,10 +314,10 @@ namespace Microsoft.IdentityModel.Protocols
             if (now >= DateTimeUtil.Add(_lastRequestRefresh.UtcDateTime, RefreshInterval) || _isFirstRefreshRequest)
             {
                 _isFirstRefreshRequest = false;
-                _lastRequestRefresh = now;
-                if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverIdle, ConfigurationRetrieverRunning) != ConfigurationRetrieverRunning)
+                if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
                 {
                     _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
+                    _lastRequestRefresh = now;
                 }
             }
         }
