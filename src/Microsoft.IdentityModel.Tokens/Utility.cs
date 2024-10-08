@@ -133,7 +133,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>
         /// true if the bytes are equal, false otherwise.
         /// </returns>
-        [MethodImpl(MethodImplOptions.NoInlining)]
+        [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
         public static bool AreEqual(byte[] a, byte[] b)
         {
             ReadOnlySpan<byte> a1, a2;
@@ -177,7 +177,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>
         /// true if the bytes are equal, false otherwise.
         /// </returns>
-        [MethodImpl(MethodImplOptions.NoInlining)]
+        [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
         internal static bool AreEqual(ReadOnlySpan<byte> a, ReadOnlySpan<byte> b, int length)
         {
             if ((a.Length < length || b.Length < length))
