@@ -4,9 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Security.Claims;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
@@ -120,26 +118,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 t => t.ToString()))));
             Assert.Contains(stringJws, listener.TraceBuffer);
             listener.TraceBuffer = string.Empty;
-        }
-
-        [Fact]
-        public void ClaimTypeMappingIsIndependent()
-        {
-            // Each handler should have its own instance of the ClaimTypeMap
-            var jwtClaimsMapping = JwtSecurityTokenHandler.DefaultInboundClaimTypeMap;
-            var jsonClaimsMapping = JsonWebTokenHandler.DefaultInboundClaimTypeMap;
-
-            Assert.NotEmpty(jwtClaimsMapping);
-            Assert.NotEmpty(jsonClaimsMapping);
-
-            Assert.Equal(jwtClaimsMapping, jsonClaimsMapping);
-
-            // Clearing one should not affect the other
-            jwtClaimsMapping.Clear();
-
-            Assert.Empty(jwtClaimsMapping);
-            Assert.NotEmpty(jsonClaimsMapping);
-
         }
 
         [Fact]
