@@ -749,6 +749,7 @@ override Microsoft.IdentityModel.Tokens.AsymmetricSignatureProvider.Sign(byte[] 
 override Microsoft.IdentityModel.Tokens.AsymmetricSignatureProvider.Sign(byte[] input, int offset, int count) -> byte[]
 override Microsoft.IdentityModel.Tokens.AsymmetricSignatureProvider.Verify(byte[] input, byte[] signature) -> bool
 override Microsoft.IdentityModel.Tokens.AsymmetricSignatureProvider.Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength) -> bool
+override Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.Clone() -> System.Security.Claims.ClaimsIdentity
 override Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.FindAll(string type) -> System.Collections.Generic.IEnumerable<System.Security.Claims.Claim>
 override Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.FindFirst(string type) -> System.Security.Claims.Claim
 override Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.HasClaim(string type, string value) -> bool
