@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,11 +30,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 return conditionsResult.UnwrapError().AddStackFrame(new StackFrame(true));
             }
-
-            //These TODO's follow the pattern of the current ValidateToken methods. They should be implemented in the future.
-            //TODO: ValidateSubject() - Skip for now
-            //TODO: ValidateIssuer()
-            //TODO: ValidateIssuerSecurityKey()...etc
 
             return new ValidatedToken(samlToken, this, validationParameters);
         }
@@ -85,8 +79,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 // AudienceRestriction.Audiences is a List<string> but returned as ICollection<string>
                 // no conversion occurs, ToList() is never called but we have to account for the possibility.
-                if (!(audienceRestriction.Audiences is List<string> audiencesAsList))
-                    audiencesAsList = audienceRestriction.Audiences.ToList();
+                if (audienceRestriction.Audiences is not List<string> audiencesAsList)
+                    audiencesAsList = [.. audienceRestriction.Audiences];
 
                 var audienceValidationResult = validationParameters.AudienceValidator(
                     audiencesAsList, samlToken, validationParameters, callContext);
