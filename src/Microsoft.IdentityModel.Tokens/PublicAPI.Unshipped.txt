@@ -1,4 +1,4 @@
-﻿abstract Microsoft.IdentityModel.Tokens.AsymmetricSecurityKey.HasPrivateKey.get -> bool
+abstract Microsoft.IdentityModel.Tokens.AsymmetricSecurityKey.HasPrivateKey.get -> bool
 abstract Microsoft.IdentityModel.Tokens.AsymmetricSecurityKey.PrivateKeyStatus.get -> Microsoft.IdentityModel.Tokens.PrivateKeyStatus
 abstract Microsoft.IdentityModel.Tokens.BaseConfigurationManager.RequestRefresh() -> void
 abstract Microsoft.IdentityModel.Tokens.CryptoProviderCache.GetCacheKey(Microsoft.IdentityModel.Tokens.SecurityKey securityKey, string algorithm, string typeofProvider) -> string
@@ -419,7 +419,6 @@ Microsoft.IdentityModel.Tokens.SecurityTokenException.SecurityTokenException() -
 Microsoft.IdentityModel.Tokens.SecurityTokenException.SecurityTokenException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenException.SecurityTokenException(string message, System.Exception innerException) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenException.SecurityTokenException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenException.SetValidationError(Microsoft.IdentityModel.Tokens.ValidationError validationError) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException
 Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException.Expires.get -> System.DateTime
 Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException.Expires.set -> void
@@ -444,6 +443,15 @@ Microsoft.IdentityModel.Tokens.SecurityTokenInvalidAudienceException.SecurityTok
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidAudienceException.SecurityTokenInvalidAudienceException(string message, System.Exception innerException) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidAudienceException.SecurityTokenInvalidAudienceException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.ConfigurationCloudInstanceName.get -> string
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.ConfigurationCloudInstanceName.set -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.SecurityTokenInvalidCloudInstanceException() -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.SecurityTokenInvalidCloudInstanceException(string message) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.SecurityTokenInvalidCloudInstanceException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.SecurityTokenInvalidCloudInstanceException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.SigningKeyCloudInstanceName.get -> string
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.SigningKeyCloudInstanceName.set -> void
+override Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidIssuerException
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidIssuerException.InvalidIssuer.get -> string
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidIssuerException.InvalidIssuer.set -> void
@@ -741,6 +749,7 @@ override Microsoft.IdentityModel.Tokens.AsymmetricSignatureProvider.Sign(byte[] 
 override Microsoft.IdentityModel.Tokens.AsymmetricSignatureProvider.Sign(byte[] input, int offset, int count) -> byte[]
 override Microsoft.IdentityModel.Tokens.AsymmetricSignatureProvider.Verify(byte[] input, byte[] signature) -> bool
 override Microsoft.IdentityModel.Tokens.AsymmetricSignatureProvider.Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength) -> bool
+override Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.Clone() -> System.Security.Claims.ClaimsIdentity
 override Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.FindAll(string type) -> System.Collections.Generic.IEnumerable<System.Security.Claims.Claim>
 override Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.FindFirst(string type) -> System.Security.Claims.Claim
 override Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.HasClaim(string type, string value) -> bool
@@ -934,19 +943,3 @@ virtual Microsoft.IdentityModel.Tokens.TokenHandler.ValidateTokenAsync(Microsoft
 virtual Microsoft.IdentityModel.Tokens.TokenHandler.ValidateTokenAsync(string token, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.TokenValidationResult>
 virtual Microsoft.IdentityModel.Tokens.TokenValidationParameters.Clone() -> Microsoft.IdentityModel.Tokens.TokenValidationParameters
 virtual Microsoft.IdentityModel.Tokens.TokenValidationParameters.CreateClaimsIdentity(Microsoft.IdentityModel.Tokens.SecurityToken securityToken, string issuer) -> System.Security.Claims.ClaimsIdentity
-override Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.ConfigurationCloudInstanceName.get -> string
-Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.ConfigurationCloudInstanceName.set -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.SecurityTokenInvalidCloudInstanceException() -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.SecurityTokenInvalidCloudInstanceException(string message) -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.SecurityTokenInvalidCloudInstanceException(string message, System.Exception innerException) -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.SecurityTokenInvalidCloudInstanceException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.SigningKeyCloudInstanceName.get -> string
-Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.SigningKeyCloudInstanceName.set -> void
-Microsoft.IdentityModel.Tokens.ValidationError
-Microsoft.IdentityModel.Tokens.ValidationError.AddStackFrame(System.Diagnostics.StackFrame stackFrame) -> Microsoft.IdentityModel.Tokens.ValidationError
-Microsoft.IdentityModel.Tokens.ValidationError.ExceptionType.get -> System.Type
-Microsoft.IdentityModel.Tokens.ValidationError.GetException() -> System.Exception
-Microsoft.IdentityModel.Tokens.ValidationError.InnerException.get -> System.Exception
-Microsoft.IdentityModel.Tokens.ValidationError.InnerValidationError.get -> Microsoft.IdentityModel.Tokens.ValidationError
-Microsoft.IdentityModel.Tokens.ValidationError.StackFrames.get -> System.Collections.Generic.IList<System.Diagnostics.StackFrame>
