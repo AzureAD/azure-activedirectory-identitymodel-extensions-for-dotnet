@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Saml2;
@@ -15,22 +16,54 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
     {
 
         [Theory, MemberData(nameof(ValidateTokenAsync_Audience_TestCases), DisableDiscoveryEnumeration = true)]
-        public async Task ValidateTokenAsync_Audience(ValidateTokenAsyncAudienceTheoryData theoryData)
+        public async Task ValidateTokenAsync_AudienceComparison(ValidateTokenAsyncAudienceTheoryData theoryData)
         {
-            var context = TestUtilities.WriteHeader($"{this}.ValidateTokenAsync_Audience", theoryData);
+            var context = TestUtilities.WriteHeader($"{this}.ValidateTokenAsync_AudienceComparison", theoryData);
 
             Saml2SecurityTokenHandler saml2TokenHandler = new Saml2SecurityTokenHandler();
 
             var saml2Token = CreateToken(theoryData.TokenAudience!, theoryData.Saml2Condition!);
 
-            var validationParameters = CreateTokenValidationParameters(
+            var tokenValidationParameters = CreateTokenValidationParameters(
                 theoryData.TVPAudiences,
                 saml2Token,
-                theoryData.ignoreTrailingSlashWhenValidatingAudience);
+                theoryData.IgnoreTrailingSlashWhenValidatingAudience);
 
-            await ValidateAndCompareResults(saml2Token, validationParameters, theoryData, context);
+            // Validate the token using TokenValidationParameters
+            TokenValidationResult tokenValidationResult =
+                await saml2TokenHandler.ValidateTokenAsync(saml2Token.Assertion.CanonicalString, tokenValidationParameters);
 
-            TestUtilities.AssertFailIfErrors(context);
+            // Validate the token using ValidationParameters.
+            ValidationResult<ValidatedToken> validationResult =
+                await saml2TokenHandler.ValidateTokenAsync(
+                    saml2Token, theoryData.ValidationParameters!, theoryData.CallContext, CancellationToken.None);
+
+            // Ensure the validity of the results match the expected result.
+            if (tokenValidationResult.IsValid != validationResult.IsSuccess)
+            {
+                context.AddDiff($"tokenValidationResult.IsValid != validationResult.IsSuccess");
+                theoryData.ExpectedExceptionValidationParameters!.ProcessException(validationResult.UnwrapError().GetException(), context);
+                theoryData.ExpectedException.ProcessException(tokenValidationResult.Exception, context);
+            }
+            else
+            {
+                if (tokenValidationResult.IsValid)
+                {
+                    //Verify the validated tokens by both paths match match.
+                    ValidatedToken validatedToken = validationResult.UnwrapResult();
+                    IdentityComparer.AreEqual(validatedToken.SecurityToken, tokenValidationResult.SecurityToken, context);
+                }
+                else
+                {
+                    // Verify the exception provided by both paths match.
+                    var tokenValidationResultException = tokenValidationResult.Exception;
+                    theoryData.ExpectedException.ProcessException(tokenValidationResult.Exception, context);
+                    var validationResultException = validationResult.UnwrapError().GetException();
+                    theoryData.ExpectedExceptionValidationParameters!.ProcessException(validationResult.UnwrapError().GetException(), context);
+                }
+
+                TestUtilities.AssertFailIfErrors(context);
+            }
         }
 
         public static TheoryData<ValidateTokenAsyncAudienceTheoryData> ValidateTokenAsync_Audience_TestCases
@@ -69,7 +102,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         // Audience has a trailing slash, but IgnoreTrailingSlashWhenValidatingAudience is true.
                         TokenAudience = Default.Audience + "/",
                         TVPAudiences = [Default.Audience],
-                        ignoreTrailingSlashWhenValidatingAudience = true,
+                        IgnoreTrailingSlashWhenValidatingAudience = true,
                         ValidationParameters = CreateValidationParameters([Default.Audience], true),
                     },
                     new ValidateTokenAsyncAudienceTheoryData("Invalid_AudienceWithSlash_IgnoreTrailingSlashFalse")
@@ -86,7 +119,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     {
                         // ValidAudiences has a trailing slash, but IgnoreTrailingSlashWhenValidatingAudience is true.
                         TokenAudience = Default.Audience,
-                        ignoreTrailingSlashWhenValidatingAudience = true,
+                        IgnoreTrailingSlashWhenValidatingAudience = true,
                         TVPAudiences = [Default.Audience + "/"],
                         ValidationParameters = CreateValidationParameters([Default.Audience + "/"], true),
                     },
@@ -117,17 +150,23 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             }
         }
 
-        public class ValidateTokenAsyncAudienceTheoryData : ValidateTokenAsyncBaseTheoryData
+        public class ValidateTokenAsyncAudienceTheoryData : TheoryDataBase
         {
             public ValidateTokenAsyncAudienceTheoryData(string testId) : base(testId) { }
+
+            internal ExpectedException? ExpectedExceptionValidationParameters { get; set; } = ExpectedException.NoExceptionExpected;
+
+            internal bool ExpectedIsValid { get; set; } = true;
+
+            public bool IgnoreTrailingSlashWhenValidatingAudience { get; internal set; } = false;
+
+            internal ValidationParameters? ValidationParameters { get; set; }
+
+            public Saml2Conditions? Saml2Condition { get; internal set; }
 
             public string? TokenAudience { get; internal set; } = Default.Audience;
 
             public List<string>? TVPAudiences { get; internal set; }
-
-            public Saml2Conditions? Saml2Condition { get; internal set; }
-
-            public bool ignoreTrailingSlashWhenValidatingAudience { get; internal set; } = false;
         }
 
         private static Saml2SecurityToken CreateToken(string audience, Saml2Conditions saml2Conditions)
@@ -144,10 +183,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             };
 
             Saml2SecurityToken saml2Token = (Saml2SecurityToken)saml2TokenHandler.CreateToken(securityTokenDescriptor);
-
-            /*
-                    if (saml2Conditions != null)
-                        saml2Token.Assertion.Conditions = saml2Conditions;*/ //TODO: Will adapt this to work with scenarios such as TokenReplay in Jwt or OneTimeUse in SAML.
 
             return saml2Token;
         }
