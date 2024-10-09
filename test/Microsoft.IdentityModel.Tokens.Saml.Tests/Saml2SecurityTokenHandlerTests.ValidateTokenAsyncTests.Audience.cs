@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             {
                 if (tokenValidationResult.IsValid)
                 {
-                    //Verify the validated tokens by both paths match match.
+                    // Verify that the validated tokens from both paths match.
                     ValidatedToken validatedToken = validationResult.UnwrapResult();
                     IdentityComparer.AreEqual(validatedToken.SecurityToken, tokenValidationResult.SecurityToken, context);
                 }
