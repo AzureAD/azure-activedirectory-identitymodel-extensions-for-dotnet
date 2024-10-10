@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
@@ -17,7 +16,7 @@ namespace Microsoft.IdentityModel.Benchmarks
     public class ClaimsIdentityTests
     {
         private ClaimsIdentity _claimsIdentity;
-        private JsonWebTokenClaimsIdentity _jwtClaimsIdentity;
+        private NewClaimsIdentity _newClaimsIdentity;
         private string _claimTypeToFind;
         private string _claimValueToFind;
         private Predicate<Claim> _findPredicate;
@@ -26,7 +25,7 @@ namespace Microsoft.IdentityModel.Benchmarks
         private JsonWebTokenHandler _jsonWebTokenHandler;
         private string _jwsWithExtendedClaims;
         private TokenValidationParameters _tokenValidationParameters;
-        private TokenValidationParameters _jwtTokenValidationParameters;
+        private TokenValidationParameters _newTokenValidationParameters;
 
         [GlobalSetup]
         public async Task SetupAsync()
@@ -44,13 +43,13 @@ namespace Microsoft.IdentityModel.Benchmarks
                 ValidIssuer = BenchmarkUtils.Issuer,
                 IssuerSigningKey = BenchmarkUtils.SigningCredentialsRsaSha256.Key,
             };
-            _jwtTokenValidationParameters = new TokenValidationParameters()
+            _newTokenValidationParameters = new TokenValidationParameters()
             {
                 ValidAudience = BenchmarkUtils.Audience,
                 ValidateLifetime = true,
                 ValidIssuer = BenchmarkUtils.Issuer,
                 IssuerSigningKey = BenchmarkUtils.SigningCredentialsRsaSha256.Key,
-                UseJsonWebTokenClaimsIdentityType = true,
+                UseNewClaimsIdentityType = true,
             };
 
             _claimTypeToFind = "";
@@ -59,7 +58,7 @@ namespace Microsoft.IdentityModel.Benchmarks
             _hasClaimPredicate = claim => claim.Type == _claimTypeToFind && claim.Value == _claimValueToFind;
 
             _claimsIdentity = (await _jsonWebTokenHandler.ValidateTokenAsync(_jwsWithExtendedClaims, _tokenValidationParameters).ConfigureAwait(false)).ClaimsIdentity;
-            _jwtClaimsIdentity = (await _jsonWebTokenHandler.ValidateTokenAsync(_jwsWithExtendedClaims, _jwtTokenValidationParameters).ConfigureAwait(false)).ClaimsIdentity as JsonWebTokenClaimsIdentity;
+            _newClaimsIdentity = (await _jsonWebTokenHandler.ValidateTokenAsync(_jwsWithExtendedClaims, _newTokenValidationParameters).ConfigureAwait(false)).ClaimsIdentity as NewClaimsIdentity;
         }
 
         [Benchmark(Baseline = true), BenchmarkCategory("FindFirst")]
@@ -105,44 +104,44 @@ namespace Microsoft.IdentityModel.Benchmarks
         }
 
         [Benchmark, BenchmarkCategory("FindFirst")]
-        public Claim JwtClaimsIdentity_FindFirst()
+        public Claim NewClaimsIdentity_FindFirst()
         {
-            var temp = _jwtClaimsIdentity.FindFirst(_claimTypeToFind);
+            var temp = _newClaimsIdentity.FindFirst(_claimTypeToFind);
             return temp;
         }
 
         [Benchmark, BenchmarkCategory("FindFirstPredicate")]
-        public Claim JwtClaimsIdentity_FindFirst_WithPredicate()
+        public Claim NewClaimsIdentity_FindFirst_WithPredicate()
         {
-            var temp = _jwtClaimsIdentity.FindFirst(_findPredicate);
+            var temp = _newClaimsIdentity.FindFirst(_findPredicate);
             return temp;
         }
 
         [Benchmark, BenchmarkCategory("FindAll")]
-        public List<Claim> JwtClaimsIdentity_FindAll()
+        public List<Claim> NewClaimsIdentity_FindAll()
         {
-            var temp = _jwtClaimsIdentity.FindAll(_claimTypeToFind).ToList();
+            var temp = _newClaimsIdentity.FindAll(_claimTypeToFind).ToList();
             return temp;
         }
 
         [Benchmark, BenchmarkCategory("FindAllPredicate")]
-        public List<Claim> JwtClaimsIdentity_FindAll_WithPredicate()
+        public List<Claim> NewClaimsIdentity_FindAll_WithPredicate()
         {
-            var temp = _jwtClaimsIdentity.FindAll(_findPredicate).ToList();
+            var temp = _newClaimsIdentity.FindAll(_findPredicate).ToList();
             return temp;
         }
 
         [Benchmark, BenchmarkCategory("HasClaim")]
-        public bool JwtClaimsIdentity_HasClaim()
+        public bool NewClaimsIdentity_HasClaim()
         {
-            var temp = _jwtClaimsIdentity.HasClaim(_claimTypeToFind, _claimValueToFind);
+            var temp = _newClaimsIdentity.HasClaim(_claimTypeToFind, _claimValueToFind);
             return temp;
         }
 
         [Benchmark, BenchmarkCategory("HasClaimPredicate")]
-        public bool JwtClaimsIdentity_HasClaim_WithPredicate()
+        public bool NewClaimsIdentity_HasClaim_WithPredicate()
         {
-            var temp = _jwtClaimsIdentity.HasClaim(_hasClaimPredicate);
+            var temp = _newClaimsIdentity.HasClaim(_hasClaimPredicate);
             return temp;
         }
 
@@ -156,9 +155,9 @@ namespace Microsoft.IdentityModel.Benchmarks
         }
 
         [Benchmark, BenchmarkCategory("ValidateAndGetClaims")]
-        public async Task<IList<Claim>> JwtClaimsIdentity_ValidateTokenAndGetClaims()
+        public async Task<IList<Claim>> NewClaimsIdentity_ValidateTokenAndGetClaims()
         {
-            var result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsWithExtendedClaims, _jwtTokenValidationParameters).ConfigureAwait(false);
+            var result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsWithExtendedClaims, _newTokenValidationParameters).ConfigureAwait(false);
             var claimsIdentity = result.ClaimsIdentity;
             var claims = claimsIdentity.Claims;
             return claims.ToList();

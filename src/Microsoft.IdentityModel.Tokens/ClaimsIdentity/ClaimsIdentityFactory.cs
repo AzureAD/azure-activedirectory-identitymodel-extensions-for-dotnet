@@ -29,15 +29,25 @@ namespace Microsoft.IdentityModel.Tokens
             return new CaseSensitiveClaimsIdentity(claims, authenticationType);
         }
 
-        internal static ClaimsIdentity Create(string authenticationType, string nameType, string roleType, SecurityToken securityToken)
+        internal static ClaimsIdentity Create(string authenticationType, string nameType, string roleType, SecurityToken securityToken, TokenValidationParameters tokenValidationParameters)
         {
             if (AppContextSwitches.UseClaimsIdentityType)
                 return new ClaimsIdentity(authenticationType: authenticationType, nameType: nameType, roleType: roleType);
 
-            return new CaseSensitiveClaimsIdentity(authenticationType: authenticationType, nameType: nameType, roleType: roleType)
+            if (tokenValidationParameters.UseNewClaimsIdentityType)
             {
-                SecurityToken = securityToken,
-            };
+                return new NewClaimsIdentity(authenticationType: authenticationType, nameType: nameType, roleType: roleType)
+                {
+                    SecurityToken = securityToken,
+                };
+            }
+            else
+            {
+                return new CaseSensitiveClaimsIdentity(authenticationType: authenticationType, nameType: nameType, roleType: roleType)
+                {
+                    SecurityToken = securityToken,
+                };
+            }
         }
     }
 
