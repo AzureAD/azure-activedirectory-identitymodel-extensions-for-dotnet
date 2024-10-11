@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// Contains information so that Exceptions can be logged or thrown written as required.
     /// </summary>
-    public class ValidationError
+    internal class ValidationError
     {
         private Type _exceptionType;
 
@@ -81,7 +81,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Creates an instance of an <see cref="Exception"/> using <see cref="ValidationError"/>
         /// </summary>
         /// <returns>An instance of an Exception.</returns>
-        public Exception GetException()
+        public virtual Exception GetException()
         {
             Exception exception = GetException(ExceptionType, InnerException);
 
