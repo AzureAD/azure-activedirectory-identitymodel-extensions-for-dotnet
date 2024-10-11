@@ -21,10 +21,19 @@ namespace Microsoft.IdentityModel.Tokens
             _invalidIssuer = invalidIssuer;
         }
 
-        internal override void AddAdditionalInformation(ISecurityTokenException exception)
+        public override Exception GetException()
         {
-            if (exception is SecurityTokenInvalidIssuerException invalidIssuerException)
-                invalidIssuerException.InvalidIssuer = _invalidIssuer;
+            if (ExceptionType == typeof(SecurityTokenInvalidIssuerException))
+            {
+                SecurityTokenInvalidIssuerException exception = new(MessageDetail.Message, InnerException)
+                {
+                    InvalidIssuer = _invalidIssuer
+                };
+
+                return exception;
+            }
+
+            return base.GetException();
         }
     }
 }
