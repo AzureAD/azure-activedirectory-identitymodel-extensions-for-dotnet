@@ -11,7 +11,7 @@ namespace Microsoft.IdentityModel.Tokens
     {
         private string? _invalidIssuer;
 
-        public IssuerValidationError(
+        internal IssuerValidationError(
             MessageDetail messageDetail,
             Type exceptionType,
             StackFrame stackFrame,

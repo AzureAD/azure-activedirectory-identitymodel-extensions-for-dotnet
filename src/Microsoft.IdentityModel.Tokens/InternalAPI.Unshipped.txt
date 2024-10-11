@@ -1,4 +1,5 @@
-﻿const Microsoft.IdentityModel.Tokens.LogMessages.IDX10001 = "IDX10001: Invalid argument '{0}'. Argument must be of type '{1}'." -> string
+﻿Microsoft.IdentityModel.Tokens.IssuerValidationError
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10001 = "IDX10001: Invalid argument '{0}'. Argument must be of type '{1}'." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10502 = "IDX10502: Signature validation failed. The token's kid is: '{0}', but did not match any keys in ValidationParameters or Configuration and TryAllIssuerSigningKeys is false. Number of keys in ValidationParameters: '{1}'. \nNumber of keys in Configuration: '{2}'.\ntoken: '{3}'." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10518 = "IDX10518: Signature validation failed. Algorithm validation failed with error: '{0}'." -> string
 Microsoft.IdentityModel.Tokens.AlgorithmValidationDelegate

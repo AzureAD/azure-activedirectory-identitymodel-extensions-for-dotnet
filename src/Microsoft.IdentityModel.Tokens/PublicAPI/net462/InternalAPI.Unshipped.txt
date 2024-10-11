@@ -1,4 +1,5 @@
-﻿Microsoft.IdentityModel.Tokens.AsymmetricAdapter.DecryptWithRsaCryptoServiceProviderProxy(byte[] bytes) -> byte[]
+﻿Microsoft.IdentityModel.Tokens.IssuerValidationError
+Microsoft.IdentityModel.Tokens.AsymmetricAdapter.DecryptWithRsaCryptoServiceProviderProxy(byte[] bytes) -> byte[]
 Microsoft.IdentityModel.Tokens.AsymmetricAdapter.EncryptWithRsaCryptoServiceProviderProxy(byte[] bytes) -> byte[]
 Microsoft.IdentityModel.Tokens.AsymmetricAdapter.SignWithRsaCryptoServiceProviderProxy(byte[] bytes) -> byte[]
 Microsoft.IdentityModel.Tokens.AsymmetricAdapter.SignWithRsaCryptoServiceProviderProxyUsingOffset(byte[] bytes, int offset, int length) -> byte[]
