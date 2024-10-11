@@ -24,6 +24,22 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             CancellationToken cancellationToken)
 #pragma warning restore CA1801 // Review unused parameters
         {
+            if (samlToken is null)
+            {
+                StackFrame stackFrame = StackFrames.TokenNull ??= new StackFrame(true);
+                return ValidationError.NullParameter(
+                    nameof(samlToken),
+                    new StackFrame(true));
+            }
+
+            if (validationParameters is null)
+            {
+                StackFrame stackFrame = StackFrames.TokenValidationParametersNull ??= new StackFrame(true);
+                return ValidationError.NullParameter(
+                    nameof(validationParameters),
+                    new StackFrame(true));
+            }
+
             var conditionsResult = ValidateConditions(samlToken, validationParameters, callContext);
 
             if (!conditionsResult.IsSuccess)
@@ -39,39 +55,64 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
         internal virtual ValidationResult<ValidatedConditions> ValidateConditions(Saml2SecurityToken samlToken, ValidationParameters validationParameters, CallContext callContext)
         {
-            if (samlToken == null)
-                return ValidationError.NullParameter(nameof(samlToken), new StackFrame(true));
+            if (samlToken.Assertion is null)
+            {
+                StackFrame stackFrame = StackFrames.AssertionNull ??= new StackFrame(true);
+                return ValidationError.NullParameter(
+                    nameof(samlToken.Assertion),
+                    new StackFrame(true));
+            }
 
-            if (validationParameters == null)
-                return ValidationError.NullParameter(nameof(validationParameters), new StackFrame(true));
-
-            if (samlToken.Assertion == null)
-                return ValidationError.NullParameter(nameof(samlToken.Assertion), new StackFrame(true));
-
-            if (samlToken.Assertion.Conditions == null)
-                return ValidationError.NullParameter(nameof(samlToken.Assertion.Conditions), new StackFrame(true));
+            if (samlToken.Assertion.Conditions is null)
+            {
+                StackFrame stackFrame = StackFrames.AssertionConditionsNull ??= new StackFrame(true);
+                return ValidationError.NullParameter(
+                    nameof(samlToken.Assertion.Conditions),
+                    new StackFrame(true));
+            }
 
             var lifetimeValidationResult = validationParameters.LifetimeValidator(
-                samlToken.Assertion.Conditions.NotBefore, samlToken.Assertion.Conditions.NotOnOrAfter, samlToken, validationParameters, callContext);
+                samlToken.Assertion.Conditions.NotBefore,
+                samlToken.Assertion.Conditions.NotOnOrAfter,
+                samlToken,
+                validationParameters,
+                callContext);
+
             if (!lifetimeValidationResult.IsSuccess)
-                return lifetimeValidationResult.UnwrapError();
+            {
+                StackFrame lifeTimeStackFrame = StackFrames.LifetimeValidationFailed ??= new StackFrame(true);
+                return lifetimeValidationResult.UnwrapError().AddStackFrame(lifeTimeStackFrame);
+            }
 
             if (samlToken.Assertion.Conditions.OneTimeUse)
             {
                 //ValidateOneTimeUseCondition(samlToken, validationParameters);
                 // We can keep an overridable method for this, or rely on the TokenReplayValidator delegate.
                 var oneTimeUseValidationResult = validationParameters.TokenReplayValidator(
-                    samlToken.Assertion.Conditions.NotOnOrAfter, samlToken.Assertion.CanonicalString, validationParameters, callContext);
+                    samlToken.Assertion.Conditions.NotOnOrAfter,
+                    samlToken.Assertion.CanonicalString,
+                    validationParameters,
+                    callContext);
+
                 if (!oneTimeUseValidationResult.IsSuccess)
-                    return oneTimeUseValidationResult.UnwrapError();
+                {
+                    StackFrame tokenReplayStackFrame = StackFrames.OneTimeUseValidationFailed ??= new StackFrame(true);
+                    return oneTimeUseValidationResult.UnwrapError().AddStackFrame(tokenReplayStackFrame);
+                }
             }
 
             if (samlToken.Assertion.Conditions.ProxyRestriction != null)
             {
                 //throw LogExceptionMessage(new SecurityTokenValidationException(LogMessages.IDX13511));
-                var proxyValidationError = ValidateProxyRestriction(samlToken, validationParameters, callContext);
+                var proxyValidationError = ValidateProxyRestriction(
+                    samlToken,
+                    validationParameters,
+                    callContext);
+
                 if (proxyValidationError is not null)
+                {
                     return proxyValidationError;
+                }
             }
 
             string? validatedAudience = null;
@@ -83,7 +124,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     audiencesAsList = [.. audienceRestriction.Audiences];
 
                 var audienceValidationResult = validationParameters.AudienceValidator(
-                    audiencesAsList, samlToken, validationParameters, callContext);
+                    audiencesAsList,
+                    samlToken,
+                    validationParameters,
+                    callContext);
                 if (!audienceValidationResult.IsSuccess)
                     return audienceValidationResult.UnwrapError();
 
@@ -91,7 +135,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 validatedAudience = audienceValidationResult.UnwrapResult();
             }
 
-            return new ValidatedConditions(validatedAudience, lifetimeValidationResult.UnwrapResult()); // no error occurred. There is nothing else to return.
+            return new ValidatedConditions(validatedAudience, lifetimeValidationResult.UnwrapResult());
         }
 
 #pragma warning disable CA1801 // Review unused parameters
