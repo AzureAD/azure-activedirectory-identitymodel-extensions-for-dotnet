@@ -29,6 +29,7 @@
     <NoWarn>$(NoWarn);SYSLIB0050</NoWarn>
     <NoWarn>$(NoWarn);SYSLIB0051</NoWarn>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <NoWarn>$(NoWarn);RS0016;RS0017;RS0051</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
