@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// <summary>
     /// A <see cref="SecurityToken"/> designed for representing a JSON Web Token (JWT).
     /// </summary>
-    public partial class JsonWebToken : SecurityToken
+    public partial class JsonWebToken : ClaimsProvider
     {
         internal const string ClassName = "Microsoft.IdentityModel.JsonWebTokens.JsonWebToken";
 
@@ -619,7 +619,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// If the key has no corresponding value, this method will throw.
         /// </para>
         /// </remarks>
-        public Claim GetClaim(string key)
+        public override Claim GetClaim(string key)
         {
             return Payload.GetClaim(key, Issuer ?? ClaimsIdentity.DefaultIssuer);
         }

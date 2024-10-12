@@ -3,18 +3,18 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Runtime.Serialization;
 using System.Security.Claims;
 
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// An implementation of <see cref="ClaimsIdentity"/> that uses a backing JsonWebToken to retrieve claims in a performant manner.
+    /// An implementation of <see cref="ClaimsIdentity"/> that uses a backing SecurityToken to retrieve claims in a performant manner.
     /// </summary>
-    internal class NewClaimsIdentity : CaseSensitiveClaimsIdentity
+    [Serializable]
+    public class NewClaimsIdentity : CaseSensitiveClaimsIdentity
     {
-        // Claims that are "removedFromJwt" from JsonWebToken
+        // Claims that are "removed" from the SecurityToken
+        [NonSerialized]
         private readonly HashSet<string> _removedClaims = [];
 
         /// <summary>
@@ -43,62 +43,71 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns></returns>
         public override Claim FindFirst(string type)
         {
-            if (SecurityToken is JsonWebToken jsonWebToken)
+            if (SecurityToken is ClaimsProvider claimsProvider)
             {
-                jsonWebToken.TryGetPayloadValue(type, out IList<string> value);
+                Claim claim = claimsProvider.GetClaim(type);
+                if (claim is not null && !_removedClaims.Contains(type))
+                    return claim;
             }
 
             return base.FindFirst(type);
         }
 
+
+        /// <inheritdoc/>
         public override Claim FindFirst(Predicate<Claim> match)
         {
             return base.FindFirst(match);
         }
 
+        /// <inheritdoc/>
         public override IEnumerable<Claim> FindAll(string type)
         {
-            JsonWebToken jsonWebToken = (JsonWebToken)BootstrapContext;
-            jsonWebToken.TryGetPayloadValue(type, out IList<object> value);
+            List<Claim> claims = new List<Claim>();
 
-            return new Claim(type, value[0]);
+            return claims;
         }
+        /// <inheritdoc/>
         public override IEnumerable<Claim> FindAll(Predicate<Claim> match)
         {
             return base.FindAll(match);
         }
 
+        /// <inheritdoc/>
         public override bool HasClaim(string type, string value)
         {
-            if (BootstrapContext is JsonWebToken jsonWebToken)
+            if (SecurityToken is ClaimsProvider claimsProvider)
             {
-                if (jsonWebToken.TryGetPayloadValue(type, out IList<string> values))
-                    return values.Contains(value);
-            }
-            else
-            {
-                return base.HasClaim(type, value);
+                if (claimsProvider.HasClaim(type, value) && !_removedClaims.Contains(type))
+                    return true;
             }
 
-            return false;
+            return base.HasClaim(type, value);
         }
 
+        /// <inheritdoc/>
         public override bool HasClaim(Predicate<Claim> match)
         {
             return base.HasClaim(match);
         }
 
-        // Add claims to base collection since claims cannot be added to JsonWebToken
+        // Add claims to base collection since claims cannot be added to SecurityToken
+        /// <inheritdoc/>
         public override void AddClaim(Claim claim)
         {
+            _ = claim ?? throw new ArgumentNullException(nameof(claim));
+
             base.AddClaim(claim);
 
             _removedClaims.Remove(claim.Type);
         }
 
-        // Add claims to base collection since claims cannot be added to JsonWebToken
+        // Add claims to base collection since claims cannot be added to SecurityToken
+        /// <inheritdoc/>
         public override void AddClaims(IEnumerable<Claim> claims)
         {
+            _ = claims ?? throw new ArgumentNullException(nameof(claims));
+
             foreach (Claim claim in claims)
             {
                 if (claim == null)
@@ -112,6 +121,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
+        /// <inheritdoc/>
         public override void RemoveClaim(Claim claim)
         {
             if (!TryRemoveClaim(claim))
@@ -122,20 +132,22 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Tries to remove  a claim from the base collection by reference.
-        /// Since a claim cannot be removedFromJwt from the JsonWebToken,
-        /// adds the claim name to the removedFromJwt collection in this class, if it exists in JsonWebToken.
+        /// Since a claim cannot be removed from the SecurityToken,
+        /// adds the claim name to the removed collection in this class, if it exists in SecurityToken.
         /// </summary>
         /// <param name="claim">Claim to remove.</param>
-        /// <returns>True, if claim existed in and was removedFromJwt from either base claims collection or JsonWebToken; false, otherwise.</returns>
+        /// <returns>True, if claim existed in and was removed from either base claims collection or SecurityToken; false, otherwise.</returns>
         public override bool TryRemoveClaim(Claim claim)
         {
+            _ = claim ?? throw new ArgumentNullException(nameof(claim));
+
             bool removedFromJwt = false;
-            if (SecurityToken is JsonWebToken jsonWebToken)
+            if (SecurityToken is ClaimsProvider claimsProvider)
             {
                 if (claim == null || _removedClaims.Contains(claim.Type))
                     return false;
 
-                removedFromJwt = jsonWebToken.TryGetPayloadValue(claim.Type, out object _);
+                removedFromJwt = claimsProvider.HasClaim(claim.Type);
                 if (removedFromJwt)
                     _removedClaims.Add(claim.Type);
             }
@@ -143,14 +155,14 @@ namespace Microsoft.IdentityModel.Tokens
             return base.TryRemoveClaim(claim) | removedFromJwt;
         }
 
-        protected override Claim CreateClaim(BinaryReader reader) => base.CreateClaim(reader);
+        //protected override Claim CreateClaim(BinaryReader reader) => base.CreateClaim(reader);
 
-        public override void WriteTo(BinaryWriter writer) => base.WriteTo(writer);
+        //public override void WriteTo(BinaryWriter writer) => base.WriteTo(writer);
 
-        protected override void WriteTo(BinaryWriter writer, byte[] userData) => base.WriteTo(writer, userData);
+        //protected override void WriteTo(BinaryWriter writer, byte[] userData) => base.WriteTo(writer, userData);
 
-        protected override void GetObjectData(SerializationInfo info, StreamingContext context) => base.GetObjectData(info, context);
+        //protected override void GetObjectData(SerializationInfo info, StreamingContext context) => base.GetObjectData(info, context);
 
-        public override IEnumerable<Claim> Claims => base.Claims;
+        //public override IEnumerable<Claim> Claims => base.Claims;
     }
 }
