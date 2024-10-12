@@ -16,7 +16,7 @@ namespace Microsoft.IdentityModel.Benchmarks
     public class ClaimsIdentityTests
     {
         private ClaimsIdentity _claimsIdentity;
-        private NewClaimsIdentity _newClaimsIdentity;
+        private SecurityTokenClaimsIdentity _newClaimsIdentity;
         private string _claimTypeToFind;
         private string _claimValueToFind;
         private Predicate<Claim> _findPredicate;
@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Benchmarks
             _hasClaimPredicate = claim => claim.Type == _claimTypeToFind && claim.Value == _claimValueToFind;
 
             _claimsIdentity = (await _jsonWebTokenHandler.ValidateTokenAsync(_jwsWithExtendedClaims, _tokenValidationParameters).ConfigureAwait(false)).ClaimsIdentity;
-            _newClaimsIdentity = (await _jsonWebTokenHandler.ValidateTokenAsync(_jwsWithExtendedClaims, _newTokenValidationParameters).ConfigureAwait(false)).ClaimsIdentity as NewClaimsIdentity;
+            _newClaimsIdentity = (await _jsonWebTokenHandler.ValidateTokenAsync(_jwsWithExtendedClaims, _newTokenValidationParameters).ConfigureAwait(false)).ClaimsIdentity as SecurityTokenClaimsIdentity;
         }
 
         [Benchmark(Baseline = true), BenchmarkCategory("FindFirst")]

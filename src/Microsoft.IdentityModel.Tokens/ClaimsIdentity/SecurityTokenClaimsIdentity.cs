@@ -11,26 +11,26 @@ namespace Microsoft.IdentityModel.Tokens
     /// An implementation of <see cref="ClaimsIdentity"/> that uses a backing SecurityToken to retrieve claims in a performant manner.
     /// </summary>
     [Serializable]
-    public class NewClaimsIdentity : CaseSensitiveClaimsIdentity
+    public class SecurityTokenClaimsIdentity : CaseSensitiveClaimsIdentity
     {
         // Claims that are "removed" from the SecurityToken
         [NonSerialized]
         private readonly HashSet<string> _removedClaims = [];
 
         /// <summary>
-        /// Initializes an instance of <see cref="NewClaimsIdentity"/>.
+        /// Initializes an instance of <see cref="SecurityTokenClaimsIdentity"/>.
         /// </summary>
-        public NewClaimsIdentity() : base()
+        public SecurityTokenClaimsIdentity() : base()
         {
         }
 
         /// <summary>
-        /// Initializes an instance of <see cref="NewClaimsIdentity"/>.
+        /// Initializes an instance of <see cref="SecurityTokenClaimsIdentity"/>.
         /// </summary>
         /// <param name="authenticationType">The authentication method used to establish this identity.</param>
         /// <param name="nameType">The <see cref="Claim.Type"/> used when obtaining the value of <see cref="ClaimsIdentity.Name"/>.</param>
         /// <param name="roleType">The <see cref="Claim.Type"/> used when performing logic for <see cref="ClaimsPrincipal.IsInRole"/>.</param>
-        public NewClaimsIdentity(string authenticationType, string nameType, string roleType) :
+        public SecurityTokenClaimsIdentity(string authenticationType, string nameType, string roleType) :
             base(authenticationType, nameType, roleType)
         {
         }

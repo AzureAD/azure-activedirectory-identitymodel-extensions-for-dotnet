@@ -603,7 +603,7 @@ namespace Microsoft.IdentityModel.Tokens
         public TypeValidator TypeValidator { get; set; }
 
         /// <summary>
-        /// Specifies whether to use <see cref="NewClaimsIdentity"/> instead of <see cref="ClaimsIdentity"/>.
+        /// Specifies whether to use <see cref="SecurityTokenClaimsIdentity"/> instead of <see cref="ClaimsIdentity"/>.
         /// </summary>
         public bool UseNewClaimsIdentityType { get; set; }
 

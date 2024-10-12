@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (tokenValidationParameters.UseNewClaimsIdentityType)
             {
-                return new NewClaimsIdentity(authenticationType: authenticationType, nameType: nameType, roleType: roleType)
+                return new SecurityTokenClaimsIdentity(authenticationType: authenticationType, nameType: nameType, roleType: roleType)
                 {
                     SecurityToken = securityToken,
                 };
