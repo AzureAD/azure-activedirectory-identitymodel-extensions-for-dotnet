@@ -45,14 +45,13 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (SecurityToken is ClaimsProvider claimsProvider)
             {
-                Claim claim = claimsProvider.GetClaim(type);
+                Claim claim = claimsProvider.GetPayloadClaim(type);
                 if (claim is not null && !_removedClaims.Contains(type))
                     return claim;
             }
 
             return base.FindFirst(type);
         }
-
 
         /// <inheritdoc/>
         public override Claim FindFirst(Predicate<Claim> match)
@@ -63,9 +62,22 @@ namespace Microsoft.IdentityModel.Tokens
         /// <inheritdoc/>
         public override IEnumerable<Claim> FindAll(string type)
         {
-            List<Claim> claims = new List<Claim>();
+            if (SecurityToken is ClaimsProvider claimsProvider)
+            {
+                List<Claim> claims = new List<Claim>();
+                Claim claim = claimsProvider.GetPayloadClaim(type);
+                if (claim is not null && !_removedClaims.Contains(type))
+                    claims.Add(claim);
 
-            return claims;
+                foreach (var addedClaim in Claims)
+                {
+                    if (addedClaim?.Type.Equals(type, StringComparison.Ordinal) == true)
+                        claims.Add(addedClaim);
+                }
+                return claims.AsReadOnly();
+            }
+
+            return base.FindAll(type);
         }
         /// <inheritdoc/>
         public override IEnumerable<Claim> FindAll(Predicate<Claim> match)
@@ -78,7 +90,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (SecurityToken is ClaimsProvider claimsProvider)
             {
-                if (claimsProvider.HasClaim(type, value) && !_removedClaims.Contains(type))
+                if (claimsProvider.HasPayloadClaim(type, value) && !_removedClaims.Contains(type))
                     return true;
             }
 
@@ -147,7 +159,7 @@ namespace Microsoft.IdentityModel.Tokens
                 if (claim == null || _removedClaims.Contains(claim.Type))
                     return false;
 
-                removedFromJwt = claimsProvider.HasClaim(claim.Type);
+                removedFromJwt = claimsProvider.HasPayloadClaim(claim.Type);
                 if (removedFromJwt)
                     _removedClaims.Add(claim.Type);
             }

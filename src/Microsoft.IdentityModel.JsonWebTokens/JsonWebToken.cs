@@ -619,9 +619,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// If the key has no corresponding value, this method will throw.
         /// </para>
         /// </remarks>
-        public override Claim GetClaim(string key)
+        public Claim GetClaim(string key)
         {
             return Payload.GetClaim(key, Issuer ?? ClaimsIdentity.DefaultIssuer);
+        }
+
+        /// <inheritdoc/>
+        public override Claim GetPayloadClaim(string name)
+        {
+            return Payload.GetPayloadClaim(name, Issuer ?? ClaimsIdentity.DefaultIssuer);
+        }
+
+        /// <inheritdoc/>
+        public override bool HasPayloadClaim(string name, string value)
+        {
+            return Payload.HasPayloadClaim(name, value, Issuer ?? ClaimsIdentity.DefaultIssuer);
+        }
+
+        /// <inheritdoc/>
+        public override bool HasPayloadClaim(string type)
+        {
+            return Payload.HasPayloadClaim(type);
         }
 
         /// <summary>
@@ -700,11 +718,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         #endregion
 
         #region Get Claims from the JWT Header and Payload
-        internal bool HasPayloadClaim(string claimName)
-        {
-            return Payload.HasClaim(claimName);
-        }
-
         /// <summary>
         /// Gets the 'value' corresponding to key from the JWT header transformed as type 'T'.
         /// </summary>

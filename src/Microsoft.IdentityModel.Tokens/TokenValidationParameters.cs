@@ -105,6 +105,7 @@ namespace Microsoft.IdentityModel.Tokens
             ValidIssuer = other.ValidIssuer;
             ValidIssuers = other.ValidIssuers;
             ValidTypes = other.ValidTypes;
+            UseNewClaimsIdentityType = other.UseNewClaimsIdentityType;
         }
 
         /// <summary>

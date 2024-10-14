@@ -15,10 +15,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public virtual Claim GetClaim(string type)
-        {
-            return null;
-        }
+        public virtual Claim GetPayloadClaim(string type) => null;
 
         /// <summary>
         /// 
@@ -26,19 +23,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="type"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public virtual bool HasClaim(string type, string value)
-        {
-            return false;
-        }
+        public virtual bool HasPayloadClaim(string type, string value) => false;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public virtual bool HasClaim(string type)
-        {
-            return false;
-        }
+        public virtual bool HasPayloadClaim(string type) => false;
     }
 }

@@ -52,8 +52,8 @@ namespace Microsoft.IdentityModel.Benchmarks
                 UseNewClaimsIdentityType = true,
             };
 
-            _claimTypeToFind = "";
-            _claimValueToFind = "";
+            _claimTypeToFind = "iss";
+            _claimValueToFind = BenchmarkUtils.Issuer;
             _findPredicate = claim => claim.Type == _claimTypeToFind;
             _hasClaimPredicate = claim => claim.Type == _claimTypeToFind && claim.Value == _claimValueToFind;
 
@@ -68,7 +68,7 @@ namespace Microsoft.IdentityModel.Benchmarks
             return temp;
         }
 
-        [Benchmark(Baseline = true), BenchmarkCategory("FindFirstPredicate")]
+        //[Benchmark(Baseline = true), BenchmarkCategory("FindFirstPredicate")]
         public Claim ClaimsIdentity_FindFirst_WithPredicate()
         {
             var temp = _claimsIdentity.FindFirst(_findPredicate);
@@ -82,21 +82,21 @@ namespace Microsoft.IdentityModel.Benchmarks
             return temp;
         }
 
-        [Benchmark(Baseline = true), BenchmarkCategory("FindAllPredicate")]
+        //[Benchmark(Baseline = true), BenchmarkCategory("FindAllPredicate")]
         public List<Claim> ClaimsIdentity_FindAll_WithPredicate()
         {
             var temp = _claimsIdentity.FindAll(_findPredicate).ToList();
             return temp;
         }
 
-        [Benchmark(Baseline = true), BenchmarkCategory("HasClaim")]
+        [Benchmark(Baseline = true), BenchmarkCategory("HasPayloadClaim")]
         public bool ClaimsIdentity_HasClaim()
         {
             var temp = _claimsIdentity.HasClaim(_claimTypeToFind, _claimValueToFind);
             return temp;
         }
 
-        [Benchmark(Baseline = true), BenchmarkCategory("HasClaimPredicate")]
+        //[Benchmark(Baseline = true), BenchmarkCategory("HasClaimPredicate")]
         public bool ClaimsIdentity_HasClaim_WithPredicate()
         {
             var temp = _claimsIdentity.HasClaim(_hasClaimPredicate);
@@ -110,7 +110,7 @@ namespace Microsoft.IdentityModel.Benchmarks
             return temp;
         }
 
-        [Benchmark, BenchmarkCategory("FindFirstPredicate")]
+        //[Benchmark, BenchmarkCategory("FindFirstPredicate")]
         public Claim NewClaimsIdentity_FindFirst_WithPredicate()
         {
             var temp = _newClaimsIdentity.FindFirst(_findPredicate);
@@ -124,28 +124,28 @@ namespace Microsoft.IdentityModel.Benchmarks
             return temp;
         }
 
-        [Benchmark, BenchmarkCategory("FindAllPredicate")]
+        //[Benchmark, BenchmarkCategory("FindAllPredicate")]
         public List<Claim> NewClaimsIdentity_FindAll_WithPredicate()
         {
             var temp = _newClaimsIdentity.FindAll(_findPredicate).ToList();
             return temp;
         }
 
-        [Benchmark, BenchmarkCategory("HasClaim")]
+        [Benchmark, BenchmarkCategory("HasPayloadClaim")]
         public bool NewClaimsIdentity_HasClaim()
         {
             var temp = _newClaimsIdentity.HasClaim(_claimTypeToFind, _claimValueToFind);
             return temp;
         }
 
-        [Benchmark, BenchmarkCategory("HasClaimPredicate")]
+        //[Benchmark, BenchmarkCategory("HasClaimPredicate")]
         public bool NewClaimsIdentity_HasClaim_WithPredicate()
         {
             var temp = _newClaimsIdentity.HasClaim(_hasClaimPredicate);
             return temp;
         }
 
-        [Benchmark(Baseline = true), BenchmarkCategory("ValidateAndGetClaims")]
+        //[Benchmark(Baseline = true), BenchmarkCategory("ValidateAndGetClaims")]
         public async Task<IList<Claim>> ClaimsIdentity_ValidateTokenAndGetClaims()
         {
             var result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsWithExtendedClaims, _tokenValidationParameters).ConfigureAwait(false);
@@ -154,7 +154,7 @@ namespace Microsoft.IdentityModel.Benchmarks
             return claims.ToList();
         }
 
-        [Benchmark, BenchmarkCategory("ValidateAndGetClaims")]
+        //[Benchmark, BenchmarkCategory("ValidateAndGetClaims")]
         public async Task<IList<Claim>> NewClaimsIdentity_ValidateTokenAndGetClaims()
         {
             var result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsWithExtendedClaims, _newTokenValidationParameters).ConfigureAwait(false);
