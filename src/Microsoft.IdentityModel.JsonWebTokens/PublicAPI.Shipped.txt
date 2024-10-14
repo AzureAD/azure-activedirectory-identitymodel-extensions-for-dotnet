@@ -1,4 +1,4 @@
-﻿const Microsoft.IdentityModel.JsonWebTokens.JsonClaimValueTypes.Json = "JSON" -> string
+const Microsoft.IdentityModel.JsonWebTokens.JsonClaimValueTypes.Json = "JSON" -> string
 const Microsoft.IdentityModel.JsonWebTokens.JsonClaimValueTypes.JsonArray = "JSON_ARRAY" -> string
 const Microsoft.IdentityModel.JsonWebTokens.JsonClaimValueTypes.JsonNull = "JSON_NULL" -> string
 const Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.Base64UrlEncodedUnsignedJWSHeader = "eyJhbGciOiJub25lIn0" -> string
