@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,7 +14,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// </summary>
     public partial class Saml2SecurityTokenHandler : SecurityTokenHandler
     {
-
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         internal async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
@@ -26,6 +24,22 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             CancellationToken cancellationToken)
 #pragma warning restore CA1801 // Review unused parameters
         {
+            if (samlToken is null)
+            {
+                StackFrames.TokenNull ??= new StackFrame(true);
+                return ValidationError.NullParameter(
+                    nameof(samlToken),
+                    StackFrames.TokenNull);
+            }
+
+            if (validationParameters is null)
+            {
+                StackFrames.TokenValidationParametersNull ??= new StackFrame(true);
+                return ValidationError.NullParameter(
+                    nameof(validationParameters),
+                    StackFrames.TokenValidationParametersNull);
+            }
+
             var conditionsResult = ValidateConditions(samlToken, validationParameters, callContext);
 
             if (!conditionsResult.IsSuccess)
@@ -33,68 +47,72 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 return conditionsResult.UnwrapError().AddStackFrame(new StackFrame(true));
             }
 
-            //These TODO's follow the pattern of the current ValidateToken methods. They should be implemented in the future.
-            //TODO: ValidateSubject() - Skip for now
-            //TODO: ValidateIssuer()
-            //TODO: ValidateIssuerSecurityKey()...etc
-
             return new ValidatedToken(samlToken, this, validationParameters);
         }
-
-
 
         // ValidatedConditions is basically a named tuple but using a record struct better expresses the intent.
         internal record struct ValidatedConditions(string? ValidatedAudience, ValidatedLifetime? ValidatedLifetime);
 
         internal virtual ValidationResult<ValidatedConditions> ValidateConditions(Saml2SecurityToken samlToken, ValidationParameters validationParameters, CallContext callContext)
         {
-            if (samlToken == null)
-                return ValidationError.NullParameter(nameof(samlToken), new System.Diagnostics.StackFrame(true));
-
-            if (validationParameters == null)
-                return ValidationError.NullParameter(nameof(validationParameters), new System.Diagnostics.StackFrame(true));
-
-            if (samlToken.Assertion == null)
-                return ValidationError.NullParameter(nameof(samlToken.Assertion), new System.Diagnostics.StackFrame(true));
-
-            // TokenValidationParameters.RequireAudience is only used for SAML.
-            // Should we add this to ValidationParameters? 
-            // Should it be just a field in Saml2SecurityTokenHandler?
-            bool requireAudience = true;
-
-            if (samlToken.Assertion.Conditions == null)
+            if (samlToken.Assertion is null)
             {
-                if (requireAudience)
-                    return new ValidationError(
-                        new MessageDetail(LogMessages.IDX13002),
-                        ValidationFailureType.AudienceValidationFailed,
-                        typeof(Saml2SecurityTokenException),
-                        new System.Diagnostics.StackFrame(true));
+                StackFrames.AssertionNull ??= new StackFrame(true);
+                return ValidationError.NullParameter(
+                    nameof(samlToken.Assertion),
+                    StackFrames.AssertionNull);
+            }
 
-                return new ValidatedConditions(null, null); // no error occurred. There is no validated audience or lifetime.
+            if (samlToken.Assertion.Conditions is null)
+            {
+                StackFrames.AssertionConditionsNull ??= new StackFrame(true);
+                return ValidationError.NullParameter(
+                    nameof(samlToken.Assertion.Conditions),
+                    StackFrames.AssertionConditionsNull);
             }
 
             var lifetimeValidationResult = validationParameters.LifetimeValidator(
-                samlToken.Assertion.Conditions.NotBefore, samlToken.Assertion.Conditions.NotOnOrAfter, samlToken, validationParameters, callContext);
+                samlToken.Assertion.Conditions.NotBefore,
+                samlToken.Assertion.Conditions.NotOnOrAfter,
+                samlToken,
+                validationParameters,
+                callContext);
+
             if (!lifetimeValidationResult.IsSuccess)
-                return lifetimeValidationResult.UnwrapError();
+            {
+                StackFrames.LifetimeValidationFailed ??= new StackFrame(true);
+                return lifetimeValidationResult.UnwrapError().AddStackFrame(StackFrames.LifetimeValidationFailed);
+            }
 
             if (samlToken.Assertion.Conditions.OneTimeUse)
             {
                 //ValidateOneTimeUseCondition(samlToken, validationParameters);
                 // We can keep an overridable method for this, or rely on the TokenReplayValidator delegate.
                 var oneTimeUseValidationResult = validationParameters.TokenReplayValidator(
-                    samlToken.Assertion.Conditions.NotOnOrAfter, samlToken.Assertion.CanonicalString, validationParameters, callContext);
+                    samlToken.Assertion.Conditions.NotOnOrAfter,
+                    samlToken.Assertion.CanonicalString,
+                    validationParameters,
+                    callContext);
+
                 if (!oneTimeUseValidationResult.IsSuccess)
-                    return oneTimeUseValidationResult.UnwrapError();
+                {
+                    StackFrames.OneTimeUseValidationFailed ??= new StackFrame(true);
+                    return oneTimeUseValidationResult.UnwrapError().AddStackFrame(StackFrames.OneTimeUseValidationFailed);
+                }
             }
 
             if (samlToken.Assertion.Conditions.ProxyRestriction != null)
             {
                 //throw LogExceptionMessage(new SecurityTokenValidationException(LogMessages.IDX13511));
-                var proxyValidationError = ValidateProxyRestriction(samlToken, validationParameters, callContext);
+                var proxyValidationError = ValidateProxyRestriction(
+                    samlToken,
+                    validationParameters,
+                    callContext);
+
                 if (proxyValidationError is not null)
+                {
                     return proxyValidationError;
+                }
             }
 
             string? validatedAudience = null;
@@ -102,11 +120,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 // AudienceRestriction.Audiences is a List<string> but returned as ICollection<string>
                 // no conversion occurs, ToList() is never called but we have to account for the possibility.
-                if (!(audienceRestriction.Audiences is List<string> audiencesAsList))
-                    audiencesAsList = audienceRestriction.Audiences.ToList();
+                if (audienceRestriction.Audiences is not List<string> audiencesAsList)
+                    audiencesAsList = [.. audienceRestriction.Audiences];
 
                 var audienceValidationResult = validationParameters.AudienceValidator(
-                    audiencesAsList, samlToken, validationParameters, callContext);
+                    audiencesAsList,
+                    samlToken,
+                    validationParameters,
+                    callContext);
                 if (!audienceValidationResult.IsSuccess)
                     return audienceValidationResult.UnwrapError();
 
@@ -114,16 +135,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 validatedAudience = audienceValidationResult.UnwrapResult();
             }
 
-            if (requireAudience && validatedAudience is null)
-            {
-                return new ValidationError(
-                    new MessageDetail(LogMessages.IDX13002),
-                    ValidationFailureType.AudienceValidationFailed,
-                    typeof(Saml2SecurityTokenException),
-                    new System.Diagnostics.StackFrame(true));
-            }
-
-            return new ValidatedConditions(validatedAudience, lifetimeValidationResult.UnwrapResult()); // no error occurred. There is nothing else to return.
+            return new ValidatedConditions(validatedAudience, lifetimeValidationResult.UnwrapResult());
         }
 
 #pragma warning disable CA1801 // Review unused parameters
