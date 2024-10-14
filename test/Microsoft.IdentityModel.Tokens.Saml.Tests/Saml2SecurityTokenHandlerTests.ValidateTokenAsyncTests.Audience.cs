@@ -74,85 +74,95 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         {
             get
             {
-                return new TheoryData<ValidateTokenAsyncAudienceTheoryData>
+
+                var theoryData = new TheoryData<ValidateTokenAsyncAudienceTheoryData>();
+
+                theoryData.Add(new ValidateTokenAsyncAudienceTheoryData("Valid_AudiencesMatch")
                 {
-                   new ValidateTokenAsyncAudienceTheoryData("Valid_AudiencesMatch")
-                    {
-                        TokenAudience = Default.Audience,
-                        TVPAudiences = [Default.Audience],
-                        ValidationParameters = CreateValidationParameters([Default.Audience])
-                    },
-                   new ValidateTokenAsyncAudienceTheoryData("Invalid_AudiencesDoNotMatch")
-                    {
-                        ValidationParameters = CreateValidationParameters([Default.Audience]),
-                        TokenAudience = "InvalidAudience",
-                        TVPAudiences = [Default.Audience],
-                        ExpectedIsValid = false,
-                        ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
-                        ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidAudienceException("IDX10215:"),
-                    },
-                    new ValidateTokenAsyncAudienceTheoryData("Invalid_TokenAudienceIsWhiteSpace")
-                    {
-                        ValidationParameters = CreateValidationParameters([Default.Audience]),
-                        TokenAudience = " ",
-                        TVPAudiences = [Default.Audience],
-                        ExpectedIsValid = false,
-                        ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
-                        ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidAudienceException("IDX10215:"),
-                    },
-                    new ValidateTokenAsyncAudienceTheoryData("Valid_AudienceWithinValidAudiences")
-                    {
-                        TokenAudience = Default.Audience,
-                        TVPAudiences = ["ExtraAudience", Default.Audience, "AnotherAudience"],
-                        ValidationParameters = CreateValidationParameters(["ExtraAudience", Default.Audience, "AnotherAudience"]),
-                    },
-                    new ValidateTokenAsyncAudienceTheoryData("Valid_AudienceWithSlash_IgnoreTrailingSlashTrue")
-                    {
-                        // Audience has a trailing slash, but IgnoreTrailingSlashWhenValidatingAudience is true.
-                        TokenAudience = Default.Audience + "/",
-                        TVPAudiences = [Default.Audience],
-                        IgnoreTrailingSlashWhenValidatingAudience = true,
-                        ValidationParameters = CreateValidationParameters([Default.Audience], true),
-                    },
-                    new ValidateTokenAsyncAudienceTheoryData("Invalid_AudienceWithSlash_IgnoreTrailingSlashFalse")
-                    {
-                        // Audience has a trailing slash and IgnoreTrailingSlashWhenValidatingAudience is false.
-                        TokenAudience = Default.Audience + "/",
-                        TVPAudiences = [Default.Audience],
-                        ValidationParameters = CreateValidationParameters([Default.Audience], false),
-                        ExpectedIsValid = false,
-                        ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
-                        ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidAudienceException("IDX10215:"),
-                    },
-                    new ValidateTokenAsyncAudienceTheoryData("Valid_ValidAudiencesWithSlash_IgnoreTrailingSlashTrue")
-                    {
-                        // ValidAudiences has a trailing slash, but IgnoreTrailingSlashWhenValidatingAudience is true.
-                        TokenAudience = Default.Audience,
-                        IgnoreTrailingSlashWhenValidatingAudience = true,
-                        TVPAudiences = [Default.Audience + "/"],
-                        ValidationParameters = CreateValidationParameters([Default.Audience + "/"], true),
-                    },
-                    new ValidateTokenAsyncAudienceTheoryData("Invalid_ValidAudiencesWithSlash_IgnoreTrailingSlashFalse")
-                    {
-                        // ValidAudiences has a trailing slash and IgnoreTrailingSlashWhenValidatingAudience is false.
-                        TokenAudience = Default.Audience,
-                        TVPAudiences = [Default.Audience + "/"],
-                        ValidationParameters = CreateValidationParameters([Default.Audience + "/"], false),
-                        ExpectedIsValid = false,
-                        ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
-                        ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidAudienceException("IDX10215:"),
-                    },
-                    new ValidateTokenAsyncAudienceTheoryData("Invalid_TokenValidationParametersAndValidationParametersAreNull")
-                    {
-                        ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
-                        ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
-                        ExpectedIsValid = false,
-                        TokenAudience = Default.Audience,
-                        TVPAudiences = [Default.Audience],
-                        ValidationParameters = null,
-                        NullTokenValidationParameters = true
-                    },
-                };
+                    TokenAudience = Default.Audience,
+                    TVPAudiences = [Default.Audience],
+                    ValidationParameters = CreateValidationParameters([Default.Audience])
+                });
+
+                theoryData.Add(new ValidateTokenAsyncAudienceTheoryData("Valid_AudienceWithinValidAudiences")
+                {
+                    TokenAudience = Default.Audience,
+                    TVPAudiences = ["ExtraAudience", Default.Audience, "AnotherAudience"],
+                    ValidationParameters = CreateValidationParameters(["ExtraAudience", Default.Audience, "AnotherAudience"]),
+                });
+
+                theoryData.Add(new ValidateTokenAsyncAudienceTheoryData("Valid_AudienceWithSlash_IgnoreTrailingSlashTrue")
+                {
+                    // Audience has a trailing slash, but IgnoreTrailingSlashWhenValidatingAudience is true.
+                    TokenAudience = Default.Audience + "/",
+                    TVPAudiences = [Default.Audience],
+                    IgnoreTrailingSlashWhenValidatingAudience = true,
+                    ValidationParameters = CreateValidationParameters([Default.Audience], true),
+                });
+
+                theoryData.Add(new ValidateTokenAsyncAudienceTheoryData("Valid_ValidAudiencesWithSlash_IgnoreTrailingSlashTrue")
+                {
+                    // ValidAudiences has a trailing slash, but IgnoreTrailingSlashWhenValidatingAudience is true.
+                    TokenAudience = Default.Audience,
+                    IgnoreTrailingSlashWhenValidatingAudience = true,
+                    TVPAudiences = [Default.Audience + "/"],
+                    ValidationParameters = CreateValidationParameters([Default.Audience + "/"], true),
+                });
+
+                theoryData.Add(new ValidateTokenAsyncAudienceTheoryData("Invalid_AudiencesDoNotMatch")
+                {
+                    ValidationParameters = CreateValidationParameters([Default.Audience]),
+                    TokenAudience = "InvalidAudience",
+                    TVPAudiences = [Default.Audience],
+                    ExpectedIsValid = false,
+                    ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
+                    ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidAudienceException("IDX10215:"),
+                });
+
+                theoryData.Add(new ValidateTokenAsyncAudienceTheoryData("Invalid_TokenAudienceIsWhiteSpace")
+                {
+                    ValidationParameters = CreateValidationParameters([Default.Audience]),
+                    TokenAudience = " ",
+                    TVPAudiences = [Default.Audience],
+                    ExpectedIsValid = false,
+                    ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
+                    ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidAudienceException("IDX10215:"),
+                });
+
+                theoryData.Add(new ValidateTokenAsyncAudienceTheoryData("Invalid_AudienceWithSlash_IgnoreTrailingSlashFalse")
+                {
+                    // Audience has a trailing slash and IgnoreTrailingSlashWhenValidatingAudience is false.
+                    TokenAudience = Default.Audience + "/",
+                    TVPAudiences = [Default.Audience],
+                    ValidationParameters = CreateValidationParameters([Default.Audience], false),
+                    ExpectedIsValid = false,
+                    ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
+                    ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidAudienceException("IDX10215:"),
+                });
+
+                theoryData.Add(new ValidateTokenAsyncAudienceTheoryData("Invalid_ValidAudiencesWithSlash_IgnoreTrailingSlashFalse")
+                {
+                    // ValidAudiences has a trailing slash and IgnoreTrailingSlashWhenValidatingAudience is false.
+                    TokenAudience = Default.Audience,
+                    TVPAudiences = [Default.Audience + "/"],
+                    ValidationParameters = CreateValidationParameters([Default.Audience + "/"], false),
+                    ExpectedIsValid = false,
+                    ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
+                    ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidAudienceException("IDX10215:"),
+                });
+
+                theoryData.Add(new ValidateTokenAsyncAudienceTheoryData("Invalid_TokenValidationParametersAndValidationParametersAreNull")
+                {
+                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                    ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
+                    ExpectedIsValid = false,
+                    TokenAudience = Default.Audience,
+                    TVPAudiences = [Default.Audience],
+                    ValidationParameters = null,
+                    NullTokenValidationParameters = true
+                });
+
+                return theoryData;
 
                 static ValidationParameters CreateValidationParameters(
                     List<string>? audiences,

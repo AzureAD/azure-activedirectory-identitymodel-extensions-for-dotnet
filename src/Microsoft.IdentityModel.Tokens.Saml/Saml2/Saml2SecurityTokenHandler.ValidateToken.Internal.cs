@@ -26,18 +26,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         {
             if (samlToken is null)
             {
-                StackFrame stackFrame = StackFrames.TokenNull ??= new StackFrame(true);
+                StackFrames.TokenNull ??= new StackFrame(true);
                 return ValidationError.NullParameter(
                     nameof(samlToken),
-                    new StackFrame(true));
+                    StackFrames.TokenNull);
             }
 
             if (validationParameters is null)
             {
-                StackFrame stackFrame = StackFrames.TokenValidationParametersNull ??= new StackFrame(true);
+                StackFrames.TokenValidationParametersNull ??= new StackFrame(true);
                 return ValidationError.NullParameter(
                     nameof(validationParameters),
-                    new StackFrame(true));
+                    StackFrames.TokenValidationParametersNull);
             }
 
             var conditionsResult = ValidateConditions(samlToken, validationParameters, callContext);
@@ -57,18 +57,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         {
             if (samlToken.Assertion is null)
             {
-                StackFrame stackFrame = StackFrames.AssertionNull ??= new StackFrame(true);
+                StackFrames.AssertionNull ??= new StackFrame(true);
                 return ValidationError.NullParameter(
                     nameof(samlToken.Assertion),
-                    new StackFrame(true));
+                    StackFrames.AssertionNull);
             }
 
             if (samlToken.Assertion.Conditions is null)
             {
-                StackFrame stackFrame = StackFrames.AssertionConditionsNull ??= new StackFrame(true);
+                StackFrames.AssertionConditionsNull ??= new StackFrame(true);
                 return ValidationError.NullParameter(
                     nameof(samlToken.Assertion.Conditions),
-                    new StackFrame(true));
+                    StackFrames.AssertionConditionsNull);
             }
 
             var lifetimeValidationResult = validationParameters.LifetimeValidator(
@@ -80,8 +80,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             if (!lifetimeValidationResult.IsSuccess)
             {
-                StackFrame lifeTimeStackFrame = StackFrames.LifetimeValidationFailed ??= new StackFrame(true);
-                return lifetimeValidationResult.UnwrapError().AddStackFrame(lifeTimeStackFrame);
+                StackFrames.LifetimeValidationFailed ??= new StackFrame(true);
+                return lifetimeValidationResult.UnwrapError().AddStackFrame(StackFrames.LifetimeValidationFailed);
             }
 
             if (samlToken.Assertion.Conditions.OneTimeUse)
@@ -96,8 +96,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
                 if (!oneTimeUseValidationResult.IsSuccess)
                 {
-                    StackFrame tokenReplayStackFrame = StackFrames.OneTimeUseValidationFailed ??= new StackFrame(true);
-                    return oneTimeUseValidationResult.UnwrapError().AddStackFrame(tokenReplayStackFrame);
+                    StackFrames.OneTimeUseValidationFailed ??= new StackFrame(true);
+                    return oneTimeUseValidationResult.UnwrapError().AddStackFrame(StackFrames.OneTimeUseValidationFailed);
                 }
             }
 
