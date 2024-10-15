@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             if (theoryData.ValidationParameters is not null && theoryData.KeyToAddToValidationParameters is not null)
                 theoryData.ValidationParameters.IssuerSigningKeys.Add(theoryData.KeyToAddToValidationParameters);
 
-            ValidationResult<SecurityKey> result = JsonWebTokenHandler.ValidateSignature(
+            ValidationResult<TokenValidationUnit> result = JsonWebTokenHandler.ValidateSignature(
                 jsonWebToken,
                 theoryData.ValidationParameters,
                 theoryData.Configuration,
@@ -49,11 +49,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             if (result.IsSuccess)
             {
-                IdentityComparer.AreSecurityKeysEqual(
-                    result.UnwrapResult(),
-                    theoryData.Result.UnwrapResult(),
-                    context);
-
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             else
@@ -139,7 +134,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         JWT = new JsonWebToken(EncodedJwts.LiveJwt),
                         ValidationParameters = new ValidationParameters
                         {
-                            SignatureValidator = (token, parameters, configuration, callContext) => KeyingMaterial.JsonWebKeyRsa256PublicSigningCredentials.Key
+                            SignatureValidator = (token, parameters, configuration, callContext) => TokenValidationUnit.Default
                         },
                         Result = KeyingMaterial.JsonWebKeyRsa256PublicSigningCredentials.Key
                     },

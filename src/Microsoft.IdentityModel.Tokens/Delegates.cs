@@ -204,6 +204,6 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="callContext">The <see cref="CallContext"/> to be used for logging.</param>
     /// <remarks>This method is not expected to throw.</remarks>
     /// <returns>The validated <see cref="SecurityToken"/>.</returns>
-    internal delegate ValidationResult<SecurityKey> SignatureValidationDelegate(SecurityToken token, ValidationParameters validationParameters, BaseConfiguration? configuration, CallContext? callContext);
+    internal delegate ValidationResult<TokenValidationUnit> SignatureValidationDelegate(SecurityToken token, ValidationParameters validationParameters, BaseConfiguration? configuration, CallContext? callContext);
 #nullable restore
 }
