@@ -579,6 +579,7 @@ Microsoft.IdentityModel.Tokens.TokenValidationResult.HasValidOrExceptionWasRead.
 Microsoft.IdentityModel.Tokens.TokenValidationResult.HasValidOrExceptionWasRead.set -> void
 Microsoft.IdentityModel.Tokens.TokenValidationResult.TokenOnFailedValidation.set -> void
 Microsoft.IdentityModel.Tokens.TokenValidationUnit
+Microsoft.IdentityModel.Tokens.TokenValidationUnit.TokenValidationUnit() -> void
 Microsoft.IdentityModel.Tokens.ValidationFailureType
 Microsoft.IdentityModel.Tokens.ValidationFailureType.Name.get -> string
 Microsoft.IdentityModel.Tokens.ValidationFailureType.ValidationFailureType(string name) -> void
@@ -787,7 +788,7 @@ static Microsoft.IdentityModel.Tokens.TokenUtilities.GetAllSigningKeys(Microsoft
 static Microsoft.IdentityModel.Tokens.TokenUtilities.GetClaimValueUsingValueType(System.Security.Claims.Claim claim) -> object
 static Microsoft.IdentityModel.Tokens.TokenUtilities.IsRecoverableException(System.Exception exception) -> bool
 static Microsoft.IdentityModel.Tokens.TokenUtilities.MergeClaims(System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> claims, System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> subjectClaims) -> System.Collections.Generic.IEnumerable<System.Security.Claims.Claim>
-static Microsoft.IdentityModel.Tokens.TokenValidationUnit.Default -> Microsoft.IdentityModel.Tokens.TokenValidationUnit
+static Microsoft.IdentityModel.Tokens.TokenValidationUnit.Default.get -> Microsoft.IdentityModel.Tokens.TokenValidationUnit
 static Microsoft.IdentityModel.Tokens.Utility.AreEqual(System.ReadOnlySpan<byte> a, System.ReadOnlySpan<byte> b, int length) -> bool
 static Microsoft.IdentityModel.Tokens.Utility.ConvertToBigEndian(long i) -> byte[]
 static Microsoft.IdentityModel.Tokens.Utility.GenerateSha256Hash(string input) -> byte[]
