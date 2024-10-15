@@ -71,7 +71,9 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (innerException == null && InnerValidationError == null)
             {
-                if (exceptionType == typeof(SecurityTokenInvalidAudienceException))
+                if (exceptionType == typeof(SecurityTokenArgumentNullException))
+                    return new SecurityTokenArgumentNullException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenInvalidAudienceException))
                     exception = new SecurityTokenInvalidAudienceException(MessageDetail.Message);
                 else if (exceptionType == typeof(SecurityTokenInvalidIssuerException))
                     exception = new SecurityTokenInvalidIssuerException(MessageDetail.Message);
@@ -120,7 +122,9 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 Exception actualException = innerException ?? InnerValidationError.GetException();
 
-                if (exceptionType == typeof(SecurityTokenInvalidAudienceException))
+                if (exceptionType == typeof(SecurityTokenArgumentNullException))
+                    return new SecurityTokenArgumentNullException(MessageDetail.Message, innerException);
+                else if (exceptionType == typeof(SecurityTokenInvalidAudienceException))
                     exception = new SecurityTokenInvalidAudienceException(MessageDetail.Message, actualException);
                 else if (exceptionType == typeof(SecurityTokenInvalidIssuerException))
                     exception = new SecurityTokenInvalidIssuerException(MessageDetail.Message, actualException);

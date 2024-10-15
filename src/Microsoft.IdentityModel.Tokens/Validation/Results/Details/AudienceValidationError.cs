@@ -39,11 +39,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>An instance of an Exception.</returns>
         internal override Exception GetException()
         {
-            if (ExceptionType == typeof(SecurityTokenArgumentNullException))
-            {
-                return new SecurityTokenArgumentNullException(MessageDetail.Message);
-            }
-            else if (ExceptionType == typeof(SecurityTokenInvalidAudienceException))
+            if (ExceptionType == typeof(SecurityTokenInvalidAudienceException))
                 return new SecurityTokenInvalidAudienceException(MessageDetail.Message) { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(_tokenAudiences) };
 
             return base.GetException(ExceptionType, null);
