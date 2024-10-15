@@ -61,11 +61,11 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (string.IsNullOrWhiteSpace(issuer))
             {
-                return new ValidationError(
+                return new IssuerValidationError(
                     new MessageDetail(LogMessages.IDX10211),
-                    ValidationFailureType.IssuerValidationFailed,
                     typeof(SecurityTokenInvalidIssuerException),
-                    new StackFrame(true));
+                    new StackFrame(true),
+                    issuer);
             }
 
             if (validationParameters == null)
@@ -84,11 +84,11 @@ namespace Microsoft.IdentityModel.Tokens
 
             // Return failed IssuerValidationResult if all possible places to validate against are null or empty.
             if (validationParameters.ValidIssuers.Count == 0 && string.IsNullOrWhiteSpace(configuration?.Issuer))
-                return new ValidationError(
+                return new IssuerValidationError(
                     new MessageDetail(LogMessages.IDX10211),
-                    ValidationFailureType.IssuerValidationFailed,
                     typeof(SecurityTokenInvalidIssuerException),
-                    new StackFrame(true));
+                    new StackFrame(true),
+                    issuer);
 
             if (configuration != null)
             {
@@ -130,15 +130,15 @@ namespace Microsoft.IdentityModel.Tokens
                 }
             }
 
-            return new ValidationError(
+            return new IssuerValidationError(
                 new MessageDetail(
                     LogMessages.IDX10212,
                     LogHelper.MarkAsNonPII(issuer),
                     LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers)),
                     LogHelper.MarkAsNonPII(configuration?.Issuer)),
-                ValidationFailureType.IssuerValidationFailed,
                 typeof(SecurityTokenInvalidIssuerException),
-                new StackFrame(true));
+                new StackFrame(true),
+                issuer);
         }
     }
 }

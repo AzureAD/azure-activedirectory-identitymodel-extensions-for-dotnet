@@ -1,0 +1,7 @@
+Microsoft.IdentityModel.Tokens.IssuerValidationError.IssuerValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, string invalidIssuer) -> void
+override Microsoft.IdentityModel.Tokens.IssuerValidationError.GetException() -> System.Exception
+Microsoft.IdentityModel.Tokens.AsymmetricAdapter.DecryptWithRsaCryptoServiceProviderProxy(byte[] bytes) -> byte[]
+Microsoft.IdentityModel.Tokens.AsymmetricAdapter.EncryptWithRsaCryptoServiceProviderProxy(byte[] bytes) -> byte[]
+Microsoft.IdentityModel.Tokens.AsymmetricAdapter.SignWithRsaCryptoServiceProviderProxy(byte[] bytes) -> byte[]
+Microsoft.IdentityModel.Tokens.AsymmetricAdapter.SignWithRsaCryptoServiceProviderProxyUsingOffset(byte[] bytes, int offset, int length) -> byte[]
+static readonly Microsoft.IdentityModel.Tokens.Json.JsonWebKeySerializer.JsonWebKeyParameterNamesUpperCase -> System.Collections.Generic.HashSet<string>
