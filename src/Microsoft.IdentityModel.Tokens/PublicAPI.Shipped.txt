@@ -129,8 +129,8 @@ Microsoft.IdentityModel.Tokens.AppCompatSwitches
 Microsoft.IdentityModel.Tokens.AsymmetricSecurityKey
 Microsoft.IdentityModel.Tokens.AsymmetricSecurityKey.AsymmetricSecurityKey() -> void
 Microsoft.IdentityModel.Tokens.AsymmetricSignatureProvider
-Microsoft.IdentityModel.Tokens.AsymmetricSignatureProvider.AsymmetricSignatureProvider(Microsoft.IdentityModel.Tokens.SecurityKey key, string algorithm) -> void
 Microsoft.IdentityModel.Tokens.AsymmetricSignatureProvider.AsymmetricSignatureProvider(Microsoft.IdentityModel.Tokens.SecurityKey key, string algorithm, bool willCreateSignatures) -> void
+Microsoft.IdentityModel.Tokens.AsymmetricSignatureProvider.AsymmetricSignatureProvider(Microsoft.IdentityModel.Tokens.SecurityKey key, string algorithm) -> void
 Microsoft.IdentityModel.Tokens.AsymmetricSignatureProvider.MinimumAsymmetricKeySizeInBitsForSigningMap.get -> System.Collections.Generic.IReadOnlyDictionary<string, int>
 Microsoft.IdentityModel.Tokens.AsymmetricSignatureProvider.MinimumAsymmetricKeySizeInBitsForVerifyingMap.get -> System.Collections.Generic.IReadOnlyDictionary<string, int>
 Microsoft.IdentityModel.Tokens.AudienceValidator
@@ -171,11 +171,11 @@ Microsoft.IdentityModel.Tokens.CallContext.CallContext() -> void
 Microsoft.IdentityModel.Tokens.CallContext.CallContext(System.Guid activityId) -> void
 Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity
 Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.CaseSensitiveClaimsIdentity() -> void
-Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.CaseSensitiveClaimsIdentity(string authenticationType) -> void
 Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.CaseSensitiveClaimsIdentity(string authenticationType, string nameType, string roleType) -> void
-Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.CaseSensitiveClaimsIdentity(System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> claims) -> void
-Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.CaseSensitiveClaimsIdentity(System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> claims, string authenticationType) -> void
+Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.CaseSensitiveClaimsIdentity(string authenticationType) -> void
 Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.CaseSensitiveClaimsIdentity(System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> claims, string authenticationType, string nameType, string roleType) -> void
+Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.CaseSensitiveClaimsIdentity(System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> claims, string authenticationType) -> void
+Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.CaseSensitiveClaimsIdentity(System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> claims) -> void
 Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.CaseSensitiveClaimsIdentity(System.Security.Claims.ClaimsIdentity claimsIdentity) -> void
 Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.SecurityToken.get -> Microsoft.IdentityModel.Tokens.SecurityToken
 Microsoft.IdentityModel.Tokens.CompressionAlgorithms
@@ -183,8 +183,8 @@ Microsoft.IdentityModel.Tokens.CompressionAlgorithms.CompressionAlgorithms() -> 
 Microsoft.IdentityModel.Tokens.CompressionProviderFactory
 Microsoft.IdentityModel.Tokens.CompressionProviderFactory.CompressionProviderFactory() -> void
 Microsoft.IdentityModel.Tokens.CompressionProviderFactory.CompressionProviderFactory(Microsoft.IdentityModel.Tokens.CompressionProviderFactory other) -> void
-Microsoft.IdentityModel.Tokens.CompressionProviderFactory.CreateCompressionProvider(string algorithm) -> Microsoft.IdentityModel.Tokens.ICompressionProvider
 Microsoft.IdentityModel.Tokens.CompressionProviderFactory.CreateCompressionProvider(string algorithm, int maximumDeflateSize) -> Microsoft.IdentityModel.Tokens.ICompressionProvider
+Microsoft.IdentityModel.Tokens.CompressionProviderFactory.CreateCompressionProvider(string algorithm) -> Microsoft.IdentityModel.Tokens.ICompressionProvider
 Microsoft.IdentityModel.Tokens.CompressionProviderFactory.CustomCompressionProvider.get -> Microsoft.IdentityModel.Tokens.ICompressionProvider
 Microsoft.IdentityModel.Tokens.CompressionProviderFactory.CustomCompressionProvider.set -> void
 Microsoft.IdentityModel.Tokens.Configuration.LKGConfigurationCacheOptions
@@ -357,23 +357,23 @@ Microsoft.IdentityModel.Tokens.SecurityToken
 Microsoft.IdentityModel.Tokens.SecurityToken.SecurityToken() -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenArgumentException
 Microsoft.IdentityModel.Tokens.SecurityTokenArgumentException.SecurityTokenArgumentException() -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenArgumentException.SecurityTokenArgumentException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenArgumentException.SecurityTokenArgumentException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenArgumentException.SecurityTokenArgumentException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenArgumentException.SecurityTokenArgumentException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenCompressionFailedException
 Microsoft.IdentityModel.Tokens.SecurityTokenCompressionFailedException.SecurityTokenCompressionFailedException() -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenCompressionFailedException.SecurityTokenCompressionFailedException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenCompressionFailedException.SecurityTokenCompressionFailedException(string message, System.Exception inner) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenCompressionFailedException.SecurityTokenCompressionFailedException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenCompressionFailedException.SecurityTokenCompressionFailedException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenDecompressionFailedException
 Microsoft.IdentityModel.Tokens.SecurityTokenDecompressionFailedException.SecurityTokenDecompressionFailedException() -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenDecompressionFailedException.SecurityTokenDecompressionFailedException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenDecompressionFailedException.SecurityTokenDecompressionFailedException(string message, System.Exception inner) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenDecompressionFailedException.SecurityTokenDecompressionFailedException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenDecompressionFailedException.SecurityTokenDecompressionFailedException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenDecryptionFailedException
 Microsoft.IdentityModel.Tokens.SecurityTokenDecryptionFailedException.SecurityTokenDecryptionFailedException() -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenDecryptionFailedException.SecurityTokenDecryptionFailedException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenDecryptionFailedException.SecurityTokenDecryptionFailedException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenDecryptionFailedException.SecurityTokenDecryptionFailedException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenDecryptionFailedException.SecurityTokenDecryptionFailedException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor
 Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.AdditionalHeaderClaims.get -> System.Collections.Generic.IDictionary<string, object>
@@ -406,25 +406,25 @@ Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.TokenType.get -> string
 Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.TokenType.set -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenEncryptionFailedException
 Microsoft.IdentityModel.Tokens.SecurityTokenEncryptionFailedException.SecurityTokenEncryptionFailedException() -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenEncryptionFailedException.SecurityTokenEncryptionFailedException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenEncryptionFailedException.SecurityTokenEncryptionFailedException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenEncryptionFailedException.SecurityTokenEncryptionFailedException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenEncryptionFailedException.SecurityTokenEncryptionFailedException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenEncryptionKeyNotFoundException
 Microsoft.IdentityModel.Tokens.SecurityTokenEncryptionKeyNotFoundException.SecurityTokenEncryptionKeyNotFoundException() -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenEncryptionKeyNotFoundException.SecurityTokenEncryptionKeyNotFoundException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenEncryptionKeyNotFoundException.SecurityTokenEncryptionKeyNotFoundException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenEncryptionKeyNotFoundException.SecurityTokenEncryptionKeyNotFoundException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenEncryptionKeyNotFoundException.SecurityTokenEncryptionKeyNotFoundException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenException
 Microsoft.IdentityModel.Tokens.SecurityTokenException.SecurityTokenException() -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenException.SecurityTokenException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenException.SecurityTokenException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenException.SecurityTokenException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenException.SecurityTokenException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException
 Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException.Expires.get -> System.DateTime
 Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException.Expires.set -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException.SecurityTokenExpiredException() -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException.SecurityTokenExpiredException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException.SecurityTokenExpiredException(string message, System.Exception inner) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException.SecurityTokenExpiredException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException.SecurityTokenExpiredException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenHandler
 Microsoft.IdentityModel.Tokens.SecurityTokenHandler.SecurityTokenHandler() -> void
@@ -432,22 +432,22 @@ Microsoft.IdentityModel.Tokens.SecurityTokenInvalidAlgorithmException
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidAlgorithmException.InvalidAlgorithm.get -> string
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidAlgorithmException.InvalidAlgorithm.set -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidAlgorithmException.SecurityTokenInvalidAlgorithmException() -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenInvalidAlgorithmException.SecurityTokenInvalidAlgorithmException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidAlgorithmException.SecurityTokenInvalidAlgorithmException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidAlgorithmException.SecurityTokenInvalidAlgorithmException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidAlgorithmException.SecurityTokenInvalidAlgorithmException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidAudienceException
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidAudienceException.InvalidAudience.get -> string
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidAudienceException.InvalidAudience.set -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidAudienceException.SecurityTokenInvalidAudienceException() -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenInvalidAudienceException.SecurityTokenInvalidAudienceException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidAudienceException.SecurityTokenInvalidAudienceException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidAudienceException.SecurityTokenInvalidAudienceException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidAudienceException.SecurityTokenInvalidAudienceException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.ConfigurationCloudInstanceName.get -> string
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.ConfigurationCloudInstanceName.set -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.SecurityTokenInvalidCloudInstanceException() -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.SecurityTokenInvalidCloudInstanceException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.SecurityTokenInvalidCloudInstanceException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.SecurityTokenInvalidCloudInstanceException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.SecurityTokenInvalidCloudInstanceException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.SigningKeyCloudInstanceName.get -> string
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidCloudInstanceException.SigningKeyCloudInstanceName.set -> void
@@ -455,8 +455,8 @@ Microsoft.IdentityModel.Tokens.SecurityTokenInvalidIssuerException
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidIssuerException.InvalidIssuer.get -> string
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidIssuerException.InvalidIssuer.set -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidIssuerException.SecurityTokenInvalidIssuerException() -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenInvalidIssuerException.SecurityTokenInvalidIssuerException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidIssuerException.SecurityTokenInvalidIssuerException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidIssuerException.SecurityTokenInvalidIssuerException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidIssuerException.SecurityTokenInvalidIssuerException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidLifetimeException
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidLifetimeException.Expires.get -> System.DateTime?
@@ -464,18 +464,18 @@ Microsoft.IdentityModel.Tokens.SecurityTokenInvalidLifetimeException.Expires.set
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidLifetimeException.NotBefore.get -> System.DateTime?
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidLifetimeException.NotBefore.set -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidLifetimeException.SecurityTokenInvalidLifetimeException() -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenInvalidLifetimeException.SecurityTokenInvalidLifetimeException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidLifetimeException.SecurityTokenInvalidLifetimeException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidLifetimeException.SecurityTokenInvalidLifetimeException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidLifetimeException.SecurityTokenInvalidLifetimeException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidSignatureException
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidSignatureException.SecurityTokenInvalidSignatureException() -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenInvalidSignatureException.SecurityTokenInvalidSignatureException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidSignatureException.SecurityTokenInvalidSignatureException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidSignatureException.SecurityTokenInvalidSignatureException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidSignatureException.SecurityTokenInvalidSignatureException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidSigningKeyException
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidSigningKeyException.SecurityTokenInvalidSigningKeyException() -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenInvalidSigningKeyException.SecurityTokenInvalidSigningKeyException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidSigningKeyException.SecurityTokenInvalidSigningKeyException(string message, System.Exception inner) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidSigningKeyException.SecurityTokenInvalidSigningKeyException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidSigningKeyException.SecurityTokenInvalidSigningKeyException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidSigningKeyException.SigningKey.get -> Microsoft.IdentityModel.Tokens.SecurityKey
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidSigningKeyException.SigningKey.set -> void
@@ -483,58 +483,58 @@ Microsoft.IdentityModel.Tokens.SecurityTokenInvalidTypeException
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidTypeException.InvalidType.get -> string
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidTypeException.InvalidType.set -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidTypeException.SecurityTokenInvalidTypeException() -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenInvalidTypeException.SecurityTokenInvalidTypeException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidTypeException.SecurityTokenInvalidTypeException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenInvalidTypeException.SecurityTokenInvalidTypeException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenInvalidTypeException.SecurityTokenInvalidTypeException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenKeyWrapException
 Microsoft.IdentityModel.Tokens.SecurityTokenKeyWrapException.SecurityTokenKeyWrapException() -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenKeyWrapException.SecurityTokenKeyWrapException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenKeyWrapException.SecurityTokenKeyWrapException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenKeyWrapException.SecurityTokenKeyWrapException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenKeyWrapException.SecurityTokenKeyWrapException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenMalformedException
 Microsoft.IdentityModel.Tokens.SecurityTokenMalformedException.SecurityTokenMalformedException() -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenMalformedException.SecurityTokenMalformedException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenMalformedException.SecurityTokenMalformedException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenMalformedException.SecurityTokenMalformedException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenMalformedException.SecurityTokenMalformedException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenNoExpirationException
 Microsoft.IdentityModel.Tokens.SecurityTokenNoExpirationException.SecurityTokenNoExpirationException() -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenNoExpirationException.SecurityTokenNoExpirationException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenNoExpirationException.SecurityTokenNoExpirationException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenNoExpirationException.SecurityTokenNoExpirationException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenNoExpirationException.SecurityTokenNoExpirationException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenNotYetValidException
 Microsoft.IdentityModel.Tokens.SecurityTokenNotYetValidException.NotBefore.get -> System.DateTime
 Microsoft.IdentityModel.Tokens.SecurityTokenNotYetValidException.NotBefore.set -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenNotYetValidException.SecurityTokenNotYetValidException() -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenNotYetValidException.SecurityTokenNotYetValidException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenNotYetValidException.SecurityTokenNotYetValidException(string message, System.Exception inner) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenNotYetValidException.SecurityTokenNotYetValidException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenNotYetValidException.SecurityTokenNotYetValidException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenReplayAddFailedException
 Microsoft.IdentityModel.Tokens.SecurityTokenReplayAddFailedException.SecurityTokenReplayAddFailedException() -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenReplayAddFailedException.SecurityTokenReplayAddFailedException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenReplayAddFailedException.SecurityTokenReplayAddFailedException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenReplayAddFailedException.SecurityTokenReplayAddFailedException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenReplayAddFailedException.SecurityTokenReplayAddFailedException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenReplayDetectedException
 Microsoft.IdentityModel.Tokens.SecurityTokenReplayDetectedException.SecurityTokenReplayDetectedException() -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenReplayDetectedException.SecurityTokenReplayDetectedException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenReplayDetectedException.SecurityTokenReplayDetectedException(string message, System.Exception inner) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenReplayDetectedException.SecurityTokenReplayDetectedException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenReplayDetectedException.SecurityTokenReplayDetectedException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenSignatureKeyNotFoundException
 Microsoft.IdentityModel.Tokens.SecurityTokenSignatureKeyNotFoundException.SecurityTokenSignatureKeyNotFoundException() -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenSignatureKeyNotFoundException.SecurityTokenSignatureKeyNotFoundException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenSignatureKeyNotFoundException.SecurityTokenSignatureKeyNotFoundException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenSignatureKeyNotFoundException.SecurityTokenSignatureKeyNotFoundException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenSignatureKeyNotFoundException.SecurityTokenSignatureKeyNotFoundException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenUnableToValidateException
 Microsoft.IdentityModel.Tokens.SecurityTokenUnableToValidateException.SecurityTokenUnableToValidateException() -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenUnableToValidateException.SecurityTokenUnableToValidateException(Microsoft.IdentityModel.Tokens.ValidationFailure validationFailure, string message) -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenUnableToValidateException.SecurityTokenUnableToValidateException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenUnableToValidateException.SecurityTokenUnableToValidateException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenUnableToValidateException.SecurityTokenUnableToValidateException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenUnableToValidateException.SecurityTokenUnableToValidateException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenUnableToValidateException.ValidationFailure.get -> Microsoft.IdentityModel.Tokens.ValidationFailure
 Microsoft.IdentityModel.Tokens.SecurityTokenUnableToValidateException.ValidationFailure.set -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenValidationException
 Microsoft.IdentityModel.Tokens.SecurityTokenValidationException.SecurityTokenValidationException() -> void
-Microsoft.IdentityModel.Tokens.SecurityTokenValidationException.SecurityTokenValidationException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenValidationException.SecurityTokenValidationException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.SecurityTokenValidationException.SecurityTokenValidationException(string message) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenValidationException.SecurityTokenValidationException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.SignatureProvider
 Microsoft.IdentityModel.Tokens.SignatureProvider.Algorithm.get -> string
@@ -556,10 +556,10 @@ Microsoft.IdentityModel.Tokens.SigningCredentials.CryptoProviderFactory.set -> v
 Microsoft.IdentityModel.Tokens.SigningCredentials.Digest.get -> string
 Microsoft.IdentityModel.Tokens.SigningCredentials.Key.get -> Microsoft.IdentityModel.Tokens.SecurityKey
 Microsoft.IdentityModel.Tokens.SigningCredentials.Kid.get -> string
-Microsoft.IdentityModel.Tokens.SigningCredentials.SigningCredentials(Microsoft.IdentityModel.Tokens.SecurityKey key, string algorithm) -> void
 Microsoft.IdentityModel.Tokens.SigningCredentials.SigningCredentials(Microsoft.IdentityModel.Tokens.SecurityKey key, string algorithm, string digest) -> void
-Microsoft.IdentityModel.Tokens.SigningCredentials.SigningCredentials(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) -> void
+Microsoft.IdentityModel.Tokens.SigningCredentials.SigningCredentials(Microsoft.IdentityModel.Tokens.SecurityKey key, string algorithm) -> void
 Microsoft.IdentityModel.Tokens.SigningCredentials.SigningCredentials(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate, string algorithm) -> void
+Microsoft.IdentityModel.Tokens.SigningCredentials.SigningCredentials(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) -> void
 Microsoft.IdentityModel.Tokens.SymmetricKeyWrapProvider
 Microsoft.IdentityModel.Tokens.SymmetricKeyWrapProvider.SymmetricKeyWrapProvider(Microsoft.IdentityModel.Tokens.SecurityKey key, string algorithm) -> void
 Microsoft.IdentityModel.Tokens.SymmetricSecurityKey
@@ -567,8 +567,8 @@ Microsoft.IdentityModel.Tokens.SymmetricSecurityKey.SymmetricSecurityKey(byte[] 
 Microsoft.IdentityModel.Tokens.SymmetricSignatureProvider
 Microsoft.IdentityModel.Tokens.SymmetricSignatureProvider.MinimumSymmetricKeySizeInBits.get -> int
 Microsoft.IdentityModel.Tokens.SymmetricSignatureProvider.MinimumSymmetricKeySizeInBits.set -> void
-Microsoft.IdentityModel.Tokens.SymmetricSignatureProvider.SymmetricSignatureProvider(Microsoft.IdentityModel.Tokens.SecurityKey key, string algorithm) -> void
 Microsoft.IdentityModel.Tokens.SymmetricSignatureProvider.SymmetricSignatureProvider(Microsoft.IdentityModel.Tokens.SecurityKey key, string algorithm, bool willCreateSignatures) -> void
+Microsoft.IdentityModel.Tokens.SymmetricSignatureProvider.SymmetricSignatureProvider(Microsoft.IdentityModel.Tokens.SecurityKey key, string algorithm) -> void
 Microsoft.IdentityModel.Tokens.SymmetricSignatureProvider.Verify(byte[] input, byte[] signature, int length) -> bool
 Microsoft.IdentityModel.Tokens.TokenContext
 Microsoft.IdentityModel.Tokens.TokenContext.TokenContext() -> void
@@ -730,22 +730,22 @@ Microsoft.IdentityModel.Tokens.ValidationFailure.None = 0 -> Microsoft.IdentityM
 Microsoft.IdentityModel.Tokens.Validators
 Microsoft.IdentityModel.Tokens.X509EncryptingCredentials
 Microsoft.IdentityModel.Tokens.X509EncryptingCredentials.Certificate.get -> System.Security.Cryptography.X509Certificates.X509Certificate2
-Microsoft.IdentityModel.Tokens.X509EncryptingCredentials.X509EncryptingCredentials(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) -> void
 Microsoft.IdentityModel.Tokens.X509EncryptingCredentials.X509EncryptingCredentials(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate, string keyWrapAlgorithm, string dataEncryptionAlgorithm) -> void
+Microsoft.IdentityModel.Tokens.X509EncryptingCredentials.X509EncryptingCredentials(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) -> void
 Microsoft.IdentityModel.Tokens.X509SecurityKey
 Microsoft.IdentityModel.Tokens.X509SecurityKey.Certificate.get -> System.Security.Cryptography.X509Certificates.X509Certificate2
 Microsoft.IdentityModel.Tokens.X509SecurityKey.PrivateKey.get -> System.Security.Cryptography.AsymmetricAlgorithm
 Microsoft.IdentityModel.Tokens.X509SecurityKey.PublicKey.get -> System.Security.Cryptography.AsymmetricAlgorithm
-Microsoft.IdentityModel.Tokens.X509SecurityKey.X509SecurityKey(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) -> void
 Microsoft.IdentityModel.Tokens.X509SecurityKey.X509SecurityKey(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate, string keyId) -> void
+Microsoft.IdentityModel.Tokens.X509SecurityKey.X509SecurityKey(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) -> void
 Microsoft.IdentityModel.Tokens.X509SecurityKey.X5t.get -> string
 Microsoft.IdentityModel.Tokens.X509SigningCredentials
 Microsoft.IdentityModel.Tokens.X509SigningCredentials.Certificate.get -> System.Security.Cryptography.X509Certificates.X509Certificate2
-Microsoft.IdentityModel.Tokens.X509SigningCredentials.X509SigningCredentials(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) -> void
 Microsoft.IdentityModel.Tokens.X509SigningCredentials.X509SigningCredentials(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate, string algorithm) -> void
+Microsoft.IdentityModel.Tokens.X509SigningCredentials.X509SigningCredentials(System.Security.Cryptography.X509Certificates.X509Certificate2 certificate) -> void
 override Microsoft.IdentityModel.Tokens.AsymmetricSignatureProvider.Dispose(bool disposing) -> void
-override Microsoft.IdentityModel.Tokens.AsymmetricSignatureProvider.Sign(byte[] input) -> byte[]
 override Microsoft.IdentityModel.Tokens.AsymmetricSignatureProvider.Sign(byte[] input, int offset, int count) -> byte[]
+override Microsoft.IdentityModel.Tokens.AsymmetricSignatureProvider.Sign(byte[] input) -> byte[]
 override Microsoft.IdentityModel.Tokens.AsymmetricSignatureProvider.Verify(byte[] input, byte[] signature) -> bool
 override Microsoft.IdentityModel.Tokens.AsymmetricSignatureProvider.Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength) -> bool
 override Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.Clone() -> System.Security.Claims.ClaimsIdentity
@@ -804,8 +804,8 @@ override Microsoft.IdentityModel.Tokens.SymmetricSecurityKey.CanComputeJwkThumbp
 override Microsoft.IdentityModel.Tokens.SymmetricSecurityKey.ComputeJwkThumbprint() -> byte[]
 override Microsoft.IdentityModel.Tokens.SymmetricSecurityKey.KeySize.get -> int
 override Microsoft.IdentityModel.Tokens.SymmetricSignatureProvider.Dispose(bool disposing) -> void
-override Microsoft.IdentityModel.Tokens.SymmetricSignatureProvider.Sign(byte[] input) -> byte[]
 override Microsoft.IdentityModel.Tokens.SymmetricSignatureProvider.Sign(byte[] input, int offset, int count) -> byte[]
+override Microsoft.IdentityModel.Tokens.SymmetricSignatureProvider.Sign(byte[] input) -> byte[]
 override Microsoft.IdentityModel.Tokens.SymmetricSignatureProvider.Verify(byte[] input, byte[] signature) -> bool
 override Microsoft.IdentityModel.Tokens.SymmetricSignatureProvider.Verify(byte[] input, int inputOffset, int inputLength, byte[] signature, int signatureOffset, int signatureLength) -> bool
 override Microsoft.IdentityModel.Tokens.X509SecurityKey.CanComputeJwkThumbprint() -> bool
@@ -817,8 +817,8 @@ override Microsoft.IdentityModel.Tokens.X509SecurityKey.KeySize.get -> int
 override Microsoft.IdentityModel.Tokens.X509SecurityKey.PrivateKeyStatus.get -> Microsoft.IdentityModel.Tokens.PrivateKeyStatus
 static Microsoft.IdentityModel.Tokens.Base64UrlEncoder.Decode(string arg) -> string
 static Microsoft.IdentityModel.Tokens.Base64UrlEncoder.DecodeBytes(string str) -> byte[]
-static Microsoft.IdentityModel.Tokens.Base64UrlEncoder.Encode(byte[] inArray) -> string
 static Microsoft.IdentityModel.Tokens.Base64UrlEncoder.Encode(byte[] inArray, int offset, int length) -> string
+static Microsoft.IdentityModel.Tokens.Base64UrlEncoder.Encode(byte[] inArray) -> string
 static Microsoft.IdentityModel.Tokens.Base64UrlEncoder.Encode(string arg) -> string
 static Microsoft.IdentityModel.Tokens.Base64UrlEncoder.Encode(System.ReadOnlySpan<byte> inArray, System.Span<char> output) -> int
 static Microsoft.IdentityModel.Tokens.CompressionProviderFactory.Default.get -> Microsoft.IdentityModel.Tokens.CompressionProviderFactory
@@ -840,8 +840,8 @@ static Microsoft.IdentityModel.Tokens.JsonWebKey.Create(string json) -> Microsof
 static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.ConvertFromRSASecurityKey(Microsoft.IdentityModel.Tokens.RsaSecurityKey key) -> Microsoft.IdentityModel.Tokens.JsonWebKey
 static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.ConvertFromSecurityKey(Microsoft.IdentityModel.Tokens.SecurityKey key) -> Microsoft.IdentityModel.Tokens.JsonWebKey
 static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.ConvertFromSymmetricSecurityKey(Microsoft.IdentityModel.Tokens.SymmetricSecurityKey key) -> Microsoft.IdentityModel.Tokens.JsonWebKey
-static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.ConvertFromX509SecurityKey(Microsoft.IdentityModel.Tokens.X509SecurityKey key) -> Microsoft.IdentityModel.Tokens.JsonWebKey
 static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.ConvertFromX509SecurityKey(Microsoft.IdentityModel.Tokens.X509SecurityKey key, bool representAsRsaKey) -> Microsoft.IdentityModel.Tokens.JsonWebKey
+static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.ConvertFromX509SecurityKey(Microsoft.IdentityModel.Tokens.X509SecurityKey key) -> Microsoft.IdentityModel.Tokens.JsonWebKey
 static Microsoft.IdentityModel.Tokens.JsonWebKeySet.Create(string json) -> Microsoft.IdentityModel.Tokens.JsonWebKeySet
 static Microsoft.IdentityModel.Tokens.JsonWebKeySet.DefaultSkipUnresolvedJsonWebKeys -> bool
 static Microsoft.IdentityModel.Tokens.UniqueId.CreateRandomId() -> string
@@ -879,8 +879,8 @@ virtual Microsoft.IdentityModel.Tokens.AsymmetricSignatureProvider.GetHashAlgori
 virtual Microsoft.IdentityModel.Tokens.AsymmetricSignatureProvider.ValidateAsymmetricSecurityKeySize(Microsoft.IdentityModel.Tokens.SecurityKey key, string algorithm, bool willCreateSignatures) -> void
 virtual Microsoft.IdentityModel.Tokens.AuthenticatedEncryptionProvider.Decrypt(byte[] ciphertext, byte[] authenticatedData, byte[] iv, byte[] authenticationTag) -> byte[]
 virtual Microsoft.IdentityModel.Tokens.AuthenticatedEncryptionProvider.Dispose(bool disposing) -> void
-virtual Microsoft.IdentityModel.Tokens.AuthenticatedEncryptionProvider.Encrypt(byte[] plaintext, byte[] authenticatedData) -> Microsoft.IdentityModel.Tokens.AuthenticatedEncryptionResult
 virtual Microsoft.IdentityModel.Tokens.AuthenticatedEncryptionProvider.Encrypt(byte[] plaintext, byte[] authenticatedData, byte[] iv) -> Microsoft.IdentityModel.Tokens.AuthenticatedEncryptionResult
+virtual Microsoft.IdentityModel.Tokens.AuthenticatedEncryptionProvider.Encrypt(byte[] plaintext, byte[] authenticatedData) -> Microsoft.IdentityModel.Tokens.AuthenticatedEncryptionResult
 virtual Microsoft.IdentityModel.Tokens.AuthenticatedEncryptionProvider.GetKeyBytes(Microsoft.IdentityModel.Tokens.SecurityKey key) -> byte[]
 virtual Microsoft.IdentityModel.Tokens.AuthenticatedEncryptionProvider.IsSupportedAlgorithm(Microsoft.IdentityModel.Tokens.SecurityKey key, string algorithm) -> bool
 virtual Microsoft.IdentityModel.Tokens.AuthenticatedEncryptionProvider.ValidateKeySize(Microsoft.IdentityModel.Tokens.SecurityKey key, string algorithm) -> void
@@ -895,17 +895,17 @@ virtual Microsoft.IdentityModel.Tokens.BaseConfiguration.TokenEndpoint.set -> vo
 virtual Microsoft.IdentityModel.Tokens.BaseConfigurationManager.GetBaseConfigurationAsync(System.Threading.CancellationToken cancel) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.BaseConfiguration>
 virtual Microsoft.IdentityModel.Tokens.CompressionProviderFactory.IsSupportedAlgorithm(string algorithm) -> bool
 virtual Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CreateAuthenticatedEncryptionProvider(Microsoft.IdentityModel.Tokens.SecurityKey key, string algorithm) -> Microsoft.IdentityModel.Tokens.AuthenticatedEncryptionProvider
-virtual Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CreateForSigning(Microsoft.IdentityModel.Tokens.SecurityKey key, string algorithm) -> Microsoft.IdentityModel.Tokens.SignatureProvider
 virtual Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CreateForSigning(Microsoft.IdentityModel.Tokens.SecurityKey key, string algorithm, bool cacheProvider) -> Microsoft.IdentityModel.Tokens.SignatureProvider
-virtual Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CreateForVerifying(Microsoft.IdentityModel.Tokens.SecurityKey key, string algorithm) -> Microsoft.IdentityModel.Tokens.SignatureProvider
+virtual Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CreateForSigning(Microsoft.IdentityModel.Tokens.SecurityKey key, string algorithm) -> Microsoft.IdentityModel.Tokens.SignatureProvider
 virtual Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CreateForVerifying(Microsoft.IdentityModel.Tokens.SecurityKey key, string algorithm, bool cacheProvider) -> Microsoft.IdentityModel.Tokens.SignatureProvider
+virtual Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CreateForVerifying(Microsoft.IdentityModel.Tokens.SecurityKey key, string algorithm) -> Microsoft.IdentityModel.Tokens.SignatureProvider
 virtual Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CreateHashAlgorithm(string algorithm) -> System.Security.Cryptography.HashAlgorithm
 virtual Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CreateHashAlgorithm(System.Security.Cryptography.HashAlgorithmName algorithm) -> System.Security.Cryptography.HashAlgorithm
 virtual Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CreateKeyedHashAlgorithm(byte[] keyBytes, string algorithm) -> System.Security.Cryptography.KeyedHashAlgorithm
 virtual Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CreateKeyWrapProvider(Microsoft.IdentityModel.Tokens.SecurityKey key, string algorithm) -> Microsoft.IdentityModel.Tokens.KeyWrapProvider
 virtual Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(Microsoft.IdentityModel.Tokens.SecurityKey key, string algorithm) -> Microsoft.IdentityModel.Tokens.KeyWrapProvider
-virtual Microsoft.IdentityModel.Tokens.CryptoProviderFactory.IsSupportedAlgorithm(string algorithm) -> bool
 virtual Microsoft.IdentityModel.Tokens.CryptoProviderFactory.IsSupportedAlgorithm(string algorithm, Microsoft.IdentityModel.Tokens.SecurityKey key) -> bool
+virtual Microsoft.IdentityModel.Tokens.CryptoProviderFactory.IsSupportedAlgorithm(string algorithm) -> bool
 virtual Microsoft.IdentityModel.Tokens.CryptoProviderFactory.ReleaseHashAlgorithm(System.Security.Cryptography.HashAlgorithm hashAlgorithm) -> void
 virtual Microsoft.IdentityModel.Tokens.CryptoProviderFactory.ReleaseKeyWrapProvider(Microsoft.IdentityModel.Tokens.KeyWrapProvider provider) -> void
 virtual Microsoft.IdentityModel.Tokens.CryptoProviderFactory.ReleaseRsaKeyWrapProvider(Microsoft.IdentityModel.Tokens.RsaKeyWrapProvider provider) -> void

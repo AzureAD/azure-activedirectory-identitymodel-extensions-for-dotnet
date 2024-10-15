@@ -12,8 +12,8 @@ Microsoft.IdentityModel.Logging.NonPII.NonPII() -> void
 Microsoft.IdentityModel.Logging.NonPII.NonPII(object argument) -> void
 Microsoft.IdentityModel.Logging.SecurityArtifact
 Microsoft.IdentityModel.Logging.SecurityArtifact.SecurityArtifact() -> void
-Microsoft.IdentityModel.Logging.SecurityArtifact.SecurityArtifact(object argument, System.Func<object, string> toStringCallback) -> void
 Microsoft.IdentityModel.Logging.SecurityArtifact.SecurityArtifact(object argument, System.Func<object, string> toStringCallback, System.Func<object, string> toStringCallbackUnsafe) -> void
+Microsoft.IdentityModel.Logging.SecurityArtifact.SecurityArtifact(object argument, System.Func<object, string> toStringCallback) -> void
 Microsoft.IdentityModel.Logging.SecurityArtifact.UnsafeToString() -> string
 override Microsoft.IdentityModel.Logging.NonPII.ToString() -> string
 override Microsoft.IdentityModel.Logging.SecurityArtifact.ToString() -> string

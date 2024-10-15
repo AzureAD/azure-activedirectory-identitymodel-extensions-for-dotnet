@@ -16,18 +16,18 @@ Microsoft.IdentityModel.Protocols.AuthenticationProtocolMessage.ScriptDisabledTe
 Microsoft.IdentityModel.Protocols.AuthenticationProtocolMessage.SetParameter(string parameter, string value) -> void
 Microsoft.IdentityModel.Protocols.Configuration.InvalidConfigurationException
 Microsoft.IdentityModel.Protocols.Configuration.InvalidConfigurationException.InvalidConfigurationException() -> void
-Microsoft.IdentityModel.Protocols.Configuration.InvalidConfigurationException.InvalidConfigurationException(string message) -> void
 Microsoft.IdentityModel.Protocols.Configuration.InvalidConfigurationException.InvalidConfigurationException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Protocols.Configuration.InvalidConfigurationException.InvalidConfigurationException(string message) -> void
 Microsoft.IdentityModel.Protocols.Configuration.InvalidConfigurationException.InvalidConfigurationException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Protocols.Configuration.LastKnownGoodConfigurationCacheOptions
 Microsoft.IdentityModel.Protocols.Configuration.LastKnownGoodConfigurationCacheOptions.LastKnownGoodConfigurationCacheOptions() -> void
 Microsoft.IdentityModel.Protocols.ConfigurationManager<T>
-Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationManager(string metadataAddress, Microsoft.IdentityModel.Protocols.IConfigurationRetriever<T> configRetriever) -> void
-Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationManager(string metadataAddress, Microsoft.IdentityModel.Protocols.IConfigurationRetriever<T> configRetriever, Microsoft.IdentityModel.Protocols.IDocumentRetriever docRetriever) -> void
 Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationManager(string metadataAddress, Microsoft.IdentityModel.Protocols.IConfigurationRetriever<T> configRetriever, Microsoft.IdentityModel.Protocols.IDocumentRetriever docRetriever, Microsoft.IdentityModel.Protocols.Configuration.LastKnownGoodConfigurationCacheOptions lkgCacheOptions) -> void
-Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationManager(string metadataAddress, Microsoft.IdentityModel.Protocols.IConfigurationRetriever<T> configRetriever, Microsoft.IdentityModel.Protocols.IDocumentRetriever docRetriever, Microsoft.IdentityModel.Protocols.IConfigurationValidator<T> configValidator) -> void
 Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationManager(string metadataAddress, Microsoft.IdentityModel.Protocols.IConfigurationRetriever<T> configRetriever, Microsoft.IdentityModel.Protocols.IDocumentRetriever docRetriever, Microsoft.IdentityModel.Protocols.IConfigurationValidator<T> configValidator, Microsoft.IdentityModel.Protocols.Configuration.LastKnownGoodConfigurationCacheOptions lkgCacheOptions) -> void
+Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationManager(string metadataAddress, Microsoft.IdentityModel.Protocols.IConfigurationRetriever<T> configRetriever, Microsoft.IdentityModel.Protocols.IDocumentRetriever docRetriever, Microsoft.IdentityModel.Protocols.IConfigurationValidator<T> configValidator) -> void
+Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationManager(string metadataAddress, Microsoft.IdentityModel.Protocols.IConfigurationRetriever<T> configRetriever, Microsoft.IdentityModel.Protocols.IDocumentRetriever docRetriever) -> void
 Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationManager(string metadataAddress, Microsoft.IdentityModel.Protocols.IConfigurationRetriever<T> configRetriever, System.Net.Http.HttpClient httpClient) -> void
+Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ConfigurationManager(string metadataAddress, Microsoft.IdentityModel.Protocols.IConfigurationRetriever<T> configRetriever) -> void
 Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.GetConfigurationAsync() -> System.Threading.Tasks.Task<T>
 Microsoft.IdentityModel.Protocols.ConfigurationValidationResult
 Microsoft.IdentityModel.Protocols.ConfigurationValidationResult.ConfigurationValidationResult() -> void

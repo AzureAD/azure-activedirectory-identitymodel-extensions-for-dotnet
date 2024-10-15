@@ -77,8 +77,8 @@ Microsoft.IdentityModel.Xml.XmlTokenStreamWriter.Tokens.get -> System.Collection
 Microsoft.IdentityModel.Xml.XmlTokenStreamWriter.TokenStream.get -> Microsoft.IdentityModel.Xml.XmlTokenStream
 Microsoft.IdentityModel.Xml.XmlTokenStreamWriter.Value.get -> string
 Microsoft.IdentityModel.Xml.XmlTokenStreamWriter.WriteAndReplaceSignature(System.Xml.XmlWriter writer, Microsoft.IdentityModel.Xml.Signature signature, Microsoft.IdentityModel.Xml.DSigSerializer dSigSerializer) -> void
-Microsoft.IdentityModel.Xml.XmlTokenStreamWriter.WriteTo(System.Xml.XmlWriter writer) -> void
 Microsoft.IdentityModel.Xml.XmlTokenStreamWriter.WriteTo(System.Xml.XmlWriter writer, string excludedElement, string excludedNamespace) -> void
+Microsoft.IdentityModel.Xml.XmlTokenStreamWriter.WriteTo(System.Xml.XmlWriter writer) -> void
 Microsoft.IdentityModel.Xml.XmlTokenStreamWriter.XmlTokenStreamWriter(Microsoft.IdentityModel.Xml.XmlTokenStream tokenStream) -> void
 static Microsoft.IdentityModel.Xml.CanonicalizingTransfrom.GetString(Microsoft.IdentityModel.Xml.XmlTokenStream tokenStream, bool includeComments, string[] inclusiveNamespacesPrefixList) -> string
 static Microsoft.IdentityModel.Xml.XmlUtil.GenerateHexString(byte[] bytes) -> string

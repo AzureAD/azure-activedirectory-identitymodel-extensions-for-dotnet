@@ -4,7 +4,8 @@ param ()
 Set-StrictMode -version 2.0
 $ErrorActionPreference = "Stop"
 
-function MarkShipped([string]$dir, [string]$access) {
+function MarkShipped([Parameter(mandatory=$true)][string]$dir,
+                     [Parameter(mandatory=$true)][string]$access) {
     $shippedFileName = $access + "API.Shipped.txt"
     $shippedFilePath = Join-Path $dir $shippedFileName
     $shipped = @()

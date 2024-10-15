@@ -18,9 +18,9 @@ Microsoft.IdentityModel.Tokens.LifetimeValidationError.AdditionalInformation.Exp
 Microsoft.IdentityModel.Tokens.LifetimeValidationError.AdditionalInformation.ExpirationDate.set -> void
 Microsoft.IdentityModel.Tokens.LifetimeValidationError.AdditionalInformation.NotBeforeDate.get -> System.DateTime?
 Microsoft.IdentityModel.Tokens.LifetimeValidationError.AdditionalInformation.NotBeforeDate.set -> void
-Microsoft.IdentityModel.Tokens.LifetimeValidationError.LifetimeValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame) -> void
 Microsoft.IdentityModel.Tokens.LifetimeValidationError.LifetimeValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, Microsoft.IdentityModel.Tokens.LifetimeValidationError.AdditionalInformation? additionalInformation) -> void
 Microsoft.IdentityModel.Tokens.LifetimeValidationError.LifetimeValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, System.Exception innerException, Microsoft.IdentityModel.Tokens.LifetimeValidationError.AdditionalInformation? additionalInformation) -> void
+Microsoft.IdentityModel.Tokens.LifetimeValidationError.LifetimeValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame) -> void
 Microsoft.IdentityModel.Tokens.SecurityTokenException.ValidationError.get -> Microsoft.IdentityModel.Tokens.ValidationError
 Microsoft.IdentityModel.Tokens.SecurityTokenException.ValidationError.set -> void
 Microsoft.IdentityModel.Tokens.TokenValidationResult.TokenValidationResult(Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.TokenHandler tokenHandler, Microsoft.IdentityModel.Tokens.TokenValidationParameters tokenValidationParameters, string issuer, System.Collections.Generic.List<Microsoft.IdentityModel.Tokens.ValidatedToken> validationResults) -> void
@@ -92,9 +92,9 @@ Microsoft.IdentityModel.Tokens.ValidationError.InnerException.get -> System.Exce
 Microsoft.IdentityModel.Tokens.ValidationError.InnerValidationError.get -> Microsoft.IdentityModel.Tokens.ValidationError
 Microsoft.IdentityModel.Tokens.ValidationError.MessageDetail.get -> Microsoft.IdentityModel.Tokens.MessageDetail
 Microsoft.IdentityModel.Tokens.ValidationError.StackFrames.get -> System.Collections.Generic.IList<System.Diagnostics.StackFrame>
-Microsoft.IdentityModel.Tokens.ValidationError.ValidationError(Microsoft.IdentityModel.Tokens.MessageDetail MessageDetail, Microsoft.IdentityModel.Tokens.ValidationFailureType failureType, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame) -> void
 Microsoft.IdentityModel.Tokens.ValidationError.ValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, Microsoft.IdentityModel.Tokens.ValidationFailureType failureType, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, Microsoft.IdentityModel.Tokens.ValidationError innerValidationError) -> void
 Microsoft.IdentityModel.Tokens.ValidationError.ValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, Microsoft.IdentityModel.Tokens.ValidationFailureType failureType, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.ValidationError.ValidationError(Microsoft.IdentityModel.Tokens.MessageDetail MessageDetail, Microsoft.IdentityModel.Tokens.ValidationFailureType failureType, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame) -> void
 Microsoft.IdentityModel.Tokens.ValidationResult<TResult>
 Microsoft.IdentityModel.Tokens.ValidationResult<TResult>.Equals(Microsoft.IdentityModel.Tokens.ValidationResult<TResult> other) -> bool
 Microsoft.IdentityModel.Tokens.ValidationResult<TResult>.IsSuccess.get -> bool

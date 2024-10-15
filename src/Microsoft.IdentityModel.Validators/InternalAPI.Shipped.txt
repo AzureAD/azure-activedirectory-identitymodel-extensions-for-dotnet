@@ -32,8 +32,8 @@ Microsoft.IdentityModel.Validators.AadIssuerValidator.AadIssuerV1.get -> string
 Microsoft.IdentityModel.Validators.AadIssuerValidator.AadIssuerV1.set -> void
 Microsoft.IdentityModel.Validators.AadIssuerValidator.AadIssuerV2.get -> string
 Microsoft.IdentityModel.Validators.AadIssuerValidator.AadIssuerV2.set -> void
-Microsoft.IdentityModel.Validators.AadIssuerValidator.AadIssuerValidator(System.Net.Http.HttpClient httpClient, string aadAuthority) -> void
 Microsoft.IdentityModel.Validators.AadIssuerValidator.AadIssuerValidator(System.Net.Http.HttpClient httpClient, string aadAuthority, System.Func<string, Microsoft.IdentityModel.Tokens.BaseConfigurationManager> configurationManagerProvider) -> void
+Microsoft.IdentityModel.Validators.AadIssuerValidator.AadIssuerValidator(System.Net.Http.HttpClient httpClient, string aadAuthority) -> void
 Microsoft.IdentityModel.Validators.AadIssuerValidator.ConfigurationManagerV1.get -> Microsoft.IdentityModel.Tokens.BaseConfigurationManager
 Microsoft.IdentityModel.Validators.AadIssuerValidator.ConfigurationManagerV1.set -> void
 Microsoft.IdentityModel.Validators.AadIssuerValidator.ConfigurationManagerV11.get -> Microsoft.IdentityModel.Tokens.BaseConfigurationManager

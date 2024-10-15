@@ -183,8 +183,8 @@ Microsoft.IdentityModel.Tokens.Saml.ClaimProperties
 Microsoft.IdentityModel.Tokens.Saml.SamlAction
 Microsoft.IdentityModel.Tokens.Saml.SamlAction.Namespace.get -> System.Uri
 Microsoft.IdentityModel.Tokens.Saml.SamlAction.Namespace.set -> void
-Microsoft.IdentityModel.Tokens.Saml.SamlAction.SamlAction(string value) -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlAction.SamlAction(string value, System.Uri namespace) -> void
+Microsoft.IdentityModel.Tokens.Saml.SamlAction.SamlAction(string value) -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlAction.Value.get -> string
 Microsoft.IdentityModel.Tokens.Saml.SamlAction.Value.set -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlAdvice
@@ -192,8 +192,8 @@ Microsoft.IdentityModel.Tokens.Saml.SamlAdvice.AssertionIdReferences.get -> Syst
 Microsoft.IdentityModel.Tokens.Saml.SamlAdvice.Assertions.get -> System.Collections.Generic.ICollection<Microsoft.IdentityModel.Tokens.Saml.SamlAssertion>
 Microsoft.IdentityModel.Tokens.Saml.SamlAdvice.SamlAdvice() -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlAdvice.SamlAdvice(System.Collections.Generic.IEnumerable<Microsoft.IdentityModel.Tokens.Saml.SamlAssertion> assertions) -> void
-Microsoft.IdentityModel.Tokens.Saml.SamlAdvice.SamlAdvice(System.Collections.Generic.IEnumerable<string> references) -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlAdvice.SamlAdvice(System.Collections.Generic.IEnumerable<string> references, System.Collections.Generic.IEnumerable<Microsoft.IdentityModel.Tokens.Saml.SamlAssertion> assertions) -> void
+Microsoft.IdentityModel.Tokens.Saml.SamlAdvice.SamlAdvice(System.Collections.Generic.IEnumerable<string> references) -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlAssertion
 Microsoft.IdentityModel.Tokens.Saml.SamlAssertion.Advice.get -> Microsoft.IdentityModel.Tokens.Saml.SamlAdvice
 Microsoft.IdentityModel.Tokens.Saml.SamlAssertion.Advice.set -> void
@@ -272,8 +272,8 @@ Microsoft.IdentityModel.Tokens.Saml.SamlAuthorizationDecisionStatement.Evidence.
 Microsoft.IdentityModel.Tokens.Saml.SamlAuthorizationDecisionStatement.Evidence.set -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlAuthorizationDecisionStatement.Resource.get -> string
 Microsoft.IdentityModel.Tokens.Saml.SamlAuthorizationDecisionStatement.Resource.set -> void
-Microsoft.IdentityModel.Tokens.Saml.SamlAuthorizationDecisionStatement.SamlAuthorizationDecisionStatement(Microsoft.IdentityModel.Tokens.Saml.SamlSubject subject, string resource, string decision, System.Collections.Generic.IEnumerable<Microsoft.IdentityModel.Tokens.Saml.SamlAction> actions) -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlAuthorizationDecisionStatement.SamlAuthorizationDecisionStatement(Microsoft.IdentityModel.Tokens.Saml.SamlSubject subject, string resource, string decision, System.Collections.Generic.IEnumerable<Microsoft.IdentityModel.Tokens.Saml.SamlAction> actions, Microsoft.IdentityModel.Tokens.Saml.SamlEvidence evidence) -> void
+Microsoft.IdentityModel.Tokens.Saml.SamlAuthorizationDecisionStatement.SamlAuthorizationDecisionStatement(Microsoft.IdentityModel.Tokens.Saml.SamlSubject subject, string resource, string decision, System.Collections.Generic.IEnumerable<Microsoft.IdentityModel.Tokens.Saml.SamlAction> actions) -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlCondition
 Microsoft.IdentityModel.Tokens.Saml.SamlCondition.SamlCondition() -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlConditions
@@ -282,8 +282,8 @@ Microsoft.IdentityModel.Tokens.Saml.SamlConditions.NotBefore.get -> System.DateT
 Microsoft.IdentityModel.Tokens.Saml.SamlConditions.NotBefore.set -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlConditions.NotOnOrAfter.get -> System.DateTime
 Microsoft.IdentityModel.Tokens.Saml.SamlConditions.NotOnOrAfter.set -> void
-Microsoft.IdentityModel.Tokens.Saml.SamlConditions.SamlConditions(System.DateTime notBefore, System.DateTime notOnOrAfter) -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlConditions.SamlConditions(System.DateTime notBefore, System.DateTime notOnOrAfter, System.Collections.Generic.IEnumerable<Microsoft.IdentityModel.Tokens.Saml.SamlCondition> conditions) -> void
+Microsoft.IdentityModel.Tokens.Saml.SamlConditions.SamlConditions(System.DateTime notBefore, System.DateTime notOnOrAfter) -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlConstants
 Microsoft.IdentityModel.Tokens.Saml.SamlConstants.AccessDecision
 Microsoft.IdentityModel.Tokens.Saml.SamlConstants.AuthenticationMethods
@@ -294,16 +294,16 @@ Microsoft.IdentityModel.Tokens.Saml.SamlEvidence
 Microsoft.IdentityModel.Tokens.Saml.SamlEvidence.AssertionIDReferences.get -> System.Collections.Generic.ICollection<string>
 Microsoft.IdentityModel.Tokens.Saml.SamlEvidence.Assertions.get -> System.Collections.Generic.ICollection<Microsoft.IdentityModel.Tokens.Saml.SamlAssertion>
 Microsoft.IdentityModel.Tokens.Saml.SamlEvidence.SamlEvidence(System.Collections.Generic.IEnumerable<Microsoft.IdentityModel.Tokens.Saml.SamlAssertion> assertions) -> void
-Microsoft.IdentityModel.Tokens.Saml.SamlEvidence.SamlEvidence(System.Collections.Generic.IEnumerable<string> assertionIDReferences) -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlEvidence.SamlEvidence(System.Collections.Generic.IEnumerable<string> assertionIDReferences, System.Collections.Generic.IEnumerable<Microsoft.IdentityModel.Tokens.Saml.SamlAssertion> assertions) -> void
+Microsoft.IdentityModel.Tokens.Saml.SamlEvidence.SamlEvidence(System.Collections.Generic.IEnumerable<string> assertionIDReferences) -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlSecurityToken
 Microsoft.IdentityModel.Tokens.Saml.SamlSecurityToken.Assertion.get -> Microsoft.IdentityModel.Tokens.Saml.SamlAssertion
 Microsoft.IdentityModel.Tokens.Saml.SamlSecurityToken.SamlSecurityToken() -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlSecurityToken.SamlSecurityToken(Microsoft.IdentityModel.Tokens.Saml.SamlAssertion assertion) -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenException
 Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenException.SamlSecurityTokenException() -> void
-Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenException.SamlSecurityTokenException(string message) -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenException.SamlSecurityTokenException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenException.SamlSecurityTokenException(string message) -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenException.SamlSecurityTokenException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler
 Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.SamlSecurityTokenHandler() -> void
@@ -313,13 +313,13 @@ Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.Serializer.get -> M
 Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.Serializer.set -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenReadException
 Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenReadException.SamlSecurityTokenReadException() -> void
-Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenReadException.SamlSecurityTokenReadException(string message) -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenReadException.SamlSecurityTokenReadException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenReadException.SamlSecurityTokenReadException(string message) -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenReadException.SamlSecurityTokenReadException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenWriteException
 Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenWriteException.SamlSecurityTokenWriteException() -> void
-Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenWriteException.SamlSecurityTokenWriteException(string message) -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenWriteException.SamlSecurityTokenWriteException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenWriteException.SamlSecurityTokenWriteException(string message) -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenWriteException.SamlSecurityTokenWriteException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlSerializer
 Microsoft.IdentityModel.Tokens.Saml.SamlSerializer.DSigSerializer.get -> Microsoft.IdentityModel.Xml.DSigSerializer
@@ -344,8 +344,8 @@ Microsoft.IdentityModel.Tokens.Saml.SamlSubject.NameFormat.set -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlSubject.NameQualifier.get -> string
 Microsoft.IdentityModel.Tokens.Saml.SamlSubject.NameQualifier.set -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlSubject.SamlSubject() -> void
-Microsoft.IdentityModel.Tokens.Saml.SamlSubject.SamlSubject(string nameFormat, string nameQualifier, string name) -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlSubject.SamlSubject(string nameFormat, string nameQualifier, string name, System.Collections.Generic.IEnumerable<string> confirmations, string confirmationData) -> void
+Microsoft.IdentityModel.Tokens.Saml.SamlSubject.SamlSubject(string nameFormat, string nameQualifier, string name) -> void
 Microsoft.IdentityModel.Tokens.Saml.SamlSubjectStatement
 Microsoft.IdentityModel.Tokens.Saml.SamlSubjectStatement.SamlSubjectStatement() -> void
 Microsoft.IdentityModel.Tokens.Saml2.AuthenticationInformation
@@ -407,9 +407,9 @@ Microsoft.IdentityModel.Tokens.Saml2.Saml2Attribute.NameFormat.get -> System.Uri
 Microsoft.IdentityModel.Tokens.Saml2.Saml2Attribute.NameFormat.set -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2Attribute.OriginalIssuer.get -> string
 Microsoft.IdentityModel.Tokens.Saml2.Saml2Attribute.OriginalIssuer.set -> void
-Microsoft.IdentityModel.Tokens.Saml2.Saml2Attribute.Saml2Attribute(string name) -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2Attribute.Saml2Attribute(string name, string value) -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2Attribute.Saml2Attribute(string name, System.Collections.Generic.IEnumerable<string> values) -> void
+Microsoft.IdentityModel.Tokens.Saml2.Saml2Attribute.Saml2Attribute(string name) -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2Attribute.Values.get -> System.Collections.Generic.ICollection<string>
 Microsoft.IdentityModel.Tokens.Saml2.Saml2AttributeStatement
 Microsoft.IdentityModel.Tokens.Saml2.Saml2AttributeStatement.Attributes.get -> System.Collections.Generic.ICollection<Microsoft.IdentityModel.Tokens.Saml2.Saml2Attribute>
@@ -427,15 +427,15 @@ Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthenticationContext.ClassReference.s
 Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthenticationContext.DeclarationReference.get -> System.Uri
 Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthenticationContext.DeclarationReference.set -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthenticationContext.Saml2AuthenticationContext() -> void
-Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthenticationContext.Saml2AuthenticationContext(System.Uri classReference) -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthenticationContext.Saml2AuthenticationContext(System.Uri classReference, System.Uri declarationReference) -> void
+Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthenticationContext.Saml2AuthenticationContext(System.Uri classReference) -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthenticationStatement
 Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthenticationStatement.AuthenticationContext.get -> Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthenticationContext
 Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthenticationStatement.AuthenticationContext.set -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthenticationStatement.AuthenticationInstant.get -> System.DateTime
 Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthenticationStatement.AuthenticationInstant.set -> void
-Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthenticationStatement.Saml2AuthenticationStatement(Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthenticationContext authenticationContext) -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthenticationStatement.Saml2AuthenticationStatement(Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthenticationContext authenticationContext, System.DateTime authenticationInstant) -> void
+Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthenticationStatement.Saml2AuthenticationStatement(Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthenticationContext authenticationContext) -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthenticationStatement.SessionIndex.get -> string
 Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthenticationStatement.SessionIndex.set -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthenticationStatement.SessionNotOnOrAfter.get -> System.DateTime?
@@ -450,8 +450,8 @@ Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthorizationDecisionStatement.Evidenc
 Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthorizationDecisionStatement.Evidence.set -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthorizationDecisionStatement.Resource.get -> System.Uri
 Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthorizationDecisionStatement.Resource.set -> void
-Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthorizationDecisionStatement.Saml2AuthorizationDecisionStatement(System.Uri resource, string decision) -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthorizationDecisionStatement.Saml2AuthorizationDecisionStatement(System.Uri resource, string decision, System.Collections.Generic.IEnumerable<Microsoft.IdentityModel.Tokens.Saml2.Saml2Action> actions) -> void
+Microsoft.IdentityModel.Tokens.Saml2.Saml2AuthorizationDecisionStatement.Saml2AuthorizationDecisionStatement(System.Uri resource, string decision) -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2Conditions
 Microsoft.IdentityModel.Tokens.Saml2.Saml2Conditions.AudienceRestrictions.get -> System.Collections.Generic.ICollection<Microsoft.IdentityModel.Tokens.Saml2.Saml2AudienceRestriction>
 Microsoft.IdentityModel.Tokens.Saml2.Saml2Conditions.NotBefore.get -> System.DateTime?
@@ -490,8 +490,8 @@ Microsoft.IdentityModel.Tokens.Saml2.Saml2NameIdentifier.Format.get -> System.Ur
 Microsoft.IdentityModel.Tokens.Saml2.Saml2NameIdentifier.Format.set -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2NameIdentifier.NameQualifier.get -> string
 Microsoft.IdentityModel.Tokens.Saml2.Saml2NameIdentifier.NameQualifier.set -> void
-Microsoft.IdentityModel.Tokens.Saml2.Saml2NameIdentifier.Saml2NameIdentifier(string name) -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2NameIdentifier.Saml2NameIdentifier(string name, System.Uri format) -> void
+Microsoft.IdentityModel.Tokens.Saml2.Saml2NameIdentifier.Saml2NameIdentifier(string name) -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2NameIdentifier.SPNameQualifier.get -> string
 Microsoft.IdentityModel.Tokens.Saml2.Saml2NameIdentifier.SPNameQualifier.set -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2NameIdentifier.SPProvidedId.get -> string
@@ -508,8 +508,8 @@ Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityToken.Assertion.get -> Microso
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityToken.Saml2SecurityToken(Microsoft.IdentityModel.Tokens.Saml2.Saml2Assertion assertion) -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenException
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenException.Saml2SecurityTokenException() -> void
-Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenException.Saml2SecurityTokenException(string message) -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenException.Saml2SecurityTokenException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenException.Saml2SecurityTokenException(string message) -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenException.Saml2SecurityTokenException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.ActorClaimName.get -> string
@@ -520,13 +520,13 @@ Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.Serializer.get ->
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.Serializer.set -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenReadException
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenReadException.Saml2SecurityTokenReadException() -> void
-Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenReadException.Saml2SecurityTokenReadException(string message) -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenReadException.Saml2SecurityTokenReadException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenReadException.Saml2SecurityTokenReadException(string message) -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenReadException.Saml2SecurityTokenReadException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenWriteException
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenWriteException.Saml2SecurityTokenWriteException() -> void
-Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenWriteException.Saml2SecurityTokenWriteException(string message) -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenWriteException.Saml2SecurityTokenWriteException(string message, System.Exception innerException) -> void
+Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenWriteException.Saml2SecurityTokenWriteException(string message) -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenWriteException.Saml2SecurityTokenWriteException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2Serializer
 Microsoft.IdentityModel.Tokens.Saml2.Saml2Serializer.DSigSerializer.get -> Microsoft.IdentityModel.Xml.DSigSerializer
@@ -547,8 +547,8 @@ Microsoft.IdentityModel.Tokens.Saml2.Saml2SubjectConfirmation.Method.get -> Syst
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SubjectConfirmation.Method.set -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SubjectConfirmation.NameIdentifier.get -> Microsoft.IdentityModel.Tokens.Saml2.Saml2NameIdentifier
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SubjectConfirmation.NameIdentifier.set -> void
-Microsoft.IdentityModel.Tokens.Saml2.Saml2SubjectConfirmation.Saml2SubjectConfirmation(System.Uri method) -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SubjectConfirmation.Saml2SubjectConfirmation(System.Uri method, Microsoft.IdentityModel.Tokens.Saml2.Saml2SubjectConfirmationData subjectConfirmationData) -> void
+Microsoft.IdentityModel.Tokens.Saml2.Saml2SubjectConfirmation.Saml2SubjectConfirmation(System.Uri method) -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SubjectConfirmation.SubjectConfirmationData.get -> Microsoft.IdentityModel.Tokens.Saml2.Saml2SubjectConfirmationData
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SubjectConfirmation.SubjectConfirmationData.set -> void
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SubjectConfirmationData
@@ -585,8 +585,8 @@ override Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.CanValidat
 override Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.CanWriteToken.get -> bool
 override Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.CreateToken(Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor tokenDescriptor) -> Microsoft.IdentityModel.Tokens.SecurityToken
 override Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.ReadToken(string token) -> Microsoft.IdentityModel.Tokens.SecurityToken
-override Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.ReadToken(System.Xml.XmlReader reader) -> Microsoft.IdentityModel.Tokens.SecurityToken
 override Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.ReadToken(System.Xml.XmlReader reader, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters) -> Microsoft.IdentityModel.Tokens.SecurityToken
+override Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.ReadToken(System.Xml.XmlReader reader) -> Microsoft.IdentityModel.Tokens.SecurityToken
 override Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.TokenType.get -> System.Type
 override Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.ValidateToken(string token, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters, out Microsoft.IdentityModel.Tokens.SecurityToken validatedToken) -> System.Security.Claims.ClaimsPrincipal
 override Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.ValidateToken(System.Xml.XmlReader reader, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters, out Microsoft.IdentityModel.Tokens.SecurityToken validatedToken) -> System.Security.Claims.ClaimsPrincipal
@@ -606,8 +606,8 @@ override Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.CanValid
 override Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.CanWriteToken.get -> bool
 override Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.CreateToken(Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor tokenDescriptor) -> Microsoft.IdentityModel.Tokens.SecurityToken
 override Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.ReadToken(string token) -> Microsoft.IdentityModel.Tokens.SecurityToken
-override Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.ReadToken(System.Xml.XmlReader reader) -> Microsoft.IdentityModel.Tokens.SecurityToken
 override Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.ReadToken(System.Xml.XmlReader reader, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters) -> Microsoft.IdentityModel.Tokens.SecurityToken
+override Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.ReadToken(System.Xml.XmlReader reader) -> Microsoft.IdentityModel.Tokens.SecurityToken
 override Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.TokenType.get -> System.Type
 override Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.ValidateToken(string token, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters, out Microsoft.IdentityModel.Tokens.SecurityToken validatedToken) -> System.Security.Claims.ClaimsPrincipal
 override Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.ValidateToken(System.Xml.XmlReader reader, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters, out Microsoft.IdentityModel.Tokens.SecurityToken validatedToken) -> System.Security.Claims.ClaimsPrincipal
@@ -709,8 +709,8 @@ virtual Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.CreateAut
 virtual Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.CreateClaimsIdentity(Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityToken samlToken, string issuer, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters) -> System.Security.Claims.ClaimsIdentity
 virtual Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.CreateConditions(Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor tokenDescriptor) -> Microsoft.IdentityModel.Tokens.Saml2.Saml2Conditions
 virtual Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.CreateIssuerNameIdentifier(Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor tokenDescriptor) -> Microsoft.IdentityModel.Tokens.Saml2.Saml2NameIdentifier
-virtual Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.CreateStatements(Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor tokenDescriptor) -> System.Collections.Generic.IEnumerable<Microsoft.IdentityModel.Tokens.Saml2.Saml2Statement>
 virtual Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.CreateStatements(Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor tokenDescriptor, Microsoft.IdentityModel.Tokens.Saml2.AuthenticationInformation authenticationInformation) -> System.Collections.Generic.IEnumerable<Microsoft.IdentityModel.Tokens.Saml2.Saml2Statement>
+virtual Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.CreateStatements(Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor tokenDescriptor) -> System.Collections.Generic.IEnumerable<Microsoft.IdentityModel.Tokens.Saml2.Saml2Statement>
 virtual Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.CreateSubject(Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor tokenDescriptor) -> Microsoft.IdentityModel.Tokens.Saml2.Saml2Subject
 virtual Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.CreateToken(Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor tokenDescriptor, Microsoft.IdentityModel.Tokens.Saml2.AuthenticationInformation authenticationInformation) -> Microsoft.IdentityModel.Tokens.SecurityToken
 virtual Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.ProcessAttributeStatement(Microsoft.IdentityModel.Tokens.Saml2.Saml2AttributeStatement statement, System.Security.Claims.ClaimsIdentity identity, string issuer) -> void

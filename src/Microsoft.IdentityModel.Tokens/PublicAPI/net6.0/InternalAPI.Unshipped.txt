@@ -1,5 +1,0 @@
-Microsoft.IdentityModel.Tokens.IssuerValidationError.IssuerValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, string invalidIssuer) -> void
-override Microsoft.IdentityModel.Tokens.IssuerValidationError.GetException() -> System.Exception
-static readonly Microsoft.IdentityModel.Tokens.Json.JsonWebKeySerializer.JsonWebKeyParameterNamesUpperCase -> System.Collections.Generic.HashSet<string>
-Microsoft.IdentityModel.Tokens.EcdhKeyExchangeProvider.GetEncryptionAlgorithm() -> string
-Microsoft.IdentityModel.Tokens.SignUsingSpanDelegate

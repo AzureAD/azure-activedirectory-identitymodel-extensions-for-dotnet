@@ -246,12 +246,12 @@ static Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.IsSaml2Ass
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2Serializer.CanCreateValidUri(string uriString, System.UriKind uriKind) -> bool
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2Serializer.LogReadException(string format, params object[] args) -> System.Exception
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2Serializer.LogReadException(string format, System.Exception inner, params object[] args) -> System.Exception
-static Microsoft.IdentityModel.Tokens.Saml2.Saml2Serializer.LogReadException(string message) -> System.Exception
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2Serializer.LogReadException(string message, System.Exception ex) -> System.Exception
+static Microsoft.IdentityModel.Tokens.Saml2.Saml2Serializer.LogReadException(string message) -> System.Exception
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2Serializer.LogWriteException(string format, params object[] args) -> System.Exception
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2Serializer.LogWriteException(string format, System.Exception inner, params object[] args) -> System.Exception
-static Microsoft.IdentityModel.Tokens.Saml2.Saml2Serializer.LogWriteException(string message) -> System.Exception
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2Serializer.LogWriteException(string message, System.Exception ex) -> System.Exception
+static Microsoft.IdentityModel.Tokens.Saml2.Saml2Serializer.LogWriteException(string message) -> System.Exception
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2Serializer.ReadEmptyContentElement(System.Xml.XmlDictionaryReader reader) -> void
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2Serializer.ReadNameIdType(System.Xml.XmlDictionaryReader reader) -> Microsoft.IdentityModel.Tokens.Saml2.Saml2NameIdentifier
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2Serializer.ReadSimpleNCNameElement(System.Xml.XmlDictionaryReader reader, string name) -> Microsoft.IdentityModel.Tokens.Saml2.Saml2Id

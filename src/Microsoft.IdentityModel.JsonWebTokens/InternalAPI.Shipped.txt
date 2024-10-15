@@ -32,8 +32,8 @@ Microsoft.IdentityModel.JsonWebTokens.JsonClaimSet.CreateClaims(string issuer) -
 Microsoft.IdentityModel.JsonWebTokens.JsonClaimSet.GetClaim(string key, string issuer) -> System.Security.Claims.Claim
 Microsoft.IdentityModel.JsonWebTokens.JsonClaimSet.GetDateTime(string key) -> System.DateTime
 Microsoft.IdentityModel.JsonWebTokens.JsonClaimSet.GetStringValue(string key) -> string
-Microsoft.IdentityModel.JsonWebTokens.JsonClaimSet.GetValue<T>(string key) -> T
 Microsoft.IdentityModel.JsonWebTokens.JsonClaimSet.GetValue<T>(string key, bool throwEx, out bool found) -> T
+Microsoft.IdentityModel.JsonWebTokens.JsonClaimSet.GetValue<T>(string key) -> T
 Microsoft.IdentityModel.JsonWebTokens.JsonClaimSet.HasClaim(string claimName) -> bool
 Microsoft.IdentityModel.JsonWebTokens.JsonClaimSet.JsonClaimSet() -> void
 Microsoft.IdentityModel.JsonWebTokens.JsonClaimSet.JsonClaimSet(System.Collections.Generic.Dictionary<string, object> jsonClaims) -> void
@@ -70,8 +70,8 @@ Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.CipherTextBytes.set -> void
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.ClaimsIdentity.get -> System.Security.Claims.ClaimsIdentity
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.ClaimsIdentity.set -> void
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.CreateClaimSet(System.ReadOnlySpan<char> strSpan, int startIndex, int length, bool createHeaderClaimSet) -> Microsoft.IdentityModel.JsonWebTokens.JsonClaimSet
-Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.CreateHeaderClaimSet(byte[] bytes) -> Microsoft.IdentityModel.JsonWebTokens.JsonClaimSet
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.CreateHeaderClaimSet(byte[] bytes, int length) -> Microsoft.IdentityModel.JsonWebTokens.JsonClaimSet
+Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.CreateHeaderClaimSet(byte[] bytes) -> Microsoft.IdentityModel.JsonWebTokens.JsonClaimSet
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.CreateHeaderClaimSet(System.ReadOnlySpan<byte> byteSpan) -> Microsoft.IdentityModel.JsonWebTokens.JsonClaimSet
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.CreatePayloadClaimSet(byte[] bytes, int length) -> Microsoft.IdentityModel.JsonWebTokens.JsonClaimSet
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.CreatePayloadClaimSet(System.ReadOnlySpan<byte> byteSpan) -> Microsoft.IdentityModel.JsonWebTokens.JsonClaimSet
@@ -257,12 +257,12 @@ static Microsoft.IdentityModel.JsonWebTokens.JwtTokenUtilities.DecryptJwtToken(M
 static Microsoft.IdentityModel.JsonWebTokens.JwtTokenUtilities.DecryptJwtToken(Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters, Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters decryptionParameters) -> string
 static Microsoft.IdentityModel.JsonWebTokens.JwtTokenUtilities.DefaultHeaderParameters -> System.Collections.Generic.List<string>
 static Microsoft.IdentityModel.JsonWebTokens.JwtTokenUtilities.GetSecurityKey(Microsoft.IdentityModel.Tokens.EncryptingCredentials encryptingCredentials, Microsoft.IdentityModel.Tokens.CryptoProviderFactory cryptoProviderFactory, System.Collections.Generic.IDictionary<string, object> additionalHeaderClaims, out byte[] wrappedKey) -> Microsoft.IdentityModel.Tokens.SecurityKey
-static Microsoft.IdentityModel.JsonWebTokens.JwtTokenUtilities.GetStringClaimValueType(string str) -> string
 static Microsoft.IdentityModel.JsonWebTokens.JwtTokenUtilities.GetStringClaimValueType(string str, string claimType) -> string
+static Microsoft.IdentityModel.JsonWebTokens.JwtTokenUtilities.GetStringClaimValueType(string str) -> string
 static Microsoft.IdentityModel.JsonWebTokens.JwtTokenUtilities.ResolveTokenSigningKey(string kid, string x5t, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.BaseConfiguration configuration) -> Microsoft.IdentityModel.Tokens.SecurityKey
 static Microsoft.IdentityModel.JsonWebTokens.JwtTokenUtilities.ResolveTokenSigningKey(string kid, string x5t, System.Collections.Generic.IEnumerable<Microsoft.IdentityModel.Tokens.SecurityKey> signingKeys) -> Microsoft.IdentityModel.Tokens.SecurityKey
 static Microsoft.IdentityModel.JsonWebTokens.JwtTokenUtilities.SafeLogJwtToken(object obj) -> string
 virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.ReadPayloadValue(ref System.Text.Json.Utf8JsonReader reader, System.Collections.Generic.IDictionary<string, object> claims) -> void
-virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.CreateClaimsIdentity(Microsoft.IdentityModel.JsonWebTokens.JsonWebToken jwtToken, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters) -> System.Security.Claims.ClaimsIdentity
 virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.CreateClaimsIdentity(Microsoft.IdentityModel.JsonWebTokens.JsonWebToken jwtToken, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, string issuer) -> System.Security.Claims.ClaimsIdentity
+virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.CreateClaimsIdentity(Microsoft.IdentityModel.JsonWebTokens.JsonWebToken jwtToken, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters) -> System.Security.Claims.ClaimsIdentity
 virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ResolveTokenDecryptionKey(string token, Microsoft.IdentityModel.JsonWebTokens.JsonWebToken jwtToken, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.SecurityKey
