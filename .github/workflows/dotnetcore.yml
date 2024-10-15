@@ -39,7 +39,7 @@ jobs:
     - name: Setup .NET 9.0.x
       uses: actions/setup-dotnet@v4.0.0
       with:
-        dotnet-version: 9.0.100-rc.1.24452.12
+        dotnet-version: 9.0.100-rc.2.24474.11
 
     - name: Run the tests
       run: dotnet test Wilson.sln
