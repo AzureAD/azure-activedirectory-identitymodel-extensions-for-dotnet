@@ -24,6 +24,15 @@ namespace Microsoft.IdentityModel.Benchmarks
         }
         private static void DebugThroughTests()
         {
+            ClaimsIdentityTests claimsIdentityTests = new ClaimsIdentityTests();
+            claimsIdentityTests.SetupAsync().GetAwaiter().GetResult();
+            var claim = claimsIdentityTests.ClaimsIdentity_FindFirst();
+            var claimsList = claimsIdentityTests.ClaimsIdentity_FindAll();
+            var hasClaim = claimsIdentityTests.ClaimsIdentity_HasClaim();
+            claim = claimsIdentityTests.NewClaimsIdentity_FindFirst();
+            claimsList = claimsIdentityTests.NewClaimsIdentity_FindAll();
+            hasClaim = claimsIdentityTests.NewClaimsIdentity_HasClaim();
+
             ReadJWETokenTests readTokenTests = new ReadJWETokenTests();
             readTokenTests.Setup();
             readTokenTests.ReadJWE_FromMemory();

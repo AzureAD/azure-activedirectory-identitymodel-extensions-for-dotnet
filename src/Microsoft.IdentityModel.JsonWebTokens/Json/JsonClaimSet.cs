@@ -429,9 +429,85 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return found;
         }
 
-        internal bool HasClaim(string claimName)
+        internal Claim GetPayloadClaim(string name, string issuer)
         {
-            return _jsonClaims.TryGetValue(claimName, out _);
+            if (_jsonClaims.TryGetValue(name, out object val))
+            {
+                Claim claim = CreateClaimFromObject(name, val, issuer);
+                if (claim != null)
+                    return claim;
+            }
+
+            return null;
+        }
+
+        internal bool HasPayloadClaim(string name)
+        {
+            return _jsonClaims.TryGetValue(name, out _);
+        }
+
+        internal bool HasPayloadClaim(string name, string value, string issuer)
+        {
+            if (_jsonClaims.TryGetValue(name, out object val))
+            {
+                Claim claim = CreateClaimFromObject(name, val, issuer);
+                if (claim != null)
+                    return claim?.Value.Equals(value, StringComparison.Ordinal) == true;
+            }
+
+            return false;
+        }
+
+        internal static Claim CreateClaimFromObject(string claimType, object value, string issuer)
+        {
+            // Json.net recognized DateTime by default.
+            if (value is string str)
+                return new Claim(claimType, str, JwtTokenUtilities.GetStringClaimValueType(str, claimType), issuer, issuer);
+            else if (value is int i)
+                return new Claim(claimType, i.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer32, issuer, issuer);
+            else if (value is long l)
+                return new Claim(claimType, l.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Integer64, issuer, issuer);
+            else if (value is bool b)
+            {
+                // Can't just use ToString or bools will get encoded as True/False instead of true/false.
+                if (b)
+                    return new Claim(claimType, "true", ClaimValueTypes.Boolean, issuer, issuer);
+                else
+                    return new Claim(claimType, "false", ClaimValueTypes.Boolean, issuer, issuer);
+            }
+            else if (value is double d)
+                return new Claim(claimType, d.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Double, issuer, issuer);
+            else if (value is DateTime dt)
+                return new Claim(claimType, dt.ToString("o", CultureInfo.InvariantCulture), ClaimValueTypes.DateTime, issuer, issuer);
+            else if (value is float f)
+                return new Claim(claimType, f.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Double, issuer, issuer);
+            else if (value is decimal m)
+                return new Claim(claimType, m.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Double, issuer, issuer);
+            else if (value is null)
+                return new Claim(claimType, string.Empty, JsonClaimValueTypes.JsonNull, issuer, issuer);
+            else if (value is IList ilist)
+            {
+                foreach (var item in ilist)
+                    return CreateClaimFromObject(claimType, item, issuer);
+            }
+            else if (value is JsonElement j)
+                if (j.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (JsonElement jsonElement in j.EnumerateArray())
+                    {
+                        Claim claim = CreateClaimFromJsonElement(claimType, issuer, jsonElement);
+                        if (claim != null)
+                            return claim;
+                    }
+                }
+                else
+                {
+                    Claim claim = CreateClaimFromJsonElement(claimType, issuer, j);
+                    if (claim != null)
+                        return claim;
+                }
+
+            return null;
         }
     }
 }

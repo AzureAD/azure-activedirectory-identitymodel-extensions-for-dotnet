@@ -105,6 +105,7 @@ namespace Microsoft.IdentityModel.Tokens
             ValidIssuer = other.ValidIssuer;
             ValidIssuers = other.ValidIssuers;
             ValidTypes = other.ValidTypes;
+            UseNewClaimsIdentityType = other.UseNewClaimsIdentityType;
         }
 
         /// <summary>
@@ -243,7 +244,8 @@ namespace Microsoft.IdentityModel.Tokens
                 authenticationType: AuthenticationType ?? DefaultAuthenticationType,
                 nameType: nameClaimType ?? ClaimsIdentity.DefaultNameClaimType,
                 roleType: roleClaimType ?? ClaimsIdentity.DefaultRoleClaimType,
-                securityToken);
+                securityToken,
+                this);
         }
 
         /// <summary>
@@ -600,6 +602,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// This means that no default 'type' validation will occur.
         /// </remarks>
         public TypeValidator TypeValidator { get; set; }
+
+        /// <summary>
+        /// Specifies whether to use <see cref="SecurityTokenClaimsIdentity"/> instead of <see cref="ClaimsIdentity"/>.
+        /// </summary>
+        public bool UseNewClaimsIdentityType { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating if an actor token is detected, whether it should be validated.

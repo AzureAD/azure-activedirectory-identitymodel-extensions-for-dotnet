@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// <summary>
     /// A <see cref="SecurityToken"/> designed for representing a JSON Web Token (JWT).
     /// </summary>
-    public partial class JsonWebToken : SecurityToken
+    public partial class JsonWebToken : ClaimsProvider
     {
         internal const string ClassName = "Microsoft.IdentityModel.JsonWebTokens.JsonWebToken";
 
@@ -624,6 +624,24 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return Payload.GetClaim(key, Issuer ?? ClaimsIdentity.DefaultIssuer);
         }
 
+        /// <inheritdoc/>
+        public override Claim GetPayloadClaim(string name)
+        {
+            return Payload.GetPayloadClaim(name, Issuer ?? ClaimsIdentity.DefaultIssuer);
+        }
+
+        /// <inheritdoc/>
+        public override bool HasPayloadClaim(string name, string value)
+        {
+            return Payload.HasPayloadClaim(name, value, Issuer ?? ClaimsIdentity.DefaultIssuer);
+        }
+
+        /// <inheritdoc/>
+        public override bool HasPayloadClaim(string type)
+        {
+            return Payload.HasPayloadClaim(type);
+        }
+
         /// <summary>
         /// Gets the names of the payload claims on the JsonWebToken.
         /// </summary>
@@ -700,11 +718,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         #endregion
 
         #region Get Claims from the JWT Header and Payload
-        internal bool HasPayloadClaim(string claimName)
-        {
-            return Payload.HasClaim(claimName);
-        }
-
         /// <summary>
         /// Gets the 'value' corresponding to key from the JWT header transformed as type 'T'.
         /// </summary>

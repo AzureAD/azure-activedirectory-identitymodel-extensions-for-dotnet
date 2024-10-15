@@ -18,6 +18,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the <see cref="SecurityToken"/> associated with this claims identity.
         /// </summary>
+        [field: NonSerialized]
         public SecurityToken SecurityToken { get; internal set; }
 
         /// <summary>
