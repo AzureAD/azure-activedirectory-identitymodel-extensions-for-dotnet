@@ -118,7 +118,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         private static ValidationResult<TokenValidationUnit> ValidateSignatureUsingAllKeys(
             JsonWebToken jwtToken,
             ValidationParameters
-            validationParameters, BaseConfiguration? configuration,
+            validationParameters,
+            BaseConfiguration? configuration,
             CallContext callContext)
         {
             // control gets here if:
