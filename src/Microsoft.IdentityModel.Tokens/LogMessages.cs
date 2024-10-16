@@ -15,6 +15,8 @@ namespace Microsoft.IdentityModel.Tokens
         // general
         public const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object. ";
         public const string IDX10001 = "IDX10001: Invalid argument '{0}'. Argument must be of type '{1}'.";
+        // TODO: Confirm the wording of this message. Possibly create a wiki page to refer users to for more information.
+        public const string IDX10002 = "IDX10002: Unknown exception type returned. Type: '{0}'. Message: '{1}'.";
 
         // properties, configuration 
         public const string IDX10101 = "IDX10101: MaximumTokenSizeInBytes must be greater than zero. value: '{0}'";

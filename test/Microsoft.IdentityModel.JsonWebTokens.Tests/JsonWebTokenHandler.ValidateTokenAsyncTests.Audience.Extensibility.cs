@@ -2,7 +2,9 @@
 // Licensed under the MIT License.
 
 #nullable enable
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
@@ -18,7 +20,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             var context = TestUtilities.WriteHeader($"{this}.{nameof(ValidateTokenAsync_Audience_Extensibility)}", theoryData);
 
-            string jwtString = CreateToken(theoryData.Audience);
+            string jwtString = CreateTokenWithAudience(theoryData.Audience);
             var handler = new JsonWebTokenHandler();
 
             ValidationResult<ValidatedToken> validationResult;
@@ -108,7 +110,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             return new AudienceValidationError(
                                 new MessageDetail("Custom message from the delegate."),
                                 typeof(SecurityTokenInvalidAudienceException),
-                                new System.Diagnostics.StackFrame(true),
+                                new StackFrame(true),
                                 [Default.Audience]);
                         }),
                         ExpectedIsValid = false,
@@ -116,9 +118,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ExpectedInvalidAudience = Default.Audience,
                     },
                     new ValidateTokenAsyncAudienceExtensibilityTheoryData(
-                        "CustomDelegate_Invalid_DelegateReturnsValidationErrorWithCustomExceptionType")
+                        "CustomDelegate_Invalid_DelegateReturnsValidationErrorWithCustomExceptionType_NoCustomValidationError")
                     {
-                        // This test currently fails because the creation of the exception does not support custom exception types.
                         Audience = Default.Audience,
                         ValidationParameters = CreateValidationParameters([Default.Audience], audienceValidationDelegate: delegate
                         (IList<string> audiences,
@@ -129,10 +130,32 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             return new AudienceValidationError(
                                 new MessageDetail("Custom message from the delegate."),
                                 typeof(CustomInvalidAudienceException),
-                                new System.Diagnostics.StackFrame(true),
+                                new StackFrame(true),
                                 [Default.Audience]);
                         }),
                         ExpectedIsValid = false,
+                        // The delegate returns a custom exception but does not implement a custom ValidationError.
+                        ExpectedException = ExpectedException.SecurityTokenException("IDX10002:"),
+                        ExpectedInvalidAudience = Default.Audience,
+                    },
+                    new ValidateTokenAsyncAudienceExtensibilityTheoryData(
+                        "CustomDelegate_Invalid_DelegateReturnsValidationErrorWithCustomExceptionType_CustomValidationErrorUsed")
+                    {
+                        Audience = Default.Audience,
+                        ValidationParameters = CreateValidationParameters([Default.Audience], audienceValidationDelegate: delegate
+                        (IList<string> audiences,
+                        SecurityToken? securityToken,
+                        ValidationParameters validationParameters,
+                        CallContext callContext)
+                        {
+                            return new CustomAudienceValidationError(
+                                new MessageDetail("Custom message from the delegate."),
+                                typeof(CustomInvalidAudienceException),
+                                new StackFrame(true),
+                                [Default.Audience]);
+                        }),
+                        ExpectedIsValid = false,
+                        // The delegate uses a custom validation error that implements GetException to return the custom exception.
                         ExpectedException = new ExpectedException(typeof(CustomInvalidAudienceException), "Custom message from the delegate."),
                         ExpectedInvalidAudience = Default.Audience,
                     },
@@ -193,6 +216,24 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             public CustomInvalidAudienceException(string message)
                 : base(message)
             {
+            }
+        }
+
+        private class CustomAudienceValidationError : AudienceValidationError
+        {
+            public CustomAudienceValidationError(MessageDetail messageDetail,
+                Type exceptionType,
+                StackFrame stackFrame,
+                IList<string>? invalidAudiences) : base(messageDetail, exceptionType, stackFrame, invalidAudiences)
+            {
+            }
+
+            internal override Exception GetException()
+            {
+                if (ExceptionType == typeof(CustomInvalidAudienceException))
+                    return new CustomInvalidAudienceException(MessageDetail.Message) { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(InvalidAudiences) };
+
+                return base.GetException();
             }
         }
     }

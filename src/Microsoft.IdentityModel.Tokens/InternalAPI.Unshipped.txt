@@ -1,0 +1,2 @@
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10002 = "IDX10002: Unknown exception type returned. Type: '{0}'. Message: '{1}'." -> string
+Microsoft.IdentityModel.Tokens.AudienceValidationError.InvalidAudiences.get -> System.Collections.Generic.IList<string>

@@ -22,20 +22,19 @@ namespace Microsoft.IdentityModel.Tokens
             _invalidAudiences = invalidAudiences;
         }
 
-        internal override void AddAdditionalInformation(ISecurityTokenException exception)
-        {
-            if (exception is SecurityTokenInvalidAudienceException invalidAudienceException)
-                invalidAudienceException.InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(_invalidAudiences);
-        }
-
         /// <summary>
         /// Creates an instance of an <see cref="Exception"/> using <see cref="ValidationError"/>
         /// </summary>
         /// <returns>An instance of an Exception.</returns>
-        public override Exception GetException()
+        internal override Exception GetException()
         {
-            return new SecurityTokenInvalidAudienceException(MessageDetail.Message) { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(_invalidAudiences) };
+            if (ExceptionType == typeof(SecurityTokenInvalidAudienceException))
+                return new SecurityTokenInvalidAudienceException(MessageDetail.Message) { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(_invalidAudiences) };
+
+            return base.GetException();
         }
+
+        internal IList<string>? InvalidAudiences => _invalidAudiences;
     }
 }
 #nullable restore
