@@ -1,0 +1,3 @@
+Microsoft.IdentityModel.Tokens.TokenValidationUnit
+Microsoft.IdentityModel.Tokens.TokenValidationUnit.TokenValidationUnit() -> void
+static Microsoft.IdentityModel.Tokens.TokenValidationUnit.Default.get -> Microsoft.IdentityModel.Tokens.TokenValidationUnit

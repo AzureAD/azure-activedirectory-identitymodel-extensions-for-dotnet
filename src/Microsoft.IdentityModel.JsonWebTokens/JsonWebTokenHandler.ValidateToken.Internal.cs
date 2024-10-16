@@ -331,7 +331,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             // The signature validation delegate is yet to be migrated to ValidationParameters.
-            ValidationResult<SecurityKey> signatureValidationResult = ValidateSignature(
+            ValidationResult<TokenValidationUnit> signatureValidationResult = ValidateSignature(
                 jsonWebToken, validationParameters, configuration, callContext);
             if (!signatureValidationResult.IsSuccess)
             {
@@ -341,7 +341,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             ValidationResult<ValidatedSigningKeyLifetime> issuerSigningKeyValidationResult =
                 validationParameters.IssuerSigningKeyValidator(
-                    signatureValidationResult.UnwrapResult(), jsonWebToken, validationParameters, configuration, callContext);
+                    jsonWebToken.SigningKey, jsonWebToken, validationParameters, configuration, callContext);
             if (!issuerSigningKeyValidationResult.IsSuccess)
             {
                 StackFrame issuerSigningKeyValidationFailureStackFrame = StackFrames.IssuerSigningKeyValidationFailed ??= new StackFrame(true);
@@ -356,7 +356,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 ValidatedTokenReplayExpirationTime = replayValidationResult.UnwrapResult(),
                 ActorValidationResult = actorValidationResult?.UnwrapResult(),
                 ValidatedTokenType = typeValidationResult.UnwrapResult(),
-                ValidatedSigningKey = signatureValidationResult.UnwrapResult(),
                 ValidatedSigningKeyLifetime = issuerSigningKeyValidationResult.UnwrapResult()
             };
         }

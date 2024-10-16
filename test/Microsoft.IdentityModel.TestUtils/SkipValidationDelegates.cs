@@ -72,9 +72,7 @@ namespace Microsoft.IdentityModel.TestUtils
             BaseConfiguration? configuration,
             CallContext? callContext)
         {
-            // This key is not used during the validation process. It is only used to satisfy the delegate signature.
-            // Follow up PR will change this to remove the SecurityKey return value.
-            return new(result: new JsonWebKey());
+            return new(result: TokenValidationUnit.Default);
         };
 
         internal static TokenReplayValidationDelegate SkipTokenReplayValidation = delegate (
