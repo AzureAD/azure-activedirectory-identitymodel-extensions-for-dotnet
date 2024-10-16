@@ -47,6 +47,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             TokenValidationResult tokenValidationParametersResult =
                 await jsonWebTokenHandler.ValidateTokenAsync(jwtString, theoryData.TokenValidationParameters);
+
             ValidationResult<ValidatedToken> validationParametersResult =
                 await jsonWebTokenHandler.ValidateTokenAsync(
                     jwtString, theoryData.ValidationParameters, theoryData.CallContext, CancellationToken.None);
@@ -191,9 +192,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
                         ExpectedIsValid = false,
                         ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10511:"),
-                        ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidSignatureException(
-                            "IDX10518:",
-                            innerTypeExpected: typeof(SecurityTokenInvalidAlgorithmException))
+                        ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidAlgorithmException("IDX10518:")
                     },
                     new JsonWebTokenHandlerValidationParametersTheoryData("Valid_JWE")
                     {

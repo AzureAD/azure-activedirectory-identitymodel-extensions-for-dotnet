@@ -46,6 +46,18 @@ namespace Microsoft.IdentityModel.Tokens
         private class AudienceValidationFailure : ValidationFailureType { internal AudienceValidationFailure(string name) : base(name) { } }
 
         /// <summary>
+        /// Defines a type that represents that audience validation failed.
+        /// </summary>
+        public static readonly ValidationFailureType NoTokenAudiencesProvided = new NoTokenAudiencesProvidedFailure("NoTokenAudiencesProvided");
+        private class NoTokenAudiencesProvidedFailure : ValidationFailureType { internal NoTokenAudiencesProvidedFailure(string name) : base(name) { } }
+
+        /// <summary>
+        /// Defines a type that represents that audience validation failed.
+        /// </summary>
+        public static readonly ValidationFailureType NoValidationParameterAudiencesProvided = new NoValidationParameterAudiencesProvidedFailure("NoValidationParameterAudiencesProvided");
+        private class NoValidationParameterAudiencesProvidedFailure : ValidationFailureType { internal NoValidationParameterAudiencesProvidedFailure(string name) : base(name) { } }
+
+        /// <summary>
         /// Defines a type that represents that token type validation failed.
         /// </summary>
         public static readonly ValidationFailureType TokenTypeValidationFailed = new TokenTypeValidationFailure("TokenTypeValidationFailed");
@@ -56,6 +68,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public static readonly ValidationFailureType SignatureValidationFailed = new SignatureValidationFailure("SignatureValidationFailed");
         private class SignatureValidationFailure : ValidationFailureType { internal SignatureValidationFailure(string name) : base(name) { } }
+
+        /// <summary>
+        /// Defines a type that represents that the token's signature algorithm validation failed.
+        /// </summary>
+        public static readonly ValidationFailureType SignatureAlgorithmValidationFailed = new SignatureAlgorithmValidationFailure("SignatureAlgorithmValidationFailed");
+        private class SignatureAlgorithmValidationFailure : ValidationFailureType { internal SignatureAlgorithmValidationFailure(string name) : base(name) { } }
 
         /// <summary>
         /// Defines a type that represents that signing key validation failed.
