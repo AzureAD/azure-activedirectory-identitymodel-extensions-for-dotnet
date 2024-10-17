@@ -75,7 +75,7 @@ namespace Microsoft.IdentityModel.Tokens
                 };
             }
             else
-                return base.GetException();
+                return base.GetException(ExceptionType, null);
         }
     }
 }

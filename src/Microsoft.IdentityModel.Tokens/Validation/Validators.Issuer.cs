@@ -9,11 +9,12 @@ using Microsoft.IdentityModel.Logging;
 #nullable enable
 namespace Microsoft.IdentityModel.Tokens
 {
+    // TODO how do we extend this?
     internal enum IssuerValidationSource
     {
         NotValidated = 0,
-        IssuerIsConfigurationIssuer,
-        IssuerIsAmongValidIssuers
+        IssuerMatchedConfiguration,
+        IssuerMatchedValidationParameters
     }
 
     internal record struct ValidatedIssuer(string Issuer, IssuerValidationSource ValidationSource);
@@ -102,7 +103,7 @@ namespace Microsoft.IdentityModel.Tokens
                     //    LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer), callContext);
 
 
-                    return new ValidatedIssuer(issuer, IssuerValidationSource.IssuerIsConfigurationIssuer);
+                    return new ValidatedIssuer(issuer, IssuerValidationSource.IssuerMatchedConfiguration);
                 }
             }
 
@@ -125,7 +126,7 @@ namespace Microsoft.IdentityModel.Tokens
                         //if (LogHelper.IsEnabled(EventLogLevel.Informational))
                         //    LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer));
 
-                        return new ValidatedIssuer(issuer, IssuerValidationSource.IssuerIsAmongValidIssuers);
+                        return new ValidatedIssuer(issuer, IssuerValidationSource.IssuerMatchedValidationParameters);
                     }
                 }
             }
