@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -1132,10 +1131,10 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             // By default, JwtSecurityTokenHandler.DefaultMapInboundClaims should be true so make sure we initialize the InboundClaimTypeMap with the default mappings.
             Assert.Equal(73, handler.InboundClaimTypeMap.Count);
 
-            JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
             handler = new JwtSecurityTokenHandler();
+            handler.MapInboundClaims = false;
 
-            // Make sure that we don't populate the InboundClaimTypeMap if DefaultMapInboundClaims was previously set to false.
+            // Make sure that we don't populate the InboundClaimTypeMap if MapInboundClaims was set to false.
             Assert.Empty(handler.InboundClaimTypeMap);
 
             var claims = new List<Claim>
@@ -1154,8 +1153,6 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             // Check to make sure that setting MapInboundClaims to true initializes the InboundClaimType map with the default mappings if it was previously empty.
             Assert.Equal(73, handler.InboundClaimTypeMap.Count);
-            // Check to make sure that changing the instance property did not alter the static property.
-            Assert.True(JwtSecurityTokenHandler.DefaultMapInboundClaims == false);
         }
 
         [Theory, MemberData(nameof(ReadTimesExpressedAsDoublesTheoryData), DisableDiscoveryEnumeration = true)]

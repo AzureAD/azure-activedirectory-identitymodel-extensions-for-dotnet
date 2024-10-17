@@ -112,6 +112,10 @@ namespace System.IdentityModel.Tokens.Jwt
                 if (!_mapInboundClaims && value && _inboundClaimTypeMap.Count == 0)
                     _inboundClaimTypeMap = new Dictionary<string, string>(DefaultInboundClaimTypeMap);
 
+                // If the inbound claim type mapping is on and being turned off, make sure that the _inboundClaimTypeMap is empty.
+                if (_mapInboundClaims && !value && _inboundClaimTypeMap.Count > 0)
+                    _inboundClaimTypeMap.Clear();
+
                 _mapInboundClaims = value;
             }
         }
