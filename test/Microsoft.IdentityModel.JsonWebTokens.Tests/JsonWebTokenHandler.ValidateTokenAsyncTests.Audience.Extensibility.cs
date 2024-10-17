@@ -74,13 +74,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 var theoryData = new TheoryData<ValidateTokenAsyncAudienceExtensibilityTheoryData>();
                 theoryData.Add(new ValidateTokenAsyncAudienceExtensibilityTheoryData("DefaultDelegate_Valid_AudiencesMatch")
                 {
-                    Audience = Default.Audience,
-                    ValidationParameters = CreateValidationParameters([Default.Audience], audienceValidationDelegate: null),
+                    ValidationParameters = CreateValidationParameters(audienceValidationDelegate: null),
                 });
 
                 theoryData.Add(new ValidateTokenAsyncAudienceExtensibilityTheoryData("DefaultDelegate_Invalid_AudiencesDontMatch")
                 {
-                    ValidationParameters = CreateValidationParameters([Default.Audience], audienceValidationDelegate: null),
+                    ValidationParameters = CreateValidationParameters(audienceValidationDelegate: null),
                     Audience = "CustomAudience",
                     ExpectedIsValid = false,
                     ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10215:"),
@@ -88,8 +87,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
                 theoryData.Add(new ValidateTokenAsyncAudienceExtensibilityTheoryData("CustomDelegate_Valid_DelegateReturnsAudience")
                 {
-                    Audience = Default.Audience,
-                    ValidationParameters = CreateValidationParameters([Default.Audience], audienceValidationDelegate: delegate
+                    ValidationParameters = CreateValidationParameters(audienceValidationDelegate: delegate
                     (IList<string> audiences,
                     SecurityToken? securityToken,
                     ValidationParameters validationParameters,
@@ -102,8 +100,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 theoryData.Add(new ValidateTokenAsyncAudienceExtensibilityTheoryData(
                         "CustomDelegate_Invalid_DelegateReturnsValidationErrorWithDefaultExceptionType")
                 {
-                    Audience = Default.Audience,
-                    ValidationParameters = CreateValidationParameters([Default.Audience], audienceValidationDelegate: delegate
+                    ValidationParameters = CreateValidationParameters(audienceValidationDelegate: delegate
                     (IList<string> audiences,
                     SecurityToken? securityToken,
                     ValidationParameters validationParameters,
@@ -123,8 +120,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 theoryData.Add(new ValidateTokenAsyncAudienceExtensibilityTheoryData(
                         "CustomDelegate_Invalid_DelegateReturnsValidationErrorWithCustomExceptionType_NoCustomValidationError")
                 {
-                    Audience = Default.Audience,
-                    ValidationParameters = CreateValidationParameters([Default.Audience], audienceValidationDelegate: delegate
+                    ValidationParameters = CreateValidationParameters(audienceValidationDelegate: delegate
                     (IList<string> audiences,
                     SecurityToken? securityToken,
                     ValidationParameters validationParameters,
@@ -145,8 +141,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 theoryData.Add(new ValidateTokenAsyncAudienceExtensibilityTheoryData(
                         "CustomDelegate_Invalid_DelegateReturnsValidationErrorWithCustomExceptionType_CustomValidationErrorUsed")
                 {
-                    Audience = Default.Audience,
-                    ValidationParameters = CreateValidationParameters([Default.Audience], audienceValidationDelegate: delegate
+                    ValidationParameters = CreateValidationParameters(audienceValidationDelegate: delegate
                     (IList<string> audiences,
                     SecurityToken? securityToken,
                     ValidationParameters validationParameters,
@@ -166,8 +161,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
                 theoryData.Add(new ValidateTokenAsyncAudienceExtensibilityTheoryData("CustomDelegate_Invalid_DelegateThrows")
                 {
-                    Audience = Default.Audience,
-                    ValidationParameters = CreateValidationParameters([Default.Audience], audienceValidationDelegate: delegate
+                    ValidationParameters = CreateValidationParameters(audienceValidationDelegate: delegate
                     (IList<string> audiences,
                     SecurityToken? securityToken,
                     ValidationParameters validationParameters,
@@ -182,11 +176,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 return theoryData;
 
                 static ValidationParameters CreateValidationParameters(
-                    List<string>? audiences,
                     AudienceValidationDelegate? audienceValidationDelegate)
                 {
                     ValidationParameters validationParameters = new ValidationParameters();
-                    audiences?.ForEach(audience => validationParameters.ValidAudiences.Add(audience));
+                    validationParameters.ValidAudiences.Add(Default.Audience);
 
                     if (audienceValidationDelegate is not null)
                         validationParameters.AudienceValidator = audienceValidationDelegate;
