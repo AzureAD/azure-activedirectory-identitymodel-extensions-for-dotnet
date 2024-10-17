@@ -43,7 +43,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     CancellationToken.None);
 
             // Ensure validity of the results match the expected result.
-            if (tokenValidationResult.IsValid != validationResult.IsSuccess)
+            if (tokenValidationResult.IsValid != validationResult.IsValid)
             {
                 context.AddDiff($"tokenValidationResult.IsValid != validationResult.IsSuccess");
                 theoryData.ExpectedExceptionValidationParameters!.ProcessException(validationResult.UnwrapError().GetException(), context);

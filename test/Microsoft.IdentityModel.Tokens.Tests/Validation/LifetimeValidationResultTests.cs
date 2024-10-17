@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 theoryData.ValidationParameters,
                 new CallContext());
 
-            if (result.IsSuccess)
+            if (result.IsValid)
             {
                 IdentityComparer.AreValidatedLifetimesEqual(
                     theoryData.Result.UnwrapResult(),

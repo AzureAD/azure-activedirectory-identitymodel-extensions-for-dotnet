@@ -30,7 +30,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 theoryData.ValidationParameters,
                 theoryData.CallContext);
 
-            if (result.IsSuccess)
+            if (result.IsValid)
             {
                 IdentityComparer.AreStringsEqual(
                     result.UnwrapResult(),
@@ -151,7 +151,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 theoryData.ValidationParameters,
                 theoryData.CallContext);
 
-            if (result.IsSuccess)
+            if (result.IsValid)
             {
                 IdentityComparer.AreStringsEqual(
                     result.UnwrapResult(),

@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 theoryData.Configuration,
                 new CallContext());
 
-            if (result.IsSuccess)
+            if (result.IsValid)
             {
                 IdentityComparer.AreStringsEqual(
                     result.UnwrapResult(),

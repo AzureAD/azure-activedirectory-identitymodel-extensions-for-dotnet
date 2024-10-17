@@ -23,7 +23,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 theoryData.BaseConfiguration,
                 new CallContext());
 
-            if (result.IsSuccess)
+            if (result.IsValid)
             {
                 IdentityComparer.AreValidatedSigningKeyLifetimesEqual(
                     theoryData.Result.UnwrapResult(),

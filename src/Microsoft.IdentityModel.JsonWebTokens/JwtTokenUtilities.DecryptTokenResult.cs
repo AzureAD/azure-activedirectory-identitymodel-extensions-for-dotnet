@@ -68,7 +68,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     }
 
                     ValidationResult<string> result = validationParameters.AlgorithmValidator(zipAlgorithm, key, jsonWebToken, validationParameters, callContext);
-                    if (!result.IsSuccess)
+                    if (!result.IsValid)
                     {
                         (exceptionStrings ??= new StringBuilder()).AppendLine(result.UnwrapError().MessageDetail.Message);
                         continue;

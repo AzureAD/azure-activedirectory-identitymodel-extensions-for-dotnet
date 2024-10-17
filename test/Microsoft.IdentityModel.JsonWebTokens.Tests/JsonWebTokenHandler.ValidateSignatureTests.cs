@@ -47,7 +47,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     DebugId = theoryData.TestId
                 });
 
-            if (result.IsSuccess)
+            if (result.IsValid)
             {
                 IdentityComparer.AreSecurityKeysEqual(
                     result.UnwrapResult(),

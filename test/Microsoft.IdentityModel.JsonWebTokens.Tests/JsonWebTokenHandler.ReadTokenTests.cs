@@ -21,7 +21,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 theoryData.Token,
                 new CallContext());
 
-            if (result.IsSuccess)
+            if (result.IsValid)
             {
                 IdentityComparer.AreEqual(result.UnwrapResult(),
                     theoryData.Result.UnwrapResult(),

@@ -55,12 +55,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             if (tokenValidationParametersResult.IsValid != theoryData.ExpectedIsValid)
                 context.AddDiff($"tokenValidationParametersResult.IsValid != theoryData.ExpectedIsValid");
 
-            if (validationParametersResult.IsSuccess != theoryData.ExpectedIsValid)
+            if (validationParametersResult.IsValid != theoryData.ExpectedIsValid)
                 context.AddDiff($"validationParametersResult.IsSuccess != theoryData.ExpectedIsValid");
 
             if (theoryData.ExpectedIsValid &&
                 tokenValidationParametersResult.IsValid &&
-                validationParametersResult.IsSuccess)
+                validationParametersResult.IsValid)
             {
                 IdentityComparer.AreEqual(
                     tokenValidationParametersResult.ClaimsIdentity,
@@ -75,7 +75,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 theoryData.ExpectedException.ProcessException(tokenValidationParametersResult.Exception, context);
 
-                if (!validationParametersResult.IsSuccess)
+                if (!validationParametersResult.IsValid)
                 {
                     // If there is a special case for the ValidationParameters path, use that.
                     if (theoryData.ExpectedExceptionValidationParameters != null)

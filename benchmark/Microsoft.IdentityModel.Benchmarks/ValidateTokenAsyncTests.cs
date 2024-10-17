@@ -105,7 +105,7 @@ namespace Microsoft.IdentityModel.Benchmarks
             // Because ValidationResult is an internal type, we cannot return it in the benchmark.
             // We return a boolean instead until the type is made public.
             ValidationResult<ValidatedToken> result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
-            return result.IsSuccess;
+            return result.IsValid;
         }
 
         [BenchmarkCategory("ValidateTokenAsync_FailTwiceBeforeSuccess"), Benchmark(Baseline = true)]
@@ -135,7 +135,7 @@ namespace Microsoft.IdentityModel.Benchmarks
             result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidValidationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
             result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
 
-            return result.IsSuccess;
+            return result.IsValid;
         }
 
         [BenchmarkCategory("ValidateTokenAsync_FailFourTimesBeforeSuccess"), Benchmark(Baseline = true)]
@@ -171,7 +171,7 @@ namespace Microsoft.IdentityModel.Benchmarks
             result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidValidationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
             result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _validationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
 
-            return result.IsSuccess;
+            return result.IsValid;
         }
 
         [BenchmarkCategory("ValidateTokenAsyncClaimAccess"), Benchmark(Baseline = true)]

@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             var conditionsResult = ValidateConditions(samlToken, validationParameters, callContext);
 
-            if (!conditionsResult.IsSuccess)
+            if (!conditionsResult.IsValid)
             {
                 return conditionsResult.UnwrapError().AddStackFrame(new StackFrame(true));
             }
@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 validationParameters,
                 callContext);
 
-            if (!lifetimeValidationResult.IsSuccess)
+            if (!lifetimeValidationResult.IsValid)
             {
                 StackFrames.LifetimeValidationFailed ??= new StackFrame(true);
                 return lifetimeValidationResult.UnwrapError().AddStackFrame(StackFrames.LifetimeValidationFailed);
@@ -94,7 +94,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     validationParameters,
                     callContext);
 
-                if (!oneTimeUseValidationResult.IsSuccess)
+                if (!oneTimeUseValidationResult.IsValid)
                 {
                     StackFrames.OneTimeUseValidationFailed ??= new StackFrame(true);
                     return oneTimeUseValidationResult.UnwrapError().AddStackFrame(StackFrames.OneTimeUseValidationFailed);
@@ -128,7 +128,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     samlToken,
                     validationParameters,
                     callContext);
-                if (!audienceValidationResult.IsSuccess)
+                if (!audienceValidationResult.IsValid)
                     return audienceValidationResult.UnwrapError();
 
                 // Audience is valid, save it for later.
