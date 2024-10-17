@@ -71,109 +71,115 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             get
             {
-                return new TheoryData<ValidateTokenAsyncAudienceExtensibilityTheoryData>
+                var theoryData = new TheoryData<ValidateTokenAsyncAudienceExtensibilityTheoryData>();
+                theoryData.Add(new ValidateTokenAsyncAudienceExtensibilityTheoryData("DefaultDelegate_Valid_AudiencesMatch")
                 {
-                    new ValidateTokenAsyncAudienceExtensibilityTheoryData("DefaultDelegate_Valid_AudiencesMatch")
+                    Audience = Default.Audience,
+                    ValidationParameters = CreateValidationParameters([Default.Audience], audienceValidationDelegate: null),
+                });
+
+                theoryData.Add(new ValidateTokenAsyncAudienceExtensibilityTheoryData("DefaultDelegate_Invalid_AudiencesDontMatch")
+                {
+                    ValidationParameters = CreateValidationParameters([Default.Audience], audienceValidationDelegate: null),
+                    Audience = "CustomAudience",
+                    ExpectedIsValid = false,
+                    ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10215:"),
+                });
+
+                theoryData.Add(new ValidateTokenAsyncAudienceExtensibilityTheoryData("CustomDelegate_Valid_DelegateReturnsAudience")
+                {
+                    Audience = Default.Audience,
+                    ValidationParameters = CreateValidationParameters([Default.Audience], audienceValidationDelegate: delegate
+                    (IList<string> audiences,
+                    SecurityToken? securityToken,
+                    ValidationParameters validationParameters,
+                    CallContext callContext)
                     {
-                        Audience = Default.Audience,
-                        ValidationParameters = CreateValidationParameters([Default.Audience], audienceValidationDelegate: null),
-                    },
-                    new ValidateTokenAsyncAudienceExtensibilityTheoryData("DefaultDelegate_Invalid_AudiencesDontMatch")
-                    {
-                        ValidationParameters = CreateValidationParameters([Default.Audience], audienceValidationDelegate: null),
-                        Audience = "CustomAudience",
-                        ExpectedIsValid = false,
-                        ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10215:"),
-                    },
-                    new ValidateTokenAsyncAudienceExtensibilityTheoryData("CustomDelegate_Valid_DelegateReturnsAudience")
-                    {
-                        Audience = Default.Audience,
-                        ValidationParameters = CreateValidationParameters([Default.Audience], audienceValidationDelegate: delegate
-                        (IList<string> audiences,
-                        SecurityToken? securityToken,
-                        ValidationParameters validationParameters,
-                        CallContext callContext)
-                        {
-                            return "CustomAudience";
-                        }),
-                    },
-                    new ValidateTokenAsyncAudienceExtensibilityTheoryData(
+                        return "CustomAudience";
+                    }),
+                });
+
+                theoryData.Add(new ValidateTokenAsyncAudienceExtensibilityTheoryData(
                         "CustomDelegate_Invalid_DelegateReturnsValidationErrorWithDefaultExceptionType")
+                {
+                    Audience = Default.Audience,
+                    ValidationParameters = CreateValidationParameters([Default.Audience], audienceValidationDelegate: delegate
+                    (IList<string> audiences,
+                    SecurityToken? securityToken,
+                    ValidationParameters validationParameters,
+                    CallContext callContext)
                     {
-                        Audience = Default.Audience,
-                        ValidationParameters = CreateValidationParameters([Default.Audience], audienceValidationDelegate: delegate
-                        (IList<string> audiences,
-                        SecurityToken? securityToken,
-                        ValidationParameters validationParameters,
-                        CallContext callContext)
-                        {
-                            return new AudienceValidationError(
-                                new MessageDetail("Custom message from the delegate."),
-                                typeof(SecurityTokenInvalidAudienceException),
-                                new StackFrame(true),
-                                [Default.Audience]);
-                        }),
-                        ExpectedIsValid = false,
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidAudienceException), "Custom message from the delegate."),
-                        ExpectedInvalidAudience = Default.Audience,
-                    },
-                    new ValidateTokenAsyncAudienceExtensibilityTheoryData(
+                        return new AudienceValidationError(
+                            new MessageDetail("Custom message from the delegate."),
+                            typeof(SecurityTokenInvalidAudienceException),
+                            new StackFrame(true),
+                            [Default.Audience]);
+                    }),
+                    ExpectedIsValid = false,
+                    ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidAudienceException), "Custom message from the delegate."),
+                    ExpectedInvalidAudience = Default.Audience,
+                });
+
+                theoryData.Add(new ValidateTokenAsyncAudienceExtensibilityTheoryData(
                         "CustomDelegate_Invalid_DelegateReturnsValidationErrorWithCustomExceptionType_NoCustomValidationError")
+                {
+                    Audience = Default.Audience,
+                    ValidationParameters = CreateValidationParameters([Default.Audience], audienceValidationDelegate: delegate
+                    (IList<string> audiences,
+                    SecurityToken? securityToken,
+                    ValidationParameters validationParameters,
+                    CallContext callContext)
                     {
-                        Audience = Default.Audience,
-                        ValidationParameters = CreateValidationParameters([Default.Audience], audienceValidationDelegate: delegate
-                        (IList<string> audiences,
-                        SecurityToken? securityToken,
-                        ValidationParameters validationParameters,
-                        CallContext callContext)
-                        {
-                            return new AudienceValidationError(
-                                new MessageDetail("Custom message from the delegate."),
-                                typeof(CustomInvalidAudienceException),
-                                new StackFrame(true),
-                                [Default.Audience]);
-                        }),
-                        ExpectedIsValid = false,
-                        // The delegate returns a custom exception but does not implement a custom ValidationError.
-                        ExpectedException = ExpectedException.SecurityTokenException("IDX10002:"),
-                        ExpectedInvalidAudience = Default.Audience,
-                    },
-                    new ValidateTokenAsyncAudienceExtensibilityTheoryData(
+                        return new AudienceValidationError(
+                            new MessageDetail("Custom message from the delegate."),
+                            typeof(CustomInvalidAudienceException),
+                            new StackFrame(true),
+                            [Default.Audience]);
+                    }),
+                    ExpectedIsValid = false,
+                    // The delegate returns a custom exception but does not implement a custom ValidationError.
+                    ExpectedException = ExpectedException.SecurityTokenException("IDX10002:"),
+                    ExpectedInvalidAudience = Default.Audience,
+                });
+
+                theoryData.Add(new ValidateTokenAsyncAudienceExtensibilityTheoryData(
                         "CustomDelegate_Invalid_DelegateReturnsValidationErrorWithCustomExceptionType_CustomValidationErrorUsed")
+                {
+                    Audience = Default.Audience,
+                    ValidationParameters = CreateValidationParameters([Default.Audience], audienceValidationDelegate: delegate
+                    (IList<string> audiences,
+                    SecurityToken? securityToken,
+                    ValidationParameters validationParameters,
+                    CallContext callContext)
                     {
-                        Audience = Default.Audience,
-                        ValidationParameters = CreateValidationParameters([Default.Audience], audienceValidationDelegate: delegate
-                        (IList<string> audiences,
-                        SecurityToken? securityToken,
-                        ValidationParameters validationParameters,
-                        CallContext callContext)
-                        {
-                            return new CustomAudienceValidationError(
-                                new MessageDetail("Custom message from the delegate."),
-                                typeof(CustomInvalidAudienceException),
-                                new StackFrame(true),
-                                [Default.Audience]);
-                        }),
-                        ExpectedIsValid = false,
-                        // The delegate uses a custom validation error that implements GetException to return the custom exception.
-                        ExpectedException = new ExpectedException(typeof(CustomInvalidAudienceException), "Custom message from the delegate."),
-                        ExpectedInvalidAudience = Default.Audience,
-                    },
-                    new ValidateTokenAsyncAudienceExtensibilityTheoryData("CustomDelegate_Invalid_DelegateThrows")
+                        return new CustomAudienceValidationError(
+                            new MessageDetail("Custom message from the delegate."),
+                            typeof(CustomInvalidAudienceException),
+                            new StackFrame(true),
+                            [Default.Audience]);
+                    }),
+                    ExpectedIsValid = false,
+                    // The delegate uses a custom validation error that implements GetException to return the custom exception.
+                    ExpectedException = new ExpectedException(typeof(CustomInvalidAudienceException), "Custom message from the delegate."),
+                    ExpectedInvalidAudience = Default.Audience,
+                });
+
+                theoryData.Add(new ValidateTokenAsyncAudienceExtensibilityTheoryData("CustomDelegate_Invalid_DelegateThrows")
+                {
+                    Audience = Default.Audience,
+                    ValidationParameters = CreateValidationParameters([Default.Audience], audienceValidationDelegate: delegate
+                    (IList<string> audiences,
+                    SecurityToken? securityToken,
+                    ValidationParameters validationParameters,
+                    CallContext callContext)
                     {
-                        Audience = Default.Audience,
-                        ValidationParameters = CreateValidationParameters([Default.Audience], audienceValidationDelegate: delegate
-                        (IList<string> audiences,
-                        SecurityToken? securityToken,
-                        ValidationParameters validationParameters,
-                        CallContext callContext)
-                        {
-                            throw new CustomInvalidAudienceException("Custom exception from the delegate.");
-                        }),
-                        ExpectedIsValid = false,
-                        ThrownException = new ExpectedException(typeof(CustomInvalidAudienceException), "Custom exception from the delegate."),
-                    },
-                };
+                        throw new CustomInvalidAudienceException("Custom exception from the delegate.");
+                    }),
+                    ExpectedIsValid = false,
+                    ThrownException = new ExpectedException(typeof(CustomInvalidAudienceException), "Custom exception from the delegate."),
+                });
+
+                return theoryData;
 
                 static ValidationParameters CreateValidationParameters(
                     List<string>? audiences,
