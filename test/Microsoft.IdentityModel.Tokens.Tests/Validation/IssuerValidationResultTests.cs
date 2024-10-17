@@ -115,7 +115,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 theoryData.Add(new IssuerValidationResultsTheoryData("Valid_FromConfig")
                 {
                     Issuer = issClaim,
-                    Result = new ValidatedIssuer(issClaim, IssuerValidationSource.IssuerIsConfigurationIssuer),
+                    Result = new ValidatedIssuer(issClaim, IssuerValidationSource.IssuerMatchedConfiguration),
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
                     ValidationParameters = new ValidationParameters()
                     {
@@ -126,7 +126,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 theoryData.Add(new IssuerValidationResultsTheoryData("Valid_FromValidationParametersValidIssuers")
                 {
                     Issuer = issClaim,
-                    Result = new ValidatedIssuer(issClaim, IssuerValidationSource.IssuerIsAmongValidIssuers),
+                    Result = new ValidatedIssuer(issClaim, IssuerValidationSource.IssuerMatchedValidationParameters),
                     SecurityToken = JsonUtilities.CreateUnsignedJsonWebToken(JwtRegisteredClaimNames.Iss, issClaim),
                     ValidationParameters = new ValidationParameters(),
                     ValidIssuerToAdd = issClaim

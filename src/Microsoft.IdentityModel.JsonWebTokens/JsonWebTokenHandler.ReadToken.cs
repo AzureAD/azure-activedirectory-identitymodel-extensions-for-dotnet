@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             CallContext? callContext)
 #pragma warning disable CA1801 // TODO: remove pragma disable once callContext is used for logging
         {
-            if (String.IsNullOrEmpty(token))
+            if (string.IsNullOrEmpty(token))
             {
                 StackFrame nullTokenStackFrame = StackFrames.ReadTokenNullOrEmpty ?? new StackFrame(true);
                 return ValidationError.NullParameter(

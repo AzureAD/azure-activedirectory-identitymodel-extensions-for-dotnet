@@ -11,7 +11,7 @@ using System.Text;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-    internal class SecurityTokenArgumentNullException : ArgumentNullException, ISecurityTokenException
+    internal class SecurityTokenArgumentNullException : ArgumentNullException
     {
         private string? _stackTrace;
         private ValidationError? _validationError;
