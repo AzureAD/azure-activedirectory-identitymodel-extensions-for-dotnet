@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateTokenAsync_Lifetime", theoryData);
 
-            string jwtString = CreateToken(theoryData.IssuedAt, theoryData.NotBefore, theoryData.Expires);
+            string jwtString = CreateTokenWithLifetime(theoryData.IssuedAt, theoryData.NotBefore, theoryData.Expires);
 
             await ValidateAndCompareResults(jwtString, theoryData, context);
 
@@ -155,7 +155,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             public DateTime? Expires { get; set; }
         }
 
-        private static string CreateToken(DateTime? issuedAt, DateTime? notBefore, DateTime? expires)
+        private static string CreateTokenWithLifetime(DateTime? issuedAt, DateTime? notBefore, DateTime? expires)
         {
             JsonWebTokenHandler jsonWebTokenHandler = new JsonWebTokenHandler();
             jsonWebTokenHandler.SetDefaultTimesOnTokenCreation = false; // Allow for null values to be passed in to validate.

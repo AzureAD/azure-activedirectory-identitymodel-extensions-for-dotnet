@@ -79,6 +79,47 @@ namespace Microsoft.IdentityModel.Tokens
             return sb.ToString();
         }
 
+
+        /// <summary>
+        /// Serializes the list of strings into string as follows:
+        /// 'str1','str2','str3' ...
+        /// </summary>
+        /// <param name="strings">
+        /// The strings used to build a comma delimited string.
+        /// </param>
+        /// <returns>
+        /// The single <see cref="string"/>.
+        /// </returns>
+        internal static string SerializeAsSingleCommaDelimitedString(IList<string> strings)
+        {
+            if (strings == null)
+            {
+                return Utility.Null;
+            }
+
+            StringBuilder sb = new();
+            bool first = true;
+            for (int i = 0; i < strings.Count; i++)
+            {
+                if (first)
+                {
+                    sb.AppendFormat(CultureInfo.InvariantCulture, "{0}", strings[i] ?? Utility.Null);
+                    first = false;
+                }
+                else
+                {
+                    sb.AppendFormat(CultureInfo.InvariantCulture, ", {0}", strings[i] ?? Utility.Null);
+                }
+            }
+
+            if (first)
+            {
+                return Utility.Empty;
+            }
+
+            return sb.ToString();
+        }
+
         /// <summary>
         /// Returns whether the input string is https.
         /// </summary>

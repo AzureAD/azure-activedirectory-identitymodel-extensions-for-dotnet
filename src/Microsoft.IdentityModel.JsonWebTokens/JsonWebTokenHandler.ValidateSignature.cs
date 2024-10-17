@@ -245,10 +245,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     new MessageDetail(
                         TokenLogMessages.IDX10518,
                         result.UnwrapError().MessageDetail.Message),
-                    ValidationFailureType.SignatureValidationFailed,
-                    typeof(SecurityTokenInvalidSignatureException),
-                    new StackFrame(true),
-                    result.UnwrapError());
+                    ValidationFailureType.SignatureAlgorithmValidationFailed,
+                    typeof(SecurityTokenInvalidAlgorithmException),
+                    new StackFrame(true));
 
             SignatureProvider signatureProvider = cryptoProviderFactory.CreateForVerifying(key, jsonWebToken.Alg);
             try
