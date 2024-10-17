@@ -15,6 +15,8 @@ namespace Microsoft.IdentityModel.Tokens
         // general
         public const string IDX10000 = "IDX10000: The parameter '{0}' cannot be a 'null' or an empty object. ";
         public const string IDX10001 = "IDX10001: Invalid argument '{0}'. Argument must be of type '{1}'.";
+        // TODO: Confirm the wording of this message. Possibly create a wiki page to refer users to for more information.
+        public const string IDX10002 = "IDX10002: Unknown exception type returned. Type: '{0}'. Message: '{1}'.";
 
         // properties, configuration 
         public const string IDX10101 = "IDX10101: MaximumTokenSizeInBytes must be greater than zero. value: '{0}'";
@@ -84,6 +86,7 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10265 = "IDX10265: Reading issuer signing keys from configuration.";
         //public const string IDX10266 = "IDX10266: Unable to validate issuer. validationParameters.ValidIssuer is null or whitespace, validationParameters.ValidIssuers is null or empty and ConfigurationManager is null.";
         public const string IDX10267 = "IDX10267: '{0}' has been called by a derived class '{1}' which has not implemented this method. For this call graph to succeed, '{1}' will need to implement '{0}'.";
+        public const string IDX10268 = "IDX10268: Unable to validate audience, validationParameters.ValidAudiences.Count == 0.";
 
 
         // 10500 - SignatureValidation

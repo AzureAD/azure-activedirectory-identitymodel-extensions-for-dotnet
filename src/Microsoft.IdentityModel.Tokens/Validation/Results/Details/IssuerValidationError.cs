@@ -21,7 +21,7 @@ namespace Microsoft.IdentityModel.Tokens
             _invalidIssuer = invalidIssuer;
         }
 
-        public override Exception GetException()
+        internal override Exception GetException()
         {
             if (ExceptionType == typeof(SecurityTokenInvalidIssuerException))
             {

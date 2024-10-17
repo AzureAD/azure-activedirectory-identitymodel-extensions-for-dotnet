@@ -71,9 +71,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
                         ValidationParameters = null,
                         Result = new ValidationError(
-                            new MessageDetail(
-                                LogMessages.IDX10000,
-                                LogHelper.MarkAsNonPII("validationParameters")),
+                            MessageDetail.NullParameter("validationParameters"),
                             ValidationFailureType.NullArgument,
                             typeof(SecurityTokenArgumentNullException),
                             null)
@@ -81,10 +79,10 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     new AudienceValidationTheoryData("AudiencesNull")
                     {
                         TokenAudiences = null,
-                        ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10207:"),
+                        ExpectedException = ExpectedException.SecurityTokenArgumentNullException("IDX10000:"),
                         Result = new ValidationError(
-                            new MessageDetail(LogMessages.IDX10207),
-                            ValidationFailureType.AudienceValidationFailed,
+                            MessageDetail.NullParameter("tokenAudiences"),
+                            ValidationFailureType.NullArgument,
                             typeof(SecurityTokenInvalidAudienceException),
                             null)
                     },
@@ -97,7 +95,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                             new MessageDetail(
                                 LogMessages.IDX10206,
                                 null),
-                            ValidationFailureType.AudienceValidationFailed,
+                            ValidationFailureType.NoTokenAudiencesProvided,
                             typeof(SecurityTokenInvalidAudienceException),
                             null)
                     },
