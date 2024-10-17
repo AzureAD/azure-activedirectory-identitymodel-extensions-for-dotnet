@@ -108,9 +108,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         return new AudienceValidationError(
                             new MessageDetail("Custom message from the delegate."),
+                            ValidationFailureType.AudienceValidationFailed,
                             typeof(SecurityTokenInvalidAudienceException),
                             new StackFrame(true),
-                            [Default.Audience]);
+                            [Default.Audience],
+                            null);
                     }),
                     ExpectedIsValid = false,
                     ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidAudienceException), "Custom message from the delegate."),
@@ -128,9 +130,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         return new AudienceValidationError(
                             new MessageDetail("Custom message from the delegate."),
+                            ValidationFailureType.AudienceValidationFailed,
                             typeof(CustomInvalidAudienceException),
                             new StackFrame(true),
-                            [Default.Audience]);
+                            [Default.Audience],
+                            null);
                     }),
                     ExpectedIsValid = false,
                     // The delegate returns a custom exception but does not implement a custom ValidationError.
@@ -223,14 +227,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             public CustomAudienceValidationError(MessageDetail messageDetail,
                 Type exceptionType,
                 StackFrame stackFrame,
-                IList<string>? invalidAudiences) : base(messageDetail, exceptionType, stackFrame, invalidAudiences)
+                IList<string>? tokenAudiences) :
+                base(messageDetail, ValidationFailureType.AudienceValidationFailed, exceptionType, stackFrame, tokenAudiences, null)
             {
             }
 
             internal override Exception GetException()
             {
                 if (ExceptionType == typeof(CustomInvalidAudienceException))
-                    return new CustomInvalidAudienceException(MessageDetail.Message) { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(InvalidAudiences) };
+                    return new CustomInvalidAudienceException(MessageDetail.Message) { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(TokenAudiences) };
 
                 return base.GetException();
             }
