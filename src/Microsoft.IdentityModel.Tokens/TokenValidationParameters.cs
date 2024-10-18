@@ -541,6 +541,11 @@ namespace Microsoft.IdentityModel.Tokens
         public SignatureValidatorUsingConfiguration SignatureValidatorUsingConfiguration { get; set; }
 
         /// <summary>
+        /// Gets or sets the time provider.
+        /// </summary>
+        internal TimeProvider TimeProvider { get; set; } = TimeProvider.System;
+
+        /// <summary>
         /// Gets or sets the <see cref="SecurityKey"/> that is to be used for decryption.
         /// </summary>
         public SecurityKey TokenDecryptionKey { get; set; }
