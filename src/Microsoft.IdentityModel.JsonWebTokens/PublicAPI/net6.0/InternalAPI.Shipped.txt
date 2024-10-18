@@ -1,0 +1,1 @@
+static Microsoft.IdentityModel.JsonWebTokens.JwtTokenUtilities.CreateSignature(System.ReadOnlySpan<byte> data, System.Span<byte> destination, Microsoft.IdentityModel.Tokens.SigningCredentials signingCredentials, out int bytesWritten) -> bool

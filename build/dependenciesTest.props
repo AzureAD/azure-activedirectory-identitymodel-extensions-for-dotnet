@@ -9,7 +9,7 @@
     <NewtonsoftVersion>13.0.3</NewtonsoftVersion>
     <SystemNetHttp>4.3.4</SystemNetHttp>
     <SystemSecurityClaimsVersion>4.3.0</SystemSecurityClaimsVersion>
-    <SystemTextJson>8.0.4</SystemTextJson>
+    <SystemTextJson>8.0.5</SystemTextJson>
     <SystemTextRegularExpressions>4.3.1</SystemTextRegularExpressions>
     <XunitRunnerConsoleVersion>2.9.0</XunitRunnerConsoleVersion>
     <XunitRunnerVisualStudioVersion>2.8.2</XunitRunnerVisualStudioVersion>

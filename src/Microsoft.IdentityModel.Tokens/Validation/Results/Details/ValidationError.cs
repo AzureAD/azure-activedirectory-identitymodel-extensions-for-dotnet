@@ -4,18 +4,14 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
-    internal interface ISecurityTokenException
-    {
-        void SetValidationError(ValidationError validationError);
-    }
-
     /// <summary>
     /// Contains information so that Exceptions can be logged or thrown written as required.
     /// </summary>
-    public class ValidationError
+    internal class ValidationError
     {
         private Type _exceptionType;
 
@@ -31,8 +27,9 @@ namespace Microsoft.IdentityModel.Tokens
             ValidationFailureType failureType,
             Type exceptionType,
             StackFrame stackFrame)
-            : this(MessageDetail, failureType, exceptionType, stackFrame, innerException: null)
+            : this(MessageDetail, failureType, exceptionType, stackFrame, null)
         {
+            // TODO: need to include CallContext.
         }
 
         /// <summary>
@@ -60,47 +57,24 @@ namespace Microsoft.IdentityModel.Tokens
             };
         }
 
-        internal ValidationError(
-            MessageDetail messageDetail,
-            ValidationFailureType failureType,
-            Type exceptionType,
-            StackFrame stackFrame,
-            ValidationError innerValidationError)
-        {
-            InnerValidationError = innerValidationError;
-            MessageDetail = messageDetail;
-            _exceptionType = exceptionType;
-            FailureType = failureType;
-            StackFrames = new List<StackFrame>(4)
-            {
-                stackFrame
-            };
-        }
-
         /// <summary>
         /// Creates an instance of an <see cref="Exception"/> using <see cref="ValidationError"/>
         /// </summary>
         /// <returns>An instance of an Exception.</returns>
-        public Exception GetException()
+        internal virtual Exception GetException()
         {
-            Exception exception = GetException(ExceptionType, InnerException);
-
-            if (exception is ISecurityTokenException securityTokenException)
-            {
-                securityTokenException.SetValidationError(this);
-                AddAdditionalInformation(securityTokenException);
-            }
-
-            return exception;
+            return GetException(ExceptionType, InnerException);
         }
 
-        private Exception GetException(Type exceptionType, Exception innerException)
+        internal Exception GetException(Type exceptionType, Exception innerException)
         {
             Exception exception = null;
 
             if (innerException == null && InnerValidationError == null)
             {
-                if (exceptionType == typeof(SecurityTokenInvalidAudienceException))
+                if (exceptionType == typeof(SecurityTokenArgumentNullException))
+                    return new SecurityTokenArgumentNullException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenInvalidAudienceException))
                     exception = new SecurityTokenInvalidAudienceException(MessageDetail.Message);
                 else if (exceptionType == typeof(SecurityTokenInvalidIssuerException))
                     exception = new SecurityTokenInvalidIssuerException(MessageDetail.Message);
@@ -144,12 +118,20 @@ namespace Microsoft.IdentityModel.Tokens
                     exception = new SecurityTokenException(MessageDetail.Message);
                 else if (exceptionType == typeof(SecurityTokenKeyWrapException))
                     exception = new SecurityTokenKeyWrapException(MessageDetail.Message);
+                else
+                {
+                    // Exception type is unknown
+                    var message = LogHelper.FormatInvariant(LogMessages.IDX10002, exceptionType, MessageDetail.Message);
+                    exception = new SecurityTokenException(message);
+                }
             }
             else
             {
                 Exception actualException = innerException ?? InnerValidationError.GetException();
 
-                if (exceptionType == typeof(SecurityTokenInvalidAudienceException))
+                if (exceptionType == typeof(SecurityTokenArgumentNullException))
+                    return new SecurityTokenArgumentNullException(MessageDetail.Message, innerException);
+                else if (exceptionType == typeof(SecurityTokenInvalidAudienceException))
                     exception = new SecurityTokenInvalidAudienceException(MessageDetail.Message, actualException);
                 else if (exceptionType == typeof(SecurityTokenInvalidIssuerException))
                     exception = new SecurityTokenInvalidIssuerException(MessageDetail.Message, actualException);
@@ -193,14 +175,15 @@ namespace Microsoft.IdentityModel.Tokens
                     exception = new SecurityTokenException(MessageDetail.Message, actualException);
                 else if (exceptionType == typeof(SecurityTokenKeyWrapException))
                     exception = new SecurityTokenKeyWrapException(MessageDetail.Message, actualException);
+                else
+                {
+                    // Exception type is unknown
+                    var message = LogHelper.FormatInvariant(LogMessages.IDX10002, exceptionType, MessageDetail.Message);
+                    exception = new SecurityTokenException(message, actualException);
+                }
             }
 
             return exception;
-        }
-
-        internal virtual void AddAdditionalInformation(ISecurityTokenException exception)
-        {
-            // base implementation is no-op. Derived classes can override to add additional information to the exception.
         }
 
         internal static ValidationError NullParameter(string parameterName, StackFrame stackFrame) => new(

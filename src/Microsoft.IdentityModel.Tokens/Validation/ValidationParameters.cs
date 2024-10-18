@@ -452,7 +452,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// This <see cref="SecurityKey"/> will be used to decrypt the token. This can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier.
         /// </remarks>
-        public ResolveTokenDecryptionKeyDelegate TokenDecryptionKeyResolver { get; set; }
+        internal DecryptionKeyResolverDelegate TokenDecryptionKeyResolver { get; set; }
 
         /// <summary>
         /// Gets the <see cref="IList{T}"/> that is to be used for decrypting inbound tokens.

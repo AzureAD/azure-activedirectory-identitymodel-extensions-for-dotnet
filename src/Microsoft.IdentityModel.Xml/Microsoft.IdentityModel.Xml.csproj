@@ -27,4 +27,9 @@
     <ProjectReference Include="..\Microsoft.IdentityModel.Tokens\Microsoft.IdentityModel.Tokens.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AdditionalFiles Include="InternalAPI.Shipped.txt" />
+    <AdditionalFiles Include="InternalAPI.Unshipped.txt" />
+  </ItemGroup>
+
 </Project>

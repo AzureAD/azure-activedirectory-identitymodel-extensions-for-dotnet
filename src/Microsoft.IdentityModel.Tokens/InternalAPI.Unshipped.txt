@@ -1,0 +1,16 @@
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10002 = "IDX10002: Unknown exception type returned. Type: '{0}'. Message: '{1}'." -> string
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10268 = "IDX10268: Unable to validate audience, validationParameters.ValidAudiences.Count == 0." -> string
+Microsoft.IdentityModel.Tokens.AudienceValidationError.AudienceValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, Microsoft.IdentityModel.Tokens.ValidationFailureType failureType, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, System.Collections.Generic.IList<string> tokenAudiences, System.Collections.Generic.IList<string> validAudiences) -> void
+Microsoft.IdentityModel.Tokens.AudienceValidationError.TokenAudiences.get -> System.Collections.Generic.IList<string>
+Microsoft.IdentityModel.Tokens.IssuerValidationSource.IssuerMatchedConfiguration = 1 -> Microsoft.IdentityModel.Tokens.IssuerValidationSource
+Microsoft.IdentityModel.Tokens.IssuerValidationSource.IssuerMatchedValidationParameters = 2 -> Microsoft.IdentityModel.Tokens.IssuerValidationSource
+Microsoft.IdentityModel.Tokens.ValidationError.GetException(System.Type exceptionType, System.Exception innerException) -> System.Exception
+static Microsoft.IdentityModel.Tokens.AudienceValidationError.AudiencesCountZero -> System.Diagnostics.StackFrame
+static Microsoft.IdentityModel.Tokens.AudienceValidationError.AudiencesNull -> System.Diagnostics.StackFrame
+static Microsoft.IdentityModel.Tokens.AudienceValidationError.ValidateAudienceFailed -> System.Diagnostics.StackFrame
+static Microsoft.IdentityModel.Tokens.AudienceValidationError.ValidationParametersAudiencesCountZero -> System.Diagnostics.StackFrame
+static Microsoft.IdentityModel.Tokens.AudienceValidationError.ValidationParametersNull -> System.Diagnostics.StackFrame
+static Microsoft.IdentityModel.Tokens.Utility.SerializeAsSingleCommaDelimitedString(System.Collections.Generic.IList<string> strings) -> string
+static readonly Microsoft.IdentityModel.Tokens.ValidationFailureType.NoTokenAudiencesProvided -> Microsoft.IdentityModel.Tokens.ValidationFailureType
+static readonly Microsoft.IdentityModel.Tokens.ValidationFailureType.NoValidationParameterAudiencesProvided -> Microsoft.IdentityModel.Tokens.ValidationFailureType
+static readonly Microsoft.IdentityModel.Tokens.ValidationFailureType.SignatureAlgorithmValidationFailed -> Microsoft.IdentityModel.Tokens.ValidationFailureType

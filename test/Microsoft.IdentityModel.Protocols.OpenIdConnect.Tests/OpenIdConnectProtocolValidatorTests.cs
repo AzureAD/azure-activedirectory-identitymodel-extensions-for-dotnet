@@ -12,10 +12,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
 using Xunit;
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 {
@@ -1813,5 +1810,3 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
     }
 }
-
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant
