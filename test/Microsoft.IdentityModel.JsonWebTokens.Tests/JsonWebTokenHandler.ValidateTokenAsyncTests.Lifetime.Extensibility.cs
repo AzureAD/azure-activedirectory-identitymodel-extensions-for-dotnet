@@ -3,6 +3,7 @@
 
 #nullable enable
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
@@ -82,121 +83,156 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 DateTime nowPlus1Hour = now.AddHours(1);
                 DateTime nowMinus1Hour = now.AddHours(-1);
 
-                return new TheoryData<ValidateTokenAsyncLifetimeExtensibilityTheoryData>
+                var theoryData = new TheoryData<ValidateTokenAsyncLifetimeExtensibilityTheoryData>();
+
+                theoryData.Add(new ValidateTokenAsyncLifetimeExtensibilityTheoryData("DefaultDelegate_Valid_LifetimeIsValid")
                 {
-                    new ValidateTokenAsyncLifetimeExtensibilityTheoryData("DefaultDelegate_Valid_LifetimeIsValid")
+                    IssuedAt = now,
+                    NotBefore = nowMinus1Hour,
+                    Expires = nowPlus1Hour,
+                    ValidationParameters = CreateValidationParameters(lifetimeValidationDelegate: null),
+                });
+
+                theoryData.Add(new ValidateTokenAsyncLifetimeExtensibilityTheoryData("DefaultDelegate_Invalid_TokenHasExpired")
+                {
+                    ValidationParameters = CreateValidationParameters(lifetimeValidationDelegate: null),
+                    IssuedAt = nowMinus1Hour,
+                    NotBefore = nowMinus1Hour,
+                    Expires = nowMinus1Hour,
+                    ExpectedIsValid = false,
+                    ExpectedException = ExpectedException.SecurityTokenExpiredException("IDX10223:"),
+                });
+
+                theoryData.Add(new ValidateTokenAsyncLifetimeExtensibilityTheoryData("CustomDelegate_Valid_DelegateReturnsValidatedLifetime")
+                {
+                    IssuedAt = nowMinus1Hour,
+                    NotBefore = nowMinus1Hour,
+                    Expires = nowMinus1Hour,
+                    ValidationParameters = CreateValidationParameters(lifetimeValidationDelegate: delegate
+                    (DateTime? notBefore,
+                    DateTime? expires,
+                    SecurityToken? securityToken,
+                    ValidationParameters validationParameters,
+                    CallContext callContext)
                     {
-                        IssuedAt = now,
-                        NotBefore = nowMinus1Hour,
-                        Expires = nowPlus1Hour,
-                        ValidationParameters = CreateValidationParameters(lifetimeValidationDelegate: null),
-                    },
-                    new ValidateTokenAsyncLifetimeExtensibilityTheoryData("DefaultDelegate_Invalid_TokenHasExpired")
+                        return new ValidatedLifetime(notBefore, expires);
+                    }),
+                });
+
+                theoryData.Add(new ValidateTokenAsyncLifetimeExtensibilityTheoryData("CustomDelegate_Valid_DelegateReturnsEmptyValidatedLifetime")
+                {
+                    IssuedAt = nowMinus1Hour,
+                    NotBefore = nowMinus1Hour,
+                    Expires = nowMinus1Hour,
+                    ValidationParameters = CreateValidationParameters(lifetimeValidationDelegate: delegate
+                    (DateTime? notBefore,
+                    DateTime? expires,
+                    SecurityToken? securityToken,
+                    ValidationParameters validationParameters,
+                    CallContext callContext)
                     {
-                        ValidationParameters = CreateValidationParameters(lifetimeValidationDelegate: null),
-                        IssuedAt = nowMinus1Hour,
-                        NotBefore = nowMinus1Hour,
-                        Expires = nowMinus1Hour,
-                        ExpectedIsValid = false,
-                        ExpectedException = ExpectedException.SecurityTokenExpiredException("IDX10223:"),
-                    },
-                    new ValidateTokenAsyncLifetimeExtensibilityTheoryData("CustomDelegate_Valid_DelegateReturnsValidatedLifetime")
-                    {
-                        IssuedAt = nowMinus1Hour,
-                        NotBefore = nowMinus1Hour,
-                        Expires = nowMinus1Hour,
-                        ValidationParameters = CreateValidationParameters(lifetimeValidationDelegate: delegate
-                        (DateTime? notBefore,
-                        DateTime? expires,
-                        SecurityToken? securityToken,
-                        ValidationParameters validationParameters,
-                        CallContext callContext)
-                        {
-                            return new ValidatedLifetime(notBefore, expires);
-                        }),
-                    },
-                    new ValidateTokenAsyncLifetimeExtensibilityTheoryData("CustomDelegate_Valid_DelegateReturnsEmptyValidatedLifetime")
-                    {
-                        IssuedAt = nowMinus1Hour,
-                        NotBefore = nowMinus1Hour,
-                        Expires = nowMinus1Hour,
-                        ValidationParameters = CreateValidationParameters(lifetimeValidationDelegate: delegate
-                        (DateTime? notBefore,
-                        DateTime? expires,
-                        SecurityToken? securityToken,
-                        ValidationParameters validationParameters,
-                        CallContext callContext)
-                        {
-                            return new ValidatedLifetime();
-                        }),
-                    },
-                    new ValidateTokenAsyncLifetimeExtensibilityTheoryData(
+                        return new ValidatedLifetime();
+                    }),
+                });
+
+                theoryData.Add(new ValidateTokenAsyncLifetimeExtensibilityTheoryData(
                         "CustomDelegate_Invalid_DelegateReturnsValidationErrorWithDefaultExceptionType")
+                {
+                    IssuedAt = nowMinus1Hour,
+                    NotBefore = nowMinus1Hour,
+                    Expires = nowMinus1Hour,
+                    ValidationParameters = CreateValidationParameters(lifetimeValidationDelegate: delegate
+                    (DateTime? notBefore,
+                    DateTime? expires,
+                    SecurityToken? securityToken,
+                    ValidationParameters validationParameters,
+                    CallContext callContext)
                     {
-                        IssuedAt = nowMinus1Hour,
-                        NotBefore = nowMinus1Hour,
-                        Expires = nowMinus1Hour,
-                        ValidationParameters = CreateValidationParameters(lifetimeValidationDelegate: delegate
-                        (DateTime? notBefore,
-                        DateTime? expires,
-                        SecurityToken? securityToken,
-                        ValidationParameters validationParameters,
-                        CallContext callContext)
-                        {
-                            return new LifetimeValidationError(
-                                new MessageDetail("Custom message from the delegate."),
-                                typeof(SecurityTokenInvalidLifetimeException),
-                                new System.Diagnostics.StackFrame(true),
-                                new LifetimeValidationError.AdditionalInformation(notBefore, expires));
-                        }),
-                        ExpectedIsValid = false,
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidLifetimeException), "Custom message from the delegate."),
-                        ExpectedInvalidNotBefore = nowMinus1Hour,
-                        ExpectedInvalidExpires = nowMinus1Hour,
-                    },
-                    new ValidateTokenAsyncLifetimeExtensibilityTheoryData(
-                        "CustomDelegate_Invalid_DelegateReturnsValidationErrorWithCustomExceptionType")
+                        return new LifetimeValidationError(new MessageDetail("Custom message from the delegate."),
+                            typeof(SecurityTokenInvalidLifetimeException),
+                            new System.Diagnostics.StackFrame(true),
+                            (DateTime)notBefore!,
+                            (DateTime)expires!);
+                    }),
+                    ExpectedIsValid = false,
+                    ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidLifetimeException), "Custom message from the delegate."),
+                    ExpectedInvalidNotBefore = nowMinus1Hour,
+                    ExpectedInvalidExpires = nowMinus1Hour,
+                });
+
+                theoryData.Add(new ValidateTokenAsyncLifetimeExtensibilityTheoryData(
+                        "CustomDelegate_Invalid_DelegateReturnsValidationErrorWithCustomExceptionType_NoCustomValidationError")
+                {
+                    IssuedAt = nowMinus1Hour,
+                    NotBefore = nowMinus1Hour,
+                    Expires = nowMinus1Hour,
+                    ValidationParameters = CreateValidationParameters(lifetimeValidationDelegate: delegate
+                    (DateTime? notBefore,
+                    DateTime? expires,
+                    SecurityToken? securityToken,
+                    ValidationParameters validationParameters,
+                    CallContext callContext)
                     {
-                        // This test currently fails because the creation of the exception does not support custom exception types.
-                        IssuedAt = nowMinus1Hour,
-                        NotBefore = nowMinus1Hour,
-                        Expires = nowMinus1Hour,
-                        ValidationParameters = CreateValidationParameters(lifetimeValidationDelegate: delegate
-                        (DateTime? notBefore,
-                        DateTime? expires,
-                        SecurityToken? securityToken,
-                        ValidationParameters validationParameters,
-                        CallContext callContext)
-                        {
-                            return new LifetimeValidationError(
-                                new MessageDetail("Custom message from the delegate."),
-                                typeof(CustomInvalidLifetimeException),
-                                new System.Diagnostics.StackFrame(true),
-                                new LifetimeValidationError.AdditionalInformation(notBefore, expires));
-                        }),
-                        ExpectedIsValid = false,
-                        ExpectedException = new ExpectedException(typeof(CustomInvalidLifetimeException), "Custom message from the delegate."),
-                        ExpectedInvalidNotBefore = nowMinus1Hour,
-                        ExpectedInvalidExpires = nowMinus1Hour,
-                    },
-                    new ValidateTokenAsyncLifetimeExtensibilityTheoryData("CustomDelegate_Invalid_DelegateThrows")
+                        return new LifetimeValidationError(
+                            new MessageDetail("Custom message from the delegate."),
+                            typeof(CustomInvalidLifetimeException),
+                            new System.Diagnostics.StackFrame(true),
+                            (DateTime)notBefore!,
+                            (DateTime)expires!);
+                    }),
+                    ExpectedIsValid = false,
+                    // The delegate returns a custom exception but does not implement a custom ValidationError.
+                    ExpectedException = ExpectedException.SecurityTokenException("IDX10002:"),
+                    ExpectedInvalidNotBefore = nowMinus1Hour,
+                    ExpectedInvalidExpires = nowMinus1Hour,
+                });
+
+                theoryData.Add(new ValidateTokenAsyncLifetimeExtensibilityTheoryData(
+                        "CustomDelegate_Invalid_DelegateReturnsValidationErrorWithCustomExceptionType_CustomValidationErrorUsed")
+                {
+                    IssuedAt = nowMinus1Hour,
+                    NotBefore = nowMinus1Hour,
+                    Expires = nowMinus1Hour,
+                    ValidationParameters = CreateValidationParameters(lifetimeValidationDelegate: delegate
+                    (DateTime? notBefore,
+                    DateTime? expires,
+                    SecurityToken? securityToken,
+                    ValidationParameters validationParameters,
+                    CallContext callContext)
                     {
-                        IssuedAt = nowMinus1Hour,
-                        NotBefore = nowMinus1Hour,
-                        Expires = nowMinus1Hour,
-                        ValidationParameters = CreateValidationParameters(lifetimeValidationDelegate: delegate
-                        (DateTime? notBefore,
-                        DateTime? expires,
-                        SecurityToken? securityToken,
-                        ValidationParameters validationParameters,
-                        CallContext callContext)
-                        {
-                            throw new CustomInvalidLifetimeException("Custom exception from the delegate.");
-                        }),
-                        ExpectedIsValid = false,
-                        ThrownException = new ExpectedException(typeof(CustomInvalidLifetimeException), "Custom exception from the delegate."),
-                    },
-                };
+                        return new CustomLifetimeValidationError(
+                            new MessageDetail("Custom message from the delegate."),
+                            typeof(CustomInvalidLifetimeException),
+                            new System.Diagnostics.StackFrame(true),
+                            (DateTime)notBefore!,
+                            (DateTime)expires!);
+                    }),
+                    ExpectedIsValid = false,
+                    // The delegate uses a custom validation error that implements GetException to return the custom exception.
+                    ExpectedException = new ExpectedException(typeof(CustomInvalidLifetimeException), "Custom message from the delegate."),
+                    ExpectedInvalidNotBefore = nowMinus1Hour,
+                    ExpectedInvalidExpires = nowMinus1Hour,
+                });
+
+                theoryData.Add(new ValidateTokenAsyncLifetimeExtensibilityTheoryData("CustomDelegate_Invalid_DelegateThrows")
+                {
+                    IssuedAt = nowMinus1Hour,
+                    NotBefore = nowMinus1Hour,
+                    Expires = nowMinus1Hour,
+                    ValidationParameters = CreateValidationParameters(lifetimeValidationDelegate: delegate
+                    (DateTime? notBefore,
+                    DateTime? expires,
+                    SecurityToken? securityToken,
+                    ValidationParameters validationParameters,
+                    CallContext callContext)
+                    {
+                        throw new CustomInvalidLifetimeException("Custom exception from the delegate.");
+                    }),
+                    ExpectedIsValid = false,
+                    ThrownException = new ExpectedException(typeof(CustomInvalidLifetimeException), "Custom exception from the delegate."),
+                });
+
+                return theoryData;
 
                 static ValidationParameters CreateValidationParameters(LifetimeValidationDelegate? lifetimeValidationDelegate)
                 {
@@ -242,6 +278,26 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             public CustomInvalidLifetimeException(string message)
                 : base(message)
             {
+            }
+        }
+
+        private class CustomLifetimeValidationError : LifetimeValidationError
+        {
+            public CustomLifetimeValidationError(MessageDetail messageDetail,
+                Type exceptionType,
+                StackFrame stackFrame,
+                DateTime notBefore,
+                DateTime expires) :
+                base(messageDetail, exceptionType, stackFrame, notBefore, expires)
+            {
+            }
+
+            internal override Exception GetException()
+            {
+                if (ExceptionType == typeof(CustomInvalidLifetimeException))
+                    return new CustomInvalidLifetimeException(MessageDetail.Message) { NotBefore = _notBefore, Expires = _expires };
+
+                return base.GetException();
             }
         }
 
