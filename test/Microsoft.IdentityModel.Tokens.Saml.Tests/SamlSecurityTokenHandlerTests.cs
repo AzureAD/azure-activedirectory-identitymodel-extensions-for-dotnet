@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
     /// <summary>
     /// 
     /// </summary>
-    public class SamlSecurityTokenHandlerTests
+    public partial class SamlSecurityTokenHandlerTests
     {
         [Fact]
         public void Constructors()
