@@ -191,7 +191,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 SecurityKey key = keysList[i];
                 ValidationResult<SecurityKey> result = ValidateSignatureWithKey(jwtToken, key, validationParameters, callContext);
-                if (result.IsSuccess)
+                if (result.IsValid)
                 {
                     jwtToken.SigningKey = key;
                     return (result, true, null);
@@ -240,7 +240,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 validationParameters,
                 callContext);
 
-            if (!result.IsSuccess)
+            if (!result.IsValid)
                 return new ValidationError(
                     new MessageDetail(
                         TokenLogMessages.IDX10518,
