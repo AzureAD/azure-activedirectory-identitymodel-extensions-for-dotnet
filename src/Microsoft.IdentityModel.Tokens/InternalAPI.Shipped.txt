@@ -567,7 +567,6 @@ Microsoft.IdentityModel.Tokens.ValidationParameters.ValidIssuers.get -> System.C
 Microsoft.IdentityModel.Tokens.ValidationParameters.ValidTypes.get -> System.Collections.Generic.IList<string>
 Microsoft.IdentityModel.Tokens.ValidationResult<TResult>
 Microsoft.IdentityModel.Tokens.ValidationResult<TResult>.Equals(Microsoft.IdentityModel.Tokens.ValidationResult<TResult> other) -> bool
-Microsoft.IdentityModel.Tokens.ValidationResult<TResult>.IsSuccess.get -> bool
 Microsoft.IdentityModel.Tokens.ValidationResult<TResult>.ToResult() -> Microsoft.IdentityModel.Tokens.ValidationResult<TResult>
 Microsoft.IdentityModel.Tokens.ValidationResult<TResult>.UnwrapError() -> Microsoft.IdentityModel.Tokens.ValidationError
 Microsoft.IdentityModel.Tokens.ValidationResult<TResult>.UnwrapResult() -> TResult
