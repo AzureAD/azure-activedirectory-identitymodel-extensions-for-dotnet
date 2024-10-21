@@ -154,5 +154,35 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             return validationParametersCloned;
 
         }
+
+        /// <summary>
+        /// Fetches current configuration from the ConfigurationManager of <paramref name="validationParameters"/>
+        /// and populates ValidIssuers and IssuerSigningKeys.
+        /// </summary>
+        /// <param name="validationParameters"> the token validation parameters to update.</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns> New ValidationParameters with ValidIssuers and IssuerSigningKeys updated.</returns>
+        internal static async Task<ValidationParameters> PopulateValidationParametersWithCurrentConfigurationAsync(
+            ValidationParameters validationParameters,
+            CancellationToken cancellationToken)
+        {
+            if (validationParameters.ConfigurationManager == null)
+            {
+                return validationParameters;
+            }
+
+            var currentConfiguration = await validationParameters.ConfigurationManager.GetBaseConfigurationAsync(cancellationToken).ConfigureAwait(false);
+            var validationParametersCloned = validationParameters.Clone();
+
+            validationParametersCloned.ValidIssuers.Add(currentConfiguration.Issuer);
+
+            foreach (SecurityKey key in currentConfiguration.SigningKeys)
+            {
+                validationParametersCloned.IssuerSigningKeys.Add(key);
+            }
+
+            return validationParametersCloned;
+
+        }
     }
 }
