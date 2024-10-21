@@ -43,10 +43,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 return;
             }
 
-            if (validationResult.IsSuccess != theoryData.ExpectedIsValid)
-                context.AddDiff($"validationResult.IsSuccess != theoryData.ExpectedIsValid");
+            if (validationResult.IsValid != theoryData.ExpectedIsValid)
+                context.AddDiff($"validationResult.IsValid != theoryData.ExpectedIsValid");
 
-            if (validationResult.IsSuccess)
+            if (validationResult.IsValid)
             {
                 theoryData.ExpectedException.ProcessNoException(context);
 
