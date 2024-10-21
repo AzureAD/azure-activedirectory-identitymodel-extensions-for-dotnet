@@ -21,7 +21,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
             SamlSecurityTokenHandler samlTokenHandler = new SamlSecurityTokenHandler();
 
-            var samlToken = CreateToken(theoryData.TokenAudience!);
+            var samlToken = CreateTokenForAudienceValidation(theoryData.TokenAudience!);
 
             var tokenValidationParameters = CreateTokenValidationParameters(
                 theoryData.TVPAudiences,
@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     CancellationToken.None);
 
             // Ensure the validity of the results match the expected result.
-            if (tokenValidationResult.IsValid != validationResult.IsSuccess)
+            if (tokenValidationResult.IsValid != validationResult.IsValid)
             {
                 context.AddDiff($"tokenValidationResult.IsValid != validationResult.IsSuccess");
                 theoryData.ExpectedExceptionValidationParameters!.ProcessException(validationResult.UnwrapError().GetException(), context);
@@ -188,7 +188,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             public List<string>? TVPAudiences { get; internal set; }
         }
 
-        private static SamlSecurityToken CreateToken(string audience)
+        private static SamlSecurityToken CreateTokenForAudienceValidation(string audience)
         {
             SamlSecurityTokenHandler samlTokenHandler = new SamlSecurityTokenHandler();
 

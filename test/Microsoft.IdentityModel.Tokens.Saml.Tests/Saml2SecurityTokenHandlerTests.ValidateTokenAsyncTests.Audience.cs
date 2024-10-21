@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
             Saml2SecurityTokenHandler saml2TokenHandler = new Saml2SecurityTokenHandler();
 
-            var saml2Token = CreateToken(theoryData.TokenAudience!, theoryData.Saml2Condition!);
+            var saml2Token = CreateTokenForAudienceValidation(theoryData.TokenAudience!, theoryData.Saml2Condition!);
 
             var tokenValidationParameters = CreateTokenValidationParameters(
                 theoryData.TVPAudiences,
@@ -200,7 +200,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             public List<string>? TVPAudiences { get; internal set; }
         }
 
-        private static Saml2SecurityToken CreateToken(string audience, Saml2Conditions saml2Conditions)
+        private static Saml2SecurityToken CreateTokenForAudienceValidation(string audience, Saml2Conditions saml2Conditions)
         {
             Saml2SecurityTokenHandler saml2TokenHandler = new Saml2SecurityTokenHandler();
 

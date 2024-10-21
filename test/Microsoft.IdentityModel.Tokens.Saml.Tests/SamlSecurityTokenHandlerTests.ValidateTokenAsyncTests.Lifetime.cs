@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateTokenAsync_LifetimeComparison", theoryData);
 
-            var samlToken = CreateToken(
+            var samlToken = CreateTokenForLifetimeValidation(
                 theoryData.IssuedAt,
                 theoryData.NotBefore,
                 theoryData.Expires);
@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     CancellationToken.None);
 
             // Ensure validity of the results match the expected result.
-            if (tokenValidationResult.IsValid != validationResult.IsSuccess)
+            if (tokenValidationResult.IsValid != validationResult.IsValid)
             {
                 context.AddDiff($"tokenValidationResult.IsValid != validationResult.IsSuccess");
                 theoryData.ExpectedExceptionValidationParameters!.ProcessException(validationResult.UnwrapError().GetException(), context);
@@ -208,7 +208,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             public bool NullTokenValidationParameters { get; internal set; } = false;
         }
 
-        private static SamlSecurityToken CreateToken(DateTime? issuedAt, DateTime? notBefore, DateTime? expires)
+        private static SamlSecurityToken CreateTokenForLifetimeValidation(DateTime? issuedAt, DateTime? notBefore, DateTime? expires)
         {
             SamlSecurityTokenHandler samlTokenHandler = new SamlSecurityTokenHandler();
 
