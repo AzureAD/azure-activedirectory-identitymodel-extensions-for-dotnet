@@ -3,7 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Protocols.WsFederation;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Saml2;
 using Xunit;
@@ -201,8 +201,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
             if (configurationIssuer is not null)
             {
-                var validConfig = new OpenIdConnectConfiguration() { Issuer = configurationIssuer };
-                tokenValidationParameters.ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(validConfig);
+                var validConfig = new WsFederationConfiguration() { Issuer = configurationIssuer };
+                tokenValidationParameters.ConfigurationManager = new MockConfigurationManager<WsFederationConfiguration>(validConfig);
             }
 
             return tokenValidationParameters;
