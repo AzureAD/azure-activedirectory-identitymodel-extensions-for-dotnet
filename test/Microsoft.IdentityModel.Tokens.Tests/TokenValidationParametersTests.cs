@@ -17,6 +17,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
     {
         int ExpectedPropertyCount = 60;
 
+        // GetSets() compares the total property count which includes internal properties, against a list of public properties, minus delegates.
+        // This allows us to keep track of any properties we are including in the total that are not public nor delegates.
+        // Remove if/once we make TimeProvider public. As the GetSets() test will fail.
+        List<string> internalNonDelegateProperties = new() { "TimeProvider" };
+
         [Fact]
         public void Publics()
         {
@@ -236,7 +241,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             };
 
             // check that we have checked all properties, subract the number of delegates.
-            if (context.PropertyNamesAndSetGetValue.Count != ExpectedPropertyCount - delegates.Count)
+            if (context.PropertyNamesAndSetGetValue.Count != ExpectedPropertyCount - delegates.Count - internalNonDelegateProperties.Count)
                 compareContext.AddDiff($"Number of properties being set is: {context.PropertyNamesAndSetGetValue.Count}, number of properties is: {properties.Length - delegates.Count} (#Properties - #Delegates), adjust tests");
 
             TestUtilities.GetSet(context);
