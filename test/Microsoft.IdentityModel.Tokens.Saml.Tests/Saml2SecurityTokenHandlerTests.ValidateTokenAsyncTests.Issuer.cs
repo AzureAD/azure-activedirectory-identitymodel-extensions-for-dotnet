@@ -98,18 +98,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     ExpectedExceptionValidationParameters = new ExpectedException(typeof(SecurityTokenInvalidIssuerException), "IDX10212:")
                 });
 
-                theoryData.Add(new ValidateTokenAsyncIssuerTheoryData("Invalid_IssuerIsNull")
+                theoryData.Add(new ValidateTokenAsyncIssuerTheoryData("Invalid_IssuerIsWhitespace")
                 {
-                    TokenIssuer = null,
-                    ValidationParametersIssuer = Default.Issuer,
-                    ValidationParameters = CreateValidationParameters(validIssuer: Default.Issuer),
-                    ExpectedIsValid = false,
-                    ExpectedException = new ExpectedException(typeof(SecurityTokenInvalidIssuerException), "IDX10211:")
-                });
-
-                theoryData.Add(new ValidateTokenAsyncIssuerTheoryData("Invalid_IssuerIsEmpty")
-                {
-                    TokenIssuer = string.Empty,
+                    //This test will cover the case where the issuer is null or empty as well since, we do not allow tokens to be created with null or empty issuer.
+                    TokenIssuer = " ",
                     ValidationParametersIssuer = Default.Issuer,
                     ValidationParameters = CreateValidationParameters(validIssuer: Default.Issuer),
                     ExpectedIsValid = false,
