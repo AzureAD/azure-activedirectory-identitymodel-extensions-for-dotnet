@@ -19,6 +19,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             internal static StackFrame? AudienceValidationFailed;
             internal static StackFrame? AssertionNull;
             internal static StackFrame? AssertionConditionsNull;
+            internal static StackFrame? AssertionConditionsValidationFailed;
             internal static StackFrame? LifetimeValidationFailed;
             internal static StackFrame? OneTimeUseValidationFailed;
         }

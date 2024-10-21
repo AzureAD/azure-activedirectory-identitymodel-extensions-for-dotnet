@@ -11,6 +11,7 @@ Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.StackFrames
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.ValidateTokenAsync(Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityToken samlToken, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.ValidationResult<Microsoft.IdentityModel.Tokens.ValidatedToken>>
 Microsoft.IdentityModel.Tokens.Saml2.SamlSecurityTokenHandler.ValidateTokenAsync(SamlSecurityToken samlToken, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.ValidationResult<Microsoft.IdentityModel.Tokens.ValidatedToken>>
 static Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.StackFrames.AssertionConditionsNull -> System.Diagnostics.StackFrame
+static Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.StackFrames.AssertionConditionsValidationFailed -> System.Diagnostics.StackFrame
 static Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.StackFrames.AssertionNull -> System.Diagnostics.StackFrame
 static Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.StackFrames.AudienceValidationFailed -> System.Diagnostics.StackFrame
 static Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.StackFrames.LifetimeValidationFailed -> System.Diagnostics.StackFrame
@@ -18,6 +19,7 @@ static Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.StackFrames.
 static Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.StackFrames.TokenNull -> System.Diagnostics.StackFrame
 static Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.StackFrames.TokenValidationParametersNull -> System.Diagnostics.StackFrame
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.StackFrames.AssertionConditionsNull -> System.Diagnostics.StackFrame
+static Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.StackFrames.AssertionConditionsValidationFailed -> System.Diagnostics.StackFrame
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.StackFrames.AssertionNull -> System.Diagnostics.StackFrame
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.StackFrames.AudienceValidationFailed -> System.Diagnostics.StackFrame
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.StackFrames.LifetimeValidationFailed -> System.Diagnostics.StackFrame

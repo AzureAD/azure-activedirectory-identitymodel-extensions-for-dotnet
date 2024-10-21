@@ -42,9 +42,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             var conditionsResult = ValidateConditions(samlToken, validationParameters, callContext);
 
-            if (!conditionsResult.IsSuccess)
+            if (!conditionsResult.IsValid)
             {
-                return conditionsResult.UnwrapError().AddStackFrame(new StackFrame(true));
+                StackFrames.AssertionConditionsValidationFailed ??= new StackFrame(true);
+                return conditionsResult.UnwrapError().AddStackFrame(StackFrames.AssertionConditionsValidationFailed);
             }
 
             return new ValidatedToken(samlToken, this, validationParameters);
@@ -53,7 +54,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         // ValidatedConditions is basically a named tuple but using a record struct better expresses the intent.
         internal record struct ValidatedConditions(string? ValidatedAudience, ValidatedLifetime? ValidatedLifetime);
 
-        internal virtual ValidationResult<ValidatedConditions> ValidateConditions(SamlSecurityToken samlToken, ValidationParameters validationParameters, CallContext callContext)
+        internal virtual ValidationResult<ValidatedConditions> ValidateConditions(
+            SamlSecurityToken samlToken,
+            ValidationParameters validationParameters,
+            CallContext callContext)
         {
             if (samlToken.Assertion is null)
             {
@@ -78,7 +82,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 validationParameters,
                 callContext);
 
-            if (!lifetimeValidationResult.IsSuccess)
+            if (!lifetimeValidationResult.IsValid)
             {
                 StackFrames.LifetimeValidationFailed ??= new StackFrame(true);
                 return lifetimeValidationResult.UnwrapError().AddStackFrame(StackFrames.LifetimeValidationFailed);
@@ -100,7 +104,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                         validationParameters,
                         callContext);
 
-                    if (!audienceValidationResult.IsSuccess)
+                    if (!audienceValidationResult.IsValid)
                         return audienceValidationResult.UnwrapError();
 
                     validatedAudience = audienceValidationResult.UnwrapResult();
