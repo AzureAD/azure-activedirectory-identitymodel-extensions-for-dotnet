@@ -58,7 +58,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             if (!(await validatedIssuerResult.ConfigureAwait(false)).IsValid)
             {
-                return (await validatedIssuerResult.ConfigureAwait(false)).UnwrapError().AddStackFrame(new StackFrame(true));
+                StackFrames.IssuerValidationFailed ??= new StackFrame(true);
+                return (await validatedIssuerResult.ConfigureAwait(false)).UnwrapError().AddStackFrame(StackFrames.IssuerValidationFailed);
             }
 
             return new ValidatedToken(samlToken, this, validationParameters);

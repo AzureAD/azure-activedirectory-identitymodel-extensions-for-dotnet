@@ -4,6 +4,7 @@ static Microsoft.IdentityModel.Tokens.Saml.SamlTokenUtilities.PopulateValidation
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.StackFrames.AssertionConditionsNull -> System.Diagnostics.StackFrame
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.StackFrames.AssertionNull -> System.Diagnostics.StackFrame
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.StackFrames.AudienceValidationFailed -> System.Diagnostics.StackFrame
+static Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.StackFrames.IssuerValidationFailed -> System.Diagnostics.StackFrame
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.StackFrames.LifetimeValidationFailed -> System.Diagnostics.StackFrame
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.StackFrames.OneTimeUseValidationFailed -> System.Diagnostics.StackFrame
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.StackFrames.TokenNull -> System.Diagnostics.StackFrame
