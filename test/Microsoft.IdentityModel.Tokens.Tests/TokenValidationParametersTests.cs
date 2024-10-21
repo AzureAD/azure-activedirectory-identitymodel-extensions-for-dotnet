@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class TokenValidationParametersTests
     {
-        int ExpectedPropertyCount = 59;
+        int ExpectedPropertyCount = 60;
 
         [Fact]
         public void Publics()
