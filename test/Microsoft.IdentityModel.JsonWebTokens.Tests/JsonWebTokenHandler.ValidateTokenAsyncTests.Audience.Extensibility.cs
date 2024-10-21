@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
 
             if (validationResult.IsValid != theoryData.ExpectedIsValid)
-                context.AddDiff($"validationResult.IsSuccess != theoryData.ExpectedIsValid");
+                context.AddDiff($"validationResult.IsValid != theoryData.ExpectedIsValid");
 
             if (validationResult.IsValid)
             {
