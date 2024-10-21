@@ -9,8 +9,8 @@ namespace Microsoft.IdentityModel.Tokens
 {
     internal class LifetimeValidationError : ValidationError
     {
-        DateTime _notBefore;
-        DateTime _expires;
+        protected DateTime _notBefore;
+        protected DateTime _expires;
 
         public LifetimeValidationError(
             MessageDetail messageDetail,
