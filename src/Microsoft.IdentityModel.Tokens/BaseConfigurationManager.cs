@@ -16,6 +16,8 @@ namespace Microsoft.IdentityModel.Tokens
     public abstract class BaseConfigurationManager
     {
         private TimeSpan _automaticRefreshInterval = DefaultAutomaticRefreshInterval;
+        private int _automaticRefreshIntervalInSeconds = (int)DefaultAutomaticRefreshInterval.TotalSeconds;
+        private int _requestRefreshIntervalInSeconds = (int)DefaultRefreshInterval.TotalSeconds;
         private TimeSpan _refreshInterval = DefaultRefreshInterval;
         private TimeSpan _lastKnownGoodLifetime = DefaultLastKnownGoodConfigurationLifetime;
         private BaseConfiguration _lastKnownGoodConfiguration;
@@ -35,8 +37,16 @@ namespace Microsoft.IdentityModel.Tokens
                     throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX10108, LogHelper.MarkAsNonPII(MinimumAutomaticRefreshInterval), LogHelper.MarkAsNonPII(value))));
 
                 _automaticRefreshInterval = value;
+                if (value.TotalSeconds > int.MaxValue)
+                    _automaticRefreshIntervalInSeconds = int.MaxValue;
+                else
+                    _automaticRefreshIntervalInSeconds = (int)value.TotalSeconds;
             }
         }
+
+        internal int SecondsRequiredBetweenAutomaticRefresh => _automaticRefreshIntervalInSeconds;
+
+        internal int SecondsRequiredBetweenRequestRefresh => _requestRefreshIntervalInSeconds;
 
         /// <summary>
         /// Default time interval (12 hours) after which a new configuration is obtained automatically.
@@ -165,6 +175,10 @@ namespace Microsoft.IdentityModel.Tokens
                     throw LogHelper.LogExceptionMessage(new ArgumentOutOfRangeException(nameof(value), LogHelper.FormatInvariant(LogMessages.IDX10107, LogHelper.MarkAsNonPII(MinimumRefreshInterval), LogHelper.MarkAsNonPII(value))));
 
                 _refreshInterval = value;
+                if (value.TotalSeconds > int.MaxValue)
+                    _requestRefreshIntervalInSeconds = int.MaxValue;
+                else
+                    _requestRefreshIntervalInSeconds = (int)value.TotalSeconds;
             }
         }
 

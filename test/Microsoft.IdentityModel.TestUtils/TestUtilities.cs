@@ -75,9 +75,22 @@ namespace Microsoft.IdentityModel.TestUtils
         /// </summary>
         public static object GetField(object obj, string field)
         {
-            Type type = obj.GetType();
-            FieldInfo fieldInfo = type.GetField(field, BindingFlags.NonPublic | BindingFlags.Instance);
-            return fieldInfo.GetValue(obj);
+            Type t = obj.GetType();
+            FieldInfo fi = null;
+            while (t != null)
+            {
+                fi = t.GetField(field, BindingFlags.Instance | BindingFlags.NonPublic);
+
+                if (fi != null)
+                    break;
+
+                t = t.BaseType;
+            }
+
+            if (fi == null)
+                throw new Exception(string.Format("Field '{0}' not found in type hierarchy.", field));
+
+            return fi.GetValue(obj);
         }
 
         /// <summary>
@@ -85,9 +98,22 @@ namespace Microsoft.IdentityModel.TestUtils
         /// </summary>
         public static void SetField(object obj, string field, object fieldValue)
         {
-            Type type = obj.GetType();
-            FieldInfo fieldInfo = type.GetField(field, BindingFlags.NonPublic | BindingFlags.Instance);
-            fieldInfo.SetValue(obj, fieldValue);
+            Type t = obj.GetType();
+            FieldInfo fi = null;
+            while (t != null)
+            {
+                fi = t.GetField(field, BindingFlags.Instance | BindingFlags.NonPublic);
+
+                if (fi != null)
+                    break;
+
+                t = t.BaseType;
+            }
+
+            if (fi == null)
+                throw new Exception(string.Format("Field '{0}' not found in type hierarchy.", field));
+
+            fi.SetValue(obj, fieldValue);
         }
 
         /// <summary>

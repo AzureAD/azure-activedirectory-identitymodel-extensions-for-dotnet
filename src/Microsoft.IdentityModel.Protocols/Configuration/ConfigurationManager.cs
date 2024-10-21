@@ -18,10 +18,12 @@ namespace Microsoft.IdentityModel.Protocols
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
     public class ConfigurationManager<T> : BaseConfigurationManager, IConfigurationManager<T> where T : class
     {
-        private DateTimeOffset _syncAfter = DateTimeOffset.MinValue;
-        private DateTimeOffset _lastRequestRefresh = DateTimeOffset.MinValue;
+        private readonly DateTimeOffset _startupTime = DateTimeOffset.UtcNow;
         private bool _isFirstRefreshRequest = true;
         private readonly SemaphoreSlim _configurationNullLock = new SemaphoreSlim(1);
+        private long _numberOfTimesRefreshCalled;
+        private int _nextAutomaticRefreshAfterSeconds;
+        private int _nextRequestRefreshAfterSeconds;
 
         private readonly IDocumentRetriever _docRetriever;
         private readonly IConfigurationRetriever<T> _configRetriever;
@@ -147,8 +149,16 @@ namespace Microsoft.IdentityModel.Protocols
         /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
         public virtual async Task<T> GetConfigurationAsync(CancellationToken cancel)
         {
-            if (_currentConfiguration != null && _syncAfter > DateTimeOffset.UtcNow)
-                return _currentConfiguration;
+
+            if (_currentConfiguration != null)
+            {
+                // Largest int value 2,147,483,647 in seconds is 68 years.
+                // If the service was running continuously for 68 years, we will have a problem.
+                // To solve this issue, we would need to lock about every 68 years.
+                int secondsSinceStartup = (int)(DateTimeOffset.UtcNow - _startupTime).TotalSeconds;
+                if (_nextAutomaticRefreshAfterSeconds > secondsSinceStartup)
+                    return _currentConfiguration;
+            }
 
             Exception fetchMetadataFailure = null;
 
@@ -157,7 +167,7 @@ namespace Microsoft.IdentityModel.Protocols
             //   reach out to the metadata endpoint. Since multiple threads could be calling this method
             //   we need to ensure that only one thread is actually fetching the metadata.
             // else
-            //   if task is running, return the current configuration
+            //   if update task is running, return the current configuration
             //   else kick off task to update current configuration
             if (_currentConfiguration == null)
             {
@@ -227,7 +237,7 @@ namespace Microsoft.IdentityModel.Protocols
                     LogHelper.FormatInvariant(
                         LogMessages.IDX20803,
                         LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
-                        LogHelper.MarkAsNonPII(_syncAfter),
+                        LogHelper.MarkAsNonPII(_nextAutomaticRefreshAfterSeconds),
                         LogHelper.MarkAsNonPII(fetchMetadataFailure)),
                     fetchMetadataFailure));
         }
@@ -239,6 +249,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         private void UpdateCurrentConfiguration()
         {
+            _numberOfTimesRefreshCalled++;
 #pragma warning disable CA1031 // Do not catch general exception types
             try
             {
@@ -285,8 +296,8 @@ namespace Microsoft.IdentityModel.Protocols
         private void UpdateConfiguration(T configuration)
         {
             _currentConfiguration = configuration;
-            _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval +
-                TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 20)));
+            int syncAfter = (int)(DateTimeOffset.UtcNow - _startupTime).TotalSeconds + SecondsRequiredBetweenAutomaticRefresh;
+            _nextAutomaticRefreshAfterSeconds = syncAfter;
         }
 
         /// <summary>
@@ -309,15 +320,18 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         public override void RequestRefresh()
         {
-            DateTimeOffset now = DateTimeOffset.UtcNow;
-
-            if (now >= DateTimeUtil.Add(_lastRequestRefresh.UtcDateTime, RefreshInterval) || _isFirstRefreshRequest)
+            // Largest int value 2,147,483,647 in seconds is 68 years.
+            // If the service was running continuously for 68 years, we will have a problem.
+            // To solve this issue, we would need to lock about every 68 years.
+            int secondsSinceStartup = (int)(DateTimeOffset.UtcNow - _startupTime).TotalSeconds;
+            if (_nextRequestRefreshAfterSeconds > secondsSinceStartup || _isFirstRefreshRequest)
             {
                 _isFirstRefreshRequest = false;
                 if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
                 {
                     _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
-                    _lastRequestRefresh = now;
+                    int syncAfter = (int)(DateTimeOffset.UtcNow - _startupTime).TotalSeconds + SecondsRequiredBetweenRequestRefresh;
+                    _nextRequestRefreshAfterSeconds = syncAfter;
                 }
             }
         }
