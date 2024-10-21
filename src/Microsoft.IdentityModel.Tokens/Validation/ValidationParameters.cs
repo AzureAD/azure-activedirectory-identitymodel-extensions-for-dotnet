@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Tokens
             IssuerSigningKeyResolver = other.IssuerSigningKeyResolver;
             _issuerSigningKeys = other.IssuerSigningKeys;
             IssuerSigningKeyValidator = other.IssuerSigningKeyValidator;
-            IssuerValidatorAsync = other.IssuerValidatorAsync;
+            IssuerValidator = other.IssuerValidator;
             LifetimeValidator = other.LifetimeValidator;
             LogTokenId = other.LogTokenId;
             NameClaimType = other.NameClaimType;
@@ -311,8 +311,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// Allows overriding the delegate that will be used to validate the issuer of the token.
         /// </summary>
         /// <exception cref="ArgumentNullException">Thrown when the value is set as null.</exception>
-        /// <returns>The <see cref="IssuerValidationDelegateAsync"/> used to validate the issuer of a token</returns>
-        public IssuerValidationDelegateAsync IssuerValidatorAsync
+        /// <returns>The <see cref="Tokens.IssuerValidationDelegateAsync"/> used to validate the issuer of a token</returns>
+        public IssuerValidationDelegateAsync IssuerValidator
         {
             get { return _issuerValidatorAsync; }
             set { _issuerValidatorAsync = value ?? throw new ArgumentNullException(nameof(value), "IssuerValidatorAsync cannot be set as null."); }

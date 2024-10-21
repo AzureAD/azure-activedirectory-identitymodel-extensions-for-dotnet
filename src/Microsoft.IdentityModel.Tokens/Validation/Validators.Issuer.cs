@@ -52,8 +52,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>An <see cref="ValidationResult{TResult}"/> that contains either the issuer that was validated or an error.</returns>
         /// <remarks>An EXACT match is required.</remarks>
         internal static async Task<ValidationResult<ValidatedIssuer>> ValidateIssuerAsync(
-            string issuer,
-            SecurityToken securityToken,
+            string? issuer,
+            SecurityToken? securityToken,
             ValidationParameters validationParameters,
 #pragma warning disable CA1801 // Review unused parameters
             CallContext? callContext,
@@ -103,7 +103,7 @@ namespace Microsoft.IdentityModel.Tokens
                     //    LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer), callContext);
 
 
-                    return new ValidatedIssuer(issuer, IssuerValidationSource.IssuerMatchedConfiguration);
+                    return new ValidatedIssuer(issuer!, IssuerValidationSource.IssuerMatchedConfiguration);
                 }
             }
 
@@ -126,7 +126,7 @@ namespace Microsoft.IdentityModel.Tokens
                         //if (LogHelper.IsEnabled(EventLogLevel.Informational))
                         //    LogHelper.LogInformation(LogMessages.IDX10236, LogHelper.MarkAsNonPII(issuer));
 
-                        return new ValidatedIssuer(issuer, IssuerValidationSource.IssuerMatchedValidationParameters);
+                        return new ValidatedIssuer(issuer!, IssuerValidationSource.IssuerMatchedValidationParameters);
                     }
                 }
             }

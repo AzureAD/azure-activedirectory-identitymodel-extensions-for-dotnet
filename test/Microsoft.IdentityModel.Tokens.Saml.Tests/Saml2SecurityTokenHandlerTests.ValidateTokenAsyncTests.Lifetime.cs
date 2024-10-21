@@ -179,7 +179,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                     // Skip all validations except lifetime
                     validationParameters.AlgorithmValidator = SkipValidationDelegates.SkipAlgorithmValidation;
                     validationParameters.AudienceValidator = SkipValidationDelegates.SkipAudienceValidation;
-                    validationParameters.IssuerValidatorAsync = SkipValidationDelegates.SkipIssuerValidation;
+                    validationParameters.IssuerValidator = SkipValidationDelegates.SkipIssuerValidation;
                     validationParameters.IssuerSigningKeyValidator = SkipValidationDelegates.SkipIssuerSigningKeyValidation;
                     validationParameters.SignatureValidator = SkipValidationDelegates.SkipSignatureValidation;
 

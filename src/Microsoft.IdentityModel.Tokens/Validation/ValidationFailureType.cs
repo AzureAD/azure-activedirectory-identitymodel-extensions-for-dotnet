@@ -110,5 +110,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public static readonly ValidationFailureType InvalidSecurityToken = new InvalidSecurityTokenFailure("InvalidSecurityToken");
         private class InvalidSecurityTokenFailure : ValidationFailureType { internal InvalidSecurityTokenFailure(string name) : base(name) { } }
+
+        /// <summary>
+        /// Defines a type that represents that a token is invalid.
+        /// </summary>
+        public static readonly ValidationFailureType IssuerValidatorThrew = new IssuerValidatorFailure("IssuerValidatorThrew");
+        private class IssuerValidatorFailure : ValidationFailureType { internal IssuerValidatorFailure(string name) : base(name) { } }
     }
 }

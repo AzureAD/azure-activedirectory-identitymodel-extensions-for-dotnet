@@ -11,9 +11,9 @@ using Microsoft.IdentityModel.Tokens.Json.Tests;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Xunit;
 
-namespace Microsoft.IdentityModel.Tokens.Validation.Tests
+namespace Microsoft.IdentityModel.Tokens.IssuerValidation.Tests
 {
-    public class IssuerValidationResultTests
+    public partial class IssuerValidationResultTests
     {
         [Theory, MemberData(nameof(IssuerValdationResultsTestCases), DisableDiscoveryEnumeration = true)]
         public async Task IssuerValidatorAsyncTests(IssuerValidationResultsTheoryData theoryData)

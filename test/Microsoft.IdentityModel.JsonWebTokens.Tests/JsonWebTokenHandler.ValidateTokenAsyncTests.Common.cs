@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
         internal TokenValidationParameters? TokenValidationParameters { get; set; }
 
-        internal ValidationParameters? ValidationParameters { get; set; }
+        internal virtual ValidationParameters? ValidationParameters { get; set; }
 
         // only set if we expect a different message on this path
         internal ExpectedException? ExpectedExceptionValidationParameters { get; set; } = null;

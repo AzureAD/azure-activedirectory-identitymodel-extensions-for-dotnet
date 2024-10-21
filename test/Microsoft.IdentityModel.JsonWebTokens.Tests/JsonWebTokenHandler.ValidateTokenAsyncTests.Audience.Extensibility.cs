@@ -190,7 +190,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
                     // Skip all validations except audience
                     validationParameters.AlgorithmValidator = SkipValidationDelegates.SkipAlgorithmValidation;
-                    validationParameters.IssuerValidatorAsync = SkipValidationDelegates.SkipIssuerValidation;
+                    validationParameters.IssuerValidator = SkipValidationDelegates.SkipIssuerValidation;
                     validationParameters.IssuerSigningKeyValidator = SkipValidationDelegates.SkipIssuerSigningKeyValidation;
                     validationParameters.LifetimeValidator = SkipValidationDelegates.SkipLifetimeValidation;
                     validationParameters.SignatureValidator = SkipValidationDelegates.SkipSignatureValidation;

@@ -9,8 +9,6 @@ namespace Microsoft.IdentityModel.Tokens
 {
     internal class IssuerValidationError : ValidationError
     {
-        private string? _invalidIssuer;
-
         internal IssuerValidationError(
             MessageDetail messageDetail,
             Type exceptionType,
@@ -18,8 +16,10 @@ namespace Microsoft.IdentityModel.Tokens
             string? invalidIssuer)
             : base(messageDetail, ValidationFailureType.IssuerValidationFailed, exceptionType, stackFrame)
         {
-            _invalidIssuer = invalidIssuer;
+            InvalidIssuer = invalidIssuer;
         }
+
+        internal string? InvalidIssuer { get; }
 
         internal override Exception GetException()
         {
@@ -27,7 +27,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 SecurityTokenInvalidIssuerException exception = new(MessageDetail.Message, InnerException)
                 {
-                    InvalidIssuer = _invalidIssuer
+                    InvalidIssuer = InvalidIssuer
                 };
 
                 return exception;

@@ -14,7 +14,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         public void SetValidators_NullValue_ThrowsArgumentNullException()
         {
             var validationParameters = new ValidationParameters();
-            Assert.Throws<ArgumentNullException>(() => validationParameters.IssuerValidatorAsync = null);
+            Assert.Throws<ArgumentNullException>(() => validationParameters.IssuerValidator = null);
             Assert.Throws<ArgumentNullException>(() => validationParameters.TokenReplayValidator = null);
             Assert.Throws<ArgumentNullException>(() => validationParameters.LifetimeValidator = null);
             Assert.Throws<ArgumentNullException>(() => validationParameters.TypeValidator = null);

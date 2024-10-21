@@ -277,15 +277,31 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return audienceValidationResult.UnwrapError().AddStackFrame(audienceValidationFailureStackFrame);
             }
 
-            ValidationResult<ValidatedIssuer> issuerValidationResult = await validationParameters.IssuerValidatorAsync(
-                jsonWebToken.Issuer, jsonWebToken, validationParameters, callContext, cancellationToken)
-                .ConfigureAwait(false);
-
-            if (!issuerValidationResult.IsValid)
+#pragma warning disable CA1031 // Do not catch general exception types
+            ValidationResult<ValidatedIssuer> issuerValidationResult;
+            try
             {
-                StackFrame issuerValidationFailureStackFrame = StackFrames.IssuerValidationFailed ??= new StackFrame(true);
-                return issuerValidationResult.UnwrapError().AddStackFrame(issuerValidationFailureStackFrame);
+                issuerValidationResult = await validationParameters.IssuerValidator(
+                    jsonWebToken.Issuer, jsonWebToken, validationParameters, callContext, cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (!issuerValidationResult.IsValid)
+                {
+                    StackFrame issuerValidationFailureStackFrame = StackFrames.IssuerValidationFailed ??= new StackFrame(true);
+                    return issuerValidationResult.UnwrapError().AddStackFrame(issuerValidationFailureStackFrame);
+                }
             }
+            catch (Exception ex)
+            {
+                StackFrames.IssuerValidatorThrew ??= new StackFrame(true);
+                return new ValidationError(
+                    new MessageDetail(TokenLogMessages.IDX10269),
+                    ValidationFailureType.IssuerValidatorThrew,
+                    typeof(SecurityTokenInvalidIssuerException),
+                    StackFrames.IssuerValidatorThrew,
+                    ex);
+            }
+#pragma warning restore CA1031 // Do not catch general exception types
 
             ValidationResult<DateTime?> replayValidationResult = validationParameters.TokenReplayValidator(
                 expires, jsonWebToken.EncodedToken, validationParameters, callContext);

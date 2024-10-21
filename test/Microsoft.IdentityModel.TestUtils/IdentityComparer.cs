@@ -1406,6 +1406,99 @@ namespace Microsoft.IdentityModel.TestUtils
             return context.Merge(localContext);
         }
 
+        internal static bool AreValidationErrorsEqual(ValidationError validationError1, ValidationError validationError2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+
+            AreStringsEqual(
+                validationError1.GetType().ToString(),
+                validationError2.GetType().ToString(),
+                "validationError1.GetType().ToString()",
+                "validationError2.GetType().ToString()",
+                localContext);
+
+            AreStringsEqual(
+                validationError1.ExceptionType.ToString(),
+                validationError2.ExceptionType.ToString(),
+                "validationError1.ExceptionType",
+                "validationError2.ExceptionType",
+                localContext);
+
+            AreStringsEqual(
+                validationError1.FailureType,
+                validationError2.FailureType,
+                "validationError1.FailureType",
+                "validationError2.FailureType",
+                localContext);
+
+            AreExceptionsEqual(
+                validationError1.GetException(),
+                validationError2.GetException(),
+                localContext);
+
+            AreMessageDetailsEqual(
+                validationError1.MessageDetail,
+                validationError2.MessageDetail,
+                localContext);
+
+            return context.Merge(localContext);
+        }
+
+        internal static bool AreExceptionsEqual(Exception exception1, Exception exception2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(exception1, exception2, localContext))
+                return context.Merge(localContext);
+
+            AreStringsEqual(
+                exception1.GetType().ToString(),
+                exception2.GetType().ToString(),
+                "exception1.GetType().ToString()",
+                "exception2.GetType().ToString()",
+                localContext);
+
+            AreStringsEqual(
+                exception1.Message,
+                exception2.Message,
+                "exception1.Message.ToString()",
+                "exception2.Message.ToString()",
+                localContext);
+
+            if (exception1.GetType() == typeof(SecurityTokenInvalidIssuerException))
+            {
+                AreStringsEqual(
+                    ((SecurityTokenInvalidIssuerException)exception1).InvalidIssuer,
+                    ((SecurityTokenInvalidIssuerException)exception2).InvalidIssuer,
+                    "((SecurityTokenInvalidIssuerException)exception1).InvalidIssuer",
+                    "((SecurityTokenInvalidIssuerException)exception2).InvalidIssuer",
+                    localContext);
+            }
+
+            return context.Merge(localContext);
+        }
+
+        internal static bool AreMessageDetailsEqual(MessageDetail messageDetail1, MessageDetail messageDetail2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+
+            AreStringsEqual(
+                messageDetail1.GetType().ToString(),
+                messageDetail2.GetType().ToString(),
+                "messageDetail1.GetType().ToString()",
+                "messageDetail2.GetType().ToString()",
+                localContext);
+
+            AreStringsEqual(
+                messageDetail1.Message,
+                messageDetail2.Message,
+                "messageDetail1.Message",
+                "messageDetail2.Message",
+                localContext);
+
+            return context.Merge(localContext);
+        }
+
+
         private static bool AreValueCollectionsEqual(Object object1, Object object2, CompareContext context)
         {
             Dictionary<string, object>.ValueCollection vc1 = (Dictionary<string, object>.ValueCollection)object1;

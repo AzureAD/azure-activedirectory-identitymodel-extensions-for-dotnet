@@ -51,6 +51,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // ValidateSignature
             internal static StackFrame? KidNotMatchedNoTryAll;
             internal static StackFrame? NoKeysProvided;
+            // ValidationDelegates throw
+            internal static StackFrame? IssuerValidatorThrew;
         }
     }
 }
