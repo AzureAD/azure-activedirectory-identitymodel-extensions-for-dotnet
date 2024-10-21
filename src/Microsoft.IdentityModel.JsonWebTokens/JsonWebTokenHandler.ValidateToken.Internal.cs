@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
 
             ValidationResult<SecurityToken> readResult = ReadToken(token, callContext);
-            if (readResult.IsSuccess)
+            if (readResult.IsValid)
             {
                 ValidationResult<ValidatedToken> validationResult = await ValidateTokenAsync(
                     readResult.UnwrapResult(),
@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     cancellationToken)
                     .ConfigureAwait(false);
 
-                if (validationResult.IsSuccess)
+                if (validationResult.IsValid)
                     return validationResult; // No need to unwrap and re-wrap the result.
 
                 StackFrame validationFailureStackFrame = StackFrames.TokenStringValidationFailed ??= new StackFrame(true);
@@ -132,14 +132,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (validationParameters.ConfigurationManager is null)
             {
-                if (result.IsSuccess)
+                if (result.IsValid)
                     return result;
 
                 StackFrame tokenValidationStackFrame = StackFrames.TokenValidationFailedNullConfigurationManager ??= new StackFrame(true);
                 return result.UnwrapError().AddStackFrame(tokenValidationStackFrame);
             }
 
-            if (result.IsSuccess)
+            if (result.IsValid)
             {
                 // Set current configuration as LKG if it exists.
                 if (currentConfiguration is not null)
@@ -168,7 +168,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             await ValidateJWEAsync(jsonWebToken, validationParameters, currentConfiguration, callContext, cancellationToken).ConfigureAwait(false) :
                             await ValidateJWSAsync(jsonWebToken, validationParameters, currentConfiguration, callContext, cancellationToken).ConfigureAwait(false);
 
-                        if (result.IsSuccess)
+                        if (result.IsValid)
                         {
                             validationParameters.ConfigurationManager.LastKnownGoodConfiguration = currentConfiguration;
                             return result;
@@ -193,7 +193,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                                 await ValidateJWEAsync(jsonWebToken, validationParameters, lkgConfiguration, callContext, cancellationToken).ConfigureAwait(false) :
                                 await ValidateJWSAsync(jsonWebToken, validationParameters, lkgConfiguration, callContext, cancellationToken).ConfigureAwait(false);
 
-                            if (result.IsSuccess)
+                            if (result.IsValid)
                                 return result;
                         }
                     }
@@ -214,14 +214,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             ValidationResult<string> decryptionResult = DecryptToken(
                 jwtToken, validationParameters, configuration, callContext);
-            if (!decryptionResult.IsSuccess)
+            if (!decryptionResult.IsValid)
             {
                 StackFrame decryptionFailureStackFrame = StackFrames.DecryptionFailed ??= new StackFrame(true);
                 return decryptionResult.UnwrapError().AddStackFrame(decryptionFailureStackFrame);
             }
 
             ValidationResult<SecurityToken> readResult = ReadToken(decryptionResult.UnwrapResult(), callContext);
-            if (!readResult.IsSuccess)
+            if (!readResult.IsValid)
             {
                 StackFrame readFailureStackFrame = StackFrames.DecryptedReadFailed ??= new StackFrame(true);
                 return readResult.UnwrapError().AddStackFrame(readFailureStackFrame);
@@ -232,7 +232,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 await ValidateJWSAsync(decryptedToken!, validationParameters, configuration, callContext, cancellationToken)
                 .ConfigureAwait(false);
 
-            if (!validationResult.IsSuccess)
+            if (!validationResult.IsValid)
             {
                 StackFrame validationFailureStackFrame = StackFrames.JWEValidationFailed ??= new StackFrame(true);
                 return validationResult.UnwrapError().AddStackFrame(validationFailureStackFrame);
@@ -259,7 +259,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             ValidationResult<ValidatedLifetime> lifetimeValidationResult = validationParameters.LifetimeValidator(
                 notBefore, expires, jsonWebToken, validationParameters, callContext);
 
-            if (!lifetimeValidationResult.IsSuccess)
+            if (!lifetimeValidationResult.IsValid)
             {
                 StackFrame lifetimeValidationFailureStackFrame = StackFrames.LifetimeValidationFailed ??= new StackFrame(true);
                 return lifetimeValidationResult.UnwrapError().AddStackFrame(lifetimeValidationFailureStackFrame);
@@ -271,7 +271,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             ValidationResult<string> audienceValidationResult = validationParameters.AudienceValidator(
                 tokenAudiences, jsonWebToken, validationParameters, callContext);
 
-            if (!audienceValidationResult.IsSuccess)
+            if (!audienceValidationResult.IsValid)
             {
                 StackFrame audienceValidationFailureStackFrame = StackFrames.AudienceValidationFailed ??= new StackFrame(true);
                 return audienceValidationResult.UnwrapError().AddStackFrame(audienceValidationFailureStackFrame);
@@ -281,7 +281,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 jsonWebToken.Issuer, jsonWebToken, validationParameters, callContext, cancellationToken)
                 .ConfigureAwait(false);
 
-            if (!issuerValidationResult.IsSuccess)
+            if (!issuerValidationResult.IsValid)
             {
                 StackFrame issuerValidationFailureStackFrame = StackFrames.IssuerValidationFailed ??= new StackFrame(true);
                 return issuerValidationResult.UnwrapError().AddStackFrame(issuerValidationFailureStackFrame);
@@ -290,7 +290,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             ValidationResult<DateTime?> replayValidationResult = validationParameters.TokenReplayValidator(
                 expires, jsonWebToken.EncodedToken, validationParameters, callContext);
 
-            if (!replayValidationResult.IsSuccess)
+            if (!replayValidationResult.IsValid)
             {
                 StackFrame replayValidationFailureStackFrame = StackFrames.ReplayValidationFailed ??= new StackFrame(true);
                 return replayValidationResult.UnwrapError().AddStackFrame(replayValidationFailureStackFrame);
@@ -301,7 +301,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (validationParameters.ValidateActor && !string.IsNullOrWhiteSpace(jsonWebToken.Actor))
             {
                 ValidationResult<SecurityToken> actorReadingResult = ReadToken(jsonWebToken.Actor, callContext);
-                if (!actorReadingResult.IsSuccess)
+                if (!actorReadingResult.IsValid)
                 {
                     StackFrame actorReadingFailureStackFrame = StackFrames.ActorReadFailed ??= new StackFrame(true);
                     return actorReadingResult.UnwrapError().AddStackFrame(actorReadingFailureStackFrame);
@@ -313,7 +313,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     await ValidateJWSAsync(actorToken, actorParameters, configuration, callContext, cancellationToken)
                     .ConfigureAwait(false);
 
-                if (!innerActorValidationResult.IsSuccess)
+                if (!innerActorValidationResult.IsValid)
                 {
                     StackFrame actorValidationFailureStackFrame = StackFrames.ActorValidationFailed ??= new StackFrame(true);
                     return innerActorValidationResult.UnwrapError().AddStackFrame(actorValidationFailureStackFrame);
@@ -324,7 +324,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             ValidationResult<ValidatedTokenType> typeValidationResult = validationParameters.TypeValidator(
                 jsonWebToken.Typ, jsonWebToken, validationParameters, callContext);
-            if (!typeValidationResult.IsSuccess)
+            if (!typeValidationResult.IsValid)
             {
                 StackFrame typeValidationFailureStackFrame = StackFrames.TypeValidationFailed ??= new StackFrame(true);
                 return typeValidationResult.UnwrapError().AddStackFrame(typeValidationFailureStackFrame);
@@ -333,7 +333,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // The signature validation delegate is yet to be migrated to ValidationParameters.
             ValidationResult<SecurityKey> signatureValidationResult = ValidateSignature(
                 jsonWebToken, validationParameters, configuration, callContext);
-            if (!signatureValidationResult.IsSuccess)
+            if (!signatureValidationResult.IsValid)
             {
                 StackFrame signatureValidationFailureStackFrame = StackFrames.SignatureValidationFailed ??= new StackFrame(true);
                 return signatureValidationResult.UnwrapError().AddStackFrame(signatureValidationFailureStackFrame);
@@ -342,7 +342,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             ValidationResult<ValidatedSigningKeyLifetime> issuerSigningKeyValidationResult =
                 validationParameters.IssuerSigningKeyValidator(
                     signatureValidationResult.UnwrapResult(), jsonWebToken, validationParameters, configuration, callContext);
-            if (!issuerSigningKeyValidationResult.IsSuccess)
+            if (!issuerSigningKeyValidationResult.IsValid)
             {
                 StackFrame issuerSigningKeyValidationFailureStackFrame = StackFrames.IssuerSigningKeyValidationFailed ??= new StackFrame(true);
                 return issuerSigningKeyValidationResult.UnwrapError().AddStackFrame(issuerSigningKeyValidationFailureStackFrame);
