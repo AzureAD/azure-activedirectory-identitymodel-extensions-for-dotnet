@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 context.AddDiff($"tokenValidationParametersResult.IsValid != theoryData.ExpectedIsValid");
 
             if (validationParametersResult.IsValid != theoryData.ExpectedIsValid)
-                context.AddDiff($"validationParametersResult.IsSuccess != theoryData.ExpectedIsValid");
+                context.AddDiff($"validationParametersResult.IsValid != theoryData.ExpectedIsValid");
 
             if (theoryData.ExpectedIsValid &&
                 legacyTokenValidationParametersResult.IsValid &&
