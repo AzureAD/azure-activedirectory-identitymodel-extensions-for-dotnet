@@ -46,7 +46,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             if (!conditionsResult.IsValid)
             {
-                return conditionsResult.UnwrapError().AddStackFrame(new StackFrame(true));
+                StackFrames.AssertionConditionsValidationFailed ??= new StackFrame(true);
+                return conditionsResult.UnwrapError().AddStackFrame(StackFrames.AssertionConditionsValidationFailed);
             }
 
             Task<ValidationResult<ValidatedIssuer>> validatedIssuerResult = validationParameters.IssuerValidatorAsync(
@@ -68,7 +69,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         // ValidatedConditions is basically a named tuple but using a record struct better expresses the intent.
         internal record struct ValidatedConditions(string? ValidatedAudience, ValidatedLifetime? ValidatedLifetime);
 
-        internal virtual ValidationResult<ValidatedConditions> ValidateConditions(Saml2SecurityToken samlToken, ValidationParameters validationParameters, CallContext callContext)
+        internal virtual ValidationResult<ValidatedConditions> ValidateConditions(
+            Saml2SecurityToken samlToken,
+            ValidationParameters validationParameters,
+            CallContext callContext)
         {
             if (samlToken.Assertion is null)
             {
@@ -144,7 +148,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     validationParameters,
                     callContext);
                 if (!audienceValidationResult.IsValid)
-                    return audienceValidationResult.UnwrapError();
+                {
+                    StackFrames.AudienceValidationFailed ??= new StackFrame(true);
+                    return audienceValidationResult.UnwrapError().AddStackFrame(StackFrames.AudienceValidationFailed);
+                }
 
                 // Audience is valid, save it for later.
                 validatedAudience = audienceValidationResult.UnwrapResult();
