@@ -50,17 +50,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 return conditionsResult.UnwrapError().AddStackFrame(StackFrames.AssertionConditionsValidationFailed);
             }
 
-            Task<ValidationResult<ValidatedIssuer>> validatedIssuerResult = validationParameters.IssuerValidatorAsync(
+            ValidationResult<ValidatedIssuer> validatedIssuerResult = await validationParameters.IssuerValidatorAsync(
                 samlToken.Issuer,
                 samlToken,
                 validationParameters,
                 callContext,
-                cancellationToken);
+                cancellationToken).ConfigureAwait(false);
 
-            if (!(await validatedIssuerResult.ConfigureAwait(false)).IsValid)
+            if (!validatedIssuerResult.IsValid)
             {
                 StackFrames.IssuerValidationFailed ??= new StackFrame(true);
-                return (await validatedIssuerResult.ConfigureAwait(false)).UnwrapError().AddStackFrame(StackFrames.IssuerValidationFailed);
+                return validatedIssuerResult.UnwrapError().AddStackFrame(StackFrames.IssuerValidationFailed);
             }
 
             return new ValidatedToken(samlToken, this, validationParameters);
