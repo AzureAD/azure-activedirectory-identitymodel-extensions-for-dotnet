@@ -82,12 +82,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 value = DateTimeUtil.ToUniversalTime(value);
 
-                // NotBefore must be earlier than NotOnOrAfter
-                if (value != null && NotBefore.HasValue)
-                {
-                    if (value.Value <= NotBefore.Value)
-                        throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13514, MarkAsNonPII(value), MarkAsNonPII(NotBefore))));
-                }
+                //This should not be checked here, instead fail during validation of the token. Will remove this code once we release new validation model bug #2905
+                /*                if (value != null && NotBefore.HasValue)
+                                {
+                                    if (value.Value <= NotBefore.Value)
+                                        throw LogExceptionMessage(new ArgumentException(FormatInvariant(LogMessages.IDX13514, MarkAsNonPII(value), MarkAsNonPII(NotBefore))));
+                                }*/
 
                 _notOnOrAfter = value;
             }

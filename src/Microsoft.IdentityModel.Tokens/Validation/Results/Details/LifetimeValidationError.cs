@@ -9,8 +9,8 @@ namespace Microsoft.IdentityModel.Tokens
 {
     internal class LifetimeValidationError : ValidationError
     {
-        DateTime _notBefore;
-        DateTime _expires;
+        protected DateTime _notBefore;
+        protected DateTime _expires;
 
         public LifetimeValidationError(
             MessageDetail messageDetail,
@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Creates an instance of an <see cref="Exception"/> using <see cref="ValidationError"/>
         /// </summary>
         /// <returns>An instance of an Exception.</returns>
-        public override Exception GetException()
+        internal override Exception GetException()
         {
             if (ExceptionType == typeof(SecurityTokenNoExpirationException))
             {
@@ -75,7 +75,7 @@ namespace Microsoft.IdentityModel.Tokens
                 };
             }
             else
-                return base.GetException();
+                return base.GetException(ExceptionType, null);
         }
     }
 }
