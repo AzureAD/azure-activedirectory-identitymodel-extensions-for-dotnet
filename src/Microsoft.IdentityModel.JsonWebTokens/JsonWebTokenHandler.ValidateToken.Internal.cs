@@ -341,7 +341,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             ValidationResult<ValidatedSigningKeyLifetime> issuerSigningKeyValidationResult =
                 validationParameters.IssuerSigningKeyValidator(
-                    signatureValidationResult.UnwrapResult(), jsonWebToken, validationParameters, configuration, callContext);
+                    jsonWebToken.SigningKey, jsonWebToken, validationParameters, configuration, callContext);
             if (!issuerSigningKeyValidationResult.IsValid)
             {
                 StackFrame issuerSigningKeyValidationFailureStackFrame = StackFrames.IssuerSigningKeyValidationFailed ??= new StackFrame(true);
