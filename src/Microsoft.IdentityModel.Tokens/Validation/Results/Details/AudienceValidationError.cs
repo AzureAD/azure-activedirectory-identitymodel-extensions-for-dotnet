@@ -10,23 +10,42 @@ namespace Microsoft.IdentityModel.Tokens
 {
     internal class AudienceValidationError : ValidationError
     {
-        private IList<string>? _invalidAudiences;
+        private IList<string>? _tokenAudiences;
+        private IList<string>? _validAudiences;
+
+        // stack frames associated with AudienceValidationErrors
+        internal static StackFrame? ValidationParametersNull;
+        internal static StackFrame? AudiencesNull;
+        internal static StackFrame? AudiencesCountZero;
+        internal static StackFrame? ValidationParametersAudiencesCountZero;
+        internal static StackFrame? ValidateAudienceFailed;
 
         public AudienceValidationError(
             MessageDetail messageDetail,
+            ValidationFailureType failureType,
             Type exceptionType,
             StackFrame stackFrame,
-            IList<string>? invalidAudiences)
-            : base(messageDetail, ValidationFailureType.AudienceValidationFailed, exceptionType, stackFrame)
+            IList<string>? tokenAudiences,
+            IList<string>? validAudiences)
+            : base(messageDetail, failureType, exceptionType, stackFrame)
         {
-            _invalidAudiences = invalidAudiences;
+            _tokenAudiences = tokenAudiences;
+            _validAudiences = validAudiences;
         }
 
-        internal override void AddAdditionalInformation(ISecurityTokenException exception)
+        /// <summary>
+        /// Creates an instance of an <see cref="Exception"/> using <see cref="ValidationError"/>
+        /// </summary>
+        /// <returns>An instance of an Exception.</returns>
+        internal override Exception GetException()
         {
-            if (exception is SecurityTokenInvalidAudienceException invalidAudienceException)
-                invalidAudienceException.InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(_invalidAudiences);
+            if (ExceptionType == typeof(SecurityTokenInvalidAudienceException))
+                return new SecurityTokenInvalidAudienceException(MessageDetail.Message) { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(_tokenAudiences) };
+
+            return base.GetException(ExceptionType, null);
         }
+
+        internal IList<string>? TokenAudiences => _tokenAudiences;
     }
 }
 #nullable restore

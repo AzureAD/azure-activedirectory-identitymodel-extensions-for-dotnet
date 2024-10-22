@@ -20,7 +20,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// Represents a security token exception.
     /// </summary>
     [Serializable]
-    public class SecurityTokenException : Exception, ISecurityTokenException
+    public class SecurityTokenException : Exception
     {
         [NonSerialized]
         private string _stackTrace;
@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Sets the <see cref="ValidationError"/> that caused the exception.
         /// </summary>
         /// <param name="validationError"></param>
-        public void SetValidationError(ValidationError validationError)
+        internal void SetValidationError(ValidationError validationError)
         {
             _validationError = validationError;
         }

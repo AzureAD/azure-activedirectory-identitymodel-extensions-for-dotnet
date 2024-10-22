@@ -208,9 +208,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         {
                             if (!(ex is SecurityTokenUnableToValidateException securityTokenUnableToValidateException))
                                 throw new ArgumentException($"expected argument of type {nameof(SecurityTokenUnableToValidateException)} received type {ex.GetType()}");
-
-                            securityTokenUnableToValidateException.ValidationFailure = ValidationFailure.InvalidIssuer;
-                            securityTokenUnableToValidateException.ValidationFailure |= ValidationFailure.InvalidLifetime;
                         },
                     },
 #pragma warning restore CS0618 // Type or member is obsolete

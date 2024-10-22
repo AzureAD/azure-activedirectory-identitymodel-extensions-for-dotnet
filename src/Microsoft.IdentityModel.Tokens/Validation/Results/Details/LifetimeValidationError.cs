@@ -9,11 +9,8 @@ namespace Microsoft.IdentityModel.Tokens
 {
     internal class LifetimeValidationError : ValidationError
     {
-        internal record struct AdditionalInformation(
-            DateTime? NotBeforeDate,
-            DateTime? ExpirationDate);
-
-        private AdditionalInformation _additionalInformation;
+        protected DateTime _notBefore;
+        protected DateTime _expires;
 
         public LifetimeValidationError(
             MessageDetail messageDetail,
@@ -27,45 +24,58 @@ namespace Microsoft.IdentityModel.Tokens
             MessageDetail messageDetail,
             Type exceptionType,
             StackFrame stackFrame,
-            AdditionalInformation? additionalInformation)
+            DateTime notBefore,
+            DateTime expires)
             : base(messageDetail, ValidationFailureType.LifetimeValidationFailed, exceptionType, stackFrame)
         {
-            if (additionalInformation.HasValue)
-                _additionalInformation = additionalInformation.Value;
+            _notBefore = notBefore;
+            _expires = expires;
         }
 
         public LifetimeValidationError(
             MessageDetail messageDetail,
             Type exceptionType,
             StackFrame stackFrame,
-            Exception innerException,
-            AdditionalInformation? additionalInformation)
-            : base(messageDetail, ValidationFailureType.LifetimeValidationFailed, exceptionType, stackFrame, innerException)
+            DateTime expires)
+            : base(messageDetail, ValidationFailureType.LifetimeValidationFailed, exceptionType, stackFrame)
         {
-            if (additionalInformation.HasValue)
-                _additionalInformation = additionalInformation.Value;
+            _expires = expires;
         }
 
-        internal override void AddAdditionalInformation(ISecurityTokenException exception)
+        /// <summary>
+        /// Creates an instance of an <see cref="Exception"/> using <see cref="ValidationError"/>
+        /// </summary>
+        /// <returns>An instance of an Exception.</returns>
+        internal override Exception GetException()
         {
-            if (exception is SecurityTokenExpiredException expiredException &&
-                _additionalInformation.ExpirationDate.HasValue)
+            if (ExceptionType == typeof(SecurityTokenNoExpirationException))
             {
-                expiredException.Expires = _additionalInformation.ExpirationDate.Value;
+                return new SecurityTokenNoExpirationException(MessageDetail.Message);
             }
-            else if (exception is SecurityTokenNotYetValidException notYetValidException &&
-                _additionalInformation.NotBeforeDate.HasValue)
+            else if (ExceptionType == typeof(SecurityTokenInvalidLifetimeException))
             {
-                notYetValidException.NotBefore = _additionalInformation.NotBeforeDate.Value;
+                return new SecurityTokenInvalidLifetimeException(MessageDetail.Message)
+                {
+                    NotBefore = _notBefore,
+                    Expires = _expires
+                };
             }
-            else if (exception is SecurityTokenInvalidLifetimeException invalidLifetimeException)
+            else if (ExceptionType == typeof(SecurityTokenNotYetValidException))
             {
-                if (_additionalInformation.NotBeforeDate.HasValue)
-                    invalidLifetimeException.NotBefore = _additionalInformation.NotBeforeDate.Value;
-
-                if (_additionalInformation.ExpirationDate.HasValue)
-                    invalidLifetimeException.Expires = _additionalInformation.ExpirationDate.Value;
+                return new SecurityTokenNotYetValidException(MessageDetail.Message)
+                {
+                    NotBefore = _notBefore
+                };
             }
+            else if (ExceptionType == typeof(SecurityTokenExpiredException))
+            {
+                return new SecurityTokenExpiredException(MessageDetail.Message)
+                {
+                    Expires = _expires
+                };
+            }
+            else
+                return base.GetException(ExceptionType, null);
         }
     }
 }

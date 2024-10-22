@@ -47,6 +47,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             TokenValidationResult tokenValidationParametersResult =
                 await jsonWebTokenHandler.ValidateTokenAsync(jwtString, theoryData.TokenValidationParameters);
+
             ValidationResult<ValidatedToken> validationParametersResult =
                 await jsonWebTokenHandler.ValidateTokenAsync(
                     jwtString, theoryData.ValidationParameters, theoryData.CallContext, CancellationToken.None);
@@ -54,12 +55,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             if (tokenValidationParametersResult.IsValid != theoryData.ExpectedIsValid)
                 context.AddDiff($"tokenValidationParametersResult.IsValid != theoryData.ExpectedIsValid");
 
-            if (validationParametersResult.IsSuccess != theoryData.ExpectedIsValid)
+            if (validationParametersResult.IsValid != theoryData.ExpectedIsValid)
                 context.AddDiff($"validationParametersResult.IsSuccess != theoryData.ExpectedIsValid");
 
             if (theoryData.ExpectedIsValid &&
                 tokenValidationParametersResult.IsValid &&
-                validationParametersResult.IsSuccess)
+                validationParametersResult.IsValid)
             {
                 IdentityComparer.AreEqual(
                     tokenValidationParametersResult.ClaimsIdentity,
@@ -74,7 +75,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 theoryData.ExpectedException.ProcessException(tokenValidationParametersResult.Exception, context);
 
-                if (!validationParametersResult.IsSuccess)
+                if (!validationParametersResult.IsValid)
                 {
                     // If there is a special case for the ValidationParameters path, use that.
                     if (theoryData.ExpectedExceptionValidationParameters != null)
@@ -191,9 +192,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
                         ExpectedIsValid = false,
                         ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10511:"),
-                        ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidSignatureException(
-                            "IDX10518:",
-                            innerTypeExpected: typeof(SecurityTokenInvalidAlgorithmException))
+                        ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidAlgorithmException("IDX10518:")
                     },
                     new JsonWebTokenHandlerValidationParametersTheoryData("Valid_JWE")
                     {
