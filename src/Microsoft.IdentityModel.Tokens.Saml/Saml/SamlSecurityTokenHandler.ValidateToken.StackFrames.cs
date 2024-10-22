@@ -4,9 +4,9 @@
 using System.Diagnostics;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens.Saml2
+namespace Microsoft.IdentityModel.Tokens.Saml
 {
-    public partial class Saml2SecurityTokenHandler : SecurityTokenHandler
+    public partial class SamlSecurityTokenHandler : SecurityTokenHandler
     {
         // Cached stack frames to build exceptions from validation errors
         internal static class StackFrames
