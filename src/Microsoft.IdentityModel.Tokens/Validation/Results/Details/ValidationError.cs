@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -117,6 +118,12 @@ namespace Microsoft.IdentityModel.Tokens
                     exception = new SecurityTokenException(MessageDetail.Message);
                 else if (exceptionType == typeof(SecurityTokenKeyWrapException))
                     exception = new SecurityTokenKeyWrapException(MessageDetail.Message);
+                else
+                {
+                    // Exception type is unknown
+                    var message = LogHelper.FormatInvariant(LogMessages.IDX10002, exceptionType, MessageDetail.Message);
+                    exception = new SecurityTokenException(message);
+                }
             }
             else
             {
@@ -168,6 +175,12 @@ namespace Microsoft.IdentityModel.Tokens
                     exception = new SecurityTokenException(MessageDetail.Message, actualException);
                 else if (exceptionType == typeof(SecurityTokenKeyWrapException))
                     exception = new SecurityTokenKeyWrapException(MessageDetail.Message, actualException);
+                else
+                {
+                    // Exception type is unknown
+                    var message = LogHelper.FormatInvariant(LogMessages.IDX10002, exceptionType, MessageDetail.Message);
+                    exception = new SecurityTokenException(message, actualException);
+                }
             }
 
             return exception;

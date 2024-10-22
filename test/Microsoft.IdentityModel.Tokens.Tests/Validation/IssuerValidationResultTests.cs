@@ -30,7 +30,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 new CallContext(),
                 CancellationToken.None);
 
-            if (result.IsSuccess)
+            if (result.IsValid)
             {
                 IdentityComparer.AreValidatedIssuersEqual(
                     theoryData.Result.UnwrapResult(),

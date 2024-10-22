@@ -44,6 +44,8 @@ namespace Microsoft.IdentityModel.Tokens
 
             return base.GetException(ExceptionType, null);
         }
+
+        internal IList<string>? TokenAudiences => _tokenAudiences;
     }
 }
 #nullable restore
