@@ -1034,7 +1034,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 {
                     KeyInfo = KeyInfo,
                     SignedInfo = SignedInfo,
-                    SignatureValue = "OaTq3jGqbPLUVROvhiqV+PneMwdu6iZgVv7vbW++wEk4tSXoqEUkY+b/M2ZzHFy0M/k33migp3s0w+Ff1vNHRI0uT8Zs1D+EdI/Oz4Pu3FwPA/UK+8qe+JTRAOhdN5H7Wv4c0p1nrWJlVlT5WWCUe2uRSpojS2+D+KC1gG/DiDqK5gWgQt/7Z0HV8ml6C0PTqXWvZcYc1u49Y3tNEPOUuSXGzSZOAfhEAMdQ6+qC+126wcbSFK5ww1aOI2K6Nk3u8sxJUXHdUXs92DKvLemcaHXw0yDNUNi/izVldy3yu6VEDEflCJkj1+yvB52U+EpvG/7IGwY66QceVbu/1FFLFA=="
+                    SignatureValue = "kzGIa0ZwE1Y7CYZ3hZHdFLGEQ6LvTdoKYSr+jClEdoL8l0bRf0Mkp7zsp0uCPyoZHKVBatU7otEmbciu9FWNMSXmpiDj9eSL/eNqpJ0sRkaNPyM3AqR2zy7TG2481K4SWZfo5EahrSat0glEUC6i3sxojjLb8DRq8ETYO1JsNhLOHQjKWlBEBZ04rAcz/kWXt0N1CQne4+GozQtiaMDvN/PXeqwiEYHbS1Gr5G16wHdiFZNYylH2pW14+t5t/eIZX8c/VJNT5uM09KHeBSMEn7Uksp2qx1brKP1K9SULzke0Pgx+lIJZgVndGbviGd5UP4ufovexs4F5TkhI7Pel6A=="
                 };
                 return signature;
             }
@@ -1062,7 +1062,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 {
                     KeyInfo = KeyInfo,
                     SignedInfo = SignedInfoReferenceWithId,
-                    SignatureValue = "fqbb3WVUTLu/ihWXHUYgPWO5rgnm9AuwAT8YeiWiood/z+ObWpTwxs42be4HIDac9U94hR05rfLOR+0WxmlzhJp7/fye50VHMKex5kAAp9aCMAzCvDkfNzhMUN3WOHGEFOs4tmxrR0TBV6j+KNnjyDs3AUtdzZnZB+QmOJAlZubdOzWk/D0CGSXSgMmqYgmvH/GZGQWxQtbGMFuB29VCR7moegGN/9VAo/K7Z22xmfUWNKWVHB0OUC8FI36sadVnnUvcKnUo3M3pnQwbEWYz/+rMSYYrboM4dOKEqxZCgFXKou08Pz0MtNe2VwketLbJrKSmuEJOgVnXrzPTwlVSpw=="
+                    SignatureValue = "BOMo5aCr+YIjOq+lmPj8be8/6u8iXJFXuJskeWaYk1iNadUhhUPcSHeFv8XmOBIXV7Yrvk2WiVoBKawJh79iqRrVpJmdpHTxuukUua6iijxEEhwjYGLneleVgBzDTnk2os21WThYSEXmhi52z4Or0eq29vObOlRN3c2VlqDba8avu8jMNqZuKWsptxLDS1q0JfE8zu7Srs9y2GD7SULbWYpsl2VIO3ZCV+0/YWnBHQ09Ee1QKP18HMNr3jgrmpNj165olYKnn+Vr2YDEBSuNX1mxdw2bqAbpEeWITmmIkW2KDivxOtL2lOZEC6QnEVidWr1oyFUb+srKAlmksiy3wA=="
                 };
                 return signature;
             }
