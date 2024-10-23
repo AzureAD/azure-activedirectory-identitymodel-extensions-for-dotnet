@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Tokens.Saml;
 
 #nullable enable
 namespace Microsoft.IdentityModel.Tokens.Saml2
@@ -14,15 +15,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// </summary>
     public partial class Saml2SecurityTokenHandler : SecurityTokenHandler
     {
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         internal async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
             Saml2SecurityToken samlToken,
             ValidationParameters validationParameters,
             CallContext callContext,
-#pragma warning disable CA1801 // Review unused parameters
             CancellationToken cancellationToken)
-#pragma warning restore CA1801 // Review unused parameters
         {
             if (samlToken is null)
             {
@@ -40,12 +37,30 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     StackFrames.TokenValidationParametersNull);
             }
 
-            var conditionsResult = ValidateConditions(samlToken, validationParameters, callContext);
+            validationParameters = await SamlTokenUtilities.PopulateValidationParametersWithCurrentConfigurationAsync(validationParameters, cancellationToken).ConfigureAwait(false);
+
+            var conditionsResult = ValidateConditions(
+                samlToken,
+                validationParameters,
+                callContext);
 
             if (!conditionsResult.IsValid)
             {
                 StackFrames.AssertionConditionsValidationFailed ??= new StackFrame(true);
                 return conditionsResult.UnwrapError().AddStackFrame(StackFrames.AssertionConditionsValidationFailed);
+            }
+
+            ValidationResult<ValidatedIssuer> validatedIssuerResult = await validationParameters.IssuerValidatorAsync(
+                samlToken.Issuer,
+                samlToken,
+                validationParameters,
+                callContext,
+                cancellationToken).ConfigureAwait(false);
+
+            if (!validatedIssuerResult.IsValid)
+            {
+                StackFrames.IssuerValidationFailed ??= new StackFrame(true);
+                return validatedIssuerResult.UnwrapError().AddStackFrame(StackFrames.IssuerValidationFailed);
             }
 
             return new ValidatedToken(samlToken, this, validationParameters);
