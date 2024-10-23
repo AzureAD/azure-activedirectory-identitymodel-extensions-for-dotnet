@@ -47,6 +47,15 @@ steps:
     regedit /s .\build\strongNameBypass.reg
   displayName: 'Strong Name Bypass'
 
+- powershell: |
+    $nugetSourceIsExternal = (dotnet nuget list source --format Short).Contains("https://api.nuget.org/v3/index.json")
+    if ($nugetSourceIsExternal) {
+        dotnet nuget remove source NuGet
+        dotnet nuget add source https://identitydivision.pkgs.visualstudio.com/_packaging/IDDP/nuget/v3/index.json -n IDDP
+        dotnet nuget list source
+    }
+  displayName: 'Remove external "NuGet" Source and add "IDDP artifacts" as a NuGet Source, if needed.'
+
 - task: DotNetCoreCLI@2
   displayName: Build
   inputs:
@@ -136,8 +145,6 @@ steps:
     verbosityPack: 'Minimal'
     configuration: $(BuildConfiguration)
     packagesToPack: '$(WilsonSourceDirectory)Product.proj'
-    feedsToUse: 'config'
-    nugetConfigPath: Nuget.config
     externalFeedCredentials: 'Internal Analyzers'
 
 - task: onebranch.pipeline.signing@1
