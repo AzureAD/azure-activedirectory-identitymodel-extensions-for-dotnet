@@ -35,6 +35,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     ValidationParameters = CreateValidationParameters(),
                 });
 
+                theoryData.Add(new ValidateTokenAsyncTokenTypeTheoryData("Valid_UnknownTokenType_NoValidTokenTypes")
+                {
+                    // If there are no valid token types, any token type is valid
+                    CustomTokenType = "SomeUnknownType",
+                    TokenValidationParameters = CreateTokenValidationParameters(null),
+                    ValidationParameters = CreateValidationParameters(null),
+                });
+
                 theoryData.Add(new ValidateTokenAsyncTokenTypeTheoryData("Valid_CustomToken_AddedAsValidTokenType")
                 {
                     CustomTokenType = "PPT",
