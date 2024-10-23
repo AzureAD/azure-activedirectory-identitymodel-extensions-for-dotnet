@@ -3,7 +3,6 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -60,16 +59,16 @@ namespace Microsoft.IdentityModel.Tokens
                     return new ValidationError(
                         new MessageDetail(
                             LogMessages.IDX10227,
-                            LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
+                            securityToken),
                         ValidationFailureType.TokenReplayValidationFailed,
-                        typeof(SecurityTokenReplayDetectedException),
+                        typeof(SecurityTokenNoExpirationException),
                         new StackFrame(true));
 
                 if (validationParameters.TokenReplayCache.TryFind(securityToken))
                     return new ValidationError(
                         new MessageDetail(
                             LogMessages.IDX10228,
-                            LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
+                            securityToken),
                         ValidationFailureType.TokenReplayValidationFailed,
                         typeof(SecurityTokenReplayDetectedException),
                         new StackFrame(true));
@@ -78,7 +77,7 @@ namespace Microsoft.IdentityModel.Tokens
                     return new ValidationError(
                         new MessageDetail(
                             LogMessages.IDX10229,
-                            LogHelper.MarkAsUnsafeSecurityArtifact(securityToken, t => t.ToString())),
+                            securityToken),
                         ValidationFailureType.TokenReplayValidationFailed,
                         typeof(SecurityTokenReplayAddFailedException),
                         new StackFrame(true));
