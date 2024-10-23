@@ -144,7 +144,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (!jwtToken.IsSigned)
             {
                 if (validationParameters.RequireSignedTokens)
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSignatureException(LogHelper.FormatInvariant(TokenLogMessages.IDX10504, jwtToken)));
+                    throw LogHelper.LogExceptionMessage(
+                        new SecurityTokenInvalidSignatureException(
+                            LogHelper.FormatInvariant(
+                                TokenLogMessages.IDX10504,
+                                LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken))));
                 else
                     return jwtToken;
             }
