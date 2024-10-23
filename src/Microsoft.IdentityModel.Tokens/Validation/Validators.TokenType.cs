@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Tokens
                     new MessageDetail(LogMessages.IDX10256),
                     typeof(SecurityTokenInvalidTypeException),
                     new StackFrame(true),
-                    type);
+                    null); // even if it is empty, we report null to match the original behaviour.
 
             if (!validationParameters.ValidTypes.Contains(type, StringComparer.Ordinal))
             {
