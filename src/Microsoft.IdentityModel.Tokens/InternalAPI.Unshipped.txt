@@ -9,6 +9,8 @@ Microsoft.IdentityModel.Tokens.LifetimeValidationError._notBefore -> System.Date
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.TimeProvider.get -> System.TimeProvider
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.TimeProvider.set -> void
 Microsoft.IdentityModel.Tokens.ValidationError.GetException(System.Type exceptionType, System.Exception innerException) -> System.Exception
+Microsoft.IdentityModel.Tokens.ValidationParameters.TokenTypeValidator.get -> Microsoft.IdentityModel.Tokens.TokenTypeValidationDelegate
+Microsoft.IdentityModel.Tokens.ValidationParameters.TokenTypeValidator.set -> void
 Microsoft.IdentityModel.Tokens.ValidationResult<TResult>.Error.get -> Microsoft.IdentityModel.Tokens.ValidationError
 Microsoft.IdentityModel.Tokens.ValidationResult<TResult>.IsValid.get -> bool
 Microsoft.IdentityModel.Tokens.ValidationResult<TResult>.Result.get -> TResult
