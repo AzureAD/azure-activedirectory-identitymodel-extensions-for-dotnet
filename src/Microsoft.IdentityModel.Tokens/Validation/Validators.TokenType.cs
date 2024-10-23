@@ -62,22 +62,22 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             if (string.IsNullOrEmpty(type))
-                return new ValidationError(
+                return new TokenTypeValidationError(
                     new MessageDetail(LogMessages.IDX10256),
-                    ValidationFailureType.TokenTypeValidationFailed,
                     typeof(SecurityTokenInvalidTypeException),
-                    new StackFrame(true));
+                    new StackFrame(true),
+                    type);
 
             if (!validationParameters.ValidTypes.Contains(type, StringComparer.Ordinal))
             {
-                return new ValidationError(
+                return new TokenTypeValidationError(
                     new MessageDetail(
                         LogMessages.IDX10257,
                         LogHelper.MarkAsNonPII(type),
                         LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidTypes))),
-                    ValidationFailureType.TokenTypeValidationFailed,
                     typeof(SecurityTokenInvalidTypeException),
-                    new StackFrame(true));
+                    new StackFrame(true),
+                    type);
             }
 
             // TODO: Move to CallContext
