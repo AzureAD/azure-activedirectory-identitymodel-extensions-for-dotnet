@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     /// which supports validating tokens passed as strings using <see cref="TokenValidationParameters"/>.
     /// </summary>
     ///
-    public class SamlSecurityTokenHandler : SecurityTokenHandler
+    public partial class SamlSecurityTokenHandler : SecurityTokenHandler
     {
         internal const string Actor = "Actor";
         private const string _className = "Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler";
