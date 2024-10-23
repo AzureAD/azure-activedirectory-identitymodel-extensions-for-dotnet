@@ -56,7 +56,8 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (validationParameters.ValidTypes.Count == 0)
             {
-                LogHelper.LogVerbose(LogMessages.IDX10255);
+                //TODO: Move to CallContext?
+                //LogHelper.LogVerbose(LogMessages.IDX10255);
                 return new ValidatedTokenType(type ?? "null", validationParameters.ValidTypes.Count);
             }
 
