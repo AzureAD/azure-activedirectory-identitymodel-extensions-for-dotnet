@@ -558,7 +558,7 @@ namespace Microsoft.IdentityModel.Tokens
             // Note: don't throw an exception for a null or empty token type when a user-defined delegate is set
             // to allow it to extract the actual token type from a different location (e.g from the claims).
             if (string.IsNullOrEmpty(type))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidTypeException(LogMessages.IDX10256) { InvalidType = null });
+                throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidTypeException(LogMessages.IDX10256) { InvalidType = type });
 
             if (!validationParameters.ValidTypes.Contains(type, StringComparer.Ordinal))
             {
