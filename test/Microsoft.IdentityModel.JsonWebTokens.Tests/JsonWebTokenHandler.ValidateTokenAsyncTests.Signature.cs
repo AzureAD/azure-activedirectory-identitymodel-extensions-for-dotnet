@@ -122,7 +122,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     validationParameters.IssuerSigningKeyValidator = SkipValidationDelegates.SkipIssuerSigningKeyValidation;
                     validationParameters.LifetimeValidator = SkipValidationDelegates.SkipLifetimeValidation;
                     validationParameters.TokenReplayValidator = SkipValidationDelegates.SkipTokenReplayValidation;
-                    validationParameters.TypeValidator = SkipValidationDelegates.SkipTokenTypeValidation;
+                    validationParameters.TokenTypeValidator = SkipValidationDelegates.SkipTokenTypeValidation;
                     validationParameters.TryAllIssuerSigningKeys = tryAllKeys;
 
                     return validationParameters;
