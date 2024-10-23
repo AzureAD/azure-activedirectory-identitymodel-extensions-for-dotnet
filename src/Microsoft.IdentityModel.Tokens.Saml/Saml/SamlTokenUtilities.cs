@@ -182,7 +182,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             }
 
             return validationParametersCloned;
-
         }
     }
 }
