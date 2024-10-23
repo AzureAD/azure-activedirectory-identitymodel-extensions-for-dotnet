@@ -1,9 +1,31 @@
+Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.StackFrames
+Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.ValidatedConditions
+Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.ValidatedConditions.ValidatedAudience.get -> string
+Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.ValidatedConditions.ValidatedAudience.set -> void
+Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.ValidatedConditions.ValidatedConditions() -> void
+Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.ValidatedConditions.ValidatedConditions(string ValidatedAudience, Microsoft.IdentityModel.Tokens.ValidatedLifetime? ValidatedLifetime) -> void
+Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.ValidatedConditions.ValidatedLifetime.get -> Microsoft.IdentityModel.Tokens.ValidatedLifetime?
+Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.ValidatedConditions.ValidatedLifetime.set -> void
+Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.ValidateTokenAsync(Microsoft.IdentityModel.Tokens.Saml.SamlSecurityToken samlToken, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.ValidationResult<Microsoft.IdentityModel.Tokens.ValidatedToken>>
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.StackFrames
 Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.ValidateTokenAsync(Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityToken samlToken, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.ValidationResult<Microsoft.IdentityModel.Tokens.ValidatedToken>>
+static Microsoft.IdentityModel.Tokens.Saml.SamlTokenUtilities.PopulateValidationParametersWithCurrentConfigurationAsync(Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.ValidationParameters>
+Microsoft.IdentityModel.Tokens.Saml2.SamlSecurityTokenHandler.ValidateTokenAsync(SamlSecurityToken samlToken, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.ValidationResult<Microsoft.IdentityModel.Tokens.ValidatedToken>>
+static Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.StackFrames.AssertionConditionsNull -> System.Diagnostics.StackFrame
+static Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.StackFrames.AssertionConditionsValidationFailed -> System.Diagnostics.StackFrame
+static Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.StackFrames.AssertionNull -> System.Diagnostics.StackFrame
+static Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.StackFrames.AudienceValidationFailed -> System.Diagnostics.StackFrame
+static Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.StackFrames.LifetimeValidationFailed -> System.Diagnostics.StackFrame
+static Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.StackFrames.OneTimeUseValidationFailed -> System.Diagnostics.StackFrame
+static Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.StackFrames.TokenNull -> System.Diagnostics.StackFrame
+static Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.StackFrames.TokenValidationParametersNull -> System.Diagnostics.StackFrame
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.StackFrames.AssertionConditionsNull -> System.Diagnostics.StackFrame
+static Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.StackFrames.AssertionConditionsValidationFailed -> System.Diagnostics.StackFrame
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.StackFrames.AssertionNull -> System.Diagnostics.StackFrame
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.StackFrames.AudienceValidationFailed -> System.Diagnostics.StackFrame
+static Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.StackFrames.IssuerValidationFailed -> System.Diagnostics.StackFrame
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.StackFrames.LifetimeValidationFailed -> System.Diagnostics.StackFrame
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.StackFrames.OneTimeUseValidationFailed -> System.Diagnostics.StackFrame
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.StackFrames.TokenNull -> System.Diagnostics.StackFrame
 static Microsoft.IdentityModel.Tokens.Saml2.Saml2SecurityTokenHandler.StackFrames.TokenValidationParametersNull -> System.Diagnostics.StackFrame
+virtual Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.ValidateConditions(Microsoft.IdentityModel.Tokens.Saml.SamlSecurityToken samlToken, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.ValidationResult<Microsoft.IdentityModel.Tokens.Saml.SamlSecurityTokenHandler.ValidatedConditions>

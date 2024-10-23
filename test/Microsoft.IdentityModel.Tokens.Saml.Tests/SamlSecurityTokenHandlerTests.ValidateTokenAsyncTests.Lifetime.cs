@@ -5,39 +5,38 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
-using Microsoft.IdentityModel.Tokens.Saml2;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 {
 #nullable enable
-    public partial class Saml2SecurityTokenHandlerTests
+    public partial class SamlSecurityTokenHandlerTests
     {
         [Theory, MemberData(nameof(ValidateTokenAsync_LifetimeTestCases), DisableDiscoveryEnumeration = true)]
         public async Task ValidateTokenAsync_LifetimeComparison(ValidateTokenAsyncLifetimeTheoryData theoryData)
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateTokenAsync_LifetimeComparison", theoryData);
 
-            var saml2Token = CreateTokenForLifetimeValidation(
+            var samlToken = CreateTokenForLifetimeValidation(
                 theoryData.IssuedAt,
                 theoryData.NotBefore,
                 theoryData.Expires);
 
             var tokenValidationParameters = CreateTokenValidationParameters(
-                saml2Token,
+                samlToken,
                 theoryData.NullTokenValidationParameters,
                 theoryData.ClockSkew);
 
-            Saml2SecurityTokenHandler saml2TokenHandler = new Saml2SecurityTokenHandler();
+            SamlSecurityTokenHandler samlTokenHandler = new SamlSecurityTokenHandler();
 
             // Validate token using TokenValidationParameters
             TokenValidationResult tokenValidationResult =
-                await saml2TokenHandler.ValidateTokenAsync(saml2Token.Assertion.CanonicalString, tokenValidationParameters);
+                await samlTokenHandler.ValidateTokenAsync(samlToken.Assertion.CanonicalString, tokenValidationParameters);
 
             // Validate token using ValidationParameters.
             ValidationResult<ValidatedToken> validationResult =
-                await saml2TokenHandler.ValidateTokenAsync(
-                    saml2Token,
+                await samlTokenHandler.ValidateTokenAsync(
+                    samlToken,
                     theoryData.ValidationParameters!,
                     theoryData.CallContext,
                     CancellationToken.None);
@@ -209,9 +208,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
             public bool NullTokenValidationParameters { get; internal set; } = false;
         }
 
-        private static Saml2SecurityToken CreateTokenForLifetimeValidation(DateTime? issuedAt, DateTime? notBefore, DateTime? expires)
+        private static SamlSecurityToken CreateTokenForLifetimeValidation(DateTime? issuedAt, DateTime? notBefore, DateTime? expires)
         {
-            Saml2SecurityTokenHandler saml2TokenHandler = new Saml2SecurityTokenHandler();
+            SamlSecurityTokenHandler samlTokenHandler = new SamlSecurityTokenHandler();
 
             SecurityTokenDescriptor securityTokenDescriptor = new SecurityTokenDescriptor
             {
@@ -224,11 +223,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 Subject = Default.SamlClaimsIdentity
             };
 
-            return (Saml2SecurityToken)saml2TokenHandler.CreateToken(securityTokenDescriptor);
+            return (SamlSecurityToken)samlTokenHandler.CreateToken(securityTokenDescriptor);
         }
 
         private static TokenValidationParameters? CreateTokenValidationParameters(
-            Saml2SecurityToken saml2SecurityToken,
+            SamlSecurityToken samlSecurityToken,
             bool nullTokenValidationParameters,
             TimeSpan? clockSkew = null)
         {
@@ -247,7 +246,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 RequireSignedTokens = false,
                 SignatureValidator = delegate (string token, TokenValidationParameters validationParameters)
                 {
-                    return saml2SecurityToken;
+                    return samlSecurityToken;
                 }
             };
 

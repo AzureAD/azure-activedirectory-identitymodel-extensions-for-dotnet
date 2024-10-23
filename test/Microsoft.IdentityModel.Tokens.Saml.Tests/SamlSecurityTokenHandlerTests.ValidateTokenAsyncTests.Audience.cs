@@ -6,13 +6,12 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
-using Microsoft.IdentityModel.Tokens.Saml2;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 {
 #nullable enable
-    public partial class Saml2SecurityTokenHandlerTests
+    public partial class SamlSecurityTokenHandlerTests
     {
 
         [Theory, MemberData(nameof(ValidateTokenAsync_Audience_TestCases), DisableDiscoveryEnumeration = true)]
@@ -20,24 +19,24 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         {
             var context = TestUtilities.WriteHeader($"{this}.ValidateTokenAsync_AudienceComparison", theoryData);
 
-            Saml2SecurityTokenHandler saml2TokenHandler = new Saml2SecurityTokenHandler();
+            SamlSecurityTokenHandler samlTokenHandler = new SamlSecurityTokenHandler();
 
-            var saml2Token = CreateTokenForAudienceValidation(theoryData.TokenAudience!, theoryData.Saml2Condition!);
+            var samlToken = CreateTokenForAudienceValidation(theoryData.TokenAudience!);
 
             var tokenValidationParameters = CreateTokenValidationParameters(
                 theoryData.TVPAudiences,
-                saml2Token,
+                samlToken,
                 theoryData.NullTokenValidationParameters,
                 theoryData.IgnoreTrailingSlashWhenValidatingAudience);
 
             // Validate the token using TokenValidationParameters
             TokenValidationResult tokenValidationResult =
-                await saml2TokenHandler.ValidateTokenAsync(saml2Token.Assertion.CanonicalString, tokenValidationParameters);
+                await samlTokenHandler.ValidateTokenAsync(samlToken.Assertion.CanonicalString, tokenValidationParameters);
 
             // Validate the token using ValidationParameters.
             ValidationResult<ValidatedToken> validationResult =
-                await saml2TokenHandler.ValidateTokenAsync(
-                    saml2Token,
+                await samlTokenHandler.ValidateTokenAsync(
+                    samlToken,
                     theoryData.ValidationParameters!,
                     theoryData.CallContext,
                     CancellationToken.None);
@@ -111,18 +110,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
                 theoryData.Add(new ValidateTokenAsyncAudienceTheoryData("Invalid_AudiencesDoNotMatch")
                 {
+                    //This test will cover scenarios where audience is whitespace, null or empty as SamlAudienceRestrictionCondition.Audiences are returned as Uri objects instead of Strings.
                     ValidationParameters = CreateValidationParameters([Default.Audience]),
-                    TokenAudience = "InvalidAudience",
-                    TVPAudiences = [Default.Audience],
-                    ExpectedIsValid = false,
-                    ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
-                    ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidAudienceException("IDX10215:"),
-                });
-
-                theoryData.Add(new ValidateTokenAsyncAudienceTheoryData("Invalid_TokenAudienceIsWhiteSpace")
-                {
-                    ValidationParameters = CreateValidationParameters([Default.Audience]),
-                    TokenAudience = " ",
+                    TokenAudience = "http://NotOurDefault.Audience.com",
                     TVPAudiences = [Default.Audience],
                     ExpectedIsValid = false,
                     ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
@@ -193,16 +183,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
             internal ValidationParameters? ValidationParameters { get; set; }
 
-            public Saml2Conditions? Saml2Condition { get; internal set; }
-
             public string? TokenAudience { get; internal set; }
 
             public List<string>? TVPAudiences { get; internal set; }
         }
 
-        private static Saml2SecurityToken CreateTokenForAudienceValidation(string audience, Saml2Conditions saml2Conditions)
+        private static SamlSecurityToken CreateTokenForAudienceValidation(string audience)
         {
-            Saml2SecurityTokenHandler saml2TokenHandler = new Saml2SecurityTokenHandler();
+            SamlSecurityTokenHandler samlTokenHandler = new SamlSecurityTokenHandler();
 
             SecurityTokenDescriptor securityTokenDescriptor = new SecurityTokenDescriptor
             {
@@ -213,14 +201,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 Subject = Default.SamlClaimsIdentity
             };
 
-            Saml2SecurityToken saml2Token = (Saml2SecurityToken)saml2TokenHandler.CreateToken(securityTokenDescriptor);
+            SamlSecurityToken samlToken = (SamlSecurityToken)samlTokenHandler.CreateToken(securityTokenDescriptor);
 
-            return saml2Token;
+            return samlToken;
         }
 
         private static TokenValidationParameters? CreateTokenValidationParameters(
             List<string>? audiences,
-            Saml2SecurityToken saml2SecurityToken,
+            SamlSecurityToken samlSecurityToken,
             bool nullTokenValidationParameters,
             bool ignoreTrailingSlashWhenValidatingAudience = false)
         {
@@ -241,7 +229,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 IgnoreTrailingSlashWhenValidatingAudience = ignoreTrailingSlashWhenValidatingAudience,
                 SignatureValidator = delegate (string token, TokenValidationParameters validationParameters)
                 {
-                    return saml2SecurityToken;
+                    return samlSecurityToken;
                 },
                 RequireAudience = true
             };
