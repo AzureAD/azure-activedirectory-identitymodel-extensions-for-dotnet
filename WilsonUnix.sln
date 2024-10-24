@@ -82,8 +82,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.IdentityModel.Val
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.IdentityModel.Abstractions.Tests", "test\Microsoft.IdentityModel.Abstractions.Tests\Microsoft.IdentityModel.Abstractions.Tests.csproj", "{4D6D09F9-5343-4831-9623-32089ADB27A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.IdentityModel.SampleTests", "test\Microsoft.IdentityModel.SampleTests\Microsoft.IdentityModel.SampleTests.csproj", "{A9A9E808-16A3-4351-A213-09D46883C0F3}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.IdentityModel.Validators.Tests", "test\Microsoft.IdentityModel.Validators.Tests\Microsoft.IdentityModel.Validators.Tests.csproj", "{17116E4B-B3FE-40A9-A733-1BC00FF5963D}"
 EndProject
 Global
@@ -196,10 +194,6 @@ Global
 		{4D6D09F9-5343-4831-9623-32089ADB27A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4D6D09F9-5343-4831-9623-32089ADB27A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4D6D09F9-5343-4831-9623-32089ADB27A0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A9A9E808-16A3-4351-A213-09D46883C0F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A9A9E808-16A3-4351-A213-09D46883C0F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A9A9E808-16A3-4351-A213-09D46883C0F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A9A9E808-16A3-4351-A213-09D46883C0F3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{17116E4B-B3FE-40A9-A733-1BC00FF5963D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{17116E4B-B3FE-40A9-A733-1BC00FF5963D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{17116E4B-B3FE-40A9-A733-1BC00FF5963D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -236,7 +230,6 @@ Global
 		{6EAA7FED-C053-4AD0-A73B-B96A5593BC49} = {BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}
 		{BD223874-759C-41AF-BA9E-F4E5D024F395} = {BD2706C5-6C57-484D-89C8-A0CF5F8E3D19}
 		{4D6D09F9-5343-4831-9623-32089ADB27A0} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
-		{A9A9E808-16A3-4351-A213-09D46883C0F3} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 		{17116E4B-B3FE-40A9-A733-1BC00FF5963D} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
