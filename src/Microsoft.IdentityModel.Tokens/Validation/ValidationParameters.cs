@@ -88,7 +88,7 @@ namespace Microsoft.IdentityModel.Tokens
             TokenDecryptionKeys = other.TokenDecryptionKeys;
             TokenReplayCache = other.TokenReplayCache;
             TokenReplayValidator = other.TokenReplayValidator;
-            TypeValidator = other.TypeValidator;
+            TokenTypeValidator = other.TokenTypeValidator;
             ValidateActor = other.ValidateActor;
             ValidateSignatureLast = other.ValidateSignatureLast;
             ValidateWithLKG = other.ValidateWithLKG;
@@ -499,7 +499,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </remarks>
         /// <exception cref="ArgumentNullException">Thrown when the value is set as null.</exception>
         /// <returns>The <see cref="TokenTypeValidationDelegate"/> used to validate the token type of a token</returns>
-        public TokenTypeValidationDelegate TypeValidator
+        public TokenTypeValidationDelegate TokenTypeValidator
         {
             get { return _tokenTypeValidator; }
             set { _tokenTypeValidator = value ?? throw new ArgumentNullException(nameof(value), "TypeValidator cannot be set as null."); }

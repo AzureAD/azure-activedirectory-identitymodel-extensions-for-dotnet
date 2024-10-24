@@ -247,7 +247,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     validationParameters.IssuerValidatorAsync = SkipValidationDelegates.SkipIssuerValidation;
                     validationParameters.IssuerSigningKeyValidator = SkipValidationDelegates.SkipIssuerSigningKeyValidation;
                     validationParameters.SignatureValidator = SkipValidationDelegates.SkipSignatureValidation;
-                    validationParameters.TypeValidator = SkipValidationDelegates.SkipTokenTypeValidation;
+                    validationParameters.TokenTypeValidator = SkipValidationDelegates.SkipTokenTypeValidation;
 
                     return validationParameters;
                 }
