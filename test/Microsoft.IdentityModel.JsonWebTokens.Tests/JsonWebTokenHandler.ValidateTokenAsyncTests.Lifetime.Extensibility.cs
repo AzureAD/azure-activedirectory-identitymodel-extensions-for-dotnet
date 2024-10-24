@@ -19,7 +19,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             var context = TestUtilities.WriteHeader($"{this}.{nameof(ValidateTokenAsync_Lifetime_Extensibility)}", theoryData);
 
-            string jwtString = CreateToken(theoryData.IssuedAt, theoryData.NotBefore, theoryData.Expires);
+            string jwtString = CreateTokenWithLifetime(theoryData.IssuedAt, theoryData.NotBefore, theoryData.Expires);
             var handler = new JsonWebTokenHandler();
 
             ValidationResult<ValidatedToken> validationResult;
@@ -299,22 +299,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
                 return base.GetException();
             }
-        }
-
-        private static string CreateToken(DateTime? issuedAt, DateTime? notBefore, DateTime? expires)
-        {
-            JsonWebTokenHandler jsonWebTokenHandler = new JsonWebTokenHandler();
-            jsonWebTokenHandler.SetDefaultTimesOnTokenCreation = false; // Allow for null values to be passed in to validate.
-
-            SecurityTokenDescriptor securityTokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = Default.ClaimsIdentity,
-                IssuedAt = issuedAt,
-                NotBefore = notBefore,
-                Expires = expires,
-            };
-
-            return jsonWebTokenHandler.CreateToken(securityTokenDescriptor);
         }
     }
 }
