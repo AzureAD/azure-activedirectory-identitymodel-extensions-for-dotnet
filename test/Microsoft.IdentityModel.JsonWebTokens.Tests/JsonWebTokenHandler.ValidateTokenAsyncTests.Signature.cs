@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 #nullable enable
-using System;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
