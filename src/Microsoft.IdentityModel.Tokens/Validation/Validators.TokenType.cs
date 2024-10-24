@@ -56,27 +56,28 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (validationParameters.ValidTypes.Count == 0)
             {
-                LogHelper.LogVerbose(LogMessages.IDX10255);
+                //TODO: Move to CallContext?
+                //LogHelper.LogVerbose(LogMessages.IDX10255);
                 return new ValidatedTokenType(type ?? "null", validationParameters.ValidTypes.Count);
             }
 
             if (string.IsNullOrEmpty(type))
-                return new ValidationError(
+                return new TokenTypeValidationError(
                     new MessageDetail(LogMessages.IDX10256),
-                    ValidationFailureType.TokenTypeValidationFailed,
                     typeof(SecurityTokenInvalidTypeException),
-                    new StackFrame(true));
+                    new StackFrame(true),
+                    null); // even if it is empty, we report null to match the original behaviour.
 
             if (!validationParameters.ValidTypes.Contains(type, StringComparer.Ordinal))
             {
-                return new ValidationError(
+                return new TokenTypeValidationError(
                     new MessageDetail(
                         LogMessages.IDX10257,
                         LogHelper.MarkAsNonPII(type),
                         LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidTypes))),
-                    ValidationFailureType.TokenTypeValidationFailed,
                     typeof(SecurityTokenInvalidTypeException),
-                    new StackFrame(true));
+                    new StackFrame(true),
+                    type);
             }
 
             // TODO: Move to CallContext
