@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 #nullable enable
-using System;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
@@ -122,7 +121,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     validationParameters.IssuerSigningKeyValidator = SkipValidationDelegates.SkipIssuerSigningKeyValidation;
                     validationParameters.LifetimeValidator = SkipValidationDelegates.SkipLifetimeValidation;
                     validationParameters.TokenReplayValidator = SkipValidationDelegates.SkipTokenReplayValidation;
-                    validationParameters.TypeValidator = SkipValidationDelegates.SkipTokenTypeValidation;
+                    validationParameters.TokenTypeValidator = SkipValidationDelegates.SkipTokenTypeValidation;
                     validationParameters.TryAllIssuerSigningKeys = tryAllKeys;
 
                     return validationParameters;

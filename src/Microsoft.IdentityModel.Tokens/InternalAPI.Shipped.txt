@@ -550,8 +550,6 @@ Microsoft.IdentityModel.Tokens.ValidationParameters.TokenReplayValidator.get -> 
 Microsoft.IdentityModel.Tokens.ValidationParameters.TokenReplayValidator.set -> void
 Microsoft.IdentityModel.Tokens.ValidationParameters.TryAllIssuerSigningKeys.get -> bool
 Microsoft.IdentityModel.Tokens.ValidationParameters.TryAllIssuerSigningKeys.set -> void
-Microsoft.IdentityModel.Tokens.ValidationParameters.TypeValidator.get -> Microsoft.IdentityModel.Tokens.TokenTypeValidationDelegate
-Microsoft.IdentityModel.Tokens.ValidationParameters.TypeValidator.set -> void
 Microsoft.IdentityModel.Tokens.ValidationParameters.ValidAlgorithms.get -> System.Collections.Generic.IList<string>
 Microsoft.IdentityModel.Tokens.ValidationParameters.ValidAlgorithms.set -> void
 Microsoft.IdentityModel.Tokens.ValidationParameters.ValidateActor.get -> bool

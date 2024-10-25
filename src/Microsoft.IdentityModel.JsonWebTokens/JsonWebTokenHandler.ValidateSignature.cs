@@ -241,13 +241,29 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 callContext);
 
             if (!result.IsValid)
-                return new ValidationError(
-                    new MessageDetail(
-                        TokenLogMessages.IDX10518,
-                        result.UnwrapError().MessageDetail.Message),
-                    ValidationFailureType.SignatureAlgorithmValidationFailed,
-                    typeof(SecurityTokenInvalidAlgorithmException),
-                    new StackFrame(true));
+            {
+                if (result.UnwrapError() is AlgorithmValidationError algorithmValidationError)
+                {
+                    return new AlgorithmValidationError(
+                        new MessageDetail(
+                            TokenLogMessages.IDX10518,
+                            algorithmValidationError.MessageDetail.Message),
+                        typeof(SecurityTokenInvalidAlgorithmException),
+                        new StackFrame(true),
+                        algorithmValidationError.InvalidAlgorithm);
+                }
+                else
+                {
+                    // overridden delegate did not return an AlgorithmValidationError
+                    return new ValidationError(
+                        new MessageDetail(
+                            TokenLogMessages.IDX10518,
+                            result.UnwrapError().MessageDetail.Message),
+                        ValidationFailureType.SignatureAlgorithmValidationFailed,
+                        typeof(SecurityTokenInvalidAlgorithmException),
+                        new StackFrame(true));
+                }
+            }
 
             SignatureProvider signatureProvider = cryptoProviderFactory.CreateForVerifying(key, jsonWebToken.Alg);
             try

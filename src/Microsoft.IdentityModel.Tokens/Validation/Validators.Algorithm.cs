@@ -53,13 +53,13 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters.ValidAlgorithms != null &&
                 validationParameters.ValidAlgorithms.Count > 0 &&
                 !validationParameters.ValidAlgorithms.Contains(algorithm, StringComparer.Ordinal))
-                return new ValidationError(
+                return new AlgorithmValidationError(
                     new MessageDetail(
                         LogMessages.IDX10696,
                         LogHelper.MarkAsNonPII(algorithm)),
-                    ValidationFailureType.AlgorithmValidationFailed,
                     typeof(SecurityTokenInvalidAlgorithmException),
-                    new StackFrame(true));
+                    new StackFrame(true),
+                    algorithm);
 
             return algorithm;
         }

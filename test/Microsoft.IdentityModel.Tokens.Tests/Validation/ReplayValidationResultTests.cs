@@ -126,7 +126,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     new TokenReplayTheoryData
                     {
                         TestId = "Invalid_ReplayCacheIsPresent_ExpirationTimeIsNull",
-                        ExpectedException = ExpectedException.SecurityTokenReplayDetected("IDX10227:"),
+                        ExpectedException = ExpectedException.SecurityTokenNoExpirationException("IDX10227:"),
                         ExpirationTime = null,
                         SecurityToken = "token",
                         ValidationParameters = new ValidationParameters

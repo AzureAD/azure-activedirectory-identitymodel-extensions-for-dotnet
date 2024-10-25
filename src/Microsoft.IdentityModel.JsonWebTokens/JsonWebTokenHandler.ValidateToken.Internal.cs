@@ -322,7 +322,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 actorValidationResult = innerActorValidationResult;
             }
 
-            ValidationResult<ValidatedTokenType> typeValidationResult = validationParameters.TypeValidator(
+            ValidationResult<ValidatedTokenType> typeValidationResult = validationParameters.TokenTypeValidator(
                 jsonWebToken.Typ, jsonWebToken, validationParameters, callContext);
             if (!typeValidationResult.IsValid)
             {

@@ -1,17 +1,28 @@
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10002 = "IDX10002: Unknown exception type returned. Type: '{0}'. Message: '{1}'." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10268 = "IDX10268: Unable to validate audience, validationParameters.ValidAudiences.Count == 0." -> string
+Microsoft.IdentityModel.Tokens.AlgorithmValidationError
+Microsoft.IdentityModel.Tokens.AlgorithmValidationError.AlgorithmValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, string invalidAlgorithm) -> void
+Microsoft.IdentityModel.Tokens.AlgorithmValidationError.InvalidAlgorithm.get -> string
+Microsoft.IdentityModel.Tokens.AlgorithmValidationError._invalidAlgorithm -> string
 Microsoft.IdentityModel.Tokens.AudienceValidationError.AudienceValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, Microsoft.IdentityModel.Tokens.ValidationFailureType failureType, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, System.Collections.Generic.IList<string> tokenAudiences, System.Collections.Generic.IList<string> validAudiences) -> void
 Microsoft.IdentityModel.Tokens.AudienceValidationError.TokenAudiences.get -> System.Collections.Generic.IList<string>
 Microsoft.IdentityModel.Tokens.IssuerValidationSource.IssuerMatchedConfiguration = 1 -> Microsoft.IdentityModel.Tokens.IssuerValidationSource
 Microsoft.IdentityModel.Tokens.IssuerValidationSource.IssuerMatchedValidationParameters = 2 -> Microsoft.IdentityModel.Tokens.IssuerValidationSource
 Microsoft.IdentityModel.Tokens.LifetimeValidationError._expires -> System.DateTime
 Microsoft.IdentityModel.Tokens.LifetimeValidationError._notBefore -> System.DateTime
+Microsoft.IdentityModel.Tokens.TokenTypeValidationError
+Microsoft.IdentityModel.Tokens.TokenTypeValidationError.TokenTypeValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, string invalidTokenType) -> void
+Microsoft.IdentityModel.Tokens.TokenTypeValidationError._invalidTokenType -> string
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.TimeProvider.get -> System.TimeProvider
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.TimeProvider.set -> void
 Microsoft.IdentityModel.Tokens.ValidationError.GetException(System.Type exceptionType, System.Exception innerException) -> System.Exception
+Microsoft.IdentityModel.Tokens.ValidationParameters.TokenTypeValidator.get -> Microsoft.IdentityModel.Tokens.TokenTypeValidationDelegate
+Microsoft.IdentityModel.Tokens.ValidationParameters.TokenTypeValidator.set -> void
 Microsoft.IdentityModel.Tokens.ValidationResult<TResult>.Error.get -> Microsoft.IdentityModel.Tokens.ValidationError
 Microsoft.IdentityModel.Tokens.ValidationResult<TResult>.IsValid.get -> bool
 Microsoft.IdentityModel.Tokens.ValidationResult<TResult>.Result.get -> TResult
+override Microsoft.IdentityModel.Tokens.AlgorithmValidationError.GetException() -> System.Exception
+override Microsoft.IdentityModel.Tokens.TokenTypeValidationError.GetException() -> System.Exception
 static Microsoft.IdentityModel.Tokens.AudienceValidationError.AudiencesCountZero -> System.Diagnostics.StackFrame
 static Microsoft.IdentityModel.Tokens.AudienceValidationError.AudiencesNull -> System.Diagnostics.StackFrame
 static Microsoft.IdentityModel.Tokens.AudienceValidationError.ValidateAudienceFailed -> System.Diagnostics.StackFrame

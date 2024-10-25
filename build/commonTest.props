@@ -13,8 +13,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <WarningsNotAsErrors>0618</WarningsNotAsErrors>
     <IsTestProject>true</IsTestProject>
-    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(TestTargets)</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">$(TestOnlyCoreTargets)</TargetFrameworks>
+    <TargetFrameworks>$(TestTargets)</TargetFrameworks>
     <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp2.1'">$(DotNetCoreAppRuntimeVersion)</RuntimeFrameworkVersion>
     <IsPackable>false</IsPackable>
     <LangVersion>12</LangVersion>

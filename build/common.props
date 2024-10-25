@@ -25,8 +25,7 @@
     <!-- Build symbol package (.snupkg) to distribute the PDB containing Source Link -->
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(SrcTargets)</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">$(SrcStandardTargets)</TargetFrameworks>
+    <TargetFrameworks>$(SrcTargets)</TargetFrameworks>
     <NetStandardImplicitPackageVersion>$(NetStandardVersion)</NetStandardImplicitPackageVersion>
     <LangVersion>12</LangVersion>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
