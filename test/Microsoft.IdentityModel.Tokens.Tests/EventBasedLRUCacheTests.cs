@@ -386,7 +386,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Fact(Skip = "Large test meant to be run manually.")]
+        [Fact]
         public void CacheOverflowTestSequential()
         {
             TestUtilities.WriteHeader($"{this}.CacheOverflowTestSequential");
