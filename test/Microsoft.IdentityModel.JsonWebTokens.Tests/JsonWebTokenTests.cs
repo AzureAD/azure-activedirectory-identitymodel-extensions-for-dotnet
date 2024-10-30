@@ -1758,6 +1758,19 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.Equal(expectedCustomClaim, derivedToken.CustomClaim);
             Assert.Equal(Default.Issuer, derivedToken.Issuer);
         }
+
+        [Fact]
+        public void CreateTokenWithoutKeyIdentifiersInHeader()
+        {
+            string rawToken = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
+            {
+                SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                IncludeKeyIdInHeader = false
+            });
+            var token = new JsonWebToken(rawToken);
+            Assert.False(token.TryGetHeaderValue(JwtHeaderParameterNames.Kid, out string _));
+            Assert.False(token.TryGetHeaderValue(JwtHeaderParameterNames.X5t, out string _));
+        }
     }
 
     public class ParseTimeValuesTheoryData : TheoryDataBase
