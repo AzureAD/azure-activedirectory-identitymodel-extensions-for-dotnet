@@ -70,6 +70,6 @@ body:
       label: Notify the Release V-Team
       description: After submitting this issue, you agree to notify the release v-team. 
       options:
-        - label: I agree to email the issue link to the release v-team.
+        - label: I agree.
           required: true
  
