@@ -1,5 +1,6 @@
 <Project>
   <PropertyGroup>
+    <CoverletCollectorVersion>6.0.2</CoverletCollectorVersion>
     <BannedApiAnalyzersVersion>3.3.4</BannedApiAnalyzersVersion>
     <DotNetCoreAppRuntimeVersion>2.1.30</DotNetCoreAppRuntimeVersion>
     <MicrosoftAzureKeyVaultCryptographyVersion>3.0.5</MicrosoftAzureKeyVaultCryptographyVersion>
