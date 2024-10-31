@@ -40,6 +40,10 @@ Included items must then not match any entries in the exclude list to remain inc
                                 <ModulePath>.*\microsoft.identitymodel.xml.dll</ModulePath>
                                 <ModulePath>.*\system.identitymodel.tokens.jwt.dll</ModulePath>
                             </Include>
+                            <Exclude>
+                                <ModulePath>.*\\test\\.*</ModulePath>
+                                <ModulePath>.*Test\.dll</ModulePath>
+                            </Exclude>
                         </ModulePaths>
                         <Attributes>
                             <Exclude>

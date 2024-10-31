@@ -923,7 +923,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Fact(Skip = "too long")]
+        [Fact]
         public async Task ReferenceCountingTest_MultiThreaded()
         {
             var context = new CompareContext($"{this}.ReferenceCountingTest_MultiThreaded");
