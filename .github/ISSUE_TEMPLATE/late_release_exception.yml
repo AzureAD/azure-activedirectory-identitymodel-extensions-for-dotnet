@@ -1,0 +1,50 @@
+# This issue template is for use in opening issues that document late release exception requests.
+# 
+# Bracketed text is a placeholder; replace the text with the requested information and remove the brackets before submitting the issue. Also, remove this comment before submitting the issue.
+
+name: "Identity Model Late Release Exception Request"
+description: Request an exception to release a feature after the release candidate deadline.
+title: "[Late Release Exception]: "
+labels: "Late Release Exception"
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Brief description of the feature.
+    validations:
+      required: true
+  - type: input
+    id: release-date
+    attributes:
+      label: Date
+      description: Which release date are you targeting?
+    validations:
+      required: true
+  - type: dropdown
+    id: version-bump
+    attributes:
+      label: Type of version bump
+      description: Indicate if this feature would incur a major, minor, or patch version bump. 
+      options:
+        - label: "Major"
+        - label: "Minor"
+        - label: "Patch"
+        - label: "I don't know."
+    validations:
+      required: true
+  - type: textarea
+    id: reason
+    attributes:
+      label: Reason for exception
+      description: Please explain why the feature release can't wait until the next month.
+    validations:
+      required: true
+  - type: textarea
+    id: test-attestation
+    attributes:
+      label: test attestation
+      description: Describe the testing and validation that was conducted for this feature. Include links to test coverage, proof of partner validation, etc.
+    validations:
+      required: true
+ 
