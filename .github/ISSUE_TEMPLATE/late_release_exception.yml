@@ -30,9 +30,26 @@ body:
         - label: "Major"
         - label: "Minor"
         - label: "Patch"
-        - label: "I don't know."
+        - label: "Not sure"
     validations:
       required: true
+  - type: checkboxes
+    id: other-libraries
+    attributes:
+      label: Other libraries
+      description: Does this feature release rely on the release of any other libraries?
+      options:
+        - label: "Yes"
+        - label: "No"
+    validations:
+      required: true
+  - type: checkboxes
+    id: if-relies-on-other-libraries
+    attributes:
+      label: If you answered "yes" to the previous question, please indicate which libraries also need to be released.
+      description: Check the boxes of the other libraries that also be released.
+      options:
+        - label: Microsoft.Identity.Abstractions
   - type: textarea
     id: reason
     attributes:
@@ -47,4 +64,12 @@ body:
       description: Describe the testing and validation that was conducted for this feature. Include links to test coverage, proof of partner validation, etc.
     validations:
       required: true
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Notify the Release V-Team
+      description: After submitting this issue, you agree to notify the release v-team. 
+      options:
+        - label: I agree to email the issue link to the release v-team.
+          required: true
  
