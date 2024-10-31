@@ -41,9 +41,9 @@ body:
     validations:
       required: true
   - type: textarea
-    id: test-attestation
+    id: testing-attestation
     attributes:
-      label: test attestation
+      label: Testing attestation
       description: Describe the testing and validation that was conducted for this feature. Include links to test coverage, proof of partner validation, etc.
     validations:
       required: true
