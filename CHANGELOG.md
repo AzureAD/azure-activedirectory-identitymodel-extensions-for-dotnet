@@ -13,7 +13,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 - (#2955)[https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2955]
 - (#2951)[https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2951]
 - (#2952)[https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2952]
-- (#2947)[https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2947]
+- [#2947](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2947)
 
 ### Work related to redesign of IdentityModel's token validation logic [#2711](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2711)
 - Validates Audience for SAML2TokenHandler with New Model (2863)[https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2863]
