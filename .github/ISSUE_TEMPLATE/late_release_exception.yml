@@ -1,11 +1,9 @@
-# This issue template is for use in opening issues that document late release exception requests.
-# 
-# Bracketed text is a placeholder; replace the text with the requested information and remove the brackets before submitting the issue. Also, remove this comment before submitting the issue.
+# This issue template is for use in opening issues that document Ask Mode Changes, for features or changes that come after the release candidate deadline.
 
-name: "IdentityModel Release Exception Request"
+name: "IdentityModel Ask Mode Change"
 description: Request an exception to release a feature or add any changes after the release candidate deadline, excludes fixes for preview regressions.
-title: "[Late Release Exception]: "
-labels: "Late Release Exception"
+title: "[Ask Mode Change]: "
+labels: "Ask Mode Change"
 body:
   - type: textarea
     id: description
@@ -41,6 +39,7 @@ body:
       options:
         - label: "Yes"
         - label: "No"
+          required: true
     validations:
       required: true
   - type: checkboxes
