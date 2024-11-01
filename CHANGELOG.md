@@ -16,11 +16,11 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 - [#2947](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2947)
 
 ### Work related to redesign of IdentityModel's token validation logic [#2711](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2711)
-- Validates Audience for SAML2TokenHandler with New Model (2863)[https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2863]
-- Improvements to AudienceValidation (2902)[https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2902]
-- Added properties to ValidationResult (2923)[https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2923]
-- Implements Audience and Lifetime validations in SamlSecurityTokenHandler (2925)[https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2925]
-- Implements Issuer validation in SamlSecurityTokenHandler (2948)[https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2948]
+- Validates Audience for SAML2TokenHandler with New Model [2863](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2863)
+- Improvements to AudienceValidation [2902](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2902)
+- Added properties to ValidationResult [2923](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2923)
+- Implements Audience and Lifetime validations in SamlSecurityTokenHandler [2925](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2925)
+- Implements Issuer validation in SamlSecurityTokenHandler [2948](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2948)
 
 8.1.2
 =====
