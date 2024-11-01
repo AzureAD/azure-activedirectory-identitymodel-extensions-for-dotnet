@@ -39,7 +39,6 @@ body:
       options:
         - label: "Yes"
         - label: "No"
-          required: true
     validations:
       required: true
   - type: checkboxes
