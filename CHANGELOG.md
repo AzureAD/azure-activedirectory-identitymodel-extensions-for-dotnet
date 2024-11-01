@@ -2,10 +2,6 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 
 8.2.0
 =====
-### Bug fixes
-- CaseSensitiveClaimsIdentity.Clone() now returns a `CaseSensitiveClaimsIdentity` as expected. See [2879](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2879)
-- Multiple unused and unusable (for the moment) public APIs were removed. These were introduced by mistake leaking from the work done on logging and exception handling. See [2888](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2888). No major version changed needed as these APIs were not usable per se.
-
 ### Fundamentals
 - Update System.Text.Json to 8.0.5 CVE-2024-43485. See [2892](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2892).
 - Using FixedTimeEquals in NETCore targets. See [2857](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2857).
