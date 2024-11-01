@@ -9,10 +9,10 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 - Adds ability to create token without kid [2968](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2968)
 - Enables code coverage in PRs [2946](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2946)
 - Various test improvements:
-- (#2953)[https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2953]
-- (#2955)[https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2955]
-- (#2951)[https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2951]
-- (#2952)[https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2952]
+- [#2953](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2953)
+- [#2955](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2955)
+- [#2951](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2951)
+- [#2952](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2952)
 - [#2947](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2947)
 
 ### Work related to redesign of IdentityModel's token validation logic [#2711](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2711)
