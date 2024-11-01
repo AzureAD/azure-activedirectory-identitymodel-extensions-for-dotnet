@@ -2,8 +2,8 @@
 # 
 # Bracketed text is a placeholder; replace the text with the requested information and remove the brackets before submitting the issue. Also, remove this comment before submitting the issue.
 
-name: "Identity Model Late Release Exception Request"
-description: Request an exception to release a feature after the release candidate deadline.
+name: "IdentityModel Release Exception Request"
+description: Request an exception to release a feature or add any changes after the release candidate deadline, excludes fixes for preview regressions.
 title: "[Late Release Exception]: "
 labels: "Late Release Exception"
 body:
@@ -37,7 +37,7 @@ body:
     id: other-libraries
     attributes:
       label: Other libraries
-      description: Does this feature release rely on the release of any other libraries?
+      description: Does this feature release rely on the release of any other ID4S libraries?
       options:
         - label: "Yes"
         - label: "No"
@@ -47,7 +47,7 @@ body:
     id: if-relies-on-other-libraries
     attributes:
       label: If you answered "yes" to the previous question, please indicate which libraries.
-      description: Check the boxes of the other libraries that also be released.
+      description: Check the boxes of the other ID4S libraries to be released.
       options:
         - label: Microsoft.Identity.Abstractions
   - type: textarea
