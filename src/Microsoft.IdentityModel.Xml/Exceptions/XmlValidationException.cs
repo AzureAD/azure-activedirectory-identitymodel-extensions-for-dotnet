@@ -2,7 +2,12 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics;
 using System.Runtime.Serialization;
+#pragma warning disable IDE0005 // Using directive is unnecessary.
+using System.Text;
+#pragma warning restore IDE0005 // Using directive is unnecessary.
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Xml
 {
@@ -12,6 +17,11 @@ namespace Microsoft.IdentityModel.Xml
     [Serializable]
     public class XmlValidationException : XmlException
     {
+        [NonSerialized]
+        private string _stackTrace;
+
+        private ValidationError _validationError;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="XmlValidationException"/> class.
         /// </summary>
@@ -48,6 +58,44 @@ namespace Microsoft.IdentityModel.Xml
         protected XmlValidationException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
+        }
+
+        /// <summary>
+        /// Sets the <see cref="ValidationError"/> that caused the exception.
+        /// </summary>
+        /// <param name="validationError"></param>
+        internal void SetValidationError(ValidationError validationError)
+        {
+            _validationError = validationError;
+        }
+
+        /// <summary>
+        /// Gets the stack trace that is captured when the exception is created.
+        /// </summary>
+        public override string StackTrace
+        {
+            get
+            {
+                if (_stackTrace == null)
+                {
+                    if (_validationError == null)
+                        return base.StackTrace;
+#if NET8_0_OR_GREATER
+                    _stackTrace = new StackTrace(_validationError.StackFrames).ToString();
+#else
+                    StringBuilder sb = new();
+                    foreach (StackFrame frame in _validationError.StackFrames)
+                    {
+                        sb.Append(frame.ToString());
+                        sb.Append(Environment.NewLine);
+                    }
+
+                    _stackTrace = sb.ToString();
+#endif
+                }
+
+                return _stackTrace;
+            }
         }
     }
 }

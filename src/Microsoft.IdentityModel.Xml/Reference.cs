@@ -126,6 +126,36 @@ namespace Microsoft.IdentityModel.Xml
                 throw LogValidationException(LogMessages.IDX30201, Uri ?? Id);
         }
 
+#nullable enable
+        /// <summary>
+        /// Verifies that the <see cref="DigestValue" /> equals the hashed value of the <see cref="TokenStream"/> after
+        /// <see cref="Transforms"/> have been applied.
+        /// </summary>
+        /// <param name="cryptoProviderFactory">supplies the <see cref="HashAlgorithm"/>.</param>
+        /// <param name="callContext"> contextual information for diagnostics.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="cryptoProviderFactory"/> is null.</exception>
+        internal ValidationError? Verify(
+            CryptoProviderFactory cryptoProviderFactory,
+#pragma warning disable CA1801 // Review unused parameters
+            CallContext callContext)
+#pragma warning restore CA1801
+        {
+            if (cryptoProviderFactory == null)
+                return ValidationError.NullParameter(nameof(cryptoProviderFactory), new System.Diagnostics.StackFrame());
+
+            if (!Utility.AreEqual(ComputeDigest(cryptoProviderFactory), Convert.FromBase64String(DigestValue)))
+                return new XmlValidationError(
+                    new MessageDetail(
+                        LogMessages.IDX30201,
+                        Uri ?? Id),
+                    ValidationFailureType.XmlValidationFailed,
+                    typeof(XmlValidationException),
+                    new System.Diagnostics.StackFrame());
+
+            return null;
+        }
+#nullable restore
+
         /// <summary>
         /// Writes into a stream and then hashes the bytes.
         /// </summary>

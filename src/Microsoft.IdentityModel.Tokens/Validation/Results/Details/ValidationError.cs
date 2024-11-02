@@ -118,6 +118,8 @@ namespace Microsoft.IdentityModel.Tokens
                     exception = new SecurityTokenException(MessageDetail.Message);
                 else if (exceptionType == typeof(SecurityTokenKeyWrapException))
                     exception = new SecurityTokenKeyWrapException(MessageDetail.Message);
+                else if (ExceptionType == typeof(SecurityTokenValidationException))
+                    exception = new SecurityTokenValidationException(MessageDetail.Message);
                 else
                 {
                     // Exception type is unknown
@@ -175,6 +177,8 @@ namespace Microsoft.IdentityModel.Tokens
                     exception = new SecurityTokenException(MessageDetail.Message, actualException);
                 else if (exceptionType == typeof(SecurityTokenKeyWrapException))
                     exception = new SecurityTokenKeyWrapException(MessageDetail.Message, actualException);
+                else if (exceptionType == typeof(SecurityTokenValidationException))
+                    exception = new SecurityTokenValidationException(MessageDetail.Message, actualException);
                 else
                 {
                     // Exception type is unknown

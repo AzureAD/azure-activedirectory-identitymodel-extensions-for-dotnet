@@ -112,6 +112,39 @@ namespace Microsoft.IdentityModel.Xml
                 reference.Verify(cryptoProviderFactory);
         }
 
+#nullable enable
+        /// <summary>
+        /// Verifies the digest of all <see cref="References"/>
+        /// </summary>
+        /// <param name="cryptoProviderFactory">supplies any required cryptographic operators.</param>
+        /// <param name="callContext"> contextual information for diagnostics.</param>
+        internal ValidationError? Verify(
+            CryptoProviderFactory cryptoProviderFactory,
+#pragma warning disable CA1801
+            CallContext callContext)
+#pragma warning restore CA1801
+        {
+            if (cryptoProviderFactory == null)
+                return ValidationError.NullParameter(nameof(cryptoProviderFactory), new System.Diagnostics.StackFrame());
+
+            ValidationError? validationError = null;
+
+            for (int i = 0; i < References.Count; i++)
+            {
+                var reference = References[i];
+                validationError = reference.Verify(cryptoProviderFactory, callContext);
+
+                if (validationError is not null)
+                {
+                    validationError.AddStackFrame(new System.Diagnostics.StackFrame());
+                    break;
+                }
+            }
+
+            return validationError;
+        }
+#nullable restore
+
         /// <summary>
         /// Writes the Canonicalized bytes into a stream.
         /// </summary>

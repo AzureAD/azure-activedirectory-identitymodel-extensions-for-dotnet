@@ -48,6 +48,29 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <summary>
+        /// Returns a <see cref="SecurityKey"/> to use when validating the signature of a token.
+        /// </summary>
+        /// <param name="tokenKeyInfo">The <see cref="KeyInfo"/> field of the token being validated</param>
+        /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
+        /// <returns>Returns a <see cref="SecurityKey"/> to use for signature validation.</returns>
+        /// <remarks>If key fails to resolve, then null is returned</remarks>
+        internal static SecurityKey ResolveTokenSigningKey(KeyInfo tokenKeyInfo, ValidationParameters validationParameters)
+        {
+            if (tokenKeyInfo is null || validationParameters.IssuerSigningKeys is null)
+                return null;
+
+            for (int i = 0; i < validationParameters.IssuerSigningKeys.Count; i++)
+            {
+                if (tokenKeyInfo.MatchesKey(validationParameters.IssuerSigningKeys[i]))
+                    return validationParameters.IssuerSigningKeys[i];
+            }
+
+            return null;
+        }
+
+
+
+        /// <summary>
         /// Creates <see cref="Claim"/>'s from <paramref name="claimsCollection"/>.
         /// </summary>
         /// <param name="claimsCollection"> A dictionary that represents a set of claims.</param>

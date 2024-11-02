@@ -54,7 +54,11 @@ namespace Microsoft.IdentityModel.AotCompatibility.Tests
                 CreateNoWindow = true,
                 WorkingDirectory = testAppPath
             };
-            process.OutputDataReceived += (sender, e) => _testOutputHelper.WriteLine(e.Data);
+            process.OutputDataReceived += (sender, eventArgs) =>
+            {
+                if (eventArgs.Data is not null)
+                    _testOutputHelper.WriteLine(eventArgs.Data);
+            };
             process.Start();
             process.BeginOutputReadLine();
 

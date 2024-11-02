@@ -1,0 +1,2 @@
+Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.IncludeKeyIdInHeader.get -> bool
+Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.IncludeKeyIdInHeader.set -> void

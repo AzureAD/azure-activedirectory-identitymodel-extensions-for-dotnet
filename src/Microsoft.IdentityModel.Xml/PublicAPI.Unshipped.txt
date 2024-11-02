@@ -1,0 +1,1 @@
+override Microsoft.IdentityModel.Xml.XmlValidationException.StackTrace.get -> string
