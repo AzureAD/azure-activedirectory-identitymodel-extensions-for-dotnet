@@ -99,6 +99,20 @@ namespace Microsoft.IdentityModel.Xml
             streamWriter.WriteTo(writer, _excludedElement, _excludedElementNamespace);
         }
 
+        /// <summary>
+        /// Writes the XML nodes into the <see cref="XmlWriter"/>.
+        /// </summary>
+        /// <param name="writer">the <see cref="XmlWriter"/> to use.</param>
+        /// <exception cref="ArgumentNullException">if <paramref name="writer"/> is null.</exception>
+        public void WriteToWithoutExclusions(XmlWriter writer)
+        {
+            if (writer == null)
+                throw LogArgumentNullException(nameof(writer));
+
+            var streamWriter = new XmlTokenStreamWriter(this);
+            streamWriter.WriteTo(writer);
+        }
+
         internal ReadOnlyCollection<XmlToken> XmlTokens => _xmlTokens.AsReadOnly();
     }
 }
