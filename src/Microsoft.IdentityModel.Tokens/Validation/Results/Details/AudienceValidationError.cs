@@ -10,9 +10,6 @@ namespace Microsoft.IdentityModel.Tokens
 {
     internal class AudienceValidationError : ValidationError
     {
-        private IList<string>? _tokenAudiences;
-        private IList<string>? _validAudiences;
-
         public AudienceValidationError(
             MessageDetail messageDetail,
             ValidationFailureType failureType,
@@ -20,10 +17,24 @@ namespace Microsoft.IdentityModel.Tokens
             StackFrame stackFrame,
             IList<string>? tokenAudiences,
             IList<string>? validAudiences)
-            : base(messageDetail, failureType, exceptionType, stackFrame)
+            : base(messageDetail, failureType, exceptionType, stackFrame, null)
         {
-            _tokenAudiences = tokenAudiences;
-            _validAudiences = validAudiences;
+            TokenAudiences = tokenAudiences;
+            ValidAudiences = validAudiences;
+        }
+
+        public AudienceValidationError(
+            MessageDetail messageDetail,
+            ValidationFailureType failureType,
+            Type exceptionType,
+            StackFrame stackFrame,
+            IList<string>? tokenAudiences,
+            IList<string>? validAudiences,
+            Exception? innerException)
+            : base(messageDetail, failureType, exceptionType, stackFrame, innerException)
+        {
+            TokenAudiences = tokenAudiences;
+            ValidAudiences = validAudiences;
         }
 
         /// <summary>
@@ -33,12 +44,18 @@ namespace Microsoft.IdentityModel.Tokens
         internal override Exception GetException()
         {
             if (ExceptionType == typeof(SecurityTokenInvalidAudienceException))
-                return new SecurityTokenInvalidAudienceException(MessageDetail.Message) { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(_tokenAudiences) };
+            {
+                var exception = new SecurityTokenInvalidAudienceException(MessageDetail.Message, InnerException) { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(TokenAudiences) };
+                exception.SetValidationError(this);
+
+                return exception;
+            }
 
             return base.GetException(ExceptionType, null);
         }
 
-        internal IList<string>? TokenAudiences => _tokenAudiences;
+        protected IList<string>? TokenAudiences { get; set; }
+        protected IList<string>? ValidAudiences { get; set; }
     }
 }
 #nullable restore
