@@ -29,16 +29,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4.1.1
 
-    - name: Setup .NET 6.x
-      uses: actions/setup-dotnet@v4.0.0
-      with:
-        dotnet-version: 6.x
-        
-    - name: Setup .NET 8.x
-      uses: actions/setup-dotnet@v4.0.0
-      with:
-        dotnet-version: 8.x
-        
     - name: Setup .NET 9.x
       uses: actions/setup-dotnet@v4.0.0
       with:
