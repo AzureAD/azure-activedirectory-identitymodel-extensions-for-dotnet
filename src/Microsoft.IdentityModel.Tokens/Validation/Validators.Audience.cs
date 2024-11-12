@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 
@@ -48,48 +47,44 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (validationParameters == null)
             {
-                AudienceValidationError.ValidationParametersNull ??= new StackFrame(true);
                 return new AudienceValidationError(
                     MessageDetail.NullParameter(nameof(validationParameters)),
                     ValidationFailureType.NullArgument,
                     typeof(SecurityTokenArgumentNullException),
-                    AudienceValidationError.ValidationParametersNull,
+                    ValidationError.GetCurrentStackFrame(),
                     tokenAudiences,
                     null);
             }
 
             if (tokenAudiences == null)
             {
-                AudienceValidationError.AudiencesNull ??= new StackFrame(true);
                 return new AudienceValidationError(
                     MessageDetail.NullParameter(nameof(tokenAudiences)),
                     ValidationFailureType.NullArgument,
                     typeof(SecurityTokenArgumentNullException),
-                    AudienceValidationError.AudiencesNull,
+                    ValidationError.GetCurrentStackFrame(),
                     tokenAudiences,
                     validationParameters.ValidAudiences);
             }
 
             if (tokenAudiences.Count == 0)
             {
-                AudienceValidationError.AudiencesCountZero ??= new StackFrame(true);
                 return new AudienceValidationError(
                     new MessageDetail(LogMessages.IDX10206),
                     ValidationFailureType.NoTokenAudiencesProvided,
                     typeof(SecurityTokenInvalidAudienceException),
-                    AudienceValidationError.AudiencesCountZero,
+                    ValidationError.GetCurrentStackFrame(),
                     tokenAudiences,
                     validationParameters.ValidAudiences);
             }
 
             if (validationParameters.ValidAudiences.Count == 0)
             {
-                AudienceValidationError.ValidationParametersAudiencesCountZero ??= new StackFrame(true);
                 return new AudienceValidationError(
                         new MessageDetail(LogMessages.IDX10268),
                         ValidationFailureType.NoValidationParameterAudiencesProvided,
                         typeof(SecurityTokenInvalidAudienceException),
-                        AudienceValidationError.ValidationParametersAudiencesCountZero,
+                        ValidationError.GetCurrentStackFrame(),
                         tokenAudiences,
                         validationParameters.ValidAudiences);
             }
@@ -99,7 +94,6 @@ namespace Microsoft.IdentityModel.Tokens
                 return validAudience;
 
             // TODO we shouldn't be serializing here.
-            AudienceValidationError.ValidateAudienceFailed ??= new StackFrame(true);
             return new AudienceValidationError(
                 new MessageDetail(
                     LogMessages.IDX10215,
@@ -107,7 +101,7 @@ namespace Microsoft.IdentityModel.Tokens
                     LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences))),
                 ValidationFailureType.AudienceValidationFailed,
                 typeof(SecurityTokenInvalidAudienceException),
-                AudienceValidationError.ValidateAudienceFailed,
+                ValidationError.GetCurrentStackFrame(),
                 tokenAudiences,
                 validationParameters.ValidAudiences);
         }

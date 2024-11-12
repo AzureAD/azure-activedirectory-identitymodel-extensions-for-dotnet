@@ -13,13 +13,6 @@ namespace Microsoft.IdentityModel.Tokens
         private IList<string>? _tokenAudiences;
         private IList<string>? _validAudiences;
 
-        // stack frames associated with AudienceValidationErrors
-        internal static StackFrame? ValidationParametersNull;
-        internal static StackFrame? AudiencesNull;
-        internal static StackFrame? AudiencesCountZero;
-        internal static StackFrame? ValidationParametersAudiencesCountZero;
-        internal static StackFrame? ValidateAudienceFailed;
-
         public AudienceValidationError(
             MessageDetail messageDetail,
             ValidationFailureType failureType,
