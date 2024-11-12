@@ -284,7 +284,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 #pragma warning restore CA1031 // Do not catch general exception types
             {
                 return new AudienceValidationError(
-                    new MessageDetail(TokenLogMessages.IDX10269),
+                    new MessageDetail(TokenLogMessages.IDX10270),
                     ValidationFailureType.AudienceValidatorThrew,
                     typeof(SecurityTokenInvalidAudienceException),
                     ValidationError.GetCurrentStackFrame(),

@@ -227,11 +227,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                 {
                     ExpectedException = new ExpectedException(
                         typeof(SecurityTokenInvalidAudienceException),
-                        string.Format(Tokens.LogMessages.IDX10269),
+                        string.Format(Tokens.LogMessages.IDX10270),
                         typeof(CustomSecurityTokenInvalidAudienceException)),
                     AudienceValidationError = new AudienceValidationError(
                         new MessageDetail(
-                            string.Format(Tokens.LogMessages.IDX10269), null),
+                            string.Format(Tokens.LogMessages.IDX10270), null),
                         ValidationFailureType.AudienceValidatorThrew,
                         typeof(SecurityTokenInvalidAudienceException),
                         new StackFrame("JsonWebTokenHandler.ValidateToken.Internal.cs", 300),
