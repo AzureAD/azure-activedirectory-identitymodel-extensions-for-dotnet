@@ -15,9 +15,17 @@ namespace Microsoft.IdentityModel.TestUtils
         }
     }
 
-    internal class CustomSecurityTokenException : SystemException
+    internal class CustomSecurityTokenException : SecurityTokenException
     {
         public CustomSecurityTokenException(string message, Exception? innerException)
+            : base(message, innerException)
+        {
+        }
+    }
+
+    internal class CustomSecurityTokenInvalidAudienceException : SecurityTokenInvalidAudienceException
+    {
+        public CustomSecurityTokenInvalidAudienceException(string message, Exception? innerException)
             : base(message, innerException)
         {
         }
