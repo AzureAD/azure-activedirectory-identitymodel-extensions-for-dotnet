@@ -95,7 +95,7 @@ steps:
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
   displayName: 'Run Roslyn Analyzers'
-  condition: and(eq(variables['TargetNet8'], 'False'), eq(variables['PipelineType'], 'legacy'))
+  condition: and(succeeded(), eq(variables['PipelineType'], 'legacy'))
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-binskim.BinSkim@4
   displayName: 'Run BinSkim'
