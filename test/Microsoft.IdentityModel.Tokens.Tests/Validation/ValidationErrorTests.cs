@@ -11,7 +11,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void ExceptionCreatedFromValidationError_ContainsTheRightStackTrace()
         {
-            var validationError = new ValidationErrorReturningClass().firstMethod();
+            var validationError = new ValidationErrorReturningClass().FirstMethod();
             Assert.NotNull(validationError);
             Assert.NotNull(validationError.StackFrames);
             Assert.Equal(3, validationError.StackFrames.Count);
@@ -24,18 +24,19 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         class ValidationErrorReturningClass
         {
             [MethodImpl(MethodImplOptions.NoInlining)]
-            public ValidationError firstMethod()
+            public ValidationError FirstMethod()
             {
-                return secondMethod().AddCurrentStackFrame();
+                return SecondMethod().AddCurrentStackFrame();
             }
 
             [MethodImpl(MethodImplOptions.NoInlining)]
-            public ValidationError secondMethod()
+            public ValidationError SecondMethod()
             {
-                return thirdMethod().AddCurrentStackFrame();
+                return ThirdMethod().AddCurrentStackFrame();
             }
 
-            public ValidationError thirdMethod()
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            public ValidationError ThirdMethod()
             {
                 return new ValidationError(
                     new MessageDetail("This is a test error"),
