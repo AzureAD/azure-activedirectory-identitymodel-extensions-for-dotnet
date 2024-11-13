@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Tests
@@ -22,11 +23,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         }
         class ValidationErrorReturningClass
         {
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public ValidationError firstMethod()
             {
                 return secondMethod().AddCurrentStackFrame();
             }
 
+            [MethodImpl(MethodImplOptions.NoInlining)]
             public ValidationError secondMethod()
             {
                 return thirdMethod().AddCurrentStackFrame();
