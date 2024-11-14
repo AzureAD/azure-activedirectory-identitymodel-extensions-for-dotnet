@@ -70,15 +70,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                 theoryData.Add(new AudienceExtensibilityTheoryData(
                     "CustomAudienceValidatorDelegate",
                     audience,
-                    CustomAudienceValidatorDelegates.CustomAudienceValidatorDelegate,
+                    CustomAudienceValidationDelegates.CustomAudienceValidatorDelegate,
                     extraStackFrames: 2)
                 {
                     ExpectedException = new ExpectedException(
                         typeof(SecurityTokenInvalidAudienceException),
-                        nameof(CustomAudienceValidatorDelegates.CustomAudienceValidatorDelegate)),
+                        nameof(CustomAudienceValidationDelegates.CustomAudienceValidatorDelegate)),
                     AudienceValidationError = new CustomAudienceValidationError(
                         new MessageDetail(
-                            nameof(CustomAudienceValidatorDelegates.CustomAudienceValidatorDelegate), null),
+                            nameof(CustomAudienceValidationDelegates.CustomAudienceValidatorDelegate), null),
                         ValidationFailureType.AudienceValidationFailed,
                         typeof(SecurityTokenInvalidAudienceException),
                         new StackFrame("CustomValidationDelegates.cs", 160),
@@ -90,15 +90,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                 theoryData.Add(new AudienceExtensibilityTheoryData(
                     "CustomAudienceValidatorCustomExceptionDelegate",
                     audience,
-                    CustomAudienceValidatorDelegates.CustomAudienceValidatorCustomExceptionDelegate,
+                    CustomAudienceValidationDelegates.CustomAudienceValidatorCustomExceptionDelegate,
                     extraStackFrames: 2)
                 {
                     ExpectedException = new ExpectedException(
                         typeof(CustomSecurityTokenInvalidAudienceException),
-                        nameof(CustomAudienceValidatorDelegates.CustomAudienceValidatorCustomExceptionDelegate)),
+                        nameof(CustomAudienceValidationDelegates.CustomAudienceValidatorCustomExceptionDelegate)),
                     AudienceValidationError = new CustomAudienceValidationError(
                         new MessageDetail(
-                            nameof(CustomAudienceValidatorDelegates.CustomAudienceValidatorCustomExceptionDelegate), null),
+                            nameof(CustomAudienceValidationDelegates.CustomAudienceValidatorCustomExceptionDelegate), null),
                         ValidationFailureType.AudienceValidationFailed,
                         typeof(CustomSecurityTokenInvalidAudienceException),
                         new StackFrame("CustomValidationDelegates.cs", 175),
@@ -110,7 +110,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                 theoryData.Add(new AudienceExtensibilityTheoryData(
                     "CustomAudienceValidatorUnknownExceptionDelegate",
                     audience,
-                    CustomAudienceValidatorDelegates.CustomAudienceValidatorUnknownExceptionDelegate,
+                    CustomAudienceValidationDelegates.CustomAudienceValidatorUnknownExceptionDelegate,
                     extraStackFrames: 2)
                 {
                     // CustomAudienceValidationError does not handle the exception type 'NotSupportedException'
@@ -118,10 +118,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                         LogHelper.FormatInvariant(
                             Tokens.LogMessages.IDX10002, // "IDX10002: Unknown exception type returned. Type: '{0}'. Message: '{1}'.";
                             typeof(NotSupportedException),
-                            nameof(CustomAudienceValidatorDelegates.CustomAudienceValidatorUnknownExceptionDelegate))),
+                            nameof(CustomAudienceValidationDelegates.CustomAudienceValidatorUnknownExceptionDelegate))),
                     AudienceValidationError = new CustomAudienceValidationError(
                         new MessageDetail(
-                            nameof(CustomAudienceValidatorDelegates.CustomAudienceValidatorUnknownExceptionDelegate), null),
+                            nameof(CustomAudienceValidationDelegates.CustomAudienceValidatorUnknownExceptionDelegate), null),
                         ValidationFailureType.AudienceValidationFailed,
                         typeof(NotSupportedException),
                         new StackFrame("CustomValidationDelegates.cs", 205),
@@ -133,15 +133,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                 theoryData.Add(new AudienceExtensibilityTheoryData(
                     "CustomAudienceValidatorCustomExceptionCustomFailureTypeDelegate",
                     audience,
-                    CustomAudienceValidatorDelegates.CustomAudienceValidatorCustomExceptionCustomFailureTypeDelegate,
+                    CustomAudienceValidationDelegates.CustomAudienceValidatorCustomExceptionCustomFailureTypeDelegate,
                     extraStackFrames: 2)
                 {
                     ExpectedException = new ExpectedException(
                         typeof(CustomSecurityTokenInvalidAudienceException),
-                        nameof(CustomAudienceValidatorDelegates.CustomAudienceValidatorCustomExceptionCustomFailureTypeDelegate)),
+                        nameof(CustomAudienceValidationDelegates.CustomAudienceValidatorCustomExceptionCustomFailureTypeDelegate)),
                     AudienceValidationError = new CustomAudienceValidationError(
                         new MessageDetail(
-                            nameof(CustomAudienceValidatorDelegates.CustomAudienceValidatorCustomExceptionCustomFailureTypeDelegate), null),
+                            nameof(CustomAudienceValidationDelegates.CustomAudienceValidatorCustomExceptionCustomFailureTypeDelegate), null),
                         CustomAudienceValidationError.CustomAudienceValidationFailureType,
                         typeof(CustomSecurityTokenInvalidAudienceException),
                         new StackFrame("CustomValidationDelegates.cs", 190),
@@ -156,15 +156,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                 theoryData.Add(new AudienceExtensibilityTheoryData(
                     "AudienceValidatorDelegate",
                     audience,
-                    CustomAudienceValidatorDelegates.AudienceValidatorDelegate,
+                    CustomAudienceValidationDelegates.AudienceValidatorDelegate,
                     extraStackFrames: 2)
                 {
                     ExpectedException = new ExpectedException(
                         typeof(SecurityTokenInvalidAudienceException),
-                        nameof(CustomAudienceValidatorDelegates.AudienceValidatorDelegate)),
+                        nameof(CustomAudienceValidationDelegates.AudienceValidatorDelegate)),
                     AudienceValidationError = new AudienceValidationError(
                         new MessageDetail(
-                            nameof(CustomAudienceValidatorDelegates.AudienceValidatorDelegate), null),
+                            nameof(CustomAudienceValidationDelegates.AudienceValidatorDelegate), null),
                         ValidationFailureType.AudienceValidationFailed,
                         typeof(SecurityTokenInvalidAudienceException),
                         new StackFrame("CustomValidationDelegates.cs", 235),
@@ -176,7 +176,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                 theoryData.Add(new AudienceExtensibilityTheoryData(
                     "AudienceValidatorCustomAudienceExceptionTypeDelegate",
                     audience,
-                    CustomAudienceValidatorDelegates.AudienceValidatorCustomAudienceExceptionTypeDelegate,
+                    CustomAudienceValidationDelegates.AudienceValidatorCustomAudienceExceptionTypeDelegate,
                     extraStackFrames: 2)
                 {
                     // AudienceValidationError does not handle the exception type 'CustomSecurityTokenInvalidAudienceException'
@@ -184,10 +184,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                         LogHelper.FormatInvariant(
                             Tokens.LogMessages.IDX10002, // "IDX10002: Unknown exception type returned. Type: '{0}'. Message: '{1}'.";
                             typeof(CustomSecurityTokenInvalidAudienceException),
-                            nameof(CustomAudienceValidatorDelegates.AudienceValidatorCustomAudienceExceptionTypeDelegate))),
+                            nameof(CustomAudienceValidationDelegates.AudienceValidatorCustomAudienceExceptionTypeDelegate))),
                     AudienceValidationError = new AudienceValidationError(
                         new MessageDetail(
-                            nameof(CustomAudienceValidatorDelegates.AudienceValidatorCustomAudienceExceptionTypeDelegate), null),
+                            nameof(CustomAudienceValidationDelegates.AudienceValidatorCustomAudienceExceptionTypeDelegate), null),
                         ValidationFailureType.AudienceValidationFailed,
                         typeof(CustomSecurityTokenInvalidAudienceException),
                         new StackFrame("CustomValidationDelegates.cs", 259),
@@ -199,7 +199,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                 theoryData.Add(new AudienceExtensibilityTheoryData(
                     "AudienceValidatorCustomExceptionTypeDelegate",
                     audience,
-                    CustomAudienceValidatorDelegates.AudienceValidatorCustomExceptionTypeDelegate,
+                    CustomAudienceValidationDelegates.AudienceValidatorCustomExceptionTypeDelegate,
                     extraStackFrames: 2)
                 {
                     // AudienceValidationError does not handle the exception type 'CustomSecurityTokenException'
@@ -207,10 +207,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                         LogHelper.FormatInvariant(
                             Tokens.LogMessages.IDX10002, // "IDX10002: Unknown exception type returned. Type: '{0}'. Message: '{1}'.";
                             typeof(CustomSecurityTokenException),
-                            nameof(CustomAudienceValidatorDelegates.AudienceValidatorCustomExceptionTypeDelegate))),
+                            nameof(CustomAudienceValidationDelegates.AudienceValidatorCustomExceptionTypeDelegate))),
                     AudienceValidationError = new AudienceValidationError(
                         new MessageDetail(
-                            nameof(CustomAudienceValidatorDelegates.AudienceValidatorCustomExceptionTypeDelegate), null),
+                            nameof(CustomAudienceValidationDelegates.AudienceValidatorCustomExceptionTypeDelegate), null),
                         ValidationFailureType.AudienceValidationFailed,
                         typeof(CustomSecurityTokenException),
                         new StackFrame("CustomValidationDelegates.cs", 274),
@@ -222,7 +222,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                 theoryData.Add(new AudienceExtensibilityTheoryData(
                     "AudienceValidatorThrows",
                     audience,
-                    CustomAudienceValidatorDelegates.AudienceValidatorThrows,
+                    CustomAudienceValidationDelegates.AudienceValidatorThrows,
                     extraStackFrames: 1)
                 {
                     ExpectedException = new ExpectedException(
@@ -237,7 +237,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                         new StackFrame("JsonWebTokenHandler.ValidateToken.Internal.cs", 250),
                         tokenAudiences,
                         null,
-                        new SecurityTokenInvalidAudienceException(nameof(CustomAudienceValidatorDelegates.AudienceValidatorThrows))
+                        new SecurityTokenInvalidAudienceException(nameof(CustomAudienceValidationDelegates.AudienceValidatorThrows))
                     )
                 });
                 #endregion
