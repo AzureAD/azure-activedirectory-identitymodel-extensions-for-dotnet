@@ -16,8 +16,11 @@ Microsoft.IdentityModel.Tokens.IssuerValidationError.InvalidIssuer.get -> string
 Microsoft.IdentityModel.Tokens.IssuerValidationError.IssuerValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, Microsoft.IdentityModel.Tokens.ValidationFailureType validationFailureType, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, string invalidIssuer, System.Exception innerException) -> void
 Microsoft.IdentityModel.Tokens.IssuerValidationSource.IssuerMatchedConfiguration = 1 -> Microsoft.IdentityModel.Tokens.IssuerValidationSource
 Microsoft.IdentityModel.Tokens.IssuerValidationSource.IssuerMatchedValidationParameters = 2 -> Microsoft.IdentityModel.Tokens.IssuerValidationSource
-Microsoft.IdentityModel.Tokens.LifetimeValidationError._expires -> System.DateTime
-Microsoft.IdentityModel.Tokens.LifetimeValidationError._notBefore -> System.DateTime
+Microsoft.IdentityModel.Tokens.LifetimeValidationError.Expires.get -> System.DateTime
+Microsoft.IdentityModel.Tokens.LifetimeValidationError.Expires.set -> void
+Microsoft.IdentityModel.Tokens.LifetimeValidationError.LifetimeValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, Microsoft.IdentityModel.Tokens.ValidationFailureType validationFailureType = null, System.DateTime? notBefore = null, System.DateTime? expires = null, System.Exception innerException = null) -> void
+Microsoft.IdentityModel.Tokens.LifetimeValidationError.NotBefore.get -> System.DateTime
+Microsoft.IdentityModel.Tokens.LifetimeValidationError.NotBefore.set -> void
 Microsoft.IdentityModel.Tokens.TokenTypeValidationError
 Microsoft.IdentityModel.Tokens.TokenTypeValidationError.TokenTypeValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, string invalidTokenType) -> void
 Microsoft.IdentityModel.Tokens.TokenTypeValidationError._invalidTokenType -> string
