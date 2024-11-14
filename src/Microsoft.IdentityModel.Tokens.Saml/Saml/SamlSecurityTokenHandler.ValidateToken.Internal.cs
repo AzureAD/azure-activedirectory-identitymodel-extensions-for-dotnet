@@ -139,17 +139,32 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     StackFrames.AssertionConditionsNull);
             }
 
-            var lifetimeValidationResult = validationParameters.LifetimeValidator(
-                samlToken.Assertion.Conditions.NotBefore,
-                samlToken.Assertion.Conditions.NotOnOrAfter,
-                samlToken,
-                validationParameters,
-                callContext);
+            ValidationResult<ValidatedLifetime> lifetimeValidationResult;
 
-            if (!lifetimeValidationResult.IsValid)
+            try
             {
-                StackFrames.LifetimeValidationFailed ??= new StackFrame(true);
-                return lifetimeValidationResult.UnwrapError().AddStackFrame(StackFrames.LifetimeValidationFailed);
+                lifetimeValidationResult = validationParameters.LifetimeValidator(
+                    samlToken.Assertion.Conditions.NotBefore,
+                    samlToken.Assertion.Conditions.NotOnOrAfter,
+                    samlToken,
+                    validationParameters,
+                    callContext);
+
+                if (!lifetimeValidationResult.IsValid)
+                    return lifetimeValidationResult.UnwrapError().AddCurrentStackFrame();
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                return new LifetimeValidationError(
+                    new MessageDetail(Tokens.LogMessages.IDX10271),
+                    typeof(SecurityTokenInvalidLifetimeException),
+                    ValidationError.GetCurrentStackFrame(),
+                    ValidationFailureType.LifetimeValidatorThrew,
+                    samlToken.Assertion.Conditions.NotBefore,
+                    samlToken.Assertion.Conditions.NotOnOrAfter,
+                    ex);
             }
 
             string? validatedAudience = null;
