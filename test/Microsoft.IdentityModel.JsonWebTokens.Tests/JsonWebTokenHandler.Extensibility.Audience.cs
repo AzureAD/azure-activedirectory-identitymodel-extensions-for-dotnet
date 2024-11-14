@@ -81,7 +81,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                             nameof(CustomAudienceValidationDelegates.CustomAudienceValidatorDelegate), null),
                         ValidationFailureType.AudienceValidationFailed,
                         typeof(SecurityTokenInvalidAudienceException),
-                        new StackFrame("CustomValidationDelegates.cs", 160),
+                        new StackFrame("CustomAudienceValidationDelegates.cs", 160),
                         tokenAudiences,
                         null)
                 });
@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                             nameof(CustomAudienceValidationDelegates.CustomAudienceValidatorCustomExceptionDelegate), null),
                         ValidationFailureType.AudienceValidationFailed,
                         typeof(CustomSecurityTokenInvalidAudienceException),
-                        new StackFrame("CustomValidationDelegates.cs", 175),
+                        new StackFrame("CustomAudienceValidationDelegates.cs", 175),
                         tokenAudiences,
                         null),
                 });
@@ -124,7 +124,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                             nameof(CustomAudienceValidationDelegates.CustomAudienceValidatorUnknownExceptionDelegate), null),
                         ValidationFailureType.AudienceValidationFailed,
                         typeof(NotSupportedException),
-                        new StackFrame("CustomValidationDelegates.cs", 205),
+                        new StackFrame("CustomAudienceValidationDelegates.cs", 205),
                         tokenAudiences,
                         null),
                 });
@@ -144,7 +144,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                             nameof(CustomAudienceValidationDelegates.CustomAudienceValidatorCustomExceptionCustomFailureTypeDelegate), null),
                         CustomAudienceValidationError.CustomAudienceValidationFailureType,
                         typeof(CustomSecurityTokenInvalidAudienceException),
-                        new StackFrame("CustomValidationDelegates.cs", 190),
+                        new StackFrame("CustomAudienceValidationDelegates.cs", 190),
                         tokenAudiences,
                         null),
                 });
@@ -167,7 +167,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                             nameof(CustomAudienceValidationDelegates.AudienceValidatorDelegate), null),
                         ValidationFailureType.AudienceValidationFailed,
                         typeof(SecurityTokenInvalidAudienceException),
-                        new StackFrame("CustomValidationDelegates.cs", 235),
+                        new StackFrame("CustomAudienceValidationDelegates.cs", 235),
                         tokenAudiences,
                         null)
                 });
@@ -190,7 +190,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                             nameof(CustomAudienceValidationDelegates.AudienceValidatorCustomAudienceExceptionTypeDelegate), null),
                         ValidationFailureType.AudienceValidationFailed,
                         typeof(CustomSecurityTokenInvalidAudienceException),
-                        new StackFrame("CustomValidationDelegates.cs", 259),
+                        new StackFrame("CustomAudienceValidationDelegates.cs", 259),
                         tokenAudiences,
                         null)
                 });
@@ -213,7 +213,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                             nameof(CustomAudienceValidationDelegates.AudienceValidatorCustomExceptionTypeDelegate), null),
                         ValidationFailureType.AudienceValidationFailed,
                         typeof(CustomSecurityTokenException),
-                        new StackFrame("CustomValidationDelegates.cs", 274),
+                        new StackFrame("CustomAudienceValidationDelegates.cs", 274),
                         tokenAudiences,
                         null)
                 });
