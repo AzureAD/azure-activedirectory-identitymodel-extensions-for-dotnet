@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Tests
@@ -10,29 +11,33 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Fact]
         public void ExceptionCreatedFromValidationError_ContainsTheRightStackTrace()
         {
-            var validationError = new ValidationErrorReturningClass().firstMethod();
+            var validationError = new ValidationErrorReturningClass().FirstMethod();
             Assert.NotNull(validationError);
             Assert.NotNull(validationError.StackFrames);
             Assert.Equal(3, validationError.StackFrames.Count);
             Assert.NotNull(validationError.GetException());
             Assert.NotNull(validationError.GetException().StackTrace);
-            Assert.Equal("thirdMethod", validationError.StackFrames[0].GetMethod().Name);
-            Assert.Equal("secondMethod", validationError.StackFrames[1].GetMethod().Name);
-            Assert.Equal("firstMethod", validationError.StackFrames[2].GetMethod().Name);
+            Assert.Equal("ThirdMethod", validationError.StackFrames[0].GetMethod().Name);
+            Assert.Equal("SecondMethod", validationError.StackFrames[1].GetMethod().Name);
+            Assert.Equal("FirstMethod", validationError.StackFrames[2].GetMethod().Name);
         }
+
         class ValidationErrorReturningClass
         {
-            public ValidationError firstMethod()
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            public ValidationError FirstMethod()
             {
-                return secondMethod().AddCurrentStackFrame();
+                return SecondMethod().AddCurrentStackFrame();
             }
 
-            public ValidationError secondMethod()
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            public ValidationError SecondMethod()
             {
-                return thirdMethod().AddCurrentStackFrame();
+                return ThirdMethod().AddCurrentStackFrame();
             }
 
-            public ValidationError thirdMethod()
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            public ValidationError ThirdMethod()
             {
                 return new ValidationError(
                     new MessageDetail("This is a test error"),

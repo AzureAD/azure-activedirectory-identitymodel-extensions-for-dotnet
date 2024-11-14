@@ -14,13 +14,18 @@ on:
 jobs:
   analyze:
     runs-on: windows-latest
-    name: Wilson GitHub AOT check
+    name: "AOT check"
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
         fetch-depth: 1
+
+    - name: Setup .NET 9.0.x
+      uses: actions/setup-dotnet@v4.1.0
+      with:
+        dotnet-version: 9.0.x
 
     - name: Runs powershell script
       id: aot-powershell
