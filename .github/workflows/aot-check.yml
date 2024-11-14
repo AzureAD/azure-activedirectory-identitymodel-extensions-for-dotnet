@@ -14,7 +14,7 @@ on:
 jobs:
   analyze:
     runs-on: windows-latest
-    name: Wilson GitHub AOT check
+    name: "AOT check"
 
     steps:
     - name: Checkout repository
@@ -23,7 +23,7 @@ jobs:
         fetch-depth: 1
 
     - name: Setup .NET 9.0.x
-      uses: actions/setup-dotnet@v4.0.1
+      uses: actions/setup-dotnet@v4.1.0
       with:
         dotnet-version: 9.0.x
 
