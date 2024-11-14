@@ -38,6 +38,12 @@ namespace Microsoft.IdentityModel.AotCompatibility.Tests
             string testAppPath = Path.Combine("..", "..", "..", "..", "Microsoft.IdentityModel.AotCompatibility.TestApp");
             string testAppProject = "Microsoft.IdentityModel.AotCompatibility.TestApp.csproj";
 
+#if NET9_0_OR_GREATER
+            string framework = "net9.0";
+#else
+            string framework = "net8.0";
+#endif
+
             // ensure we run a clean publish every time
             DirectoryInfo testObjDir = new DirectoryInfo(Path.Combine(testAppPath, "obj"));
             if (testObjDir.Exists)
@@ -47,7 +53,7 @@ namespace Microsoft.IdentityModel.AotCompatibility.Tests
 
             var process = new Process();
             // set '-nodereuse:false /p:UseSharedCompilation=false' so the MSBuild and Roslyn server processes don't hang around, which may hang the test in CI
-            process.StartInfo = new ProcessStartInfo("dotnet", $"publish {testAppProject} --self-contained -nodereuse:false /p:UseSharedCompilation=false")
+            process.StartInfo = new ProcessStartInfo("dotnet", $"publish {testAppProject} --self-contained --framework {framework} -nodereuse:false /p:UseSharedCompilation=false")
             {
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
