@@ -159,7 +159,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (!lifetimeValidationResult.IsValid)
                     return lifetimeValidationResult.UnwrapError().AddCurrentStackFrame();
             }
-
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
