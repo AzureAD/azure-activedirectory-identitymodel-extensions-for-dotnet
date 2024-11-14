@@ -113,5 +113,56 @@ namespace Microsoft.IdentityModel.TestUtils
         }
     }
     #endregion
+
+    #region LifetimeValidationErrors
+    internal class CustomLifetimeValidationError : LifetimeValidationError
+    {
+        /// <summary>
+        /// A custom validation failure type.
+        /// </summary>
+        public static readonly ValidationFailureType CustomLifetimeValidationFailureType = new LifetimeValidationFailure("CustomLifetimeValidationFailureType");
+        private class LifetimeValidationFailure : ValidationFailureType { internal LifetimeValidationFailure(string name) : base(name) { } }
+
+        public CustomLifetimeValidationError(
+            MessageDetail messageDetail,
+            ValidationFailureType validationFailureType,
+            Type exceptionType,
+            StackFrame stackFrame,
+            DateTime? notBefore,
+            DateTime? expires,
+            Exception? innerException = null)
+            : base(messageDetail, exceptionType, stackFrame, validationFailureType, notBefore, expires, innerException)
+        {
+        }
+
+        internal override Exception GetException()
+        {
+            if (ExceptionType == typeof(CustomSecurityTokenInvalidLifetimeException))
+            {
+                var exception = new CustomSecurityTokenInvalidLifetimeException(MessageDetail.Message, InnerException) { NotBefore = NotBefore, Expires = Expires };
+                exception.SetValidationError(this);
+
+                return exception;
+            }
+
+            return base.GetException();
+        }
+    }
+
+    internal class CustomLifetimeWithoutGetExceptionValidationOverrideError : LifetimeValidationError
+    {
+        public CustomLifetimeWithoutGetExceptionValidationOverrideError(
+            MessageDetail messageDetail,
+            ValidationFailureType validationFailureType,
+            Type exceptionType,
+            StackFrame stackFrame,
+            DateTime? notBefore = null,
+            DateTime? expires = null,
+            Exception? innerException = null)
+            : base(messageDetail, exceptionType, stackFrame, validationFailureType, notBefore, expires, innerException)
+        {
+        }
+    }
+    #endregion
 }
 #nullable restore

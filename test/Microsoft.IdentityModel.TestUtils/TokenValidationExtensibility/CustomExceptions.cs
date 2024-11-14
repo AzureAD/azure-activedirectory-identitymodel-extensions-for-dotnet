@@ -30,5 +30,13 @@ namespace Microsoft.IdentityModel.TestUtils
         {
         }
     }
+
+    internal class CustomSecurityTokenInvalidLifetimeException : SecurityTokenInvalidLifetimeException
+    {
+        public CustomSecurityTokenInvalidLifetimeException(string message, Exception? innerException)
+            : base(message, innerException)
+        {
+        }
+    }
 }
 #nullable restore
