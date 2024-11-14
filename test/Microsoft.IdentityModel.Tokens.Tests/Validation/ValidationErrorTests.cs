@@ -17,10 +17,11 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.Equal(3, validationError.StackFrames.Count);
             Assert.NotNull(validationError.GetException());
             Assert.NotNull(validationError.GetException().StackTrace);
-            Assert.Equal("thirdMethod", validationError.StackFrames[0].GetMethod().Name);
-            Assert.Equal("secondMethod", validationError.StackFrames[1].GetMethod().Name);
-            Assert.Equal("firstMethod", validationError.StackFrames[2].GetMethod().Name);
+            Assert.Equal("ThirdMethod", validationError.StackFrames[0].GetMethod().Name);
+            Assert.Equal("SecondMethod", validationError.StackFrames[1].GetMethod().Name);
+            Assert.Equal("FirstMethod", validationError.StackFrames[2].GetMethod().Name);
         }
+
         class ValidationErrorReturningClass
         {
             [MethodImpl(MethodImplOptions.NoInlining)]
