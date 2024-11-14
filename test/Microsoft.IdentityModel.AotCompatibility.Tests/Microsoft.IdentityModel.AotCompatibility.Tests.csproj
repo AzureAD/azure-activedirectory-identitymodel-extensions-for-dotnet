@@ -4,8 +4,8 @@
 
   <PropertyGroup>
     <!-- This test only needs to run on .NET -->
-    <TargetFrameworks>net8.0</TargetFrameworks>
-    <TargetFrameworks Condition="'$(TargetNet9)'== 'True'">$(TargetFrameworks);net9.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks Condition="'$(TargetNetNext)'== 'True'">$(TargetFrameworks);</TargetFrameworks>
     <langversion>12</langversion>
     <Version>1.0.0-preview</Version>
   </PropertyGroup>

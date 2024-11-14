@@ -70,6 +70,12 @@ namespace Microsoft.IdentityModel.Tokens
         private class SignatureValidationFailure : ValidationFailureType { internal SignatureValidationFailure(string name) : base(name) { } }
 
         /// <summary>
+        /// Defines a type that represents that the token is not signed.
+        /// </summary>
+        public static readonly ValidationFailureType TokenIsNotSigned = new TokenNotSignedFailure("TokenIsNotSigned");
+        private class TokenNotSignedFailure : ValidationFailureType { internal TokenNotSignedFailure(string name) : base(name) { } }
+
+        /// <summary>
         /// Defines a type that represents that the token's signature algorithm validation failed.
         /// </summary>
         public static readonly ValidationFailureType SignatureAlgorithmValidationFailed = new SignatureAlgorithmValidationFailure("SignatureAlgorithmValidationFailed");
@@ -100,6 +106,12 @@ namespace Microsoft.IdentityModel.Tokens
         private class TokenReadingFailure : ValidationFailureType { internal TokenReadingFailure(string name) : base(name) { } }
 
         /// <summary>
+        /// Defines a type that represents that a token exceeds the maximum size.
+        /// </summary>
+        public static readonly ValidationFailureType TokenExceedsMaximumSize = new TokenExceedsMaximumSizeFailure("TokenExceedsMaximumSize");
+        private class TokenExceedsMaximumSizeFailure : ValidationFailureType { internal TokenExceedsMaximumSizeFailure(string name) : base(name) { } }
+
+        /// <summary>
         /// Defines a type that represents that a JWE could not be decrypted.
         /// </summary>
         public static readonly ValidationFailureType TokenDecryptionFailed = new TokenDecryptionFailure("TokenDecryptionFailed");
@@ -116,5 +128,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public static readonly ValidationFailureType XmlValidationFailed = new XmlValidationFailure("XmlValidationFailed");
         private class XmlValidationFailure : ValidationFailureType { internal XmlValidationFailure(string name) : base(name) { } }
+
+        /// <summary>
+        /// Defines a type that represents that a token is invalid.
+        /// </summary>
+        public static readonly ValidationFailureType IssuerValidatorThrew = new IssuerValidatorFailure("IssuerValidatorThrew");
+        private class IssuerValidatorFailure : ValidationFailureType { internal IssuerValidatorFailure(string name) : base(name) { } }
     }
 }

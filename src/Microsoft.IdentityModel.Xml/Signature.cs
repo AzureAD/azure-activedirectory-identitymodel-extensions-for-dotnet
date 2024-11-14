@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
 using System.IO;
 using Microsoft.IdentityModel.Tokens;
 using static Microsoft.IdentityModel.Logging.LogHelper;
@@ -135,24 +134,24 @@ namespace Microsoft.IdentityModel.Xml
 #pragma warning restore CA1801
         {
             if (key is null)
-                return ValidationError.NullParameter(nameof(key), new StackFrame());
+                return ValidationError.NullParameter(nameof(key), ValidationError.GetCurrentStackFrame());
 
             if (cryptoProviderFactory is null)
-                return ValidationError.NullParameter(nameof(cryptoProviderFactory), new StackFrame());
+                return ValidationError.NullParameter(nameof(cryptoProviderFactory), ValidationError.GetCurrentStackFrame());
 
             if (SignedInfo is null)
                 return new XmlValidationError(
                     new MessageDetail(LogMessages.IDX30212),
                     ValidationFailureType.XmlValidationFailed,
                     typeof(XmlValidationException),
-                    new StackFrame());
+                    ValidationError.GetCurrentStackFrame());
 
             if (!cryptoProviderFactory.IsSupportedAlgorithm(SignedInfo.SignatureMethod, key))
                 return new XmlValidationError(
                     new MessageDetail(LogMessages.IDX30207, SignedInfo.SignatureMethod, cryptoProviderFactory.GetType()),
                     ValidationFailureType.XmlValidationFailed,
                     typeof(XmlValidationException),
-                    new StackFrame());
+                    ValidationError.GetCurrentStackFrame());
 
             var signatureProvider = cryptoProviderFactory.CreateForVerifying(key, SignedInfo.SignatureMethod);
             if (signatureProvider is null)
@@ -160,7 +159,7 @@ namespace Microsoft.IdentityModel.Xml
                     new MessageDetail(LogMessages.IDX30203, cryptoProviderFactory, key, SignedInfo.SignatureMethod),
                     ValidationFailureType.XmlValidationFailed,
                     typeof(XmlValidationException),
-                    new StackFrame());
+                    ValidationError.GetCurrentStackFrame());
 
             ValidationError? validationError = null;
 
@@ -175,14 +174,14 @@ namespace Microsoft.IdentityModel.Xml
                             new MessageDetail(LogMessages.IDX30200, cryptoProviderFactory, key),
                             ValidationFailureType.XmlValidationFailed,
                             typeof(XmlValidationException),
-                            new StackFrame());
+                            ValidationError.GetCurrentStackFrame());
                     }
                 }
 
                 if (validationError is null)
                 {
                     validationError = SignedInfo.Verify(cryptoProviderFactory, callContext);
-                    validationError?.AddStackFrame(new StackFrame());
+                    validationError?.AddCurrentStackFrame();
                 }
             }
             finally

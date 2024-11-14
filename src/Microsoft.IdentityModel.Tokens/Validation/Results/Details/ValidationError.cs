@@ -2,8 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -73,7 +75,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (innerException == null && InnerValidationError == null)
             {
                 if (exceptionType == typeof(SecurityTokenArgumentNullException))
-                    return new SecurityTokenArgumentNullException(MessageDetail.Message);
+                    exception = new SecurityTokenArgumentNullException(MessageDetail.Message);
                 else if (exceptionType == typeof(SecurityTokenInvalidAudienceException))
                     exception = new SecurityTokenInvalidAudienceException(MessageDetail.Message);
                 else if (exceptionType == typeof(SecurityTokenInvalidIssuerException))
@@ -187,6 +189,11 @@ namespace Microsoft.IdentityModel.Tokens
                 }
             }
 
+            if (exception is SecurityTokenException securityTokenException)
+                securityTokenException.SetValidationError(this);
+            else if (exception is SecurityTokenArgumentNullException securityTokenArgumentNullException)
+                securityTokenArgumentNullException.SetValidationError(this);
+
             return exception;
         }
 
@@ -236,5 +243,41 @@ namespace Microsoft.IdentityModel.Tokens
             StackFrames.Add(stackFrame);
             return this;
         }
+
+        /// <summary>
+        /// Adds the current stack frame to the list of stack frames and returns the updated object.
+        /// If there is no cache entry for the given file path and line number, a new stack frame is created and added to the cache.
+        /// </summary>
+        /// <param name="filePath">The path to the file from which this method is called. Captured automatically by default.</param>
+        /// <param name="lineNumber">The line number from which this method is called. CAptured automatically by default.</param>
+        /// <param name="skipFrames">The number of stack frames to skip when capturing. Used to avoid capturing this method and get the caller instead.</param>
+        /// <returns>The updated object.</returns>
+        internal ValidationError AddCurrentStackFrame([CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, int skipFrames = 1)
+        {
+            // We add 1 to the skipped frames to skip the current method
+            StackFrames.Add(GetCurrentStackFrame(filePath, lineNumber, skipFrames + 1));
+            return this;
+        }
+
+        /// <summary>
+        /// Returns the stack frame corresponding to the file path and line number from which this method is called.
+        /// If there is no cache entry for the given file path and line number, a new stack frame is created and added to the cache.
+        /// </summary>
+        /// <param name="filePath">The path to the file from which this method is called. Captured automatically by default.</param>
+        /// <param name="lineNumber">The line number from which this method is called. CAptured automatically by default.</param>
+        /// <param name="skipFrames">The number of stack frames to skip when capturing. Used to avoid capturing this method and get the caller instead.</param>
+        /// <returns>The captured stack frame.</returns>
+        /// <remarks>If this is called from a helper method, consider adding an extra skip frame to avoid capturing the helper instead.</remarks>
+        internal static StackFrame GetCurrentStackFrame(
+            [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, int skipFrames = 1)
+        {
+            // String is allocated, but it goes out of scope immediately after the call
+            string key = filePath + lineNumber;
+            StackFrame frame = CachedStackFrames.GetOrAdd(key, new StackFrame(skipFrames, true));
+            return frame;
+        }
+
+        // ConcurrentDictionary is thread-safe and only locks when adding a new item.
+        private static ConcurrentDictionary<string, StackFrame> CachedStackFrames { get; } = new();
     }
 }

@@ -14,9 +14,26 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     /// </summary>
     public partial class SamlSecurityTokenHandler : SecurityTokenHandler
     {
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         internal async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+            string token,
+            ValidationParameters validationParameters,
+            CallContext callContext,
+            CancellationToken cancellationToken)
+        {
+            if (token is null)
+                return ValidationError.NullParameter(nameof(token), ValidationError.GetCurrentStackFrame());
+
+            if (validationParameters is null)
+                return ValidationError.NullParameter(nameof(validationParameters), ValidationError.GetCurrentStackFrame());
+
+            var tokenReadingResult = ReadSamlToken(token, callContext);
+            if (!tokenReadingResult.IsValid)
+                return tokenReadingResult.UnwrapError().AddCurrentStackFrame();
+
+            return await ValidateTokenAsync(tokenReadingResult.UnwrapResult(), validationParameters, callContext, cancellationToken).ConfigureAwait(false);
+        }
+
+        internal async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
             SamlSecurityToken samlToken,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -40,7 +57,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     StackFrames.TokenValidationParametersNull);
             }
 
-            var conditionsResult = ValidateConditions(samlToken, validationParameters, callContext);
+            ValidationResult<ValidatedConditions> conditionsResult = ValidateConditions(samlToken, validationParameters, callContext);
 
             if (!conditionsResult.IsValid)
             {
@@ -48,7 +65,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 return conditionsResult.UnwrapError().AddStackFrame(StackFrames.AssertionConditionsValidationFailed);
             }
 
-            var issuerValidationResult = await validationParameters.IssuerValidatorAsync(
+            ValidationResult<ValidatedIssuer> issuerValidationResult = await validationParameters.IssuerValidatorAsync(
                 samlToken.Issuer,
                 samlToken,
                 validationParameters,
@@ -61,11 +78,25 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 return issuerValidationResult.UnwrapError().AddStackFrame(StackFrames.IssuerValidationFailed);
             }
 
-            var signatureValidationResult = ValidateSignature(samlToken, validationParameters, callContext);
+            ValidationResult<SecurityKey> signatureValidationResult = ValidateSignature(samlToken, validationParameters, callContext);
+
             if (!signatureValidationResult.IsValid)
             {
                 StackFrames.SignatureValidationFailed ??= new StackFrame(true);
                 return signatureValidationResult.UnwrapError().AddStackFrame(StackFrames.SignatureValidationFailed);
+            }
+
+            ValidationResult<ValidatedSigningKeyLifetime> issuerSigningKeyValidationResult = validationParameters.IssuerSigningKeyValidator(
+                samlToken.SigningKey,
+                samlToken,
+                validationParameters,
+                null,
+                callContext);
+
+            if (!issuerSigningKeyValidationResult.IsValid)
+            {
+                StackFrames.IssuerSigningKeyValidationFailed ??= new StackFrame(true);
+                return issuerSigningKeyValidationResult.UnwrapError().AddStackFrame(StackFrames.IssuerSigningKeyValidationFailed);
             }
 
             return new ValidatedToken(samlToken, this, validationParameters);

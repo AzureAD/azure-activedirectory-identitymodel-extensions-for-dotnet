@@ -311,7 +311,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Allows overriding the delegate that will be used to validate the issuer of the token.
         /// </summary>
         /// <exception cref="ArgumentNullException">Thrown when the value is set as null.</exception>
-        /// <returns>The <see cref="IssuerValidationDelegateAsync"/> used to validate the issuer of a token</returns>
+        /// <returns>The <see cref="Tokens.IssuerValidationDelegateAsync"/> used to validate the issuer of a token</returns>
         public IssuerValidationDelegateAsync IssuerValidatorAsync
         {
             get { return _issuerValidatorAsync; }

@@ -3,20 +3,19 @@
 
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Xml;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens.Saml
+namespace Microsoft.IdentityModel.Tokens.Saml2
 {
-    public partial class SamlSecurityTokenHandler : SecurityTokenHandler
+    public partial class Saml2SecurityTokenHandler : SecurityTokenHandler
     {
         internal static ValidationResult<SecurityKey> ValidateSignature(
-            SamlSecurityToken samlToken,
+            Saml2SecurityToken samlToken,
             ValidationParameters validationParameters,
-#pragma warning disable CA1801 // Review unused parameters
             CallContext callContext)
-#pragma warning restore CA1801 // Review unused parameters
         {
             if (samlToken is null)
             {
@@ -36,7 +35,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             if (validationParameters.SignatureValidator is not null)
                 return validationParameters.SignatureValidator(samlToken, validationParameters, null, callContext);
 
-            // If the user wants to accept unsigned tokens, they must implement the delegate
+            // If the user wants to accept unsigned tokens, they must set validationParameters.SignatureValidator
             if (samlToken.Assertion.Signature is null)
                 return new XmlValidationError(
                     new MessageDetail(
@@ -108,7 +107,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                         TokenLogMessages.IDX10514,
                         keysAttempted?.ToString(),
                         samlToken.Assertion.Signature.KeyInfo,
-                        GetErrorString(error, errors),
+                        GetErrorStrings(error, errors),
                         samlToken),
                     ValidationFailureType.SignatureValidationFailed,
                     typeof(SecurityTokenInvalidSignatureException),
@@ -125,7 +124,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     new MessageDetail(
                         TokenLogMessages.IDX10512,
                         keysAttemptedString,
-                        GetErrorString(error, errors),
+                        GetErrorStrings(error, errors),
                         samlToken),
                     ValidationFailureType.SignatureValidationFailed,
                     typeof(SecurityTokenSignatureKeyNotFoundException),
@@ -138,7 +137,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 ValidationError.GetCurrentStackFrame());
         }
 
-        private static ValidationResult<SecurityKey> ValidateSignatureUsingKey(SecurityKey key, SamlSecurityToken samlToken, ValidationParameters validationParameters, CallContext callContext)
+        private static ValidationResult<SecurityKey> ValidateSignatureUsingKey(SecurityKey key, Saml2SecurityToken samlToken, ValidationParameters validationParameters, CallContext callContext)
         {
             ValidationResult<string> algorithmValidationResult = validationParameters.AlgorithmValidator(
                         samlToken.Assertion.Signature.SignedInfo.SignatureMethod,
@@ -171,23 +170,23 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             }
         }
 
-        private static string GetErrorString(ValidationError? error, List<ValidationError>? errorList)
+        private static string GetErrorStrings(ValidationError? error, List<ValidationError>? errors)
         {
             // This method is called if there are errors in the signature validation process.
             // This check is there to account for the optional parameter.
             if (error is not null)
                 return error.MessageDetail.Message;
 
-            if (errorList is null)
+            if (errors is null)
                 return string.Empty;
 
-            if (errorList.Count == 1)
-                return errorList[0].MessageDetail.Message;
+            if (errors.Count == 1)
+                return errors[0].MessageDetail.Message;
 
             StringBuilder sb = new();
-            for (int i = 0; i < errorList.Count; i++)
+            for (int i = 0; i < errors.Count; i++)
             {
-                sb.AppendLine(errorList[i].MessageDetail.Message);
+                sb.AppendLine(errors[i].MessageDetail.Message);
             }
 
             return sb.ToString();

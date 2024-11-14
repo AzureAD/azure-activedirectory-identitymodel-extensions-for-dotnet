@@ -125,7 +125,7 @@ namespace Microsoft.IdentityModel.Xml
 #pragma warning restore CA1801
         {
             if (cryptoProviderFactory == null)
-                return ValidationError.NullParameter(nameof(cryptoProviderFactory), new System.Diagnostics.StackFrame());
+                return ValidationError.NullParameter(nameof(cryptoProviderFactory), ValidationError.GetCurrentStackFrame());
 
             ValidationError? validationError = null;
 
@@ -136,7 +136,7 @@ namespace Microsoft.IdentityModel.Xml
 
                 if (validationError is not null)
                 {
-                    validationError.AddStackFrame(new System.Diagnostics.StackFrame());
+                    validationError.AddCurrentStackFrame();
                     break;
                 }
             }

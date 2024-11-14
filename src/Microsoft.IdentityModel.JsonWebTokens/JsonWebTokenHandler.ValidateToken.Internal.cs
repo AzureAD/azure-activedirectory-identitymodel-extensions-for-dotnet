@@ -135,8 +135,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (result.IsValid)
                     return result;
 
-                StackFrame tokenValidationStackFrame = StackFrames.TokenValidationFailedNullConfigurationManager ??= new StackFrame(true);
-                return result.UnwrapError().AddStackFrame(tokenValidationStackFrame);
+                return result.UnwrapError().AddStackFrame(ValidationError.GetCurrentStackFrame());
             }
 
             if (result.IsValid)
@@ -277,14 +276,29 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return audienceValidationResult.UnwrapError().AddStackFrame(audienceValidationFailureStackFrame);
             }
 
-            ValidationResult<ValidatedIssuer> issuerValidationResult = await validationParameters.IssuerValidatorAsync(
-                jsonWebToken.Issuer, jsonWebToken, validationParameters, callContext, cancellationToken)
-                .ConfigureAwait(false);
-
-            if (!issuerValidationResult.IsValid)
+            ValidationResult<ValidatedIssuer> issuerValidationResult;
+            try
             {
-                StackFrame issuerValidationFailureStackFrame = StackFrames.IssuerValidationFailed ??= new StackFrame(true);
-                return issuerValidationResult.UnwrapError().AddStackFrame(issuerValidationFailureStackFrame);
+                issuerValidationResult = await validationParameters.IssuerValidatorAsync(
+                    jsonWebToken.Issuer, jsonWebToken, validationParameters, callContext, cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (!issuerValidationResult.IsValid)
+                {
+                    return issuerValidationResult.UnwrapError().AddCurrentStackFrame();
+                }
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                return new IssuerValidationError(
+                    new MessageDetail(TokenLogMessages.IDX10269),
+                    ValidationFailureType.IssuerValidatorThrew,
+                    typeof(SecurityTokenInvalidIssuerException),
+                    ValidationError.GetCurrentStackFrame(),
+                    jsonWebToken.Issuer,
+                    ex);
             }
 
             ValidationResult<DateTime?> replayValidationResult = validationParameters.TokenReplayValidator(
