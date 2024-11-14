@@ -255,13 +255,28 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             DateTime? expires = jsonWebToken.HasPayloadClaim(JwtRegisteredClaimNames.Exp) ? jsonWebToken.ValidTo : null;
             DateTime? notBefore = jsonWebToken.HasPayloadClaim(JwtRegisteredClaimNames.Nbf) ? jsonWebToken.ValidFrom : null;
 
-            ValidationResult<ValidatedLifetime> lifetimeValidationResult = validationParameters.LifetimeValidator(
-                notBefore, expires, jsonWebToken, validationParameters, callContext);
+            ValidationResult<ValidatedLifetime> lifetimeValidationResult;
 
-            if (!lifetimeValidationResult.IsValid)
+            try
             {
-                StackFrame lifetimeValidationFailureStackFrame = StackFrames.LifetimeValidationFailed ??= new StackFrame(true);
-                return lifetimeValidationResult.UnwrapError().AddStackFrame(lifetimeValidationFailureStackFrame);
+                lifetimeValidationResult = validationParameters.LifetimeValidator(
+                    notBefore, expires, jsonWebToken, validationParameters, callContext);
+
+                if (!lifetimeValidationResult.IsValid)
+                    return lifetimeValidationResult.UnwrapError().AddCurrentStackFrame();
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                return new LifetimeValidationError(
+                    new MessageDetail(TokenLogMessages.IDX10271),
+                    typeof(SecurityTokenInvalidLifetimeException),
+                    ValidationError.GetCurrentStackFrame(),
+                    ValidationFailureType.LifetimeValidatorThrew,
+                    notBefore,
+                    expires,
+                    ex);
             }
 
             if (jsonWebToken.Audiences is not IList<string> tokenAudiences)

@@ -139,5 +139,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// Defines a type that represents that the audience validation delegate threw and exception.
         /// </summary>
         public static readonly ValidationFailureType AudienceValidatorThrew = new AudienceValidationFailure("AudienceValidatorThrew");
+
+        /// <summary>
+        /// Defines a type that represents that the audience validation delegate threw and exception.
+        /// </summary>
+        public static readonly ValidationFailureType LifetimeValidatorThrew = new AudienceValidationFailure("LifetimeValidatorThrew");
     }
 }
