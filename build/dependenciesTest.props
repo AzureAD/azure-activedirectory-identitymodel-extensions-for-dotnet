@@ -4,19 +4,19 @@
     <BannedApiAnalyzersVersion>3.3.4</BannedApiAnalyzersVersion>
     <DotNetCoreAppRuntimeVersion>2.1.30</DotNetCoreAppRuntimeVersion>
     <MicrosoftAzureKeyVaultCryptographyVersion>3.0.5</MicrosoftAzureKeyVaultCryptographyVersion>
-    <MicrosoftNETTestSdkVersion>17.11.0</MicrosoftNETTestSdkVersion>
+    <MicrosoftNETTestSdkVersion>17.11.1</MicrosoftNETTestSdkVersion>
     <NetStandardVersion>2.0.3</NetStandardVersion>
     <NewtonsoftVersion>13.0.3</NewtonsoftVersion>
     <SystemNetHttp>4.3.4</SystemNetHttp>
     <SystemSecurityClaimsVersion>4.3.0</SystemSecurityClaimsVersion>
     <SystemTextJson>8.0.5</SystemTextJson>
     <SystemTextRegularExpressions>4.3.1</SystemTextRegularExpressions>
-    <XunitRunnerConsoleVersion>2.9.0</XunitRunnerConsoleVersion>
+    <XunitRunnerConsoleVersion>2.9.2</XunitRunnerConsoleVersion>
     <XunitRunnerVisualStudioVersion>2.8.2</XunitRunnerVisualStudioVersion>
-    <XunitVersion>2.9.0</XunitVersion>
+    <XunitVersion>2.9.2</XunitVersion>
     <MicrosoftRestClientRuntimeVersion>2.3.24</MicrosoftRestClientRuntimeVersion>
   </PropertyGroup>
   <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))">
-    <XunitRunnerVisualStudioVersion>3.0.0-pre.35</XunitRunnerVisualStudioVersion>
+    <XunitRunnerVisualStudioVersion>3.0.0-pre.49</XunitRunnerVisualStudioVersion>
   </PropertyGroup>
 </Project>
