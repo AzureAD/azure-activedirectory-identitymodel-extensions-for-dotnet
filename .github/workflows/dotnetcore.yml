@@ -34,6 +34,10 @@ jobs:
       with:
         dotnet-version: 9.x
 
+    - name: Strong name bypass
+      run: |
+          regedit /s .\build\strongNameBypass.reg  
+
     - name: Run the tests
       run: dotnet test Wilson.sln --collect:"XPlat Code Coverage" --settings:./build/CodeCoverage.runsettings
 
