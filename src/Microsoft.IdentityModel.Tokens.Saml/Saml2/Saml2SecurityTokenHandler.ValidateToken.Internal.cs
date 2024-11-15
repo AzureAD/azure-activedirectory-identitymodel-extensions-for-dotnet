@@ -92,6 +92,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     return tokenReplayValidationResult.UnwrapError().AddCurrentStackFrame();
             }
 
+            var signatureValidationResult = ValidateSignature(samlToken, validationParameters, callContext);
+            if (!signatureValidationResult.IsValid)
+            {
+                StackFrames.SignatureValidationFailed ??= new StackFrame(true);
+                return signatureValidationResult.UnwrapError().AddStackFrame(StackFrames.SignatureValidationFailed);
+            }
+
             var issuerSigningKeyValidationResult = validationParameters.IssuerSigningKeyValidator(
                 samlToken.SigningKey,
                 samlToken,
@@ -103,13 +110,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 StackFrames.IssuerSigningKeyValidationFailed ??= new StackFrame(true);
                 return issuerSigningKeyValidationResult.UnwrapError().AddStackFrame(StackFrames.IssuerSigningKeyValidationFailed);
-            }
-
-            var signatureValidationResult = ValidateSignature(samlToken, validationParameters, callContext);
-            if (!signatureValidationResult.IsValid)
-            {
-                StackFrames.SignatureValidationFailed ??= new StackFrame(true);
-                return signatureValidationResult.UnwrapError().AddStackFrame(StackFrames.SignatureValidationFailed);
             }
 
             return new ValidatedToken(samlToken, this, validationParameters);

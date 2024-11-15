@@ -88,6 +88,14 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     return tokenReplayValidationResult.UnwrapError().AddCurrentStackFrame();
             }
 
+            ValidationResult<SecurityKey> signatureValidationResult = ValidateSignature(samlToken, validationParameters, callContext);
+
+            if (!signatureValidationResult.IsValid)
+            {
+                StackFrames.SignatureValidationFailed ??= new StackFrame(true);
+                return signatureValidationResult.UnwrapError().AddStackFrame(StackFrames.SignatureValidationFailed);
+            }
+
             ValidationResult<ValidatedSigningKeyLifetime> issuerSigningKeyValidationResult = validationParameters.IssuerSigningKeyValidator(
                 samlToken.SigningKey,
                 samlToken,
@@ -97,14 +105,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             if (!issuerSigningKeyValidationResult.IsValid)
                 return issuerSigningKeyValidationResult.UnwrapError().AddCurrentStackFrame();
-
-            ValidationResult<SecurityKey> signatureValidationResult = ValidateSignature(samlToken, validationParameters, callContext);
-
-            if (!signatureValidationResult.IsValid)
-            {
-                StackFrames.SignatureValidationFailed ??= new StackFrame(true);
-                return signatureValidationResult.UnwrapError().AddStackFrame(StackFrames.SignatureValidationFailed);
-            }
 
             return new ValidatedToken(samlToken, this, validationParameters);
         }
