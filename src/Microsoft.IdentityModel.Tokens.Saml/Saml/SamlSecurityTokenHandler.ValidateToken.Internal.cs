@@ -145,18 +145,34 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
                 if (condition is SamlAudienceRestrictionCondition audienceRestriction)
                 {
-
                     // AudienceRestriction.Audiences is an ICollection<Uri> so we need make a conversion to List<string> before calling our audience validator 
                     var audiencesAsList = audienceRestriction.Audiences.Select(static x => x.OriginalString).ToList();
+                    ValidationResult<string> audienceValidationResult;
 
-                    var audienceValidationResult = validationParameters.AudienceValidator(
-                        audiencesAsList,
-                        samlToken,
-                        validationParameters,
-                        callContext);
+                    try
+                    {
+                        audienceValidationResult = validationParameters.AudienceValidator(
+                            audiencesAsList,
+                            samlToken,
+                            validationParameters,
+                            callContext);
 
-                    if (!audienceValidationResult.IsValid)
-                        return audienceValidationResult.UnwrapError();
+                        if (!audienceValidationResult.IsValid)
+                            return audienceValidationResult.UnwrapError().AddCurrentStackFrame();
+                    }
+#pragma warning disable CA1031 // Do not catch general exception types
+                    catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+                    {
+                        return new AudienceValidationError(
+                            new MessageDetail(Tokens.LogMessages.IDX10270),
+                            typeof(SecurityTokenInvalidAudienceException),
+                            ValidationError.GetCurrentStackFrame(),
+                            audiencesAsList,
+                            validationParameters.ValidAudiences,
+                            ValidationFailureType.AudienceValidatorThrew,
+                            ex);
+                    }
 
                     validatedAudience = audienceValidationResult.UnwrapResult();
                 }

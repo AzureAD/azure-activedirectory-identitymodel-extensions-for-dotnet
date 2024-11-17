@@ -181,15 +181,31 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (audienceRestriction.Audiences is not List<string> audiencesAsList)
                     audiencesAsList = [.. audienceRestriction.Audiences];
 
-                var audienceValidationResult = validationParameters.AudienceValidator(
-                    audiencesAsList,
-                    samlToken,
-                    validationParameters,
-                    callContext);
-                if (!audienceValidationResult.IsValid)
+                ValidationResult<string> audienceValidationResult;
+
+                try
                 {
-                    StackFrames.AudienceValidationFailed ??= new StackFrame(true);
-                    return audienceValidationResult.UnwrapError().AddStackFrame(StackFrames.AudienceValidationFailed);
+                    audienceValidationResult = validationParameters.AudienceValidator(
+                        audiencesAsList,
+                        samlToken,
+                        validationParameters,
+                        callContext);
+
+                    if (!audienceValidationResult.IsValid)
+                        return audienceValidationResult.UnwrapError().AddCurrentStackFrame();
+                }
+#pragma warning disable CA1031 // Do not catch general exception types
+                catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+                {
+                    return new AudienceValidationError(
+                        new MessageDetail(Tokens.LogMessages.IDX10270),
+                        typeof(SecurityTokenInvalidAudienceException),
+                        ValidationError.GetCurrentStackFrame(),
+                        audiencesAsList,
+                        validationParameters.ValidAudiences,
+                        ValidationFailureType.AudienceValidatorThrew,
+                        ex);
                 }
 
                 // Audience is valid, save it for later.

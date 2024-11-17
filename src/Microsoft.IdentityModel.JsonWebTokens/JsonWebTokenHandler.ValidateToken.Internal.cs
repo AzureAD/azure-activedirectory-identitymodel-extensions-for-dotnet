@@ -267,13 +267,30 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (jsonWebToken.Audiences is not IList<string> tokenAudiences)
                 tokenAudiences = jsonWebToken.Audiences.ToList();
 
-            ValidationResult<string> audienceValidationResult = validationParameters.AudienceValidator(
-                tokenAudiences, jsonWebToken, validationParameters, callContext);
-
-            if (!audienceValidationResult.IsValid)
+            ValidationResult<string> audienceValidationResult;
+            try
             {
-                StackFrame audienceValidationFailureStackFrame = StackFrames.AudienceValidationFailed ??= new StackFrame(true);
-                return audienceValidationResult.UnwrapError().AddStackFrame(audienceValidationFailureStackFrame);
+                audienceValidationResult = validationParameters.AudienceValidator(
+                    tokenAudiences, jsonWebToken, validationParameters, callContext);
+
+                if (!audienceValidationResult.IsValid)
+                {
+                    StackFrame audienceValidationFailureStackFrame = StackFrames.AudienceValidationFailed ??= new StackFrame(true);
+                    return audienceValidationResult.UnwrapError().AddStackFrame(audienceValidationFailureStackFrame);
+                }
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                return new AudienceValidationError(
+                    new MessageDetail(TokenLogMessages.IDX10270),
+                    typeof(SecurityTokenInvalidAudienceException),
+                    ValidationError.GetCurrentStackFrame(),
+                    tokenAudiences,
+                    null,
+                    ValidationFailureType.AudienceValidatorThrew,
+                    ex);
             }
 
             ValidationResult<ValidatedIssuer> issuerValidationResult;
