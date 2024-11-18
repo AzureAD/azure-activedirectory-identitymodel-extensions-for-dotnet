@@ -29,7 +29,7 @@ jobs:
 
     - name: Create symbolic link to avoid overlong paths
       run: |
-        mklink /D D:\a\w D:\a\azure-activedirectory-identitymodel-extensions-for-dotnet\azure-activedirectory-identitymodel-extensions-for-dotnet
+        cmd /c mklink /D D:\a\w D:\a\azure-activedirectory-identitymodel-extensions-for-dotnet\azure-activedirectory-identitymodel-extensions-for-dotnet
         dir D:\a\w
 
     - name: Checkout repository
