@@ -27,9 +27,10 @@ jobs:
     name: "Build and run unit tests"
     steps:
 
-    - name: Enable long paths
+    - name: Create symbolic link to avoid overlong paths
       run: |
-        New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
+        mklink /D D:\a\w D:\a\azure-activedirectory-identitymodel-extensions-for-dotnet\azure-activedirectory-identitymodel-extensions-for-dotnet
+        dir D:\a\w
 
     - name: Checkout repository
       uses: actions/checkout@v4.1.1
