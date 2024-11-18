@@ -26,6 +26,11 @@ jobs:
     continue-on-error: false
     name: "Build and run unit tests"
     steps:
+
+    - name: Enable long paths
+      run: |
+        New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
+
     - name: Checkout repository
       uses: actions/checkout@v4.1.1
         
