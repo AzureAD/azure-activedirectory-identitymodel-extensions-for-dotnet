@@ -157,6 +157,53 @@ namespace Microsoft.IdentityModel.TestUtils
     }
     #endregion
 
+    #region IssuerSigningKeyValidationErrors
+    internal class CustomIssuerSigningKeyValidationError : IssuerSigningKeyValidationError
+    {
+        /// <summary>
+        /// A custom validation failure type.
+        /// </summary>
+        public static readonly ValidationFailureType CustomIssuerSigningKeyValidationFailureType = new IssuerSigningKeyValidationFailure("CustomIssuerSigningKeyValidationFailureType");
+        private class IssuerSigningKeyValidationFailure : ValidationFailureType { internal IssuerSigningKeyValidationFailure(string name) : base(name) { } }
+
+        public CustomIssuerSigningKeyValidationError(
+            MessageDetail messageDetail,
+            Type exceptionType,
+            StackFrame stackFrame,
+            SecurityKey? securityKey,
+            ValidationFailureType? validationFailureType = null,
+            Exception? innerException = null)
+            : base(messageDetail, exceptionType, stackFrame, securityKey, validationFailureType, innerException)
+        {
+        }
+
+        internal override Exception GetException()
+        {
+            if (ExceptionType == typeof(CustomSecurityTokenInvalidSigningKeyException))
+            {
+                var exception = new CustomSecurityTokenInvalidSigningKeyException(MessageDetail.Message, InnerException) { SigningKey = InvalidSigningKey };
+                exception.SetValidationError(this);
+                return exception;
+            }
+            return base.GetException();
+        }
+    }
+
+    internal class CustomIssuerSigningKeyWithoutGetExceptionValidationOverrideError : IssuerSigningKeyValidationError
+    {
+        public CustomIssuerSigningKeyWithoutGetExceptionValidationOverrideError(
+            MessageDetail messageDetail,
+            Type exceptionType,
+            StackFrame stackFrame,
+            SecurityKey? securityKey,
+            ValidationFailureType? failureType = null,
+            Exception? innerException = null)
+            : base(messageDetail, exceptionType, stackFrame, securityKey, failureType, innerException)
+        {
+        }
+    }
+    #endregion // IssuerSigningKeyValidationErrors
+
     // Other custom validation errors to be added here for signature validation, issuer signing key, etc.
 }
 #nullable restore
