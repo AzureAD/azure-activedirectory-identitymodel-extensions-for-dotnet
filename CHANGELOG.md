@@ -10,7 +10,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 - Update cgmanifest to align with the JSON schema. See [2969](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2969).
 
 ### Fundamentals
-- Streamline token creation in `SecurityTokenDescriptor`. See [2993](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2993).
+- Streamline token creation by using `SecurityTokenDescriptor`. See [2993](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2993).
 - Prevent inlining to guarantee stack frames in test. See [2999](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2999).
 
 ### Work related to redesign of IdentityModel's token validation logic [#2711](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2711)
