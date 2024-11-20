@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
@@ -89,17 +90,31 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 return signatureValidationResult.UnwrapError().AddStackFrame(StackFrames.SignatureValidationFailed);
             }
 
-            var issuerSigningKeyValidationResult = validationParameters.IssuerSigningKeyValidator(
-                samlToken.SigningKey,
-                samlToken,
-                validationParameters,
-                null,
-                callContext);
+            ValidationResult<ValidatedSigningKeyLifetime> issuerSigningKeyValidationResult;
 
-            if (!issuerSigningKeyValidationResult.IsValid)
+            try
             {
-                StackFrames.IssuerSigningKeyValidationFailed ??= new StackFrame(true);
-                return issuerSigningKeyValidationResult.UnwrapError().AddStackFrame(StackFrames.IssuerSigningKeyValidationFailed);
+                issuerSigningKeyValidationResult = validationParameters.IssuerSigningKeyValidator(
+                    samlToken.SigningKey,
+                    samlToken,
+                    validationParameters,
+                    null,
+                    callContext);
+
+                if (!issuerSigningKeyValidationResult.IsValid)
+                    return issuerSigningKeyValidationResult.UnwrapError().AddCurrentStackFrame();
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                return new IssuerSigningKeyValidationError(
+                    new MessageDetail(Tokens.LogMessages.IDX10274),
+                    typeof(SecurityTokenInvalidSigningKeyException),
+                    ValidationError.GetCurrentStackFrame(),
+                    samlToken.SigningKey,
+                    ValidationFailureType.IssuerSigningKeyValidatorThrew,
+                    ex);
             }
 
             return new ValidatedToken(samlToken, this, validationParameters);

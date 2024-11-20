@@ -353,13 +353,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return signatureValidationResult.UnwrapError().AddStackFrame(signatureValidationFailureStackFrame);
             }
 
-            ValidationResult<ValidatedSigningKeyLifetime> issuerSigningKeyValidationResult =
-                validationParameters.IssuerSigningKeyValidator(
-                    jsonWebToken.SigningKey, jsonWebToken, validationParameters, configuration, callContext);
-            if (!issuerSigningKeyValidationResult.IsValid)
+            ValidationResult<ValidatedSigningKeyLifetime> issuerSigningKeyValidationResult;
+
+            try
             {
-                StackFrame issuerSigningKeyValidationFailureStackFrame = StackFrames.IssuerSigningKeyValidationFailed ??= new StackFrame(true);
-                return issuerSigningKeyValidationResult.UnwrapError().AddStackFrame(issuerSigningKeyValidationFailureStackFrame);
+                issuerSigningKeyValidationResult = validationParameters.IssuerSigningKeyValidator(
+                    jsonWebToken.SigningKey, jsonWebToken, validationParameters, configuration, callContext);
+
+                if (!issuerSigningKeyValidationResult.IsValid)
+                    return issuerSigningKeyValidationResult.UnwrapError().AddCurrentStackFrame();
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                return new IssuerSigningKeyValidationError(
+                    new MessageDetail(TokenLogMessages.IDX10274),
+                    typeof(SecurityTokenInvalidSigningKeyException),
+                    ValidationError.GetCurrentStackFrame(),
+                    jsonWebToken.SigningKey,
+                    ValidationFailureType.IssuerSigningKeyValidatorThrew,
+                    ex);
             }
 
             return new ValidatedToken(jsonWebToken, this, validationParameters)
