@@ -19,7 +19,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 - Implement new model for validating SAML signature. See [2950](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2950).
 - Add tests for `IssuerExtensibility`. See [2987](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2987).
 - Add validation for SAML and SAML2 issuer signing key. See [2965](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2965).
-- Add validation for SAML and SAML2 algorithm. See [2984](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2984).
+- Switch to new validation model for SAML and SAML2 algorithm. See [2984](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2984).
 
 8.2.0
 =====
