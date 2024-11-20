@@ -25,7 +25,7 @@ namespace Microsoft.IdentityModel.Tokens
         SecurityToken securityToken,
         ValidationParameters validationParameters,
         BaseConfiguration? configuration,
-        CallContext? callContext);
+        CallContext callContext);
 
     /// <summary>
     /// SigningKeyValidation

@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.TestUtils
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,
-            CallContext? callContext)
+            CallContext callContext)
         {
             return new ValidatedSigningKeyLifetime(
                 null, // ValidFrom
