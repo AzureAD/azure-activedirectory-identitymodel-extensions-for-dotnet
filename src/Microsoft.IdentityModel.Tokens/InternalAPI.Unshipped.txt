@@ -20,8 +20,9 @@ Microsoft.IdentityModel.Tokens.LifetimeValidationError.LifetimeValidationError(M
 Microsoft.IdentityModel.Tokens.LifetimeValidationError.NotBefore.get -> System.DateTime
 Microsoft.IdentityModel.Tokens.LifetimeValidationError.NotBefore.set -> void
 Microsoft.IdentityModel.Tokens.TokenTypeValidationError
+Microsoft.IdentityModel.Tokens.TokenTypeValidationError.InvalidTokenType.get -> string
+Microsoft.IdentityModel.Tokens.TokenTypeValidationError.InvalidTokenType.set -> void
 Microsoft.IdentityModel.Tokens.TokenTypeValidationError.TokenTypeValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, string invalidTokenType, Microsoft.IdentityModel.Tokens.ValidationFailureType validationFailureType = null, System.Exception innerException = null) -> void
-Microsoft.IdentityModel.Tokens.TokenTypeValidationError._invalidTokenType -> string
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.TimeProvider.get -> System.TimeProvider
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.TimeProvider.set -> void
 Microsoft.IdentityModel.Tokens.ValidationError.AddCurrentStackFrame(string filePath = "", int lineNumber = 0, int skipFrames = 1) -> Microsoft.IdentityModel.Tokens.ValidationError
@@ -39,6 +40,7 @@ static Microsoft.IdentityModel.Tokens.AudienceValidationError.AudiencesNull -> S
 static Microsoft.IdentityModel.Tokens.AudienceValidationError.ValidateAudienceFailed -> System.Diagnostics.StackFrame
 static Microsoft.IdentityModel.Tokens.AudienceValidationError.ValidationParametersAudiencesCountZero -> System.Diagnostics.StackFrame
 static Microsoft.IdentityModel.Tokens.AudienceValidationError.ValidationParametersNull -> System.Diagnostics.StackFrame
+static Microsoft.IdentityModel.Tokens.TokenTypeValidationError.NullParameter(string parameterName, System.Diagnostics.StackFrame stackFrame) -> Microsoft.IdentityModel.Tokens.TokenTypeValidationError
 static Microsoft.IdentityModel.Tokens.Utility.SerializeAsSingleCommaDelimitedString(System.Collections.Generic.IList<string> strings) -> string
 static Microsoft.IdentityModel.Tokens.ValidationError.GetCurrentStackFrame(string filePath = "", int lineNumber = 0, int skipFrames = 1) -> System.Diagnostics.StackFrame
 static readonly Microsoft.IdentityModel.Tokens.ValidationFailureType.IssuerValidatorThrew -> Microsoft.IdentityModel.Tokens.ValidationFailureType
