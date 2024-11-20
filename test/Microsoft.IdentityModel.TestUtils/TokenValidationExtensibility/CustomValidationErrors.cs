@@ -157,6 +157,52 @@ namespace Microsoft.IdentityModel.TestUtils
     }
     #endregion
 
+    #region TokenTypeValidationErrors
+    internal class CustomTokenTypeValidationError : TokenTypeValidationError
+    {
+        /// <summary>
+        /// A custom validation failure type.
+        /// </summary>
+        public static readonly ValidationFailureType CustomTokenTypeValidationFailureType = new TokenTypeValidationFailure("CustomTokenTypeValidationFailureType");
+        private class TokenTypeValidationFailure : ValidationFailureType { internal TokenTypeValidationFailure(string name) : base(name) { } }
+
+        public CustomTokenTypeValidationError(
+            MessageDetail messageDetail,
+            Type exceptionType,
+            StackFrame stackFrame,
+            string? invalidTokenType,
+            ValidationFailureType? validationFailureType = null,
+            Exception? innerException = null)
+            : base(messageDetail, exceptionType, stackFrame, invalidTokenType, validationFailureType, innerException)
+        {
+        }
+        internal override Exception GetException()
+        {
+            if (ExceptionType == typeof(CustomSecurityTokenInvalidTypeException))
+            {
+                var exception = new CustomSecurityTokenInvalidTypeException(MessageDetail.Message, InnerException) { InvalidType = InvalidTokenType };
+                exception.SetValidationError(this);
+                return exception;
+            }
+            return base.GetException();
+        }
+    }
+
+    internal class CustomTokenTypeWithoutGetExceptionValidationOverrideError : TokenTypeValidationError
+    {
+        public CustomTokenTypeWithoutGetExceptionValidationOverrideError(
+            MessageDetail messageDetail,
+            Type exceptionType,
+            StackFrame stackFrame,
+            string? invalidTokenType,
+            ValidationFailureType? validationFailureType = null,
+            Exception? innerException = null)
+            : base(messageDetail, exceptionType, stackFrame, invalidTokenType, validationFailureType, innerException)
+        {
+        }
+    }
+    #endregion // TokenTypeValidationErrors
+
     // Other custom validation errors to be added here for signature validation, issuer signing key, etc.
 }
 #nullable restore
