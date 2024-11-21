@@ -1,5 +1,26 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+8.2.1
+=====
+### New features
+- Update to use .NET 9 GA. See [2990](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2990).
+
+### Bug fixes
+- Remove dependency on Microsoft.Bcl.TimeProvider for .NET 8+ targets. See [2935](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2935).
+- Update cgmanifest to align with the JSON schema. See [2969](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2969).
+
+### Fundamentals
+- Streamline token creation by using `SecurityTokenDescriptor`. See [2993](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2993).
+- Prevent inlining to guarantee stack frames in test. See [2999](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2999).
+
+### Work related to redesign of IdentityModel's token validation logic [#2711](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2711)
+- Simplify stack frame caching. See [2976](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2976).
+- Implement new model for reading SAML and SAML2 tokens. See [2980](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2980).
+- Implement new model for validating SAML signature. See [2950](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2950).
+- Add tests for `IssuerExtensibility`. See [2987](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2987).
+- Switch to new validation model for SAML and SAML2 issuer signing key. See [2965](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2965).
+- Switch to new validation model for SAML and SAML2 algorithm. See [2984](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2984).
+
 8.2.0
 =====
 ### Fundamentals
