@@ -353,10 +353,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 return new TokenTypeValidationError(
                     new MessageDetail(TokenLogMessages.IDX10275),
+                    ValidationFailureType.TokenTypeValidatorThrew,
                     typeof(SecurityTokenInvalidTypeException),
                     ValidationError.GetCurrentStackFrame(),
                     jsonWebToken.Typ,
-                    ValidationFailureType.TokenTypeValidatorThrew,
                     ex);
             }
 

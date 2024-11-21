@@ -39,10 +39,10 @@ namespace Microsoft.IdentityModel.Tokens
 
         internal static new TokenTypeValidationError NullParameter(string parameterName, StackFrame stackFrame) => new(
             MessageDetail.NullParameter(parameterName),
+            ValidationFailureType.NullArgument,
             typeof(SecurityTokenArgumentNullException),
             stackFrame,
-            null, // invalidTokenType
-            ValidationFailureType.NullArgument);
+            null); // invalidTokenType
 
         protected string? InvalidTokenType { get; }
     }

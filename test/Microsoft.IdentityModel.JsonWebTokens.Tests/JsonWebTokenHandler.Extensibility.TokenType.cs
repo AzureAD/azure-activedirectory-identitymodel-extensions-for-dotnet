@@ -73,10 +73,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                     TokenTypeValidationError = new CustomTokenTypeValidationError(
                         new MessageDetail(
                             nameof(CustomTokenTypeValidationDelegates.CustomTokenTypeValidatorDelegate), null),
+                        ValidationFailureType.TokenTypeValidationFailed,
                         typeof(SecurityTokenInvalidTypeException),
                         new StackFrame("CustomTokenTypeValidationDelegates.cs", 160),
-                        "JWT",
-                        ValidationFailureType.TokenTypeValidationFailed)
+                        "JWT")
                 });
 
                 // CustomTokenTypeValidationError : TokenTypeValidationError, ExceptionType: CustomSecurityTokenInvalidTypeException : SecurityTokenInvalidTypeException
@@ -91,10 +91,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                     TokenTypeValidationError = new CustomTokenTypeValidationError(
                         new MessageDetail(
                             nameof(CustomTokenTypeValidationDelegates.CustomTokenTypeValidatorCustomExceptionDelegate), null),
+                        ValidationFailureType.TokenTypeValidationFailed,
                         typeof(CustomSecurityTokenInvalidTypeException),
                         new StackFrame("CustomTokenTypeValidationDelegates.cs", 175),
-                        "JWT",
-                        ValidationFailureType.TokenTypeValidationFailed),
+                        "JWT")
                 });
 
                 // CustomTokenTypeValidationError : TokenTypeValidationError, ExceptionType: NotSupportedException : SystemException
@@ -112,10 +112,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                     TokenTypeValidationError = new CustomTokenTypeValidationError(
                         new MessageDetail(
                             nameof(CustomTokenTypeValidationDelegates.CustomTokenTypeValidatorUnknownExceptionDelegate), null),
+                        ValidationFailureType.TokenTypeValidationFailed,
                         typeof(NotSupportedException),
                         new StackFrame("CustomTokenTypeValidationDelegates.cs", 205),
-                        "JWT",
-                        ValidationFailureType.TokenTypeValidationFailed),
+                        "JWT")
                 });
 
                 // CustomTokenTypeValidationError : TokenTypeValidationError, ExceptionType: NotSupportedException : SystemException, ValidationFailureType: CustomAudienceValidationFailureType
@@ -130,10 +130,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                     TokenTypeValidationError = new CustomTokenTypeValidationError(
                         new MessageDetail(
                             nameof(CustomTokenTypeValidationDelegates.CustomTokenTypeValidatorCustomExceptionCustomFailureTypeDelegate), null),
+                        CustomTokenTypeValidationError.CustomTokenTypeValidationFailureType,
                         typeof(CustomSecurityTokenInvalidTypeException),
                         new StackFrame("CustomTokenTypeValidationDelegates.cs", 190),
-                        "JWT",
-                        CustomTokenTypeValidationError.CustomTokenTypeValidationFailureType),
+                        "JWT"),
                 });
                 #endregion
 
@@ -151,10 +151,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                     TokenTypeValidationError = new TokenTypeValidationError(
                         new MessageDetail(
                             nameof(CustomTokenTypeValidationDelegates.TokenTypeValidatorDelegate), null),
+                        ValidationFailureType.TokenTypeValidationFailed,
                         typeof(SecurityTokenInvalidTypeException),
                         new StackFrame("CustomTokenTypeValidationDelegates.cs", 235),
-                        "JWT",
-                        ValidationFailureType.TokenTypeValidationFailed)
+                        "JWT")
                 });
 
                 // TokenTypeValidationError : ValidationError, ExceptionType:  CustomSecurityTokenInvalidTypeException : SecurityTokenInvalidTypeException
@@ -172,10 +172,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                     TokenTypeValidationError = new TokenTypeValidationError(
                         new MessageDetail(
                             nameof(CustomTokenTypeValidationDelegates.TokenTypeValidatorCustomTokenTypeExceptionTypeDelegate), null),
+                        ValidationFailureType.TokenTypeValidationFailed,
                         typeof(CustomSecurityTokenInvalidTypeException),
                         new StackFrame("CustomTokenTypeValidationDelegates.cs", 259),
-                        "JWT",
-                        ValidationFailureType.TokenTypeValidationFailed)
+                        "JWT")
                 });
 
                 // TokenTypeValidationError : ValidationError, ExceptionType:  CustomSecurityTokenException : SystemException
@@ -193,10 +193,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                     TokenTypeValidationError = new TokenTypeValidationError(
                         new MessageDetail(
                             nameof(CustomTokenTypeValidationDelegates.TokenTypeValidatorCustomExceptionTypeDelegate), null),
+                        ValidationFailureType.TokenTypeValidationFailed,
                         typeof(CustomSecurityTokenException),
                         new StackFrame("CustomTokenTypeValidationDelegates.cs", 274),
-                        "JWT",
-                        ValidationFailureType.TokenTypeValidationFailed)
+                        "JWT")
                 });
 
                 // TokenTypeValidationError : ValidationError, ExceptionType: SecurityTokenInvalidTypeException, inner: CustomSecurityTokenInvalidTypeException
@@ -212,10 +212,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Extensibility.Tests
                     TokenTypeValidationError = new TokenTypeValidationError(
                         new MessageDetail(
                             string.Format(Tokens.LogMessages.IDX10275), null),
+                        ValidationFailureType.TokenTypeValidatorThrew,
                         typeof(SecurityTokenInvalidTypeException),
                         new StackFrame("JsonWebTokenHandler.ValidateToken.Internal.cs", 250),
                         "JWT",
-                        ValidationFailureType.TokenTypeValidatorThrew,
                         new SecurityTokenInvalidTypeException(nameof(CustomTokenTypeValidationDelegates.TokenTypeValidatorThrows))
                     )
                 });

@@ -167,12 +167,12 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public CustomTokenTypeValidationError(
             MessageDetail messageDetail,
+            ValidationFailureType validationFailureType,
             Type exceptionType,
             StackFrame stackFrame,
             string? invalidTokenType,
-            ValidationFailureType? validationFailureType = null,
             Exception? innerException = null)
-            : base(messageDetail, exceptionType, stackFrame, invalidTokenType, validationFailureType, innerException)
+            : base(messageDetail, validationFailureType, exceptionType, stackFrame, invalidTokenType, innerException)
         {
         }
         internal override Exception GetException()
@@ -194,9 +194,8 @@ namespace Microsoft.IdentityModel.TestUtils
             Type exceptionType,
             StackFrame stackFrame,
             string? invalidTokenType,
-            ValidationFailureType? validationFailureType = null,
             Exception? innerException = null)
-            : base(messageDetail, exceptionType, stackFrame, invalidTokenType, validationFailureType, innerException)
+            : base(messageDetail, ValidationFailureType.TokenTypeValidationFailed, exceptionType, stackFrame, invalidTokenType, innerException)
         {
         }
     }

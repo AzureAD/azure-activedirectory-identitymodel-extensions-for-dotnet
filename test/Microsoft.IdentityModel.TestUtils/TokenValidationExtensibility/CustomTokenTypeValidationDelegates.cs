@@ -18,6 +18,7 @@ namespace Microsoft.IdentityModel.TestUtils
             // Returns a CustomTokenTypeValidationError : TokenTypeValidationError
             return new CustomTokenTypeValidationError(
                 new MessageDetail(nameof(CustomTokenTypeValidatorDelegate), null),
+                ValidationFailureType.TokenTypeValidationFailed,
                 typeof(SecurityTokenInvalidTypeException),
                 ValidationError.GetCurrentStackFrame(),
                 type,
@@ -32,6 +33,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return new CustomTokenTypeValidationError(
                 new MessageDetail(nameof(CustomTokenTypeValidatorCustomExceptionDelegate), null),
+                ValidationFailureType.TokenTypeValidationFailed,
                 typeof(CustomSecurityTokenInvalidTypeException),
                 ValidationError.GetCurrentStackFrame(),
                 type,
@@ -46,10 +48,10 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return new CustomTokenTypeValidationError(
                 new MessageDetail(nameof(CustomTokenTypeValidatorCustomExceptionCustomFailureTypeDelegate), null),
+                CustomTokenTypeValidationError.CustomTokenTypeValidationFailureType,
                 typeof(CustomSecurityTokenInvalidTypeException),
                 ValidationError.GetCurrentStackFrame(),
-                type,
-                CustomTokenTypeValidationError.CustomTokenTypeValidationFailureType);
+                type);
         }
 
         internal static ValidationResult<ValidatedTokenType> CustomTokenTypeValidatorUnknownExceptionDelegate(
@@ -60,6 +62,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return new CustomTokenTypeValidationError(
                 new MessageDetail(nameof(CustomTokenTypeValidatorUnknownExceptionDelegate), null),
+                ValidationFailureType.TokenTypeValidationFailed,
                 typeof(NotSupportedException),
                 ValidationError.GetCurrentStackFrame(),
                 type,
@@ -88,6 +91,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return new TokenTypeValidationError(
                 new MessageDetail(nameof(TokenTypeValidatorDelegate), null),
+                ValidationFailureType.TokenTypeValidationFailed,
                 typeof(SecurityTokenInvalidTypeException),
                 ValidationError.GetCurrentStackFrame(),
                 type,
@@ -111,6 +115,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return new TokenTypeValidationError(
                 new MessageDetail(nameof(TokenTypeValidatorCustomTokenTypeExceptionTypeDelegate), null),
+                ValidationFailureType.TokenTypeValidationFailed,
                 typeof(CustomSecurityTokenInvalidTypeException),
                 ValidationError.GetCurrentStackFrame(),
                 type,
@@ -125,6 +130,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             return new TokenTypeValidationError(
                 new MessageDetail(nameof(TokenTypeValidatorCustomExceptionTypeDelegate), null),
+                ValidationFailureType.TokenTypeValidationFailed,
                 typeof(CustomSecurityTokenException),
                 ValidationError.GetCurrentStackFrame(),
                 type,
