@@ -75,6 +75,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Extensibility.Tests
                     IssuerValidationError = new CustomIssuerValidationError(
                         new MessageDetail(
                             nameof(CustomIssuerValidationDelegates.CustomIssuerValidatorDelegateAsync), null),
+                        ValidationFailureType.IssuerValidationFailed,
                         typeof(SecurityTokenInvalidIssuerException),
                         new StackFrame("CustomIssuerValidationDelegates.cs", 88),
                         issuerGuid)
@@ -93,6 +94,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Extensibility.Tests
                     IssuerValidationError = new CustomIssuerValidationError(
                         new MessageDetail(
                             nameof(CustomIssuerValidationDelegates.CustomIssuerValidatorCustomExceptionDelegateAsync), null),
+                        ValidationFailureType.IssuerValidationFailed,
                         typeof(CustomSecurityTokenInvalidIssuerException),
                         new StackFrame("CustomIssuerValidationDelegates.cs", 107),
                         issuerGuid),
@@ -114,6 +116,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Extensibility.Tests
                     IssuerValidationError = new CustomIssuerValidationError(
                         new MessageDetail(
                             nameof(CustomIssuerValidationDelegates.CustomIssuerValidatorUnknownExceptionDelegateAsync), null),
+                        ValidationFailureType.IssuerValidationFailed,
                         typeof(NotSupportedException),
                         new StackFrame("CustomIssuerValidationDelegates.cs", 139),
                         issuerGuid),
@@ -132,10 +135,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Extensibility.Tests
                     IssuerValidationError = new CustomIssuerValidationError(
                         new MessageDetail(
                             nameof(CustomIssuerValidationDelegates.CustomIssuerValidatorCustomExceptionCustomFailureTypeDelegateAsync), null),
+                        CustomIssuerValidationError.CustomIssuerValidationFailureType,
                         typeof(CustomSecurityTokenInvalidIssuerException),
                         new StackFrame("CustomIssuerValidationDelegates.cs", 123),
-                        issuerGuid,
-                        CustomIssuerValidationError.CustomIssuerValidationFailureType),
+                        issuerGuid),
                 });
                 #endregion
 
@@ -154,6 +157,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Extensibility.Tests
                     IssuerValidationError = new IssuerValidationError(
                         new MessageDetail(
                             nameof(CustomIssuerValidationDelegates.IssuerValidatorDelegateAsync), null),
+                        ValidationFailureType.IssuerValidationFailed,
                         typeof(SecurityTokenInvalidIssuerException),
                         new StackFrame("CustomIssuerValidationDelegates.cs", 169),
                         issuerGuid)
@@ -175,6 +179,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Extensibility.Tests
                     IssuerValidationError = new IssuerValidationError(
                         new MessageDetail(
                             nameof(CustomIssuerValidationDelegates.IssuerValidatorCustomIssuerExceptionTypeDelegateAsync), null),
+                        ValidationFailureType.IssuerValidationFailed,
                         typeof(CustomSecurityTokenInvalidIssuerException),
                         new StackFrame("CustomIssuerValidationDelegates.cs", 196),
                         issuerGuid)
@@ -196,6 +201,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Extensibility.Tests
                     IssuerValidationError = new IssuerValidationError(
                         new MessageDetail(
                             nameof(CustomIssuerValidationDelegates.IssuerValidatorCustomExceptionTypeDelegateAsync), null),
+                        ValidationFailureType.IssuerValidationFailed,
                         typeof(CustomSecurityTokenException),
                         new StackFrame("CustomIssuerValidationDelegates.cs", 210),
                         issuerGuid)
@@ -215,10 +221,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Extensibility.Tests
                     IssuerValidationError = new IssuerValidationError(
                         new MessageDetail(
                             string.Format(Tokens.LogMessages.IDX10269), null),
+                        ValidationFailureType.IssuerValidatorThrew,
                         typeof(SecurityTokenInvalidIssuerException),
                         new StackFrame("SamlSecurityTokenHandler.ValidateToken.Internal.cs", 92),
                         issuerGuid,
-                        ValidationFailureType.IssuerValidatorThrew,
                         new SecurityTokenInvalidIssuerException(nameof(CustomIssuerValidationDelegates.IssuerValidatorThrows))
                     )
                 });

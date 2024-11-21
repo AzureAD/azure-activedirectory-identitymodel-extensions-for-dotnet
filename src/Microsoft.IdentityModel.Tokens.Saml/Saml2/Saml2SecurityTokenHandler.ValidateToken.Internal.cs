@@ -88,10 +88,10 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 return new IssuerValidationError(
                     new MessageDetail(Tokens.LogMessages.IDX10269),
+                    ValidationFailureType.IssuerValidatorThrew,
                     typeof(SecurityTokenInvalidIssuerException),
                     ValidationError.GetCurrentStackFrame(),
                     samlToken.Issuer,
-                    ValidationFailureType.IssuerValidatorThrew,
                     ex);
             }
 
