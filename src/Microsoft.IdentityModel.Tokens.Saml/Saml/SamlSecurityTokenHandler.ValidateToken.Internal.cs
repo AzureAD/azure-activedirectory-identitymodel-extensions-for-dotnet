@@ -73,10 +73,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     cancellationToken).ConfigureAwait(false);
 
                 if (!issuerValidationResult.IsValid)
-                {
-                    StackFrames.IssuerValidationFailed ??= new StackFrame(true);
-                    return issuerValidationResult.UnwrapError().AddStackFrame(StackFrames.IssuerValidationFailed);
-                }
+                    return issuerValidationResult.UnwrapError().AddCurrentStackFrame();
             }
 #pragma warning disable CA1031 // Do not catch general exception types
             catch (Exception ex)
@@ -89,6 +86,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     ValidationError.GetCurrentStackFrame(),
                     samlToken.Issuer,
                     ex);
+            }
+
+            if (samlToken.Assertion.Conditions is not null)
+            {
+                ValidationResult<DateTime?> tokenReplayValidationResult = Validators.ValidateTokenReplay(
+                    samlToken.Assertion.Conditions.NotOnOrAfter,
+                    samlToken.Assertion.CanonicalString,
+                    validationParameters,
+                    callContext);
+
+                if (!tokenReplayValidationResult.IsValid)
+                    return tokenReplayValidationResult.UnwrapError().AddCurrentStackFrame();
             }
 
             ValidationResult<SecurityKey> signatureValidationResult = ValidateSignature(samlToken, validationParameters, callContext);
@@ -107,10 +116,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 callContext);
 
             if (!issuerSigningKeyValidationResult.IsValid)
-            {
-                StackFrames.IssuerSigningKeyValidationFailed ??= new StackFrame(true);
-                return issuerSigningKeyValidationResult.UnwrapError().AddStackFrame(StackFrames.IssuerSigningKeyValidationFailed);
-            }
+                return issuerSigningKeyValidationResult.UnwrapError().AddCurrentStackFrame();
 
             return new ValidatedToken(samlToken, this, validationParameters);
         }
