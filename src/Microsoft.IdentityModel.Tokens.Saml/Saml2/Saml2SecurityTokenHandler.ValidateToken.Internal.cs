@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
@@ -64,10 +65,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 callContext);
 
             if (!conditionsResult.IsValid)
-            {
-                StackFrames.AssertionConditionsValidationFailed ??= new StackFrame(true);
-                return conditionsResult.UnwrapError().AddStackFrame(StackFrames.AssertionConditionsValidationFailed);
-            }
+                return conditionsResult.UnwrapError().AddCurrentStackFrame();
 
             ValidationResult<ValidatedIssuer> validatedIssuerResult = await validationParameters.IssuerValidatorAsync(
                 samlToken.Issuer,
@@ -80,6 +78,18 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 StackFrames.IssuerValidationFailed ??= new StackFrame(true);
                 return validatedIssuerResult.UnwrapError().AddStackFrame(StackFrames.IssuerValidationFailed);
+            }
+
+            if (samlToken.Assertion.Conditions is not null)
+            {
+                ValidationResult<DateTime?> tokenReplayValidationResult = Validators.ValidateTokenReplay(
+                    samlToken.Assertion.Conditions.NotOnOrAfter,
+                    samlToken.Assertion.CanonicalString,
+                    validationParameters,
+                    callContext);
+
+                if (!tokenReplayValidationResult.IsValid)
+                    return tokenReplayValidationResult.UnwrapError().AddCurrentStackFrame();
             }
 
             var signatureValidationResult = ValidateSignature(samlToken, validationParameters, callContext);
@@ -144,33 +154,21 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             if (samlToken.Assertion.Conditions.OneTimeUse)
             {
-                //ValidateOneTimeUseCondition(samlToken, validationParameters);
-                // We can keep an overridable method for this, or rely on the TokenReplayValidator delegate.
-                var oneTimeUseValidationResult = validationParameters.TokenReplayValidator(
-                    samlToken.Assertion.Conditions.NotOnOrAfter,
-                    samlToken.Assertion.CanonicalString,
-                    validationParameters,
-                    callContext);
+                var oneTimeUseValidationError = ValidateOneTimeUseCondition(samlToken, validationParameters, callContext);
 
-                if (!oneTimeUseValidationResult.IsValid)
-                {
-                    StackFrames.OneTimeUseValidationFailed ??= new StackFrame(true);
-                    return oneTimeUseValidationResult.UnwrapError().AddStackFrame(StackFrames.OneTimeUseValidationFailed);
-                }
+                if (oneTimeUseValidationError is not null)
+                    return oneTimeUseValidationError.AddCurrentStackFrame();
             }
 
-            if (samlToken.Assertion.Conditions.ProxyRestriction != null)
+            if (samlToken.Assertion.Conditions.ProxyRestriction is not null)
             {
-                //throw LogExceptionMessage(new SecurityTokenValidationException(LogMessages.IDX13511));
                 var proxyValidationError = ValidateProxyRestriction(
                     samlToken,
                     validationParameters,
                     callContext);
 
                 if (proxyValidationError is not null)
-                {
-                    return proxyValidationError;
-                }
+                    return proxyValidationError.AddCurrentStackFrame();
             }
 
             string? validatedAudience = null;
@@ -203,7 +201,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         internal virtual ValidationError? ValidateProxyRestriction(Saml2SecurityToken samlToken, ValidationParameters validationParameters, CallContext callContext)
 #pragma warning restore CA1801 // Review unused parameters
         {
-            // return an error, or ignore and allow overriding?
+            return null;
+        }
+
+#pragma warning disable CA1801 // Review unused parameters
+        internal virtual ValidationError? ValidateOneTimeUseCondition(Saml2SecurityToken samlToken, ValidationParameters validationParameters, CallContext callContext)
+#pragma warning restore CA1801 // Review unused parameters
+        {
             return null;
         }
     }
