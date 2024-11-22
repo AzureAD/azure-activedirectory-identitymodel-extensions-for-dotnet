@@ -13,10 +13,12 @@ namespace Microsoft.IdentityModel.Tokens
 
         public AlgorithmValidationError(
             MessageDetail messageDetail,
+            ValidationFailureType validationFailureType,
             Type exceptionType,
             StackFrame stackFrame,
-            string? invalidAlgorithm) :
-            base(messageDetail, ValidationFailureType.AlgorithmValidationFailed, exceptionType, stackFrame)
+            string? invalidAlgorithm,
+            Exception? innerException = null) :
+            base(messageDetail, validationFailureType, exceptionType, stackFrame, innerException)
         {
             _invalidAlgorithm = invalidAlgorithm;
         }

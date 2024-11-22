@@ -13,10 +13,12 @@ namespace Microsoft.IdentityModel.Tokens
 
         internal TokenTypeValidationError(
             MessageDetail messageDetail,
+            ValidationFailureType validationFailureType,
             Type exceptionType,
             StackFrame stackFrame,
-            string? invalidTokenType)
-            : base(messageDetail, ValidationFailureType.TokenTypeValidationFailed, exceptionType, stackFrame)
+            string? invalidTokenType,
+            Exception? innerException = null)
+            : base(messageDetail, validationFailureType, exceptionType, stackFrame, innerException)
         {
             _invalidTokenType = invalidTokenType;
         }

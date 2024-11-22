@@ -9,37 +9,19 @@ namespace Microsoft.IdentityModel.Tokens
 {
     internal class LifetimeValidationError : ValidationError
     {
-        protected DateTime _notBefore;
-        protected DateTime _expires;
-
         public LifetimeValidationError(
             MessageDetail messageDetail,
-            Type exceptionType,
-            StackFrame stackFrame)
-            : base(messageDetail, ValidationFailureType.LifetimeValidationFailed, exceptionType, stackFrame)
-        {
-        }
-
-        public LifetimeValidationError(
-            MessageDetail messageDetail,
+            ValidationFailureType validationFailureType,
             Type exceptionType,
             StackFrame stackFrame,
-            DateTime notBefore,
-            DateTime expires)
-            : base(messageDetail, ValidationFailureType.LifetimeValidationFailed, exceptionType, stackFrame)
-        {
-            _notBefore = notBefore;
-            _expires = expires;
-        }
+            DateTime? notBefore,
+            DateTime? expires,
+            Exception? innerException = null)
 
-        public LifetimeValidationError(
-            MessageDetail messageDetail,
-            Type exceptionType,
-            StackFrame stackFrame,
-            DateTime expires)
-            : base(messageDetail, ValidationFailureType.LifetimeValidationFailed, exceptionType, stackFrame)
+            : base(messageDetail, validationFailureType, exceptionType, stackFrame, innerException)
         {
-            _expires = expires;
+            NotBefore = notBefore;
+            Expires = expires;
         }
 
         /// <summary>
@@ -50,33 +32,45 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (ExceptionType == typeof(SecurityTokenNoExpirationException))
             {
-                return new SecurityTokenNoExpirationException(MessageDetail.Message);
+                var exception = new SecurityTokenNoExpirationException(MessageDetail.Message, InnerException);
+                exception.SetValidationError(this);
+                return exception;
             }
             else if (ExceptionType == typeof(SecurityTokenInvalidLifetimeException))
             {
-                return new SecurityTokenInvalidLifetimeException(MessageDetail.Message)
+                var exception = new SecurityTokenInvalidLifetimeException(MessageDetail.Message, InnerException)
                 {
-                    NotBefore = _notBefore,
-                    Expires = _expires
+                    NotBefore = NotBefore,
+                    Expires = Expires
                 };
+                exception.SetValidationError(this);
+                return exception;
             }
             else if (ExceptionType == typeof(SecurityTokenNotYetValidException))
             {
-                return new SecurityTokenNotYetValidException(MessageDetail.Message)
+                var exception = new SecurityTokenNotYetValidException(MessageDetail.Message, InnerException)
                 {
-                    NotBefore = _notBefore
+                    NotBefore = (DateTime)NotBefore!
                 };
+                exception.SetValidationError(this);
+                return exception;
             }
             else if (ExceptionType == typeof(SecurityTokenExpiredException))
             {
-                return new SecurityTokenExpiredException(MessageDetail.Message)
+                var exception = new SecurityTokenExpiredException(MessageDetail.Message, InnerException)
                 {
-                    Expires = _expires
+                    Expires = (DateTime)Expires!
                 };
+                exception.SetValidationError(this);
+                return exception;
             }
             else
                 return base.GetException(ExceptionType, null);
         }
+
+        protected DateTime? NotBefore { get; }
+
+        protected DateTime? Expires { get; }
     }
 }
 #nullable restore

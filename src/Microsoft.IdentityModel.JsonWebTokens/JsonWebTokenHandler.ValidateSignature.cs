@@ -248,6 +248,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         new MessageDetail(
                             TokenLogMessages.IDX10518,
                             algorithmValidationError.MessageDetail.Message),
+                        ValidationFailureType.AlgorithmValidationFailed,
                         typeof(SecurityTokenInvalidAlgorithmException),
                         new StackFrame(true),
                         algorithmValidationError.InvalidAlgorithm);

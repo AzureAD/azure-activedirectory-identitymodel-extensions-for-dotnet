@@ -9,7 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 #nullable enable
 namespace Microsoft.IdentityModel.TestUtils
 {
-    internal class CustomIssuerValidatorDelegates
+    internal class CustomIssuerValidationDelegates
     {
         internal async static Task<ValidationResult<ValidatedIssuer>> CustomIssuerValidatorDelegateAsync(
             string issuer,
@@ -22,6 +22,7 @@ namespace Microsoft.IdentityModel.TestUtils
             return await Task.FromResult(new ValidationResult<ValidatedIssuer>(
                 new CustomIssuerValidationError(
                     new MessageDetail(nameof(CustomIssuerValidatorDelegateAsync), null),
+                    ValidationFailureType.IssuerValidationFailed,
                     typeof(SecurityTokenInvalidIssuerException),
                     ValidationError.GetCurrentStackFrame(),
                     issuer)));
@@ -37,6 +38,7 @@ namespace Microsoft.IdentityModel.TestUtils
             return await Task.FromResult(new ValidationResult<ValidatedIssuer>(
                 new CustomIssuerValidationError(
                     new MessageDetail(nameof(CustomIssuerValidatorCustomExceptionDelegateAsync), null),
+                    ValidationFailureType.IssuerValidationFailed,
                     typeof(CustomSecurityTokenInvalidIssuerException),
                     ValidationError.GetCurrentStackFrame(),
                     issuer)));
@@ -69,6 +71,7 @@ namespace Microsoft.IdentityModel.TestUtils
             return await Task.FromResult(new ValidationResult<ValidatedIssuer>(
                 new CustomIssuerValidationError(
                     new MessageDetail(nameof(CustomIssuerValidatorUnknownExceptionDelegateAsync), null),
+                    ValidationFailureType.IssuerValidationFailed,
                     typeof(NotSupportedException),
                     ValidationError.GetCurrentStackFrame(),
                     issuer)));
@@ -99,6 +102,7 @@ namespace Microsoft.IdentityModel.TestUtils
             return await Task.FromResult(new ValidationResult<ValidatedIssuer>(
                 new IssuerValidationError(
                     new MessageDetail(nameof(IssuerValidatorDelegateAsync), null),
+                    ValidationFailureType.IssuerValidationFailed,
                     typeof(SecurityTokenInvalidIssuerException),
                     ValidationError.GetCurrentStackFrame(),
                     issuer)));
@@ -111,7 +115,7 @@ namespace Microsoft.IdentityModel.TestUtils
             CallContext callContext,
             CancellationToken cancellationToken)
         {
-            throw new CustomSecurityTokenInvalidIssuerException(nameof(IssuerValidatorThrows));
+            throw new CustomSecurityTokenInvalidIssuerException(nameof(IssuerValidatorThrows), null);
         }
 
         internal async static Task<ValidationResult<ValidatedIssuer>> IssuerValidatorCustomIssuerExceptionTypeDelegateAsync(
@@ -124,6 +128,7 @@ namespace Microsoft.IdentityModel.TestUtils
             return await Task.FromResult(new ValidationResult<ValidatedIssuer>(
                 new IssuerValidationError(
                     new MessageDetail(nameof(IssuerValidatorCustomIssuerExceptionTypeDelegateAsync), null),
+                    ValidationFailureType.IssuerValidationFailed,
                     typeof(CustomSecurityTokenInvalidIssuerException),
                     ValidationError.GetCurrentStackFrame(),
                     issuer)));
@@ -138,6 +143,7 @@ namespace Microsoft.IdentityModel.TestUtils
             return await Task.FromResult(new ValidationResult<ValidatedIssuer>(
                 new IssuerValidationError(
                     new MessageDetail(nameof(IssuerValidatorCustomExceptionTypeDelegateAsync), null),
+                    ValidationFailureType.IssuerValidationFailed,
                     typeof(CustomSecurityTokenException),
                     ValidationError.GetCurrentStackFrame(),
                     issuer)));
