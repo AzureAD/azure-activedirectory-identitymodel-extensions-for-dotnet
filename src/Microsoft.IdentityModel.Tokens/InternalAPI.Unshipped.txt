@@ -1,7 +1,6 @@
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10002 = "IDX10002: Unknown exception type returned. Type: '{0}'. Message: '{1}'." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10268 = "IDX10268: Unable to validate audience, validationParameters.ValidAudiences.Count == 0." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10269 = "IDX10269: IssuerValidationDelegate threw an exception, see inner exception." -> string
-const Microsoft.IdentityModel.Tokens.LogMessages.IDX10271 = "IDX10271: LifetimeValidationDelegate threw an exception, see inner exception." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10275 = "IDX10275: TokenTypeValidationDelegate threw an exception, see inner exception." -> string
 Microsoft.IdentityModel.Tokens.AlgorithmValidationError
 Microsoft.IdentityModel.Tokens.AlgorithmValidationError.AlgorithmValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, Microsoft.IdentityModel.Tokens.ValidationFailureType validationFailureType, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, string invalidAlgorithm, System.Exception innerException = null) -> void
@@ -25,7 +24,7 @@ Microsoft.IdentityModel.Tokens.LifetimeValidationError.LifetimeValidationError(M
 Microsoft.IdentityModel.Tokens.LifetimeValidationError.NotBefore.get -> System.DateTime?
 Microsoft.IdentityModel.Tokens.TokenTypeValidationError
 Microsoft.IdentityModel.Tokens.TokenTypeValidationError.TokenTypeValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, Microsoft.IdentityModel.Tokens.ValidationFailureType validationFailureType, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, string invalidTokenType, System.Exception innerException = null) -> void
-Microsoft.IdentityModel.Tokens.TokenTypeValidationError._invalidTokenType -> string
+Microsoft.IdentityModel.Tokens.TokenTypeValidationError.InvalidTokenType.get -> string
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.TimeProvider.get -> System.TimeProvider
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.TimeProvider.set -> void
 Microsoft.IdentityModel.Tokens.ValidationError.AddCurrentStackFrame(string filePath = "", int lineNumber = 0, int skipFrames = 1) -> Microsoft.IdentityModel.Tokens.ValidationError
@@ -39,7 +38,7 @@ Microsoft.IdentityModel.Tokens.ValidationResult<TResult>.Result.get -> TResult
 override Microsoft.IdentityModel.Tokens.AlgorithmValidationError.GetException() -> System.Exception
 override Microsoft.IdentityModel.Tokens.IssuerSigningKeyValidationError.GetException() -> System.Exception
 override Microsoft.IdentityModel.Tokens.TokenTypeValidationError.GetException() -> System.Exception
-static Microsoft.IdentityModel.Tokens.IssuerSigningKeyValidationError.NullParameter(string parameterName, System.Diagnostics.StackFrame stackFrame) -> Microsoft.IdentityModel.Tokens.IssuerSigningKeyValidationError
+static Microsoft.IdentityModel.Tokens.TokenTypeValidationError.NullParameter(string parameterName, System.Diagnostics.StackFrame stackFrame) -> Microsoft.IdentityModel.Tokens.TokenTypeValidationError
 static Microsoft.IdentityModel.Tokens.Utility.SerializeAsSingleCommaDelimitedString(System.Collections.Generic.IList<string> strings) -> string
 static Microsoft.IdentityModel.Tokens.ValidationError.GetCurrentStackFrame(string filePath = "", int lineNumber = 0, int skipFrames = 1) -> System.Diagnostics.StackFrame
 static readonly Microsoft.IdentityModel.Tokens.ValidationFailureType.IssuerValidatorThrew -> Microsoft.IdentityModel.Tokens.ValidationFailureType

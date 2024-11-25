@@ -134,5 +134,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public static readonly ValidationFailureType IssuerValidatorThrew = new IssuerValidatorFailure("IssuerValidatorThrew");
         private class IssuerValidatorFailure : ValidationFailureType { internal IssuerValidatorFailure(string name) : base(name) { } }
+
+        /// <summary>
+        /// Defines a type that represents the fact that the token type validation delegate threw an exception.
+        /// </summary>
+        public static readonly ValidationFailureType TokenTypeValidatorThrew = new TokenTypeValidationFailure("TokenTypeValidatorThrew");
     }
 }

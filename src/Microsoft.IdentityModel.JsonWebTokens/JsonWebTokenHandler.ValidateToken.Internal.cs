@@ -336,12 +336,28 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 actorValidationResult = innerActorValidationResult;
             }
 
-            ValidationResult<ValidatedTokenType> typeValidationResult = validationParameters.TokenTypeValidator(
-                jsonWebToken.Typ, jsonWebToken, validationParameters, callContext);
-            if (!typeValidationResult.IsValid)
+            ValidationResult<ValidatedTokenType> typeValidationResult;
+
+            try
             {
-                StackFrame typeValidationFailureStackFrame = StackFrames.TypeValidationFailed ??= new StackFrame(true);
-                return typeValidationResult.UnwrapError().AddStackFrame(typeValidationFailureStackFrame);
+                typeValidationResult = validationParameters.TokenTypeValidator(
+                    jsonWebToken.Typ, jsonWebToken, validationParameters, callContext);
+
+                if (!typeValidationResult.IsValid)
+                    return typeValidationResult.UnwrapError().AddCurrentStackFrame();
+            }
+
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                return new TokenTypeValidationError(
+                    new MessageDetail(TokenLogMessages.IDX10275),
+                    ValidationFailureType.TokenTypeValidatorThrew,
+                    typeof(SecurityTokenInvalidTypeException),
+                    ValidationError.GetCurrentStackFrame(),
+                    jsonWebToken.Typ,
+                    ex);
             }
 
             // The signature validation delegate is yet to be migrated to ValidationParameters.
