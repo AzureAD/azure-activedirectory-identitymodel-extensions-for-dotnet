@@ -35,19 +35,32 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         internal async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
-            SamlSecurityToken samlToken,
+            SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext,
 #pragma warning disable CA1801 // Review unused parameters
             CancellationToken cancellationToken)
 #pragma warning restore CA1801 // Review unused parameters
         {
-            if (samlToken is null)
+            if (securityToken is null)
             {
                 StackFrames.TokenNull ??= new StackFrame(true);
                 return ValidationError.NullParameter(
-                    nameof(samlToken),
+                    nameof(securityToken),
                     StackFrames.TokenNull);
+            }
+
+            if (securityToken is not SamlSecurityToken samlToken)
+            {
+                return new ValidationError(
+                    new MessageDetail(
+                        LogMessages.IDX11400,
+                        this,
+                        typeof(SamlSecurityToken),
+                        securityToken.GetType()),
+                    ValidationFailureType.InvalidSecurityToken,
+                    typeof(SecurityTokenArgumentException),
+                    ValidationError.GetCurrentStackFrame());
             }
 
             if (validationParameters is null)

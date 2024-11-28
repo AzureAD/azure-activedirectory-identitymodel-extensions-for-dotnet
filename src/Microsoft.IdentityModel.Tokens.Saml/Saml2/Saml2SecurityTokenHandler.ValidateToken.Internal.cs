@@ -36,17 +36,30 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         internal async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
-            Saml2SecurityToken samlToken,
+            SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext,
             CancellationToken cancellationToken)
         {
-            if (samlToken is null)
+            if (securityToken is null)
             {
                 StackFrames.TokenNull ??= new StackFrame(true);
                 return ValidationError.NullParameter(
-                    nameof(samlToken),
+                    nameof(securityToken),
                     StackFrames.TokenNull);
+            }
+
+            if (securityToken is not Saml2SecurityToken samlToken)
+            {
+                return new ValidationError(
+                    new MessageDetail(
+                        Tokens.Saml.LogMessages.IDX11400,
+                        this,
+                        typeof(Saml2SecurityToken),
+                        securityToken.GetType()),
+                    ValidationFailureType.InvalidSecurityToken,
+                    typeof(SecurityTokenArgumentException),
+                    ValidationError.GetCurrentStackFrame());
             }
 
             if (validationParameters is null)
