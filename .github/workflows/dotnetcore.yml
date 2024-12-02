@@ -28,7 +28,13 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4.1.1
-        
+      
+    - name: Link working directory
+      run: New-Item -Path D:/a/wilson -ItemType SymbolicLink -Value D:\a\azure-activedirectory-identitymodel-extensions-for-dotnet\azure-activedirectory-identitymodel-extensions-for-dotnet
+    
+    - name: Change working directory
+      run: cd D:/a/wilson
+      
     - name: Setup .NET 9.x
       uses: actions/setup-dotnet@v4.1.0
       with:
