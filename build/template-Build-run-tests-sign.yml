@@ -54,7 +54,7 @@ steps:
         dotnet nuget list source
     }
   workingDirectory: '$(Build.SourcesDirectory)\$(WilsonSourceDirectory)'
-  displayName: 'Remove external "NuGet" Source and add "IDDP artifacts" as a NuGet Source, if needed.'
+  displayName: 'Remove external "NuGet" source and add "IDDP artifacts" as a NuGet source, if needed.'
   env:
     DOTNET_NOLOGO: 1
 
