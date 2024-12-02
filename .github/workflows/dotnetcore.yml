@@ -33,10 +33,6 @@ jobs:
       uses: actions/setup-dotnet@v4.1.0
       with:
         dotnet-version: 9.x
-        
-    - name: Long Path Name
-      run: |
-          regedit /s .\build\longPathName.reg
 
     - name: Strong name bypass
       run: |

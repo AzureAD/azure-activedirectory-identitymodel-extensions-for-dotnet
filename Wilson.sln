@@ -92,7 +92,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Abs
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.AotCompatibility.TestApp", "test\Microsoft.IdentityModel.AotCompatibility.TestApp\Microsoft.IdentityModel.AotCompatibility.TestApp.csproj", "{8105289F-3D54-4054-9738-5985F3B6CF2C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.AotCompatibility.Tests", "test\Microsoft.IdentityModel.AotCompatibility.Tests\Microsoft.IdentityModel.AotCompatibility.Tests.csproj", "{CD0EEF56-7221-4420-8181-48EE82E91306}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aot.Tests", "test\Aot.Tests\Aot.Tests.csproj", "{CD0EEF56-7221-4420-8181-48EE82E91306}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Benchmarks", "benchmark\Microsoft.IdentityModel.Benchmarks\Microsoft.IdentityModel.Benchmarks.csproj", "{F1BB31E4-8865-4425-8BD4-94F1815C16E0}"
 EndProject
