@@ -28,6 +28,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4.1.1
+      with:
+        path: main
         
     - name: Setup .NET 9.x
       uses: actions/setup-dotnet@v4.1.0
