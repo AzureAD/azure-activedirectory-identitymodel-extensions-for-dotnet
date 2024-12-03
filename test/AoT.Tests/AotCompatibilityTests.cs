@@ -35,8 +35,8 @@ namespace Microsoft.IdentityModel.AotCompatibility.Tests
         [IgnoreOnAzureDevopsFact]
         public void EnsureAotCompatibility()
         {
-            string testAppPath = Path.Combine("..", "..", "..", "..", "Microsoft.IdentityModel.AotCompatibility.TestApp");
-            string testAppProject = "Microsoft.IdentityModel.AotCompatibility.TestApp.csproj";
+            string testAppPath = Path.Combine("..", "..", "..", "..", "Aot.TestApp");
+            string testAppProject = "Aot.csproj";
 
 #if NET9_0_OR_GREATER
             string framework = "net9.0";
