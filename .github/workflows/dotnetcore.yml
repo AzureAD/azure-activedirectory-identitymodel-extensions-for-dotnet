@@ -31,10 +31,7 @@ jobs:
       
     - name: Link working directory
       run: New-Item -Path D:/a/wilson -ItemType SymbolicLink -Value D:/a/azure-activedirectory-identitymodel-extensions-for-dotnet/azure-activedirectory-identitymodel-extensions-for-dotnet
-    
-    - name: Change working directory
-      run: cd D:/a/wilson
-      
+
     - name: Setup .NET 9.x
       uses: actions/setup-dotnet@v4.1.0
       with:
@@ -42,17 +39,19 @@ jobs:
 
     - name: Strong name bypass
       run: |
-          regedit /s .\build\strongNameBypass.reg  
+          regedit /s .\build\strongNameBypass.reg
 
     - name: Run the tests
-      run: dotnet test Wilson.sln --collect:"XPlat Code Coverage" --settings:./build/CodeCoverage.runsettings
       working-directory: D:/a/wilson
+      run: dotnet test Wilson.sln --collect:"XPlat Code Coverage" --settings:./build/CodeCoverage.runsettings
+
 
     - name: Create code coverage report
+      working-directory: D:/a/wilson
       run: |
         dotnet tool install -g dotnet-reportgenerator-globaltool --version 5.4.1
         reportgenerator -reports:./**/coverage.cobertura.xml -targetdir:CodeCoverage -reporttypes:'MarkdownSummaryGithub;Cobertura'
-      working-directory: D:/a/wilson
+
 
     - name: Write coverage to job summary
       shell: bash
