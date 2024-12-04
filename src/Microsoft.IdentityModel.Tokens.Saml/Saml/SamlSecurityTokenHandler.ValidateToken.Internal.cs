@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -34,19 +35,32 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         internal async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
-            SamlSecurityToken samlToken,
+            SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext,
 #pragma warning disable CA1801 // Review unused parameters
             CancellationToken cancellationToken)
 #pragma warning restore CA1801 // Review unused parameters
         {
-            if (samlToken is null)
+            if (securityToken is null)
             {
                 StackFrames.TokenNull ??= new StackFrame(true);
                 return ValidationError.NullParameter(
-                    nameof(samlToken),
+                    nameof(securityToken),
                     StackFrames.TokenNull);
+            }
+
+            if (securityToken is not SamlSecurityToken samlToken)
+            {
+                return new ValidationError(
+                    new MessageDetail(
+                        LogMessages.IDX11400,
+                        this,
+                        typeof(SamlSecurityToken),
+                        securityToken.GetType()),
+                    ValidationFailureType.InvalidSecurityToken,
+                    typeof(SecurityTokenArgumentException),
+                    ValidationError.GetCurrentStackFrame());
             }
 
             if (validationParameters is null)
@@ -60,22 +74,60 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             ValidationResult<ValidatedConditions> conditionsResult = ValidateConditions(samlToken, validationParameters, callContext);
 
             if (!conditionsResult.IsValid)
+                return conditionsResult.UnwrapError().AddCurrentStackFrame();
+
+            try
             {
-                StackFrames.AssertionConditionsValidationFailed ??= new StackFrame(true);
-                return conditionsResult.UnwrapError().AddStackFrame(StackFrames.AssertionConditionsValidationFailed);
+                ValidationResult<ValidatedIssuer> issuerValidationResult = await validationParameters.IssuerValidatorAsync(
+                    samlToken.Issuer,
+                    samlToken,
+                    validationParameters,
+                    callContext,
+                    cancellationToken).ConfigureAwait(false);
+
+                if (!issuerValidationResult.IsValid)
+                    return issuerValidationResult.UnwrapError().AddCurrentStackFrame();
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                return new IssuerValidationError(
+                    new MessageDetail(Tokens.LogMessages.IDX10269),
+                    ValidationFailureType.IssuerValidatorThrew,
+                    typeof(SecurityTokenInvalidIssuerException),
+                    ValidationError.GetCurrentStackFrame(),
+                    samlToken.Issuer,
+                    ex);
             }
 
-            ValidationResult<ValidatedIssuer> issuerValidationResult = await validationParameters.IssuerValidatorAsync(
-                samlToken.Issuer,
-                samlToken,
-                validationParameters,
-                callContext,
-                cancellationToken).ConfigureAwait(false);
-
-            if (!issuerValidationResult.IsValid)
+            if (samlToken.Assertion.Conditions is not null)
             {
-                StackFrames.IssuerValidationFailed ??= new StackFrame(true);
-                return issuerValidationResult.UnwrapError().AddStackFrame(StackFrames.IssuerValidationFailed);
+                ValidationResult<DateTime?> tokenReplayValidationResult;
+
+                try
+                {
+                    tokenReplayValidationResult = validationParameters.TokenReplayValidator(
+                        samlToken.Assertion.Conditions.NotOnOrAfter,
+                        samlToken.Assertion.CanonicalString,
+                        validationParameters,
+                        callContext);
+
+                    if (!tokenReplayValidationResult.IsValid)
+                        return tokenReplayValidationResult.UnwrapError().AddCurrentStackFrame();
+                }
+#pragma warning disable CA1031 // Do not catch general exception types
+                catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+                {
+                    return new TokenReplayValidationError(
+                        new MessageDetail(Tokens.LogMessages.IDX10276),
+                        ValidationFailureType.TokenReplayValidatorThrew,
+                        typeof(SecurityTokenReplayDetectedException),
+                        ValidationError.GetCurrentStackFrame(),
+                        samlToken.Assertion.Conditions.NotOnOrAfter,
+                        ex);
+                }
             }
 
             ValidationResult<SecurityKey> signatureValidationResult = ValidateSignature(samlToken, validationParameters, callContext);
@@ -86,17 +138,31 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 return signatureValidationResult.UnwrapError().AddStackFrame(StackFrames.SignatureValidationFailed);
             }
 
-            ValidationResult<ValidatedSigningKeyLifetime> issuerSigningKeyValidationResult = validationParameters.IssuerSigningKeyValidator(
-                samlToken.SigningKey,
-                samlToken,
-                validationParameters,
-                null,
-                callContext);
+            ValidationResult<ValidatedSigningKeyLifetime> issuerSigningKeyValidationResult;
 
-            if (!issuerSigningKeyValidationResult.IsValid)
+            try
             {
-                StackFrames.IssuerSigningKeyValidationFailed ??= new StackFrame(true);
-                return issuerSigningKeyValidationResult.UnwrapError().AddStackFrame(StackFrames.IssuerSigningKeyValidationFailed);
+                issuerSigningKeyValidationResult = validationParameters.IssuerSigningKeyValidator(
+                    samlToken.SigningKey,
+                    samlToken,
+                    validationParameters,
+                    null,
+                    callContext);
+
+                if (!issuerSigningKeyValidationResult.IsValid)
+                    return issuerSigningKeyValidationResult.UnwrapError().AddCurrentStackFrame();
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                return new IssuerSigningKeyValidationError(
+                    new MessageDetail(Tokens.LogMessages.IDX10274),
+                    ValidationFailureType.IssuerSigningKeyValidatorThrew,
+                    typeof(SecurityTokenInvalidSigningKeyException),
+                    ValidationError.GetCurrentStackFrame(),
+                    samlToken.SigningKey,
+                    ex);
             }
 
             return new ValidatedToken(samlToken, this, validationParameters);

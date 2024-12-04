@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -43,44 +42,47 @@ namespace Microsoft.IdentityModel.Tokens
 #pragma warning restore CA1801 // Review unused parameters
         {
             if (string.IsNullOrWhiteSpace(securityToken))
-                return ValidationError.NullParameter(
+                return TokenReplayValidationError.NullParameter(
                     nameof(securityToken),
-                    new StackFrame(true));
+                    ValidationError.GetCurrentStackFrame());
 
             if (validationParameters == null)
-                return ValidationError.NullParameter(
+                return TokenReplayValidationError.NullParameter(
                     nameof(validationParameters),
-                    new StackFrame(true));
+                    ValidationError.GetCurrentStackFrame());
 
             // check if token if replay cache is set, then there must be an expiration time.
             if (validationParameters.TokenReplayCache != null)
             {
                 if (expirationTime == null)
-                    return new ValidationError(
+                    return new TokenReplayValidationError(
                         new MessageDetail(
                             LogMessages.IDX10227,
                             securityToken),
                         ValidationFailureType.TokenReplayValidationFailed,
                         typeof(SecurityTokenNoExpirationException),
-                        new StackFrame(true));
+                        ValidationError.GetCurrentStackFrame(),
+                        expirationTime);
 
                 if (validationParameters.TokenReplayCache.TryFind(securityToken))
-                    return new ValidationError(
+                    return new TokenReplayValidationError(
                         new MessageDetail(
                             LogMessages.IDX10228,
                             securityToken),
                         ValidationFailureType.TokenReplayValidationFailed,
                         typeof(SecurityTokenReplayDetectedException),
-                        new StackFrame(true));
+                        ValidationError.GetCurrentStackFrame(),
+                        expirationTime);
 
                 if (!validationParameters.TokenReplayCache.TryAdd(securityToken, expirationTime.Value))
-                    return new ValidationError(
+                    return new TokenReplayValidationError(
                         new MessageDetail(
                             LogMessages.IDX10229,
                             securityToken),
                         ValidationFailureType.TokenReplayValidationFailed,
                         typeof(SecurityTokenReplayAddFailedException),
-                        new StackFrame(true));
+                        ValidationError.GetCurrentStackFrame(),
+                        expirationTime);
             }
 
             // if it reaches here, that means no token replay is detected.

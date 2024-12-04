@@ -1429,7 +1429,7 @@ namespace Microsoft.IdentityModel.TestUtils
                     localContext.Diffs.Add($"(validationError1.StackFrames[0].GetFileName(): " +
                         $"'{validationError1.StackFrames[0].GetFileName()}', " +
                         $"does not contain validationError2.StackFrames[0].GetFileName():" +
-                        $"'{validationError1.StackFrames[0].GetFileName()}'.");
+                        $"'{validationError2.StackFrames[0].GetFileName()}'.");
                 }
             }
 
@@ -1467,6 +1467,12 @@ namespace Microsoft.IdentityModel.TestUtils
                 validationError1.MessageDetail,
                 validationError2.MessageDetail,
                 localContext);
+
+            // compare the actual exception's stack trace against the expected stack trace.
+            if (exception1.StackTrace == null)
+            {
+                localContext.Diffs.Add($"exception1.StackTrace is null. Exception type: {exception1.GetType().Name}");
+            }
 
             return context.Merge(localContext);
         }

@@ -9,16 +9,16 @@ namespace Microsoft.IdentityModel.Tokens
 {
     internal class AlgorithmValidationError : ValidationError
     {
-        protected string? _invalidAlgorithm;
-
         public AlgorithmValidationError(
             MessageDetail messageDetail,
+            ValidationFailureType validationFailureType,
             Type exceptionType,
             StackFrame stackFrame,
-            string? invalidAlgorithm) :
-            base(messageDetail, ValidationFailureType.AlgorithmValidationFailed, exceptionType, stackFrame)
+            string? invalidAlgorithm,
+            Exception? innerException = null) :
+            base(messageDetail, validationFailureType, exceptionType, stackFrame, innerException)
         {
-            _invalidAlgorithm = invalidAlgorithm;
+            InvalidAlgorithm = invalidAlgorithm;
         }
 
         internal override Exception GetException()
@@ -27,8 +27,9 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 SecurityTokenInvalidAlgorithmException exception = new(MessageDetail.Message, InnerException)
                 {
-                    InvalidAlgorithm = _invalidAlgorithm
+                    InvalidAlgorithm = InvalidAlgorithm
                 };
+                exception.SetValidationError(this);
 
                 return exception;
             }
@@ -36,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens
             return base.GetException();
         }
 
-        internal string? InvalidAlgorithm => _invalidAlgorithm;
+        protected string? InvalidAlgorithm { get; }
     }
 }
 #nullable restore

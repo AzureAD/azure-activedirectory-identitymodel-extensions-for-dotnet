@@ -399,7 +399,7 @@ namespace Microsoft.IdentityModel.Validators
                     return false;
 
                 // Ensure tokenIssuer is atleast as long as issuerTemplate with tenantIdTemplate replaced
-                if (tokenIssuer.Length <= templateTenantIdPosition + tenantId.Length)
+                if (tokenIssuer.Length < templateTenantIdPosition + tenantId.Length)
                     return false;
 
                 // Ensure the tenant ID in the token issuer matches the expected tenant ID

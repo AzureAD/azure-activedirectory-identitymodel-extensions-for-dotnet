@@ -9,16 +9,16 @@ namespace Microsoft.IdentityModel.Tokens
 {
     internal class TokenTypeValidationError : ValidationError
     {
-        protected string? _invalidTokenType;
-
         internal TokenTypeValidationError(
             MessageDetail messageDetail,
+            ValidationFailureType validationFailureType,
             Type exceptionType,
             StackFrame stackFrame,
-            string? invalidTokenType)
-            : base(messageDetail, ValidationFailureType.TokenTypeValidationFailed, exceptionType, stackFrame)
+            string? invalidTokenType,
+            Exception? innerException = null)
+            : base(messageDetail, validationFailureType, exceptionType, stackFrame, innerException)
         {
-            _invalidTokenType = invalidTokenType;
+            InvalidTokenType = invalidTokenType;
         }
 
         internal override Exception GetException()
@@ -27,14 +27,24 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 SecurityTokenInvalidTypeException exception = new(MessageDetail.Message, InnerException)
                 {
-                    InvalidType = _invalidTokenType
+                    InvalidType = InvalidTokenType
                 };
+                exception.SetValidationError(this);
 
                 return exception;
             }
 
             return base.GetException();
         }
+
+        internal static new TokenTypeValidationError NullParameter(string parameterName, StackFrame stackFrame) => new(
+            MessageDetail.NullParameter(parameterName),
+            ValidationFailureType.NullArgument,
+            typeof(SecurityTokenArgumentNullException),
+            stackFrame,
+            null); // invalidTokenType
+
+        protected string? InvalidTokenType { get; }
     }
 }
 #nullable restore

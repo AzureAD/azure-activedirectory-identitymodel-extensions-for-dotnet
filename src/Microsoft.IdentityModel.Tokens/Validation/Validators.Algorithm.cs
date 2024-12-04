@@ -57,6 +57,7 @@ namespace Microsoft.IdentityModel.Tokens
                     new MessageDetail(
                         LogMessages.IDX10696,
                         LogHelper.MarkAsNonPII(algorithm)),
+                    ValidationFailureType.AlgorithmValidationFailed,
                     typeof(SecurityTokenInvalidAlgorithmException),
                     new StackFrame(true),
                     algorithm);

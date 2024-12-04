@@ -301,13 +301,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     ex);
             }
 
-            ValidationResult<DateTime?> replayValidationResult = validationParameters.TokenReplayValidator(
-                expires, jsonWebToken.EncodedToken, validationParameters, callContext);
+            ValidationResult<DateTime?> replayValidationResult;
 
-            if (!replayValidationResult.IsValid)
+            try
             {
-                StackFrame replayValidationFailureStackFrame = StackFrames.ReplayValidationFailed ??= new StackFrame(true);
-                return replayValidationResult.UnwrapError().AddStackFrame(replayValidationFailureStackFrame);
+                replayValidationResult = validationParameters.TokenReplayValidator(
+                    expires, jsonWebToken.EncodedToken, validationParameters, callContext);
+
+                if (!replayValidationResult.IsValid)
+                    return replayValidationResult.UnwrapError().AddCurrentStackFrame();
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                return new TokenReplayValidationError(
+                    new MessageDetail(TokenLogMessages.IDX10276),
+                    ValidationFailureType.TokenReplayValidatorThrew,
+                    typeof(SecurityTokenReplayDetectedException),
+                    ValidationError.GetCurrentStackFrame(),
+                    expires,
+                    ex);
             }
 
             ValidationResult<ValidatedToken>? actorValidationResult = null;
@@ -336,12 +350,28 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 actorValidationResult = innerActorValidationResult;
             }
 
-            ValidationResult<ValidatedTokenType> typeValidationResult = validationParameters.TokenTypeValidator(
-                jsonWebToken.Typ, jsonWebToken, validationParameters, callContext);
-            if (!typeValidationResult.IsValid)
+            ValidationResult<ValidatedTokenType> typeValidationResult;
+
+            try
             {
-                StackFrame typeValidationFailureStackFrame = StackFrames.TypeValidationFailed ??= new StackFrame(true);
-                return typeValidationResult.UnwrapError().AddStackFrame(typeValidationFailureStackFrame);
+                typeValidationResult = validationParameters.TokenTypeValidator(
+                    jsonWebToken.Typ, jsonWebToken, validationParameters, callContext);
+
+                if (!typeValidationResult.IsValid)
+                    return typeValidationResult.UnwrapError().AddCurrentStackFrame();
+            }
+
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                return new TokenTypeValidationError(
+                    new MessageDetail(TokenLogMessages.IDX10275),
+                    ValidationFailureType.TokenTypeValidatorThrew,
+                    typeof(SecurityTokenInvalidTypeException),
+                    ValidationError.GetCurrentStackFrame(),
+                    jsonWebToken.Typ,
+                    ex);
             }
 
             // The signature validation delegate is yet to be migrated to ValidationParameters.
@@ -353,13 +383,27 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return signatureValidationResult.UnwrapError().AddStackFrame(signatureValidationFailureStackFrame);
             }
 
-            ValidationResult<ValidatedSigningKeyLifetime> issuerSigningKeyValidationResult =
-                validationParameters.IssuerSigningKeyValidator(
-                    jsonWebToken.SigningKey, jsonWebToken, validationParameters, configuration, callContext);
-            if (!issuerSigningKeyValidationResult.IsValid)
+            ValidationResult<ValidatedSigningKeyLifetime> issuerSigningKeyValidationResult;
+
+            try
             {
-                StackFrame issuerSigningKeyValidationFailureStackFrame = StackFrames.IssuerSigningKeyValidationFailed ??= new StackFrame(true);
-                return issuerSigningKeyValidationResult.UnwrapError().AddStackFrame(issuerSigningKeyValidationFailureStackFrame);
+                issuerSigningKeyValidationResult = validationParameters.IssuerSigningKeyValidator(
+                    jsonWebToken.SigningKey, jsonWebToken, validationParameters, configuration, callContext);
+
+                if (!issuerSigningKeyValidationResult.IsValid)
+                    return issuerSigningKeyValidationResult.UnwrapError().AddCurrentStackFrame();
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                return new IssuerSigningKeyValidationError(
+                    new MessageDetail(TokenLogMessages.IDX10274),
+                    ValidationFailureType.IssuerSigningKeyValidatorThrew,
+                    typeof(SecurityTokenInvalidSigningKeyException),
+                    ValidationError.GetCurrentStackFrame(),
+                    jsonWebToken.SigningKey,
+                    ex);
             }
 
             return new ValidatedToken(jsonWebToken, this, validationParameters)

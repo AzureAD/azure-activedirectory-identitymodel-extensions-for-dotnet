@@ -64,6 +64,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 return new IssuerValidationError(
                     new MessageDetail(LogMessages.IDX10211),
+                    ValidationFailureType.IssuerValidationFailed,
                     typeof(SecurityTokenInvalidIssuerException),
                     new StackFrame(true),
                     issuer);
@@ -87,6 +88,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters.ValidIssuers.Count == 0 && string.IsNullOrWhiteSpace(configuration?.Issuer))
                 return new IssuerValidationError(
                     new MessageDetail(LogMessages.IDX10211),
+                    ValidationFailureType.IssuerValidationFailed,
                     typeof(SecurityTokenInvalidIssuerException),
                     new StackFrame(true),
                     issuer);
@@ -137,6 +139,7 @@ namespace Microsoft.IdentityModel.Tokens
                     LogHelper.MarkAsNonPII(issuer),
                     LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers)),
                     LogHelper.MarkAsNonPII(configuration?.Issuer)),
+                ValidationFailureType.IssuerValidationFailed,
                 typeof(SecurityTokenInvalidIssuerException),
                 new StackFrame(true),
                 issuer);
