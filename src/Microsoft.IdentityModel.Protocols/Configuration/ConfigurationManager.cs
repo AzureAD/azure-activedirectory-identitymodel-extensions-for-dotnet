@@ -235,7 +235,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// This should be called when the configuration needs to be updated either from RequestRefresh or AutomaticRefresh
         /// The Caller should first check the state checking state using:
-        ///   if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverIdle, ConfigurationRetrieverRunning) != ConfigurationRetrieverRunning).
+        ///   if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle).
         /// </summary>
         private void UpdateCurrentConfiguration()
         {
