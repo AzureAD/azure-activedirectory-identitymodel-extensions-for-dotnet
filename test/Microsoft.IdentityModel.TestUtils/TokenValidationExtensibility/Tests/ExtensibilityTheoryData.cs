@@ -83,6 +83,8 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
         internal ValidationError? ValidationError { get; set; }
 
         internal int ExtraStackFrames { get; }
+
+        internal ExpectedException? ExpectedInnerException { get; set; }
     }
 }
 #nullable restore

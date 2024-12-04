@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Tokens;
 
+#nullable enable
 namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
 {
     public partial class ExtensibilityTesting
@@ -35,8 +36,31 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
                 else
                 {
                     ValidationError validationError = validationResult.UnwrapError();
-                    IdentityComparer.AreValidationErrorsEqual(validationError, theoryData.ValidationError, context);
+
+                    if (validationError is SignatureValidationError signatureValidationError &&
+                        signatureValidationError.InnerValidationError is not null)
+                    {
+                        // Algorithm validation errors are wrapped in a signature validation error
+                        // Other validation errors use the else branch.
+                        IdentityComparer.AreValidationErrorsEqual(
+                            signatureValidationError.InnerValidationError,
+                            theoryData.ValidationError,
+                            context);
+                    }
+                    else
+                    {
+                        IdentityComparer.AreValidationErrorsEqual(
+                            validationError,
+                            theoryData.ValidationError,
+                            context);
+                    }
+
                     theoryData.ExpectedException.ProcessException(validationError.GetException(), context);
+
+                    // In the algorithm validation case, we want to ensure the inner exception contains
+                    // the expected message and not just assert its type.
+                    if (theoryData.ExpectedInnerException is not null)
+                        theoryData.ExpectedInnerException.ProcessException(validationError.GetException().InnerException, context);
                 }
             }
             catch (Exception ex)
@@ -48,3 +72,4 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
         }
     }
 }
+#nullable restore

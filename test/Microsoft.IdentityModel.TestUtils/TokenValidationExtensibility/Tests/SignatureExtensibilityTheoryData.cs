@@ -6,21 +6,20 @@ using Microsoft.IdentityModel.Tokens;
 #nullable enable
 namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
 {
-    public class IssuerExtensibilityTheoryData : ExtensibilityTheoryData
+    public class SignatureExtensibilityTheoryData : ExtensibilityTheoryData
     {
-        internal IssuerExtensibilityTheoryData(
+        internal SignatureExtensibilityTheoryData(
             string testId,
             string tokenHandlerType,
-            string issuer,
-            IssuerValidationDelegateAsync issuerValidationDelegate,
+            SignatureValidationDelegate signatureValidationDelegate,
             int extraStackFrames) : base(testId, tokenHandlerType, extraStackFrames)
         {
             SecurityTokenDescriptor = new()
             {
-                Issuer = issuer,
+                Issuer = Default.Issuer,
             };
 
-            ValidationParameters.IssuerValidatorAsync = issuerValidationDelegate;
+            ValidationParameters.SignatureValidator = signatureValidationDelegate;
         }
     }
 }

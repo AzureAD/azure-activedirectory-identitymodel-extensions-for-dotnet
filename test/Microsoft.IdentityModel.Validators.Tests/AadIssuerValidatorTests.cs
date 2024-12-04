@@ -26,6 +26,13 @@ namespace Microsoft.IdentityModel.Validators.Tests
             var theoryData = new TheoryData<AadIssuerValidatorTheoryData>
             {
                 // Success cases
+                new AadIssuerValidatorTheoryData("V1_TemplateWithoutTrailingSlash_Matches_V1_IssuerWithoutTrailingSlash_Success")
+                {
+                    TemplatedIssuer = ValidatorConstants.AadIssuerV1CommonAuthorityWithoutTrailingSlash,
+                    TokenIssuer = ValidatorConstants.V1IssuerWithoutTrailingSlash,
+                    TenantIdClaim = ValidatorConstants.TenantIdAsGuid,
+                    ExpectedResult = true,
+                },
                 new AadIssuerValidatorTheoryData("V1_Template_Matches_V1_Issuer_Success")
                 {
                     TemplatedIssuer = ValidatorConstants.AadIssuerV1CommonAuthority,
@@ -106,7 +113,7 @@ namespace Microsoft.IdentityModel.Validators.Tests
 
     public class AadIssuerValidatorTheoryData : TheoryDataBase
     {
-        public AadIssuerValidatorTheoryData() {}
+        public AadIssuerValidatorTheoryData() { }
 
         public AadIssuerValidatorTheoryData(string testId) : base(testId) { }
 

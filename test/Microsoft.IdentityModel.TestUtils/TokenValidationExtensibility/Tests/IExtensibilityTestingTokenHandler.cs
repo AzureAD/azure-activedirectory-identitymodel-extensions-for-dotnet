@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml;
 using Microsoft.IdentityModel.Tokens.Saml2;
 
+#nullable enable
 namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
 {
     // This interface is used to test the extensibility of the ValidateTokenAsync method
@@ -93,3 +94,4 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
         }
     }
 }
+#nullable restore

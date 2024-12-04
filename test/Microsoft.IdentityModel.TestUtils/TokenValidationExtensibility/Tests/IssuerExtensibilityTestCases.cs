@@ -7,6 +7,7 @@ using Xunit;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Logging;
 
+#nullable enable
 namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
 {
     public partial class ExtensibilityTesting
@@ -203,3 +204,4 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
         }
     }
 }
+#nullable restore
