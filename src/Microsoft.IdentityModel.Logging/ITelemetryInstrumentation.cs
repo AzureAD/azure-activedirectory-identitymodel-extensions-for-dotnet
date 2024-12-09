@@ -1,22 +1,24 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
+
 namespace Microsoft.IdentityModel.Logging
 {
     internal interface ITelemetryInstrumentation
     {
         internal void LogOperationDuration(
-            long durationInMilliseconds);
+            TimeSpan operationDuration);
 
         internal void LogOperationDuration(
-            long durationInMilliseconds,
-            string exceptionType);
+            TimeSpan operationDuration,
+            Exception exception);
 
         internal void IncrementOperationCounter(
             string operationStatus);
 
         internal void IncrementOperationCounter(
             string operationStatus,
-            string exceptionType);
+            Exception exception);
     }
 }

@@ -196,7 +196,7 @@ namespace Microsoft.IdentityModel.Protocols
 
                             _telemetryClient.IncrementOperationCounter(
                                 TelemetryConstants.FirstRefresh,
-                                ex.GetType().ToString());
+                                ex);
 
                             throw LogHelper.LogExceptionMessage(ex);
                         }
@@ -211,7 +211,7 @@ namespace Microsoft.IdentityModel.Protocols
                     fetchMetadataFailure = ex;
                     _telemetryClient.IncrementOperationCounter(
                         TelemetryConstants.FirstRefresh,
-                        ex.GetType().ToString());
+                        ex);
 
                     LogHelper.LogExceptionMessage(
                         new InvalidOperationException(
@@ -269,7 +269,7 @@ namespace Microsoft.IdentityModel.Protocols
                     _docRetriever,
                     CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
 
-                long elapsedTime = (long)_timeProvider.GetElapsedTime(startTimestamp).TotalMilliseconds;
+                var elapsedTime = _timeProvider.GetElapsedTime(startTimestamp);
                 _telemetryClient.LogOperationDuration(elapsedTime);
 
                 if (_configValidator == null)
@@ -292,10 +292,10 @@ namespace Microsoft.IdentityModel.Protocols
             }
             catch (Exception ex)
             {
-                long elapsedTime = (long)_timeProvider.GetElapsedTime(startTimestamp).TotalMilliseconds;
+                var elapsedTime = _timeProvider.GetElapsedTime(startTimestamp);
                 _telemetryClient.LogOperationDuration(
                     elapsedTime,
-                    ex.GetType().ToString());
+                    ex);
 
                 LogHelper.LogExceptionMessage(
                     new InvalidOperationException(

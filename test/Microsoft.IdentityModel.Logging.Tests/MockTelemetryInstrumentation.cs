@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.IdentityModel.Logging.Tests
@@ -21,22 +22,22 @@ namespace Microsoft.IdentityModel.Logging.Tests
             ExportedItems.Add(TelemetryConstants.OperationStatusTag, operationStatus);
         }
 
-        public void IncrementOperationCounter(string operationStatus, string exceptionType)
+        public void IncrementOperationCounter(string operationStatus, Exception exception)
         {
             ExportedItems.Add(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
             ExportedItems.Add(TelemetryConstants.OperationStatusTag, operationStatus);
-            ExportedItems.Add(TelemetryConstants.ExceptionTypeTag, exceptionType);
+            ExportedItems.Add(TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString());
         }
 
-        public void LogOperationDuration(long durationInMilliseconds)
+        public void LogOperationDuration(TimeSpan operationDuration)
         {
             ExportedHistogramItems.Add(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
         }
 
-        public void LogOperationDuration(long durationInMilliseconds, string exceptionType)
+        public void LogOperationDuration(TimeSpan operationDuration, Exception exception)
         {
             ExportedHistogramItems.Add(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
-            ExportedHistogramItems.Add(TelemetryConstants.ExceptionTypeTag, exceptionType);
+            ExportedHistogramItems.Add(TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString());
         }
     }
 }

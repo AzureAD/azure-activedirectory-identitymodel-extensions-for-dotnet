@@ -17,15 +17,15 @@ Microsoft.IdentityModel.Logging.IdentityModelTelemetry
 Microsoft.IdentityModel.Logging.IdentityModelTelemetry.IdentityModelTelemetry() -> void
 Microsoft.IdentityModel.Logging.ITelemetryInstrumentation
 Microsoft.IdentityModel.Logging.ITelemetryInstrumentation.IncrementOperationCounter(string operationStatus) -> void
-Microsoft.IdentityModel.Logging.ITelemetryInstrumentation.IncrementOperationCounter(string operationStatus, string exceptionType) -> void
-Microsoft.IdentityModel.Logging.ITelemetryInstrumentation.LogOperationDuration(long durationInMilliseconds) -> void
-Microsoft.IdentityModel.Logging.ITelemetryInstrumentation.LogOperationDuration(long durationInMilliseconds, string exceptionType) -> void
+Microsoft.IdentityModel.Logging.ITelemetryInstrumentation.IncrementOperationCounter(string operationStatus, System.Exception exception) -> void
+Microsoft.IdentityModel.Logging.ITelemetryInstrumentation.LogOperationDuration(System.TimeSpan operationDuration) -> void
+Microsoft.IdentityModel.Logging.ITelemetryInstrumentation.LogOperationDuration(System.TimeSpan operationDuration, System.Exception exception) -> void
 Microsoft.IdentityModel.Logging.TelemetryConstants
 Microsoft.IdentityModel.Logging.TelemetryInstrumentation
 Microsoft.IdentityModel.Logging.TelemetryInstrumentation.IncrementOperationCounter(string operationStatus) -> void
-Microsoft.IdentityModel.Logging.TelemetryInstrumentation.IncrementOperationCounter(string operationStatus, string exceptionType) -> void
-Microsoft.IdentityModel.Logging.TelemetryInstrumentation.LogOperationDuration(long durationInMilliseconds) -> void
-Microsoft.IdentityModel.Logging.TelemetryInstrumentation.LogOperationDuration(long durationInMilliseconds, string exceptionType) -> void
+Microsoft.IdentityModel.Logging.TelemetryInstrumentation.IncrementOperationCounter(string operationStatus, System.Exception exception) -> void
+Microsoft.IdentityModel.Logging.TelemetryInstrumentation.LogOperationDuration(System.TimeSpan operationDuration) -> void
+Microsoft.IdentityModel.Logging.TelemetryInstrumentation.LogOperationDuration(System.TimeSpan operationDuration, System.Exception exception) -> void
 Microsoft.IdentityModel.Logging.TelemetryInstrumentation.TelemetryInstrumentation() -> void
 static Microsoft.IdentityModel.Logging.IdentityModelTelemetry.IncrementOperationCounter(in System.Diagnostics.TagList tagList) -> void
 static Microsoft.IdentityModel.Logging.IdentityModelTelemetry.RecordTotalDurationHistogram(long requestDurationInMs, in System.Diagnostics.TagList tagList) -> void

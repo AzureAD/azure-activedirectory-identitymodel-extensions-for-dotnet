@@ -1,12 +1,18 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Diagnostics;
 
 namespace Microsoft.IdentityModel.Logging
 {
     internal class TelemetryInstrumentation : ITelemetryInstrumentation
     {
+        static TagList ClientVerTagList = new TagList()
+        {
+            { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer }
+        };
+
         public void IncrementOperationCounter(string operationStatus)
         {
             var tagList = new TagList()
@@ -18,36 +24,33 @@ namespace Microsoft.IdentityModel.Logging
             IdentityModelTelemetry.IncrementOperationCounter(tagList);
         }
 
-        public void IncrementOperationCounter(string operationStatus, string exceptionType)
+        public void IncrementOperationCounter(string operationStatus, Exception exception)
         {
             var tagList = new TagList()
             {
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.OperationStatusTag, operationStatus },
-                { TelemetryConstants.ExceptionTypeTag, exceptionType }
+                { TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString() }
             };
 
             IdentityModelTelemetry.IncrementOperationCounter(tagList);
         }
 
-        public void LogOperationDuration(long durationInMilliseconds)
+        public void LogOperationDuration(TimeSpan operationDuration)
         {
-            var tagList = new TagList()
-            {
-                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer }
-            };
-
-            IdentityModelTelemetry.RecordTotalDurationHistogram(durationInMilliseconds, tagList);
+            long durationInMilliseconds = (long)operationDuration.TotalMilliseconds;
+            IdentityModelTelemetry.RecordTotalDurationHistogram(durationInMilliseconds, ClientVerTagList);
         }
 
-        public void LogOperationDuration(long durationInMilliseconds, string exceptionType)
+        public void LogOperationDuration(TimeSpan operationDuration, Exception exception)
         {
             var tagList = new TagList()
             {
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
-                { TelemetryConstants.ExceptionTypeTag, exceptionType }
+                { TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString() }
             };
 
+            long durationInMilliseconds = (long)operationDuration.TotalMilliseconds;
             IdentityModelTelemetry.RecordTotalDurationHistogram(durationInMilliseconds, tagList);
         }
     }
