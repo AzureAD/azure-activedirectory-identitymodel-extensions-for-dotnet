@@ -3,8 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.IdentityModel.Logging;
 
-namespace Microsoft.IdentityModel.Logging.Tests
+namespace Microsoft.IdentityModel.Tokens.Telemetry.Tests
 {
     public class MockTelemetryInstrumentation : ITelemetryInstrumentation
     {

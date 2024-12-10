@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-namespace Microsoft.IdentityModel.Logging
+namespace Microsoft.IdentityModel.Tokens.Telemetry
 {
     internal static class TelemetryConstants
     {

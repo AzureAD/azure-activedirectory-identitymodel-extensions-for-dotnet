@@ -3,11 +3,12 @@
 
 using System.Collections.Generic;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Logging.Tests;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Telemetry;
+using Microsoft.IdentityModel.Tokens.Telemetry.Tests;
 using Microsoft.IdentityModel.Validators;
 using Xunit;
 

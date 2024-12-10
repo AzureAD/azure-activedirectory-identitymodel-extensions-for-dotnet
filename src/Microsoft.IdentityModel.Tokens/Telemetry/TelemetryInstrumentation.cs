@@ -3,8 +3,9 @@
 
 using System;
 using System.Diagnostics;
+using Microsoft.IdentityModel.Logging;
 
-namespace Microsoft.IdentityModel.Logging
+namespace Microsoft.IdentityModel.Tokens.Telemetry
 {
     internal class TelemetryInstrumentation : ITelemetryInstrumentation
     {

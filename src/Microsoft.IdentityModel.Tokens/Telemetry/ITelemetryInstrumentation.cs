@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.IdentityModel.Logging
+namespace Microsoft.IdentityModel.Tokens.Telemetry
 {
     internal interface ITelemetryInstrumentation
     {
