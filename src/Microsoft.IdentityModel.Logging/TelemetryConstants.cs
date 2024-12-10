@@ -11,14 +11,17 @@ namespace Microsoft.IdentityModel.Logging
         public const string OperationStatusTag = "OperationStatus";
         public const string ExceptionTypeTag = "ExceptionType";
 
-        // Configuration manager refresh statuses
-        public const string Automatic = "Microsoft.IdentityModel.Protocols.Automatic";
-        public const string Direct = "Microsoft.IdentityModel.Protocols.Direct";
-        public const string FirstRefresh = "Microsoft.IdentityModel.Protocols.FirstRefresh";
-        public const string LKG = "Microsoft.IdentityModel.Protocols.LastKnownGood";
+        public static class Protocols
+        {
+            // Configuration manager refresh statuses
+            public const string Automatic = "Automatic";
+            public const string Direct = "Direct";
+            public const string FirstRefresh = "FirstRefresh";
+            public const string LKG = "LastKnownGood";
 
-        // Configuration manager exception types
-        public const string ConfigurationInvalid = "Microsoft.IdentityModel.Protocols.ConfigurationInvalid";
-        public const string ConfigurationRetrievalFailed = "Microsoft.IdentityModel.Protocols.ConfigurationRetrievalFailed";
+            // Configuration manager exception types
+            public const string ConfigurationInvalid = "ConfigurationInvalid";
+            public const string ConfigurationRetrievalFailed = "ConfigurationRetrievalFailed";
+        }
     }
 }

@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var expectedCounterTagList = new Dictionary<string, object>
             {
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
-                { TelemetryConstants.OperationStatusTag, TelemetryConstants.LKG }
+                { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.LKG }
             };
 
             Assert.Equal(expectedCounterTagList, testTelemetryClient.ExportedItems);

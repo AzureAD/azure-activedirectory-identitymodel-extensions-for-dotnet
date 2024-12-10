@@ -1,34 +1,35 @@
 const Microsoft.IdentityModel.Logging.IdentityModelTelemetry.IdentityModelConfigurationManagerCounterDescription = "Counter capturing configuration manager operations." -> string
-const Microsoft.IdentityModel.Logging.IdentityModelTelemetry.IdentityModelConfigurationManagerCounterName = "IdentityModelConfigurationManagerCounter" -> string
+const Microsoft.IdentityModel.Logging.IdentityModelTelemetry.IdentityModelConfigurationManagerCounterName = "IdentityModelConfigurationManager" -> string
 const Microsoft.IdentityModel.Logging.IdentityModelTelemetry.MeterName = "MicrosoftIdentityModel_Meter" -> string
 const Microsoft.IdentityModel.Logging.IdentityModelTelemetry.ServiceName = "MicrosoftIdentityModel" -> string
 const Microsoft.IdentityModel.Logging.IdentityModelTelemetry.TotalDurationHistogramName = "IdentityModelConfigurationRequestTotalDurationInMS" -> string
-const Microsoft.IdentityModel.Logging.TelemetryConstants.Automatic = "Microsoft.IdentityModel.Protocols.Automatic" -> string
-const Microsoft.IdentityModel.Logging.TelemetryConstants.ConfigurationInvalid = "Microsoft.IdentityModel.Protocols.ConfigurationInvalid" -> string
-const Microsoft.IdentityModel.Logging.TelemetryConstants.ConfigurationRetrievalFailed = "Microsoft.IdentityModel.Protocols.ConfigurationRetrievalFailed" -> string
-const Microsoft.IdentityModel.Logging.TelemetryConstants.Direct = "Microsoft.IdentityModel.Protocols.Direct" -> string
 const Microsoft.IdentityModel.Logging.TelemetryConstants.ExceptionTypeTag = "ExceptionType" -> string
-const Microsoft.IdentityModel.Logging.TelemetryConstants.FirstRefresh = "Microsoft.IdentityModel.Protocols.FirstRefresh" -> string
 const Microsoft.IdentityModel.Logging.TelemetryConstants.IdentityModelVersionTag = "IdentityModelVersion" -> string
-const Microsoft.IdentityModel.Logging.TelemetryConstants.LKG = "Microsoft.IdentityModel.Protocols.LastKnownGood" -> string
 const Microsoft.IdentityModel.Logging.TelemetryConstants.MetadataAddressTag = "MetadataAddress" -> string
 const Microsoft.IdentityModel.Logging.TelemetryConstants.OperationStatusTag = "OperationStatus" -> string
+const Microsoft.IdentityModel.Logging.TelemetryConstants.Protocols.Automatic = "Automatic" -> string
+const Microsoft.IdentityModel.Logging.TelemetryConstants.Protocols.ConfigurationInvalid = "ConfigurationInvalid" -> string
+const Microsoft.IdentityModel.Logging.TelemetryConstants.Protocols.ConfigurationRetrievalFailed = "ConfigurationRetrievalFailed" -> string
+const Microsoft.IdentityModel.Logging.TelemetryConstants.Protocols.Direct = "Direct" -> string
+const Microsoft.IdentityModel.Logging.TelemetryConstants.Protocols.FirstRefresh = "FirstRefresh" -> string
+const Microsoft.IdentityModel.Logging.TelemetryConstants.Protocols.LKG = "LastKnownGood" -> string
 Microsoft.IdentityModel.Logging.IdentityModelTelemetry
 Microsoft.IdentityModel.Logging.IdentityModelTelemetry.IdentityModelTelemetry() -> void
 Microsoft.IdentityModel.Logging.ITelemetryInstrumentation
-Microsoft.IdentityModel.Logging.ITelemetryInstrumentation.IncrementOperationCounter(string operationStatus) -> void
-Microsoft.IdentityModel.Logging.ITelemetryInstrumentation.IncrementOperationCounter(string operationStatus, System.Exception exception) -> void
-Microsoft.IdentityModel.Logging.ITelemetryInstrumentation.LogOperationDuration(System.TimeSpan operationDuration) -> void
-Microsoft.IdentityModel.Logging.ITelemetryInstrumentation.LogOperationDuration(System.TimeSpan operationDuration, System.Exception exception) -> void
+Microsoft.IdentityModel.Logging.ITelemetryInstrumentation.IncrementConfigurationRefreshRequestCounter(string operationStatus) -> void
+Microsoft.IdentityModel.Logging.ITelemetryInstrumentation.IncrementConfigurationRefreshRequestCounter(string operationStatus, System.Exception exception) -> void
+Microsoft.IdentityModel.Logging.ITelemetryInstrumentation.LogConfigurationRetrievalDuration(System.TimeSpan operationDuration) -> void
+Microsoft.IdentityModel.Logging.ITelemetryInstrumentation.LogConfigurationRetrievalDuration(System.TimeSpan operationDuration, System.Exception exception) -> void
 Microsoft.IdentityModel.Logging.TelemetryConstants
+Microsoft.IdentityModel.Logging.TelemetryConstants.Protocols
 Microsoft.IdentityModel.Logging.TelemetryInstrumentation
-Microsoft.IdentityModel.Logging.TelemetryInstrumentation.IncrementOperationCounter(string operationStatus) -> void
-Microsoft.IdentityModel.Logging.TelemetryInstrumentation.IncrementOperationCounter(string operationStatus, System.Exception exception) -> void
-Microsoft.IdentityModel.Logging.TelemetryInstrumentation.LogOperationDuration(System.TimeSpan operationDuration) -> void
-Microsoft.IdentityModel.Logging.TelemetryInstrumentation.LogOperationDuration(System.TimeSpan operationDuration, System.Exception exception) -> void
+Microsoft.IdentityModel.Logging.TelemetryInstrumentation.IncrementConfigurationRefreshRequestCounter(string operationStatus) -> void
+Microsoft.IdentityModel.Logging.TelemetryInstrumentation.IncrementConfigurationRefreshRequestCounter(string operationStatus, System.Exception exception) -> void
+Microsoft.IdentityModel.Logging.TelemetryInstrumentation.LogConfigurationRetrievalDuration(System.TimeSpan operationDuration) -> void
+Microsoft.IdentityModel.Logging.TelemetryInstrumentation.LogConfigurationRetrievalDuration(System.TimeSpan operationDuration, System.Exception exception) -> void
 Microsoft.IdentityModel.Logging.TelemetryInstrumentation.TelemetryInstrumentation() -> void
-static Microsoft.IdentityModel.Logging.IdentityModelTelemetry.IncrementOperationCounter(in System.Diagnostics.TagList tagList) -> void
-static Microsoft.IdentityModel.Logging.IdentityModelTelemetry.RecordTotalDurationHistogram(long requestDurationInMs, in System.Diagnostics.TagList tagList) -> void
+static Microsoft.IdentityModel.Logging.IdentityModelTelemetry.IncrementConfigurationRefreshRequestCounter(in System.Diagnostics.TagList tagList) -> void
+static Microsoft.IdentityModel.Logging.IdentityModelTelemetry.RecordConfigurationRetrievalDurationHistogram(long requestDurationInMs, in System.Diagnostics.TagList tagList) -> void
 static readonly Microsoft.IdentityModel.Logging.IdentityModelTelemetry.ConfigurationManagerCounter -> System.Diagnostics.Metrics.Counter<long>
 static readonly Microsoft.IdentityModel.Logging.IdentityModelTelemetry.IdentityModelMeter -> System.Diagnostics.Metrics.Meter
 static readonly Microsoft.IdentityModel.Logging.IdentityModelTelemetry.TotalDurationHistogram -> System.Diagnostics.Metrics.Histogram<long>

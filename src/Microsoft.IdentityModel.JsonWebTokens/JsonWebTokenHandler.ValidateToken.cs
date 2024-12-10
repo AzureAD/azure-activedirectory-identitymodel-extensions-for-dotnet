@@ -513,8 +513,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     // where a new valid configuration was somehow published during validation time.
                     if (currentConfiguration != null)
                     {
-                        _telemetryClient.IncrementOperationCounter(
-                            TelemetryConstants.LKG);
+                        _telemetryClient.IncrementConfigurationRefreshRequestCounter(
+                            TelemetryConstants.Protocols.LKG);
 
                         validationParameters.ConfigurationManager.RequestRefresh();
                         validationParameters.RefreshBeforeValidation = true;

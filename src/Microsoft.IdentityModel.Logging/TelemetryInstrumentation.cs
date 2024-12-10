@@ -8,12 +8,12 @@ namespace Microsoft.IdentityModel.Logging
 {
     internal class TelemetryInstrumentation : ITelemetryInstrumentation
     {
-        static TagList ClientVerTagList = new TagList()
+        static TagList ClientVerTagList = new()
         {
             { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer }
         };
 
-        public void IncrementOperationCounter(string operationStatus)
+        public void IncrementConfigurationRefreshRequestCounter(string operationStatus)
         {
             var tagList = new TagList()
             {
@@ -21,10 +21,10 @@ namespace Microsoft.IdentityModel.Logging
                 { TelemetryConstants.OperationStatusTag, operationStatus }
             };
 
-            IdentityModelTelemetry.IncrementOperationCounter(tagList);
+            IdentityModelTelemetry.IncrementConfigurationRefreshRequestCounter(tagList);
         }
 
-        public void IncrementOperationCounter(string operationStatus, Exception exception)
+        public void IncrementConfigurationRefreshRequestCounter(string operationStatus, Exception exception)
         {
             var tagList = new TagList()
             {
@@ -33,16 +33,16 @@ namespace Microsoft.IdentityModel.Logging
                 { TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString() }
             };
 
-            IdentityModelTelemetry.IncrementOperationCounter(tagList);
+            IdentityModelTelemetry.IncrementConfigurationRefreshRequestCounter(tagList);
         }
 
-        public void LogOperationDuration(TimeSpan operationDuration)
+        public void LogConfigurationRetrievalDuration(TimeSpan operationDuration)
         {
             long durationInMilliseconds = (long)operationDuration.TotalMilliseconds;
-            IdentityModelTelemetry.RecordTotalDurationHistogram(durationInMilliseconds, ClientVerTagList);
+            IdentityModelTelemetry.RecordConfigurationRetrievalDurationHistogram(durationInMilliseconds, ClientVerTagList);
         }
 
-        public void LogOperationDuration(TimeSpan operationDuration, Exception exception)
+        public void LogConfigurationRetrievalDuration(TimeSpan operationDuration, Exception exception)
         {
             var tagList = new TagList()
             {
@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.Logging
             };
 
             long durationInMilliseconds = (long)operationDuration.TotalMilliseconds;
-            IdentityModelTelemetry.RecordTotalDurationHistogram(durationInMilliseconds, tagList);
+            IdentityModelTelemetry.RecordConfigurationRetrievalDurationHistogram(durationInMilliseconds, tagList);
         }
     }
 }

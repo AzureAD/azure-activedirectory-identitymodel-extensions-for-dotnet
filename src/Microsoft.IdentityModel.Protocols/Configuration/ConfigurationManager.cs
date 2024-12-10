@@ -194,23 +194,23 @@ namespace Microsoft.IdentityModel.Protocols
                                     LogMessages.IDX20810,
                                     result.ErrorMessage));
 
-                            _telemetryClient.IncrementOperationCounter(
-                                TelemetryConstants.FirstRefresh,
+                            _telemetryClient.IncrementConfigurationRefreshRequestCounter(
+                                TelemetryConstants.Protocols.FirstRefresh,
                                 ex);
 
                             throw LogHelper.LogExceptionMessage(ex);
                         }
                     }
 
-                    _telemetryClient.IncrementOperationCounter(TelemetryConstants.FirstRefresh);
+                    _telemetryClient.IncrementConfigurationRefreshRequestCounter(TelemetryConstants.Protocols.FirstRefresh);
                     UpdateConfiguration(configuration);
                 }
                 catch (Exception ex)
                 {
                     // counter for failure first time
                     fetchMetadataFailure = ex;
-                    _telemetryClient.IncrementOperationCounter(
-                        TelemetryConstants.FirstRefresh,
+                    _telemetryClient.IncrementConfigurationRefreshRequestCounter(
+                        TelemetryConstants.Protocols.FirstRefresh,
                         ex);
 
                     LogHelper.LogExceptionMessage(
@@ -231,7 +231,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
                 {
-                    _telemetryClient.IncrementOperationCounter(TelemetryConstants.Automatic);
+                    _telemetryClient.IncrementConfigurationRefreshRequestCounter(TelemetryConstants.Protocols.Automatic);
                     _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
                 }
             }
@@ -270,7 +270,7 @@ namespace Microsoft.IdentityModel.Protocols
                     CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
 
                 var elapsedTime = _timeProvider.GetElapsedTime(startTimestamp);
-                _telemetryClient.LogOperationDuration(elapsedTime);
+                _telemetryClient.LogConfigurationRetrievalDuration(elapsedTime);
 
                 if (_configValidator == null)
                 {
@@ -293,7 +293,7 @@ namespace Microsoft.IdentityModel.Protocols
             catch (Exception ex)
             {
                 var elapsedTime = _timeProvider.GetElapsedTime(startTimestamp);
-                _telemetryClient.LogOperationDuration(
+                _telemetryClient.LogConfigurationRetrievalDuration(
                     elapsedTime,
                     ex);
 
@@ -341,7 +341,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             DateTimeOffset now = DateTimeOffset.UtcNow;
 
-            _telemetryClient.IncrementOperationCounter(TelemetryConstants.Direct);
+            _telemetryClient.IncrementConfigurationRefreshRequestCounter(TelemetryConstants.Protocols.Direct);
             if (now >= DateTimeUtil.Add(_lastRequestRefresh.UtcDateTime, RefreshInterval) || _isFirstRefreshRequest)
             {
                 _isFirstRefreshRequest = false;

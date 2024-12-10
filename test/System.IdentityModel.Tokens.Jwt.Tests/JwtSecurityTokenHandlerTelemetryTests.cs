@@ -53,7 +53,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
             var expectedCounterTagList = new Dictionary<string, object>
             {
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
-                { TelemetryConstants.OperationStatusTag, TelemetryConstants.LKG },
+                { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.LKG },
             };
 
             Assert.Equal(expectedCounterTagList, testTelemetryClient.ExportedItems);

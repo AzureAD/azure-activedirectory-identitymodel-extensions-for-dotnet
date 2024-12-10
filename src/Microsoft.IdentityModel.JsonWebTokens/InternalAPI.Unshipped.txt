@@ -1,4 +1,22 @@
+const Microsoft.IdentityModel.Logging.TelemetryConstants.ExceptionTypeTag = "ExceptionType" -> string
+const Microsoft.IdentityModel.Logging.TelemetryConstants.IdentityModelVersionTag = "IdentityModelVersion" -> string
+const Microsoft.IdentityModel.Logging.TelemetryConstants.MetadataAddressTag = "MetadataAddress" -> string
+const Microsoft.IdentityModel.Logging.TelemetryConstants.OperationStatusTag = "OperationStatus" -> string
+const Microsoft.IdentityModel.Logging.TelemetryConstants.Protocols.Automatic = "Microsoft.IdentityModel.Protocols.Automatic" -> string
+const Microsoft.IdentityModel.Logging.TelemetryConstants.Protocols.ConfigurationInvalid = "Microsoft.IdentityModel.Protocols.ConfigurationInvalid" -> string
+const Microsoft.IdentityModel.Logging.TelemetryConstants.Protocols.ConfigurationRetrievalFailed = "Microsoft.IdentityModel.Protocols.ConfigurationRetrievalFailed" -> string
+const Microsoft.IdentityModel.Logging.TelemetryConstants.Protocols.Direct = "Microsoft.IdentityModel.Protocols.Direct" -> string
+const Microsoft.IdentityModel.Logging.TelemetryConstants.Protocols.FirstRefresh = "Microsoft.IdentityModel.Protocols.FirstRefresh" -> string
+const Microsoft.IdentityModel.Logging.TelemetryConstants.Protocols.LKG = "Microsoft.IdentityModel.Protocols.LastKnownGood" -> string
 Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler._telemetryClient -> Microsoft.IdentityModel.Logging.ITelemetryInstrumentation
+Microsoft.IdentityModel.Logging.TelemetryConstants
+Microsoft.IdentityModel.Logging.TelemetryConstants.Protocols
+Microsoft.IdentityModel.Logging.TelemetryInstrumentation
+Microsoft.IdentityModel.Logging.TelemetryInstrumentation.IncrementOperationCounter(string operationStatus) -> void
+Microsoft.IdentityModel.Logging.TelemetryInstrumentation.IncrementOperationCounter(string operationStatus, System.Exception exception) -> void
+Microsoft.IdentityModel.Logging.TelemetryInstrumentation.LogOperationDuration(System.TimeSpan operationDuration) -> void
+Microsoft.IdentityModel.Logging.TelemetryInstrumentation.LogOperationDuration(System.TimeSpan operationDuration, System.Exception exception) -> void
+Microsoft.IdentityModel.Logging.TelemetryInstrumentation.TelemetryInstrumentation() -> void
 static Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.CreateToken(string payload, Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor tokenDescriptor) -> string
 static Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.EncryptToken(byte[] innerTokenUtf8Bytes, Microsoft.IdentityModel.Tokens.EncryptingCredentials encryptingCredentials, string compressionAlgorithm, System.Collections.Generic.IDictionary<string, object> additionalHeaderClaims, string tokenType, bool includeKeyIdInHeader) -> string
 static Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.EncryptToken(byte[] innerTokenUtf8Bytes, Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor tokenDescriptor) -> string

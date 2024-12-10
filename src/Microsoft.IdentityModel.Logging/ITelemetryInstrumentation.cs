@@ -7,17 +7,17 @@ namespace Microsoft.IdentityModel.Logging
 {
     internal interface ITelemetryInstrumentation
     {
-        internal void LogOperationDuration(
+        internal void LogConfigurationRetrievalDuration(
             TimeSpan operationDuration);
 
-        internal void LogOperationDuration(
+        internal void LogConfigurationRetrievalDuration(
             TimeSpan operationDuration,
             Exception exception);
 
-        internal void IncrementOperationCounter(
+        internal void IncrementConfigurationRefreshRequestCounter(
             string operationStatus);
 
-        internal void IncrementOperationCounter(
+        internal void IncrementConfigurationRefreshRequestCounter(
             string operationStatus,
             Exception exception);
     }

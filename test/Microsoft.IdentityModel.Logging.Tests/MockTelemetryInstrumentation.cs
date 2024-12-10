@@ -16,25 +16,25 @@ namespace Microsoft.IdentityModel.Logging.Tests
             ExportedItems.Clear();
         }
 
-        public void IncrementOperationCounter(string operationStatus)
+        public void IncrementConfigurationRefreshRequestCounter(string operationStatus)
         {
             ExportedItems.Add(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
             ExportedItems.Add(TelemetryConstants.OperationStatusTag, operationStatus);
         }
 
-        public void IncrementOperationCounter(string operationStatus, Exception exception)
+        public void IncrementConfigurationRefreshRequestCounter(string operationStatus, Exception exception)
         {
             ExportedItems.Add(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
             ExportedItems.Add(TelemetryConstants.OperationStatusTag, operationStatus);
             ExportedItems.Add(TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString());
         }
 
-        public void LogOperationDuration(TimeSpan operationDuration)
+        public void LogConfigurationRetrievalDuration(TimeSpan operationDuration)
         {
             ExportedHistogramItems.Add(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
         }
 
-        public void LogOperationDuration(TimeSpan operationDuration, Exception exception)
+        public void LogConfigurationRetrievalDuration(TimeSpan operationDuration, Exception exception)
         {
             ExportedHistogramItems.Add(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
             ExportedHistogramItems.Add(TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString());

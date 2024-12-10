@@ -10,35 +10,12 @@ using Microsoft.IdentityModel.Logging.Tests;
 using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration;
 using Microsoft.IdentityModel.TestUtils;
-using OpenTelemetry;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 {
     public class ConfigurationManagerTelemetryTests
     {
-        readonly List<Metric> ExportedItems;
-        readonly MeterProvider MeterProvider;
-
-        public ConfigurationManagerTelemetryTests()
-        {
-            ExportedItems = new List<Metric>();
-
-            MeterProvider = Sdk.CreateMeterProviderBuilder()
-                .SetResourceBuilder(ResourceBuilder.CreateDefault())
-                .AddMeter(IdentityModelTelemetry.MeterName)
-                .AddInMemoryExporter(ExportedItems, (options) =>
-                {
-                    options.PeriodicExportingMetricReaderOptions = new PeriodicExportingMetricReaderOptions
-                    {
-                        ExportIntervalMilliseconds = 10,
-                    };
-                })
-                .Build();
-        }
-
         [Fact]
         public async Task RequestRefresh_ExpectedTagsExist()
         {
@@ -66,7 +43,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var expectedCounterTagList = new Dictionary<string, object>
             {
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
-                { TelemetryConstants.OperationStatusTag, TelemetryConstants.Direct },
+                { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.Direct },
             };
 
             var expectedHistogramTagList = new Dictionary<string, object>
@@ -122,7 +99,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ExpectedTagList = new Dictionary<string, object>
                     {
                         { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
-                        { TelemetryConstants.OperationStatusTag, TelemetryConstants.FirstRefresh },
+                        { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.FirstRefresh },
                     }
                 },
                 new ConfigurationManagerTelemetryTheoryData<OpenIdConnectConfiguration>("Failure-invalid metadata address")
@@ -132,7 +109,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ExpectedTagList = new Dictionary<string, object>
                     {
                         { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
-                        { TelemetryConstants.OperationStatusTag, TelemetryConstants.FirstRefresh },
+                        { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.FirstRefresh },
                         { TelemetryConstants.ExceptionTypeTag, new IOException().GetType().ToString() },
                     }
                 },
@@ -145,7 +122,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ExpectedTagList = new Dictionary<string, object>
                     {
                         { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
-                        { TelemetryConstants.OperationStatusTag, TelemetryConstants.FirstRefresh },
+                        { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.FirstRefresh },
                         { TelemetryConstants.ExceptionTypeTag, new InvalidConfigurationException().GetType().ToString() },
                     }
                 },
@@ -157,7 +134,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ExpectedTagList = new Dictionary<string, object>
                     {
                         { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
-                        { TelemetryConstants.OperationStatusTag, TelemetryConstants.Automatic },
+                        { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.Automatic },
                     }
                 },
             };
