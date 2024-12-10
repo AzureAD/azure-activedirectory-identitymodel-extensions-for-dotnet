@@ -8,6 +8,7 @@ const Microsoft.IdentityModel.Tokens.LogMessages.IDX10273 = "IDX10273: Algorithm
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10274 = "IDX10274: IssuerSigningKeyValidationDelegate threw an exception, see inner exception." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10275 = "IDX10275: TokenTypeValidationDelegate threw an exception, see inner exception." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10276 = "IDX10276: TokenReplayValidationDelegate threw an exception, see inner exception." -> string
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10277 = "IDX10277: RequireAudience property on ValidationParameters is set to false. Exiting without validating the audience." -> string
 Microsoft.IdentityModel.Tokens.AlgorithmValidationError
 Microsoft.IdentityModel.Tokens.AlgorithmValidationError.AlgorithmValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, Microsoft.IdentityModel.Tokens.ValidationFailureType validationFailureType, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, string invalidAlgorithm, System.Exception innerException = null) -> void
 Microsoft.IdentityModel.Tokens.AlgorithmValidationError.InvalidAlgorithm.get -> string

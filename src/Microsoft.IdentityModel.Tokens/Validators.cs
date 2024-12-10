@@ -87,6 +87,12 @@ namespace Microsoft.IdentityModel.Tokens
                 return;
             }
 
+            if (!validationParameters.RequireAudience && !audiences.Any())
+            {
+                LogHelper.LogWarning(LogMessages.IDX10277);
+                return;
+            }
+
             if (audiences == null)
                 throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAudienceException(LogMessages.IDX10207) { InvalidAudience = null });
 
