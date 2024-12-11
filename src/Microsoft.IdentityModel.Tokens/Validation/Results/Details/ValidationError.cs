@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Logging;
 
 #nullable enable
@@ -183,6 +184,11 @@ namespace Microsoft.IdentityModel.Tokens
             return exception;
         }
 
+        internal void Log(ILogger logger)
+        {
+            Logger.TokenValidationFailed(logger, FailureType.Name, MessageDetail.Message);
+        }
+
         internal static ValidationError NullParameter(string parameterName, StackFrame stackFrame) => new(
             MessageDetail.NullParameter(parameterName),
             ValidationFailureType.NullArgument,
@@ -261,6 +267,27 @@ namespace Microsoft.IdentityModel.Tokens
 
         // ConcurrentDictionary is thread-safe and only locks when adding a new item.
         private static ConcurrentDictionary<string, StackFrame> CachedStackFrames { get; } = new();
+
+        private static class Logger
+        {
+            private static readonly Action<ILogger, string, string, Exception?> s_tokenValidationFailed =
+                LoggerMessage.Define<string, string>(
+                    LogLevel.Information,
+                    LoggingEventId.TokenValidationFailed,
+                    "[MsIdentityModel] The token validation was unsuccessful due to: {ValidationFailureType} " +
+                    "Error message provided: {ValidationErrorMessage}");
+
+            /// <summary>
+            /// Logger for handling failures in token validation.
+            /// </summary>
+            /// <param name="logger">ILogger.</param>
+            /// <param name="validationFailureType">The cause of the failure.</param>
+            /// <param name="messageDetail">The message provided as part of the failure.</param>
+            public static void TokenValidationFailed(
+                ILogger logger,
+                string validationFailureType,
+                string messageDetail) => s_tokenValidationFailed(logger, validationFailureType, messageDetail, null);
+        }
     }
 }
 #nullable restore

@@ -25,7 +25,7 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
             ValidationParameters = CreateValidationParametersSkippingValidations();
         }
 
-        private IExtensibilityTestingTokenHandler CreateSecurityTokenHandlerForType(string tokenHandlerType)
+        internal static ITestingTokenHandler CreateSecurityTokenHandlerForType(string tokenHandlerType)
         {
             return tokenHandlerType switch
             {
@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
             set => _securityTokenDescriptor = PopulateSubjectForSecurityTokenDescriptor(value, _tokenHandlerType);
         }
 
-        internal IExtensibilityTestingTokenHandler TokenHandler { get; }
+        internal ITestingTokenHandler TokenHandler { get; }
 
         public bool IsValid { get; set; }
 
