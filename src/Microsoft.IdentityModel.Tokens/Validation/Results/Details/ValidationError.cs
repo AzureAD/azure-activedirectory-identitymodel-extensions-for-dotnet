@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Logging;
 
 #nullable enable
@@ -22,13 +23,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// Creates an instance of <see cref="ValidationError"/>
         /// </summary>
         /// <param name="messageDetail"/> contains information about the exception that is used to generate the exception message.
-        /// <param name="failureType"/> is the type of validation failure that occurred.
+        /// <param name="validationFailureType"/> is the type of validation failure that occurred.
         /// <param name="exceptionType"/> is the type of exception that occurred.
         /// <param name="stackFrame"/> is the stack frame where the exception occurred.
         /// <param name="innerException"/> is the inner exception that occurred.
         internal ValidationError(
             MessageDetail messageDetail,
-            ValidationFailureType failureType,
+            ValidationFailureType validationFailureType,
             Type exceptionType,
             StackFrame stackFrame,
             Exception? innerException = null)
@@ -36,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens
             InnerException = innerException;
             MessageDetail = messageDetail;
             _exceptionType = exceptionType;
-            FailureType = failureType;
+            FailureType = validationFailureType;
             StackFrames = new List<StackFrame>(4)
             {
                 stackFrame
@@ -66,6 +67,8 @@ namespace Microsoft.IdentityModel.Tokens
                     exception = new SecurityTokenInvalidIssuerException(MessageDetail.Message);
                 else if (exceptionType == typeof(SecurityTokenInvalidLifetimeException))
                     exception = new SecurityTokenInvalidLifetimeException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenInvalidOperationException))
+                    exception = new SecurityTokenInvalidOperationException(MessageDetail.Message);
                 else if (exceptionType == typeof(SecurityTokenReplayDetectedException))
                     exception = new SecurityTokenReplayDetectedException(MessageDetail.Message);
                 else if (exceptionType == typeof(SecurityTokenReplayAddFailedException))
@@ -123,6 +126,8 @@ namespace Microsoft.IdentityModel.Tokens
                     exception = new SecurityTokenInvalidIssuerException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenInvalidLifetimeException))
                     exception = new SecurityTokenInvalidLifetimeException(MessageDetail.Message, innerException);
+                else if (exceptionType == typeof(SecurityTokenInvalidOperationException))
+                    exception = new SecurityTokenInvalidOperationException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenReplayDetectedException))
                     exception = new SecurityTokenReplayDetectedException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenReplayAddFailedException))
@@ -177,6 +182,11 @@ namespace Microsoft.IdentityModel.Tokens
                 securityTokenArgumentNullException.SetValidationError(this);
 
             return exception;
+        }
+
+        internal void Log(ILogger logger)
+        {
+            Logger.TokenValidationFailed(logger, FailureType.Name, MessageDetail.Message);
         }
 
         internal static ValidationError NullParameter(string parameterName, StackFrame stackFrame) => new(
@@ -257,6 +267,27 @@ namespace Microsoft.IdentityModel.Tokens
 
         // ConcurrentDictionary is thread-safe and only locks when adding a new item.
         private static ConcurrentDictionary<string, StackFrame> CachedStackFrames { get; } = new();
+
+        private static class Logger
+        {
+            private static readonly Action<ILogger, string, string, Exception?> s_tokenValidationFailed =
+                LoggerMessage.Define<string, string>(
+                    LogLevel.Information,
+                    LoggingEventId.TokenValidationFailed,
+                    "[MsIdentityModel] The token validation was unsuccessful due to: {ValidationFailureType} " +
+                    "Error message provided: {ValidationErrorMessage}");
+
+            /// <summary>
+            /// Logger for handling failures in token validation.
+            /// </summary>
+            /// <param name="logger">ILogger.</param>
+            /// <param name="validationFailureType">The cause of the failure.</param>
+            /// <param name="messageDetail">The message provided as part of the failure.</param>
+            public static void TokenValidationFailed(
+                ILogger logger,
+                string validationFailureType,
+                string messageDetail) => s_tokenValidationFailed(logger, validationFailureType, messageDetail, null);
+        }
     }
 }
 #nullable restore

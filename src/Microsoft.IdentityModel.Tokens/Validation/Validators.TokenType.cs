@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
 using System.Linq;
 using Microsoft.IdentityModel.Logging;
 
@@ -45,14 +44,14 @@ namespace Microsoft.IdentityModel.Tokens
 #pragma warning restore CA1801 // TODO: remove pragma disable once callContext is used for logging
         {
             if (securityToken == null)
-                return ValidationError.NullParameter(
+                return TokenTypeValidationError.NullParameter(
                     nameof(securityToken),
-                    new StackFrame(true));
+                    ValidationError.GetCurrentStackFrame());
 
             if (validationParameters == null)
-                return ValidationError.NullParameter(
+                return TokenTypeValidationError.NullParameter(
                     nameof(validationParameters),
-                    new StackFrame(true));
+                    ValidationError.GetCurrentStackFrame());
 
             if (validationParameters.ValidTypes.Count == 0)
             {
@@ -66,7 +65,7 @@ namespace Microsoft.IdentityModel.Tokens
                     new MessageDetail(LogMessages.IDX10256),
                     ValidationFailureType.TokenTypeValidationFailed,
                     typeof(SecurityTokenInvalidTypeException),
-                    new StackFrame(true),
+                    ValidationError.GetCurrentStackFrame(),
                     null); // even if it is empty, we report null to match the original behaviour.
 
             if (!validationParameters.ValidTypes.Contains(type, StringComparer.Ordinal))
@@ -78,7 +77,7 @@ namespace Microsoft.IdentityModel.Tokens
                         LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidTypes))),
                     ValidationFailureType.TokenTypeValidationFailed,
                     typeof(SecurityTokenInvalidTypeException),
-                    new StackFrame(true),
+                    ValidationError.GetCurrentStackFrame(),
                     type);
             }
 

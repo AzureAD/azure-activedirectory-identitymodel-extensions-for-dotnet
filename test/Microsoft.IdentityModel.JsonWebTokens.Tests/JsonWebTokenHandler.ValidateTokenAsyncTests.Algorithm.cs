@@ -73,9 +73,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             validAlgorithms: [SecurityAlgorithms.Sha256]),
                     ExpectedIsValid = false,
                     ExpectedException = ExpectedException.SecurityTokenInvalidSignatureException("IDX10511:"),
-                    ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidAlgorithmException(
+                    ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenInvalidSignatureException(
                         "IDX10518:",
-                        propertiesExpected: new() { { "InvalidAlgorithm", SecurityAlgorithms.HmacSha256Signature } }),
+                        typeof(SecurityTokenInvalidAlgorithmException)),
                 });
 
                 return theoryData;

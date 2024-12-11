@@ -132,7 +132,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         SecurityToken token,
                         ValidationParameters validationParameters,
                         BaseConfiguration? configuration,
-                        CallContext? callContext) =>
+                        CallContext callContext) =>
                     {
                         // Set the signing key for validation
                         token.SigningKey = issuerSigingKey;

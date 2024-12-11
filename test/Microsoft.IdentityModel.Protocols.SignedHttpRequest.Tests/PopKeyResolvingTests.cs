@@ -813,7 +813,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest.Tests
                         {
                             RequireHttpsForJkuResourceRetrieval = false,
                         },
-                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23022", typeof(ArgumentException)),
+                        ExpectedException = new ExpectedException(typeof(SignedHttpRequestInvalidPopKeyException), "IDX23022", null, true),
                     },
                     new ResolvePopKeyTheoryData("Valid0KeysReturned")
                     {

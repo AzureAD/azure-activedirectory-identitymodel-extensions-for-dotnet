@@ -48,7 +48,7 @@ namespace Microsoft.IdentityModel.TestUtils
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,
-            CallContext? callContext)
+            CallContext callContext)
         {
             return new ValidatedSigningKeyLifetime(
                 null, // ValidFrom
@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.TestUtils
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,
-            CallContext? callContext)
+            CallContext callContext)
         {
             // This key is not used during the validation process. It is only used to satisfy the delegate signature.
             // Follow up PR will change this to remove the SecurityKey return value.

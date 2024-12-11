@@ -92,8 +92,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Abs
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.AotCompatibility.TestApp", "test\Microsoft.IdentityModel.AotCompatibility.TestApp\Microsoft.IdentityModel.AotCompatibility.TestApp.csproj", "{8105289F-3D54-4054-9738-5985F3B6CF2C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.AotCompatibility.Tests", "test\Microsoft.IdentityModel.AotCompatibility.Tests\Microsoft.IdentityModel.AotCompatibility.Tests.csproj", "{CD0EEF56-7221-4420-8181-48EE82E91306}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Benchmarks", "benchmark\Microsoft.IdentityModel.Benchmarks\Microsoft.IdentityModel.Benchmarks.csproj", "{F1BB31E4-8865-4425-8BD4-94F1815C16E0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{BC99A01F-1C6E-4994-8991-4919A9B096E1}"
@@ -225,10 +223,6 @@ Global
 		{8105289F-3D54-4054-9738-5985F3B6CF2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8105289F-3D54-4054-9738-5985F3B6CF2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8105289F-3D54-4054-9738-5985F3B6CF2C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CD0EEF56-7221-4420-8181-48EE82E91306}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CD0EEF56-7221-4420-8181-48EE82E91306}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CD0EEF56-7221-4420-8181-48EE82E91306}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CD0EEF56-7221-4420-8181-48EE82E91306}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F1BB31E4-8865-4425-8BD4-94F1815C16E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F1BB31E4-8865-4425-8BD4-94F1815C16E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F1BB31E4-8865-4425-8BD4-94F1815C16E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -267,7 +261,6 @@ Global
 		{C1F5A997-FAA9-45E5-8D28-D4E92D4A034D} = {EB14B99B-2255-45BC-BF14-E488DCD4A4BA}
 		{EF9A4431-6D2C-4DD1-BF6B-6F2CC619DEE1} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 		{8105289F-3D54-4054-9738-5985F3B6CF2C} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
-		{CD0EEF56-7221-4420-8181-48EE82E91306} = {8905D2E3-4499-4A86-BF3E-F098F228DD59}
 		{F1BB31E4-8865-4425-8BD4-94F1815C16E0} = {2F79F3C4-F4E3-46DD-8B34-8EF403A6F7F5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
