@@ -53,7 +53,9 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
             var expectedCounterTagList = new Dictionary<string, object>
             {
+                // metadata address is null because the configuration manager is made using an invalid config to trigger an exception
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.MetadataAddressTag, null },
                 { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.LKG },
             };
 

@@ -51,23 +51,23 @@ Microsoft.IdentityModel.Tokens.SecurityTokenInvalidOperationException.SecurityTo
 Microsoft.IdentityModel.Tokens.SignatureValidationError
 Microsoft.IdentityModel.Tokens.SignatureValidationError.InnerValidationError.get -> Microsoft.IdentityModel.Tokens.ValidationError
 Microsoft.IdentityModel.Tokens.SignatureValidationError.SignatureValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, Microsoft.IdentityModel.Tokens.ValidationFailureType validationFailureType, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, Microsoft.IdentityModel.Tokens.ValidationError innerValidationError = null, System.Exception innerException = null) -> void
+Microsoft.IdentityModel.Tokens.Telemetry.ITelemetryInstrumentation.IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus) -> void
+Microsoft.IdentityModel.Tokens.Telemetry.ITelemetryInstrumentation.IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, System.Exception exception) -> void
+Microsoft.IdentityModel.Tokens.Telemetry.TelemetryInstrumentation.IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus) -> void
+Microsoft.IdentityModel.Tokens.Telemetry.TelemetryInstrumentation.IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, System.Exception exception) -> void
 Microsoft.IdentityModel.Tokens.TokenReplayValidationError
 Microsoft.IdentityModel.Tokens.TokenReplayValidationError.ExpirationTime.get -> System.DateTime?
 Microsoft.IdentityModel.Tokens.TokenReplayValidationError.TokenReplayValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, Microsoft.IdentityModel.Tokens.ValidationFailureType validationFailureType, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, System.DateTime? expirationTime, System.Exception innerException = null) -> void
 Microsoft.IdentityModel.Tokens.Telemetry.IdentityModelTelemetry
 Microsoft.IdentityModel.Tokens.Telemetry.IdentityModelTelemetry.IdentityModelTelemetry() -> void
 Microsoft.IdentityModel.Tokens.Telemetry.ITelemetryInstrumentation
-Microsoft.IdentityModel.Tokens.Telemetry.ITelemetryInstrumentation.IncrementConfigurationRefreshRequestCounter(string operationStatus) -> void
-Microsoft.IdentityModel.Tokens.Telemetry.ITelemetryInstrumentation.IncrementConfigurationRefreshRequestCounter(string operationStatus, System.Exception exception) -> void
-Microsoft.IdentityModel.Tokens.Telemetry.ITelemetryInstrumentation.LogConfigurationRetrievalDuration(System.TimeSpan operationDuration) -> void
-Microsoft.IdentityModel.Tokens.Telemetry.ITelemetryInstrumentation.LogConfigurationRetrievalDuration(System.TimeSpan operationDuration, System.Exception exception) -> void
+Microsoft.IdentityModel.Tokens.Telemetry.ITelemetryInstrumentation.LogConfigurationRetrievalDuration(string metadataAddress, System.TimeSpan operationDuration) -> void
+Microsoft.IdentityModel.Tokens.Telemetry.ITelemetryInstrumentation.LogConfigurationRetrievalDuration(string metadataAddress, System.TimeSpan operationDuration, System.Exception exception) -> void
 Microsoft.IdentityModel.Tokens.Telemetry.TelemetryConstants
 Microsoft.IdentityModel.Tokens.Telemetry.TelemetryConstants.Protocols
 Microsoft.IdentityModel.Tokens.Telemetry.TelemetryInstrumentation
-Microsoft.IdentityModel.Tokens.Telemetry.TelemetryInstrumentation.IncrementConfigurationRefreshRequestCounter(string operationStatus) -> void
-Microsoft.IdentityModel.Tokens.Telemetry.TelemetryInstrumentation.IncrementConfigurationRefreshRequestCounter(string operationStatus, System.Exception exception) -> void
-Microsoft.IdentityModel.Tokens.Telemetry.TelemetryInstrumentation.LogConfigurationRetrievalDuration(System.TimeSpan operationDuration) -> void
-Microsoft.IdentityModel.Tokens.Telemetry.TelemetryInstrumentation.LogConfigurationRetrievalDuration(System.TimeSpan operationDuration, System.Exception exception) -> void
+Microsoft.IdentityModel.Tokens.Telemetry.TelemetryInstrumentation.LogConfigurationRetrievalDuration(string metadataAddress, System.TimeSpan operationDuration) -> void
+Microsoft.IdentityModel.Tokens.Telemetry.TelemetryInstrumentation.LogConfigurationRetrievalDuration(string metadataAddress, System.TimeSpan operationDuration, System.Exception exception) -> void
 Microsoft.IdentityModel.Tokens.Telemetry.TelemetryInstrumentation.TelemetryInstrumentation() -> void
 Microsoft.IdentityModel.Tokens.TokenTypeValidationError
 Microsoft.IdentityModel.Tokens.TokenTypeValidationError.InvalidTokenType.get -> string

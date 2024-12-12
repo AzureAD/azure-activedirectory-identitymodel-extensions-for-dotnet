@@ -22,7 +22,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             // arrange
             var testTelemetryClient = new MockTelemetryInstrumentation();
-            // mock up retirever to return something quickly 
             var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
                 OpenIdConfigData.AccountsGoogle,
                 new OpenIdConnectConfigurationRetriever(),
@@ -43,12 +42,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // assert
             var expectedCounterTagList = new Dictionary<string, object>
             {
+                { TelemetryConstants.MetadataAddressTag, OpenIdConfigData.AccountsGoogle },
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.Direct },
             };
 
             var expectedHistogramTagList = new Dictionary<string, object>
             {
+                { TelemetryConstants.MetadataAddressTag, OpenIdConfigData.AccountsGoogle },
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer }
             };
 
@@ -99,6 +100,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ConfigurationValidator = new OpenIdConnectConfigurationValidator(),
                     ExpectedTagList = new Dictionary<string, object>
                     {
+                        { TelemetryConstants.MetadataAddressTag, OpenIdConfigData.AccountsGoogle },
                         { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                         { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.FirstRefresh },
                     }
@@ -109,6 +111,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ConfigurationValidator = new OpenIdConnectConfigurationValidator(),
                     ExpectedTagList = new Dictionary<string, object>
                     {
+                        { TelemetryConstants.MetadataAddressTag, OpenIdConfigData.HttpsBadUri },
                         { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                         { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.FirstRefresh },
                         { TelemetryConstants.ExceptionTypeTag, new IOException().GetType().ToString() },
@@ -122,6 +125,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ConfigurationValidator = new OpenIdConnectConfigurationValidator() { MinimumNumberOfKeys = 3 },
                     ExpectedTagList = new Dictionary<string, object>
                     {
+                        { TelemetryConstants.MetadataAddressTag, OpenIdConfigData.JsonFile },
                         { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                         { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.FirstRefresh },
                         { TelemetryConstants.ExceptionTypeTag, new InvalidConfigurationException().GetType().ToString() },
@@ -134,6 +138,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     SyncAfter = DateTime.UtcNow - TimeSpan.FromDays(2),
                     ExpectedTagList = new Dictionary<string, object>
                     {
+                        { TelemetryConstants.MetadataAddressTag, OpenIdConfigData.AADCommonUrl },
                         { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                         { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.Automatic },
                     }

@@ -8,16 +8,20 @@ namespace Microsoft.IdentityModel.Tokens.Telemetry
     internal interface ITelemetryInstrumentation
     {
         internal void LogConfigurationRetrievalDuration(
+            string metadataAddress,
             TimeSpan operationDuration);
 
         internal void LogConfigurationRetrievalDuration(
+            string metadataAddress,
             TimeSpan operationDuration,
             Exception exception);
 
         internal void IncrementConfigurationRefreshRequestCounter(
+            string metadataAddress,
             string operationStatus);
 
         internal void IncrementConfigurationRefreshRequestCounter(
+            string metadataAddress,
             string operationStatus,
             Exception exception);
     }

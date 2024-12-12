@@ -17,27 +17,31 @@ namespace Microsoft.IdentityModel.Tokens.Telemetry.Tests
             ExportedItems.Clear();
         }
 
-        public void IncrementConfigurationRefreshRequestCounter(string operationStatus)
+        public void IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus)
         {
             ExportedItems.Add(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
+            ExportedItems.Add(TelemetryConstants.MetadataAddressTag, metadataAddress);
             ExportedItems.Add(TelemetryConstants.OperationStatusTag, operationStatus);
         }
 
-        public void IncrementConfigurationRefreshRequestCounter(string operationStatus, Exception exception)
+        public void IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, Exception exception)
         {
             ExportedItems.Add(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
+            ExportedItems.Add(TelemetryConstants.MetadataAddressTag, metadataAddress);
             ExportedItems.Add(TelemetryConstants.OperationStatusTag, operationStatus);
             ExportedItems.Add(TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString());
         }
 
-        public void LogConfigurationRetrievalDuration(TimeSpan operationDuration)
+        public void LogConfigurationRetrievalDuration(string metadataAddress, TimeSpan operationDuration)
         {
             ExportedHistogramItems.Add(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
+            ExportedHistogramItems.Add(TelemetryConstants.MetadataAddressTag, metadataAddress);
         }
 
-        public void LogConfigurationRetrievalDuration(TimeSpan operationDuration, Exception exception)
+        public void LogConfigurationRetrievalDuration(string metadataAddress, TimeSpan operationDuration, Exception exception)
         {
             ExportedHistogramItems.Add(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
+            ExportedHistogramItems.Add(TelemetryConstants.MetadataAddressTag, metadataAddress);
             ExportedHistogramItems.Add(TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString());
         }
     }

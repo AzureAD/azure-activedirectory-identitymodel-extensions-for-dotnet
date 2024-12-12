@@ -196,6 +196,7 @@ namespace Microsoft.IdentityModel.Protocols
                                     result.ErrorMessage));
 
                             _telemetryClient.IncrementConfigurationRefreshRequestCounter(
+                                MetadataAddress,
                                 TelemetryConstants.Protocols.FirstRefresh,
                                 ex);
 
@@ -203,14 +204,17 @@ namespace Microsoft.IdentityModel.Protocols
                         }
                     }
 
-                    _telemetryClient.IncrementConfigurationRefreshRequestCounter(TelemetryConstants.Protocols.FirstRefresh);
+                    _telemetryClient.IncrementConfigurationRefreshRequestCounter(
+                        MetadataAddress,
+                        TelemetryConstants.Protocols.FirstRefresh);
+
                     UpdateConfiguration(configuration);
                 }
                 catch (Exception ex)
                 {
-                    // counter for failure first time
                     fetchMetadataFailure = ex;
                     _telemetryClient.IncrementConfigurationRefreshRequestCounter(
+                        MetadataAddress,
                         TelemetryConstants.Protocols.FirstRefresh,
                         ex);
 
@@ -232,7 +236,10 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
                 {
-                    _telemetryClient.IncrementConfigurationRefreshRequestCounter(TelemetryConstants.Protocols.Automatic);
+                    _telemetryClient.IncrementConfigurationRefreshRequestCounter(
+                        MetadataAddress,
+                        TelemetryConstants.Protocols.Automatic);
+
                     _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
                 }
             }
@@ -271,7 +278,9 @@ namespace Microsoft.IdentityModel.Protocols
                     CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
 
                 var elapsedTime = _timeProvider.GetElapsedTime(startTimestamp);
-                _telemetryClient.LogConfigurationRetrievalDuration(elapsedTime);
+                _telemetryClient.LogConfigurationRetrievalDuration(
+                    MetadataAddress,
+                    elapsedTime);
 
                 if (_configValidator == null)
                 {
@@ -295,6 +304,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 var elapsedTime = _timeProvider.GetElapsedTime(startTimestamp);
                 _telemetryClient.LogConfigurationRetrievalDuration(
+                    MetadataAddress,
                     elapsedTime,
                     ex);
 
@@ -342,7 +352,10 @@ namespace Microsoft.IdentityModel.Protocols
         {
             DateTimeOffset now = DateTimeOffset.UtcNow;
 
-            _telemetryClient.IncrementConfigurationRefreshRequestCounter(TelemetryConstants.Protocols.Direct);
+            _telemetryClient.IncrementConfigurationRefreshRequestCounter(
+                MetadataAddress,
+                TelemetryConstants.Protocols.Direct);
+
             if (now >= DateTimeUtil.Add(_lastRequestRefresh.UtcDateTime, RefreshInterval) || _isFirstRefreshRequest)
             {
                 _isFirstRefreshRequest = false;

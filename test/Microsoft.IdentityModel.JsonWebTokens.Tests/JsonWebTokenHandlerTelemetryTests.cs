@@ -19,7 +19,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
     public class JsonWebTokenHandlerTelemetryTests
     {
         [Fact]
-        public async Task ValidateJWSWithConfigAsync()
+        public async Task ValidateJWSWithConfigAsync_ExpectedTagsExist()
         {
             var invalidIssuerConfig = new OpenIdConnectConfiguration()
             {
@@ -57,7 +57,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             var expectedCounterTagList = new Dictionary<string, object>
             {
+                // metadata address is null because the configuration manager is made using an invalid config to trigger an exception
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.MetadataAddressTag, null },
                 { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.LKG }
             };
 

@@ -9,27 +9,25 @@ namespace Microsoft.IdentityModel.Tokens.Telemetry
 {
     internal class TelemetryInstrumentation : ITelemetryInstrumentation
     {
-        static TagList ClientVerTagList = new()
-        {
-            { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer }
-        };
 
-        public void IncrementConfigurationRefreshRequestCounter(string operationStatus)
+        public void IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus)
         {
             var tagList = new TagList()
             {
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.MetadataAddressTag, metadataAddress },
                 { TelemetryConstants.OperationStatusTag, operationStatus }
             };
 
             IdentityModelTelemetry.IncrementConfigurationRefreshRequestCounter(tagList);
         }
 
-        public void IncrementConfigurationRefreshRequestCounter(string operationStatus, Exception exception)
+        public void IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, Exception exception)
         {
             var tagList = new TagList()
             {
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.MetadataAddressTag, metadataAddress },
                 { TelemetryConstants.OperationStatusTag, operationStatus },
                 { TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString() }
             };
@@ -37,17 +35,25 @@ namespace Microsoft.IdentityModel.Tokens.Telemetry
             IdentityModelTelemetry.IncrementConfigurationRefreshRequestCounter(tagList);
         }
 
-        public void LogConfigurationRetrievalDuration(TimeSpan operationDuration)
+        public void LogConfigurationRetrievalDuration(string metadataAddress, TimeSpan operationDuration)
         {
+
+            var tagList = new TagList()
+            {
+                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.MetadataAddressTag, metadataAddress },
+            };
+
             long durationInMilliseconds = (long)operationDuration.TotalMilliseconds;
-            IdentityModelTelemetry.RecordConfigurationRetrievalDurationHistogram(durationInMilliseconds, ClientVerTagList);
+            IdentityModelTelemetry.RecordConfigurationRetrievalDurationHistogram(durationInMilliseconds, tagList);
         }
 
-        public void LogConfigurationRetrievalDuration(TimeSpan operationDuration, Exception exception)
+        public void LogConfigurationRetrievalDuration(string metadataAddress, TimeSpan operationDuration, Exception exception)
         {
             var tagList = new TagList()
             {
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.MetadataAddressTag, metadataAddress },
                 { TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString() }
             };
 

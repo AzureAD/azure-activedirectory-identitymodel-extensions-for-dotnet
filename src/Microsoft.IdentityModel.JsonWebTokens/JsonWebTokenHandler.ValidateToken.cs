@@ -515,6 +515,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     if (currentConfiguration != null)
                     {
                         _telemetryClient.IncrementConfigurationRefreshRequestCounter(
+                            validationParameters.ConfigurationManager.MetadataAddress,
                             TelemetryConstants.Protocols.LKG);
 
                         validationParameters.ConfigurationManager.RequestRefresh();
