@@ -104,9 +104,25 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                         ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10208:"),
                     },
                     new AudienceValidationTheoryData("AudiencesEmpty_RequireAudienceFalse_NoException")
-                    // default value of TVP.RequireAudience is true.
                     {
                         Audiences = new List<string> { },
+                        TokenValidationParameters = new TokenValidationParameters{
+                            RequireAudience = false
+                            // default value of TVP.RequireAudience is true.
+                        }
+                    },
+                    new AudienceValidationTheoryData("ValidAudience_RequireAudienceFalse_NoException")
+                    {
+                        Audiences = new List<string> { "audience" },
+                        TokenValidationParameters = new TokenValidationParameters{
+                            ValidAudience = "audience",
+                            RequireAudience = false
+                        }
+                    },
+                    new AudienceValidationTheoryData("InvalidAudience_RequireAudienceFalse_ExceptionThrown")
+                    {
+                        Audiences = new List<string> { "audience1" },
+                        ExpectedException =  ExpectedException.SecurityTokenInvalidAudienceException("IDX10214:"),
                         TokenValidationParameters = new TokenValidationParameters{
                             ValidAudience = "audience",
                             RequireAudience = false
