@@ -459,7 +459,7 @@ namespace Microsoft.IdentityModel.Tokens
         public bool RefreshBeforeValidation { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether SAML tokens must have at least one AudienceRestriction.
+        /// Gets or sets a value indicating whether SAML or JWT tokens must have at least one AudienceRestriction.
         /// The default is <c>true</c>.
         /// </summary>
         /// <remarks>
