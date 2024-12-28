@@ -56,9 +56,3 @@ scenarios:
       job: benchmarks
       variables:
         filterArg: "*ValidateTokenAsyncTests*"
-
-  Base64UrlEncoderTests:
-    application:
-      job: benchmarks
-      variables:
-        filterArg: "*Base64UrlEncoderTests*"
