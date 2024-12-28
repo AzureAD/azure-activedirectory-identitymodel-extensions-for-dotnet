@@ -255,25 +255,57 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             DateTime? expires = jsonWebToken.HasPayloadClaim(JwtRegisteredClaimNames.Exp) ? jsonWebToken.ValidTo : null;
             DateTime? notBefore = jsonWebToken.HasPayloadClaim(JwtRegisteredClaimNames.Nbf) ? jsonWebToken.ValidFrom : null;
 
-            ValidationResult<ValidatedLifetime> lifetimeValidationResult = validationParameters.LifetimeValidator(
-                notBefore, expires, jsonWebToken, validationParameters, callContext);
+            ValidationResult<ValidatedLifetime> lifetimeValidationResult;
 
-            if (!lifetimeValidationResult.IsValid)
+            try
             {
-                StackFrame lifetimeValidationFailureStackFrame = StackFrames.LifetimeValidationFailed ??= new StackFrame(true);
-                return lifetimeValidationResult.UnwrapError().AddStackFrame(lifetimeValidationFailureStackFrame);
+                lifetimeValidationResult = validationParameters.LifetimeValidator(
+                    notBefore, expires, jsonWebToken, validationParameters, callContext);
+
+                if (!lifetimeValidationResult.IsValid)
+                    return lifetimeValidationResult.UnwrapError().AddCurrentStackFrame();
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                return new LifetimeValidationError(
+                    new MessageDetail(TokenLogMessages.IDX10271),
+                    ValidationFailureType.LifetimeValidatorThrew,
+                    typeof(SecurityTokenInvalidLifetimeException),
+                    ValidationError.GetCurrentStackFrame(),
+                    notBefore,
+                    expires,
+                    ex);
             }
 
             if (jsonWebToken.Audiences is not IList<string> tokenAudiences)
                 tokenAudiences = jsonWebToken.Audiences.ToList();
 
-            ValidationResult<string> audienceValidationResult = validationParameters.AudienceValidator(
-                tokenAudiences, jsonWebToken, validationParameters, callContext);
-
-            if (!audienceValidationResult.IsValid)
+            ValidationResult<string> audienceValidationResult;
+            try
             {
-                StackFrame audienceValidationFailureStackFrame = StackFrames.AudienceValidationFailed ??= new StackFrame(true);
-                return audienceValidationResult.UnwrapError().AddStackFrame(audienceValidationFailureStackFrame);
+                audienceValidationResult = validationParameters.AudienceValidator(
+                    tokenAudiences, jsonWebToken, validationParameters, callContext);
+
+                if (!audienceValidationResult.IsValid)
+                {
+                    StackFrame audienceValidationFailureStackFrame = StackFrames.AudienceValidationFailed ??= new StackFrame(true);
+                    return audienceValidationResult.UnwrapError().AddStackFrame(audienceValidationFailureStackFrame);
+                }
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+            {
+                return new AudienceValidationError(
+                    new MessageDetail(TokenLogMessages.IDX10270),
+                    ValidationFailureType.AudienceValidatorThrew,
+                    typeof(SecurityTokenInvalidAudienceException),
+                    ValidationError.GetCurrentStackFrame(),
+                    tokenAudiences,
+                    null,
+                    ex);
             }
 
             ValidationResult<ValidatedIssuer> issuerValidationResult;
