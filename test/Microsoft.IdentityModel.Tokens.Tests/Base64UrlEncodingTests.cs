@@ -34,8 +34,8 @@ namespace Microsoft.IdentityModel.Tokens.UrlEncoding.Tests
                 string encodingString = Base64UrlEncoding.Encode(theoryData.Bytes);
                 string encodingBytesUsingOffset = Base64UrlEncoding.Encode(theoryData.OffsetBytes, theoryData.Offset, theoryData.Length);
                 byte[] decodedBytes = theoryData.Bytes?.Length == 0 ? Array.Empty<byte>() : Base64UrlEncoding.Decode(encodingString);
-                const string randomPadding = "RANDOMPADDING";
-                byte[] decodedBytes2 = theoryData.Bytes?.Length == 0 ? Array.Empty<byte>() : Base64UrlEncoding.Decode(randomPadding + encodingString + randomPadding, randomPadding.Length, encodingString.Length);
+                const string extraPadding = "EXTRAPADDING";
+                byte[] decodedBytes2 = theoryData.Bytes?.Length == 0 ? Array.Empty<byte>() : Base64UrlEncoding.Decode(extraPadding + encodingString + extraPadding, extraPadding.Length, encodingString.Length);
 
                 theoryData.ExpectedException.ProcessNoException(context);
 
@@ -333,7 +333,7 @@ namespace Microsoft.IdentityModel.Tokens.UrlEncoding.Tests
         }
 
         [Fact]
-        public void EncodeDecodeExceptionTests()
+        public void EncodeDecode_InvalidParameters_ThrowsExceptionTests()
         {
             Assert.Throws<ArgumentNullException>(static () => Base64UrlEncoding.Decode(null));
             Assert.Throws<ArgumentNullException>(static () => Base64UrlEncoding.Decode(null, 0, 0));
