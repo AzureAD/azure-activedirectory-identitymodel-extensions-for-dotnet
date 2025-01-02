@@ -16,20 +16,6 @@ steps:
       command: custom
       custom: '--list-sdks '
 
-  - task: PowerShell@2
-    displayName: "Install Strawberry Perl"
-    inputs:
-      targetType: filePath
-      filePath: $(Build.SourcesDirectory)\$(WilsonSourceDirectory)build\install-strawberry-perl.ps1
-      arguments: >
-        -ci_path "$(Build.SourcesDirectory)"
-        -debug
-    condition: and(succeeded(), eq(variables['PipelineType'], 'onebranch'))
-
-  - powershell: |
-        perl "$(Build.SourcesDirectory)\$(WilsonSourceDirectory)src\VerifyResourceUsage.pl"
-    displayName: 'Verify error messages are all used.'
-
   - powershell: |
       regedit /s .\build\strongNameBypass.reg
     displayName: 'Strong Name Bypass'
@@ -40,6 +26,12 @@ steps:
       targetType: filePath
       filePath: ./$(WilsonSourceDirectory)updateAssemblyInfo.ps1
       arguments: '-packageType $(BuildConfiguration)'
+
+  - task: PowerShell@2
+    displayName: 'Verify error messages are all used.'
+    inputs:
+      targetType: filePath
+      filePath: $(WilsonSourceDirectory)/Tools/VerifyResourceUsage.ps1
 
   - task: MSBuild@1
     displayName: Build
