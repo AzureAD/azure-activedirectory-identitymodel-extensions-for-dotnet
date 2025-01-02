@@ -19,9 +19,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     {
         internal const string ClassName = "Microsoft.IdentityModel.JsonWebTokens.JsonWebToken";
 
-        private ClaimsIdentity _claimsIdentity;
-        private bool _wasClaimsIdentitySet;
-
         private string _act;
         private string _authenticationTag;
         private string _ciphertext;
@@ -628,61 +625,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Gets the names of the payload claims on the JsonWebToken.
         /// </summary>
         internal IReadOnlyCollection<string> PayloadClaimNames => Payload._jsonClaims.Keys;
-
-        internal ClaimsIdentity ClaimsIdentity
-        {
-            get
-            {
-                if (!_wasClaimsIdentitySet)
-                {
-                    _wasClaimsIdentitySet = true;
-                    string actualIssuer = ActualIssuer ?? Issuer;
-
-                    foreach (Claim claim in Claims)
-                    {
-                        string claimType = claim.Type;
-                        if (claimType == ClaimTypes.Actor)
-                        {
-                            if (_claimsIdentity.Actor != null)
-                                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX14112, LogHelper.MarkAsNonPII(JwtRegisteredClaimNames.Actort), claim.Value)));
-
-#pragma warning disable CA1031 // Do not catch general exception types
-                            try
-                            {
-                                JsonWebToken actorToken = new JsonWebToken(claim.Value);
-                                _claimsIdentity.Actor = ActorClaimsIdentity;
-                            }
-                            catch
-                            {
-
-                            }
-#pragma warning restore CA1031 // Do not catch general exception types
-                        }
-
-                        if (claim.Properties.Count == 0)
-                        {
-                            _claimsIdentity.AddClaim(new Claim(claimType, claim.Value, claim.ValueType, actualIssuer, actualIssuer, _claimsIdentity));
-                        }
-                        else
-                        {
-                            Claim newClaim = new Claim(claimType, claim.Value, claim.ValueType, actualIssuer, actualIssuer, _claimsIdentity);
-
-                            foreach (var kv in claim.Properties)
-                                newClaim.Properties[kv.Key] = kv.Value;
-
-                            _claimsIdentity.AddClaim(newClaim);
-                        }
-                    }
-                }
-
-                return _claimsIdentity;
-            }
-
-            set
-            {
-                _claimsIdentity = value;
-            }
-        }
 
         /// <summary>
         /// Try to get a <see cref="Claim"/> representing the { key, 'value' } pair corresponding to the provided <paramref name="key"/>.
