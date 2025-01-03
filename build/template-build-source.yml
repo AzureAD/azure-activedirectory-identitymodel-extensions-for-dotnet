@@ -31,7 +31,7 @@ steps:
     displayName: 'Verify error messages are all used.'
     inputs:
       targetType: filePath
-      filePath: $(WilsonSourceDirectory)/Tools/VerifyResourceUsage.ps1
+      filePath: $(Build.SourcesDirectory)\$(WilsonSourceDirectory)Tools\VerifyResourceUsage.ps1
 
   - task: MSBuild@1
     displayName: Build
