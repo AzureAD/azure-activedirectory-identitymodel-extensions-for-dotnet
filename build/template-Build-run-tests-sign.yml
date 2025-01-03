@@ -212,7 +212,7 @@ steps:
     PathtoPublish: '$(Build.SourcesDirectory)\artifacts'
     ArtifactName: '$(Build.BuildNumber)-nuget-package'
 
- - task: BuildQualityChecks@9
+- task: BuildQualityChecks@9
   displayName: 'Check Warnings'
   inputs:
     checkWarnings: true
