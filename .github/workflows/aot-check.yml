@@ -23,7 +23,7 @@ jobs:
         fetch-depth: 1
 
     - name: Setup .NET 9.0.x
-      uses: actions/setup-dotnet@v4.1.0
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 9.0.x
 
