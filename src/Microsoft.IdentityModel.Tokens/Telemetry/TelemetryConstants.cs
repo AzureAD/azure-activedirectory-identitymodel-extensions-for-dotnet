@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Tokens.Telemetry
             /// <summary>
             /// Telemetry tag indicating configuration retrieval per a call to RequestRefresh.
             /// </summary>
-            public const string Direct = "Direct";
+            public const string Manual = "Manual";
 
             /// <summary>
             /// Telemetry tag indicating configuration retrieval when there is no previously cached configuration.
@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.Tokens.Telemetry
             /// <summary>
             /// Telemetry tag indicating configuration retrieval when the last known good configuration is needed.
             /// </summary>
-            public const string LKG = "LastKnownGood";
+            public const string Lkg = "LastKnownGood";
 
             // Configuration manager exception types
 

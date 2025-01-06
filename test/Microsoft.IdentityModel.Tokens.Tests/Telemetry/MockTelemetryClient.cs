@@ -7,7 +7,7 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens.Telemetry.Tests
 {
-    public class MockTelemetryInstrumentation : ITelemetryInstrumentation
+    public class MockTelemetryClient : ITelemetryClient
     {
         public Dictionary<string, object> ExportedItems = new Dictionary<string, object>();
         public Dictionary<string, object> ExportedHistogramItems = new Dictionary<string, object>();

@@ -7,14 +7,15 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens.Telemetry
 {
-    internal class TelemetryInstrumentation : ITelemetryInstrumentation
+    internal class TelemetryClient : ITelemetryClient
     {
+        public string ClientVer = IdentityModelTelemetryUtil.ClientVer;
 
         public void IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus)
         {
             var tagList = new TagList()
             {
-                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.IdentityModelVersionTag, ClientVer },
                 { TelemetryConstants.MetadataAddressTag, metadataAddress },
                 { TelemetryConstants.OperationStatusTag, operationStatus }
             };
@@ -26,7 +27,7 @@ namespace Microsoft.IdentityModel.Tokens.Telemetry
         {
             var tagList = new TagList()
             {
-                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.IdentityModelVersionTag, ClientVer },
                 { TelemetryConstants.MetadataAddressTag, metadataAddress },
                 { TelemetryConstants.OperationStatusTag, operationStatus },
                 { TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString() }
@@ -40,7 +41,7 @@ namespace Microsoft.IdentityModel.Tokens.Telemetry
 
             var tagList = new TagList()
             {
-                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.IdentityModelVersionTag, ClientVer },
                 { TelemetryConstants.MetadataAddressTag, metadataAddress },
             };
 
@@ -52,7 +53,7 @@ namespace Microsoft.IdentityModel.Tokens.Telemetry
         {
             var tagList = new TagList()
             {
-                { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
+                { TelemetryConstants.IdentityModelVersionTag, ClientVer },
                 { TelemetryConstants.MetadataAddressTag, metadataAddress },
                 { TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString() }
             };

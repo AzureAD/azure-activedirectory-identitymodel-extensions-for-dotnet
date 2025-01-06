@@ -11,13 +11,13 @@ namespace Microsoft.IdentityModel.Tokens.Telemetry
         /// <summary>
         /// Meter name for MicrosoftIdentityModel.
         /// </summary>
-        public const string MeterName = "MicrosoftIdentityModel_Meter";
-        public const string ServiceName = "MicrosoftIdentityModel";
+        private const string MeterName = "MicrosoftIdentityModel_Meter";
+        //public const string ServiceName = "MicrosoftIdentityModel";
 
         /// <summary>
         /// The meter responsible for creating instruments.
         /// </summary>
-        public static readonly Meter IdentityModelMeter = new(MeterName, "1.0.0");
+        private static readonly Meter IdentityModelMeter = new(MeterName, "1.0.0");
 
         internal const string TotalDurationHistogramName = "IdentityModelConfigurationRequestTotalDurationInMS";
 

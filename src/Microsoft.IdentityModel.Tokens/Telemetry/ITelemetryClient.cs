@@ -5,7 +5,7 @@ using System;
 
 namespace Microsoft.IdentityModel.Tokens.Telemetry
 {
-    internal interface ITelemetryInstrumentation
+    internal interface ITelemetryClient
     {
         internal void LogConfigurationRetrievalDuration(
             string metadataAddress,

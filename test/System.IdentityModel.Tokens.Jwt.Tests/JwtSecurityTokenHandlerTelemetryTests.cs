@@ -36,13 +36,13 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 ValidateLifetime = false
             };
 
-            var testTelemetryClient = new MockTelemetryInstrumentation();
+            var testTelemetryClient = new MockTelemetryClient();
             try
             {
                 AadIssuerValidator.GetAadIssuerValidator(Default.AadV1Authority).ConfigurationManagerV1 = validationParameters.ConfigurationManager;
                 var handler = new JwtSecurityTokenHandler()
                 {
-                    _telemetryClient = testTelemetryClient
+                    TelemetryClient = testTelemetryClient
                 };
                 handler.ValidateToken(Default.AsymmetricJws, validationParameters, out _);
             }
@@ -56,7 +56,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
                 // metadata address is null because the configuration manager is made using an invalid config to trigger an exception
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
                 { TelemetryConstants.MetadataAddressTag, null },
-                { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.LKG },
+                { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.Lkg },
             };
 
             Assert.Equal(expectedCounterTagList, testTelemetryClient.ExportedItems);

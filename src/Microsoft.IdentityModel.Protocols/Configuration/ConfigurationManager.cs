@@ -36,8 +36,8 @@ namespace Microsoft.IdentityModel.Protocols
         private const int ConfigurationRetrieverRunning = 1;
         private int _configurationRetrieverState = ConfigurationRetrieverIdle;
 
-        internal TimeProvider _timeProvider = TimeProvider.System;
-        internal ITelemetryInstrumentation _telemetryClient = new TelemetryInstrumentation();
+        internal TimeProvider TimeProvider = TimeProvider.System;
+        internal ITelemetryClient TelemetryClient = new TelemetryClient();
 
         /// <summary>
         /// Instantiates a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
@@ -152,9 +152,7 @@ namespace Microsoft.IdentityModel.Protocols
         public virtual async Task<T> GetConfigurationAsync(CancellationToken cancel)
         {
             if (_currentConfiguration != null && _syncAfter > DateTimeOffset.UtcNow)
-            {
                 return _currentConfiguration;
-            }
 
             Exception fetchMetadataFailure = null;
 
@@ -195,16 +193,11 @@ namespace Microsoft.IdentityModel.Protocols
                                     LogMessages.IDX20810,
                                     result.ErrorMessage));
 
-                            _telemetryClient.IncrementConfigurationRefreshRequestCounter(
-                                MetadataAddress,
-                                TelemetryConstants.Protocols.FirstRefresh,
-                                ex);
-
                             throw LogHelper.LogExceptionMessage(ex);
                         }
                     }
 
-                    _telemetryClient.IncrementConfigurationRefreshRequestCounter(
+                    TelemetryClient.IncrementConfigurationRefreshRequestCounter(
                         MetadataAddress,
                         TelemetryConstants.Protocols.FirstRefresh);
 
@@ -213,7 +206,7 @@ namespace Microsoft.IdentityModel.Protocols
                 catch (Exception ex)
                 {
                     fetchMetadataFailure = ex;
-                    _telemetryClient.IncrementConfigurationRefreshRequestCounter(
+                    TelemetryClient.IncrementConfigurationRefreshRequestCounter(
                         MetadataAddress,
                         TelemetryConstants.Protocols.FirstRefresh,
                         ex);
@@ -236,7 +229,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
                 {
-                    _telemetryClient.IncrementConfigurationRefreshRequestCounter(
+                    TelemetryClient.IncrementConfigurationRefreshRequestCounter(
                         MetadataAddress,
                         TelemetryConstants.Protocols.Automatic);
 
@@ -246,9 +239,7 @@ namespace Microsoft.IdentityModel.Protocols
 
             // If metadata exists return it.
             if (_currentConfiguration != null)
-            {
                 return _currentConfiguration;
-            }
 
             throw LogHelper.LogExceptionMessage(
                 new InvalidOperationException(
@@ -268,7 +259,7 @@ namespace Microsoft.IdentityModel.Protocols
         private void UpdateCurrentConfiguration()
         {
 #pragma warning disable CA1031 // Do not catch general exception types
-            long startTimestamp = _timeProvider.GetTimestamp();
+            long startTimestamp = TimeProvider.GetTimestamp();
 
             try
             {
@@ -277,8 +268,8 @@ namespace Microsoft.IdentityModel.Protocols
                     _docRetriever,
                     CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
 
-                var elapsedTime = _timeProvider.GetElapsedTime(startTimestamp);
-                _telemetryClient.LogConfigurationRetrievalDuration(
+                var elapsedTime = TimeProvider.GetElapsedTime(startTimestamp);
+                TelemetryClient.LogConfigurationRetrievalDuration(
                     MetadataAddress,
                     elapsedTime);
 
@@ -302,8 +293,8 @@ namespace Microsoft.IdentityModel.Protocols
             }
             catch (Exception ex)
             {
-                var elapsedTime = _timeProvider.GetElapsedTime(startTimestamp);
-                _telemetryClient.LogConfigurationRetrievalDuration(
+                var elapsedTime = TimeProvider.GetElapsedTime(startTimestamp);
+                TelemetryClient.LogConfigurationRetrievalDuration(
                     MetadataAddress,
                     elapsedTime,
                     ex);
@@ -352,9 +343,9 @@ namespace Microsoft.IdentityModel.Protocols
         {
             DateTimeOffset now = DateTimeOffset.UtcNow;
 
-            _telemetryClient.IncrementConfigurationRefreshRequestCounter(
+            TelemetryClient.IncrementConfigurationRefreshRequestCounter(
                 MetadataAddress,
-                TelemetryConstants.Protocols.Direct);
+                TelemetryConstants.Protocols.Manual);
 
             if (now >= DateTimeUtil.Add(_lastRequestRefresh.UtcDateTime, RefreshInterval) || _isFirstRefreshRequest)
             {

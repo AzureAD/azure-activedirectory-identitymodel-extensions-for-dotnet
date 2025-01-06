@@ -21,14 +21,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         public async Task RequestRefresh_ExpectedTagsExist()
         {
             // arrange
-            var testTelemetryClient = new MockTelemetryInstrumentation();
+            var testTelemetryClient = new MockTelemetryClient();
             var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
                 OpenIdConfigData.AccountsGoogle,
                 new OpenIdConnectConfigurationRetriever(),
                 new HttpDocumentRetriever(),
                 new OpenIdConnectConfigurationValidator())
             {
-                _telemetryClient = testTelemetryClient
+                TelemetryClient = testTelemetryClient
             };
 
             // act
@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             {
                 { TelemetryConstants.MetadataAddressTag, OpenIdConfigData.AccountsGoogle },
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer },
-                { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.Direct },
+                { TelemetryConstants.OperationStatusTag, TelemetryConstants.Protocols.Manual },
             };
 
             var expectedHistogramTagList = new Dictionary<string, object>
@@ -60,7 +60,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         [Theory, MemberData(nameof(GetConfiguration_ExpectedTagList_TheoryData), DisableDiscoveryEnumeration = true)]
         public async Task GetConfigurationAsync_ExpectedTagsExist(ConfigurationManagerTelemetryTheoryData<OpenIdConnectConfiguration> theoryData)
         {
-            var testTelemetryClient = new MockTelemetryInstrumentation();
+            var testTelemetryClient = new MockTelemetryClient();
 
             var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
                 theoryData.MetadataAddress,
@@ -68,7 +68,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 theoryData.DocumentRetriever,
                 theoryData.ConfigurationValidator)
             {
-                _telemetryClient = testTelemetryClient
+                TelemetryClient = testTelemetryClient
             };
 
             try

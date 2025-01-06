@@ -18,7 +18,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// <remarks>This partial class contains methods and logic related to the validation of tokens.</remarks>
     public partial class JsonWebTokenHandler : TokenHandler
     {
-        internal ITelemetryInstrumentation _telemetryClient = new TelemetryInstrumentation();
+        internal Tokens.Telemetry.ITelemetryClient _telemetryClient = new TelemetryClient();
 
         /// <summary>
         /// Returns a value that indicates if this handler can validate a <see cref="SecurityToken"/>.
@@ -516,7 +516,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     {
                         _telemetryClient.IncrementConfigurationRefreshRequestCounter(
                             validationParameters.ConfigurationManager.MetadataAddress,
-                            TelemetryConstants.Protocols.LKG);
+                            TelemetryConstants.Protocols.Lkg);
 
                         validationParameters.ConfigurationManager.RequestRefresh();
                         validationParameters.RefreshBeforeValidation = true;

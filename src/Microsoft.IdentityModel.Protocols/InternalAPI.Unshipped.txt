@@ -1,2 +1,2 @@
-Microsoft.IdentityModel.Protocols.ConfigurationManager<T>._telemetryClient -> Microsoft.IdentityModel.Tokens.Telemetry.ITelemetryInstrumentation
-Microsoft.IdentityModel.Protocols.ConfigurationManager<T>._timeProvider -> System.TimeProvider
+Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.TelemetryClient -> Microsoft.IdentityModel.Tokens.Telemetry.ITelemetryClient
+Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.TimeProvider -> System.TimeProvider

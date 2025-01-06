@@ -37,7 +37,7 @@ namespace System.IdentityModel.Tokens.Jwt
         private static string _shortClaimType = _namespace + "/ShortTypeName";
         private bool _mapInboundClaims = DefaultMapInboundClaims;
 
-        internal ITelemetryInstrumentation _telemetryClient = new TelemetryInstrumentation();
+        internal Microsoft.IdentityModel.Tokens.Telemetry.ITelemetryClient TelemetryClient = new TelemetryClient();
 
         /// <summary>
         /// Default claim type mapping for inbound claims.
@@ -890,9 +890,9 @@ namespace System.IdentityModel.Tokens.Jwt
                     // where a new valid configuration was somehow published during validation time.
                     if (currentConfiguration != null)
                     {
-                        _telemetryClient.IncrementConfigurationRefreshRequestCounter(
+                        TelemetryClient.IncrementConfigurationRefreshRequestCounter(
                             validationParameters.ConfigurationManager.MetadataAddress,
-                            TelemetryConstants.Protocols.LKG);
+                            TelemetryConstants.Protocols.Lkg);
 
                         validationParameters.ConfigurationManager.RequestRefresh();
                         validationParameters.RefreshBeforeValidation = true;
