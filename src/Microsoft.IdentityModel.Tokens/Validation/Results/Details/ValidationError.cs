@@ -6,8 +6,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Logging;
 
+#nullable enable
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
@@ -20,39 +22,22 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Creates an instance of <see cref="ValidationError"/>
         /// </summary>
-        /// <param name="MessageDetail"/> contains information about the exception that is used to generate the exception message.
-        /// <param name="exceptionType"/> is the type of exception that occurred.
-        /// <param name="failureType"/> is the type of validation failure that occurred.
-        /// <param name="stackFrame"/> is the stack frame where the exception occurred.
-        internal ValidationError(
-            MessageDetail MessageDetail,
-            ValidationFailureType failureType,
-            Type exceptionType,
-            StackFrame stackFrame)
-            : this(MessageDetail, failureType, exceptionType, stackFrame, null)
-        {
-            // TODO: need to include CallContext.
-        }
-
-        /// <summary>
-        /// Creates an instance of <see cref="ValidationError"/>
-        /// </summary>
         /// <param name="messageDetail"/> contains information about the exception that is used to generate the exception message.
+        /// <param name="validationFailureType"/> is the type of validation failure that occurred.
         /// <param name="exceptionType"/> is the type of exception that occurred.
-        /// <param name="failureType"/> is the type of validation failure that occurred.
         /// <param name="stackFrame"/> is the stack frame where the exception occurred.
         /// <param name="innerException"/> is the inner exception that occurred.
         internal ValidationError(
             MessageDetail messageDetail,
-            ValidationFailureType failureType,
+            ValidationFailureType validationFailureType,
             Type exceptionType,
             StackFrame stackFrame,
-            Exception innerException)
+            Exception? innerException = null)
         {
             InnerException = innerException;
             MessageDetail = messageDetail;
             _exceptionType = exceptionType;
-            FailureType = failureType;
+            FailureType = validationFailureType;
             StackFrames = new List<StackFrame>(4)
             {
                 stackFrame
@@ -68,11 +53,11 @@ namespace Microsoft.IdentityModel.Tokens
             return GetException(ExceptionType, InnerException);
         }
 
-        internal Exception GetException(Type exceptionType, Exception innerException)
+        internal Exception GetException(Type exceptionType, Exception? innerException)
         {
-            Exception exception = null;
+            Exception? exception = null;
 
-            if (innerException == null && InnerValidationError == null)
+            if (innerException is null)
             {
                 if (exceptionType == typeof(SecurityTokenArgumentNullException))
                     exception = new SecurityTokenArgumentNullException(MessageDetail.Message);
@@ -82,6 +67,8 @@ namespace Microsoft.IdentityModel.Tokens
                     exception = new SecurityTokenInvalidIssuerException(MessageDetail.Message);
                 else if (exceptionType == typeof(SecurityTokenInvalidLifetimeException))
                     exception = new SecurityTokenInvalidLifetimeException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenInvalidOperationException))
+                    exception = new SecurityTokenInvalidOperationException(MessageDetail.Message);
                 else if (exceptionType == typeof(SecurityTokenReplayDetectedException))
                     exception = new SecurityTokenReplayDetectedException(MessageDetail.Message);
                 else if (exceptionType == typeof(SecurityTokenReplayAddFailedException))
@@ -131,61 +118,61 @@ namespace Microsoft.IdentityModel.Tokens
             }
             else
             {
-                Exception actualException = innerException ?? InnerValidationError.GetException();
-
                 if (exceptionType == typeof(SecurityTokenArgumentNullException))
-                    return new SecurityTokenArgumentNullException(MessageDetail.Message, innerException);
+                    exception = new SecurityTokenArgumentNullException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenInvalidAudienceException))
-                    exception = new SecurityTokenInvalidAudienceException(MessageDetail.Message, actualException);
+                    exception = new SecurityTokenInvalidAudienceException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenInvalidIssuerException))
-                    exception = new SecurityTokenInvalidIssuerException(MessageDetail.Message, actualException);
+                    exception = new SecurityTokenInvalidIssuerException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenInvalidLifetimeException))
-                    exception = new SecurityTokenInvalidLifetimeException(MessageDetail.Message, actualException);
+                    exception = new SecurityTokenInvalidLifetimeException(MessageDetail.Message, innerException);
+                else if (exceptionType == typeof(SecurityTokenInvalidOperationException))
+                    exception = new SecurityTokenInvalidOperationException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenReplayDetectedException))
-                    exception = new SecurityTokenReplayDetectedException(MessageDetail.Message, actualException);
+                    exception = new SecurityTokenReplayDetectedException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenReplayAddFailedException))
-                    exception = new SecurityTokenReplayAddFailedException(MessageDetail.Message, actualException);
+                    exception = new SecurityTokenReplayAddFailedException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenInvalidSigningKeyException))
-                    exception = new SecurityTokenInvalidSigningKeyException(MessageDetail.Message, actualException);
+                    exception = new SecurityTokenInvalidSigningKeyException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenInvalidTypeException))
-                    exception = new SecurityTokenInvalidTypeException(MessageDetail.Message, actualException);
+                    exception = new SecurityTokenInvalidTypeException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenReplayDetectedException))
-                    exception = new SecurityTokenReplayDetectedException(MessageDetail.Message, actualException);
+                    exception = new SecurityTokenReplayDetectedException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenExpiredException))
-                    exception = new SecurityTokenExpiredException(MessageDetail.Message, actualException);
+                    exception = new SecurityTokenExpiredException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenNotYetValidException))
-                    exception = new SecurityTokenNotYetValidException(MessageDetail.Message, actualException);
+                    exception = new SecurityTokenNotYetValidException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenInvalidLifetimeException))
-                    exception = new SecurityTokenInvalidLifetimeException(MessageDetail.Message, actualException);
+                    exception = new SecurityTokenInvalidLifetimeException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenNoExpirationException))
-                    exception = new SecurityTokenNoExpirationException(MessageDetail.Message, actualException);
+                    exception = new SecurityTokenNoExpirationException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenInvalidIssuerException))
-                    exception = new SecurityTokenInvalidIssuerException(MessageDetail.Message, actualException);
+                    exception = new SecurityTokenInvalidIssuerException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenSignatureKeyNotFoundException))
-                    exception = new SecurityTokenSignatureKeyNotFoundException(MessageDetail.Message, actualException);
+                    exception = new SecurityTokenSignatureKeyNotFoundException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenDecryptionFailedException))
-                    exception = new SecurityTokenDecryptionFailedException(MessageDetail.Message, actualException);
+                    exception = new SecurityTokenDecryptionFailedException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenMalformedException))
-                    exception = new SecurityTokenMalformedException(MessageDetail.Message, actualException);
+                    exception = new SecurityTokenMalformedException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenInvalidSignatureException))
-                    exception = new SecurityTokenInvalidSignatureException(MessageDetail.Message, actualException);
+                    exception = new SecurityTokenInvalidSignatureException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenArgumentNullException))
-                    exception = new SecurityTokenArgumentNullException(MessageDetail.Message, actualException);
+                    exception = new SecurityTokenArgumentNullException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenInvalidAlgorithmException))
-                    exception = new SecurityTokenInvalidAlgorithmException(MessageDetail.Message, actualException);
+                    exception = new SecurityTokenInvalidAlgorithmException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenInvalidAlgorithmException))
-                    exception = new SecurityTokenInvalidAlgorithmException(MessageDetail.Message, actualException);
+                    exception = new SecurityTokenInvalidAlgorithmException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenException))
-                    exception = new SecurityTokenException(MessageDetail.Message, actualException);
+                    exception = new SecurityTokenException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenKeyWrapException))
-                    exception = new SecurityTokenKeyWrapException(MessageDetail.Message, actualException);
+                    exception = new SecurityTokenKeyWrapException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenValidationException))
-                    exception = new SecurityTokenValidationException(MessageDetail.Message, actualException);
+                    exception = new SecurityTokenValidationException(MessageDetail.Message, innerException);
                 else
                 {
                     // Exception type is unknown
                     var message = LogHelper.FormatInvariant(LogMessages.IDX10002, exceptionType, MessageDetail.Message);
-                    exception = new SecurityTokenException(message, actualException);
+                    exception = new SecurityTokenException(message, innerException);
                 }
             }
 
@@ -197,11 +184,17 @@ namespace Microsoft.IdentityModel.Tokens
             return exception;
         }
 
+        internal void Log(ILogger logger)
+        {
+            Logger.TokenValidationFailed(logger, FailureType.Name, MessageDetail.Message);
+        }
+
         internal static ValidationError NullParameter(string parameterName, StackFrame stackFrame) => new(
             MessageDetail.NullParameter(parameterName),
             ValidationFailureType.NullArgument,
             typeof(SecurityTokenArgumentNullException),
-            stackFrame);
+            stackFrame,
+            null);
 
         /// <summary>
         /// Gets the type of validation failure that occurred.
@@ -216,12 +209,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the inner exception that occurred.
         /// </summary>
-        public Exception InnerException { get; }
-
-        /// <summary>
-        /// Gets the details for the inner exception that occurred.
-        /// </summary>
-        public ValidationError InnerValidationError { get; }
+        public Exception? InnerException { get; }
 
         /// <summary>
         /// Gets the message details that are used to generate the exception message.
@@ -279,5 +267,27 @@ namespace Microsoft.IdentityModel.Tokens
 
         // ConcurrentDictionary is thread-safe and only locks when adding a new item.
         private static ConcurrentDictionary<string, StackFrame> CachedStackFrames { get; } = new();
+
+        private static class Logger
+        {
+            private static readonly Action<ILogger, string, string, Exception?> s_tokenValidationFailed =
+                LoggerMessage.Define<string, string>(
+                    LogLevel.Information,
+                    LoggingEventId.TokenValidationFailed,
+                    "[MsIdentityModel] The token validation was unsuccessful due to: {ValidationFailureType} " +
+                    "Error message provided: {ValidationErrorMessage}");
+
+            /// <summary>
+            /// Logger for handling failures in token validation.
+            /// </summary>
+            /// <param name="logger">ILogger.</param>
+            /// <param name="validationFailureType">The cause of the failure.</param>
+            /// <param name="messageDetail">The message provided as part of the failure.</param>
+            public static void TokenValidationFailed(
+                ILogger logger,
+                string validationFailureType,
+                string messageDetail) => s_tokenValidationFailed(logger, validationFailureType, messageDetail, null);
+        }
     }
 }
+#nullable restore

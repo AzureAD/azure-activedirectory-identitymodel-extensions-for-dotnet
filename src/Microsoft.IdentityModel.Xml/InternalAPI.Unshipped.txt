@@ -1,7 +1,7 @@
-Microsoft.IdentityModel.Xml.Reference.Verify(Microsoft.IdentityModel.Tokens.CryptoProviderFactory cryptoProviderFactory, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.ValidationError
-Microsoft.IdentityModel.Xml.Signature.Verify(Microsoft.IdentityModel.Tokens.SecurityKey key, Microsoft.IdentityModel.Tokens.CryptoProviderFactory cryptoProviderFactory, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.ValidationError
-Microsoft.IdentityModel.Xml.SignedInfo.Verify(Microsoft.IdentityModel.Tokens.CryptoProviderFactory cryptoProviderFactory, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.ValidationError
+Microsoft.IdentityModel.Xml.Reference.Verify(Microsoft.IdentityModel.Tokens.CryptoProviderFactory cryptoProviderFactory, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.SignatureValidationError
+Microsoft.IdentityModel.Xml.Signature.Verify(Microsoft.IdentityModel.Tokens.SecurityKey key, Microsoft.IdentityModel.Tokens.CryptoProviderFactory cryptoProviderFactory, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.SignatureValidationError
+Microsoft.IdentityModel.Xml.SignedInfo.Verify(Microsoft.IdentityModel.Tokens.CryptoProviderFactory cryptoProviderFactory, Microsoft.IdentityModel.Tokens.CallContext callContext) -> Microsoft.IdentityModel.Tokens.SignatureValidationError
 Microsoft.IdentityModel.Xml.XmlValidationError
-Microsoft.IdentityModel.Xml.XmlValidationError.XmlValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, Microsoft.IdentityModel.Tokens.ValidationFailureType validationFailureType, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame) -> void
+Microsoft.IdentityModel.Xml.XmlValidationError.XmlValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, Microsoft.IdentityModel.Tokens.ValidationFailureType validationFailureType, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, System.Exception innerException = null) -> void
 Microsoft.IdentityModel.Xml.XmlValidationException.SetValidationError(Microsoft.IdentityModel.Tokens.ValidationError validationError) -> void
 override Microsoft.IdentityModel.Xml.XmlValidationError.GetException() -> System.Exception

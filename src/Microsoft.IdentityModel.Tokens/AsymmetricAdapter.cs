@@ -47,14 +47,23 @@ namespace Microsoft.IdentityModel.Tokens
         {
         }
 
-        internal AsymmetricAdapter(SecurityKey key, string algorithm, HashAlgorithm hashAlgorithm, HashAlgorithmName hashAlgorithmName, bool requirePrivateKey)
+        internal AsymmetricAdapter(
+            SecurityKey key,
+            string algorithm,
+            HashAlgorithm hashAlgorithm,
+            HashAlgorithmName hashAlgorithmName,
+            bool requirePrivateKey)
             : this(key, algorithm, hashAlgorithm, requirePrivateKey)
         {
 
             HashAlgorithmName = hashAlgorithmName;
         }
 
-        internal AsymmetricAdapter(SecurityKey key, string algorithm, HashAlgorithm hashAlgorithm, bool requirePrivateKey)
+        internal AsymmetricAdapter(
+            SecurityKey key,
+            string algorithm,
+            HashAlgorithm hashAlgorithm,
+            bool requirePrivateKey)
         {
             HashAlgorithm = hashAlgorithm;
 
@@ -79,7 +88,11 @@ namespace Microsoft.IdentityModel.Tokens
                     else if (securityKey is ECDsaSecurityKey edcsaSecurityKeyFromJsonWebKey)
                         InitializeUsingEcdsaSecurityKey(edcsaSecurityKeyFromJsonWebKey);
                     else
-                        throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10684, LogHelper.MarkAsNonPII(algorithm), key)));
+                        throw LogHelper.LogExceptionMessage(
+                            new NotSupportedException(
+                                LogHelper.FormatInvariant(
+                                    LogMessages.IDX10684,
+                                    LogHelper.MarkAsNonPII(algorithm), key)));
                 }
             }
             else if (key is ECDsaSecurityKey ecdsaKey)
@@ -87,7 +100,11 @@ namespace Microsoft.IdentityModel.Tokens
                 InitializeUsingEcdsaSecurityKey(ecdsaKey);
             }
             else
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10684, LogHelper.MarkAsNonPII(algorithm), key)));
+                throw LogHelper.LogExceptionMessage(
+                    new NotSupportedException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX10684,
+                            LogHelper.MarkAsNonPII(algorithm), key)));
         }
 
         internal byte[] Decrypt(byte[] data)
@@ -233,7 +250,10 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
-        private void InitializeUsingX509SecurityKey(X509SecurityKey x509SecurityKey, string algorithm, bool requirePrivateKey)
+        private void InitializeUsingX509SecurityKey(
+            X509SecurityKey x509SecurityKey,
+            string algorithm,
+            bool requirePrivateKey)
         {
             if (requirePrivateKey)
                 InitializeUsingRsa(x509SecurityKey.PrivateKey as RSA, algorithm);
@@ -249,7 +269,10 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
 #if NET6_0_OR_GREATER
-        internal bool SignUsingSpan(ReadOnlySpan<byte> data, Span<byte> destination, out int bytesWritten)
+        internal bool SignUsingSpan(
+            ReadOnlySpan<byte> data,
+            Span<byte> destination,
+            out int bytesWritten)
         {
             return _signUsingSpanFunction(data, destination, out bytesWritten);
         }
@@ -274,7 +297,10 @@ namespace Microsoft.IdentityModel.Tokens
 
 #if NET6_0_OR_GREATER
 #pragma warning disable CA1801 // Review unused parameters
-        private static bool SignUsingSpanNotFound(ReadOnlySpan<byte> data, Span<byte> destination, out int bytesWritten)
+        private static bool SignUsingSpanNotFound(
+            ReadOnlySpan<byte> data,
+            Span<byte> destination,
+            out int bytesWritten)
 #pragma warning restore CA1801 // Review unused parameters
         {
             // we should never get here, its a bug if we do.
@@ -288,7 +314,10 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
 #if NET6_0_OR_GREATER
-        internal bool SignUsingSpanECDsa(ReadOnlySpan<byte> data, Span<byte> destination, out int bytesWritten)
+        internal bool SignUsingSpanECDsa(
+            ReadOnlySpan<byte> data,
+            Span<byte> destination,
+            out int bytesWritten)
         {
             // ECDSA.TrySignData will return true and set bytesWritten = 64, if destination is null.
             if (destination.Length == 0)
@@ -397,7 +426,11 @@ namespace Microsoft.IdentityModel.Tokens
 #if NET6_0_OR_GREATER
             return VerifyUsingSpan(isRSA: true, bytes.AsSpan(offset, count), signature);
 #else
-            return RSA.VerifyHash(HashAlgorithm.ComputeHash(bytes, offset, count), signature, HashAlgorithmName, RSASignaturePadding);
+            return RSA.VerifyHash(
+                HashAlgorithm.ComputeHash(bytes, offset, count),
+                signature,
+                HashAlgorithmName,
+                RSASignaturePadding);
 #endif
         }
 

@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Logging;
 
@@ -26,7 +25,7 @@ namespace Microsoft.IdentityModel.Tokens
         SecurityToken securityToken,
         ValidationParameters validationParameters,
         BaseConfiguration? configuration,
-        CallContext? callContext);
+        CallContext callContext);
 
     /// <summary>
     /// SigningKeyValidation
@@ -55,21 +54,22 @@ namespace Microsoft.IdentityModel.Tokens
             CallContext? callContext)
         {
             if (validationParameters == null)
-                return ValidationError.NullParameter(
+                return IssuerSigningKeyValidationError.NullParameter(
                     nameof(validationParameters),
-                    new StackFrame(true));
+                    ValidationError.GetCurrentStackFrame());
 
             if (securityKey == null)
-                return new ValidationError(
+                return new IssuerSigningKeyValidationError(
                     new MessageDetail(LogMessages.IDX10253, nameof(securityKey)),
                     ValidationFailureType.SigningKeyValidationFailed,
                     typeof(SecurityTokenArgumentNullException),
-                    new StackFrame(true));
+                    ValidationError.GetCurrentStackFrame(),
+                    securityKey);
 
             if (securityToken == null)
-                return ValidationError.NullParameter(
+                return IssuerSigningKeyValidationError.NullParameter(
                     nameof(securityToken),
-                    new StackFrame(true));
+                    ValidationError.GetCurrentStackFrame());
 
             return ValidateIssuerSigningKeyLifeTime(securityKey, validationParameters, callContext);
         }
@@ -98,28 +98,30 @@ namespace Microsoft.IdentityModel.Tokens
                 notAfterUtc = cert.NotAfter.ToUniversalTime();
 
                 if (notBeforeUtc > DateTimeUtil.Add(utcNow, validationParameters.ClockSkew))
-                    return new ValidationError(
+                    return new IssuerSigningKeyValidationError(
                         new MessageDetail(
                             LogMessages.IDX10248,
                             LogHelper.MarkAsNonPII(notBeforeUtc),
                             LogHelper.MarkAsNonPII(utcNow)),
                         ValidationFailureType.SigningKeyValidationFailed,
                         typeof(SecurityTokenInvalidSigningKeyException),
-                        new StackFrame(true));
+                        ValidationError.GetCurrentStackFrame(),
+                        securityKey);
 
                 //TODO: Move to CallContext
                 //if (LogHelper.IsEnabled(EventLogLevel.Informational))
                 //    LogHelper.LogInformation(LogMessages.IDX10250, LogHelper.MarkAsNonPII(notBeforeUtc), LogHelper.MarkAsNonPII(utcNow));
 
                 if (notAfterUtc < DateTimeUtil.Add(utcNow, validationParameters.ClockSkew.Negate()))
-                    return new ValidationError(
+                    return new IssuerSigningKeyValidationError(
                         new MessageDetail(
                             LogMessages.IDX10249,
                             LogHelper.MarkAsNonPII(notAfterUtc),
                             LogHelper.MarkAsNonPII(utcNow)),
                         ValidationFailureType.SigningKeyValidationFailed,
                         typeof(SecurityTokenInvalidSigningKeyException),
-                        new StackFrame(true));
+                        ValidationError.GetCurrentStackFrame(),
+                        securityKey);
 
                 // TODO: Move to CallContext
                 //if (LogHelper.IsEnabled(EventLogLevel.Informational))
