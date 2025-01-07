@@ -12,7 +12,6 @@ namespace Microsoft.IdentityModel.Tokens.Telemetry
         /// Meter name for MicrosoftIdentityModel.
         /// </summary>
         private const string MeterName = "MicrosoftIdentityModel_Meter";
-        //public const string ServiceName = "MicrosoftIdentityModel";
 
         /// <summary>
         /// The meter responsible for creating instruments.

@@ -38,7 +38,6 @@ namespace Microsoft.IdentityModel.Tokens.Telemetry
 
         public void LogConfigurationRetrievalDuration(string metadataAddress, TimeSpan operationDuration)
         {
-
             var tagList = new TagList()
             {
                 { TelemetryConstants.IdentityModelVersionTag, ClientVer },
