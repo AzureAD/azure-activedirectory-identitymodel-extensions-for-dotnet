@@ -61,6 +61,10 @@
     <PackageReference Include="Microsoft.Bcl.TimeProvider" Version="$(MicrosoftBclTimeProviderVersion)" />
   </ItemGroup>
 
+  <ItemGroup Condition="!$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))">
+    <PackageReference Include="Microsoft.Bcl.Memory" Version="$(MicrosoftBclMemory)" />
+  </ItemGroup>
+
   <ItemGroup>
     <AdditionalFiles Include="InternalAPI.Shipped.txt" />
     <AdditionalFiles Include="InternalAPI.Unshipped.txt" />

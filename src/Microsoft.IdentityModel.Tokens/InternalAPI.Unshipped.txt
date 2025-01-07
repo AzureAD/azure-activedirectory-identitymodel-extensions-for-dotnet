@@ -98,6 +98,7 @@ static Microsoft.IdentityModel.Tokens.TokenReplayValidationError.NullParameter(s
 static Microsoft.IdentityModel.Tokens.TokenTypeValidationError.NullParameter(string parameterName, System.Diagnostics.StackFrame stackFrame) -> Microsoft.IdentityModel.Tokens.TokenTypeValidationError
 static Microsoft.IdentityModel.Tokens.Telemetry.IdentityModelTelemetry.IncrementConfigurationRefreshRequestCounter(in System.Diagnostics.TagList tagList) -> void
 static Microsoft.IdentityModel.Tokens.Telemetry.IdentityModelTelemetry.RecordConfigurationRetrievalDurationHistogram(long requestDurationInMs, in System.Diagnostics.TagList tagList) -> void
+static Microsoft.IdentityModel.Tokens.Base64UrlEncoder.Decode(System.ReadOnlySpan<char> strSpan, System.Span<byte> output) -> int
 static Microsoft.IdentityModel.Tokens.Utility.SerializeAsSingleCommaDelimitedString(System.Collections.Generic.IList<string> strings) -> string
 static Microsoft.IdentityModel.Tokens.ValidationError.GetCurrentStackFrame(string filePath = "", int lineNumber = 0, int skipFrames = 1) -> System.Diagnostics.StackFrame
 static readonly Microsoft.IdentityModel.Tokens.LoggingEventId.TokenValidationFailed -> Microsoft.Extensions.Logging.EventId
