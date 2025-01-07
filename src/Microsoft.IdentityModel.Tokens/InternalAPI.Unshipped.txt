@@ -8,11 +8,6 @@ const Microsoft.IdentityModel.Tokens.LogMessages.IDX10273 = "IDX10273: Algorithm
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10274 = "IDX10274: IssuerSigningKeyValidationDelegate threw an exception, see inner exception." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10275 = "IDX10275: TokenTypeValidationDelegate threw an exception, see inner exception." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10276 = "IDX10276: TokenReplayValidationDelegate threw an exception, see inner exception." -> string
-const Microsoft.IdentityModel.Tokens.Telemetry.IdentityModelTelemetry.IdentityModelConfigurationManagerCounterDescription = "Counter capturing configuration manager operations." -> string
-const Microsoft.IdentityModel.Tokens.Telemetry.IdentityModelTelemetry.IdentityModelConfigurationManagerCounterName = "IdentityModelConfigurationManager" -> string
-const Microsoft.IdentityModel.Tokens.Telemetry.IdentityModelTelemetry.MeterName = "MicrosoftIdentityModel_Meter" -> string
-const Microsoft.IdentityModel.Tokens.Telemetry.IdentityModelTelemetry.ServiceName = "MicrosoftIdentityModel" -> string
-const Microsoft.IdentityModel.Tokens.Telemetry.IdentityModelTelemetry.TotalDurationHistogramName = "IdentityModelConfigurationRequestTotalDurationInMS" -> string
 const Microsoft.IdentityModel.Tokens.Telemetry.TelemetryConstants.ExceptionTypeTag = "ExceptionType" -> string
 const Microsoft.IdentityModel.Tokens.Telemetry.TelemetryConstants.IdentityModelVersionTag = "IdentityModelVersion" -> string
 const Microsoft.IdentityModel.Tokens.Telemetry.TelemetryConstants.MetadataAddressTag = "MetadataAddress" -> string
@@ -24,6 +19,9 @@ const Microsoft.IdentityModel.Tokens.Telemetry.TelemetryConstants.Protocols.Firs
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10277 = "IDX10277: RequireAudience property on ValidationParameters is set to false. Exiting without validating the audience." -> string
 const Microsoft.IdentityModel.Tokens.Telemetry.TelemetryConstants.Protocols.Lkg = "LastKnownGood" -> string
 const Microsoft.IdentityModel.Tokens.Telemetry.TelemetryConstants.Protocols.Manual = "Manual" -> string
+const Microsoft.IdentityModel.Tokens.Telemetry.TelemetryDataRecorder.IdentityModelConfigurationManagerCounterDescription = "Counter capturing configuration manager operations." -> string
+const Microsoft.IdentityModel.Tokens.Telemetry.TelemetryDataRecorder.IdentityModelConfigurationManagerCounterName = "IdentityModelConfigurationManager" -> string
+const Microsoft.IdentityModel.Tokens.Telemetry.TelemetryDataRecorder.TotalDurationHistogramName = "IdentityModelConfigurationRequestTotalDurationInMS" -> string
 Microsoft.IdentityModel.Tokens.AlgorithmValidationError
 Microsoft.IdentityModel.Tokens.AlgorithmValidationError.AlgorithmValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, Microsoft.IdentityModel.Tokens.ValidationFailureType validationFailureType, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, string invalidAlgorithm, System.Exception innerException = null) -> void
 Microsoft.IdentityModel.Tokens.AlgorithmValidationError.InvalidAlgorithm.get -> string
@@ -64,11 +62,11 @@ Microsoft.IdentityModel.Tokens.Telemetry.TelemetryClient.IncrementConfigurationR
 Microsoft.IdentityModel.Tokens.Telemetry.TelemetryClient.LogConfigurationRetrievalDuration(string metadataAddress, System.TimeSpan operationDuration) -> void
 Microsoft.IdentityModel.Tokens.Telemetry.TelemetryClient.LogConfigurationRetrievalDuration(string metadataAddress, System.TimeSpan operationDuration, System.Exception exception) -> void
 Microsoft.IdentityModel.Tokens.Telemetry.TelemetryClient.TelemetryClient() -> void
+Microsoft.IdentityModel.Tokens.Telemetry.TelemetryDataRecorder
+Microsoft.IdentityModel.Tokens.Telemetry.TelemetryDataRecorder.TelemetryDataRecorder() -> void
 Microsoft.IdentityModel.Tokens.TokenReplayValidationError
 Microsoft.IdentityModel.Tokens.TokenReplayValidationError.ExpirationTime.get -> System.DateTime?
 Microsoft.IdentityModel.Tokens.TokenReplayValidationError.TokenReplayValidationError(Microsoft.IdentityModel.Tokens.MessageDetail messageDetail, Microsoft.IdentityModel.Tokens.ValidationFailureType validationFailureType, System.Type exceptionType, System.Diagnostics.StackFrame stackFrame, System.DateTime? expirationTime, System.Exception innerException = null) -> void
-Microsoft.IdentityModel.Tokens.Telemetry.IdentityModelTelemetry
-Microsoft.IdentityModel.Tokens.Telemetry.IdentityModelTelemetry.IdentityModelTelemetry() -> void
 Microsoft.IdentityModel.Tokens.Telemetry.TelemetryConstants
 Microsoft.IdentityModel.Tokens.Telemetry.TelemetryConstants.Protocols
 Microsoft.IdentityModel.Tokens.TokenTypeValidationError
@@ -94,21 +92,20 @@ override Microsoft.IdentityModel.Tokens.TokenReplayValidationError.GetException(
 override Microsoft.IdentityModel.Tokens.TokenTypeValidationError.GetException() -> System.Exception
 static Microsoft.IdentityModel.Tokens.IssuerSigningKeyValidationError.NullParameter(string parameterName, System.Diagnostics.StackFrame stackFrame) -> Microsoft.IdentityModel.Tokens.IssuerSigningKeyValidationError
 static Microsoft.IdentityModel.Tokens.SignatureValidationError.NullParameter(string parameterName, System.Diagnostics.StackFrame stackFrame) -> Microsoft.IdentityModel.Tokens.SignatureValidationError
+static Microsoft.IdentityModel.Tokens.Telemetry.TelemetryDataRecorder.IncrementConfigurationRefreshRequestCounter(in System.Diagnostics.TagList tagList) -> void
+static Microsoft.IdentityModel.Tokens.Telemetry.TelemetryDataRecorder.RecordConfigurationRetrievalDurationHistogram(long requestDurationInMs, in System.Diagnostics.TagList tagList) -> void
 static Microsoft.IdentityModel.Tokens.TokenReplayValidationError.NullParameter(string parameterName, System.Diagnostics.StackFrame stackFrame) -> Microsoft.IdentityModel.Tokens.TokenReplayValidationError
 static Microsoft.IdentityModel.Tokens.TokenTypeValidationError.NullParameter(string parameterName, System.Diagnostics.StackFrame stackFrame) -> Microsoft.IdentityModel.Tokens.TokenTypeValidationError
-static Microsoft.IdentityModel.Tokens.Telemetry.IdentityModelTelemetry.IncrementConfigurationRefreshRequestCounter(in System.Diagnostics.TagList tagList) -> void
-static Microsoft.IdentityModel.Tokens.Telemetry.IdentityModelTelemetry.RecordConfigurationRetrievalDurationHistogram(long requestDurationInMs, in System.Diagnostics.TagList tagList) -> void
 static Microsoft.IdentityModel.Tokens.Base64UrlEncoder.Decode(System.ReadOnlySpan<char> strSpan, System.Span<byte> output) -> int
 static Microsoft.IdentityModel.Tokens.Utility.SerializeAsSingleCommaDelimitedString(System.Collections.Generic.IList<string> strings) -> string
 static Microsoft.IdentityModel.Tokens.ValidationError.GetCurrentStackFrame(string filePath = "", int lineNumber = 0, int skipFrames = 1) -> System.Diagnostics.StackFrame
 static readonly Microsoft.IdentityModel.Tokens.LoggingEventId.TokenValidationFailed -> Microsoft.Extensions.Logging.EventId
 static readonly Microsoft.IdentityModel.Tokens.LoggingEventId.TokenValidationSucceeded -> Microsoft.Extensions.Logging.EventId
+static readonly Microsoft.IdentityModel.Tokens.Telemetry.TelemetryDataRecorder.ConfigurationManagerCounter -> System.Diagnostics.Metrics.Counter<long>
+static readonly Microsoft.IdentityModel.Tokens.Telemetry.TelemetryDataRecorder.TotalDurationHistogram -> System.Diagnostics.Metrics.Histogram<long>
 static readonly Microsoft.IdentityModel.Tokens.ValidationFailureType.AlgorithmValidatorThrew -> Microsoft.IdentityModel.Tokens.ValidationFailureType
 static readonly Microsoft.IdentityModel.Tokens.ValidationFailureType.AudienceValidatorThrew -> Microsoft.IdentityModel.Tokens.ValidationFailureType
 static readonly Microsoft.IdentityModel.Tokens.ValidationFailureType.IssuerSigningKeyValidatorThrew -> Microsoft.IdentityModel.Tokens.ValidationFailureType
-static readonly Microsoft.IdentityModel.Tokens.Telemetry.IdentityModelTelemetry.ConfigurationManagerCounter -> System.Diagnostics.Metrics.Counter<long>
-static readonly Microsoft.IdentityModel.Tokens.Telemetry.IdentityModelTelemetry.IdentityModelMeter -> System.Diagnostics.Metrics.Meter
-static readonly Microsoft.IdentityModel.Tokens.Telemetry.IdentityModelTelemetry.TotalDurationHistogram -> System.Diagnostics.Metrics.Histogram<long>
 static readonly Microsoft.IdentityModel.Tokens.ValidationFailureType.IssuerValidatorThrew -> Microsoft.IdentityModel.Tokens.ValidationFailureType
 static readonly Microsoft.IdentityModel.Tokens.ValidationFailureType.LifetimeValidatorThrew -> Microsoft.IdentityModel.Tokens.ValidationFailureType
 static readonly Microsoft.IdentityModel.Tokens.ValidationFailureType.NoTokenAudiencesProvided -> Microsoft.IdentityModel.Tokens.ValidationFailureType

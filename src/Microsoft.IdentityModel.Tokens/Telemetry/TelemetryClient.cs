@@ -7,6 +7,9 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens.Telemetry
 {
+    /// <summary>
+    /// Prepares <see cref="TagList"/>s using the provided data and sends them to <see cref="TelemetryDataRecorder"/> for recording.
+    /// </summary>
     internal class TelemetryClient : ITelemetryClient
     {
         public string ClientVer = IdentityModelTelemetryUtil.ClientVer;
@@ -20,7 +23,7 @@ namespace Microsoft.IdentityModel.Tokens.Telemetry
                 { TelemetryConstants.OperationStatusTag, operationStatus }
             };
 
-            IdentityModelTelemetry.IncrementConfigurationRefreshRequestCounter(tagList);
+            TelemetryDataRecorder.IncrementConfigurationRefreshRequestCounter(tagList);
         }
 
         public void IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, Exception exception)
@@ -33,7 +36,7 @@ namespace Microsoft.IdentityModel.Tokens.Telemetry
                 { TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString() }
             };
 
-            IdentityModelTelemetry.IncrementConfigurationRefreshRequestCounter(tagList);
+            TelemetryDataRecorder.IncrementConfigurationRefreshRequestCounter(tagList);
         }
 
         public void LogConfigurationRetrievalDuration(string metadataAddress, TimeSpan operationDuration)
@@ -45,7 +48,7 @@ namespace Microsoft.IdentityModel.Tokens.Telemetry
             };
 
             long durationInMilliseconds = (long)operationDuration.TotalMilliseconds;
-            IdentityModelTelemetry.RecordConfigurationRetrievalDurationHistogram(durationInMilliseconds, tagList);
+            TelemetryDataRecorder.RecordConfigurationRetrievalDurationHistogram(durationInMilliseconds, tagList);
         }
 
         public void LogConfigurationRetrievalDuration(string metadataAddress, TimeSpan operationDuration, Exception exception)
@@ -58,7 +61,7 @@ namespace Microsoft.IdentityModel.Tokens.Telemetry
             };
 
             long durationInMilliseconds = (long)operationDuration.TotalMilliseconds;
-            IdentityModelTelemetry.RecordConfigurationRetrievalDurationHistogram(durationInMilliseconds, tagList);
+            TelemetryDataRecorder.RecordConfigurationRetrievalDurationHistogram(durationInMilliseconds, tagList);
         }
     }
 }

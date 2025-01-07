@@ -6,7 +6,10 @@ using System.Diagnostics.Metrics;
 
 namespace Microsoft.IdentityModel.Tokens.Telemetry
 {
-    internal class IdentityModelTelemetry
+    /// <summary>
+    /// Pushes telemetry data to the configured <see cref="Counter{T}"/> or <see cref="Histogram{T}"/>.
+    /// </summary>
+    internal class TelemetryDataRecorder
     {
         /// <summary>
         /// Meter name for MicrosoftIdentityModel.
