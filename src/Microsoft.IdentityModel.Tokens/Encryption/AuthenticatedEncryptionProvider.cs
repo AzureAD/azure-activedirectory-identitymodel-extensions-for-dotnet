@@ -152,7 +152,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(LogMessages.IDX10654, ex)));
             }
 
-            byte[] al = Utility.ConvertToBigEndian(authenticatedData.Length * 8);
+            byte[] al = Utility.ConvertToBigEndian(authenticatedData.Length * 8L);
             byte[] macBytes = new byte[authenticatedData.Length + aes.IV.Length + ciphertext.Length + al.Length];
             Array.Copy(authenticatedData, 0, macBytes, 0, authenticatedData.Length);
             Array.Copy(aes.IV, 0, macBytes, authenticatedData.Length, aes.IV.Length);
@@ -173,7 +173,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogExceptionMessage(new SecurityTokenDecryptionFailedException(
                     LogHelper.FormatInvariant(LogMessages.IDX10625, authenticationTag.Length, expectedTagLength, Base64UrlEncoder.Encode(authenticationTag), Algorithm)));
 
-            byte[] al = Utility.ConvertToBigEndian(authenticatedData.Length * 8);
+            byte[] al = Utility.ConvertToBigEndian(authenticatedData.Length * 8L);
             byte[] macBytes = new byte[authenticatedData.Length + iv.Length + ciphertext.Length + al.Length];
             Array.Copy(authenticatedData, 0, macBytes, 0, authenticatedData.Length);
             Array.Copy(iv, 0, macBytes, authenticatedData.Length, iv.Length);
