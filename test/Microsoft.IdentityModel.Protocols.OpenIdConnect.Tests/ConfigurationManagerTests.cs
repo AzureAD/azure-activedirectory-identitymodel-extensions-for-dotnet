@@ -230,7 +230,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // Interlocked guard will block.
             // Configuration should be AADCommonV1Config
             signalEvent.Reset();
-            configurationManager.RequestRefresh();
+            _ = Task.Run(() => configurationManager.RequestRefresh());
 
             // InMemoryDocumentRetrieverWithEvents will signal when it is OK to change the MetadataAddress
             // otherwise, it may be the case that the MetadataAddress is changed before the previous Task has finished.
@@ -239,7 +239,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // AADCommonV1Json would have been passed to the the previous retriever, which is blocked on an event.
             configurationManager.MetadataAddress = "AADCommonV2Json";
             TestUtilities.SetField(configurationManager, "_lastRequestRefresh", DateTimeOffset.MinValue);
-            configurationManager.RequestRefresh();
+            _ = Task.Run(() => configurationManager.RequestRefresh());
 
             // Set the event to release the lock and let the previous retriever finish.
             waitEvent.Set();
@@ -658,13 +658,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var configuration = await configManager.GetConfigurationAsync(CancellationToken.None);
 
             TestUtilities.SetField(configManager, "_lastRequestRefresh", DateTimeOffset.UtcNow - TimeSpan.FromHours(1));
-            configManager.RequestRefresh();
             configManager.MetadataAddress = "http://127.0.0.1";
+            configManager.RequestRefresh();
             var configuration2 = await configManager.GetConfigurationAsync(CancellationToken.None);
             IdentityComparer.AreEqual(configuration, configuration2, context);
             if (!object.ReferenceEquals(configuration, configuration2))
                 context.Diffs.Add("!object.ReferenceEquals(configuration, configuration2)");
-
 
             // get configuration from http address, should throw
             // get configuration with unsuccessful HTTP response status code
