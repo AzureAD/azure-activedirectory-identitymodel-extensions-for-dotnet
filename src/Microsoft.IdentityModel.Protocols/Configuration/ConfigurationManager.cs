@@ -35,6 +35,10 @@ namespace Microsoft.IdentityModel.Protocols
         private const int ConfigurationRetrieverRunning = 1;
         private int _configurationRetrieverState = ConfigurationRetrieverIdle;
 
+        // If a refresh is requested, then do the refresh as a blocking operation
+        // not on a background thread.
+        bool _refreshRequested;
+
         /// <summary>
         /// Instantiates a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
         /// </summary>
@@ -214,7 +218,13 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
                 {
-                    _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
+                    if (_refreshRequested)
+                    {
+                        UpdateCurrentConfiguration();
+                        _refreshRequested = false;
+                    }
+                    else
+                        _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
                 }
             }
 
@@ -310,15 +320,11 @@ namespace Microsoft.IdentityModel.Protocols
         public override void RequestRefresh()
         {
             DateTimeOffset now = DateTimeOffset.UtcNow;
-
             if (now >= DateTimeUtil.Add(_lastRequestRefresh.UtcDateTime, RefreshInterval) || _isFirstRefreshRequest)
             {
                 _isFirstRefreshRequest = false;
-                if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
-                {
-                    UpdateCurrentConfiguration();
-                    _lastRequestRefresh = now;
-                }
+                _syncAfter = now;
+                _refreshRequested = true;
             }
         }
 

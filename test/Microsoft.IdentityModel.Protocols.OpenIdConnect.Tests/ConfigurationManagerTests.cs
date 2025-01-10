@@ -210,48 +210,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
 
         [Fact]
-        public async Task VerifyInterlockGuardForRequestRefresh()
-        {
-            ManualResetEvent waitEvent = new ManualResetEvent(false);
-            ManualResetEvent signalEvent = new ManualResetEvent(false);
-            InMemoryDocumentRetriever inMemoryDocumentRetriever = InMemoryDocumentRetrieverWithEvents(waitEvent, signalEvent);
-
-            var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
-                    "AADCommonV1Json",
-                    new OpenIdConnectConfigurationRetriever(),
-                    inMemoryDocumentRetriever);
-
-            // populate the configurationManager with AADCommonV1Config
-            TestUtilities.SetField(configurationManager, "_currentConfiguration", OpenIdConfigData.AADCommonV1Config);
-
-            // InMemoryDocumentRetrieverWithEvents will block until waitEvent.Set() is called.
-            // The first RequestRefresh will not have finished before the next RequestRefresh() is called.
-            // The guard '_lastRequestRefresh' will not block as we set it to DateTimeOffset.MinValue.
-            // Interlocked guard will block.
-            // Configuration should be AADCommonV1Config
-            signalEvent.Reset();
-            _ = Task.Run(() => configurationManager.RequestRefresh());
-
-            // InMemoryDocumentRetrieverWithEvents will signal when it is OK to change the MetadataAddress
-            // otherwise, it may be the case that the MetadataAddress is changed before the previous Task has finished.
-            signalEvent.WaitOne();
-
-            // AADCommonV1Json would have been passed to the the previous retriever, which is blocked on an event.
-            configurationManager.MetadataAddress = "AADCommonV2Json";
-            TestUtilities.SetField(configurationManager, "_lastRequestRefresh", DateTimeOffset.MinValue);
-            _ = Task.Run(() => configurationManager.RequestRefresh());
-
-            // Set the event to release the lock and let the previous retriever finish.
-            waitEvent.Set();
-
-            // Configuration should be AADCommonV1Config
-            var configuration = await configurationManager.GetConfigurationAsync();
-            Assert.True(configuration.Issuer.Equals(OpenIdConfigData.AADCommonV1Config.Issuer),
-                    $"configuration.Issuer from configurationManager was not as expected," +
-                    $"configuration.Issuer: '{configuration.Issuer}' != expected '{OpenIdConfigData.AADCommonV1Config.Issuer}'.");
-        }
-
-        [Fact]
         public async Task VerifyInterlockGuardForGetConfigurationAsync()
         {
             ManualResetEvent waitEvent = new ManualResetEvent(false);
@@ -320,12 +278,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             catch (Exception firstFetchMetadataFailure)
             {
                 // _syncAfter should not have been changed, because the fetch failed.
-                var syncAfter = TestUtilities.GetField(configManager, "_syncAfter");
-                if ((DateTimeOffset)syncAfter != DateTimeOffset.MinValue)
+                DateTimeOffset syncAfter = (DateTimeOffset)TestUtilities.GetField(configManager, "_syncAfter");
+                if (syncAfter != DateTimeOffset.MinValue)
                     context.AddDiff($"ConfigurationManager._syncAfter: '{syncAfter}' should equal '{DateTimeOffset.MinValue}'.");
 
                 if (firstFetchMetadataFailure.InnerException == null)
                     context.AddDiff($"Expected exception to contain inner exception for fetch metadata failure.");
+
+                DateTime requestTime = DateTime.UtcNow;
 
                 // Fetch metadata again during refresh interval, the exception should be same from above.
                 try
@@ -339,9 +299,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         context.AddDiff($"Expected exception to contain inner exception for fetch metadata failure.");
 
                     // _syncAfter should not have been changed, because the fetch failed.
-                    syncAfter = TestUtilities.GetField(configManager, "_syncAfter");
-                    if ((DateTimeOffset)syncAfter != DateTimeOffset.MinValue)
-                        context.AddDiff($"ConfigurationManager._syncAfter: '{syncAfter}' should equal '{DateTimeOffset.MinValue}'.");
+                    syncAfter = (DateTimeOffset)TestUtilities.GetField(configManager, "_syncAfter");
+
+                    if (!IdentityComparer.AreDatesEqualWithEpsilon(requestTime, syncAfter.UtcDateTime, 1))
+                        context.AddDiff($"ConfigurationManager._syncAfter: '{syncAfter.UtcDateTime}' should equal be within 1 second of '{requestTime}'.");
 
                     IdentityComparer.AreEqual(firstFetchMetadataFailure, secondFetchMetadataFailure, context);
                 }
@@ -605,7 +566,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
 
         [Fact]
-        public async Task CheckSyncAfter()
+        public async Task CheckSyncAfterAndRefreshRequested()
         {
             // This test checks that the _syncAfter field is set correctly after a refresh.
             var context = new CompareContext($"{this}.CheckSyncAfter");
@@ -634,9 +595,18 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // make same check for RequestRefresh
             // force a refresh by setting internal field
             TestUtilities.SetField(configManager, "_lastRequestRefresh", DateTimeOffset.UtcNow - TimeSpan.FromHours(1));
+
             configManager.RequestRefresh();
-            // wait 1000ms here because update of config is run as a new task.
-            Thread.Sleep(1000);
+
+            bool refreshRequested = (bool)TestUtilities.GetField(configManager, "_refreshRequested");
+            if (!refreshRequested)
+                context.Diffs.Add("Refresh is expected to be requested after RequestRefresh is called");
+
+            await configManager.GetConfigurationAsync();
+
+            refreshRequested = (bool)TestUtilities.GetField(configManager, "_refreshRequested");
+            if (refreshRequested)
+                context.Diffs.Add("Refresh is not expected to be requested after GetConfigurationAsync is called");
 
             // check that _syncAfter is greater than DateTimeOffset.UtcNow + AutomaticRefreshInterval
             syncAfter = (DateTimeOffset)TestUtilities.GetField(configManager, "_syncAfter");
