@@ -35,6 +35,8 @@ namespace Microsoft.IdentityModel.Protocols
         private const int ConfigurationRetrieverRunning = 1;
         private int _configurationRetrieverState = ConfigurationRetrieverIdle;
 
+        private readonly TimeProvider _timeProvider = TimeProvider.System;
+
         // If a refresh is requested, then do the refresh as a blocking operation
         // not on a background thread.
         bool _refreshRequested;
@@ -151,7 +153,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
         public virtual async Task<T> GetConfigurationAsync(CancellationToken cancel)
         {
-            if (_currentConfiguration != null && _syncAfter > DateTimeOffset.UtcNow)
+            if (_currentConfiguration != null && _syncAfter > _timeProvider.GetUtcNow())
                 return _currentConfiguration;
 
             Exception fetchMetadataFailure = null;
@@ -295,7 +297,7 @@ namespace Microsoft.IdentityModel.Protocols
         private void UpdateConfiguration(T configuration)
         {
             _currentConfiguration = configuration;
-            _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval +
+            _syncAfter = DateTimeUtil.Add(_timeProvider.GetUtcNow().UtcDateTime, AutomaticRefreshInterval +
                 TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 20)));
         }
 
@@ -319,11 +321,12 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         public override void RequestRefresh()
         {
-            DateTimeOffset now = DateTimeOffset.UtcNow;
+            DateTimeOffset now = _timeProvider.GetUtcNow();
             if (now >= DateTimeUtil.Add(_lastRequestRefresh.UtcDateTime, RefreshInterval) || _isFirstRefreshRequest)
             {
                 _isFirstRefreshRequest = false;
                 _syncAfter = now;
+                _lastRequestRefresh = now;
                 _refreshRequested = true;
             }
         }

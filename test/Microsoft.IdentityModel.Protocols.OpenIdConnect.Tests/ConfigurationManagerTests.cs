@@ -11,6 +11,7 @@ using System.Net;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Time.Testing;
 using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration;
 using Microsoft.IdentityModel.TestUtils;
@@ -19,9 +20,6 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 {
-    /// <summary>
-    /// 
-    /// </summary>
     public class ConfigurationManagerTests
     {
         /// <summary>
@@ -569,7 +567,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         public async Task CheckSyncAfterAndRefreshRequested()
         {
             // This test checks that the _syncAfter field is set correctly after a refresh.
-            var context = new CompareContext($"{this}.CheckSyncAfter");
+            var context = new CompareContext($"{this}.CheckSyncAfterAndRefreshRequested");
 
             var docRetriever = new FileDocumentRetriever();
             var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
@@ -716,6 +714,96 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             configurationManager.LastKnownGoodConfiguration = configWithSameKidDiffKeyMaterial;
             IdentityComparer.AreEqual(configurationManager.GetValidLkgConfigurations().Length, 4, context);
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
+        public async Task RequestRefresh_RespectsRefreshInterval()
+        {
+            // This test checks that the _syncAfter field is set correctly after a refresh.
+            var context = new CompareContext($"{this}.RequestRefresh_RespectsRefreshInterval");
+
+            var timeProvider = new FakeTimeProvider();
+
+            var docRetriever = new FileDocumentRetriever();
+            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
+            TestUtilities.SetField(configManager, "_timeProvider", timeProvider);
+
+            // Get the first configuration.
+            var configuration = await configManager.GetConfigurationAsync(CancellationToken.None);
+
+            configManager.RequestRefresh();
+
+            var configAfterFirstRefresh = await configManager.GetConfigurationAsync(CancellationToken.None);
+
+            // First RequestRefresh triggers a refresh.
+            if (object.ReferenceEquals(configuration, configAfterFirstRefresh))
+                context.Diffs.Add("object.ReferenceEquals(configuration, configAfterFirstRefresh)");
+
+            configManager.RequestRefresh();
+
+            var configAfterSecondRefresh = await configManager.GetConfigurationAsync(CancellationToken.None);
+
+            // Second RequestRefresh should not trigger a refresh because the refresh interval has not passed.
+            if (!object.ReferenceEquals(configAfterFirstRefresh, configAfterSecondRefresh))
+                context.Diffs.Add("!object.ReferenceEquals(configAfterFirstRefresh, configAfterSecondRefresh)");
+
+            // Advance time to trigger a refresh.
+            timeProvider.Advance(configManager.RefreshInterval);
+
+            configManager.RequestRefresh();
+
+            var configAfterThirdRefresh = await configManager.GetConfigurationAsync(CancellationToken.None);
+
+            // Third RequestRefresh should trigger a refresh because the refresh interval has passed.
+            if (object.ReferenceEquals(configAfterSecondRefresh, configAfterThirdRefresh))
+                context.Diffs.Add("object.ReferenceEquals(configAfterSecondRefresh, configAfterThirdRefresh)");
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
+        public async Task GetConfigurationAsync_RespectsRefreshInterval()
+        {
+            var context = new CompareContext($"{this}.GetConfigurationAsync_RespectsRefreshInterval");
+
+            var timeProvider = new FakeTimeProvider();
+
+            var docRetriever = new FileDocumentRetriever();
+            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
+            TestUtilities.SetField(configManager, "_timeProvider", timeProvider);
+
+            TimeSpan advanceInterval = BaseConfigurationManager.DefaultAutomaticRefreshInterval.Add(TimeSpan.FromSeconds(configManager.AutomaticRefreshInterval.TotalSeconds / 20));
+
+            TestUtilities.SetField(configManager, "_timeProvider", timeProvider);
+
+            // Get the first configuration.
+            var configuration = await configManager.GetConfigurationAsync(CancellationToken.None);
+
+            var configNoAdvanceInTime = await configManager.GetConfigurationAsync(CancellationToken.None);
+
+            // First GetConfigurationAsync should not trigger a refresh because the refresh interval has not passed.
+            if (!object.ReferenceEquals(configuration, configNoAdvanceInTime))
+                context.Diffs.Add("!object.ReferenceEquals(configuration, configNoAdvanceInTime)");
+
+            // Advance time to trigger a refresh.
+            timeProvider.Advance(advanceInterval);
+
+            var configAfterTimeIsAdvanced = await configManager.GetConfigurationAsync(CancellationToken.None);
+
+            // Same config, but a task is queued to update the configuration.
+            if (!object.ReferenceEquals(configNoAdvanceInTime, configAfterTimeIsAdvanced))
+                context.Diffs.Add("!object.ReferenceEquals(configuration, configAfterTimeIsAdvanced)");
+
+            // Need to wait for background task to finish.
+            Thread.Sleep(250);
+
+            var configAfterBackgroundTask = await configManager.GetConfigurationAsync(CancellationToken.None);
+
+            // Configuration should be updated after the background task finishes.
+            if (object.ReferenceEquals(configAfterTimeIsAdvanced, configAfterBackgroundTask))
+                context.Diffs.Add("object.ReferenceEquals(configuration, configAfterBackgroundTask)");
 
             TestUtilities.AssertFailIfErrors(context);
         }
