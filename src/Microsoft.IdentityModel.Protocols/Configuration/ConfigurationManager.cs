@@ -38,7 +38,10 @@ namespace Microsoft.IdentityModel.Protocols
         private readonly TimeProvider _timeProvider = TimeProvider.System;
 
         // If a refresh is requested, then do the refresh as a blocking operation
-        // not on a background thread.
+        // not on a background thread. RequestRefresh signals that the app is explicitly
+        // requesting a refresh, so it should be done immediately so the next
+        // call to GetConfiguration will return new configuration if the minimum
+        // refresh interval has passed.
         bool _refreshRequested;
 
         /// <summary>

@@ -743,22 +743,40 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             configManager.RequestRefresh();
 
-            var configAfterSecondRefresh = await configManager.GetConfigurationAsync(CancellationToken.None);
+            var configAfterNoTimePassed = await configManager.GetConfigurationAsync(CancellationToken.None);
 
             // Second RequestRefresh should not trigger a refresh because the refresh interval has not passed.
-            if (!object.ReferenceEquals(configAfterFirstRefresh, configAfterSecondRefresh))
-                context.Diffs.Add("!object.ReferenceEquals(configAfterFirstRefresh, configAfterSecondRefresh)");
+            if (!object.ReferenceEquals(configAfterFirstRefresh, configAfterNoTimePassed))
+                context.Diffs.Add("!object.ReferenceEquals(configAfterFirstRefresh, configAfterNoTimePassed)");
 
             // Advance time to trigger a refresh.
             timeProvider.Advance(configManager.RefreshInterval);
 
             configManager.RequestRefresh();
 
-            var configAfterThirdRefresh = await configManager.GetConfigurationAsync(CancellationToken.None);
+            var configAfterRefreshInterval = await configManager.GetConfigurationAsync(CancellationToken.None);
 
             // Third RequestRefresh should trigger a refresh because the refresh interval has passed.
-            if (object.ReferenceEquals(configAfterSecondRefresh, configAfterThirdRefresh))
-                context.Diffs.Add("object.ReferenceEquals(configAfterSecondRefresh, configAfterThirdRefresh)");
+            if (object.ReferenceEquals(configAfterNoTimePassed, configAfterRefreshInterval))
+                context.Diffs.Add("object.ReferenceEquals(configAfterNoTimePassed, configAfterRefreshInterval)");
+
+            // Advance time just prior to a refresh.
+            timeProvider.Advance(configManager.RefreshInterval.Subtract(TimeSpan.FromSeconds(1)));
+
+            var configAfterLessThanRefreshInterval = await configManager.GetConfigurationAsync(CancellationToken.None);
+
+            // Fourth RequestRefresh should not trigger a refresh because the refresh interval has not passed.
+            if (!object.ReferenceEquals(configAfterRefreshInterval, configAfterLessThanRefreshInterval))
+                context.Diffs.Add("object.ReferenceEquals(configAfterRefreshInterval, configAfterLessThanRefreshInterval)");
+
+            // Advance time 365 days.
+            timeProvider.Advance(TimeSpan.FromDays(365));
+
+            var configAfterOneYear = await configManager.GetConfigurationAsync(CancellationToken.None);
+
+            // Fifth RequestRefresh should trigger a refresh because the refresh interval has passed.
+            if (!object.ReferenceEquals(configAfterLessThanRefreshInterval, configAfterOneYear))
+                context.Diffs.Add("object.ReferenceEquals(configAfterLessThanRefreshInterval, configAfterOneYear)");
 
             TestUtilities.AssertFailIfErrors(context);
         }
