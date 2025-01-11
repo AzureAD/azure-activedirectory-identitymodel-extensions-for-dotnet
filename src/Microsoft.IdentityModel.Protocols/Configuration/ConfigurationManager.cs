@@ -3,6 +3,7 @@
 
 using System;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
@@ -18,8 +19,16 @@ namespace Microsoft.IdentityModel.Protocols
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
     public class ConfigurationManager<T> : BaseConfigurationManager, IConfigurationManager<T> where T : class
     {
-        private DateTimeOffset _syncAfter = DateTimeOffset.MinValue;
-        private DateTimeOffset _lastRequestRefresh = DateTimeOffset.MinValue;
+        // To prevent tearing, this needs to be only updated through AtomicUpdateSyncAfter.
+        // Reads should be done through the property SyncAfter.
+        private DateTime _syncAfter = DateTime.MinValue;
+        private DateTime SyncAfter => _syncAfter;
+
+        // See comment above, this should only be updated through AtomicUpdateLastRequestRefresh,
+        // read through LastRequestRefresh.
+        private DateTime _lastRequestRefresh = DateTime.MinValue;
+        private DateTime LastRequestRefresh => _lastRequestRefresh;
+
         private bool _isFirstRefreshRequest = true;
         private readonly SemaphoreSlim _configurationNullLock = new SemaphoreSlim(1);
 
@@ -156,7 +165,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
         public virtual async Task<T> GetConfigurationAsync(CancellationToken cancel)
         {
-            if (_currentConfiguration != null && _syncAfter > _timeProvider.GetUtcNow())
+            if (_currentConfiguration != null && SyncAfter > _timeProvider.GetUtcNow())
                 return _currentConfiguration;
 
             Exception fetchMetadataFailure = null;
@@ -242,7 +251,7 @@ namespace Microsoft.IdentityModel.Protocols
                     LogHelper.FormatInvariant(
                         LogMessages.IDX20803,
                         LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
-                        LogHelper.MarkAsNonPII(_syncAfter),
+                        LogHelper.MarkAsNonPII(SyncAfter),
                         LogHelper.MarkAsNonPII(fetchMetadataFailure)),
                     fetchMetadataFailure));
         }
@@ -300,8 +309,27 @@ namespace Microsoft.IdentityModel.Protocols
         private void UpdateConfiguration(T configuration)
         {
             _currentConfiguration = configuration;
-            _syncAfter = DateTimeUtil.Add(_timeProvider.GetUtcNow().UtcDateTime, AutomaticRefreshInterval +
+            var newSyncTime = DateTimeUtil.Add(_timeProvider.GetUtcNow().UtcDateTime, AutomaticRefreshInterval +
                 TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 20)));
+            AtomicUpdateSyncAfter(newSyncTime);
+        }
+
+        private void AtomicUpdateSyncAfter(DateTime syncAfter)
+        {
+            // DateTime's backing data is safe to treat as a long if the Kind is not local.
+            // _syncAfter will always be updated to a UTC time.
+            // See the implementation of ToBinary on DateTime.
+            Interlocked.Exchange(
+                ref Unsafe.As<DateTime, long>(ref _syncAfter),
+                Unsafe.As<DateTime, long>(ref syncAfter));
+        }
+
+        private void AtomicUpdateLastRequestRefresh(DateTime lastRequestRefresh)
+        {
+            // See the comment in AtomicUpdateSyncAfter.
+            Interlocked.Exchange(
+                ref Unsafe.As<DateTime, long>(ref _lastRequestRefresh),
+                Unsafe.As<DateTime, long>(ref lastRequestRefresh));
         }
 
         /// <summary>
@@ -324,12 +352,12 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         public override void RequestRefresh()
         {
-            DateTimeOffset now = _timeProvider.GetUtcNow();
-            if (now >= DateTimeUtil.Add(_lastRequestRefresh.UtcDateTime, RefreshInterval) || _isFirstRefreshRequest)
+            DateTime now = _timeProvider.GetUtcNow().UtcDateTime;
+            if (now >= DateTimeUtil.Add(LastRequestRefresh, RefreshInterval) || _isFirstRefreshRequest)
             {
                 _isFirstRefreshRequest = false;
-                _syncAfter = now;
-                _lastRequestRefresh = now;
+                AtomicUpdateSyncAfter(now);
+                AtomicUpdateLastRequestRefresh(now);
                 _refreshRequested = true;
             }
         }
