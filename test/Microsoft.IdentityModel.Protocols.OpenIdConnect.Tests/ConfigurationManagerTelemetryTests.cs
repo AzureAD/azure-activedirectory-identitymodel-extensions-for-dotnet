@@ -9,8 +9,8 @@ using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration;
 using Microsoft.IdentityModel.TestUtils;
-using Microsoft.IdentityModel.Tokens.Telemetry;
-using Microsoft.IdentityModel.Tokens.Telemetry.Tests;
+using Microsoft.IdentityModel.Telemetry;
+using Microsoft.IdentityModel.Telemetry.Tests;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests

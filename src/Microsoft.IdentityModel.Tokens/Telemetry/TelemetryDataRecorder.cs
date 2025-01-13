@@ -4,7 +4,7 @@
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 
-namespace Microsoft.IdentityModel.Tokens.Telemetry
+namespace Microsoft.IdentityModel.Telemetry
 {
     /// <summary>
     /// Pushes telemetry data to the configured <see cref="Counter{T}"/> or <see cref="Histogram{T}"/>.

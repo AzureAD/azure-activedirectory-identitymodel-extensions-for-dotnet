@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.IdentityModel.Tokens.Telemetry
+namespace Microsoft.IdentityModel.Telemetry
 {
     internal interface ITelemetryClient
     {

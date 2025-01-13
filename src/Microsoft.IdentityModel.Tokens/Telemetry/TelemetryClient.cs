@@ -5,7 +5,7 @@ using System;
 using System.Diagnostics;
 using Microsoft.IdentityModel.Logging;
 
-namespace Microsoft.IdentityModel.Tokens.Telemetry
+namespace Microsoft.IdentityModel.Telemetry
 {
     /// <summary>
     /// Prepares <see cref="TagList"/>s using the provided data and sends them to <see cref="TelemetryDataRecorder"/> for recording.

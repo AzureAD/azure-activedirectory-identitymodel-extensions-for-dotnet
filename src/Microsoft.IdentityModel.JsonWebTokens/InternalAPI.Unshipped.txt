@@ -1,4 +1,4 @@
-Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler._telemetryClient -> Microsoft.IdentityModel.Tokens.Telemetry.ITelemetryClient
+Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler._telemetryClient -> Microsoft.IdentityModel.Telemetry.ITelemetryClient
 static Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.CreateToken(string payload, Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor tokenDescriptor) -> string
 static Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.EncryptToken(byte[] innerTokenUtf8Bytes, Microsoft.IdentityModel.Tokens.EncryptingCredentials encryptingCredentials, string compressionAlgorithm, System.Collections.Generic.IDictionary<string, object> additionalHeaderClaims, string tokenType, bool includeKeyIdInHeader) -> string
 static Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.EncryptToken(byte[] innerTokenUtf8Bytes, Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor tokenDescriptor) -> string

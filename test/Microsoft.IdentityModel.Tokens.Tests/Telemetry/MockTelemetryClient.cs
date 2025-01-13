@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.IdentityModel.Logging;
 
-namespace Microsoft.IdentityModel.Tokens.Telemetry.Tests
+namespace Microsoft.IdentityModel.Telemetry.Tests
 {
     public class MockTelemetryClient : ITelemetryClient
     {

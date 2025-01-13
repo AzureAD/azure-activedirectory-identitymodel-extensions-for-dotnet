@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Telemetry;
+using Microsoft.IdentityModel.Telemetry;
 
 namespace Microsoft.IdentityModel.Protocols
 {
