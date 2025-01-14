@@ -1,2 +1,3 @@
 Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.IncludeKeyIdInHeader.get -> bool
 Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.IncludeKeyIdInHeader.set -> void
+static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.TryConvertToSecurityKey(Microsoft.IdentityModel.Tokens.JsonWebKey webKey, out Microsoft.IdentityModel.Tokens.SecurityKey key) -> bool

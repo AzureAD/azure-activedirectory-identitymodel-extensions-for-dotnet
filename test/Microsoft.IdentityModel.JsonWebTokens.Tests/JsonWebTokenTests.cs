@@ -1743,19 +1743,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         [Fact]
         public void DerivedJsonWebToken_IsCreatedCorrectly()
         {
-            var expectedCustomClaim = "customclaim";
+            var expectedCustomClaim = new CustomClaim() { CustomClaimValue = "customclaim" };
             var tokenStr = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
             {
                 Issuer = Default.Issuer,
                 Claims = new Dictionary<string, object>
                 {
-                    { "CustomClaim", expectedCustomClaim },
+                    { CustomJsonWebToken.CustomClaimName, System.Text.Json.JsonSerializer.Serialize(expectedCustomClaim) },
                 }
             });
 
             var derivedToken = new CustomJsonWebToken(tokenStr);
+            derivedToken.TryGetPayloadValue<CustomClaim>(
+                CustomJsonWebToken.CustomClaimName, out CustomClaim customClaim);
 
-            Assert.Equal(expectedCustomClaim, derivedToken.CustomClaim);
+            Assert.Equal(expectedCustomClaim.CustomClaimValue, derivedToken.CustomClaim.CustomClaimValue);
+            Assert.Equal(expectedCustomClaim.CustomClaimValue, customClaim.CustomClaimValue);
             Assert.Equal(Default.Issuer, derivedToken.Issuer);
         }
 

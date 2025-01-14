@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.Configuration;
@@ -30,14 +31,16 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             {
                 TelemetryClient = testTelemetryClient
             };
+            var cancel = new CancellationToken();
 
             // act
+            // Retrieve the configuration for the first time
+            await configurationManager.GetConfigurationAsync(cancel);
+            testTelemetryClient.ClearExportedItems();
+
+            // Manually request a config refresh
             configurationManager.RequestRefresh();
-            //// Wait for UpdateCurrentConfiguration to complete
-            while (TestUtilities.GetField(configurationManager, "_currentConfiguration") == null)
-            {
-                await Task.Delay(100);
-            }
+            await configurationManager.GetConfigurationAsync(cancel);
 
             // assert
             var expectedCounterTagList = new Dictionary<string, object>
@@ -157,7 +160,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
         public IConfigurationValidator<T> ConfigurationValidator { get; set; }
 
-        public DateTimeOffset? SyncAfter { get; set; } = null;
+        public DateTime? SyncAfter { get; set; } = null;
 
         public Dictionary<string, object> ExpectedTagList { get; set; }
     }

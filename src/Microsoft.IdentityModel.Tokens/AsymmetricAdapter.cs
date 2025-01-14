@@ -241,6 +241,9 @@ namespace Microsoft.IdentityModel.Tokens
             {
 #if NET472 || NET6_0_OR_GREATER
                 var rsa = RSA.Create(rsaSecurityKey.Parameters);
+#elif  NET462
+                var rsa = new RSACng();
+                rsa.ImportParameters(rsaSecurityKey.Parameters);
 #else
                 var rsa = RSA.Create();
                 rsa.ImportParameters(rsaSecurityKey.Parameters);
