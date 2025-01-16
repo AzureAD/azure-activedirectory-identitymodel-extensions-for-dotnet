@@ -248,21 +248,25 @@ namespace Microsoft.IdentityModel.Protocols
                 {
                     if (_refreshRequested)
                     {
+                        _refreshRequested = false;
                         // Log as manual because RequestRefresh was called
                         TelemetryClient.IncrementConfigurationRefreshRequestCounter(
                             MetadataAddress,
                             TelemetryConstants.Protocols.Manual);
 
                         UpdateCurrentConfiguration();
-                        _refreshRequested = false;
+                    }
+                    else if (SyncAfter <= _timeProvider.GetUtcNow())
+                    {
+                        TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                        MetadataAddress,
+                        TelemetryConstants.Protocols.Automatic);
+
+                        _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
                     }
                     else
                     {
-                        TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                            MetadataAddress,
-                            TelemetryConstants.Protocols.Automatic);
-
-                        _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
+                        Interlocked.Exchange(ref _configurationRetrieverState, ConfigurationRetrieverIdle);
                     }
                 }
             }
