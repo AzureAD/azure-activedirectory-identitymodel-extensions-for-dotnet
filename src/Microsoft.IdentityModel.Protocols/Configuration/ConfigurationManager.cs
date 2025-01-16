@@ -269,8 +269,8 @@ namespace Microsoft.IdentityModel.Protocols
                         try
                         {
                             TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                            MetadataAddress,
-                            TelemetryConstants.Protocols.Automatic);
+                                MetadataAddress,
+                                TelemetryConstants.Protocols.Automatic);
                         }
 #pragma warning disable CA1031 // Do not catch general exception types
                         catch
