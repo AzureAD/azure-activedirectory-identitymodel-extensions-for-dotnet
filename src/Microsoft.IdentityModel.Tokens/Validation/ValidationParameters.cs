@@ -8,6 +8,7 @@ using System.Security.Claims;
 using System.Threading;
 using Microsoft.IdentityModel.Logging;
 
+#nullable enable
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
@@ -15,21 +16,24 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     internal class ValidationParameters
     {
-        private string _authenticationType;
+        private string? _authenticationType;
         private TimeSpan _clockSkew = DefaultClockSkew;
         private string _nameClaimType = ClaimsIdentity.DefaultNameClaimType;
         private string _roleClaimType = ClaimsIdentity.DefaultRoleClaimType;
-        private Dictionary<string, object> _instancePropertyBag;
-        private IList<SecurityKey> _issuerSigningKeys;
-        private IList<string> _validIssuers;
-        private IList<string> _validTokenTypes;
-        private IList<string> _validAudiences;
+        private Dictionary<string, object>? _instancePropertyBag;
+        private IList<SecurityKey>? _issuerSigningKeys;
+        private IDictionary<string, object>? _propertyBag;
+        private IList<SecurityKey>? _tokenDecryptionKeys;
+        private IList<string>? _validIssuers;
+        private IList<string>? _validTokenTypes;
+        private IList<string>? _validAudiences;
+        private IList<string>? _validAlgorithms;
 
         private AlgorithmValidationDelegate _algorithmValidator = Validators.ValidateAlgorithm;
         private AudienceValidationDelegate _audienceValidator = Validators.ValidateAudience;
         private IssuerValidationDelegateAsync _issuerValidatorAsync = Validators.ValidateIssuerAsync;
         private LifetimeValidationDelegate _lifetimeValidator = Validators.ValidateLifetime;
-        private SignatureValidationDelegate _signatureValidator;
+        private SignatureValidationDelegate? _signatureValidator;
         private TokenReplayValidationDelegate _tokenReplayValidator = Validators.ValidateTokenReplay;
         private TokenTypeValidationDelegate _tokenTypeValidator = Validators.ValidateTokenType;
         private IssuerSigningKeyValidationDelegate _issuerSigningKeyValidator = Validators.ValidateIssuerSigningKey;
@@ -61,11 +65,13 @@ namespace Microsoft.IdentityModel.Tokens
             if (other == null)
                 throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(other)));
 
+            ActorValidationParameters = other.ActorValidationParameters;
             AlgorithmValidator = other.AlgorithmValidator;
             AudienceValidator = other.AudienceValidator;
             _authenticationType = other._authenticationType;
             ClockSkew = other.ClockSkew;
             ConfigurationManager = other.ConfigurationManager;
+            CryptoProviderFactory = other.CryptoProviderFactory;
             DebugId = other.DebugId;
             IncludeTokenOnFailedValidation = other.IncludeTokenOnFailedValidation;
             IgnoreTrailingSlashWhenValidatingAudience = other.IgnoreTrailingSlashWhenValidatingAudience;
@@ -77,24 +83,23 @@ namespace Microsoft.IdentityModel.Tokens
             LogTokenId = other.LogTokenId;
             NameClaimType = other.NameClaimType;
             NameClaimTypeRetriever = other.NameClaimTypeRetriever;
-            PropertyBag = other.PropertyBag;
+            _propertyBag = other.PropertyBag;
             RefreshBeforeValidation = other.RefreshBeforeValidation;
             RoleClaimType = other.RoleClaimType;
             RoleClaimTypeRetriever = other.RoleClaimTypeRetriever;
             SaveSigninToken = other.SaveSigninToken;
-            SignatureValidator = other.SignatureValidator;
+            _signatureValidator = other.SignatureValidator;
             TimeProvider = other.TimeProvider;
             TokenDecryptionKeyResolver = other.TokenDecryptionKeyResolver;
-            TokenDecryptionKeys = other.TokenDecryptionKeys;
+            _tokenDecryptionKeys = other.TokenDecryptionKeys;
             TokenReplayCache = other.TokenReplayCache;
             TokenReplayValidator = other.TokenReplayValidator;
             TokenTypeValidator = other.TokenTypeValidator;
             ValidateActor = other.ValidateActor;
-            ValidateSignatureLast = other.ValidateSignatureLast;
             ValidateWithLKG = other.ValidateWithLKG;
-            ValidAlgorithms = other.ValidAlgorithms;
             _validIssuers = other.ValidIssuers;
             _validAudiences = other.ValidAudiences;
+            _validAlgorithms = other.ValidAlgorithms;
             _validTokenTypes = other.ValidTypes;
         }
 
@@ -111,7 +116,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets <see cref="ValidationParameters"/>.
         /// </summary>
-        public ValidationParameters ActorValidationParameters { get; set; }
+        public ValidationParameters? ActorValidationParameters { get; set; }
 
         /// <summary>
         /// Allows overriding the delegate used to validate the cryptographic algorithm used.
@@ -145,7 +150,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets the AuthenticationType when creating a <see cref="ClaimsIdentity"/>.
         /// </summary>
         /// <exception cref="ArgumentNullException">If 'value' is null or whitespace.</exception>
-        public string AuthenticationType
+        public string? AuthenticationType
         {
             get
             {
@@ -158,7 +163,7 @@ namespace Microsoft.IdentityModel.Tokens
                     throw LogHelper.LogExceptionMessage(new ArgumentNullException("AuthenticationType"));
                 }
 
-                _authenticationType = value;
+                _authenticationType = value!;
             }
         }
 
@@ -230,26 +235,28 @@ namespace Microsoft.IdentityModel.Tokens
             //if (LogHelper.IsEnabled(EventLogLevel.Informational))
             //    LogHelper.LogInformation(LogMessages.IDX10245, securityToken);
 
-#pragma warning disable RS0030 // Do not use banned APIs
-            return new ClaimsIdentity(authenticationType: AuthenticationType ?? DefaultAuthenticationType, nameType: nameClaimType ?? ClaimsIdentity.DefaultNameClaimType, roleType: roleClaimType ?? ClaimsIdentity.DefaultRoleClaimType);
-#pragma warning disable RS0030 // Do not use banned APIs
+            return ClaimsIdentityFactory.Create(
+                            authenticationType: AuthenticationType ?? DefaultAuthenticationType,
+                            nameType: nameClaimType ?? ClaimsIdentity.DefaultNameClaimType,
+                            roleType: roleClaimType ?? ClaimsIdentity.DefaultRoleClaimType,
+                            securityToken);
         }
 
         /// <summary>
         /// If set, this property will be used to obtain the issuer and signing keys associated with the metadata endpoint of <see cref="BaseConfiguration.Issuer"/>.
         /// The obtained issuer and signing keys will then be used along with those present on the ValidationParameters for validation of the incoming token.
         /// </summary>
-        public BaseConfigurationManager ConfigurationManager { get; set; }
+        public BaseConfigurationManager? ConfigurationManager { get; set; }
 
         /// <summary>
         /// Users can override the default <see cref="CryptoProviderFactory"/> with this property. This factory will be used for creating signature providers.
         /// </summary>
-        public CryptoProviderFactory CryptoProviderFactory { get; set; }
+        public CryptoProviderFactory? CryptoProviderFactory { get; set; }
 
         /// <summary>
         /// Gets or sets a string that helps with setting breakpoints when debugging.
         /// </summary>
-        public string DebugId { get; set; }
+        public string? DebugId { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean that controls if a '/' is significant at the end of the audience.
@@ -282,7 +289,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets a <see cref="IDictionary{TKey, TValue}"/> that is unique to this instance.
         /// Calling <see cref="Clone"/> will result in a new instance of this IDictionary.
         /// </summary>
-        public IDictionary<string, object> InstancePropertyBag => _instancePropertyBag ??= new Dictionary<string, object>();
+        public IDictionary<string, object> InstancePropertyBag =>
+            _instancePropertyBag ??= new Dictionary<string, object>();
 
         /// <summary>
         /// Gets a value indicating if <see cref="Clone"/> was called to obtain this instance.
@@ -294,18 +302,25 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <remarks>
         /// This <see cref="SecurityKey"/> will be used to check the signature. This can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier.
-        /// If both <see cref="IssuerSigningKeyResolverUsingConfiguration"/> and <see cref="IssuerSigningKeyResolver"/> are set, IssuerSigningKeyResolverUsingConfiguration takes
-        /// priority.
         /// </remarks>
-        public IssuerSigningKeyResolverDelegate IssuerSigningKeyResolver { get; set; }
+        public IssuerSigningKeyResolverDelegate? IssuerSigningKeyResolver { get; set; }
 
         /// <summary>
         /// Gets the <see cref="IList{T}"/> used for signature validation.
         /// </summary>
-        public IList<SecurityKey> IssuerSigningKeys =>
-            _issuerSigningKeys ??
-            Interlocked.CompareExchange(ref _issuerSigningKeys, [], null) ??
-            _issuerSigningKeys;
+        public IList<SecurityKey> IssuerSigningKeys
+        {
+            get
+            {
+                return _issuerSigningKeys ??
+                    Interlocked.CompareExchange(ref _issuerSigningKeys, [], null) ??
+                    _issuerSigningKeys;
+            }
+            internal set
+            {
+                _issuerSigningKeys = value;
+            }
+        }
 
         /// <summary>
         /// Allows overriding the delegate that will be used to validate the issuer of the token.
@@ -368,13 +383,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// <para>The issuer associated with the token.</para>
         /// <para>Returns the value that will set the property <see cref="ClaimsIdentity.NameClaimType"/>.</para>
         /// </remarks>
-        public Func<SecurityToken, string, string> NameClaimTypeRetriever { get; set; }
+        public Func<SecurityToken, string, string>? NameClaimTypeRetriever { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="IDictionary{TKey, TValue}"/> that contains a collection of custom key/value pairs.
         /// This allows addition of parameters that could be used in custom token validation scenarios.
         /// </summary>
-        public IDictionary<string, object> PropertyBag { get; }
+        public IDictionary<string, object> PropertyBag => _propertyBag ??= new Dictionary<string, object>();
 
         /// <summary>
         /// A boolean to control whether configuration should be refreshed before validating a token.
@@ -418,7 +433,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <para>The issuer associated with the token.</para>
         /// <para>Returns the value that will set the property <see cref="ClaimsIdentity.RoleClaimType"/>.</para>
         /// </remarks>
-        public Func<SecurityToken, string, string> RoleClaimTypeRetriever { get; set; }
+        public Func<SecurityToken, string, string>? RoleClaimTypeRetriever { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean to control if the original token should be saved after the security token is validated.
@@ -435,7 +450,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// If set, this delegate will be called to validate the signature of the token, instead of default processing.
         /// </remarks>
-        public SignatureValidationDelegate SignatureValidator
+        public SignatureValidationDelegate? SignatureValidator
         {
             get { return _signatureValidator; }
             set { _signatureValidator = value; }
@@ -452,18 +467,30 @@ namespace Microsoft.IdentityModel.Tokens
         /// <remarks>
         /// This <see cref="SecurityKey"/> will be used to decrypt the token. This can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier.
         /// </remarks>
-        internal DecryptionKeyResolverDelegate TokenDecryptionKeyResolver { get; set; }
+        internal DecryptionKeyResolverDelegate? TokenDecryptionKeyResolver { get; set; }
 
         /// <summary>
         /// Gets the <see cref="IList{T}"/> that is to be used for decrypting inbound tokens.
         /// </summary>
-        public IList<SecurityKey> TokenDecryptionKeys { get; internal set; }
+        public IList<SecurityKey> TokenDecryptionKeys
+        {
+            get
+            {
+                return _tokenDecryptionKeys ??
+                    Interlocked.CompareExchange(ref _tokenDecryptionKeys, [], null) ??
+                    _tokenDecryptionKeys;
+            }
+            internal set
+            {
+                _tokenDecryptionKeys = value;
+            }
+        }
 
         /// <summary>
         /// Gets or set the <see cref="ITokenReplayCache"/> that store tokens that can be checked to help detect token replay.
         /// </summary>
         /// <remarks>If set, then tokens must have an expiration time or the runtime will fault.</remarks>
-        public ITokenReplayCache TokenReplayCache { get; set; }
+        public ITokenReplayCache? TokenReplayCache { get; set; }
 
         /// <summary>
         /// Allows overriding the delegate that will be used to validate the token replay of the token.
@@ -515,41 +542,62 @@ namespace Microsoft.IdentityModel.Tokens
         public bool ValidateWithLKG { get; set; }
 
         /// <summary>
-        /// Gets or sets a boolean that controls the validation order of the payload and signature during token validation.
-        /// </summary>
-        /// <remarks>If <see cref= "ValidateSignatureLast" /> is set to true, it will validate payload ahead of signature.
-        /// The default is <c>false</c>.
-        /// </remarks>
-        [DefaultValue(false)]
-        public bool ValidateSignatureLast { get; set; }
-
-        /// <summary>
         /// Gets or sets the valid algorithms for cryptographic operations.
         /// </summary>
         /// <remarks>
         /// If set to a non-empty collection, only the algorithms listed will be considered valid.
         /// The default is <c>null</c>.
         /// </remarks>
-        public IList<string> ValidAlgorithms { get; set; }
+        public IList<string> ValidAlgorithms
+        {
+            get
+            {
+                return _validAlgorithms ??
+                    Interlocked.CompareExchange(ref _validAlgorithms, [], null) ??
+                    _validAlgorithms;
+            }
+            internal set
+            {
+                _validAlgorithms = value;
+            }
+        }
 
         /// <summary>
         /// Gets the <see cref="IList{T}"/> that contains valid audiences that will be used to check against the token's audience.
         /// The default is an empty collection.
         /// </summary>
-        public IList<string> ValidAudiences =>
-            _validAudiences ??
-            Interlocked.CompareExchange(ref _validAudiences, [], null) ??
-            _validAudiences;
+        public IList<string> ValidAudiences
+        {
+            get
+            {
+                return _validAudiences ??
+                    Interlocked.CompareExchange(ref _validAudiences, [], null) ??
+                    _validAudiences;
+            }
+            internal set
+            {
+                _validAudiences = value;
+            }
+        }
 
         /// <summary>
         /// Gets the <see cref="IList{T}"/> that contains valid issuers that will be used to check against the token's issuer.
         /// The default is an empty collection.
         /// </summary>
         /// <returns>The <see cref="IList{T}"/> that contains valid issuers that will be used to check against the token's 'iss' claim.</returns>
-        public IList<string> ValidIssuers =>
-            _validIssuers ??
-            Interlocked.CompareExchange(ref _validIssuers, [], null) ??
-            _validIssuers;
+        public IList<string> ValidIssuers
+        {
+            get
+            {
+                return _validIssuers ??
+                    Interlocked.CompareExchange(ref _validIssuers, [], null) ??
+                    _validIssuers;
+            }
+            internal set
+            {
+                _validIssuers = value;
+            }
+        }
 
         /// <summary>
         /// Gets the <see cref="IList{T}"/> that contains valid types that will be used to check against the JWT header's 'typ' claim.
@@ -558,11 +606,25 @@ namespace Microsoft.IdentityModel.Tokens
         /// The default is an empty collection.
         /// </summary>
         /// <returns>The <see cref="IList{T}"/> that contains valid token types that will be used to check against the token's 'typ' claim.</returns>
-        public IList<string> ValidTypes =>
-            _validTokenTypes ??
-            Interlocked.CompareExchange(ref _validTokenTypes, [], null) ??
-            _validTokenTypes;
+        public IList<string> ValidTypes
+        {
+            get
+            {
+                return _validTokenTypes ??
+                    Interlocked.CompareExchange(ref _validTokenTypes, [], null) ??
+                    _validTokenTypes;
+            }
+            internal set
+            {
+                _validTokenTypes = value;
+            }
+        }
 
+        /// <summary>
+        /// Gets or sets a boolean that controls if the actor claim should be validated.
+        /// </summary>
+        /// <remarks>Default value is false.</remarks>
         public bool ValidateActor { get; set; }
     }
 }
+#nullable restore

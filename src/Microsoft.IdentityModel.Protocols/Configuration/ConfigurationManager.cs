@@ -248,21 +248,40 @@ namespace Microsoft.IdentityModel.Protocols
                 {
                     if (_refreshRequested)
                     {
-                        // Log as manual because RequestRefresh was called
-                        TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                            MetadataAddress,
-                            TelemetryConstants.Protocols.Manual);
+                        _refreshRequested = false;
+
+                        try
+                        {
+                            // Log as manual because RequestRefresh was called
+                            TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                                MetadataAddress,
+                                TelemetryConstants.Protocols.Manual);
+                        }
+#pragma warning disable CA1031 // Do not catch general exception types
+                        catch
+                        { }
+#pragma warning restore CA1031 // Do not catch general exception types
 
                         UpdateCurrentConfiguration();
-                        _refreshRequested = false;
+                    }
+                    else if (SyncAfter <= _timeProvider.GetUtcNow())
+                    {
+                        try
+                        {
+                            TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                                MetadataAddress,
+                                TelemetryConstants.Protocols.Automatic);
+                        }
+#pragma warning disable CA1031 // Do not catch general exception types
+                        catch
+                        { }
+#pragma warning restore CA1031 // Do not catch general exception types
+
+                        _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
                     }
                     else
                     {
-                        TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                            MetadataAddress,
-                            TelemetryConstants.Protocols.Automatic);
-
-                        _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
+                        Interlocked.Exchange(ref _configurationRetrieverState, ConfigurationRetrieverIdle);
                     }
                 }
             }

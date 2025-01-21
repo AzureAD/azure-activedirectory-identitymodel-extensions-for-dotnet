@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,11 +14,21 @@ namespace Microsoft.IdentityModel.Tokens.Saml
     /// </summary>
     public partial class SamlSecurityTokenHandler : SecurityTokenHandler
     {
+        /// <summary>
+        /// Validates a token.
+        /// On a validation failure, no exception will be thrown; instead, the <see cref="ValidationError"/> will contain the information about the error that occurred.
+        /// Callers should always check the ValidationResult.IsValid property to verify the validity of the result.
+        /// </summary>
+        /// <param name="token">The token to be validated.</param>
+        /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
+        /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the asynchronous operation.</param>
+        /// <returns>A <see cref="ValidationResult{TResult}"/> with either a <see cref="ValidatedToken"/> if the token was validated or an <see cref="ValidationError"/> with the failure information and exception otherwise.</returns>
         internal async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken = default)
         {
             if (token is null)
                 return ValidationError.NullParameter(nameof(token), ValidationError.GetCurrentStackFrame());
@@ -38,16 +47,13 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext,
-#pragma warning disable CA1801 // Review unused parameters
-            CancellationToken cancellationToken)
-#pragma warning restore CA1801 // Review unused parameters
+            CancellationToken cancellationToken = default)
         {
             if (securityToken is null)
             {
-                StackFrames.TokenNull ??= new StackFrame(true);
                 return ValidationError.NullParameter(
                     nameof(securityToken),
-                    StackFrames.TokenNull);
+                    ValidationError.GetCurrentStackFrame());
             }
 
             if (securityToken is not SamlSecurityToken samlToken)
@@ -65,10 +71,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml
 
             if (validationParameters is null)
             {
-                StackFrames.TokenValidationParametersNull ??= new StackFrame(true);
                 return ValidationError.NullParameter(
                     nameof(validationParameters),
-                    StackFrames.TokenValidationParametersNull);
+                    ValidationError.GetCurrentStackFrame());
             }
 
             ValidationResult<ValidatedConditions> conditionsResult = ValidateConditions(samlToken, validationParameters, callContext);
@@ -135,10 +140,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             ValidationResult<SecurityKey> signatureValidationResult = ValidateSignature(samlToken, validationParameters, callContext);
 
             if (!signatureValidationResult.IsValid)
-            {
-                StackFrames.SignatureValidationFailed ??= new StackFrame(true);
-                return signatureValidationResult.UnwrapError().AddStackFrame(StackFrames.SignatureValidationFailed);
-            }
+                return signatureValidationResult.UnwrapError().AddCurrentStackFrame();
 
             ValidationResult<ValidatedSigningKeyLifetime> issuerSigningKeyValidationResult;
 
@@ -188,18 +190,16 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         {
             if (samlToken.Assertion is null)
             {
-                StackFrames.AssertionNull ??= new StackFrame(true);
                 return ValidationError.NullParameter(
                     nameof(samlToken.Assertion),
-                    StackFrames.AssertionNull);
+                    ValidationError.GetCurrentStackFrame());
             }
 
             if (samlToken.Assertion.Conditions is null)
             {
-                StackFrames.AssertionConditionsNull ??= new StackFrame(true);
                 return ValidationError.NullParameter(
                     nameof(samlToken.Assertion.Conditions),
-                    StackFrames.AssertionConditionsNull);
+                    ValidationError.GetCurrentStackFrame());
             }
 
             ValidationResult<ValidatedLifetime> lifetimeValidationResult;

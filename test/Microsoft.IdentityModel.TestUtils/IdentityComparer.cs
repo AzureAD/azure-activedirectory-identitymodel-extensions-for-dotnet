@@ -1331,11 +1331,11 @@ namespace Microsoft.IdentityModel.TestUtils
                 "validatedIssuer2.Issuer",
                 localContext);
 
-            AreIntsEqual(
-                (int)validatedIssuer1.ValidationSource,
-                (int)validatedIssuer2.ValidationSource,
-                "validatedIssuer1.ValidationSource",
-                "validatedIssuer2.ValidationSource",
+            AreStringsEqual(
+                validatedIssuer1.ValidationSource.Name,
+                validatedIssuer2.ValidationSource.Name,
+                "validatedIssuer1.ValidationSource.Name",
+                "validatedIssuer2.ValidationSource.Name",
                 localContext);
 
             return context.Merge(localContext);

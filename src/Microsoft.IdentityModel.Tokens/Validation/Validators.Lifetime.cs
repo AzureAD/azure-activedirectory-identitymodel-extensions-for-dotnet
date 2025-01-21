@@ -7,8 +7,6 @@ using Microsoft.IdentityModel.Logging;
 #nullable enable
 namespace Microsoft.IdentityModel.Tokens
 {
-    internal record struct ValidatedLifetime(DateTime? NotBefore, DateTime? Expires);
-
     /// <summary>
     /// Definition for delegate that will validate the lifetime of a <see cref="SecurityToken"/>.
     /// </summary>
@@ -16,7 +14,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <param name="expires">The 'expiration' time found in the <see cref="SecurityToken"/>.</param>
     /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
     /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
-    /// <param name="callContext"></param>
+    /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
     /// <returns>A <see cref="ValidationResult{TResult}"/>that contains the results of validating the issuer.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
     internal delegate ValidationResult<ValidatedLifetime> LifetimeValidationDelegate(
@@ -27,7 +25,7 @@ namespace Microsoft.IdentityModel.Tokens
         CallContext callContext);
 
     /// <summary>
-    /// IssuerValidation
+    /// Partial class for Lifetime Validation.
     /// </summary>
     public static partial class Validators
     {
@@ -38,15 +36,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="expires">The 'expiration' time found in the <see cref="SecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
-        /// <param name="callContext"></param>
+        /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
         /// <returns>A <see cref="ValidationResult{TResult}"/> indicating whether validation was successful, and providing a <see cref="SecurityTokenInvalidLifetimeException"/> if it was not.</returns>
-        /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
-        /// <exception cref="SecurityTokenNoExpirationException">If 'expires.HasValue' is false.</exception>
-        /// <exception cref="SecurityTokenInvalidLifetimeException">If 'notBefore' is &gt; 'expires'.</exception>
-        /// <exception cref="SecurityTokenNotYetValidException">If 'notBefore' is &gt; DateTime.UtcNow.</exception>
-        /// <exception cref="SecurityTokenExpiredException">If 'expires' is &lt; DateTime.UtcNow.</exception>
         /// <remarks>All time comparisons apply <see cref="ValidationParameters.ClockSkew"/>.</remarks>
-#pragma warning disable CA1801 // TODO: remove pragma disable once callContext is used for logging
+#pragma warning disable CA1801
         internal static ValidationResult<ValidatedLifetime> ValidateLifetime(
             DateTime? notBefore,
             DateTime? expires,

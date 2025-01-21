@@ -13,11 +13,14 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Contains information so that Exceptions can be logged or thrown written as required.
+    /// Represents an error that occurred during token validation.
+    /// If necessary, it can be used to create an instance of <see cref="Exception"/>.
     /// </summary>
     internal class ValidationError
     {
         private Type _exceptionType;
+
+        private Exception? _exception;
 
         /// <summary>
         /// Creates an instance of <see cref="ValidationError"/>
@@ -26,8 +29,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationFailureType"/> is the type of validation failure that occurred.
         /// <param name="exceptionType"/> is the type of exception that occurred.
         /// <param name="stackFrame"/> is the stack frame where the exception occurred.
-        /// <param name="innerException"/> is the inner exception that occurred.
-        internal ValidationError(
+        /// <param name="innerException"/> if present, represents the exception that occurred during validation.
+        internal protected ValidationError(
             MessageDetail messageDetail,
             ValidationFailureType validationFailureType,
             Type exceptionType,
@@ -44,16 +47,24 @@ namespace Microsoft.IdentityModel.Tokens
             };
         }
 
+        public Exception GetException()
+        {
+            if (_exception is null)
+                _exception = CreateException();
+
+            return _exception;
+        }
+
         /// <summary>
         /// Creates an instance of an <see cref="Exception"/> using <see cref="ValidationError"/>
         /// </summary>
         /// <returns>An instance of an Exception.</returns>
-        internal virtual Exception GetException()
+        protected virtual Exception CreateException()
         {
-            return GetException(ExceptionType, InnerException);
+            return CreateException(ExceptionType, InnerException);
         }
 
-        internal Exception GetException(Type exceptionType, Exception? innerException)
+        internal Exception CreateException(Type exceptionType, Exception? innerException)
         {
             Exception? exception = null;
 
@@ -184,12 +195,22 @@ namespace Microsoft.IdentityModel.Tokens
             return exception;
         }
 
-        internal void Log(ILogger logger)
+        /// <summary>
+        /// Logs the validation error.
+        /// </summary>
+        /// <param name="logger">The <see cref="ILogger"/> to be used for logging.</param>
+        public void Log(ILogger logger)
         {
             Logger.TokenValidationFailed(logger, FailureType.Name, MessageDetail.Message);
         }
 
-        internal static ValidationError NullParameter(string parameterName, StackFrame stackFrame) => new(
+        /// <summary>
+        /// Creates a new instance of <see cref="ValidationError"/> representing a null parameter.
+        /// </summary>
+        /// <param name="parameterName">The name of the parameter.</param>
+        /// <param name="stackFrame">The stack frame where the error occurred.</param>
+        /// <returns>A new <see cref="ValidationError"/>.</returns>
+        public static ValidationError NullParameter(string parameterName, StackFrame stackFrame) => new(
             MessageDetail.NullParameter(parameterName),
             ValidationFailureType.NullArgument,
             typeof(SecurityTokenArgumentNullException),
@@ -210,6 +231,11 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets the inner exception that occurred.
         /// </summary>
         public Exception? InnerException { get; }
+
+        /// <summary>
+        /// Gets the message that explains the error.
+        /// </summary>
+        public string Message => MessageDetail.Message;
 
         /// <summary>
         /// Gets the message details that are used to generate the exception message.
@@ -240,7 +266,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="lineNumber">The line number from which this method is called. CAptured automatically by default.</param>
         /// <param name="skipFrames">The number of stack frames to skip when capturing. Used to avoid capturing this method and get the caller instead.</param>
         /// <returns>The updated object.</returns>
-        internal ValidationError AddCurrentStackFrame([CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, int skipFrames = 1)
+        public ValidationError AddCurrentStackFrame([CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, int skipFrames = 1)
         {
             // We add 1 to the skipped frames to skip the current method
             StackFrames.Add(GetCurrentStackFrame(filePath, lineNumber, skipFrames + 1));
@@ -256,7 +282,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="skipFrames">The number of stack frames to skip when capturing. Used to avoid capturing this method and get the caller instead.</param>
         /// <returns>The captured stack frame.</returns>
         /// <remarks>If this is called from a helper method, consider adding an extra skip frame to avoid capturing the helper instead.</remarks>
-        internal static StackFrame GetCurrentStackFrame(
+        public static StackFrame GetCurrentStackFrame(
             [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, int skipFrames = 1)
         {
             // String is allocated, but it goes out of scope immediately after the call
@@ -286,7 +312,13 @@ namespace Microsoft.IdentityModel.Tokens
             public static void TokenValidationFailed(
                 ILogger logger,
                 string validationFailureType,
-                string messageDetail) => s_tokenValidationFailed(logger, validationFailureType, messageDetail, null);
+                string messageDetail)
+            {
+                if (logger.IsEnabled(LogLevel.Information))
+                {
+                    s_tokenValidationFailed(logger, validationFailureType, messageDetail, null);
+                }
+            }
         }
     }
 }
