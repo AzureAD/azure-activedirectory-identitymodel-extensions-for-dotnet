@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.Tokens
         private string _roleClaimType = ClaimsIdentity.DefaultRoleClaimType;
         private Dictionary<string, object>? _instancePropertyBag;
         private IList<SecurityKey>? _issuerSigningKeys;
-        private IDictionary<string, object>? _propertyBag;
+        private Dictionary<string, object>? _propertyBag;
         private IList<SecurityKey>? _tokenDecryptionKeys;
         private IList<string>? _validIssuers;
         private IList<string>? _validTokenTypes;
@@ -83,7 +83,9 @@ namespace Microsoft.IdentityModel.Tokens
             LogTokenId = other.LogTokenId;
             NameClaimType = other.NameClaimType;
             NameClaimTypeRetriever = other.NameClaimTypeRetriever;
-            _propertyBag = other.PropertyBag;
+            foreach (var keyValue in other.PropertyBag)
+                PropertyBag[keyValue.Key] = keyValue.Value;
+
             RefreshBeforeValidation = other.RefreshBeforeValidation;
             RoleClaimType = other.RoleClaimType;
             RoleClaimTypeRetriever = other.RoleClaimTypeRetriever;
@@ -290,7 +292,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// Calling <see cref="Clone"/> will result in a new instance of this IDictionary.
         /// </summary>
         public IDictionary<string, object> InstancePropertyBag =>
-            _instancePropertyBag ??= new Dictionary<string, object>();
+            _instancePropertyBag ??
+            Interlocked.CompareExchange(ref _instancePropertyBag, [], null) ??
+            _instancePropertyBag;
 
         /// <summary>
         /// Gets a value indicating if <see cref="Clone"/> was called to obtain this instance.
@@ -389,7 +393,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// Gets or sets the <see cref="IDictionary{TKey, TValue}"/> that contains a collection of custom key/value pairs.
         /// This allows addition of parameters that could be used in custom token validation scenarios.
         /// </summary>
-        public IDictionary<string, object> PropertyBag => _propertyBag ??= new Dictionary<string, object>();
+        public IDictionary<string, object> PropertyBag => _propertyBag ??
+            Interlocked.CompareExchange(ref _propertyBag, [], null) ??
+            _propertyBag;
 
         /// <summary>
         /// A boolean to control whether configuration should be refreshed before validating a token.

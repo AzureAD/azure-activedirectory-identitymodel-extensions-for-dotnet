@@ -16,8 +16,6 @@ namespace Microsoft.IdentityModel.Validators
     /// </summary>
     public static class AadTokenValidationParametersExtension
     {
-        private const string CloudInstanceNameKey = "cloud_instance_name";
-
         /// <summary>
         /// Enables validation of the cloud instance of the Microsoft Entra ID token signing keys.
         /// </summary>
@@ -150,13 +148,13 @@ namespace Microsoft.IdentityModel.Validators
                 return;
 
             JsonWebKey matchedKeyFromConfig = GetJsonWebKeyBySecurityKey(openIdConnectConfiguration, securityKey);
-            if (matchedKeyFromConfig != null && matchedKeyFromConfig.AdditionalData.TryGetValue(CloudInstanceNameKey, out object value))
+            if (matchedKeyFromConfig != null && matchedKeyFromConfig.AdditionalData.TryGetValue(AadIssuerValidatorConstants.CloudInstanceNameKey, out object value))
             {
                 string signingKeyCloudInstanceName = value as string;
                 if (string.IsNullOrWhiteSpace(signingKeyCloudInstanceName))
                     return;
 
-                if (openIdConnectConfiguration.AdditionalData.TryGetValue(CloudInstanceNameKey, out object configurationCloudInstanceNameObjectValue))
+                if (openIdConnectConfiguration.AdditionalData.TryGetValue(AadIssuerValidatorConstants.CloudInstanceNameKey, out object configurationCloudInstanceNameObjectValue))
                 {
                     string configurationCloudInstanceName = configurationCloudInstanceNameObjectValue as string;
                     if (string.IsNullOrWhiteSpace(configurationCloudInstanceName))
@@ -174,7 +172,7 @@ namespace Microsoft.IdentityModel.Validators
             }
         }
 
-        private static JsonWebKey GetJsonWebKeyBySecurityKey(OpenIdConnectConfiguration configuration, SecurityKey securityKey)
+        internal static JsonWebKey GetJsonWebKeyBySecurityKey(OpenIdConnectConfiguration configuration, SecurityKey securityKey)
         {
             if (configuration.JsonWebKeySet == null)
                 return null;
