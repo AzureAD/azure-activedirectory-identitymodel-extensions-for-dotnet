@@ -3,7 +3,6 @@
 
 using Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Saml;
 using System;
 using System.Collections.Generic;
 using System.Threading;

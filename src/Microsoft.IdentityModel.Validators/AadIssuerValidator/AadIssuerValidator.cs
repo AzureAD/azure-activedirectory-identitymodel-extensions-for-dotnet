@@ -19,7 +19,7 @@ namespace Microsoft.IdentityModel.Validators
     /// <summary>
     /// Generic class that validates the issuer for either JsonWebTokens or JwtSecurityTokens issued from the Microsoft identity platform (AAD).
     /// </summary>
-    public class AadIssuerValidator
+    public partial class AadIssuerValidator
     {
         private static readonly TimeSpan LastKnownGoodConfigurationLifetime = new TimeSpan(0, 24, 0, 0);
 
@@ -492,7 +492,7 @@ namespace Microsoft.IdentityModel.Validators
                     return configurationManager;
             }
 
-            // If no provider or provider returned null, fallback to previous strategy            
+            // If no provider or provider returned null, fallback to previous strategy
             return GetConfigurationManager(protocolVersion);
         }
 
