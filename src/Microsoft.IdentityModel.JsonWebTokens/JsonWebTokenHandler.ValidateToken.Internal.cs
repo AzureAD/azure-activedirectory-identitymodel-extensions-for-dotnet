@@ -24,6 +24,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the asynchronous operation.</param>
         /// <returns>A <see cref="ValidationResult{TResult}"/> with either a <see cref="ValidatedToken"/> if the token was validated or an <see cref="ValidationError"/> with the failure information and exception otherwise.</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("ApiDesign", "RS0026:Do not add multiple public overloads with optional parameters", Justification = "This is not an overload.")]
         public async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
@@ -76,6 +77,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <inheritdoc/>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("ApiDesign", "RS0026:Do not add multiple public overloads with optional parameters", Justification = "This is not an overload.")]
         public async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
             SecurityToken token,
             ValidationParameters validationParameters,
