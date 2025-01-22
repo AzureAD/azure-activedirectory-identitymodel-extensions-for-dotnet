@@ -367,7 +367,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return new ValidationError(
                     new MessageDetail(
                         TokenLogMessages.IDX10603,
-                        keysAttempted.ToString(),
+                        LogHelper.MarkAsNonPII(keysAttempted.ToString()),
                         exceptionStrings?.ToString() ?? string.Empty,
                         LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken)),
                     ValidationFailureType.TokenDecryptionFailed,
