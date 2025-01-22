@@ -8,7 +8,7 @@ using System.Diagnostics;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Represents a signature validation error.
+    /// Represents an error that occurs when the token's signature cannot be validated.
     /// </summary>
     public class SignatureValidationError : ValidationError
     {
@@ -20,7 +20,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="exceptionType"/> is the type of exception that occurred.
         /// <param name="stackFrame"/> is the stack frame where the exception occurred.
         /// <param name="innerValidationError"/> if present, is the inner validation error that caused this signature validation error.
-        /// <param name="innerException"/> is the inner exception that occurred.
+        /// <param name="innerException"/> if present, represents the exception that occurred during validation.
         public SignatureValidationError(
             MessageDetail messageDetail,
             ValidationFailureType validationFailureType,
@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Creates an instance of an <see cref="Exception"/> using <see cref="ValidationError"/>
         /// </summary>
         /// <returns>An instance of an exception.</returns>
-        public override Exception GetException()
+        protected override Exception CreateException()
         {
             var inner = InnerException ?? InnerValidationError?.GetException();
 
@@ -56,7 +56,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return exception;
             }
 
-            return base.GetException();
+            return base.CreateException();
         }
 
         /// <summary>

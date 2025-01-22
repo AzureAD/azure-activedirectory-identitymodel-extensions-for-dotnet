@@ -14,12 +14,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Initializes a new instance of <see cref="ValidatedIssuer"/>.
         /// </summary>
-        /// <param name="Issuer">The issuer that was validated.</param>
-        /// <param name="ValidationSource">The source of the validation, i.e. configuration, validation parameters.</param>
-        public ValidatedIssuer(string Issuer, IssuerValidationSource ValidationSource)
+        /// <param name="issuer">The issuer that was validated.</param>
+        /// <param name="validationSource">The source of the validation, i.e. configuration, validation parameters.</param>
+        public ValidatedIssuer(string issuer, IssuerValidationSource validationSource)
         {
-            this.Issuer = Issuer;
-            this.ValidationSource = ValidationSource;
+            Issuer = issuer;
+            ValidationSource = validationSource;
         }
 
         /// <summary>
@@ -92,6 +92,12 @@ namespace Microsoft.IdentityModel.Tokens
 
             return true;
         }
+
+        /// <summary>
+        /// The validated issuer's string representation.
+        /// </summary>
+        /// <returns>A string representing the issuer and where it was validated from.</returns>
+        public override string ToString() => $"{Issuer} (from {ValidationSource})";
     }
 }
 #nullable restore

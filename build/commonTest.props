@@ -16,7 +16,7 @@
     <TargetFrameworks>$(TestTargets)</TargetFrameworks>
     <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'netcoreapp2.1'">$(DotNetCoreAppRuntimeVersion)</RuntimeFrameworkVersion>
     <IsPackable>false</IsPackable>
-    <LangVersion>12</LangVersion>
+    <LangVersion>13</LangVersion>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
@@ -49,5 +49,10 @@
     </PackageReference>
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)..\BannedSymbols.txt" />
   </ItemGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <!-- Suprpess the "Microsoft.Bcl.Memory 9.0.0 doesn't support net6.0 and has not been tested with it" warning -->
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+  </PropertyGroup>
   
 </Project>

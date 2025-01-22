@@ -29,7 +29,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken = default)
         {
             if (token is null)
                 return ValidationError.NullParameter(nameof(token), ValidationError.GetCurrentStackFrame());
@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken = default)
         {
             if (securityToken is null)
             {

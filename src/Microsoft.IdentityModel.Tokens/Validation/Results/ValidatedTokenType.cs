@@ -14,12 +14,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Initializes a new instance of <see cref="ValidatedTokenType"/>.
         /// </summary>
-        /// <param name="Type">The token type that was validated.</param>
-        /// <param name="ValidTypeCount">The number of valid types present in the validation parameters.</param>
-        public ValidatedTokenType(string Type, int ValidTypeCount)
+        /// <param name="type">The token type that was validated.</param>
+        /// <param name="validTypeCount">The number of valid types present in the validation parameters.</param>
+        public ValidatedTokenType(string type, int validTypeCount)
         {
-            this.Type = Type;
-            this.ValidTypeCount = ValidTypeCount;
+            Type = type;
+            ValidTypeCount = validTypeCount;
         }
 
         /// <summary>
@@ -62,7 +62,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="left">The left value to compare.</param>
         /// <param name="right">The right value to compare.</param>
         /// <returns>A boolean indicating whether the left value is equal to the right one.</returns>
-        public static bool operator ==(ValidatedTokenType left, ValidatedTokenType right) => left.Equals(right);
+        public static bool operator ==(ValidatedTokenType left, ValidatedTokenType right)
+        {
+            return left.Equals(right);
+        }
 
         /// <summary>
         /// Inequality comparison operator for <see cref="ValidatedTokenType"/>.
@@ -87,6 +90,12 @@ namespace Microsoft.IdentityModel.Tokens
 
             return true;
         }
+
+        /// <summary>
+        /// The validated token type's string representation.
+        /// </summary>
+        /// <returns>A string representing the validated token type and the amount of valid types.</returns>
+        public override string ToString() => $"{Type} ({ValidTypeCount} valid types)";
     }
 }
 #nullable restore

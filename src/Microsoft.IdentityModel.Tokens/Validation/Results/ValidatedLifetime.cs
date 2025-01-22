@@ -14,12 +14,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Initializes a new instance of <see cref="ValidatedLifetime"/>.
         /// </summary>
-        /// <param name="NotBefore">The <see cref="DateTime"/> representing the time from which the token is considered valid.</param>
-        /// <param name="Expires">The <see cref="DateTime"/> representing the token's expiration time.</param>
-        public ValidatedLifetime(DateTime? NotBefore, DateTime? Expires)
+        /// <param name="notBefore">The <see cref="DateTime"/> representing the time from which the token is considered valid.</param>
+        /// <param name="expires">The <see cref="DateTime"/> representing the token's expiration time.</param>
+        public ValidatedLifetime(DateTime? notBefore, DateTime? expires)
         {
-            this.NotBefore = NotBefore;
-            this.Expires = Expires;
+            NotBefore = notBefore;
+            Expires = expires;
         }
 
         /// <summary>
@@ -92,6 +92,12 @@ namespace Microsoft.IdentityModel.Tokens
 
             return true;
         }
+
+        /// <summary>
+        /// The validated lifetime's string representation.
+        /// </summary>
+        /// <returns>A string representing the validated lifetime.</returns>
+        public override string ToString() => $"[{NotBefore}, {Expires}]";
     }
 }
 #nullable restore

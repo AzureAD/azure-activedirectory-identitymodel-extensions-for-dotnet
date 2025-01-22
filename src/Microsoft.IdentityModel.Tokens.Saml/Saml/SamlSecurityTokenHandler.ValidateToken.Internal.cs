@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken = default)
         {
             if (token is null)
                 return ValidationError.NullParameter(nameof(token), ValidationError.GetCurrentStackFrame());
@@ -48,9 +48,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext,
-#pragma warning disable CA1801 // Review unused parameters
-            CancellationToken cancellationToken)
-#pragma warning restore CA1801 // Review unused parameters
+            CancellationToken cancellationToken = default)
         {
             if (securityToken is null)
             {

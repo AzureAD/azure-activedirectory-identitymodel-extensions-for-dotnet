@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// Creates an instance of an <see cref="Exception"/> using <see cref="ValidationError"/>
         /// </summary>
         /// <returns>An instance of an Exception.</returns>
-        public override Exception GetException()
+        protected override Exception CreateException()
         {
             if (ExceptionType == typeof(Saml2SecurityTokenReadException))
             {
@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 return exception;
             }
 
-            return base.GetException();
+            return base.CreateException();
         }
     }
 }

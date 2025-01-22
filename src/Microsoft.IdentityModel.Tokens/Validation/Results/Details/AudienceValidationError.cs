@@ -9,7 +9,9 @@ using System.Diagnostics;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Represents an audience validation error.
+    /// Represents an error that occurs when the token's audience cannot be validated.
+    /// If available, the invalid audiences from the token are stored in <see cref="TokenAudiences"/>
+    /// and the allowed audiences are stored in <see cref="ValidAudiences"/>.
     /// </summary>
     public class AudienceValidationError : ValidationError
     {
@@ -20,9 +22,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationFailureType"/> is the type of validation failure that occurred.
         /// <param name="exceptionType"/> is the type of exception that occurred.
         /// <param name="stackFrame"/> is the stack frame where the exception occurred.
-        /// <param name="tokenAudiences"/> are the audiences that were in the token.
-        /// <param name="validAudiences"/> are the audiences that were expected.
-        /// <param name="innerException"/> is the inner exception that occurred.
+        /// <param name="tokenAudiences"/> are the audiences that were in the token. Can be null if no audiences were found in the token.
+        /// <param name="validAudiences"/> are the audiences that were expected. Can be null if no valid audiences were provided in the validation parameters.
+        /// <param name="innerException"/> if present, represents the exception that occurred during validation.
         public AudienceValidationError(
             MessageDetail messageDetail,
             ValidationFailureType validationFailureType,
@@ -41,7 +43,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Creates an instance of an <see cref="Exception"/> using <see cref="ValidationError"/>
         /// </summary>
         /// <returns>An instance of an Exception.</returns>
-        public override Exception GetException()
+        protected override Exception CreateException()
         {
             if (ExceptionType == typeof(SecurityTokenInvalidAudienceException))
             {
@@ -51,7 +53,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return exception;
             }
 
-            return base.GetException(ExceptionType, null);
+            return base.CreateException(ExceptionType, null);
         }
 
         /// <summary>

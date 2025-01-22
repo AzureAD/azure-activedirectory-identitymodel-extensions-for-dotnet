@@ -8,7 +8,8 @@ using System.Diagnostics;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Represents an algorithm validation error.
+    /// Represents a validation error that occurs when a token's algorithm cannot be validated.
+    /// If available, the invalid algorithm is stored in <see cref="InvalidAlgorithm"/>.
     /// </summary>
     public class AlgorithmValidationError : ValidationError
     {
@@ -19,8 +20,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationFailureType"/> is the type of validation failure that occurred.
         /// <param name="exceptionType"/> is the type of exception that occurred.
         /// <param name="stackFrame"/> is the stack frame where the exception occurred.
-        /// <param name="invalidAlgorithm"/> is the algorithm that could not be validated.
-        /// <param name="innerException"/> is the inner exception that occurred.
+        /// <param name="invalidAlgorithm"/> is the algorithm that could not be validated. Can be null if the algorithm is missing from the token.
+        /// <param name="innerException"/> if present, represents the exception that occurred during validation.
         public AlgorithmValidationError(
             MessageDetail messageDetail,
             ValidationFailureType validationFailureType,
@@ -37,7 +38,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Creates an instance of an <see cref="Exception"/> using <see cref="ValidationError"/>
         /// </summary>
         /// <returns>An instance of an Exception.</returns>
-        public override Exception GetException()
+        protected override Exception CreateException()
         {
             if (ExceptionType == typeof(SecurityTokenInvalidAlgorithmException))
             {
@@ -50,7 +51,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return exception;
             }
 
-            return base.GetException();
+            return base.CreateException();
         }
 
         /// <summary>

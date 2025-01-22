@@ -8,7 +8,8 @@ using System;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Represents an issuer signing key validation error.
+    /// Represents a validation error that occurs when the issuer signing key cannot be validated.
+    /// If available, the invalid signing key is stored in <see cref="InvalidSigningKey"/>.
     /// </summary>
     public class IssuerSigningKeyValidationError : ValidationError
     {
@@ -19,8 +20,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationFailureType"/> is the type of validation failure that occurred.
         /// <param name="exceptionType"/> is the type of exception that occurred.
         /// <param name="stackFrame"/> is the stack frame where the exception occurred.
-        /// <param name="invalidSigningKey"/> is the signing key that could not be validated.
-        /// <param name="innerException"/> is the inner exception that occurred.
+        /// <param name="invalidSigningKey"/> is the signing key that could not be validated. Can be null if the signing key for the token is missing.
+        /// <param name="innerException"/> if present, represents the exception that occurred during validation.
         public IssuerSigningKeyValidationError(
             MessageDetail messageDetail,
             ValidationFailureType validationFailureType,
@@ -37,7 +38,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Creates an instance of an <see cref="Exception"/> using <see cref="ValidationError"/>
         /// </summary>
         /// <returns>An instance of an Exception.</returns>
-        public override Exception GetException()
+        protected override Exception CreateException()
         {
             if (ExceptionType == typeof(SecurityTokenInvalidSigningKeyException))
             {
@@ -50,7 +51,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return exception;
             }
 
-            return base.GetException();
+            return base.CreateException();
         }
 
         /// <summary>

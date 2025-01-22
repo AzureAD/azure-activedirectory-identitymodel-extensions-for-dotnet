@@ -5,7 +5,9 @@
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Represents the source of the validation of an issuer.
+    /// Represents the source from which the token issuer was validated.
+    /// i.e. whether the issuer was matched with the configuration provided or the validation parameters provided.
+    /// If a custom issuer validation delegate is used, a custom validation source can be instantiated and used.
     /// </summary>
     public class IssuerValidationSource
     {
@@ -34,6 +36,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// Represents the issuer validation source that has been matched with the validation parameters provided.
         /// </summary>
         public static readonly IssuerValidationSource IssuerMatchedValidationParameters = new("IssuerMatchedValidationParameters");
+
+        /// <summary>
+        /// The issuer validation source's string representation.
+        /// </summary>
+        /// <returns>The name of the issuer validation source.</returns>
+        public override string ToString() => Name;
     }
 }
 #nullable restore

@@ -194,6 +194,7 @@ override Microsoft.IdentityModel.Tokens.ValidatedTokenType.GetHashCode() -> int
 override Microsoft.IdentityModel.Tokens.ValidationResult<TResult>.Equals(object? obj) -> bool
 override Microsoft.IdentityModel.Tokens.ValidationResult<TResult>.GetHashCode() -> int
 static Microsoft.IdentityModel.Tokens.IssuerSigningKeyValidationError.NullParameter(string! parameterName, System.Diagnostics.StackFrame! stackFrame) -> Microsoft.IdentityModel.Tokens.IssuerSigningKeyValidationError!
+static Microsoft.IdentityModel.Tokens.JsonWebKeyConverter.TryConvertToSecurityKey(Microsoft.IdentityModel.Tokens.JsonWebKey webKey, out Microsoft.IdentityModel.Tokens.SecurityKey key) -> bool
 static Microsoft.IdentityModel.Tokens.SignatureValidationError.NullParameter(string! parameterName, System.Diagnostics.StackFrame! stackFrame) -> Microsoft.IdentityModel.Tokens.SignatureValidationError!
 static Microsoft.IdentityModel.Tokens.TokenReplayValidationError.NullParameter(string! parameterName, System.Diagnostics.StackFrame! stackFrame) -> Microsoft.IdentityModel.Tokens.TokenReplayValidationError!
 static Microsoft.IdentityModel.Tokens.TokenTypeValidationError.NullParameter(string! parameterName, System.Diagnostics.StackFrame! stackFrame) -> Microsoft.IdentityModel.Tokens.TokenTypeValidationError!

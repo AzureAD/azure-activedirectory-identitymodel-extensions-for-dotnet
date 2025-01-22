@@ -8,7 +8,8 @@ using System.Diagnostics;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Represents a lifetime validation error.
+    /// Represents an error that occurs when a token's lifetime cannot be validated.
+    /// If available, the not before and expires values are stored in <see cref="NotBefore"/> and <see cref="Expires"/>.
     /// </summary>
     public class LifetimeValidationError : ValidationError
     {
@@ -19,9 +20,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationFailureType"/> is the type of validation failure that occurred.
         /// <param name="exceptionType"/> is the type of exception that occurred.
         /// <param name="stackFrame"/> is the stack frame where the exception occurred.
-        /// <param name="notBefore"/> is the date from which the token is valid.
-        /// <param name="expires"/> is the date at which the token expires.
-        /// <param name="innerException"/> is the inner exception that occurred.
+        /// <param name="notBefore"/> is the date from which the token is valid. Can be null if the token does not contain a not before claim.
+        /// <param name="expires"/> is the date at which the token expires. Can be null if the token does not contain an expires claim.
+        /// <param name="innerException"/> if present, represents the exception that occurred during validation.
         public LifetimeValidationError(
             MessageDetail messageDetail,
             ValidationFailureType validationFailureType,
@@ -41,7 +42,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Creates an instance of an <see cref="Exception"/> using <see cref="ValidationError"/>
         /// </summary>
         /// <returns>An instance of an Exception.</returns>
-        public override Exception GetException()
+        protected override Exception CreateException()
         {
             if (ExceptionType == typeof(SecurityTokenNoExpirationException))
             {
@@ -78,7 +79,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return exception;
             }
             else
-                return base.GetException(ExceptionType, null);
+                return base.CreateException(ExceptionType, null);
         }
 
         /// <summary>

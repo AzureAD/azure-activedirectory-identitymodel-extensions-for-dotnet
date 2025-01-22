@@ -14,14 +14,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Initializes a new instance of <see cref="ValidatedSigningKeyLifetime"/>.
         /// </summary>
-        /// <param name="ValidFrom">The date from which the signing key is considered valid.</param>
-        /// <param name="ValidTo">The date until which the signing key is considered valid.</param>
-        /// <param name="ValidationTime">The time the validation occurred.</param>
-        internal ValidatedSigningKeyLifetime(DateTime? ValidFrom, DateTime? ValidTo, DateTime? ValidationTime)
+        /// <param name="validFrom">The date from which the signing key is considered valid.</param>
+        /// <param name="validTo">The date until which the signing key is considered valid.</param>
+        /// <param name="validationTime">The time the validation occurred.</param>
+        internal ValidatedSigningKeyLifetime(DateTime? validFrom, DateTime? validTo, DateTime? validationTime)
         {
-            this.ValidFrom = ValidFrom;
-            this.ValidTo = ValidTo;
-            this.ValidationTime = ValidationTime;
+            ValidFrom = validFrom;
+            ValidTo = validTo;
+            ValidationTime = validationTime;
         }
 
         /// <summary>
@@ -99,6 +99,12 @@ namespace Microsoft.IdentityModel.Tokens
 
             return true;
         }
+
+        /// <summary>
+        /// The validated signing key lifetime's string representation.
+        /// </summary>
+        /// <returns>A string that represents the validated signing key lifetime and the validation time.</returns>
+        public override string ToString() => $"{ValidationTime} ∊ [{ValidFrom}, {ValidTo}]";
     }
 }
 #nullable restore

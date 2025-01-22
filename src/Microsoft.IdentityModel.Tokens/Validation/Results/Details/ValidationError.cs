@@ -13,11 +13,14 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Contains information so that Exceptions can be logged or thrown written as required.
+    /// Represents an error that occurred during token validation.
+    /// If necessary, it can be used to create an instance of <see cref="Exception"/>.
     /// </summary>
     public class ValidationError
     {
         private Type _exceptionType;
+
+        private Exception? _exception;
 
         /// <summary>
         /// Creates an instance of <see cref="ValidationError"/>
@@ -26,8 +29,8 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationFailureType"/> is the type of validation failure that occurred.
         /// <param name="exceptionType"/> is the type of exception that occurred.
         /// <param name="stackFrame"/> is the stack frame where the exception occurred.
-        /// <param name="innerException"/> is the inner exception that occurred.
-        internal protected ValidationError(
+        /// <param name="innerException"/> if present, represents the exception that occurred during validation.
+        protected internal ValidationError(
             MessageDetail messageDetail,
             ValidationFailureType validationFailureType,
             Type exceptionType,
@@ -44,16 +47,24 @@ namespace Microsoft.IdentityModel.Tokens
             };
         }
 
+        public Exception GetException()
+        {
+            if (_exception is null)
+                _exception = CreateException();
+
+            return _exception;
+        }
+
         /// <summary>
         /// Creates an instance of an <see cref="Exception"/> using <see cref="ValidationError"/>
         /// </summary>
         /// <returns>An instance of an Exception.</returns>
-        public virtual Exception GetException()
+        protected virtual Exception CreateException()
         {
-            return GetException(ExceptionType, InnerException);
+            return CreateException(ExceptionType, InnerException);
         }
 
-        internal Exception GetException(Type exceptionType, Exception? innerException)
+        internal Exception CreateException(Type exceptionType, Exception? innerException)
         {
             Exception? exception = null;
 
@@ -302,7 +313,13 @@ namespace Microsoft.IdentityModel.Tokens
             public static void TokenValidationFailed(
                 ILogger logger,
                 string validationFailureType,
-                string messageDetail) => s_tokenValidationFailed(logger, validationFailureType, messageDetail, null);
+                string messageDetail)
+            {
+                if (logger.IsEnabled(LogLevel.Information))
+                {
+                    s_tokenValidationFailed(logger, validationFailureType, messageDetail, null);
+                }
+            }
         }
     }
 }

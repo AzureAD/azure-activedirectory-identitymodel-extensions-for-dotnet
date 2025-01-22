@@ -17,8 +17,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     {
         /// <summary>
         /// Validates a token.
-        /// On a validation failure, no exception will be thrown; instead, the <see cref="ValidationError"/> will contain the information about the error that occurred.
-        /// Callers should always check the ValidationResult.IsValid property to verify the validity of the result.
+        /// On validation failure no exception will be thrown. 'see cref="ValidationError"' will contain information pertaining to the error.
         /// </summary>
         /// <param name="token">The token to be validated.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
@@ -29,7 +28,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(token))
             {
@@ -81,7 +80,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken = default)
         {
             if (token is null)
             {
