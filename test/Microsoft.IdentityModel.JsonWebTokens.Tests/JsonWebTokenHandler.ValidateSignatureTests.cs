@@ -195,9 +195,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         SigningCredentials = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2_NoKeyId,
                         ValidationParameters = new ValidationParameters(),
                         KeyToAddToValidationParameters = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2_NoKeyId.Key,
-                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10500:"),
+                        ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10519:"),
                         Result = new ValidationError(
-                            new MessageDetail(TokenLogMessages.IDX10500),
+                            new MessageDetail(TokenLogMessages.IDX10519),
                             ValidationFailureType.SignatureValidationFailed,
                             typeof(SecurityTokenSignatureKeyNotFoundException),
                             null)
