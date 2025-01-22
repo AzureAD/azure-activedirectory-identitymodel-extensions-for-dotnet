@@ -202,6 +202,9 @@ namespace Microsoft.IdentityModel.Tokens
         [CLSCompliant(false)]
         public void Log(ILogger logger)
         {
+            if (logger == null)
+                throw new ArgumentNullException(nameof(logger));
+
             Logger.TokenValidationFailed(logger, FailureType.Name, MessageDetail.Message);
         }
 

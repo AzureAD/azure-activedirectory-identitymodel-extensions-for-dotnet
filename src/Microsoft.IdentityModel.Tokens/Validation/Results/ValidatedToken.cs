@@ -40,7 +40,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// Logs the validation result.
         /// </summary>
         [CLSCompliant(false)]
-        public void Log(ILogger logger) => Logger.TokenValidationSucceeded(
+        public void Log(ILogger logger)
+        {
+            if (logger is null)
+                throw new ArgumentNullException(nameof(logger));
+
+            Logger.TokenValidationSucceeded(
                 logger,
                 ValidatedAudience ?? "none",
                 ValidatedLifetime,
@@ -49,6 +54,7 @@ namespace Microsoft.IdentityModel.Tokens
                 ValidatedSigningKey?.KeyId ?? "none",
                 ActorValidationResult is not null
             );
+        }
 
         /// <summary>
         /// The <see cref="SecurityToken"/> that was validated.
