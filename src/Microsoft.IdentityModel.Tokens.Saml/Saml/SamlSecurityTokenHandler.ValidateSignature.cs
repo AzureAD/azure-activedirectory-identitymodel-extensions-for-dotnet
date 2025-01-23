@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.IdentityModel.Logging;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 #nullable enable
@@ -130,7 +131,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 return new SignatureValidationError(
                     new MessageDetail(
                         TokenLogMessages.IDX10514,
-                        keysAttempted?.ToString(),
+                        LogHelper.MarkAsNonPII(keysAttempted?.ToString()),
                         samlToken.Assertion.Signature.KeyInfo,
                         GetErrorString(errors),
                         samlToken),
@@ -148,7 +149,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 return new SignatureValidationError(
                     new MessageDetail(
                         TokenLogMessages.IDX10512,
-                        keysAttemptedString,
+                        LogHelper.MarkAsNonPII(keysAttemptedString),
                         GetErrorString(errors),
                         samlToken),
                     ValidationFailureType.SignatureValidationFailed,

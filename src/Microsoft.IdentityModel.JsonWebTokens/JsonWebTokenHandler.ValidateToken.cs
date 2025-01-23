@@ -320,7 +320,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (!cryptoProviderFactory.IsSupportedAlgorithm(jsonWebToken.Alg, key))
             {
                 if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                    LogHelper.LogInformation(LogMessages.IDX14000, LogHelper.MarkAsNonPII(jsonWebToken.Alg), key);
+                    LogHelper.LogInformation(LogMessages.IDX14000, LogHelper.MarkAsNonPII(jsonWebToken.Alg), LogHelper.MarkAsNonPII(key.ToString()));
 
                 return false;
             }

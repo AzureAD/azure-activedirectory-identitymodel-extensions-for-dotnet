@@ -257,7 +257,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (cryptoProviderFactory == null)
                 {
                     if (LogHelper.IsEnabled(EventLogLevel.Warning))
-                        LogHelper.LogWarning(TokenLogMessages.IDX10607, key);
+                        LogHelper.LogWarning(TokenLogMessages.IDX10607, LogHelper.MarkAsNonPII(key.ToString()));
 
                     continue;
                 }
@@ -273,7 +273,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         if (!cryptoProviderFactory.IsSupportedAlgorithm(jsonWebToken.Enc, key))
                         {
                             if (LogHelper.IsEnabled(EventLogLevel.Warning))
-                                LogHelper.LogWarning(TokenLogMessages.IDX10611, LogHelper.MarkAsNonPII(decryptionParameters.Enc), key);
+                                LogHelper.LogWarning(TokenLogMessages.IDX10611, LogHelper.MarkAsNonPII(decryptionParameters.Enc), LogHelper.MarkAsNonPII(key.ToString()));
 
                             algorithmNotSupportedByCryptoProvider = true;
                             continue;
@@ -299,7 +299,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         if (!cryptoProviderFactory.IsSupportedAlgorithm(decryptionParameters.Enc, key))
                         {
                             if (LogHelper.IsEnabled(EventLogLevel.Warning))
-                                LogHelper.LogWarning(TokenLogMessages.IDX10611, LogHelper.MarkAsNonPII(decryptionParameters.Enc), key);
+                                LogHelper.LogWarning(TokenLogMessages.IDX10611, LogHelper.MarkAsNonPII(decryptionParameters.Enc), LogHelper.MarkAsNonPII(key.ToString()));
 
                             algorithmNotSupportedByCryptoProvider = true;
                             continue;
@@ -397,7 +397,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             using (AuthenticatedEncryptionProvider decryptionProvider = cryptoProviderFactory.CreateAuthenticatedEncryptionProvider(key, encAlg))
             {
                 if (decryptionProvider == null)
-                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10610, key, LogHelper.MarkAsNonPII(encAlg))));
+                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10610, LogHelper.MarkAsNonPII(key.ToString()), LogHelper.MarkAsNonPII(encAlg))));
 
                 return decryptionProvider.Decrypt(
                     ciphertext,
@@ -445,7 +445,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (JwtConstants.DirectKeyUseAlg.Equals(encryptingCredentials.Alg))
             {
                 if (!cryptoProviderFactory.IsSupportedAlgorithm(encryptingCredentials.Enc, encryptingCredentials.Key))
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10615, LogHelper.MarkAsNonPII(encryptingCredentials.Enc), encryptingCredentials.Key)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(
+                        LogHelper.FormatInvariant(TokenLogMessages.IDX10615, LogHelper.MarkAsNonPII(encryptingCredentials.Enc), LogHelper.MarkAsNonPII(encryptingCredentials.Key.ToString()))));
 
                 securityKey = encryptingCredentials.Key;
             }
@@ -484,7 +485,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             else
             {
                 if (!cryptoProviderFactory.IsSupportedAlgorithm(encryptingCredentials.Alg, encryptingCredentials.Key))
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10615, LogHelper.MarkAsNonPII(encryptingCredentials.Alg), encryptingCredentials.Key)));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(
+                        LogHelper.FormatInvariant(TokenLogMessages.IDX10615, LogHelper.MarkAsNonPII(encryptingCredentials.Alg), LogHelper.MarkAsNonPII(encryptingCredentials.Key.ToString()))));
 
                 // only 128, 384 and 512 AesCbcHmac for CEK algorithm
                 if (SecurityAlgorithms.Aes128CbcHmacSha256.Equals(encryptingCredentials.Enc))

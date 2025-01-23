@@ -689,7 +689,8 @@ namespace System.IdentityModel.Tokens.Jwt
                 }
                 catch (Exception ex)
                 {
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10616, LogHelper.MarkAsNonPII(encryptingCredentials.Enc), encryptingCredentials.Key), ex));
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(
+                        LogHelper.FormatInvariant(TokenLogMessages.IDX10616, LogHelper.MarkAsNonPII(encryptingCredentials.Enc), LogHelper.MarkAsNonPII(encryptingCredentials.Key.ToString())), ex));
                 }
             }
         }
@@ -1858,7 +1859,7 @@ namespace System.IdentityModel.Tokens.Jwt
             if (unwrappedKeys.Count > 0 || exceptionStrings.Length == 0)
                 return unwrappedKeys;
             else
-                throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(LogHelper.FormatInvariant(TokenLogMessages.IDX10618, keysAttempted, exceptionStrings, jwtToken)));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(LogHelper.FormatInvariant(TokenLogMessages.IDX10618, LogHelper.MarkAsNonPII(keysAttempted.ToString()), exceptionStrings, jwtToken)));
         }
 
         private static byte[] GetSymmetricSecurityKey(SecurityKey key)

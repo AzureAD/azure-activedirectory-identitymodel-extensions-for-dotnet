@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Saml;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
@@ -128,7 +129,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 return new SignatureValidationError(
                     new MessageDetail(
                         TokenLogMessages.IDX10514,
-                        keysAttempted?.ToString(),
+                        LogHelper.MarkAsNonPII(keysAttempted?.ToString()),
                         samlToken.Assertion.Signature.KeyInfo,
                         GetErrorStrings(errors),
                         samlToken),
@@ -146,7 +147,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 return new SignatureValidationError(
                     new MessageDetail(
                         TokenLogMessages.IDX10512,
-                        keysAttemptedString,
+                        LogHelper.MarkAsNonPII(keysAttemptedString),
                         GetErrorStrings(errors),
                         samlToken),
                     ValidationFailureType.SignatureValidationFailed,

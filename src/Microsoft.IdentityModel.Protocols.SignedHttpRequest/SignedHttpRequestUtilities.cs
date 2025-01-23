@@ -106,7 +106,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             }
             catch (Exception e)
             {
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23018, string.Join(", ", decryptionKeys.Select(x => x?.KeyId ?? "Null")), e), e));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX23018,
+                        LogHelper.MarkAsNonPII(string.Join(", ", decryptionKeys.Select(x => x?.KeyId ?? "Null"))),
+                        e),
+                    e));
             }
         }
     }

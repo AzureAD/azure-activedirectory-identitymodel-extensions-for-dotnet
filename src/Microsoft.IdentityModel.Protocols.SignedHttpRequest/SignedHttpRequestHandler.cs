@@ -1099,7 +1099,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23015, LogHelper.MarkAsNonPII(key.GetType().ToString()))));
             }
             else
-                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23016, jsonWebKey.ToString())));
+                throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPopKeyException(LogHelper.FormatInvariant(LogMessages.IDX23016, LogHelper.MarkAsNonPII(jsonWebKey.ToString()))));
         }
 
         /// <summary>
@@ -1164,7 +1164,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     new SignedHttpRequestInvalidPopKeyException(
                         LogHelper.FormatInvariant(
                             LogMessages.IDX23021,
-                            LogHelper.MarkAsNonPII(cnf.Kid), string.Join(", ", popKeys.Select(x => x.KeyId ?? "Null")))));
+                            LogHelper.MarkAsNonPII(cnf.Kid),
+                            LogHelper.MarkAsNonPII(string.Join(", ", popKeys.Select(x => x.KeyId ?? "Null"))))));
             }
             else
             {

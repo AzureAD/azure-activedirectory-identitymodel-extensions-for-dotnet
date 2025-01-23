@@ -206,7 +206,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 ValidationError validationError = new(
                     new MessageDetail(
                         TokenLogMessages.IDX10618,
-                        keysAttempted?.ToString() ?? "",
+                        LogHelper.MarkAsNonPII(keysAttempted?.ToString() ?? ""),
                         exceptionStrings?.ToString() ?? "",
                         LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken)),
                     ValidationFailureType.TokenDecryptionFailed,
