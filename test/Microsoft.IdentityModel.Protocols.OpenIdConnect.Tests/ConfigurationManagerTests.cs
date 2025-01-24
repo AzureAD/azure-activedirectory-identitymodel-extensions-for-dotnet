@@ -20,6 +20,7 @@ using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 {
+    [ResetAppContextSwitches]
     public class ConfigurationManagerTests
     {
         /// <summary>
@@ -422,8 +423,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
 
         [Theory, MemberData(nameof(RequestRefreshTestCases), DisableDiscoveryEnumeration = true)]
-        public async Task RequestRefresh(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData)
+        public async Task RequestRefresh_Blocking(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData)
         {
+            AppContext.SetSwitch(AppContextSwitches.RefreshConfigAsBlockingSwitch, true);
+
             var context = new CompareContext($"{this}.RequestRefresh");
 
             var configuration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
@@ -566,6 +569,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         [Fact]
         public async Task CheckSyncAfterAndRefreshRequested()
         {
+            AppContext.SetSwitch(AppContextSwitches.RefreshConfigAsBlockingSwitch, true);
+
             // This test checks that the _syncAfter field is set correctly after a refresh.
             var context = new CompareContext($"{this}.CheckSyncAfterAndRefreshRequested");
 
@@ -719,8 +724,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         }
 
         [Fact]
-        public async Task RequestRefresh_RespectsRefreshInterval()
+        public async Task RequestRefresh_Blocking_RespectsRefreshInterval()
         {
+            AppContext.SetSwitch(AppContextSwitches.RefreshConfigAsBlockingSwitch, true);
+
             // This test checks that the _syncAfter field is set correctly after a refresh.
             var context = new CompareContext($"{this}.RequestRefresh_RespectsRefreshInterval");
 
@@ -775,7 +782,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var configAfterOneYear = await configManager.GetConfigurationAsync(CancellationToken.None);
 
             // Fifth RequestRefresh should trigger a refresh because the refresh interval has passed.
-            if (!object.ReferenceEquals(configAfterLessThanRefreshInterval, configAfterOneYear))
+            if (object.ReferenceEquals(configAfterLessThanRefreshInterval, configAfterOneYear))
                 context.Diffs.Add("object.ReferenceEquals(configAfterLessThanRefreshInterval, configAfterOneYear)");
 
             TestUtilities.AssertFailIfErrors(context);

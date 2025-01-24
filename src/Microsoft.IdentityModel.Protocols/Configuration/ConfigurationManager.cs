@@ -8,8 +8,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.Configuration;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Telemetry;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -20,18 +20,22 @@ namespace Microsoft.IdentityModel.Protocols
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
     public class ConfigurationManager<T> : BaseConfigurationManager, IConfigurationManager<T> where T : class
     {
-        // To prevent tearing, this needs to be only updated through AtomicUpdateSyncAfter.
-        // Reads should be done through the property SyncAfter.
         private DateTime _syncAfter = DateTime.MinValue;
-        private DateTime SyncAfter => _syncAfter;
+        private DateTime SyncAfter
+        {
+            get => _syncAfter;
+            set => AtomicUpdateSyncAfter(value);
+        }
 
-        // See comment above, this should only be updated through AtomicUpdateLastRequestRefresh,
-        // read through LastRequestRefresh.
         private DateTime _lastRequestRefresh = DateTime.MinValue;
-        private DateTime LastRequestRefresh => _lastRequestRefresh;
+        private DateTime LastRequestRefresh
+        {
+            get => _lastRequestRefresh;
+            set => AtomicUpdateLastRequestRefresh(value);
+        }
 
         private bool _isFirstRefreshRequest = true;
-        private readonly SemaphoreSlim _configurationNullLock = new SemaphoreSlim(1);
+        private readonly SemaphoreSlim _configurationNullLock = new(1, 1);
 
         private readonly IDocumentRetriever _docRetriever;
         private readonly IConfigurationRetriever<T> _configRetriever;
@@ -48,13 +52,7 @@ namespace Microsoft.IdentityModel.Protocols
         private readonly TimeProvider _timeProvider = TimeProvider.System;
         internal ITelemetryClient TelemetryClient = new TelemetryClient();
 
-        // If a refresh is requested, then do the refresh as a blocking operation
-        // not on a background thread. RequestRefresh signals that the app is explicitly
-        // requesting a refresh, so it should be done immediately so the next
-        // call to GetConfiguration will return new configuration if the minimum
-        // refresh interval has passed.
         bool _refreshRequested;
-
 
         /// <summary>
         /// Instantiates a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
@@ -182,108 +180,15 @@ namespace Microsoft.IdentityModel.Protocols
             //   else kick off task to update current configuration
             if (_currentConfiguration == null)
             {
-                await _configurationNullLock.WaitAsync(cancel).ConfigureAwait(false);
-                if (_currentConfiguration != null)
-                {
-                    _configurationNullLock.Release();
-                    return _currentConfiguration;
-                }
+                var (configuration, exception) = await FirstFetchAsync(cancel).ConfigureAwait(false);
+                if (configuration != null)
+                    return configuration;
 
-#pragma warning disable CA1031 // Do not catch general exception types
-                try
-                {
-                    // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
-                    // The transport should have its own timeouts, etc.
-                    T configuration = await _configRetriever.GetConfigurationAsync(
-                        MetadataAddress,
-                        _docRetriever,
-                        CancellationToken.None).ConfigureAwait(false);
-
-                    if (_configValidator != null)
-                    {
-                        ConfigurationValidationResult result = _configValidator.Validate(configuration);
-                        // in this case we have never had a valid configuration, so we will throw an exception if the validation fails
-                        if (!result.Succeeded)
-                        {
-                            var ex = new InvalidConfigurationException(
-                                LogHelper.FormatInvariant(
-                                    LogMessages.IDX20810,
-                                    result.ErrorMessage));
-
-                            throw LogHelper.LogExceptionMessage(ex);
-                        }
-                    }
-
-                    TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                        MetadataAddress,
-                        TelemetryConstants.Protocols.FirstRefresh);
-
-                    UpdateConfiguration(configuration);
-                }
-                catch (Exception ex)
-                {
-                    fetchMetadataFailure = ex;
-                    TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                        MetadataAddress,
-                        TelemetryConstants.Protocols.FirstRefresh,
-                        ex);
-
-                    LogHelper.LogExceptionMessage(
-                        new InvalidOperationException(
-                             LogHelper.FormatInvariant(
-                                LogMessages.IDX20806,
-                                LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
-                                LogHelper.MarkAsNonPII(ex)),
-                            ex));
-                }
-                finally
-                {
-                    _configurationNullLock.Release();
-                }
-#pragma warning restore CA1031 // Do not catch general exception types
+                fetchMetadataFailure = exception;
             }
-            else
+            else if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
             {
-                if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
-                {
-                    if (_refreshRequested)
-                    {
-                        _refreshRequested = false;
-
-                        try
-                        {
-                            // Log as manual because RequestRefresh was called
-                            TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                                MetadataAddress,
-                                TelemetryConstants.Protocols.Manual);
-                        }
-#pragma warning disable CA1031 // Do not catch general exception types
-                        catch
-                        { }
-#pragma warning restore CA1031 // Do not catch general exception types
-
-                        UpdateCurrentConfiguration();
-                    }
-                    else if (SyncAfter <= _timeProvider.GetUtcNow())
-                    {
-                        try
-                        {
-                            TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                                MetadataAddress,
-                                TelemetryConstants.Protocols.Automatic);
-                        }
-#pragma warning disable CA1031 // Do not catch general exception types
-                        catch
-                        { }
-#pragma warning restore CA1031 // Do not catch general exception types
-
-                        _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
-                    }
-                    else
-                    {
-                        Interlocked.Exchange(ref _configurationRetrieverState, ConfigurationRetrieverIdle);
-                    }
-                }
+                ManualOrAutomaticConfigurationRefresh();
             }
 
             // If metadata exists return it.
@@ -300,6 +205,107 @@ namespace Microsoft.IdentityModel.Protocols
                     fetchMetadataFailure));
         }
 
+        private async Task<(T, Exception)> FirstFetchAsync(CancellationToken cancel)
+        {
+            await _configurationNullLock.WaitAsync(cancel).ConfigureAwait(false);
+            if (_currentConfiguration != null)
+            {
+                _configurationNullLock.Release();
+                return (_currentConfiguration, null);
+            }
+
+            Exception fetchMetadataFailure = null;
+
+            try
+            {
+                // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
+                // The transport should have its own timeouts, etc.
+                T configuration = await _configRetriever.GetConfigurationAsync(
+                    MetadataAddress,
+                    _docRetriever,
+                    CancellationToken.None).ConfigureAwait(false);
+
+                if (_configValidator != null)
+                {
+                    ConfigurationValidationResult result = _configValidator.Validate(configuration);
+                    // in this case we have never had a valid configuration, so we will throw an exception if the validation fails
+                    if (!result.Succeeded)
+                    {
+                        var ex = new InvalidConfigurationException(
+                            LogHelper.FormatInvariant(
+                                LogMessages.IDX20810,
+                                result.ErrorMessage));
+
+                        throw LogHelper.LogExceptionMessage(ex);
+                    }
+                }
+
+                TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                    MetadataAddress,
+                    TelemetryConstants.Protocols.FirstRefresh);
+
+                UpdateConfiguration(configuration);
+                return (configuration, null);
+            }
+            catch (Exception ex)
+            {
+                fetchMetadataFailure = ex;
+                TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                    MetadataAddress,
+                    TelemetryConstants.Protocols.FirstRefresh,
+                    ex);
+
+                LogHelper.LogExceptionMessage(
+                    new InvalidOperationException(
+                         LogHelper.FormatInvariant(
+                            LogMessages.IDX20806,
+                            LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
+                            LogHelper.MarkAsNonPII(ex)),
+                        ex));
+            }
+            finally
+            {
+                _configurationNullLock.Release();
+            }
+
+            return (null, fetchMetadataFailure);
+        }
+
+        /// <remarks>
+        /// This is guarded with a CompareExchange.
+        /// </remarks>
+        private void ManualOrAutomaticConfigurationRefresh()
+        {
+            if (SyncAfter <= _timeProvider.GetUtcNow())
+            {
+                var updateMode = _refreshRequested ? TelemetryConstants.Protocols.Manual : TelemetryConstants.Protocols.Automatic;
+
+                try
+                {
+                    TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                        MetadataAddress,
+                        updateMode);
+                }
+                catch
+                {
+                }
+
+                StartUpdateTask();
+            }
+        }
+
+        private void StartUpdateTask()
+        {
+            if (AppContextSwitches.RefreshConfigAsBlocking)
+            {
+                UpdateCurrentConfiguration();
+            }
+            else
+            {
+                _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
+            }
+        }
+
         /// <summary>
         /// This should be called when the configuration needs to be updated either from RequestRefresh or AutomaticRefresh
         /// The Caller should first check the state checking state using:
@@ -307,7 +313,6 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         private void UpdateCurrentConfiguration()
         {
-#pragma warning disable CA1031 // Do not catch general exception types
             long startTimestamp = _timeProvider.GetTimestamp();
 
             try
@@ -359,16 +364,22 @@ namespace Microsoft.IdentityModel.Protocols
             finally
             {
                 Interlocked.Exchange(ref _configurationRetrieverState, ConfigurationRetrieverIdle);
+                _refreshRequested = false;
             }
-#pragma warning restore CA1031 // Do not catch general exception types
         }
 
         private void UpdateConfiguration(T configuration)
         {
+#if NETCOREAPP
+            var random = Random.Shared;
+#else
+            var random = new Random();
+#endif
+
             _currentConfiguration = configuration;
             var newSyncTime = DateTimeUtil.Add(_timeProvider.GetUtcNow().UtcDateTime, AutomaticRefreshInterval +
-                TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 20)));
-            AtomicUpdateSyncAfter(newSyncTime);
+                TimeSpan.FromSeconds(random.Next((int)AutomaticRefreshInterval.TotalSeconds / 20)));
+            SyncAfter = newSyncTime;
         }
 
         private void AtomicUpdateSyncAfter(DateTime syncAfter)
@@ -414,8 +425,8 @@ namespace Microsoft.IdentityModel.Protocols
             if (now >= DateTimeUtil.Add(LastRequestRefresh, RefreshInterval) || _isFirstRefreshRequest)
             {
                 _isFirstRefreshRequest = false;
-                AtomicUpdateSyncAfter(now);
-                AtomicUpdateLastRequestRefresh(now);
+                SyncAfter = now;
+                LastRequestRefresh = now;
                 _refreshRequested = true;
             }
         }

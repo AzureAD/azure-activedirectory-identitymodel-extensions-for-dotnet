@@ -12,3 +12,24 @@ using System.Diagnostics.CodeAnalysis;
 #if NET6_0_OR_GREATER
 [assembly: SuppressMessage("Globalization", "CA1307:Specify StringComparison", Justification = "Adding StringComparison.Ordinal adds a performance penalty.", Scope = "member", Target = "~M:Microsoft.IdentityModel.Protocols.AuthenticationProtocolMessage.BuildRedirectUrl~System.String")]
 #endif
+
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage(
+    "Microsoft.Design",
+    "CA1031:DoNotCatchGeneralExceptionTypes",
+    Justification = "Exception handling is required for telemetry logging and to ensure the state is reset.",
+    Scope = "member",
+    Target = "~M:Microsoft.IdentityModel.Protocols.ConfigurationManager`1.ManualOrAutomaticConfigurationRefresh")]
+
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage(
+    "Microsoft.Design",
+    "CA1031:DoNotCatchGeneralExceptionTypes",
+    Justification = "Ensure _configurationNullLock is reset.",
+    Scope = "member",
+    Target = "~M:Microsoft.IdentityModel.Protocols.ConfigurationManager`1.FirstFetchAsync(System.Threading.CancellationToken)~System.Threading.Tasks.Task{System.ValueTuple{`0,System.Exception}}")]
+
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage(
+       "Microsoft.Design",
+       "CA1031:DoNotCatchGeneralExceptionTypes",
+       Justification = "Exception handling is required for telemetry logging and to ensure the state is reset.",
+       Scope = "member",
+       Target = "~M:Microsoft.IdentityModel.Protocols.ConfigurationManager`1.UpdateCurrentConfiguration")]

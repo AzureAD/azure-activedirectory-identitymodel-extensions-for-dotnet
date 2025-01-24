@@ -70,6 +70,12 @@ namespace Microsoft.IdentityModel.Tokens
 
         internal static bool UseRfcDefinitionOfEpkAndKid => _useRfcDefinitionOfEpkAndKid ??= (AppContext.TryGetSwitch(UseRfcDefinitionOfEpkAndKidSwitch, out bool isEnabled) && isEnabled);
 
+        internal const string RefreshConfigAsBlockingSwitch = "Switch.Microsoft.IdentityModel.RefreshConfigAsBlocking";
+
+        private static bool? _refreshConfigAsBlockingCall;
+
+        internal static bool RefreshConfigAsBlocking => _refreshConfigAsBlockingCall ??= (AppContext.TryGetSwitch(RefreshConfigAsBlockingSwitch, out bool blockingCall) && blockingCall);
+
         /// <summary>
         /// Used for testing to reset all switches to its default value.
         /// </summary>
@@ -86,6 +92,9 @@ namespace Microsoft.IdentityModel.Tokens
 
             _useRfcDefinitionOfEpkAndKid = null;
             AppContext.SetSwitch(UseRfcDefinitionOfEpkAndKidSwitch, false);
+
+            _refreshConfigAsBlockingCall = null;
+            AppContext.SetSwitch(RefreshConfigAsBlockingSwitch, false);
         }
     }
 }
