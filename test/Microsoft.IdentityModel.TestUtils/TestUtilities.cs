@@ -35,6 +35,77 @@ namespace Microsoft.IdentityModel.TestUtils
 
     public static class TestUtilities
     {
+        internal static ValidationParameters CreateFromTokenValidationParameters(TokenValidationParameters tokenValidationParameters)
+        {
+            ValidationParameters validationParameters = new();
+
+            if (tokenValidationParameters.AuthenticationType != null)
+                validationParameters.AuthenticationType = tokenValidationParameters.AuthenticationType;
+
+            validationParameters.ClockSkew = tokenValidationParameters.ClockSkew;
+            validationParameters.ConfigurationManager = tokenValidationParameters.ConfigurationManager;
+            validationParameters.CryptoProviderFactory = tokenValidationParameters.CryptoProviderFactory;
+            validationParameters.DebugId = tokenValidationParameters.DebugId;
+            validationParameters.IncludeTokenOnFailedValidation = tokenValidationParameters.IncludeTokenOnFailedValidation;
+            validationParameters.IgnoreTrailingSlashWhenValidatingAudience = tokenValidationParameters.IgnoreTrailingSlashWhenValidatingAudience;
+
+            //validationParameters.IssuerSigningKeyResolver = tokenValidationParameters.IssuerSigningKeyResolver;
+            if (tokenValidationParameters.IssuerSigningKeys != null)
+                foreach (SecurityKey key in tokenValidationParameters.IssuerSigningKeys)
+                    validationParameters.IssuerSigningKeys.Add(key);
+
+            if (tokenValidationParameters.IssuerSigningKey != null)
+                validationParameters.IssuerSigningKeys.Add(tokenValidationParameters.IssuerSigningKey);
+
+            validationParameters.LogTokenId = tokenValidationParameters.LogTokenId;
+            validationParameters.NameClaimType = tokenValidationParameters.NameClaimType;
+            validationParameters.NameClaimTypeRetriever = tokenValidationParameters.NameClaimTypeRetriever;
+            if (tokenValidationParameters.PropertyBag != null)
+                foreach (var item in tokenValidationParameters.PropertyBag)
+                    validationParameters.PropertyBag.Add(item.Key, item.Value);
+
+            validationParameters.RefreshBeforeValidation = tokenValidationParameters.RefreshBeforeValidation;
+            validationParameters.RoleClaimType = tokenValidationParameters.RoleClaimType;
+            validationParameters.RoleClaimTypeRetriever = tokenValidationParameters.RoleClaimTypeRetriever;
+            validationParameters.SaveSigninToken = tokenValidationParameters.SaveSigninToken;
+
+            if (tokenValidationParameters.TokenDecryptionKey != null)
+                validationParameters.TokenDecryptionKeys.Add(tokenValidationParameters.TokenDecryptionKey);
+
+            if (tokenValidationParameters.TokenDecryptionKeys != null)
+                foreach (SecurityKey key in tokenValidationParameters.TokenDecryptionKeys)
+                    validationParameters.TokenDecryptionKeys.Add(key);
+
+            validationParameters.TokenReplayCache = tokenValidationParameters.TokenReplayCache;
+            validationParameters.TryAllIssuerSigningKeys = tokenValidationParameters.TryAllIssuerSigningKeys;
+            validationParameters.ValidateActor = tokenValidationParameters.ValidateActor;
+            validationParameters.ValidateWithLKG = tokenValidationParameters.ValidateWithLKG;
+
+            if (tokenValidationParameters.ValidAlgorithms != null)
+                foreach (string algorithms in tokenValidationParameters.ValidAlgorithms)
+                    validationParameters.ValidAlgorithms.Add(algorithms);
+
+            if (tokenValidationParameters.ValidAudiences != null)
+                foreach (string audience in tokenValidationParameters.ValidAudiences)
+                    validationParameters.ValidAudiences.Add(audience);
+
+            if (tokenValidationParameters.ValidAudience != null)
+                validationParameters.ValidAudiences.Add(tokenValidationParameters.ValidAudience);
+
+            if (tokenValidationParameters.ValidIssuers != null)
+                foreach (string issuer in tokenValidationParameters.ValidIssuers)
+                    validationParameters.ValidIssuers.Add(issuer);
+
+            if (tokenValidationParameters.ValidIssuer != null)
+                validationParameters.ValidIssuers.Add(tokenValidationParameters.ValidIssuer);
+
+            if (tokenValidationParameters.ValidTypes != null)
+                foreach (string type in tokenValidationParameters.ValidTypes)
+                    validationParameters.ValidTypes.Add(type);
+
+            return validationParameters;
+        }
+
         /// <summary>
         /// Calls all public instance and static properties on an object
         /// </summary>
