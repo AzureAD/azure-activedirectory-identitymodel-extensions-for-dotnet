@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal JsonClaimSet()
         {
-            _jsonClaims = new Dictionary<string, object>();
+            _jsonClaims = [];
         }
 
         internal JsonClaimSet(Dictionary<string, object> jsonClaims)

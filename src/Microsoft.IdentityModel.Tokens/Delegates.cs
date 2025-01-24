@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Tokens
@@ -210,4 +211,13 @@ namespace Microsoft.IdentityModel.Tokens
         BaseConfiguration? configuration,
         CallContext callContext);
 #nullable restore
+
+    /// <summary>
+    /// Definition for ReadTokenPayloadValueDelegate.
+    /// Called for each claim when token payload is being read.
+    /// </summary>
+    /// <param name="reader">Reader for the underlying token bytes.</param>
+    /// <param name="claims">A collection to hold claims that have been read.</param>
+    /// <returns></returns>
+    internal delegate void ReadTokenPayloadValueDelegate(ref Utf8JsonReader reader, IDictionary<string, object> claims);
 }

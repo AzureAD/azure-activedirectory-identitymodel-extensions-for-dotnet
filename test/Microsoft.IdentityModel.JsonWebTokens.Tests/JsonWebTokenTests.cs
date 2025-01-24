@@ -12,7 +12,9 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Json.Tests;
@@ -1741,25 +1743,103 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         }
 
         [Fact]
-        public void DerivedJsonWebToken_IsCreatedCorrectly()
+        public void ReadTokenDelegates_UsingJsonWebToken_CalledCorrectly()
         {
-            var expectedCustomClaim = new CustomClaim() { CustomClaimValue = "customclaim" };
-            var tokenStr = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
+            var customPayloadClaimName = "CustomPayload";
+
+            var expectedCustomPayloadClaim = new CustomPayloadClaim("custom_payload");
+
+            var tokenSpan = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
             {
                 Issuer = Default.Issuer,
                 Claims = new Dictionary<string, object>
                 {
-                    { CustomJsonWebToken.CustomClaimName, System.Text.Json.JsonSerializer.Serialize(expectedCustomClaim) },
+                    { customPayloadClaimName, System.Text.Json.JsonSerializer.Serialize(expectedCustomPayloadClaim) },
                 }
-            });
+            }).AsMemory();
 
-            var derivedToken = new CustomJsonWebToken(tokenStr);
-            derivedToken.TryGetPayloadValue<CustomClaim>(
-                CustomJsonWebToken.CustomClaimName, out CustomClaim customClaim);
+            CustomPayloadClaim payloadClaimFromDelegate = null;
+            void ReadPayloadValue(ref Utf8JsonReader reader, IDictionary<string, object> claims)
+            {
+                // Handle custom claims.
+                if (reader.ValueTextEquals(customPayloadClaimName))
+                {
+                    reader.Read(); // Move to the value.
+                    payloadClaimFromDelegate = System.Text.Json.JsonSerializer.Deserialize<CustomPayloadClaim>(reader.GetString());
+                    claims[customPayloadClaimName] = payloadClaimFromDelegate;
+                    reader.Read();
+                }
+                else
+                {
+                    // Call base implementation to handle other claims known to IdentityModel.
+                    JsonWebToken.ReadTokenPayloadValue(ref reader, claims);
+                }
+            }
 
-            Assert.Equal(expectedCustomClaim.CustomClaimValue, derivedToken.CustomClaim.CustomClaimValue);
-            Assert.Equal(expectedCustomClaim.CustomClaimValue, customClaim.CustomClaimValue);
-            Assert.Equal(Default.Issuer, derivedToken.Issuer);
+            var jwt = new JsonWebToken(tokenSpan, ReadPayloadValue);
+
+            Assert.True(jwt.TryGetPayloadValue<CustomPayloadClaim>(customPayloadClaimName, out var actualPayloadClaim));
+            Assert.Equal(expectedCustomPayloadClaim.Value, actualPayloadClaim.Value);
+            Assert.NotNull(payloadClaimFromDelegate);
+            Assert.Equal(expectedCustomPayloadClaim.Value, payloadClaimFromDelegate.Value);
+        }
+
+        [Fact]
+        public async Task ReadTokenDelegates_UsingJsonWebTokenHandler_CalledCorrectly()
+        {
+            var customPayloadClaimName = "CustomPayload";
+
+            var expectedCustomPayloadClaim = new CustomPayloadClaim("custom_payload");
+
+            var tokenSpan = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
+            {
+                Issuer = Default.Issuer,
+                Claims = new Dictionary<string, object>
+                {
+                    { customPayloadClaimName, System.Text.Json.JsonSerializer.Serialize(expectedCustomPayloadClaim) },
+                },
+                SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+            }).AsMemory();
+
+            CustomPayloadClaim payloadClaimFromDelegate = null;
+            void ReadPayloadValue(ref Utf8JsonReader reader, IDictionary<string, object> claims)
+            {
+                // Handle custom claims.
+                if (reader.ValueTextEquals(customPayloadClaimName))
+                {
+                    reader.Read(); // Move to the value.
+                    payloadClaimFromDelegate = System.Text.Json.JsonSerializer.Deserialize<CustomPayloadClaim>(reader.GetString());
+                    claims[customPayloadClaimName] = payloadClaimFromDelegate;
+                    reader.Read();
+                }
+                else
+                {
+                    // Call base implementation to handle other claims known to IdentityModel.
+                    JsonWebToken.ReadTokenPayloadValue(ref reader, claims);
+                }
+            }
+
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateAudience = false,
+                ValidateIssuer = false,
+                ValidateLifetime = false,
+                ValidateIssuerSigningKey = false,
+                IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                ReadTokenPayloadValue = ReadPayloadValue,
+            };
+
+            var validationResult = await new JsonWebTokenHandler().ValidateTokenAsync(tokenSpan.ToString(), tokenValidationParameters);
+
+            Assert.True(((JsonWebToken)validationResult.SecurityToken).TryGetPayloadValue<CustomPayloadClaim>(customPayloadClaimName, out var actualPayloadClaim));
+            Assert.Equal(expectedCustomPayloadClaim.Value, actualPayloadClaim.Value);
+            Assert.NotNull(payloadClaimFromDelegate);
+            Assert.Equal(expectedCustomPayloadClaim.Value, payloadClaimFromDelegate.Value);
+        }
+
+        private class CustomPayloadClaim(string value)
+        {
+            public string Value { get; set; } = value;
         }
 
         [Fact]

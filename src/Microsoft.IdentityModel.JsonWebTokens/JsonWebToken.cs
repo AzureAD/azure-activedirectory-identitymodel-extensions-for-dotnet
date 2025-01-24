@@ -84,6 +84,33 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
+        /// Initializes a new instance of <see cref="JsonWebToken"/> from a string in JWS or JWE Compact serialized format.
+        /// </summary>
+        /// <param name="jwtEncodedString">A JSON Web Token that has been serialized in JWS or JWE Compact serialized format.</param>
+        /// <param name="readTokenPayloadValueDelegate">A custom delegate to be called when each payload claim is being read. If null, default implementation is called.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="jwtEncodedString"/> is null or empty.</exception>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="jwtEncodedString"/> is not in JWS or JWE Compact Serialization format.</exception>
+        /// <remarks>
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7519"/> (JWT).
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7515"/> (JWS).
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7516"/> (JWE).
+        /// <para>
+        /// The contents of the returned <see cref="JsonWebToken"/> have not been validated, the JSON Web Token is simply decoded. Validation can be accomplished using the validation methods in <see cref="JsonWebTokenHandler"/>
+        /// </para>
+        /// </remarks>
+        internal JsonWebToken(string jwtEncodedString, ReadTokenPayloadValueDelegate readTokenPayloadValueDelegate)
+        {
+            if (string.IsNullOrEmpty(jwtEncodedString))
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(jwtEncodedString)));
+
+            ReadTokenPayloadValueDelegate = readTokenPayloadValueDelegate ?? ReadTokenPayloadValue;
+
+            ReadToken(jwtEncodedString.AsMemory());
+
+            _encodedToken = jwtEncodedString;
+        }
+
+        /// <summary>
         /// Initializes a new instance of <see cref="JsonWebToken"/> from a ReadOnlyMemory{char} in JWS or JWE Compact serialized format.
         /// </summary>
         /// <param name="encodedTokenMemory">A ReadOnlyMemory{char} containing the JSON Web Token serialized in JWS or JWE Compact format.</param>
@@ -101,6 +128,33 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             if (encodedTokenMemory.IsEmpty)
                 throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(encodedTokenMemory)));
+
+            ReadToken(encodedTokenMemory);
+
+            _encodedTokenMemory = encodedTokenMemory;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="JsonWebToken"/> from a ReadOnlyMemory{char} in JWS or JWE Compact serialized format.
+        /// </summary>
+        /// <param name="encodedTokenMemory">A ReadOnlyMemory{char} containing the JSON Web Token serialized in JWS or JWE Compact format.</param>
+        /// <param name="readTokenPayloadValueDelegate">A custom delegate to be called when each payload claim is being read. If null, default implementation is called.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="encodedTokenMemory"/> is empty.</exception>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="encodedTokenMemory"/> does not represent a valid JWS or JWE Compact Serialization format.</exception>
+        /// <remarks>
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7519"/> (JWT).
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7515"/> (JWS).
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7516"/> (JWE).
+        /// <para>
+        /// The contents of the returned <see cref="JsonWebToken"/> have not been validated; the JSON Web Token is simply decoded. Validation can be performed using the methods in <see cref="JsonWebTokenHandler"/>.
+        /// </para>
+        /// </remarks>
+        internal JsonWebToken(ReadOnlyMemory<char> encodedTokenMemory, ReadTokenPayloadValueDelegate readTokenPayloadValueDelegate)
+        {
+            if (encodedTokenMemory.IsEmpty)
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(encodedTokenMemory)));
+
+            ReadTokenPayloadValueDelegate = readTokenPayloadValueDelegate ?? ReadTokenPayloadValue;
 
             ReadToken(encodedTokenMemory);
 
@@ -137,6 +191,58 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             _encodedToken = encodedToken;
         }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JsonWebToken"/> class where the header contains the crypto algorithms applied to the encoded header and payload.
+        /// </summary>
+        /// <param name="header">A string containing JSON which represents the cryptographic operations applied to the JWT and optionally any additional properties of the JWT.</param>
+        /// <param name="payload">A string containing JSON which represents the claims contained in the JWT. Each claim is a JSON object of the form { Name, Value }. Can be the empty.</param>
+        /// <param name="readTokenPayloadValueDelegate">A custom delegate to be called when each payload claim is being read. If null, default implementation is called.</param>
+        /// <remarks>
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7519"/> (JWT).
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7515"/> (JWS).
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7516"/> (JWE).
+        /// <para>
+        /// The contents of the returned <see cref="JsonWebToken"/> have not been validated, the JSON Web Token is simply decoded. Validation can be accomplished using the validation methods in <see cref="JsonWebTokenHandler"/>
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="header"/> is null or empty.</exception>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="payload"/> is null.</exception>
+        internal JsonWebToken(string header, string payload, ReadTokenPayloadValueDelegate readTokenPayloadValueDelegate)
+        {
+            if (string.IsNullOrEmpty(header))
+                throw LogHelper.LogArgumentNullException(nameof(header));
+
+            _ = payload ?? throw LogHelper.LogArgumentNullException(nameof(payload));
+
+            var encodedHeader = Base64UrlEncoder.Encode(header);
+            var encodedPayload = Base64UrlEncoder.Encode(payload);
+            var encodedToken = encodedHeader + "." + encodedPayload + ".";
+
+            ReadTokenPayloadValueDelegate = readTokenPayloadValueDelegate ?? ReadTokenPayloadValue;
+
+            ReadToken(encodedToken.AsMemory());
+
+            _encodedToken = encodedToken;
+        }
+
+        /// <summary>
+        /// Called for each claim when token payload is being read.
+        /// </summary>
+        /// <remarks>
+        /// An example implementation:
+        /// <code>
+        /// object ReadPayloadValueDelegate(ref Utf8JsonReader reader, string claimName) =>
+        /// {
+        ///     if (reader.ValueTextEquals("CustomProp"))
+        ///     {
+        ///         return JsonSerializerPrimitives.ReadString(ref reader, JwtRegisteredClaimNames.CustomProp, ClassName, true);    
+        ///     }
+        ///     return JsonWebToken.ReadTokenPayloadValue(ref reader, claimName);
+        /// }
+        /// </code>
+        /// </remarks>
+        internal ReadTokenPayloadValueDelegate ReadTokenPayloadValueDelegate { get; set; } = ReadTokenPayloadValue;
 
         internal string ActualIssuer { get; set; }
 
