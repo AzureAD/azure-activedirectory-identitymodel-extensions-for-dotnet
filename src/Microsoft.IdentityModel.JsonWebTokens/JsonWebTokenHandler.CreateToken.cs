@@ -1299,13 +1299,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (key != null)
                 {
                     if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                        LogHelper.LogInformation(TokenLogMessages.IDX10904, key);
+                        LogHelper.LogInformation(TokenLogMessages.IDX10904, LogHelper.MarkAsNonPII(key));
                 }
                 else if (configuration != null)
                 {
                     key = ResolveTokenDecryptionKeyFromConfig(jwtToken, configuration);
                     if (key != null && LogHelper.IsEnabled(EventLogLevel.Informational))
-                        LogHelper.LogInformation(TokenLogMessages.IDX10905, key);
+                        LogHelper.LogInformation(TokenLogMessages.IDX10905, LogHelper.MarkAsNonPII(key));
                 }
 
                 if (key != null)

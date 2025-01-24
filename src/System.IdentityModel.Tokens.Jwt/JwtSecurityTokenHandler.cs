@@ -1254,7 +1254,9 @@ namespace System.IdentityModel.Tokens.Jwt
             var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
             var signatureProvider = cryptoProviderFactory.CreateForVerifying(key, algorithm);
             if (signatureProvider == null)
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10636, key == null ? "Null" : key.ToString(), LogHelper.MarkAsNonPII(algorithm))));
+                throw LogHelper.LogExceptionMessage(
+                    new InvalidOperationException(
+                        LogHelper.FormatInvariant(TokenLogMessages.IDX10636, LogHelper.MarkAsNonPII(key == null ? "Null" : key.ToString()), LogHelper.MarkAsNonPII(algorithm))));
 
             try
             {

@@ -73,7 +73,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             var cryptoProviderFactory = signingCredentials.CryptoProviderFactory ?? signingCredentials.Key.CryptoProviderFactory;
             var signatureProvider = cryptoProviderFactory.CreateForSigning(signingCredentials.Key, signingCredentials.Algorithm);
             if (signatureProvider == null)
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10637, signingCredentials.Key == null ? "Null" : signingCredentials.Key.ToString(), LogHelper.MarkAsNonPII(signingCredentials.Algorithm))));
+                throw LogHelper.LogExceptionMessage(
+                    new InvalidOperationException(
+                        LogHelper.FormatInvariant(
+                            TokenLogMessages.IDX10637,
+                            LogHelper.MarkAsNonPII(signingCredentials.Key == null ? "Null" : signingCredentials.Key.ToString()),
+                            LogHelper.MarkAsNonPII(signingCredentials.Algorithm))));
 
             try
             {
@@ -105,7 +110,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             var cryptoProviderFactory = signingCredentials.CryptoProviderFactory ?? signingCredentials.Key.CryptoProviderFactory;
             var signatureProvider = cryptoProviderFactory.CreateForSigning(signingCredentials.Key, signingCredentials.Algorithm, cacheProvider);
             if (signatureProvider == null)
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10637, signingCredentials.Key == null ? "Null" : signingCredentials.Key.ToString(), LogHelper.MarkAsNonPII(signingCredentials.Algorithm))));
+                throw LogHelper.LogExceptionMessage(
+                    new InvalidOperationException(
+                        LogHelper.FormatInvariant(
+                            TokenLogMessages.IDX10637,
+                            LogHelper.MarkAsNonPII(signingCredentials.Key == null ? "Null" : signingCredentials.Key.ToString()),
+                            LogHelper.MarkAsNonPII(signingCredentials.Algorithm))));
 
             try
             {
@@ -138,7 +148,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     new InvalidOperationException(
                         LogHelper.FormatInvariant(
                             TokenLogMessages.IDX10637,
-                            signingCredentials.Key == null ? "Null" : signingCredentials.Key.ToString(),
+                            LogHelper.MarkAsNonPII(signingCredentials.Key == null ? "Null" : signingCredentials.Key.ToString()),
                             LogHelper.MarkAsNonPII(signingCredentials.Algorithm))));
 
             try
@@ -179,7 +189,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 throw LogHelper.LogExceptionMessage(
                     new InvalidOperationException(
                         LogHelper.FormatInvariant(
-                            TokenLogMessages.IDX10637, signingCredentials.Key == null ? "Null" : signingCredentials.Key.ToString(),
+                            TokenLogMessages.IDX10637,
+                            LogHelper.MarkAsNonPII(signingCredentials.Key == null ? "Null" : signingCredentials.Key.ToString()),
                             LogHelper.MarkAsNonPII(signingCredentials.Algorithm))));
 
             try

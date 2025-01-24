@@ -330,7 +330,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             try
             {
                 if (signatureProvider == null)
-                    throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(TokenLogMessages.IDX10636, key == null ? "Null" : key.ToString(), LogHelper.MarkAsNonPII(jsonWebToken.Alg))));
+                    throw LogHelper.LogExceptionMessage
+                        (new InvalidOperationException(
+                            LogHelper.FormatInvariant(
+                                TokenLogMessages.IDX10636,
+                                LogHelper.MarkAsNonPII(key == null ? "Null" : key.ToString()),
+                                LogHelper.MarkAsNonPII(jsonWebToken.Alg))));
 
                 return EncodingUtils.PerformEncodingDependentOperation<bool, string, int, SignatureProvider>(
                     jsonWebToken.EncodedToken,

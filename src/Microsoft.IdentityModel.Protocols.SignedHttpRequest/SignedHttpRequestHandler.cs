@@ -656,7 +656,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                     {
                         signatureProvider = popKey.CryptoProviderFactory.CreateForVerifying(popKey, signedHttpRequest.Alg, false);
                         if (signatureProvider == null)
-                            throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(Tokens.LogMessages.IDX10636, popKey.ToString(), LogHelper.MarkAsNonPII(signedHttpRequest.Alg))));
+                            throw LogHelper.LogExceptionMessage(
+                                new InvalidOperationException(
+                                    LogHelper.FormatInvariant(Tokens.LogMessages.IDX10636, LogHelper.MarkAsNonPII(popKey.ToString()), LogHelper.MarkAsNonPII(signedHttpRequest.Alg))));
 
                         if (EncodingUtils.PerformEncodingDependentOperation<bool, string, int, SignatureProvider>(
                             signedHttpRequest.EncodedToken,
