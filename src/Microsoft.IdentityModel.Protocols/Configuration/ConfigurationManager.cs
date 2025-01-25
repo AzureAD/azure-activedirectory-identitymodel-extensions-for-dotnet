@@ -52,6 +52,8 @@ namespace Microsoft.IdentityModel.Protocols
         private readonly TimeProvider _timeProvider = TimeProvider.System;
         internal ITelemetryClient TelemetryClient = new TelemetryClient();
 
+        private readonly AutoResetEvent _signal = new(false);
+
         bool _refreshRequested;
 
         /// <summary>
@@ -115,6 +117,9 @@ namespace Microsoft.IdentityModel.Protocols
             MetadataAddress = metadataAddress;
             _docRetriever = docRetriever;
             _configRetriever = configRetriever;
+
+            if (!AppContextSwitches.RefreshConfigAsBlocking)
+                _ = Task.Run(BackgroundTaskAsync, CancellationToken.None);
         }
 
         /// <summary>
@@ -302,7 +307,16 @@ namespace Microsoft.IdentityModel.Protocols
             }
             else
             {
-                _ = Task.Run(UpdateCurrentConfigurationAsync, CancellationToken.None);
+                _signal.Set();
+            }
+        }
+
+        private async Task BackgroundTaskAsync()
+        {
+            while (true)
+            {
+                if (_signal.WaitOne())
+                    await UpdateCurrentConfigurationAsync().ConfigureAwait(false);
             }
         }
 
