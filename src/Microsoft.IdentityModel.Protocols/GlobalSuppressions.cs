@@ -18,7 +18,7 @@ using System.Diagnostics.CodeAnalysis;
     "CA1031:DoNotCatchGeneralExceptionTypes",
     Justification = "Exception handling is required for telemetry logging and to ensure the state is reset.",
     Scope = "member",
-    Target = "~M:Microsoft.IdentityModel.Protocols.ConfigurationManager`1.ManualOrAutomaticConfigurationRefreshAsync")]
+    Target = "~M:Microsoft.IdentityModel.Protocols.ConfigurationManager`1.ManualOrAutomaticConfigurationRefresh")]
 
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage(
     "Microsoft.Design",
@@ -32,4 +32,6 @@ using System.Diagnostics.CodeAnalysis;
        "CA1031:DoNotCatchGeneralExceptionTypes",
        Justification = "Exception handling is required for telemetry logging and to ensure the state is reset.",
        Scope = "member",
-       Target = "~M:Microsoft.IdentityModel.Protocols.ConfigurationManager`1.UpdateCurrentConfigurationAsync")]
+       Target = "~M:Microsoft.IdentityModel.Protocols.ConfigurationManager`1.UpdateCurrentConfiguration")]
+
+[assembly: SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "<Pending>", Scope = "member", Target = "~M:Microsoft.IdentityModel.Protocols.ConfigurationManager`1.UpdateCurrentConfiguration")]

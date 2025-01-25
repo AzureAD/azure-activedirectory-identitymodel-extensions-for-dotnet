@@ -836,6 +836,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         [Theory, MemberData(nameof(ValidateOpenIdConnectConfigurationTestCases), DisableDiscoveryEnumeration = true)]
         public async Task ValidateOpenIdConnectConfigurationTests(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData)
         {
+            AppContext.SetSwitch(AppContextSwitches.RefreshConfigAsBlockingSwitch, true);
+
             TestUtilities.WriteHeader($"{this}.ValidateOpenIdConnectConfigurationTests");
             var context = new CompareContext();
             OpenIdConnectConfiguration configuration;
@@ -849,9 +851,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 //create a listener and enable it for logs
                 var listener = TestUtils.SampleListener.CreateLoggerListener(EventLevel.Warning);
                 configuration = await configurationManager.GetConfigurationAsync();
-
-                // we need to sleep here to make sure the task that updates configuration has finished.
-                Thread.Sleep(250);
 
                 if (!string.IsNullOrEmpty(theoryData.ExpectedErrorMessage) && !listener.TraceBuffer.Contains(theoryData.ExpectedErrorMessage))
                     context.AddDiff($"Expected exception to contain: '{theoryData.ExpectedErrorMessage}'.{Environment.NewLine}Log is:{Environment.NewLine}'{listener.TraceBuffer}'");

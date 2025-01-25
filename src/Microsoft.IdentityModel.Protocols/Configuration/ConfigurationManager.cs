@@ -119,7 +119,7 @@ namespace Microsoft.IdentityModel.Protocols
             _configRetriever = configRetriever;
 
             if (!AppContextSwitches.RefreshConfigAsBlocking)
-                _ = Task.Run(BackgroundTaskAsync, CancellationToken.None);
+                _ = Task.Run(BackgroundTask, CancellationToken.None);
         }
 
         /// <summary>
@@ -193,7 +193,7 @@ namespace Microsoft.IdentityModel.Protocols
             }
             else if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
             {
-                await ManualOrAutomaticConfigurationRefreshAsync().ConfigureAwait(false);
+                ManualOrAutomaticConfigurationRefresh();
             }
 
             // If metadata exists return it.
@@ -279,7 +279,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <remarks>
         /// This is guarded with a CompareExchange.
         /// </remarks>
-        private async Task ManualOrAutomaticConfigurationRefreshAsync()
+        private void ManualOrAutomaticConfigurationRefresh()
         {
             if (SyncAfter <= _timeProvider.GetUtcNow())
             {
@@ -295,15 +295,15 @@ namespace Microsoft.IdentityModel.Protocols
                 {
                 }
 
-                await StartUpdateTaskAsync().ConfigureAwait(false);
+                StartUpdateTask();
             }
         }
 
-        private async Task StartUpdateTaskAsync()
+        private void StartUpdateTask()
         {
             if (AppContextSwitches.RefreshConfigAsBlocking)
             {
-                await UpdateCurrentConfigurationAsync().ConfigureAwait(false);
+                UpdateCurrentConfiguration();
             }
             else
             {
@@ -311,12 +311,12 @@ namespace Microsoft.IdentityModel.Protocols
             }
         }
 
-        private async Task BackgroundTaskAsync()
+        private void BackgroundTask()
         {
             while (true)
             {
                 if (_signal.WaitOne())
-                    await UpdateCurrentConfigurationAsync().ConfigureAwait(false);
+                    UpdateCurrentConfiguration();
             }
         }
 
@@ -325,16 +325,16 @@ namespace Microsoft.IdentityModel.Protocols
         /// The Caller should first check the state checking state using:
         ///   if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle).
         /// </summary>
-        private async Task UpdateCurrentConfigurationAsync()
+        private void UpdateCurrentConfiguration()
         {
             long startTimestamp = _timeProvider.GetTimestamp();
 
             try
             {
-                T configuration = await _configRetriever.GetConfigurationAsync(
+                T configuration = _configRetriever.GetConfigurationAsync(
                     MetadataAddress,
                     _docRetriever,
-                    CancellationToken.None).ConfigureAwait(false);
+                    CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
 
                 var elapsedTime = _timeProvider.GetElapsedTime(startTimestamp);
                 TelemetryClient.LogConfigurationRetrievalDuration(
