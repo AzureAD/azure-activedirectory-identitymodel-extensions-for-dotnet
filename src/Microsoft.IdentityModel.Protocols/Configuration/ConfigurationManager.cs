@@ -188,7 +188,7 @@ namespace Microsoft.IdentityModel.Protocols
             }
             else if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
             {
-                ManualOrAutomaticConfigurationRefresh();
+                await ManualOrAutomaticConfigurationRefreshAsync().ConfigureAwait(false);
             }
 
             // If metadata exists return it.
@@ -274,7 +274,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <remarks>
         /// This is guarded with a CompareExchange.
         /// </remarks>
-        private void ManualOrAutomaticConfigurationRefresh()
+        private async Task ManualOrAutomaticConfigurationRefreshAsync()
         {
             if (SyncAfter <= _timeProvider.GetUtcNow())
             {
@@ -290,19 +290,19 @@ namespace Microsoft.IdentityModel.Protocols
                 {
                 }
 
-                StartUpdateTask();
+                await StartUpdateTaskAsync().ConfigureAwait(false);
             }
         }
 
-        private void StartUpdateTask()
+        private async Task StartUpdateTaskAsync()
         {
             if (AppContextSwitches.RefreshConfigAsBlocking)
             {
-                UpdateCurrentConfiguration();
+                await UpdateCurrentConfigurationAsync().ConfigureAwait(false);
             }
             else
             {
-                _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
+                _ = Task.Run(UpdateCurrentConfigurationAsync, CancellationToken.None);
             }
         }
 
@@ -311,16 +311,16 @@ namespace Microsoft.IdentityModel.Protocols
         /// The Caller should first check the state checking state using:
         ///   if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle).
         /// </summary>
-        private void UpdateCurrentConfiguration()
+        private async Task UpdateCurrentConfigurationAsync()
         {
             long startTimestamp = _timeProvider.GetTimestamp();
 
             try
             {
-                T configuration = _configRetriever.GetConfigurationAsync(
+                T configuration = await _configRetriever.GetConfigurationAsync(
                     MetadataAddress,
                     _docRetriever,
-                    CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
+                    CancellationToken.None).ConfigureAwait(false);
 
                 var elapsedTime = _timeProvider.GetElapsedTime(startTimestamp);
                 TelemetryClient.LogConfigurationRetrievalDuration(
