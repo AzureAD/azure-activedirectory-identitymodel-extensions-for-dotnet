@@ -196,7 +196,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     (exceptionStrings ??= new StringBuilder()).AppendLine(ex.ToString());
                 }
 
-                (keysAttempted ??= new StringBuilder()).AppendLine(key.ToString());
+                (keysAttempted ??= new StringBuilder()).AppendLine(key.KeyId);
             }
 
             if (unwrappedKeys.Count > 0 || exceptionStrings is null)

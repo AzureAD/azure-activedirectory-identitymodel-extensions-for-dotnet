@@ -74,7 +74,7 @@ namespace Microsoft.IdentityModel.Tokens
                     InitializeUsingAesCbc();
             }
             else
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10668, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII(algorithm), LogHelper.MarkAsNonPII(key))));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10668, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII(algorithm), LogHelper.MarkAsNonPII(key.KeyId))));
         }
 
         private void InitializeUsingAesGcm()
@@ -207,7 +207,7 @@ namespace Microsoft.IdentityModel.Tokens
         internal SymmetricSignatureProvider CreateSymmetricSignatureProvider()
         {
             if (!IsSupportedAlgorithm(Key, Algorithm))
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10668, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII(Algorithm), LogHelper.MarkAsNonPII(Key))));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10668, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII(Algorithm), LogHelper.MarkAsNonPII(Key.KeyId))));
 
             ValidateKeySize(Key, Algorithm);
 
@@ -370,7 +370,7 @@ namespace Microsoft.IdentityModel.Tokens
             else if (algorithm.Equals(SecurityAlgorithms.Aes128CbcHmacSha256))
                 keyLength = 16;
             else
-                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10668, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII(algorithm), LogHelper.MarkAsNonPII(key))));
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10668, LogHelper.MarkAsNonPII(_className), LogHelper.MarkAsNonPII(algorithm), LogHelper.MarkAsNonPII(key.KeyId))));
 
             var keyBytes = GetKeyBytes(key);
             byte[] aesKey = new byte[keyLength];
@@ -426,7 +426,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (key is JsonWebKey jsonWebKey && JsonWebKeyConverter.TryConvertToSymmetricSecurityKey(jsonWebKey, out SecurityKey securityKey))
                 return GetKeyBytes(securityKey);
 
-            throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10667, LogHelper.MarkAsNonPII(key))));
+            throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10667, LogHelper.MarkAsNonPII(key.KeyId))));
         }
 
         internal static byte[] Transform(ICryptoTransform transform, byte[] input, int inputOffset, int inputLength)

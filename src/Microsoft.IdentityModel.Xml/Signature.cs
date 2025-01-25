@@ -106,7 +106,7 @@ namespace Microsoft.IdentityModel.Xml
 
             var signatureProvider = cryptoProviderFactory.CreateForVerifying(key, SignedInfo.SignatureMethod);
             if (signatureProvider == null)
-                throw LogValidationException(LogMessages.IDX30203, cryptoProviderFactory, LogHelper.MarkAsNonPII(key), SignedInfo.SignatureMethod);
+                throw LogValidationException(LogMessages.IDX30203, cryptoProviderFactory, LogHelper.MarkAsNonPII(key.KeyId), SignedInfo.SignatureMethod);
 
             try
             {
@@ -114,7 +114,7 @@ namespace Microsoft.IdentityModel.Xml
                 {
                     SignedInfo.GetCanonicalBytes(memoryStream);
                     if (!signatureProvider.Verify(memoryStream.ToArray(), Convert.FromBase64String(SignatureValue)))
-                        throw LogValidationException(LogMessages.IDX30200, cryptoProviderFactory, LogHelper.MarkAsNonPII(key));
+                        throw LogValidationException(LogMessages.IDX30200, cryptoProviderFactory, LogHelper.MarkAsNonPII(key.KeyId));
                 }
 
                 SignedInfo.Verify(cryptoProviderFactory);
@@ -161,7 +161,7 @@ namespace Microsoft.IdentityModel.Xml
             var signatureProvider = cryptoProviderFactory.CreateForVerifying(key, SignedInfo.SignatureMethod);
             if (signatureProvider is null)
                 return new SignatureValidationError(
-                    new MessageDetail(LogMessages.IDX30203, cryptoProviderFactory, LogHelper.MarkAsNonPII(key), SignedInfo.SignatureMethod),
+                    new MessageDetail(LogMessages.IDX30203, cryptoProviderFactory, LogHelper.MarkAsNonPII(key.KeyId), SignedInfo.SignatureMethod),
                     ValidationFailureType.XmlValidationFailed,
                     typeof(SecurityTokenInvalidSignatureException),
                     ValidationError.GetCurrentStackFrame());
@@ -176,7 +176,7 @@ namespace Microsoft.IdentityModel.Xml
                     if (!signatureProvider.Verify(memoryStream.ToArray(), Convert.FromBase64String(SignatureValue)))
                     {
                         validationError = new SignatureValidationError(
-                            new MessageDetail(LogMessages.IDX30200, cryptoProviderFactory, LogHelper.MarkAsNonPII(key)),
+                            new MessageDetail(LogMessages.IDX30200, cryptoProviderFactory, LogHelper.MarkAsNonPII(key.KeyId)),
                             ValidationFailureType.XmlValidationFailed,
                             typeof(SecurityTokenInvalidSignatureException),
                             ValidationError.GetCurrentStackFrame());

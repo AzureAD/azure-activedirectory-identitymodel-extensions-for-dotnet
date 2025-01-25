@@ -94,7 +94,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
 
                 if (key != null)
-                    (keysAttempted ??= new StringBuilder()).AppendLine(key.ToString());
+                    (keysAttempted ??= new StringBuilder()).AppendLine(key.KeyId);
             }
 
             if (!decryptionSucceeded)

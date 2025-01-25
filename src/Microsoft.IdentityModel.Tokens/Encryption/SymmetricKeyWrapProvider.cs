@@ -67,7 +67,7 @@ namespace Microsoft.IdentityModel.Tokens
         private SymmetricAlgorithm CreateSymmetricAlgorithm()
         {
             if (!IsSupportedAlgorithm(Key, Algorithm))
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, LogHelper.MarkAsNonPII(Algorithm), LogHelper.MarkAsNonPII(Key))));
+                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, LogHelper.MarkAsNonPII(Algorithm), LogHelper.MarkAsNonPII(Key.KeyId))));
 
             SymmetricAlgorithm symmetricAlgorithm = GetSymmetricAlgorithm(Key, Algorithm);
 
@@ -137,7 +137,7 @@ namespace Microsoft.IdentityModel.Tokens
                 throw LogHelper.LogArgumentNullException(nameof(key));
 
             if (!IsSupportedAlgorithm(key, algorithm))
-                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, LogHelper.MarkAsNonPII(algorithm), LogHelper.MarkAsNonPII(key))));
+                throw LogHelper.LogExceptionMessage(new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10661, LogHelper.MarkAsNonPII(algorithm), LogHelper.MarkAsNonPII(key.KeyId))));
 
             byte[] keyBytes = null;
 
@@ -172,7 +172,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10663, LogHelper.MarkAsNonPII(key), LogHelper.MarkAsNonPII(algorithm)), ex));
+                throw LogHelper.LogExceptionMessage(new InvalidOperationException(LogHelper.FormatInvariant(LogMessages.IDX10663, LogHelper.MarkAsNonPII(key.KeyId), LogHelper.MarkAsNonPII(algorithm)), ex));
             }
         }
 

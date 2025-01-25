@@ -1276,7 +1276,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     throw LogHelper.LogExceptionMessage(
                         new SecurityTokenEncryptionFailedException(
-                            LogHelper.FormatInvariant(TokenLogMessages.IDX10616, LogHelper.MarkAsNonPII(encryptingCredentials.Enc), LogHelper.MarkAsNonPII(encryptingCredentials.Key.ToString())),
+                            LogHelper.FormatInvariant(TokenLogMessages.IDX10616, LogHelper.MarkAsNonPII(encryptingCredentials.Enc), LogHelper.MarkAsNonPII(encryptingCredentials.Key.KeyId)),
                             ex));
                 }
             }
@@ -1299,13 +1299,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (key != null)
                 {
                     if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                        LogHelper.LogInformation(TokenLogMessages.IDX10904, LogHelper.MarkAsNonPII(key));
+                        LogHelper.LogInformation(TokenLogMessages.IDX10904, LogHelper.MarkAsNonPII(key.KeyId));
                 }
                 else if (configuration != null)
                 {
                     key = ResolveTokenDecryptionKeyFromConfig(jwtToken, configuration);
                     if (key != null && LogHelper.IsEnabled(EventLogLevel.Informational))
-                        LogHelper.LogInformation(TokenLogMessages.IDX10905, LogHelper.MarkAsNonPII(key));
+                        LogHelper.LogInformation(TokenLogMessages.IDX10905, LogHelper.MarkAsNonPII(key.KeyId));
                 }
 
                 if (key != null)
@@ -1386,7 +1386,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     (exceptionStrings ??= new StringBuilder()).AppendLine(ex.ToString());
                 }
 
-                (keysAttempted ??= new StringBuilder()).AppendLine(key.ToString());
+                (keysAttempted ??= new StringBuilder()).AppendLine(key.KeyId);
             }
 
             if (unwrappedKeys.Count > 0 || exceptionStrings is null)
