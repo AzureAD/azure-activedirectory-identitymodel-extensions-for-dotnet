@@ -297,6 +297,10 @@ namespace Microsoft.IdentityModel.Protocols
 
                 StartUpdateTask();
             }
+            else
+            {
+                Interlocked.Exchange(ref _configurationRetrieverState, ConfigurationRetrieverIdle);
+            }
         }
 
         private void StartUpdateTask()
