@@ -119,7 +119,10 @@ namespace Microsoft.IdentityModel.Protocols
             _configRetriever = configRetriever;
 
             if (!AppContextSwitches.RefreshConfigAsBlocking)
-                _ = Task.Run(BackgroundTask, CancellationToken.None);
+            {
+                var backgroundTask = new Thread(BackgroundTask);
+                backgroundTask.Start();
+            }
         }
 
         /// <summary>
