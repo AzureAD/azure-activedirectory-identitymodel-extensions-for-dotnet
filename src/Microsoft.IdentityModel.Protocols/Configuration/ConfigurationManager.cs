@@ -55,6 +55,7 @@ namespace Microsoft.IdentityModel.Protocols
         private readonly AutoResetEvent _signal = new(false);
 
         bool _refreshRequested;
+        Task _updateMetadataTask;
 
         /// <summary>
         /// Instantiates a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
@@ -119,7 +120,7 @@ namespace Microsoft.IdentityModel.Protocols
             _configRetriever = configRetriever;
 
             if (!AppContextSwitches.RefreshConfigAsBlocking)
-                _ = Task.Run(BackgroundTask, CancellationToken.None);
+                _updateMetadataTask = Task.Run(BackgroundTask, CancellationToken.None);
         }
 
         /// <summary>
@@ -285,6 +286,9 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 var updateMode = _refreshRequested ? TelemetryConstants.Protocols.Manual : TelemetryConstants.Protocols.Automatic;
 
+                if (_refreshRequested)
+                    _refreshRequested = false;
+
                 try
                 {
                     TelemetryClient.IncrementConfigurationRefreshRequestCounter(
@@ -311,6 +315,9 @@ namespace Microsoft.IdentityModel.Protocols
             }
             else
             {
+                if (_updateMetadataTask == null || _updateMetadataTask.Status != TaskStatus.Running)
+                    _updateMetadataTask = Task.Run(BackgroundTask, CancellationToken.None);
+
                 _signal.Set();
             }
         }
@@ -382,7 +389,6 @@ namespace Microsoft.IdentityModel.Protocols
             finally
             {
                 Interlocked.Exchange(ref _configurationRetrieverState, ConfigurationRetrieverIdle);
-                _refreshRequested = false;
             }
         }
 
