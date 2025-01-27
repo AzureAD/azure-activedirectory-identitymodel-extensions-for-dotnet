@@ -791,6 +791,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         [Fact]
         public async Task GetConfigurationAsync_RespectsRefreshInterval()
         {
+            AppContext.SetSwitch(AppContextSwitches.RefreshConfigAsBlockingSwitch, true);
+
             var context = new CompareContext($"{this}.GetConfigurationAsync_RespectsRefreshInterval");
 
             var timeProvider = new FakeTimeProvider();
@@ -817,18 +819,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             var configAfterTimeIsAdvanced = await configManager.GetConfigurationAsync(CancellationToken.None);
 
-            // Same config, but a task is queued to update the configuration.
-            if (!object.ReferenceEquals(configNoAdvanceInTime, configAfterTimeIsAdvanced))
-                context.Diffs.Add("!object.ReferenceEquals(configuration, configAfterTimeIsAdvanced)");
-
-            // Need to wait for background task to finish.
-            Thread.Sleep(250);
-
-            var configAfterBackgroundTask = await configManager.GetConfigurationAsync(CancellationToken.None);
-
             // Configuration should be updated after the background task finishes.
-            if (object.ReferenceEquals(configAfterTimeIsAdvanced, configAfterBackgroundTask))
-                context.Diffs.Add("object.ReferenceEquals(configuration, configAfterBackgroundTask)");
+            if (object.ReferenceEquals(configAfterTimeIsAdvanced, configuration))
+                context.Diffs.Add("object.ReferenceEquals(configAfterTimeIsAdvanced, configuration)");
 
             TestUtilities.AssertFailIfErrors(context);
         }
