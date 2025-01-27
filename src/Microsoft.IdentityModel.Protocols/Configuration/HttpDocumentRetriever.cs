@@ -165,5 +165,107 @@ namespace Microsoft.IdentityModel.Protocols
 
             return response;
         }
+
+#if NETCOREAPP
+        /// <summary>
+        /// Returns a task which contains a string converted from remote document when completed, by using the provided address.
+        /// </summary>
+        /// <param name="address">Location of document</param>
+        /// <param name="cancel">A cancellation token that can be used by other objects or threads to receive notice of cancellation. <see cref="CancellationToken"/></param>
+        /// <returns>Document as a string</returns>
+        public string GetDocument(string address, CancellationToken cancel)
+        {
+            if (string.IsNullOrWhiteSpace(address))
+                throw LogHelper.LogArgumentNullException(nameof(address));
+
+            if (!Utility.IsHttps(address) && RequireHttps)
+                throw LogHelper.LogExceptionMessage(
+                    new ArgumentException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX20108,
+                            LogHelper.MarkAsNonPII(address)),
+                        nameof(address)));
+
+            Exception unsuccessfulHttpResponseException;
+            HttpResponseMessage response;
+            try
+            {
+                if (LogHelper.IsEnabled(EventLogLevel.Verbose))
+                    LogHelper.LogVerbose(LogMessages.IDX20805, LogHelper.MarkAsNonPII(address));
+
+                var httpClient = _httpClient ?? _defaultHttpClient;
+                var uri = new Uri(address, UriKind.RelativeOrAbsolute);
+                response = SendAndRetryOnNetworkError(httpClient, uri);
+
+                var responseContent = response.Content.ToString();
+                if (response.IsSuccessStatusCode)
+                    return responseContent;
+
+                unsuccessfulHttpResponseException = new IOException(
+                    LogHelper.FormatInvariant(
+                        LogMessages.IDX20807,
+                        LogHelper.MarkAsNonPII(address),
+                        response,
+                        responseContent));
+
+                unsuccessfulHttpResponseException.Data.Add(StatusCode, response.StatusCode);
+                unsuccessfulHttpResponseException.Data.Add(ResponseContent, responseContent);
+            }
+            catch (Exception ex)
+            {
+                throw LogHelper.LogExceptionMessage(
+                    new IOException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX20804,
+                            LogHelper.MarkAsNonPII(address)),
+                        ex));
+            }
+
+            throw LogHelper.LogExceptionMessage(unsuccessfulHttpResponseException);
+        }
+
+        private HttpResponseMessage SendAndRetryOnNetworkError(HttpClient httpClient, Uri uri)
+        {
+            int maxAttempt = 2;
+            HttpResponseMessage response = null;
+            for (int i = 1; i <= maxAttempt; i++)
+            {
+                // need to create a new message each time since you cannot send the same message twice
+                using (var message = new HttpRequestMessage(HttpMethod.Get, uri))
+                {
+                    if (SendAdditionalHeaderData)
+                        IdentityModelTelemetryUtil.SetTelemetryData(message, AdditionalHeaderData);
+
+                    httpClient.Send(message);
+                    if (response.IsSuccessStatusCode)
+                        return response;
+
+                    if (response.StatusCode.Equals(HttpStatusCode.RequestTimeout) || response.StatusCode.Equals(HttpStatusCode.ServiceUnavailable))
+                    {
+                        var content = ReadContent(response);
+                        if (i < maxAttempt && LogHelper.IsEnabled(EventLogLevel.Informational)) // logging exception details and that we will attempt to retry document retrieval
+                            LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX20808, response.StatusCode, content, message.RequestUri));
+                    }
+                    else // if the exception type does not indicate the need to retry we should break
+                    {
+                        var content = ReadContent(response);
+                        if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                            LogHelper.LogWarning(LogHelper.FormatInvariant(LogMessages.IDX20809, message.RequestUri, response.StatusCode, content));
+
+                        break;
+                    }
+                }
+            }
+
+            return response;
+        }
+
+        private static string ReadContent(HttpResponseMessage response)
+        {
+            using var stream = response.Content.ReadAsStream();
+            using var reader = new StreamReader(stream);
+            return reader.ReadToEnd();
+        }
+#endif
     }
 }

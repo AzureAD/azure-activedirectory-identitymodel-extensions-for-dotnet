@@ -12,7 +12,11 @@ namespace Microsoft.IdentityModel.TestUtils
     /// Returns a string set in the constructor.
     /// Simplifies testing.
     /// </summary>
+#if NETCOREAPP
+    public class InMemoryDocumentRetriever : IDocumentRetriever, IDocumentRetrieverSync
+#else
     public class InMemoryDocumentRetriever : IDocumentRetriever
+#endif
     {
         private readonly Dictionary<string, string> _configurations;
         private ManualResetEvent _waitEvent;
@@ -32,6 +36,10 @@ namespace Microsoft.IdentityModel.TestUtils
             _waitEvent = waitEvent;
             _signalEvent = signalEvent;
         }
+
+#if NETCOREAPP
+        public string GetDocument(string address, CancellationToken cancel) => GetDocumentAsync(address, cancel).GetAwaiter().GetResult();
+#endif
 
         /// <summary>
         /// Returns the document passed in constructor in dictionary./>

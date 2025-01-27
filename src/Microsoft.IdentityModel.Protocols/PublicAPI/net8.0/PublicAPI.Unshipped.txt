@@ -1,0 +1,5 @@
+Microsoft.IdentityModel.Protocols.HttpDocumentRetriever.GetDocument(string address, System.Threading.CancellationToken cancel) -> string
+Microsoft.IdentityModel.Protocols.IConfigurationRetrieverSync<T>.GetConfiguration(string address, Microsoft.IdentityModel.Protocols.IDocumentRetrieverSync retriever, System.Threading.CancellationToken cancel) -> T
+Microsoft.IdentityModel.Protocols.IDocumentRetrieverSync
+Microsoft.IdentityModel.Protocols.IDocumentRetrieverSync.GetDocument(string address, System.Threading.CancellationToken cancel) -> string
+Microsoft.IdentityModel.Protocols.IConfigurationRetrieverSync<T>

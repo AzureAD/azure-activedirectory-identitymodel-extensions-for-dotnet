@@ -56,6 +56,8 @@ namespace Microsoft.IdentityModel.Protocols
 
         bool _refreshRequested;
 
+        Task _updateMetadataTask;
+
         /// <summary>
         /// Instantiates a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
         /// </summary>
@@ -118,12 +120,29 @@ namespace Microsoft.IdentityModel.Protocols
             _docRetriever = docRetriever;
             _configRetriever = configRetriever;
 
+#if NETCOREAPP
+            CheckForSyncInterfaces();
+#endif
+
             if (!AppContextSwitches.RefreshConfigAsBlocking)
             {
-                var backgroundTask = new Thread(BackgroundTask);
-                backgroundTask.Start();
+                _updateMetadataTask = Task.Run(BackgroundTask, CancellationToken.None);
             }
         }
+
+#if NETCOREAPP
+        IDocumentRetrieverSync _docRetrieverSync;
+        IConfigurationRetrieverSync<T> _configRetrieverSync;
+
+        private bool HasSyncInterfaces => _docRetrieverSync != null && _configRetrieverSync != null;
+
+        private void CheckForSyncInterfaces()
+        {
+            _docRetrieverSync = _docRetriever as IDocumentRetrieverSync;
+            _configRetrieverSync = _configRetriever as IConfigurationRetrieverSync<T>;
+        }
+#endif
+
 
         /// <summary>
         /// Instantiates a new <see cref="ConfigurationManager{T}"/> with configuration validator that manages automatic and controls refreshing on configuration data.
@@ -302,6 +321,103 @@ namespace Microsoft.IdentityModel.Protocols
             }
         }
 
+#if NETCOREAPP
+        private void StartUpdateTask()
+        {
+            if (AppContextSwitches.RefreshConfigAsBlocking)
+            {
+                if (HasSyncInterfaces)
+                    UpdateCurrentConfigurationSync();
+                else
+                    UpdateCurrentConfiguration();
+            }
+            else
+            {
+                if (_updateMetadataTask == null || _updateMetadataTask.Status != TaskStatus.Running)
+                    _updateMetadataTask = Task.Run(BackgroundTask, CancellationToken.None);
+
+                _signal.Set();
+            }
+        }
+
+        private void BackgroundTask()
+        {
+            while (true)
+            {
+                if (_signal.WaitOne())
+                {
+                    if (HasSyncInterfaces)
+                        UpdateCurrentConfigurationSync();
+                    else
+                        UpdateCurrentConfiguration();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sync version of <see cref="UpdateCurrentConfiguration"/>
+        /// This should be called when the configuration needs to be updated either from RequestRefresh or AutomaticRefresh
+        /// The Caller should first check the state checking state using:
+        ///   if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle).
+        /// </summary>
+        private void UpdateCurrentConfigurationSync()
+        {
+            long startTimestamp = _timeProvider.GetTimestamp();
+
+            try
+            {
+                T configuration = _configRetrieverSync.GetConfiguration(
+                    MetadataAddress,
+                    _docRetrieverSync,
+                    CancellationToken.None);
+
+                var elapsedTime = _timeProvider.GetElapsedTime(startTimestamp);
+                TelemetryClient.LogConfigurationRetrievalDuration(
+                    MetadataAddress,
+                    elapsedTime);
+
+                if (_configValidator == null)
+                {
+                    UpdateConfiguration(configuration);
+                }
+                else
+                {
+                    ConfigurationValidationResult result = _configValidator.Validate(configuration);
+
+                    if (!result.Succeeded)
+                        LogHelper.LogExceptionMessage(
+                            new InvalidConfigurationException(
+                                LogHelper.FormatInvariant(
+                                    LogMessages.IDX20810,
+                                    result.ErrorMessage)));
+                    else
+                        UpdateConfiguration(configuration);
+                }
+            }
+            catch (Exception ex)
+            {
+                var elapsedTime = _timeProvider.GetElapsedTime(startTimestamp);
+                TelemetryClient.LogConfigurationRetrievalDuration(
+                    MetadataAddress,
+                    elapsedTime,
+                    ex);
+
+                LogHelper.LogExceptionMessage(
+                    new InvalidOperationException(
+                        LogHelper.FormatInvariant(
+                            LogMessages.IDX20806,
+                            LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
+                            ex),
+                        ex));
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _configurationRetrieverState, ConfigurationRetrieverIdle);
+                _refreshRequested = false;
+            }
+        }
+
+#else
         private void StartUpdateTask()
         {
             if (AppContextSwitches.RefreshConfigAsBlocking)
@@ -319,9 +435,12 @@ namespace Microsoft.IdentityModel.Protocols
             while (true)
             {
                 if (_signal.WaitOne())
+                {
                     UpdateCurrentConfiguration();
+                }
             }
         }
+#endif
 
         /// <summary>
         /// This should be called when the configuration needs to be updated either from RequestRefresh or AutomaticRefresh
