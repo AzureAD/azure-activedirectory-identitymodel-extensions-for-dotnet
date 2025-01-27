@@ -18,17 +18,21 @@ namespace Microsoft.IdentityModel.Protocols
     /// </summary>
     /// <typeparam name="T">The type of <see cref="IDocumentRetriever"/>.</typeparam>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
-    public class ConfigurationManager<T> : BaseConfigurationManager, IConfigurationManager<T> where T : class
+    public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfigurationManager<T> where T : class
     {
-        // To prevent tearing, this needs to be only updated through AtomicUpdateSyncAfter.
-        // Reads should be done through the property SyncAfter.
         private DateTime _syncAfter = DateTime.MinValue;
-        private DateTime SyncAfter => _syncAfter;
+        private DateTime SyncAfter
+        {
+            get => _syncAfter;
+            set => AtomicUpdateDateTime(ref _syncAfter, ref value);
+        }
 
-        // See comment above, this should only be updated through AtomicUpdateLastRequestRefresh,
-        // read through LastRequestRefresh.
         private DateTime _lastRequestRefresh = DateTime.MinValue;
-        private DateTime LastRequestRefresh => _lastRequestRefresh;
+        private DateTime LastRequestRefresh
+        {
+            get => _lastRequestRefresh;
+            set => AtomicUpdateDateTime(ref _lastRequestRefresh, ref value);
+        }
 
         private bool _isFirstRefreshRequest = true;
         private readonly SemaphoreSlim _configurationNullLock = new SemaphoreSlim(1);
@@ -55,6 +59,8 @@ namespace Microsoft.IdentityModel.Protocols
         // refresh interval has passed.
         bool _refreshRequested;
 
+        private readonly AutoResetEvent _updateMetadata = new(false);
+        Task _updateMetadataTask;
 
         /// <summary>
         /// Instantiates a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
@@ -117,6 +123,7 @@ namespace Microsoft.IdentityModel.Protocols
             MetadataAddress = metadataAddress;
             _docRetriever = docRetriever;
             _configRetriever = configRetriever;
+            EnsureBackgroundTaskIsRunning();
         }
 
         /// <summary>
@@ -171,6 +178,14 @@ namespace Microsoft.IdentityModel.Protocols
             if (_currentConfiguration != null && SyncAfter > _timeProvider.GetUtcNow())
                 return _currentConfiguration;
 
+            if (AppContextSwitches.UpdateConfigAsBlocking)
+                return await GetConfigurationWithBlockingAsync(cancel).ConfigureAwait(false);
+            else
+                return await GetConfigurationWithBackgroundTaskUpdatesAsync(cancel).ConfigureAwait(false);
+        }
+
+        private async Task<T> GetConfigurationWithBackgroundTaskUpdatesAsync(CancellationToken cancel)
+        {
             Exception fetchMetadataFailure = null;
 
             // LOGIC
@@ -246,38 +261,10 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
                 {
-                    if (_refreshRequested)
+                    if (SyncAfter <= _timeProvider.GetUtcNow())
                     {
-                        _refreshRequested = false;
-
-                        try
-                        {
-                            // Log as manual because RequestRefresh was called
-                            TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                                MetadataAddress,
-                                TelemetryConstants.Protocols.Manual);
-                        }
-#pragma warning disable CA1031 // Do not catch general exception types
-                        catch
-                        { }
-#pragma warning restore CA1031 // Do not catch general exception types
-
-                        UpdateCurrentConfiguration();
-                    }
-                    else if (SyncAfter <= _timeProvider.GetUtcNow())
-                    {
-                        try
-                        {
-                            TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                                MetadataAddress,
-                                TelemetryConstants.Protocols.Automatic);
-                        }
-#pragma warning disable CA1031 // Do not catch general exception types
-                        catch
-                        { }
-#pragma warning restore CA1031 // Do not catch general exception types
-
-                        _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
+                        EnsureBackgroundTaskIsRunning();
+                        _updateMetadata.Set();
                     }
                     else
                     {
@@ -300,6 +287,40 @@ namespace Microsoft.IdentityModel.Protocols
                     fetchMetadataFailure));
         }
 
+        private void EnsureBackgroundTaskIsRunning()
+        {
+            if (_updateMetadataTask == null || _updateMetadataTask.Status != TaskStatus.Running)
+                _updateMetadataTask = Task.Run(UpdateCurrentConfigurationUsingSignals, CancellationToken.None);
+        }
+
+        private void TelemetryForUpdate()
+        {
+            var updateMode = _refreshRequested ? TelemetryConstants.Protocols.Manual : TelemetryConstants.Protocols.Automatic;
+
+            if (_refreshRequested)
+                _refreshRequested = false;
+
+            try
+            {
+                TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                    MetadataAddress,
+                    updateMode);
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch
+            { }
+#pragma warning restore CA1031 // Do not catch general exception types
+        }
+
+        private void UpdateCurrentConfigurationUsingSignals()
+        {
+            while (true)
+            {
+                _updateMetadata.WaitOne();
+                UpdateCurrentConfiguration();
+            }
+        }
+
         /// <summary>
         /// This should be called when the configuration needs to be updated either from RequestRefresh or AutomaticRefresh
         /// The Caller should first check the state checking state using:
@@ -307,6 +328,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         private void UpdateCurrentConfiguration()
         {
+            TelemetryForUpdate();
 #pragma warning disable CA1031 // Do not catch general exception types
             long startTimestamp = _timeProvider.GetTimestamp();
 
@@ -368,25 +390,17 @@ namespace Microsoft.IdentityModel.Protocols
             _currentConfiguration = configuration;
             var newSyncTime = DateTimeUtil.Add(_timeProvider.GetUtcNow().UtcDateTime, AutomaticRefreshInterval +
                 TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 20)));
-            AtomicUpdateSyncAfter(newSyncTime);
+            SyncAfter = newSyncTime;
         }
 
-        private void AtomicUpdateSyncAfter(DateTime syncAfter)
+        private static void AtomicUpdateDateTime(ref DateTime field, ref DateTime value)
         {
             // DateTime's backing data is safe to treat as a long if the Kind is not local.
-            // _syncAfter will always be updated to a UTC time.
+            // time will always be updated to a UTC time.
             // See the implementation of ToBinary on DateTime.
             Interlocked.Exchange(
-                ref Unsafe.As<DateTime, long>(ref _syncAfter),
-                Unsafe.As<DateTime, long>(ref syncAfter));
-        }
-
-        private void AtomicUpdateLastRequestRefresh(DateTime lastRequestRefresh)
-        {
-            // See the comment in AtomicUpdateSyncAfter.
-            Interlocked.Exchange(
-                ref Unsafe.As<DateTime, long>(ref _lastRequestRefresh),
-                Unsafe.As<DateTime, long>(ref lastRequestRefresh));
+                ref Unsafe.As<DateTime, long>(ref field),
+                Unsafe.As<DateTime, long>(ref value));
         }
 
         /// <summary>
@@ -409,14 +423,30 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         public override void RequestRefresh()
         {
+            if (AppContextSwitches.UpdateConfigAsBlocking)
+            {
+                RequestRefreshBlocking();
+            }
+            else
+            {
+                RequestRefreshBackgroundThread();
+            }
+        }
+
+        private void RequestRefreshBackgroundThread()
+        {
             DateTime now = _timeProvider.GetUtcNow().UtcDateTime;
 
             if (now >= DateTimeUtil.Add(LastRequestRefresh, RefreshInterval) || _isFirstRefreshRequest)
             {
                 _isFirstRefreshRequest = false;
-                AtomicUpdateSyncAfter(now);
-                AtomicUpdateLastRequestRefresh(now);
-                _refreshRequested = true;
+
+                if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
+                {
+                    _refreshRequested = true;
+                    LastRequestRefresh = now;
+                    _updateMetadata.Set();
+                }
             }
         }
 
