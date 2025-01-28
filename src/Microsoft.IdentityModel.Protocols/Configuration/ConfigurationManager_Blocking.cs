@@ -7,6 +7,7 @@ using System;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Telemetry;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -27,6 +28,9 @@ namespace Microsoft.IdentityModel.Protocols
         {
             Exception _fetchMetadataFailure = null;
             await _refreshLock.WaitAsync(cancel).ConfigureAwait(false);
+
+            long startTimestamp = _timeProvider.GetTimestamp();
+
             try
             {
                 if (SyncAfter <= _timeProvider.GetUtcNow())
@@ -36,6 +40,12 @@ namespace Microsoft.IdentityModel.Protocols
                         // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
                         // The transport should have it's own timeouts, etc..
                         var configuration = await _configRetriever.GetConfigurationAsync(MetadataAddress, _docRetriever, CancellationToken.None).ConfigureAwait(false);
+
+                        var elapsedTime = _timeProvider.GetElapsedTime(startTimestamp);
+                        TelemetryClient.LogConfigurationRetrievalDuration(
+                            MetadataAddress,
+                            elapsedTime);
+
                         if (_configValidator != null)
                         {
                             ConfigurationValidationResult result = _configValidator.Validate(configuration);
@@ -44,7 +54,7 @@ namespace Microsoft.IdentityModel.Protocols
                         }
 
                         LastRefresh = _timeProvider.GetUtcNow().UtcDateTime;
-                        TelemetryForUpdate();
+                        TelemetryForUpdateBlocking();
                         UpdateConfiguration(configuration);
                     }
                     catch (Exception ex)
@@ -67,6 +77,11 @@ namespace Microsoft.IdentityModel.Protocols
                                     AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
                             }
 
+                            TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                                MetadataAddress,
+                                TelemetryConstants.Protocols.FirstRefresh,
+                                ex);
+
                             throw LogHelper.LogExceptionMessage(
                                 new InvalidOperationException(
                                     LogHelper.FormatInvariant(LogMessages.IDX20803, LogHelper.MarkAsNonPII(MetadataAddress ?? "null"), LogHelper.MarkAsNonPII(_syncAfter), LogHelper.MarkAsNonPII(ex)), ex));
@@ -76,6 +91,13 @@ namespace Microsoft.IdentityModel.Protocols
                             _syncAfter = DateTimeUtil.Add(
                                 _timeProvider.GetUtcNow().UtcDateTime,
                                 AutomaticRefreshInterval < RefreshInterval ? AutomaticRefreshInterval : RefreshInterval);
+
+                            var elapsedTime = _timeProvider.GetElapsedTime(startTimestamp);
+
+                            TelemetryClient.LogConfigurationRetrievalDuration(
+                                MetadataAddress,
+                                elapsedTime,
+                                ex);
 
                             LogHelper.LogExceptionMessage(
                                 new InvalidOperationException(
@@ -113,6 +135,34 @@ namespace Microsoft.IdentityModel.Protocols
                 _syncAfter = now;
                 _isFirstRefreshRequest = false;
             }
+        }
+
+        private void TelemetryForUpdateBlocking()
+        {
+            string updateMode;
+
+            if (_currentConfiguration is null)
+            {
+                updateMode = TelemetryConstants.Protocols.FirstRefresh;
+            }
+            else
+            {
+                updateMode = _refreshRequested ? TelemetryConstants.Protocols.Manual : TelemetryConstants.Protocols.Automatic;
+
+                if (_refreshRequested)
+                    _refreshRequested = false;
+            }
+
+            try
+            {
+                TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                    MetadataAddress,
+                    updateMode);
+            }
+#pragma warning disable CA1031 // Do not catch general exception types
+            catch
+            { }
+#pragma warning restore CA1031 // Do not catch general exception types
         }
     }
 }

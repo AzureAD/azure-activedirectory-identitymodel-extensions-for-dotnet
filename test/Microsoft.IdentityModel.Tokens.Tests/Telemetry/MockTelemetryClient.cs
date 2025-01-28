@@ -15,6 +15,7 @@ namespace Microsoft.IdentityModel.Telemetry.Tests
         public void ClearExportedItems()
         {
             ExportedItems.Clear();
+            ExportedHistogramItems.Clear();
         }
 
         public void IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus)

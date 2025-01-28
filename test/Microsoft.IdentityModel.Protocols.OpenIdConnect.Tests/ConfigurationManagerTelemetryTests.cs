@@ -13,13 +13,27 @@ using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Telemetry;
 using Microsoft.IdentityModel.Telemetry.Tests;
 using Xunit;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 {
+    [ResetAppContextSwitches]
     public class ConfigurationManagerTelemetryTests
     {
         [Fact]
         public async Task RequestRefresh_ExpectedTagsExist()
+        {
+            await RequestRefresh_ExpectedTagsBody();
+        }
+
+        [Fact]
+        public async Task RequestRefresh_ExpectedTagsExist_Blocking()
+        {
+            AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
+            await RequestRefresh_ExpectedTagsBody(true);
+        }
+
+        private static async Task RequestRefresh_ExpectedTagsBody(bool blocking = false)
         {
             // arrange
             var testTelemetryClient = new MockTelemetryClient();
@@ -42,6 +56,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             configurationManager.RequestRefresh();
             await configurationManager.GetConfigurationAsync(cancel);
 
+            if (!blocking)
+                Thread.Sleep(250);
+
             // assert
             var expectedCounterTagList = new Dictionary<string, object>
             {
@@ -62,6 +79,20 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
         [Theory, MemberData(nameof(GetConfiguration_ExpectedTagList_TheoryData), DisableDiscoveryEnumeration = true)]
         public async Task GetConfigurationAsync_ExpectedTagsExist(ConfigurationManagerTelemetryTheoryData<OpenIdConnectConfiguration> theoryData)
+        {
+            await GetConfigurationAsync_ExpectedTagList_Body(theoryData);
+        }
+
+        [Theory, MemberData(nameof(GetConfiguration_ExpectedTagList_TheoryData), DisableDiscoveryEnumeration = true)]
+        public async Task GetConfigurationAsync_ExpectedTagsExist_Blocking(ConfigurationManagerTelemetryTheoryData<OpenIdConnectConfiguration> theoryData)
+        {
+            AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
+            await GetConfigurationAsync_ExpectedTagList_Body(theoryData, true);
+        }
+
+        private static async Task GetConfigurationAsync_ExpectedTagList_Body(
+            ConfigurationManagerTelemetryTheoryData<OpenIdConnectConfiguration> theoryData,
+            bool blocking = false)
         {
             var testTelemetryClient = new MockTelemetryClient();
 
@@ -84,6 +115,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     await configurationManager.GetConfigurationAsync();
                 }
 
+                if (!blocking)
+                    Thread.Sleep(250);
             }
             catch (Exception)
             {
