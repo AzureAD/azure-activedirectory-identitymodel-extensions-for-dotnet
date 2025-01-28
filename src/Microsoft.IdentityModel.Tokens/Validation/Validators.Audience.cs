@@ -35,14 +35,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="tokenAudiences">The audiences found in the <see cref="SecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
-        /// <param name="callContext"></param>
-        /// <exception cref="ArgumentNullException">If 'validationParameters' is null.</exception>
-        /// <exception cref="ArgumentNullException">If 'audiences' is null and <see cref="TokenValidationParameters.ValidateAudience"/> is true.</exception>
-        /// <exception cref="SecurityTokenInvalidAudienceException">If <see cref="TokenValidationParameters.ValidAudience"/> is null or whitespace and <see cref="TokenValidationParameters.ValidAudiences"/> is null.</exception>
-        /// <exception cref="SecurityTokenInvalidAudienceException">If none of the 'audiences' matched either <see cref="TokenValidationParameters.ValidAudience"/> or one of <see cref="TokenValidationParameters.ValidAudiences"/>.</exception>
+        /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
         /// <remarks>An EXACT match is required.</remarks>
-#pragma warning disable CA1801 // TODO: remove pragma disable once callContext is used for logging
-        internal static ValidationResult<string> ValidateAudience(IList<string> tokenAudiences, SecurityToken? securityToken, ValidationParameters validationParameters, CallContext callContext)
+        internal static ValidationResult<string> ValidateAudience(
+            IList<string> tokenAudiences,
+#pragma warning disable CA1801
+            SecurityToken? securityToken,
+            ValidationParameters validationParameters,
+            CallContext callContext)
 #pragma warning restore CA1801
         {
             if (validationParameters == null)

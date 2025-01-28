@@ -7,9 +7,20 @@ using System.Diagnostics;
 #nullable enable
 namespace Microsoft.IdentityModel.Tokens.Saml2
 {
+    /// <summary>
+    /// Represents a SAML2 validation error.
+    /// </summary>
     internal class Saml2ValidationError : ValidationError
     {
-        internal Saml2ValidationError(
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Saml2ValidationError"/> class.
+        /// </summary>
+        /// <param name="messageDetail" /> contains information about the exception that is used to generate the exception message.
+        /// <param name="validationFailureType"/> is the type of validation failure that occurred.
+        /// <param name="exceptionType"/> is the type of exception that occurred.
+        /// <param name="stackFrame"/> is the stack frame where the exception occurred.
+        /// <param name="innerException"/> is the inner exception that occurred.
+        public Saml2ValidationError(
             MessageDetail messageDetail,
             ValidationFailureType validationFailureType,
             Type exceptionType,
@@ -19,7 +30,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         {
         }
 
-        internal override Exception GetException()
+        /// <summary>
+        /// Creates an instance of an <see cref="Exception"/> using <see cref="ValidationError"/>
+        /// </summary>
+        /// <returns>An instance of an Exception.</returns>
+        protected override Exception CreateException()
         {
             if (ExceptionType == typeof(Saml2SecurityTokenReadException))
             {
@@ -27,7 +42,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 return exception;
             }
 
-            return base.GetException();
+            return base.CreateException();
         }
     }
 }

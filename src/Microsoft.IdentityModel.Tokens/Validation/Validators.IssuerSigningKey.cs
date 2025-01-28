@@ -8,15 +8,12 @@ using Microsoft.IdentityModel.Logging;
 #nullable enable
 namespace Microsoft.IdentityModel.Tokens
 {
-    internal record struct ValidatedSigningKeyLifetime(DateTime? ValidFrom, DateTime? ValidTo, DateTime? ValidationTime);
-
     /// <summary>
     /// Definition for delegate that will validate the <see cref="SecurityKey"/> that signed a <see cref="SecurityToken"/>.
     /// </summary>
     /// <param name="signingKey">The security key to validate.</param>
     /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
     /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
-    /// <param name="configuration">The <see cref="BaseConfiguration"/> to be used for validation.</param>
     /// <param name="callContext">The <see cref="CallContext"/> to be used for logging.</param> 
     /// <returns>A <see cref="ValidationResult{TResult}"/>that contains the results of validating the issuer.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
@@ -24,13 +21,11 @@ namespace Microsoft.IdentityModel.Tokens
         SecurityKey signingKey,
         SecurityToken securityToken,
         ValidationParameters validationParameters,
-        BaseConfiguration? configuration,
         CallContext callContext);
 
     /// <summary>
-    /// SigningKeyValidation
+    /// Partial class for Issuer Signing Key Validation.
     /// </summary>
-
     public static partial class Validators
     {
         /// <summary>
@@ -39,19 +34,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
-        /// <param name="configuration">The <see cref="BaseConfiguration"/> to be used for validation.</param>
-        /// <param name="callContext">The <see cref="CallContext"/> to be used for logging.</param>
-        /// <exception cref="SecurityTokenArgumentNullException"> if 'securityKey' is null and ValidateIssuerSigningKey is true.</exception>
-        /// <exception cref="SecurityTokenArgumentNullException"> if 'securityToken' is null and ValidateIssuerSigningKey is true.</exception>
-        /// <exception cref="SecurityTokenArgumentNullException"> if 'validationParameters' is null.</exception>
+        /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
         internal static ValidationResult<ValidatedSigningKeyLifetime> ValidateIssuerSigningKey(
             SecurityKey securityKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
-#pragma warning disable CA1801 // Review unused parameters
-            BaseConfiguration? configuration,
-#pragma warning restore CA1801 // Review unused parameters
-            CallContext? callContext)
+            CallContext callContext)
         {
             if (validationParameters == null)
                 return IssuerSigningKeyValidationError.NullParameter(
@@ -79,12 +67,12 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
-        /// <param name="callContext"></param>
+        /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
 #pragma warning disable CA1801 // Review unused parameters
         internal static ValidationResult<ValidatedSigningKeyLifetime> ValidateIssuerSigningKeyLifeTime(
             SecurityKey securityKey,
             ValidationParameters validationParameters,
-            CallContext? callContext)
+            CallContext callContext)
 #pragma warning restore CA1801 // Review unused parameters
         {
             DateTime utcNow = validationParameters.TimeProvider.GetUtcNow().UtcDateTime;

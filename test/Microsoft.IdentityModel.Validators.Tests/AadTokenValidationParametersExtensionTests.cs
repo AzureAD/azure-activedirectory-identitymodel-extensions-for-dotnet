@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols;
@@ -13,8 +14,6 @@ using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Saml2;
 using Xunit;
-
-#pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
 namespace Microsoft.IdentityModel.Validators.Tests
 {
@@ -28,16 +27,33 @@ namespace Microsoft.IdentityModel.Validators.Tests
             var context = TestUtilities.WriteHeader($"{this}.EnableAadSigningKeyValidationTests", theoryData);
             try
             {
+
+                ValidationParameters validationParameters = TestUtilities.CreateFromTokenValidationParameters(theoryData.TokenValidationParameters);
+                validationParameters.AudienceValidator = SkipValidationDelegates.SkipAudienceValidation;
+                validationParameters.IssuerValidatorAsync = SkipValidationDelegates.SkipIssuerValidation;
+
                 // set delegates
+                bool validationParametersDelegateSet = false;
                 bool delegateSet = false;
+
                 if (theoryData.SetDelegateUsingConfig)
                 {
                     theoryData.TokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration = (securityKey, securityToken, tvp, config) => { delegateSet = true; return true; };
+                    validationParameters.IssuerSigningKeyValidator = (securityKey, securityToken, validationParameters, callContext) =>
+                    {
+                        validationParametersDelegateSet = true;
+                        return new ValidatedSigningKeyLifetime(DateTime.UtcNow, DateTime.UtcNow, DateTime.UtcNow);
+                    };
                 }
                 else if (theoryData.SetDelegateWithoutConfig)
                 {
                     theoryData.TokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration = null;
                     theoryData.TokenValidationParameters.IssuerSigningKeyValidator = (securityKey, securityToken, tvp) => { delegateSet = true; return true; };
+                    validationParameters.IssuerSigningKeyValidator = (securityKey, securityToken, validationParameters, callContext) =>
+                    {
+                        validationParametersDelegateSet = true;
+                        return new ValidatedSigningKeyLifetime(DateTime.UtcNow, DateTime.UtcNow, DateTime.UtcNow);
+                    };
                 }
 
                 var handler = new JsonWebTokenHandler();
@@ -45,13 +61,18 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 theoryData.TokenValidationParameters.EnableEntraIdSigningKeyCloudInstanceValidation();
 
                 var validationResult = await handler.ValidateTokenAsync(theoryData.Token, theoryData.TokenValidationParameters);
+                ValidationResult<ValidatedToken> validatedToken = await handler.ValidateTokenAsync(theoryData.Token, validationParameters, new CallContext(), CancellationToken.None);
+
                 theoryData.ExpectedException.ProcessNoException(context);
                 Assert.NotNull(theoryData.TokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration);
                 Assert.Equal(theoryData.ExpectedValidationResult, validationResult.IsValid);
 
                 // verify delegates were executed
                 if (theoryData.ExpectedValidationResult && (theoryData.SetDelegateUsingConfig || theoryData.SetDelegateWithoutConfig))
+                {
                     Assert.True(delegateSet);
+                    Assert.True(validationParametersDelegateSet);
+                }
             }
             catch (Exception ex)
             {
@@ -165,16 +186,32 @@ namespace Microsoft.IdentityModel.Validators.Tests
             var context = TestUtilities.WriteHeader($"{this}.EnableAadSigningKeyIssuerValidationTests", theoryData);
             try
             {
+                ValidationParameters validationParameters = TestUtilities.CreateFromTokenValidationParameters(theoryData.TokenValidationParameters);
+                validationParameters.AudienceValidator = SkipValidationDelegates.SkipAudienceValidation;
+                validationParameters.IssuerValidatorAsync = SkipValidationDelegates.SkipIssuerValidation;
+
                 // set delegates
                 bool delegateSet = false;
+                bool validationParametersDelegateSet = false;
                 if (theoryData.SetDelegateUsingConfig)
                 {
                     theoryData.TokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration = (securityKey, securityToken, tvp, config) => { delegateSet = true; return true; };
+                    validationParameters.IssuerSigningKeyValidator = (securityKey, securityToken, validationParameters, callContext) =>
+                    {
+                        validationParametersDelegateSet = true;
+                        return new ValidatedSigningKeyLifetime(DateTime.UtcNow, DateTime.UtcNow, DateTime.UtcNow);
+                    };
                 }
                 else if (theoryData.SetDelegateWithoutConfig)
                 {
                     theoryData.TokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration = null;
                     theoryData.TokenValidationParameters.IssuerSigningKeyValidator = (securityKey, securityToken, tvp) => { delegateSet = true; return true; };
+                    validationParameters.IssuerSigningKeyValidator = (securityKey, securityToken, validationParameters, callContext) =>
+                    {
+                        validationParametersDelegateSet = true;
+                        return new ValidatedSigningKeyLifetime(DateTime.UtcNow, DateTime.UtcNow, DateTime.UtcNow);
+                    };
+
                 }
 
                 var handler = new JsonWebTokenHandler();
@@ -183,13 +220,18 @@ namespace Microsoft.IdentityModel.Validators.Tests
                 theoryData.TokenValidationParameters.EnableAadSigningKeyIssuerValidation();
 
                 var validationResult = await handler.ValidateTokenAsync(jwt, theoryData.TokenValidationParameters);
+                ValidationResult<ValidatedToken> validatedToken = await handler.ValidateTokenAsync(jwt, validationParameters, new CallContext(), CancellationToken.None);
                 theoryData.ExpectedException.ProcessNoException(context);
+
                 Assert.NotNull(theoryData.TokenValidationParameters.IssuerSigningKeyValidatorUsingConfiguration);
                 Assert.True(validationResult.IsValid);
 
                 // verify delegates were executed
                 if (theoryData.SetDelegateUsingConfig || theoryData.SetDelegateWithoutConfig)
+                {
                     Assert.True(delegateSet);
+                    Assert.True(validationParametersDelegateSet);
+                }
             }
             catch (Exception ex)
             {
@@ -701,5 +743,3 @@ namespace Microsoft.IdentityModel.Validators.Tests
         }
     }
 }
-
-#pragma warning restore CS3016 // Arrays as attribute arguments is not CLS-compliant

@@ -29,7 +29,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
         }
 
-        internal override Exception GetException()
+        protected override Exception CreateException()
         {
             if (ExceptionType == typeof(CustomSecurityTokenInvalidIssuerException))
             {
@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 return exception;
             }
 
-            return base.GetException();
+            return base.CreateException();
         }
     }
 
@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
         }
 
-        internal override Exception GetException()
+        protected override Exception CreateException()
         {
             if (ExceptionType == typeof(CustomSecurityTokenInvalidAudienceException))
             {
@@ -86,7 +86,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 return exception;
             }
 
-            return base.GetException();
+            return base.CreateException();
         }
     }
 
@@ -126,7 +126,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
         }
 
-        internal override Exception GetException()
+        protected override Exception CreateException()
         {
             if (ExceptionType == typeof(CustomSecurityTokenInvalidLifetimeException))
             {
@@ -136,7 +136,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 return exception;
             }
 
-            return base.GetException();
+            return base.CreateException();
         }
     }
 
@@ -176,7 +176,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
         }
 
-        internal override Exception GetException()
+        protected override Exception CreateException()
         {
             if (ExceptionType == typeof(CustomSecurityTokenInvalidSigningKeyException))
             {
@@ -184,7 +184,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 exception.SetValidationError(this);
                 return exception;
             }
-            return base.GetException();
+            return base.CreateException();
         }
     }
 
@@ -221,7 +221,7 @@ namespace Microsoft.IdentityModel.TestUtils
             : base(messageDetail, validationFailureType, exceptionType, stackFrame, invalidTokenType, innerException)
         {
         }
-        internal override Exception GetException()
+        protected override Exception CreateException()
         {
             if (ExceptionType == typeof(CustomSecurityTokenInvalidTypeException))
             {
@@ -229,7 +229,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 exception.SetValidationError(this);
                 return exception;
             }
-            return base.GetException();
+            return base.CreateException();
         }
     }
 
@@ -266,7 +266,7 @@ namespace Microsoft.IdentityModel.TestUtils
             base(messageDetail, validationFailureType, exceptionType, stackFrame, innerValidationError, innerException)
         {
         }
-        internal override Exception GetException()
+        protected override Exception CreateException()
         {
             if (ExceptionType == typeof(CustomSecurityTokenInvalidSignatureException))
             {
@@ -274,7 +274,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 exception.SetValidationError(this);
                 return exception;
             }
-            return base.GetException();
+            return base.CreateException();
         }
     }
 
@@ -312,7 +312,7 @@ namespace Microsoft.IdentityModel.TestUtils
             : base(messageDetail, validationFailureType, exceptionType, stackFrame, algorithm, innerException)
         {
         }
-        internal override Exception GetException()
+        protected override Exception CreateException()
         {
             if (ExceptionType == typeof(CustomSecurityTokenInvalidAlgorithmException))
             {
@@ -320,7 +320,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 exception.SetValidationError(this);
                 return exception;
             }
-            return base.GetException();
+            return base.CreateException();
         }
     }
 
@@ -359,7 +359,7 @@ namespace Microsoft.IdentityModel.TestUtils
         {
         }
 
-        internal override Exception GetException()
+        protected override Exception CreateException()
         {
             if (ExceptionType == typeof(CustomSecurityTokenReplayDetectedException))
             {
@@ -369,7 +369,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 return exception;
             }
 
-            return base.GetException();
+            return base.CreateException();
         }
     }
 

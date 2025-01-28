@@ -17,27 +17,26 @@ namespace Microsoft.IdentityModel.Tokens
     internal class ValidatedToken
     {
         /// <summary>
-        /// Creates an instance of <see cref="ValidatedToken"/>
+        /// Initializes a new instance of <see cref="ValidatedToken"/>.
         /// </summary>
-        /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
-        /// <param name="tokenHandler">The <see cref="TokenHandler"/> that is being used to validate the token.</param>
-        /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
-        internal ValidatedToken(
+        /// <param name="securityToken">The <see cref="SecurityToken"/> that was validated.</param>
+        /// <param name="tokenHandler">The <see cref="TokenHandler"/> that was used to validate the token.</param>
+        /// <param name="validationParameters">The <see cref="ValidationParameters"/> used to validate the token.</param>
+        /// <exception cref="ArgumentNullException">If <paramref name="securityToken"/>, <paramref name="tokenHandler"/>, or <paramref name="validationParameters"/> is null.</exception>
+        public ValidatedToken(
             SecurityToken securityToken,
             TokenHandler tokenHandler,
             ValidationParameters validationParameters)
         {
-            TokenHandler = tokenHandler ?? throw new ArgumentNullException(nameof(tokenHandler));
             SecurityToken = securityToken ?? throw new ArgumentNullException(nameof(securityToken));
+            TokenHandler = tokenHandler ?? throw new ArgumentNullException(nameof(tokenHandler));
             ValidationParameters = validationParameters ?? throw new ArgumentNullException(nameof(validationParameters));
         }
 
         /// <summary>
         /// Logs the validation result.
         /// </summary>
-        public void Log(ILogger logger)
-        {
-            Logger.TokenValidationSucceeded(
+        public void Log(ILogger logger) => Logger.TokenValidationSucceeded(
                 logger,
                 ValidatedAudience ?? "none",
                 ValidatedLifetime,
@@ -46,29 +45,61 @@ namespace Microsoft.IdentityModel.Tokens
                 ValidatedSigningKey?.KeyId ?? "none",
                 ActorValidationResult is not null
             );
-        }
 
-        public SecurityToken SecurityToken { get; private set; }
+        /// <summary>
+        /// The <see cref="SecurityToken"/> that was validated.
+        /// </summary>
+        public SecurityToken SecurityToken { get; }
 
-        public TokenHandler TokenHandler { get; private set; }
+        /// <summary>
+        /// The <see cref="TokenHandler"/> that was used to validate the token.
+        /// </summary>
+        public TokenHandler TokenHandler { get; }
 
-        public ValidationParameters ValidationParameters { get; private set; }
+        /// <summary>
+        /// The <see cref="ValidationParameters"/> that were used to validate the token.
+        /// </summary>
+        public ValidationParameters ValidationParameters { get; }
 
         #region Validated Properties
+        /// <summary>
+        /// The result of validating the actor, if any.
+        /// </summary>
         public ValidatedToken? ActorValidationResult { get; internal set; }
 
+        /// <summary>
+        /// The audience that was validated, if any.
+        /// </summary>
         public string? ValidatedAudience { get; internal set; }
 
+        /// <summary>
+        /// The issuer that was validated. If present, it contains the source of the validation as well.
+        /// </summary>
         public ValidatedIssuer? ValidatedIssuer { get; internal set; }
 
+        /// <summary>
+        /// The lifetime that was validated, if any.
+        /// </summary>
         public ValidatedLifetime? ValidatedLifetime { get; internal set; }
 
+        /// <summary>
+        /// The expiration time of the token that was used to validate the token was not replayed, if any.
+        /// </summary>
         public DateTime? ValidatedTokenReplayExpirationTime { get; internal set; }
 
+        /// <summary>
+        /// The token type that was validated, if any.
+        /// </summary>
         public ValidatedTokenType? ValidatedTokenType { get; internal set; }
 
+        /// <summary>
+        /// The <see cref="SecurityKey"/> that was used to validate the token, if any.
+        /// </summary>
         public SecurityKey? ValidatedSigningKey { get; internal set; }
 
+        /// <summary>
+        /// The validated lifetime of the <see cref="SecurityKey"/> that was used to sign the token, if any.
+        /// </summary>
         public ValidatedSigningKeyLifetime? ValidatedSigningKeyLifetime { get; internal set; }
         #endregion
 
@@ -177,6 +208,9 @@ namespace Microsoft.IdentityModel.Tokens
         #endregion
 
         #region Logging
+        /// <summary>
+        /// Internal class used for logging.
+        /// </summary>
         private static class Logger
         {
             private static readonly Action<ILogger, string, string, Exception?> s_tokenValidationFailed =
@@ -195,7 +229,13 @@ namespace Microsoft.IdentityModel.Tokens
             public static void TokenValidationFailed(
                 ILogger logger,
                 ValidationFailureType validationFailureType,
-                MessageDetail messageDetail) => s_tokenValidationFailed(logger, validationFailureType.Name, messageDetail.Message, null);
+                MessageDetail messageDetail)
+            {
+                if (logger.IsEnabled(LogLevel.Information))
+                {
+                    s_tokenValidationFailed(logger, validationFailureType.Name, messageDetail.Message, null);
+                }
+            }
 
             private static readonly Action<ILogger, string, ValidatedLifetime?, ValidatedIssuer?, ValidatedTokenType?, string, bool, Exception?> s_tokenValidationSucceeded =
                 LoggerMessage.Define<string, ValidatedLifetime?, ValidatedIssuer?, ValidatedTokenType?, string, bool>(
@@ -226,15 +266,21 @@ namespace Microsoft.IdentityModel.Tokens
                 ValidatedIssuer? validatedIssuer,
                 ValidatedTokenType? validatedTokenType,
                 string validatedSigningKeyId,
-                bool actorWasValidated) => s_tokenValidationSucceeded(
-                    logger,
-                    validatedAudience,
-                    validatedLifetime,
-                    validatedIssuer,
-                    validatedTokenType,
-                    validatedSigningKeyId,
-                    actorWasValidated,
-                    null);
+                bool actorWasValidated)
+            {
+                if (logger.IsEnabled(LogLevel.Debug))
+                {
+                    s_tokenValidationSucceeded(
+                        logger,
+                        validatedAudience,
+                        validatedLifetime,
+                        validatedIssuer,
+                        validatedTokenType,
+                        validatedSigningKeyId,
+                        actorWasValidated,
+                        null);
+                }
+            }
         }
         #endregion
     }

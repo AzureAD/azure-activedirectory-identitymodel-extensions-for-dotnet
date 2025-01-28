@@ -143,12 +143,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 static ValidationParameters CreateValidationParameters(
                     SecurityKey? signingKey = null, List<string>? validAlgorithms = null, bool tryAllKeys = false)
                 {
-                    ValidationParameters validationParameters = new ValidationParameters();
-
-                    if (signingKey is not null)
-                        validationParameters.IssuerSigningKeys.Add(signingKey);
-
-                    validationParameters.ValidAlgorithms = validAlgorithms;
+                    ValidationParameters validationParameters = new ValidationParameters()
+                    {
+                        ValidAlgorithms = validAlgorithms ?? [],
+                        IssuerSigningKeys = signingKey is not null ? [signingKey] : [],
+                    };
 
                     validationParameters.AudienceValidator = SkipValidationDelegates.SkipAudienceValidation;
                     validationParameters.IssuerSigningKeyValidator = SkipValidationDelegates.SkipIssuerSigningKeyValidation;

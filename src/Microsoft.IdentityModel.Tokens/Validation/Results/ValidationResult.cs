@@ -17,7 +17,8 @@ namespace Microsoft.IdentityModel.Tokens
         readonly ValidationError? _error;
 
         /// <summary>
-        /// Creates a successful, valid validation result.
+        /// Creates a new instance of <see cref="ValidationResult{TResult}"/> indicating a successful operation
+        /// and containing an object of the associated type.
         /// </summary>
         /// <param name="result">The value associated with the success.</param>
         public ValidationResult(TResult result)
@@ -28,7 +29,8 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Creates an error, invalid validation result.
+        /// Creates a new instance of <see cref="ValidationResult{TResult}"/> indicating a failed operation
+        /// and containing a <see cref="ValidationError"/> with the error information.
         /// </summary>
         /// <param name="error">The error associated with the failure.</param>
         public ValidationResult(ValidationError error)
@@ -115,10 +117,10 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// 
+        /// Determines whether the specified object is equal to the current instance of <see cref="ValidationResult{TResult}"/>.
         /// </summary>
-        /// <param name="obj"></param>
-        /// <returns></returns>
+        /// <param name="obj">The object to compare with the current instance.</param>
+        /// <returns><c>true</c> if the specified object is equal to the current instance; otherwise, <c>false</c>.</returns>
         public override bool Equals(object? obj)
         {
             if (obj is ValidationResult<TResult> other)
@@ -130,10 +132,9 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// 
+        /// Returns the hash code for this instance of <see cref="ValidationResult{TResult}"/>.
         /// </summary>
-        /// <returns></returns>
-        /// <exception cref="NotImplementedException"></exception>
+        /// <returns>The hash code for the current instance.</returns>
         public override int GetHashCode()
         {
             if (IsValid)
@@ -143,32 +144,32 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// 
+        /// Equality comparison operator for <see cref="ValidationResult{TResult}"/>.
         /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <returns></returns>
+        /// <param name="left">The left value to compare.</param>
+        /// <param name="right">The right value to compare.</param>
+        /// <returns>A boolean indicating whether the left value is equal to the right one.</returns>
         public static bool operator ==(ValidationResult<TResult> left, ValidationResult<TResult> right)
         {
             return left.Equals(right);
         }
 
         /// <summary>
-        /// 
+        /// Inequality comparison operator for <see cref="ValidationResult{TResult}"/>.
         /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <returns></returns>
+        /// <param name="left">The left value to compare.</param>
+        /// <param name="right">The right value to compare.</param>
+        /// <returns>A boolean indicating whether the left value is not equal to the right one.</returns>
         public static bool operator !=(ValidationResult<TResult> left, ValidationResult<TResult> right)
         {
             return !(left == right);
         }
 
         /// <summary>
-        /// 
+        /// Determines whether the specified <see cref="ValidationResult{TResult}"/> is equal to the current instance.
         /// </summary>
-        /// <param name="other"></param>
-        /// <returns></returns>
+        /// <param name="other">The <see cref="ValidationResult{TResult}"/> to compare with the current instance.</param>
+        /// <returns><c>true</c> if the specified <see cref="ValidationResult{TResult}"/> is equal to the current instance; otherwise, <c>false</c>.</returns>
         public bool Equals(ValidationResult<TResult> other)
         {
             if (other.IsValid != IsValid)
@@ -185,7 +186,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>#
         /// <remarks>Required for compatibility, see CA2225 for more information</remarks>
         /// <returns>The existing instance.</returns>
-        public ValidationResult<TResult> ToResult()
+        public ValidationResult<TResult> ToValidationResult()
         {
             return this;
         }

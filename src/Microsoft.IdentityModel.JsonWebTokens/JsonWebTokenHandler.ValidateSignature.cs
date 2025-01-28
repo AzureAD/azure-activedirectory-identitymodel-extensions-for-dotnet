@@ -130,7 +130,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
 
                 return new SignatureValidationError(
-                    new MessageDetail(TokenLogMessages.IDX10500),
+                    new MessageDetail(TokenLogMessages.IDX10519),
                     ValidationFailureType.SignatureValidationFailed,
                     typeof(SecurityTokenSignatureKeyNotFoundException),
                     ValidationError.GetCurrentStackFrame());
@@ -318,10 +318,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 else
                     return new SignatureValidationError(
                         new MessageDetail(
-                            TokenLogMessages.IDX10504,
-                            LogHelper.MarkAsSecurityArtifact(
-                                jsonWebToken.EncodedToken,
-                                JwtTokenUtilities.SafeLogJwtToken)),
+                            TokenLogMessages.IDX10520,
+                            LogHelper.MarkAsNonPII(key.ToString())),
                         ValidationFailureType.SignatureValidationFailed,
                         typeof(SecurityTokenInvalidSignatureException),
                         ValidationError.GetCurrentStackFrame());
@@ -332,10 +330,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 return new SignatureValidationError(
                     new MessageDetail(
-                        TokenLogMessages.IDX10504,
-                        LogHelper.MarkAsSecurityArtifact(
-                            jsonWebToken.EncodedToken,
-                            JwtTokenUtilities.SafeLogJwtToken)),
+                        TokenLogMessages.IDX10521,
+                        LogHelper.MarkAsNonPII(key.ToString()),
+                        LogHelper.MarkAsNonPII(ex.Message)),
                     ValidationFailureType.SignatureValidationFailed,
                     typeof(SecurityTokenInvalidSignatureException),
                     ValidationError.GetCurrentStackFrame(),
