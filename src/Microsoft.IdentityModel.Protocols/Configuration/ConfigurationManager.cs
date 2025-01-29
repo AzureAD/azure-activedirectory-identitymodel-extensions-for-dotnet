@@ -20,6 +20,12 @@ namespace Microsoft.IdentityModel.Protocols
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
     public partial class ConfigurationManager<T> : BaseConfigurationManager, IConfigurationManager<T> where T : class
     {
+#pragma warning disable IDE0044 // Add readonly modifier
+#pragma warning disable CS0649 // Unused, it gets used in tests.
+        private Action _onBackgroundTaskFinish;
+#pragma warning restore CS0649 // Unused
+#pragma warning restore IDE0044 // Add readonly modifier
+
         private DateTime _syncAfter = DateTime.MinValue;
         private DateTime SyncAfter
         {
@@ -318,6 +324,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 _updateMetadata.WaitOne();
                 UpdateCurrentConfiguration();
+                _onBackgroundTaskFinish?.Invoke();
             }
         }
 

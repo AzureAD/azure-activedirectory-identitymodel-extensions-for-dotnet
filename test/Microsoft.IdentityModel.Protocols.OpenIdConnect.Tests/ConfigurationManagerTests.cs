@@ -419,6 +419,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         private async Task AutomaticRefreshIntervalBody(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData, bool blocking = false)
         {
             var context = new CompareContext($"{this}.AutomaticRefreshInterval");
+            AutoResetEvent resetEvent = SetupResetEvent(theoryData.ConfigurationManager, blocking);
 
             try
             {
@@ -429,11 +430,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 TestUtilities.SetField(theoryData.ConfigurationManager, "_syncAfter", theoryData.SyncAfter.UtcDateTime);
                 var updatedConfiguration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
 
-                if (!blocking)
-                {
-                    // we wait here to make the task is finished.
-                    Thread.Sleep(1000);
-                }
+                if (!blocking && theoryData.SyncAfter < DateTimeOffset.UtcNow.Add(TimeSpan.FromMinutes(1)))
+                    WaitOrFail(resetEvent);
 
                 updatedConfiguration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
 
@@ -447,6 +445,19 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
 
             TestUtilities.AssertFailIfErrors(context);
+        }
+
+        private static AutoResetEvent SetupResetEvent(ConfigurationManager<OpenIdConnectConfiguration> configurationManager, bool blocking)
+        {
+            var resetEvent = new AutoResetEvent(false);
+
+            if (!blocking)
+            {
+                Action _waitAction = () => resetEvent.Set();
+                TestUtilities.SetField(configurationManager, "_onBackgroundTaskFinish", _waitAction);
+            }
+
+            return resetEvent;
         }
 
         public static TheoryData<ConfigurationManagerTheoryData<OpenIdConnectConfiguration>> AutomaticIntervalTestCases
@@ -509,35 +520,40 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         public async Task RequestRefresh_Blocking(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData)
         {
             AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
-            await RequestRefreshBody(theoryData);
+            await RequestRefreshBody(theoryData, true);
         }
 
-        private async Task RequestRefreshBody(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData)
+        private async Task RequestRefreshBody(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData, bool blocking = false)
         {
             var context = new CompareContext($"{this}.RequestRefresh");
             var configuration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
             IdentityComparer.AreEqual(configuration, theoryData.ExpectedConfiguration, context);
+
+            AutoResetEvent resetEvent = SetupResetEvent(theoryData.ConfigurationManager, blocking);
+
+            var timeProvider = new FakeTimeProvider();
+            TestUtilities.SetField(theoryData.ConfigurationManager, "_timeProvider", timeProvider);
 
             // the first call to RequestRefresh will trigger a refresh with ConfigurationManager.RefreshInterval being ignored.
             // Testing RefreshInterval requires a two calls, the second call will trigger a refresh with ConfigurationManager.RefreshInterval being used.
             if (theoryData.RequestRefresh)
             {
                 theoryData.ConfigurationManager.RequestRefresh();
-                if (theoryData.SleepTimeInMs > 0)
-                    Thread.Sleep(theoryData.SleepTimeInMs);
+                if (!blocking)
+                    WaitOrFail(resetEvent);
+
                 configuration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
             }
-
-            if (theoryData.SleepTimeInMs > 0)
-                Thread.Sleep(theoryData.SleepTimeInMs);
 
             theoryData.ConfigurationManager.RefreshInterval = theoryData.RefreshInterval;
             theoryData.ConfigurationManager.MetadataAddress = theoryData.UpdatedMetadataAddress;
 
+            timeProvider.Advance(TimeSpan.FromMilliseconds(theoryData.SleepTimeInMs));
+
             theoryData.ConfigurationManager.RequestRefresh();
 
-            if (theoryData.SleepTimeInMs > 0)
-                Thread.Sleep(theoryData.SleepTimeInMs);
+            if (!blocking && theoryData.RefreshInterval != TimeSpan.MaxValue)
+                WaitOrFail(resetEvent);
 
             var updatedConfiguration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
 
@@ -675,6 +691,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var docRetriever = new FileDocumentRetriever();
             var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
 
+            AutoResetEvent resetEvent = SetupResetEvent(configManager, blocking);
+
             // This is the minimum time that should pass before an automatic refresh occurs
             // stored in advance to avoid any time drift issues.
             DateTimeOffset minimumRefreshInterval = DateTimeOffset.UtcNow + configManager.AutomaticRefreshInterval;
@@ -687,7 +705,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             configuration = await configManager.GetConfigurationAsync(CancellationToken.None);
 
             if (!blocking)
-                Thread.Sleep(500);
+                WaitOrFail(resetEvent);
 
             // check that _syncAfter is greater than DateTimeOffset.UtcNow + AutomaticRefreshInterval
             DateTime syncAfter = (DateTime)TestUtilities.GetField(configManager, "_syncAfter");
@@ -716,9 +734,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     context.Diffs.Add("Refresh is expected to be requested after RequestRefresh is called");
             }
 
-            // wait 1000ms here because update of config is run as a new task.
             if (!blocking)
-                Thread.Sleep(1000);
+                WaitOrFail(resetEvent);
 
             // check that _syncAfter is greater than DateTimeOffset.UtcNow + AutomaticRefreshInterval
             syncAfter = (DateTime)TestUtilities.GetField(configManager, "_syncAfter");
@@ -880,13 +897,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
             TestUtilities.SetField(configManager, "_timeProvider", timeProvider);
 
+            var resetEvent = SetupResetEvent(configManager, blocking);
+
             // Get the first configuration.
             var configuration = await configManager.GetConfigurationAsync(CancellationToken.None);
 
             configManager.RequestRefresh();
 
             if (!blocking)
-                Thread.Sleep(250);
+                WaitOrFail(resetEvent);
 
             var configAfterFirstRefresh = await configManager.GetConfigurationAsync(CancellationToken.None);
 
@@ -895,9 +914,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 context.Diffs.Add("object.ReferenceEquals(configuration, configAfterFirstRefresh)");
 
             configManager.RequestRefresh();
-
-            if (!blocking)
-                Thread.Sleep(250);
 
             var configAfterNoTimePassed = await configManager.GetConfigurationAsync(CancellationToken.None);
 
@@ -911,7 +927,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             configManager.RequestRefresh();
 
             if (!blocking)
-                Thread.Sleep(250);
+                WaitOrFail(resetEvent);
 
             var configAfterRefreshInterval = await configManager.GetConfigurationAsync(CancellationToken.None);
 
@@ -926,9 +942,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             var configAfterLessThanRefreshInterval = await configManager.GetConfigurationAsync(CancellationToken.None);
 
-            if (!blocking)
-                Thread.Sleep(250);
-
             // Fourth RequestRefresh should not trigger a refresh because the refresh interval has not passed.
             if (!object.ReferenceEquals(configAfterRefreshInterval, configAfterLessThanRefreshInterval))
                 context.Diffs.Add("object.ReferenceEquals(configAfterRefreshInterval, configAfterLessThanRefreshInterval)");
@@ -939,7 +952,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             configManager.RequestRefresh();
 
             if (!blocking)
-                Thread.Sleep(250);
+                WaitOrFail(resetEvent);
 
             var configAfterOneYear = await configManager.GetConfigurationAsync(CancellationToken.None);
 
@@ -973,7 +986,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
             TestUtilities.SetField(configManager, "_timeProvider", timeProvider);
 
-            TimeSpan advanceInterval = BaseConfigurationManager.DefaultAutomaticRefreshInterval.Add(TimeSpan.FromSeconds(configManager.AutomaticRefreshInterval.TotalSeconds / 20));
+            TimeSpan advanceInterval = BaseConfigurationManager.DefaultAutomaticRefreshInterval.Add(TimeSpan.FromSeconds(configManager.AutomaticRefreshInterval.TotalSeconds / 10));
 
             TestUtilities.SetField(configManager, "_timeProvider", timeProvider);
 
@@ -993,12 +1006,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             if (!blocking)
             {
+                var resetEvent = SetupResetEvent(configManager, blocking);
                 // Same config, but a task is queued to update the configuration.
                 if (!object.ReferenceEquals(configNoAdvanceInTime, configAfterTimeIsAdvanced))
                     context.Diffs.Add("!object.ReferenceEquals(configuration, configAfterTimeIsAdvanced)");
 
                 // Need to wait for background task to finish.
-                Thread.Sleep(500);
+                WaitOrFail(resetEvent);
 
                 var configAfterBackgroundTask = await configManager.GetConfigurationAsync(CancellationToken.None);
 
@@ -1019,7 +1033,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         public async Task ValidateOpenIdConnectConfigurationTests_Blocking(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData)
         {
             AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
-            await ValidateOIDCConfigurationBody(theoryData);
+            await ValidateOIDCConfigurationBody(theoryData, true);
         }
 
         [Theory, MemberData(nameof(ValidateOpenIdConnectConfigurationTestCases), DisableDiscoveryEnumeration = true)]
@@ -1028,12 +1042,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             await ValidateOIDCConfigurationBody(theoryData);
         }
 
-        private async Task ValidateOIDCConfigurationBody(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData)
+        private async Task ValidateOIDCConfigurationBody(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData, bool blocking = false)
         {
             TestUtilities.WriteHeader($"{this}.ValidateOpenIdConnectConfigurationTests");
             var context = new CompareContext();
             OpenIdConnectConfiguration configuration;
             var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(theoryData.MetadataAddress, theoryData.ConfigurationRetriever, theoryData.DocumentRetriever, theoryData.ConfigurationValidator);
+
+            var resetEvent = SetupResetEvent(configurationManager, blocking);
 
             if (theoryData.PresetCurrentConfiguration)
                 TestUtilities.SetField(configurationManager, "_currentConfiguration", new OpenIdConnectConfiguration() { Issuer = Default.Issuer });
@@ -1041,14 +1057,25 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             try
             {
                 //create a listener and enable it for logs
-                var listener = TestUtils.SampleListener.CreateLoggerListener(EventLevel.Warning);
+                using var listener = TestUtils.SampleListener.CreateLoggerListener(EventLevel.Warning);
+
                 configuration = await configurationManager.GetConfigurationAsync();
 
-                Thread.Sleep(1000);
+                if (!blocking && theoryData.ExpectedException is null && string.IsNullOrEmpty(theoryData.ExpectedErrorMessage))
+                    WaitOrFail(resetEvent);
+
+                // Need to wait for the events on the listener to be processed.
+                if (!string.IsNullOrEmpty(theoryData.ExpectedErrorMessage))
+                {
+                    var success = await PollForConditionAsync(() => listener.WriteCount >= 1, TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(10));
+                    if (!success)
+                        context.AddDiff($"Expected 1 or more logs to be written, but only {listener.WriteCount} were written.");
+                }
 
                 if (!string.IsNullOrEmpty(theoryData.ExpectedErrorMessage) && !listener.TraceBuffer.Contains(theoryData.ExpectedErrorMessage))
                     context.AddDiff($"Expected exception to contain: '{theoryData.ExpectedErrorMessage}'.{Environment.NewLine}Log is:{Environment.NewLine}'{listener.TraceBuffer}'");
 
+                Console.WriteLine(listener.WriteCount);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -1060,6 +1087,28 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
 
             TestUtilities.AssertFailIfErrors(context);
+        }
+
+        private static async Task<bool> PollForConditionAsync(Func<bool> condition, TimeSpan interval, TimeSpan timeout)
+        {
+            var startTime = DateTime.UtcNow;
+
+            while (DateTime.UtcNow - startTime < timeout)
+            {
+                if (condition())
+                    return true;
+
+                try
+                {
+                    await Task.Delay(interval);
+                }
+                catch (TaskCanceledException)
+                {
+                    return false;
+                }
+            }
+
+            return false;
         }
 
         public static TheoryData<ConfigurationManagerTheoryData<OpenIdConnectConfiguration>> ValidateOpenIdConnectConfigurationTestCases
@@ -1189,6 +1238,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 },
                 waitEvent,
                 signalEvent);
+        }
+
+        private static void WaitOrFail(AutoResetEvent are)
+        {
+            if (!are.WaitOne(30000))
+                Assert.Fail("Failed to receive a signal in 30s, failing test");
         }
 
         public class ConfigurationManagerTheoryData<T> : TheoryDataBase where T : class

@@ -10,11 +10,14 @@ namespace Microsoft.IdentityModel.TestUtils
     {
         public string TraceBuffer { get; set; } = string.Empty;
 
+        public int WriteCount { get; set; }
+
         protected override void OnEventWritten(EventWrittenEventArgs eventData)
         {
             if (eventData != null && eventData.Payload.Count > 0)
             {
                 TraceBuffer += eventData.Payload[0] + "\n";
+                WriteCount += 1;
             }
         }
 
