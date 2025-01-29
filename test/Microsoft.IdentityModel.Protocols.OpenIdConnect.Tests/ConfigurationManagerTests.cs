@@ -447,7 +447,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        private static AutoResetEvent SetupResetEvent(ConfigurationManager<OpenIdConnectConfiguration> configurationManager, bool blocking)
+        internal static AutoResetEvent SetupResetEvent(ConfigurationManager<OpenIdConnectConfiguration> configurationManager, bool blocking)
         {
             var resetEvent = new AutoResetEvent(false);
 
@@ -1240,7 +1240,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 signalEvent);
         }
 
-        private static void WaitOrFail(AutoResetEvent are)
+        internal static void WaitOrFail(AutoResetEvent are)
         {
             if (!are.WaitOne(30000))
                 Assert.Fail("Failed to receive a signal in 30s, failing test");

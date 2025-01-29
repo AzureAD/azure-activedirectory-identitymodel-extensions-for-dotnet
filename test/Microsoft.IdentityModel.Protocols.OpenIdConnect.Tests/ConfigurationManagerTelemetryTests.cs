@@ -56,8 +56,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             configurationManager.RequestRefresh();
             await configurationManager.GetConfigurationAsync(cancel);
 
+            AutoResetEvent resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager, blocking);
+
             if (!blocking)
-                Thread.Sleep(250);
+                ConfigurationManagerTests.WaitOrFail(resetEvent);
 
             // assert
             var expectedCounterTagList = new Dictionary<string, object>
@@ -105,6 +107,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 TelemetryClient = testTelemetryClient
             };
 
+            AutoResetEvent resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager, blocking);
+
             try
             {
                 await configurationManager.GetConfigurationAsync();
@@ -116,7 +120,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 }
 
                 if (!blocking)
-                    Thread.Sleep(250);
+                    ConfigurationManagerTests.WaitOrFail(resetEvent);
             }
             catch (Exception)
             {
