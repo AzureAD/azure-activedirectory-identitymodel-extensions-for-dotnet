@@ -196,7 +196,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     (exceptionStrings ??= new StringBuilder()).AppendLine(ex.ToString());
                 }
 
-                (keysAttempted ??= new StringBuilder()).AppendLine(key.ToString());
+                (keysAttempted ??= new StringBuilder()).AppendLine(key.KeyId);
             }
 
             if (unwrappedKeys.Count > 0 || exceptionStrings is null)
@@ -206,7 +206,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 ValidationError validationError = new(
                     new MessageDetail(
                         TokenLogMessages.IDX10618,
-                        keysAttempted?.ToString() ?? "",
+                        LogHelper.MarkAsNonPII(keysAttempted?.ToString() ?? ""),
                         exceptionStrings?.ToString() ?? "",
                         LogHelper.MarkAsSecurityArtifact(jwtToken, JwtTokenUtilities.SafeLogJwtToken)),
                     ValidationFailureType.TokenDecryptionFailed,

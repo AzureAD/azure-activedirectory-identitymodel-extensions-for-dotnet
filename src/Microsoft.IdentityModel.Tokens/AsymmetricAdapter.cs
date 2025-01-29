@@ -92,7 +92,7 @@ namespace Microsoft.IdentityModel.Tokens
                             new NotSupportedException(
                                 LogHelper.FormatInvariant(
                                     LogMessages.IDX10684,
-                                    LogHelper.MarkAsNonPII(algorithm), key)));
+                                    LogHelper.MarkAsNonPII(algorithm), LogHelper.MarkAsNonPII(key.KeyId))));
                 }
             }
             else if (key is ECDsaSecurityKey ecdsaKey)
@@ -104,7 +104,7 @@ namespace Microsoft.IdentityModel.Tokens
                     new NotSupportedException(
                         LogHelper.FormatInvariant(
                             LogMessages.IDX10684,
-                            LogHelper.MarkAsNonPII(algorithm), key)));
+                            LogHelper.MarkAsNonPII(algorithm), LogHelper.MarkAsNonPII(key.KeyId))));
         }
 
         internal byte[] Decrypt(byte[] data)

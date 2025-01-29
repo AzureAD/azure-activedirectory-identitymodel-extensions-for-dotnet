@@ -297,7 +297,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     return new SignatureValidationError(
                         new MessageDetail(
                             TokenLogMessages.IDX10636,
-                            key?.ToString() ?? "Null",
+                            LogHelper.MarkAsNonPII(key?.KeyId ?? "Null"),
                             LogHelper.MarkAsNonPII(jsonWebToken.Alg)),
                         ValidationFailureType.SignatureValidationFailed,
                         typeof(SecurityTokenInvalidOperationException),
