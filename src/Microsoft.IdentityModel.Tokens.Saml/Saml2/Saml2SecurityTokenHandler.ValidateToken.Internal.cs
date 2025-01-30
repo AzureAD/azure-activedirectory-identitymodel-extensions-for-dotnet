@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Tokens.Experimental;
 using Microsoft.IdentityModel.Tokens.Saml;
 
 #nullable enable
@@ -13,7 +14,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
     /// <summary>
     /// A <see cref="SecurityTokenHandler"/> designed for creating and validating Saml2 Tokens. See: http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf
     /// </summary>
-    public partial class Saml2SecurityTokenHandler : SecurityTokenHandler
+    public partial class Saml2SecurityTokenHandler : SecurityTokenHandler, IResultBasedValidation
     {
         /// <summary>
         /// Validates a token.
@@ -25,12 +26,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the asynchronous operation.</param>
         /// <returns>A <see cref="ValidationResult{TResult}"/> with either a <see cref="ValidatedToken"/> if the token was validated or an <see cref="ValidationError"/> with the failure information and exception otherwise.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("ApiDesign", "RS0026:Do not add multiple public overloads with optional parameters", Justification = "This is not an overload.")]
-        public async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
+        internal async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken)
         {
             if (token is null)
                 return ValidationError.NullParameter(nameof(token), ValidationError.GetCurrentStackFrame());
@@ -46,12 +46,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <inheritdoc/>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("ApiDesign", "RS0026:Do not add multiple public overloads with optional parameters", Justification = "This is not an overload.")]
-        public async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
+        internal async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken)
         {
             if (securityToken is null)
             {
@@ -312,6 +311,58 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         {
             return null;
         }
+
+        #region Explicit Interface Implementations
+        async Task<ValidationResult<ValidatedToken>> IResultBasedValidation.ValidateTokenAsync(
+            string token,
+            ValidationParameters validationParameters,
+            CallContext callContext)
+        {
+            return await ValidateTokenAsync(
+                token,
+                validationParameters,
+                callContext,
+                default).ConfigureAwait(false);
+        }
+
+        async Task<ValidationResult<ValidatedToken>> IResultBasedValidation.ValidateTokenAsync(
+            string token,
+            ValidationParameters validationParameters,
+            CallContext callContext,
+            CancellationToken cancellationToken)
+        {
+            return await ValidateTokenAsync(
+                token,
+                validationParameters,
+                callContext,
+                cancellationToken).ConfigureAwait(false);
+        }
+
+        async Task<ValidationResult<ValidatedToken>> IResultBasedValidation.ValidateTokenAsync(
+            SecurityToken token,
+            ValidationParameters validationParameters,
+            CallContext callContext)
+        {
+            return await ValidateTokenAsync(
+                token,
+                validationParameters,
+                callContext,
+                default).ConfigureAwait(false);
+        }
+
+        async Task<ValidationResult<ValidatedToken>> IResultBasedValidation.ValidateTokenAsync(
+            SecurityToken token,
+            ValidationParameters validationParameters,
+            CallContext callContext,
+            CancellationToken cancellationToken)
+        {
+            return await ValidateTokenAsync(
+                token,
+                validationParameters,
+                callContext,
+                cancellationToken).ConfigureAwait(false);
+        }
+        #endregion
     }
 }
 #nullable restore

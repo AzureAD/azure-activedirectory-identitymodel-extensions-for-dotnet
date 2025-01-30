@@ -11,6 +11,11 @@ Microsoft.IdentityModel.Tokens.AudienceValidationError.AudienceValidationError(M
 Microsoft.IdentityModel.Tokens.AudienceValidationError.TokenAudiences.get -> System.Collections.Generic.IList<string!>?
 Microsoft.IdentityModel.Tokens.AudienceValidationError.ValidAudiences.get -> System.Collections.Generic.IList<string!>?
 Microsoft.IdentityModel.Tokens.DecryptionKeyResolverDelegate
+Microsoft.IdentityModel.Tokens.Experimental.IResultBasedValidation
+Microsoft.IdentityModel.Tokens.Experimental.IResultBasedValidation.ValidateTokenAsync(Microsoft.IdentityModel.Tokens.SecurityToken! securityToken, Microsoft.IdentityModel.Tokens.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext! callContext) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.ValidationResult<Microsoft.IdentityModel.Tokens.ValidatedToken!>>!
+Microsoft.IdentityModel.Tokens.Experimental.IResultBasedValidation.ValidateTokenAsync(Microsoft.IdentityModel.Tokens.SecurityToken! securityToken, Microsoft.IdentityModel.Tokens.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext! callContext, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.ValidationResult<Microsoft.IdentityModel.Tokens.ValidatedToken!>>!
+Microsoft.IdentityModel.Tokens.Experimental.IResultBasedValidation.ValidateTokenAsync(string! token, Microsoft.IdentityModel.Tokens.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext! callContext) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.ValidationResult<Microsoft.IdentityModel.Tokens.ValidatedToken!>>!
+Microsoft.IdentityModel.Tokens.Experimental.IResultBasedValidation.ValidateTokenAsync(string! token, Microsoft.IdentityModel.Tokens.ValidationParameters! validationParameters, Microsoft.IdentityModel.Tokens.CallContext! callContext, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.ValidationResult<Microsoft.IdentityModel.Tokens.ValidatedToken!>>!
 Microsoft.IdentityModel.Tokens.IssuerSigningKeyResolverDelegate
 Microsoft.IdentityModel.Tokens.IssuerSigningKeyValidationDelegate
 Microsoft.IdentityModel.Tokens.IssuerSigningKeyValidationError

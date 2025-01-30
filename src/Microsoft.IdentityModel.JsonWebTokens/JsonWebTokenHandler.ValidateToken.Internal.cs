@@ -9,11 +9,12 @@ using System.Threading.Tasks;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Logging;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 #nullable enable
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
-    public partial class JsonWebTokenHandler : TokenHandler
+    public partial class JsonWebTokenHandler : TokenHandler, IResultBasedValidation
     {
         /// <summary>
         /// Validates a token.
@@ -24,12 +25,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the asynchronous operation.</param>
         /// <returns>A <see cref="ValidationResult{TResult}"/> with either a <see cref="ValidatedToken"/> if the token was validated or an <see cref="ValidationError"/> with the failure information and exception otherwise.</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("ApiDesign", "RS0026:Do not add multiple public overloads with optional parameters", Justification = "This is not an overload.")]
-        public async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
+        internal async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(token))
             {
@@ -77,12 +77,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <inheritdoc/>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("ApiDesign", "RS0026:Do not add multiple public overloads with optional parameters", Justification = "This is not an overload.")]
-        public async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
+        internal async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken)
         {
             if (token is null)
             {
@@ -447,6 +446,58 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             return currentConfiguration;
         }
+
+        #region Explicit Interface Implementations
+        async Task<ValidationResult<ValidatedToken>> IResultBasedValidation.ValidateTokenAsync(
+            string token,
+            ValidationParameters validationParameters,
+            CallContext callContext)
+        {
+            return await ValidateTokenAsync(
+                token,
+                validationParameters,
+                callContext,
+                default).ConfigureAwait(false);
+        }
+
+        async Task<ValidationResult<ValidatedToken>> IResultBasedValidation.ValidateTokenAsync(
+            string token,
+            ValidationParameters validationParameters,
+            CallContext callContext,
+            CancellationToken cancellationToken)
+        {
+            return await ValidateTokenAsync(
+                token,
+                validationParameters,
+                callContext,
+                cancellationToken).ConfigureAwait(false);
+        }
+
+        async Task<ValidationResult<ValidatedToken>> IResultBasedValidation.ValidateTokenAsync(
+            SecurityToken token,
+            ValidationParameters validationParameters,
+            CallContext callContext)
+        {
+            return await ValidateTokenAsync(
+                token,
+                validationParameters,
+                callContext,
+                default).ConfigureAwait(false);
+        }
+
+        async Task<ValidationResult<ValidatedToken>> IResultBasedValidation.ValidateTokenAsync(
+            SecurityToken token,
+            ValidationParameters validationParameters,
+            CallContext callContext,
+            CancellationToken cancellationToken)
+        {
+            return await ValidateTokenAsync(
+                token,
+                validationParameters,
+                callContext,
+                cancellationToken).ConfigureAwait(false);
+        }
+        #endregion
     }
 }
 #nullable restore
