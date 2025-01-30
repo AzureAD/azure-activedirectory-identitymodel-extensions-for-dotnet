@@ -108,6 +108,22 @@ namespace Microsoft.IdentityModel.Benchmarks
             return result.IsValid;
         }
 
+        [BenchmarkCategory("ValidateTokenAsync_Failure"), Benchmark]
+        public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsyncWithTVP_Failure()
+        {
+            TokenValidationResult result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidTokenValidationParameters.Clone()).ConfigureAwait(false);
+
+            return result;
+        }
+
+        [BenchmarkCategory("ValidateTokenAsync_Failure"), Benchmark]
+        public async Task<bool> JsonWebTokenHandler_ValidateTokenAsyncWithVP_Failure()
+        {
+            ValidationResult<ValidatedToken> result = await _jsonWebTokenHandler.ValidateTokenAsync(_jwsExtendedClaims, _invalidValidationParameters, _callContext, CancellationToken.None).ConfigureAwait(false);
+
+            return result.IsValid;
+        }
+
         [BenchmarkCategory("ValidateTokenAsync_FailTwiceBeforeSuccess"), Benchmark(Baseline = true)]
         public async Task<TokenValidationResult> JsonWebTokenHandler_ValidateTokenAsyncWithTVP_SucceedOnThirdAttempt()
         {
