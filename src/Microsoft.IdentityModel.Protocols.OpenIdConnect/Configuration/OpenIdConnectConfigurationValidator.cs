@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration
                         LogMessages.IDX21818,
                         LogHelper.MarkAsNonPII(MinimumNumberOfKeys),
                         LogHelper.MarkAsNonPII(numberOfValidKeys),
-                        string.IsNullOrEmpty(convertKeyInfos) ? "None" : convertKeyInfos),
+                        string.IsNullOrEmpty(convertKeyInfos) ? "None" : LogHelper.MarkAsNonPII(convertKeyInfos)),
                     Succeeded = false
                 };
             }

@@ -74,6 +74,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     ValidationParameters = CreateValidationParameters(Default.AsymmetricSigningKey),
                     ExpectedIsValid = false,
                     ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10500:"),
+                    ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10519:"),
                 });
 
                 theoryData.Add(new ValidateTokenAsyncSignatureTheoryData("Invalid_TokenSignedWithDifferentKey_KeyIdNotPresent_TryAllKeysTrue")

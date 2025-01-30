@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens.Saml;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
@@ -118,7 +119,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
                     (errors ??= new()).Add(result.UnwrapError());
 
-                    (keysAttempted ??= new()).Append(key.ToString());
+                    (keysAttempted ??= new()).Append(key.KeyId);
                     if (canMatchKey && !keyMatched && key.KeyId is not null && samlToken.Assertion.Signature.KeyInfo is not null)
                         keyMatched = samlToken.Assertion.Signature.KeyInfo.MatchesKey(key);
                 }
@@ -128,7 +129,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 return new SignatureValidationError(
                     new MessageDetail(
                         TokenLogMessages.IDX10514,
-                        keysAttempted?.ToString(),
+                        LogHelper.MarkAsNonPII(keysAttempted?.ToString()),
                         samlToken.Assertion.Signature.KeyInfo,
                         GetErrorStrings(errors),
                         samlToken),
@@ -138,7 +139,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             string? keysAttemptedString = null;
             if (resolvedKey is not null)
-                keysAttemptedString = resolvedKey.ToString();
+                keysAttemptedString = resolvedKey.KeyId;
             else if ((keysAttempted?.Length ?? 0) > 0)
                 keysAttemptedString = keysAttempted!.ToString();
 
@@ -146,7 +147,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 return new SignatureValidationError(
                     new MessageDetail(
                         TokenLogMessages.IDX10512,
-                        keysAttemptedString,
+                        LogHelper.MarkAsNonPII(keysAttemptedString),
                         GetErrorStrings(errors),
                         samlToken),
                     ValidationFailureType.SignatureValidationFailed,

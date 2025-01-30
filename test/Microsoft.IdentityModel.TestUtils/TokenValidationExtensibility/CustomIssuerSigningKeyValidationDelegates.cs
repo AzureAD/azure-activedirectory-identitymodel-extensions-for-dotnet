@@ -13,7 +13,6 @@ namespace Microsoft.IdentityModel.TestUtils
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
-            BaseConfiguration? configuration,
             CallContext callContext)
         {
             // Returns a CustomIssuerSigningKeyValidationError : IssuerSigningKeyValidationError
@@ -30,7 +29,6 @@ namespace Microsoft.IdentityModel.TestUtils
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
-            BaseConfiguration? configuration,
             CallContext callContext)
         {
             return new CustomIssuerSigningKeyValidationError(
@@ -46,7 +44,6 @@ namespace Microsoft.IdentityModel.TestUtils
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
-            BaseConfiguration? configuration,
             CallContext callContext)
         {
             return new CustomIssuerSigningKeyValidationError(
@@ -61,7 +58,6 @@ namespace Microsoft.IdentityModel.TestUtils
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
-            BaseConfiguration? configuration,
             CallContext callContext)
         {
             return new CustomIssuerSigningKeyValidationError(
@@ -77,7 +73,6 @@ namespace Microsoft.IdentityModel.TestUtils
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
-            BaseConfiguration? configuration,
             CallContext callContext)
         {
             return new CustomIssuerSigningKeyWithoutGetExceptionValidationOverrideError(
@@ -92,7 +87,6 @@ namespace Microsoft.IdentityModel.TestUtils
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
-            BaseConfiguration? configuration,
             CallContext callContext)
         {
             return new IssuerSigningKeyValidationError(
@@ -108,7 +102,6 @@ namespace Microsoft.IdentityModel.TestUtils
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
-            BaseConfiguration? configuration,
             CallContext callContext)
         {
             throw new CustomSecurityTokenInvalidSigningKeyException(nameof(IssuerSigningKeyValidatorThrows), null);
@@ -118,7 +111,6 @@ namespace Microsoft.IdentityModel.TestUtils
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
-            BaseConfiguration? configuration,
             CallContext callContext)
         {
             return new IssuerSigningKeyValidationError(
@@ -134,7 +126,6 @@ namespace Microsoft.IdentityModel.TestUtils
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
-            BaseConfiguration? configuration,
             CallContext callContext)
         {
             return new IssuerSigningKeyValidationError(

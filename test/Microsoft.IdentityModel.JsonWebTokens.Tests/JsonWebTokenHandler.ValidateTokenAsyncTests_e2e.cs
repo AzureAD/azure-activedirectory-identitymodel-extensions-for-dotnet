@@ -119,8 +119,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.Null(validationResult.Result);
             Assert.NotNull(validationResult.Error);
             Assert.IsType<SignatureValidationError>(validationResult.Error);
-            Assert.Contains("IDX10504", validationResult.Error.Message);
-            // IDX10504: Unable to validate signature, token does not have a signature: '[PII of type 'Microsoft.IdentityModel.Logging.SecurityArtifact' is hidden. For more details, see https://aka.ms/IdentityModel/PII.]'.
+            Assert.Contains("IDX10520", validationResult.Error.Message);
+            // IDX10520: Signature validation failed. The key provided could not validate the signature. Key tried: '{0}'.
         }
 
         [Fact]
@@ -203,11 +203,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             ValidationResult<ValidatedToken> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
-            // TODO:
-            // Is this expected that a token with a future issued at time is valid?
             Assert.True(validationResult.IsValid);
             Assert.NotNull(validationResult.Result);
             Assert.Null(validationResult.Error);
+            // TODO: Define potentially adding a setting to reject tokens issued in the future.
+            // As it is not part of the specification, it should be optional.
         }
 
         [Fact]
@@ -255,7 +255,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         }
 
         [Fact]
-        public async Task TestTokenWithBadSignatureKey()
+        public async Task TestTokenWithBadSignatureKey_TryAllIssuerSigningKeysFalse()
         {
             string token = testTokenCreator.CreateTokenWithBadSignatureKey();
             ValidationParameters validationParameters = new ValidationParameters()
@@ -272,13 +272,31 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.Null(validationResult.Result);
             Assert.NotNull(validationResult.Error);
             Assert.IsType<SignatureValidationError>(validationResult.Error);
-            Assert.Contains("IDX10500", validationResult.Error.Message);
-            // IDX10500: Signature validation failed. No security keys were provided to validate the signature.
+            Assert.Contains("IDX10519", validationResult.Error.Message);
+            // IDX10519: Signature validation failed. The token's kid is missing and ValidationParameters.TryAllIssuerSigningKeys is set to false.
+        }
 
+        [Fact]
+        public async Task TestTokenWithBadSignatureKey_TryAllIssuerSigningKeysTrue()
+        {
+            string token = testTokenCreator.CreateTokenWithBadSignatureKey();
+            ValidationParameters validationParameters = new ValidationParameters()
+            {
+                ValidAudiences = ["http://Default.Audience.com"],
+                ValidIssuers = ["http://Default.Issuer.com"],
+                IssuerSigningKeys = [KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key]
+            };
+            validationParameters.TryAllIssuerSigningKeys = true;
+            CallContext callContext = new CallContext();
 
-            // TODO: this message is not right. A security key was provided. but not the right one.
-            // Should we write no matching security key was provided to validate the signature?
-            // Or Security were provided in the Validation Parameters but none of them matched the signature key?
+            ValidationResult<ValidatedToken> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
+
+            Assert.False(validationResult.IsValid);
+            Assert.Null(validationResult.Result);
+            Assert.NotNull(validationResult.Error);
+            Assert.IsType<SignatureValidationError>(validationResult.Error);
+            Assert.Contains("IDX10517", validationResult.Error.Message);
+            // IDX10517: Signature validation failed. The token's kid is missing. Keys tried: '{0}'. Number of keys in TokenValidationParameters: '{1}'. \nNumber of keys in Configuration: '{2}'. \nExceptions caught:\n '{3}'.\ntoken: '{4}'. See https://aka.ms/IDX10503 for details.
         }
 
         [Fact]
@@ -342,10 +360,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             ValidationResult<ValidatedToken> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
-            // TODO: is it expected that a token with a missing issued at time is valid?
             Assert.True(validationResult.IsValid);
             Assert.NotNull(validationResult.Result);
             Assert.Null(validationResult.Error);
+            // The iat claim is optional.
         }
 
         [Fact]
@@ -362,10 +380,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             ValidationResult<ValidatedToken> validationResult = await jsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
-            // TODO: is it expected that a token with a missing issued at time is valid?
             Assert.True(validationResult.IsValid);
             Assert.NotNull(validationResult.Result);
             Assert.Null(validationResult.Error);
+            // The nbf claim is optional.
         }
 
         [Fact]

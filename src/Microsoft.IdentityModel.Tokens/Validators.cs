@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (!validationParameters.AlgorithmValidator(algorithm, securityKey, securityToken, validationParameters))
                 {
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAlgorithmException(LogHelper.FormatInvariant(LogMessages.IDX10697, LogHelper.MarkAsNonPII(algorithm), securityKey))
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidAlgorithmException(LogHelper.FormatInvariant(LogMessages.IDX10697, LogHelper.MarkAsNonPII(algorithm), LogHelper.MarkAsNonPII(securityKey?.KeyId)))
                     {
                         InvalidAlgorithm = algorithm,
                     });
@@ -366,7 +366,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters.IssuerSigningKeyValidatorUsingConfiguration != null)
             {
                 if (!validationParameters.IssuerSigningKeyValidatorUsingConfiguration(securityKey, securityToken, validationParameters, configuration))
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(LogHelper.FormatInvariant(LogMessages.IDX10232, securityKey)) { SigningKey = securityKey });
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(LogHelper.FormatInvariant(LogMessages.IDX10232, LogHelper.MarkAsNonPII(securityKey?.KeyId))) { SigningKey = securityKey });
 
                 return;
             }
@@ -374,7 +374,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (validationParameters.IssuerSigningKeyValidator != null)
             {
                 if (!validationParameters.IssuerSigningKeyValidator(securityKey, securityToken, validationParameters))
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(LogHelper.FormatInvariant(LogMessages.IDX10232, securityKey)) { SigningKey = securityKey });
+                    throw LogHelper.LogExceptionMessage(new SecurityTokenInvalidSigningKeyException(LogHelper.FormatInvariant(LogMessages.IDX10232, LogHelper.MarkAsNonPII(securityKey?.KeyId))) { SigningKey = securityKey });
 
                 return;
             }

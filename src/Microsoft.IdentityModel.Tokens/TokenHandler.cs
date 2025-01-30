@@ -13,7 +13,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// Defines properties shared across all security token handlers.
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("ApiDesign", "RS0036:Annotate nullability of public types and members in the declared API", Justification = "Nullability annotations not yet added.")]
-    public abstract class TokenHandler
+    public abstract partial class TokenHandler
     {
         private int _defaultTokenLifetimeInMinutes = DefaultTokenLifetimeInMinutes;
         private int _maximumTokenSizeInBytes = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;

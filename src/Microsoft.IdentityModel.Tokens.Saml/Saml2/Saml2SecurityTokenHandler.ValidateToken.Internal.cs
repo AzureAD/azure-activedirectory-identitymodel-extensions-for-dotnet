@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the asynchronous operation.</param>
         /// <returns>A <see cref="ValidationResult{TResult}"/> with either a <see cref="ValidatedToken"/> if the token was validated or an <see cref="ValidationError"/> with the failure information and exception otherwise.</returns>
-        internal async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
+        internal override async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <inheritdoc/>
-        internal async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
+        internal async override Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -157,7 +157,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     samlToken.SigningKey,
                     samlToken,
                     validationParameters,
-                    null,
                     callContext);
 
                 if (!issuerSigningKeyValidationResult.IsValid)
