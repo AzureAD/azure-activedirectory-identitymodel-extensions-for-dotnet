@@ -290,7 +290,8 @@ namespace Microsoft.IdentityModel.Tokens
 
             return CachedStackFrames.GetOrAdd(
                 key,
-                _ => new StackFrame(skipFrames, true));
+                // Need to skip the call to the delegate + GetOrAdd when creating the frame
+                _ => new StackFrame(skipFrames + 2, true));
         }
 
         // ConcurrentDictionary is thread-safe and only locks when adding a new item.
