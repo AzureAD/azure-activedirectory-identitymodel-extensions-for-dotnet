@@ -104,8 +104,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (key is not null)
             {
-                jwtToken.SigningKey = key;
-
                 // If the key is found, validate the signature.
                 return ValidateSignatureWithKey(jwtToken, key, validationParameters, callContext);
             }
@@ -314,7 +312,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     ValidateSignature);
 
                 if (valid)
+                {
+                    jsonWebToken.SigningKey = key;
+
                     return key;
+                }
                 else
                     return new SignatureValidationError(
                         new MessageDetail(
