@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             var configManager = new ConfigurationManager<IssuerMetadata>("IssuerMetadata.json", new IssuerConfigurationRetriever(), docRetriever);
             var context = new CompareContext($"{this}.ConfigurationManagerUsingCustomClass");
 
-            TestUtilities.SetField(configManager, "_cancellationToken", cts.Token);
+            TestUtilities.SetField(configManager, "_BackgroundTaskCancellationToken", cts.Token);
 
             var configuration = await configManager.GetConfigurationAsync();
             configManager.MetadataAddress = "IssuerMetadata.json";
@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             configManager.RequestRefresh();
             configuration = await configManager.GetConfigurationAsync();
             TestUtilities.SetField(configManager, "_lastRequestRefresh", DateTime.UtcNow.Subtract(TimeSpan.FromHours(1)));
-            TestUtilities.SetField(configManager, "_cancellationToken", cts.Token);
+            TestUtilities.SetField(configManager, "_BackgroundTaskCancellationToken", cts.Token);
 
             configManager.MetadataAddress = "IssuerMetadata2.json";
 

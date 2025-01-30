@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 TelemetryClient = testTelemetryClient
             };
 
-            TestUtilities.SetField(configurationManager, "_cancellationToken", cts.Token);
+            TestUtilities.SetField(configurationManager, "_BackgroundTaskCancellationToken", cts.Token);
 
             var cancel = new CancellationToken();
             AutoResetEvent resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager, blocking);
@@ -83,9 +83,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             cts.Cancel();
 
             await ConfigurationManagerTests.PollForConditionAsync(
-                () => expectedCounterTagList.SequenceEqual(testTelemetryClient.ExportedItems) &&
-                    expectedHistogramTagList.SequenceEqual(testTelemetryClient.ExportedHistogramItems),
-                TimeSpan.FromMilliseconds(100),
+                () => expectedCounterTagList.Count == testTelemetryClient.ExportedItems.Count &&
+                    expectedHistogramTagList.Count == testTelemetryClient.ExportedHistogramItems.Count,
+                TimeSpan.FromMilliseconds(250),
                 TimeSpan.FromSeconds(10));
 
             Assert.Equal(expectedCounterTagList, testTelemetryClient.ExportedItems);
@@ -121,7 +121,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 TelemetryClient = testTelemetryClient
             };
 
-            TestUtilities.SetField(configurationManager, "_cancellationToken", cts.Token);
+            TestUtilities.SetField(configurationManager, "_BackgroundTaskCancellationToken", cts.Token);
             AutoResetEvent resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager, blocking);
 
             try
@@ -147,7 +147,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
 
             await ConfigurationManagerTests.PollForConditionAsync(
-                () => theoryData.ExpectedTagList.SequenceEqual(testTelemetryClient.ExportedItems),
+                () => theoryData.ExpectedTagList.Count == testTelemetryClient.ExportedItems.Count,
                 TimeSpan.FromMilliseconds(100),
                 TimeSpan.FromSeconds(10));
 
