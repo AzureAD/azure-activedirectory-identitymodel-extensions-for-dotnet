@@ -67,9 +67,12 @@ namespace Microsoft.IdentityModel.Protocols.Tests
         [Fact]
         public async Task ConfigurationManagerUsingCustomClass()
         {
+            var cts = new CancellationTokenSource();
             var docRetriever = new FileDocumentRetriever();
             var configManager = new ConfigurationManager<IssuerMetadata>("IssuerMetadata.json", new IssuerConfigurationRetriever(), docRetriever);
             var context = new CompareContext($"{this}.ConfigurationManagerUsingCustomClass");
+
+            TestUtilities.SetField(configManager, "_cancellationToken", cts.Token);
 
             var configuration = await configManager.GetConfigurationAsync();
             configManager.MetadataAddress = "IssuerMetadata.json";
@@ -82,6 +85,8 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             configManager.RequestRefresh();
             configuration = await configManager.GetConfigurationAsync();
             TestUtilities.SetField(configManager, "_lastRequestRefresh", DateTime.UtcNow.Subtract(TimeSpan.FromHours(1)));
+            TestUtilities.SetField(configManager, "_cancellationToken", cts.Token);
+
             configManager.MetadataAddress = "IssuerMetadata2.json";
 
             // Wait for the refresh to complete.
@@ -100,6 +105,8 @@ namespace Microsoft.IdentityModel.Protocols.Tests
 
             if (IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer))
                 context.Diffs.Add($"Expected: {configuration.Issuer}, to be different from: {configuration2.Issuer}");
+
+            cts.Cancel();
 
             TestUtilities.AssertFailIfErrors(context);
         }

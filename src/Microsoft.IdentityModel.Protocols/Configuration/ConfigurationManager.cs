@@ -26,6 +26,8 @@ namespace Microsoft.IdentityModel.Protocols
 #pragma warning restore CS0649 // Unused
 #pragma warning restore IDE0044 // Add readonly modifier
 
+        private CancellationToken _cancellationToken = CancellationToken.None;
+
         private DateTime _syncAfter = DateTime.MinValue;
         private DateTime SyncAfter
         {
@@ -296,7 +298,7 @@ namespace Microsoft.IdentityModel.Protocols
         private void EnsureBackgroundTaskIsRunning()
         {
             if (_updateMetadataTask == null || _updateMetadataTask.Status != TaskStatus.Running)
-                _updateMetadataTask = Task.Run(UpdateCurrentConfigurationUsingSignals, CancellationToken.None);
+                _updateMetadataTask = Task.Run(UpdateCurrentConfigurationUsingSignals);
         }
 
         private void TelemetryForUpdate()
@@ -320,11 +322,13 @@ namespace Microsoft.IdentityModel.Protocols
 
         private void UpdateCurrentConfigurationUsingSignals()
         {
-            while (true)
+            while (!_cancellationToken.IsCancellationRequested)
             {
-                _updateMetadata.WaitOne();
-                UpdateCurrentConfiguration();
-                _onBackgroundTaskFinish?.Invoke();
+                if (_updateMetadata.WaitOne(500))
+                {
+                    UpdateCurrentConfiguration();
+                    _onBackgroundTaskFinish?.Invoke();
+                }
             }
         }
 

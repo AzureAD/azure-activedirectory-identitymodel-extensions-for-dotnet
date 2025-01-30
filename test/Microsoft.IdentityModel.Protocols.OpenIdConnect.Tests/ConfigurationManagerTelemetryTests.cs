@@ -4,16 +4,17 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration;
-using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Telemetry;
 using Microsoft.IdentityModel.Telemetry.Tests;
-using Xunit;
+using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
+using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 {
@@ -35,6 +36,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
         private static async Task RequestRefresh_ExpectedTagsBody(bool blocking = false)
         {
+            var cts = new CancellationTokenSource();
+
             // arrange
             var testTelemetryClient = new MockTelemetryClient();
             var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
@@ -45,7 +48,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             {
                 TelemetryClient = testTelemetryClient
             };
+
+            TestUtilities.SetField(configurationManager, "_cancellationToken", cts.Token);
+
             var cancel = new CancellationToken();
+            AutoResetEvent resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager, blocking);
 
             // act
             // Retrieve the configuration for the first time
@@ -55,8 +62,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // Manually request a config refresh
             configurationManager.RequestRefresh();
             await configurationManager.GetConfigurationAsync(cancel);
-
-            AutoResetEvent resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager, blocking);
 
             if (!blocking)
                 ConfigurationManagerTests.WaitOrFail(resetEvent);
@@ -74,6 +79,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 { TelemetryConstants.MetadataAddressTag, OpenIdConfigData.AccountsGoogle },
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer }
             };
+
+            cts.Cancel();
+
+            await ConfigurationManagerTests.PollForConditionAsync(
+                () => expectedCounterTagList.SequenceEqual(testTelemetryClient.ExportedItems) &&
+                    expectedHistogramTagList.SequenceEqual(testTelemetryClient.ExportedHistogramItems),
+                TimeSpan.FromMilliseconds(100),
+                TimeSpan.FromSeconds(10));
 
             Assert.Equal(expectedCounterTagList, testTelemetryClient.ExportedItems);
             Assert.Equal(expectedHistogramTagList, testTelemetryClient.ExportedHistogramItems);
@@ -97,6 +110,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             bool blocking = false)
         {
             var testTelemetryClient = new MockTelemetryClient();
+            var cts = new CancellationTokenSource();
 
             var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
                 theoryData.MetadataAddress,
@@ -107,6 +121,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 TelemetryClient = testTelemetryClient
             };
 
+            TestUtilities.SetField(configurationManager, "_cancellationToken", cts.Token);
             AutoResetEvent resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager, blocking);
 
             try
@@ -117,15 +132,24 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     testTelemetryClient.ClearExportedItems();
                     TestUtilities.SetField(configurationManager, "_syncAfter", theoryData.SyncAfter);
                     await configurationManager.GetConfigurationAsync();
-                }
 
-                if (!blocking)
-                    ConfigurationManagerTests.WaitOrFail(resetEvent);
+                    if (!blocking)
+                        ConfigurationManagerTests.WaitOrFail(resetEvent);
+                }
             }
             catch (Exception)
             {
                 // Ignore exceptions
             }
+            finally
+            {
+                cts.Cancel();
+            }
+
+            await ConfigurationManagerTests.PollForConditionAsync(
+                () => theoryData.ExpectedTagList.SequenceEqual(testTelemetryClient.ExportedItems),
+                TimeSpan.FromMilliseconds(100),
+                TimeSpan.FromSeconds(10));
 
             Assert.Equal(theoryData.ExpectedTagList, testTelemetryClient.ExportedItems);
         }

@@ -33,6 +33,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         [Theory, MemberData(nameof(GetPublicMetadataTheoryData), DisableDiscoveryEnumeration = true)]
         public async Task GetPublicMetadata(ConfigurationManagerTheoryData<OpenIdConnectConfiguration> theoryData)
         {
+            var cts = new CancellationTokenSource();
             CompareContext context = TestUtilities.WriteHeader($"{this}.GetPublicMetadata", theoryData);
             try
             {
@@ -42,6 +43,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     theoryData.DocumentRetriever,
                     theoryData.ConfigurationValidator);
 
+                TestUtilities.SetField(configurationManager, "_cancellationToken", cts.Token);
+
                 var configuration = await configurationManager.GetConfigurationAsync(CancellationToken.None);
 
                 Assert.NotNull(configuration);
@@ -50,6 +53,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             catch (Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex, context);
+            }
+            finally
+            {
+                cts.Cancel();
             }
 
             TestUtilities.AssertFailIfErrors(context);
@@ -191,8 +198,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             var context = new CompareContext($"{this}.FetchMetadataFailureTest");
 
+            var cts = new CancellationTokenSource();
+
             var documentRetriever = new HttpDocumentRetriever(HttpResponseMessageUtils.SetupHttpClientThatReturns("OpenIdConnectMetadata.json", HttpStatusCode.NotFound));
             var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), documentRetriever);
+            TestUtilities.SetField(configManager, "_cancellationToken", cts.Token);
 
             // First time to fetch metadata
             try
@@ -217,6 +227,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     IdentityComparer.AreEqual(firstFetchMetadataFailure, secondFetchMetadataFailure, context);
                 }
             }
+            finally
+            {
+                cts.Cancel();
+            }
 
             TestUtilities.AssertFailIfErrors(context);
         }
@@ -230,10 +244,14 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             InMemoryDocumentRetriever inMemoryDocumentRetriever = InMemoryDocumentRetrieverWithEvents(waitEvent, signalEvent);
             waitEvent.Set();
 
+            var cts = new CancellationTokenSource();
+
             var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
                     "AADCommonV1Json",
                     new OpenIdConnectConfigurationRetriever(),
                     inMemoryDocumentRetriever);
+
+            TestUtilities.SetField(configurationManager, "_cancellationToken", cts.Token);
 
             OpenIdConnectConfiguration configuration = await configurationManager.GetConfigurationAsync();
 
@@ -262,6 +280,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             // Configuration should be AADCommonV1Config
             configuration = await configurationManager.GetConfigurationAsync();
+
+            cts.Cancel();
+
             Assert.True(configuration.Issuer.Equals(OpenIdConfigData.AADCommonV1Config.Issuer),
                     $"configuration.Issuer from configurationManager was not as expected," +
                     $" configuration.Issuer: '{configuration.Issuer}' != expected: '{OpenIdConfigData.AADCommonV1Config.Issuer}'.");
@@ -275,11 +296,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var documentRetriever = new HttpDocumentRetriever(
                 HttpResponseMessageUtils.SetupHttpClientThatReturns("OpenIdConnectMetadata.json", HttpStatusCode.NotFound));
 
+            var cts = new CancellationTokenSource();
+
             var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
                 "OpenIdConnectMetadata.json",
                 new OpenIdConnectConfigurationRetriever(),
                 documentRetriever)
             { RefreshInterval = TimeSpan.FromSeconds(2) };
+
+            TestUtilities.SetField(configManager, "_cancellationToken", cts.Token);
 
             // ConfigurationManager._syncAfter is set to DateTimeOffset.MinValue on startup
             // If obtaining the metadata fails due to error, the value should not change
@@ -315,6 +340,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                     IdentityComparer.AreEqual(firstFetchMetadataFailure, secondFetchMetadataFailure, context);
                 }
+            }
+            finally
+            {
+                cts.Cancel();
             }
 
             TestUtilities.AssertFailIfErrors(context);
@@ -372,6 +401,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         [Fact]
         public void GetSets()
         {
+            AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
+
             TestUtilities.WriteHeader($"{this}.GetSets", "GetSets", true);
 
             int ExpectedPropertyCount = 7;
@@ -428,6 +459,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.ConfigurationManager.MetadataAddress = theoryData.UpdatedMetadataAddress;
                 TestUtilities.SetField(theoryData.ConfigurationManager, "_syncAfter", theoryData.SyncAfter.UtcDateTime);
+                TestUtilities.SetField(theoryData.ConfigurationManager, "_cancellationToken", theoryData.CancellationTokenSource.Token);
                 var updatedConfiguration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
 
                 if (!blocking && theoryData.SyncAfter < DateTimeOffset.UtcNow.Add(TimeSpan.FromMinutes(1)))
@@ -442,6 +474,10 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             catch (Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex, context);
+            }
+            finally
+            {
+                theoryData.CancellationTokenSource.Cancel();
             }
 
             TestUtilities.AssertFailIfErrors(context);
@@ -473,6 +509,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         "AADCommonV1Json",
                         new OpenIdConnectConfigurationRetriever(),
                         InMemoryDocumentRetriever),
+                    CancellationTokenSource = new(),
                     ExpectedConfiguration = OpenIdConfigData.AADCommonV1Config,
                     ExpectedUpdatedConfiguration = OpenIdConfigData.AADCommonV1Config,
                     SyncAfter = DateTime.UtcNow - TimeSpan.FromDays(2),
@@ -486,6 +523,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                        "AADCommonV1Json",
                        new OpenIdConnectConfigurationRetriever(),
                        InMemoryDocumentRetriever),
+                    CancellationTokenSource = new(),
                     ExpectedConfiguration = OpenIdConfigData.AADCommonV1Config,
                     ExpectedUpdatedConfiguration = OpenIdConfigData.AADCommonV1Config,
                     SyncAfter = DateTime.UtcNow + TimeSpan.FromDays(2),
@@ -499,6 +537,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         "AADCommonV1Json",
                         new OpenIdConnectConfigurationRetriever(),
                         InMemoryDocumentRetriever),
+                    CancellationTokenSource = new(),
                     ExpectedConfiguration = OpenIdConfigData.AADCommonV1Config,
                     ExpectedUpdatedConfiguration = OpenIdConfigData.AADCommonV2Config,
                     SyncAfter = DateTime.UtcNow,
@@ -533,6 +572,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             var timeProvider = new FakeTimeProvider();
             TestUtilities.SetField(theoryData.ConfigurationManager, "_timeProvider", timeProvider);
+            TestUtilities.SetField(theoryData.ConfigurationManager, "_cancellationToken", theoryData.CancellationTokenSource.Token);
 
             // the first call to RequestRefresh will trigger a refresh with ConfigurationManager.RefreshInterval being ignored.
             // Testing RefreshInterval requires a two calls, the second call will trigger a refresh with ConfigurationManager.RefreshInterval being used.
@@ -557,6 +597,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             var updatedConfiguration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
 
+            theoryData.CancellationTokenSource.Cancel();
+
             IdentityComparer.AreEqual(updatedConfiguration, theoryData.ExpectedUpdatedConfiguration, context);
 
             TestUtilities.AssertFailIfErrors(context);
@@ -575,6 +617,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         "AADCommonV1Json",
                         new OpenIdConnectConfigurationRetriever(),
                         InMemoryDocumentRetriever),
+                    CancellationTokenSource = new(),
                     ExpectedConfiguration = OpenIdConfigData.AADCommonV1Config,
                     ExpectedUpdatedConfiguration = OpenIdConfigData.AADCommonV2Config,
                     RefreshInterval = TimeSpan.FromSeconds(1),
@@ -590,6 +633,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         "AADCommonV1Json",
                         new OpenIdConnectConfigurationRetriever(),
                         InMemoryDocumentRetriever),
+                    CancellationTokenSource = new(),
                     ExpectedConfiguration = OpenIdConfigData.AADCommonV1Config,
                     ExpectedUpdatedConfiguration = OpenIdConfigData.AADCommonV1Config,
                     RefreshInterval = TimeSpan.MaxValue,
@@ -605,6 +649,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         "AADCommonV1Json",
                         new OpenIdConnectConfigurationRetriever(),
                         InMemoryDocumentRetriever),
+                    CancellationTokenSource = new(),
                     ExpectedConfiguration = OpenIdConfigData.AADCommonV1Config,
                     ExpectedUpdatedConfiguration = OpenIdConfigData.AADCommonV2Config,
                     SleepTimeInMs = 1000,
@@ -623,11 +668,17 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             try
             {
                 _ = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
+                TestUtilities.SetField(theoryData.ConfigurationManager, "_cancellationToken", theoryData.CancellationTokenSource.Token);
+
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex, context);
+            }
+            finally
+            {
+                theoryData.CancellationTokenSource.Cancel();
             }
 
             TestUtilities.AssertFailIfErrors(context);
@@ -645,6 +696,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         "https://httpstat.us/429",
                         new OpenIdConnectConfigurationRetriever(),
                         new HttpDocumentRetriever()),
+                    CancellationTokenSource = new(),
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX20803:", typeof(IOException)),
                 });
 
@@ -654,6 +706,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         "https://127.0.0.1",
                         new OpenIdConnectConfigurationRetriever(),
                         new HttpDocumentRetriever()),
+                    CancellationTokenSource = new(),
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX20803:", typeof(IOException)),
                 });
 
@@ -663,6 +716,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         "http://127.0.0.1",
                         new OpenIdConnectConfigurationRetriever(),
                         new HttpDocumentRetriever()),
+                    CancellationTokenSource = new(),
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX20803:", typeof(ArgumentException)),
                 });
 
@@ -688,8 +742,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // This test checks that the _syncAfter field is set correctly after a refresh.
             var context = new CompareContext($"{this}.CheckSyncAfterAndRefreshRequested");
 
+            var cts = new CancellationTokenSource();
+
             var docRetriever = new FileDocumentRetriever();
-            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
+            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+                "OpenIdConnectMetadata.json",
+                new OpenIdConnectConfigurationRetriever(),
+                docRetriever);
+
+            TestUtilities.SetField(configManager, "_cancellationToken", cts.Token);
 
             AutoResetEvent resetEvent = SetupResetEvent(configManager, blocking);
 
@@ -742,6 +803,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             if (syncAfter < minimumRefreshInterval)
                 context.Diffs.Add($"(RequestRefresh) syncAfter '{syncAfter}' < DateTimeOffset.UtcNow + configManager.AutomaticRefreshInterval: '{minimumRefreshInterval}'.");
 
+            cts.Cancel();
+
             TestUtilities.AssertFailIfErrors(context);
         }
 
@@ -760,21 +823,30 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
         private async Task GetConfigurationBody()
         {
-            var docRetriever = new FileDocumentRetriever();
-            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
             var context = new CompareContext($"{this}.GetConfiguration");
+            var cts = new CancellationTokenSource();
 
-            // Unable to obtain a new configuration, but _currentConfiguration is not null so it should be returned.
-            configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
+            var docRetriever = new FileDocumentRetriever();
+            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+                "OpenIdConnectMetadata.json",
+                new OpenIdConnectConfigurationRetriever(),
+                docRetriever);
+
+            TestUtilities.SetField(configManager, "_cancellationToken", cts.Token);
+
             var configuration = await configManager.GetConfigurationAsync(CancellationToken.None);
 
             TestUtilities.SetField(configManager, "_lastRequestRefresh", DateTime.UtcNow.Subtract(TimeSpan.FromHours(1)));
             configManager.MetadataAddress = "http://127.0.0.1";
             configManager.RequestRefresh();
+
+            // Unable to obtain a new configuration, but _currentConfiguration is not null so it should be returned.
             var configuration2 = await configManager.GetConfigurationAsync(CancellationToken.None);
             IdentityComparer.AreEqual(configuration, configuration2, context);
             if (!object.ReferenceEquals(configuration, configuration2))
                 context.Diffs.Add("!object.ReferenceEquals(configuration, configuration2)");
+
+            cts.Cancel();
 
             // get configuration from http address, should throw
             // get configuration with unsuccessful HTTP response status code
@@ -891,11 +963,17 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // This test checks that the _syncAfter field is set correctly after a refresh.
             var context = new CompareContext($"{this}.RequestRefresh_RespectsRefreshInterval");
 
+            var cts = new CancellationTokenSource();
             var timeProvider = new FakeTimeProvider();
 
             var docRetriever = new FileDocumentRetriever();
-            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
+            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+                "OpenIdConnectMetadata.json",
+                new OpenIdConnectConfigurationRetriever(),
+                docRetriever);
+
             TestUtilities.SetField(configManager, "_timeProvider", timeProvider);
+            TestUtilities.SetField(configManager, "_cancellationToken", cts.Token);
 
             var resetEvent = SetupResetEvent(configManager, blocking);
 
@@ -960,6 +1038,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             if (object.ReferenceEquals(configAfterLessThanRefreshInterval, configAfterOneYear))
                 context.Diffs.Add("object.ReferenceEquals(configAfterLessThanRefreshInterval, configAfterOneYear)");
 
+            cts.Cancel();
+
             TestUtilities.AssertFailIfErrors(context);
         }
 
@@ -983,10 +1063,17 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var timeProvider = new FakeTimeProvider();
 
             var docRetriever = new FileDocumentRetriever();
-            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
-            TestUtilities.SetField(configManager, "_timeProvider", timeProvider);
 
-            TimeSpan advanceInterval = BaseConfigurationManager.DefaultAutomaticRefreshInterval.Add(TimeSpan.FromSeconds(configManager.AutomaticRefreshInterval.TotalSeconds / 10));
+            var cts = new CancellationTokenSource();
+            var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+                "OpenIdConnectMetadata.json",
+                new OpenIdConnectConfigurationRetriever(),
+                docRetriever);
+
+            TestUtilities.SetField(configManager, "_timeProvider", timeProvider);
+            TestUtilities.SetField(configManager, "_cancellationToken", cts.Token);
+
+            TimeSpan advanceInterval = BaseConfigurationManager.DefaultAutomaticRefreshInterval.Add(TimeSpan.FromSeconds(configManager.AutomaticRefreshInterval.TotalSeconds));
 
             TestUtilities.SetField(configManager, "_timeProvider", timeProvider);
 
@@ -1026,6 +1113,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     context.Diffs.Add("object.ReferenceEquals(configAfterTimeIsAdvanced, configuration)");
             }
 
+            cts.Cancel();
+
             TestUtilities.AssertFailIfErrors(context);
         }
 
@@ -1047,7 +1136,13 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.WriteHeader($"{this}.ValidateOpenIdConnectConfigurationTests");
             var context = new CompareContext();
             OpenIdConnectConfiguration configuration;
-            var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(theoryData.MetadataAddress, theoryData.ConfigurationRetriever, theoryData.DocumentRetriever, theoryData.ConfigurationValidator);
+            var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+                theoryData.MetadataAddress,
+                theoryData.ConfigurationRetriever,
+                theoryData.DocumentRetriever,
+                theoryData.ConfigurationValidator);
+
+            TestUtilities.SetField(configurationManager, "_cancellationToken", theoryData.CancellationTokenSource.Token);
 
             var resetEvent = SetupResetEvent(configurationManager, blocking);
 
@@ -1067,7 +1162,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 // Need to wait for the events on the listener to be processed.
                 if (!string.IsNullOrEmpty(theoryData.ExpectedErrorMessage))
                 {
-                    var success = await PollForConditionAsync(() => listener.WriteCount >= 1, TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(10));
+                    var success = await PollForConditionAsync(
+                        () => listener.TraceBuffer.Contains(theoryData.ExpectedErrorMessage),
+                        TimeSpan.FromMilliseconds(100),
+                        TimeSpan.FromSeconds(10));
+
                     if (!success)
                         context.AddDiff($"Expected 1 or more logs to be written, but only {listener.WriteCount} were written.");
                 }
@@ -1085,11 +1184,15 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
                 theoryData.ExpectedException.ProcessException(ex, context);
             }
+            finally
+            {
+                theoryData.CancellationTokenSource.Cancel();
+            }
 
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        private static async Task<bool> PollForConditionAsync(Func<bool> condition, TimeSpan interval, TimeSpan timeout)
+        internal static async Task<bool> PollForConditionAsync(Func<bool> condition, TimeSpan interval, TimeSpan timeout)
         {
             var startTime = DateTime.UtcNow;
 
@@ -1126,7 +1229,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     DocumentRetriever = new FileDocumentRetriever(),
                     First = true,
                     MetadataAddress = "OpenIdConnectMetadata.json",
-                    TestId = "ValidConfiguration"
+                    TestId = "ValidConfiguration",
+                    CancellationTokenSource = new(),
                 });
 
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
@@ -1136,7 +1240,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     DocumentRetriever = new FileDocumentRetriever(),
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX21818:", typeof(InvalidConfigurationException)),
                     MetadataAddress = "OpenIdConnectMetadata.json",
-                    TestId = "ValidConfiguration_NotEnoughKey"
+                    TestId = "ValidConfiguration_NotEnoughKey",
+                    CancellationTokenSource = new(),
                 });
 
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
@@ -1147,7 +1252,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     PresetCurrentConfiguration = true,
                     ExpectedErrorMessage = "IDX21818: ",
                     MetadataAddress = "OpenIdConnectMetadata.json",
-                    TestId = "ValidConfiguration_NotEnoughKey_PresetCurrentConfiguration"
+                    TestId = "ValidConfiguration_NotEnoughKey_PresetCurrentConfiguration",
+                    CancellationTokenSource = new(),
                 });
 
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
@@ -1157,7 +1263,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     DocumentRetriever = new FileDocumentRetriever(),
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX10810:", typeof(InvalidConfigurationException)),
                     MetadataAddress = "OpenIdConnectMetadataUnrecognizedKty.json",
-                    TestId = "InvalidConfiguration_UnrecognizedKty"
+                    TestId = "InvalidConfiguration_UnrecognizedKty",
+                    CancellationTokenSource = new(),
                 });
 
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
@@ -1168,7 +1275,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     PresetCurrentConfiguration = true,
                     ExpectedErrorMessage = "IDX10810: ",
                     MetadataAddress = "OpenIdConnectMetadataUnrecognizedKty.json",
-                    TestId = "InvalidConfiguration_UnrecognizedKty_PresetCurrentConfiguration"
+                    TestId = "InvalidConfiguration_UnrecognizedKty_PresetCurrentConfiguration",
+                    CancellationTokenSource = new(),
                 });
 
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
@@ -1178,7 +1286,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     DocumentRetriever = new FileDocumentRetriever(),
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX21817:", typeof(InvalidConfigurationException)),
                     MetadataAddress = "JsonWebKeySetUnrecognizedKty.json",
-                    TestId = "InvalidConfiguration_EmptyJsonWenKeySet"
+                    TestId = "InvalidConfiguration_EmptyJsonWenKeySet",
+                    CancellationTokenSource = new(),
                 });
 
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
@@ -1189,7 +1298,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     PresetCurrentConfiguration = true,
                     ExpectedErrorMessage = "IDX21817: ",
                     MetadataAddress = "JsonWebKeySetUnrecognizedKty.json",
-                    TestId = "InvalidConfiguration_EmptyJsonWenKeySet_PresetCurrentConfiguration"
+                    TestId = "InvalidConfiguration_EmptyJsonWenKeySet_PresetCurrentConfiguration",
+                    CancellationTokenSource = new(),
                 });
 
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
@@ -1199,7 +1309,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     DocumentRetriever = new FileDocumentRetriever(),
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX10814:", typeof(InvalidConfigurationException)),
                     MetadataAddress = "OpenIdConnectMetadataBadRsaDataMissingComponent.json",
-                    TestId = "InvalidConfiguration_RsaKeyMissingComponent"
+                    TestId = "InvalidConfiguration_RsaKeyMissingComponent",
+                    CancellationTokenSource = new(),
                 });
 
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
@@ -1210,7 +1321,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     PresetCurrentConfiguration = true,
                     ExpectedErrorMessage = "IDX10814: ",
                     MetadataAddress = "OpenIdConnectMetadataBadRsaDataMissingComponent.json",
-                    TestId = "InvalidConfiguration_RsaKeyMissingComponent_PresetCurrentConfiguration"
+                    TestId = "InvalidConfiguration_RsaKeyMissingComponent_PresetCurrentConfiguration",
+                    CancellationTokenSource = new(),
                 });
 
                 return theoryData;
@@ -1290,6 +1402,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
 
             public string UpdatedMetadataAddress { get; set; }
+
+            public CancellationTokenSource CancellationTokenSource { get; set; }
         }
     }
 }
