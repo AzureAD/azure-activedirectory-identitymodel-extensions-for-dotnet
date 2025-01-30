@@ -168,7 +168,7 @@ namespace Microsoft.IdentityModel.Tokens
                             LogHelper.FormatInvariant(
                                 LogMessages.IDX10646,
                                 LogHelper.MarkAsNonPII(algorithm),
-                                key,
+                                LogHelper.MarkAsNonPII(key.KeyId),
                                 LogHelper.MarkAsNonPII(typeof(AuthenticatedEncryptionProvider)))));
 
                 return cryptoProvider;
@@ -247,7 +247,7 @@ namespace Microsoft.IdentityModel.Tokens
                             LogHelper.FormatInvariant(
                                 LogMessages.IDX10646,
                                 LogHelper.MarkAsNonPII(algorithm),
-                                key,
+                                LogHelper.MarkAsNonPII(key.KeyId),
                                 LogHelper.MarkAsNonPII(typeof(SignatureProvider)))));
 
                 return keyWrapProvider;
@@ -264,7 +264,7 @@ namespace Microsoft.IdentityModel.Tokens
                     LogHelper.FormatInvariant(
                         LogMessages.IDX10661,
                         LogHelper.MarkAsNonPII(algorithm),
-                        key)));
+                        LogHelper.MarkAsNonPII(key.KeyId))));
         }
 
         /// <summary>
@@ -605,7 +605,7 @@ namespace Microsoft.IdentityModel.Tokens
                             LogHelper.FormatInvariant(
                                 LogMessages.IDX10646,
                                 LogHelper.MarkAsNonPII(algorithm),
-                                key,
+                                LogHelper.MarkAsNonPII(key.KeyId),
                                 LogHelper.MarkAsNonPII(typeof(SignatureProvider)))));
 
                 return signatureProvider;
@@ -652,7 +652,7 @@ namespace Microsoft.IdentityModel.Tokens
                         new InvalidOperationException(
                             LogHelper.FormatInvariant(
                                 LogMessages.IDX10694,
-                                key,
+                                LogHelper.MarkAsNonPII(key.KeyId),
                                 ex),
                             ex));
                 }
@@ -693,7 +693,7 @@ namespace Microsoft.IdentityModel.Tokens
                             LogHelper.FormatInvariant(
                                 LogMessages.IDX10634,
                                 LogHelper.MarkAsNonPII(algorithm),
-                                key)));
+                                LogHelper.MarkAsNonPII(key.KeyId))));
 
                 if (createAsymmetric)
                     signatureProvider = new AsymmetricSignatureProvider(key, algorithm, willCreateSignatures, this);
@@ -718,7 +718,7 @@ namespace Microsoft.IdentityModel.Tokens
                             LogHelper.FormatInvariant(
                                 LogMessages.IDX10634,
                                 LogHelper.MarkAsNonPII(algorithm),
-                                key)));
+                                LogHelper.MarkAsNonPII(key.KeyId))));
 
                 if (createAsymmetric)
                 {

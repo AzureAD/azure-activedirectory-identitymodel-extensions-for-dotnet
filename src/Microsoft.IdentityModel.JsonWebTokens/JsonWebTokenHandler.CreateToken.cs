@@ -1274,7 +1274,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
                 catch (Exception ex)
                 {
-                    throw LogHelper.LogExceptionMessage(new SecurityTokenEncryptionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10616, LogHelper.MarkAsNonPII(encryptingCredentials.Enc), encryptingCredentials.Key), ex));
+                    throw LogHelper.LogExceptionMessage(
+                        new SecurityTokenEncryptionFailedException(
+                            LogHelper.FormatInvariant(TokenLogMessages.IDX10616, LogHelper.MarkAsNonPII(encryptingCredentials.Enc), LogHelper.MarkAsNonPII(encryptingCredentials.Key.KeyId)),
+                            ex));
                 }
             }
         }
@@ -1296,13 +1299,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (key != null)
                 {
                     if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                        LogHelper.LogInformation(TokenLogMessages.IDX10904, key);
+                        LogHelper.LogInformation(TokenLogMessages.IDX10904, LogHelper.MarkAsNonPII(key.KeyId));
                 }
                 else if (configuration != null)
                 {
                     key = ResolveTokenDecryptionKeyFromConfig(jwtToken, configuration);
                     if (key != null && LogHelper.IsEnabled(EventLogLevel.Informational))
-                        LogHelper.LogInformation(TokenLogMessages.IDX10905, key);
+                        LogHelper.LogInformation(TokenLogMessages.IDX10905, LogHelper.MarkAsNonPII(key.KeyId));
                 }
 
                 if (key != null)
@@ -1383,13 +1386,19 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     (exceptionStrings ??= new StringBuilder()).AppendLine(ex.ToString());
                 }
 
-                (keysAttempted ??= new StringBuilder()).AppendLine(key.ToString());
+                (keysAttempted ??= new StringBuilder()).AppendLine(key.KeyId);
             }
 
             if (unwrappedKeys.Count > 0 || exceptionStrings is null)
                 return unwrappedKeys;
             else
-                throw LogHelper.LogExceptionMessage(new SecurityTokenKeyWrapException(LogHelper.FormatInvariant(TokenLogMessages.IDX10618, (object)keysAttempted ?? "", (object)exceptionStrings ?? "", jwtToken)));
+                throw LogHelper.LogExceptionMessage(
+                    new SecurityTokenKeyWrapException(
+                        LogHelper.FormatInvariant(
+                            TokenLogMessages.IDX10618,
+                            LogHelper.MarkAsNonPII((object)keysAttempted ?? ""),
+                            LogHelper.MarkAsNonPII((object)exceptionStrings ?? ""),
+                            jwtToken)));
         }
     }
 }
