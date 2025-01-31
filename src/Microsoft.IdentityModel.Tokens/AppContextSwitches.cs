@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Enabling this switch will cause the configuration manager to block other requests to GetConfigurationAsync if a request is already in progress.
-        /// The default behavior is if a request is already in progress, the current configuration will be returned until the request is completed on
+        /// The default configuration refresh behavior is if a request is already in progress, the current configuration will be returned until the ongoing request is completed on
         /// a background thread.
         /// </summary>
         internal const string UpdateConfigAsBlockingSwitch = "Switch.Microsoft.IdentityModel.UpdateConfigAsBlocking";

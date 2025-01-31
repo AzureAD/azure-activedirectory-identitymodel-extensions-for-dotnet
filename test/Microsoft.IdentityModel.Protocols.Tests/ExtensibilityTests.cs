@@ -71,7 +71,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             var docRetriever = new FileDocumentRetriever();
             var configManager = new ConfigurationManager<IssuerMetadata>("IssuerMetadata.json", new IssuerConfigurationRetriever(), docRetriever)
             {
-                BackgroundTaskCancellationToken = cts.Token
+                BackgroundRefreshTaskCancellationToken = cts.Token
             };
             var context = new CompareContext($"{this}.ConfigurationManagerUsingCustomClass");
 
@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             // AutomaticRefreshInterval should pick up new bits.
             configManager = new ConfigurationManager<IssuerMetadata>("IssuerMetadata.json", new IssuerConfigurationRetriever(), docRetriever)
             {
-                BackgroundTaskCancellationToken = cts.Token
+                BackgroundRefreshTaskCancellationToken = cts.Token
             };
             configManager.RequestRefresh();
             configuration = await configManager.GetConfigurationAsync();

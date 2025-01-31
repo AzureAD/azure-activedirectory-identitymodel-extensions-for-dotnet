@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.Protocols
     {
 #pragma warning disable IDE0044 // Add readonly modifier
 #pragma warning disable CS0649 // Unused, it gets used in tests.
-        private Action _onBackgroundTaskFinish;
+        internal Action _onBackgroundTaskFinish;
 #pragma warning restore CS0649 // Unused
 #pragma warning restore IDE0044 // Add readonly modifier
 
@@ -65,7 +65,13 @@ namespace Microsoft.IdentityModel.Protocols
         // refresh interval has passed.
         bool _refreshRequested;
 
-        private readonly AutoResetEvent _updateMetadata = new(false);
+        // Wait handle used to signal a background task to update the configuration.
+        // Handle starts unset, and AutoResetEvent.Set() sets it, this indicates that
+        // the background refresh task should immediately run.
+        private readonly AutoResetEvent _updateMetadataEvent = new(false);
+
+        // Background task that updates the configuration. Signaled with _updateMetadataEvent.
+        // Task should be started with EnsureBackgroundRefreshTaskIsRunning.
         Task _updateMetadataTask;
 
         /// <summary>
@@ -74,7 +80,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// then this will not be used.
         /// Note that this does not influence <see cref="GetConfigurationAsync(CancellationToken)"/>.
         /// </summary>
-        public CancellationToken BackgroundTaskCancellationToken { get; set; }
+        public CancellationToken BackgroundRefreshTaskCancellationToken { get; set; }
 
         /// <summary>
         /// Instantiates a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
@@ -139,7 +145,7 @@ namespace Microsoft.IdentityModel.Protocols
             _configRetriever = configRetriever;
 
             if (!AppContextSwitches.UpdateConfigAsBlocking)
-                EnsureBackgroundTaskIsRunning();
+                EnsureBackgroundRefreshTaskIsRunning();
         }
 
         /// <summary>
@@ -279,8 +285,8 @@ namespace Microsoft.IdentityModel.Protocols
                 {
                     if (SyncAfter <= _timeProvider.GetUtcNow())
                     {
-                        EnsureBackgroundTaskIsRunning();
-                        _updateMetadata.Set();
+                        EnsureBackgroundRefreshTaskIsRunning();
+                        _updateMetadataEvent.Set();
                     }
                     else
                     {
@@ -303,9 +309,9 @@ namespace Microsoft.IdentityModel.Protocols
                     fetchMetadataFailure));
         }
 
-        private void EnsureBackgroundTaskIsRunning()
+        private void EnsureBackgroundRefreshTaskIsRunning()
         {
-            if (BackgroundTaskCancellationToken.IsCancellationRequested)
+            if (BackgroundRefreshTaskCancellationToken.IsCancellationRequested)
                 return;
 
             if (_updateMetadataTask == null || _updateMetadataTask.Status != TaskStatus.Running)
@@ -335,9 +341,9 @@ namespace Microsoft.IdentityModel.Protocols
         {
             try
             {
-                while (!BackgroundTaskCancellationToken.IsCancellationRequested)
+                while (!BackgroundRefreshTaskCancellationToken.IsCancellationRequested)
                 {
-                    if (_updateMetadata.WaitOne(500))
+                    if (_updateMetadataEvent.WaitOne(500))
                     {
                         UpdateCurrentConfiguration();
                         _onBackgroundTaskFinish?.Invoke();
@@ -473,8 +479,8 @@ namespace Microsoft.IdentityModel.Protocols
                 {
                     _refreshRequested = true;
                     LastRequestRefresh = now;
-                    EnsureBackgroundTaskIsRunning();
-                    _updateMetadata.Set();
+                    EnsureBackgroundRefreshTaskIsRunning();
+                    _updateMetadataEvent.Set();
                 }
             }
         }

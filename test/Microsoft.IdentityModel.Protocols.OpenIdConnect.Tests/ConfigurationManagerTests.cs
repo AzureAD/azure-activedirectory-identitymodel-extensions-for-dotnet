@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     theoryData.DocumentRetriever,
                     theoryData.ConfigurationValidator);
 
-                configurationManager.BackgroundTaskCancellationToken = cts.Token;
+                configurationManager.BackgroundRefreshTaskCancellationToken = cts.Token;
 
                 var configuration = await configurationManager.GetConfigurationAsync(CancellationToken.None);
 
@@ -203,7 +203,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             var documentRetriever = new HttpDocumentRetriever(HttpResponseMessageUtils.SetupHttpClientThatReturns("OpenIdConnectMetadata.json", HttpStatusCode.NotFound));
             var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), documentRetriever);
-            configManager.BackgroundTaskCancellationToken = cts.Token;
+            configManager.BackgroundRefreshTaskCancellationToken = cts.Token;
 
             // First time to fetch metadata
             try
@@ -252,7 +252,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     new OpenIdConnectConfigurationRetriever(),
                     inMemoryDocumentRetriever);
 
-            configurationManager.BackgroundTaskCancellationToken = cts.Token;
+            configurationManager.BackgroundRefreshTaskCancellationToken = cts.Token;
 
             OpenIdConnectConfiguration configuration = await configurationManager.GetConfigurationAsync();
 
@@ -305,7 +305,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 documentRetriever)
             { RefreshInterval = TimeSpan.FromSeconds(2) };
 
-            configManager.BackgroundTaskCancellationToken = cts.Token;
+            configManager.BackgroundRefreshTaskCancellationToken = cts.Token;
 
             // ConfigurationManager._syncAfter is set to DateTimeOffset.MinValue on startup
             // If obtaining the metadata fails due to error, the value should not change
@@ -512,7 +512,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         new OpenIdConnectConfigurationRetriever(),
                         InMemoryDocumentRetriever)
                     {
-                        BackgroundTaskCancellationToken = cts.Token
+                        BackgroundRefreshTaskCancellationToken = cts.Token
                     },
                     CancellationTokenSource = cts,
                     ExpectedConfiguration = OpenIdConfigData.AADCommonV1Config,
@@ -531,7 +531,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                        new OpenIdConnectConfigurationRetriever(),
                        InMemoryDocumentRetriever)
                     {
-                        BackgroundTaskCancellationToken = cts.Token
+                        BackgroundRefreshTaskCancellationToken = cts.Token
                     },
                     CancellationTokenSource = cts,
                     ExpectedConfiguration = OpenIdConfigData.AADCommonV1Config,
@@ -550,7 +550,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         new OpenIdConnectConfigurationRetriever(),
                         InMemoryDocumentRetriever)
                     {
-                        BackgroundTaskCancellationToken = cts.Token
+                        BackgroundRefreshTaskCancellationToken = cts.Token
                     },
                     CancellationTokenSource = cts,
                     ExpectedConfiguration = OpenIdConfigData.AADCommonV1Config,
@@ -632,7 +632,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         new OpenIdConnectConfigurationRetriever(),
                         InMemoryDocumentRetriever)
                     {
-                        BackgroundTaskCancellationToken = cts.Token
+                        BackgroundRefreshTaskCancellationToken = cts.Token
                     },
                     CancellationTokenSource = cts,
                     ExpectedConfiguration = OpenIdConfigData.AADCommonV1Config,
@@ -651,7 +651,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         new OpenIdConnectConfigurationRetriever(),
                         InMemoryDocumentRetriever)
                     {
-                        BackgroundTaskCancellationToken = cts.Token
+                        BackgroundRefreshTaskCancellationToken = cts.Token
                     },
                     CancellationTokenSource = cts,
                     ExpectedConfiguration = OpenIdConfigData.AADCommonV1Config,
@@ -670,7 +670,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         new OpenIdConnectConfigurationRetriever(),
                         InMemoryDocumentRetriever)
                     {
-                        BackgroundTaskCancellationToken = cts.Token
+                        BackgroundRefreshTaskCancellationToken = cts.Token
                     },
                     CancellationTokenSource = cts,
                     ExpectedConfiguration = OpenIdConfigData.AADCommonV1Config,
@@ -773,7 +773,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 new OpenIdConnectConfigurationRetriever(),
                 docRetriever);
 
-            configManager.BackgroundTaskCancellationToken = cts.Token;
+            configManager.BackgroundRefreshTaskCancellationToken = cts.Token;
 
             AutoResetEvent resetEvent = SetupResetEvent(configManager, blocking);
 
@@ -855,7 +855,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 new OpenIdConnectConfigurationRetriever(),
                 docRetriever);
 
-            configManager.BackgroundTaskCancellationToken = cts.Token;
+            configManager.BackgroundRefreshTaskCancellationToken = cts.Token;
 
             var configuration = await configManager.GetConfigurationAsync(CancellationToken.None);
 
@@ -996,7 +996,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 docRetriever);
 
             TestUtilities.SetField(configManager, "_timeProvider", timeProvider);
-            configManager.BackgroundTaskCancellationToken = cts.Token;
+            configManager.BackgroundRefreshTaskCancellationToken = cts.Token;
 
             var resetEvent = SetupResetEvent(configManager, blocking);
 
@@ -1093,7 +1093,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 docRetriever);
 
             TestUtilities.SetField(configManager, "_timeProvider", timeProvider);
-            configManager.BackgroundTaskCancellationToken = cts.Token;
+            configManager.BackgroundRefreshTaskCancellationToken = cts.Token;
 
             TimeSpan advanceInterval = BaseConfigurationManager.DefaultAutomaticRefreshInterval.Add(TimeSpan.FromSeconds(configManager.AutomaticRefreshInterval.TotalSeconds));
 
@@ -1162,7 +1162,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 theoryData.DocumentRetriever,
                 theoryData.ConfigurationValidator)
             {
-                BackgroundTaskCancellationToken = theoryData.CancellationTokenSource.Token
+                BackgroundRefreshTaskCancellationToken = theoryData.CancellationTokenSource.Token
             };
 
             var resetEvent = SetupResetEvent(configurationManager, blocking);
