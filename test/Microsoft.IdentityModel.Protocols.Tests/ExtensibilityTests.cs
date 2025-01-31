@@ -69,10 +69,11 @@ namespace Microsoft.IdentityModel.Protocols.Tests
         {
             var cts = new CancellationTokenSource();
             var docRetriever = new FileDocumentRetriever();
-            var configManager = new ConfigurationManager<IssuerMetadata>("IssuerMetadata.json", new IssuerConfigurationRetriever(), docRetriever);
+            var configManager = new ConfigurationManager<IssuerMetadata>("IssuerMetadata.json", new IssuerConfigurationRetriever(), docRetriever)
+            {
+                BackgroundTaskCancellationToken = cts.Token
+            };
             var context = new CompareContext($"{this}.ConfigurationManagerUsingCustomClass");
-
-            TestUtilities.SetField(configManager, "_BackgroundTaskCancellationToken", cts.Token);
 
             var configuration = await configManager.GetConfigurationAsync();
             configManager.MetadataAddress = "IssuerMetadata.json";
@@ -81,11 +82,13 @@ namespace Microsoft.IdentityModel.Protocols.Tests
                 context.Diffs.Add("!IdentityComparer.AreEqual(configuration, configuration2)");
 
             // AutomaticRefreshInterval should pick up new bits.
-            configManager = new ConfigurationManager<IssuerMetadata>("IssuerMetadata.json", new IssuerConfigurationRetriever(), docRetriever);
+            configManager = new ConfigurationManager<IssuerMetadata>("IssuerMetadata.json", new IssuerConfigurationRetriever(), docRetriever)
+            {
+                BackgroundTaskCancellationToken = cts.Token
+            };
             configManager.RequestRefresh();
             configuration = await configManager.GetConfigurationAsync();
             TestUtilities.SetField(configManager, "_lastRequestRefresh", DateTime.UtcNow.Subtract(TimeSpan.FromHours(1)));
-            TestUtilities.SetField(configManager, "_BackgroundTaskCancellationToken", cts.Token);
 
             configManager.MetadataAddress = "IssuerMetadata2.json";
 

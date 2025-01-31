@@ -1,0 +1,2 @@
+Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.BackgroundTaskCancellationToken.get -> System.Threading.CancellationToken
+Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.BackgroundTaskCancellationToken.set -> void

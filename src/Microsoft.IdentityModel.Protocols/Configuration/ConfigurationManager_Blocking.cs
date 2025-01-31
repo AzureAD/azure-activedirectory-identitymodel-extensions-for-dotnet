@@ -17,13 +17,6 @@ namespace Microsoft.IdentityModel.Protocols
 
         private TimeSpan _bootstrapRefreshInterval = TimeSpan.FromSeconds(1);
 
-        private DateTime _lastRefresh = DateTime.MinValue;
-        private DateTime LastRefresh
-        {
-            get => _lastRefresh;
-            set => AtomicUpdateDateTime(ref _lastRefresh, ref value);
-        }
-
         private async Task<T> GetConfigurationWithBlockingAsync(CancellationToken cancel)
         {
             Exception _fetchMetadataFailure = null;
@@ -53,7 +46,7 @@ namespace Microsoft.IdentityModel.Protocols
                                 throw LogHelper.LogExceptionMessage(new InvalidConfigurationException(LogHelper.FormatInvariant(LogMessages.IDX20810, result.ErrorMessage)));
                         }
 
-                        LastRefresh = _timeProvider.GetUtcNow().UtcDateTime;
+                        LastRequestRefresh = _timeProvider.GetUtcNow().UtcDateTime;
                         TelemetryForUpdateBlocking();
                         UpdateConfiguration(configuration);
                     }
@@ -129,7 +122,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             DateTime now = _timeProvider.GetUtcNow().UtcDateTime;
 
-            if (now >= DateTimeUtil.Add(LastRefresh, RefreshInterval) || _isFirstRefreshRequest)
+            if (now >= DateTimeUtil.Add(LastRequestRefresh, RefreshInterval) || _isFirstRefreshRequest)
             {
                 _refreshRequested = true;
                 _syncAfter = now;

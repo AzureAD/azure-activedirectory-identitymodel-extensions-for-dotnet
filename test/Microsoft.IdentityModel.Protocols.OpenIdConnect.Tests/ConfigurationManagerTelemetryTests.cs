@@ -50,7 +50,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 TelemetryClient = testTelemetryClient
             };
 
-            TestUtilities.SetField(configurationManager, "_BackgroundTaskCancellationToken", cts.Token);
+            configurationManager.BackgroundTaskCancellationToken = cts.Token;
 
             var cancel = new CancellationToken();
             AutoResetEvent resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager, blocking);
@@ -122,7 +122,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 TelemetryClient = testTelemetryClient
             };
 
-            TestUtilities.SetField(configurationManager, "_BackgroundTaskCancellationToken", cts.Token);
+            configurationManager.BackgroundTaskCancellationToken = cts.Token;
             AutoResetEvent resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager, blocking);
 
             var timeProvider = new FakeTimeProvider();

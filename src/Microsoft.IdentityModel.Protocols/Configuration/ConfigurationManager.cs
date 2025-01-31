@@ -26,8 +26,6 @@ namespace Microsoft.IdentityModel.Protocols
 #pragma warning restore CS0649 // Unused
 #pragma warning restore IDE0044 // Add readonly modifier
 
-        private CancellationToken _BackgroundTaskCancellationToken = CancellationToken.None;
-
         private DateTime _syncAfter = DateTime.MinValue;
         private DateTime SyncAfter
         {
@@ -69,6 +67,14 @@ namespace Microsoft.IdentityModel.Protocols
 
         private readonly AutoResetEvent _updateMetadata = new(false);
         Task _updateMetadataTask;
+
+        /// <summary>
+        /// Cancellation token to control cancelling the background task.
+        /// If 'Switch.Microsoft.IdentityModel.UpdateConfigAsBlocking' is set to true,
+        /// then this will not be used.
+        /// Note that this does not influence <see cref="GetConfigurationAsync(CancellationToken)"/>.
+        /// </summary>
+        public CancellationToken BackgroundTaskCancellationToken { get; set; }
 
         /// <summary>
         /// Instantiates a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
@@ -131,7 +137,9 @@ namespace Microsoft.IdentityModel.Protocols
             MetadataAddress = metadataAddress;
             _docRetriever = docRetriever;
             _configRetriever = configRetriever;
-            EnsureBackgroundTaskIsRunning();
+
+            if (!AppContextSwitches.UpdateConfigAsBlocking)
+                EnsureBackgroundTaskIsRunning();
         }
 
         /// <summary>
@@ -297,6 +305,9 @@ namespace Microsoft.IdentityModel.Protocols
 
         private void EnsureBackgroundTaskIsRunning()
         {
+            if (BackgroundTaskCancellationToken.IsCancellationRequested)
+                return;
+
             if (_updateMetadataTask == null || _updateMetadataTask.Status != TaskStatus.Running)
                 _updateMetadataTask = Task.Run(UpdateCurrentConfigurationUsingSignals);
         }
@@ -322,13 +333,19 @@ namespace Microsoft.IdentityModel.Protocols
 
         private void UpdateCurrentConfigurationUsingSignals()
         {
-            while (!_BackgroundTaskCancellationToken.IsCancellationRequested)
+            try
             {
-                if (_updateMetadata.WaitOne(500))
+                while (!BackgroundTaskCancellationToken.IsCancellationRequested)
                 {
-                    UpdateCurrentConfiguration();
-                    _onBackgroundTaskFinish?.Invoke();
+                    if (_updateMetadata.WaitOne(500))
+                    {
+                        UpdateCurrentConfiguration();
+                        _onBackgroundTaskFinish?.Invoke();
+                    }
                 }
+            }
+            catch (Exception)
+            {
             }
         }
 
