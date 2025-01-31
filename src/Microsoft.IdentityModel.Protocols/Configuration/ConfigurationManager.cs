@@ -350,8 +350,9 @@ namespace Microsoft.IdentityModel.Protocols
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                TelemetryClient.LogBackgroundRefreshFailure(MetadataAddress, ex);
             }
         }
 

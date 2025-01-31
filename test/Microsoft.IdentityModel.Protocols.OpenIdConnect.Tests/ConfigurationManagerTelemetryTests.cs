@@ -160,14 +160,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             DateTime syncAfter = (DateTime)TestUtilities.GetField(configurationManager, "_syncAfter");
 
-            try
-            {
-                Assert.Equal(theoryData.ExpectedTagList, testTelemetryClient.ExportedItems);
-            }
-            catch (Exception)
-            {
-                throw new Exception(syncAfter.ToString() + "-" + (object.ReferenceEquals(firstConfig, secondConfig).ToString() + "-" + AppContextSwitches.UpdateConfigAsBlocking.ToString()));
-            }
+            Assert.Equal(theoryData.ExpectedTagList, testTelemetryClient.ExportedItems);
         }
 
         public static TheoryData<ConfigurationManagerTelemetryTheoryData<OpenIdConnectConfiguration>> GetConfiguration_ExpectedTagList_TheoryData()

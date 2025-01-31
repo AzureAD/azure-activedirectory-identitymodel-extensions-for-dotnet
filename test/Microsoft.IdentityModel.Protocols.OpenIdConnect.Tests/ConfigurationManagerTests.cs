@@ -143,7 +143,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     DocumentRetriever = new HttpDocumentRetriever(),
                     ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
                     MetadataAddress = "OpenIdConnectMetadata.json",
-                    TestId = "ConfigurationRetreiver: NULL"
+                    TestId = "ConfigurationRetriever: NULL"
                 });
 
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>

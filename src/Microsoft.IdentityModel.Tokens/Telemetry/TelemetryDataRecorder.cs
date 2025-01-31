@@ -26,9 +26,16 @@ namespace Microsoft.IdentityModel.Telemetry
         /// <summary>
         /// Counter to capture configuration refresh requests to ConfigurationManager.
         /// </summary>
+        internal static readonly Counter<long> ConfigurationManagerCounter = IdentityModelMeter.CreateCounter<long>(IdentityModelConfigurationManagerCounterName, description: IdentityModelConfigurationManagerCounterDescription);
         internal const string IdentityModelConfigurationManagerCounterName = "IdentityModelConfigurationManager";
         internal const string IdentityModelConfigurationManagerCounterDescription = "Counter capturing configuration manager operations.";
-        internal static readonly Counter<long> ConfigurationManagerCounter = IdentityModelMeter.CreateCounter<long>(IdentityModelConfigurationManagerCounterName, description: IdentityModelConfigurationManagerCounterDescription);
+
+        /// <summary>
+        /// Counter to capture background refresh failures in the ConfigurationManager.
+        /// </summary>
+        internal static readonly Counter<long> BackgroundRefreshFailureCounter = IdentityModelMeter.CreateCounter<long>(BackgroundRefreshFailureCounterName, description: BackgroundRefreshFailureCounterDescription);
+        internal const string BackgroundRefreshFailureCounterName = "IdentityModelConfigurationManagerBackgroundRefreshFailure";
+        internal const string BackgroundRefreshFailureCounterDescription = "Counter capturing configuration manager background refresh failures.";
 
         /// <summary>
         /// Histogram to capture total duration of configuration retrieval by ConfigurationManager in milliseconds.
@@ -46,6 +53,11 @@ namespace Microsoft.IdentityModel.Telemetry
         internal static void IncrementConfigurationRefreshRequestCounter(in TagList tagList)
         {
             ConfigurationManagerCounter.Add(1, tagList);
+        }
+
+        internal static void IncrementConfigurationBackgroundRefreshFailureCounter(in TagList tagList)
+        {
+            BackgroundRefreshFailureCounter.Add(1, tagList);
         }
     }
 }
