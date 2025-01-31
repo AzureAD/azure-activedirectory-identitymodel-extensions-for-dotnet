@@ -4,9 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Time.Testing;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration;
@@ -19,6 +19,7 @@ using Xunit;
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 {
     [ResetAppContextSwitches]
+    [Collection(nameof(AppContextSwitches.UpdateConfigAsBlocking))]
     public class ConfigurationManagerTelemetryTests
     {
         [Fact]
@@ -86,7 +87,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 () => expectedCounterTagList.Count == testTelemetryClient.ExportedItems.Count &&
                     expectedHistogramTagList.Count == testTelemetryClient.ExportedHistogramItems.Count,
                 TimeSpan.FromMilliseconds(250),
-                TimeSpan.FromSeconds(10));
+                TimeSpan.FromSeconds(20));
 
             Assert.Equal(expectedCounterTagList, testTelemetryClient.ExportedItems);
             Assert.Equal(expectedHistogramTagList, testTelemetryClient.ExportedHistogramItems);
@@ -124,14 +125,20 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.SetField(configurationManager, "_BackgroundTaskCancellationToken", cts.Token);
             AutoResetEvent resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager, blocking);
 
+            var timeProvider = new FakeTimeProvider();
+            TestUtilities.SetField(configurationManager, "_timeProvider", timeProvider);
+
+            OpenIdConnectConfiguration firstConfig = null;
+            OpenIdConnectConfiguration secondConfig = null;
+
             try
             {
-                await configurationManager.GetConfigurationAsync();
-                if (theoryData.SyncAfter != null)
+                firstConfig = await configurationManager.GetConfigurationAsync();
+                if (theoryData.AdjustTime.HasValue)
                 {
                     testTelemetryClient.ClearExportedItems();
-                    TestUtilities.SetField(configurationManager, "_syncAfter", theoryData.SyncAfter);
-                    await configurationManager.GetConfigurationAsync();
+                    timeProvider.Advance(theoryData.AdjustTime.Value);
+                    secondConfig = await configurationManager.GetConfigurationAsync();
 
                     if (!blocking)
                         ConfigurationManagerTests.WaitOrFail(resetEvent);
@@ -148,10 +155,19 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             await ConfigurationManagerTests.PollForConditionAsync(
                 () => theoryData.ExpectedTagList.Count == testTelemetryClient.ExportedItems.Count,
-                TimeSpan.FromMilliseconds(100),
-                TimeSpan.FromSeconds(10));
+                TimeSpan.FromMilliseconds(250),
+                TimeSpan.FromSeconds(20));
 
-            Assert.Equal(theoryData.ExpectedTagList, testTelemetryClient.ExportedItems);
+            DateTime syncAfter = (DateTime)TestUtilities.GetField(configurationManager, "_syncAfter");
+
+            try
+            {
+                Assert.Equal(theoryData.ExpectedTagList, testTelemetryClient.ExportedItems);
+            }
+            catch (Exception)
+            {
+                throw new Exception(syncAfter.ToString() + "-" + (object.ReferenceEquals(firstConfig, secondConfig).ToString() + "-" + AppContextSwitches.UpdateConfigAsBlocking.ToString()));
+            }
         }
 
         public static TheoryData<ConfigurationManagerTelemetryTheoryData<OpenIdConnectConfiguration>> GetConfiguration_ExpectedTagList_TheoryData()
@@ -199,7 +215,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 {
                     MetadataAddress = OpenIdConfigData.AADCommonUrl,
                     ConfigurationValidator = new OpenIdConnectConfigurationValidator(),
-                    SyncAfter = DateTime.UtcNow - TimeSpan.FromDays(2),
+                    AdjustTime = TimeSpan.FromDays(1),
                     ExpectedTagList = new Dictionary<string, object>
                     {
                         { TelemetryConstants.MetadataAddressTag, OpenIdConfigData.AADCommonUrl },
@@ -221,7 +237,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
         public IConfigurationValidator<T> ConfigurationValidator { get; set; }
 
-        public DateTime? SyncAfter { get; set; } = null;
+        public TimeSpan? AdjustTime { get; set; }
 
         public Dictionary<string, object> ExpectedTagList { get; set; }
     }

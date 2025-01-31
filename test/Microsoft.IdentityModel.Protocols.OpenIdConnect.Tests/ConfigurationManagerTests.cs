@@ -21,6 +21,7 @@ using Xunit;
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 {
     [ResetAppContextSwitches]
+    [Collection(nameof(AppContextSwitches.UpdateConfigAsBlocking))]
     public class ConfigurationManagerTests
     {
         /// <summary>
@@ -1061,7 +1062,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var context = new CompareContext($"{this}.GetConfigurationAsync_RespectsRefreshInterval");
 
             var timeProvider = new FakeTimeProvider();
-
             var docRetriever = new FileDocumentRetriever();
 
             var cts = new CancellationTokenSource();
@@ -1074,8 +1074,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             TestUtilities.SetField(configManager, "_BackgroundTaskCancellationToken", cts.Token);
 
             TimeSpan advanceInterval = BaseConfigurationManager.DefaultAutomaticRefreshInterval.Add(TimeSpan.FromSeconds(configManager.AutomaticRefreshInterval.TotalSeconds));
-
-            TestUtilities.SetField(configManager, "_timeProvider", timeProvider);
 
             // Get the first configuration.
             var configuration = await configManager.GetConfigurationAsync(CancellationToken.None);
@@ -1166,15 +1164,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                         () => listener.TraceBuffer.Contains(theoryData.ExpectedErrorMessage),
                         TimeSpan.FromMilliseconds(100),
                         TimeSpan.FromSeconds(10));
-
-                    if (!success)
-                        context.AddDiff($"Expected 1 or more logs to be written, but only {listener.WriteCount} were written.");
                 }
 
                 if (!string.IsNullOrEmpty(theoryData.ExpectedErrorMessage) && !listener.TraceBuffer.Contains(theoryData.ExpectedErrorMessage))
                     context.AddDiff($"Expected exception to contain: '{theoryData.ExpectedErrorMessage}'.{Environment.NewLine}Log is:{Environment.NewLine}'{listener.TraceBuffer}'");
 
-                Console.WriteLine(listener.WriteCount);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
