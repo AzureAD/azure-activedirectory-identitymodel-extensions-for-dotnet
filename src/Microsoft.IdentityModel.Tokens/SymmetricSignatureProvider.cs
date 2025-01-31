@@ -77,7 +77,7 @@ namespace Microsoft.IdentityModel.Tokens
                     new NotSupportedException(
                         LogHelper.FormatInvariant(
                             LogMessages.IDX10634,
-                            LogHelper.MarkAsNonPII((algorithm)), key)));
+                            LogHelper.MarkAsNonPII((algorithm)), LogHelper.MarkAsNonPII(key.KeyId))));
 
             if (key.KeySize < MinimumSymmetricKeySizeInBits)
                 throw LogHelper.LogExceptionMessage(
@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.Tokens
                                 (algorithm)),
                             LogHelper.MarkAsNonPII(
                                 MinimumSymmetricKeySizeInBits),
-                            key,
+                            LogHelper.MarkAsNonPII(key.KeyId),
                             LogHelper.MarkAsNonPII(key.KeySize))));
 
             WillCreateSignatures = willCreateSignatures;
@@ -144,7 +144,7 @@ namespace Microsoft.IdentityModel.Tokens
             if (key is JsonWebKey jsonWebKey && jsonWebKey.K != null && jsonWebKey.Kty == JsonWebAlgorithmsKeyTypes.Octet)
                 return Base64UrlEncoder.DecodeBytes(jsonWebKey.K);
 
-            throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10667, key)));
+            throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10667, LogHelper.MarkAsNonPII(key.KeyId))));
         }
 
         /// <summary>

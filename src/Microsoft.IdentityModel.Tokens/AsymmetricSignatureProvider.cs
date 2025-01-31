@@ -128,14 +128,15 @@ namespace Microsoft.IdentityModel.Tokens
             if (willCreateSignatures && FoundPrivateKey(key) == PrivateKeyStatus.DoesNotExist)
                 throw LogHelper.LogExceptionMessage(
                     new InvalidOperationException(
-                        LogHelper.FormatInvariant(LogMessages.IDX10638, key)));
+                        LogHelper.FormatInvariant(LogMessages.IDX10638, LogHelper.MarkAsNonPII(key.KeyId))));
 
             if (!_cryptoProviderFactory.IsSupportedAlgorithm(algorithm, key))
                 throw LogHelper.LogExceptionMessage(
                     new NotSupportedException(
                         LogHelper.FormatInvariant(
                             LogMessages.IDX10634,
-                            LogHelper.MarkAsNonPII((algorithm)), key)));
+                            LogHelper.MarkAsNonPII((algorithm)),
+                            LogHelper.MarkAsNonPII(key.KeyId))));
 
             WillCreateSignatures = willCreateSignatures;
             _asymmetricAdapterObjectPool = new DisposableObjectPool<AsymmetricAdapter>(
@@ -346,12 +347,12 @@ namespace Microsoft.IdentityModel.Tokens
                     keySize = convertedAsymmetricKey.KeySize;
                 else if (convertedSecurityKey is SymmetricSecurityKey)
                     throw LogHelper.LogExceptionMessage(
-                        new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10704, key)));
+                        new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10704, LogHelper.MarkAsNonPII(key.KeyId))));
             }
             else
             {
                 throw LogHelper.LogExceptionMessage(
-                    new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10704, key)));
+                    new NotSupportedException(LogHelper.FormatInvariant(LogMessages.IDX10704, LogHelper.MarkAsNonPII(key.KeyId))));
             }
 
             if (willCreateSignatures)
@@ -363,7 +364,7 @@ namespace Microsoft.IdentityModel.Tokens
                             nameof(key),
                             LogHelper.FormatInvariant(
                                 LogMessages.IDX10630,
-                                key,
+                                LogHelper.MarkAsNonPII(key.KeyId),
                                 LogHelper.MarkAsNonPII(
                                     MinimumAsymmetricKeySizeInBitsForSigningMap[algorithm]),
                                 LogHelper.MarkAsNonPII(keySize))));

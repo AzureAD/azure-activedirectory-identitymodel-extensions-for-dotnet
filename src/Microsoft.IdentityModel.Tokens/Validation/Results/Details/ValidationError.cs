@@ -287,8 +287,11 @@ namespace Microsoft.IdentityModel.Tokens
         {
             // String is allocated, but it goes out of scope immediately after the call
             string key = filePath + lineNumber;
-            StackFrame frame = CachedStackFrames.GetOrAdd(key, new StackFrame(skipFrames, true));
-            return frame;
+
+            return CachedStackFrames.GetOrAdd(
+                key,
+                // Need to skip the call to the delegate + GetOrAdd when creating the frame
+                _ => new StackFrame(skipFrames + 2, true));
         }
 
         // ConcurrentDictionary is thread-safe and only locks when adding a new item.
