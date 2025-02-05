@@ -58,3 +58,5 @@ Copyright (c) Microsoft Corporation.  All rights reserved. Licensed under the MI
 ## We Value and Adhere to the Microsoft Open Source Code of Conduct
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
+I have a BOT and hacker in my device iPhone 15 that I’m trying to get out. It’s been there for the past year. I’ve tried everything. I don’t know what to do there after my investments they’re gonna ruin me. Please help me.
