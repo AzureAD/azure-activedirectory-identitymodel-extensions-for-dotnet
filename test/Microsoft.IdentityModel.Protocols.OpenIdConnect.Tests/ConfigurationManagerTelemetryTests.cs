@@ -37,8 +37,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
         private static async Task RequestRefresh_ExpectedTagsBody(bool blocking = false)
         {
-            var cts = new CancellationTokenSource();
-
             // arrange
             var testTelemetryClient = new MockTelemetryClient();
             var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
@@ -50,19 +48,16 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 TelemetryClient = testTelemetryClient
             };
 
-            configurationManager.BackgroundRefreshTaskCancellationToken = cts.Token;
-
-            var cancel = new CancellationToken();
             AutoResetEvent resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager, blocking);
 
             // act
             // Retrieve the configuration for the first time
-            await configurationManager.GetConfigurationAsync(cancel);
+            await configurationManager.GetConfigurationAsync();
             testTelemetryClient.ClearExportedItems();
 
             // Manually request a config refresh
             configurationManager.RequestRefresh();
-            await configurationManager.GetConfigurationAsync(cancel);
+            await configurationManager.GetConfigurationAsync();
 
             if (!blocking)
                 ConfigurationManagerTests.WaitOrFail(resetEvent);
@@ -81,7 +76,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer }
             };
 
-            cts.Cancel();
+            configurationManager.ShutdownBackgroundTask();
 
             await ConfigurationManagerTests.PollForConditionAsync(
                 () => expectedCounterTagList.Count == testTelemetryClient.ExportedItems.Count &&
@@ -111,7 +106,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             bool blocking = false)
         {
             var testTelemetryClient = new MockTelemetryClient();
-            var cts = new CancellationTokenSource();
 
             var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
                 theoryData.MetadataAddress,
@@ -122,7 +116,6 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 TelemetryClient = testTelemetryClient
             };
 
-            configurationManager.BackgroundRefreshTaskCancellationToken = cts.Token;
             AutoResetEvent resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager, blocking);
 
             var timeProvider = new FakeTimeProvider();
@@ -150,7 +143,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             }
             finally
             {
-                cts.Cancel();
+                configurationManager.ShutdownBackgroundTask();
             }
 
             await ConfigurationManagerTests.PollForConditionAsync(

@@ -1,2 +1,1 @@
-Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.BackgroundRefreshTaskCancellationToken.get -> System.Threading.CancellationToken
-Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.BackgroundRefreshTaskCancellationToken.set -> void
+Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ShutdownBackgroundTask() -> void

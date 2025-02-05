@@ -67,12 +67,8 @@ namespace Microsoft.IdentityModel.Protocols.Tests
         [Fact]
         public async Task ConfigurationManagerUsingCustomClass()
         {
-            var cts = new CancellationTokenSource();
             var docRetriever = new FileDocumentRetriever();
-            var configManager = new ConfigurationManager<IssuerMetadata>("IssuerMetadata.json", new IssuerConfigurationRetriever(), docRetriever)
-            {
-                BackgroundRefreshTaskCancellationToken = cts.Token
-            };
+            var configManager = new ConfigurationManager<IssuerMetadata>("IssuerMetadata.json", new IssuerConfigurationRetriever(), docRetriever);
             var context = new CompareContext($"{this}.ConfigurationManagerUsingCustomClass");
 
             var configuration = await configManager.GetConfigurationAsync();
@@ -81,11 +77,10 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             if (!IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer, context))
                 context.Diffs.Add("!IdentityComparer.AreEqual(configuration, configuration2)");
 
+            configManager.ShutdownBackgroundTask();
+
             // AutomaticRefreshInterval should pick up new bits.
-            configManager = new ConfigurationManager<IssuerMetadata>("IssuerMetadata.json", new IssuerConfigurationRetriever(), docRetriever)
-            {
-                BackgroundRefreshTaskCancellationToken = cts.Token
-            };
+            configManager = new ConfigurationManager<IssuerMetadata>("IssuerMetadata.json", new IssuerConfigurationRetriever(), docRetriever);
             configManager.RequestRefresh();
             configuration = await configManager.GetConfigurationAsync();
             TestUtilities.SetField(configManager, "_lastRequestRefresh", DateTime.UtcNow.Subtract(TimeSpan.FromHours(1)));
@@ -109,7 +104,7 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             if (IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer))
                 context.Diffs.Add($"Expected: {configuration.Issuer}, to be different from: {configuration2.Issuer}");
 
-            cts.Cancel();
+            configManager.ShutdownBackgroundTask();
 
             TestUtilities.AssertFailIfErrors(context);
         }

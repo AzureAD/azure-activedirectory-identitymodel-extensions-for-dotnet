@@ -74,13 +74,17 @@ namespace Microsoft.IdentityModel.Protocols
         // Task should be started with EnsureBackgroundRefreshTaskIsRunning.
         Task _updateMetadataTask;
 
+        private readonly CancellationTokenSource _backgroundRefreshTaskCancellationTokenSource;
+
         /// <summary>
-        /// Cancellation token to control cancelling the background task.
-        /// If 'Switch.Microsoft.IdentityModel.UpdateConfigAsBlocking' is set to true,
-        /// then this will not be used.
+        /// Requests that background tasks be shutdown.
+        /// This only applies if 'Switch.Microsoft.IdentityModel.UpdateConfigAsBlocking' is set to true.
         /// Note that this does not influence <see cref="GetConfigurationAsync(CancellationToken)"/>.
         /// </summary>
-        public CancellationToken BackgroundRefreshTaskCancellationToken { get; set; }
+        public void ShutdownBackgroundTask()
+        {
+            _backgroundRefreshTaskCancellationTokenSource.Cancel();
+        }
 
         /// <summary>
         /// Instantiates a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
@@ -143,6 +147,7 @@ namespace Microsoft.IdentityModel.Protocols
             MetadataAddress = metadataAddress;
             _docRetriever = docRetriever;
             _configRetriever = configRetriever;
+            _backgroundRefreshTaskCancellationTokenSource = new CancellationTokenSource();
 
             if (!AppContextSwitches.UpdateConfigAsBlocking)
                 EnsureBackgroundRefreshTaskIsRunning();
@@ -311,7 +316,7 @@ namespace Microsoft.IdentityModel.Protocols
 
         private void EnsureBackgroundRefreshTaskIsRunning()
         {
-            if (BackgroundRefreshTaskCancellationToken.IsCancellationRequested)
+            if (_backgroundRefreshTaskCancellationTokenSource.IsCancellationRequested)
                 return;
 
             if (_updateMetadataTask == null || _updateMetadataTask.Status != TaskStatus.Running)
@@ -341,7 +346,7 @@ namespace Microsoft.IdentityModel.Protocols
         {
             try
             {
-                while (!BackgroundRefreshTaskCancellationToken.IsCancellationRequested)
+                while (!_backgroundRefreshTaskCancellationTokenSource.IsCancellationRequested)
                 {
                     if (_updateMetadataEvent.WaitOne(500))
                     {
