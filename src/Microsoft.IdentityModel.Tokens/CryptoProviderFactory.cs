@@ -516,7 +516,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             // In the case of Aes128CbcHmacSha256, Aes192CbcHmacSha384, Aes256CbcHmacSha512 which are Authenticated Encryption algorithms
-            // SymmetricSignatureProvider will get passed a key with 1/2 the minimum keysize expected size for the HashAlgorithm. 16 bytes for SHA256, instead of 32 bytes.
+            // SymmetricSignatureProvider will get passed a key with 1/2 the minimum key size expected size for the HashAlgorithm. 16 bytes for SHA256, instead of 32 bytes.
             // see: https://datatracker.ietf.org/doc/html/rfc7518#section-5.2.2.1
             switch (algorithm)
             {
@@ -704,10 +704,10 @@ namespace Microsoft.IdentityModel.Tokens
                     // CryptoProviderCache.TryAdd will return false if unable to add the SignatureProvider.
                     // One possibility is the SignatureProvider was added between when we called TryGetSignatureProvider and here.
                     // SignatureProvider.IsCached will be false and CryptoProviderFactory.Release will dispose the SignatureProvider.
-                    // Since the SignatueProvider, was never added to the cache, TryGetSignatureProvider will not return this instance, we can dispose.
+                    // Since the SignatureProvider, was never added to the cache, TryGetSignatureProvider will not return this instance, we can dispose.
                     // This will result in sometimes (rarely) creating a SignatureProvider that is never cached.
                     // The alternative is to use a lock after the call to TryGetSignatureProvider, and then check again: { TryGet, lock, TryGet }.
-                    // This will result in excesive locking for different keys, which is common in POP scenarios.
+                    // This will result in excessive locking for different keys, which is common in POP scenarios.
                     signatureProvider.IsCached = CryptoProviderCache.TryAdd(signatureProvider);
             }
             else
