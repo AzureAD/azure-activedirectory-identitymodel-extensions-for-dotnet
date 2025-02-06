@@ -10,6 +10,9 @@ using Perfolizer.Horology;
 
 namespace Microsoft.IdentityModel.Benchmarks
 {
+    /// <summary>
+    /// Configuration for BenchmarkDotNet benchmarks.
+    /// </summary>
     public class BenchmarkConfig : ManualConfig
     {
         public BenchmarkConfig()
