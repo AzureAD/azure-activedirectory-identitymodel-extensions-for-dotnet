@@ -7,11 +7,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 - IdentityModel now enables symmetric and asymmetric keys to be created publicly with JWK. See [#3094](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3094) for details.
 - IdentityModel now allows specifying the HTTP protocol version and version policy. See [#2808](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2808) for details.
 
-## Bug Fixes
-- Add internal virtual on TokenHandler. See [#3084](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3084) for details.
-
 ## Repair items
-- 
 - Add request count and duration telemetry for configuration requests. See [#3022](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3022) for details.
 - `KeyID` should be present in exception messages and is no longer PII. See [#3104](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3104) for details.
 
@@ -20,7 +16,8 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 - Fix comment coverage in PR builds. See [#3079](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3079) for details.
 
 ### Work related to redesign of IdentityModel's token validation logic [#2711](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2711)
-- [#3056](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3056). [#3100](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3100), [#3017](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3107), [#3111](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3111), 
+- See [#3056](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3056). [#3100](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3100), [#3017](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3107), and [#3111](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3111).
+- Add internal virtual on TokenHandler. See [#3084](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3084) for details.
 
 8.3.1
 =====
