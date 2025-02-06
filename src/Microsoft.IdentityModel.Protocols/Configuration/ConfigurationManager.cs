@@ -191,8 +191,14 @@ namespace Microsoft.IdentityModel.Protocols
         /// <summary>
         /// Obtains an updated version of Configuration.
         /// </summary>
-        /// <returns>Configuration of type T.</returns>
-        /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
+        /// <returns>Configuration of type <typeparamref name="T"/>.</returns>
+        /// <remarks>
+        /// If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/>
+        /// then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.
+        /// If the configuration is not able to be updated, but a previous configuration was previously retrieved, the previous configuration is returned.
+        /// </remarks>
+        /// <exception cref="InvalidOperationException" >Throw if the configuration is unable to be retrieved.</exception>
+        /// <exception cref="InvalidConfigurationException" >Throw if the configuration fails to be validated by the <see cref="IConfigurationValidator{T}"/>.</exception>
         public async Task<T> GetConfigurationAsync()
         {
             return await GetConfigurationAsync(CancellationToken.None).ConfigureAwait(false);
@@ -202,8 +208,14 @@ namespace Microsoft.IdentityModel.Protocols
         /// Obtains an updated version of Configuration.
         /// </summary>
         /// <param name="cancel">CancellationToken</param>
-        /// <returns>Configuration of type T.</returns>
-        /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
+        /// <returns>Configuration of type <typeparamref name="T"/>.</returns>
+        /// <remarks>
+        /// If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/>
+        /// then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.
+        /// If the configuration is not able to be updated, but a previous configuration was previously retrieved, the previous configuration is returned.
+        /// </remarks>
+        /// <exception cref="InvalidOperationException" >Throw if the configuration is unable to be retrieved.</exception>
+        /// <exception cref="InvalidConfigurationException" >Throw if the configuration fails to be validated by the <see cref="IConfigurationValidator{T}"/>.</exception>
         public virtual async Task<T> GetConfigurationAsync(CancellationToken cancel)
         {
             if (_currentConfiguration != null && SyncAfter > _timeProvider.GetUtcNow())
