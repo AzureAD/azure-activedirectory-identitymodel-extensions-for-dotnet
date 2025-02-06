@@ -1,2 +1,3 @@
 Microsoft.IdentityModel.Protocols.HttpDocumentRetriever.HttpVersion.get -> System.Version
 Microsoft.IdentityModel.Protocols.HttpDocumentRetriever.HttpVersion.set -> void
+Microsoft.IdentityModel.Protocols.ConfigurationManager<T>.ShutdownBackgroundTask() -> void
