@@ -9,9 +9,9 @@ As part of an effort to modernize aspects of the library that have become bloate
   - In success scenarios, provide the validated information for audit purposes.
   - In failure scenarios, provide enough information to identify what part of the token was invalid or could not be validated without the need for further steps, and for diagnostic purposes provide the ability to create an exception that can be thrown and observed. 
 - Do not automatically print logs as part of the validation. These can be printed from the validation result using C#'s [high-performance logging](https://learn.microsoft.com/en-us/dotnet/core/extensions/high-performance-logging) based on `ILogger`.
-- Simpler validation parameters object, as the current one has grown in complexity over the years by including multiple parameters for things like `ValidIssuer` and `ValidIssuers`, or multiple delegates for the same validation. `ValidationParameters` is being introduced to offer a simplified object that enables simplifying the default validation code as well.
+- Simpler validation parameters object, as the current one has grown in complexity over the years by including multiple parameters for things like `ValidIssuer` and `ValidIssuers`, or multiple delegates for the same validation. `ValidationParameters` is being introduced as an alternative to `TokenValidationParameters`, to offer a clearer configuration object that enables simplifying the default validation code as well.
 - New APIs provide nullability annotations to simplify code branches when the API can ensure no `null` will be returned from a method.
-- New APIs receive a `CancellationToken` to allow for the cancellation of running validation operations.
+- New async APIs receive a `CancellationToken` to allow for the cancellation of running validation operations, as expected.
 
 ## Embracing the Result pattern to remove exceptions on a hot path
 In order to remove the exceptions being thrown, we are introducing a `ValidationResult` type to handle the result of all validation operations.  
