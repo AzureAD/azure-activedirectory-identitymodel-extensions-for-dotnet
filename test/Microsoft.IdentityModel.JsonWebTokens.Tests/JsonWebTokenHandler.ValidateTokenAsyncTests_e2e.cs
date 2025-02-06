@@ -18,6 +18,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         };
         private JsonWebTokenHandler jsonWebTokenHandler = new JsonWebTokenHandler();
 
+        private IResultBasedValidation resultBasedJsonWebTokenHandler => jsonWebTokenHandler;
+
         [Fact]
         public async Task TestDefaultValidToken()
         {
@@ -30,7 +32,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken> validationResult = await ((IResultBasedValidation)jsonWebTokenHandler).ValidateTokenAsync(token, validationParameters, callContext, default);
+            ValidationResult<ValidatedToken> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
             Assert.True(validationResult.IsValid);
             Assert.NotNull(validationResult.Result);
@@ -48,7 +50,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken> validationResult = await ((IResultBasedValidation)jsonWebTokenHandler).ValidateTokenAsync(token, validationParameters, callContext, default);
+            ValidationResult<ValidatedToken> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
             Assert.False(validationResult.IsValid);
             Assert.Null(validationResult.Result);
@@ -69,7 +71,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken> validationResult = await ((IResultBasedValidation)jsonWebTokenHandler).ValidateTokenAsync(token, validationParameters, callContext, default);
+            ValidationResult<ValidatedToken> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
             Assert.False(validationResult.IsValid);
             Assert.Null(validationResult.Result);
@@ -90,7 +92,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken> validationResult = await ((IResultBasedValidation)jsonWebTokenHandler).ValidateTokenAsync(token, validationParameters, callContext, default);
+            ValidationResult<ValidatedToken> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
             Assert.False(validationResult.IsValid);
             Assert.Null(validationResult.Result);
@@ -114,7 +116,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken> validationResult = await ((IResultBasedValidation)jsonWebTokenHandler).ValidateTokenAsync(token, validationParameters, callContext, default);
+            ValidationResult<ValidatedToken> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
             Assert.False(validationResult.IsValid);
             Assert.Null(validationResult.Result);
@@ -136,7 +138,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken> validationResult = await ((IResultBasedValidation)jsonWebTokenHandler).ValidateTokenAsync(token, validationParameters, callContext, default);
+            ValidationResult<ValidatedToken> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
             Assert.False(validationResult.IsValid);
             Assert.Null(validationResult.Result);
@@ -158,7 +160,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken> validationResult = await ((IResultBasedValidation)jsonWebTokenHandler).ValidateTokenAsync(token, validationParameters, callContext, default);
+            ValidationResult<ValidatedToken> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
             Assert.False(validationResult.IsValid);
             Assert.Null(validationResult.Result);
@@ -180,7 +182,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken> validationResult = await ((IResultBasedValidation)jsonWebTokenHandler).ValidateTokenAsync(token, validationParameters, callContext, default);
+            ValidationResult<ValidatedToken> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
             Assert.False(validationResult.IsValid);
             Assert.Null(validationResult.Result);
@@ -202,7 +204,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken> validationResult = await ((IResultBasedValidation)jsonWebTokenHandler).ValidateTokenAsync(token, validationParameters, callContext, default);
+            ValidationResult<ValidatedToken> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
             Assert.True(validationResult.IsValid);
             Assert.NotNull(validationResult.Result);
@@ -223,7 +225,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken> validationResult = await ((IResultBasedValidation)jsonWebTokenHandler).ValidateTokenAsync(token, validationParameters, callContext, default);
+            ValidationResult<ValidatedToken> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
             Assert.False(validationResult.IsValid);
             Assert.Null(validationResult.Result);
@@ -245,7 +247,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken> validationResult = await ((IResultBasedValidation)jsonWebTokenHandler).ValidateTokenAsync(token, validationParameters, callContext, default);
+            ValidationResult<ValidatedToken> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
             Assert.False(validationResult.IsValid);
             Assert.Null(validationResult.Result);
@@ -267,7 +269,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken> validationResult = await ((IResultBasedValidation)jsonWebTokenHandler).ValidateTokenAsync(token, validationParameters, callContext, default);
+            ValidationResult<ValidatedToken> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
             Assert.False(validationResult.IsValid);
             Assert.Null(validationResult.Result);
@@ -290,7 +292,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             validationParameters.TryAllIssuerSigningKeys = true;
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken> validationResult = await ((IResultBasedValidation)jsonWebTokenHandler).ValidateTokenAsync(token, validationParameters, callContext, default);
+            ValidationResult<ValidatedToken> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
             Assert.False(validationResult.IsValid);
             Assert.Null(validationResult.Result);
@@ -312,7 +314,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken> validationResult = await ((IResultBasedValidation)jsonWebTokenHandler).ValidateTokenAsync(token, validationParameters, callContext, default);
+            ValidationResult<ValidatedToken> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
             Assert.False(validationResult.IsValid);
             Assert.Null(validationResult.Result);
@@ -336,7 +338,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken> validationResult = await ((IResultBasedValidation)jsonWebTokenHandler).ValidateTokenAsync(token, validationParameters, callContext, default);
+            ValidationResult<ValidatedToken> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
             Assert.False(validationResult.IsValid);
             Assert.Null(validationResult.Result);
@@ -359,7 +361,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken> validationResult = await ((IResultBasedValidation)jsonWebTokenHandler).ValidateTokenAsync(token, validationParameters, callContext, default);
+            ValidationResult<ValidatedToken> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
             Assert.True(validationResult.IsValid);
             Assert.NotNull(validationResult.Result);
@@ -379,7 +381,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken> validationResult = await ((IResultBasedValidation)jsonWebTokenHandler).ValidateTokenAsync(token, validationParameters, callContext, default);
+            ValidationResult<ValidatedToken> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
             Assert.True(validationResult.IsValid);
             Assert.NotNull(validationResult.Result);
@@ -399,7 +401,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken> validationResult = await ((IResultBasedValidation)jsonWebTokenHandler).ValidateTokenAsync(token, validationParameters, callContext, default);
+            ValidationResult<ValidatedToken> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
             Assert.False(validationResult.IsValid);
             Assert.Null(validationResult.Result);
@@ -421,7 +423,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             };
             CallContext callContext = new CallContext();
 
-            ValidationResult<ValidatedToken> validationResult = await ((IResultBasedValidation)jsonWebTokenHandler).ValidateTokenAsync(token, validationParameters, callContext, default);
+            ValidationResult<ValidatedToken> validationResult = await resultBasedJsonWebTokenHandler.ValidateTokenAsync(token, validationParameters, callContext, default);
 
             Assert.False(validationResult.IsValid);
             Assert.Null(validationResult.Result);
