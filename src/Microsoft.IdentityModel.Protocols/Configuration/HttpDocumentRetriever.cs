@@ -77,14 +77,24 @@ namespace Microsoft.IdentityModel.Protocols
         public bool RequireHttps { get; set; } = true;
 
         /// <summary>
-        /// If set specifies the protocol version to use when sending HTTP requests.
+        /// If set, specifies the desired HTTP version to use for the requests.
+        /// Otherwise, HttpClient.DefaultRequestVersion is used.
         /// </summary>
+        /// <remarks>
+        /// HttpRequestMessage.Version specifies the desired request version.
+        /// HttpRequestMessage.VersionPolicy defines how strictly the HTTP version should be adhered to, allowing for fallback to other versions if necessary.
+        /// </remarks>
         public Version HttpVersion { get; set; }
 
 #if NET6_0_OR_GREATER
         /// <summary>
-        /// If set specifies the protocol version policy to use when sending HTTP requests.
+        /// If set, specifies the protocol version policy to use when sending HTTP requests.
+        /// Otherwise, HttpClient.DefaultVersionPolicy is used.
         /// </summary>
+        /// <remarks>
+        /// HttpRequestMessage.Version specifies the desired request version.
+        /// HttpRequestMessage.VersionPolicy defines how strictly the HTTP version should be adhered to, allowing for fallback to other versions if necessary.
+        /// </remarks>
         public HttpVersionPolicy? HttpVersionPolicy { get; set; }
 #endif
 
@@ -158,14 +168,12 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 message.Version = HttpVersion;
             }
+#if NET6_0_OR_GREATER
             else
             {
-#if NET6_0_OR_GREATER
                 message.Version = httpClient.DefaultRequestVersion;
-#endif
             }
 
-#if NET6_0_OR_GREATER
             // either use explicit or default version policy from HttpClient
             message.VersionPolicy = HttpVersionPolicy.GetValueOrDefault(httpClient.DefaultVersionPolicy);
 #endif
