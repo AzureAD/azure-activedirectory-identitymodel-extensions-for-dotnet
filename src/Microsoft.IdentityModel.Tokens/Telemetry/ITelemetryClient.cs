@@ -25,7 +25,7 @@ namespace Microsoft.IdentityModel.Telemetry
             string operationStatus,
             Exception exception);
 
-        internal void LogBackgroundRefreshFailure(
+        internal void LogBackgroundConfigurationRefreshFailure(
             string metadataAddress,
             Exception exception);
     }

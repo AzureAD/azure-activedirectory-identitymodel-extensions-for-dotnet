@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Telemetry.Tests
             ExportedHistogramItems.Add(TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString());
         }
 
-        void ITelemetryClient.LogBackgroundRefreshFailure(string metadataAddress, Exception exception)
+        void ITelemetryClient.LogBackgroundConfigurationRefreshFailure(string metadataAddress, Exception exception)
         {
             ExportedItems.Add(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
             ExportedItems.Add(TelemetryConstants.MetadataAddressTag, metadataAddress);

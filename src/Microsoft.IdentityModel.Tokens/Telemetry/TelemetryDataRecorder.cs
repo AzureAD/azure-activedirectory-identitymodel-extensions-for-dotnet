@@ -33,9 +33,9 @@ namespace Microsoft.IdentityModel.Telemetry
         /// <summary>
         /// Counter to capture background refresh failures in the ConfigurationManager.
         /// </summary>
-        internal static readonly Counter<long> BackgroundRefreshFailureCounter = IdentityModelMeter.CreateCounter<long>(BackgroundRefreshFailureCounterName, description: BackgroundRefreshFailureCounterDescription);
-        internal const string BackgroundRefreshFailureCounterName = "IdentityModelConfigurationManagerBackgroundRefreshFailure";
-        internal const string BackgroundRefreshFailureCounterDescription = "Counter capturing configuration manager background refresh failures.";
+        internal static readonly Counter<long> BackgroundConfigurationRefreshFailureCounter = IdentityModelMeter.CreateCounter<long>(BackgroundConfigurationRefreshFailureCounterName, description: BackgroundConfigurationRefreshFailureCounterDescription);
+        internal const string BackgroundConfigurationRefreshFailureCounterName = "IdentityModelConfigurationManagerBackgroundRefreshFailure";
+        internal const string BackgroundConfigurationRefreshFailureCounterDescription = "Counter capturing configuration manager background refresh failures.";
 
         /// <summary>
         /// Histogram to capture total duration of configuration retrieval by ConfigurationManager in milliseconds.
@@ -55,9 +55,9 @@ namespace Microsoft.IdentityModel.Telemetry
             ConfigurationManagerCounter.Add(1, tagList);
         }
 
-        internal static void IncrementConfigurationBackgroundRefreshFailureCounter(in TagList tagList)
+        internal static void IncrementBackgroundConfigurationRefreshFailureCounter(in TagList tagList)
         {
-            BackgroundRefreshFailureCounter.Add(1, tagList);
+            BackgroundConfigurationRefreshFailureCounter.Add(1, tagList);
         }
     }
 }

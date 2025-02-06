@@ -63,7 +63,7 @@ namespace Microsoft.IdentityModel.Protocols
         // requesting a refresh, so it should be done immediately so the next
         // call to GetConfiguration will return new configuration if the minimum
         // refresh interval has passed.
-        bool _refreshRequested;
+        private bool _refreshRequested;
 
         // Wait handle used to signal a background task to update the configuration.
         // Handle starts unset, and AutoResetEvent.Set() sets it, this indicates that
@@ -72,14 +72,18 @@ namespace Microsoft.IdentityModel.Protocols
 
         // Background task that updates the configuration. Signaled with _updateMetadataEvent.
         // Task should be started with EnsureBackgroundRefreshTaskIsRunning.
-        Task _updateMetadataTask;
+        private Task _updateMetadataTask;
 
         private readonly CancellationTokenSource _backgroundRefreshTaskCancellationTokenSource;
 
         /// <summary>
         /// Requests that background tasks be shutdown.
-        /// This only applies if 'Switch.Microsoft.IdentityModel.UpdateConfigAsBlocking' is set to true.
+        /// This only applies if 'Switch.Microsoft.IdentityModel.UpdateConfigAsBlocking' is not set or set to false.
         /// Note that this does not influence <see cref="GetConfigurationAsync(CancellationToken)"/>.
+        /// If the background task stops, the next time the task would be signaled, the task will be
+        /// restarted unless <see cref="ShutdownBackgroundTask"/> is called.
+        /// If using a background task, the <see cref="Configuration"/> cannot
+        /// be used after calling this method.
         /// </summary>
         public void ShutdownBackgroundTask()
         {
@@ -357,7 +361,7 @@ namespace Microsoft.IdentityModel.Protocols
             }
             catch (Exception ex)
             {
-                TelemetryClient.LogBackgroundRefreshFailure(MetadataAddress, ex);
+                TelemetryClient.LogBackgroundConfigurationRefreshFailure(MetadataAddress, ex);
             }
         }
 

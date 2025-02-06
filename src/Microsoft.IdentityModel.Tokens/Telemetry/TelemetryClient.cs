@@ -16,7 +16,7 @@ namespace Microsoft.IdentityModel.Telemetry
     {
         public string ClientVer = IdentityModelTelemetryUtil.ClientVer;
 
-        private KeyValuePair<string, object> _BlockingTagValue = new(
+        private KeyValuePair<string, object> _blockingTagValue = new(
             TelemetryConstants.BlockingTypeTag,
             AppContextSwitches.UpdateConfigAsBlocking.ToString()
         );
@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.Telemetry
                 { TelemetryConstants.IdentityModelVersionTag, ClientVer },
                 { TelemetryConstants.MetadataAddressTag, metadataAddress },
                 { TelemetryConstants.OperationStatusTag, operationStatus },
-                _BlockingTagValue
+                _blockingTagValue
             };
 
             TelemetryDataRecorder.IncrementConfigurationRefreshRequestCounter(tagList);
@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.Telemetry
                 { TelemetryConstants.MetadataAddressTag, metadataAddress },
                 { TelemetryConstants.OperationStatusTag, operationStatus },
                 { TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString() },
-                _BlockingTagValue
+                _blockingTagValue
             };
 
             TelemetryDataRecorder.IncrementConfigurationRefreshRequestCounter(tagList);
@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Telemetry
             {
                 { TelemetryConstants.IdentityModelVersionTag, ClientVer },
                 { TelemetryConstants.MetadataAddressTag, metadataAddress },
-                _BlockingTagValue
+                _blockingTagValue
             };
 
             long durationInMilliseconds = (long)operationDuration.TotalMilliseconds;
@@ -68,14 +68,14 @@ namespace Microsoft.IdentityModel.Telemetry
                 { TelemetryConstants.IdentityModelVersionTag, ClientVer },
                 { TelemetryConstants.MetadataAddressTag, metadataAddress },
                 { TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString() },
-                _BlockingTagValue
+                _blockingTagValue
             };
 
             long durationInMilliseconds = (long)operationDuration.TotalMilliseconds;
             TelemetryDataRecorder.RecordConfigurationRetrievalDurationHistogram(durationInMilliseconds, tagList);
         }
 
-        public void LogBackgroundRefreshFailure(
+        public void LogBackgroundConfigurationRefreshFailure(
             string metadataAddress,
             Exception exception)
         {
@@ -84,10 +84,10 @@ namespace Microsoft.IdentityModel.Telemetry
                 { TelemetryConstants.IdentityModelVersionTag, ClientVer },
                 { TelemetryConstants.MetadataAddressTag, metadataAddress },
                 { TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString() },
-                _BlockingTagValue
+                _blockingTagValue
             };
 
-            TelemetryDataRecorder.IncrementConfigurationBackgroundRefreshFailureCounter(tagList);
+            TelemetryDataRecorder.IncrementBackgroundConfigurationRefreshFailureCounter(tagList);
         }
     }
 }
