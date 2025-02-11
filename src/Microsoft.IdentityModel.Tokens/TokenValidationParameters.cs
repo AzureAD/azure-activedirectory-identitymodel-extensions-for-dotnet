@@ -73,6 +73,7 @@ namespace Microsoft.IdentityModel.Tokens
             NameClaimType = other.NameClaimType;
             NameClaimTypeRetriever = other.NameClaimTypeRetriever;
             PropertyBag = other.PropertyBag;
+            ReadTokenPayloadValueDelegates = other.ReadTokenPayloadValueDelegates;
             RefreshBeforeValidation = other.RefreshBeforeValidation;
             RequireAudience = other.RequireAudience;
             RequireExpirationTime = other.RequireExpirationTime;
@@ -450,9 +451,10 @@ namespace Microsoft.IdentityModel.Tokens
         public IDictionary<string, object> PropertyBag { get; set; }
 
         /// <summary>
-        /// Gets or sets a delegate that will be called when reading token payload claims.
+        /// Gets or sets the <see cref="IDictionary{String, Object}"/> that contains a collection of claim name and delegate pairs.
+        /// When reading token payload claims, a delegate will be called if the token has an associated claim.
         /// </summary>
-        internal ReadTokenPayloadValueDelegate ReadTokenPayloadValue { get; set; }
+        internal IDictionary<string, ReadTokenPayloadValueDelegate> ReadTokenPayloadValueDelegates { get; set; }
 
         /// <summary>
         /// Gets or sets a boolean to control if configuration required to be refreshed before token validation.
@@ -560,7 +562,7 @@ namespace Microsoft.IdentityModel.Tokens
         public SecurityKey TokenDecryptionKey { get; set; }
 
         /// <summary>
-        /// Gets or sets a delegate that will be called to retreive a <see cref="SecurityKey"/> used for decryption.
+        /// Gets or sets a delegate that will be called to retrieve a <see cref="SecurityKey"/> used for decryption.
         /// </summary>
         /// <remarks>
         /// This <see cref="SecurityKey"/> will be used to decrypt the token. This can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier.

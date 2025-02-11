@@ -213,11 +213,11 @@ namespace Microsoft.IdentityModel.Tokens
 #nullable restore
 
     /// <summary>
-    /// Definition for ReadTokenPayloadValueDelegate.
-    /// Called for each claim when token payload is being read.
+    /// When token payload is being read claim by claim,
+    /// this delegate is called after all claims known to the library have been processed.
+    /// When called, the reader is positioned at the claim value.
     /// </summary>
     /// <param name="reader">Reader for the underlying token bytes.</param>
-    /// <param name="claims">A collection to hold claims that have been read.</param>
-    /// <returns></returns>
-    internal delegate void ReadTokenPayloadValueDelegate(ref Utf8JsonReader reader, IDictionary<string, object> claims);
+    /// <returns>Claim value associated with the claim name.</returns>
+    internal delegate object ReadTokenPayloadValueDelegate(ref Utf8JsonReader reader);
 }
