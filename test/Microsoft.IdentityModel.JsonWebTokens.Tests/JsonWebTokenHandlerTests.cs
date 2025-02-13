@@ -672,7 +672,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 var jwtTokenFromJsonHandlerWithKid = new JsonWebToken(jweFromJsonHandlerWithKid);
                 var encryptionKeysFromJsonHandlerWithKid = theoryData.JsonWebTokenHandler.GetContentEncryptionKeys(jwtTokenFromJsonHandlerWithKid, theoryData.ValidationParameters, theoryData.Configuration);
 
-                IdentityComparer.AreEqual(encryptionKeysFromJsonHandlerWithKid, theoryData.ExpectedDecryptionKeys);
+                Assert.True(IdentityComparer.AreEqual(encryptionKeysFromJsonHandlerWithKid, theoryData.ExpectedDecryptionKeys));
                 theoryData.ExpectedException.ProcessNoException(context);
             }
             catch (Exception ex)
@@ -696,15 +696,19 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 configurationWithDecryptionKeys.TokenDecryptionKeys.Add(KeyingMaterial.DefaultSymmetricSecurityKey_256);
                 configurationWithDecryptionKeys.TokenDecryptionKeys.Add(KeyingMaterial.DefaultSymmetricSecurityKey_512);
 
-                var configurationThatThrows = CreateCustomConfigurationThatThrows();
+                var rsaKey = new RsaSecurityKey(KeyingMaterial.RsaParameters_2048) { KeyId = "CustomRsaSecurityKey_2048" };
+                var configurationThatThrows = CreateCustomConfigurationThatThrows(rsaKey);
+
+                var configurationWithMismatchedKeys = new OpenIdConnectConfiguration();
+                configurationWithMismatchedKeys.TokenDecryptionKeys.Add(rsaKey);
 
                 tokenHandler.InboundClaimTypeMap.Clear();
                 return new TheoryData<CreateTokenTheoryData>
                 {
-                   new CreateTokenTheoryData
-                   {
+                    new CreateTokenTheoryData
+                    {
                         First = true,
-                        TestId = "EncryptionKeyInConfig",
+                        TestId = "ValidKeyInConfig_KeysSetInConfig",
                         Payload = Default.PayloadString,
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
@@ -720,10 +724,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         },
                         Configuration = configurationWithDecryptionKeys,
                         ExpectedDecryptionKeys =  new List<SecurityKey>(){ KeyingMaterial.DefaultSymmetricSecurityKey_256 },
-                   },
-                   new CreateTokenTheoryData
-                   {
-                        TestId = "ValidEncryptionKeyInConfig",
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "ValidKeyInConfig_KeysSetInConfigAndTvp",
                         Payload = Default.PayloadString,
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
@@ -740,10 +744,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         },
                         Configuration = configurationWithDecryptionKeys,
                         ExpectedDecryptionKeys =  new List<SecurityKey>(){ KeyingMaterial.DefaultSymmetricSecurityKey_256 },
-                   },
-                   new CreateTokenTheoryData
-                   {
-                        TestId = "Valid",
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "ValidKeyInTvp_KeysSetInTvp",
                         Payload = Default.PayloadString,
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
@@ -759,10 +763,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidIssuer = Default.Issuer
                         },
                         ExpectedDecryptionKeys =  new List<SecurityKey>(){ KeyingMaterial.DefaultSymmetricSecurityKey_256 },
-                   },
-                   new CreateTokenTheoryData
-                   {
-                        TestId = "AlgorithmMismatch",
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "AlgorithmMismatch_ReturnsNoKeys",
                         Payload = Default.PayloadString,
                         // There is no error, just no decryption keys are returned.
                         ExpectedException = ExpectedException.NoExceptionExpected,
@@ -780,10 +784,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidAudience = Default.Audience,
                             ValidIssuer = Default.Issuer
                         },
-                   },
-                   new CreateTokenTheoryData
-                   {
-                        TestId = "EncryptionKeyInConfig_OneKeysThrows_SuccessfulKeyReturned",
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "ValidKeyInConfig_OneKeyThrows_SuccessfulKeyReturned",
                         Payload = Default.PayloadString,
                         TokenDescriptor =  new SecurityTokenDescriptor
                         {
@@ -798,13 +802,53 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             ValidIssuer = Default.Issuer
                         },
                         Configuration = configurationThatThrows,
-                        ExpectedDecryptionKeys =  new List<SecurityKey>(){ KeyingMaterial.DefaultSymmetricSecurityKey_256 },
-                   }
+                        ExpectedDecryptionKeys =  new List<SecurityKey>(){ rsaKey },
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "KeyIdMismatch_TryAllDecryptionKeysTrue_ReturnsKey",
+                        Payload = Default.PayloadString,
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                            EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
+                            Claims = Default.PayloadDictionary
+                        },
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                            TryAllDecryptionKeys = true,
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer
+                        },
+                        Configuration = configurationWithMismatchedKeys,
+                        ExpectedDecryptionKeys =  new List<SecurityKey>(){ rsaKey },
+                    },
+                    new CreateTokenTheoryData
+                    {
+                        TestId = "KeyIdMismatch_TryAllDecryptionKeysFalse_ReturnsNoKeys",
+                        Payload = Default.PayloadString,
+                        TokenDescriptor =  new SecurityTokenDescriptor
+                        {
+                            SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+                            EncryptingCredentials = new EncryptingCredentials(KeyingMaterial.RsaSecurityKey_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256),
+                            Claims = Default.PayloadDictionary
+                        },
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+                            TryAllDecryptionKeys = false,
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer
+                        },
+                        Configuration = configurationWithMismatchedKeys,
+                        ExpectedDecryptionKeys =  new List<SecurityKey>(),
+                    }
                 };
             }
         }
 
-        private static OpenIdConnectConfiguration CreateCustomConfigurationThatThrows()
+        private static OpenIdConnectConfiguration CreateCustomConfigurationThatThrows(SecurityKey rsaKey)
         {
             var customCryptoProviderFactory = new DerivedCryptoProviderFactory
             {
@@ -814,8 +858,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             var sym512Hey = new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_512) { KeyId = "CustomSymmetricSecurityKey_512" };
             sym512Hey.CryptoProviderFactory = customCryptoProviderFactory;
-
-            var rsaKey = new RsaSecurityKey(KeyingMaterial.RsaParameters_2048) { KeyId = "CustomRsaSecurityKey_2048" };
 
             var configurationWithCustomCryptoProviderFactory = new OpenIdConnectConfiguration();
             configurationWithCustomCryptoProviderFactory.TokenDecryptionKeys.Add(rsaKey);

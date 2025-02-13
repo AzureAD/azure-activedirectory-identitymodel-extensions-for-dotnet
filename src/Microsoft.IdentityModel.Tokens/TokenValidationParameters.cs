@@ -89,6 +89,7 @@ namespace Microsoft.IdentityModel.Tokens
             TokenReplayCache = other.TokenReplayCache;
             TokenReplayValidator = other.TokenReplayValidator;
             TransformBeforeSignatureValidation = other.TransformBeforeSignatureValidation;
+            TryAllDecryptionKeys = other.TryAllDecryptionKeys;
             TryAllIssuerSigningKeys = other.TryAllIssuerSigningKeys;
             TypeValidator = other.TypeValidator;
             ValidateActor = other.ValidateActor;
@@ -118,6 +119,7 @@ namespace Microsoft.IdentityModel.Tokens
             RequireSignedTokens = true;
             RequireAudience = true;
             SaveSigninToken = false;
+            TryAllDecryptionKeys = true;
             TryAllIssuerSigningKeys = true;
             ValidateActor = false;
             ValidateAudience = true;
@@ -552,10 +554,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the <see cref="SecurityKey"/> that is to be used for decryption.
         /// </summary>
+        /// <remarks>
+        /// This <see cref="TokenDecryptionKey"/> will only be used if its <see cref="SecurityKey.KeyId"/> matches the 'kid' parameter in the token.
+        /// </remarks>
         public SecurityKey TokenDecryptionKey { get; set; }
 
         /// <summary>
-        /// Gets or sets a delegate that will be called to retreive a <see cref="SecurityKey"/> used for decryption.
+        /// Gets or sets a delegate that will be called to retrieve a <see cref="SecurityKey"/> used for decryption.
         /// </summary>
         /// <remarks>
         /// This <see cref="SecurityKey"/> will be used to decrypt the token. This can be helpful when the <see cref="SecurityToken"/> does not contain a key identifier.
@@ -565,6 +570,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets or sets the <see cref="IEnumerable{SecurityKey}"/> that is to be used for decrypting inbound tokens.
         /// </summary>
+        /// <remarks>
+        /// The decryption keys in this <see cref="TokenDecryptionKeys"/> collection will only be used if their <see cref="SecurityKey.KeyId"/> matches the 'kid' parameter in the token.
+        /// </remarks>
         public IEnumerable<SecurityKey> TokenDecryptionKeys { get; set; }
 
         /// <summary>
@@ -592,7 +600,14 @@ namespace Microsoft.IdentityModel.Tokens
         public TokenReplayValidator TokenReplayValidator { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether all <see cref="IssuerSigningKeys"/> should be tried during signature validation when a key is not matched to token kid or if token kid is empty.
+        /// Gets or sets a value indicating whether all <see cref="TokenDecryptionKeys"/> should be tried during token decryption when a key is not matched to token 'kid' or if token 'kid' is empty.
+        /// The default is <c>true</c>.
+        /// </summary>
+        [DefaultValue(true)]
+        public bool TryAllDecryptionKeys { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether all <see cref="IssuerSigningKeys"/> should be tried during signature validation when a key is not matched to token 'kid' or if token 'kid' is empty.
         /// The default is <c>true</c>.
         /// </summary>
         [DefaultValue(true)]

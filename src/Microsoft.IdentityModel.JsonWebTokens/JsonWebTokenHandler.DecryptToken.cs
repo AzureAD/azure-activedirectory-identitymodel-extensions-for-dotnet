@@ -121,7 +121,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // 2. ResolveTokenDecryptionKey returned null
             // 3. ResolveTokenDecryptionKeyFromConfig returned null
             // Try all the keys. This is the degenerate case, not concerned about perf.
-            if (keys == null)
+            if (validationParameters.TryAllDecryptionKeys && keys.IsNullOrEmpty())
             {
                 keys = validationParameters.TokenDecryptionKeys;
                 if (configuration != null)
