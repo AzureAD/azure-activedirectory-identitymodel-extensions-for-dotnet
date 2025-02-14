@@ -82,7 +82,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     break;
                 else if (!reader.Read())
                     break;
-            };
+            }
+            ;
 
             return new JsonClaimSet(claims);
         }

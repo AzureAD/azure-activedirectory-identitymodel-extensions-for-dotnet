@@ -210,7 +210,8 @@ namespace Microsoft.IdentityModel.Protocols
             foreach (string key in nameValueCollection.AllKeys)
             {
                 SetParameter(key, nameValueCollection[key]);
-            };
+            }
+            ;
         }
 
         /// <summary>
