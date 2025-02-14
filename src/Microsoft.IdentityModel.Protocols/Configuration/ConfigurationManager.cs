@@ -316,7 +316,7 @@ namespace Microsoft.IdentityModel.Protocols
                 _isFirstRefreshRequest = false;
                 if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
                 {
-                    UpdateCurrentConfiguration();
+                    _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
                     _lastRequestRefresh = now;
                 }
             }
