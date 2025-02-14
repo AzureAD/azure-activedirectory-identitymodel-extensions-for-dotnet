@@ -343,12 +343,12 @@ namespace Microsoft.IdentityModel.Protocols
         {
             DateTimeOffset now = DateTimeOffset.UtcNow;
 
-            TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                MetadataAddress,
-                TelemetryConstants.Protocols.Manual);
-
             if (now >= DateTimeUtil.Add(_lastRequestRefresh.UtcDateTime, RefreshInterval) || _isFirstRefreshRequest)
             {
+                TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                    MetadataAddress,
+                    TelemetryConstants.Protocols.Manual);
+
                 _isFirstRefreshRequest = false;
                 if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
                 {

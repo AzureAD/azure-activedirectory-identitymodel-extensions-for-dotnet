@@ -19,6 +19,43 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
     public class ConfigurationManagerTelemetryTests
     {
         [Fact]
+        public async Task RequestRefresh_IntervalHasNotPassed_ExpectedCount()
+        {
+            // arrange
+            var testTelemetryClient = new MockTelemetryClient();
+            var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+                OpenIdConfigData.AccountsGoogle,
+                new OpenIdConnectConfigurationRetriever(),
+                new HttpDocumentRetriever(),
+                new OpenIdConnectConfigurationValidator())
+            {
+                TelemetryClient = testTelemetryClient
+            };
+            var cancel = new CancellationToken();
+
+            // act
+            // Retrieve the configuration for the first time
+            await configurationManager.GetConfigurationAsync(cancel);
+            testTelemetryClient.ClearExportedItems();
+
+            // Manually request a config refresh
+            configurationManager.RequestRefresh();
+            await configurationManager.GetConfigurationAsync(cancel);
+
+            Thread.Sleep(1000);
+
+            // Request a second refresh, but don't wait for the interval to pass
+            configurationManager.RequestRefresh();
+            await configurationManager.GetConfigurationAsync(cancel);
+
+            Thread.Sleep(1000);
+
+            // assert: There should be two calls here, first from the call to GetConfigurationAsync
+            // the second from RequestRefresh, first request refresh always goes through
+            Assert.Equal(2, testTelemetryClient.RequestRefreshCounter);
+        }
+
+        [Fact]
         public async Task RequestRefresh_ExpectedTagsExist()
         {
             // arrange
