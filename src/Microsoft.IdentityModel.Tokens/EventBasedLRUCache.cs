@@ -662,7 +662,8 @@ namespace Microsoft.IdentityModel.Tokens
         {
             while (!_eventQueue.IsEmpty)
             {
-            };
+            }
+            ;
         }
 
         #endregion
