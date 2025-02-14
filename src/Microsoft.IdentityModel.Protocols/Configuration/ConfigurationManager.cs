@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Telemetry;
 
 namespace Microsoft.IdentityModel.Protocols
 {
@@ -46,7 +45,6 @@ namespace Microsoft.IdentityModel.Protocols
         private int _configurationRetrieverState = ConfigurationRetrieverIdle;
 
         private readonly TimeProvider _timeProvider = TimeProvider.System;
-        internal ITelemetryClient TelemetryClient = new TelemetryClient();
 
         // If a refresh is requested, then do the refresh as a blocking operation
         // not on a background thread. RequestRefresh signals that the app is explicitly
@@ -54,7 +52,6 @@ namespace Microsoft.IdentityModel.Protocols
         // call to GetConfiguration will return new configuration if the minimum
         // refresh interval has passed.
         bool _refreshRequested;
-
 
         /// <summary>
         /// Instantiates a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
@@ -193,7 +190,7 @@ namespace Microsoft.IdentityModel.Protocols
                 try
                 {
                     // Don't use the individual CT here, this is a shared operation that shouldn't be affected by an individual's cancellation.
-                    // The transport should have its own timeouts, etc.
+                    // The transport should have it's own timeouts, etc.
                     T configuration = await _configRetriever.GetConfigurationAsync(
                         MetadataAddress,
                         _docRetriever,
@@ -204,29 +201,18 @@ namespace Microsoft.IdentityModel.Protocols
                         ConfigurationValidationResult result = _configValidator.Validate(configuration);
                         // in this case we have never had a valid configuration, so we will throw an exception if the validation fails
                         if (!result.Succeeded)
-                        {
-                            var ex = new InvalidConfigurationException(
-                                LogHelper.FormatInvariant(
-                                    LogMessages.IDX20810,
-                                    result.ErrorMessage));
-
-                            throw LogHelper.LogExceptionMessage(ex);
-                        }
+                            throw LogHelper.LogExceptionMessage(
+                                new InvalidConfigurationException(
+                                    LogHelper.FormatInvariant(
+                                        LogMessages.IDX20810,
+                                        result.ErrorMessage)));
                     }
-
-                    TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                        MetadataAddress,
-                        TelemetryConstants.Protocols.FirstRefresh);
 
                     UpdateConfiguration(configuration);
                 }
                 catch (Exception ex)
                 {
                     fetchMetadataFailure = ex;
-                    TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                        MetadataAddress,
-                        TelemetryConstants.Protocols.FirstRefresh,
-                        ex);
 
                     LogHelper.LogExceptionMessage(
                         new InvalidOperationException(
@@ -248,22 +234,11 @@ namespace Microsoft.IdentityModel.Protocols
                 {
                     if (_refreshRequested)
                     {
-                        // Log as manual because RequestRefresh was called
-                        TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                            MetadataAddress,
-                            TelemetryConstants.Protocols.Manual);
-
                         UpdateCurrentConfiguration();
                         _refreshRequested = false;
                     }
                     else
-                    {
-                        TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                            MetadataAddress,
-                            TelemetryConstants.Protocols.Automatic);
-
                         _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
-                    }
                 }
             }
 
@@ -289,19 +264,12 @@ namespace Microsoft.IdentityModel.Protocols
         private void UpdateCurrentConfiguration()
         {
 #pragma warning disable CA1031 // Do not catch general exception types
-            long startTimestamp = _timeProvider.GetTimestamp();
-
             try
             {
                 T configuration = _configRetriever.GetConfigurationAsync(
                     MetadataAddress,
                     _docRetriever,
                     CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
-
-                var elapsedTime = _timeProvider.GetElapsedTime(startTimestamp);
-                TelemetryClient.LogConfigurationRetrievalDuration(
-                    MetadataAddress,
-                    elapsedTime);
 
                 if (_configValidator == null)
                 {
@@ -323,12 +291,6 @@ namespace Microsoft.IdentityModel.Protocols
             }
             catch (Exception ex)
             {
-                var elapsedTime = _timeProvider.GetElapsedTime(startTimestamp);
-                TelemetryClient.LogConfigurationRetrievalDuration(
-                    MetadataAddress,
-                    elapsedTime,
-                    ex);
-
                 LogHelper.LogExceptionMessage(
                     new InvalidOperationException(
                         LogHelper.FormatInvariant(
@@ -374,7 +336,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// Obtains an updated version of Configuration.
         /// </summary>
         /// <param name="cancel">CancellationToken</param>
-        /// <returns>Configuration of type BaseConfiguration.</returns>
+        /// <returns>Configuration of type BaseConfiguration    .</returns>
         /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
         public override async Task<BaseConfiguration> GetBaseConfigurationAsync(CancellationToken cancel)
         {
@@ -391,7 +353,6 @@ namespace Microsoft.IdentityModel.Protocols
         public override void RequestRefresh()
         {
             DateTime now = _timeProvider.GetUtcNow().UtcDateTime;
-
             if (now >= DateTimeUtil.Add(LastRequestRefresh, RefreshInterval) || _isFirstRefreshRequest)
             {
                 _isFirstRefreshRequest = false;
