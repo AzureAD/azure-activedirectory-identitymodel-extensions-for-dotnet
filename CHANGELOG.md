@@ -1,5 +1,11 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+8.5.0
+=====
+## Reverting previous breaking change
+- The Configuration Manager has been reverted to version 8.3.1. The changes made in 8.4.0 assume the configuration manager is used as a singleton, which is similar to marking the type as disposable. We have since learned that [adding IDisposable is a breaking change](https://learn.microsoft.com/en-us/dotnet/fundamentals/runtime-libraries/system-idisposable), so we are following [semver guidance](https://semver.org/#what-do-i-do-if-i-accidentally-release-a-backward-incompatible-change-as-a-minor-version) and reverting and releasing a minor version (8.5.0).
+- Cherry-picked Changes: Included changes from PR [#3022](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3022) and [#3104](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3104).
+
 8.4.0
 =====
 ## New Features
