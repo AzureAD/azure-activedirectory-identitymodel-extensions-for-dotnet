@@ -35,15 +35,6 @@ namespace Microsoft.IdentityModel.Protocols
         private const int ConfigurationRetrieverRunning = 1;
         private int _configurationRetrieverState = ConfigurationRetrieverIdle;
 
-        private readonly TimeProvider _timeProvider = TimeProvider.System;
-
-        // If a refresh is requested, then do the refresh as a blocking operation
-        // not on a background thread. RequestRefresh signals that the app is explicitly
-        // requesting a refresh, so it should be done immediately so the next
-        // call to GetConfiguration will return new configuration if the minimum
-        // refresh interval has passed.
-        bool _refreshRequested;
-
         /// <summary>
         /// Instantiates a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
         /// </summary>
@@ -156,7 +147,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
         public virtual async Task<T> GetConfigurationAsync(CancellationToken cancel)
         {
-            if (_currentConfiguration != null && _syncAfter > _timeProvider.GetUtcNow())
+            if (_currentConfiguration != null && _syncAfter > DateTimeOffset.UtcNow)
                 return _currentConfiguration;
 
             Exception fetchMetadataFailure = null;
@@ -223,13 +214,7 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
                 {
-                    if (_refreshRequested)
-                    {
-                        UpdateCurrentConfiguration();
-                        _refreshRequested = false;
-                    }
-                    else
-                        _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
+                    _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
                 }
             }
 
@@ -300,7 +285,7 @@ namespace Microsoft.IdentityModel.Protocols
         private void UpdateConfiguration(T configuration)
         {
             _currentConfiguration = configuration;
-            _syncAfter = DateTimeUtil.Add(_timeProvider.GetUtcNow().UtcDateTime, AutomaticRefreshInterval +
+            _syncAfter = DateTimeUtil.Add(DateTime.UtcNow, AutomaticRefreshInterval +
                 TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 20)));
         }
 
@@ -324,13 +309,16 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         public override void RequestRefresh()
         {
-            DateTimeOffset now = _timeProvider.GetUtcNow();
+            DateTimeOffset now = DateTimeOffset.UtcNow;
+
             if (now >= DateTimeUtil.Add(_lastRequestRefresh.UtcDateTime, RefreshInterval) || _isFirstRefreshRequest)
             {
                 _isFirstRefreshRequest = false;
-                _syncAfter = now;
-                _lastRequestRefresh = now;
-                _refreshRequested = true;
+                if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
+                {
+                    UpdateCurrentConfiguration();
+                    _lastRequestRefresh = now;
+                }
             }
         }
 
