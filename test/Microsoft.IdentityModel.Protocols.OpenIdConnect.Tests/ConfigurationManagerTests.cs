@@ -11,6 +11,7 @@ using System.Net;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Time.Testing;
 using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration;
 using Microsoft.IdentityModel.TestUtils;
@@ -389,17 +390,20 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             var context = new CompareContext($"{this}.AutomaticRefreshInterval");
 
+            AutoResetEvent resetEvent = SetupResetEvent(theoryData.ConfigurationManager);
+
             try
             {
-
                 var configuration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
                 IdentityComparer.AreEqual(configuration, theoryData.ExpectedConfiguration, context);
 
                 theoryData.ConfigurationManager.MetadataAddress = theoryData.UpdatedMetadataAddress;
                 TestUtilities.SetField(theoryData.ConfigurationManager, "_syncAfter", theoryData.SyncAfter);
                 var updatedConfiguration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
-                // we wait 250 ms here to make the task is finished.
-                Thread.Sleep(250);
+
+                if (theoryData.WaitForEvent)
+                    WaitOrFail(resetEvent);
+
                 updatedConfiguration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
                 IdentityComparer.AreEqual(updatedConfiguration, theoryData.ExpectedUpdatedConfiguration, context);
 
@@ -455,7 +459,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ExpectedConfiguration = OpenIdConfigData.AADCommonV1Config,
                     ExpectedUpdatedConfiguration = OpenIdConfigData.AADCommonV2Config,
                     SyncAfter = DateTime.UtcNow,
-                    UpdatedMetadataAddress = "AADCommonV2Json"
+                    UpdatedMetadataAddress = "AADCommonV2Json",
+                    WaitForEvent = true
                 });
 
                 return theoryData;
@@ -467,6 +472,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         {
             var context = new CompareContext($"{this}.RequestRefresh");
 
+            AutoResetEvent resetEvent = SetupResetEvent(theoryData.ConfigurationManager);
+
+            var timeProvider = new FakeTimeProvider();
+            theoryData.ConfigurationManager.TimeProvider = timeProvider;
+
             var configuration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
             IdentityComparer.AreEqual(configuration, theoryData.ExpectedConfiguration, context);
 
@@ -475,19 +485,22 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             if (theoryData.RequestRefresh)
             {
                 theoryData.ConfigurationManager.RequestRefresh();
+
+                if (theoryData.WaitForEvent)
+                    WaitOrFail(resetEvent);
+
                 configuration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
             }
-
-            if (theoryData.SleepTimeInMs > 0)
-                Thread.Sleep(theoryData.SleepTimeInMs);
 
             theoryData.ConfigurationManager.RefreshInterval = theoryData.RefreshInterval;
             theoryData.ConfigurationManager.MetadataAddress = theoryData.UpdatedMetadataAddress;
 
+            timeProvider.Advance(TimeSpan.FromMilliseconds(theoryData.SleepTimeInMs));
+
             theoryData.ConfigurationManager.RequestRefresh();
 
-            if (theoryData.SleepTimeInMs > 0)
-                Thread.Sleep(theoryData.SleepTimeInMs);
+            if (theoryData.WaitForEvent)
+                WaitOrFail(resetEvent);
 
             var updatedConfiguration = await theoryData.ConfigurationManager.GetConfigurationAsync(CancellationToken.None);
 
@@ -514,7 +527,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     RefreshInterval = TimeSpan.FromSeconds(1),
                     RequestRefresh = true,
                     SleepTimeInMs = 1000,
-                    UpdatedMetadataAddress = "AADCommonV2Json"
+                    UpdatedMetadataAddress = "AADCommonV2Json",
+                    WaitForEvent = true,
                 });
 
                 // RefreshInterval set to TimeSpan.MaxValue should return same config.
@@ -542,7 +556,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     ExpectedConfiguration = OpenIdConfigData.AADCommonV1Config,
                     ExpectedUpdatedConfiguration = OpenIdConfigData.AADCommonV2Config,
                     SleepTimeInMs = 100,
-                    UpdatedMetadataAddress = "AADCommonV2Json"
+                    UpdatedMetadataAddress = "AADCommonV2Json",
+                    WaitForEvent = true
                 });
 
                 return theoryData;
@@ -613,18 +628,24 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var docRetriever = new FileDocumentRetriever();
             var configManager = new ConfigurationManager<OpenIdConnectConfiguration>("OpenIdConnectMetadata.json", new OpenIdConnectConfigurationRetriever(), docRetriever);
 
+            AutoResetEvent resetEvent = SetupResetEvent(configManager);
+
+            var timeProvider = new FakeTimeProvider();
+            configManager.TimeProvider = timeProvider;
+
             // This is the minimum time that should pass before an automatic refresh occurs
             // stored in advance to avoid any time drift issues.
-            DateTimeOffset minimumRefreshInterval = DateTimeOffset.UtcNow + configManager.AutomaticRefreshInterval;
+            DateTimeOffset minimumRefreshInterval = timeProvider.GetUtcNow() + configManager.AutomaticRefreshInterval;
 
             // get the first configuration, internal _syncAfter should be set to a time greater than UtcNow + AutomaticRefreshInterval.
             var configuration = await configManager.GetConfigurationAsync(CancellationToken.None);
 
             // force a refresh by setting internal field
-            TestUtilities.SetField(configManager, "_syncAfter", DateTimeOffset.UtcNow - TimeSpan.FromHours(1));
+            timeProvider.Advance(TimeSpan.FromDays(1));
             configuration = await configManager.GetConfigurationAsync(CancellationToken.None);
+
             // wait 1000ms here because update of config is run as a new task.
-            Thread.Sleep(1000);
+            WaitOrFail(resetEvent);
 
             // check that _syncAfter is greater than DateTimeOffset.UtcNow + AutomaticRefreshInterval
             DateTimeOffset syncAfter = (DateTimeOffset)TestUtilities.GetField(configManager, "_syncAfter");
@@ -635,8 +656,9 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             // force a refresh by setting internal field
             TestUtilities.SetField(configManager, "_lastRequestRefresh", DateTimeOffset.UtcNow - TimeSpan.FromHours(1));
             configManager.RequestRefresh();
+
             // wait 1000ms here because update of config is run as a new task.
-            Thread.Sleep(1000);
+            WaitOrFail(resetEvent);
 
             // check that _syncAfter is greater than DateTimeOffset.UtcNow + AutomaticRefreshInterval
             syncAfter = (DateTimeOffset)TestUtilities.GetField(configManager, "_syncAfter");
@@ -762,14 +784,16 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             if (theoryData.PresetCurrentConfiguration)
                 TestUtilities.SetField(configurationManager, "_currentConfiguration", new OpenIdConnectConfiguration() { Issuer = Default.Issuer });
 
+            AutoResetEvent resetEvent = SetupResetEvent(configurationManager);
+
             try
             {
                 //create a listener and enable it for logs
                 var listener = TestUtils.SampleListener.CreateLoggerListener(EventLevel.Warning);
                 configuration = await configurationManager.GetConfigurationAsync();
 
-                // we need to sleep here to make sure the task that updates configuration has finished.
-                Thread.Sleep(250);
+                if (theoryData.WaitForEvent)
+                    WaitOrFail(resetEvent);
 
                 if (!string.IsNullOrEmpty(theoryData.ExpectedErrorMessage) && !listener.TraceBuffer.Contains(theoryData.ExpectedErrorMessage))
                     context.AddDiff($"Expected exception to contain: '{theoryData.ExpectedErrorMessage}'.{Environment.NewLine}Log is:{Environment.NewLine}'{listener.TraceBuffer}'");
@@ -812,7 +836,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     DocumentRetriever = new FileDocumentRetriever(),
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX21818:", typeof(InvalidConfigurationException)),
                     MetadataAddress = "OpenIdConnectMetadata.json",
-                    TestId = "ValidConfiguration_NotEnoughKey"
+                    TestId = "ValidConfiguration_NotEnoughKey",
+                    WaitForEvent = true
                 });
 
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
@@ -823,7 +848,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     PresetCurrentConfiguration = true,
                     ExpectedErrorMessage = "IDX21818: ",
                     MetadataAddress = "OpenIdConnectMetadata.json",
-                    TestId = "ValidConfiguration_NotEnoughKey_PresetCurrentConfiguration"
+                    TestId = "ValidConfiguration_NotEnoughKey_PresetCurrentConfiguration",
+                    WaitForEvent = true
                 });
 
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
@@ -833,7 +859,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     DocumentRetriever = new FileDocumentRetriever(),
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX10810:", typeof(InvalidConfigurationException)),
                     MetadataAddress = "OpenIdConnectMetadataUnrecognizedKty.json",
-                    TestId = "InvalidConfiguration_UnrecognizedKty"
+                    TestId = "InvalidConfiguration_UnrecognizedKty",
+                    WaitForEvent = true
                 });
 
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
@@ -844,7 +871,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     PresetCurrentConfiguration = true,
                     ExpectedErrorMessage = "IDX10810: ",
                     MetadataAddress = "OpenIdConnectMetadataUnrecognizedKty.json",
-                    TestId = "InvalidConfiguration_UnrecognizedKty_PresetCurrentConfiguration"
+                    TestId = "InvalidConfiguration_UnrecognizedKty_PresetCurrentConfiguration",
+                    WaitForEvent = true
                 });
 
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
@@ -854,7 +882,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     DocumentRetriever = new FileDocumentRetriever(),
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX21817:", typeof(InvalidConfigurationException)),
                     MetadataAddress = "JsonWebKeySetUnrecognizedKty.json",
-                    TestId = "InvalidConfiguration_EmptyJsonWenKeySet"
+                    TestId = "InvalidConfiguration_EmptyJsonWenKeySet",
+                    WaitForEvent = true
                 });
 
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
@@ -865,7 +894,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     PresetCurrentConfiguration = true,
                     ExpectedErrorMessage = "IDX21817: ",
                     MetadataAddress = "JsonWebKeySetUnrecognizedKty.json",
-                    TestId = "InvalidConfiguration_EmptyJsonWenKeySet_PresetCurrentConfiguration"
+                    TestId = "InvalidConfiguration_EmptyJsonWenKeySet_PresetCurrentConfiguration",
+                    WaitForEvent = true
                 });
 
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
@@ -875,7 +905,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     DocumentRetriever = new FileDocumentRetriever(),
                     ExpectedException = new ExpectedException(typeof(InvalidOperationException), "IDX10814:", typeof(InvalidConfigurationException)),
                     MetadataAddress = "OpenIdConnectMetadataBadRsaDataMissingComponent.json",
-                    TestId = "InvalidConfiguration_RsaKeyMissingComponent"
+                    TestId = "InvalidConfiguration_RsaKeyMissingComponent",
+                    WaitForEvent = true
                 });
 
                 theoryData.Add(new ConfigurationManagerTheoryData<OpenIdConnectConfiguration>
@@ -886,7 +917,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                     PresetCurrentConfiguration = true,
                     ExpectedErrorMessage = "IDX10814: ",
                     MetadataAddress = "OpenIdConnectMetadataBadRsaDataMissingComponent.json",
-                    TestId = "InvalidConfiguration_RsaKeyMissingComponent_PresetCurrentConfiguration"
+                    TestId = "InvalidConfiguration_RsaKeyMissingComponent_PresetCurrentConfiguration",
+                    WaitForEvent = true
                 });
 
                 return theoryData;
@@ -914,6 +946,22 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 },
                 waitEvent,
                 signalEvent);
+        }
+
+        internal static AutoResetEvent SetupResetEvent(ConfigurationManager<OpenIdConnectConfiguration> configurationManager)
+        {
+            var resetEvent = new AutoResetEvent(false);
+
+            Action _waitAction = () => resetEvent.Set();
+            configurationManager._onBackgroundTaskFinish = _waitAction;
+
+            return resetEvent;
+        }
+
+        internal static void WaitOrFail(AutoResetEvent are)
+        {
+            if (!are.WaitOne(30000))
+                Assert.Fail("Failed to receive a signal in 30s, failing test");
         }
 
         public class ConfigurationManagerTheoryData<T> : TheoryDataBase where T : class
@@ -953,6 +1001,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             public int SleepTimeInMs { get; set; } = 0;
 
             public DateTimeOffset SyncAfter { get; set; } = DateTime.UtcNow;
+
+            public bool WaitForEvent { get; set; }
 
             public override string ToString()
             {
