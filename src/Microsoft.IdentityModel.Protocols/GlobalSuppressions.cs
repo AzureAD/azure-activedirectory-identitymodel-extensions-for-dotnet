@@ -12,8 +12,3 @@ using System.Diagnostics.CodeAnalysis;
 #if NET6_0_OR_GREATER
 [assembly: SuppressMessage("Globalization", "CA1307:Specify StringComparison", Justification = "Adding StringComparison.Ordinal adds a performance penalty.", Scope = "member", Target = "~M:Microsoft.IdentityModel.Protocols.AuthenticationProtocolMessage.BuildRedirectUrl~System.String")]
 #endif
-
-[assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types",
-    Justification = "Background thread needs to never throw an unhandled exception.",
-    Scope = "member",
-    Target = "~M:Microsoft.IdentityModel.Protocols.ConfigurationManager`1.UpdateCurrentConfigurationUsingSignals")]

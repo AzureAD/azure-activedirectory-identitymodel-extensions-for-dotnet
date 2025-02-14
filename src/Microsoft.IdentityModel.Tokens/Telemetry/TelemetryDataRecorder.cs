@@ -26,16 +26,9 @@ namespace Microsoft.IdentityModel.Telemetry
         /// <summary>
         /// Counter to capture configuration refresh requests to ConfigurationManager.
         /// </summary>
-        internal static readonly Counter<long> ConfigurationManagerCounter = IdentityModelMeter.CreateCounter<long>(IdentityModelConfigurationManagerCounterName, description: IdentityModelConfigurationManagerCounterDescription);
         internal const string IdentityModelConfigurationManagerCounterName = "IdentityModelConfigurationManager";
         internal const string IdentityModelConfigurationManagerCounterDescription = "Counter capturing configuration manager operations.";
-
-        /// <summary>
-        /// Counter to capture background refresh failures in the ConfigurationManager.
-        /// </summary>
-        internal static readonly Counter<long> BackgroundConfigurationRefreshFailureCounter = IdentityModelMeter.CreateCounter<long>(BackgroundConfigurationRefreshFailureCounterName, description: BackgroundConfigurationRefreshFailureCounterDescription);
-        internal const string BackgroundConfigurationRefreshFailureCounterName = "IdentityModelConfigurationManagerBackgroundRefreshFailure";
-        internal const string BackgroundConfigurationRefreshFailureCounterDescription = "Counter capturing configuration manager background refresh failures.";
+        internal static readonly Counter<long> ConfigurationManagerCounter = IdentityModelMeter.CreateCounter<long>(IdentityModelConfigurationManagerCounterName, description: IdentityModelConfigurationManagerCounterDescription);
 
         /// <summary>
         /// Histogram to capture total duration of configuration retrieval by ConfigurationManager in milliseconds.
@@ -53,11 +46,6 @@ namespace Microsoft.IdentityModel.Telemetry
         internal static void IncrementConfigurationRefreshRequestCounter(in TagList tagList)
         {
             ConfigurationManagerCounter.Add(1, tagList);
-        }
-
-        internal static void IncrementBackgroundConfigurationRefreshFailureCounter(in TagList tagList)
-        {
-            BackgroundConfigurationRefreshFailureCounter.Add(1, tagList);
         }
     }
 }
