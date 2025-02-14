@@ -77,11 +77,14 @@ namespace Microsoft.IdentityModel.Protocols.Tests
             if (!IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer, context))
                 context.Diffs.Add("!IdentityComparer.AreEqual(configuration, configuration2)");
 
+            configManager.ShutdownBackgroundTask();
+
             // AutomaticRefreshInterval should pick up new bits.
             configManager = new ConfigurationManager<IssuerMetadata>("IssuerMetadata.json", new IssuerConfigurationRetriever(), docRetriever);
             configManager.RequestRefresh();
             configuration = await configManager.GetConfigurationAsync();
             TestUtilities.SetField(configManager, "_lastRequestRefresh", DateTime.UtcNow.Subtract(TimeSpan.FromHours(1)));
+
             configManager.MetadataAddress = "IssuerMetadata2.json";
 
             // Wait for the refresh to complete.
@@ -100,6 +103,8 @@ namespace Microsoft.IdentityModel.Protocols.Tests
 
             if (IdentityComparer.AreEqual(configuration.Issuer, configuration2.Issuer))
                 context.Diffs.Add($"Expected: {configuration.Issuer}, to be different from: {configuration2.Issuer}");
+
+            configManager.ShutdownBackgroundTask();
 
             TestUtilities.AssertFailIfErrors(context);
         }

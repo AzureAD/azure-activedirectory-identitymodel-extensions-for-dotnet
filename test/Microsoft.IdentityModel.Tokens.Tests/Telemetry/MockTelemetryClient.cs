@@ -15,6 +15,7 @@ namespace Microsoft.IdentityModel.Telemetry.Tests
         public void ClearExportedItems()
         {
             ExportedItems.Clear();
+            ExportedHistogramItems.Clear();
         }
 
         public void IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus)
@@ -43,6 +44,13 @@ namespace Microsoft.IdentityModel.Telemetry.Tests
             ExportedHistogramItems.Add(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
             ExportedHistogramItems.Add(TelemetryConstants.MetadataAddressTag, metadataAddress);
             ExportedHistogramItems.Add(TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString());
+        }
+
+        void ITelemetryClient.LogBackgroundConfigurationRefreshFailure(string metadataAddress, Exception exception)
+        {
+            ExportedItems.Add(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
+            ExportedItems.Add(TelemetryConstants.MetadataAddressTag, metadataAddress);
+            ExportedItems.Add(TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString());
         }
     }
 }

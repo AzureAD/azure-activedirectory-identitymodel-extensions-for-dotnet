@@ -27,6 +27,11 @@ namespace Microsoft.IdentityModel.Telemetry
         /// </summary>
         public const string ExceptionTypeTag = "ExceptionType";
 
+        /// <summary>
+        /// Telemetry tag indicating if the update was blocking.
+        /// </summary>
+        public const string BlockingTypeTag = "Blocking";
+
         public static class Protocols
         {
             // Configuration manager refresh statuses
