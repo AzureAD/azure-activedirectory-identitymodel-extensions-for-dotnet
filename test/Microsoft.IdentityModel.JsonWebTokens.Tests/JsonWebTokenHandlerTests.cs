@@ -4196,7 +4196,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         IssuerSigningKey = Default.SymmetricSigningKey,
                         ValidIssuer = Default.Issuer
                     },
-                    ExpectedException = ExpectedException.SecurityTokenExpiredException("IDX10223:")
+                    ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10208:")
                 },
                 new CreateTokenTheoryData
                 {
@@ -4227,7 +4227,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     {
                         IssuerSigningKey = Default.SymmetricSigningKey,
                     },
-                    ExpectedException = ExpectedException.SecurityTokenExpiredException("IDX10223:")
+                    ExpectedException = ExpectedException.SecurityTokenInvalidIssuerException("IDX10204:")
                 },
                 new CreateTokenTheoryData
                 {
