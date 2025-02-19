@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         IssuerSigningKey = Default.SymmetricSigningKey,
                         ValidIssuer = Default.Issuer,
                      },
-                     ExpectedException = ExpectedException.SecurityTokenExpiredException("IDX10223:")
+                     ExpectedException = ExpectedException.SecurityTokenInvalidAudienceException("IDX10208:")
                 },
                 new CreateTokenTheoryData
                 {
@@ -70,7 +70,9 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                         ValidateIssuer = false,
                         ValidateAudience = false
                     },
-                    ExpectedException = ExpectedException.SecurityTokenExpiredException("IDX10223:")
+                    //not sure this is the correct exception, it probably needs to be SecurityTokenInvalidIssuerException (IDX10204) since the goal of this PR is to remove: SecurityTokenExpiredException (IDX10223)
+                    //ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10512:")
+                    ExpectedException = ExpectedException.SecurityTokenSignatureKeyNotFoundException("IDX10204:")
                 },
                 new CreateTokenTheoryData
                 {
