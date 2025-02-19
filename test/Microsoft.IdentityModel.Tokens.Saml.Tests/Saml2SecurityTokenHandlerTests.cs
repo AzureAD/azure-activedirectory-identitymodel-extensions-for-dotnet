@@ -940,7 +940,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                     {
                         Audiences = new List<string>(),
                         Token = ReferenceTokens.Saml2Token_NoAudienceRestrictions_NoSignature,
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenExpiredException), "IDX10223:"),
                         ValidationParameters = new TokenValidationParameters
                         {
                             IssuerSigningKey = KeyingMaterial.DefaultAADSigningKey,
