@@ -460,13 +460,6 @@ namespace Microsoft.IdentityModel.Tokens
                 LogHelper.LogInformation(LogMessages.IDX10238);
                 return;
             }
-            DateTime utcNow = validationParameters.TimeProvider.GetUtcNow().UtcDateTime;
-            if (expires.HasValue && (expires.Value < DateTimeUtil.Add(utcNow, validationParameters.ClockSkew.Negate())))
-                if (LogHelper.IsEnabled(EventLogLevel.Warning))
-                {
-                    LogHelper.LogWarning(LogMessages.IDX10223, LogHelper.MarkAsNonPII(expires.Value), LogHelper.MarkAsNonPII(utcNow));
-                    return;
-                }
 
             ValidatorUtilities.ValidateLifetime(notBefore, expires, securityToken, validationParameters);
         }
