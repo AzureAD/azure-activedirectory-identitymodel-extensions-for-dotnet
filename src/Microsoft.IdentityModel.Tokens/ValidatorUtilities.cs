@@ -42,13 +42,6 @@ namespace Microsoft.IdentityModel.Tokens
                 {
                     NotBefore = notBefore.Value
                 });
-
-            if (expires.HasValue && (expires.Value < DateTimeUtil.Add(utcNow, validationParameters.ClockSkew.Negate())))
-                throw LogHelper.LogExceptionMessage(new SecurityTokenExpiredException(LogHelper.FormatInvariant(LogMessages.IDX10223, LogHelper.MarkAsNonPII(expires.Value), LogHelper.MarkAsNonPII(utcNow)))
-                {
-                    Expires = expires.Value
-                });
-
             // if it reaches here, that means lifetime of the token is valid
             if (LogHelper.IsEnabled(EventLogLevel.Informational))
                 LogHelper.LogInformation(LogMessages.IDX10239);
