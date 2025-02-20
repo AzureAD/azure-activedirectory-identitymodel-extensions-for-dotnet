@@ -730,13 +730,13 @@ namespace Microsoft.IdentityModel.TestUtils
             }
         }
 
-#if NET472_OR_GREATER || NET6_0_OR_GREATER
+#if NET472_OR_GREATER || NETCOREAPP
         /// <summary>
         /// Can be used to generate a self-signed certificate for testing purposes.
         /// Since we support .NET 4.6.2, we can't call directly as CertificateRequest is not available.
         /// Instead, use Convert.ToBase64string(cert.RawData), copy the string and then rehydrate the cert.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A X509Certificate with the DigitalSignature and SubjectKeyIdentifier extensions set.</returns>
         public static X509Certificate2 GenerateSelfSignedCertificate()
         {
             string subjectName = "CN=Self-Signed-Cert";
