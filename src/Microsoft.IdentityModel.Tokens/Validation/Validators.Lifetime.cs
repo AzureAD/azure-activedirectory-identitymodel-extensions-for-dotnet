@@ -90,16 +90,10 @@ namespace Microsoft.IdentityModel.Tokens
                     expires);
 
             if (expires.HasValue && (expires.Value < DateTimeUtil.Add(utcNow, validationParameters.ClockSkew.Negate())))
-                return new LifetimeValidationError(
-                    new MessageDetail(
-                        LogMessages.IDX10223,
-                        LogHelper.MarkAsNonPII(expires.Value),
-                        LogHelper.MarkAsNonPII(utcNow)),
-                    ValidationFailureType.LifetimeValidationFailed,
-                    typeof(SecurityTokenExpiredException),
-                    ValidationError.GetCurrentStackFrame(),
-                    notBefore,
-                    expires);
+                LogHelper.LogWarning(
+                    LogMessages.IDX10223,
+                    LogHelper.MarkAsNonPII(expires.Value),
+                    LogHelper.MarkAsNonPII(utcNow));
 
             // if it reaches here, that means lifetime of the token is valid
             return new ValidatedLifetime(notBefore, expires);
