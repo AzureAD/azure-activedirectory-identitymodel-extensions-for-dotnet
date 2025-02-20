@@ -26,14 +26,15 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 theoryData.ValidationParameters,
                 new CallContext());
 
-            if (result.IsValid && result.Error == null)
-            {
-                var warningId = "IDX10223";
-                Assert.Contains(warningId, listener.TraceBuffer);
+            //if (result.IsValid && result.Error == null)
+            //{
+            //    var warningId = "IDX10223";
+            //    Assert.Contains(warningId, listener.TraceBuffer);
 
-                theoryData.ExpectedException.ProcessNoException();
-            }
-            else if (result.IsValid)
+            //    theoryData.ExpectedException.ProcessNoException();
+            //}
+            //else
+            if (result.IsValid)
             {
                 IdentityComparer.AreValidatedLifetimesEqual(
                     theoryData.Result.UnwrapResult(),

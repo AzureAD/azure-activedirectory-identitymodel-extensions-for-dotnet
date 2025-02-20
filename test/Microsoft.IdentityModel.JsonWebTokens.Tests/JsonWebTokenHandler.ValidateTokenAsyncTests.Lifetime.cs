@@ -36,6 +36,17 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
                 return new TheoryData<ValidateTokenAsyncLifetimeTheoryData>
                 {
+                    new ValidateTokenAsyncLifetimeTheoryData("Invalid_ExpiredThreeMinutesAgoButSkewIsTwoMinutes")
+                    {
+                        // We override the clock skew to 2 minutes.
+                        IssuedAt = nowMinus1Hour,
+                        NotBefore = nowMinus1Hour,
+                        Expires = nowMinus3Minutes,
+                        TokenValidationParameters = CreateTokenValidationParameters(TimeSpan.FromMinutes(2)),
+                        ValidationParameters = CreateValidationParameters(TimeSpan.FromMinutes(2)),
+                        ExpectedIsValid = false,
+                        ExpectedException = ExpectedException.SecurityTokenExpiredException("IDX10261:"),
+                    },
                     new ValidateTokenAsyncLifetimeTheoryData("Valid_LifetimeIsValid")
                     {
                         IssuedAt = now,
@@ -72,17 +83,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Expires = nowMinus3Minutes,
                         TokenValidationParameters = CreateTokenValidationParameters(),
                         ValidationParameters = CreateValidationParameters(),
-                    },
-                    new ValidateTokenAsyncLifetimeTheoryData("Invalid_ExpiredThreeMinutesAgoButSkewIsTwoMinutes")
-                    {
-                        // We override the clock skew to 2 minutes.
-                        IssuedAt = nowMinus1Hour,
-                        NotBefore = nowMinus1Hour,
-                        Expires = nowMinus3Minutes,
-                        TokenValidationParameters = CreateTokenValidationParameters(TimeSpan.FromMinutes(2)),
-                        ValidationParameters = CreateValidationParameters(TimeSpan.FromMinutes(2)),
-                        ExpectedIsValid = false,
-                        ExpectedException = ExpectedException.SecurityTokenExpiredException("IDX10223:"),
                     },
                     new ValidateTokenAsyncLifetimeTheoryData("Valid_ValidInThreeMinutesButSkewIsFiveMinutes")
                     {
