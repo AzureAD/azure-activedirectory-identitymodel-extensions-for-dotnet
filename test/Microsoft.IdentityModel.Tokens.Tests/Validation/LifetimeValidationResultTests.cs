@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics.Tracing;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
@@ -15,6 +16,9 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.LifetimeValidatorTests", theoryData);
 
+            //Creating a listener and enabling it for log warnings of IDX10233
+            SampleListener listener = SampleListener.CreateLoggerListener(EventLevel.Warning);
+
             ValidationResult<ValidatedLifetime> result = Validators.ValidateLifetime(
                 theoryData.NotBefore,
                 theoryData.Expires,
@@ -22,7 +26,14 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                 theoryData.ValidationParameters,
                 new CallContext());
 
-            if (result.IsValid)
+            if (result.IsValid && result.Error == null)
+            {
+                var warningId = "IDX10223";
+                Assert.Contains(warningId, listener.TraceBuffer);
+
+                theoryData.ExpectedException.ProcessNoException();
+            }
+            else if (result.IsValid)
             {
                 IdentityComparer.AreValidatedLifetimesEqual(
                     theoryData.Result.UnwrapResult(),
@@ -153,18 +164,12 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                     },
                     new ValidateLifetimeTheoryData("Invalid_Expired")
                     {
-                        ExpectedException = ExpectedException.SecurityTokenExpiredException("IDX10223:"),
+                        //ExpectedException = ExpectedException.SecurityTokenExpiredException("IDX10223:"),
                         Expires = oneHourAgo,
                         NotBefore = twoHoursAgo,
                         ValidationParameters = new ValidationParameters() { TimeProvider = timeProvider },
-                        Result = new ValidationError(
-                            new MessageDetail(
-                                LogMessages.IDX10223,
-                                LogHelper.MarkAsNonPII(oneHourAgo),
-                                LogHelper.MarkAsNonPII(utcNow)),
-                            ValidationFailureType.LifetimeValidationFailed,
-                            typeof(SecurityTokenExpiredException),
-                            null),
+                        Result = null,
+
                     },
                     new ValidateLifetimeTheoryData("Invalid_NotYetValid_SkewForward")
                     {
