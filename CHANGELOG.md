@@ -8,7 +8,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 
 ## Fundamentals
 * Update dependency on Microsoft.Extensions.Logging.Abstractions from 9.0.0 to 8.0.2 to avoid package downgrade in apps on .NET 9 using a netstandard2.0 library referencing logging.abstractions. See [3143](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3143)
-* Add more tests for token encryption. See [#3139](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3139)
+* Add more tests for encrypted tokens. See [#3139](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3139)
 
 8.5.0
 =====
