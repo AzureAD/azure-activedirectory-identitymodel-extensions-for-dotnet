@@ -3,7 +3,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 8.6.0
 =====
 ## New Features
-- TokenValidationParameters has a new boolean property `TryAllDecryptionKeys` that let you choose whether to try all decrypt keys when no key match the token decrypt key IDs. By default it's set to **true** (legacy behavior) but you can set it to false to avoid tyring all keys which is more performant. See [#3128](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3128)
+- TokenValidationParameters has a new boolean property `TryAllDecryptionKeys` that let you choose whether to try all decrypt keys when no key matches the token decrypt key IDs. By default it's set to **true** (legacy behavior) but you can set it to false to avoid tyring all keys which is more performant. See [#3128](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3128)
 - Promote KeyInfo.MatchesKey from internal to protected internal virtual to enable SAML extensibility (for CoreWcf). See [#3140](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3140)
 
 ## Fundamentals
