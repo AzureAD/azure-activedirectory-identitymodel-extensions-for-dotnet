@@ -80,6 +80,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         internal static bool UpdateConfigAsBlocking => _updateConfigAsBlockingCall ??= (AppContext.TryGetSwitch(UpdateConfigAsBlockingSwitch, out bool blockingCall) && blockingCall);
 
+        internal static bool StoreArrayClaimsAsJsonString => _storeArrayClaimsAsJsonString ??=
+            (AppContext.TryGetSwitch(StoreArrayClaimsAsJsonStringSwitch, out bool storeArrayClaimsAsJsonString) && storeArrayClaimsAsJsonString);
+
+        internal const string StoreArrayClaimsAsJsonStringSwitch = "Switch.Microsoft.IdentityModel.StoreArrayClaimsAsJsonString";
+
+        private static bool? _storeArrayClaimsAsJsonString;
+
         /// <summary>
         /// Used for testing to reset all switches to its default value.
         /// </summary>
@@ -96,6 +103,9 @@ namespace Microsoft.IdentityModel.Tokens
 
             _useRfcDefinitionOfEpkAndKid = null;
             AppContext.SetSwitch(UseRfcDefinitionOfEpkAndKidSwitch, false);
+
+            _storeArrayClaimsAsJsonString = null;
+            AppContext.SetSwitch(StoreArrayClaimsAsJsonStringSwitch, false);
         }
     }
 }

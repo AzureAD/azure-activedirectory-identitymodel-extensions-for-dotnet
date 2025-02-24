@@ -12,8 +12,29 @@ using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Json;
 
+#if NET8_0_OR_GREATER
+using System.Text.Json.Serialization;
+#endif
+
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
+#if NET8_0_OR_GREATER
+    // On .NET8+, we can benefit from more performant code generated serializers.
+    [JsonSourceGenerationOptions(WriteIndented = false)]
+    [JsonSerializable(typeof(IList))]
+    [JsonSerializable(typeof(string))]
+    [JsonSerializable(typeof(int))]
+    [JsonSerializable(typeof(long))]
+    [JsonSerializable(typeof(bool))]
+    [JsonSerializable(typeof(double))]
+    [JsonSerializable(typeof(DateTime))]
+    [JsonSerializable(typeof(float))]
+    [JsonSerializable(typeof(decimal))]
+    internal partial class SourceGenerationContext : JsonSerializerContext
+    {
+    }
+#endif
+
     /// <summary>
     /// This class provides an abstraction over the json parser for net461+ using System.Text.Json.
     /// <see cref="JsonWebToken"/> will delegate to this class to get values.
@@ -83,17 +104,36 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 claims.Add(new Claim(claimType, string.Empty, JsonClaimValueTypes.JsonNull, issuer, issuer));
             else if (value is IList ilist)
             {
-                foreach (var item in ilist)
-                    CreateClaimFromObject(claims, claimType, item, issuer);
+                if (AppContextSwitches.StoreArrayClaimsAsJsonString)
+                {
+#if NET8_0_OR_GREATER
+                    string jsonString = JsonSerializer.Serialize(ilist, SourceGenerationContext.Default.IList);
+#else
+                    string jsonString = JsonSerializer.Serialize(ilist);
+#endif
+                    claims.Add(new Claim(claimType, jsonString, JsonClaimValueTypes.JsonArray, issuer, issuer));
+                }
+                else
+                {
+                    foreach (var item in ilist)
+                        CreateClaimFromObject(claims, claimType, item, issuer);
+                }
             }
             else if (value is JsonElement j)
                 if (j.ValueKind == JsonValueKind.Array)
                 {
-                    foreach (JsonElement jsonElement in j.EnumerateArray())
+                    if (AppContextSwitches.StoreArrayClaimsAsJsonString)
                     {
-                        Claim claim = CreateClaimFromJsonElement(claimType, issuer, jsonElement);
-                        if (claim != null)
-                            claims.Add(claim);
+                        claims.Add(new Claim(claimType, j.ToString(), JsonClaimValueTypes.JsonArray, issuer, issuer));
+                    }
+                    else
+                    {
+                        foreach (JsonElement jsonElement in j.EnumerateArray())
+                        {
+                            Claim claim = CreateClaimFromJsonElement(claimType, issuer, jsonElement);
+                            if (claim != null)
+                                claims.Add(claim);
+                        }
                     }
                 }
                 else
