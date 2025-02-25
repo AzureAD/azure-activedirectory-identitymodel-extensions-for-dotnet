@@ -3257,6 +3257,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             {
                 var handlerWithNoDefaultTimes = new JsonWebTokenHandler();
                 handlerWithNoDefaultTimes.SetDefaultTimesOnTokenCreation = false;
+
+                var configNoDecryptKeys = new OpenIdConnectConfiguration();
+                var configWithDecryptKeys = new OpenIdConnectConfiguration();
+                configWithDecryptKeys.TokenDecryptionKeys.Add(KeyingMaterial.DefaultX509Key_2048);
+                var configManager = new MockConfigurationManager<OpenIdConnectConfiguration>(configNoDecryptKeys);
+                configManager.RefreshedConfiguration = configWithDecryptKeys;
+
                 return new TheoryData<JwtTheoryData>
                 {
                     new JwtTheoryData
@@ -3344,6 +3351,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             TokenDecryptionKey = KeyingMaterial.DefaultX509Key_2048,
                             AlgorithmValidator = ValidationDelegates.AlgorithmValidatorBuilder(true)
                         },
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = "JWE_TokenDecryptError_SuccessOnRetry",
+                        Token = new JsonWebTokenHandler().CreateToken(
+                            Default.PayloadString,
+                            KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
+                            new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256)),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer,
+                            ValidateIssuerSigningKey = true,
+                            IssuerSigningKey = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
+                            ConfigurationManager = configManager,
+                        }
                     },
                 };
             }

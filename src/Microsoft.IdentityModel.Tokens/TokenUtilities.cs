@@ -252,7 +252,8 @@ namespace Microsoft.IdentityModel.Tokens
         {
             return exception is SecurityTokenInvalidSignatureException
                   || exception is SecurityTokenInvalidIssuerException
-                  || exception is SecurityTokenSignatureKeyNotFoundException;
+                  || exception is SecurityTokenSignatureKeyNotFoundException
+                  || exception is SecurityTokenDecryptionFailedException;
         }
 
         /// <summary>
@@ -297,7 +298,8 @@ namespace Microsoft.IdentityModel.Tokens
         {
             return exceptionType == typeof(SecurityTokenInvalidSignatureException) ||
                 exceptionType == typeof(SecurityTokenInvalidIssuerException) ||
-                exceptionType == typeof(SecurityTokenSignatureKeyNotFoundException);
+                exceptionType == typeof(SecurityTokenSignatureKeyNotFoundException) ||
+                exceptionType == typeof(SecurityTokenDecryptionFailedException);
         }
 
         /// <summary>
