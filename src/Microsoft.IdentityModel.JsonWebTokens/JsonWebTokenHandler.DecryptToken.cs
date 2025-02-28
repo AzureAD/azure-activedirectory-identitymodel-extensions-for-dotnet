@@ -68,15 +68,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     ValidationError.GetCurrentStackFrame());
             }
 
+            var decryptionParameters = CreateJwtTokenDecryptionParameters(jwtToken, result.contentEncryptionKeys);
+
             return JwtTokenUtilities.DecryptJwtToken(
                 jwtToken,
                 validationParameters,
-                new JwtTokenDecryptionParameters
-                {
-                    DecompressionFunction = JwtTokenUtilities.DecompressToken,
-                    Keys = result.contentEncryptionKeys,
-                    MaximumDeflateSize = MaximumTokenSizeInBytes
-                },
+                decryptionParameters,
                 callContext);
         }
 

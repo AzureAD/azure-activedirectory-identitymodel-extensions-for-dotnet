@@ -13,6 +13,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.TestUtils;
@@ -2797,6 +2798,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         EncryptingCredentials = Default.SymmetricEncryptingCredentials,
                         ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10603:")
                     },
+                    GetTokenTheoryDataWithKeyId(),
                     new CreateTokenTheoryData()
                     {
                         TestId = "EncryptionAlgorithmNotSupported",
@@ -2812,6 +2814,38 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10619:")
                     },
                 };
+
+                static CreateTokenTheoryData GetTokenTheoryDataWithKeyId()
+                {
+                    var validationParameters = new TokenValidationParameters
+                    {
+                        IssuerSigningKey = Default.SymmetricSigningKey256,
+                        TokenDecryptionKey = NotDefault.SymmetricSigningKey256,
+                    };
+
+                    var keysAttempted = new StringBuilder().AppendLine(validationParameters.TokenDecryptionKey.KeyId);
+                    var incompleteExceptionMessage = new MessageDetail(
+                                Tokens.LogMessages.IDX10603,
+                                LogHelper.MarkAsNonPII(keysAttempted.ToString()),
+                                string.Empty,   // Using empty since actual exception contains file paths, which are machine specific.
+                                string.Empty)   // Using empty since EncodedToken is not available and the message is getting used partially below.
+                        .Message;
+                    // Get partial messages as the actual exception message contains file paths.
+                    var partialExceptionMessage = incompleteExceptionMessage.Substring(
+                        0,
+                        incompleteExceptionMessage.IndexOf(validationParameters.TokenDecryptionKey.KeyId) + validationParameters.TokenDecryptionKey.KeyId.Length);
+
+                    return new CreateTokenTheoryData()
+                    {
+                        TestId = "EncryptionKey-Not-Found-Returns-KeyId-In-Error-Message",
+                        IsValid = false,
+                        ValidationParameters = validationParameters,
+                        Payload = Default.PayloadString,
+                        SigningCredentials = Default.SymmetricSigningCredentials,
+                        EncryptingCredentials = Default.SymmetricEncryptingCredentials,
+                        ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10603:")
+                    };
+                }
             }
         }
 

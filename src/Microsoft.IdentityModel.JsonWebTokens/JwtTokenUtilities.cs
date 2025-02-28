@@ -264,7 +264,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             string zipAlgorithm = null;
             foreach (SecurityKey key in decryptionParameters.Keys)
             {
-                var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
+                var cryptoProviderFactory = s_getCryptoProviderFactory(validationParameters, key);
                 if (cryptoProviderFactory == null)
                 {
                     if (LogHelper.IsEnabled(EventLogLevel.Warning))
@@ -275,61 +275,28 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 try
                 {
-                    // The JsonWebTokenHandler will set the JsonWebToken and those values will be used.
-                    // The JwtSecurityTokenHandler will calculate values and set the values on DecryptionParameters.
-
-                    // JsonWebToken from JsonWebTokenHandler
-                    if (securityToken is JsonWebToken jsonWebToken)
+                    if (!cryptoProviderFactory.IsSupportedAlgorithm(decryptionParameters.Enc, key))
                     {
-                        if (!cryptoProviderFactory.IsSupportedAlgorithm(jsonWebToken.Enc, key))
-                        {
-                            if (LogHelper.IsEnabled(EventLogLevel.Warning))
-                                LogHelper.LogWarning(TokenLogMessages.IDX10611, LogHelper.MarkAsNonPII(decryptionParameters.Enc), LogHelper.MarkAsNonPII(key.KeyId));
+                        if (LogHelper.IsEnabled(EventLogLevel.Warning))
+                            LogHelper.LogWarning(TokenLogMessages.IDX10611, LogHelper.MarkAsNonPII(decryptionParameters.Enc), LogHelper.MarkAsNonPII(key.KeyId));
 
-                            algorithmNotSupportedByCryptoProvider = true;
-                            continue;
-                        }
-
-                        Validators.ValidateAlgorithm(jsonWebToken.Enc, key, securityToken, validationParameters);
-                        decryptedTokenBytes = DecryptToken(
-                            cryptoProviderFactory,
-                            key,
-                            jsonWebToken.Enc,
-                            jsonWebToken.CipherTextBytes,
-                            jsonWebToken.HeaderAsciiBytes,
-                            jsonWebToken.InitializationVectorBytes,
-                            jsonWebToken.AuthenticationTagBytes);
-
-                        zipAlgorithm = jsonWebToken.Zip;
-                        decryptionSucceeded = true;
-                        break;
+                        algorithmNotSupportedByCryptoProvider = true;
+                        continue;
                     }
-                    // JwtSecurityToken from JwtSecurityTokenHandler
-                    else
-                    {
-                        if (!cryptoProviderFactory.IsSupportedAlgorithm(decryptionParameters.Enc, key))
-                        {
-                            if (LogHelper.IsEnabled(EventLogLevel.Warning))
-                                LogHelper.LogWarning(TokenLogMessages.IDX10611, LogHelper.MarkAsNonPII(decryptionParameters.Enc), LogHelper.MarkAsNonPII(key.KeyId));
 
-                            algorithmNotSupportedByCryptoProvider = true;
-                            continue;
-                        }
+                    Validators.ValidateAlgorithm(decryptionParameters.Enc, key, securityToken, validationParameters);
+                    decryptedTokenBytes = DecryptToken(
+                        cryptoProviderFactory,
+                        key,
+                        decryptionParameters.Enc,
+                        decryptionParameters.CipherTextBytes,
+                        decryptionParameters.HeaderAsciiBytes,
+                        decryptionParameters.InitializationVectorBytes,
+                        decryptionParameters.AuthenticationTagBytes);
 
-                        Validators.ValidateAlgorithm(decryptionParameters.Enc, key, securityToken, validationParameters);
-                        decryptedTokenBytes = DecryptToken(
-                            cryptoProviderFactory,
-                            key,
-                            decryptionParameters.Enc,
-                            decryptionParameters.CipherTextBytes,
-                            decryptionParameters.HeaderAsciiBytes,
-                            decryptionParameters.InitializationVectorBytes,
-                            decryptionParameters.AuthenticationTagBytes);
-
-                        zipAlgorithm = decryptionParameters.Zip;
-                        decryptionSucceeded = true;
-                        break;
-                    }
+                    zipAlgorithm = decryptionParameters.Zip;
+                    decryptionSucceeded = true;
+                    break;
                 }
                 catch (Exception ex)
                 {
@@ -364,6 +331,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 throw LogHelper.LogExceptionMessage(new SecurityTokenDecompressionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10679, zipAlgorithm), ex));
             }
         }
+
+        internal static Func<TokenValidationParameters, SecurityKey, CryptoProviderFactory>
+            s_getCryptoProviderFactory = (validationParameters, key) =>
+        {
+            return validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
+        };
 
         private static ValidationError GetDecryptionError(
             JwtTokenDecryptionParameters decryptionParameters,
