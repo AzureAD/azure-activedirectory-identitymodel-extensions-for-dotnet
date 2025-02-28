@@ -24,8 +24,7 @@ namespace Microsoft.IdentityModel.Logging.Tests
             {
                 IdentityModelTelemetryUtil.SetTelemetryData(theoryData.HttpRequestMessage, theoryData.AdditionalHeaders);
                 // check if the resulting headers are as expected
-                if (!IdentityComparer.AreEqual(theoryData.ExpectedHeaders, theoryData.HttpRequestMessage?.Headers))
-                    throw new ArgumentException("resulting headers do not match the expected headers.");
+                IdentityComparer.AreEqual(theoryData.ExpectedHeaders, theoryData.HttpRequestMessage?.Headers, testContext);
 
                 theoryData.ExpectedException.ProcessNoException(testContext);
             }

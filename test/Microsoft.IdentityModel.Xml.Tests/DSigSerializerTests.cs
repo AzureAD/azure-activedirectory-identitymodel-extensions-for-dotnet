@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
@@ -115,7 +116,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 theoryData.Serializer.WriteKeyInfo(writer, keyInfo);
                 writer.Flush();
                 var xml = Encoding.UTF8.GetString(ms.ToArray());
-                IdentityComparer.AreEqual(theoryData.Xml, xml);
+                IdentityComparer.AreEqual(theoryData.Xml, xml, context);
             }
             catch (Exception ex)
             {
@@ -251,7 +252,7 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 theoryData.Serializer.WriteSignature(writer, signature);
                 writer.Flush();
                 var xml = Encoding.UTF8.GetString(ms.ToArray());
-                IdentityComparer.AreEqual(theoryData.Xml, xml);
+                IdentityComparer.AreEqual(theoryData.Xml, xml, context);
             }
             catch (Exception ex)
             {

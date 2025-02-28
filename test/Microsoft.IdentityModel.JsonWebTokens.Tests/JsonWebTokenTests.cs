@@ -288,7 +288,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             string header = "{}";
             var jsonWebToken = new JsonWebToken(header, payload);
             var jwtSecurityToken = new JwtSecurityToken($"{Base64UrlEncoder.Encode(header)}.{Base64UrlEncoder.Encode(payload)}.");
-            IdentityComparer.AreEqual(jsonWebToken.Claims, jwtSecurityToken.Claims);
+            IdentityComparer.AreEqual(jsonWebToken.Claims, jwtSecurityToken.Claims, context);
             IdentityComparer.AreEqual(jsonWebToken.Audiences, jwtSecurityToken.Audiences, context);
             TestUtilities.AssertFailIfErrors(context);
         }

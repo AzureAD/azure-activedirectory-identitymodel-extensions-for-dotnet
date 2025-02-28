@@ -198,7 +198,7 @@ namespace Microsoft.IdentityModel.TestUtils
                         {
                             context.Errors.Add(propertyKV.Key + ": initial value != null && expected == null, initial value: " + initialValue.ToString());
                         }
-                        else if (initialValue != null && !IdentityComparer.AreEqual(initialValue, propertyKV.Value[0]))
+                        else if (initialValue != null && !IdentityComparer.AreEqual(initialValue, propertyKV.Value[0], CompareContext.Default))
                         {
                             context.Errors.Add(propertyKV.Key + ", initial value != expected. expected: " + propertyKV.Value[0].ToString() + ", was: " + initialValue.ToString());
                         }
@@ -422,7 +422,6 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             AssertFailIfErrors(context.Title, context.Diffs);
         }
-
         public static void AssertFailIfErrors(string testId, List<string> errors)
         {
             if (errors.Count != 0)

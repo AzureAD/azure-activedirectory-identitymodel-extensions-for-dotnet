@@ -139,6 +139,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         private async Task<OpenIdConnectConfiguration> GetConfigurationFromHttpAsync(string uri, ExpectedException expectedException, OpenIdConnectConfiguration expectedConfiguration = null)
         {
             OpenIdConnectConfiguration openIdConnectConfiguration = null;
+            var testContext = new CompareContext($"{this}.GetConfigurationFromHttpAsync");
+
             try
             {
                 openIdConnectConfiguration = await OpenIdConnectConfigurationRetriever.GetAsync(uri, CancellationToken.None);
@@ -151,7 +153,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             if (expectedConfiguration != null)
             {
-                Assert.True(IdentityComparer.AreEqual(openIdConnectConfiguration, expectedConfiguration));
+                Assert.True(IdentityComparer.AreEqual(openIdConnectConfiguration, expectedConfiguration, testContext));
             }
 
             return openIdConnectConfiguration;
@@ -179,6 +181,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         private async Task<OpenIdConnectConfiguration> GetConfigurationFromTextAsync(string primaryDocument, string secondaryDocument, ExpectedException expectedException, OpenIdConnectConfiguration expectedConfiguration = null)
         {
             OpenIdConnectConfiguration openIdConnectConfiguration = null;
+            var testContext = new CompareContext($"{this}.GetConfigurationFromTextAsync");
+
             try
             {
                 openIdConnectConfiguration = await OpenIdConnectConfigurationRetriever.GetAsync(
@@ -192,7 +196,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             if (expectedConfiguration != null)
             {
-                Assert.True(IdentityComparer.AreEqual(openIdConnectConfiguration, expectedConfiguration));
+                Assert.True(IdentityComparer.AreEqual(openIdConnectConfiguration, expectedConfiguration, testContext));
             }
 
             return openIdConnectConfiguration;
@@ -201,6 +205,8 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
         private async Task<OpenIdConnectConfiguration> GetConfigurationFromMixedAsync(string primaryDocument, ExpectedException expectedException, OpenIdConnectConfiguration expectedConfiguration = null)
         {
             OpenIdConnectConfiguration openIdConnectConfiguration = null;
+            var testContext = new CompareContext($"{this}.GetConfigurationFromMixedAsync");
+
             try
             {
                 openIdConnectConfiguration = await OpenIdConnectConfigurationRetriever.GetAsync("primary",
@@ -214,7 +220,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             if (expectedConfiguration != null)
             {
-                Assert.True(IdentityComparer.AreEqual(openIdConnectConfiguration, expectedConfiguration));
+                Assert.True(IdentityComparer.AreEqual(openIdConnectConfiguration, expectedConfiguration, testContext));
             }
 
             return openIdConnectConfiguration;

@@ -801,13 +801,14 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         public void BootstrapContext(JwtTheoryData theoryData)
         {
             TestUtilities.WriteHeader($"{this}.BootstrapContext", theoryData);
+            var testContext = new CompareContext();
 
             var claimsPrincipal = theoryData.TokenHandler.ValidateToken(theoryData.Token, theoryData.ValidationParameters, out SecurityToken securityToken);
             var bootstrapContext = (claimsPrincipal.Identity as ClaimsIdentity).BootstrapContext as string;
             if (theoryData.ValidationParameters.SaveSigninToken)
             {
                 Assert.NotNull(bootstrapContext);
-                Assert.True(IdentityComparer.AreEqual(claimsPrincipal, theoryData.TokenHandler.ValidateToken(bootstrapContext, theoryData.ValidationParameters, out SecurityToken validatedToken)));
+                Assert.True(IdentityComparer.AreEqual(claimsPrincipal, theoryData.TokenHandler.ValidateToken(bootstrapContext, theoryData.ValidationParameters, out SecurityToken validatedToken), testContext));
             }
             else
             {
@@ -3083,8 +3084,8 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
 
                 var encryptionKeysFromJwtHandlerWithNoKid = theoryData.JwtSecurityTokenHandler.GetContentEncryptionKeys(jwtTokenFromJwtHandlerWithNoKid, theoryData.ValidationParameters);
 
-                IdentityComparer.AreEqual(encryptionKeysFromJwtHandlerWithKid, theoryData.ExpectedDecryptionKeys);
-                IdentityComparer.AreEqual(encryptionKeysFromJwtHandlerWithNoKid, theoryData.ExpectedDecryptionKeys);
+                IdentityComparer.AreEqual(encryptionKeysFromJwtHandlerWithKid, theoryData.ExpectedDecryptionKeys, context);
+                IdentityComparer.AreEqual(encryptionKeysFromJwtHandlerWithNoKid, theoryData.ExpectedDecryptionKeys, context);
                 IdentityComparer.AreEqual(encryptionKeysFromJwtHandlerWithKid, encryptionKeysFromJwtHandlerWithNoKid, context);
                 theoryData.ExpectedException.ProcessNoException(context);
             }
