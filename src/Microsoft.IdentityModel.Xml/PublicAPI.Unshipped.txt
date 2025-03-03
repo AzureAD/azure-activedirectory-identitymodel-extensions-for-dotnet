@@ -1,2 +1,0 @@
-override Microsoft.IdentityModel.Xml.XmlValidationException.StackTrace.get -> string
-virtual Microsoft.IdentityModel.Xml.KeyInfo.MatchesKey(Microsoft.IdentityModel.Tokens.SecurityKey key) -> bool
