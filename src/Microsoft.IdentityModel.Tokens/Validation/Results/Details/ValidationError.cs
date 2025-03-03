@@ -104,6 +104,8 @@ namespace Microsoft.IdentityModel.Tokens
                     exception = new SecurityTokenSignatureKeyNotFoundException(MessageDetail.Message);
                 else if (exceptionType == typeof(SecurityTokenDecryptionFailedException))
                     exception = new SecurityTokenDecryptionFailedException(MessageDetail.Message);
+                else if (exceptionType == typeof(SecurityTokenEncryptionKeyNotFoundException))
+                    exception = new SecurityTokenEncryptionKeyNotFoundException(MessageDetail.Message);
                 else if (exceptionType == typeof(SecurityTokenMalformedException))
                     exception = new SecurityTokenMalformedException(MessageDetail.Message);
                 else if (exceptionType == typeof(SecurityTokenInvalidSignatureException))
@@ -161,6 +163,8 @@ namespace Microsoft.IdentityModel.Tokens
                     exception = new SecurityTokenInvalidIssuerException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenSignatureKeyNotFoundException))
                     exception = new SecurityTokenSignatureKeyNotFoundException(MessageDetail.Message, innerException);
+                else if (exceptionType == typeof(SecurityTokenEncryptionKeyNotFoundException))
+                    exception = new SecurityTokenEncryptionKeyNotFoundException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenDecryptionFailedException))
                     exception = new SecurityTokenDecryptionFailedException(MessageDetail.Message, innerException);
                 else if (exceptionType == typeof(SecurityTokenMalformedException))

@@ -85,15 +85,45 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         // Avoid comparing the full exception message as the stack traces for the inner exceptions are different.
                         ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenKeyWrapException("IDX10618:"),
                     },
-                    new ValidateTokenAsyncDecryptionTheoryData("JWE_TokenDecryptError_SuccessOnRetry")
+                    new ValidateTokenAsyncDecryptionTheoryData("JWE_KeyWithKeyId_TokenDecryptError_KeysInConfig_SuccessOnRetry")
                     {
-                        EncryptingCredentials = new EncryptingCredentials(
-                            KeyingMaterial.DefaultX509Key_2048,
-                            SecurityAlgorithms.RsaPKCS1,
-                            SecurityAlgorithms.Aes128CbcHmacSha256),
-                        TokenValidationParameters = CreateTokenValidationParameters(configurationManager: CreateConfigurationManager()),
-                        ValidationParameters = CreateValidationParameters(configurationManager: CreateConfigurationManager()),
+                        EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2,
+                        TokenValidationParameters = CreateTokenValidationParameters(configurationManager: CreateConfigurationManager(true)),
+                        ValidationParameters = CreateValidationParameters(configurationManager: CreateConfigurationManager(true)),
                         ExpectedIsValid = true,
+                    },
+                    new ValidateTokenAsyncDecryptionTheoryData("JWE_KeyWithoutKeyId_TokenDecryptError_KeysInConfig_SuccessOnRetry")
+                    {
+                        EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2,
+                        TokenValidationParameters = CreateTokenValidationParameters(configurationManager: CreateConfigurationManager(false)),
+                        ValidationParameters = CreateValidationParameters(configurationManager: CreateConfigurationManager(false)),
+                        ExpectedIsValid = true,
+                    },
+                    new ValidateTokenAsyncDecryptionTheoryData("JWE_KeyWithKeyId_TokenDecryptError_KeysOnlyInTvp_ThrowsException")
+                    {
+                        EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2,
+                        TokenValidationParameters = CreateTokenValidationParameters(
+                            tokenDecryptionKey: KeyingMaterial.DefaultSymmetricSecurityKey_128,
+                            configurationManager: new MockConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration())),
+                        ValidationParameters = CreateValidationParameters(
+                            tokenDecryptionKey: KeyingMaterial.DefaultSymmetricSecurityKey_128,
+                            configurationManager: new MockConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration())),
+                        ExpectedIsValid = false,
+                        ExpectedException = ExpectedException.SecurityTokenEncryptionKeyNotFoundException("IDX10907:"),
+                        ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenEncryptionKeyNotFoundException("IDX10907:"),
+                    },
+                    new ValidateTokenAsyncDecryptionTheoryData("JWE_KeyWithoutKeyId_TokenDecryptError_KeysOnlyInTvp_ThrowsException")
+                    {
+                        EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2,
+                        TokenValidationParameters = CreateTokenValidationParameters(
+                            tokenDecryptionKey: new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_128) { KeyId = null },
+                            configurationManager: new MockConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration())),
+                        ValidationParameters = CreateValidationParameters(
+                            tokenDecryptionKey: new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_128) { KeyId = null },
+                            configurationManager: new MockConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration())),
+                        ExpectedIsValid = false,
+                        ExpectedException = ExpectedException.SecurityTokenEncryptionKeyNotFoundException("IDX10907:"),
+                        ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenEncryptionKeyNotFoundException("IDX10907:"),
                     },
                 };
 
@@ -144,12 +174,18 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     return validationParameters;
                 }
 
-                static BaseConfigurationManager CreateConfigurationManager()
+                static BaseConfigurationManager CreateConfigurationManager(bool invalidKeyHasKeyId)
                 {
-                    var configNoDecryptKeys = new OpenIdConnectConfiguration();
+                    var configWrongDecryptKeys = new OpenIdConnectConfiguration();
+                    if (invalidKeyHasKeyId)
+                        configWrongDecryptKeys.TokenDecryptionKeys.Add(KeyingMaterial.DefaultSymmetricSecurityKey_128);
+                    else
+                        configWrongDecryptKeys.TokenDecryptionKeys.Add(new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_128) { KeyId = null });
+
                     var configWithDecryptKeys = new OpenIdConnectConfiguration();
-                    configWithDecryptKeys.TokenDecryptionKeys.Add(KeyingMaterial.DefaultX509Key_2048);
-                    var configManager = new MockConfigurationManager<OpenIdConnectConfiguration>(configNoDecryptKeys);
+                    configWithDecryptKeys.TokenDecryptionKeys.Add(KeyingMaterial.DefaultSymmetricSecurityKey_256);
+
+                    var configManager = new MockConfigurationManager<OpenIdConnectConfiguration>(configWrongDecryptKeys);
                     configManager.RefreshedConfiguration = configWithDecryptKeys;
 
                     return configManager;

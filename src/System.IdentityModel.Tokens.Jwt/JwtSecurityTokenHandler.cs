@@ -883,7 +883,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
                     return claimsPrincipal;
                 }
-                else if (TokenUtilities.IsRecoverableException(exceptionThrown.SourceException))
+                else if (TokenUtilities.IsRecoverableException(exceptionThrown.SourceException, (currentConfiguration != null && currentConfiguration.TokenDecryptionKeys.Count > 0)))
                 {
                     // If we were still unable to validate, attempt to refresh the configuration and validate using it
                     // but ONLY if the currentConfiguration is not null. We want to avoid refreshing the configuration on

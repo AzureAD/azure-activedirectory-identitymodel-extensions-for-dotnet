@@ -2795,7 +2795,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = Default.SymmetricEncryptingCredentials,
-                        ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10603:")
+                        ExpectedException = ExpectedException.SecurityTokenEncryptionKeyNotFoundException("IDX10907:")
                     },
                     new CreateTokenTheoryData()
                     {
@@ -3258,12 +3258,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 var handlerWithNoDefaultTimes = new JsonWebTokenHandler();
                 handlerWithNoDefaultTimes.SetDefaultTimesOnTokenCreation = false;
 
-                var configNoDecryptKeys = new OpenIdConnectConfiguration();
-                var configWithDecryptKeys = new OpenIdConnectConfiguration();
-                configWithDecryptKeys.TokenDecryptionKeys.Add(KeyingMaterial.DefaultX509Key_2048);
-                var configManager = new MockConfigurationManager<OpenIdConnectConfiguration>(configNoDecryptKeys);
-                configManager.RefreshedConfiguration = configWithDecryptKeys;
-
                 return new TheoryData<JwtTheoryData>
                 {
                     new JwtTheoryData
@@ -3282,7 +3276,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             TokenDecryptionKey = KeyingMaterial.DefaultX509Key_2048,
                             AlgorithmValidator = ValidationDelegates.AlgorithmValidatorBuilder(false)
                         },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenDecryptionFailedException), "IDX10697"),
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenEncryptionKeyNotFoundException), "IDX10907"),
                     },
                     new JwtTheoryData
                     {
@@ -3354,21 +3348,90 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = "JWE_TokenDecryptError_SuccessOnRetry",
+                        TestId = "JWE_KeyWithKeyId_TokenDecryptError_KeysInConfig_SuccessOnRetry",
                         Token = new JsonWebTokenHandler().CreateToken(
                             Default.PayloadString,
                             KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
-                            new EncryptingCredentials(KeyingMaterial.DefaultX509Key_2048, SecurityAlgorithms.RsaPKCS1, SecurityAlgorithms.Aes128CbcHmacSha256)),
+                            KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2),
                         ValidationParameters = new TokenValidationParameters
                         {
                             ValidAudience = Default.Audience,
                             ValidIssuer = Default.Issuer,
                             ValidateIssuerSigningKey = true,
                             IssuerSigningKey = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
-                            ConfigurationManager = configManager,
-                        }
+                            ConfigurationManager = CreateConfigurationManager(true),
+                        },
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = "JWE_KeyWithoutKeyId_TokenDecryptError_KeysInConfig_SuccessOnRetry",
+                        Token = new JsonWebTokenHandler().CreateToken(
+                            Default.PayloadString,
+                            KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
+                            KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer,
+                            ValidateIssuerSigningKey = true,
+                            IssuerSigningKey = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
+                            ConfigurationManager = CreateConfigurationManager(false),
+                        },
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = "JWE_KeyWithKeyId_TokenDecryptError_KeysOnlyInTvp_ThrowsException",
+                        Token = new JsonWebTokenHandler().CreateToken(
+                            Default.PayloadString,
+                            KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
+                            KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer,
+                            ValidateIssuerSigningKey = true,
+                            IssuerSigningKey = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
+                            TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_128,
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration()),
+                        },
+                        ExpectedException = ExpectedException.SecurityTokenEncryptionKeyNotFoundException("IDX10907:")
+                    },
+                    new JwtTheoryData
+                    {
+                        TestId = "JWE_KeyWithoutKeyId_TokenDecryptError_KeysOnlyInTvp_ThrowsException",
+                        Token = new JsonWebTokenHandler().CreateToken(
+                            Default.PayloadString,
+                            KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
+                            KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2),
+                        ValidationParameters = new TokenValidationParameters
+                        {
+                            ValidAudience = Default.Audience,
+                            ValidIssuer = Default.Issuer,
+                            ValidateIssuerSigningKey = true,
+                            IssuerSigningKey = KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2.Key,
+                            TokenDecryptionKey = new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_128) { KeyId = null },
+                            ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration()),
+                        },
+                        ExpectedException = ExpectedException.SecurityTokenEncryptionKeyNotFoundException("IDX10907:")
                     },
                 };
+
+                static BaseConfigurationManager CreateConfigurationManager(bool invalidKeyHasKeyId)
+                {
+                    var configWrongDecryptKeys = new OpenIdConnectConfiguration();
+                    if (invalidKeyHasKeyId)
+                        configWrongDecryptKeys.TokenDecryptionKeys.Add(KeyingMaterial.DefaultSymmetricSecurityKey_128);
+                    else
+                        configWrongDecryptKeys.TokenDecryptionKeys.Add(new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_128) { KeyId = null });
+
+                    var configWithDecryptKeys = new OpenIdConnectConfiguration();
+                    configWithDecryptKeys.TokenDecryptionKeys.Add(KeyingMaterial.DefaultSymmetricSecurityKey_256);
+
+                    var configManager = new MockConfigurationManager<OpenIdConnectConfiguration>(configWrongDecryptKeys);
+                    configManager.RefreshedConfiguration = configWithDecryptKeys;
+
+                    return configManager;
+                }
             }
         }
 

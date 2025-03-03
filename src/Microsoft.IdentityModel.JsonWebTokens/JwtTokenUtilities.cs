@@ -262,6 +262,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             StringBuilder exceptionStrings = null;
             StringBuilder keysAttempted = null;
             string zipAlgorithm = null;
+            var jwtKidExists = false;
+            var jwtKidMatchedKeyId = false;
+
             foreach (SecurityKey key in decryptionParameters.Keys)
             {
                 var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
@@ -281,6 +284,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     // JsonWebToken from JsonWebTokenHandler
                     if (securityToken is JsonWebToken jsonWebToken)
                     {
+                        jwtKidExists = !string.IsNullOrEmpty(jsonWebToken.Kid);
+                        if (jwtKidExists && key?.KeyId != null)
+                            jwtKidMatchedKeyId = jsonWebToken.Kid.Equals(key.KeyId, key is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+
                         if (!cryptoProviderFactory.IsSupportedAlgorithm(jsonWebToken.Enc, key))
                         {
                             if (LogHelper.IsEnabled(EventLogLevel.Warning))
@@ -347,6 +354,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     algorithmNotSupportedByCryptoProvider,
                     exceptionStrings,
                     keysAttempted,
+                    jwtKidExists && !jwtKidMatchedKeyId,
                     null);
 
                 throw LogHelper.LogExceptionMessage(validationError.GetException());
@@ -370,11 +378,26 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             bool algorithmNotSupportedByCryptoProvider,
             StringBuilder exceptionStrings,
             StringBuilder keysAttempted,
+            bool unknownTokenDecryptKey,
 #pragma warning disable CA1801 // Review unused parameters
             CallContext callContext)
 #pragma warning restore CA1801 // Review unused parameters
         {
             if (keysAttempted is not null)
+            {
+                if (unknownTokenDecryptKey)
+                {
+                    return new ValidationError(
+                        new MessageDetail(
+                            TokenLogMessages.IDX10907,
+                            LogHelper.MarkAsNonPII(keysAttempted.ToString()),
+                            exceptionStrings?.ToString() ?? string.Empty,
+                            LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken, SafeLogJwtToken)),
+                        ValidationFailureType.TokenDecryptionFailed,
+                        typeof(SecurityTokenEncryptionKeyNotFoundException),
+                        ValidationError.GetCurrentStackFrame());
+                }
+
                 return new ValidationError(
                     new MessageDetail(
                         TokenLogMessages.IDX10603,
@@ -384,7 +407,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     ValidationFailureType.TokenDecryptionFailed,
                     typeof(SecurityTokenDecryptionFailedException),
                     ValidationError.GetCurrentStackFrame());
+            }
             else if (algorithmNotSupportedByCryptoProvider)
+            {
                 return new ValidationError(
                     new MessageDetail(
                         TokenLogMessages.IDX10619,
@@ -393,7 +418,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     ValidationFailureType.TokenDecryptionFailed,
                     typeof(SecurityTokenDecryptionFailedException),
                     ValidationError.GetCurrentStackFrame());
+            }
             else
+            {
                 return new ValidationError(
                     new MessageDetail(
                         TokenLogMessages.IDX10609,
@@ -401,6 +428,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     ValidationFailureType.TokenDecryptionFailed,
                     typeof(SecurityTokenDecryptionFailedException),
                     ValidationError.GetCurrentStackFrame());
+            }
         }
 
         private static byte[] DecryptToken(CryptoProviderFactory cryptoProviderFactory, SecurityKey key, string encAlg, byte[] ciphertext, byte[] headerAscii, byte[] initializationVector, byte[] authenticationTag)
