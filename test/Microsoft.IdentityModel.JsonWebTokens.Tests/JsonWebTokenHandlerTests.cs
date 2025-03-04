@@ -2843,7 +2843,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = Default.SymmetricEncryptingCredentials,
-                        ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10603:")
+                        ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException(partialExceptionMessage)
                     };
                 }
             }

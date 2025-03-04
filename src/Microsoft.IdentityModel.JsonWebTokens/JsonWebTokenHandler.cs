@@ -350,7 +350,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return JwtTokenUtilities.DecryptJwtToken(jwtToken, validationParameters, decryptionParameters);
         }
 
-        internal JwtTokenDecryptionParameters CreateJwtTokenDecryptionParameters(JsonWebToken jwtToken, IEnumerable<SecurityKey> keys)
+        private JwtTokenDecryptionParameters CreateJwtTokenDecryptionParameters(JsonWebToken jwtToken, IEnumerable<SecurityKey> keys)
         {
             return new JwtTokenDecryptionParameters
             {

@@ -256,9 +256,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         }
 
         [Fact]
-        public void DecryptJwtToken_WhenValidationParametersIsNull_ShouldThrow()
+        public void DecryptJwtToken_WhenValidationParametersIsNull_ThrowsException()
         {
             // Arrange
+            var expectedExceptionParamName = "validationParameters";
             TokenValidationParameters validationParameters = null;
 
             // Act & Assert
@@ -268,13 +269,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     validationParameters: validationParameters,
                     decryptionParameters: null));
 
-            Assert.Equal("validationParameters", exception.ParamName);
+            Assert.Equal(expectedExceptionParamName, exception.ParamName);
         }
 
         [Fact]
-        public void DecryptJwtToken_WhenJwtTokenDecryptionParametersIsNull_ShouldThrow()
+        public void DecryptJwtToken_WhenJwtTokenDecryptionParametersIsNull_ThrowsException()
         {
             // Arrange
+            var expectedExceptionParamName = "decryptionParameters";
             var validationParameters = new TokenValidationParameters();
             JwtTokenDecryptionParameters decryptionParameters = null;
 
@@ -285,11 +287,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     validationParameters: validationParameters,
                     decryptionParameters: decryptionParameters));
 
-            Assert.Equal("decryptionParameters", exception.ParamName);
+            Assert.Equal(expectedExceptionParamName, exception.ParamName);
         }
 
-        [Fact(Skip = "Skip due to potential false positives it may cause running tests in parallel as it overrides JwtTokenUtilities.s_getCryptoProviderFactory.")]
-        public void DecryptJwtToken_WhenCryptoProviderFactoryIsNull_FailsWithIDX10609AndLogsIDX10607()
+        [Fact]
+        public void DecryptJwtToken_WhenCryptoProviderFactoryIsNull_ThrowsException()
         {
             // Save the original delegate to restore.
             var getCryptoProviderFactory = JwtTokenUtilities.s_getCryptoProviderFactory;
@@ -342,7 +344,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         }
 
         [Fact]
-        public void DecryptJwtToken_WhenEncIsNotSupported_FailsWithIDX10619AndLogsIDX10611()
+        public void DecryptJwtToken_WhenEncIsNotSupported_ThrowsException()
         {
             // Arrange
             var securityKey = symmetricSecurityKey;
@@ -392,7 +394,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         }
 
         [Fact]
-        public void DecryptJwtToken_WhenNoKeys_FailsWithIDX10609()
+        public void DecryptJwtToken_WhenNoKeys_ThrowsException()
         {
             // Arrange
             using var listener = new SampleListener();
@@ -429,7 +431,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         }
 
         [Fact]
-        public void DecryptJwtToken_WhenDecryptionFails_FailsWithIDX10603()
+        public void DecryptJwtToken_WhenDecryptionFails_ThrowsException()
         {
             // Arrange
             var securityKey = NotDefault.SymmetricSigningKey256;

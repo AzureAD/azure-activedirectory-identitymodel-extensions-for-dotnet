@@ -1,2 +1,1 @@
-Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.CreateJwtTokenDecryptionParameters(Microsoft.IdentityModel.JsonWebTokens.JsonWebToken jwtToken, System.Collections.Generic.IEnumerable<Microsoft.IdentityModel.Tokens.SecurityKey> keys) -> Microsoft.IdentityModel.JsonWebTokens.JwtTokenDecryptionParameters
 static Microsoft.IdentityModel.JsonWebTokens.JwtTokenUtilities.s_getCryptoProviderFactory -> System.Func<Microsoft.IdentityModel.Tokens.TokenValidationParameters, Microsoft.IdentityModel.Tokens.SecurityKey, Microsoft.IdentityModel.Tokens.CryptoProviderFactory>

@@ -51,13 +51,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     ValidationError.GetCurrentStackFrame());
             }
 
-            (IList<SecurityKey>? contentEncryptionKeys, ValidationError? validationError) result =
+            (IList<SecurityKey>? ContentEncryptionKeys, ValidationError? ValidationError) result =
                 GetContentEncryptionKeys(jwtToken, validationParameters, configuration, callContext);
 
-            if (result.validationError != null)
-                return result.validationError.AddCurrentStackFrame();
+            if (result.ValidationError != null)
+                return result.ValidationError.AddCurrentStackFrame();
 
-            if (result.contentEncryptionKeys == null || result.contentEncryptionKeys.Count == 0)
+            if (result.ContentEncryptionKeys == null || result.ContentEncryptionKeys.Count == 0)
             {
                 return new ValidationError(
                     new MessageDetail(
@@ -68,7 +68,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     ValidationError.GetCurrentStackFrame());
             }
 
-            var decryptionParameters = CreateJwtTokenDecryptionParameters(jwtToken, result.contentEncryptionKeys);
+            var decryptionParameters = CreateJwtTokenDecryptionParameters(jwtToken, result.ContentEncryptionKeys);
 
             return JwtTokenUtilities.DecryptJwtToken(
                 jwtToken,

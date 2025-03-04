@@ -332,6 +332,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
 
+        /// <summary>
+        /// This is added for testing purpose to allow returning null.
+        /// 
+        /// When this is called outside of test(s),
+        /// <see cref="TokenValidationParameters.CryptoProviderFactory"/> can be null
+        /// but <see cref="SecurityKey.CryptoProviderFactory"/> will never be. Thus, the caller
+        /// will never receive a null <see cref="CryptoProviderFactory"/>.
+        /// </summary>
         internal static Func<TokenValidationParameters, SecurityKey, CryptoProviderFactory>
             s_getCryptoProviderFactory = (validationParameters, key) =>
         {
