@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.IdentityModel.Tokens.Jwt;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -450,6 +451,107 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             Assert.Contains(partialExceptionMessage, listener.TraceBuffer);
             Assert.Contains(partialExceptionMessage, exception.Message);
+        }
+
+        [Theory, MemberData(nameof(DecompressionFailTheoryData), DisableDiscoveryEnumeration = true)]
+        public void DecryptJwtToken_WhenDecompressionFails_ThrowsException(DecompressionFailureTheoryData theoryData)
+        {
+            // Arrange
+            var jsonWebTokenHandler = new JsonWebTokenHandler();
+            CompressionProviderFactory.Default = theoryData.CompressionProviderFactory;
+            var securityToken = new JsonWebToken(theoryData.JwtEncodedString);
+
+            using var listener = new SampleListener();
+            IdentityModelEventSource.ShowPII = false;
+            IdentityModelEventSource.Logger.LogLevel = EventLevel.Warning;
+            listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Warning);
+
+            var kwp = Default.JWECompressionTokenValidationParameters.TokenDecryptionKey.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(Default.JWECompressionTokenValidationParameters.TokenDecryptionKey, securityToken.Alg);
+            var unwrappedKey = kwp.UnwrapKey(securityToken.EncryptedKeyBytes);
+
+            var keys = new List<SecurityKey>()
+            {
+                new SymmetricSecurityKey(unwrappedKey),
+            };
+            var decryptionParameters = new JwtTokenDecryptionParameters
+            {
+                Alg = securityToken.Alg,
+                AuthenticationTagBytes = securityToken.AuthenticationTagBytes,
+                CipherTextBytes = securityToken.CipherTextBytes,
+                DecompressionFunction = JwtTokenUtilities.DecompressToken,
+                Enc = securityToken.Enc,
+                EncodedToken = securityToken.EncodedToken,
+                HeaderAsciiBytes = securityToken.HeaderAsciiBytes,
+                InitializationVectorBytes = securityToken.InitializationVectorBytes,
+                MaximumDeflateSize = jsonWebTokenHandler.MaximumTokenSizeInBytes,
+                Keys = keys,
+                Zip = securityToken.Zip,
+            };
+            var validationParameters = Default.JWECompressionTokenValidationParameters;
+
+            var exceptionMessage = LogHelper.FormatInvariant(Tokens.LogMessages.IDX10679, LogHelper.MarkAsNonPII(decryptionParameters.Zip));
+            string innerExceptionMessage = string.Empty;
+            if (theoryData.ValidateInnerExceptionMessage)
+                innerExceptionMessage = LogHelper.FormatInvariant(theoryData.InnerExceptionMessageId, LogHelper.MarkAsNonPII(decryptionParameters.Zip));
+
+            // Act & Assert
+            var exception = Assert.Throws<SecurityTokenDecompressionFailedException>(() =>
+                JwtTokenUtilities.DecryptJwtToken(securityToken, validationParameters, decryptionParameters));
+
+            Assert.Contains(exceptionMessage, listener.TraceBuffer);
+            Assert.Contains(exceptionMessage, exception.Message);
+            Assert.Equal(theoryData.InnerExceptionType, exception.InnerException.GetType());
+            if (theoryData.ValidateInnerExceptionMessage)
+            {
+                Assert.Contains(innerExceptionMessage, listener.TraceBuffer);
+                Assert.Contains(innerExceptionMessage, exception.InnerException.Message);
+            }
+        }
+
+        public static TheoryData<DecompressionFailureTheoryData> DecompressionFailTheoryData()
+        {
+            var compressionProviderFactoryForCustom2 = new CompressionProviderFactory()
+            {
+                CustomCompressionProvider = new SampleCustomCompressionProviderDecompressAndCompressAlwaysFail("MyAlgorithm")
+            };
+
+            return new TheoryData<DecompressionFailureTheoryData>() {
+                new DecompressionFailureTheoryData
+                {
+                    TestId = "NotSupportedAlgorithm",
+                    JwtEncodedString = ReferenceTokens.JWECompressionTokenWithUnsupportedAlgorithm,
+                    CompressionProviderFactory = CompressionProviderFactory.Default,
+                    InnerExceptionType = typeof(NotSupportedException),
+                    ValidateInnerExceptionMessage = true,
+                    InnerExceptionMessageId = Tokens.LogMessages.IDX10682,
+                },
+                new DecompressionFailureTheoryData
+                {
+                    TestId = "InvalidToken",
+                    JwtEncodedString = ReferenceTokens.JWEInvalidCompressionTokenWithDEF,
+                    CompressionProviderFactory = CompressionProviderFactory.Default,
+                    InnerExceptionType = typeof(InvalidDataException),
+                    ValidateInnerExceptionMessage = false,
+                },
+                new DecompressionFailureTheoryData
+                {
+                    TestId = "NotSupportedAlgorithmFromCustomCompressionProvider",
+                    JwtEncodedString = ReferenceTokens.JWECompressionTokenWithDEF,
+                    CompressionProviderFactory = compressionProviderFactoryForCustom2,
+                    InnerExceptionType = typeof(SecurityTokenDecompressionFailedException),
+                    ValidateInnerExceptionMessage = true,
+                    InnerExceptionMessageId = Tokens.LogMessages.IDX10679,
+                }
+            };
+        }
+
+        public class DecompressionFailureTheoryData : TheoryDataBase
+        {
+            public string JwtEncodedString;
+            public CompressionProviderFactory CompressionProviderFactory;
+            public Type InnerExceptionType;
+            public bool ValidateInnerExceptionMessage;
+            public string InnerExceptionMessageId;
         }
         #endregion
 

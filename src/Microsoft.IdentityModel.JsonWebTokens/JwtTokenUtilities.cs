@@ -233,7 +233,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             var decompressedBytes = compressionProvider.Decompress(tokenBytes);
 
-            return decompressedBytes != null ? Encoding.UTF8.GetString(decompressedBytes) : throw LogHelper.LogExceptionMessage(new SecurityTokenDecompressionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10679, LogHelper.MarkAsNonPII(algorithm))));
+            return decompressedBytes != null ? Encoding.UTF8.GetString(decompressedBytes) : throw LogHelper.LogExceptionMessage(new SecurityTokenDecompressionFailedException(GetIDX10679LogMessage(algorithm)));
+        }
+
+        private static string GetIDX10679LogMessage(string algorithm)
+        {
+            return LogHelper.FormatInvariant(TokenLogMessages.IDX10679, LogHelper.MarkAsNonPII(algorithm));
         }
 
         /// <summary>
@@ -328,7 +333,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
             catch (Exception ex)
             {
-                throw LogHelper.LogExceptionMessage(new SecurityTokenDecompressionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10679, zipAlgorithm), ex));
+                throw LogHelper.LogExceptionMessage(new SecurityTokenDecompressionFailedException(GetIDX10679LogMessage(zipAlgorithm), ex));
             }
         }
 
