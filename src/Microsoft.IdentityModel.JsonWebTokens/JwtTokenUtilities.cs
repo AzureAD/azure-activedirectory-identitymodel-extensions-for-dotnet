@@ -264,7 +264,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             string zipAlgorithm = null;
             foreach (SecurityKey key in decryptionParameters.Keys)
             {
-                var cryptoProviderFactory = s_getCryptoProviderFactory(validationParameters, key);
+                var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
                 if (cryptoProviderFactory == null)
                 {
                     if (LogHelper.IsEnabled(EventLogLevel.Warning))
@@ -331,20 +331,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 throw LogHelper.LogExceptionMessage(new SecurityTokenDecompressionFailedException(LogHelper.FormatInvariant(TokenLogMessages.IDX10679, zipAlgorithm), ex));
             }
         }
-
-        /// <summary>
-        /// This is added for testing purpose to allow returning null.
-        /// 
-        /// When this is called outside of test(s),
-        /// <see cref="TokenValidationParameters.CryptoProviderFactory"/> can be null
-        /// but <see cref="SecurityKey.CryptoProviderFactory"/> will never be. Thus, the caller
-        /// will never receive a null <see cref="CryptoProviderFactory"/>.
-        /// </summary>
-        internal static Func<TokenValidationParameters, SecurityKey, CryptoProviderFactory>
-            s_getCryptoProviderFactory = (validationParameters, key) =>
-        {
-            return validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
-        };
 
         private static ValidationError GetDecryptionError(
             JwtTokenDecryptionParameters decryptionParameters,

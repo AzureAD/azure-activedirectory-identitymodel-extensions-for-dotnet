@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -216,45 +217,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         }
 
         #region DecryptJwtToken Tests
-
-        [Fact]
-        public void GetCryptoProviderFactory_WhenSetOnTokenValidationParameters_ReturnsFromValidationParameters()
-        {
-            // Arrange
-            // SecurityKey can never have 'null' CryptoProviderFactory.
-            var securityKey = symmetricSecurityKey;
-            var validationParameters = new TokenValidationParameters()
-            {
-                CryptoProviderFactory = new CryptoProviderFactory(),
-            };
-
-            // Act
-            var result = JwtTokenUtilities.s_getCryptoProviderFactory(validationParameters, securityKey);
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Same(validationParameters.CryptoProviderFactory, result);
-        }
-
-        [Fact]
-        public void GetCryptoProviderFactory_WhenSetToNullOnTokenValidationParameters_ReturnsFromSecurityKey()
-        {
-            // Arrange
-            // SecurityKey can never have 'null' CryptoProviderFactory.
-            var securityKey = symmetricSecurityKey;
-            var validationParameters = new TokenValidationParameters
-            {
-                CryptoProviderFactory = null,
-            };
-
-            // Act
-            var result = JwtTokenUtilities.s_getCryptoProviderFactory(validationParameters, securityKey);
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(securityKey.CryptoProviderFactory, result);
-        }
-
         [Fact]
         public void DecryptJwtToken_WhenValidationParametersIsNull_ThrowsException()
         {
@@ -293,54 +255,53 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         [Fact]
         public void DecryptJwtToken_WhenCryptoProviderFactoryIsNull_ThrowsException()
         {
-            // Save the original delegate to restore.
-            var getCryptoProviderFactory = JwtTokenUtilities.s_getCryptoProviderFactory;
-            try
+            // Arrange
+            var securityKey = new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricSecurityKey_128.Key)
             {
-                // Arrange
-                var securityKey = symmetricSecurityKey;
-                using var listener = new SampleListener();
-                IdentityModelEventSource.ShowPII = false;
-                IdentityModelEventSource.Logger.LogLevel = EventLevel.Warning;
-                listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Warning);
+                KeyId = KeyingMaterial.DefaultSymmetricSecurityKey_256.KeyId,
+            };
 
-                var keys = new List<SecurityKey>()
-                {
-                    securityKey,
-                };
+            // Get the private _cryptoProviderFactory field and set it to null.
+            var fieldInfo = typeof(SecurityKey).GetField("_cryptoProviderFactory", BindingFlags.NonPublic | BindingFlags.Instance);
+            fieldInfo.SetValue(securityKey, null);
 
-                var validationParameters = new TokenValidationParameters();
-                var decryptionParameters = new JwtTokenDecryptionParameters
-                {
-                    Keys = keys,
-                };
+            using var listener = new SampleListener();
+            IdentityModelEventSource.ShowPII = false;
+            IdentityModelEventSource.Logger.LogLevel = EventLevel.Warning;
+            listener.EnableEvents(IdentityModelEventSource.Logger, EventLevel.Warning);
 
-                JwtTokenUtilities.s_getCryptoProviderFactory = (validationParameters, decryptionParameters) => null;
-
-                var expectedWarning = LogHelper.FormatInvariant(
-                    Tokens.LogMessages.IDX10607,
-                    LogHelper.MarkAsNonPII(securityKey.KeyId));
-                var expectedExceptionMessage = new MessageDetail(
-                    Tokens.LogMessages.IDX10609,
-                    LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken,
-                    JwtTokenUtilities.SafeLogJwtToken)).Message;
-
-                // Act & Assert
-                var exception = Assert.Throws<SecurityTokenDecryptionFailedException>(() =>
-                    JwtTokenUtilities.DecryptJwtToken(
-                        securityToken: null,
-                        validationParameters: validationParameters,
-                        decryptionParameters: decryptionParameters));
-
-                Assert.Contains(expectedWarning, listener.TraceBuffer);
-                Assert.Contains(expectedExceptionMessage, listener.TraceBuffer);
-                Assert.Equal(expectedExceptionMessage, exception.Message);
-            }
-            finally
+            var keys = new List<SecurityKey>()
             {
-                // Restore the original delegate.
-                JwtTokenUtilities.s_getCryptoProviderFactory = getCryptoProviderFactory;
-            }
+                securityKey,
+            };
+
+            var validationParameters = new TokenValidationParameters()
+            {
+                CryptoProviderFactory = null,
+            };
+            var decryptionParameters = new JwtTokenDecryptionParameters
+            {
+                Keys = keys,
+            };
+
+            var expectedWarning = LogHelper.FormatInvariant(
+                Tokens.LogMessages.IDX10607,
+                LogHelper.MarkAsNonPII(securityKey.KeyId));
+            var expectedExceptionMessage = new MessageDetail(
+                Tokens.LogMessages.IDX10609,
+                LogHelper.MarkAsSecurityArtifact(decryptionParameters.EncodedToken,
+                JwtTokenUtilities.SafeLogJwtToken)).Message;
+
+            // Act & Assert
+            var exception = Assert.Throws<SecurityTokenDecryptionFailedException>(() =>
+                JwtTokenUtilities.DecryptJwtToken(
+                    securityToken: null,
+                    validationParameters: validationParameters,
+                    decryptionParameters: decryptionParameters));
+
+            Assert.Contains(expectedWarning, listener.TraceBuffer);
+            Assert.Contains(expectedExceptionMessage, listener.TraceBuffer);
+            Assert.Equal(expectedExceptionMessage, exception.Message);
         }
 
         [Fact]
