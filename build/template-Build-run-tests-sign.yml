@@ -12,6 +12,7 @@ steps:
   displayName: 'Use .NET SDK from global.json'
   inputs:
     useGlobalJson: true
+    workingDirectory: '$(Build.SourcesDirectory)'
     installationPath: $(Agent.ToolsDirectory)/dotnet
 
 # Additional .NET SDKs needed for targeting older frameworks
