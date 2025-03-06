@@ -85,21 +85,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         // Avoid comparing the full exception message as the stack traces for the inner exceptions are different.
                         ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenKeyWrapException("IDX10618:"),
                     },
-                    new ValidateTokenAsyncDecryptionTheoryData("JWE_KeyWithKeyId_TokenDecryptError_KeysInConfig_SuccessOnRetry")
+                    new ValidateTokenAsyncDecryptionTheoryData("JWE_KeyWithKeyId_OnTokenDecryptFailure_KeysInConfig_SuccessOnRetry")
                     {
                         EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2,
                         TokenValidationParameters = CreateTokenValidationParameters(configurationManager: CreateConfigurationManager(true)),
                         ValidationParameters = CreateValidationParameters(configurationManager: CreateConfigurationManager(true)),
                         ExpectedIsValid = true,
                     },
-                    new ValidateTokenAsyncDecryptionTheoryData("JWE_KeyWithoutKeyId_TokenDecryptError_KeysInConfig_SuccessOnRetry")
+                    new ValidateTokenAsyncDecryptionTheoryData("JWE_KeyWithoutKeyId_OnTokenDecryptFailure_KeysInConfig_SuccessOnRetry")
                     {
                         EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2,
                         TokenValidationParameters = CreateTokenValidationParameters(configurationManager: CreateConfigurationManager(false)),
                         ValidationParameters = CreateValidationParameters(configurationManager: CreateConfigurationManager(false)),
                         ExpectedIsValid = true,
                     },
-                    new ValidateTokenAsyncDecryptionTheoryData("JWE_KeyWithKeyId_TokenDecryptError_KeysOnlyInTvp_ThrowsException")
+                    new ValidateTokenAsyncDecryptionTheoryData("JWE_KeyWithKeyId_OnTokenDecryptFailure_KeysOnlyInTvp_ThrowsException")
                     {
                         EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2,
                         TokenValidationParameters = CreateTokenValidationParameters(
@@ -109,10 +109,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             tokenDecryptionKey: KeyingMaterial.DefaultSymmetricSecurityKey_128,
                             configurationManager: new MockConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration())),
                         ExpectedIsValid = false,
-                        ExpectedException = ExpectedException.SecurityTokenEncryptionKeyNotFoundException("IDX10907:"),
-                        ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenEncryptionKeyNotFoundException("IDX10907:"),
+                        ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10603:"),
+                        ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenDecryptionFailedException("IDX10603:"),
                     },
-                    new ValidateTokenAsyncDecryptionTheoryData("JWE_KeyWithoutKeyId_TokenDecryptError_KeysOnlyInTvp_ThrowsException")
+                    new ValidateTokenAsyncDecryptionTheoryData("JWE_KeyWithoutKeyId_OnTokenDecryptFailure_KeysOnlyInTvp_ThrowsException")
                     {
                         EncryptingCredentials = KeyingMaterial.DefaultSymmetricEncryptingCreds_Aes128_Sha2,
                         TokenValidationParameters = CreateTokenValidationParameters(
@@ -122,8 +122,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             tokenDecryptionKey: new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_128) { KeyId = null },
                             configurationManager: new MockConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration())),
                         ExpectedIsValid = false,
-                        ExpectedException = ExpectedException.SecurityTokenEncryptionKeyNotFoundException("IDX10907:"),
-                        ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenEncryptionKeyNotFoundException("IDX10907:"),
+                        ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10603:"),
+                        ExpectedExceptionValidationParameters = ExpectedException.SecurityTokenDecryptionFailedException("IDX10603:"),
                     },
                 };
 

@@ -125,7 +125,7 @@ namespace Microsoft.IdentityModel.Tokens
         // encryption / decryption
         // public const string IDX10600 = "IDX10600:";
         // public const string IDX10601 = "IDX10601:";
-        public const string IDX10603 = "IDX10603: Decryption failed. Keys tried: '{0}'.\nExceptions caught:\n '{1}'.\nToken: '{2}'";
+        public const string IDX10603 = "IDX10603: Decryption failed. Keys tried: '{0}'.\nExceptions caught:\n '{1}'.\ntoken: '{2}'";
         // public const string IDX10604 = "IDX10604:";
         // public const string IDX10605 = "IDX10605:";
         // public const string IDX10606 = "IDX10606:";
@@ -146,7 +146,6 @@ namespace Microsoft.IdentityModel.Tokens
         //public const string IDX10903 = "IDX10903: Token decryption succeeded. With thumbprint: '{0}'.";
         public const string IDX10904 = "IDX10904: Token decryption key : '{0}' found in TokenValidationParameters.";
         public const string IDX10905 = "IDX10905: Token decryption key : '{0}' found in Configuration/Metadata.";
-        public const string IDX10907 = "IDX10907: Decryption failed. The token's kid did not match any keys in TokenValidationParameters or Configuration. Keys tried: '{0}'. \nExceptions caught:\n '{1}'.\nToken: '{2}'.";
 
         // Formatting
         public const string IDX10400 = "IDX10400: Unable to decode: '{0}' as Base64url encoded string.";

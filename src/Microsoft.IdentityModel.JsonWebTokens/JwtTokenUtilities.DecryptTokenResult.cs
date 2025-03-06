@@ -42,15 +42,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             StringBuilder exceptionStrings = null;
             StringBuilder keysAttempted = null;
             string zipAlgorithm = null;
-            var jwtKidExists = false;
-            var jwtKidMatchedKeyId = false;
-
             foreach (SecurityKey key in decryptionParameters.Keys)
             {
-                jwtKidExists = !string.IsNullOrEmpty(jsonWebToken.Kid);
-                if (jwtKidExists && key?.KeyId != null)
-                    jwtKidMatchedKeyId = jsonWebToken.Kid.Equals(key.KeyId, key is X509SecurityKey ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
-
                 var cryptoProviderFactory = validationParameters.CryptoProviderFactory ?? key.CryptoProviderFactory;
                 if (cryptoProviderFactory == null)
                 {
@@ -110,7 +103,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     algorithmNotSupportedByCryptoProvider,
                     exceptionStrings,
                     keysAttempted,
-                    jwtKidExists && !jwtKidMatchedKeyId,
                     callContext);
 
             try

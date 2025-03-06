@@ -2795,7 +2795,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                         Payload = Default.PayloadString,
                         SigningCredentials = Default.SymmetricSigningCredentials,
                         EncryptingCredentials = Default.SymmetricEncryptingCredentials,
-                        ExpectedException = ExpectedException.SecurityTokenEncryptionKeyNotFoundException("IDX10907:")
+                        ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10603:")
                     },
                     new CreateTokenTheoryData()
                     {
@@ -3276,7 +3276,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             TokenDecryptionKey = KeyingMaterial.DefaultX509Key_2048,
                             AlgorithmValidator = ValidationDelegates.AlgorithmValidatorBuilder(false)
                         },
-                        ExpectedException = new ExpectedException(typeof(SecurityTokenEncryptionKeyNotFoundException), "IDX10907"),
+                        ExpectedException = new ExpectedException(typeof(SecurityTokenDecryptionFailedException), "IDX10697:"),
                     },
                     new JwtTheoryData
                     {
@@ -3348,7 +3348,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = "JWE_KeyWithKeyId_TokenDecryptError_KeysInConfig_SuccessOnRetry",
+                        TestId = "JWE_KeyWithKeyId_OnTokenDecryptFailure_KeysInConfig_SuccessOnRetry",
                         Token = new JsonWebTokenHandler().CreateToken(
                             Default.PayloadString,
                             KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
@@ -3364,7 +3364,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = "JWE_KeyWithoutKeyId_TokenDecryptError_KeysInConfig_SuccessOnRetry",
+                        TestId = "JWE_KeyWithoutKeyId_OnTokenDecryptFailure_KeysInConfig_SuccessOnRetry",
                         Token = new JsonWebTokenHandler().CreateToken(
                             Default.PayloadString,
                             KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
@@ -3380,7 +3380,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                     },
                     new JwtTheoryData
                     {
-                        TestId = "JWE_KeyWithKeyId_TokenDecryptError_KeysOnlyInTvp_ThrowsException",
+                        TestId = "JWE_KeyWithKeyId_OnTokenDecryptFailure_KeysOnlyInTvp_ThrowsException",
                         Token = new JsonWebTokenHandler().CreateToken(
                             Default.PayloadString,
                             KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
@@ -3394,11 +3394,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             TokenDecryptionKey = KeyingMaterial.DefaultSymmetricSecurityKey_128,
                             ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration()),
                         },
-                        ExpectedException = ExpectedException.SecurityTokenEncryptionKeyNotFoundException("IDX10907:")
+                        ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10603:")
                     },
                     new JwtTheoryData
                     {
-                        TestId = "JWE_KeyWithoutKeyId_TokenDecryptError_KeysOnlyInTvp_ThrowsException",
+                        TestId = "JWE_KeyWithoutKeyId_OnTokenDecryptFailure_KeysOnlyInTvp_ThrowsException",
                         Token = new JsonWebTokenHandler().CreateToken(
                             Default.PayloadString,
                             KeyingMaterial.DefaultSymmetricSigningCreds_256_Sha2,
@@ -3412,7 +3412,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                             TokenDecryptionKey = new SymmetricSecurityKey(KeyingMaterial.DefaultSymmetricKeyBytes_128) { KeyId = null },
                             ConfigurationManager = new MockConfigurationManager<OpenIdConnectConfiguration>(new OpenIdConnectConfiguration()),
                         },
-                        ExpectedException = ExpectedException.SecurityTokenEncryptionKeyNotFoundException("IDX10907:")
+                        ExpectedException = ExpectedException.SecurityTokenDecryptionFailedException("IDX10603:")
                     },
                 };
 
