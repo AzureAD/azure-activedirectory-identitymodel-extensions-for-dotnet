@@ -5,7 +5,12 @@
     <DotNetCoreAppRuntimeVersion>2.1.30</DotNetCoreAppRuntimeVersion>
     <MicrosoftAzureKeyVaultCryptographyVersion>3.0.5</MicrosoftAzureKeyVaultCryptographyVersion>
     <MicrosoftNETTestSdkVersion>17.11.1</MicrosoftNETTestSdkVersion>
-    <MoqVersion>4.16.1</MoqVersion>
+    <!--
+    Locking the Moq version similar to https://github.com/Azure/azure-sdk-for-net/pull/38113/.
+    This version should not be changed without team discussion.
+    See https://github.com/Azure/azure-sdk-for-net/issues/38111.
+    -->
+    <MoqVersion>[4.16.1]</MoqVersion>
     <NetStandardVersion>2.0.3</NetStandardVersion>
     <NewtonsoftVersion>13.0.3</NewtonsoftVersion>
     <OpenTelemetryVersion>1.6.0</OpenTelemetryVersion>
