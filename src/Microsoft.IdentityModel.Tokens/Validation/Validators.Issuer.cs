@@ -9,23 +9,6 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Definition for delegate that will validate the issuer value in a token.
-    /// </summary>
-    /// <param name="issuer">The issuer to validate.</param>
-    /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
-    /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
-    /// <param name="callContext"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns>An <see cref="ValidationResult{TResult}"/>that contains the results of validating the issuer.</returns>
-    /// <remarks>This delegate is not expected to throw.</remarks>
-    public delegate Task<ValidationResult<ValidatedIssuer>> IssuerValidationDelegateAsync(
-        string issuer,
-        SecurityToken securityToken,
-        ValidationParameters validationParameters,
-        CallContext callContext,
-        CancellationToken cancellationToken);
-
-    /// <summary>
     /// Partial class for Issuer Validation.
     /// </summary>
     public static partial class Validators

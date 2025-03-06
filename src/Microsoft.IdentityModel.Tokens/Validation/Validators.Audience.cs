@@ -10,21 +10,6 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Definition for delegate that will validate the audiences value in a token.
-    /// </summary>
-    /// <param name="tokenAudiences">The audiences found in the <see cref="SecurityToken"/>.</param>
-    /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
-    /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
-    /// <param name="callContext"></param>
-    /// <returns>A <see cref="ValidationResult{TResult}"/>that contains the results of validating the issuer.</returns>
-    /// <remarks>This delegate is not expected to throw.</remarks>
-    public delegate ValidationResult<string> AudienceValidationDelegate(
-        IList<string> tokenAudiences,
-        SecurityToken? securityToken,
-        ValidationParameters validationParameters,
-        CallContext callContext);
-
-    /// <summary>
     /// Partial class for Audience Validation.
     /// </summary>
     public static partial class Validators

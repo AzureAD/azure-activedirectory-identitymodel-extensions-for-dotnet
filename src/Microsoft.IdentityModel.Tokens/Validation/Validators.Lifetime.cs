@@ -8,23 +8,6 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Definition for delegate that will validate the lifetime of a <see cref="SecurityToken"/>.
-    /// </summary>
-    /// <param name="notBefore">The 'notBefore' time found in the <see cref="SecurityToken"/>.</param>
-    /// <param name="expires">The 'expiration' time found in the <see cref="SecurityToken"/>.</param>
-    /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
-    /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
-    /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-    /// <returns>A <see cref="ValidationResult{TResult}"/>that contains the results of validating the issuer.</returns>
-    /// <remarks>This delegate is not expected to throw.</remarks>
-    public delegate ValidationResult<ValidatedLifetime> LifetimeValidationDelegate(
-        DateTime? notBefore,
-        DateTime? expires,
-        SecurityToken? securityToken,
-        ValidationParameters validationParameters,
-        CallContext callContext);
-
-    /// <summary>
     /// Partial class for Lifetime Validation.
     /// </summary>
     public static partial class Validators

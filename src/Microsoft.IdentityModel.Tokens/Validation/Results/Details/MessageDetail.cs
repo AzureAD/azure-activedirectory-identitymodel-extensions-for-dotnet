@@ -3,7 +3,7 @@
 
 using Microsoft.IdentityModel.Logging;
 
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// Contains information about a message that is used to generate a message for logging or exceptions.

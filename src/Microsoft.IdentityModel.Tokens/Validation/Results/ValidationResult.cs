@@ -5,7 +5,7 @@ using System;
 using Microsoft.IdentityModel.Logging;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// Represents a validation result that can be either valid or invalid.

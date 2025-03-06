@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// Represents an error that occurs when the token's audience cannot be validated.
@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return exception;
             }
 
-            return base.CreateException(ExceptionType, null);
+            return CreateException(ExceptionType, null);
         }
 
         /// <summary>

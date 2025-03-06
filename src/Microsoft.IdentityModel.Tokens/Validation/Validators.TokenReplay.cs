@@ -7,21 +7,6 @@ using System;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Definition for delegate that will validate that a <see cref="SecurityToken"/> has not been replayed.
-    /// </summary>
-    /// <param name="expirationTime">When does the <see cref="SecurityToken"/> expire..</param>
-    /// <param name="securityToken">The security token that is being validated.</param>
-    /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
-    /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-    /// <returns>A <see cref="ValidationResult{TResult}"/>that contains the results of validating the token.</returns>
-    /// <remarks>This delegate is not expected to throw.</remarks>
-    public delegate ValidationResult<DateTime?> TokenReplayValidationDelegate(
-        DateTime? expirationTime,
-        string securityToken,
-        ValidationParameters validationParameters,
-        CallContext callContext);
-
-    /// <summary>
     /// Partial class for Token Replay validation.
     /// </summary>
     public static partial class Validators

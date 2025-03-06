@@ -9,7 +9,7 @@ using System.Threading;
 using Microsoft.Extensions.Logging;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// Contains the results of successfully validating a <see cref="SecurityToken"/>.

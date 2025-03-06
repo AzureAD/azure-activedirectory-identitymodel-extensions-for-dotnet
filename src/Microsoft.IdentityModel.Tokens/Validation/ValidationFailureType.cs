@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// The type of the failure that occurred when validating a <see cref="SecurityToken"/>.

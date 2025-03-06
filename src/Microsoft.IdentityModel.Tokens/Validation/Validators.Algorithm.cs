@@ -9,23 +9,6 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
-    /// Definition for delegate that will validate a given algorithm for a <see cref="SecurityKey"/>.
-    /// </summary>
-    /// <param name="algorithm">The algorithm to be validated.</param>
-    /// <param name="securityKey">The <see cref="SecurityKey"/> that signed the <see cref="SecurityToken"/>.</param>
-    /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
-    /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
-    /// <param name="callContext"></param>
-    /// <returns>A <see cref="ValidationResult{TResult}"/>that contains the results of validating the algorithm.</returns>
-    /// <remarks>This delegate is not expected to throw.</remarks>
-    public delegate ValidationResult<string> AlgorithmValidationDelegate(
-        string algorithm,
-        SecurityKey securityKey,
-        SecurityToken securityToken,
-        ValidationParameters validationParameters,
-        CallContext callContext);
-
-    /// <summary>
     /// Partial class for Algorithm Validation.
     /// </summary>
     public static partial class Validators

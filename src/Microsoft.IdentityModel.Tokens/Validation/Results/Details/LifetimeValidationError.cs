@@ -5,7 +5,7 @@ using System;
 using System.Diagnostics;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// Represents an error that occurs when a token's lifetime cannot be validated.
@@ -79,7 +79,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return exception;
             }
             else
-                return base.CreateException(ExceptionType, null);
+                return CreateException(ExceptionType, null);
         }
 
         /// <summary>
