@@ -453,7 +453,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.Contains(partialExceptionMessage, exception.Message);
         }
 
-        [Theory, MemberData(nameof(DecompressionFailTheoryData), DisableDiscoveryEnumeration = false)]
+        [Theory, MemberData(nameof(DecompressionFailTheoryData), DisableDiscoveryEnumeration = true)]
         public void DecryptJwtToken_WhenDecompressionFails_ThrowsException(DecompressionFailureTheoryData theoryData)
         {
             // Arrange
