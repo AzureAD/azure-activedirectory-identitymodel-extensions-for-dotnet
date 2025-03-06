@@ -26,10 +26,10 @@ jobs:
       with:
         fetch-depth: 2
 
-    - name: Setup .NET
+    - name: Setup .NET SDK from global.json
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 9.0.x        
+        global-json-file: ./global.json        
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
