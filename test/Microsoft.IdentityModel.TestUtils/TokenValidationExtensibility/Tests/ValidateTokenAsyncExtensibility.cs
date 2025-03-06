@@ -24,7 +24,7 @@ namespace Microsoft.IdentityModel.TestUtils.TokenValidationExtensibility.Tests
 
             try
             {
-                ValidationResult<ValidatedToken> validationResult = await theoryData.TokenHandler.ValidateTokenAsync(
+                ValidationResult<ValidatedToken, ValidationError> validationResult = await theoryData.TokenHandler.ValidateTokenAsync(
                     securityToken,
                     theoryData.ValidationParameters!,
                     theoryData.CallContext,

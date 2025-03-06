@@ -55,6 +55,19 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         }
 
         /// <summary>
+        /// Creates a new instance of <see cref="AlgorithmValidationError"/> representing a null parameter.
+        /// </summary>
+        /// <param name="parameterName">The name of the parameter.</param>
+        /// <param name="stackFrame">The stack frame where the error occurred.</param>
+        /// <returns>A new <see cref="AlgorithmValidationError"/>.</returns>
+        public static new AlgorithmValidationError NullParameter(string parameterName, StackFrame stackFrame) => new(
+            MessageDetail.NullParameter(parameterName),
+            ValidationFailureType.NullArgument,
+            typeof(SecurityTokenArgumentNullException),
+            stackFrame,
+            null); // InvalidAlgorithm
+
+        /// <summary>
         /// The algorithm that could not be validated.
         /// </summary>
         public string? InvalidAlgorithm { get; }

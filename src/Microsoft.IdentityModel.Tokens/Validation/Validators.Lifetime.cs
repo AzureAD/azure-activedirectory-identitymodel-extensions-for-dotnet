@@ -21,10 +21,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-        /// <returns>A <see cref="ValidationResult{TResult}"/> indicating whether validation was successful, and providing a <see cref="SecurityTokenInvalidLifetimeException"/> if it was not.</returns>
+        /// <returns>A <see cref="ValidationResult{TResult, TError}"/> indicating whether validation was successful, and providing a <see cref="SecurityTokenInvalidLifetimeException"/> if it was not.</returns>
         /// <remarks>All time comparisons apply <see cref="ValidationParameters.ClockSkew"/>.</remarks>
 #pragma warning disable CA1801
-        public static ValidationResult<ValidatedLifetime> ValidateLifetime(
+        public static ValidationResult<ValidatedLifetime, LifetimeValidationError> ValidateLifetime(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -33,7 +33,7 @@ namespace Microsoft.IdentityModel.Tokens
 #pragma warning restore CA1801
         {
             if (validationParameters == null)
-                return ValidationError.NullParameter(
+                return LifetimeValidationError.NullParameter(
                     nameof(validationParameters),
                     ValidationError.GetCurrentStackFrame());
 

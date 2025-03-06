@@ -10,7 +10,7 @@ namespace Microsoft.IdentityModel.TestUtils
 {
     internal class CustomLifetimeValidationDelegates
     {
-        internal static ValidationResult<ValidatedLifetime> CustomLifetimeValidatorDelegate(
+        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> CustomLifetimeValidatorDelegate(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<ValidatedLifetime> CustomLifetimeValidatorCustomExceptionDelegate(
+        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> CustomLifetimeValidatorCustomExceptionDelegate(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<ValidatedLifetime> CustomLifetimeValidatorCustomExceptionCustomFailureTypeDelegate(
+        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> CustomLifetimeValidatorCustomExceptionCustomFailureTypeDelegate(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 expires);
         }
 
-        internal static ValidationResult<ValidatedLifetime> CustomLifetimeValidatorUnknownExceptionDelegate(
+        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> CustomLifetimeValidatorUnknownExceptionDelegate(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -78,7 +78,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<ValidatedLifetime> CustomLifetimeValidatorWithoutGetExceptionOverrideDelegate(
+        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> CustomLifetimeValidatorWithoutGetExceptionOverrideDelegate(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<ValidatedLifetime> LifetimeValidatorDelegate(
+        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> LifetimeValidatorDelegate(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -112,7 +112,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<ValidatedLifetime> LifetimeValidatorThrows(
+        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> LifetimeValidatorThrows(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -122,7 +122,7 @@ namespace Microsoft.IdentityModel.TestUtils
             throw new CustomSecurityTokenInvalidLifetimeException(nameof(LifetimeValidatorThrows), null);
         }
 
-        internal static ValidationResult<ValidatedLifetime> LifetimeValidatorCustomLifetimeExceptionTypeDelegate(
+        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> LifetimeValidatorCustomLifetimeExceptionTypeDelegate(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,
@@ -139,7 +139,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<ValidatedLifetime> LifetimeValidatorCustomExceptionTypeDelegate(
+        internal static ValidationResult<ValidatedLifetime, LifetimeValidationError> LifetimeValidatorCustomExceptionTypeDelegate(
             DateTime? notBefore,
             DateTime? expires,
             SecurityToken? securityToken,

@@ -22,9 +22,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext"></param>
         /// <param name="cancellationToken"></param>
-        /// <returns>An <see cref="ValidationResult{TResult}"/> that contains either the issuer that was validated or an error.</returns>
+        /// <returns>An <see cref="ValidationResult{TResult, TError}"/> that contains either the issuer that was validated or an error.</returns>
         /// <remarks>An EXACT match is required.</remarks>
-        public static async Task<ValidationResult<ValidatedIssuer>> ValidateIssuerAsync(
+        public static async Task<ValidationResult<ValidatedIssuer, IssuerValidationError>> ValidateIssuerAsync(
             string? issuer,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -44,12 +44,12 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             if (validationParameters == null)
-                return ValidationError.NullParameter(
+                return IssuerValidationError.NullParameter(
                     nameof(validationParameters),
                     ValidationError.GetCurrentStackFrame());
 
             if (securityToken == null)
-                return ValidationError.NullParameter(
+                return IssuerValidationError.NullParameter(
                     nameof(securityToken),
                     ValidationError.GetCurrentStackFrame());
 

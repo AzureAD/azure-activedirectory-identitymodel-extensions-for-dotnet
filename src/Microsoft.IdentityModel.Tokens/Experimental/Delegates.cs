@@ -17,9 +17,9 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
     /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
     /// <param name="validationParameters"><see cref="TokenValidationParameters"/> required for validation.</param>
     /// <param name="callContext"></param>
-    /// <returns>A <see cref="ValidationResult{TResult}"/>that contains the results of validating the algorithm.</returns>
+    /// <returns>A <see cref="ValidationResult{TResult, TError}"/>that contains the results of validating the algorithm.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
-    public delegate ValidationResult<string> AlgorithmValidationDelegate(
+    public delegate ValidationResult<string, AlgorithmValidationError> AlgorithmValidationDelegate(
         string algorithm,
         SecurityKey securityKey,
         SecurityToken securityToken,
@@ -33,9 +33,9 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
     /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
     /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
     /// <param name="callContext"></param>
-    /// <returns>A <see cref="ValidationResult{TResult}"/>that contains the results of validating the issuer.</returns>
+    /// <returns>A <see cref="ValidationResult{TResult, TError}"/>that contains the results of validating the issuer.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
-    public delegate ValidationResult<string> AudienceValidationDelegate(
+    public delegate ValidationResult<string, AudienceValidationError> AudienceValidationDelegate(
         IList<string> tokenAudiences,
         SecurityToken? securityToken,
         ValidationParameters validationParameters,
@@ -49,9 +49,9 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
     /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
     /// <param name="callContext"></param>
     /// <param name="cancellationToken"></param>
-    /// <returns>An <see cref="ValidationResult{TResult}"/>that contains the results of validating the issuer.</returns>
+    /// <returns>An <see cref="ValidationResult{TResult, TError}"/>that contains the results of validating the issuer.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
-    public delegate Task<ValidationResult<ValidatedIssuer>> IssuerValidationDelegateAsync(
+    public delegate Task<ValidationResult<ValidatedIssuer, IssuerValidationError>> IssuerValidationDelegateAsync(
         string issuer,
         SecurityToken securityToken,
         ValidationParameters validationParameters,
@@ -65,9 +65,9 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
     /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
     /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
     /// <param name="callContext">The <see cref="CallContext"/> to be used for logging.</param> 
-    /// <returns>A <see cref="ValidationResult{TResult}"/>that contains the results of validating the issuer.</returns>
+    /// <returns>A <see cref="ValidationResult{TResult, TError}"/>that contains the results of validating the issuer.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
-    public delegate ValidationResult<ValidatedSigningKeyLifetime> IssuerSigningKeyValidationDelegate(
+    public delegate ValidationResult<ValidatedSigningKeyLifetime, IssuerSigningKeyValidationError> IssuerSigningKeyValidationDelegate(
         SecurityKey signingKey,
         SecurityToken securityToken,
         ValidationParameters validationParameters,
@@ -81,9 +81,9 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
     /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
     /// <param name="validationParameters">The <see cref="TokenValidationParameters"/> to be used for validating the token.</param>
     /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-    /// <returns>A <see cref="ValidationResult{TResult}"/>that contains the results of validating the issuer.</returns>
+    /// <returns>A <see cref="ValidationResult{TResult, TError}"/>that contains the results of validating the issuer.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
-    public delegate ValidationResult<ValidatedLifetime> LifetimeValidationDelegate(
+    public delegate ValidationResult<ValidatedLifetime, LifetimeValidationError> LifetimeValidationDelegate(
         DateTime? notBefore,
         DateTime? expires,
         SecurityToken? securityToken,
@@ -97,9 +97,9 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
     /// <param name="securityToken">The security token that is being validated.</param>
     /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
     /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-    /// <returns>A <see cref="ValidationResult{TResult}"/>that contains the results of validating the token.</returns>
+    /// <returns>A <see cref="ValidationResult{TResult, TError}"/>that contains the results of validating the token.</returns>
     /// <remarks>This delegate is not expected to throw.</remarks>
-    public delegate ValidationResult<DateTime?> TokenReplayValidationDelegate(
+    public delegate ValidationResult<DateTime?, TokenReplayValidationError> TokenReplayValidationDelegate(
         DateTime? expirationTime,
         string securityToken,
         ValidationParameters validationParameters,
@@ -112,9 +112,9 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
     /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
     /// <param name="validationParameters"><see cref="ValidationParameters"/> required for validation.</param>
     /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-    /// <returns> A <see cref="ValidationResult{TResult}"/>that contains the results of validating the token type.</returns>
+    /// <returns> A <see cref="ValidationResult{TResult, TError}"/>that contains the results of validating the token type.</returns>
     /// <remarks>An EXACT match is required. <see cref="StringComparison.Ordinal"/> (case sensitive) is used for comparing <paramref name="type"/> against <see cref="ValidationParameters.ValidTypes"/>.</remarks>
-    public delegate ValidationResult<ValidatedTokenType> TokenTypeValidationDelegate(
+    public delegate ValidationResult<ValidatedTokenType, TokenTypeValidationError> TokenTypeValidationDelegate(
         string? type,
         SecurityToken? securityToken,
         ValidationParameters validationParameters,
@@ -153,7 +153,7 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
     /// <param name="callContext">The <see cref="CallContext"/> to be used for logging.</param>
     /// <remarks>This method is not expected to throw.</remarks>
     /// <returns>The validated <see cref="SecurityToken"/>.</returns>
-    public delegate ValidationResult<SecurityKey> SignatureValidationDelegate(
+    public delegate ValidationResult<SecurityKey, ValidationError> SignatureValidationDelegate(
         SecurityToken token,
         ValidationParameters validationParameters,
         BaseConfiguration? configuration,

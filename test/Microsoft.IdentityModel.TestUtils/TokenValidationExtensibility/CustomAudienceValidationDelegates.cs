@@ -11,7 +11,7 @@ namespace Microsoft.IdentityModel.TestUtils
 {
     internal class CustomAudienceValidationDelegates
     {
-        internal static ValidationResult<string> CustomAudienceValidatorDelegate(
+        internal static ValidationResult<string, AudienceValidationError> CustomAudienceValidatorDelegate(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -27,7 +27,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<string> CustomAudienceValidatorCustomExceptionDelegate(
+        internal static ValidationResult<string, AudienceValidationError> CustomAudienceValidatorCustomExceptionDelegate(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -42,7 +42,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<string> CustomAudienceValidatorCustomExceptionCustomFailureTypeDelegate(
+        internal static ValidationResult<string, AudienceValidationError> CustomAudienceValidatorCustomExceptionCustomFailureTypeDelegate(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<string> CustomAudienceValidatorUnknownExceptionDelegate(
+        internal static ValidationResult<string, AudienceValidationError> CustomAudienceValidatorUnknownExceptionDelegate(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<string> CustomAudienceValidatorWithoutGetExceptionOverrideDelegate(
+        internal static ValidationResult<string, AudienceValidationError> CustomAudienceValidatorWithoutGetExceptionOverrideDelegate(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -86,7 +86,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<string> AudienceValidatorDelegate(
+        internal static ValidationResult<string, AudienceValidationError> AudienceValidatorDelegate(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<string> AudienceValidatorThrows(
+        internal static ValidationResult<string, AudienceValidationError> AudienceValidatorThrows(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -110,7 +110,7 @@ namespace Microsoft.IdentityModel.TestUtils
             throw new CustomSecurityTokenInvalidAudienceException(nameof(AudienceValidatorThrows), null);
         }
 
-        internal static ValidationResult<string> AudienceValidatorCustomAudienceExceptionTypeDelegate(
+        internal static ValidationResult<string, AudienceValidationError> AudienceValidatorCustomAudienceExceptionTypeDelegate(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -125,7 +125,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<string> AudienceValidatorCustomExceptionTypeDelegate(
+        internal static ValidationResult<string, AudienceValidationError> AudienceValidatorCustomExceptionTypeDelegate(
             IList<string> tokenAudiences,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,

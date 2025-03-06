@@ -10,7 +10,7 @@ namespace Microsoft.IdentityModel.TestUtils
 {
     internal class CustomIssuerSigningKeyValidationDelegates
     {
-        internal static ValidationResult<ValidatedSigningKeyLifetime> CustomIssuerSigningKeyValidatorDelegate(
+        internal static ValidationResult<ValidatedSigningKeyLifetime, IssuerSigningKeyValidationError> CustomIssuerSigningKeyValidatorDelegate(
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<ValidatedSigningKeyLifetime> CustomIssuerSigningKeyValidatorCustomExceptionDelegate(
+        internal static ValidationResult<ValidatedSigningKeyLifetime, IssuerSigningKeyValidationError> CustomIssuerSigningKeyValidatorCustomExceptionDelegate(
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<ValidatedSigningKeyLifetime> CustomIssuerSigningKeyValidatorCustomExceptionCustomFailureTypeDelegate(
+        internal static ValidationResult<ValidatedSigningKeyLifetime, IssuerSigningKeyValidationError> CustomIssuerSigningKeyValidatorCustomExceptionCustomFailureTypeDelegate(
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 signingKey);
         }
 
-        internal static ValidationResult<ValidatedSigningKeyLifetime> CustomIssuerSigningKeyValidatorUnknownExceptionDelegate(
+        internal static ValidationResult<ValidatedSigningKeyLifetime, IssuerSigningKeyValidationError> CustomIssuerSigningKeyValidatorUnknownExceptionDelegate(
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<ValidatedSigningKeyLifetime> CustomIssuerSigningKeyValidatorWithoutGetExceptionOverrideDelegate(
+        internal static ValidationResult<ValidatedSigningKeyLifetime, IssuerSigningKeyValidationError> CustomIssuerSigningKeyValidatorWithoutGetExceptionOverrideDelegate(
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<ValidatedSigningKeyLifetime> IssuerSigningKeyValidatorDelegate(
+        internal static ValidationResult<ValidatedSigningKeyLifetime, IssuerSigningKeyValidationError> IssuerSigningKeyValidatorDelegate(
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
@@ -99,7 +99,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<ValidatedSigningKeyLifetime> IssuerSigningKeyValidatorThrows(
+        internal static ValidationResult<ValidatedSigningKeyLifetime, IssuerSigningKeyValidationError> IssuerSigningKeyValidatorThrows(
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
@@ -108,7 +108,7 @@ namespace Microsoft.IdentityModel.TestUtils
             throw new CustomSecurityTokenInvalidSigningKeyException(nameof(IssuerSigningKeyValidatorThrows), null);
         }
 
-        internal static ValidationResult<ValidatedSigningKeyLifetime> IssuerSigningKeyValidatorCustomIssuerSigningKeyExceptionTypeDelegate(
+        internal static ValidationResult<ValidatedSigningKeyLifetime, IssuerSigningKeyValidationError> IssuerSigningKeyValidatorCustomIssuerSigningKeyExceptionTypeDelegate(
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
@@ -123,7 +123,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<ValidatedSigningKeyLifetime> IssuerSigningKeyValidatorCustomExceptionTypeDelegate(
+        internal static ValidationResult<ValidatedSigningKeyLifetime, IssuerSigningKeyValidationError> IssuerSigningKeyValidatorCustomExceptionTypeDelegate(
             SecurityKey signingKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,

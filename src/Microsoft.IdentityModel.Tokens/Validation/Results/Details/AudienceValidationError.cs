@@ -57,6 +57,20 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         }
 
         /// <summary>
+        /// Creates a new instance of <see cref="AudienceValidationError"/> representing a null parameter.
+        /// </summary>
+        /// <param name="parameterName">The name of the parameter.</param>
+        /// <param name="stackFrame">The stack frame where the error occurred.</param>
+        /// <returns>A new <see cref="AudienceValidationError"/>.</returns>
+        public static new AudienceValidationError NullParameter(string parameterName, StackFrame stackFrame) => new(
+            MessageDetail.NullParameter(parameterName),
+            ValidationFailureType.NullArgument,
+            typeof(SecurityTokenArgumentNullException),
+            stackFrame,
+            null, // TokenAudiences
+            null); // ValidAudiences
+
+        /// <summary>
         /// The audiences that were in the token.
         /// </summary>
         public IList<string>? TokenAudiences { get; }

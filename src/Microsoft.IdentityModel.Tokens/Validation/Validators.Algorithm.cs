@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters"><see cref="ValidationParameters"/> required for validation.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-        public static ValidationResult<string> ValidateAlgorithm(
+        public static ValidationResult<string, AlgorithmValidationError> ValidateAlgorithm(
             string algorithm,
 #pragma warning disable CA1801
             SecurityKey securityKey,
@@ -32,7 +32,7 @@ namespace Microsoft.IdentityModel.Tokens
 #pragma warning restore CA1801
         {
             if (validationParameters == null)
-                return ValidationError.NullParameter(
+                return AlgorithmValidationError.NullParameter(
                     nameof(validationParameters),
                     ValidationError.GetCurrentStackFrame());
 

@@ -10,7 +10,7 @@ namespace Microsoft.IdentityModel.TestUtils
 {
     internal class CustomAlgorithmValidationDelegates
     {
-        internal static ValidationResult<string> CustomAlgorithmValidatorDelegate(
+        internal static ValidationResult<string, AlgorithmValidationError> CustomAlgorithmValidatorDelegate(
             string algorithm,
             SecurityKey securityKey,
             SecurityToken securityToken,
@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 algorithm);
         }
 
-        internal static ValidationResult<string> CustomAlgorithmValidatorCustomExceptionDelegate(
+        internal static ValidationResult<string, AlgorithmValidationError> CustomAlgorithmValidatorCustomExceptionDelegate(
             string algorithm,
             SecurityKey securityKey,
             SecurityToken securityToken,
@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 algorithm);
         }
 
-        internal static ValidationResult<string> CustomAlgorithmValidatorCustomExceptionCustomFailureTypeDelegate(
+        internal static ValidationResult<string, AlgorithmValidationError> CustomAlgorithmValidatorCustomExceptionCustomFailureTypeDelegate(
             string algorithm,
             SecurityKey securityKey,
             SecurityToken securityToken,
@@ -56,7 +56,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 algorithm);
         }
 
-        internal static ValidationResult<string> CustomAlgorithmValidatorUnknownExceptionDelegate(
+        internal static ValidationResult<string, AlgorithmValidationError> CustomAlgorithmValidatorUnknownExceptionDelegate(
             string algorithm,
             SecurityKey securityKey,
             SecurityToken securityToken,
@@ -71,7 +71,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 algorithm);
         }
 
-        internal static ValidationResult<string> CustomAlgorithmValidatorWithoutGetExceptionOverrideDelegate(
+        internal static ValidationResult<string, AlgorithmValidationError> CustomAlgorithmValidatorWithoutGetExceptionOverrideDelegate(
             string algorithm,
             SecurityKey securityKey,
             SecurityToken securityToken,
@@ -86,7 +86,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 algorithm);
         }
 
-        internal static ValidationResult<string> AlgorithmValidatorDelegate(
+        internal static ValidationResult<string, AlgorithmValidationError> AlgorithmValidatorDelegate(
             string algorithm,
             SecurityKey securityKey,
             SecurityToken securityToken,
@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 algorithm);
         }
 
-        internal static ValidationResult<string> AlgorithmValidatorThrows(
+        internal static ValidationResult<string, AlgorithmValidationError> AlgorithmValidatorThrows(
             string algorithm,
             SecurityKey securityKey,
             SecurityToken securityToken,
@@ -111,7 +111,7 @@ namespace Microsoft.IdentityModel.TestUtils
             throw new CustomSecurityTokenInvalidAlgorithmException(nameof(AlgorithmValidatorThrows), null);
         }
 
-        internal static ValidationResult<string> AlgorithmValidatorCustomAlgorithmExceptionTypeDelegate(
+        internal static ValidationResult<string, AlgorithmValidationError> AlgorithmValidatorCustomAlgorithmExceptionTypeDelegate(
             string algorithm,
             SecurityKey securityKey,
             SecurityToken securityToken,
@@ -126,7 +126,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 algorithm);
         }
 
-        internal static ValidationResult<string> AlgorithmValidatorCustomExceptionTypeDelegate(
+        internal static ValidationResult<string, AlgorithmValidationError> AlgorithmValidatorCustomExceptionTypeDelegate(
             string algorithm,
             SecurityKey securityKey,
             SecurityToken securityToken,
