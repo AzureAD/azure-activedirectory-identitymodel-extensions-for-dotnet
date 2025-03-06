@@ -3,6 +3,7 @@ const Microsoft.IdentityModel.Validators.AadIssuerValidator.V11EndpointSuffix = 
 const Microsoft.IdentityModel.Validators.AadIssuerValidator.V11EndpointSuffixWithTrailingSlash = "/v1.1/" -> string
 const Microsoft.IdentityModel.Validators.AadIssuerValidator.V2EndpointSuffix = "/v2.0" -> string
 const Microsoft.IdentityModel.Validators.AadIssuerValidator.V2EndpointSuffixWithTrailingSlash = "/v2.0/" -> string
+const Microsoft.IdentityModel.Validators.AadIssuerValidatorConstants.CloudInstanceNameKey = "cloud_instance_name" -> string
 const Microsoft.IdentityModel.Validators.AadIssuerValidatorConstants.Common = "common" -> string
 const Microsoft.IdentityModel.Validators.AadIssuerValidatorConstants.FallbackAuthority = "https://login.microsoftonline.com/" -> string
 const Microsoft.IdentityModel.Validators.AadIssuerValidatorConstants.OidcEndpoint = "/.well-known/openid-configuration" -> string
@@ -32,8 +33,8 @@ Microsoft.IdentityModel.Validators.AadIssuerValidator.AadIssuerV1.get -> string
 Microsoft.IdentityModel.Validators.AadIssuerValidator.AadIssuerV1.set -> void
 Microsoft.IdentityModel.Validators.AadIssuerValidator.AadIssuerV2.get -> string
 Microsoft.IdentityModel.Validators.AadIssuerValidator.AadIssuerV2.set -> void
-Microsoft.IdentityModel.Validators.AadIssuerValidator.AadIssuerValidator(System.Net.Http.HttpClient httpClient, string aadAuthority, System.Func<string, Microsoft.IdentityModel.Tokens.BaseConfigurationManager> configurationManagerProvider) -> void
 Microsoft.IdentityModel.Validators.AadIssuerValidator.AadIssuerValidator(System.Net.Http.HttpClient httpClient, string aadAuthority) -> void
+Microsoft.IdentityModel.Validators.AadIssuerValidator.AadIssuerValidator(System.Net.Http.HttpClient httpClient, string aadAuthority, System.Func<string, Microsoft.IdentityModel.Tokens.BaseConfigurationManager> configurationManagerProvider) -> void
 Microsoft.IdentityModel.Validators.AadIssuerValidator.ConfigurationManagerV1.get -> Microsoft.IdentityModel.Tokens.BaseConfigurationManager
 Microsoft.IdentityModel.Validators.AadIssuerValidator.ConfigurationManagerV1.set -> void
 Microsoft.IdentityModel.Validators.AadIssuerValidator.ConfigurationManagerV11.get -> Microsoft.IdentityModel.Tokens.BaseConfigurationManager
@@ -41,8 +42,10 @@ Microsoft.IdentityModel.Validators.AadIssuerValidator.ConfigurationManagerV11.se
 Microsoft.IdentityModel.Validators.AadIssuerValidator.ConfigurationManagerV2.get -> Microsoft.IdentityModel.Tokens.BaseConfigurationManager
 Microsoft.IdentityModel.Validators.AadIssuerValidator.ConfigurationManagerV2.set -> void
 Microsoft.IdentityModel.Validators.AadIssuerValidator.ValidateAsync(string issuer, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters) -> System.Threading.Tasks.ValueTask<string>
+Microsoft.IdentityModel.Validators.AadIssuerValidator.ValidateIssuerAsync(string issuer, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters, Microsoft.IdentityModel.Tokens.CallContext callContext, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.Task<Microsoft.IdentityModel.Tokens.ValidationResult<Microsoft.IdentityModel.Tokens.ValidatedIssuer>>
 Microsoft.IdentityModel.Validators.AadIssuerValidatorConstants
 Microsoft.IdentityModel.Validators.AadIssuerValidatorConstants.AadIssuerValidatorConstants() -> void
+Microsoft.IdentityModel.Validators.AadValidationParametersExtension
 Microsoft.IdentityModel.Validators.IssuerLastKnownGood
 Microsoft.IdentityModel.Validators.IssuerLastKnownGood.Issuer.get -> string
 Microsoft.IdentityModel.Validators.IssuerLastKnownGood.Issuer.set -> void
@@ -54,7 +57,13 @@ Microsoft.IdentityModel.Validators.LogMessages
 static Microsoft.IdentityModel.Validators.AadIssuerValidator.GetAadIssuerValidator(string aadAuthority, System.Net.Http.HttpClient httpClient, System.Func<string, Microsoft.IdentityModel.Tokens.BaseConfigurationManager> configurationManagerProvider) -> Microsoft.IdentityModel.Validators.AadIssuerValidator
 static Microsoft.IdentityModel.Validators.AadIssuerValidator.GetTenantIdFromToken(Microsoft.IdentityModel.Tokens.SecurityToken securityToken) -> string
 static Microsoft.IdentityModel.Validators.AadIssuerValidator.IsValidIssuer(string issuerTemplate, string tenantId, string tokenIssuer) -> bool
+static Microsoft.IdentityModel.Validators.AadTokenValidationParametersExtension.GetJsonWebKeyBySecurityKey(Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfiguration configuration, Microsoft.IdentityModel.Tokens.SecurityKey securityKey) -> Microsoft.IdentityModel.Tokens.JsonWebKey
 static Microsoft.IdentityModel.Validators.AadTokenValidationParametersExtension.ValidateIssuerSigningKey(Microsoft.IdentityModel.Tokens.SecurityKey securityKey, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.BaseConfiguration configuration) -> bool
 static Microsoft.IdentityModel.Validators.AadTokenValidationParametersExtension.ValidateIssuerSigningKeyCertificate(Microsoft.IdentityModel.Tokens.SecurityKey securityKey, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters) -> bool
 static Microsoft.IdentityModel.Validators.AadTokenValidationParametersExtension.ValidateSigningKeyCloudInstance(Microsoft.IdentityModel.Tokens.SecurityKey securityKey, Microsoft.IdentityModel.Tokens.BaseConfiguration configuration) -> void
+static Microsoft.IdentityModel.Validators.AadValidationParametersExtension.EnableAadSigningKeyIssuerValidation(this Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters) -> void
+static Microsoft.IdentityModel.Validators.AadValidationParametersExtension.EnableEntraIdSigningKeyCloudInstanceValidation(this Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters) -> void
+static Microsoft.IdentityModel.Validators.AadValidationParametersExtension.ValidateIssuerSigningKey(Microsoft.IdentityModel.Tokens.SecurityKey securityKey, Microsoft.IdentityModel.Tokens.SecurityToken securityToken, Microsoft.IdentityModel.Tokens.BaseConfiguration configuration) -> bool
+static Microsoft.IdentityModel.Validators.AadValidationParametersExtension.ValidateIssuerSigningKeyCertificate(Microsoft.IdentityModel.Tokens.SecurityKey securityKey, Microsoft.IdentityModel.Tokens.ValidationParameters validationParameters) -> Microsoft.IdentityModel.Tokens.ValidationResult<Microsoft.IdentityModel.Tokens.ValidatedSigningKeyLifetime>
+static Microsoft.IdentityModel.Validators.AadValidationParametersExtension.ValidateSigningKeyCloudInstance(Microsoft.IdentityModel.Tokens.SecurityKey securityKey, Microsoft.IdentityModel.Tokens.BaseConfiguration configuration) -> void
 static readonly Microsoft.IdentityModel.Validators.AadIssuerValidator.s_issuerValidators -> System.Collections.Generic.IDictionary<string, Microsoft.IdentityModel.Validators.AadIssuerValidator>
