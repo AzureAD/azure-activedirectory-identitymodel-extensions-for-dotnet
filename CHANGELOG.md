@@ -1,5 +1,10 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+8.6.1
+=====
+## Fundamentals
+- For development, IdentityModel now has a global.json file to specify the .NET SDK version. See issue [#2995](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2995) for details.
+
 8.6.0
 =====
 ## New Features
