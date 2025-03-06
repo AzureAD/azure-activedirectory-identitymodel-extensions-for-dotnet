@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Microsoft.IdentityModel.Telemetry
 {
@@ -62,6 +63,21 @@ namespace Microsoft.IdentityModel.Telemetry
 
             long durationInMilliseconds = (long)operationDuration.TotalMilliseconds;
             TelemetryDataRecorder.RecordConfigurationRetrievalDurationHistogram(durationInMilliseconds, tagList);
+        }
+
+        public void LogBackgroundConfigurationRefreshFailure(
+            string metadataAddress,
+            Exception exception)
+        {
+            var tagList = new TagList()
+            {
+                { TelemetryConstants.IdentityModelVersionTag, ClientVer },
+                { TelemetryConstants.MetadataAddressTag, metadataAddress },
+                { TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString() },
+                { TelemetryConstants.BlockingTypeTag, AppContextSwitches.UpdateConfigAsBlocking.ToString() }
+            };
+
+            TelemetryDataRecorder.IncrementBackgroundConfigurationRefreshFailureCounter(tagList);
         }
     }
 }

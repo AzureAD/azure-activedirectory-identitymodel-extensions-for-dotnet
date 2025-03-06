@@ -17,7 +17,11 @@
 
 
 <PropertyGroup Condition="'$(TargetFramework)' == 'net9.0'">
-    <MicrosoftExtensionsLoggingAbstractionsVersion>9.0.0</MicrosoftExtensionsLoggingAbstractionsVersion>
+    <!--
+      Do not bump to 9.0. complicated reasons due to some runtime incompatibilities if 
+      CoreWCF compiles against an older version but then run with a newer version in a related package
+    -->
+    <MicrosoftExtensionsLoggingAbstractionsVersion>8.0.2</MicrosoftExtensionsLoggingAbstractionsVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0'">

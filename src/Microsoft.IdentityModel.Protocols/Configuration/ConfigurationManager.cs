@@ -3,7 +3,6 @@
 
 using System;
 using System.Net.Http;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Logging;
@@ -20,16 +19,10 @@ namespace Microsoft.IdentityModel.Protocols
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable")]
     public class ConfigurationManager<T> : BaseConfigurationManager, IConfigurationManager<T> where T : class
     {
-        // To prevent tearing, this needs to be only updated through AtomicUpdateSyncAfter.
-        // Reads should be done through the property SyncAfter.
-        private DateTime _syncAfter = DateTime.MinValue;
-        private DateTime SyncAfter => _syncAfter;
+        internal Action _onBackgroundTaskFinish;
 
-        // See comment above, this should only be updated through AtomicUpdateLastRequestRefresh,
-        // read through LastRequestRefresh.
-        private DateTime _lastRequestRefresh = DateTime.MinValue;
-        private DateTime LastRequestRefresh => _lastRequestRefresh;
-
+        private DateTimeOffset _syncAfter = DateTimeOffset.MinValue;
+        private DateTimeOffset _lastRequestRefresh = DateTimeOffset.MinValue;
         private bool _isFirstRefreshRequest = true;
         private readonly SemaphoreSlim _configurationNullLock = new SemaphoreSlim(1);
 
@@ -45,16 +38,8 @@ namespace Microsoft.IdentityModel.Protocols
         private const int ConfigurationRetrieverRunning = 1;
         private int _configurationRetrieverState = ConfigurationRetrieverIdle;
 
-        private readonly TimeProvider _timeProvider = TimeProvider.System;
+        internal TimeProvider TimeProvider = TimeProvider.System;
         internal ITelemetryClient TelemetryClient = new TelemetryClient();
-
-        // If a refresh is requested, then do the refresh as a blocking operation
-        // not on a background thread. RequestRefresh signals that the app is explicitly
-        // requesting a refresh, so it should be done immediately so the next
-        // call to GetConfiguration will return new configuration if the minimum
-        // refresh interval has passed.
-        bool _refreshRequested;
-
 
         /// <summary>
         /// Instantiates a new <see cref="ConfigurationManager{T}"/> that manages automatic and controls refreshing on configuration data.
@@ -168,7 +153,7 @@ namespace Microsoft.IdentityModel.Protocols
         /// <remarks>If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/> then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.</remarks>
         public virtual async Task<T> GetConfigurationAsync(CancellationToken cancel)
         {
-            if (_currentConfiguration != null && SyncAfter > _timeProvider.GetUtcNow())
+            if (_currentConfiguration != null && _syncAfter > TimeProvider.GetUtcNow())
                 return _currentConfiguration;
 
             Exception fetchMetadataFailure = null;
@@ -246,43 +231,11 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
                 {
-                    if (_refreshRequested)
-                    {
-                        _refreshRequested = false;
+                    TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                        MetadataAddress,
+                        TelemetryConstants.Protocols.Automatic);
 
-                        try
-                        {
-                            // Log as manual because RequestRefresh was called
-                            TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                                MetadataAddress,
-                                TelemetryConstants.Protocols.Manual);
-                        }
-#pragma warning disable CA1031 // Do not catch general exception types
-                        catch
-                        { }
-#pragma warning restore CA1031 // Do not catch general exception types
-
-                        UpdateCurrentConfiguration();
-                    }
-                    else if (SyncAfter <= _timeProvider.GetUtcNow())
-                    {
-                        try
-                        {
-                            TelemetryClient.IncrementConfigurationRefreshRequestCounter(
-                                MetadataAddress,
-                                TelemetryConstants.Protocols.Automatic);
-                        }
-#pragma warning disable CA1031 // Do not catch general exception types
-                        catch
-                        { }
-#pragma warning restore CA1031 // Do not catch general exception types
-
-                        _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
-                    }
-                    else
-                    {
-                        Interlocked.Exchange(ref _configurationRetrieverState, ConfigurationRetrieverIdle);
-                    }
+                    _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
                 }
             }
 
@@ -295,7 +248,7 @@ namespace Microsoft.IdentityModel.Protocols
                     LogHelper.FormatInvariant(
                         LogMessages.IDX20803,
                         LogHelper.MarkAsNonPII(MetadataAddress ?? "null"),
-                        LogHelper.MarkAsNonPII(SyncAfter),
+                        LogHelper.MarkAsNonPII(_syncAfter),
                         LogHelper.MarkAsNonPII(fetchMetadataFailure)),
                     fetchMetadataFailure));
         }
@@ -308,7 +261,7 @@ namespace Microsoft.IdentityModel.Protocols
         private void UpdateCurrentConfiguration()
         {
 #pragma warning disable CA1031 // Do not catch general exception types
-            long startTimestamp = _timeProvider.GetTimestamp();
+            long startTimestamp = TimeProvider.GetTimestamp();
 
             try
             {
@@ -317,7 +270,7 @@ namespace Microsoft.IdentityModel.Protocols
                     _docRetriever,
                     CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
 
-                var elapsedTime = _timeProvider.GetElapsedTime(startTimestamp);
+                var elapsedTime = TimeProvider.GetElapsedTime(startTimestamp);
                 TelemetryClient.LogConfigurationRetrievalDuration(
                     MetadataAddress,
                     elapsedTime);
@@ -342,7 +295,7 @@ namespace Microsoft.IdentityModel.Protocols
             }
             catch (Exception ex)
             {
-                var elapsedTime = _timeProvider.GetElapsedTime(startTimestamp);
+                var elapsedTime = TimeProvider.GetElapsedTime(startTimestamp);
                 TelemetryClient.LogConfigurationRetrievalDuration(
                     MetadataAddress,
                     elapsedTime,
@@ -360,33 +313,16 @@ namespace Microsoft.IdentityModel.Protocols
             {
                 Interlocked.Exchange(ref _configurationRetrieverState, ConfigurationRetrieverIdle);
             }
+
+            _onBackgroundTaskFinish?.Invoke();
 #pragma warning restore CA1031 // Do not catch general exception types
         }
 
         private void UpdateConfiguration(T configuration)
         {
             _currentConfiguration = configuration;
-            var newSyncTime = DateTimeUtil.Add(_timeProvider.GetUtcNow().UtcDateTime, AutomaticRefreshInterval +
+            _syncAfter = DateTimeUtil.Add(TimeProvider.GetUtcNow().DateTime, AutomaticRefreshInterval +
                 TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 20)));
-            AtomicUpdateSyncAfter(newSyncTime);
-        }
-
-        private void AtomicUpdateSyncAfter(DateTime syncAfter)
-        {
-            // DateTime's backing data is safe to treat as a long if the Kind is not local.
-            // _syncAfter will always be updated to a UTC time.
-            // See the implementation of ToBinary on DateTime.
-            Interlocked.Exchange(
-                ref Unsafe.As<DateTime, long>(ref _syncAfter),
-                Unsafe.As<DateTime, long>(ref syncAfter));
-        }
-
-        private void AtomicUpdateLastRequestRefresh(DateTime lastRequestRefresh)
-        {
-            // See the comment in AtomicUpdateSyncAfter.
-            Interlocked.Exchange(
-                ref Unsafe.As<DateTime, long>(ref _lastRequestRefresh),
-                Unsafe.As<DateTime, long>(ref lastRequestRefresh));
         }
 
         /// <summary>
@@ -409,14 +345,20 @@ namespace Microsoft.IdentityModel.Protocols
         /// </summary>
         public override void RequestRefresh()
         {
-            DateTime now = _timeProvider.GetUtcNow().UtcDateTime;
+            DateTimeOffset now = TimeProvider.GetUtcNow();
 
-            if (now >= DateTimeUtil.Add(LastRequestRefresh, RefreshInterval) || _isFirstRefreshRequest)
+            if (now >= DateTimeUtil.Add(_lastRequestRefresh.UtcDateTime, RefreshInterval) || _isFirstRefreshRequest)
             {
+                TelemetryClient.IncrementConfigurationRefreshRequestCounter(
+                    MetadataAddress,
+                    TelemetryConstants.Protocols.Manual);
+
                 _isFirstRefreshRequest = false;
-                AtomicUpdateSyncAfter(now);
-                AtomicUpdateLastRequestRefresh(now);
-                _refreshRequested = true;
+                if (Interlocked.CompareExchange(ref _configurationRetrieverState, ConfigurationRetrieverRunning, ConfigurationRetrieverIdle) == ConfigurationRetrieverIdle)
+                {
+                    _ = Task.Run(UpdateCurrentConfiguration, CancellationToken.None);
+                    _lastRequestRefresh = now;
+                }
             }
         }
 

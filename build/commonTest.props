@@ -51,7 +51,12 @@
   </ItemGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
-    <!-- Suprpess the "Microsoft.Bcl.Memory 9.0.0 doesn't support net6.0 and has not been tested with it" warning -->
+    <!-- Suprpess the "Microsoft.Bcl.Memory/Microsoft.Extensions.TimeProvider.Testing 9.0.0 doesn't support net6.0 and has not been tested with it" warning -->
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net462' or '$(TargetFramework)' == 'net472'">
+    <!-- Suprpess the "Microsoft.Extensions.TimeProvider.Testing 9.0.0 doesn't support net462 and has not been tested with it" warning -->
     <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
   </PropertyGroup>
   

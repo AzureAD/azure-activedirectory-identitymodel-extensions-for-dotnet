@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Telemetry.Tests
@@ -12,13 +13,19 @@ namespace Microsoft.IdentityModel.Telemetry.Tests
         public Dictionary<string, object> ExportedItems = new Dictionary<string, object>();
         public Dictionary<string, object> ExportedHistogramItems = new Dictionary<string, object>();
 
+        internal int _requestRefreshCounter;
+
+        public int RequestRefreshCounter => _requestRefreshCounter;
+
         public void ClearExportedItems()
         {
             ExportedItems.Clear();
+            ExportedHistogramItems.Clear();
         }
 
         public void IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus)
         {
+            Interlocked.Increment(ref _requestRefreshCounter);
             ExportedItems.Add(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
             ExportedItems.Add(TelemetryConstants.MetadataAddressTag, metadataAddress);
             ExportedItems.Add(TelemetryConstants.OperationStatusTag, operationStatus);
@@ -26,6 +33,7 @@ namespace Microsoft.IdentityModel.Telemetry.Tests
 
         public void IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, Exception exception)
         {
+            Interlocked.Increment(ref _requestRefreshCounter);
             ExportedItems.Add(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
             ExportedItems.Add(TelemetryConstants.MetadataAddressTag, metadataAddress);
             ExportedItems.Add(TelemetryConstants.OperationStatusTag, operationStatus);
@@ -43,6 +51,13 @@ namespace Microsoft.IdentityModel.Telemetry.Tests
             ExportedHistogramItems.Add(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
             ExportedHistogramItems.Add(TelemetryConstants.MetadataAddressTag, metadataAddress);
             ExportedHistogramItems.Add(TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString());
+        }
+
+        void ITelemetryClient.LogBackgroundConfigurationRefreshFailure(string metadataAddress, Exception exception)
+        {
+            ExportedItems.Add(TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer);
+            ExportedItems.Add(TelemetryConstants.MetadataAddressTag, metadataAddress);
+            ExportedItems.Add(TelemetryConstants.ExceptionTypeTag, exception.GetType().ToString());
         }
     }
 }

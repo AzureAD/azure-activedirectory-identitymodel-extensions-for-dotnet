@@ -70,6 +70,16 @@ namespace Microsoft.IdentityModel.Tokens
 
         internal static bool UseRfcDefinitionOfEpkAndKid => _useRfcDefinitionOfEpkAndKid ??= (AppContext.TryGetSwitch(UseRfcDefinitionOfEpkAndKidSwitch, out bool isEnabled) && isEnabled);
 
+
+        internal const string UpdateConfigAsBlockingSwitch = "Switch.Microsoft.IdentityModel.UpdateConfigAsBlocking";
+
+        private static bool? _updateConfigAsBlockingCall;
+
+        /// <summary>
+        /// Unused, part of a previous release. This is a friend, so we cannot remove.
+        /// </summary>
+        internal static bool UpdateConfigAsBlocking => _updateConfigAsBlockingCall ??= (AppContext.TryGetSwitch(UpdateConfigAsBlockingSwitch, out bool blockingCall) && blockingCall);
+
         /// <summary>
         /// Used for testing to reset all switches to its default value.
         /// </summary>

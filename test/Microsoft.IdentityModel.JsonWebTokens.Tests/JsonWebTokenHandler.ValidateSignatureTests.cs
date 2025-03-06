@@ -66,6 +66,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
                 Exception exception = validationError.GetException();
                 theoryData.ExpectedException.ProcessException(exception, context);
+
+                if (jsonWebToken is not null)
+                    Assert.Null(jsonWebToken.SigningKey);
             }
 
             TestUtilities.AssertFailIfErrors(context);

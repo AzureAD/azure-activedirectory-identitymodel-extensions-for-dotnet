@@ -1320,7 +1320,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // 2. ResolveTokenDecryptionKey returned null
             // 3. ResolveTokenDecryptionKeyFromConfig returned null
             // Try all the keys. This is the degenerate case, not concerned about perf.
-            if (keys == null)
+            if (validationParameters.TryAllDecryptionKeys && keys.IsNullOrEmpty())
             {
                 keys = JwtTokenUtilities.GetAllDecryptionKeys(validationParameters);
                 if (configuration != null)
@@ -1335,60 +1335,62 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // keep track of exceptions thrown, keys that were tried
             StringBuilder exceptionStrings = null;
             StringBuilder keysAttempted = null;
-            foreach (var key in keys)
+            if (keys != null)
             {
-                try
+                foreach (var key in keys)
                 {
-#if NET472 || NET6_0_OR_GREATER
-                    if (SupportedAlgorithms.EcdsaWrapAlgorithms.Contains(jwtToken.Alg))
+                    try
                     {
-                        ECDsaSecurityKey publicKey;
-
-                        // Since developers may have already worked around this issue, implicitly taking a dependency on the
-                        // old behavior, we guard the new behavior behind an AppContext switch. The new/RFC-conforming behavior
-                        // is treated as opt-in. When the library is at the point where it is able to make breaking changes
-                        // (such as the next major version update) we should consider whether or not this app-compat switch
-                        // needs to be maintained.
-                        if (AppContextSwitches.UseRfcDefinitionOfEpkAndKid)
+#if NET472 || NET6_0_OR_GREATER
+                        if (SupportedAlgorithms.EcdsaWrapAlgorithms.Contains(jwtToken.Alg))
                         {
-                            // on decryption we get the public key from the EPK value see: https://datatracker.ietf.org/doc/html/rfc7518#appendix-C
-                            jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Epk, out string epk);
-                            publicKey = new ECDsaSecurityKey(new JsonWebKey(epk), false);
+                            ECDsaSecurityKey publicKey;
+
+                            // Since developers may have already worked around this issue, implicitly taking a dependency on the
+                            // old behavior, we guard the new behavior behind an AppContext switch. The new/RFC-conforming behavior
+                            // is treated as opt-in. When the library is at the point where it is able to make breaking changes
+                            // (such as the next major version update) we should consider whether or not this app-compat switch
+                            // needs to be maintained.
+                            if (AppContextSwitches.UseRfcDefinitionOfEpkAndKid)
+                            {
+                                // on decryption we get the public key from the EPK value see: https://datatracker.ietf.org/doc/html/rfc7518#appendix-C
+                                jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Epk, out string epk);
+                                publicKey = new ECDsaSecurityKey(new JsonWebKey(epk), false);
+                            }
+                            else
+                            {
+                                publicKey = validationParameters.TokenDecryptionKey as ECDsaSecurityKey;
+                            }
+
+                            var ecdhKeyExchangeProvider = new EcdhKeyExchangeProvider(
+                                key as ECDsaSecurityKey,
+                                publicKey,
+                                jwtToken.Alg,
+                                jwtToken.Enc);
+                            jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Apu, out string apu);
+                            jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Apv, out string apv);
+                            SecurityKey kdf = ecdhKeyExchangeProvider.GenerateKdf(apu, apv);
+                            var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(kdf, ecdhKeyExchangeProvider.GetEncryptionAlgorithm());
+                            var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.EncryptedKey));
+                            unwrappedKeys.Add(new SymmetricSecurityKey(unwrappedKey));
                         }
                         else
-                        {
-                            publicKey = validationParameters.TokenDecryptionKey as ECDsaSecurityKey;
-                        }
-
-                        var ecdhKeyExchangeProvider = new EcdhKeyExchangeProvider(
-                            key as ECDsaSecurityKey,
-                            publicKey,
-                            jwtToken.Alg,
-                            jwtToken.Enc);
-                        jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Apu, out string apu);
-                        jwtToken.TryGetHeaderValue(JwtHeaderParameterNames.Apv, out string apv);
-                        SecurityKey kdf = ecdhKeyExchangeProvider.GenerateKdf(apu, apv);
-                        var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(kdf, ecdhKeyExchangeProvider.GetEncryptionAlgorithm());
-                        var unwrappedKey = kwp.UnwrapKey(Base64UrlEncoder.DecodeBytes(jwtToken.EncryptedKey));
-                        unwrappedKeys.Add(new SymmetricSecurityKey(unwrappedKey));
-                    }
-                    else
 #endif
-                    if (key.CryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Alg, key))
-                    {
-                        var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(key, jwtToken.Alg);
-                        var unwrappedKey = kwp.UnwrapKey(jwtToken.EncryptedKeyBytes);
-                        unwrappedKeys.Add(new SymmetricSecurityKey(unwrappedKey));
+                        if (key.CryptoProviderFactory.IsSupportedAlgorithm(jwtToken.Alg, key))
+                        {
+                            var kwp = key.CryptoProviderFactory.CreateKeyWrapProviderForUnwrap(key, jwtToken.Alg);
+                            var unwrappedKey = kwp.UnwrapKey(jwtToken.EncryptedKeyBytes);
+                            unwrappedKeys.Add(new SymmetricSecurityKey(unwrappedKey));
+                        }
                     }
-                }
-                catch (Exception ex)
-                {
-                    (exceptionStrings ??= new StringBuilder()).AppendLine(ex.ToString());
-                }
+                    catch (Exception ex)
+                    {
+                        (exceptionStrings ??= new StringBuilder()).AppendLine(ex.ToString());
+                    }
 
-                (keysAttempted ??= new StringBuilder()).AppendLine(key.KeyId);
+                    (keysAttempted ??= new StringBuilder()).AppendLine(key.KeyId);
+                }
             }
-
             if (unwrappedKeys.Count > 0 || exceptionStrings is null)
                 return unwrappedKeys;
             else

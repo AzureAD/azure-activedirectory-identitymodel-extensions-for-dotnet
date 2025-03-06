@@ -29,6 +29,9 @@ namespace Microsoft.IdentityModel.TestUtils
         public static SecureString SelfSigned2048_SHA384_Password = ConvertToSecureString("SelfSigned2048_SHA384");
         public static SecureString SelfSigned2048_SHA512_Password = ConvertToSecureString("SelfSigned2048_SHA512");
 
+        // X509Certificate created with SKI extension, expires in 15 years from 2/19/2025
+        public static string SelfSignedWithSKIExtension_Public = "MIIC6jCCAdKgAwIBAgIJAMnPnxHDryl8MA0GCSqGSIb3DQEBCwUAMBsxGTAXBgNVBAMTEFNlbGYtU2lnbmVkLUNlcnQwHhcNMjUwMjE4MjE1NzUxWhcNNDAwMjE5MjE1NzUxWjAbMRkwFwYDVQQDExBTZWxmLVNpZ25lZC1DZXJ0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAp6oQ5HQXhBKAoY+g/AAEhwMKLPcKQY9up9fDFZeU77rnMoJvuwE6gdqMyJ4684lKdKWWeU4eB1gkA3d8uNuLXoNlRed1wyQFd7RJ5xN+WnHRadLYus4xfYYzdqHlR/4FMd2hpnekmOrKuaAjnjzjppqopSxIvgmYdInahYaebs5ebkgCbJqxrLDWvWsiLMw4d/MP6aol6kUKOI+S2VIwovOM1h1mJvu2gneWQrY3icb7YUGcvJf+VwGpN9Y5qEGcTwWBdgOXiyQim5DQgK9B4lQG07fVEk6O5/U73id78tyv8WHWnz2v1atwe6Rlv/+ePIB+YpACpddpPdVc6Y3TaQIDAQABozEwLzAOBgNVHQ8BAf8EBAMCB4AwHQYDVR0OBBYEFKoqKH110TGBQu3MAyDXEDk6qEbiMA0GCSqGSIb3DQEBCwUAA4IBAQBoMdhMtWCkSFge57MXn4uTGioXKNIvGxQ9Fh8JHNJ6Zzmb8+fjEK5Llofp9/sqaKbBiIg8KC9QKoSYtqyKitIYTx08eAXRi7wbEl55eTuHAkcZpxpX8B2JvTF8Z+tLqmre91cL8cARZDdVlIfys5TSvPYPCKbNMbrD5kHjvx7OZBWDKFIaedQ5eD7NwmdhIOOurvmkLRNYoHpVI06ReGzIxLeeLxfNy/xDY3NKoJ0+bO7rDR6lBpiwvdB6hE4LcTJNYVtKztFLkV+s3LEW3rVr0nX4/VEXPq0YdSyW7bAYyEDtStciu9+txY6AA0Xhz6Sp4KHt6WOWAT9tLZvR8Hyc";
+
         // .../Certs/SelfSigned1024_SHA256.pfx
         // password: SelfSigned1024_SHA256
         public static string SelfSigned1024_SHA256 = @"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";
@@ -606,6 +609,7 @@ namespace Microsoft.IdentityModel.TestUtils
             return Activator.CreateInstance(_rsaCngType, 2048);
         }
 #endif
+
         public static SecurityKey DefaultRsaSecurityKey1
         {
             get
@@ -725,6 +729,26 @@ namespace Microsoft.IdentityModel.TestUtils
                 return jsonWebKey;
             }
         }
+
+#if NET472_OR_GREATER || NETCOREAPP
+        /// <summary>
+        /// Can be used to generate a self-signed certificate for testing purposes.
+        /// Since we support .NET 4.6.2, we can't call directly as CertificateRequest is not available.
+        /// Instead, use Convert.ToBase64string(cert.RawData), copy the string and then rehydrate the cert.
+        /// </summary>
+        /// <returns>A X509Certificate with the DigitalSignature and SubjectKeyIdentifier extensions set.</returns>
+        public static X509Certificate2 GenerateSelfSignedCertificate()
+        {
+            string subjectName = "CN=Self-Signed-Cert";
+            using (var rsa = RSA.Create(2048))
+            {
+                var certRequest = new CertificateRequest(subjectName, rsa, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+                certRequest.CertificateExtensions.Add(new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature, true));
+                certRequest.CertificateExtensions.Add(new X509SubjectKeyIdentifierExtension(certRequest.PublicKey, false));
+                return certRequest.CreateSelfSigned(DateTimeOffset.Now.AddDays(-1), DateTimeOffset.Now.AddYears(15));
+            }
+        }
+#endif
 
         public static string JsonWebKeySymmetricKid128
         {
@@ -979,8 +1003,6 @@ namespace Microsoft.IdentityModel.TestUtils
                 return jsonWebKey;
             }
         }
-
-
 
         public static JsonWebKey JsonWebKeyX509_2048_Public
         {

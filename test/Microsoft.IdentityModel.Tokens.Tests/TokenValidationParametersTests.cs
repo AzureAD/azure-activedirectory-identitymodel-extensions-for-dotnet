@@ -15,7 +15,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class TokenValidationParametersTests
     {
-        int ExpectedPropertyCount = 60;
+        int ExpectedPropertyCount = 61;
 
         // GetSets() compares the total property count which includes internal properties, against a list of public properties, minus delegates.
         // This allows us to keep track of any properties we are including in the total that are not public nor delegates.
@@ -135,7 +135,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var compareContext = new CompareContext();
             IdentityComparer.AreEqual(validationParametersInline, validationParametersSets, compareContext);
 
-            // only exlude 'IsClone' when comparing Clone vs. Original.
+            // only exclude 'IsClone' when comparing Clone vs. Original.
             var instanceContext = new CompareContext();
             instanceContext.PropertiesToIgnoreWhenComparing.Add(typeof(TokenValidationParameters), new List<string> { "IsClone" });
             TokenValidationParameters validationParametersInLineClone = validationParametersInline.Clone();
@@ -221,6 +221,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     new KeyValuePair<string, List<object>>("TokenDecryptionKey", new List<object>{(SecurityKey)null, KeyingMaterial.DefaultX509Key_2048, KeyingMaterial.RsaSecurityKey_2048}),
                     new KeyValuePair<string, List<object>>("TokenDecryptionKeys", new List<object>{(IEnumerable<SecurityKey>)null, new List<SecurityKey>{KeyingMaterial.DefaultX509Key_2048, KeyingMaterial.RsaSecurityKey_1024}, new List<SecurityKey>()}),
                     new KeyValuePair<string, List<object>>("TokenReplayCache", new List<object>{(ITokenReplayCache)null, new TokenReplayCache(), new TokenReplayCache()}),
+                    new KeyValuePair<string, List<object>>("TryAllDecryptionKeys", new List<object>{true, false, true}),
                     new KeyValuePair<string, List<object>>("TryAllIssuerSigningKeys", new List<object>{true, false, true}),
                     new KeyValuePair<string, List<object>>("ValidateActor", new List<object>{false, true, false}),
                     new KeyValuePair<string, List<object>>("ValidAlgorithms", new List<object>{(IEnumerable<string>)null, new List<string>{Guid.NewGuid().ToString()}, new List<string>{Guid.NewGuid().ToString()}}),
@@ -240,7 +241,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 Object = validationParameters,
             };
 
-            // check that we have checked all properties, subract the number of delegates.
+            // check that we have checked all properties, subtract the number of delegates.
             if (context.PropertyNamesAndSetGetValue.Count != ExpectedPropertyCount - delegates.Count - internalNonDelegateProperties.Count)
                 compareContext.AddDiff($"Number of properties being set is: {context.PropertyNamesAndSetGetValue.Count}, number of properties is: {properties.Length - delegates.Count} (#Properties - #Delegates), adjust tests");
 
