@@ -6,6 +6,7 @@ using Xunit;
 using Microsoft.IdentityModel.TestUtils;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 {
