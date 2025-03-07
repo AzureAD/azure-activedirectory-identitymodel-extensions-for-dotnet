@@ -2,6 +2,9 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 
 8.6.1
 =====
+## Bug fix
+- Microsoft.IdentityModel now triggers a configuration refresh if token decryption fails. See issue [#3148](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3148) for details.
+
 ## Fundamentals
 - For development, IdentityModel now has a global.json file to specify the .NET SDK version. See issue [#2995](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2995) for details.
 
