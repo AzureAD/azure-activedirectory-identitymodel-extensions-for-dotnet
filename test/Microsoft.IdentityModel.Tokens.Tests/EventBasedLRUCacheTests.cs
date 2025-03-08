@@ -9,8 +9,9 @@ using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
-namespace Microsoft.IdentityModel.Tokens.Tests
+namespace Microsoft.IdentityModel.Tokens.EventBasedLRUCache.Tests
 {
+    [Collection("EventBasedLRU")]
     public class EventBasedLRUCacheTests
     {
         [Fact]
@@ -189,13 +190,16 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 context.AddDiff("The key value pair {1, 'one'} should have been added to the cache, but the Contains() method returned false.");
 
             // The LRU item should be removed, allowing this value to be added even though the cache is full.
-            cache.SetValue(2, "two");
-            if (!cache.Contains(2))
+            bool wasAdded = cache.SetValue(2, "two");
+            if (cache.Contains(2))
                 context.AddDiff("The key value pair {2, 'two'} should have been added to the cache, but the Contains() method returned false.");
+
+            if (wasAdded)
+                context.AddDiff("The key value pair {2, 'two'} was added to the cache, but the cache was full.");
 
             try
             {
-                cache.SetValue(null, "three");
+                cache.SetValue(null, "three", DateTime.MaxValue);
                 context.AddDiff("The first parameter passed into the SetValue() method was null, but no exception was thrown.");
             }
             catch (Exception ex)
@@ -287,7 +291,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var cache = new EventBasedLRUCache<int, string>(10, removeExpiredValues: false, maintainLRU: true);
             for (int i = 0; i <= 1000; i++)
             {
-                cache.SetValue(i, Guid.NewGuid().ToString());
+                string guid = Guid.NewGuid().ToString();
+                cache.SetValue(i, guid, DateTime.MaxValue);
 
                 // check that list and map values match up every 10 items
                 // every 10th item should result in two LRU items being removed
@@ -307,8 +312,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     // and therefore are most recently used.
                     if (!IsDescending(cache.LinkedList))
                     {
-                        context.AddDiff("LRU order was not maintained.");
+                        context.AddDiff($"LRU order was not maintained, i = '{i}'.");
+                        foreach (var item in cache.LinkedList)
+                            context.AddDiff($"Key: '{item.Key}', Value: '{item.Value}'.");
                     }
+
+                    if (cache.MapCount != cache.LinkedList.Count)
+                        context.AddDiff($"The cache map count: '{cache.MapCount}', does not match the linked list count: '{cache.LinkedListCount}'.");
                 }
             }
 

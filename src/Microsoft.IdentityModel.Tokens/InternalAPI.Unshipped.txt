@@ -8,6 +8,8 @@ const Microsoft.IdentityModel.Tokens.LogMessages.IDX10521 = "IDX10521: Signature
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10620 = "IDX10620: Unable to obtain a CryptoProviderFactory, both EncryptingCredentials.CryptoProviderFactory and EncryptingCredentials.Key.CryptoProviderFactory are null." -> string
 Microsoft.IdentityModel.Telemetry.ITelemetryClient.LogBackgroundConfigurationRefreshFailure(string metadataAddress, System.Exception exception) -> void
 Microsoft.IdentityModel.Telemetry.TelemetryClient.LogBackgroundConfigurationRefreshFailure(string metadataAddress, System.Exception exception) -> void
+Microsoft.IdentityModel.Tokens.EventBasedLRUCache<TKey, TValue>.SetValue(TKey key, TValue value) -> bool
+Microsoft.IdentityModel.Tokens.EventBasedLRUCache<TKey, TValue>.StopEventQueueTaskImmediately() -> void
 Microsoft.IdentityModel.Tokens.RsaSecurityKey.InitializeWithRsaParameters(System.Security.Cryptography.RSAParameters rsaParameters) -> void
 Microsoft.IdentityModel.Tokens.ValidatedIssuer.Equals(Microsoft.IdentityModel.Tokens.ValidatedIssuer other) -> bool
 Microsoft.IdentityModel.Tokens.ValidatedIssuer.ValidatedIssuer(string issuer, Microsoft.IdentityModel.Tokens.IssuerValidationSource validationSource) -> void

@@ -122,7 +122,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Trys to adds a <see cref="SignatureProvider"/> to this cache.
+        /// Tries to add a <see cref="SignatureProvider"/> to this cache.
         /// </summary>
         /// <param name="signatureProvider"><see cref="SignatureProvider"/> to cache.</param>
         /// <exception cref="ArgumentNullException">if signatureProvider is null.</exception>
@@ -146,16 +146,18 @@ namespace Microsoft.IdentityModel.Tokens
             // The cache does NOT already have a crypto provider associated with this key.
             if (!signatureProviderCache.Contains(cacheKey))
             {
-                signatureProviderCache.SetValue(cacheKey, signatureProvider);
-                signatureProvider.CryptoProviderCache = this;
-                return true;
+                if (signatureProviderCache.SetValue(cacheKey, signatureProvider))
+                {
+                    signatureProvider.CryptoProviderCache = this;
+                    return true;
+                }
             }
 
             return false;
         }
 
         /// <summary>
-        /// Trys to find a <see cref="SignatureProvider"/> to this cache.
+        /// Tries to find a <see cref="SignatureProvider"/> in this cache.
         /// </summary>
         /// <param name="securityKey">the key that is used to by the crypto provider.</param>
         /// <param name="algorithm">the algorithm that is used by the crypto provider.</param>
@@ -185,7 +187,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Trys to remove a <see cref="SignatureProvider"/> from this cache.
+        /// Tries to remove a <see cref="SignatureProvider"/> from this cache.
         /// </summary>
         /// <param name="signatureProvider"><see cref="SignatureProvider"/> to remove.</param>
         /// <exception cref="ArgumentNullException">if signatureProvider is null.</exception>
@@ -243,8 +245,8 @@ namespace Microsoft.IdentityModel.Tokens
             if (!_disposed)
             {
                 // Stop the event queue tasks if they are running.
-                _signingSignatureProviders.StopEventQueueTask();
-                _verifyingSignatureProviders.StopEventQueueTask();
+                _signingSignatureProviders.StopEventQueueTaskImmediately();
+                _verifyingSignatureProviders.StopEventQueueTaskImmediately();
 
                 _disposed = true;
             }
