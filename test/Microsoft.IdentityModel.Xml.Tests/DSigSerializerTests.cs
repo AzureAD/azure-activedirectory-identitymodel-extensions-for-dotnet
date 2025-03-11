@@ -7,6 +7,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
+using System.Xml.Linq;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Xml;
@@ -115,7 +116,11 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 theoryData.Serializer.WriteKeyInfo(writer, keyInfo);
                 writer.Flush();
                 var xml = Encoding.UTF8.GetString(ms.ToArray());
-                IdentityComparer.AreEqual(theoryData.Xml, xml);
+
+                // Compare the original XML with the re-serialized XML.
+                // Parsing the XML strings into XDocument ensures that the comparison is based on 
+                // structural and content equality rather than raw string differences (formatting, whitespace,...).
+                IdentityComparer.AreEqual(XDocument.Parse(theoryData.Xml), XDocument.Parse(xml), context);
             }
             catch (Exception ex)
             {

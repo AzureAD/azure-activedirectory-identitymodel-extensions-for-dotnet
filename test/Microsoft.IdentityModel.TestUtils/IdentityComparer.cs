@@ -20,6 +20,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -142,6 +143,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 { typeof(SignedInfo).ToString(), CompareAllPublicProperties },
                 { typeof(SigningCredentials).ToString(), CompareAllPublicProperties },
                 { typeof(string).ToString(), AreStringsEqual },
+                { typeof(XDocument).ToString(), AreXmlsEqual },
                 { typeof(SymmetricSecurityKey).ToString(), CompareAllPublicProperties },
                 { typeof(TimeSpan).ToString(), AreTimeSpansEqual },
                 { typeof(TokenValidationParameters).ToString(), CompareAllPublicProperties },
@@ -1170,9 +1172,114 @@ namespace Microsoft.IdentityModel.TestUtils
             context.Diffs.AddRange(localContext.Diffs);
             return localContext.Diffs.Count == 0;
         }
+        public static bool AreXmlsEqual(object xml1, object xml2, CompareContext context)
+        {
+            return AreXmlsEqual((XDocument)xml1, (XDocument)xml2, "xml1", "xml2", context);
+        }
+
+        private static bool AreXmlsEqual(XDocument xml1, XDocument xml2, string name1, string name2, CompareContext context)
+        {
+            var localContext = new CompareContext(context);
+            if (!ContinueCheckingEquality(xml1, xml2, localContext))
+                return context.Merge(localContext);
+
+            if (ReferenceEquals(xml1, xml2))
+                return true;
+
+            if (xml1 == null)
+                localContext.Diffs.Add($"({name1} == null, {name2} == {xml2.ToString()}.");
+
+            if (xml2 == null)
+                localContext.Diffs.Add($"({name1} == {xml1.ToString()}, {name2} == null.");
+
+            if (!CompareXmlElements(xml1.Root, xml2.Root, localContext))
+            {
+
+                localContext.Diffs.Add($"'{name1}' != '{name2}', StringComparison: '{context.StringComparison}'");
+                localContext.Diffs.Add($"'{xml1.ToString()}'");
+                localContext.Diffs.Add($"!=");
+                localContext.Diffs.Add($"'{xml2.ToString()}'");
+            }
+
+
+            return context.Merge(localContext);
+        }
+
+        /// <summary>
+        /// Compares two XML elements for equality, ignoring order of attributes and child elements.
+        /// Ignore X509 certificate elements and attributes.
+        /// </summary>
+        /// <param name="elem1">The first XML element to compare.</param>
+        /// <param name="elem2">The second XML element to compare.</param>
+        /// <param name="localContext"></param>
+        /// <returns>True if the elements are considered equal, otherwise false.</returns>
+        private static bool CompareXmlElements(XElement elem1, XElement elem2, CompareContext localContext)
+        {
+            // Ensure both elements exist; if one is null while the other isn't, they are not equal.
+            if (elem1 == null || elem2 == null)
+                return false;
+
+            // Compare element names; if they are different, the elements are not equal.
+            if (elem1.Name != elem2.Name)
+                return false;
+
+            // Ignore comparison for elements related to X509 certificates.
+            if (elem1.Name.ToString().Contains("X509"))
+                return true;
+
+            // Retrieve and order attributes by name to ensure order-independent comparison.
+            var attrs1 = elem1.Attributes().OrderBy(a => a.Name.ToString()).ToList();
+            var attrs2 = elem2.Attributes().OrderBy(a => a.Name.ToString()).ToList();
+
+            // If the number of attributes differs, the elements are not equal.
+            if (attrs1.Count != attrs2.Count)
+                return false;
+
+            // Compare attributes
+            for (int i = 0; i < attrs1.Count; i++)
+            {
+                // Compare attribute names; if different, the elements are not equal.
+                if (attrs1[i].Name != attrs2[i].Name)
+                    return false;
+
+                // Ignore attributes related to X509 certificates.
+                if (attrs1[i].Name.ToString().Contains("X509"))
+                    continue;
+
+                // Compare attribute values using the specified string comparison method.
+                if (!string.Equals(attrs1[i].Value, attrs2[i].Value, localContext.StringComparison))
+                    return false;
+            }
+
+            // Retrieve and order child elements by name to ensure order-independent comparison.
+            var children1 = elem1.Elements().OrderBy(e => e.Name.ToString()).ToList();
+            var children2 = elem2.Elements().OrderBy(e => e.Name.ToString()).ToList();
+
+            // If the number of child elements differs, the elements are not equal.
+            if (children1.Count != children2.Count)
+                return false;
+
+            // Recursively compare child elements.
+            for (int i = 0; i < children1.Count; i++)
+            {
+                if (!CompareXmlElements(children1[i], children2[i], localContext))
+                    return false; // Child elements mismatch
+            }
+
+            // If the element has no children, compare its values.
+            if (children1.Count == 0 && !string.Equals(elem1.Value.Trim(), elem2.Value.Trim(), localContext.StringComparison))
+            {
+                localContext.Diffs.Add(elem1.Value.Trim());
+                localContext.Diffs.Add("!=");
+                localContext.Diffs.Add(elem2.Value.Trim());
+                return false;
+            }
+            return true;
+        }
 
         public static bool AreStringsEqual(object object1, object object2, CompareContext context)
         {
+
             return AreStringsEqual(object1, object2, "str1", "str2", context);
         }
 
