@@ -15,12 +15,19 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class Cnf
     {
-        private const string ClassName = "Microsoft.IdentityModel.Protocols.SignedHttpRequest.Cnf";
+        private const string DefaultClassName = "Microsoft.IdentityModel.Tokens.Cnf";
+
+        /// <summary>
+        /// The class name used for logging and exception messages.
+        /// </summary>
+        protected internal string ClassName { get; set; } = DefaultClassName;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Cnf"/> class.
         /// </summary>
-        public Cnf() { }
+        public Cnf()
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Cnf"/> class.
