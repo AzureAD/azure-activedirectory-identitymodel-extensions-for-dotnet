@@ -44,6 +44,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         };
 
         [Fact]
+        public void JsonWebToken_HeaderClaims_ReturnsExpectedClaims()
+        {
+            var jsonWebTokenHandler = new JsonWebTokenHandler();
+            var jsonWebTokenString = jsonWebTokenHandler.CreateToken(Default.PayloadString, KeyingMaterial.JsonWebKeyRsa256SigningCredentials);
+            var jsonWebToken = new JsonWebToken(jsonWebTokenString);
+            var claims = jsonWebToken.HeaderClaims;
+
+            // Header should have three default claims:
+            Assert.Equal(3, claims.Count);
+            Assert.Contains(claims, c => c.Type == "alg");
+            Assert.Contains(claims, c => c.Type == "typ");
+            Assert.Contains(claims, c => c.Type == "kid");
+        }
+
+        [Fact]
         public void ByteArrayClaimsEncodedAsExpected()
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(new string('a', 128)));

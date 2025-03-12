@@ -614,6 +614,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
+        /// Gets an <see cref="IReadOnlyList{Claim}"/> where each claim in the JWT header { name, value } is returned as a <see cref="Claim"/>.
+        /// </summary>
+        /// <remarks>
+        /// A <see cref="Claim"/> requires each value to be represented as a string. If the value was not a string, then <see cref="Claim.Type"/> contains the json type.
+        /// <see cref="JsonClaimValueTypes"/> and <see cref="ClaimValueTypes"/> to determine the json type.
+        /// </remarks>
+        public IReadOnlyList<Claim> HeaderClaims => Header.Claims(Issuer ?? ClaimsIdentity.DefaultIssuer);
+
+        /// <summary>
         /// Gets a <see cref="Claim"/> representing the { key, 'value' } pair corresponding to the provided <paramref name="key"/>.
         /// </summary>
         /// <remarks>
