@@ -494,11 +494,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 var signedHttpRequest = ReadSignedHttpRequest(signedHttpRequestValidationContext);
 
                 // read access token ("at")
-                if (!signedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.At, out string accessToken) || string.IsNullOrEmpty(accessToken))
+                if (!signedHttpRequest.Payload._jsonClaims.TryGetValue(SignedHttpRequestClaimTypes.At, out object accessToken) || string.IsNullOrEmpty(accessToken as string))
                     throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidAtClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.At))));
 
                 // validate access token ("at")
-                var tokenValidationResult = await ValidateAccessTokenAsync(accessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+                var tokenValidationResult = await ValidateAccessTokenAsync(accessToken as string, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
                 if (!tokenValidationResult.IsValid)
                     throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidAtClaimException(LogHelper.FormatInvariant(LogMessages.IDX23013, tokenValidationResult.Exception), tokenValidationResult.Exception));
 
@@ -724,13 +724,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </remarks>
         internal virtual void ValidateTsClaim(JsonWebToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
         {
-            if (!signedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.Ts, out long tsClaimValue))
+            if (!signedHttpRequest.Payload._jsonClaims.TryGetValue(SignedHttpRequestClaimTypes.Ts, out object tsClaimValueObj) || tsClaimValueObj == null || !long.TryParse(tsClaimValueObj.ToString(), out long tsClaimValue))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidTsClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.Ts))));
-
             DateTime utcNow = DateTime.UtcNow;
-            DateTime signedHttpRequestCreationTime = EpochTime.DateTime(tsClaimValue);
+            DateTime signedHttpRequestCreationTime = EpochTime.DateTime(Convert.ToInt64(tsClaimValue));
             DateTime signedHttpRequestExpirationTime = signedHttpRequestCreationTime.Add(signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.SignedHttpRequestLifetime);
-
             if (utcNow > signedHttpRequestExpirationTime)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidTsClaimException(LogHelper.FormatInvariant(LogMessages.IDX23010, LogHelper.MarkAsNonPII(utcNow), LogHelper.MarkAsNonPII(signedHttpRequestExpirationTime))));
         }
@@ -752,12 +750,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (string.IsNullOrEmpty(expectedHttpMethod))
                 throw LogHelper.LogArgumentNullException(nameof(expectedHttpMethod));
 
-            if (!signedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.M, out string httpMethod) || httpMethod == null)
+            if (!signedHttpRequest.Payload._jsonClaims.TryGetValue(SignedHttpRequestClaimTypes.M, out object httpMethodObj) || httpMethodObj == null)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidMClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.M))));
 
             // "get " is functionally the same as "GET".
             // different implementations might use differently formatted http verbs and we shouldn't fault.
-            httpMethod = httpMethod.Trim();
+            string httpMethod = (httpMethodObj as string).Trim();
             expectedHttpMethod = expectedHttpMethod.Trim();
             if (!string.Equals(expectedHttpMethod, httpMethod, StringComparison.OrdinalIgnoreCase))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidMClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.M), LogHelper.MarkAsNonPII(expectedHttpMethod), LogHelper.MarkAsNonPII(httpMethod))));
@@ -783,7 +781,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (!httpRequestUri.IsAbsoluteUri)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidUClaimException(LogHelper.FormatInvariant(LogMessages.IDX23001, httpRequestUri.OriginalString)));
 
-            if (!signedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.U, out string uClaimValue) || uClaimValue == null)
+            if (!signedHttpRequest.Payload._jsonClaims.TryGetValue(SignedHttpRequestClaimTypes.U, out object uClainValueObj) || uClainValueObj == null)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidUClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.U))));
 
             // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3.2
@@ -791,7 +789,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             // This MAY include the port separated from the host by a colon in host:port format.
             var expectedUClaimValue = httpRequestUri.Host;
             var expectedUClaimValueIncludingPort = $"{expectedUClaimValue}:{httpRequestUri.Port}";
-
+            string uClaimValue = uClainValueObj.ToString();
             if (!string.Equals(expectedUClaimValue, uClaimValue, StringComparison.OrdinalIgnoreCase) &&
                 !string.Equals(expectedUClaimValueIncludingPort, uClaimValue, StringComparison.OrdinalIgnoreCase))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidUClaimException(LogHelper.FormatInvariant(LogMessages.IDX23012, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.U), expectedUClaimValue, expectedUClaimValueIncludingPort, uClaimValue)));
