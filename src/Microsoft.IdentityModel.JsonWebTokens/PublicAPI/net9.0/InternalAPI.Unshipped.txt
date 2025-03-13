@@ -1,0 +1,1 @@
+Microsoft.IdentityModel.JsonWebTokens.JsonClaimSet._claimsLock -> System.Threading.Lock
