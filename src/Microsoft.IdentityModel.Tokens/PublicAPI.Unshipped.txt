@@ -11,5 +11,3 @@ const Microsoft.IdentityModel.Tokens.ConfirmationClaimTypes.Jwe = "jwe" -> strin
 const Microsoft.IdentityModel.Tokens.ConfirmationClaimTypes.Jwk = "jwk" -> string
 const Microsoft.IdentityModel.Tokens.ConfirmationClaimTypes.Kid = "kid" -> string
 Microsoft.IdentityModel.Tokens.ConfirmationClaimTypes
-Microsoft.IdentityModel.Tokens.Cnf.ClassName.get -> string
-Microsoft.IdentityModel.Tokens.Cnf.ClassName.set -> void

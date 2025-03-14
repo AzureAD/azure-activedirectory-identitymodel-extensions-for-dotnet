@@ -15,18 +15,19 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     public class Cnf
     {
-        private const string DefaultClassName = "Microsoft.IdentityModel.Tokens.Cnf";
-
         /// <summary>
         /// The class name used for logging and exception messages.
         /// </summary>
-        protected internal string ClassName { get; set; } = DefaultClassName;
+        internal string ClassName { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Cnf"/> class.
         /// </summary>
         public Cnf()
         {
+            // GetType returns the runtime type, e.g. if derived,
+            // it will return the derived type.
+            ClassName = GetType().FullName;
         }
 
         /// <summary>
@@ -35,7 +36,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="json">
         /// JSON representation of the Cnf Claim.
         /// </param>
-        public Cnf(string json)
+        public Cnf(string json) : this()
         {
             if (string.IsNullOrEmpty(json))
                 throw LogHelper.LogArgumentNullException(nameof(json));

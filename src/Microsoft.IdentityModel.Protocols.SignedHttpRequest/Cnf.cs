@@ -8,16 +8,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
     /// </summary>
     internal class Cnf : Tokens.Cnf
     {
-        private const string ShrClassName = "Microsoft.IdentityModel.Protocols.SignedHttpRequest.Cnf";
-
         public Cnf() : base()
         {
-            ClassName = ShrClassName;
         }
 
         public Cnf(string json) : base(json)
         {
-            ClassName = ShrClassName;
         }
     }
 }
