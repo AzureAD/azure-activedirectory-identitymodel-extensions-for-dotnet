@@ -31,7 +31,7 @@ namespace Microsoft.IdentityModel.Tokens
         // guarantees object writes are store releases and that reads won't be introduced.
         private volatile bool _claimsIdentityInitialized;
 #if NET9_0_OR_GREATER
-        private Lock _claimsIdentitySyncObj = new();
+        private Lock _claimsIdentitySyncObj;
 #else
         private object _claimsIdentitySyncObj;
 #endif

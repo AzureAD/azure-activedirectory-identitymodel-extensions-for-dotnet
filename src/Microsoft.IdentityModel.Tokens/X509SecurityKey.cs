@@ -117,10 +117,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 #if NET9_0_OR_GREATER
-        Lock ThisLock
-        {
-            get { return _thisLock; }
-        }
+        Lock ThisLock => _thisLock;
 #else
         object ThisLock
         {
