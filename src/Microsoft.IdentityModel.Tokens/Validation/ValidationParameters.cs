@@ -115,6 +115,7 @@ namespace Microsoft.IdentityModel.Tokens
             LogTokenId = true;
             SaveSigninToken = false;
             TryAllDecryptionKeys = true;
+            TryAllIssuerSigningKeys = true;
             ValidateActor = false;
         }
 
