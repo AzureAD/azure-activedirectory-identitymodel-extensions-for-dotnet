@@ -1,0 +1,13 @@
+Microsoft.IdentityModel.Tokens.Cnf
+Microsoft.IdentityModel.Tokens.Cnf.Cnf() -> void
+Microsoft.IdentityModel.Tokens.Cnf.Cnf(string json) -> void
+Microsoft.IdentityModel.Tokens.Cnf.Jku.get -> string
+Microsoft.IdentityModel.Tokens.Cnf.JsonWebKey.get -> Microsoft.IdentityModel.Tokens.JsonWebKey
+Microsoft.IdentityModel.Tokens.Cnf.Jwe.get -> string
+Microsoft.IdentityModel.Tokens.Cnf.Kid.get -> string
+const Microsoft.IdentityModel.Tokens.ConfirmationClaimTypes.Cnf = "cnf" -> string
+const Microsoft.IdentityModel.Tokens.ConfirmationClaimTypes.Jku = "jku" -> string
+const Microsoft.IdentityModel.Tokens.ConfirmationClaimTypes.Jwe = "jwe" -> string
+const Microsoft.IdentityModel.Tokens.ConfirmationClaimTypes.Jwk = "jwk" -> string
+const Microsoft.IdentityModel.Tokens.ConfirmationClaimTypes.Kid = "kid" -> string
+Microsoft.IdentityModel.Tokens.ConfirmationClaimTypes
