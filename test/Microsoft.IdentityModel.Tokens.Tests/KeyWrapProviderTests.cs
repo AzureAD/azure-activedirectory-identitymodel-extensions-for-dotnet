@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -278,6 +279,21 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             }
 
             TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
+        public void WrapAndUnwrapKey_ConcurrencyTest()
+        {
+            var key = new SymmetricSecurityKey(new byte[32]);
+            var provider = new SymmetricKeyWrapProvider(key, SecurityAlgorithms.Aes256KW);
+
+            Parallel.For(0, 1000, i =>
+            {
+                var wrappedKey = provider.WrapKey(new byte[32]);
+                Assert.NotNull(wrappedKey);
+                var unwrappedKey = provider.UnwrapKey(wrappedKey);
+                Assert.NotNull(unwrappedKey);
+            });
         }
 
         public static TheoryData<KeyWrapTheoryData> UnwrapTheoryData()

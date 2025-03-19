@@ -2,6 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -208,6 +212,22 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         public void CanComputeJwkThumbprint()
         {
             Assert.False(new CustomSecurityKey().CanComputeJwkThumbprint(), "CustomSecurityKey shouldn't be able to compute JWK thumbprint if CanComputeJwkThumbprint() is not overriden.");
+        }
+
+        [Fact]
+        public void InternalId_ConcurrencyTest()
+        {
+            var key = new CustomSecurityKey();
+            string firstInternalId = null;
+
+            Parallel.For(0, 1000, i =>
+            {
+                var internalId = key.InternalId;
+                Assert.NotNull(internalId);
+                Interlocked.CompareExchange(ref firstInternalId, internalId, null);
+                Assert.Same(firstInternalId, internalId);
+
+            });
         }
 
         public class SecurityKeyTheoryData : TheoryDataBase

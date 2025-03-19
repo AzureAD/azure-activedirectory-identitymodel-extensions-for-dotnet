@@ -12,6 +12,8 @@ using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens.Json.Tests;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
@@ -98,6 +100,26 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
 
             TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
+        public void ValidJsonClaimSet_ConcurrencyTest()
+        {
+            var jsonClaims = new Dictionary<string, object>
+        {
+            { "claim1", "value1" },
+            { "claim2", "value2" }
+        };
+            var jsonClaimSet = new JsonClaimSet(jsonClaims);
+            List<Claim> firstClaims = null;
+
+            Parallel.For(0, 1000, i =>
+            {
+                var claims = jsonClaimSet.Claims("issuer");
+                Assert.NotNull(claims);
+                Interlocked.CompareExchange(ref firstClaims, claims, null);
+                Assert.Same(firstClaims, claims);
+            });
         }
 
         public static TheoryData<JsonClaimSetTheoryData> GetClaimAsTypeTheoryData()

@@ -4,6 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Security.Claims;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
@@ -43,6 +46,21 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.GetSet(context);
 
             TestUtilities.AssertFailIfErrors("TokenValidationResultTests.GetSets", context.Errors);
+        }
+
+        [Fact]
+        public void ClaimsIdentity_ConcurrencyTest()
+        {
+            var result = new TokenValidationResult();
+            ClaimsIdentity firstClaimsIdentity = null;
+
+            Parallel.For(0, 1000, i =>
+            {
+                var claimsIdentity = result.ClaimsIdentity;
+                Assert.NotNull(claimsIdentity);
+                Interlocked.CompareExchange(ref firstClaimsIdentity, claimsIdentity, null);
+                Assert.Same(firstClaimsIdentity, claimsIdentity);
+            });
         }
     }
 }
