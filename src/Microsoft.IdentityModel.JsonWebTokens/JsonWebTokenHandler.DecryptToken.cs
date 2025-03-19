@@ -51,13 +51,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     ValidationError.GetCurrentStackFrame());
             }
 
-            (IList<SecurityKey>? contentEncryptionKeys, ValidationError? validationError) result =
+            (IList<SecurityKey>? ContentEncryptionKeys, ValidationError? ValidationError) result =
                 GetContentEncryptionKeys(jwtToken, validationParameters, configuration, callContext);
 
-            if (result.validationError != null)
-                return result.validationError.AddCurrentStackFrame();
+            if (result.ValidationError != null)
+                return result.ValidationError.AddCurrentStackFrame();
 
-            if (result.contentEncryptionKeys == null || result.contentEncryptionKeys.Count == 0)
+            if (result.ContentEncryptionKeys == null || result.ContentEncryptionKeys.Count == 0)
             {
                 return new ValidationError(
                     new MessageDetail(
@@ -68,15 +68,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     ValidationError.GetCurrentStackFrame());
             }
 
+            var decryptionParameters = CreateJwtTokenDecryptionParameters(jwtToken, result.ContentEncryptionKeys);
+
             return JwtTokenUtilities.DecryptJwtToken(
                 jwtToken,
                 validationParameters,
-                new JwtTokenDecryptionParameters
-                {
-                    DecompressionFunction = JwtTokenUtilities.DecompressToken,
-                    Keys = result.contentEncryptionKeys,
-                    MaximumDeflateSize = MaximumTokenSizeInBytes
-                },
+                decryptionParameters,
                 callContext);
         }
 
@@ -121,7 +118,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // 2. ResolveTokenDecryptionKey returned null
             // 3. ResolveTokenDecryptionKeyFromConfig returned null
             // Try all the keys. This is the degenerate case, not concerned about perf.
-            if (keys == null)
+            if (validationParameters.TryAllDecryptionKeys && keys.IsNullOrEmpty())
             {
                 keys = validationParameters.TokenDecryptionKeys;
                 if (configuration != null)

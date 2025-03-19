@@ -93,8 +93,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             {
                 TokenDecryptionKeys = decryptionKeys,
                 RequireSignedTokens = false,
+                // CodeQL [SM03926] intentional: Validation disabled as it is not applicable during pop key decryption.
                 ValidateIssuer = false,
+                // CodeQL [SM03926] intentional: Validation disabled as it is not applicable during pop key decryption.
                 ValidateAudience = false,
+                // CodeQL [SM03926] intentional: Validation disabled as it is not applicable during pop key decryption.
                 ValidateLifetime = false,
                 ValidateIssuerSigningKey = false,
             };

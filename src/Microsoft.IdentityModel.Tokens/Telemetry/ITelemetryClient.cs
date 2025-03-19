@@ -25,6 +25,8 @@ namespace Microsoft.IdentityModel.Telemetry
             string operationStatus,
             Exception exception);
 
+        // Unused, this was part of a previous release, since it is a friend,
+        // it cannot be removed.
         internal void LogBackgroundConfigurationRefreshFailure(
             string metadataAddress,
             Exception exception);

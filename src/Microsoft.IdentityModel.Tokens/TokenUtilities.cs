@@ -245,14 +245,17 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Check whether the given exception type is recoverable by LKG.
+        /// Decryption error is only recoverable, if the configuration has decryption keys in it.
         /// </summary>
         /// <param name="exception">The exception to check.</param>
+        /// <param name="configContainsDecryptionKeys">Whether the configuration contains decryption keys.</param>
         /// <returns><c>true</c> if the exception is certain types of exceptions otherwise, <c>false</c>.</returns>
-        internal static bool IsRecoverableException(Exception exception)
+        internal static bool IsRecoverableException(Exception exception, bool configContainsDecryptionKeys)
         {
             return exception is SecurityTokenInvalidSignatureException
                   || exception is SecurityTokenInvalidIssuerException
-                  || exception is SecurityTokenSignatureKeyNotFoundException;
+                  || exception is SecurityTokenSignatureKeyNotFoundException
+                  || (exception is SecurityTokenDecryptionFailedException && configContainsDecryptionKeys);
         }
 
         /// <summary>
@@ -292,12 +295,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// Check whether the given exception type is recoverable by LKG.
         /// </summary>
         /// <param name="exceptionType">The exception type to check</param>
+        /// <param name="configContainsDecryptionKeys">Whether the configuration contains decryption keys.</param>
         /// <returns><c>true</c> if the exception is certain types of exceptions otherwise, <c>false</c>.</returns>
-        internal static bool IsRecoverableExceptionType(Type exceptionType)
+        internal static bool IsRecoverableExceptionType(Type exceptionType, bool configContainsDecryptionKeys)
         {
             return exceptionType == typeof(SecurityTokenInvalidSignatureException) ||
                 exceptionType == typeof(SecurityTokenInvalidIssuerException) ||
-                exceptionType == typeof(SecurityTokenSignatureKeyNotFoundException);
+                exceptionType == typeof(SecurityTokenSignatureKeyNotFoundException) ||
+                (exceptionType == typeof(SecurityTokenDecryptionFailedException) && configContainsDecryptionKeys);
         }
 
         /// <summary>

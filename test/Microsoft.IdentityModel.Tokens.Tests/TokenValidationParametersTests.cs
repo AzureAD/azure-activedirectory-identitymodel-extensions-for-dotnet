@@ -221,6 +221,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     new KeyValuePair<string, List<object>>("TokenDecryptionKey", new List<object>{(SecurityKey)null, KeyingMaterial.DefaultX509Key_2048, KeyingMaterial.RsaSecurityKey_2048}),
                     new KeyValuePair<string, List<object>>("TokenDecryptionKeys", new List<object>{(IEnumerable<SecurityKey>)null, new List<SecurityKey>{KeyingMaterial.DefaultX509Key_2048, KeyingMaterial.RsaSecurityKey_1024}, new List<SecurityKey>()}),
                     new KeyValuePair<string, List<object>>("TokenReplayCache", new List<object>{(ITokenReplayCache)null, new TokenReplayCache(), new TokenReplayCache()}),
+                    new KeyValuePair<string, List<object>>("TryAllDecryptionKeys", new List<object>{true, false, true}),
                     new KeyValuePair<string, List<object>>("TryAllIssuerSigningKeys", new List<object>{true, false, true}),
                     new KeyValuePair<string, List<object>>("ValidateActor", new List<object>{false, true, false}),
                     new KeyValuePair<string, List<object>>("ValidAlgorithms", new List<object>{(IEnumerable<string>)null, new List<string>{Guid.NewGuid().ToString()}, new List<string>{Guid.NewGuid().ToString()}}),

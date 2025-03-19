@@ -92,6 +92,7 @@ namespace Microsoft.IdentityModel.Tokens
             SaveSigninToken = other.SaveSigninToken;
             _signatureValidator = other.SignatureValidator;
             TimeProvider = other.TimeProvider;
+            TryAllDecryptionKeys = other.TryAllDecryptionKeys;
             TokenDecryptionKeyResolver = other.TokenDecryptionKeyResolver;
             _tokenDecryptionKeys = other.TokenDecryptionKeys;
             TokenReplayCache = other.TokenReplayCache;
@@ -112,6 +113,7 @@ namespace Microsoft.IdentityModel.Tokens
         {
             LogTokenId = true;
             SaveSigninToken = false;
+            TryAllDecryptionKeys = true;
             ValidateActor = false;
         }
 
@@ -478,6 +480,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the <see cref="IList{T}"/> that is to be used for decrypting inbound tokens.
         /// </summary>
+        /// <remarks>
+        /// The decryption keys in this <see cref="TokenDecryptionKeys"/> collection will only be used if their <see cref="SecurityKey.KeyId"/> matches the 'kid' parameter in the token.
+        /// </remarks>
         public IList<SecurityKey> TokenDecryptionKeys
         {
             get
@@ -512,6 +517,13 @@ namespace Microsoft.IdentityModel.Tokens
             get { return _tokenReplayValidator; }
             set { _tokenReplayValidator = value ?? throw new ArgumentNullException(nameof(value), "TokenReplayValidator cannot be set as null."); }
         }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether all <see cref="TokenDecryptionKeys"/> should be tried during token decryption when a key is not matched to token 'kid' or if token 'kid' is empty.
+        /// The default is <c>true</c>.
+        /// </summary>
+        [DefaultValue(true)]
+        public bool TryAllDecryptionKeys { get; set; }
 
         /// <summary>
         /// If the IssuerSigningKeyResolver is unable to resolve the key when validating the signature of the SecurityToken,

@@ -115,7 +115,7 @@ namespace Microsoft.IdentityModel.Xml
         /// <summary>
         /// Returns true if the KeyInfo object can be matched with the specified SecurityKey, returns false otherwise.
         /// </summary>
-        internal bool MatchesKey(SecurityKey key)
+        protected internal virtual bool MatchesKey(SecurityKey key)
         {
             if (key == null)
                 return false;
@@ -188,10 +188,14 @@ namespace Microsoft.IdentityModel.Xml
             if (key == null)
                 return false;
 
-            if (RSAKeyValue != null)
+            if (RSAKeyValue != null
+            && !string.IsNullOrEmpty(key.E)
+            && !string.IsNullOrEmpty(key.N)
+            && !string.IsNullOrEmpty(RSAKeyValue.Exponent)
+            && !string.IsNullOrEmpty(RSAKeyValue.Modulus))
             {
-                return RSAKeyValue.Exponent.Equals(Convert.FromBase64String(key.E))
-                        && RSAKeyValue.Modulus.Equals(Convert.FromBase64String(key.N));
+                return key.E.Equals(Base64UrlEncoder.Encode(Convert.FromBase64String(RSAKeyValue.Exponent)))
+                    && key.N.Equals(Base64UrlEncoder.Encode(Convert.FromBase64String(RSAKeyValue.Modulus)));
             }
 
             foreach (var x5c in key.X5c)

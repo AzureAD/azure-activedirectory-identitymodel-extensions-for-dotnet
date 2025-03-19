@@ -344,15 +344,28 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 throw LogHelper.LogExceptionMessage(new SecurityTokenException(LogHelper.FormatInvariant(TokenLogMessages.IDX10612)));
 
             var keys = GetContentEncryptionKeys(jwtToken, validationParameters, configuration);
-            return JwtTokenUtilities.DecryptJwtToken(
-                jwtToken,
-                validationParameters,
-                new JwtTokenDecryptionParameters
-                {
-                    DecompressionFunction = JwtTokenUtilities.DecompressToken,
-                    Keys = keys,
-                    MaximumDeflateSize = MaximumTokenSizeInBytes
-                });
+
+            var decryptionParameters = CreateJwtTokenDecryptionParameters(jwtToken, keys);
+
+            return JwtTokenUtilities.DecryptJwtToken(jwtToken, validationParameters, decryptionParameters);
+        }
+
+        private JwtTokenDecryptionParameters CreateJwtTokenDecryptionParameters(JsonWebToken jwtToken, IEnumerable<SecurityKey> keys)
+        {
+            return new JwtTokenDecryptionParameters
+            {
+                Alg = jwtToken.Alg,
+                AuthenticationTagBytes = jwtToken.AuthenticationTagBytes,
+                CipherTextBytes = jwtToken.CipherTextBytes,
+                DecompressionFunction = JwtTokenUtilities.DecompressToken,
+                Enc = jwtToken.Enc,
+                EncodedToken = jwtToken.EncodedToken,
+                HeaderAsciiBytes = jwtToken.HeaderAsciiBytes,
+                InitializationVectorBytes = jwtToken.InitializationVectorBytes,
+                MaximumDeflateSize = MaximumTokenSizeInBytes,
+                Keys = keys,
+                Zip = jwtToken.Zip,
+            };
         }
 
         private static SecurityKey ResolveTokenDecryptionKeyFromConfig(JsonWebToken jwtToken, BaseConfiguration configuration)

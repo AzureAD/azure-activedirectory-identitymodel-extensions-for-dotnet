@@ -4,7 +4,6 @@
 using System;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
@@ -120,7 +119,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 #pragma warning restore CA1031 // Do not catch general exception types
             {
                 return new ValidationError(
-                    new MessageDetail(TokenLogMessages.IDX10679, zipAlgorithm),
+                    new MessageDetail(GetIDX10679LogMessage(zipAlgorithm)),
                     ValidationFailureType.TokenDecryptionFailed,
                     typeof(SecurityTokenDecompressionFailedException),
                     ValidationError.GetCurrentStackFrame(),

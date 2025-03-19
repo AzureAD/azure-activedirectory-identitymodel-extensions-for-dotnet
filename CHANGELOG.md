@@ -1,5 +1,30 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+8.6.1
+=====
+## Bug fix
+- Microsoft.IdentityModel now triggers a configuration refresh if token decryption fails. See issue [#3148](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3148) for details.
+- Fix a bug in `JsonWebTokenHandler` where `JwtTokenDecryptionParameters`'s `Alg` and `Enc` were not set during token decryption, causing `IDX10611` and `IDX10619` errors to show null values in the messages. See issue [#3003](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3003) for details.
+
+## Fundamentals
+- For development, IdentityModel now has a global.json file to specify the .NET SDK version. See issue [#2995](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2995) for details.
+
+8.6.0
+=====
+## New Features
+- TokenValidationParameters has a new boolean property `TryAllDecryptionKeys` that let you choose whether to try all decrypt keys when no key matches the token decrypt key IDs. By default it's set to **true** (legacy behavior) but you can set it to false to avoid tyring all keys which is more performant. See [#3128](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3128)
+- Promote KeyInfo.MatchesKey from internal to protected internal virtual to enable SAML extensibility (for CoreWcf). See [#3140](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3140)
+
+## Fundamentals
+* Update dependency on Microsoft.Extensions.Logging.Abstractions from 9.0.0 to 8.0.2 to avoid package downgrade in apps on .NET 9 using a netstandard2.0 library referencing logging.abstractions. See [3143](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3143)
+* Add more tests for encrypted tokens. See [#3139](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3139)
+
+8.5.0
+=====
+## Reverting previous breaking change
+- The Configuration Manager has been reverted to version 8.3.1. The changes made in 8.4.0 assume the configuration manager is used as a singleton, which is similar to marking the type as disposable. We have since learned that [adding IDisposable is a breaking change](https://learn.microsoft.com/en-us/dotnet/fundamentals/runtime-libraries/system-idisposable), so we are following [semver guidance](https://semver.org/#what-do-i-do-if-i-accidentally-release-a-backward-incompatible-change-as-a-minor-version) and reverting and releasing a minor version (8.5.0).
+- Cherry-picked Changes: Included changes from PR [#3022](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3022) and [#3104](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3104).
+
 8.4.0
 =====
 ## New Features

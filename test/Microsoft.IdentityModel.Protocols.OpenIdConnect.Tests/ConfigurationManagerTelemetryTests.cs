@@ -13,29 +13,14 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect.Configuration;
 using Microsoft.IdentityModel.Telemetry;
 using Microsoft.IdentityModel.Telemetry.Tests;
 using Microsoft.IdentityModel.TestUtils;
-using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 {
-    [ResetAppContextSwitches]
-    [Collection(nameof(AppContextSwitches.UpdateConfigAsBlocking))]
     public class ConfigurationManagerTelemetryTests
     {
         [Fact]
-        public async Task RequestRefresh_ExpectedTagsExist()
-        {
-            await RequestRefresh_ExpectedTagsBody();
-        }
-
-        [Fact]
-        public async Task RequestRefresh_ExpectedTagsExist_Blocking()
-        {
-            AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
-            await RequestRefresh_ExpectedTagsBody(true);
-        }
-
-        private static async Task RequestRefresh_ExpectedTagsBody(bool blocking = false)
+        public async Task RequestRefresh_IntervalHasNotPassed_ExpectedCount()
         {
             // arrange
             var testTelemetryClient = new MockTelemetryClient();
@@ -47,20 +32,63 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             {
                 TelemetryClient = testTelemetryClient
             };
+            var cancel = new CancellationToken();
 
-            AutoResetEvent resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager, blocking);
+            AutoResetEvent resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager);
+
+            var timeProvider = new FakeTimeProvider();
+            configurationManager.TimeProvider = timeProvider;
 
             // act
             // Retrieve the configuration for the first time
-            await configurationManager.GetConfigurationAsync();
+            await configurationManager.GetConfigurationAsync(cancel);
             testTelemetryClient.ClearExportedItems();
 
             // Manually request a config refresh
             configurationManager.RequestRefresh();
-            await configurationManager.GetConfigurationAsync();
+            await configurationManager.GetConfigurationAsync(cancel);
 
-            if (!blocking)
-                ConfigurationManagerTests.WaitOrFail(resetEvent);
+            ConfigurationManagerTests.WaitOrFail(resetEvent);
+
+            // Request a second refresh, but don't wait for the interval to pass
+            configurationManager.RequestRefresh();
+            await configurationManager.GetConfigurationAsync(cancel);
+
+            // assert: There should be two calls here, first from the call to GetConfigurationAsync
+            // the second from RequestRefresh, first request refresh always goes through
+            Assert.Equal(2, testTelemetryClient.RequestRefreshCounter);
+        }
+
+        [Fact]
+        public async Task RequestRefresh_ExpectedTagsExist()
+        {
+            // arrange
+            var testTelemetryClient = new MockTelemetryClient();
+            var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+                OpenIdConfigData.AccountsGoogle,
+                new OpenIdConnectConfigurationRetriever(),
+                new HttpDocumentRetriever(),
+                new OpenIdConnectConfigurationValidator())
+            {
+                TelemetryClient = testTelemetryClient
+            };
+            var cancel = new CancellationToken();
+
+            AutoResetEvent resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager);
+
+            var timeProvider = new FakeTimeProvider();
+            configurationManager.TimeProvider = timeProvider;
+
+            // act
+            // Retrieve the configuration for the first time
+            await configurationManager.GetConfigurationAsync(cancel);
+            testTelemetryClient.ClearExportedItems();
+
+            // Manually request a config refresh
+            configurationManager.RequestRefresh();
+            await configurationManager.GetConfigurationAsync(cancel);
+
+            ConfigurationManagerTests.WaitOrFail(resetEvent);
 
             // assert
             var expectedCounterTagList = new Dictionary<string, object>
@@ -76,34 +104,12 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 { TelemetryConstants.IdentityModelVersionTag, IdentityModelTelemetryUtil.ClientVer }
             };
 
-            configurationManager.ShutdownBackgroundTask();
-
-            await ConfigurationManagerTests.PollForConditionAsync(
-                () => expectedCounterTagList.Count == testTelemetryClient.ExportedItems.Count &&
-                    expectedHistogramTagList.Count == testTelemetryClient.ExportedHistogramItems.Count,
-                TimeSpan.FromMilliseconds(250),
-                TimeSpan.FromSeconds(20));
-
             Assert.Equal(expectedCounterTagList, testTelemetryClient.ExportedItems);
             Assert.Equal(expectedHistogramTagList, testTelemetryClient.ExportedHistogramItems);
         }
 
         [Theory, MemberData(nameof(GetConfiguration_ExpectedTagList_TheoryData), DisableDiscoveryEnumeration = true)]
         public async Task GetConfigurationAsync_ExpectedTagsExist(ConfigurationManagerTelemetryTheoryData<OpenIdConnectConfiguration> theoryData)
-        {
-            await GetConfigurationAsync_ExpectedTagList_Body(theoryData);
-        }
-
-        [Theory, MemberData(nameof(GetConfiguration_ExpectedTagList_TheoryData), DisableDiscoveryEnumeration = true)]
-        public async Task GetConfigurationAsync_ExpectedTagsExist_Blocking(ConfigurationManagerTelemetryTheoryData<OpenIdConnectConfiguration> theoryData)
-        {
-            AppContext.SetSwitch(AppContextSwitches.UpdateConfigAsBlockingSwitch, true);
-            await GetConfigurationAsync_ExpectedTagList_Body(theoryData, true);
-        }
-
-        private static async Task GetConfigurationAsync_ExpectedTagList_Body(
-            ConfigurationManagerTelemetryTheoryData<OpenIdConnectConfiguration> theoryData,
-            bool blocking = false)
         {
             var testTelemetryClient = new MockTelemetryClient();
 
@@ -116,42 +122,27 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 TelemetryClient = testTelemetryClient
             };
 
-            AutoResetEvent resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager, blocking);
+            AutoResetEvent resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager);
 
             var timeProvider = new FakeTimeProvider();
-            TestUtilities.SetField(configurationManager, "_timeProvider", timeProvider);
-
-            OpenIdConnectConfiguration firstConfig = null;
-            OpenIdConnectConfiguration secondConfig = null;
+            configurationManager.TimeProvider = timeProvider;
 
             try
             {
-                firstConfig = await configurationManager.GetConfigurationAsync();
-                if (theoryData.AdjustTime.HasValue)
+                await configurationManager.GetConfigurationAsync();
+                if (theoryData.SyncAfter != null)
                 {
                     testTelemetryClient.ClearExportedItems();
-                    timeProvider.Advance(theoryData.AdjustTime.Value);
-                    secondConfig = await configurationManager.GetConfigurationAsync();
+                    timeProvider.Advance((theoryData.SyncAfter - DateTimeOffset.UtcNow).Value);
+                    await configurationManager.GetConfigurationAsync();
 
-                    if (!blocking)
-                        ConfigurationManagerTests.WaitOrFail(resetEvent);
+                    ConfigurationManagerTests.WaitOrFail(resetEvent);
                 }
             }
             catch (Exception)
             {
                 // Ignore exceptions
             }
-            finally
-            {
-                configurationManager.ShutdownBackgroundTask();
-            }
-
-            await ConfigurationManagerTests.PollForConditionAsync(
-                () => theoryData.ExpectedTagList.Count == testTelemetryClient.ExportedItems.Count,
-                TimeSpan.FromMilliseconds(250),
-                TimeSpan.FromSeconds(20));
-
-            DateTime syncAfter = (DateTime)TestUtilities.GetField(configurationManager, "_syncAfter");
 
             Assert.Equal(theoryData.ExpectedTagList, testTelemetryClient.ExportedItems);
         }
@@ -201,7 +192,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 {
                     MetadataAddress = OpenIdConfigData.AADCommonUrl,
                     ConfigurationValidator = new OpenIdConnectConfigurationValidator(),
-                    AdjustTime = TimeSpan.FromDays(1),
+                    SyncAfter = DateTime.UtcNow + TimeSpan.FromDays(2),
                     ExpectedTagList = new Dictionary<string, object>
                     {
                         { TelemetryConstants.MetadataAddressTag, OpenIdConfigData.AADCommonUrl },
@@ -223,7 +214,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
         public IConfigurationValidator<T> ConfigurationValidator { get; set; }
 
-        public TimeSpan? AdjustTime { get; set; }
+        public DateTimeOffset? SyncAfter { get; set; } = null;
 
         public Dictionary<string, object> ExpectedTagList { get; set; }
     }

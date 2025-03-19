@@ -26,9 +26,9 @@ namespace Microsoft.IdentityModel.Telemetry
         /// <summary>
         /// Counter to capture configuration refresh requests to ConfigurationManager.
         /// </summary>
-        internal static readonly Counter<long> ConfigurationManagerCounter = IdentityModelMeter.CreateCounter<long>(IdentityModelConfigurationManagerCounterName, description: IdentityModelConfigurationManagerCounterDescription);
         internal const string IdentityModelConfigurationManagerCounterName = "IdentityModelConfigurationManager";
         internal const string IdentityModelConfigurationManagerCounterDescription = "Counter capturing configuration manager operations.";
+        internal static readonly Counter<long> ConfigurationManagerCounter = IdentityModelMeter.CreateCounter<long>(IdentityModelConfigurationManagerCounterName, description: IdentityModelConfigurationManagerCounterDescription);
 
         /// <summary>
         /// Counter to capture background refresh failures in the ConfigurationManager.

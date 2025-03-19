@@ -5,6 +5,10 @@ using System;
 using System.Security.Cryptography;
 using Microsoft.IdentityModel.Logging;
 
+#if NET9_0_OR_GREATER
+using System.Threading;
+#endif
+
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
@@ -15,9 +19,13 @@ namespace Microsoft.IdentityModel.Tokens
         private static readonly byte[] _defaultIV = new byte[] { 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6, 0xA6 };
         private const int _blockSizeInBits = 64;
         private const int _blockSizeInBytes = _blockSizeInBits >> 3;
-        private static readonly object _encryptorLock = new object();
-        private static readonly object _decryptorLock = new object();
-
+#if NET9_0_OR_GREATER
+        private static readonly Lock s_encryptorLock = new();
+        private static readonly Lock s_decryptorLock = new();
+#else
+        private static readonly object s_encryptorLock = new();
+        private static readonly object s_decryptorLock = new();
+#endif
         private Lazy<SymmetricAlgorithm> _symmetricAlgorithm;
         private ICryptoTransform _symmetricAlgorithmEncryptor;
         private ICryptoTransform _symmetricAlgorithmDecryptor;
@@ -259,7 +267,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (_symmetricAlgorithmDecryptor == null)
             {
-                lock (_decryptorLock)
+                lock (s_decryptorLock)
                 {
                     if (_symmetricAlgorithmDecryptor == null)
                         _symmetricAlgorithmDecryptor = _symmetricAlgorithm.Value.CreateDecryptor();
@@ -409,7 +417,7 @@ namespace Microsoft.IdentityModel.Tokens
 
             if (_symmetricAlgorithmEncryptor == null)
             {
-                lock (_encryptorLock)
+                lock (s_encryptorLock)
                 {
                     if (_symmetricAlgorithmEncryptor == null)
                         _symmetricAlgorithmEncryptor = _symmetricAlgorithm.Value.CreateEncryptor();

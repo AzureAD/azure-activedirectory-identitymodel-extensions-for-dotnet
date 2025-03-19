@@ -883,7 +883,7 @@ namespace System.IdentityModel.Tokens.Jwt
 
                     return claimsPrincipal;
                 }
-                else if (TokenUtilities.IsRecoverableException(exceptionThrown.SourceException))
+                else if (TokenUtilities.IsRecoverableException(exceptionThrown.SourceException, (currentConfiguration != null && currentConfiguration.TokenDecryptionKeys.Count > 0)))
                 {
                     // If we were still unable to validate, attempt to refresh the configuration and validate using it
                     // but ONLY if the currentConfiguration is not null. We want to avoid refreshing the configuration on
@@ -1762,7 +1762,14 @@ namespace System.IdentityModel.Tokens.Jwt
 
             var keys = GetContentEncryptionKeys(jwtToken, validationParameters);
 
-            return JwtTokenUtilities.DecryptJwtToken(jwtToken, validationParameters, new JwtTokenDecryptionParameters
+            var decryptionParameters = CreateJwtTokenDecryptionParameters(jwtToken, keys);
+
+            return JwtTokenUtilities.DecryptJwtToken(jwtToken, validationParameters, decryptionParameters);
+        }
+
+        private JwtTokenDecryptionParameters CreateJwtTokenDecryptionParameters(JwtSecurityToken jwtToken, IEnumerable<SecurityKey> keys)
+        {
+            return new JwtTokenDecryptionParameters
             {
                 Alg = jwtToken.Header.Alg,
                 AuthenticationTagBytes = Base64UrlEncoder.DecodeBytes(jwtToken.RawAuthenticationTag),
@@ -1775,7 +1782,7 @@ namespace System.IdentityModel.Tokens.Jwt
                 MaximumDeflateSize = MaximumTokenSizeInBytes,
                 Keys = keys,
                 Zip = jwtToken.Header.Zip,
-            });
+            };
         }
 
         internal IEnumerable<SecurityKey> GetContentEncryptionKeys(JwtSecurityToken jwtToken, TokenValidationParameters validationParameters)

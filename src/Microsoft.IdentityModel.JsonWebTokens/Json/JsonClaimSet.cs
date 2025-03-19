@@ -12,6 +12,10 @@ using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Json;
 
+#if NET9_0_OR_GREATER
+using System.Threading;
+#endif
+
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
     /// <summary>
@@ -21,8 +25,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     internal class JsonClaimSet
     {
         internal const string ClassName = "Microsoft.IdentityModel.JsonWebTokens.JsonClaimSet";
-
+#if NET9_0_OR_GREATER
+        internal Lock _claimsLock = new();
+#else
         internal object _claimsLock = new();
+#endif
         internal readonly Dictionary<string, object> _jsonClaims;
         private List<Claim> _claims;
 

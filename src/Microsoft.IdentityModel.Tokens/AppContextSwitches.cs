@@ -70,15 +70,14 @@ namespace Microsoft.IdentityModel.Tokens
 
         internal static bool UseRfcDefinitionOfEpkAndKid => _useRfcDefinitionOfEpkAndKid ??= (AppContext.TryGetSwitch(UseRfcDefinitionOfEpkAndKidSwitch, out bool isEnabled) && isEnabled);
 
-        /// <summary>
-        /// Enabling this switch will cause the configuration manager to block other requests to GetConfigurationAsync if a request is already in progress.
-        /// The default configuration refresh behavior is if a request is already in progress, the current configuration will be returned until the ongoing request is completed on
-        /// a background thread.
-        /// </summary>
+
         internal const string UpdateConfigAsBlockingSwitch = "Switch.Microsoft.IdentityModel.UpdateConfigAsBlocking";
 
         private static bool? _updateConfigAsBlockingCall;
 
+        /// <summary>
+        /// Unused, part of a previous release. This is a friend, so we cannot remove.
+        /// </summary>
         internal static bool UpdateConfigAsBlocking => _updateConfigAsBlockingCall ??= (AppContext.TryGetSwitch(UpdateConfigAsBlockingSwitch, out bool blockingCall) && blockingCall);
 
         /// <summary>
@@ -97,9 +96,6 @@ namespace Microsoft.IdentityModel.Tokens
 
             _useRfcDefinitionOfEpkAndKid = null;
             AppContext.SetSwitch(UseRfcDefinitionOfEpkAndKidSwitch, false);
-
-            _updateConfigAsBlockingCall = null;
-            AppContext.SetSwitch(UpdateConfigAsBlockingSwitch, false);
         }
     }
 }
