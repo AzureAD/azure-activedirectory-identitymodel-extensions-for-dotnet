@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -244,6 +244,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Should not be used. Exists only for backwards compatibility.
         /// Check whether the given exception type is recoverable by LKG.
         /// </summary>
         /// <param name="exception">The exception to check.</param>
@@ -302,6 +303,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Should not be used. Exists only for backwards compatibility.
         /// Check whether the given exception type is recoverable by LKG.
         /// </summary>
         /// <param name="exceptionType">The exception type to check</param>
