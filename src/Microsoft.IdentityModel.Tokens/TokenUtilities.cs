@@ -245,6 +245,16 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Check whether the given exception type is recoverable by LKG.
+        /// </summary>
+        /// <param name="exception">The exception to check.</param>
+        /// <returns><c>true</c> if the exception is certain types of exceptions otherwise, <c>false</c>.</returns>
+        internal static bool IsRecoverableException(Exception exception)
+        {
+            return IsRecoverableException(exception, false);
+        }
+
+        /// <summary>
+        /// Check whether the given exception type is recoverable by LKG.
         /// Decryption error is only recoverable, if the configuration has decryption keys in it.
         /// </summary>
         /// <param name="exception">The exception to check.</param>
@@ -289,6 +299,16 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Check whether the given exception type is recoverable by LKG.
+        /// </summary>
+        /// <param name="exceptionType">The exception type to check</param>
+        /// <returns><c>true</c> if the exception is certain types of exceptions otherwise, <c>false</c>.</returns>
+        internal static bool IsRecoverableExceptionType(Type exceptionType)
+        {
+            return IsRecoverableExceptionType(exceptionType, false);
         }
 
         /// <summary>
