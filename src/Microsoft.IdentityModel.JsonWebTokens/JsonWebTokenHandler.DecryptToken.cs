@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
 #nullable enable
@@ -22,7 +23,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="configuration">The <see cref="BaseConfiguration"/> to be used for validating the token.</param>
         /// <param name="callContext"></param>
         /// <returns>The decoded / cleartext contents of the JWE.</returns>
-        internal ValidationResult<string> DecryptToken(
+        internal ValidationResult<string, ValidationError> DecryptToken(
             JsonWebToken jwtToken,
             ValidationParameters validationParameters,
             BaseConfiguration? configuration,

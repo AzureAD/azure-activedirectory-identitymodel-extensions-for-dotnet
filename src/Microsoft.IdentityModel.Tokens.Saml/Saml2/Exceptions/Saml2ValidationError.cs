@@ -3,9 +3,10 @@
 
 using System;
 using System.Diagnostics;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens.Saml2
+namespace Microsoft.IdentityModel.Tokens.Saml2.Experimental
 {
     /// <summary>
     /// Represents a SAML2 validation error.

@@ -5,7 +5,7 @@ using System;
 using System.Diagnostics;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// Represents an error that occurs when a token type cannot be validated.

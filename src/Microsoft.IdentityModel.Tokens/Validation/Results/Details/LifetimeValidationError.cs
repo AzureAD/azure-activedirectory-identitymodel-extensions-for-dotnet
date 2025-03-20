@@ -5,7 +5,7 @@ using System;
 using System.Diagnostics;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// Represents an error that occurs when a token's lifetime cannot be validated.
@@ -79,8 +79,22 @@ namespace Microsoft.IdentityModel.Tokens
                 return exception;
             }
             else
-                return base.CreateException(ExceptionType, null);
+                return CreateException(ExceptionType, null);
         }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="LifetimeValidationError"/> representing a null parameter.
+        /// </summary>
+        /// <param name="parameterName">The name of the parameter.</param>
+        /// <param name="stackFrame">The stack frame where the error occurred.</param>
+        /// <returns>A new <see cref="LifetimeValidationError"/>.</returns>
+        public static new LifetimeValidationError NullParameter(string parameterName, StackFrame stackFrame) => new(
+            MessageDetail.NullParameter(parameterName),
+            ValidationFailureType.NullArgument,
+            typeof(SecurityTokenArgumentNullException),
+            stackFrame,
+            null, // NotBefore
+            null); // Expires
 
         /// <summary>
         /// The date from which the token is valid.

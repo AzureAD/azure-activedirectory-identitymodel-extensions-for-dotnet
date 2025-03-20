@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens.Experimental;
 using Microsoft.IdentityModel.Tokens.Saml;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
@@ -13,7 +14,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 {
     public partial class Saml2SecurityTokenHandler : SecurityTokenHandler
     {
-        internal static ValidationResult<SecurityKey> ValidateSignature(
+        internal static ValidationResult<SecurityKey, ValidationError> ValidateSignature(
             Saml2SecurityToken samlToken,
             ValidationParameters validationParameters,
             CallContext callContext)
@@ -37,7 +38,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             {
                 try
                 {
-                    ValidationResult<SecurityKey> signatureValidationResult = validationParameters.SignatureValidator(
+                    ValidationResult<SecurityKey, ValidationError> signatureValidationResult = validationParameters.SignatureValidator(
                         samlToken,
                         validationParameters,
                         null, // configuration
@@ -161,11 +162,11 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 ValidationError.GetCurrentStackFrame());
         }
 
-        private static ValidationResult<SecurityKey> ValidateSignatureUsingKey(SecurityKey key, Saml2SecurityToken samlToken, ValidationParameters validationParameters, CallContext callContext)
+        private static ValidationResult<SecurityKey, ValidationError> ValidateSignatureUsingKey(SecurityKey key, Saml2SecurityToken samlToken, ValidationParameters validationParameters, CallContext callContext)
         {
             try
             {
-                ValidationResult<string> algorithmValidationResult = validationParameters.AlgorithmValidator(
+                ValidationResult<string, AlgorithmValidationError> algorithmValidationResult = validationParameters.AlgorithmValidator(
                     samlToken.Assertion.Signature.SignedInfo.SignatureMethod,
                     key,
                     samlToken,

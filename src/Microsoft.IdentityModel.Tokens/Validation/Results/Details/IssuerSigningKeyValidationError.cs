@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// Represents a validation error that occurs when the issuer signing key cannot be validated.

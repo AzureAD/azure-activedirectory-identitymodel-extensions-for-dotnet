@@ -6,6 +6,7 @@ using System.IdentityModel.Tokens.Jwt.Tests;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 using Xunit;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
@@ -17,7 +18,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public void ReadToken(TokenReadingTheoryData theoryData)
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.JsonWebTokenHandlerReadTokenTests", theoryData);
-            ValidationResult<SecurityToken> result = JsonWebTokenHandler.ReadToken(
+            ValidationResult<SecurityToken, ValidationError> result = JsonWebTokenHandler.ReadToken(
                 theoryData.Token,
                 new CallContext());
 
@@ -47,7 +48,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         [Fact]
         public void ReadToken_ThrowsIfAccessingSecurityTokenOnFailedRead()
         {
-            ValidationResult<SecurityToken> result = JsonWebTokenHandler.ReadToken(
+            ValidationResult<SecurityToken, ValidationError> result = JsonWebTokenHandler.ReadToken(
                 null,
                 new CallContext());
 
@@ -117,6 +118,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
     public class TokenReadingTheoryData : TheoryDataBase
     {
         public string Token { get; set; }
-        internal ValidationResult<SecurityToken> Result { get; set; }
+        internal ValidationResult<SecurityToken, ValidationError> Result { get; set; }
     }
 }

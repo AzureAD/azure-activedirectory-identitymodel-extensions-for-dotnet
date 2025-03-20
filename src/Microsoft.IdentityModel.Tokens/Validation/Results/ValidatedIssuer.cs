@@ -4,7 +4,7 @@
 using System;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// Represents a validated issuer, including the source of the validation.

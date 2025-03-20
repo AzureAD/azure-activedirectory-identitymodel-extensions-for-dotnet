@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// Represents the source from which the token issuer was validated.

@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Threading;
 using Microsoft.IdentityModel.Logging;
 using System.Diagnostics;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 namespace Microsoft.IdentityModel.Validators
 {
@@ -24,9 +25,9 @@ namespace Microsoft.IdentityModel.Validators
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The call context used for logging.</param>
         /// <param name="cancellationToken">CancellationToken used to cancel call.</param>
-        /// <returns>An <see cref="ValidationResult{TResult}"/> that contains either the issuer that was validated or an error.</returns>
+        /// <returns>An <see cref="ValidationResult{TResult, TError}"/> that contains either the issuer that was validated or an error.</returns>
         /// <remarks>An EXACT match is required.</remarks>
-        internal async Task<ValidationResult<ValidatedIssuer>> ValidateIssuerAsync(
+        internal async Task<ValidationResult<ValidatedIssuer, IssuerValidationError>> ValidateIssuerAsync(
             string issuer,
             SecurityToken securityToken,
             ValidationParameters validationParameters,

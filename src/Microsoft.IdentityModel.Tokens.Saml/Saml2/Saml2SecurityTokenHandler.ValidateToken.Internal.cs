@@ -25,8 +25,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the asynchronous operation.</param>
-        /// <returns>A <see cref="ValidationResult{TResult}"/> with either a <see cref="ValidatedToken"/> if the token was validated or an <see cref="ValidationError"/> with the failure information and exception otherwise.</returns>
-        internal override async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
+        /// <returns>A <see cref="ValidationResult{TResult, TError}"/> with either a <see cref="ValidatedToken"/> if the token was validated or an <see cref="ValidationError"/> with the failure information and exception otherwise.</returns>
+        internal override async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         /// <inheritdoc/>
-        internal async override Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
+        internal async override Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -89,7 +89,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (!conditionsResult.IsValid)
                 return conditionsResult.UnwrapError().AddCurrentStackFrame();
 
-            ValidationResult<ValidatedIssuer> issuerValidationResult;
+            ValidationResult<ValidatedIssuer, IssuerValidationError> issuerValidationResult;
 
             try
             {
@@ -116,7 +116,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     ex);
             }
 
-            ValidationResult<DateTime?>? tokenReplayValidationResult = null;
+            ValidationResult<DateTime?, TokenReplayValidationError>? tokenReplayValidationResult = null;
 
             if (samlToken.Assertion.Conditions is not null)
             {
@@ -149,7 +149,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             if (!signatureValidationResult.IsValid)
                 return signatureValidationResult.UnwrapError().AddCurrentStackFrame();
 
-            ValidationResult<ValidatedSigningKeyLifetime> issuerSigningKeyValidationResult;
+            ValidationResult<ValidatedSigningKeyLifetime, IssuerSigningKeyValidationError> issuerSigningKeyValidationResult;
 
             try
             {
@@ -189,7 +189,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         // ValidatedConditions is basically a named tuple but using a record struct better expresses the intent.
         internal record struct ValidatedConditions(string? ValidatedAudience, ValidatedLifetime? ValidatedLifetime);
 
-        internal virtual ValidationResult<ValidatedConditions> ValidateConditions(
+        internal virtual ValidationResult<ValidatedConditions, ValidationError> ValidateConditions(
             Saml2SecurityToken samlToken,
             ValidationParameters validationParameters,
             CallContext callContext)
@@ -208,7 +208,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                     ValidationError.GetCurrentStackFrame());
             }
 
-            ValidationResult<ValidatedLifetime> lifetimeValidationResult;
+            ValidationResult<ValidatedLifetime, LifetimeValidationError> lifetimeValidationResult;
 
             try
             {
@@ -263,7 +263,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 if (audienceRestriction.Audiences is not List<string> audiencesAsList)
                     audiencesAsList = [.. audienceRestriction.Audiences];
 
-                ValidationResult<string> audienceValidationResult;
+                ValidationResult<string, AudienceValidationError> audienceValidationResult;
 
                 try
                 {
@@ -312,7 +312,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         }
 
         #region Explicit Interface Implementations
-        async Task<ValidationResult<ValidatedToken>> IResultBasedValidation.ValidateTokenAsync(
+        async Task<ValidationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext)
@@ -324,7 +324,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 default).ConfigureAwait(false);
         }
 
-        async Task<ValidationResult<ValidatedToken>> IResultBasedValidation.ValidateTokenAsync(
+        async Task<ValidationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -337,7 +337,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 cancellationToken).ConfigureAwait(false);
         }
 
-        async Task<ValidationResult<ValidatedToken>> IResultBasedValidation.ValidateTokenAsync(
+        async Task<ValidationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext)
@@ -349,7 +349,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
                 default).ConfigureAwait(false);
         }
 
-        async Task<ValidationResult<ValidatedToken>> IResultBasedValidation.ValidateTokenAsync(
+        async Task<ValidationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext,
