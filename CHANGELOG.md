@@ -1,6 +1,7 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
 8.7.0
+=====
 ## Bug Fixes
 - Add back internal methods `IsRecoverableException` and `IsRecoverableExceptionType` whose signatures were changed in the previous version. See [#3181](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3181).
 
