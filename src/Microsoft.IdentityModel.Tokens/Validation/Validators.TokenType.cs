@@ -21,9 +21,9 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityToken">The <see cref="SecurityToken"/> that is being validated.</param>
         /// <param name="validationParameters"><see cref="ValidationParameters"/> required for validation.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-        /// <returns> A <see cref="ValidationResult{TResult}"/>that contains the results of validating the token type.</returns>
+        /// <returns> A <see cref="ValidationResult{TResult, TError}"/>that contains the results of validating the token type.</returns>
         /// <remarks>An EXACT match is required. <see cref="StringComparison.Ordinal"/> (case sensitive) is used for comparing <paramref name="type"/> against <see cref="ValidationParameters.ValidTypes"/>.</remarks>
-        public static ValidationResult<ValidatedTokenType> ValidateTokenType(
+        public static ValidationResult<ValidatedTokenType, TokenTypeValidationError> ValidateTokenType(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,

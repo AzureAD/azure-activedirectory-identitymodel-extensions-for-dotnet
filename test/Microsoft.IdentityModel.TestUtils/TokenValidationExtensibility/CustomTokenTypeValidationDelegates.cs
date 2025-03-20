@@ -10,7 +10,7 @@ namespace Microsoft.IdentityModel.TestUtils
 {
     internal class CustomTokenTypeValidationDelegates
     {
-        internal static ValidationResult<ValidatedTokenType> CustomTokenTypeValidatorDelegate(
+        internal static ValidationResult<ValidatedTokenType, TokenTypeValidationError> CustomTokenTypeValidatorDelegate(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<ValidatedTokenType> CustomTokenTypeValidatorCustomExceptionDelegate(
+        internal static ValidationResult<ValidatedTokenType, TokenTypeValidationError> CustomTokenTypeValidatorCustomExceptionDelegate(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<ValidatedTokenType> CustomTokenTypeValidatorCustomExceptionCustomFailureTypeDelegate(
+        internal static ValidationResult<ValidatedTokenType, TokenTypeValidationError> CustomTokenTypeValidatorCustomExceptionCustomFailureTypeDelegate(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 type);
         }
 
-        internal static ValidationResult<ValidatedTokenType> CustomTokenTypeValidatorUnknownExceptionDelegate(
+        internal static ValidationResult<ValidatedTokenType, TokenTypeValidationError> CustomTokenTypeValidatorUnknownExceptionDelegate(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<ValidatedTokenType> CustomTokenTypeValidatorWithoutGetExceptionOverrideDelegate(
+        internal static ValidationResult<ValidatedTokenType, TokenTypeValidationError> CustomTokenTypeValidatorWithoutGetExceptionOverrideDelegate(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -84,7 +84,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<ValidatedTokenType> TokenTypeValidatorDelegate(
+        internal static ValidationResult<ValidatedTokenType, TokenTypeValidationError> TokenTypeValidatorDelegate(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -99,7 +99,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<ValidatedTokenType> TokenTypeValidatorThrows(
+        internal static ValidationResult<ValidatedTokenType, TokenTypeValidationError> TokenTypeValidatorThrows(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -108,7 +108,7 @@ namespace Microsoft.IdentityModel.TestUtils
             throw new CustomSecurityTokenInvalidTypeException(nameof(TokenTypeValidatorThrows), null);
         }
 
-        internal static ValidationResult<ValidatedTokenType> TokenTypeValidatorCustomTokenTypeExceptionTypeDelegate(
+        internal static ValidationResult<ValidatedTokenType, TokenTypeValidationError> TokenTypeValidatorCustomTokenTypeExceptionTypeDelegate(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,
@@ -123,7 +123,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<ValidatedTokenType> TokenTypeValidatorCustomExceptionTypeDelegate(
+        internal static ValidationResult<ValidatedTokenType, TokenTypeValidationError> TokenTypeValidatorCustomExceptionTypeDelegate(
             string? type,
             SecurityToken? securityToken,
             ValidationParameters validationParameters,

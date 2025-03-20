@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Threading.Tasks;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
 
@@ -11,7 +10,7 @@ namespace Microsoft.IdentityModel.TestUtils
 {
     internal class CustomTokenReplayValidationDelegates
     {
-        internal static ValidationResult<DateTime?> CustomTokenReplayValidationDelegate(
+        internal static ValidationResult<DateTime?, TokenReplayValidationError> CustomTokenReplayValidationDelegate(
             DateTime? expirationTime,
             string securityToken,
             ValidationParameters validationParameters,
@@ -26,7 +25,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 expirationTime);
         }
 
-        internal static ValidationResult<DateTime?> CustomTokenReplayValidatorCustomExceptionDelegate(
+        internal static ValidationResult<DateTime?, TokenReplayValidationError> CustomTokenReplayValidatorCustomExceptionDelegate(
             DateTime? expirationTime,
             string securityToken,
             ValidationParameters validationParameters,
@@ -40,7 +39,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 expirationTime);
         }
 
-        internal static ValidationResult<DateTime?> CustomTokenReplayValidatorCustomExceptionCustomFailureTypeDelegate(
+        internal static ValidationResult<DateTime?, TokenReplayValidationError> CustomTokenReplayValidatorCustomExceptionCustomFailureTypeDelegate(
             DateTime? expirationTime,
             string securityToken,
             ValidationParameters validationParameters,
@@ -55,7 +54,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 null);
         }
 
-        internal static ValidationResult<DateTime?> CustomTokenReplayValidatorUnknownExceptionDelegate(
+        internal static ValidationResult<DateTime?, TokenReplayValidationError> CustomTokenReplayValidatorUnknownExceptionDelegate(
             DateTime? expirationTime,
             string securityToken,
             ValidationParameters validationParameters,
@@ -69,7 +68,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 expirationTime);
         }
 
-        internal static ValidationResult<DateTime?> CustomTokenReplayValidatorWithoutGetExceptionOverrideDelegate(
+        internal static ValidationResult<DateTime?, TokenReplayValidationError> CustomTokenReplayValidatorWithoutGetExceptionOverrideDelegate(
             DateTime? expirationTime,
             string securityToken,
             ValidationParameters validationParameters,
@@ -82,7 +81,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 expirationTime);
         }
 
-        internal static ValidationResult<DateTime?> TokenReplayValidationDelegate(
+        internal static ValidationResult<DateTime?, TokenReplayValidationError> TokenReplayValidationDelegate(
             DateTime? expirationTime,
             string securityToken,
             ValidationParameters validationParameters,
@@ -96,7 +95,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 expirationTime);
         }
 
-        internal static ValidationResult<DateTime?> TokenReplayValidatorThrows(
+        internal static ValidationResult<DateTime?, TokenReplayValidationError> TokenReplayValidatorThrows(
             DateTime? expirationTime,
             string securityToken,
             ValidationParameters validationParameters,
@@ -105,7 +104,7 @@ namespace Microsoft.IdentityModel.TestUtils
             throw new CustomSecurityTokenReplayDetectedException(nameof(TokenReplayValidatorThrows), null);
         }
 
-        internal static ValidationResult<DateTime?> TokenReplayValidatorCustomTokenReplayDetectedExceptionTypeDelegate(
+        internal static ValidationResult<DateTime?, TokenReplayValidationError> TokenReplayValidatorCustomTokenReplayDetectedExceptionTypeDelegate(
             DateTime? expirationTime,
             string securityToken,
             ValidationParameters validationParameters,
@@ -118,7 +117,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 ValidationError.GetCurrentStackFrame(),
                 expirationTime);
         }
-        internal static ValidationResult<DateTime?> TokenReplayValidatorCustomExceptionTypeDelegate(
+        internal static ValidationResult<DateTime?, TokenReplayValidationError> TokenReplayValidatorCustomExceptionTypeDelegate(
             DateTime? expirationTime,
             string securityToken,
             ValidationParameters validationParameters,

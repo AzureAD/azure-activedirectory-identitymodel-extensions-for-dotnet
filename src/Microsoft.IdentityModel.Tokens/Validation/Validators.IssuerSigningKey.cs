@@ -21,7 +21,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="securityToken">The <see cref="SecurityToken"/> being validated.</param>
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
-        public static ValidationResult<ValidatedSigningKeyLifetime> ValidateIssuerSigningKey(
+        public static ValidationResult<ValidatedSigningKeyLifetime, IssuerSigningKeyValidationError> ValidateIssuerSigningKey(
             SecurityKey securityKey,
             SecurityToken securityToken,
             ValidationParameters validationParameters,
@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
 #pragma warning disable CA1801 // Review unused parameters
-        internal static ValidationResult<ValidatedSigningKeyLifetime> ValidateIssuerSigningKeyLifeTime(
+        internal static ValidationResult<ValidatedSigningKeyLifetime, IssuerSigningKeyValidationError> ValidateIssuerSigningKeyLifeTime(
             SecurityKey securityKey,
             ValidationParameters validationParameters,
             CallContext callContext)

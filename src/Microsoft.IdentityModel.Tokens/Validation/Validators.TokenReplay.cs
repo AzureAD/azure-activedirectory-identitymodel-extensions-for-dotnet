@@ -20,7 +20,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">The <see cref="CallContext"/> that contains call information.</param>
 #pragma warning disable CA1801 // Review unused parameters
-        public static ValidationResult<DateTime?> ValidateTokenReplay(
+        public static ValidationResult<DateTime?, TokenReplayValidationError> ValidateTokenReplay(
             DateTime? expirationTime,
             string securityToken,
             ValidationParameters validationParameters,

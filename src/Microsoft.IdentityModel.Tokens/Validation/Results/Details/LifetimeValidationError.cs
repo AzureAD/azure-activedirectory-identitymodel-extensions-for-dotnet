@@ -83,6 +83,20 @@ namespace Microsoft.IdentityModel.Tokens.Experimental
         }
 
         /// <summary>
+        /// Creates a new instance of <see cref="LifetimeValidationError"/> representing a null parameter.
+        /// </summary>
+        /// <param name="parameterName">The name of the parameter.</param>
+        /// <param name="stackFrame">The stack frame where the error occurred.</param>
+        /// <returns>A new <see cref="LifetimeValidationError"/>.</returns>
+        public static new LifetimeValidationError NullParameter(string parameterName, StackFrame stackFrame) => new(
+            MessageDetail.NullParameter(parameterName),
+            ValidationFailureType.NullArgument,
+            typeof(SecurityTokenArgumentNullException),
+            stackFrame,
+            null, // NotBefore
+            null); // Expires
+
+        /// <summary>
         /// The date from which the token is valid.
         /// </summary>
         public DateTime? NotBefore { get; }

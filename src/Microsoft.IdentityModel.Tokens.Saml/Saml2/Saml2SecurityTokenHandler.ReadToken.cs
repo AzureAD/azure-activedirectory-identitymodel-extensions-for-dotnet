@@ -22,7 +22,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
         /// <returns>A <see cref="SamlSecurityToken"/></returns>
         /// <exception cref="ArgumentNullException">If <paramref name="token"/> is null or empty.</exception>
         /// <exception cref="ArgumentException">If 'token.Length' is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
-        internal virtual ValidationResult<Saml2SecurityToken> ReadSaml2Token(string token, CallContext callContext)
+        internal virtual ValidationResult<Saml2SecurityToken, ValidationError> ReadSaml2Token(string token, CallContext callContext)
         {
             if (string.IsNullOrEmpty(token))
                 return ValidationError.NullParameter(nameof(token), ValidationError.GetCurrentStackFrame());

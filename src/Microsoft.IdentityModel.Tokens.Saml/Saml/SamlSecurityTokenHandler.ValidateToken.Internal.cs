@@ -24,8 +24,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         /// <param name="validationParameters">The <see cref="ValidationParameters"/> to be used for validating the token.</param>
         /// <param name="callContext">A <see cref="CallContext"/> that contains call information.</param>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> that can be used to request cancellation of the asynchronous operation.</param>
-        /// <returns>A <see cref="ValidationResult{TResult}"/> with either a <see cref="ValidatedToken"/> if the token was validated or an <see cref="ValidationError"/> with the failure information and exception otherwise.</returns>
-        internal async override Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
+        /// <returns>A <see cref="ValidationResult{TResult, TError}"/> with either a <see cref="ValidatedToken"/> if the token was validated or an <see cref="ValidationError"/> with the failure information and exception otherwise.</returns>
+        internal async override Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         /// <inheritdoc/>
-        internal override async Task<ValidationResult<ValidatedToken>> ValidateTokenAsync(
+        internal override async Task<ValidationResult<ValidatedToken, ValidationError>> ValidateTokenAsync(
             SecurityToken securityToken,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -78,12 +78,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     ValidationError.GetCurrentStackFrame());
             }
 
-            ValidationResult<ValidatedConditions> conditionsResult = ValidateConditions(samlToken, validationParameters, callContext);
+            ValidationResult<ValidatedConditions, ValidationError> conditionsResult = ValidateConditions(samlToken, validationParameters, callContext);
 
             if (!conditionsResult.IsValid)
                 return conditionsResult.UnwrapError().AddCurrentStackFrame();
 
-            ValidationResult<ValidatedIssuer> issuerValidationResult;
+            ValidationResult<ValidatedIssuer, IssuerValidationError> issuerValidationResult;
 
             try
             {
@@ -110,7 +110,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     ex);
             }
 
-            ValidationResult<DateTime?>? tokenReplayValidationResult = null;
+            ValidationResult<DateTime?, TokenReplayValidationError>? tokenReplayValidationResult = null;
 
             if (samlToken.Assertion.Conditions is not null)
             {
@@ -139,12 +139,12 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 }
             }
 
-            ValidationResult<SecurityKey> signatureValidationResult = ValidateSignature(samlToken, validationParameters, callContext);
+            ValidationResult<SecurityKey, ValidationError> signatureValidationResult = ValidateSignature(samlToken, validationParameters, callContext);
 
             if (!signatureValidationResult.IsValid)
                 return signatureValidationResult.UnwrapError().AddCurrentStackFrame();
 
-            ValidationResult<ValidatedSigningKeyLifetime> issuerSigningKeyValidationResult;
+            ValidationResult<ValidatedSigningKeyLifetime, IssuerSigningKeyValidationError> issuerSigningKeyValidationResult;
 
             try
             {
@@ -184,7 +184,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         // ValidatedConditions is basically a named tuple but using a record struct better expresses the intent.
         internal record struct ValidatedConditions(string? ValidatedAudience, ValidatedLifetime? ValidatedLifetime);
 
-        internal virtual ValidationResult<ValidatedConditions> ValidateConditions(
+        internal virtual ValidationResult<ValidatedConditions, ValidationError> ValidateConditions(
             SamlSecurityToken samlToken,
             ValidationParameters validationParameters,
             CallContext callContext)
@@ -203,7 +203,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                     ValidationError.GetCurrentStackFrame());
             }
 
-            ValidationResult<ValidatedLifetime> lifetimeValidationResult;
+            ValidationResult<ValidatedLifetime, LifetimeValidationError> lifetimeValidationResult;
 
             try
             {
@@ -239,7 +239,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 {
                     // AudienceRestriction.Audiences is an ICollection<Uri> so we need make a conversion to List<string> before calling our audience validator 
                     var audiencesAsList = audienceRestriction.Audiences.Select(static x => x.OriginalString).ToList();
-                    ValidationResult<string> audienceValidationResult;
+                    ValidationResult<string, AudienceValidationError> audienceValidationResult;
 
                     try
                     {
@@ -277,7 +277,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
         }
 
         #region Explicit Interface Implementations
-        async Task<ValidationResult<ValidatedToken>> IResultBasedValidation.ValidateTokenAsync(
+        async Task<ValidationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext)
@@ -289,7 +289,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 default).ConfigureAwait(false);
         }
 
-        async Task<ValidationResult<ValidatedToken>> IResultBasedValidation.ValidateTokenAsync(
+        async Task<ValidationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
             string token,
             ValidationParameters validationParameters,
             CallContext callContext,
@@ -302,7 +302,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 cancellationToken).ConfigureAwait(false);
         }
 
-        async Task<ValidationResult<ValidatedToken>> IResultBasedValidation.ValidateTokenAsync(
+        async Task<ValidationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext)
@@ -314,7 +314,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml
                 default).ConfigureAwait(false);
         }
 
-        async Task<ValidationResult<ValidatedToken>> IResultBasedValidation.ValidateTokenAsync(
+        async Task<ValidationResult<ValidatedToken, ValidationError>> IResultBasedValidation.ValidateTokenAsync(
             SecurityToken token,
             ValidationParameters validationParameters,
             CallContext callContext,

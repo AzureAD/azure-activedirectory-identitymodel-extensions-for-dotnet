@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
         {
             CompareContext context = TestUtilities.WriteHeader($"{this}.ReadToken_ResultType", theoryData);
             SamlSecurityTokenHandler handler = new SamlSecurityTokenHandler();
-            ValidationResult<SamlSecurityToken> result = handler.ReadSamlToken(
+            ValidationResult<SamlSecurityToken, ValidationError> result = handler.ReadSamlToken(
                 theoryData.Token,
                 new CallContext());
 
@@ -107,6 +107,6 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
 
         public string Token { get; set; }
 
-        internal ValidationResult<SecurityToken> Result { get; set; }
+        internal ValidationResult<SecurityToken, ValidationError> Result { get; set; }
     }
 }

@@ -24,7 +24,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 await jsonWebTokenHandler.ValidateTokenAsync(jwtString, theoryData.TokenValidationParameters);
 
             // Validate the token using ValidationParameters
-            ValidationResult<ValidatedToken> validationParametersResult =
+            ValidationResult<ValidatedToken, ValidationError> validationParametersResult =
                 await jsonWebTokenHandler.ValidateTokenAsync(
                     jwtString, theoryData.ValidationParameters!, theoryData.CallContext, CancellationToken.None);
 

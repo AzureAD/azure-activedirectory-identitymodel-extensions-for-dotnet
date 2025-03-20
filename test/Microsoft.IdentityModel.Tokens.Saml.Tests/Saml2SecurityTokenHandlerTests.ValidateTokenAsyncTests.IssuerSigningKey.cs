@@ -28,7 +28,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml.Tests
                 await saml2TokenHandler.ValidateTokenAsync(saml2Token.Assertion.CanonicalString, theoryData.TokenValidationParameters!);
 
             // Validate the token using ValidationParameters.
-            ValidationResult<ValidatedToken> validationResult =
+            ValidationResult<ValidatedToken, ValidationError> validationResult =
                 await saml2TokenHandler.ValidateTokenAsync(
                     saml2Token,
                     theoryData.ValidationParameters!,
