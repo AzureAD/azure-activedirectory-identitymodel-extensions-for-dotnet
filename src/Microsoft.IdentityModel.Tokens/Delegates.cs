@@ -213,11 +213,11 @@ namespace Microsoft.IdentityModel.Tokens
 #nullable restore
 
     /// <summary>
-    /// When token payload is being read claim by claim,
+    /// When token header or payload is being read claim by claim,
     /// this delegate is called after all claims known to the library have been processed.
     /// When called, the reader is positioned at the claim value.
     /// </summary>
     /// <param name="reader">Reader for the underlying token bytes.</param>
     /// <returns>Claim value associated with the claim name.</returns>
-    internal delegate object ReadTokenPayloadValueDelegate(ref Utf8JsonReader reader);
+    internal delegate object ReadTokenClaimValueDelegate(ref Utf8JsonReader reader);
 }

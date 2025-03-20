@@ -527,7 +527,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 #pragma warning disable CA1031 // Do not catch general exception types
                 try
                 {
-                    jsonWebToken = new JsonWebToken(token, validationParameters.ReadTokenPayloadValueDelegates);
+                    jsonWebToken = new JsonWebToken(token, validationParameters.ReadTokenHeaderValueDelegates, validationParameters.ReadTokenPayloadValueDelegates);
                 }
                 catch (Exception ex)
                 {
