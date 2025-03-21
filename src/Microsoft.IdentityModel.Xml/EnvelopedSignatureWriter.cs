@@ -8,10 +8,6 @@ using System.Xml;
 using Microsoft.IdentityModel.Tokens;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 
-#if NET9_0_OR_GREATER
-using System.Threading;
-#endif
-
 namespace Microsoft.IdentityModel.Xml
 {
     /// <summary>
@@ -43,12 +39,7 @@ namespace Microsoft.IdentityModel.Xml
         private bool _signaturePlaceholderWritten;
         private SigningCredentials _signingCredentials;
         private MemoryStream _internalStream;
-
-#if NET9_0_OR_GREATER
-        private Lock _signatureLock = new();
-#else
-        private object _signatureLock = new();
-#endif
+        private object _signatureLock = new object();
 
         /// <summary>
         /// Initializes an instance of <see cref="EnvelopedSignatureWriter"/>. The returned writer can be directly used
