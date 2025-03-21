@@ -6,7 +6,6 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 - Add back internal methods `IsRecoverableException` and `IsRecoverableExceptionType` whose signatures were changed in the previous version. See [#3181](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3181).
 
 ## New Features
-- Use the new `System.Threading.Lock` instead of `lock` on .NET 9 or greater. See [#3169](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3169).
 - Make `Cnf` class public and move it to Microsoft.IdentityModel.Tokens package. See [#3165](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/3165).
   
 8.6.1
