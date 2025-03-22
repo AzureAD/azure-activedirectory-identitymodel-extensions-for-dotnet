@@ -122,6 +122,16 @@ namespace Microsoft.IdentityModel.Xml.Tests
                 // structural and content equality rather than raw string differences (formatting, whitespace,...).
                 IdentityComparer.AreEqual(XDocument.Parse(theoryData.Xml), XDocument.Parse(xml), context);
             }
+            catch (InvalidCastException ex)
+            {
+                context.Diffs.Add($"InvalidCastException: {ex.Message}");
+                theoryData.ExpectedException.ProcessException(ex, context.Diffs);
+            }
+            catch (XmlException ex)
+            {
+                context.Diffs.Add($"XmlException: {ex.Message}");
+                theoryData.ExpectedException.ProcessException(ex, context.Diffs);
+            }
             catch (Exception ex)
             {
                 theoryData.ExpectedException.ProcessException(ex, context.Diffs);
