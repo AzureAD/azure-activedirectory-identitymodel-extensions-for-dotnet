@@ -531,7 +531,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// If the IssuerSigningKeyResolver is unable to resolve the key when validating the signature of the SecurityToken,
         /// all available keys will be tried.
         /// </summary>
-        /// <remarks>Default is false.</remarks>
+        /// <remarks>Default is true.</remarks>
         [DefaultValue(true)]
         public bool TryAllIssuerSigningKeys { get; set; }
 
