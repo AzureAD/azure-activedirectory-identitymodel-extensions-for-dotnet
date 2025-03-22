@@ -1188,13 +1188,11 @@ namespace Microsoft.IdentityModel.TestUtils
 
             if (!CompareXmlElements(xml1.Root, xml2.Root, localContext))
             {
-
                 localContext.Diffs.Add($"'{name1}' != '{name2}', StringComparison: '{context.StringComparison}'");
                 localContext.Diffs.Add($"'{xml1.ToString()}'");
                 localContext.Diffs.Add($"!=");
                 localContext.Diffs.Add($"'{xml2.ToString()}'");
             }
-
 
             return context.Merge(localContext);
         }
@@ -1211,11 +1209,23 @@ namespace Microsoft.IdentityModel.TestUtils
         {
             // Ensure both elements exist; if one is null while the other isn't, they are not equal.
             if (elem1 == null || elem2 == null)
+            {
+                localContext.Diffs.Add($"one of the xml elements is null");
+                localContext.Diffs.Add($"'{elem1.ToString()}'");
+                localContext.Diffs.Add($"!=");
+                localContext.Diffs.Add($"'{elem2.ToString()}'");
                 return false;
+            }
 
             // Compare element names; if they are different, the elements are not equal.
             if (elem1.Name != elem2.Name)
+            {
+                localContext.Diffs.Add($"xml element name are not equal, StringComparison: '{localContext.StringComparison}'");
+                localContext.Diffs.Add($"'{elem1.Name.ToString()}'");
+                localContext.Diffs.Add($"!=");
+                localContext.Diffs.Add($"'{elem2.Name.ToString()}'");
                 return false;
+            }
 
             // Ignore comparison for elements related to X509 certificates.
             if (elem1.Name.ToString().Contains("X509"))
@@ -1227,14 +1237,26 @@ namespace Microsoft.IdentityModel.TestUtils
 
             // If the number of attributes differs, the elements are not equal.
             if (attrs1.Count != attrs2.Count)
+            {
+                localContext.Diffs.Add($"number of xml element attribute are not the same");
+                localContext.Diffs.Add($"'{attrs1.Count}'");
+                localContext.Diffs.Add($"!=");
+                localContext.Diffs.Add($"'{attrs2.Count}'");
                 return false;
+            }
 
             // Compare attributes
             for (int i = 0; i < attrs1.Count; i++)
             {
                 // Compare attribute names; if different, the elements are not equal.
                 if (attrs1[i].Name != attrs2[i].Name)
+                {
+                    localContext.Diffs.Add($"the xml element attribute name are not equal, StringComparison: '{localContext.StringComparison}'");
+                    localContext.Diffs.Add($"'{attrs1[i].Name}'");
+                    localContext.Diffs.Add($"!=");
+                    localContext.Diffs.Add($"'{attrs2[i].Name}'");
                     return false;
+                }
 
                 // Ignore attributes related to X509 certificates.
                 if (attrs1[i].Name.ToString().Contains("X509"))
@@ -1242,7 +1264,13 @@ namespace Microsoft.IdentityModel.TestUtils
 
                 // Compare attribute values using the specified string comparison method.
                 if (!string.Equals(attrs1[i].Value, attrs2[i].Value, localContext.StringComparison))
+                {
+                    localContext.Diffs.Add($"the xml element attribute value are not equal, StringComparison: '{localContext.StringComparison}'");
+                    localContext.Diffs.Add($"'{attrs1[i].Value}'");
+                    localContext.Diffs.Add($"!=");
+                    localContext.Diffs.Add($"'{attrs2[i].Value}'");
                     return false;
+                }
             }
 
             // Retrieve and order child elements by name to ensure order-independent comparison.
@@ -1251,7 +1279,13 @@ namespace Microsoft.IdentityModel.TestUtils
 
             // If the number of child elements differs, the elements are not equal.
             if (children1.Count != children2.Count)
+            {
+                localContext.Diffs.Add($"number of xml element children are not the same");
+                localContext.Diffs.Add($"'{children1.Count}'");
+                localContext.Diffs.Add($"!=");
+                localContext.Diffs.Add($"'{children2.Count}'");
                 return false;
+            }
 
             // Recursively compare child elements.
             for (int i = 0; i < children1.Count; i++)
@@ -1263,6 +1297,7 @@ namespace Microsoft.IdentityModel.TestUtils
             // If the element has no children, compare its values.
             if (children1.Count == 0 && !string.Equals(elem1.Value.Trim(), elem2.Value.Trim(), localContext.StringComparison))
             {
+                localContext.Diffs.Add($"the xml element value are not equal, StringComparison: '{localContext.StringComparison}'");
                 localContext.Diffs.Add(elem1.Value.Trim());
                 localContext.Diffs.Add("!=");
                 localContext.Diffs.Add(elem2.Value.Trim());
@@ -1273,7 +1308,6 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static bool AreStringsEqual(object object1, object object2, CompareContext context)
         {
-
             return AreStringsEqual(object1, object2, "str1", "str2", context);
         }
 
