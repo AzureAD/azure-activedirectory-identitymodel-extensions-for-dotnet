@@ -1186,12 +1186,6 @@ namespace Microsoft.IdentityModel.TestUtils
             if (ReferenceEquals(xml1, xml2))
                 return true;
 
-            if (xml1 == null)
-                localContext.Diffs.Add($"({name1} == null, {name2} == {xml2.ToString()}.");
-
-            if (xml2 == null)
-                localContext.Diffs.Add($"({name1} == {xml1.ToString()}, {name2} == null.");
-
             if (!CompareXmlElements(xml1.Root, xml2.Root, localContext))
             {
 
