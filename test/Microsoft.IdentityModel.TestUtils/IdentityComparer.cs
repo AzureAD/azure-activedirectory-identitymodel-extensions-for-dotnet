@@ -1174,7 +1174,15 @@ namespace Microsoft.IdentityModel.TestUtils
         }
         public static bool AreXmlsEqual(object xml1, object xml2, CompareContext context)
         {
-            return AreXmlsEqual((XDocument)xml1, (XDocument)xml2, "xml1", "xml2", context);
+            try
+            {
+                return AreXmlsEqual((XDocument)xml1, (XDocument)xml2, "xml1", "xml2", context);
+            }
+            catch (InvalidCastException ex)
+            {
+                context.Diffs.Add($"unable to cast {xml1.ToString()} and/or {xml2.ToString()} to xml document. Exception: '{ex}'.");
+                return false;
+            }
         }
 
         private static bool AreXmlsEqual(XDocument xml1, XDocument xml2, string name1, string name2, CompareContext context)
@@ -1220,7 +1228,7 @@ namespace Microsoft.IdentityModel.TestUtils
             // Compare element names; if they are different, the elements are not equal.
             if (elem1.Name != elem2.Name)
             {
-                localContext.Diffs.Add($"xml element name are not equal, StringComparison: '{localContext.StringComparison}'");
+                localContext.Diffs.Add($"xml element names are not equal, StringComparison: '{localContext.StringComparison}'");
                 localContext.Diffs.Add($"'{elem1.Name.ToString()}'");
                 localContext.Diffs.Add($"!=");
                 localContext.Diffs.Add($"'{elem2.Name.ToString()}'");
@@ -1238,7 +1246,7 @@ namespace Microsoft.IdentityModel.TestUtils
             // If the number of attributes differs, the elements are not equal.
             if (attrs1.Count != attrs2.Count)
             {
-                localContext.Diffs.Add($"number of xml element attribute are not the same");
+                localContext.Diffs.Add($"number of xml element attributes are not the same");
                 localContext.Diffs.Add($"'{attrs1.Count}'");
                 localContext.Diffs.Add($"!=");
                 localContext.Diffs.Add($"'{attrs2.Count}'");
@@ -1251,7 +1259,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 // Compare attribute names; if different, the elements are not equal.
                 if (attrs1[i].Name != attrs2[i].Name)
                 {
-                    localContext.Diffs.Add($"the xml element attribute name are not equal, StringComparison: '{localContext.StringComparison}'");
+                    localContext.Diffs.Add($"the xml element attribute names are not equal, StringComparison: '{localContext.StringComparison}'");
                     localContext.Diffs.Add($"'{attrs1[i].Name}'");
                     localContext.Diffs.Add($"!=");
                     localContext.Diffs.Add($"'{attrs2[i].Name}'");
@@ -1265,7 +1273,7 @@ namespace Microsoft.IdentityModel.TestUtils
                 // Compare attribute values using the specified string comparison method.
                 if (!string.Equals(attrs1[i].Value, attrs2[i].Value, localContext.StringComparison))
                 {
-                    localContext.Diffs.Add($"the xml element attribute value are not equal, StringComparison: '{localContext.StringComparison}'");
+                    localContext.Diffs.Add($"the xml element attribute values are not equal, StringComparison: '{localContext.StringComparison}'");
                     localContext.Diffs.Add($"'{attrs1[i].Value}'");
                     localContext.Diffs.Add($"!=");
                     localContext.Diffs.Add($"'{attrs2[i].Value}'");
@@ -1280,7 +1288,7 @@ namespace Microsoft.IdentityModel.TestUtils
             // If the number of child elements differs, the elements are not equal.
             if (children1.Count != children2.Count)
             {
-                localContext.Diffs.Add($"number of xml element children are not the same");
+                localContext.Diffs.Add($"number of xml element childrens are not the same");
                 localContext.Diffs.Add($"'{children1.Count}'");
                 localContext.Diffs.Add($"!=");
                 localContext.Diffs.Add($"'{children2.Count}'");
