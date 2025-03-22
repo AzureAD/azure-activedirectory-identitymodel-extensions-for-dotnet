@@ -1,0 +1,1 @@
+Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.GetClaimValue(string claimName, out object value) -> bool

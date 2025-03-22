@@ -1399,23 +1399,23 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var jwtToken = new JsonWebTokenHandler().CreateToken(theoryData.TokenDescriptor);
             JsonWebToken jsonWebToken = new JsonWebToken(jwtToken);
 
-            jsonWebToken.Payload._jsonClaims.TryGetValue("iss", out object tempobj);
+            jsonWebToken.GetClaimValue("iss", out object tempobj);
             string issuer = tempobj?.ToString();
             IdentityComparer.AreEqual(theoryData.ExpectedClaims["iss"], issuer, context);
 
-            jsonWebToken.Payload._jsonClaims.TryGetValue("aud", out tempobj);
+            jsonWebToken.GetClaimValue("aud", out tempobj);
             string audience = tempobj?.ToString();
             IdentityComparer.AreEqual(theoryData.ExpectedClaims["aud"], audience, context);
 
-            jsonWebToken.Payload._jsonClaims.TryGetValue("exp", out tempobj);
+            jsonWebToken.GetClaimValue("exp", out tempobj);
             string exp = tempobj?.ToString();
             IdentityComparer.AreEqual(theoryData.ExpectedClaims["exp"], exp, context);
 
-            jsonWebToken.Payload._jsonClaims.TryGetValue("iat", out tempobj);
+            jsonWebToken.GetClaimValue("iat", out tempobj);
             string iat = tempobj?.ToString();
             IdentityComparer.AreEqual(theoryData.ExpectedClaims["iat"], iat, context);
 
-            jsonWebToken.Payload._jsonClaims.TryGetValue("nbf", out tempobj);
+            jsonWebToken.GetClaimValue("nbf", out tempobj);
             string nbf = tempobj?.ToString();
             IdentityComparer.AreEqual(theoryData.ExpectedClaims["nbf"], nbf, context);
 

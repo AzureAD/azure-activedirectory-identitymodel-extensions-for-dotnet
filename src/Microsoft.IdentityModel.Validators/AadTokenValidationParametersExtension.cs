@@ -191,7 +191,7 @@ namespace Microsoft.IdentityModel.Validators
             switch (securityToken)
             {
                 case JsonWebToken jsonWebToken:
-                    if (jsonWebToken.Payload._jsonClaims.TryGetValue(AadIssuerValidatorConstants.Tid, out object tid))
+                    if (jsonWebToken.GetClaimValue(AadIssuerValidatorConstants.Tid, out object tid))
                     {
                         EnforceSingleClaimCaseInsensitive(jsonWebToken.PayloadClaimNames, AadIssuerValidatorConstants.Tid);
                         return tid as string;

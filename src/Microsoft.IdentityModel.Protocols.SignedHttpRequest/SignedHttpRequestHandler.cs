@@ -494,7 +494,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 var signedHttpRequest = ReadSignedHttpRequest(signedHttpRequestValidationContext);
 
                 // read access token ("at")
-                if (!signedHttpRequest.Payload._jsonClaims.TryGetValue(SignedHttpRequestClaimTypes.At, out object accessToken) || string.IsNullOrEmpty(accessToken as string))
+                if (!signedHttpRequest.GetClaimValue(SignedHttpRequestClaimTypes.At, out object accessToken) || string.IsNullOrEmpty(accessToken as string))
                     throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidAtClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.At))));
 
                 // validate access token ("at")
@@ -724,7 +724,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </remarks>
         internal virtual void ValidateTsClaim(JsonWebToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
         {
-            if (!signedHttpRequest.Payload._jsonClaims.TryGetValue(SignedHttpRequestClaimTypes.Ts, out object tsClaimValueObj) || tsClaimValueObj == null || !long.TryParse(tsClaimValueObj.ToString(), out long tsClaimValue))
+            if (!signedHttpRequest.GetClaimValue(SignedHttpRequestClaimTypes.Ts, out object tsClaimValueObj) || tsClaimValueObj == null || !long.TryParse(tsClaimValueObj.ToString(), out long tsClaimValue))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidTsClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.Ts))));
             DateTime utcNow = DateTime.UtcNow;
             DateTime signedHttpRequestCreationTime = EpochTime.DateTime(Convert.ToInt64(tsClaimValue));
@@ -750,7 +750,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (string.IsNullOrEmpty(expectedHttpMethod))
                 throw LogHelper.LogArgumentNullException(nameof(expectedHttpMethod));
 
-            if (!signedHttpRequest.Payload._jsonClaims.TryGetValue(SignedHttpRequestClaimTypes.M, out object httpMethodObj) || httpMethodObj == null)
+            if (!signedHttpRequest.GetClaimValue(SignedHttpRequestClaimTypes.M, out object httpMethodObj) || httpMethodObj == null)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidMClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.M))));
 
             // "get " is functionally the same as "GET".
@@ -781,7 +781,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (!httpRequestUri.IsAbsoluteUri)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidUClaimException(LogHelper.FormatInvariant(LogMessages.IDX23001, httpRequestUri.OriginalString)));
 
-            if (!signedHttpRequest.Payload._jsonClaims.TryGetValue(SignedHttpRequestClaimTypes.U, out object uClainValueObj) || uClainValueObj == null)
+            if (!signedHttpRequest.GetClaimValue(SignedHttpRequestClaimTypes.U, out object uClainValueObj) || uClainValueObj == null)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidUClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.U))));
 
             // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3.2
@@ -813,11 +813,11 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestValidationContext.HttpRequestData.Uri));
 
             httpRequestUri = EnsureAbsoluteUri(httpRequestUri);
-            if (!signedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.P, out string pClaimValue) || pClaimValue == null)
+            if (!signedHttpRequest.GetClaimValue(SignedHttpRequestClaimTypes.P, out object pClaimValueObj) || string.IsNullOrEmpty(pClaimValueObj as string))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.P))));
 
             // relax comparison by trimming start and ending forward slashes
-            pClaimValue = pClaimValue.Trim('/');
+            string pClaimValue = (pClaimValueObj as string).Trim('/');
             var expectedPClaimValue = httpRequestUri.AbsolutePath.Trim('/');
 
             if (!string.Equals(expectedPClaimValue, pClaimValue, StringComparison.OrdinalIgnoreCase))
@@ -985,9 +985,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (httpRequestBody == null)
                 httpRequestBody = Array.Empty<byte>();
 
-            if (!signedHttpRequest.TryGetPayloadValue(SignedHttpRequestClaimTypes.B, out string bClaim) || bClaim == null)
+            if (!signedHttpRequest.GetClaimValue(SignedHttpRequestClaimTypes.B, out object bClaimObj) || string.IsNullOrEmpty(bClaimObj as string))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidBClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.B))));
-
+            string bClaim = bClaimObj as string;
             string expectedBase64UrlEncodedHash;
             try
             {
@@ -998,7 +998,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.B), e), e));
             }
 
-            if (!string.Equals(expectedBase64UrlEncodedHash, bClaim))
+            if (!string.Equals(expectedBase64UrlEncodedHash, bClaimObj as string))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidBClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.B), expectedBase64UrlEncodedHash, bClaim)));
         }
         #endregion
