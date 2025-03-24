@@ -219,5 +219,5 @@ namespace Microsoft.IdentityModel.Tokens
     /// </summary>
     /// <param name="reader">Reader for the underlying token bytes.</param>
     /// <returns>Claim value associated with the claim name.</returns>
-    internal delegate object ReadTokenClaimValueDelegate(ref Utf8JsonReader reader);
+    public delegate object ReadTokenClaimValueDelegate(ref Utf8JsonReader reader);
 }

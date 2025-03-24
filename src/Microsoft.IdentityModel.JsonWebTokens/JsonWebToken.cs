@@ -99,7 +99,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// The contents of the returned <see cref="JsonWebToken"/> have not been validated, the JSON Web Token is simply decoded. Validation can be accomplished using the validation methods in <see cref="JsonWebTokenHandler"/>
         /// </para>
         /// </remarks>
-        internal JsonWebToken(
+        public JsonWebToken(
             string jwtEncodedString,
             IDictionary<string, ReadTokenClaimValueDelegate> readTokenHeaderValueDelegates,
             IDictionary<string, ReadTokenClaimValueDelegate> readTokenPayloadValueDelegates)
@@ -155,7 +155,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// The contents of the returned <see cref="JsonWebToken"/> have not been validated; the JSON Web Token is simply decoded. Validation can be performed using the methods in <see cref="JsonWebTokenHandler"/>.
         /// </para>
         /// </remarks>
-        internal JsonWebToken(
+        public JsonWebToken(
             ReadOnlyMemory<char> encodedTokenMemory,
             IDictionary<string, ReadTokenClaimValueDelegate> readTokenHeaderValueDelegates,
             IDictionary<string, ReadTokenClaimValueDelegate> readTokenPayloadValueDelegates)
@@ -219,7 +219,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </remarks>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="header"/> is null or empty.</exception>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="payload"/> is null.</exception>
-        internal JsonWebToken(
+        public JsonWebToken(
             string header,
             string payload,
             IDictionary<string, ReadTokenClaimValueDelegate> readTokenHeaderValueDelegates,

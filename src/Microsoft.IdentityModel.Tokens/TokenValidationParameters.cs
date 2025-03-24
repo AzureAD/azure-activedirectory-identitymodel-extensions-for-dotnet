@@ -456,17 +456,19 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         public IDictionary<string, object> PropertyBag { get; set; }
 
+#pragma warning disable CA2227 // Collection properties should be read only
         /// <summary>
         /// Gets or sets the <see cref="IDictionary{String, Object}"/> that contains a collection of header claim name and delegate pairs.
         /// When reading token header claims, a delegate will be called if the token has an associated claim.
         /// </summary>
-        internal IDictionary<string, ReadTokenClaimValueDelegate> ReadTokenHeaderValueDelegates { get; set; }
+        public IDictionary<string, ReadTokenClaimValueDelegate> ReadTokenHeaderValueDelegates { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="IDictionary{String, Object}"/> that contains a collection of claim name and delegate pairs.
         /// When reading token payload claims, a delegate will be called if the token has an associated claim.
         /// </summary>
-        internal IDictionary<string, ReadTokenClaimValueDelegate> ReadTokenPayloadValueDelegates { get; set; }
+        public IDictionary<string, ReadTokenClaimValueDelegate> ReadTokenPayloadValueDelegates { get; set; }
+#pragma warning restore CA2227 // Collection properties should be read only
 
         /// <summary>
         /// Gets or sets a boolean to control if configuration required to be refreshed before token validation.

@@ -1934,6 +1934,65 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         }
 
         [Fact]
+        public void ReadTokenDelegates_CreatesClaimsCorrectly()
+        {
+            // Arrange - create token with custom claims
+            var customNullPayloadClaimName = "CustomNullPayload";
+            var customStringPayloadClaimName = "CustomStringPayload";
+            var customObjectPayloadClaimName = "CustomObjectPayload";
+            var expectedCustomStringPayloadClaim = "custom_string_payload";
+            var expectedCustomObjectPayloadClaim = new CustomClaim("custom_string_payload");
+
+            var tokenSpan = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
+            {
+                Issuer = Default.Issuer,
+                Claims = new Dictionary<string, object>
+                {
+                    { customNullPayloadClaimName, String.Empty },
+                    { customStringPayloadClaimName, String.Empty },
+                    { customObjectPayloadClaimName, String.Empty },
+                }
+            }).AsMemory();
+
+            // Arrange - create delegates to read custom claims
+            object ReadCustomNullPayloadClaimValue(ref Utf8JsonReader reader)
+            {
+                return null;
+            }
+            object ReadCustomStringPayloadClaimValue(ref Utf8JsonReader reader)
+            {
+                return expectedCustomStringPayloadClaim;
+            }
+            object ReadCustomObjectPayloadClaimValue(ref Utf8JsonReader reader)
+            {
+                return expectedCustomObjectPayloadClaim;
+            }
+
+            // Act - create JsonWebToken with delegates to read custom claims
+            var jwt = new JsonWebToken(
+                tokenSpan,
+                null,
+                new Dictionary<string, ReadTokenClaimValueDelegate> {
+                    { customNullPayloadClaimName, ReadCustomNullPayloadClaimValue },
+                    { customStringPayloadClaimName, ReadCustomStringPayloadClaimValue },
+                    { customObjectPayloadClaimName, ReadCustomObjectPayloadClaimValue },
+                });
+
+            // Assert custom claims, issuer
+            Assert.True(jwt.TryGetClaim(customNullPayloadClaimName, out var actualNullPayloadClaim));
+            Assert.Equal(JsonClaimValueTypes.JsonNull, actualNullPayloadClaim.ValueType);
+            Assert.Equal(string.Empty, actualNullPayloadClaim.Value);
+
+            Assert.True(jwt.TryGetClaim(customStringPayloadClaimName, out var actualStringPayloadClaim));
+            Assert.Equal(ClaimValueTypes.String, actualStringPayloadClaim.ValueType);
+            Assert.Equal(expectedCustomStringPayloadClaim, actualStringPayloadClaim.Value);
+
+            Assert.True(jwt.TryGetClaim(customObjectPayloadClaimName, out var actualObjectPayloadClaim));
+            Assert.Equal(ClaimValueTypes.String, actualStringPayloadClaim.ValueType);
+            Assert.Equal(expectedCustomObjectPayloadClaim.ToString(), actualObjectPayloadClaim.Value);
+        }
+
+        [Fact]
         public void CreateTokenWithoutKeyIdentifiersInHeader()
         {
             string rawToken = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
