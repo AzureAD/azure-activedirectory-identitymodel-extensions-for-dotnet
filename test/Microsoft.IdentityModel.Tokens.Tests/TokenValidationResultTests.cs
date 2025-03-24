@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Security.Claims;
@@ -48,19 +49,36 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors("TokenValidationResultTests.GetSets", context.Errors);
         }
 
+        // Ensure the same ClaimsIdentity object is returned when concurrent calls made to TokenValidationResult.
         [Fact]
         public void ClaimsIdentity_ConcurrencyTest()
         {
+            // Arrange
+            var numThreads = 10;
+            var barrier = new Barrier(numThreads);
             var result = new TokenValidationResult();
-            ClaimsIdentity firstClaimsIdentity = null;
+            ConcurrentBag<ClaimsIdentity> allClaimsIdentity = new();
+            List<Action> actions = [];
 
-            Parallel.For(0, 1000, i =>
+            for (int i = 0; i < numThreads; i++)
             {
-                var claimsIdentity = result.ClaimsIdentity;
-                Assert.NotNull(claimsIdentity);
-                Interlocked.CompareExchange(ref firstClaimsIdentity, claimsIdentity, null);
-                Assert.Same(firstClaimsIdentity, claimsIdentity);
-            });
+                actions.Add(() =>
+                {
+                    barrier.SignalAndWait();
+                    allClaimsIdentity.Add(result.ClaimsIdentity);
+                });
+            }
+
+            // Act
+            Parallel.Invoke(actions.ToArray());
+
+            // Assert
+            Assert.Equal(numThreads, allClaimsIdentity.Count);
+            Assert.True(allClaimsIdentity.TryTake(out var controlClaimsIdentity));
+            foreach (var claimsIdentity in allClaimsIdentity)
+            {
+                Assert.Same(controlClaimsIdentity, claimsIdentity);
+            }
         }
     }
 }

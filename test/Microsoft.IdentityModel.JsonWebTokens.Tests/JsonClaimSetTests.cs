@@ -2,18 +2,19 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
-using Microsoft.IdentityModel.TestUtils;
-using Microsoft.IdentityModel.Tokens.Json.Tests;
-using Microsoft.IdentityModel.Tokens;
-using Xunit;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.IdentityModel.TestUtils;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Json.Tests;
+using Xunit;
 
 namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
@@ -102,24 +103,41 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        // Tests a JsonClaimSet, to ensure the same List object is returned for concurrent calls to the Claims member.
         [Fact]
         public void ValidJsonClaimSet_ConcurrencyTest()
         {
+            // Arrange
+            var numThreads = 10;
+            var barrier = new Barrier(numThreads);
             var jsonClaims = new Dictionary<string, object>
-        {
-            { "claim1", "value1" },
-            { "claim2", "value2" }
-        };
-            var jsonClaimSet = new JsonClaimSet(jsonClaims);
-            List<Claim> firstClaims = null;
-
-            Parallel.For(0, 1000, i =>
             {
-                var claims = jsonClaimSet.Claims("issuer");
-                Assert.NotNull(claims);
-                Interlocked.CompareExchange(ref firstClaims, claims, null);
-                Assert.Same(firstClaims, claims);
-            });
+                { "claim1", "value1" },
+                { "claim2", "value2" }
+            };
+            var jsonClaimSet = new JsonClaimSet(jsonClaims);
+            ConcurrentBag<List<Claim>> allClaims = new();
+            List<Action> actions = new List<Action>();
+
+            for (int i = 0; i < numThreads; i++)
+            {
+                actions.Add(() =>
+                {
+                    barrier.SignalAndWait();
+                    allClaims.Add(jsonClaimSet.Claims("claim1"));
+                });
+            }
+
+            // Act
+            Parallel.Invoke(actions.ToArray());
+
+            // Assert
+            Assert.Equal(numThreads, allClaims.Count);
+            Assert.True(allClaims.TryTake(out List<Claim> controlClaims));
+            foreach (var claims in allClaims)
+            {
+                Assert.Same(controlClaims, claims);
+            }
         }
 
         public static TheoryData<JsonClaimSetTheoryData> GetClaimAsTypeTheoryData()

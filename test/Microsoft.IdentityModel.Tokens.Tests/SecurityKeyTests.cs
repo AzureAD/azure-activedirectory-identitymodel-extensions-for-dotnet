@@ -2,10 +2,10 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
@@ -214,20 +214,36 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             Assert.False(new CustomSecurityKey().CanComputeJwkThumbprint(), "CustomSecurityKey shouldn't be able to compute JWK thumbprint if CanComputeJwkThumbprint() is not overriden.");
         }
 
+        // Tests a SecurityKey object, to ensure the InternalId is set exactly once when faced with concurrent calls.
         [Fact]
         public void InternalId_ConcurrencyTest()
         {
+            // Arrange
+            var numThreads = 10;
+            var barrier = new Barrier(numThreads);
             var key = new CustomSecurityKey();
-            string firstInternalId = null;
+            ConcurrentBag<string> internalIds = new();
+            List<Action> actions = [];
 
-            Parallel.For(0, 1000, i =>
+            for (int i = 0; i < numThreads; i++)
             {
-                var internalId = key.InternalId;
-                Assert.NotNull(internalId);
-                Interlocked.CompareExchange(ref firstInternalId, internalId, null);
-                Assert.Same(firstInternalId, internalId);
+                actions.Add(() =>
+                {
+                    barrier.SignalAndWait();
+                    internalIds.Add(key.InternalId);
+                });
+            }
 
-            });
+            // Act
+            Parallel.Invoke(actions.ToArray());
+
+            // Assert
+            Assert.Equal(numThreads, internalIds.Count);
+            Assert.True(internalIds.TryTake(out var internalId));
+            foreach (var id in internalIds)
+            {
+                Assert.Same(internalId, id);
+            }
         }
 
         public class SecurityKeyTheoryData : TheoryDataBase

@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
@@ -281,19 +283,31 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
+        // Tests that concurrent calls to WrapKey and UnwrapKey do not run into encrypt/decrypt lock contention issues or race conditions.
         [Fact]
         public void WrapAndUnwrapKey_ConcurrencyTest()
         {
+            // Arrange
+            var numThreads = 10;
+            var barrier = new Barrier(numThreads);
+            var barrierTimeoutInMs = 5000;
             var key = new SymmetricSecurityKey(new byte[32]);
             var provider = new SymmetricKeyWrapProvider(key, SecurityAlgorithms.Aes256KW);
+            var actions = new List<Action>();
 
-            Parallel.For(0, 1000, i =>
+            // Act and Assert
+            for (int i = 0; i < numThreads; i++)
             {
-                var wrappedKey = provider.WrapKey(new byte[32]);
-                Assert.NotNull(wrappedKey);
-                var unwrappedKey = provider.UnwrapKey(wrappedKey);
-                Assert.NotNull(unwrappedKey);
-            });
+                actions.Add(() =>
+                {
+                    barrier.SignalAndWait(barrierTimeoutInMs);
+                    var wrappedKey = provider.WrapKey(new byte[32]);
+                    Assert.NotNull(wrappedKey);
+                    var unwrappedKey = provider.UnwrapKey(wrappedKey);
+                    Assert.NotNull(unwrappedKey);
+                });
+            }
+            Parallel.Invoke(actions.ToArray());
         }
 
         public static TheoryData<KeyWrapTheoryData> UnwrapTheoryData()
