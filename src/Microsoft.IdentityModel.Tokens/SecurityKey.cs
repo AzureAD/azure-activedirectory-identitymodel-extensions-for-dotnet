@@ -5,10 +5,6 @@ using System;
 using System.Text.Json.Serialization;
 using Microsoft.IdentityModel.Logging;
 
-#if NET9_0_OR_GREATER
-using System.Threading;
-#endif
-
 namespace Microsoft.IdentityModel.Tokens
 {
     /// <summary>
@@ -17,13 +13,9 @@ namespace Microsoft.IdentityModel.Tokens
     public abstract class SecurityKey
     {
         private CryptoProviderFactory _cryptoProviderFactory;
-
-#if NET9_0_OR_GREATER
-        private readonly Lock _internalIdLock = new();
-#else
-        private readonly object _internalIdLock = new();
-#endif
+        private object _internalIdLock = new object();
         private string _internalId;
+
         internal SecurityKey(SecurityKey key)
         {
             _cryptoProviderFactory = key._cryptoProviderFactory;
