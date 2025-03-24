@@ -107,8 +107,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (string.IsNullOrEmpty(jwtEncodedString))
                 throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(jwtEncodedString)));
 
-            ReadTokenHeaderValueDelegates = readTokenHeaderValueDelegates ?? new Dictionary<string, ReadTokenClaimValueDelegate>();
-            ReadTokenPayloadValueDelegates = readTokenPayloadValueDelegates ?? new Dictionary<string, ReadTokenClaimValueDelegate>();
+            ReadTokenHeaderValueDelegates = readTokenHeaderValueDelegates;
+            ReadTokenPayloadValueDelegates = readTokenPayloadValueDelegates;
 
             ReadToken(jwtEncodedString.AsMemory());
 
@@ -163,8 +163,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (encodedTokenMemory.IsEmpty)
                 throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(encodedTokenMemory)));
 
-            ReadTokenHeaderValueDelegates = readTokenHeaderValueDelegates ?? new Dictionary<string, ReadTokenClaimValueDelegate>();
-            ReadTokenPayloadValueDelegates = readTokenPayloadValueDelegates ?? new Dictionary<string, ReadTokenClaimValueDelegate>();
+            ReadTokenHeaderValueDelegates = readTokenHeaderValueDelegates;
+            ReadTokenPayloadValueDelegates = readTokenPayloadValueDelegates;
 
             ReadToken(encodedTokenMemory);
 
@@ -234,8 +234,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             var encodedPayload = Base64UrlEncoder.Encode(payload);
             var encodedToken = encodedHeader + "." + encodedPayload + ".";
 
-            ReadTokenHeaderValueDelegates = readTokenHeaderValueDelegates ?? new Dictionary<string, ReadTokenClaimValueDelegate>();
-            ReadTokenPayloadValueDelegates = readTokenPayloadValueDelegates ?? new Dictionary<string, ReadTokenClaimValueDelegate>();
+            ReadTokenHeaderValueDelegates = readTokenHeaderValueDelegates;
+            ReadTokenPayloadValueDelegates = readTokenPayloadValueDelegates;
 
             ReadToken(encodedToken.AsMemory());
 
@@ -255,7 +255,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// }
         /// </code>
         /// </remarks>
-        internal IDictionary<string, ReadTokenClaimValueDelegate> ReadTokenHeaderValueDelegates { get; set; } = new Dictionary<string, ReadTokenClaimValueDelegate>();
+        internal IDictionary<string, ReadTokenClaimValueDelegate> ReadTokenHeaderValueDelegates { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="IDictionary{String, Object}"/> that contains a collection of claim name and delegate pairs.
@@ -270,7 +270,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// }
         /// </code>
         /// </remarks>
-        internal IDictionary<string, ReadTokenClaimValueDelegate> ReadTokenPayloadValueDelegates { get; set; } = new Dictionary<string, ReadTokenClaimValueDelegate>();
+        internal IDictionary<string, ReadTokenClaimValueDelegate> ReadTokenPayloadValueDelegates { get; set; }
 
         internal string ActualIssuer { get; set; }
 

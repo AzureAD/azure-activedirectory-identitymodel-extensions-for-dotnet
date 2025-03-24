@@ -114,7 +114,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 string propertyName = reader.GetString();
 
-                if (ReadTokenPayloadValueDelegates.Count > 0 && ReadTokenPayloadValueDelegates.TryGetValue(propertyName, out var readTokenPayloadValueDelegate) && readTokenPayloadValueDelegate != null)
+                if (ReadTokenPayloadValueDelegates != null && ReadTokenPayloadValueDelegates.TryGetValue(propertyName, out var readTokenPayloadValueDelegate) && readTokenPayloadValueDelegate != null)
                 {
                     reader.Read();
                     claims[propertyName] = readTokenPayloadValueDelegate(ref reader);
