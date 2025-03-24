@@ -73,6 +73,7 @@ namespace Microsoft.IdentityModel.Tokens
             NameClaimType = other.NameClaimType;
             NameClaimTypeRetriever = other.NameClaimTypeRetriever;
             PropertyBag = other.PropertyBag;
+            ReadTokenHeaderValueDelegates = other.ReadTokenHeaderValueDelegates;
             ReadTokenPayloadValueDelegates = other.ReadTokenPayloadValueDelegates;
             RefreshBeforeValidation = other.RefreshBeforeValidation;
             RequireAudience = other.RequireAudience;

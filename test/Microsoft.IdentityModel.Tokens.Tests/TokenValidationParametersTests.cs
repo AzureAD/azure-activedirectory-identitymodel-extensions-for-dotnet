@@ -15,12 +15,12 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 {
     public class TokenValidationParametersTests
     {
-        int ExpectedPropertyCount = 61;
+        int ExpectedPropertyCount = 63;
 
         // GetSets() compares the total property count which includes internal properties, against a list of public properties, minus delegates.
         // This allows us to keep track of any properties we are including in the total that are not public nor delegates.
         // Remove if/once we make TimeProvider public. As the GetSets() test will fail.
-        List<string> internalNonDelegateProperties = new() { "TimeProvider", "ReadTokenPayloadValueDelegates" };
+        List<string> internalNonDelegateProperties = new() { "TimeProvider" };
 
         [Fact]
         public void Publics()
@@ -212,6 +212,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     new KeyValuePair<string, List<object>>("LogValidationExceptions", new List<object>{true, false, true}),
                     new KeyValuePair<string, List<object>>("NameClaimType", new List<object>{ClaimsIdentity.DefaultNameClaimType, Guid.NewGuid().ToString(), Guid.NewGuid().ToString()}),
                     new KeyValuePair<string, List<object>>("PropertyBag", new List<object>{(IDictionary<string, Object>)null, new Dictionary<string, Object> {{"CustomKey", "CustomValue"}}, new Dictionary<string, Object>()}),
+                    new KeyValuePair<string, List<object>>("ReadTokenHeaderValueDelegates",  new List<object>{ null, new Dictionary<string, ReadTokenClaimValueDelegate>(), new Dictionary<string, ReadTokenClaimValueDelegate>()}),
+                    new KeyValuePair<string, List<object>>("ReadTokenPayloadValueDelegates",  new List<object>{ null, new Dictionary<string, ReadTokenClaimValueDelegate>(), new Dictionary<string, ReadTokenClaimValueDelegate>()}),
                     new KeyValuePair<string, List<object>>("RefreshBeforeValidation", new List<object>{false, true, false}),
                     new KeyValuePair<string, List<object>>("RequireAudience", new List<object>{true, false, true}),
                     new KeyValuePair<string, List<object>>("RequireExpirationTime", new List<object>{true, false, true}),

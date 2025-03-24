@@ -1,0 +1,5 @@
+Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.ReadTokenHeaderValueDelegates.get -> System.Collections.Generic.IDictionary<string, Microsoft.IdentityModel.Tokens.ReadTokenClaimValueDelegate>
+Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.ReadTokenHeaderValueDelegates.set -> void
+Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.ReadTokenPayloadValueDelegates.get -> System.Collections.Generic.IDictionary<string, Microsoft.IdentityModel.Tokens.ReadTokenClaimValueDelegate>
+Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.ReadTokenPayloadValueDelegates.set -> void
+virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.ReadHeaderValue(ref System.Text.Json.Utf8JsonReader reader, System.Collections.Generic.IDictionary<string, object> claims) -> void
