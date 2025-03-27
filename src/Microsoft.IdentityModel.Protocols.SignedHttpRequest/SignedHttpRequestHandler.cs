@@ -783,7 +783,8 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (!httpRequestUri.IsAbsoluteUri)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidUClaimException(LogHelper.FormatInvariant(LogMessages.IDX23001, httpRequestUri.OriginalString)));
 
-            if (!signedHttpRequest.GetClaimValue(SignedHttpRequestClaimTypes.U, out object uClainValueObj) || uClainValueObj == null)
+            string uClaimValue = signedHttpRequest.U;
+            if (string.IsNullOrEmpty(uClaimValue))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidUClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.U))));
 
             // https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3.2
@@ -791,7 +792,6 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             // This MAY include the port separated from the host by a colon in host:port format.
             var expectedUClaimValue = httpRequestUri.Host;
             var expectedUClaimValueIncludingPort = $"{expectedUClaimValue}:{httpRequestUri.Port}";
-            string uClaimValue = uClainValueObj.ToString();
             if (!string.Equals(expectedUClaimValue, uClaimValue, StringComparison.OrdinalIgnoreCase) &&
                 !string.Equals(expectedUClaimValueIncludingPort, uClaimValue, StringComparison.OrdinalIgnoreCase))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidUClaimException(LogHelper.FormatInvariant(LogMessages.IDX23012, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.U), expectedUClaimValue, expectedUClaimValueIncludingPort, uClaimValue)));
