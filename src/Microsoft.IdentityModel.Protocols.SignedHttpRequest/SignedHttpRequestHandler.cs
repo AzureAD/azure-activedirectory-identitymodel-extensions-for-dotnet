@@ -751,12 +751,13 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (string.IsNullOrEmpty(expectedHttpMethod))
                 throw LogHelper.LogArgumentNullException(nameof(expectedHttpMethod));
 
-            if (!signedHttpRequest.GetClaimValue(SignedHttpRequestClaimTypes.M, out object httpMethodObj) || httpMethodObj == null)
+            string httpMethod = signedHttpRequest.M;
+            if (string.IsNullOrEmpty(httpMethod))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidMClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.M))));
 
             // "get " is functionally the same as "GET".
             // different implementations might use differently formatted http verbs and we shouldn't fault.
-            string httpMethod = (httpMethodObj as string).Trim();
+            httpMethod = httpMethod.Trim();
             expectedHttpMethod = expectedHttpMethod.Trim();
             if (!string.Equals(expectedHttpMethod, httpMethod, StringComparison.OrdinalIgnoreCase))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidMClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.M), LogHelper.MarkAsNonPII(expectedHttpMethod), LogHelper.MarkAsNonPII(httpMethod))));
