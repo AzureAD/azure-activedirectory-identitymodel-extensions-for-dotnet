@@ -494,11 +494,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 var signedHttpRequest = ReadSignedHttpRequest(signedHttpRequestValidationContext);
 
                 // read access token ("at")
-                if (!signedHttpRequest.GetClaimValue(SignedHttpRequestClaimTypes.At, out object accessToken) || string.IsNullOrEmpty(accessToken as string))
+                string accessToken = signedHttpRequest.AccessToken;
+                if (string.IsNullOrEmpty(accessToken))
                     throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidAtClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.At))));
 
                 // validate access token ("at")
-                var tokenValidationResult = await ValidateAccessTokenAsync(accessToken as string, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
+                var tokenValidationResult = await ValidateAccessTokenAsync(accessToken, signedHttpRequestValidationContext, cancellationToken).ConfigureAwait(false);
                 if (!tokenValidationResult.IsValid)
                     throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidAtClaimException(LogHelper.FormatInvariant(LogMessages.IDX23013, tokenValidationResult.Exception), tokenValidationResult.Exception));
 

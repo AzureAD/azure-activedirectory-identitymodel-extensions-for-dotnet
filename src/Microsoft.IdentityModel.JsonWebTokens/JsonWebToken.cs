@@ -45,6 +45,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         #region properties relating to the payload
         // when constructing a JWT, these properties, when found, will be set
         internal string _azp;
+        internal string _at;
         internal long? _exp;
         internal DateTime? _expDateTime;
         internal long? _iat;
@@ -140,6 +141,21 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal string ActualIssuer { get; set; }
 
+        /// <summary>
+        /// Gets the 'at' claim from the payload.
+        /// </summary>
+        /// <remarks>
+        /// This is used for Signed HTTP Requests that include an access token reference.
+        /// See: https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3
+        /// </remarks>
+        internal string AccessToken
+        {
+            get
+            {
+                _at ??= Payload.GetStringValue("at");
+                return _at;
+            }
+        }
         internal ClaimsIdentity ActorClaimsIdentity { get; set; }
 
         /// <summary>
