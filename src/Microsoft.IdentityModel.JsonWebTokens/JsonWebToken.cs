@@ -48,6 +48,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal string _at;
         internal string _m;
         internal string _u;
+        internal string _p;
+        internal string _b;
         internal DateTime _ts;
         internal long? _exp;
         internal DateTime? _expDateTime;
@@ -193,7 +195,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Gets the 'M' claim from the payload.
+        /// Gets the 'U' claim from the payload.
         /// </summary>
         /// <remarks>
         /// This is used for Signed HTTP Requests that include an access token reference.
@@ -207,6 +209,39 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return _u;
             }
         }
+
+        /// <summary>
+        /// Gets the 'U' claim from the payload.
+        /// </summary>
+        /// <remarks>
+        /// This is used for Signed HTTP Requests that include an access token reference.
+        /// See: https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3
+        /// </remarks>
+        internal string P
+        {
+            get
+            {
+                _p ??= Payload.GetStringValue("p");
+                return _p;
+            }
+        }
+
+        /// <summary>
+        /// Gets the 'U' claim from the payload.
+        /// </summary>
+        /// <remarks>
+        /// This is used for Signed HTTP Requests that include an access token reference.
+        /// See: https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3
+        /// </remarks>
+        internal string B
+        {
+            get
+            {
+                _b ??= Payload.GetStringValue("b");
+                return _b;
+            }
+        }
+
         internal ClaimsIdentity ActorClaimsIdentity { get; set; }
 
         /// <summary>

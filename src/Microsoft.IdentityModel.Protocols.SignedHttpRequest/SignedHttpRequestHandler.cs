@@ -815,11 +815,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestValidationContext.HttpRequestData.Uri));
 
             httpRequestUri = EnsureAbsoluteUri(httpRequestUri);
-            if (!signedHttpRequest.GetClaimValue(SignedHttpRequestClaimTypes.P, out object pClaimValueObj) || string.IsNullOrEmpty(pClaimValueObj as string))
+            string pClaimValue = signedHttpRequest.P;
+            if (string.IsNullOrEmpty(pClaimValue))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.P))));
 
             // relax comparison by trimming start and ending forward slashes
-            string pClaimValue = (pClaimValueObj as string).Trim('/');
+            pClaimValue = pClaimValue.Trim('/');
             var expectedPClaimValue = httpRequestUri.AbsolutePath.Trim('/');
 
             if (!string.Equals(expectedPClaimValue, pClaimValue, StringComparison.OrdinalIgnoreCase))
@@ -987,9 +988,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (httpRequestBody == null)
                 httpRequestBody = Array.Empty<byte>();
 
-            if (!signedHttpRequest.GetClaimValue(SignedHttpRequestClaimTypes.B, out object bClaimObj) || string.IsNullOrEmpty(bClaimObj as string))
+            string bClaim = signedHttpRequest.B;
+            if (string.IsNullOrEmpty(bClaim))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidBClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.B))));
-            string bClaim = bClaimObj as string;
             string expectedBase64UrlEncodedHash;
             try
             {
@@ -1000,7 +1001,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestCreationException(LogHelper.FormatInvariant(LogMessages.IDX23008, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.B), e), e));
             }
 
-            if (!string.Equals(expectedBase64UrlEncodedHash, bClaimObj as string))
+            if (!string.Equals(expectedBase64UrlEncodedHash, bClaim))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidBClaimException(LogHelper.FormatInvariant(LogMessages.IDX23011, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.B), expectedBase64UrlEncodedHash, bClaim)));
         }
         #endregion
