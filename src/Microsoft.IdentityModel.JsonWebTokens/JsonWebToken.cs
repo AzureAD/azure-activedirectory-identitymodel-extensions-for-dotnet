@@ -285,10 +285,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             get
             {
-                if (_exp == null)
-                {
-                    return default;
-                }
+                _exp ??= ValidTo.Ticks;
                 return (long)_exp;
             }
         }
@@ -302,7 +299,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 if (_iat == null)
                 {
-                    return default;
+                    _iat ??= IssuedAt.Ticks;
                 }
                 return (long)_iat;
             }
@@ -317,7 +314,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 if (_nbf == null)
                 {
-                    return default;
+                    _nbf ??= ValidFrom.Ticks;
                 }
                 return (long)_nbf;
             }
