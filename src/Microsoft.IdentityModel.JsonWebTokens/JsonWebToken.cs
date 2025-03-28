@@ -577,30 +577,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal int NumberOfDots { get; set; }
 
         /// <summary>
-        /// Gets the value for a specified claim name from the payload.
-        /// </summary>
-        /// <param name="claimName">The name of the claim to retrieve.</param>
-        /// <param name="value">When this method returns, contains the value associated with the specified claim name, if the claim is found; 
-        /// otherwise, null. This parameter is passed uninitialized.</param>
-        /// <returns>
-        /// <c>true</c> if the payload contains a claim with the specified name; otherwise, <c>false</c>.
-        /// </returns>
-        /// <remarks>
-        /// This method provides direct access to the raw claim values in the token payload.
-        /// It follows the TryGetValue pattern, which is more efficient than throwing exceptions
-        /// when a claim is not found.
-        /// </remarks>
-        public bool GetClaimValue(string claimName, out object value)
-        {
-            if (Payload == null)
-            {
-                value = null;
-                return false;
-            }
-            return Payload._jsonClaims.TryGetValue(claimName, out value);
-
-        }
-        /// <summary>
         /// Converts a span into an instance of <see cref="JsonWebToken"/>.
         /// </summary>
         /// <param name="encodedTokenMemory">A span representing a JSON Web Token (JWT) in JWS or JWE Compact Serialization format.</param>

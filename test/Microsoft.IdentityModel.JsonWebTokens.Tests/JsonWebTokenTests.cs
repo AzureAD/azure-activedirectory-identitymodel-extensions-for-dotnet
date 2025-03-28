@@ -208,67 +208,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
             TestUtilities.AssertFailIfErrors(context);
         }
-        [Fact]
-        public void CompareTryGetPayloadValueAndGetClaimValue()
-        {
-            // Create a token with various claim types to test
-            var jsonWebTokenHandler = new JsonWebTokenHandler();
-            var tokenString = jsonWebTokenHandler.CreateToken(new SecurityTokenDescriptor
-            {
-                Claims = new Dictionary<string, object>
-                {
-                    { "stringClaim", "stringValue" },
-                    { "longClaim", 123456789L },
-                    { "boolClaim", true },
-                    { "dateTimeClaim", DateTime.UtcNow }
-                },
-                SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials
-            });
-
-            var token = new JsonWebToken(tokenString);
-
-            // Test with regular string value
-            AssertConsistentClaimRetrieval(token, "stringClaim");
-
-            // Test with long value
-            AssertConsistentClaimRetrieval(token, "longClaim");
-
-            // Test with boolean value
-            AssertConsistentClaimRetrieval(token, "boolClaim");
-
-            // Test with DateTime value
-            AssertConsistentClaimRetrieval(token, "dateTimeClaim");
-
-            // Test with non-existent claim
-            AssertConsistentClaimRetrieval(token, "nonExistentClaim");
-        }
-
-        private void AssertConsistentClaimRetrieval(JsonWebToken token, string claimName)
-        {
-            // Test direct GetClaimValue retrieval
-            token.GetClaimValue(claimName, out object directValue);
-
-            // Test TryGetPayloadValue<object> retrieval
-            bool tryGetSuccess = token.TryGetPayloadValue(claimName, out object payloadValue);
-
-            // Test existence consistency
-            bool directExists = token.HasPayloadClaim(claimName);
-
-            // Check consistency
-            Assert.Equal(directExists, tryGetSuccess);
-
-            // If value exists, compare the actual values
-            if (directExists && tryGetSuccess)
-            {
-                Assert.Equal(directValue, payloadValue);
-            }
-            else
-            {
-                // Both should return null/default for non-existent claims
-                Assert.Null(directValue);
-                Assert.Null(payloadValue);
-            }
-        }
 
         // Test checks to make sure that the Claim values returned by GetClaim() are what we expect.
         // This includes JArrays and JObjects, which are converted to strings.

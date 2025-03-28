@@ -6,4 +6,3 @@ const Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.TenantId = "
 const Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.TId = "tid" -> string
 const Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Timestamp = "ts" -> string
 const Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.U = "u" -> string
-Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.GetClaimValue(string claimName, out object value) -> bool
