@@ -1,1 +1,9 @@
+const Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.AccessToken = "at" -> string
+const Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.B = "b" -> string
+const Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.M = "m" -> string
+const Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.P = "p" -> string
+const Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.TenantId = "http://schemas.microsoft.com/identity/claims/tenantid" -> string
+const Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.TId = "tid" -> string
+const Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.Timestamp = "ts" -> string
+const Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.U = "u" -> string
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.GetClaimValue(string claimName, out object value) -> bool

@@ -9,7 +9,6 @@ using System.Text;
 using System.Threading;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
     /// <summary>
@@ -50,6 +49,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal string _u;
         internal string _p;
         internal string _b;
+        internal string _tId;
+        internal string _tenantId;
         internal DateTime _ts;
         internal long? _exp;
         internal DateTime? _expDateTime;
@@ -157,7 +158,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             get
             {
-                _at ??= Payload.GetStringValue("at");
+                _at ??= Payload.GetStringValue(JwtRegisteredClaimNames.AccessToken);
                 return _at;
             }
         }
@@ -169,11 +170,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// This is used for Signed HTTP Requests that include an access token reference.
         /// See: https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3
         /// </remarks>
-        internal DateTime TImestamp
+        internal DateTime Timestamp
         {
             get
             {
-                _ts = Payload.GetDateTime("ts");
+                _ts = Payload.GetDateTime(JwtRegisteredClaimNames.Timestamp);
                 return _ts;
             }
         }
@@ -189,7 +190,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             get
             {
-                _m ??= Payload.GetStringValue("m");
+                _m ??= Payload.GetStringValue(JwtRegisteredClaimNames.M);
                 return _m;
             }
         }
@@ -205,13 +206,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             get
             {
-                _u ??= Payload.GetStringValue("u");
+                _u ??= Payload.GetStringValue(JwtRegisteredClaimNames.U);
                 return _u;
             }
         }
 
         /// <summary>
-        /// Gets the 'U' claim from the payload.
+        /// Gets the 'P' claim from the payload.
         /// </summary>
         /// <remarks>
         /// This is used for Signed HTTP Requests that include an access token reference.
@@ -221,13 +222,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             get
             {
-                _p ??= Payload.GetStringValue("p");
+                _p ??= Payload.GetStringValue(JwtRegisteredClaimNames.P);
                 return _p;
             }
         }
 
         /// <summary>
-        /// Gets the 'U' claim from the payload.
+        /// Gets the 'B' claim from the payload.
         /// </summary>
         /// <remarks>
         /// This is used for Signed HTTP Requests that include an access token reference.
@@ -237,8 +238,38 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             get
             {
-                _b ??= Payload.GetStringValue("b");
+                _b ??= Payload.GetStringValue(JwtRegisteredClaimNames.B);
                 return _b;
+            }
+        }
+        /// <summary>
+        /// Gets the 'TId' claim from the payload.
+        /// </summary>
+        /// <remarks>
+        /// This is used for Signed HTTP Requests that include an access token reference.
+        /// See: https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3
+        /// </remarks>
+        internal string TId
+        {
+            get
+            {
+                _tId ??= Payload.GetStringValue(JwtRegisteredClaimNames.TId);
+                return _tId;
+            }
+        }
+        /// <summary>
+        /// Gets the 'TenantId' claim from the payload.
+        /// </summary>
+        /// <remarks>
+        /// This is used for Signed HTTP Requests that include an access token reference.
+        /// See: https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3
+        /// </remarks>
+        internal string TenantId
+        {
+            get
+            {
+                _tenantId ??= Payload.GetStringValue(JwtRegisteredClaimNames.TenantId);
+                return _tenantId;
             }
         }
 
