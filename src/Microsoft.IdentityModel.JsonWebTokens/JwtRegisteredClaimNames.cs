@@ -16,11 +16,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         // Please keep in alphabetical order
 
         /// <summary>
-        /// See: <see href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3"/>.
-        /// </summary>
-        public const string AccessToken = "at";
-
-        /// <summary>
         /// </summary>
         public const string Actort = "actort";
 
@@ -58,11 +53,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// See: <see href="https://openid.net/specs/openid-connect-core-1_0.html#IDToken"/>.
         /// </summary>
         public const string Azp = "azp";
-
-        /// <summary>
-        /// See: <see href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3"/>.
-        /// </summary>
-        public const string B = "b";
 
         /// <summary>
         /// See: <see href="https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims"/>.
@@ -130,11 +120,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public const string Locale = "locale";
 
         /// <summary>
-        /// See: <see href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3"/>.
-        /// </summary>
-        public const string M = "m";
-
-        /// <summary>
         /// See: <see href="https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims"/>.
         /// </summary>
         public const string MiddleName = "middle_name";
@@ -162,11 +147,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7519#section-4"/>.
         /// </summary>
         public const string Nbf = "nbf";
-
-        /// <summary>
-        /// See: <see href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3"/>.
-        /// </summary>
-        public const string P = "p";
 
         /// <summary>
         /// See: <see href="https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims"/>.
@@ -218,19 +198,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public const string TId = "tid";
 
         /// <summary>
-        /// See: <see href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3"/>.
-        /// </summary>
-        public const string Timestamp = "ts";
-
-        /// <summary>
         /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7519#section-5"/>.
         /// </summary>
         public const string Typ = "typ";
-
-        /// <summary>
-        /// See: <see href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3"/>.
-        /// </summary>
-        public const string U = "u";
 
         /// <summary>
         /// </summary>

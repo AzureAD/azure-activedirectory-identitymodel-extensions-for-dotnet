@@ -494,7 +494,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 var signedHttpRequest = ReadSignedHttpRequest(signedHttpRequestValidationContext);
 
                 // read access token ("at")
-                string accessToken = signedHttpRequest.AccessToken;
+                string accessToken = signedHttpRequest.Payload.GetStringValue(SignedHttpRequestClaimTypes.At);
                 if (string.IsNullOrEmpty(accessToken))
                     throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidAtClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.At))));
 
@@ -725,7 +725,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </remarks>
         internal virtual void ValidateTsClaim(JsonWebToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
         {
-            DateTime signedHttpRequestCreationTime = signedHttpRequest.Timestamp;
+            DateTime signedHttpRequestCreationTime = signedHttpRequest.Payload.GetDateTime(SignedHttpRequestClaimTypes.Ts);
 
             if (signedHttpRequestCreationTime.Equals(DateTime.MinValue))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidTsClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.Ts))));
@@ -753,7 +753,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (string.IsNullOrEmpty(expectedHttpMethod))
                 throw LogHelper.LogArgumentNullException(nameof(expectedHttpMethod));
 
-            string httpMethod = signedHttpRequest.M;
+            string httpMethod = signedHttpRequest.Payload.GetStringValue(SignedHttpRequestClaimTypes.M);
             if (string.IsNullOrEmpty(httpMethod))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidMClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.M))));
 
@@ -785,7 +785,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (!httpRequestUri.IsAbsoluteUri)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidUClaimException(LogHelper.FormatInvariant(LogMessages.IDX23001, httpRequestUri.OriginalString)));
 
-            string uClaimValue = signedHttpRequest.U;
+            string uClaimValue = signedHttpRequest.Payload.GetStringValue(SignedHttpRequestClaimTypes.U);
             if (string.IsNullOrEmpty(uClaimValue))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidUClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.U))));
 
@@ -818,7 +818,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
                 throw LogHelper.LogArgumentNullException(nameof(signedHttpRequestValidationContext.HttpRequestData.Uri));
 
             httpRequestUri = EnsureAbsoluteUri(httpRequestUri);
-            string pClaimValue = signedHttpRequest.P;
+            string pClaimValue = signedHttpRequest.Payload.GetStringValue(SignedHttpRequestClaimTypes.P);
             if (string.IsNullOrEmpty(pClaimValue))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidPClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.P))));
 
@@ -991,7 +991,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             if (httpRequestBody == null)
                 httpRequestBody = Array.Empty<byte>();
 
-            string bClaim = signedHttpRequest.B;
+            string bClaim = signedHttpRequest.Payload.GetStringValue(SignedHttpRequestClaimTypes.B);
             if (string.IsNullOrEmpty(bClaim))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidBClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.B))));
 
