@@ -1,2 +1,0 @@
-const Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.TenantId = "http://schemas.microsoft.com/identity/claims/tenantid" -> string
-const Microsoft.IdentityModel.JsonWebTokens.JwtRegisteredClaimNames.TId = "tid" -> string

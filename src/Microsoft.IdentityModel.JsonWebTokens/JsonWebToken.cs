@@ -60,8 +60,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         #endregion
 
         internal string _aud;
-        internal string _tId;
-        internal string _tenantId;
 
         /// <summary>
         /// Initializes a new instance of <see cref="JsonWebToken"/> from a string in JWS or JWE Compact serialized format.
@@ -143,29 +141,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         internal string ActualIssuer { get; set; }
-
-        /// <summary>
-        /// Gets the 'TId' claim from the payload.
-        /// </summary>
-        internal string TId
-        {
-            get
-            {
-                _tId ??= Payload.GetStringValue(JwtRegisteredClaimNames.TId);
-                return _tId;
-            }
-        }
-        /// <summary>
-        /// Gets the 'TenantId' claim from the payload.
-        /// </summary>
-        internal string TenantId
-        {
-            get
-            {
-                _tenantId ??= Payload.GetStringValue(JwtRegisteredClaimNames.TenantId);
-                return _tenantId;
-            }
-        }
 
         /// <summary>
         /// Gets the 'aud' claim from the payload.

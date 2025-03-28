@@ -188,16 +188,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public const string Sub = "sub";
 
         /// <summary>
-        /// Old TenantId claim: "http://schemas.microsoft.com/identity/claims/tenantid".
-        /// </summary>
-        public const string TenantId = "http://schemas.microsoft.com/identity/claims/tenantid";
-
-        /// <summary>
-        /// New Tenant Id claim: "tid".
-        /// </summary>
-        public const string TId = "tid";
-
-        /// <summary>
         /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7519#section-5"/>.
         /// </summary>
         public const string Typ = "typ";

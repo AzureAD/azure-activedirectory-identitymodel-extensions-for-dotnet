@@ -1,7 +1,3 @@
-Microsoft.IdentityModel.JsonWebTokens.JsonWebToken._tenantId -> string
-Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.TenantId.get -> string
-Microsoft.IdentityModel.JsonWebTokens.JsonWebToken._tId -> string
-Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.TId.get -> string
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken._aud -> string
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.Audience.get -> string
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.Exp.get -> long

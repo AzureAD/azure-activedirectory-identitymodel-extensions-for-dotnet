@@ -571,11 +571,11 @@ namespace Microsoft.IdentityModel.Validators
 
             if (securityToken is JsonWebToken jsonWebToken)
             {
-                string tid = jsonWebToken.TId;
+                string tid = jsonWebToken.Payload.GetStringValue(AadIssuerValidatorConstants.Tid);
                 if (!string.IsNullOrEmpty(tid))
                     return tid;
 
-                string tenantId = jsonWebToken.TenantId;
+                string tenantId = jsonWebToken.Payload.GetStringValue(AadIssuerValidatorConstants.TenantId);
                 if (!string.IsNullOrEmpty(tenantId))
                     return tenantId;
 
