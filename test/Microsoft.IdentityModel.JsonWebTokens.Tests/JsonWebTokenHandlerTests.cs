@@ -1399,24 +1399,19 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var jwtToken = new JsonWebTokenHandler().CreateToken(theoryData.TokenDescriptor);
             JsonWebToken jsonWebToken = new JsonWebToken(jwtToken);
 
-            jsonWebToken.GetClaimValue("iss", out object tempobj);
-            string issuer = tempobj?.ToString();
+            string issuer = jsonWebToken.Issuer;
             IdentityComparer.AreEqual(theoryData.ExpectedClaims["iss"], issuer, context);
 
-            jsonWebToken.GetClaimValue("aud", out tempobj);
-            string audience = tempobj?.ToString();
+            string audience = jsonWebToken.Audience;
             IdentityComparer.AreEqual(theoryData.ExpectedClaims["aud"], audience, context);
 
-            jsonWebToken.GetClaimValue("exp", out tempobj);
-            string exp = tempobj?.ToString();
+            long exp = jsonWebToken.Exp;
             IdentityComparer.AreEqual(theoryData.ExpectedClaims["exp"], exp, context);
 
-            jsonWebToken.GetClaimValue("iat", out tempobj);
-            string iat = tempobj?.ToString();
+            long iat = jsonWebToken.Iat;
             IdentityComparer.AreEqual(theoryData.ExpectedClaims["iat"], iat, context);
 
-            jsonWebToken.GetClaimValue("nbf", out tempobj);
-            string nbf = tempobj?.ToString();
+            long nbf = jsonWebToken.Nbf;
             IdentityComparer.AreEqual(theoryData.ExpectedClaims["nbf"], nbf, context);
 
             TestUtilities.AssertFailIfErrors(context);

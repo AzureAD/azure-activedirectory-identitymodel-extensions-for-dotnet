@@ -14,3 +14,8 @@ Microsoft.IdentityModel.JsonWebTokens.JsonWebToken._tId -> string
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.TId.get -> string
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken._ts -> System.DateTime
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.Timestamp.get -> System.DateTime
+Microsoft.IdentityModel.JsonWebTokens.JsonWebToken._aud -> string
+Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.Audience.get -> string
+Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.Exp.get -> long
+Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.Iat.get -> long
+Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.Nbf.get -> long

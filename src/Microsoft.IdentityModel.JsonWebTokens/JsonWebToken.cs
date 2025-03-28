@@ -52,6 +52,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal string _tId;
         internal string _tenantId;
         internal DateTime _ts;
+        internal string _aud;
         internal long? _exp;
         internal DateTime? _expDateTime;
         internal long? _iat;
@@ -262,6 +263,67 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 _tenantId ??= Payload.GetStringValue(JwtRegisteredClaimNames.TenantId);
                 return _tenantId;
+            }
+        }
+
+        /// <summary>
+        /// Gets the 'aud' claim from the payload.
+        /// </summary>
+        internal string Audience
+        {
+            get
+            {
+                _aud ??= Payload.GetStringValue(JwtRegisteredClaimNames.Aud);
+                return _aud;
+            }
+        }
+
+        /// <summary>
+        /// Gets the 'exp' claim from the payload.
+        /// </summary>
+        internal long Exp
+        {
+            get
+            {
+                if (_exp == null)
+                {
+                    return default;
+                }
+                return (long)_exp;
+            }
+        }
+
+        /// <summary>
+        /// Gets the 'iat' claim from the payload.
+        /// </summary>
+        internal long Iat
+        {
+            get
+            {
+                if (_iat == null)
+                {
+                    return default;
+                }
+                return (long)_iat;
+            }
+        }
+
+        /// <summary>
+        /// Gets the 'nbf' claim from the payload.
+        /// </summary>
+        /// <remarks>
+        /// This is used for Signed HTTP Requests that include an access token reference.
+        /// See: https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3
+        /// </remarks>
+        internal long Nbf
+        {
+            get
+            {
+                if (_nbf == null)
+                {
+                    return default;
+                }
+                return (long)_nbf;
             }
         }
 
