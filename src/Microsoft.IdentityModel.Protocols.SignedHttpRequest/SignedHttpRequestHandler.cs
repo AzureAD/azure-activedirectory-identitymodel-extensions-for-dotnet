@@ -726,10 +726,12 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         internal virtual void ValidateTsClaim(JsonWebToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
         {
             DateTime signedHttpRequestCreationTime = signedHttpRequest.Timestamp;
+
             if (signedHttpRequestCreationTime.Equals(DateTime.MinValue))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidTsClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.Ts))));
             DateTime utcNow = DateTime.UtcNow;
             DateTime signedHttpRequestExpirationTime = signedHttpRequestCreationTime.Add(signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.SignedHttpRequestLifetime);
+
             if (utcNow > signedHttpRequestExpirationTime)
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidTsClaimException(LogHelper.FormatInvariant(LogMessages.IDX23010, LogHelper.MarkAsNonPII(utcNow), LogHelper.MarkAsNonPII(signedHttpRequestExpirationTime))));
         }
@@ -792,6 +794,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             // This MAY include the port separated from the host by a colon in host:port format.
             var expectedUClaimValue = httpRequestUri.Host;
             var expectedUClaimValueIncludingPort = $"{expectedUClaimValue}:{httpRequestUri.Port}";
+
             if (!string.Equals(expectedUClaimValue, uClaimValue, StringComparison.OrdinalIgnoreCase) &&
                 !string.Equals(expectedUClaimValueIncludingPort, uClaimValue, StringComparison.OrdinalIgnoreCase))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidUClaimException(LogHelper.FormatInvariant(LogMessages.IDX23012, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.U), expectedUClaimValue, expectedUClaimValueIncludingPort, uClaimValue)));
@@ -991,6 +994,7 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
             string bClaim = signedHttpRequest.B;
             if (string.IsNullOrEmpty(bClaim))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidBClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.B))));
+
             string expectedBase64UrlEncodedHash;
             try
             {

@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
     /// <summary>
@@ -43,15 +44,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         #region properties relating to the payload
         // when constructing a JWT, these properties, when found, will be set
-        internal string _azp;
-        internal string _at;
-        internal string _m;
-        internal string _u;
-        internal string _p;
-        internal string _b;
-        internal string _tId;
-        internal string _tenantId;
-        internal DateTime _ts;
         internal string _aud;
         internal long? _exp;
         internal DateTime? _expDateTime;
@@ -66,6 +58,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal DateTime? _validFrom;
         internal DateTime? _validTo;
         #endregion
+
+        internal string _azp;
+        internal string _at;
+        internal string _m;
+        internal string _u;
+        internal string _p;
+        internal string _b;
+        internal string _tId;
+        internal string _tenantId;
+        internal DateTime _ts;
 
         /// <summary>
         /// Initializes a new instance of <see cref="JsonWebToken"/> from a string in JWS or JWE Compact serialized format.
