@@ -210,7 +210,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// See: <see href="https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims"/>.
         /// </summary>
         public const string ZoneInfo = "zoneinfo";
-
     }
 
     /// <summary>

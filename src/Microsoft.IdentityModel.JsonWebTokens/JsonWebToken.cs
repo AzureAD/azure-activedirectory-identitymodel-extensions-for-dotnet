@@ -58,7 +58,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal DateTime? _validFrom;
         internal DateTime? _validTo;
         #endregion
-
         internal string _aud;
 
         /// <summary>
