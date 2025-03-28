@@ -245,10 +245,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Gets the 'TId' claim from the payload.
         /// </summary>
-        /// <remarks>
-        /// This is used for Signed HTTP Requests that include an access token reference.
-        /// See: https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3
-        /// </remarks>
         internal string TId
         {
             get
@@ -260,10 +256,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <summary>
         /// Gets the 'TenantId' claim from the payload.
         /// </summary>
-        /// <remarks>
-        /// This is used for Signed HTTP Requests that include an access token reference.
-        /// See: https://datatracker.ietf.org/doc/html/draft-ietf-oauth-signed-http-request-03#section-3
-        /// </remarks>
         internal string TenantId
         {
             get
