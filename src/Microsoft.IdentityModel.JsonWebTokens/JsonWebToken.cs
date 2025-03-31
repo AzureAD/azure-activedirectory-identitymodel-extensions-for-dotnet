@@ -58,7 +58,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal DateTime? _validFrom;
         internal DateTime? _validTo;
         #endregion
-        internal string _aud;
 
         /// <summary>
         /// Initializes a new instance of <see cref="JsonWebToken"/> from a string in JWS or JWE Compact serialized format.
