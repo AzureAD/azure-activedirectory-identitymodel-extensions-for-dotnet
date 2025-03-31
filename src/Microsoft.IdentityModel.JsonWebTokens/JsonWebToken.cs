@@ -141,60 +141,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
         internal string ActualIssuer { get; set; }
 
-        /// <summary>
-        /// Gets the 'aud' claim from the payload.
-        /// </summary>
-        internal string Audience
-        {
-            get
-            {
-                _aud ??= Payload.GetStringValue(JwtRegisteredClaimNames.Aud);
-                return _aud;
-            }
-        }
-
-        /// <summary>
-        /// Gets the 'exp' claim from the payload.
-        /// </summary>
-        internal long Exp
-        {
-            get
-            {
-                _exp ??= ValidTo.Ticks;
-                return (long)_exp;
-            }
-        }
-
-        /// <summary>
-        /// Gets the 'iat' claim from the payload.
-        /// </summary>
-        internal long Iat
-        {
-            get
-            {
-                if (_iat == null)
-                {
-                    _iat ??= IssuedAt.Ticks;
-                }
-                return (long)_iat;
-            }
-        }
-
-        /// <summary>
-        /// Gets the 'nbf' claim from the payload.
-        /// </summary>
-        internal long Nbf
-        {
-            get
-            {
-                if (_nbf == null)
-                {
-                    _nbf ??= ValidFrom.Ticks;
-                }
-                return (long)_nbf;
-            }
-        }
-
         internal ClaimsIdentity ActorClaimsIdentity { get; set; }
 
         /// <summary>

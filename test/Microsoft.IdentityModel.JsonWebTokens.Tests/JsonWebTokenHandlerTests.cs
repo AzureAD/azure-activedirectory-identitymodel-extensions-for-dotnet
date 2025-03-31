@@ -1402,16 +1402,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             string issuer = jsonWebToken.Issuer;
             IdentityComparer.AreEqual(theoryData.ExpectedClaims["iss"], issuer, context);
 
-            string audience = jsonWebToken.Audience;
+            string audience = jsonWebToken.Payload.GetStringValue("aud");
             IdentityComparer.AreEqual(theoryData.ExpectedClaims["aud"], audience, context);
 
-            long exp = jsonWebToken.Exp;
+            long exp = EpochTime.GetIntDate(jsonWebToken.ValidTo);
             IdentityComparer.AreEqual(theoryData.ExpectedClaims["exp"], exp, context);
 
-            long iat = jsonWebToken.Iat;
+            long iat = EpochTime.GetIntDate(jsonWebToken.IssuedAt);
             IdentityComparer.AreEqual(theoryData.ExpectedClaims["iat"], iat, context);
 
-            long nbf = jsonWebToken.Nbf;
+            long nbf = EpochTime.GetIntDate(jsonWebToken.ValidFrom);
             IdentityComparer.AreEqual(theoryData.ExpectedClaims["nbf"], nbf, context);
 
             TestUtilities.AssertFailIfErrors(context);
