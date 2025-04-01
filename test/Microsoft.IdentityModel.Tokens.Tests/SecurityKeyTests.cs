@@ -2,8 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
@@ -216,33 +214,34 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
         // Tests a SecurityKey object, to ensure the InternalId is set exactly once when faced with concurrent calls.
         [Fact]
-        public void InternalId_ConcurrencyTest()
+        public async Task InternalId_ConcurrencyTest()
         {
             // Arrange
-            var numThreads = 10;
-            var barrier = new Barrier(numThreads);
+            var numTasks = 10;
+            var barrier = new Barrier(numTasks);
             var key = new CustomSecurityKey();
-            ConcurrentBag<string> internalIds = new();
-            List<Action> actions = [];
+            string[] internalIds = new string[numTasks];
+            Task[] tasks = new Task[numTasks];
 
-            for (int i = 0; i < numThreads; i++)
+            for (int i = 0; i < numTasks; i++)
             {
-                actions.Add(() =>
+                var index = i;
+                tasks[i] = Task.Run(() =>
                 {
                     barrier.SignalAndWait();
-                    internalIds.Add(key.InternalId);
+                    internalIds[index] = key.InternalId;
                 });
             }
 
             // Act
-            Parallel.Invoke(actions.ToArray());
+            await Task.WhenAll(tasks);
 
             // Assert
-            Assert.Equal(numThreads, internalIds.Count);
-            Assert.True(internalIds.TryTake(out var internalId));
-            foreach (var id in internalIds)
+            Assert.All(internalIds, id => Assert.NotNull(id));
+            var firstId = internalIds[0];
+            for (int i = 1; i < numTasks; i++)
             {
-                Assert.Same(internalId, id);
+                Assert.Same(firstId, internalIds[i]);
             }
         }
 

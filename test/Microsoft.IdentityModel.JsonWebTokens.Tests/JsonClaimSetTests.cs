@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
@@ -105,7 +104,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 
         // Tests a JsonClaimSet, to ensure the same List object is returned for concurrent calls to the Claims member.
         [Fact]
-        public void ValidJsonClaimSet_ConcurrencyTest()
+        public async Task ValidJsonClaimSet_ConcurrencyTest()
         {
             // Arrange
             var numThreads = 10;
@@ -116,27 +115,28 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 { "claim2", "value2" }
             };
             var jsonClaimSet = new JsonClaimSet(jsonClaims);
-            ConcurrentBag<List<Claim>> allClaims = new();
-            List<Action> actions = new List<Action>();
+            List<Claim>[] allClaims = new List<Claim>[numThreads];
+            Task[] tasks = new Task[numThreads];
 
-            for (int i = 0; i < numThreads; i++)
+            for (var i = 0; i < numThreads; i++)
             {
-                actions.Add(() =>
+                var index = i;
+                tasks[i] = (Task.Run(() =>
                 {
                     barrier.SignalAndWait();
-                    allClaims.Add(jsonClaimSet.Claims("claim1"));
-                });
+                    allClaims[index] = jsonClaimSet.Claims("claim1");
+                }));
             }
 
             // Act
-            Parallel.Invoke(actions.ToArray());
+            await Task.WhenAll(tasks);
 
             // Assert
-            Assert.Equal(numThreads, allClaims.Count);
-            Assert.True(allClaims.TryTake(out List<Claim> controlClaims));
-            foreach (var claims in allClaims)
+            Assert.All(allClaims, claims => Assert.NotNull(claims));
+            var firstClaims = allClaims[0];
+            for (var i = 1; i < numThreads; i++)
             {
-                Assert.Same(controlClaims, claims);
+                Assert.Same(firstClaims, allClaims[i]);
             }
         }
 

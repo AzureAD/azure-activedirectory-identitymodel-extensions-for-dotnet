@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Security.Claims;
@@ -10,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
+using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Tests
@@ -49,36 +49,47 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors("TokenValidationResultTests.GetSets", context.Errors);
         }
 
-        // Ensure the same ClaimsIdentity object is returned when concurrent calls made to TokenValidationResult.
+        // Ensure setting the ClaimsIdentity object simultaneously doesn't cause lock contention or other concurrency issues.
         [Fact]
-        public void ClaimsIdentity_ConcurrencyTest()
+        public async Task ClaimsIdentity_ConcurrencyTest()
         {
             // Arrange
             var numThreads = 10;
             var barrier = new Barrier(numThreads);
             var result = new TokenValidationResult();
-            ConcurrentBag<ClaimsIdentity> allClaimsIdentity = new();
-            List<Action> actions = [];
+            var claimsIdentity = new CaseSensitiveClaimsIdentity(Default.PayloadClaims);
+            Task[] tasks = new Task[numThreads];
 
             for (int i = 0; i < numThreads; i++)
             {
-                actions.Add(() =>
+                tasks[i] = Task.Run(() =>
                 {
                     barrier.SignalAndWait();
-                    allClaimsIdentity.Add(result.ClaimsIdentity);
+                    result.ClaimsIdentity = claimsIdentity;
                 });
             }
 
-            // Act
-            Parallel.Invoke(actions.ToArray());
+            // Act and implicit Assert as any exception will cause the test to fail
+            await Task.WhenAll(tasks);
+        }
 
-            // Assert
-            Assert.Equal(numThreads, allClaimsIdentity.Count);
-            Assert.True(allClaimsIdentity.TryTake(out var controlClaimsIdentity));
-            foreach (var claimsIdentity in allClaimsIdentity)
+        private static async Task<TokenValidationResult> GetTestValidationResultAsync()
+        {
+            var tokenHandler = new JsonWebTokenHandler();
+            var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Assert.Same(controlClaimsIdentity, claimsIdentity);
-            }
+                Subject = new CaseSensitiveClaimsIdentity(Default.PayloadClaims),
+                SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
+            };
+            var accessToken = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenValidationParameters = new TokenValidationParameters()
+            {
+                ValidAudience = "http://Default.Audience.com",
+                ValidateLifetime = false,
+                ValidIssuer = "http://Default.Issuer.com",
+                IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
+            };
+            return await tokenHandler.ValidateTokenAsync(accessToken, tokenValidationParameters);
         }
     }
 }

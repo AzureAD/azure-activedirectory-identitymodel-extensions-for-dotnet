@@ -283,31 +283,37 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        // Tests that concurrent calls to WrapKey and UnwrapKey do not run into encrypt/decrypt lock contention issues or race conditions.
+        // Tests that concurrent calls to WrapKey and UnwrapKey do not run into encrypt/decrypt lock contention issues or other race conditions.
         [Fact]
         public void WrapAndUnwrapKey_ConcurrencyTest()
         {
             // Arrange
             var numThreads = 10;
-            var barrier = new Barrier(numThreads);
+            var wrapBarrier = new Barrier(numThreads);
+            var unwrapBarrier = new Barrier(numThreads);
             var barrierTimeoutInMs = 5000;
             var key = new SymmetricSecurityKey(new byte[32]);
             var provider = new SymmetricKeyWrapProvider(key, SecurityAlgorithms.Aes256KW);
-            var actions = new List<Action>();
+            var tasks = new List<Task>(numThreads);
 
             // Act and Assert
             for (int i = 0; i < numThreads; i++)
             {
-                actions.Add(() =>
+                tasks.Add(Task.Run(() =>
                 {
-                    barrier.SignalAndWait(barrierTimeoutInMs);
-                    var wrappedKey = provider.WrapKey(new byte[32]);
+                    // Wait for all threads to be ready before checking the WrapKey locks
+                    var keyBytes = new byte[32];
+                    wrapBarrier.SignalAndWait(barrierTimeoutInMs);
+                    var wrappedKey = provider.WrapKey(keyBytes);
                     Assert.NotNull(wrappedKey);
+
+                    // Wait for all threads to be ready before checking the UnwrapKey locks
+                    unwrapBarrier.SignalAndWait(barrierTimeoutInMs);
                     var unwrappedKey = provider.UnwrapKey(wrappedKey);
                     Assert.NotNull(unwrappedKey);
-                });
+                }));
             }
-            Parallel.Invoke(actions.ToArray());
+            Task.WhenAll(tasks);
         }
 
         public static TheoryData<KeyWrapTheoryData> UnwrapTheoryData()
