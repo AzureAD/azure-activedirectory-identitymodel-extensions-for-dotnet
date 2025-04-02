@@ -4,12 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.TestUtils;
-using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
 namespace Microsoft.IdentityModel.Tokens.Tests
@@ -71,25 +69,6 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             // Act and implicit Assert as any exception will cause the test to fail
             await Task.WhenAll(tasks);
-        }
-
-        private static async Task<TokenValidationResult> GetTestValidationResultAsync()
-        {
-            var tokenHandler = new JsonWebTokenHandler();
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new CaseSensitiveClaimsIdentity(Default.PayloadClaims),
-                SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
-            };
-            var accessToken = tokenHandler.CreateToken(tokenDescriptor);
-            var tokenValidationParameters = new TokenValidationParameters()
-            {
-                ValidAudience = "http://Default.Audience.com",
-                ValidateLifetime = false,
-                ValidIssuer = "http://Default.Issuer.com",
-                IssuerSigningKey = KeyingMaterial.JsonWebKeyRsa256SigningCredentials.Key,
-            };
-            return await tokenHandler.ValidateTokenAsync(accessToken, tokenValidationParameters);
         }
     }
 }
