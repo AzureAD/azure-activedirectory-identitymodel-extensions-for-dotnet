@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Net.Http" Version="$(SystemNetHttp)"/>
+    <PackageReference Include="System.Net.Http" Version="$(SystemNetHttp)" />
   </ItemGroup>
 
   <ItemGroup>

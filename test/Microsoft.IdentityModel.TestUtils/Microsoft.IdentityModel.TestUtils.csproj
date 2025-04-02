@@ -15,7 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="System.Security.Claims" Version="$(SystemSecurityClaimsVersion)" />
-    <PackageReference Include="System.Net.Http" Version="$(SystemNetHttp)"/>
+    <PackageReference Include="System.Net.Http" Version="$(SystemNetHttp)" />
     <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" Version="$(MicrosoftExtensionsTimeProviderTestingVersion)" />
   </ItemGroup>
 

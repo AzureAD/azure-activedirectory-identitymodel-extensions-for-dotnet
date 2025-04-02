@@ -70,7 +70,6 @@ namespace Microsoft.IdentityModel.Tokens
 
         internal static bool UseRfcDefinitionOfEpkAndKid => _useRfcDefinitionOfEpkAndKid ??= (AppContext.TryGetSwitch(UseRfcDefinitionOfEpkAndKidSwitch, out bool isEnabled) && isEnabled);
 
-
         internal const string UpdateConfigAsBlockingSwitch = "Switch.Microsoft.IdentityModel.UpdateConfigAsBlocking";
 
         private static bool? _updateConfigAsBlockingCall;
@@ -79,6 +78,10 @@ namespace Microsoft.IdentityModel.Tokens
         /// Unused, part of a previous release. This is a friend, so we cannot remove.
         /// </summary>
         internal static bool UpdateConfigAsBlocking => _updateConfigAsBlockingCall ??= (AppContext.TryGetSwitch(UpdateConfigAsBlockingSwitch, out bool blockingCall) && blockingCall);
+
+        private static bool? s_doNotScrubExceptions;
+        internal const string DoNotScrubExceptionsSwitch = "Switch.Microsoft.IdentityModel.DoNotScrubExceptions";
+        internal static bool DoNotScrubExceptions => s_doNotScrubExceptions ??= (AppContext.TryGetSwitch(DoNotScrubExceptionsSwitch, out bool doNotScrubExceptions) && doNotScrubExceptions);
 
         /// <summary>
         /// Used for testing to reset all switches to its default value.
@@ -96,6 +99,9 @@ namespace Microsoft.IdentityModel.Tokens
 
             _useRfcDefinitionOfEpkAndKid = null;
             AppContext.SetSwitch(UseRfcDefinitionOfEpkAndKidSwitch, false);
+
+            s_doNotScrubExceptions = null;
+            AppContext.SetSwitch(DoNotScrubExceptionsSwitch, false);
         }
     }
 }

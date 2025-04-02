@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Text.RegularExpressions" Version="$(SystemTextRegularExpressions)"/>
+    <PackageReference Include="System.Text.RegularExpressions" Version="$(SystemTextRegularExpressions)" />
   </ItemGroup>
 
 </Project>

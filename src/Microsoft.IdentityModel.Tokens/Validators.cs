@@ -319,13 +319,19 @@ namespace Microsoft.IdentityModel.Tokens
                 }
             }
 
-            SecurityTokenInvalidIssuerException ex = new SecurityTokenInvalidIssuerException(
-                LogHelper.FormatInvariant(LogMessages.IDX10205,
-                    LogHelper.MarkAsNonPII(issuer),
-                    LogHelper.MarkAsNonPII(validationParameters.ValidIssuer ?? "null"),
-                    LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers)),
-                    LogHelper.MarkAsNonPII(configuration?.Issuer)))
-            { InvalidIssuer = issuer };
+            SecurityTokenInvalidIssuerException ex;
+
+            if (AppContextSwitches.DoNotScrubExceptions)
+                ex = new(
+                    LogHelper.FormatInvariant(LogMessages.IDX10205,
+                        LogHelper.MarkAsNonPII(issuer),
+                        LogHelper.MarkAsNonPII(validationParameters.ValidIssuer ?? "null"),
+                        LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidIssuers)),
+                        LogHelper.MarkAsNonPII(configuration?.Issuer)))
+                { InvalidIssuer = issuer };
+            else
+                ex = new SecurityTokenInvalidIssuerException(
+                    LogHelper.FormatInvariant(LogMessages.IDX10205E));
 
             if (!validationParameters.LogValidationExceptions)
                 throw ex;

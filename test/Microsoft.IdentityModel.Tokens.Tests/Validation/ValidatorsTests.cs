@@ -278,6 +278,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
         [Theory, MemberData(nameof(IssuerDataSet), DisableDiscoveryEnumeration = true)]
         public void Issuer(string issuer, SecurityToken securityToken, TokenValidationParameters validationParameters, BaseConfiguration configuration, ExpectedException ee)
         {
+            AppContext.SetSwitch(AppContextSwitches.DoNotFailOnMissingTidSwitch, true);
             try
             {
                 Validators.ValidateIssuer(issuer, securityToken, validationParameters, configuration);
@@ -297,18 +298,19 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                 List<string> invalidIssuers = new List<string> { "", NotDefault.Issuer };
                 Dictionary<string, object> properties = new Dictionary<string, object> { { "InvalidIssuer", Default.Issuer } };
 
-                var dataset = new TheoryData<string, SecurityToken, TokenValidationParameters, BaseConfiguration, ExpectedException>();
-
-                dataset.Add(null, null, null, null, ExpectedException.ArgumentNullException());
-                dataset.Add(null, null, new TokenValidationParameters { ValidateIssuer = false }, null, ExpectedException.NoExceptionExpected);
-                dataset.Add(null, null, new TokenValidationParameters(), null, ExpectedException.SecurityTokenInvalidIssuerException("IDX10211:", propertiesExpected: new Dictionary<string, object> { { "InvalidIssuer", null } }));
-                dataset.Add(Default.Issuer, null, new TokenValidationParameters(), null, ExpectedException.SecurityTokenInvalidIssuerException("IDX10204:", propertiesExpected: properties));
-                dataset.Add(Default.Issuer, null, new TokenValidationParameters { ValidIssuer = NotDefault.Issuer }, null, ExpectedException.SecurityTokenInvalidIssuerException("IDX10205:", propertiesExpected: properties));
-                dataset.Add(Default.Issuer, null, new TokenValidationParameters { ValidIssuers = invalidIssuers }, null, ExpectedException.SecurityTokenInvalidIssuerException("IDX10205:", propertiesExpected: properties));
-                dataset.Add(Default.Issuer, null, new TokenValidationParameters { ValidIssuer = Default.Issuer }, null, ExpectedException.NoExceptionExpected);
-                dataset.Add(Default.Issuer, null, new TokenValidationParameters { ValidIssuers = issuers }, null, ExpectedException.NoExceptionExpected);
-                dataset.Add(Default.Issuer, null, new TokenValidationParameters { ValidIssuer = NotDefault.Issuer }, new OpenIdConnectConfiguration { Issuer = Default.Issuer }, ExpectedException.NoExceptionExpected);
-                dataset.Add(Default.Issuer, null, new TokenValidationParameters { ValidIssuers = invalidIssuers }, new OpenIdConnectConfiguration { Issuer = Default.Issuer }, ExpectedException.NoExceptionExpected);
+                var dataset = new TheoryData<string, SecurityToken, TokenValidationParameters, BaseConfiguration, ExpectedException>
+                {
+                    { null, null, null, null, ExpectedException.ArgumentNullException() },
+                    { null, null, new TokenValidationParameters { ValidateIssuer = false }, null, ExpectedException.NoExceptionExpected },
+                    { null, null, new TokenValidationParameters(), null, ExpectedException.SecurityTokenInvalidIssuerException("IDX10211:", propertiesExpected: new Dictionary<string, object> { { "InvalidIssuer", null } }) },
+                    { Default.Issuer, null, new TokenValidationParameters(), null, ExpectedException.SecurityTokenInvalidIssuerException("IDX10204:", propertiesExpected: properties) },
+                    { Default.Issuer, null, new TokenValidationParameters { ValidIssuer = NotDefault.Issuer }, null, ExpectedException.SecurityTokenInvalidIssuerException("IDX10205:", propertiesExpected: properties) },
+                    { Default.Issuer, null, new TokenValidationParameters { ValidIssuers = invalidIssuers }, null, ExpectedException.SecurityTokenInvalidIssuerException("IDX10205:", propertiesExpected: properties) },
+                    { Default.Issuer, null, new TokenValidationParameters { ValidIssuer = Default.Issuer }, null, ExpectedException.NoExceptionExpected },
+                    { Default.Issuer, null, new TokenValidationParameters { ValidIssuers = issuers }, null, ExpectedException.NoExceptionExpected },
+                    { Default.Issuer, null, new TokenValidationParameters { ValidIssuer = NotDefault.Issuer }, new OpenIdConnectConfiguration { Issuer = Default.Issuer }, ExpectedException.NoExceptionExpected },
+                    { Default.Issuer, null, new TokenValidationParameters { ValidIssuers = invalidIssuers }, new OpenIdConnectConfiguration { Issuer = Default.Issuer }, ExpectedException.NoExceptionExpected }
+                };
 
                 return dataset;
             }
