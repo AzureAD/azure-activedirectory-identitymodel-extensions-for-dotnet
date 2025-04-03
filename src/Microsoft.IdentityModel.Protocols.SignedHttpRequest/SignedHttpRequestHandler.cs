@@ -725,10 +725,9 @@ namespace Microsoft.IdentityModel.Protocols.SignedHttpRequest
         /// </remarks>
         internal virtual void ValidateTsClaim(JsonWebToken signedHttpRequest, SignedHttpRequestValidationContext signedHttpRequestValidationContext)
         {
-            DateTime signedHttpRequestCreationTime = signedHttpRequest.Payload.GetDateTime(SignedHttpRequestClaimTypes.Ts);
-
-            if (signedHttpRequestCreationTime.Equals(DateTime.MinValue))
+            if (!signedHttpRequest.Payload.TryGetValue<long>(SignedHttpRequestClaimTypes.Ts, out long tsLongVal))
                 throw LogHelper.LogExceptionMessage(new SignedHttpRequestInvalidTsClaimException(LogHelper.FormatInvariant(LogMessages.IDX23003, LogHelper.MarkAsNonPII(SignedHttpRequestClaimTypes.Ts))));
+            DateTime signedHttpRequestCreationTime = EpochTime.DateTime(tsLongVal);
             DateTime utcNow = DateTime.UtcNow;
             DateTime signedHttpRequestExpirationTime = signedHttpRequestCreationTime.Add(signedHttpRequestValidationContext.SignedHttpRequestValidationParameters.SignedHttpRequestLifetime);
 
