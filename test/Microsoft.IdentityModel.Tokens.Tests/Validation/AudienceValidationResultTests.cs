@@ -107,9 +107,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ValidAudiences = ["audience1"],
                         Result = new ValidationError(
                             new MessageDetail(
-                                LogMessages.IDX10215,
-                                LogHelper.MarkAsNonPII(string.Empty),
-                                LogHelper.MarkAsNonPII("audience1")),
+                                LogMessages.IDX10215S),
                             ValidationFailureType.AudienceValidationFailed,
                             typeof(SecurityTokenInvalidAudienceException),
                             null)
@@ -122,9 +120,7 @@ namespace Microsoft.IdentityModel.Tokens.Validation.Tests
                         ValidAudiences = ["audience1"],
                         Result = new ValidationError(
                             new MessageDetail(
-                                LogMessages.IDX10215,
-                                LogHelper.MarkAsNonPII("    "),
-                                LogHelper.MarkAsNonPII("audience1")),
+                                LogMessages.IDX10215S),
                             ValidationFailureType.AudienceValidationFailed,
                             typeof(SecurityTokenInvalidAudienceException),
                             null)
