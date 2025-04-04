@@ -738,20 +738,20 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             var configuration = await configManager.GetConfigurationAsync(CancellationToken.None);
 
             // force a refresh by setting internal field
-            TestUtilities.SetField(configManager, "_syncAfter", DateTime.UtcNow.Subtract(TimeSpan.FromHours(1)));
+            TestUtilities.SetField(configManager, "_syncAfter", DateTimeOffset.UtcNow.Subtract(TimeSpan.FromHours(1)));
             configuration = await configManager.GetConfigurationAsync(CancellationToken.None);
 
             if (!blocking)
                 WaitOrFail(resetEvent);
 
             // check that _syncAfter is greater than DateTimeOffset.UtcNow + AutomaticRefreshInterval
-            DateTime syncAfter = (DateTime)TestUtilities.GetField(configManager, "_syncAfter");
+            DateTimeOffset syncAfter = (DateTimeOffset)TestUtilities.GetField(configManager, "_syncAfter");
             if (syncAfter < minimumRefreshInterval)
                 context.Diffs.Add($"(AutomaticRefreshInterval) syncAfter '{syncAfter}' < DateTimeOffset.UtcNow + configManager.AutomaticRefreshInterval: '{minimumRefreshInterval}'.");
 
             // make same check for RequestRefresh
             // force a refresh by setting internal field
-            TestUtilities.SetField(configManager, "_lastRequestRefresh", DateTime.UtcNow.Subtract(TimeSpan.FromHours(1)));
+            TestUtilities.SetField(configManager, "_lastRequestRefresh", DateTimeOffset.UtcNow.Subtract(TimeSpan.FromHours(1)));
 
             configManager.RequestRefresh();
 
@@ -775,7 +775,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 WaitOrFail(resetEvent);
 
             // check that _syncAfter is greater than DateTimeOffset.UtcNow + AutomaticRefreshInterval
-            syncAfter = (DateTime)TestUtilities.GetField(configManager, "_syncAfter");
+            syncAfter = (DateTimeOffset)TestUtilities.GetField(configManager, "_syncAfter");
             if (syncAfter < minimumRefreshInterval)
                 context.Diffs.Add($"(RequestRefresh) syncAfter '{syncAfter}' < DateTimeOffset.UtcNow + configManager.AutomaticRefreshInterval: '{minimumRefreshInterval}'.");
 
@@ -807,7 +807,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
 
             var configuration = await configManager.GetConfigurationAsync(CancellationToken.None);
 
-            TestUtilities.SetField(configManager, "_lastRequestRefresh", DateTime.UtcNow.Subtract(TimeSpan.FromHours(1)));
+            TestUtilities.SetField(configManager, "_lastRequestRefresh", DateTimeOffset.UtcNow.Subtract(TimeSpan.FromHours(1)));
             configManager.MetadataAddress = "http://127.0.0.1";
             configManager.RequestRefresh();
 

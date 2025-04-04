@@ -104,6 +104,7 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
             bool blocking = false)
         {
             var testTelemetryClient = new MockTelemetryClient();
+            var timeProvider = new FakeTimeProvider();
 
             var configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
                 theoryData.MetadataAddress,
@@ -111,13 +112,11 @@ namespace Microsoft.IdentityModel.Protocols.OpenIdConnect.Tests
                 theoryData.DocumentRetriever,
                 theoryData.ConfigurationValidator)
             {
-                TelemetryClient = testTelemetryClient
+                TelemetryClient = testTelemetryClient,
+                TimeProvider = timeProvider,
             };
 
             AutoResetEvent resetEvent = ConfigurationManagerTests.SetupResetEvent(configurationManager);
-
-            var timeProvider = new FakeTimeProvider();
-            TestUtilities.SetField(configurationManager, "_timeProvider", timeProvider);
 
             OpenIdConnectConfiguration firstConfig = null;
             OpenIdConnectConfiguration secondConfig = null;
