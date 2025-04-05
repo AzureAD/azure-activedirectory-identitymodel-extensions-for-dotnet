@@ -38,5 +38,7 @@ namespace System.IdentityModel.Tokens.Jwt.Tests
         public bool SetupIssuerLkg { get; set; }
 
         public BaseConfigurationManager SetupIssuerLkgConfigurationManager { get; set; }
+
+        internal bool DoNotScrubErrorMessages { get; set; }
     }
 }
