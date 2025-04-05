@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System;
@@ -244,6 +244,17 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Should not be used. Exists only for backwards compatibility.
+        /// Check whether the given exception type is recoverable by LKG.
+        /// </summary>
+        /// <param name="exception">The exception to check.</param>
+        /// <returns><c>true</c> if the exception is certain types of exceptions otherwise, <c>false</c>.</returns>
+        internal static bool IsRecoverableException(Exception exception)
+        {
+            return IsRecoverableException(exception, false);
+        }
+
+        /// <summary>
         /// Check whether the given exception type is recoverable by LKG.
         /// Decryption error is only recoverable, if the configuration has decryption keys in it.
         /// </summary>
@@ -289,6 +300,17 @@ namespace Microsoft.IdentityModel.Tokens
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Should not be used. Exists only for backwards compatibility.
+        /// Check whether the given exception type is recoverable by LKG.
+        /// </summary>
+        /// <param name="exceptionType">The exception type to check</param>
+        /// <returns><c>true</c> if the exception is certain types of exceptions otherwise, <c>false</c>.</returns>
+        internal static bool IsRecoverableExceptionType(Type exceptionType)
+        {
+            return IsRecoverableExceptionType(exceptionType, false);
         }
 
         /// <summary>
