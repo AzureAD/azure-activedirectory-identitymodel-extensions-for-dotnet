@@ -236,6 +236,7 @@ Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ValidateTokenAsync(str
 Microsoft.IdentityModel.JsonWebTokens.Results.SignatureValidationResult
 Microsoft.IdentityModel.JsonWebTokens.Results.SignatureValidationResult.SignatureValidationResult(bool isValid, Microsoft.IdentityModel.Tokens.ValidationFailureType validationFailureType) -> void
 Microsoft.IdentityModel.JsonWebTokens.Results.SignatureValidationResult.SignatureValidationResult(Microsoft.IdentityModel.Tokens.ValidationFailureType validationFailure, Microsoft.IdentityModel.Tokens.ExceptionDetail exceptionDetail) -> void
+Microsoft.IdentityModel.Protocols.SignedHttpRequest.ConfirmationClaimTypesUtf8Bytes
 Microsoft.IdentityModel.Telemetry.ITelemetryClient
 Microsoft.IdentityModel.Telemetry.ITelemetryClient.IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus) -> void
 Microsoft.IdentityModel.Telemetry.ITelemetryClient.IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, System.Exception exception) -> void
@@ -306,6 +307,10 @@ Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.SecurityToken.set -> 
 Microsoft.IdentityModel.Tokens.CertificateHelper
 Microsoft.IdentityModel.Tokens.CertificateHelper.CertificateHelper() -> void
 Microsoft.IdentityModel.Tokens.ClaimsIdentityFactory
+Microsoft.IdentityModel.Tokens.Cnf.Jku.set -> void
+Microsoft.IdentityModel.Tokens.Cnf.JsonWebKey.set -> void
+Microsoft.IdentityModel.Tokens.Cnf.Jwe.set -> void
+Microsoft.IdentityModel.Tokens.Cnf.Kid.set -> void
 Microsoft.IdentityModel.Tokens.Cng
 Microsoft.IdentityModel.Tokens.Cng.OpenAlgorithmProviderFlags
 Microsoft.IdentityModel.Tokens.Cng.OpenAlgorithmProviderFlags.BCRYPT_ALG_HANDLE_HMAC_FLAG = 8 -> Microsoft.IdentityModel.Tokens.Cng.OpenAlgorithmProviderFlags
