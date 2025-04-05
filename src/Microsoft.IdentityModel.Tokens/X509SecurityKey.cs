@@ -5,6 +5,9 @@ using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.Logging;
+#if NET9_0_OR_GREATER
+using System.Threading;
+#endif
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -16,8 +19,11 @@ namespace Microsoft.IdentityModel.Tokens
         AsymmetricAlgorithm _privateKey;
         bool _privateKeyAvailabilityDetermined;
         AsymmetricAlgorithm _publicKey;
-        object _thisLock = new Object();
-
+#if NET9_0_OR_GREATER
+        Lock _thisLock = new();
+#else
+        object _thisLock = new();
+#endif
         internal X509SecurityKey(JsonWebKey webKey)
             : base(webKey)
         {
@@ -110,12 +116,14 @@ namespace Microsoft.IdentityModel.Tokens
                 return _publicKey;
             }
         }
-
+#if NET9_0_OR_GREATER
+        Lock ThisLock => _thisLock;
+#else
         object ThisLock
         {
             get { return _thisLock; }
         }
-
+#endif
         /// <summary>
         /// Gets a bool indicating if a private key exists.
         /// </summary>
