@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Threading;
 using Microsoft.IdentityModel.Abstractions;
@@ -467,6 +468,55 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
+        /// Similar to <see cref="RepresentAsAsymmetricPublicJwk"/> but includes more fields.
+        /// </summary>
+        internal JsonObject RepresentAsAsymmetricPublicJwkForDpop()
+        {
+            if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.EllipticCurve))
+            {
+                if (string.IsNullOrEmpty(Crv))
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10708, LogHelper.MarkAsNonPII(nameof(Crv)))));
+
+                if (string.IsNullOrEmpty(X))
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10708, LogHelper.MarkAsNonPII(nameof(X)))));
+
+                if (string.IsNullOrEmpty(Y))
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10708, LogHelper.MarkAsNonPII(nameof(Y)))));
+
+                return new JsonObject
+                {
+                    [JsonWebKeyParameterNames.Crv] = Crv,
+                    [JsonWebKeyParameterNames.Kty] = Kty,
+                    [JsonWebKeyParameterNames.X] = X,
+                    [JsonWebKeyParameterNames.Y] = Y,
+                };
+            }
+            else if (string.Equals(Kty, JsonWebAlgorithmsKeyTypes.RSA))
+            {
+                if (string.IsNullOrEmpty(E))
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10709, LogHelper.MarkAsNonPII(nameof(E)))));
+
+                if (string.IsNullOrEmpty(N))
+                    throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10709, LogHelper.MarkAsNonPII(nameof(N)))));
+
+
+                return new JsonObject
+                {
+                    // Alg isn't always set, work around for demo
+                    [JsonWebKeyParameterNames.Alg] = "RS256",
+                    [JsonWebKeyParameterNames.E] = E,
+                    [JsonWebKeyParameterNames.Kty] = Kty,
+                    [JsonWebKeyParameterNames.Kid] = Kid,
+                    [JsonWebKeyParameterNames.N] = N,
+                    [JsonWebKeyParameterNames.Use] = "sig",
+                };
+            }
+            else
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10707, LogHelper.MarkAsNonPII(nameof(Kty)), LogHelper.MarkAsNonPII(string.Join(", ", JsonWebAlgorithmsKeyTypes.EllipticCurve, JsonWebAlgorithmsKeyTypes.RSA)), LogHelper.MarkAsNonPII(nameof(Kty)))));
+
+        }
+
+        /// <summary>
         /// Creates a JsonWebKey representation of an asymmetric public key.
         /// </summary>
         /// <returns>JsonWebKey representation of an asymmetric public key.</returns>
@@ -501,7 +551,7 @@ namespace Microsoft.IdentityModel.Tokens
                     throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(LogMessages.IDX10709, LogHelper.MarkAsNonPII(nameof(N)))));
 
                 return $@"{kid}" +
-                        $@"""{JsonWebKeyParameterNames.E}"":""{E}""," +
+                        $@"{{""{JsonWebKeyParameterNames.E}"":""{E}""," +
                         $@"""{JsonWebKeyParameterNames.Kty}"":""{Kty}""," +
                         $@"""{JsonWebKeyParameterNames.N}"":""{N}""}}";
             }
