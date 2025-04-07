@@ -151,13 +151,24 @@ namespace Microsoft.IdentityModel.Protocols
         /// <param name="cancel">CancellationToken</param>
         /// <returns>Configuration of type <typeparamref name="T"/>.</returns>
         /// <remarks>
+        /// <para>
         /// If the time since the last call is less than <see cref="BaseConfigurationManager.AutomaticRefreshInterval"/>
         /// then <see cref="IConfigurationRetriever{T}.GetConfigurationAsync"/> is not called and the current Configuration is returned.
-        /// By default, this method blocks until the configuration is retrieved the first time. After the configuration is retrieved,
+        /// By default, this method blocks until the configuration is retrieved the first time. After the configuration was retrieved once,
         /// updates will happen in the background. Failures to retrieve the configuration on the background thread will be logged.
+        /// </para>
+        /// <para>
         /// If this operation is configured to be blocking through the switch 'Switch.Microsoft.IdentityModel.UpdateConfigAsBlocking'
-        /// then this method will block when the configuration needs to be updated or hasn't been retrieved. If the configuration
-        /// is unable to be retrieved, an exception will be thrown.
+        /// then this method will block each time the configuration needs to be updated or hasn't been retrieved. If the configuration
+        /// cannot be initially retrieved an exception will be thrown. If the configuration has been retrieved, but cannot be updated,
+        /// then the exception will be logged and the current configuration will be returned.
+        /// </para>
+        /// <para>
+        /// By using the app context switch you choose what works best for you when there is a signing key update:
+        /// either block requests from being validated until the new key is retrieved, or allow requests to be validated
+        /// with the current key until the new key is retrieved. If blocking, a service receiving high concurrent request
+        /// may experience thread starvation.
+        /// </para>
         /// </remarks>
         public virtual async Task<T> GetConfigurationAsync(CancellationToken cancel)
         {
