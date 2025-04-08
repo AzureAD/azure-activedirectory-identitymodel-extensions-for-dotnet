@@ -81,7 +81,7 @@ namespace Microsoft.IdentityModel.Tokens
         internal static bool UpdateConfigAsBlocking => _updateConfigAsBlockingCall ??= (AppContext.TryGetSwitch(UpdateConfigAsBlockingSwitch, out bool blockingCall) && blockingCall);
 
         /// <summary>
-        /// When enabled, some exceptions and log messages will contain additional details. Enable only for debugging purposes.
+        /// When enabled, some exceptions and log messages will contain additional details. Enable temporarily only for debugging purposes.
         /// </summary>
         internal const string DoNotScrubExceptionsSwitch = "Switch.Microsoft.IdentityModel.DoNotScrubExceptions";
         private static bool? _doNotScrubExceptions;
