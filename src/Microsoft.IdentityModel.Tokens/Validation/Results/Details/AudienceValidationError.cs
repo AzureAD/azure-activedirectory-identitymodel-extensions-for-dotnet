@@ -47,7 +47,9 @@ namespace Microsoft.IdentityModel.Tokens
         {
             if (ExceptionType == typeof(SecurityTokenInvalidAudienceException))
             {
-                var exception = new SecurityTokenInvalidAudienceException(MessageDetail.Message, InnerException) { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(TokenAudiences) };
+                var exception = TokenAudiences != null ?
+                    new SecurityTokenInvalidAudienceException(MessageDetail.Message, InnerException) { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(TokenAudiences) } :
+                    new SecurityTokenInvalidAudienceException(MessageDetail.Message, InnerException);
                 exception.SetValidationError(this);
 
                 return exception;

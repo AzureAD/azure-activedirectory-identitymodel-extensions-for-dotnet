@@ -85,6 +85,13 @@ namespace Microsoft.IdentityModel.Tokens
         internal static bool UpdateConfigAsBlocking => _updateConfigAsBlockingCall ??= (AppContext.TryGetSwitch(UpdateConfigAsBlockingSwitch, out bool blockingCall) && blockingCall);
 
         /// <summary>
+        /// When enabled, some exceptions and log messages will contain additional details. Enable temporarily only for debugging purposes.
+        /// </summary>
+        internal const string DoNotScrubExceptionsSwitch = "Switch.Microsoft.IdentityModel.DoNotScrubExceptions";
+        private static bool? _doNotScrubExceptions;
+        internal static bool DoNotScrubExceptions => _doNotScrubExceptions ??= (AppContext.TryGetSwitch(DoNotScrubExceptionsSwitch, out bool doNotScrubExceptions) && doNotScrubExceptions);
+
+        /// <summary>
         /// Used for testing to reset all switches to its default value.
         /// </summary>
         internal static void ResetAllSwitches()
@@ -103,6 +110,9 @@ namespace Microsoft.IdentityModel.Tokens
 
             _updateConfigAsBlockingCall = null;
             AppContext.SetSwitch(UpdateConfigAsBlockingSwitch, false);
+
+            _doNotScrubExceptions = null;
+            AppContext.SetSwitch(DoNotScrubExceptionsSwitch, false);
         }
     }
 }

@@ -117,12 +117,18 @@ namespace Microsoft.IdentityModel.Tokens
             if (AudienceIsValid(audiences, validationParameters, validationParametersAudiences))
                 return;
 
-            SecurityTokenInvalidAudienceException ex = new SecurityTokenInvalidAudienceException(
-                LogHelper.FormatInvariant(LogMessages.IDX10214,
-                    LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(audiences)),
-                    LogHelper.MarkAsNonPII(validationParameters.ValidAudience ?? "null"),
-                    LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences))))
-            { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences) };
+            SecurityTokenInvalidAudienceException ex;
+
+            if (AppContextSwitches.DoNotScrubExceptions)
+                ex = new SecurityTokenInvalidAudienceException(
+                    LogHelper.FormatInvariant(LogMessages.IDX10214,
+                        LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(audiences)),
+                        LogHelper.MarkAsNonPII(validationParameters.ValidAudience ?? "null"),
+                        LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences))))
+                { InvalidAudience = Utility.SerializeAsSingleCommaDelimitedString(audiences) };
+            else
+                ex = new SecurityTokenInvalidAudienceException(
+                    LogHelper.FormatInvariant(LogMessages.IDX10214S));
 
             if (!validationParameters.LogValidationExceptions)
                 throw ex;

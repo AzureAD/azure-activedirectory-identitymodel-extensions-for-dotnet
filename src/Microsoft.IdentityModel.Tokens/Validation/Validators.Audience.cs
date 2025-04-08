@@ -86,16 +86,27 @@ namespace Microsoft.IdentityModel.Tokens
                 return validAudience;
 
             // TODO we shouldn't be serializing here.
-            return new AudienceValidationError(
-                new MessageDetail(
-                    LogMessages.IDX10215,
-                    LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(tokenAudiences)),
-                    LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences))),
-                ValidationFailureType.AudienceValidationFailed,
-                typeof(SecurityTokenInvalidAudienceException),
-                ValidationError.GetCurrentStackFrame(),
-                tokenAudiences,
-                validationParameters.ValidAudiences);
+
+            if (AppContextSwitches.DoNotScrubExceptions)
+                return new AudienceValidationError(
+                    new MessageDetail(
+                        LogMessages.IDX10215,
+                        LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(tokenAudiences)),
+                        LogHelper.MarkAsNonPII(Utility.SerializeAsSingleCommaDelimitedString(validationParameters.ValidAudiences))),
+                    ValidationFailureType.AudienceValidationFailed,
+                    typeof(SecurityTokenInvalidAudienceException),
+                    ValidationError.GetCurrentStackFrame(),
+                    tokenAudiences,
+                    validationParameters.ValidAudiences);
+            else
+                return new AudienceValidationError(
+                    new MessageDetail(
+                        LogMessages.IDX10215S),
+                    ValidationFailureType.AudienceValidationFailed,
+                    typeof(SecurityTokenInvalidAudienceException),
+                    ValidationError.GetCurrentStackFrame(),
+                    null,
+                    null);
         }
 
         private static string? ValidTokenAudience(IList<string> tokenAudiences, IList<string> validAudiences, bool ignoreTrailingSlashWhenValidatingAudience)
