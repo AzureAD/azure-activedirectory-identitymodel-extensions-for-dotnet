@@ -47,7 +47,9 @@ const Microsoft.IdentityModel.Tokens.LogMessages.IDX10209 = "IDX10209: Token has
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10211 = "IDX10211: Unable to validate issuer. The 'issuer' parameter is null or whitespace." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10212 = "IDX10212: Issuer validation failed. Issuer: '{0}'. Did not match any: validationParameters.ValidIssuers: '{1}' or validationParameters.ConfigurationManager.CurrentConfiguration.Issuer: '{2}'. For more details, see https://aka.ms/IdentityModel/issuer-validation. " -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10214 = "IDX10214: Audience validation failed. Audiences: '{0}'. Did not match: validationParameters.ValidAudience: '{1}' or validationParameters.ValidAudiences: '{2}'." -> string
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10214S = "IDX10214: Audience validation failed. See https://aka.ms/identitymodel/app-context-switches" -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10215 = "IDX10215: Audience validation failed. Audiences: '{0}'. Did not match: validationParameters.ValidAudiences: '{1}'." -> string
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10215S = "IDX10215: Audience validation failed. See https://aka.ms/identitymodel/app-context-switches" -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10222 = "IDX10222: Lifetime validation failed. The token is not yet valid. ValidFrom (UTC): '{0}', Current time (UTC): '{1}'." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10223 = "IDX10223: Lifetime validation failed. The token is expired. ValidTo (UTC): '{0}', Current time (UTC): '{1}'." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10224 = "IDX10224: Lifetime validation failed. The NotBefore (UTC): '{0}' is after Expires (UTC): '{1}'." -> string
@@ -236,6 +238,7 @@ Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ValidateTokenAsync(str
 Microsoft.IdentityModel.JsonWebTokens.Results.SignatureValidationResult
 Microsoft.IdentityModel.JsonWebTokens.Results.SignatureValidationResult.SignatureValidationResult(bool isValid, Microsoft.IdentityModel.Tokens.ValidationFailureType validationFailureType) -> void
 Microsoft.IdentityModel.JsonWebTokens.Results.SignatureValidationResult.SignatureValidationResult(Microsoft.IdentityModel.Tokens.ValidationFailureType validationFailure, Microsoft.IdentityModel.Tokens.ExceptionDetail exceptionDetail) -> void
+Microsoft.IdentityModel.Protocols.SignedHttpRequest.ConfirmationClaimTypesUtf8Bytes
 Microsoft.IdentityModel.Telemetry.ITelemetryClient
 Microsoft.IdentityModel.Telemetry.ITelemetryClient.IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus) -> void
 Microsoft.IdentityModel.Telemetry.ITelemetryClient.IncrementConfigurationRefreshRequestCounter(string metadataAddress, string operationStatus, System.Exception exception) -> void
@@ -306,6 +309,10 @@ Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.SecurityToken.set -> 
 Microsoft.IdentityModel.Tokens.CertificateHelper
 Microsoft.IdentityModel.Tokens.CertificateHelper.CertificateHelper() -> void
 Microsoft.IdentityModel.Tokens.ClaimsIdentityFactory
+Microsoft.IdentityModel.Tokens.Cnf.Jku.set -> void
+Microsoft.IdentityModel.Tokens.Cnf.JsonWebKey.set -> void
+Microsoft.IdentityModel.Tokens.Cnf.Jwe.set -> void
+Microsoft.IdentityModel.Tokens.Cnf.Kid.set -> void
 Microsoft.IdentityModel.Tokens.Cng
 Microsoft.IdentityModel.Tokens.Cng.OpenAlgorithmProviderFlags
 Microsoft.IdentityModel.Tokens.Cng.OpenAlgorithmProviderFlags.BCRYPT_ALG_HANDLE_HMAC_FLAG = 8 -> Microsoft.IdentityModel.Tokens.Cng.OpenAlgorithmProviderFlags

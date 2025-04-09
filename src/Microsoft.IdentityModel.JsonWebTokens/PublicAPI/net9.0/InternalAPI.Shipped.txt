@@ -1,1 +1,2 @@
+Microsoft.IdentityModel.JsonWebTokens.JsonClaimSet._claimsLock -> System.Threading.Lock
 static Microsoft.IdentityModel.JsonWebTokens.JwtTokenUtilities.CreateSignature(System.ReadOnlySpan<byte> data, System.Span<byte> destination, Microsoft.IdentityModel.Tokens.SigningCredentials signingCredentials, out int bytesWritten) -> bool
