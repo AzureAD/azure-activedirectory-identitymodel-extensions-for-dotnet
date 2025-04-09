@@ -114,9 +114,13 @@ namespace Microsoft.IdentityModel.Tokens
         // reordered relative to the other operations. The rest of the objects are not because the .NET memory model
         // guarantees object writes are store releases and that reads won't be introduced.
         private volatile bool _claimsIdentityInitialized;
-        private object? _claimsIdentitySyncObj;
         private ClaimsIdentity? _claimsIdentity;
         private Dictionary<string, object>? _claims;
+#if NET9_0_OR_GREATER
+        private Lock? _claimsIdentitySyncObj;
+#else
+        private object? _claimsIdentitySyncObj;
+#endif
 
         /// <summary>
         /// The <see cref="Dictionary{String, Object}"/> created from the validated security token.
@@ -190,6 +194,23 @@ namespace Microsoft.IdentityModel.Tokens
             }
         }
 
+#if NET9_0_OR_GREATER
+        /// <summary>Gets the Lock to use in <see cref="ClaimsIdentity"/> for double-checked locking.</summary>
+        private Lock ClaimsIdentitySyncObj
+        {
+            get
+            {
+                Lock? syncObj = _claimsIdentitySyncObj;
+                if (syncObj is null)
+                {
+                    Interlocked.CompareExchange(ref _claimsIdentitySyncObj, new Lock(), null);
+                    syncObj = _claimsIdentitySyncObj;
+                }
+
+                return syncObj;
+            }
+        }
+#else
         /// <summary>Gets the object to use in <see cref="ClaimsIdentity"/> for double-checked locking.</summary>
         private object ClaimsIdentitySyncObj
         {
@@ -205,6 +226,7 @@ namespace Microsoft.IdentityModel.Tokens
                 return syncObj;
             }
         }
+#endif
         #endregion
 
         #region Logging

@@ -1,3 +1,5 @@
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10214S = "IDX10214: Audience validation failed. See https://aka.ms/identitymodel/app-context-switches" -> string
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10215S = "IDX10215: Audience validation failed. See https://aka.ms/identitymodel/app-context-switches" -> string
 Microsoft.IdentityModel.Tokens.Cnf.Jku.set -> void
 Microsoft.IdentityModel.Tokens.Cnf.JsonWebKey.set -> void
 Microsoft.IdentityModel.Tokens.Cnf.Jwe.set -> void

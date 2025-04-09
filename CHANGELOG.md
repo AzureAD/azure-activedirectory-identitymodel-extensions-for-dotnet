@@ -1,5 +1,12 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+8.8.0
+=====
+## New Features
+- Adds the ability for the metadata refresh to be done as a blocking call, as per 8.0.1 behavior. This is done through the `Switch.Microsoft.IdentityModel.UpdateConfigAsBlocking` switch. If set, configuration calls will be blocking when metadata is updated, otherwise, if token arrive with a new signing keys, validation errors will be returned to the caller. See PR [#3193](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3193) for details.
+- Identity.Model updates some log and error messages (IDX10214, IDX10215). If the information is needed for debugging purposes, it can be reverted via the `Switch.Microsoft.IdentityModel.DoNotScrubExceptions` AppContextSwitch. See PR [#3195](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3195) and https://aka.ms/identitymodel/app-context-switches for details.
+- Change all plain object locks to `System.Thread.Lock` objects for .NET 9 or greater. See PRs [#3185](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3185) and [#3189](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3189) for details.
+
 8.7.0
 =====
 ## Bug Fixes
