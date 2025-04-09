@@ -87,8 +87,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Initializes a new instance of <see cref="JsonWebToken"/> from a string in JWS or JWE Compact serialized format.
         /// </summary>
         /// <param name="jwtEncodedString">A JSON Web Token that has been serialized in JWS or JWE Compact serialized format.</param>
-        /// <param name="readTokenHeaderValueDelegates">Custom delegates to be called when reading associated header claim names.</param>
-        /// <param name="readTokenPayloadValueDelegates">Custom delegates to be called when reading associated payload claim names.</param>
+        /// <param name="tryReadJwtClaim">Custom delegate to be called when reading associated claims.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="jwtEncodedString"/> is null or empty.</exception>
         /// <exception cref="ArgumentException">Thrown if <paramref name="jwtEncodedString"/> is not in JWS or JWE Compact Serialization format.</exception>
         /// <remarks>
@@ -101,14 +100,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </remarks>
         public JsonWebToken(
             string jwtEncodedString,
-            IDictionary<string, ReadTokenClaimValueDelegate> readTokenHeaderValueDelegates,
-            IDictionary<string, ReadTokenClaimValueDelegate> readTokenPayloadValueDelegates)
+            TryReadJwtClaim tryReadJwtClaim)
         {
             if (string.IsNullOrEmpty(jwtEncodedString))
                 throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(jwtEncodedString)));
 
-            ReadTokenHeaderValueDelegates = readTokenHeaderValueDelegates;
-            ReadTokenPayloadValueDelegates = readTokenPayloadValueDelegates;
+            TryReadJwtClaim = tryReadJwtClaim;
 
             ReadToken(jwtEncodedString.AsMemory());
 
@@ -143,8 +140,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Initializes a new instance of <see cref="JsonWebToken"/> from a ReadOnlyMemory{char} in JWS or JWE Compact serialized format.
         /// </summary>
         /// <param name="encodedTokenMemory">A ReadOnlyMemory{char} containing the JSON Web Token serialized in JWS or JWE Compact format.</param>
-        /// <param name="readTokenHeaderValueDelegates">Custom delegates to be called when reading associated header claim names.</param>
-        /// <param name="readTokenPayloadValueDelegates">Custom delegates to be called when reading associated payload claim names.</param>
+        /// <param name="tryReadJwtClaim">Custom delegate to be called when reading associated claims.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="encodedTokenMemory"/> is empty.</exception>
         /// <exception cref="ArgumentException">Thrown if <paramref name="encodedTokenMemory"/> does not represent a valid JWS or JWE Compact Serialization format.</exception>
         /// <remarks>
@@ -157,14 +153,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </remarks>
         public JsonWebToken(
             ReadOnlyMemory<char> encodedTokenMemory,
-            IDictionary<string, ReadTokenClaimValueDelegate> readTokenHeaderValueDelegates,
-            IDictionary<string, ReadTokenClaimValueDelegate> readTokenPayloadValueDelegates)
+            TryReadJwtClaim tryReadJwtClaim)
         {
             if (encodedTokenMemory.IsEmpty)
                 throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(encodedTokenMemory)));
 
-            ReadTokenHeaderValueDelegates = readTokenHeaderValueDelegates;
-            ReadTokenPayloadValueDelegates = readTokenPayloadValueDelegates;
+            TryReadJwtClaim = tryReadJwtClaim;
 
             ReadToken(encodedTokenMemory);
 
@@ -207,8 +201,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <param name="header">A string containing JSON which represents the cryptographic operations applied to the JWT and optionally any additional properties of the JWT.</param>
         /// <param name="payload">A string containing JSON which represents the claims contained in the JWT. Each claim is a JSON object of the form { Name, Value }. Can be the empty.</param>
-        /// <param name="readTokenHeaderValueDelegates">Custom delegates to be called when reading associated header claim names.</param>
-        /// <param name="readTokenPayloadValueDelegates">Custom delegates to be called when reading associated payload claim names.</param>
+        /// <param name="tryReadJwtClaim">Custom delegate to be called when reading associated claims.</param>
         /// <remarks>
         /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7519"/> (JWT).
         /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7515"/> (JWS).
@@ -222,8 +215,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         public JsonWebToken(
             string header,
             string payload,
-            IDictionary<string, ReadTokenClaimValueDelegate> readTokenHeaderValueDelegates,
-            IDictionary<string, ReadTokenClaimValueDelegate> readTokenPayloadValueDelegates)
+            TryReadJwtClaim tryReadJwtClaim)
         {
             if (string.IsNullOrEmpty(header))
                 throw LogHelper.LogArgumentNullException(nameof(header));
@@ -234,8 +226,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             var encodedPayload = Base64UrlEncoder.Encode(payload);
             var encodedToken = encodedHeader + "." + encodedPayload + ".";
 
-            ReadTokenHeaderValueDelegates = readTokenHeaderValueDelegates;
-            ReadTokenPayloadValueDelegates = readTokenPayloadValueDelegates;
+            TryReadJwtClaim = tryReadJwtClaim;
 
             ReadToken(encodedToken.AsMemory());
 
@@ -243,23 +234,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="IDictionary{String, Object}"/> that contains a collection of header claim name and delegate pairs.
-        /// When reading token header claims, a delegate will be called if the token has an associated claim.
-        /// </summary>
-        /// <remarks>
-        /// An example implementation:
-        /// <code>
-        /// object ReadHeaderValueDelegate(ref Utf8JsonReader reader) =&gt;
-        /// {
-        ///     return JsonSerializer.Deserialize&lt;CustomClaim&gt;(reader.GetString());   
-        /// }
-        /// </code>
-        /// </remarks>
-        internal IDictionary<string, ReadTokenClaimValueDelegate> ReadTokenHeaderValueDelegates { get; set; }
-
-        /// <summary>
-        /// Gets or sets the <see cref="IDictionary{String, Object}"/> that contains a collection of claim name and delegate pairs.
-        /// When reading token payload claims, a delegate will be called if the token has an associated claim.
+        /// Gets or sets the delegate that will be called when reading JSON Web Token header and payload claims.
         /// </summary>
         /// <remarks>
         /// An example implementation:
@@ -270,7 +245,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// }
         /// </code>
         /// </remarks>
-        internal IDictionary<string, ReadTokenClaimValueDelegate> ReadTokenPayloadValueDelegates { get; set; }
+        internal TryReadJwtClaim TryReadJwtClaim { get; set; }
 
         internal string ActualIssuer { get; set; }
 

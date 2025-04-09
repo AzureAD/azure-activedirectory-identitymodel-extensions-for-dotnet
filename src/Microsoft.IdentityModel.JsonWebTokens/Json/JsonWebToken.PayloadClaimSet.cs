@@ -112,17 +112,26 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
             else
             {
-                string propertyName = reader.GetString();
+                string claimName = reader.GetString();
 
-                if (ReadTokenPayloadValueDelegates != null && ReadTokenPayloadValueDelegates.TryGetValue(propertyName, out var readTokenPayloadValueDelegate) && readTokenPayloadValueDelegate != null)
+                if (TryReadJwtClaim != null)
                 {
-                    reader.Read();
-                    claims[propertyName] = readTokenPayloadValueDelegate(ref reader);
-                    reader.Read();
+                    reader.Read(); // Move to the value
+                    if (TryReadJwtClaim(ref reader, claimName, out object claimValue))
+                    {
+                        claims[claimName] = claimValue;
+                        reader.Read(); // Move to the next token
+                    }
+                    else
+                    {
+                        // The reader is positioned at the value token. The custom delegate did not read the value. Use our own logic.
+                        claims[claimName] = JsonSerializerPrimitives.ReadPropertyValueAsObject(ref reader, claimName, JsonClaimSet.ClassName, false);
+                    }
                 }
                 else
                 {
-                    claims[propertyName] = JsonSerializerPrimitives.ReadPropertyValueAsObject(ref reader, propertyName, JsonClaimSet.ClassName, true);
+                    // Move the reader forward to the value and read it using our own logic.
+                    claims[claimName] = JsonSerializerPrimitives.ReadPropertyValueAsObject(ref reader, claimName, JsonClaimSet.ClassName, true);
                 }
             }
         }

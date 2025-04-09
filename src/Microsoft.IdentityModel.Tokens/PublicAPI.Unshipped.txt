@@ -5,14 +5,12 @@ Microsoft.IdentityModel.Tokens.Cnf.Jku.get -> string
 Microsoft.IdentityModel.Tokens.Cnf.JsonWebKey.get -> Microsoft.IdentityModel.Tokens.JsonWebKey
 Microsoft.IdentityModel.Tokens.Cnf.Jwe.get -> string
 Microsoft.IdentityModel.Tokens.Cnf.Kid.get -> string
-Microsoft.IdentityModel.Tokens.ReadTokenClaimValueDelegate
-Microsoft.IdentityModel.Tokens.TokenValidationParameters.ReadTokenHeaderValueDelegates.get -> System.Collections.Generic.IDictionary<string, Microsoft.IdentityModel.Tokens.ReadTokenClaimValueDelegate>
-Microsoft.IdentityModel.Tokens.TokenValidationParameters.ReadTokenHeaderValueDelegates.set -> void
-Microsoft.IdentityModel.Tokens.TokenValidationParameters.ReadTokenPayloadValueDelegates.get -> System.Collections.Generic.IDictionary<string, Microsoft.IdentityModel.Tokens.ReadTokenClaimValueDelegate>
-Microsoft.IdentityModel.Tokens.TokenValidationParameters.ReadTokenPayloadValueDelegates.set -> void
 const Microsoft.IdentityModel.Tokens.ConfirmationClaimTypes.Cnf = "cnf" -> string
 const Microsoft.IdentityModel.Tokens.ConfirmationClaimTypes.Jku = "jku" -> string
 const Microsoft.IdentityModel.Tokens.ConfirmationClaimTypes.Jwe = "jwe" -> string
 const Microsoft.IdentityModel.Tokens.ConfirmationClaimTypes.Jwk = "jwk" -> string
 const Microsoft.IdentityModel.Tokens.ConfirmationClaimTypes.Kid = "kid" -> string
 Microsoft.IdentityModel.Tokens.ConfirmationClaimTypes
+Microsoft.IdentityModel.Tokens.TokenValidationParameters.TryReadJwtClaim.get -> Microsoft.IdentityModel.Tokens.TryReadJwtClaim
+Microsoft.IdentityModel.Tokens.TokenValidationParameters.TryReadJwtClaim.set -> void
+Microsoft.IdentityModel.Tokens.TryReadJwtClaim
