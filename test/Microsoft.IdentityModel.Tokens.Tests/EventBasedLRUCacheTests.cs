@@ -9,8 +9,9 @@ using System.Threading.Tasks;
 using Microsoft.IdentityModel.TestUtils;
 using Xunit;
 
-namespace Microsoft.IdentityModel.Tokens.Tests
+namespace Microsoft.IdentityModel.Tokens.EventBasedLRUCache.Tests
 {
+    [Collection("EventBasedLRU")]
     public class EventBasedLRUCacheTests
     {
         [Fact]
@@ -19,7 +20,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.WriteHeader($"{this}.Contains");
             var context = new CompareContext($"{this}.Contains");
             var cache = new EventBasedLRUCache<int?, string>(10, removeExpiredValues: false);
-            cache.SetValue(1, "one");
+            cache.TrySetValue(1, "one");
             if (!cache.Contains(1))
                 context.AddDiff("Cache should contain the key value pair {1, 'one'}, but the Contains() method returned false.");
 
@@ -49,7 +50,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var context = new CompareContext($"{this}.DoNotRemoveExpiredValues");
             var cache = new EventBasedLRUCache<int, string>(11, removeExpiredValuesIntervalInSeconds: 5, removeExpiredValues: false);
             for (int i = 0; i <= 10; i++)
-                cache.SetValue(i, i.ToString(), DateTime.UtcNow + TimeSpan.FromSeconds(5));
+                cache.TrySetValue(i, i.ToString(), DateTime.UtcNow + TimeSpan.FromSeconds(5));
 
             Thread.Sleep(5000);
 
@@ -147,9 +148,9 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 // Only even values should expire.
                 if (i % 2 == 0)
-                    cache.SetValue(i, i.ToString(), DateTime.UtcNow + TimeSpan.FromSeconds(expiredInSeconds));
+                    cache.TrySetValue(i, i.ToString(), DateTime.UtcNow + TimeSpan.FromSeconds(expiredInSeconds));
                 else
-                    cache.SetValue(i, i.ToString());
+                    cache.TrySetValue(i, i.ToString());
             }
         }
 
@@ -178,24 +179,27 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.WriteHeader($"{this}.SetValue");
             var context = new CompareContext($"{this}.SetValue");
             var cache = new EventBasedLRUCache<int?, string>(1, removeExpiredValues: false);
-            Assert.Throws<ArgumentNullException>(() => cache.SetValue(1, null));
+            Assert.Throws<ArgumentNullException>(() => cache.TrySetValue(1, null));
 
-            cache.SetValue(1, "one");
+            cache.TrySetValue(1, "one");
             if (!cache.Contains(1))
                 context.AddDiff("The key value pair {1, 'one'} should have been added to the cache, but the Contains() method returned false.");
 
-            cache.SetValue(1, "one");
+            cache.TrySetValue(1, "one");
             if (!cache.Contains(1))
                 context.AddDiff("The key value pair {1, 'one'} should have been added to the cache, but the Contains() method returned false.");
 
             // The LRU item should be removed, allowing this value to be added even though the cache is full.
-            cache.SetValue(2, "two");
-            if (!cache.Contains(2))
+            bool wasAdded = cache.TrySetValue(2, "two");
+            if (cache.Contains(2))
                 context.AddDiff("The key value pair {2, 'two'} should have been added to the cache, but the Contains() method returned false.");
+
+            if (wasAdded)
+                context.AddDiff("The key value pair {2, 'two'} was added to the cache, but the cache was full.");
 
             try
             {
-                cache.SetValue(null, "three");
+                cache.TrySetValue(null, "three", DateTime.MaxValue);
                 context.AddDiff("The first parameter passed into the SetValue() method was null, but no exception was thrown.");
             }
             catch (Exception ex)
@@ -206,7 +210,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             try
             {
-                cache.SetValue(3, null);
+                cache.TrySetValue(3, null);
                 context.AddDiff("The second parameter passed into the SetValue() method was null, but no exception was thrown.");
             }
             catch (Exception ex)
@@ -224,7 +228,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             TestUtilities.WriteHeader($"{this}.TryGetValue");
             var context = new CompareContext($"{this}.TryGetValue");
             var cache = new EventBasedLRUCache<int?, string>(2, removeExpiredValues: false);
-            cache.SetValue(1, "one");
+            cache.TrySetValue(1, "one");
 
             if (!cache.TryGetValue(1, out var value))
             {
@@ -257,7 +261,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var context = new CompareContext($"{this}.RemoveValue");
             var cache = new EventBasedLRUCache<int?, string>(1, removeExpiredValues: false);
 
-            cache.SetValue(1, "one");
+            cache.TrySetValue(1, "one");
 
             if (!cache.TryRemove(1, out _))
                 context.AddDiff("The key value pair {1, 'one'} should have been removed from the cache, but the TryRemove() method returned false.");
@@ -287,7 +291,8 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             var cache = new EventBasedLRUCache<int, string>(10, removeExpiredValues: false, maintainLRU: true);
             for (int i = 0; i <= 1000; i++)
             {
-                cache.SetValue(i, Guid.NewGuid().ToString());
+                string guid = Guid.NewGuid().ToString();
+                cache.TrySetValue(i, guid, DateTime.MaxValue);
 
                 // check that list and map values match up every 10 items
                 // every 10th item should result in two LRU items being removed
@@ -307,8 +312,13 @@ namespace Microsoft.IdentityModel.Tokens.Tests
                     // and therefore are most recently used.
                     if (!IsDescending(cache.LinkedList))
                     {
-                        context.AddDiff("LRU order was not maintained.");
+                        context.AddDiff($"LRU order was not maintained, i = '{i}'.");
+                        foreach (var item in cache.LinkedList)
+                            context.AddDiff($"Key: '{item.Key}', Value: '{item.Value}'.");
                     }
+
+                    if (cache.MapCount != cache.LinkedList.Count)
+                        context.AddDiff($"The cache map count: '{cache.MapCount}', does not match the linked list count: '{cache.LinkedListCount}'.");
                 }
             }
 
@@ -372,7 +382,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
             {
                 taskList.Add(Task.Factory.StartNew(() =>
                 {
-                    cache.SetValue(i, i.ToString());
+                    cache.TrySetValue(i, i.ToString());
                 }));
             }
 
@@ -395,7 +405,7 @@ namespace Microsoft.IdentityModel.Tokens.Tests
 
             for (int i = 0; i < 100000; i++)
             {
-                cache.SetValue(i, i.ToString());
+                cache.TrySetValue(i, i.ToString());
             }
 
             // Cache size should be less than the capacity (somewhere between 800-1000 items).

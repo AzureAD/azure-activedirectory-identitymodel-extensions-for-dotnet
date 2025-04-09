@@ -119,7 +119,7 @@ namespace Microsoft.IdentityModel.Tokens
                 _lastKnownGoodConfigFirstUse = DateTime.UtcNow;
 
                 // LRU cache will remove the expired configuration
-                _lastKnownGoodConfigurationCache.SetValue(_lastKnownGoodConfiguration, DateTime.UtcNow + LastKnownGoodLifetime, DateTime.UtcNow + LastKnownGoodLifetime);
+                _lastKnownGoodConfigurationCache.TrySetValue(_lastKnownGoodConfiguration, DateTime.UtcNow + LastKnownGoodLifetime, DateTime.UtcNow + LastKnownGoodLifetime);
             }
         }
 
