@@ -210,6 +210,12 @@ Microsoft.IdentityModel.Tokens.Configuration.LKGConfigurationCacheOptions.Remove
 Microsoft.IdentityModel.Tokens.Configuration.LKGConfigurationCacheOptions.TaskCreationOptions.get -> System.Threading.Tasks.TaskCreationOptions
 Microsoft.IdentityModel.Tokens.Configuration.LKGConfigurationCacheOptions.TaskCreationOptions.set -> void
 Microsoft.IdentityModel.Tokens.ConfirmationClaimTypes
+Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes
+Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Cnf.get -> System.ReadOnlySpan<byte>
+Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jwk.get -> System.ReadOnlySpan<byte>
+Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jwe.get -> System.ReadOnlySpan<byte>
+Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jku.get -> System.ReadOnlySpan<byte>
+Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Kid.get -> System.ReadOnlySpan<byte>
 Microsoft.IdentityModel.Tokens.CryptoProviderCache
 Microsoft.IdentityModel.Tokens.CryptoProviderCache.CryptoProviderCache() -> void
 Microsoft.IdentityModel.Tokens.CryptoProviderCacheOptions
