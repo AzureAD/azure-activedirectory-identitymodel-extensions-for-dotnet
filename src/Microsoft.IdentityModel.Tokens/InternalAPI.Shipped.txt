@@ -314,6 +314,7 @@ Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jwk.get -> System
 Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jwe.get -> System.ReadOnlySpan<byte>
 Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jku.get -> System.ReadOnlySpan<byte>
 Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Kid.get -> System.ReadOnlySpan<byte>
+Microsoft.IdentityModel.Tokens.Cnf.ClassName.get -> string
 Microsoft.IdentityModel.Tokens.Cnf.Jku.set -> void
 Microsoft.IdentityModel.Tokens.Cnf.JsonWebKey.set -> void
 Microsoft.IdentityModel.Tokens.Cnf.Jwe.set -> void
@@ -777,14 +778,14 @@ static Microsoft.IdentityModel.Tokens.Base64UrlEncoding.Encode(byte[] bytes) -> 
 static Microsoft.IdentityModel.Tokens.Base64UrlEncoding.Encode(byte[] input, int offset, int length) -> string
 static Microsoft.IdentityModel.Tokens.Base64UrlEncoding.ValidateAndGetOutputSize(System.ReadOnlySpan<char> strSpan, int offset, int length) -> int
 static Microsoft.IdentityModel.Tokens.CertificateHelper.LoadX509Certificate(string data) -> System.Security.Cryptography.X509Certificates.X509Certificate2
+static Microsoft.IdentityModel.Tokens.ClaimsIdentityFactory.Create(string authenticationType, string nameType, string roleType, Microsoft.IdentityModel.Tokens.SecurityToken securityToken) -> System.Security.Claims.ClaimsIdentity
+static Microsoft.IdentityModel.Tokens.ClaimsIdentityFactory.Create(System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> claims) -> System.Security.Claims.ClaimsIdentity
+static Microsoft.IdentityModel.Tokens.ClaimsIdentityFactory.Create(System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> claims, string authenticationType) -> System.Security.Claims.ClaimsIdentity
 static Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Cnf.get -> System.ReadOnlySpan<byte>
 static Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jku.get -> System.ReadOnlySpan<byte>
 static Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jwe.get -> System.ReadOnlySpan<byte>
 static Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jwk.get -> System.ReadOnlySpan<byte>
 static Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Kid.get -> System.ReadOnlySpan<byte>
-static Microsoft.IdentityModel.Tokens.ClaimsIdentityFactory.Create(string authenticationType, string nameType, string roleType, Microsoft.IdentityModel.Tokens.SecurityToken securityToken) -> System.Security.Claims.ClaimsIdentity
-static Microsoft.IdentityModel.Tokens.ClaimsIdentityFactory.Create(System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> claims) -> System.Security.Claims.ClaimsIdentity
-static Microsoft.IdentityModel.Tokens.ClaimsIdentityFactory.Create(System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> claims, string authenticationType) -> System.Security.Claims.ClaimsIdentity
 static Microsoft.IdentityModel.Tokens.Cng.BCryptOpenAlgorithmProvider(string pszAlgId, string pszImplementation, Microsoft.IdentityModel.Tokens.Cng.OpenAlgorithmProviderFlags dwFlags) -> Microsoft.IdentityModel.Tokens.SafeAlgorithmHandle
 static Microsoft.IdentityModel.Tokens.Cng.SetCipherMode(this Microsoft.IdentityModel.Tokens.SafeAlgorithmHandle hAlg, string cipherMode) -> void
 static Microsoft.IdentityModel.Tokens.CollectionUtilities.IsNullOrEmpty<T>(this System.Collections.Generic.IEnumerable<T> enumerable) -> bool
