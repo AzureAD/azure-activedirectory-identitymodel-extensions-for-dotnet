@@ -309,12 +309,6 @@ Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.SecurityToken.set -> 
 Microsoft.IdentityModel.Tokens.CertificateHelper
 Microsoft.IdentityModel.Tokens.CertificateHelper.CertificateHelper() -> void
 Microsoft.IdentityModel.Tokens.ClaimsIdentityFactory
-Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes
-Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Cnf.get -> System.ReadOnlySpan<byte>
-Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jwk.get -> System.ReadOnlySpan<byte>
-Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jwe.get -> System.ReadOnlySpan<byte>
-Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jku.get -> System.ReadOnlySpan<byte>
-Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Kid.get -> System.ReadOnlySpan<byte>
 Microsoft.IdentityModel.Tokens.Cnf.ClassName.get -> string
 Microsoft.IdentityModel.Tokens.Cnf.Jku.set -> void
 Microsoft.IdentityModel.Tokens.Cnf.JsonWebKey.set -> void
@@ -325,6 +319,12 @@ Microsoft.IdentityModel.Tokens.Cng.OpenAlgorithmProviderFlags
 Microsoft.IdentityModel.Tokens.Cng.OpenAlgorithmProviderFlags.BCRYPT_ALG_HANDLE_HMAC_FLAG = 8 -> Microsoft.IdentityModel.Tokens.Cng.OpenAlgorithmProviderFlags
 Microsoft.IdentityModel.Tokens.Cng.OpenAlgorithmProviderFlags.NONE = 0 -> Microsoft.IdentityModel.Tokens.Cng.OpenAlgorithmProviderFlags
 Microsoft.IdentityModel.Tokens.CollectionUtilities
+Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes
+Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Cnf.get -> System.ReadOnlySpan<byte>
+Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jku.get -> System.ReadOnlySpan<byte>
+Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jwe.get -> System.ReadOnlySpan<byte>
+Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jwk.get -> System.ReadOnlySpan<byte>
+Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Kid.get -> System.ReadOnlySpan<byte>
 Microsoft.IdentityModel.Tokens.CreateECDsaDelegate
 Microsoft.IdentityModel.Tokens.CryptographicOperations
 Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CryptoProviderCache.set -> void
@@ -757,8 +757,8 @@ static Microsoft.IdentityModel.Tokens.AesAead.Decrypt(Microsoft.IdentityModel.To
 static Microsoft.IdentityModel.Tokens.AesAead.Encrypt(Microsoft.IdentityModel.Tokens.SafeKeyHandle keyHandle, byte[] nonce, byte[] associatedData, byte[] plaintext, byte[] ciphertext, byte[] tag) -> void
 static Microsoft.IdentityModel.Tokens.AesBCryptModes.OpenAesAlgorithm(string cipherMode) -> System.Lazy<Microsoft.IdentityModel.Tokens.SafeAlgorithmHandle>
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.DoNotFailOnMissingTid.get -> bool
-static Microsoft.IdentityModel.Tokens.AppContextSwitches.DontFailOnMissingTid.get -> bool
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.DoNotScrubExceptions.get -> bool
+static Microsoft.IdentityModel.Tokens.AppContextSwitches.DontFailOnMissingTid.get -> bool
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.ResetAllSwitches() -> void
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.TryAllStringClaimsAsDateTime.get -> bool
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.UpdateConfigAsBlocking.get -> bool
@@ -783,14 +783,14 @@ static Microsoft.IdentityModel.Tokens.CertificateHelper.LoadX509Certificate(stri
 static Microsoft.IdentityModel.Tokens.ClaimsIdentityFactory.Create(string authenticationType, string nameType, string roleType, Microsoft.IdentityModel.Tokens.SecurityToken securityToken) -> System.Security.Claims.ClaimsIdentity
 static Microsoft.IdentityModel.Tokens.ClaimsIdentityFactory.Create(System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> claims) -> System.Security.Claims.ClaimsIdentity
 static Microsoft.IdentityModel.Tokens.ClaimsIdentityFactory.Create(System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> claims, string authenticationType) -> System.Security.Claims.ClaimsIdentity
+static Microsoft.IdentityModel.Tokens.Cng.BCryptOpenAlgorithmProvider(string pszAlgId, string pszImplementation, Microsoft.IdentityModel.Tokens.Cng.OpenAlgorithmProviderFlags dwFlags) -> Microsoft.IdentityModel.Tokens.SafeAlgorithmHandle
+static Microsoft.IdentityModel.Tokens.Cng.SetCipherMode(this Microsoft.IdentityModel.Tokens.SafeAlgorithmHandle hAlg, string cipherMode) -> void
+static Microsoft.IdentityModel.Tokens.CollectionUtilities.IsNullOrEmpty<T>(this System.Collections.Generic.IEnumerable<T> enumerable) -> bool
 static Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Cnf.get -> System.ReadOnlySpan<byte>
 static Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jku.get -> System.ReadOnlySpan<byte>
 static Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jwe.get -> System.ReadOnlySpan<byte>
 static Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jwk.get -> System.ReadOnlySpan<byte>
 static Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Kid.get -> System.ReadOnlySpan<byte>
-static Microsoft.IdentityModel.Tokens.Cng.BCryptOpenAlgorithmProvider(string pszAlgId, string pszImplementation, Microsoft.IdentityModel.Tokens.Cng.OpenAlgorithmProviderFlags dwFlags) -> Microsoft.IdentityModel.Tokens.SafeAlgorithmHandle
-static Microsoft.IdentityModel.Tokens.Cng.SetCipherMode(this Microsoft.IdentityModel.Tokens.SafeAlgorithmHandle hAlg, string cipherMode) -> void
-static Microsoft.IdentityModel.Tokens.CollectionUtilities.IsNullOrEmpty<T>(this System.Collections.Generic.IEnumerable<T> enumerable) -> bool
 static Microsoft.IdentityModel.Tokens.CryptographicOperations.ZeroMemory(byte[] buffer) -> void
 static Microsoft.IdentityModel.Tokens.CryptoProviderFactory.ShouldCacheSignatureProvider(Microsoft.IdentityModel.Tokens.SignatureProvider signatureProvider) -> bool
 static Microsoft.IdentityModel.Tokens.CryptoThrowHelper.ToCryptographicException(this int hr) -> System.Security.Cryptography.CryptographicException
