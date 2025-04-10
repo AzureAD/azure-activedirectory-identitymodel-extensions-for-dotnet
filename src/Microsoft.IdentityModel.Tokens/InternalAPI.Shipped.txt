@@ -17,6 +17,7 @@ const Microsoft.IdentityModel.Telemetry.TelemetryDataRecorder.TotalDurationHisto
 const Microsoft.IdentityModel.Tokens.AesGcm.NonceSize = 12 -> int
 const Microsoft.IdentityModel.Tokens.AesGcm.TagSize = 16 -> int
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.DoNotFailOnMissingTidSwitch = "Switch.Microsoft.IdentityModel.DontFailOnMissingTidValidateIssuerSigning" -> string
+const Microsoft.IdentityModel.Tokens.AppContextSwitches.DoNotScrubExceptionsSwitch = "Switch.Microsoft.IdentityModel.DoNotScrubExceptions" -> string
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.TryAllStringClaimsAsDateTimeSwitch = "Switch.Microsoft.IdentityModel.TryAllStringClaimsAsDateTime" -> string
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.UpdateConfigAsBlockingSwitch = "Switch.Microsoft.IdentityModel.UpdateConfigAsBlocking" -> string
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseClaimsIdentityTypeSwitch = "Microsoft.IdentityModel.Tokens.UseClaimsIdentityType" -> string
@@ -757,6 +758,7 @@ static Microsoft.IdentityModel.Tokens.AesAead.Encrypt(Microsoft.IdentityModel.To
 static Microsoft.IdentityModel.Tokens.AesBCryptModes.OpenAesAlgorithm(string cipherMode) -> System.Lazy<Microsoft.IdentityModel.Tokens.SafeAlgorithmHandle>
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.DoNotFailOnMissingTid.get -> bool
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.DontFailOnMissingTid.get -> bool
+static Microsoft.IdentityModel.Tokens.AppContextSwitches.DoNotScrubExceptions.get -> bool
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.ResetAllSwitches() -> void
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.TryAllStringClaimsAsDateTime.get -> bool
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.UpdateConfigAsBlocking.get -> bool
