@@ -143,17 +143,37 @@ namespace Microsoft.IdentityModel.Tokens
                 if (string.IsNullOrWhiteSpace(tokenAudience))
                     continue;
 
-                foreach (string validAudience in validationParametersAudiences)
+                if (validationParametersAudiences is IList<string> audienceList)
                 {
-                    if (string.IsNullOrWhiteSpace(validAudience))
-                        continue;
-
-                    if (AudiencesMatch(validationParameters, tokenAudience, validAudience))
+                    for (int i = 0; i < audienceList.Count; i++)
                     {
-                        if (LogHelper.IsEnabled(EventLogLevel.Informational))
-                            LogHelper.LogInformation(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
+                        string validAudience = audienceList[i];
+                        if (string.IsNullOrWhiteSpace(validAudience))
+                            continue;
 
-                        return true;
+                        if (AudiencesMatch(validationParameters, tokenAudience, validAudience))
+                        {
+                            if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                                LogHelper.LogInformation(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
+
+                            return true;
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (string validAudience in validationParametersAudiences)
+                    {
+                        if (string.IsNullOrWhiteSpace(validAudience))
+                            continue;
+
+                        if (AudiencesMatch(validationParameters, tokenAudience, validAudience))
+                        {
+                            if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                                LogHelper.LogInformation(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
+
+                            return true;
+                        }
                     }
                 }
             }
