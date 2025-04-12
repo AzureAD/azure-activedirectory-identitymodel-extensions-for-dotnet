@@ -165,7 +165,7 @@ namespace Microsoft.IdentityModel.Xml
 
         private bool Matches(RsaSecurityKey key)
         {
-            if (key == null)
+            if (key == null || RSAKeyValue == null)
                 return false;
 
             if (!key.Parameters.Equals(default(RSAParameters)))
