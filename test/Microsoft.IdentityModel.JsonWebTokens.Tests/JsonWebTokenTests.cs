@@ -1746,34 +1746,35 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public void DerivedJsonWebToken_IsCreatedCorrectly()
         {
             // Arrange - create token with custom claims
-            var expectedCustomHeaderClaim = new CustomClaim("custom_header_claim");
-            var expectedCustomPayloadClaim = new CustomClaim("custom_payload_claim");
+            var expectedCustomHeaderClaimValue = new CustomClaim("custom_header_claim");
+            var expectedCustomPayloadClaimValue = new CustomClaim("custom_payload_claim");
             var tokenStr = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
             {
                 Issuer = Default.Issuer,
+                // The claim name is the same in the header and the payload, but the value is different.
                 AdditionalHeaderClaims = new Dictionary<string, object>
                 {
-                    { CustomJsonWebToken.CustomHeaderClaimName, System.Text.Json.JsonSerializer.Serialize(expectedCustomHeaderClaim) },
+                    { CustomJsonWebToken.CustomClaimName, System.Text.Json.JsonSerializer.Serialize(expectedCustomHeaderClaimValue) },
                 },
                 Claims = new Dictionary<string, object>
                 {
-                    { CustomJsonWebToken.CustomPayloadClaimName, System.Text.Json.JsonSerializer.Serialize(expectedCustomPayloadClaim) },
+                    { CustomJsonWebToken.CustomClaimName, System.Text.Json.JsonSerializer.Serialize(expectedCustomPayloadClaimValue) },
                 }
             });
 
             // Act - Create derived token, get custom claims
             var derivedToken = new CustomJsonWebToken(tokenStr);
             derivedToken.TryGetHeaderValue<CustomClaim>(
-                CustomJsonWebToken.CustomHeaderClaimName, out CustomClaim customHeaderClaim);
+                CustomJsonWebToken.CustomClaimName, out CustomClaim customHeaderClaim);
             derivedToken.TryGetPayloadValue<CustomClaim>(
-                CustomJsonWebToken.CustomPayloadClaimName, out CustomClaim customPayloadClaim);
+                CustomJsonWebToken.CustomClaimName, out CustomClaim customPayloadClaim);
 
             // Assert custom header claim, custom payload claim, issuer
-            Assert.Equal(expectedCustomHeaderClaim.CustomClaimValue, derivedToken.CustomHeaderClaim.CustomClaimValue);
-            Assert.Equal(expectedCustomHeaderClaim.CustomClaimValue, customHeaderClaim.CustomClaimValue);
+            Assert.Equal(expectedCustomHeaderClaimValue.CustomClaimValue, derivedToken.CustomHeaderClaim.CustomClaimValue);
+            Assert.Equal(expectedCustomHeaderClaimValue.CustomClaimValue, customHeaderClaim.CustomClaimValue);
 
-            Assert.Equal(expectedCustomPayloadClaim.CustomClaimValue, derivedToken.CustomPayloadClaim.CustomClaimValue);
-            Assert.Equal(expectedCustomPayloadClaim.CustomClaimValue, customPayloadClaim.CustomClaimValue);
+            Assert.Equal(expectedCustomPayloadClaimValue.CustomClaimValue, derivedToken.CustomPayloadClaim.CustomClaimValue);
+            Assert.Equal(expectedCustomPayloadClaimValue.CustomClaimValue, customPayloadClaim.CustomClaimValue);
 
             Assert.Equal(Default.Issuer, derivedToken.Issuer);
         }
@@ -1783,22 +1784,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             // Arrange - create token with custom claims
             const string customPayloadClaimName1 = "CustomPayload1";
-            const string customPayloadClaimName2 = "CustomPayload2";
+            var expectedCustomHeaderClaim = new CustomClaim("custom_header_claim");
             var expectedCustomPayloadClaim1 = new CustomClaim("custom_payload1");
             var expectedCustomPayloadClaim2 = new CustomClaim("custom_payload2");
-            var expectedCustomHeaderClaim = new CustomClaim("custom_header_claim");
 
             var tokenSpan = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
             {
                 Issuer = Default.Issuer,
+                // The claim name is the same in the header and the payload, but the value is different.
                 AdditionalHeaderClaims = new Dictionary<string, object>
                 {
-                    { CustomJsonWebToken.CustomHeaderClaimName, System.Text.Json.JsonSerializer.Serialize(expectedCustomHeaderClaim) },
+                    { CustomJsonWebToken.CustomClaimName, System.Text.Json.JsonSerializer.Serialize(expectedCustomHeaderClaim) },
                 },
                 Claims = new Dictionary<string, object>
                 {
                     { customPayloadClaimName1, System.Text.Json.JsonSerializer.Serialize(expectedCustomPayloadClaim1) },
-                    { customPayloadClaimName2, System.Text.Json.JsonSerializer.Serialize(expectedCustomPayloadClaim2) },
+                    { CustomJsonWebToken.CustomClaimName, System.Text.Json.JsonSerializer.Serialize(expectedCustomPayloadClaim2) },
                 }
             }).AsMemory();
 
@@ -1806,27 +1807,40 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             CustomClaim headerClaimFromDelegate = null;
             CustomClaim payloadClaimFromDelegate1 = null;
             CustomClaim payloadClaimFromDelegate2 = null;
-            bool TryReadJwtClaim(ref Utf8JsonReader reader, string claimName, out object claimValue)
+            bool TryReadJwtClaim(ref Utf8JsonReader reader, JwtSegment jwtSegment, string claimName, out object claimValue)
             {
                 // Handle custom claims.
-                switch (claimName)
+                switch (jwtSegment)
                 {
-                    case CustomJsonWebToken.CustomHeaderClaimName:
-                        headerClaimFromDelegate = System.Text.Json.JsonSerializer.Deserialize<CustomClaim>(reader.GetString());
-                        claimValue = headerClaimFromDelegate;
-                        return true;
-                    case customPayloadClaimName1:
-                        payloadClaimFromDelegate1 = System.Text.Json.JsonSerializer.Deserialize<CustomClaim>(reader.GetString());
-                        claimValue = payloadClaimFromDelegate1;
-                        return true;
-                    case customPayloadClaimName2:
-                        payloadClaimFromDelegate2 = System.Text.Json.JsonSerializer.Deserialize<CustomClaim>(reader.GetString());
-                        claimValue = payloadClaimFromDelegate2;
-                        return true;
-                    default:
-                        claimValue = null;
-                        return false;
+                    case JwtSegment.Header:
+                        switch (claimName)
+                        {
+                            case CustomJsonWebToken.CustomClaimName:
+                                headerClaimFromDelegate = System.Text.Json.JsonSerializer.Deserialize<CustomClaim>(reader.GetString());
+                                claimValue = headerClaimFromDelegate;
+                                return true;
+                            default:
+                                break;
+                        }
+                        break;
+                    case JwtSegment.Payload:
+                        switch (claimName)
+                        {
+                            case customPayloadClaimName1:
+                                payloadClaimFromDelegate1 = System.Text.Json.JsonSerializer.Deserialize<CustomClaim>(reader.GetString());
+                                claimValue = payloadClaimFromDelegate1;
+                                return true;
+                            case CustomJsonWebToken.CustomClaimName:
+                                payloadClaimFromDelegate2 = System.Text.Json.JsonSerializer.Deserialize<CustomClaim>(reader.GetString());
+                                claimValue = payloadClaimFromDelegate2;
+                                return true;
+                            default:
+                                break;
+                        }
+                        break;
                 }
+                claimValue = null;
+                return false;
             }
 
             // Act - create JsonWebToken with delegates to read custom claims
@@ -1835,7 +1849,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 TryReadJwtClaim);
 
             // Assert custom header claim, custom payload claim, issuer
-            Assert.True(jwt.TryGetHeaderValue<CustomClaim>(CustomJsonWebToken.CustomHeaderClaimName, out var actualHeaderClaim));
+            Assert.True(jwt.TryGetHeaderValue<CustomClaim>(CustomJsonWebToken.CustomClaimName, out var actualHeaderClaim));
             Assert.Equal(expectedCustomHeaderClaim.CustomClaimValue, actualHeaderClaim.CustomClaimValue);
             Assert.NotNull(headerClaimFromDelegate);
             Assert.Equal(expectedCustomHeaderClaim.CustomClaimValue, headerClaimFromDelegate.CustomClaimValue);
@@ -1845,7 +1859,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.NotNull(payloadClaimFromDelegate1);
             Assert.Equal(expectedCustomPayloadClaim1.CustomClaimValue, payloadClaimFromDelegate1.CustomClaimValue);
 
-            Assert.True(jwt.TryGetPayloadValue<CustomClaim>(customPayloadClaimName2, out var actualPayloadClaim2));
+            Assert.True(jwt.TryGetPayloadValue<CustomClaim>(CustomJsonWebToken.CustomClaimName, out var actualPayloadClaim2));
             Assert.Equal(expectedCustomPayloadClaim2.CustomClaimValue, actualPayloadClaim2.CustomClaimValue);
             Assert.NotNull(payloadClaimFromDelegate2);
             Assert.Equal(expectedCustomPayloadClaim2.CustomClaimValue, payloadClaimFromDelegate2.CustomClaimValue);
@@ -1856,22 +1870,22 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         {
             // Arrange - create token with custom claims
             const string customPayloadClaimName1 = "CustomPayload1";
-            const string customPayloadClaimName2 = "CustomPayload2";
+            var expectedCustomHeaderClaim = new CustomClaim("custom_header_claim");
             var expectedCustomPayloadClaim1 = new CustomClaim("custom_payload1");
             var expectedCustomPayloadClaim2 = new CustomClaim("custom_payload2");
-            var expectedCustomHeaderClaim = new CustomClaim("custom_header_claim");
 
             var tokenSpan = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
             {
                 Issuer = Default.Issuer,
+                // The claim name is the same in the header and the payload, but the value is different.
                 AdditionalHeaderClaims = new Dictionary<string, object>
                 {
-                    { CustomJsonWebToken.CustomHeaderClaimName, System.Text.Json.JsonSerializer.Serialize(expectedCustomHeaderClaim) },
+                    { CustomJsonWebToken.CustomClaimName, System.Text.Json.JsonSerializer.Serialize(expectedCustomHeaderClaim) },
                 },
                 Claims = new Dictionary<string, object>
                 {
                     { customPayloadClaimName1, System.Text.Json.JsonSerializer.Serialize(expectedCustomPayloadClaim1) },
-                    { customPayloadClaimName2, System.Text.Json.JsonSerializer.Serialize(expectedCustomPayloadClaim2) },
+                    { CustomJsonWebToken.CustomClaimName, System.Text.Json.JsonSerializer.Serialize(expectedCustomPayloadClaim2) },
                 },
                 SigningCredentials = KeyingMaterial.JsonWebKeyRsa256SigningCredentials,
             }).AsMemory();
@@ -1880,27 +1894,40 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             CustomClaim headerClaimFromDelegate = null;
             CustomClaim payloadClaimFromDelegate1 = null;
             CustomClaim payloadClaimFromDelegate2 = null;
-            bool TryReadJwtClaim(ref Utf8JsonReader reader, string claimName, out object claimValue)
+            bool TryReadJwtClaim(ref Utf8JsonReader reader, JwtSegment jwtSegment, string claimName, out object claimValue)
             {
                 // Handle custom claims.
-                switch (claimName)
+                switch (jwtSegment)
                 {
-                    case CustomJsonWebToken.CustomHeaderClaimName:
-                        headerClaimFromDelegate = System.Text.Json.JsonSerializer.Deserialize<CustomClaim>(reader.GetString());
-                        claimValue = headerClaimFromDelegate;
-                        return true;
-                    case customPayloadClaimName1:
-                        payloadClaimFromDelegate1 = System.Text.Json.JsonSerializer.Deserialize<CustomClaim>(reader.GetString());
-                        claimValue = payloadClaimFromDelegate1;
-                        return true;
-                    case customPayloadClaimName2:
-                        payloadClaimFromDelegate2 = System.Text.Json.JsonSerializer.Deserialize<CustomClaim>(reader.GetString());
-                        claimValue = payloadClaimFromDelegate2;
-                        return true;
-                    default:
-                        claimValue = null;
-                        return false;
+                    case JwtSegment.Header:
+                        switch (claimName)
+                        {
+                            case CustomJsonWebToken.CustomClaimName:
+                                headerClaimFromDelegate = System.Text.Json.JsonSerializer.Deserialize<CustomClaim>(reader.GetString());
+                                claimValue = headerClaimFromDelegate;
+                                return true;
+                            default:
+                                break;
+                        }
+                        break;
+                    case JwtSegment.Payload:
+                        switch (claimName)
+                        {
+                            case customPayloadClaimName1:
+                                payloadClaimFromDelegate1 = System.Text.Json.JsonSerializer.Deserialize<CustomClaim>(reader.GetString());
+                                claimValue = payloadClaimFromDelegate1;
+                                return true;
+                            case CustomJsonWebToken.CustomClaimName:
+                                payloadClaimFromDelegate2 = System.Text.Json.JsonSerializer.Deserialize<CustomClaim>(reader.GetString());
+                                claimValue = payloadClaimFromDelegate2;
+                                return true;
+                            default:
+                                break;
+                        }
+                        break;
                 }
+                claimValue = null;
+                return false;
             }
 
             var tokenValidationParameters = new TokenValidationParameters
@@ -1917,7 +1944,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             var validationResult = await new JsonWebTokenHandler().ValidateTokenAsync(tokenSpan.ToString(), tokenValidationParameters);
 
             // Assert custom header claim, custom payload claims
-            Assert.True(((JsonWebToken)validationResult.SecurityToken).TryGetHeaderValue<CustomClaim>(CustomJsonWebToken.CustomHeaderClaimName, out var actualHeaderClaim));
+            Assert.True(((JsonWebToken)validationResult.SecurityToken).TryGetHeaderValue<CustomClaim>(CustomJsonWebToken.CustomClaimName, out var actualHeaderClaim));
             Assert.Equal(expectedCustomHeaderClaim.CustomClaimValue, actualHeaderClaim.CustomClaimValue);
             Assert.NotNull(headerClaimFromDelegate);
             Assert.Equal(expectedCustomHeaderClaim.CustomClaimValue, headerClaimFromDelegate.CustomClaimValue);
@@ -1927,7 +1954,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             Assert.NotNull(payloadClaimFromDelegate1);
             Assert.Equal(expectedCustomPayloadClaim1.CustomClaimValue, payloadClaimFromDelegate1.CustomClaimValue);
 
-            Assert.True(((JsonWebToken)validationResult.SecurityToken).TryGetPayloadValue<CustomClaim>(customPayloadClaimName2, out var actualPayloadClaim2));
+            Assert.True(((JsonWebToken)validationResult.SecurityToken).TryGetPayloadValue<CustomClaim>(CustomJsonWebToken.CustomClaimName, out var actualPayloadClaim2));
             Assert.Equal(expectedCustomPayloadClaim2.CustomClaimValue, actualPayloadClaim2.CustomClaimValue);
             Assert.NotNull(payloadClaimFromDelegate2);
             Assert.Equal(expectedCustomPayloadClaim2.CustomClaimValue, payloadClaimFromDelegate2.CustomClaimValue);
@@ -1955,7 +1982,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }).AsMemory();
 
             // Arrange - create delegates to read custom claims
-            bool TryReadJwtClaim(ref Utf8JsonReader reader, string claimName, out object claimValue)
+            bool TryReadJwtClaim(ref Utf8JsonReader reader, JwtSegment jwtSegment, string claimName, out object claimValue)
             {
                 // Handle custom claims.
                 switch (claimName)

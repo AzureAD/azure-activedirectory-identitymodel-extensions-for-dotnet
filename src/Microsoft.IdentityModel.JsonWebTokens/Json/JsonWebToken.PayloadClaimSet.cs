@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Json;
 
 namespace Microsoft.IdentityModel.JsonWebTokens
@@ -117,7 +118,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (TryReadJwtClaim != null)
                 {
                     reader.Read(); // Move to the value
-                    if (TryReadJwtClaim(ref reader, claimName, out object claimValue))
+                    if (TryReadJwtClaim(ref reader, JwtSegment.Payload, claimName, out object claimValue))
                     {
                         claims[claimName] = claimValue;
                         reader.Read(); // Move to the next token

@@ -11,6 +11,9 @@ const Microsoft.IdentityModel.Tokens.ConfirmationClaimTypes.Jwe = "jwe" -> strin
 const Microsoft.IdentityModel.Tokens.ConfirmationClaimTypes.Jwk = "jwk" -> string
 const Microsoft.IdentityModel.Tokens.ConfirmationClaimTypes.Kid = "kid" -> string
 Microsoft.IdentityModel.Tokens.ConfirmationClaimTypes
+Microsoft.IdentityModel.Tokens.JwtSegment.Header = 0 -> Microsoft.IdentityModel.Tokens.JwtSegment
+Microsoft.IdentityModel.Tokens.JwtSegment.Payload = 1 -> Microsoft.IdentityModel.Tokens.JwtSegment
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.TryReadJwtClaim.get -> Microsoft.IdentityModel.Tokens.TryReadJwtClaim
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.TryReadJwtClaim.set -> void
 Microsoft.IdentityModel.Tokens.TryReadJwtClaim
+Microsoft.IdentityModel.Tokens.JwtSegment

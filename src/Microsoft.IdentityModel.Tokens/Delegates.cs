@@ -217,9 +217,22 @@ namespace Microsoft.IdentityModel.Tokens
     /// this delegate is called after all claims known to the library have been processed.
     /// When called, the reader is positioned at the claim value.
     /// </summary>
+    /// <remarks>
+    /// An example implementation:
+    /// <code>
+    /// bool TryReadJwtClaim(ref Utf8JsonReader reader, JwtSegment jwtSegment, string claimName, out object claimValue)
+    /// {
+    ///     if (jwtSegment == JwtSegment.Payload &amp;&amp; claimName == "CustomClaimName")
+    ///         claimValue = JsonSerializer.Deserialize&lt;CustomClaim&gt;(reader.GetString());
+    ///         return true;
+    ///     return false;
+    /// }
+    /// </code>
+    /// </remarks>
     /// <param name="reader">Reader for the underlying token bytes.</param>
+    /// <param name="jwtSegment">Specifies whether the claim is from the JWT header or payload.</param>
     /// <param name="claimName">The claim name for this claim value.</param>
     /// <param name="claimValue">The claim value that was read and parsed from the reader.</param>
     /// <returns>True, if the claim value was read successfully; false otherwise.</returns>
-    public delegate bool TryReadJwtClaim(ref Utf8JsonReader reader, string claimName, out object claimValue);
+    public delegate bool TryReadJwtClaim(ref Utf8JsonReader reader, JwtSegment jwtSegment, string claimName, out object claimValue);
 }

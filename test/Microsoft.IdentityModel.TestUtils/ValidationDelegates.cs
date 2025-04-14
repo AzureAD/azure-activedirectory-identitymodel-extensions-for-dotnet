@@ -240,7 +240,7 @@ namespace Microsoft.IdentityModel.TestUtils
             return token;
         }
 
-        public static bool TryReadJwtClaim(ref Utf8JsonReader reader, string claimName, out object claimValue)
+        public static bool TryReadJwtClaim(ref Utf8JsonReader reader, JwtSegment jwtSegment, string claimName, out object claimValue)
         {
             claimValue = null;
             return false;
