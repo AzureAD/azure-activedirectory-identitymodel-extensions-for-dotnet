@@ -75,7 +75,17 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
             public const string SessionNotOnOrAfter = "SessionNotOnOrAfter";
             public const string SPNameQualifier = "SPNameQualifier";
             public const string SPProvidedID = "SPProvidedID";
+            /// <summary>
+            /// W3C XML Schema standard xsi:type attribute name (lowercase)
+            /// </summary>
             public const string Type = "type";
+
+            /// <summary>
+            /// SAML specific xsi:type attribute (uppercase).
+            /// Used only for SubjectConfirmationData to maintain compatibility with ADFS and other SAML implementations.
+            /// See: https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/issues/2894
+            /// </summary>
+            public const string SubjectConfirmationDataType = "Type";
             public const string Version = "Version";
         }
 

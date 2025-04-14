@@ -2169,7 +2169,8 @@ namespace Microsoft.IdentityModel.Tokens.Saml2
 
             // @xsi:type
             if (subjectConfirmationData.KeyInfos.Count > 0)
-                writer.WriteAttributeString(XmlSignatureConstants.Attributes.Type, XmlSignatureConstants.XmlSchemaNamespace, Saml2Constants.Types.KeyInfoConfirmationDataType);
+                // Use uppercase "Type" specifically for SAML SubjectConfirmationData for ADFS compatibility
+                writer.WriteAttributeString(Saml2Constants.Attributes.SubjectConfirmationDataType, Saml2Constants.Types.KeyInfoConfirmationDataType);
 
             // @Address - optional
             if (!string.IsNullOrEmpty(subjectConfirmationData.Address))

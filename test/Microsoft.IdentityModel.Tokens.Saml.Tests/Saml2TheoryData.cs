@@ -57,5 +57,7 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
         public Saml2Subject Subject { get; set; }
 
         public Saml2ProxyRestriction ProxyRestriction { get; set; }
+
+        public Saml2SubjectConfirmationData SubjectConfirmationData { get; set; }
     }
 }
