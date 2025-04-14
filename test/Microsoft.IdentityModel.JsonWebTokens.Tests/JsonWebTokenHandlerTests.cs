@@ -4573,6 +4573,57 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 }
             };
         }
+
+        [Theory, MemberData(nameof(ReadJsonWebTokenSpanTheoryData))]
+        public void ReadJsonWebToken_Span(JwtTheoryData theoryData)
+        {
+            var context = TestUtilities.WriteHeader($"{this}.ReadJsonWebToken_Span", theoryData);
+            try
+            {
+                var handler = new JsonWebTokenHandler();
+                var readOnlySpan = theoryData.Token.AsMemory();
+                var jwtFromSpan = handler.ReadJsonWebToken(readOnlySpan);
+                var jwtFromString = handler.ReadJsonWebToken(theoryData.Token);
+
+                if (theoryData.ExpectedException == null)
+                {
+                    // Results should match between span and string versions
+                    IdentityComparer.AreEqual(jwtFromSpan, jwtFromString, context);
+                }
+
+                theoryData.ExpectedException.ProcessNoException(context);
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex, context);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<JwtTheoryData> ReadJsonWebTokenSpanTheoryData()
+        {
+            return new TheoryData<JwtTheoryData>
+            {
+                new JwtTheoryData
+                {
+                    TestId = "ValidToken",
+                    Token = Default.AsymmetricJws,
+                },
+                new JwtTheoryData
+                {
+                    TestId = "TokenTooLong",
+                    Token = new string('x', TokenValidationParameters.DefaultMaximumTokenSizeInBytes + 1),
+                    ExpectedException = ExpectedException.ArgumentException("IDX10209:"),
+                },
+                new JwtTheoryData
+                {
+                    TestId = "EmptyToken",
+                    Token = string.Empty,
+                    ExpectedException = ExpectedException.ArgumentNullException("IDX10000:"),
+                }
+            };
+        }
     }
 
     public class CreateTokenTheoryData : TheoryDataBase

@@ -334,6 +334,14 @@ namespace Microsoft.IdentityModel.Xml.Tests
                     MatchesKey = true,
                 });
 
+                theoryData.Add(new KeyInfoTheoryData("NullRSAKeyValue")
+                {
+                    ExpectedException = ExpectedException.NoExceptionExpected,
+                    KeyInfo = new KeyInfo(), // This will have null RSAKeyValue
+                    SecurityKey = KeyingMaterial.RsaSecurityKey_2048_Public,
+                    MatchesKey = false,
+                });
+
                 return theoryData;
             }
         }

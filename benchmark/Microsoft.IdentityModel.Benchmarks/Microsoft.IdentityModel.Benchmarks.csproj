@@ -45,6 +45,7 @@
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Tokens\Microsoft.IdentityModel.Tokens.csproj" />
     <ProjectReference Include="..\..\src\System.IdentityModel.Tokens.Jwt\System.IdentityModel.Tokens.Jwt.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Protocols.SignedHttpRequest\Microsoft.IdentityModel.Protocols.SignedHttpRequest.csproj" />
+    <ProjectReference Include="..\..\test\Microsoft.IdentityModel.TestUtils\Microsoft.IdentityModel.TestUtils.csproj" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">

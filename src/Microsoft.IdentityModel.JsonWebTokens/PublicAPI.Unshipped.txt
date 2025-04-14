@@ -1,0 +1,1 @@
+virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ReadJsonWebToken(System.ReadOnlyMemory<char> token) -> Microsoft.IdentityModel.JsonWebTokens.JsonWebToken
