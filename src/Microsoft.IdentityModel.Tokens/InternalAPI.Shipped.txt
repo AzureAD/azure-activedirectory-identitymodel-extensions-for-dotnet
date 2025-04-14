@@ -17,6 +17,7 @@ const Microsoft.IdentityModel.Telemetry.TelemetryDataRecorder.TotalDurationHisto
 const Microsoft.IdentityModel.Tokens.AesGcm.NonceSize = 12 -> int
 const Microsoft.IdentityModel.Tokens.AesGcm.TagSize = 16 -> int
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.DoNotFailOnMissingTidSwitch = "Switch.Microsoft.IdentityModel.DontFailOnMissingTidValidateIssuerSigning" -> string
+const Microsoft.IdentityModel.Tokens.AppContextSwitches.DoNotScrubExceptionsSwitch = "Switch.Microsoft.IdentityModel.DoNotScrubExceptions" -> string
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.TryAllStringClaimsAsDateTimeSwitch = "Switch.Microsoft.IdentityModel.TryAllStringClaimsAsDateTime" -> string
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.UpdateConfigAsBlockingSwitch = "Switch.Microsoft.IdentityModel.UpdateConfigAsBlocking" -> string
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseClaimsIdentityTypeSwitch = "Microsoft.IdentityModel.Tokens.UseClaimsIdentityType" -> string
@@ -47,7 +48,9 @@ const Microsoft.IdentityModel.Tokens.LogMessages.IDX10209 = "IDX10209: Token has
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10211 = "IDX10211: Unable to validate issuer. The 'issuer' parameter is null or whitespace." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10212 = "IDX10212: Issuer validation failed. Issuer: '{0}'. Did not match any: validationParameters.ValidIssuers: '{1}' or validationParameters.ConfigurationManager.CurrentConfiguration.Issuer: '{2}'. For more details, see https://aka.ms/IdentityModel/issuer-validation. " -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10214 = "IDX10214: Audience validation failed. Audiences: '{0}'. Did not match: validationParameters.ValidAudience: '{1}' or validationParameters.ValidAudiences: '{2}'." -> string
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10214S = "IDX10214: Audience validation failed. See https://aka.ms/identitymodel/app-context-switches" -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10215 = "IDX10215: Audience validation failed. Audiences: '{0}'. Did not match: validationParameters.ValidAudiences: '{1}'." -> string
+const Microsoft.IdentityModel.Tokens.LogMessages.IDX10215S = "IDX10215: Audience validation failed. See https://aka.ms/identitymodel/app-context-switches" -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10222 = "IDX10222: Lifetime validation failed. The token is not yet valid. ValidFrom (UTC): '{0}', Current time (UTC): '{1}'." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10223 = "IDX10223: Lifetime validation failed. The token is expired. ValidTo (UTC): '{0}', Current time (UTC): '{1}'." -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX10224 = "IDX10224: Lifetime validation failed. The NotBefore (UTC): '{0}' is after Expires (UTC): '{1}'." -> string
@@ -306,11 +309,22 @@ Microsoft.IdentityModel.Tokens.CaseSensitiveClaimsIdentity.SecurityToken.set -> 
 Microsoft.IdentityModel.Tokens.CertificateHelper
 Microsoft.IdentityModel.Tokens.CertificateHelper.CertificateHelper() -> void
 Microsoft.IdentityModel.Tokens.ClaimsIdentityFactory
+Microsoft.IdentityModel.Tokens.Cnf.ClassName.get -> string
+Microsoft.IdentityModel.Tokens.Cnf.Jku.set -> void
+Microsoft.IdentityModel.Tokens.Cnf.JsonWebKey.set -> void
+Microsoft.IdentityModel.Tokens.Cnf.Jwe.set -> void
+Microsoft.IdentityModel.Tokens.Cnf.Kid.set -> void
 Microsoft.IdentityModel.Tokens.Cng
 Microsoft.IdentityModel.Tokens.Cng.OpenAlgorithmProviderFlags
 Microsoft.IdentityModel.Tokens.Cng.OpenAlgorithmProviderFlags.BCRYPT_ALG_HANDLE_HMAC_FLAG = 8 -> Microsoft.IdentityModel.Tokens.Cng.OpenAlgorithmProviderFlags
 Microsoft.IdentityModel.Tokens.Cng.OpenAlgorithmProviderFlags.NONE = 0 -> Microsoft.IdentityModel.Tokens.Cng.OpenAlgorithmProviderFlags
 Microsoft.IdentityModel.Tokens.CollectionUtilities
+Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes
+Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Cnf.get -> System.ReadOnlySpan<byte>
+Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jku.get -> System.ReadOnlySpan<byte>
+Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jwe.get -> System.ReadOnlySpan<byte>
+Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jwk.get -> System.ReadOnlySpan<byte>
+Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Kid.get -> System.ReadOnlySpan<byte>
 Microsoft.IdentityModel.Tokens.CreateECDsaDelegate
 Microsoft.IdentityModel.Tokens.CryptographicOperations
 Microsoft.IdentityModel.Tokens.CryptoProviderFactory.CryptoProviderCache.set -> void
@@ -743,6 +757,7 @@ static Microsoft.IdentityModel.Tokens.AesAead.Decrypt(Microsoft.IdentityModel.To
 static Microsoft.IdentityModel.Tokens.AesAead.Encrypt(Microsoft.IdentityModel.Tokens.SafeKeyHandle keyHandle, byte[] nonce, byte[] associatedData, byte[] plaintext, byte[] ciphertext, byte[] tag) -> void
 static Microsoft.IdentityModel.Tokens.AesBCryptModes.OpenAesAlgorithm(string cipherMode) -> System.Lazy<Microsoft.IdentityModel.Tokens.SafeAlgorithmHandle>
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.DoNotFailOnMissingTid.get -> bool
+static Microsoft.IdentityModel.Tokens.AppContextSwitches.DoNotScrubExceptions.get -> bool
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.DontFailOnMissingTid.get -> bool
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.ResetAllSwitches() -> void
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.TryAllStringClaimsAsDateTime.get -> bool
@@ -771,6 +786,11 @@ static Microsoft.IdentityModel.Tokens.ClaimsIdentityFactory.Create(System.Collec
 static Microsoft.IdentityModel.Tokens.Cng.BCryptOpenAlgorithmProvider(string pszAlgId, string pszImplementation, Microsoft.IdentityModel.Tokens.Cng.OpenAlgorithmProviderFlags dwFlags) -> Microsoft.IdentityModel.Tokens.SafeAlgorithmHandle
 static Microsoft.IdentityModel.Tokens.Cng.SetCipherMode(this Microsoft.IdentityModel.Tokens.SafeAlgorithmHandle hAlg, string cipherMode) -> void
 static Microsoft.IdentityModel.Tokens.CollectionUtilities.IsNullOrEmpty<T>(this System.Collections.Generic.IEnumerable<T> enumerable) -> bool
+static Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Cnf.get -> System.ReadOnlySpan<byte>
+static Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jku.get -> System.ReadOnlySpan<byte>
+static Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jwe.get -> System.ReadOnlySpan<byte>
+static Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Jwk.get -> System.ReadOnlySpan<byte>
+static Microsoft.IdentityModel.Tokens.ConfirmationClaimTypesUtf8Bytes.Kid.get -> System.ReadOnlySpan<byte>
 static Microsoft.IdentityModel.Tokens.CryptographicOperations.ZeroMemory(byte[] buffer) -> void
 static Microsoft.IdentityModel.Tokens.CryptoProviderFactory.ShouldCacheSignatureProvider(Microsoft.IdentityModel.Tokens.SignatureProvider signatureProvider) -> bool
 static Microsoft.IdentityModel.Tokens.CryptoThrowHelper.ToCryptographicException(this int hr) -> System.Security.Cryptography.CryptographicException
