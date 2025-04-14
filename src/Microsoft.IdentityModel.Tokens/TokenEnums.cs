@@ -6,7 +6,7 @@ namespace Microsoft.IdentityModel.Tokens
     /// <summary>
     /// Specifies the segment of a JWT.
     /// </summary>
-    public enum JwtSegment
+    public enum JwtSegmentType
     {
         /// <summary>
         /// The header segment of the JWT.

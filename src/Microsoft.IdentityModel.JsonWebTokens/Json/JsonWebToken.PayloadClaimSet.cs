@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (TryReadJwtClaim != null)
                 {
                     reader.Read(); // Move to the value
-                    if (TryReadJwtClaim(ref reader, JwtSegment.Payload, claimName, out object claimValue))
+                    if (TryReadJwtClaim(ref reader, JwtSegmentType.Payload, claimName, out object claimValue))
                     {
                         claims[claimName] = claimValue;
                         reader.Read(); // Move to the next token

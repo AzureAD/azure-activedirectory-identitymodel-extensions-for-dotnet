@@ -1807,12 +1807,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             CustomClaim headerClaimFromDelegate = null;
             CustomClaim payloadClaimFromDelegate1 = null;
             CustomClaim payloadClaimFromDelegate2 = null;
-            bool TryReadJwtClaim(ref Utf8JsonReader reader, JwtSegment jwtSegment, string claimName, out object claimValue)
+            bool TryReadJwtClaim(ref Utf8JsonReader reader, JwtSegmentType jwtSegmentType, string claimName, out object claimValue)
             {
                 // Handle custom claims.
-                switch (jwtSegment)
+                switch (jwtSegmentType)
                 {
-                    case JwtSegment.Header:
+                    case JwtSegmentType.Header:
                         switch (claimName)
                         {
                             case CustomJsonWebToken.CustomClaimName:
@@ -1823,7 +1823,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 break;
                         }
                         break;
-                    case JwtSegment.Payload:
+                    case JwtSegmentType.Payload:
                         switch (claimName)
                         {
                             case customPayloadClaimName1:
@@ -1894,12 +1894,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             CustomClaim headerClaimFromDelegate = null;
             CustomClaim payloadClaimFromDelegate1 = null;
             CustomClaim payloadClaimFromDelegate2 = null;
-            bool TryReadJwtClaim(ref Utf8JsonReader reader, JwtSegment jwtSegment, string claimName, out object claimValue)
+            bool TryReadJwtClaim(ref Utf8JsonReader reader, JwtSegmentType jwtSegmentType, string claimName, out object claimValue)
             {
                 // Handle custom claims.
-                switch (jwtSegment)
+                switch (jwtSegmentType)
                 {
-                    case JwtSegment.Header:
+                    case JwtSegmentType.Header:
                         switch (claimName)
                         {
                             case CustomJsonWebToken.CustomClaimName:
@@ -1910,7 +1910,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                                 break;
                         }
                         break;
-                    case JwtSegment.Payload:
+                    case JwtSegmentType.Payload:
                         switch (claimName)
                         {
                             case customPayloadClaimName1:
@@ -1982,7 +1982,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }).AsMemory();
 
             // Arrange - create delegates to read custom claims
-            bool TryReadJwtClaim(ref Utf8JsonReader reader, JwtSegment jwtSegment, string claimName, out object claimValue)
+            bool TryReadJwtClaim(ref Utf8JsonReader reader, JwtSegmentType jwtSegmentType, string claimName, out object claimValue)
             {
                 // Handle custom claims.
                 switch (claimName)

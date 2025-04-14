@@ -239,9 +239,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <remarks>
         /// An example implementation:
         /// <code>
-        /// bool TryReadJwtClaim(ref Utf8JsonReader reader, JwtSegment jwtSegment, string claimName, out object claimValue)
+        /// bool TryReadJwtClaim(ref Utf8JsonReader reader, JwtSegmentType jwtSegmentType, string claimName, out object claimValue)
         /// {
-        ///     if (jwtSegment == JwtSegment.Payload &amp;&amp; claimName == "CustomClaimName")
+        ///     if (jwtSegmentType == JwtSegmentType.Payload &amp;&amp; claimName == "CustomClaimName")
         ///         claimValue = JsonSerializer.Deserialize&lt;CustomClaim&gt;(reader.GetString());
         ///         return true;
         ///     return false;
