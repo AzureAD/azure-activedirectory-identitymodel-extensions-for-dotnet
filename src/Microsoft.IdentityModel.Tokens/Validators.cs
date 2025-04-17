@@ -143,10 +143,10 @@ namespace Microsoft.IdentityModel.Tokens
                 if (string.IsNullOrWhiteSpace(tokenAudience))
                     continue;
 
-                foreach (string validAudience in validationParametersAudiences)
+                bool TryMatchAudience(string validAudience)
                 {
                     if (string.IsNullOrWhiteSpace(validAudience))
-                        continue;
+                        return false;
 
                     if (AudiencesMatch(validationParameters, tokenAudience, validAudience))
                     {
@@ -154,6 +154,25 @@ namespace Microsoft.IdentityModel.Tokens
                             LogHelper.LogInformation(LogMessages.IDX10234, LogHelper.MarkAsNonPII(tokenAudience));
 
                         return true;
+                    }
+
+                    return false;
+                }
+
+                if (validationParametersAudiences is IList<string> audienceList)
+                {
+                    for (int i = 0; i < audienceList.Count; i++)
+                    {
+                        if (TryMatchAudience(audienceList[i]))
+                            return true;
+                    }
+                }
+                else
+                {
+                    foreach (string validAudience in validationParametersAudiences)
+                    {
+                        if (TryMatchAudience(validAudience))
+                            return true;
                     }
                 }
             }

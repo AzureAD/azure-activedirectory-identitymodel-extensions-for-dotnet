@@ -487,6 +487,31 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
+        /// Converts a ReadOnlyMemory span of characters into an instance of <see cref="JsonWebToken"/>.
+        /// </summary>
+        /// <param name="token">A ReadOnlyMemory span containing a JSON Web Token (JWT) in JWS or JWE Compact Serialization format.</param>
+        /// <returns>A <see cref="JsonWebToken"/>.</returns>
+        /// <exception cref="ArgumentException">Thrown if the length of <paramref name="token"/> is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</exception>
+        /// <remarks>
+        /// <para>If the <paramref name="token"/> is in JWE Compact Serialization format, only the protected header will be deserialized.</para>
+        /// This method is unable to decrypt the payload. Use <see cref="ValidateToken(string, TokenValidationParameters)"/>to obtain the payload.
+        /// <para>
+        /// The token is NOT validated and no security decisions should be made about the contents.
+        /// Use <see cref="ValidateToken(string, TokenValidationParameters)"/> or <see cref="ValidateTokenAsync(string, TokenValidationParameters)"/> to ensure the token is acceptable.
+        /// </para>
+        /// </remarks>
+        public virtual JsonWebToken ReadJsonWebToken(ReadOnlyMemory<char> token)
+        {
+            if (token.IsEmpty)
+                throw LogHelper.LogArgumentNullException(nameof(token));
+
+            if (token.Span.Length > MaximumTokenSizeInBytes)
+                throw LogHelper.LogExceptionMessage(new ArgumentException(LogHelper.FormatInvariant(TokenLogMessages.IDX10209, LogHelper.MarkAsNonPII(token.Length), LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes))));
+
+            return new JsonWebToken(token);
+        }
+
+        /// <summary>
         /// Converts a string into an instance of <see cref="JsonWebToken"/>.
         /// </summary>
         /// <param name="token">A JSON Web Token (JWT) in JWS or JWE Compact Serialization format.</param>
