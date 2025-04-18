@@ -28,9 +28,24 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         private static readonly SecurityTokenDescriptor s_emptyTokenDescriptor = new();
 
         /// <summary>
-        /// Creates an unsigned JSON Web Signature (JWS).
+        /// Creates an unsigned JSON Web Signature (JWS) using the exact JSON payload provided.
         /// </summary>
-        /// <param name="payload">A string containing JSON which represents the JWT token payload.</param>
+        /// <param name="payload">A string containing JSON which represents the JWT token payload. The payload will be used exactly as provided without modification.</param>
+        /// <remarks>
+        /// This method uses the exact payload JSON provided without adding any default claims.
+        /// To automatically include default time-based claims (exp, nbf, iat), use the <see cref="CreateToken(SecurityTokenDescriptor)"/> overload instead.
+        /// Example with manual time claims:
+        /// <code>
+        /// var handler = new JsonWebTokenHandler();
+        /// var now = DateTime.UtcNow;
+        /// var token = handler.CreateToken(@"{
+        ///     ""sub"": ""subject"",
+        ///     ""exp"": " + EpochTime.GetIntDate(now.AddMinutes(30)) + @",
+        ///     ""nbf"": " + EpochTime.GetIntDate(now) + @",
+        ///     ""iat"": " + EpochTime.GetIntDate(now) + @"
+        /// }");
+        /// </code>
+        /// </remarks>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="payload"/> is null.</exception>
         /// <returns>A JWS in Compact Serialization format.</returns>
         public virtual string CreateToken(string payload)
@@ -102,9 +117,37 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
 
         /// <summary>
-        /// Creates a JWT that can be a JWS or JWE.
+        /// Creates a JWT that can be a JWS or JWE with automatically managed time-based claims.
         /// </summary>
         /// <param name="tokenDescriptor">A <see cref="SecurityTokenDescriptor"/> that contains details of contents of the token.</param>
+        /// <remarks>
+        /// This method will automatically add time-based claims (exp, nbf, iat) to the token if <see cref="TokenHandler.SetDefaultTimesOnTokenCreation"/> is true.
+        /// The expiration time will be set according to <see cref="TokenHandler.TokenLifetimeInMinutes"/>. For manual control over these claims,
+        /// use the CreateToken(string payload) overload with the claims explicitly set in the JSON payload.
+        /// 
+        /// Example with automatic time claims:
+        /// <code>
+        /// var handler = new JsonWebTokenHandler();
+        /// var descriptor = new SecurityTokenDescriptor
+        /// {
+        ///     Subject = new ClaimsIdentity(new[] { new Claim("sub", "subject") }),
+        ///     SigningCredentials = signingCredentials
+        /// };
+        /// var token = handler.CreateToken(descriptor); // Will include exp, nbf, iat claims automatically
+        /// </code>
+        /// 
+        /// Example with manual time claims using raw JSON:
+        /// <code>
+        /// var handler = new JsonWebTokenHandler();
+        /// var now = DateTime.UtcNow;
+        /// var token = handler.CreateToken(@"{
+        ///     ""sub"": ""subject"",
+        ///     ""exp"": " + EpochTime.GetIntDate(now.AddMinutes(30)) + @",
+        ///     ""nbf"": " + EpochTime.GetIntDate(now) + @",
+        ///     ""iat"": " + EpochTime.GetIntDate(now) + @"
+        /// }");
+        /// </code>
+        /// </remarks>
         /// <returns>A JWT in Compact Serialization format.</returns>
         public virtual string CreateToken(SecurityTokenDescriptor tokenDescriptor)
         {

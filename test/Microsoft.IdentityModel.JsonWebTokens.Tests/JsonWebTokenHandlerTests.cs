@@ -29,6 +29,45 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
     public class JsonWebTokenHandlerTests
     {
         [Fact]
+        public void CreateToken_DefaultTimesComparison()
+        {
+            var handler = new JsonWebTokenHandler();
+
+            // Raw JSON payload without time claims
+            var rawPayload = new JObject()
+            {
+                { "sub", "subject" }
+            }.ToString();
+
+            // Create token with raw JSON payload
+            var tokenFromRawJson = handler.CreateToken(rawPayload);
+            var jsonTokenFromRaw = new JsonWebToken(tokenFromRawJson);
+
+            // Should not have time claims when using raw JSON
+            Assert.False(jsonTokenFromRaw.TryGetPayloadValue<long>("exp", out _));
+            Assert.False(jsonTokenFromRaw.TryGetPayloadValue<long>("nbf", out _));
+            Assert.False(jsonTokenFromRaw.TryGetPayloadValue<long>("iat", out _));
+
+            // Same payload via SecurityTokenDescriptor
+            var descriptor = new SecurityTokenDescriptor
+            {
+                Claims = new Dictionary<string, object>
+                {
+                    { "sub", "subject" }
+                }
+            };
+
+            // Create token with SecurityTokenDescriptor
+            var tokenFromDescriptor = handler.CreateToken(descriptor);
+            var jsonTokenFromDescriptor = new JsonWebToken(tokenFromDescriptor);
+
+            // Should have time claims when using SecurityTokenDescriptor
+            Assert.True(jsonTokenFromDescriptor.TryGetPayloadValue<long>("exp", out _));
+            Assert.True(jsonTokenFromDescriptor.TryGetPayloadValue<long>("nbf", out _));
+            Assert.True(jsonTokenFromDescriptor.TryGetPayloadValue<long>("iat", out _));
+        }
+
+        [Fact]
         public void JsonWebTokenHandler_CreateToken_SameTypeMultipleValues()
         {
             var identity = new CaseSensitiveClaimsIdentity("Test");
