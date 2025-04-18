@@ -248,7 +248,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// }
         /// </code>
         /// </remarks>
-        internal TryReadJwtClaim TryReadJwtClaim { get; set; }
+        private TryReadJwtClaim TryReadJwtClaim { get; set; }
 
         internal string ActualIssuer { get; set; }
 
