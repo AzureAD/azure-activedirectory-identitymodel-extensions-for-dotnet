@@ -91,8 +91,11 @@ Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.IsEncrypted.get -> bool
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.IsSigned.get -> bool
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.IssuedAt.get -> System.DateTime
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.JsonWebToken(string header, string payload) -> void
+Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.JsonWebToken(string header, string payload, Microsoft.IdentityModel.Tokens.TryReadJwtClaim tryReadJwtClaim) -> void
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.JsonWebToken(string jwtEncodedString) -> void
+Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.JsonWebToken(string jwtEncodedString, Microsoft.IdentityModel.Tokens.TryReadJwtClaim tryReadJwtClaim) -> void
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.JsonWebToken(System.ReadOnlyMemory<char> encodedTokenMemory) -> void
+Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.JsonWebToken(System.ReadOnlyMemory<char> encodedTokenMemory, Microsoft.IdentityModel.Tokens.TryReadJwtClaim tryReadJwtClaim) -> void
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.Kid.get -> string
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.Subject.get -> string
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.TryGetClaim(string key, out System.Security.Claims.Claim value) -> bool
@@ -162,5 +165,6 @@ virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.CreateToken(st
 virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.CreateToken(string payload, Microsoft.IdentityModel.Tokens.SigningCredentials signingCredentials, System.Collections.Generic.IDictionary<string, object> additionalHeaderClaims) -> string
 virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.CreateToken(string payload, System.Collections.Generic.IDictionary<string, object> additionalHeaderClaims) -> string
 virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ReadJsonWebToken(string token) -> Microsoft.IdentityModel.JsonWebTokens.JsonWebToken
+virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ReadJsonWebToken(System.ReadOnlyMemory<char> token) -> Microsoft.IdentityModel.JsonWebTokens.JsonWebToken
 virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ResolveTokenDecryptionKey(string token, Microsoft.IdentityModel.JsonWebTokens.JsonWebToken jwtToken, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters) -> Microsoft.IdentityModel.Tokens.SecurityKey
 virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ValidateToken(string token, Microsoft.IdentityModel.Tokens.TokenValidationParameters validationParameters) -> Microsoft.IdentityModel.Tokens.TokenValidationResult

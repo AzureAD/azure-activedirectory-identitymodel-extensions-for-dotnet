@@ -1,3 +1,0 @@
-Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.TryReadJwtClaim.get -> Microsoft.IdentityModel.Tokens.TryReadJwtClaim
-Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.TryReadJwtClaim.set -> void
-virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.ReadHeaderValue(ref System.Text.Json.Utf8JsonReader reader, System.Collections.Generic.IDictionary<string, object> claims) -> void
