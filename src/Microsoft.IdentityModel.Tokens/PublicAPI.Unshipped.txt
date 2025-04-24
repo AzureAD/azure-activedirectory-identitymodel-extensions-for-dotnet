@@ -1,6 +1,0 @@
-Microsoft.IdentityModel.Tokens.JwtSegmentType.Header = 0 -> Microsoft.IdentityModel.Tokens.JwtSegmentType
-Microsoft.IdentityModel.Tokens.JwtSegmentType.Payload = 1 -> Microsoft.IdentityModel.Tokens.JwtSegmentType
-Microsoft.IdentityModel.Tokens.TokenValidationParameters.TryReadJwtClaim.get -> Microsoft.IdentityModel.Tokens.TryReadJwtClaim
-Microsoft.IdentityModel.Tokens.TokenValidationParameters.TryReadJwtClaim.set -> void
-Microsoft.IdentityModel.Tokens.TryReadJwtClaim
-Microsoft.IdentityModel.Tokens.JwtSegmentType

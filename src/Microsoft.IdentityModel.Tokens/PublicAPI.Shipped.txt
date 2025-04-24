@@ -344,6 +344,9 @@ Microsoft.IdentityModel.Tokens.JsonWebKeySet.SkipUnresolvedJsonWebKeys.get -> bo
 Microsoft.IdentityModel.Tokens.JsonWebKeySet.SkipUnresolvedJsonWebKeys.set -> void
 Microsoft.IdentityModel.Tokens.JsonWebKeySetParameterNames
 Microsoft.IdentityModel.Tokens.JsonWebKeyUseNames
+Microsoft.IdentityModel.Tokens.JwtSegmentType
+Microsoft.IdentityModel.Tokens.JwtSegmentType.Header = 0 -> Microsoft.IdentityModel.Tokens.JwtSegmentType
+Microsoft.IdentityModel.Tokens.JwtSegmentType.Payload = 1 -> Microsoft.IdentityModel.Tokens.JwtSegmentType
 Microsoft.IdentityModel.Tokens.KeyWrapProvider
 Microsoft.IdentityModel.Tokens.KeyWrapProvider.Dispose() -> void
 Microsoft.IdentityModel.Tokens.KeyWrapProvider.KeyWrapProvider() -> void
@@ -687,6 +690,8 @@ Microsoft.IdentityModel.Tokens.TokenValidationParameters.TryAllDecryptionKeys.ge
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.TryAllDecryptionKeys.set -> void
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.TryAllIssuerSigningKeys.get -> bool
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.TryAllIssuerSigningKeys.set -> void
+Microsoft.IdentityModel.Tokens.TokenValidationParameters.TryReadJwtClaim.get -> Microsoft.IdentityModel.Tokens.TryReadJwtClaim
+Microsoft.IdentityModel.Tokens.TokenValidationParameters.TryReadJwtClaim.set -> void
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.TypeValidator.get -> Microsoft.IdentityModel.Tokens.TypeValidator
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.TypeValidator.set -> void
 Microsoft.IdentityModel.Tokens.TokenValidationParameters.ValidAlgorithms.get -> System.Collections.Generic.IEnumerable<string>
@@ -737,6 +742,7 @@ Microsoft.IdentityModel.Tokens.TokenValidationResult.TokenType.get -> string
 Microsoft.IdentityModel.Tokens.TokenValidationResult.TokenType.set -> void
 Microsoft.IdentityModel.Tokens.TokenValidationResult.TokenValidationResult() -> void
 Microsoft.IdentityModel.Tokens.TransformBeforeSignatureValidation
+Microsoft.IdentityModel.Tokens.TryReadJwtClaim
 Microsoft.IdentityModel.Tokens.TypeValidator
 Microsoft.IdentityModel.Tokens.UniqueId
 Microsoft.IdentityModel.Tokens.Utility

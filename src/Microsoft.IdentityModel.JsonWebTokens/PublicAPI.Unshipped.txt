@@ -1,4 +1,0 @@
-Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.JsonWebToken(string header, string payload, Microsoft.IdentityModel.Tokens.TryReadJwtClaim tryReadJwtClaim) -> void
-Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.JsonWebToken(string jwtEncodedString, Microsoft.IdentityModel.Tokens.TryReadJwtClaim tryReadJwtClaim) -> void
-Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.JsonWebToken(System.ReadOnlyMemory<char> encodedTokenMemory, Microsoft.IdentityModel.Tokens.TryReadJwtClaim tryReadJwtClaim) -> void
-virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.ReadJsonWebToken(System.ReadOnlyMemory<char> token) -> Microsoft.IdentityModel.JsonWebTokens.JsonWebToken
