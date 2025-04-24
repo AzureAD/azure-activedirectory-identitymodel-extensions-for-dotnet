@@ -3,7 +3,7 @@ See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymode
 8.9.0
 =====
 ## Bug Fixes
-- syncAfter has been updated to preserve UTC information, addressing a bug where GetConfigurationAsync does not refresh configuration in ConfigurationManager.. See [#3213](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3213).
+- syncAfter has been updated to preserve UTC information, addressing a bug where GetConfigurationAsync does not refresh configuration in ConfigurationManager. See [#3213](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3213).
 - Fixed a null reference issue in KeyInfo. See (#3203)[https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3203].
 
 ## New Features
