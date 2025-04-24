@@ -1,5 +1,18 @@
 See the [releases](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/releases) for details on bug fixes and added features.
 
+8.9.0
+=====
+## Bug Fixes
+- syncAfter has been updated to preserve UTC information, addressing a bug where GetConfigurationAsync does not refresh configuration in ConfigurationManager.. See [#3213](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3213).
+- Fixed a null reference issue in KeyInfo. See (#3203)[https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3203].
+
+## New Features
+- Introduced a new delegate for reading custom token payload values on JsonWebToken. See [#2981](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/2981).
+- Added an overload for ReadJsonWebToken to take a ReadOnlyMemory. See [#3205](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/commit/48cdc0ca10e81cf9d6d7071801112d63189a44a7#diff-03e8a19f3b3aeb7f65b778b988b6bf792d118ca00b6dbda337526e8678e0ef7f). 
+
+## Fundamentals
+- Utilized IList to avoid enumerator allocation during audience validation. See [#3204](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/pull/3204).
+
 8.8.0
 =====
 ## New Features
