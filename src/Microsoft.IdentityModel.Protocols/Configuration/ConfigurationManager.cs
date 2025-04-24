@@ -348,7 +348,7 @@ namespace Microsoft.IdentityModel.Protocols
         private void UpdateConfiguration(T configuration)
         {
             _currentConfiguration = configuration;
-            _syncAfter = DateTimeUtil.Add(TimeProvider.GetUtcNow().DateTime, AutomaticRefreshInterval +
+            _syncAfter = DateTimeUtil.Add(TimeProvider.GetUtcNow().UtcDateTime, AutomaticRefreshInterval +
                 TimeSpan.FromSeconds(new Random().Next((int)AutomaticRefreshInterval.TotalSeconds / 20)));
         }
 
