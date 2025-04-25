@@ -377,7 +377,7 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static string RoleDescriptorTemplate
         {
-            get => "<RoleDescriptor xsi:Type=\"{0}\" protocolSupportEnumeration=\"{1}\" xmlns:xsi=\"{2}\" xmlns:fed=\"{3}\">{4}{5}{6}{7}{8}{9}{10}</RoleDescriptor>";
+            get => "<RoleDescriptor xsi:type=\"{0}\" protocolSupportEnumeration=\"{1}\" xmlns:xsi=\"{2}\" xmlns:fed=\"{3}\">{4}{5}{6}{7}{8}{9}{10}</RoleDescriptor>";
         }
 
         public static string SignatureTemplate
