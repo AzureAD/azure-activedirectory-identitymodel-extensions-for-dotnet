@@ -31,7 +31,7 @@ namespace Microsoft.IdentityModel.Xml
             public const string NcName = "NCName";
             public const string Nil = "nil";
             public const string PrefixList = "PrefixList";
-            public const string Type = "Type";
+            public const string Type = "type";
             public const string URI = "URI";
         }
 
