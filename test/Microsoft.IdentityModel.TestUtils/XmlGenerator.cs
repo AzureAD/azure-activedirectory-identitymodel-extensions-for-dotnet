@@ -354,12 +354,12 @@ namespace Microsoft.IdentityModel.TestUtils
 
         public static string ReferenceTemplate
         {
-            get => "<{0}Reference Id=\"{1}\" Type=\"{2}\" URI=\"{3}\" xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><Transforms><Transform Algorithm=\"{4}\" /><Transform Algorithm=\"{5}\" /></Transforms><DigestMethod Algorithm=\"{6}\" /><DigestValue>{7}</DigestValue></{0}Reference>";
+            get => "<{0}Reference Id=\"{1}\" {8}=\"{2}\" URI=\"{3}\" xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\"><Transforms><Transform Algorithm=\"{4}\" /><Transform Algorithm=\"{5}\" /></Transforms><DigestMethod Algorithm=\"{6}\" /><DigestValue>{7}</DigestValue></{0}Reference>";
         }
 
-        public static string ReferenceXml(string prefix, string id, string type, string referenceUri, string envelopingAlgorithm, string c14nAlgorithm, string digestAlgorithm, string digestValue)
+        public static string ReferenceXml(string prefix, string id, string type, string referenceUri, string envelopingAlgorithm, string c14nAlgorithm, string digestAlgorithm, string digestValue, string typeAttr = "type")
         {
-            return string.Format(ReferenceTemplate, prefix, id, type, referenceUri, envelopingAlgorithm, c14nAlgorithm, digestAlgorithm, digestValue);
+            return string.Format(ReferenceTemplate, prefix, id, type, referenceUri, envelopingAlgorithm, c14nAlgorithm, digestAlgorithm, digestValue, typeAttr);
         }
 
         // Always assumes two transforms
