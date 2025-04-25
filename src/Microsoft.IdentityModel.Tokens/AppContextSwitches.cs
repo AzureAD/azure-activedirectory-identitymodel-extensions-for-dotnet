@@ -120,6 +120,9 @@ namespace Microsoft.IdentityModel.Tokens
 
             _doNotScrubExceptions = null;
             AppContext.SetSwitch(DoNotScrubExceptionsSwitch, false);
+
+            _useCapitalizedXMLTypeAttr = null;
+            AppContext.SetSwitch(UseCapitalizedXMLTypeAttrSwitch, false);
         }
     }
 }
