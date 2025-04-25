@@ -92,6 +92,13 @@ namespace Microsoft.IdentityModel.Tokens
         internal static bool DoNotScrubExceptions => _doNotScrubExceptions ??= (AppContext.TryGetSwitch(DoNotScrubExceptionsSwitch, out bool doNotScrubExceptions) && doNotScrubExceptions);
 
         /// <summary>
+        /// When enabled, the XML type attribute will be capitalized (XML) for saml configurations.
+        /// </summary>
+        internal const string UseCapitalizedXMLTypeAttrSwitch = "Switch.Microsoft.IdentityModel.UseCapitalizedXMLTypeAttr";
+        private static bool? _useCapitalizedXMLTypeAttr;
+        internal static bool UseCapitalizedXMLTypeAttr => _useCapitalizedXMLTypeAttr ??= (AppContext.TryGetSwitch(UseCapitalizedXMLTypeAttrSwitch, out bool useCapitalizedXMLTypeAttr) && useCapitalizedXMLTypeAttr);
+
+        /// <summary>
         /// Used for testing to reset all switches to its default value.
         /// </summary>
         internal static void ResetAllSwitches()
