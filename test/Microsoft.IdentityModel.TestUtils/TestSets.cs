@@ -884,7 +884,8 @@ namespace Microsoft.IdentityModel.TestUtils
                                 SecurityAlgorithms.EnvelopedSignature,
                                 SecurityAlgorithms.ExclusiveC14n,
                                 Default.ReferenceDigestMethod,
-                                digestValue, typeAttr))
+                                digestValue,
+                                typeAttr))
                 };
             }
         }
@@ -992,7 +993,8 @@ namespace Microsoft.IdentityModel.TestUtils
                                 unknownTransform,
                                 SecurityAlgorithms.ExclusiveC14n,
                                 SecurityAlgorithms.Sha256Digest,
-                                Default.ReferenceDigestValue, typeAttr))
+                                Default.ReferenceDigestValue,
+                                typeAttr))
 
                 };
             }
