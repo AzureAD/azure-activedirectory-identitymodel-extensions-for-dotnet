@@ -133,7 +133,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             LogMessages.IDX14116,
                             LogHelper.MarkAsNonPII(nameof(tokenDescriptor.AdditionalInnerHeaderClaims)),
                             LogHelper.MarkAsNonPII(string.Join(", ", JwtTokenUtilities.DefaultHeaderParameters)))));
-
+            Console.WriteLine("create token 2");
             return CreateToken(
                 tokenDescriptor,
                 SetDefaultTimesOnTokenCreation,
@@ -804,7 +804,24 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             var payload = new Dictionary<string, object>();
 
             bool checkClaims = tokenDescriptor.Claims != null && tokenDescriptor.Claims.Count > 0;
+            // Handle Actor claim specifically
+            if (tokenDescriptor.Subject.Actor != null)
+            {
+                // Create a nested JWT for the Actor
+                var actorTokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = tokenDescriptor.Subject.Actor,
+                    // Copy any signing credentials from the parent token
+                    SigningCredentials = tokenDescriptor.SigningCredentials
+                };
 
+                // Create a JWT from the Actor claims identity
+                string actorToken = CreateToken(actorTokenDescriptor, false, 0);
+
+                // Add the Actor token as a claim
+                writer.WritePropertyName(JwtRegisteredClaimNames.Actort);
+                writer.WriteStringValue(actorToken);
+            }
             foreach (Claim claim in tokenDescriptor.Subject.Claims)
             {
                 if (claim == null)
@@ -818,6 +835,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     continue;
 
                 if (issuerSet && claim.Type.Equals(JwtRegisteredClaimNames.Iss, StringComparison.Ordinal))
+                    continue;
+
+                // Skip the actor claim as we've already processed it above
+                if (claim.Type.Equals(ClaimTypes.Actor, StringComparison.Ordinal))
                     continue;
 
                 if (claim.Type.Equals(JwtRegisteredClaimNames.Exp, StringComparison.Ordinal))
