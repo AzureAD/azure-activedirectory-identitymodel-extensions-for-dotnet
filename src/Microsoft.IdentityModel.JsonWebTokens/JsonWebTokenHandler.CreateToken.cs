@@ -784,21 +784,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             writer.WriteEndObject();
             writer.Flush();
         }
-        private static string GetClaimValueAsUnsignedJWT(string jsonClaimsString)
-        {
-            using JsonDocument doc = JsonDocument.Parse(jsonClaimsString);
-            JsonElement root = doc.RootElement;
-            var claimsDictionary = new Dictionary<string, string>();
-            foreach (JsonProperty property in root.EnumerateObject())
-            {
-                claimsDictionary[property.Name] = property.Value.ToString();
-            }
-            string header = Base64UrlEncoder.Encode("{\"alg\":\"none\"}");
-            string encodedPayload = Base64UrlEncoder.Encode(jsonClaimsString);
-            string jwtString = $"{header}.{encodedPayload}.";
-            return jwtString;
-        }
-
         internal static void AddSubjectClaims(
             ref Utf8JsonWriter writer,
             SecurityTokenDescriptor tokenDescriptor,
@@ -819,6 +804,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             bool checkClaims = tokenDescriptor.Claims != null && tokenDescriptor.Claims.Count > 0;
             bool isActorTokenSet = false;
+            JsonWebTokenHandler jsonWebTokenHandler = new JsonWebTokenHandler();
             foreach (Claim claim in tokenDescriptor.Subject.Claims)
             {
                 if (claim == null)
@@ -837,7 +823,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (!isActorTokenSet && claim.Type.Equals(ClaimTypes.Actor, StringComparison.Ordinal))
                 {
                     isActorTokenSet = true;
-                    string claimJwtString = GetClaimValueAsUnsignedJWT(claim.Value);
+                    string claimJwtString = jsonWebTokenHandler.CreateToken(claim.Value);
                     writer.WritePropertyName(JwtRegisteredClaimNames.Actort);
                     writer.WriteStringValue(claimJwtString);
                 }
