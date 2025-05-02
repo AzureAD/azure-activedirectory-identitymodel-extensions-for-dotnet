@@ -822,10 +822,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 if (!isActorTokenSet && claim.Type.Equals(ClaimTypes.Actor, StringComparison.Ordinal))
                 {
-                    isActorTokenSet = true;
-                    string claimJwtString = jsonWebTokenHandler.CreateToken(claim.Value);
-                    writer.WritePropertyName(JwtRegisteredClaimNames.Actort);
-                    writer.WriteStringValue(claimJwtString);
+                    using (JsonDocument.Parse(claim.Value))
+                    {
+                        isActorTokenSet = true;
+                        string claimJwtString = jsonWebTokenHandler.CreateToken(claim.Value);
+                        writer.WritePropertyName(JwtRegisteredClaimNames.Actort);
+                        writer.WriteStringValue(claimJwtString);
+                    }
                 }
                 if (claim.Type.Equals(JwtRegisteredClaimNames.Exp, StringComparison.Ordinal))
                 {
@@ -881,7 +884,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 var actorTokenDescriptor = new SecurityTokenDescriptor
                 {
                     Subject = tokenDescriptor.Subject.Actor,
-                    SigningCredentials = tokenDescriptor.SigningCredentials
                 };
 
                 string actorToken = CreateToken(actorTokenDescriptor, false, 0);
