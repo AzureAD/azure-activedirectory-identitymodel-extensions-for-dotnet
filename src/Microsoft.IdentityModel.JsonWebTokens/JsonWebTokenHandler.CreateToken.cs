@@ -13,7 +13,6 @@ using System.Text.Json;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 using JsonPrimitives = Microsoft.IdentityModel.Tokens.Json.JsonSerializerPrimitives;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
@@ -787,7 +786,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         }
         private static string GetClaimValueAsUnsignedJWT(string jsonClaimsString)
         {
-            JwtPayload payload = JwtPayload.Deserialize(jsonClaimsString);
+            using JsonDocument doc = JsonDocument.Parse(jsonClaimsString);
+            JsonElement root = doc.RootElement;
+            var claimsDictionary = new Dictionary<string, string>();
+            foreach (JsonProperty property in root.EnumerateObject())
+            {
+                claimsDictionary[property.Name] = property.Value.ToString();
+            }
             string header = Base64UrlEncoder.Encode("{\"alg\":\"none\"}");
             string encodedPayload = Base64UrlEncoder.Encode(jsonClaimsString);
             string jwtString = $"{header}.{encodedPayload}.";
@@ -829,7 +834,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (issuerSet && claim.Type.Equals(JwtRegisteredClaimNames.Iss, StringComparison.Ordinal))
                     continue;
 
-                // Skip the actor claim as we've already processed it above
                 if (!isActorTokenSet && claim.Type.Equals(ClaimTypes.Actor, StringComparison.Ordinal))
                 {
                     isActorTokenSet = true;
