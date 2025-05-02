@@ -13,6 +13,7 @@ using System.Text.Json;
 using Microsoft.IdentityModel.Abstractions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using JsonPrimitives = Microsoft.IdentityModel.Tokens.Json.JsonSerializerPrimitives;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 
@@ -784,6 +785,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             writer.WriteEndObject();
             writer.Flush();
         }
+        private static string GetClaimValueAsUnsignedJWT(string jsonClaimsString)
+        {
+            JwtPayload payload = JwtPayload.Deserialize(jsonClaimsString);
+            string header = Base64UrlEncoder.Encode("{\"alg\":\"none\"}");
+            string encodedPayload = Base64UrlEncoder.Encode(jsonClaimsString);
+            string jwtString = $"{header}.{encodedPayload}.";
+            return jwtString;
+        }
 
         internal static void AddSubjectClaims(
             ref Utf8JsonWriter writer,
@@ -804,24 +813,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             var payload = new Dictionary<string, object>();
 
             bool checkClaims = tokenDescriptor.Claims != null && tokenDescriptor.Claims.Count > 0;
-            // Handle Actor claim specifically
-            if (tokenDescriptor.Subject.Actor != null)
-            {
-                // Create a nested JWT for the Actor
-                var actorTokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = tokenDescriptor.Subject.Actor,
-                    // Copy any signing credentials from the parent token
-                    SigningCredentials = tokenDescriptor.SigningCredentials
-                };
-
-                // Create a JWT from the Actor claims identity
-                string actorToken = CreateToken(actorTokenDescriptor, false, 0);
-
-                // Add the Actor token as a claim
-                writer.WritePropertyName(JwtRegisteredClaimNames.Actort);
-                writer.WriteStringValue(actorToken);
-            }
+            bool isActorTokenSet = false;
             foreach (Claim claim in tokenDescriptor.Subject.Claims)
             {
                 if (claim == null)
@@ -838,9 +830,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     continue;
 
                 // Skip the actor claim as we've already processed it above
-                if (claim.Type.Equals(ClaimTypes.Actor, StringComparison.Ordinal))
-                    continue;
-
+                if (!isActorTokenSet && claim.Type.Equals(ClaimTypes.Actor, StringComparison.Ordinal))
+                {
+                    isActorTokenSet = true;
+                    string claimJwtString = GetClaimValueAsUnsignedJWT(claim.Value);
+                    writer.WritePropertyName(JwtRegisteredClaimNames.Actort);
+                    writer.WriteStringValue(claimJwtString);
+                }
                 if (claim.Type.Equals(JwtRegisteredClaimNames.Exp, StringComparison.Ordinal))
                 {
                     if (expSet)
@@ -890,7 +886,19 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     payload[claim.Type] = jsonClaimValue;
                 }
             }
+            if (!isActorTokenSet && tokenDescriptor.Subject.Actor != null)
+            {
+                var actorTokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = tokenDescriptor.Subject.Actor,
+                    SigningCredentials = tokenDescriptor.SigningCredentials
+                };
 
+                string actorToken = CreateToken(actorTokenDescriptor, false, 0);
+                writer.WritePropertyName(JwtRegisteredClaimNames.Actort);
+                writer.WriteStringValue(actorToken);
+                isActorTokenSet = true;
+            }
             foreach (KeyValuePair<string, object> kvp in payload)
                 JsonPrimitives.WriteObject(ref writer, kvp.Key, kvp.Value);
 
