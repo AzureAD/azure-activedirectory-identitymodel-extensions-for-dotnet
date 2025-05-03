@@ -618,6 +618,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             bool iatSet = false;
             bool descriptorClaimsNbfChecked = false;
             bool nbfSet = false;
+            bool isActorTokenSet = false;
 
             writer.WriteStartObject();
 
@@ -753,9 +754,26 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                     JsonPrimitives.WriteObject(ref writer, kvp.Key, kvp.Value);
                 }
+                if (tokenDescriptor.Claims.ContainsKey(JwtRegisteredClaimNames.Actort))
+                {
+                    if (isActorTokenSet)
+                    {
+                        if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                            LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, LogHelper.MarkAsNonPII(nameof(tokenDescriptor.Expires))));
+
+                    }
+                    ClaimsIdentity actor = tokenDescriptor.Claims[JwtRegisteredClaimNames.Actort] as ClaimsIdentity;
+                    var actorTokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Subject = actor,
+                    };
+                    string actorToken = CreateToken(actorTokenDescriptor, false, 0);
+                    JsonPrimitives.WriteObject(ref writer, JwtRegisteredClaimNames.Actort, actorToken);
+                    isActorTokenSet = true;
+                }
             }
 
-            AddSubjectClaims(ref writer, tokenDescriptor, audienceSet, issuerSet, ref expSet, ref iatSet, ref nbfSet);
+            AddSubjectClaims(ref writer, tokenDescriptor, audienceSet, issuerSet, ref expSet, ref iatSet, ref nbfSet, ref isActorTokenSet);
 
             // By default we set these three properties only if they haven't been detected before.
             if (setDefaultTimesOnTokenCreation && !(expSet && iatSet && nbfSet))
@@ -791,7 +809,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             bool issuerSet,
             ref bool expSet,
             ref bool iatSet,
-            ref bool nbfSet)
+            ref bool nbfSet,
+            ref bool isActorTokenSet)
         {
             if (tokenDescriptor.Subject == null)
                 return;
@@ -803,8 +822,20 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             var payload = new Dictionary<string, object>();
 
             bool checkClaims = tokenDescriptor.Claims != null && tokenDescriptor.Claims.Count > 0;
-            bool isActorTokenSet = false;
             JsonWebTokenHandler jsonWebTokenHandler = new JsonWebTokenHandler();
+
+            if (!isActorTokenSet && tokenDescriptor.Subject.Actor != null)
+            {
+                var actorTokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = tokenDescriptor.Subject.Actor,
+                };
+
+                string actorToken = CreateToken(actorTokenDescriptor, false, 0);
+                writer.WritePropertyName(JwtRegisteredClaimNames.Actort);
+                writer.WriteStringValue(actorToken);
+                isActorTokenSet = true;
+            }
             foreach (Claim claim in tokenDescriptor.Subject.Claims)
             {
                 if (claim == null)
@@ -820,16 +851,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (issuerSet && claim.Type.Equals(JwtRegisteredClaimNames.Iss, StringComparison.Ordinal))
                     continue;
 
-                if (!isActorTokenSet && claim.Type.Equals(ClaimTypes.Actor, StringComparison.Ordinal))
-                {
-                    using (JsonDocument.Parse(claim.Value))
-                    {
-                        isActorTokenSet = true;
-                        string claimJwtString = jsonWebTokenHandler.CreateToken(claim.Value);
-                        writer.WritePropertyName(JwtRegisteredClaimNames.Actort);
-                        writer.WriteStringValue(claimJwtString);
-                    }
-                }
                 if (claim.Type.Equals(JwtRegisteredClaimNames.Exp, StringComparison.Ordinal))
                 {
                     if (expSet)
@@ -878,18 +899,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 {
                     payload[claim.Type] = jsonClaimValue;
                 }
-            }
-            if (!isActorTokenSet && tokenDescriptor.Subject.Actor != null)
-            {
-                var actorTokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = tokenDescriptor.Subject.Actor,
-                };
-
-                string actorToken = CreateToken(actorTokenDescriptor, false, 0);
-                writer.WritePropertyName(JwtRegisteredClaimNames.Actort);
-                writer.WriteStringValue(actorToken);
-                isActorTokenSet = true;
             }
             foreach (KeyValuePair<string, object> kvp in payload)
                 JsonPrimitives.WriteObject(ref writer, kvp.Key, kvp.Value);

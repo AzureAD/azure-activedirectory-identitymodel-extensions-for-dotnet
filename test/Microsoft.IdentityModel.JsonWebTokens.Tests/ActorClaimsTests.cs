@@ -2,13 +2,12 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Security.Claims;
-//using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 using Microsoft.IdentityModel.JsonWebTokens;
+using Newtonsoft.Json;
 
 #pragma warning disable CS3016 // Arrays as attribute arguments is not CLS-compliant
 
@@ -17,35 +16,27 @@ namespace Microsoft.IdentityModel.Tests
     public class ActorClaimsTests
     {
         [Fact]
-        public void ActorClaimsShouldBeSerializedInTokens()
+        public void ActorTokenAsClaimShouldBeSerialized()
         {
-            var context = new CompareContext($"{this}.ActorClaimsShouldBeSerializedInTokens");
+            var context = new CompareContext($"{this}.ActorTokenAsClaimShouldBeSerialized");
 
             try
             {
-                // Create actor claims identity
-                var actorIdentity = new CaseSensitiveClaimsIdentity("ActorAuth"); // Updated to CaseSensitiveClaimsIdentity
-                actorIdentity.AddClaim(new Claim("sub", "actor-subject-id"));
-                actorIdentity.AddClaim(new Claim("name", "Actor Name"));
-
-                var actorIdentityInner = new CaseSensitiveClaimsIdentity("ActorAuthInner"); // Updated to CaseSensitiveClaimsIdentity
-                actorIdentityInner.AddClaim(new Claim("sub", "actor-subject-id_inner"));
-                actorIdentityInner.AddClaim(new Claim("name", "Actor Name Inner"));
-                // Add a claim with destinations
-                var claim = new Claim("role", "admin");
-                claim.Properties["destination"] = "accesstoken id_token";
-                actorIdentity.AddClaim(claim);
-                actorIdentity.Actor = actorIdentityInner;
-
                 // Create the main identity
-                var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer"); // Updated to CaseSensitiveClaimsIdentity
+                var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
                 mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
                 mainIdentity.AddClaim(new Claim("name", "Main User"));
 
-                // Set the actor
-                mainIdentity.Actor = actorIdentity;
+                // Create an actor claim with a JSON string payload
+                var actorJson = JsonConvert.SerializeObject(new
+                {
+                    sub = "actor-subject-id",
+                    name = "Actor Name",
+                    role = "admin"
+                });
 
-                // Create a ClaimsPrincipal
+                mainIdentity.AddClaim(new Claim(ClaimTypes.Actor, actorJson));
+
                 var principal = new ClaimsPrincipal(mainIdentity);
 
                 // Create a token with JsonWebTokenHandler
@@ -58,75 +49,70 @@ namespace Microsoft.IdentityModel.Tests
                     Expires = DateTime.UtcNow.AddHours(1),
                     SigningCredentials = Default.AsymmetricSigningCredentials
                 };
-                //Console.WriteLine($"Token Descriptor: {tokenDescriptor.Subject.Actor.Claims.IsNullOrEmpty()}");
+
                 var token = tokenHandler.CreateToken(tokenDescriptor);
 
-                // Encode the token
-                var encodedToken = token;
-                JsonWebToken decodedToken = tokenHandler.ReadJsonWebToken(encodedToken);
-                Console.WriteLine($"jsonWeb Token: {token}");
-                Console.WriteLine($"Decoded Token Subject Actor: {decodedToken.Actor}");
-                // Verify actor claim exists in the token
-                Assert.True(decodedToken.Payload.HasClaim("actort"), "JWT token should contain 'act' claim");
-                //decodedToken.Payload.TryGetValue("actort", out object actorClaimStr);
-                //Console.WriteLine($"Decoded Actor Token: {tokenHandler.ReadJwtToken(actorClaimStr as string)}");
-                //// Parse actor token and verify its claims
-                var actorClaim = decodedToken.Payload.GetValue<Dictionary<string, object>>("actort");
-                Assert.NotNull(actorClaim);
-                Assert.Equal("actor-subject-id", actorClaim["sub"]);
-                Assert.Equal("Actor Name", actorClaim["name"]);
+                // Verify token was created successfully
+                JsonWebToken decodedToken = tokenHandler.ReadJsonWebToken(token);
 
-                //// Verify the destination property was maintained for the role claim
-                //if (actorClaim.TryGetValue("role", out object roleValue))
-                //{
-                //    // Further verification could be done here for the destination properties
-                //    Assert.Equal("admin", roleValue);
-                //}
-                //else
-                //{
-                //    context.Diffs.Add("Actor claim should contain 'role' claim with destination properties");
-                //}
+                // Verify actor claim exists in the token
+                Assert.True(decodedToken.Payload.HasClaim("actort"), "JWT token should contain 'actort' claim");
+
+                // Verify actor token can be parsed
+                var actorToken = decodedToken.Actor;
+                Assert.NotNull(actorToken);
+
+                // Try to deserialize the actor token string into a JSON object
+                var actorTokenString = decodedToken.Actor;
+                JsonWebToken actorJwt = tokenHandler.ReadJsonWebToken(actorTokenString);
+
+                // Verify actor claims
+                Assert.Equal("actor-subject-id", actorJwt.Payload.GetValue<string>("sub"));
+                Assert.Equal("Actor Name", actorJwt.Payload.GetValue<string>("name"));
+                Assert.Equal("admin", actorJwt.Payload.GetValue<string>("role"));
             }
             catch (Exception ex)
             {
-                context.Diffs.Add($"Exception: {ex.ToString()}");
+                context.Diffs.Add($"Exception: {ex}");
             }
 
             TestUtilities.AssertFailIfErrors(context);
         }
 
         [Fact]
-        public void ActorClaimsWithDestinationsShouldBePreserved()
+        public void ActorTokenAsClaimsIdentityShouldBeSerialized()
         {
-            var context = new CompareContext($"{this}.ActorClaimsWithDestinationsShouldBePreserved");
+            var context = new CompareContext($"{this}.ActorTokenAsClaimsIdentityShouldBeSerialized");
 
             try
             {
                 // Create actor claims identity
-                var actorIdentity = new CaseSensitiveClaimsIdentity("ActorAuth"); // Updated to CaseSensitiveClaimsIdentity
+                var actorIdentity = new CaseSensitiveClaimsIdentity("ActorAuth");
+                actorIdentity.AddClaim(new Claim("sub", "actor-subject-id"));
+                actorIdentity.AddClaim(new Claim("name", "Actor Name"));
+                actorIdentity.AddClaim(new Claim("role", "admin"));
 
-                // Add claims with destinations
-                var claim1 = new Claim("role", "admin");
-                claim1.Properties["destination"] = "accesstoken";
-                actorIdentity.AddClaim(claim1);
+                // Create nested actor
+                var nestedActorIdentity = new CaseSensitiveClaimsIdentity("NestedActorAuth");
+                nestedActorIdentity.AddClaim(new Claim("sub", "nested-actor-id"));
+                nestedActorIdentity.AddClaim(new Claim("name", "Nested Actor"));
 
-                var claim2 = new Claim("email", "actor@example.com");
-                claim2.Properties["destination"] = "id_token";
-                actorIdentity.AddClaim(claim2);
+                // Set nested actor
+                actorIdentity.Actor = nestedActorIdentity;
 
                 // Create the main identity
-                var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer"); // Updated to CaseSensitiveClaimsIdentity
+                var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
                 mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+                mainIdentity.AddClaim(new Claim("name", "Main User"));
 
                 // Set the actor
                 mainIdentity.Actor = actorIdentity;
 
-                // Create a ClaimsPrincipal
                 var principal = new ClaimsPrincipal(mainIdentity);
 
-                // Create a token with JsonWebTokenHandler to test its handling
-                var handler = new JsonWebTokenHandler();
-                var tokenDescriptor = new SecurityTokenDescriptor
+                // Create a token with JsonWebTokenHandler
+                var tokenHandler = new JsonWebTokenHandler();
+                SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
                 {
                     Subject = principal.Identity as ClaimsIdentity,
                     Issuer = "https://example.com",
@@ -135,49 +121,226 @@ namespace Microsoft.IdentityModel.Tests
                     SigningCredentials = Default.AsymmetricSigningCredentials
                 };
 
-                var token = handler.CreateToken(tokenDescriptor);
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+                JsonWebToken decodedToken = tokenHandler.ReadJsonWebToken(token);
 
-                // Read back the token
-                var validationParameters = new TokenValidationParameters
+                // Verify actor claim exists
+                Assert.True(decodedToken.Payload.HasClaim("actort"), "JWT token should contain 'actort' claim");
+
+                // Validate actor token and its claims
+                var result = tokenHandler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateActor = true,
+                    ValidIssuer = "https://example.com",
+                    ValidAudience = "https://api.example.com",
+                    IssuerSigningKey = Default.AsymmetricSigningCredentials.Key
+                });
+
+                Assert.True(result.IsValid);
+
+                // Verify actor identity structure
+                Assert.NotNull(result.ClaimsIdentity.Actor);
+                Assert.Equal("actor-subject-id", result.ClaimsIdentity.Actor.FindFirst("sub")?.Value);
+                Assert.Equal("Actor Name", result.ClaimsIdentity.Actor.FindFirst("name")?.Value);
+                Assert.Equal("admin", result.ClaimsIdentity.Actor.FindFirst("role")?.Value);
+
+                // Verify nested actor
+                Assert.NotNull(result.ClaimsIdentity.Actor.Actor);
+                Assert.Equal("nested-actor-id", result.ClaimsIdentity.Actor.Actor.FindFirst("sub")?.Value);
+                Assert.Equal("Nested Actor", result.ClaimsIdentity.Actor.Actor.FindFirst("name")?.Value);
+            }
+            catch (Exception ex)
+            {
+                context.Diffs.Add($"Exception: {ex}");
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
+        public void ActorTokenInBothClaimAndIdentityShouldPreferClaim()
+        {
+            var context = new CompareContext($"{this}.ActorTokenInBothClaimAndIdentityShouldPreferClaim");
+
+            try
+            {
+                // Create actor claims identity that should NOT be used
+                var actorIdentity = new CaseSensitiveClaimsIdentity("ActorAuth");
+                actorIdentity.AddClaim(new Claim("sub", "identity-actor-id"));
+                actorIdentity.AddClaim(new Claim("name", "Identity Actor"));
+
+                // Create the main identity with Actor set
+                var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+                mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+                mainIdentity.AddClaim(new Claim("name", "Main User"));
+                mainIdentity.Actor = actorIdentity;
+
+                // Add an actor claim that should take precedence
+                var actorJson = JsonConvert.SerializeObject(new
+                {
+                    sub = "claim-actor-id",
+                    name = "Claim Actor"
+                });
+
+                mainIdentity.AddClaim(new Claim(ClaimTypes.Actor, actorJson));
+
+                var principal = new ClaimsPrincipal(mainIdentity);
+
+                // Create a token with JsonWebTokenHandler
+                var tokenHandler = new JsonWebTokenHandler();
+                SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = principal.Identity as ClaimsIdentity,
+                    Issuer = "https://example.com",
+                    Audience = "https://api.example.com",
+                    Expires = DateTime.UtcNow.AddHours(1),
+                    SigningCredentials = Default.AsymmetricSigningCredentials
+                };
+
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+
+                // Verify token was created successfully
+                JsonWebToken decodedToken = tokenHandler.ReadJsonWebToken(token);
+
+                // Verify actor claim exists in the token
+                Assert.True(decodedToken.Payload.HasClaim("actort"), "JWT token should contain 'actort' claim");
+
+                // Verify the actor token contains the claim data, not the identity data
+                var actorTokenString = decodedToken.Actor;
+                JsonWebToken actorJwt = tokenHandler.ReadJsonWebToken(actorTokenString);
+
+                Assert.Equal("claim-actor-id", actorJwt.Payload.GetValue<string>("sub"));
+                Assert.Equal("Claim Actor", actorJwt.Payload.GetValue<string>("name"));
+                Assert.NotEqual("identity-actor-id", actorJwt.Payload.GetValue<string>("sub"));
+                Assert.NotEqual("Identity Actor", actorJwt.Payload.GetValue<string>("name"));
+            }
+            catch (Exception ex)
+            {
+                context.Diffs.Add($"Exception: {ex}");
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
+        public void InvalidActorTokenJsonShouldNotParse()
+        {
+            var context = new CompareContext($"{this}.InvalidActorTokenJsonShouldNotParse");
+
+            try
+            {
+                // Create the main identity
+                var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+                mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+
+                // Create an actor claim with an invalid JSON string
+                var invalidJson = "{ invalid json format }";
+                mainIdentity.AddClaim(new Claim(ClaimTypes.Actor, invalidJson));
+
+                var principal = new ClaimsPrincipal(mainIdentity);
+
+                // Create a token with JsonWebTokenHandler
+                var tokenHandler = new JsonWebTokenHandler();
+                SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = principal.Identity as ClaimsIdentity,
+                    Issuer = "https://example.com",
+                    Audience = "https://api.example.com",
+                    Expires = DateTime.UtcNow.AddHours(1),
+                    SigningCredentials = Default.AsymmetricSigningCredentials
+                };
+
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+
+                // Verify token was created successfully
+                JsonWebToken decodedToken = tokenHandler.ReadJsonWebToken(token);
+
+                // The actort claim should exist but with the raw value
+                Assert.True(decodedToken.Payload.HasClaim("actort"), "JWT token should contain 'actort' claim");
+
+                // Verify the actor token is not parseable as a JWT
+                var actorTokenString = decodedToken.Actor;
+
+                // This should not be parseable as a JWT
+                var exception = Record.Exception(() => tokenHandler.ReadJsonWebToken(actorTokenString));
+                Assert.NotNull(exception);
+
+                // The actor claim should be the raw invalid JSON
+                Assert.Equal(invalidJson, decodedToken.Payload.GetValue<string>("actort"));
+
+                // When validating a token with an invalid actor, validation should still pass if not validating actor
+                var result = tokenHandler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateActor = false,
+                    ValidIssuer = "https://example.com",
+                    ValidAudience = "https://api.example.com",
+                    IssuerSigningKey = Default.AsymmetricSigningCredentials.Key
+                });
+
+                Assert.True(result.IsValid);
+            }
+            catch (Exception ex)
+            {
+                context.Diffs.Add($"Exception: {ex}");
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        [Fact]
+        public void ClaimPropertiesShouldBePreservedInActorToken()
+        {
+            var context = new CompareContext($"{this}.ClaimPropertiesShouldBePreservedInActorToken");
+
+            try
+            {
+                // Create actor claims identity with properties
+                // Add a claim with properties
+                var actorIdentityInner = new CaseSensitiveClaimsIdentity("ActorAuth"); // Updated to CaseSensitiveClaimsIdentity
+                actorIdentityInner.AddClaim(new Claim("destination", "accesstoken id_token"));
+                actorIdentityInner.AddClaim(new Claim("custom_property", "custom_value"));
+
+                // Create the main identity
+                var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+                mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+                mainIdentity.Actor = actorIdentityInner;
+
+                var principal = new ClaimsPrincipal(mainIdentity);
+
+                // Create a token with JsonWebTokenHandler
+                var tokenHandler = new JsonWebTokenHandler();
+                SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = principal.Identity as ClaimsIdentity,
+                    Issuer = "https://example.com",
+                    Audience = "https://api.example.com",
+                    Expires = DateTime.UtcNow.AddHours(1),
+                    SigningCredentials = Default.AsymmetricSigningCredentials
+                };
+
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+                Console.WriteLine($"Here is the token {token}");
+                // Validate and check if properties were preserved
+                var result = tokenHandler.ValidateToken(token, new TokenValidationParameters
                 {
                     ValidIssuer = "https://example.com",
                     ValidAudience = "https://api.example.com",
                     IssuerSigningKey = Default.AsymmetricSigningCredentials.Key
-                };
+                });
 
-                var result = handler.ValidateToken(token, validationParameters);
                 Assert.True(result.IsValid);
+                Assert.NotNull(result.ClaimsIdentity.Actor);
 
-                // Check if actor claim is preserved with correct identity
-                var claimsIdentity = result.ClaimsIdentity;
-                Assert.NotNull(claimsIdentity.Actor);
-
-                // Check destination properties on actor claims
-                bool foundRoleClaim = false;
-                bool foundEmailClaim = false;
-
-                foreach (var claim in claimsIdentity.Actor.Claims)
-                {
-                    if (claim.Type == "role")
-                    {
-                        foundRoleClaim = true;
-                        Assert.Equal("accesstoken", claim.Properties["destination"]);
-                    }
-                    else if (claim.Type == "email")
-                    {
-                        foundEmailClaim = true;
-                        Assert.Equal("id_token", claim.Properties["destination"]);
-                    }
-                }
-
-                if (!foundRoleClaim || !foundEmailClaim)
-                {
-                    context.Diffs.Add("Actor identity should preserve claims with destination properties");
-                }
+                // Check if property was preserved in actor claim
+                var roleClaim = result.ClaimsIdentity.Actor.FindFirst("role");
+                Assert.NotNull(roleClaim);
+                Assert.Equal("admin", roleClaim.Value);
+                Assert.Equal("accesstoken id_token", roleClaim.Properties["destination"]);
+                Assert.Equal("custom_value", roleClaim.Properties["custom_property"]);
             }
             catch (Exception ex)
             {
-                context.Diffs.Add($"Exception: {ex.ToString()}");
+                context.Diffs.Add($"Exception: {ex}");
             }
 
             TestUtilities.AssertFailIfErrors(context);
