@@ -626,9 +626,60 @@ namespace Microsoft.IdentityModel.Tokens.Saml2.Tests
                 return base.ReadSubject(reader);
             }
 
+            public void WriteSubjectConfirmationDataPublic(XmlWriter writer, Saml2SubjectConfirmationData subjectConfirmationData)
+            {
+                base.WriteSubjectConfirmationData(writer, subjectConfirmationData);
+            }
+
             public void WriteProxyRestrictionPublic(XmlWriter writer, Saml2ProxyRestriction proxyRestriction)
             {
                 base.WriteProxyRestriction(writer, proxyRestriction);
+            }
+        }
+
+        [Theory, MemberData(nameof(WriteSubjectConfirmationDataTheoryData), DisableDiscoveryEnumeration = true)]
+        public void WriteSubjectConfirmationData(Saml2TheoryData theoryData)
+        {
+            TestUtilities.WriteHeader($"{this}.WriteSubjectConfirmationData", theoryData);
+            var context = new CompareContext($"{this}.WriteSubjectConfirmationData, {theoryData.TestId}");
+            try
+            {
+                var ms = new MemoryStream();
+                var writer = XmlDictionaryWriter.CreateTextWriter(ms, Encoding.UTF8, false);
+                (theoryData.Saml2Serializer as Saml2SerializerPublic).WriteSubjectConfirmationDataPublic(writer, theoryData.SubjectConfirmationData);
+
+                writer.Flush();
+                var xml = Encoding.UTF8.GetString(ms.ToArray());
+                IdentityComparer.AreEqual(xml, theoryData.Xml, context);
+                theoryData.ExpectedException.ProcessNoException();
+            }
+            catch (Exception ex)
+            {
+                theoryData.ExpectedException.ProcessException(ex);
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
+        public static TheoryData<Saml2TheoryData> WriteSubjectConfirmationDataTheoryData
+        {
+            get
+            {
+                var keyInfo = new KeyInfo();
+                keyInfo.KeyName = "test";
+                var confirmationData = new Saml2SubjectConfirmationData();
+                confirmationData.KeyInfos.Add(keyInfo);
+
+                return new TheoryData<Saml2TheoryData>
+                {
+                    new Saml2TheoryData
+                    {
+                        SubjectConfirmationData = confirmationData,
+                        Xml = "<saml:SubjectConfirmationData Type=\"KeyInfoConfirmationDataType\" xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\"><KeyInfo xmlns=\"http://www.w3.org/2000/09/xmldsig#\"><KeyName>test</KeyName></KeyInfo></saml:SubjectConfirmationData>",
+                        Saml2Serializer = new Saml2SerializerPublic(),
+                        TestId = "WriteSubjectConfirmationDataWithUppercaseType"
+                    }
+                };
             }
         }
     }
