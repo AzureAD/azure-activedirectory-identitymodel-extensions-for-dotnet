@@ -133,7 +133,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             LogMessages.IDX14116,
                             LogHelper.MarkAsNonPII(nameof(tokenDescriptor.AdditionalInnerHeaderClaims)),
                             LogHelper.MarkAsNonPII(string.Join(", ", JwtTokenUtilities.DefaultHeaderParameters)))));
-            Console.WriteLine("create token 2");
             return CreateToken(
                 tokenDescriptor,
                 SetDefaultTimesOnTokenCreation,
@@ -674,6 +673,10 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 foreach (KeyValuePair<string, object> kvp in tokenDescriptor.Claims)
                 {
+                    if (kvp.Key.Equals(JwtRegisteredClaimNames.Actort, StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
                     if (!descriptorClaimsAudienceChecked && kvp.Key.Equals(JwtRegisteredClaimNames.Aud, StringComparison.Ordinal))
                     {
                         descriptorClaimsAudienceChecked = true;
@@ -751,7 +754,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                         nbfSet = true;
                     }
-
                     JsonPrimitives.WriteObject(ref writer, kvp.Key, kvp.Value);
                 }
                 if (tokenDescriptor.Claims.ContainsKey(JwtRegisteredClaimNames.Actort))
