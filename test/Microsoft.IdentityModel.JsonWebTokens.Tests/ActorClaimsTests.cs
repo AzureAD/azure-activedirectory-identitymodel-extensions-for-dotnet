@@ -328,14 +328,37 @@ namespace Microsoft.IdentityModel.Tests
 
             TestUtilities.AssertFailIfErrors(context);
         }
-        [Fact]// This tests that the MaxActorChainLength can be changed.
-        public void MaxActorChainLength_CanBeChanged()
-        {
-            // Act
-            JsonWebTokenHandler.MaxActorChainLength = 10;
 
-            // Assert
-            Assert.Equal(10, JsonWebTokenHandler.MaxActorChainLength);
+        [Fact] // This tests that the MaxActorChainLength rejects negative values but accepts all the permissible values
+        public void MaxActorChainLength_RejectsNegativeValues()
+        {
+            // Arrange
+            int originalValue = JsonWebTokenHandler.MaxActorChainLength;
+
+            try
+            {
+                // Act & Assert - Valid value 0 should not throw
+                JsonWebTokenHandler.MaxActorChainLength = 0;
+                Assert.Equal(0, JsonWebTokenHandler.MaxActorChainLength);
+
+                // Act & Assert - Negative value
+                var ex = Assert.Throws<ArgumentOutOfRangeException>(() =>
+                    JsonWebTokenHandler.MaxActorChainLength = -5);
+                Assert.Contains("MaxActorChainLength must be non negative", ex.Message);
+
+                // Act & Assert - Valid value 1 should not throw
+                JsonWebTokenHandler.MaxActorChainLength = 1;
+                Assert.Equal(1, JsonWebTokenHandler.MaxActorChainLength);
+
+                // Act & Assert - Valid larger value
+                JsonWebTokenHandler.MaxActorChainLength = 10;
+                Assert.Equal(10, JsonWebTokenHandler.MaxActorChainLength);
+            }
+            finally
+            {
+                // Restore to original value
+                JsonWebTokenHandler.MaxActorChainLength = originalValue;
+            }
         }
 
         [Fact]// This tests that an exception is thrown when actor token at level 1 is provided as Subject and there are more nested actors than the MaxActorChainLength.
