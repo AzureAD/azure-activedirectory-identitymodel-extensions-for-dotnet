@@ -3,7 +3,9 @@
 
 using System;
 using System.Buffers;
+#if NET9_0
 using System.Buffers.Text;
+#endif
 using System.Text;
 using Microsoft.IdentityModel.Logging;
 
@@ -21,6 +23,8 @@ namespace Microsoft.IdentityModel.Tokens
         private const char Base64PadCharacter = '=';
         private const char Base64Character62 = '+';
         private const char Base64Character63 = '/';
+        private const char Base64UrlCharacter62 = '-';
+        private const char Base64UrlCharacter63 = '_';
 
         /// <summary>
         /// Performs base64url encoding, which differs from regular base64 encoding as follows:
@@ -98,9 +102,17 @@ namespace Microsoft.IdentityModel.Tokens
                         LogHelper.MarkAsNonPII(inArray.Length))));
 #pragma warning restore CA2208 // Instantiate argument exceptions correctly
 
+#if NET9_0
             return Base64Url.EncodeToString(inArray.AsSpan().Slice(offset, length));
+#else
+            char[] destination = new char[(inArray.Length + 2) / 3 * 4];
+            int j = Encode(inArray.AsSpan<byte>().Slice(offset, length), destination.AsSpan<char>());
+
+            return new string(destination, 0, j);
+#endif
         }
 
+#if NET9_0
         /// <summary>
         /// Populates a <see cref="Span{T}"/> with the base64url encoded representation of a <see cref="ReadOnlySpan{T}"/> of bytes.
         /// </summary>
@@ -108,7 +120,68 @@ namespace Microsoft.IdentityModel.Tokens
         /// <param name="output">The span of characters to write the encoded output.</param>
         /// <returns>The number of characters written to the output span.</returns>
         public static int Encode(ReadOnlySpan<byte> inArray, Span<char> output) => Base64Url.EncodeToChars(inArray, output);
+#else
+        /// <summary>
+        /// Populates a <see cref="Span{T}"/> with the base64url encoded representation of a <see cref="ReadOnlySpan{T}"/> of bytes.
+        /// </summary>
+        /// <param name="inArray">A read-only span of bytes to encode.</param>
+        /// <param name="output">The span of characters to write the encoded output.</param>
+        /// <returns>The number of characters written to the output span.</returns>
+        public static int Encode(ReadOnlySpan<byte> inArray, Span<char> output)
+        {
+            int lengthmod3 = inArray.Length % 3;
+            int limit = (inArray.Length - lengthmod3);
+            ReadOnlySpan<byte> table = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"u8;
 
+            int i, j = 0;
+
+            // takes 3 bytes from inArray and insert 4 bytes into output
+            for (i = 0; i < limit; i += 3)
+            {
+                byte d0 = inArray[i];
+                byte d1 = inArray[i + 1];
+                byte d2 = inArray[i + 2];
+
+                output[j + 0] = (char)table[d0 >> 2];
+                output[j + 1] = (char)table[((d0 & 0x03) << 4) | (d1 >> 4)];
+                output[j + 2] = (char)table[((d1 & 0x0f) << 2) | (d2 >> 6)];
+                output[j + 3] = (char)table[d2 & 0x3f];
+                j += 4;
+            }
+
+            //Where we left off before
+            i = limit;
+
+            switch (lengthmod3)
+            {
+                case 2:
+                    {
+                        byte d0 = inArray[i];
+                        byte d1 = inArray[i + 1];
+
+                        output[j + 0] = (char)table[d0 >> 2];
+                        output[j + 1] = (char)table[((d0 & 0x03) << 4) | (d1 >> 4)];
+                        output[j + 2] = (char)table[(d1 & 0x0f) << 2];
+                        j += 3;
+                    }
+                    break;
+                case 1:
+                    {
+                        byte d0 = inArray[i];
+
+                        output[j + 0] = (char)table[d0 >> 2];
+                        output[j + 1] = (char)table[(d0 & 0x03) << 4];
+                        j += 2;
+                    }
+                    break;
+
+                    //default or case 0: no further operations are needed.
+            }
+
+            return j;
+        }
+
+#endif
         /// <summary>
         /// Converts the specified base64url encoded string to UTF-8 bytes.
         /// </summary>
@@ -123,6 +196,8 @@ namespace Microsoft.IdentityModel.Tokens
 #if NETCOREAPP
         [SkipLocalsInit]
 #endif
+
+#if NET9_0
         internal static byte[] Decode(ReadOnlySpan<char> strSpan)
         {
             int upperBound = Base64Url.GetMaxDecodedLength(strSpan.Length);
@@ -144,6 +219,24 @@ namespace Microsoft.IdentityModel.Tokens
                     ArrayPool<byte>.Shared.Return(rented, true);
             }
         }
+#else
+        internal static byte[] Decode(ReadOnlySpan<char> strSpan)
+        {
+            int mod = strSpan.Length % 4;
+            if (mod == 1)
+                throw LogHelper.LogExceptionMessage(new FormatException(LogHelper.FormatInvariant(LogMessages.IDX10400, strSpan.ToString())));
+
+            bool needReplace = strSpan.IndexOfAny(Base64UrlCharacter62, Base64UrlCharacter63) >= 0;
+            int decodedLength = strSpan.Length + (4 - mod) % 4;
+#if NET6_0_OR_GREATER
+            Span<byte> output = new byte[decodedLength];
+            int length = Decode(strSpan, output, needReplace, decodedLength);
+            return output.Slice(0, length).ToArray();
+#else
+            return UnsafeDecode(strSpan, needReplace, decodedLength);
+#endif
+        }
+#endif
 
 #if !NET8_0_OR_GREATER
         private static bool IsOnlyValidBase64Chars(ReadOnlySpan<char> strSpan)
