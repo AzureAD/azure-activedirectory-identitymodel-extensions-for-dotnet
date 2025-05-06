@@ -28,6 +28,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         private static readonly SecurityTokenDescriptor s_emptyTokenDescriptor = new();
 
         /// <summary>
+        /// Gets or sets the maximum depth allowed when processing nested actor tokens.
+        /// This prevents excessive recursion when handling deeply nested actor tokens.
+        /// Default value is 5.
+        /// </summary>
+        public static int MaxActorChainLength { get; set; } = 5;
+        /// <summary>
         /// Creates an unsigned JSON Web Signature (JWS).
         /// </summary>
         /// <param name="payload">A string containing JSON which represents the JWT token payload.</param>
@@ -142,7 +148,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal static string CreateToken(
             SecurityTokenDescriptor tokenDescriptor,
             bool setdefaultTimesOnTokenCreation,
-            int tokenLifetimeInMinutes)
+            int tokenLifetimeInMinutes,
+            int actorChainDepth = 0)
         {
             // The form of a JWS is: Base64UrlEncoding(UTF8(Header)) | . | Base64UrlEncoding(Payload) | . | Base64UrlEncoding(Signature)
             // Where the Header is specifically the UTF8 bytes of the JSON, whereas the Payload encoding is not specified, but UTF8 is used by everyone.
@@ -174,7 +181,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         ref writer,
                         tokenDescriptor,
                         setdefaultTimesOnTokenCreation,
-                        tokenLifetimeInMinutes);
+                        tokenLifetimeInMinutes,
+                        actorChainDepth);
 
                     // mark end of payload
                     int payloadEnd = (int)utf8ByteMemoryStream.Length;
@@ -600,12 +608,14 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <param name="tokenDescriptor">The <see cref="SecurityTokenDescriptor"/> used to create the token.</param>
         /// <param name="setDefaultTimesOnTokenCreation">A boolean that controls if expiration, notbefore, issuedat should be added if missing.</param>
         /// <param name="tokenLifetimeInMinutes">The default value for the token lifetime in minutes.</param>
+        /// <param name="actorChainDepth">Controls the recursion length while parsing nested actor tokens</param>
         /// <returns>A dictionary of claims.</returns>
         internal static void WriteJwsPayload(
             ref Utf8JsonWriter writer,
             SecurityTokenDescriptor tokenDescriptor,
             bool setDefaultTimesOnTokenCreation,
-            int tokenLifetimeInMinutes)
+            int tokenLifetimeInMinutes,
+            int actorChainDepth)
         {
             bool descriptorClaimsAudienceChecked = false;
             bool audienceSet = false;
@@ -668,7 +678,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // Duplicates are resolved according to the following priority:
             // SecurityTokenDescriptor.{Audience/Audiences, Issuer, Expires, IssuedAt, NotBefore}, SecurityTokenDescriptor.Claims, SecurityTokenDescriptor.Subject.Claims
             // SecurityTokenDescriptor.Claims are KeyValuePairs<string,object>, whereas SecurityTokenDescriptor.Subject.Claims are System.Security.Claims.Claim and are processed differently.
-
+            Console.WriteLine($"Actor token claim depth :{actorChainDepth}");
             if (tokenDescriptor.Claims != null && tokenDescriptor.Claims.Count > 0)
             {
                 foreach (KeyValuePair<string, object> kvp in tokenDescriptor.Claims)
@@ -758,6 +768,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 }
                 if (tokenDescriptor.Claims.ContainsKey(JwtRegisteredClaimNames.Actort))
                 {
+                    // Check for maximum actor chain depth
+                    if (actorChainDepth >= MaxActorChainLength)
+                    {
+                        throw LogHelper.LogExceptionMessage(
+                            new SecurityTokenException(
+                                LogHelper.FormatInvariant(
+                                LogMessages.IDX14313,
+                                 LogHelper.MarkAsNonPII(MaxActorChainLength))));
+                    }
                     if (isActorTokenSet)
                     {
                         if (LogHelper.IsEnabled(EventLogLevel.Informational))
@@ -765,17 +784,19 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                     }
                     ClaimsIdentity actor = tokenDescriptor.Claims[JwtRegisteredClaimNames.Actort] as ClaimsIdentity;
+                    Console.WriteLine($"Claims Identity identifier :{actor.AuthenticationType} and main token identifier {tokenDescriptor.ToString()}");
                     var actorTokenDescriptor = new SecurityTokenDescriptor
                     {
-                        Subject = actor,
+                        Subject = actor
                     };
-                    string actorToken = CreateToken(actorTokenDescriptor, false, 0);
+                    actorChainDepth = actorChainDepth + 1;
+                    string actorToken = CreateToken(actorTokenDescriptor, false, 0, actorChainDepth);
                     JsonPrimitives.WriteObject(ref writer, JwtRegisteredClaimNames.Actort, actorToken);
                     isActorTokenSet = true;
                 }
             }
 
-            AddSubjectClaims(ref writer, tokenDescriptor, audienceSet, issuerSet, ref expSet, ref iatSet, ref nbfSet, ref isActorTokenSet);
+            AddSubjectClaims(ref writer, tokenDescriptor, audienceSet, issuerSet, ref expSet, ref iatSet, ref nbfSet, ref isActorTokenSet, actorChainDepth);
 
             // By default we set these three properties only if they haven't been detected before.
             if (setDefaultTimesOnTokenCreation && !(expSet && iatSet && nbfSet))
@@ -812,7 +833,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             ref bool expSet,
             ref bool iatSet,
             ref bool nbfSet,
-            ref bool isActorTokenSet)
+            ref bool isActorTokenSet,
+            int actorChainDepth = 0)
         {
             if (tokenDescriptor.Subject == null)
                 return;
@@ -824,16 +846,23 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             var payload = new Dictionary<string, object>();
 
             bool checkClaims = tokenDescriptor.Claims != null && tokenDescriptor.Claims.Count > 0;
-            JsonWebTokenHandler jsonWebTokenHandler = new JsonWebTokenHandler();
 
             if (!isActorTokenSet && tokenDescriptor.Subject.Actor != null)
             {
+                if (actorChainDepth >= MaxActorChainLength)
+                {
+                    throw LogHelper.LogExceptionMessage(
+                        new SecurityTokenException(
+                            LogHelper.FormatInvariant(
+                            LogMessages.IDX14313,
+                             LogHelper.MarkAsNonPII(MaxActorChainLength))));
+                }
                 var actorTokenDescriptor = new SecurityTokenDescriptor
                 {
                     Subject = tokenDescriptor.Subject.Actor,
                 };
 
-                string actorToken = CreateToken(actorTokenDescriptor, false, 0);
+                string actorToken = CreateToken(actorTokenDescriptor, false, 0, actorChainDepth + 1);
                 writer.WritePropertyName(JwtRegisteredClaimNames.Actort);
                 writer.WriteStringValue(actorToken);
                 isActorTokenSet = true;
