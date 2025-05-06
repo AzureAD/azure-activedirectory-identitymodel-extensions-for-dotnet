@@ -139,6 +139,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             LogMessages.IDX14116,
                             LogHelper.MarkAsNonPII(nameof(tokenDescriptor.AdditionalInnerHeaderClaims)),
                             LogHelper.MarkAsNonPII(string.Join(", ", JwtTokenUtilities.DefaultHeaderParameters)))));
+
             return CreateToken(
                 tokenDescriptor,
                 SetDefaultTimesOnTokenCreation,
@@ -678,7 +679,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             // Duplicates are resolved according to the following priority:
             // SecurityTokenDescriptor.{Audience/Audiences, Issuer, Expires, IssuedAt, NotBefore}, SecurityTokenDescriptor.Claims, SecurityTokenDescriptor.Subject.Claims
             // SecurityTokenDescriptor.Claims are KeyValuePairs<string,object>, whereas SecurityTokenDescriptor.Subject.Claims are System.Security.Claims.Claim and are processed differently.
-            Console.WriteLine($"Actor token claim depth :{actorChainDepth}");
+
             if (tokenDescriptor.Claims != null && tokenDescriptor.Claims.Count > 0)
             {
                 foreach (KeyValuePair<string, object> kvp in tokenDescriptor.Claims)
@@ -764,6 +765,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                         nbfSet = true;
                     }
+
                     JsonPrimitives.WriteObject(ref writer, kvp.Key, kvp.Value);
                 }
                 if (tokenDescriptor.Claims.ContainsKey(JwtRegisteredClaimNames.Actort))
@@ -825,6 +827,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             writer.WriteEndObject();
             writer.Flush();
         }
+
         internal static void AddSubjectClaims(
             ref Utf8JsonWriter writer,
             SecurityTokenDescriptor tokenDescriptor,
@@ -931,6 +934,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     payload[claim.Type] = jsonClaimValue;
                 }
             }
+
             foreach (KeyValuePair<string, object> kvp in payload)
                 JsonPrimitives.WriteObject(ref writer, kvp.Key, kvp.Value);
 
