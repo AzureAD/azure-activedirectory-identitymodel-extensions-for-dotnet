@@ -476,7 +476,6 @@ namespace Microsoft.IdentityModel.Tests
             }
             catch (SecurityTokenException ex)
             {
-                Console.WriteLine("Here is the exception message: " + ex.Message);
                 // Assert - Verify the exception message contains the expected content
                 if (ex.Message.Contains("IDX14313"))
                 {

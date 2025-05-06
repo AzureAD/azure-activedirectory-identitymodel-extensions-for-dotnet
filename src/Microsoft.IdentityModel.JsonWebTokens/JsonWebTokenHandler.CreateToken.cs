@@ -803,7 +803,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                     }
                     ClaimsIdentity actor = tokenDescriptor.Claims[JwtRegisteredClaimNames.Actort] as ClaimsIdentity;
-                    Console.WriteLine($"Claims Identity identifier :{actor.AuthenticationType} and main token identifier {tokenDescriptor.ToString()}");
                     var actorTokenDescriptor = new SecurityTokenDescriptor
                     {
                         Subject = actor
