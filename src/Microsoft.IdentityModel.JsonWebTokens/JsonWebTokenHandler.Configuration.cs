@@ -17,7 +17,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// </remarks>
     public static class JsonWebTokenConfiguration
     {
-        private static int s_maxActorChainLength = 5; // Default value
+        // Default value
+        private static int s_maxActorChainLength = 5;
 
         /// <summary>
         /// Gets or sets the maximum depth allowed when processing nested actor tokens.
