@@ -63,6 +63,30 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Initializes a new instance of <see cref="JsonWebToken"/> from a string in JWS or JWE Compact serialized format.
         /// </summary>
         /// <param name="jwtEncodedString">A JSON Web Token that has been serialized in JWS or JWE Compact serialized format.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="jwtEncodedString"/> is null or empty.</exception>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="jwtEncodedString"/> is not in JWS or JWE Compact Serialization format.</exception>
+        /// <remarks>
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7519"/> (JWT).
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7515"/> (JWS).
+        /// See: <see href="https://datatracker.ietf.org/doc/html/rfc7516"/> (JWE).
+        /// <para>
+        /// The contents of the returned <see cref="JsonWebToken"/> have not been validated, the JSON Web Token is simply decoded. Validation can be accomplished using the validation methods in <see cref="JsonWebTokenHandler"/>
+        /// </para>
+        /// </remarks>
+        public JsonWebToken(string jwtEncodedString)
+        {
+            if (string.IsNullOrEmpty(jwtEncodedString))
+                throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(jwtEncodedString)));
+
+            ReadToken(jwtEncodedString.AsMemory());
+
+            _encodedToken = jwtEncodedString;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="JsonWebToken"/> from a string in JWS or JWE Compact serialized format.
+        /// </summary>
+        /// <param name="jwtEncodedString">A JSON Web Token that has been serialized in JWS or JWE Compact serialized format.</param>
         /// <param name="actorChainDepth">this is used to control the deserialization depth of the actor token</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="jwtEncodedString"/> is null or empty.</exception>
         /// <exception cref="ArgumentException">Thrown if <paramref name="jwtEncodedString"/> is not in JWS or JWE Compact Serialization format.</exception>
@@ -74,7 +98,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// The contents of the returned <see cref="JsonWebToken"/> have not been validated, the JSON Web Token is simply decoded. Validation can be accomplished using the validation methods in <see cref="JsonWebTokenHandler"/>
         /// </para>
         /// </remarks>
-        public JsonWebToken(string jwtEncodedString, int actorChainDepth = 0)
+        public JsonWebToken(string jwtEncodedString, int actor)
         {
             if (string.IsNullOrEmpty(jwtEncodedString))
                 throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(jwtEncodedString)));

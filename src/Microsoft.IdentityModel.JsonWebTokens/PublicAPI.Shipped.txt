@@ -92,6 +92,7 @@ Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.IsSigned.get -> bool
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.IssuedAt.get -> System.DateTime
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.JsonWebToken(string header, string payload) -> void
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.JsonWebToken(string header, string payload, Microsoft.IdentityModel.Tokens.TryReadJwtClaim tryReadJwtClaim) -> void
+Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.JsonWebToken(string jwtEncodedString) -> void
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.JsonWebToken(string jwtEncodedString, Microsoft.IdentityModel.Tokens.TryReadJwtClaim tryReadJwtClaim) -> void
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.JsonWebToken(System.ReadOnlyMemory<char> encodedTokenMemory) -> void
 Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.JsonWebToken(System.ReadOnlyMemory<char> encodedTokenMemory, Microsoft.IdentityModel.Tokens.TryReadJwtClaim tryReadJwtClaim) -> void
