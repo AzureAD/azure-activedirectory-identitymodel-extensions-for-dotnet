@@ -765,13 +765,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 if (tokenDescriptor.Claims.ContainsKey(JwtRegisteredClaimNames.Actort))
                 {
                     // Check for maximum actor chain depth
-                    if (actorChainDepth >= JsonWebTokenConfiguration.MaxActorChainLength)
+                    if (actorChainDepth >= JsonWebTokenHandlerConfiguration.MaxActorChainLength)
                     {
                         throw LogHelper.LogExceptionMessage(
                             new SecurityTokenException(
                                 LogHelper.FormatInvariant(
                                 LogMessages.IDX14313,
-                                 LogHelper.MarkAsNonPII(JsonWebTokenConfiguration.MaxActorChainLength))));
+                                 LogHelper.MarkAsNonPII(JsonWebTokenHandlerConfiguration.MaxActorChainLength))));
                     }
                     if (isActorTokenSet)
                     {
@@ -845,13 +845,13 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             if (!isActorTokenSet && tokenDescriptor.Subject.Actor != null)
             {
-                if (actorChainDepth >= JsonWebTokenConfiguration.MaxActorChainLength)
+                if (actorChainDepth >= JsonWebTokenHandlerConfiguration.MaxActorChainLength)
                 {
                     throw LogHelper.LogExceptionMessage(
                         new SecurityTokenException(
                             LogHelper.FormatInvariant(
                             LogMessages.IDX14313,
-                             LogHelper.MarkAsNonPII(JsonWebTokenConfiguration.MaxActorChainLength))));
+                             LogHelper.MarkAsNonPII(JsonWebTokenHandlerConfiguration.MaxActorChainLength))));
                 }
                 var actorTokenDescriptor = new SecurityTokenDescriptor
                 {

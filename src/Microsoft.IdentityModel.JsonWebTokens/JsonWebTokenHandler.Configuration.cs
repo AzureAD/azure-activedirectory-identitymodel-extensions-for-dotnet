@@ -11,11 +11,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
     /// This class provides centralized control over various aspects of JWT handling.
     /// </summary>
     /// <remarks>
-    /// The JsonWebTokenConfiguration class allows applications to customize token processing
+    /// The JsonWebTokenHandlerConfiguration class allows applications to customize token processing
     /// behavior application-wide, including settings like actor token chain depth limitations.
     /// This helps prevent security issues like excessive recursion and denial of service attacks.
     /// </remarks>
-    public static class JsonWebTokenConfiguration
+    public static class JsonWebTokenHandlerConfiguration
     {
         // Default value
         private static int s_maxActorChainLength = 5;

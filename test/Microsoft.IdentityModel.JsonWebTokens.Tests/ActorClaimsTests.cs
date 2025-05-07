@@ -333,31 +333,31 @@ namespace Microsoft.IdentityModel.Tests
         public void MaxActorChainLength_RejectsNegativeValues()
         {
             // Arrange
-            int originalValue = JsonWebTokenConfiguration.MaxActorChainLength;
+            int originalValue = JsonWebTokenHandlerConfiguration.MaxActorChainLength;
 
             try
             {
                 // Act & Assert - Valid value 0 should not throw
-                JsonWebTokenConfiguration.MaxActorChainLength = 0;
-                Assert.Equal(0, JsonWebTokenConfiguration.MaxActorChainLength);
+                JsonWebTokenHandlerConfiguration.MaxActorChainLength = 0;
+                Assert.Equal(0, JsonWebTokenHandlerConfiguration.MaxActorChainLength);
 
                 // Act & Assert - Negative value
                 var ex = Assert.Throws<ArgumentOutOfRangeException>(() =>
-                    JsonWebTokenConfiguration.MaxActorChainLength = -5);
+                    JsonWebTokenHandlerConfiguration.MaxActorChainLength = -5);
                 Assert.Contains("MaxActorChainLength must be non negative", ex.Message);
 
                 // Act & Assert - Valid value 1 should not throw
-                JsonWebTokenConfiguration.MaxActorChainLength = 1;
-                Assert.Equal(1, JsonWebTokenConfiguration.MaxActorChainLength);
+                JsonWebTokenHandlerConfiguration.MaxActorChainLength = 1;
+                Assert.Equal(1, JsonWebTokenHandlerConfiguration.MaxActorChainLength);
 
                 // Act & Assert - Valid larger value
-                JsonWebTokenConfiguration.MaxActorChainLength = 10;
-                Assert.Equal(10, JsonWebTokenConfiguration.MaxActorChainLength);
+                JsonWebTokenHandlerConfiguration.MaxActorChainLength = 10;
+                Assert.Equal(10, JsonWebTokenHandlerConfiguration.MaxActorChainLength);
             }
             finally
             {
                 // Restore to original value
-                JsonWebTokenConfiguration.MaxActorChainLength = originalValue;
+                JsonWebTokenHandlerConfiguration.MaxActorChainLength = originalValue;
             }
         }
 
@@ -370,7 +370,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 // Arrange
                 var handler = new JsonWebTokenHandler();
-                JsonWebTokenConfiguration.MaxActorChainLength = 2; // Allow only 2 levels of nesting
+                JsonWebTokenHandlerConfiguration.MaxActorChainLength = 2; // Allow only 2 levels of nesting
 
                 // Create nested actor identities (3 levels, but we'll set MaxActorChainLength to 2)
                 var level3Actor = new CaseSensitiveClaimsIdentity("Level3Auth");
@@ -434,7 +434,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 // Arrange
                 var handler = new JsonWebTokenHandler();
-                JsonWebTokenConfiguration.MaxActorChainLength = 1; // Allow only 1 level of nesting
+                JsonWebTokenHandlerConfiguration.MaxActorChainLength = 1; // Allow only 1 level of nesting
 
                 // Create nested actor identities
                 var nestedActorIdentity = new CaseSensitiveClaimsIdentity("NestedActorAuth");
@@ -492,7 +492,7 @@ namespace Microsoft.IdentityModel.Tests
         {
             // Arrange
             var handler = new JsonWebTokenHandler();
-            JsonWebTokenConfiguration.MaxActorChainLength = 1; // Allow 1 levels of nesting
+            JsonWebTokenHandlerConfiguration.MaxActorChainLength = 1; // Allow 1 levels of nesting
 
             // Create level 2 actor (will be in claims dictionary)
             var level2Actor = new CaseSensitiveClaimsIdentity("Level2Auth");
@@ -555,7 +555,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 // Arrange
                 var handler = new JsonWebTokenHandler();
-                JsonWebTokenConfiguration.MaxActorChainLength = 2; // Allow only 2 levels of nesting
+                JsonWebTokenHandlerConfiguration.MaxActorChainLength = 2; // Allow only 2 levels of nesting
 
                 // Create nested actor identities (3 levels, but we'll set MaxActorChainLength to 2)
                 var level3Actor = new CaseSensitiveClaimsIdentity("Level3Auth");
