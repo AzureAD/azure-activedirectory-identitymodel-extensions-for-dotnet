@@ -26,7 +26,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// The value must be at least 0. Value 0 would mean that the actor token is not allowed to be nested.
         /// Default value is 5.
         /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if the value is less than 1.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if the value is less than 0.</exception>
         public static int MaxActorChainLength
         {
             get => s_maxActorChainLength;
