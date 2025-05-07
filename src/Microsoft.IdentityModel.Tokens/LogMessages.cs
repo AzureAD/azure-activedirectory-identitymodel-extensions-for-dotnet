@@ -274,6 +274,11 @@ namespace Microsoft.IdentityModel.Tokens
         public const string IDX10902 = "IDX10902: Exception caught while removing expired items: '{0}', Exception: '{1}'";
         public const string IDX10906 = "IDX10906: Exception caught while compacting items: '{0}', Exception: '{1}'";
 
+
+        // Base64UrlEncoding
+        public const string IDX10820 = "IDX10820: Invalid character found in Base64UrlEncoding. Character: '{0}', Encoding: '{1}'.";
+        public const string IDX10821 = "IDX10821: Incorrect padding detected in Base64UrlEncoding. Encoding: '{0}'.";
+
         // Crypto Errors
         public const string IDX11000 = "IDX11000: Cannot create EcdhKeyExchangeProvider. '{0}'\'s Curve '{1}' does not match with '{2}'\'s curve '{3}'.";
         public const string IDX11001 = "IDX11001: Cannot generate KDF. '{0}':'{1}' and '{2}':'{3}' must be different.";
