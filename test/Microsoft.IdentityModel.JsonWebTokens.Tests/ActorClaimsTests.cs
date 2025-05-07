@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Xunit;
+using System.Numerics;
 
 namespace Microsoft.IdentityModel.Tests
 {
@@ -621,6 +622,99 @@ namespace Microsoft.IdentityModel.Tests
 
             TestUtilities.AssertFailIfErrors(context);
         }
+
+        [Fact]
+        public void ActorToken_DeserializationWithMaxDepth_EnforcesLimit()
+        {
+            var context = new CompareContext($"{this}.ActorToken_DeserializationWithMaxDepth_EnforcesLimit");
+
+            try
+            {
+                // Save original configuration value to restore later
+                int originalMaxDepth = JsonWebTokenConfiguration.MaxActorChainLength;
+
+                try
+                {
+                    // Scenario 1: Create a token with 2 levels of actor tokens
+                    // Should deserialize successfully with MaxActorChainLength = 3
+                    JsonWebTokenConfiguration.MaxActorChainLength = 3;
+
+                    // Create nested actor (level 2)
+                    var level3Actor = new CaseSensitiveClaimsIdentity("Level3Auth");
+                    level3Actor.AddClaim(new Claim("sub", "level3-actor"));
+                    level3Actor.AddClaim(new Claim("name", "Level 3 Actor"));
+
+                    // Create nested actor (level 2)
+                    var level2Actor = new CaseSensitiveClaimsIdentity("Level2Auth");
+                    level2Actor.AddClaim(new Claim("sub", "level2-actor"));
+                    level2Actor.AddClaim(new Claim("name", "Level 2 Actor"));
+                    level2Actor.Actor = level3Actor;
+
+                    // Create actor identity with nested actor (level 1)
+                    var level1Actor = new CaseSensitiveClaimsIdentity("Level1Auth");
+                    level1Actor.AddClaim(new Claim("sub", "level1-actor"));
+                    level1Actor.AddClaim(new Claim("name", "Level 1 Actor"));
+                    level1Actor.Actor = level2Actor;
+
+                    // Create the main identity
+                    var mainIdentity = new CaseSensitiveClaimsIdentity("Bearer");
+                    mainIdentity.AddClaim(new Claim("sub", "main-subject-id"));
+                    mainIdentity.AddClaim(new Claim("name", "Main User"));
+                    mainIdentity.Actor = level1Actor;
+
+                    // Create and serialize token
+                    var handler = new JsonWebTokenHandler();
+                    var tokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Subject = mainIdentity,
+                        Issuer = "https://example.com",
+                        Audience = "https://api.example.com",
+                        SigningCredentials = Default.AsymmetricSigningCredentials
+                    };
+
+                    var token = handler.CreateToken(tokenDescriptor);
+
+                    // Successfully deserialize with sufficient depth
+                    var decodedToken = handler.ReadJsonWebToken(token);
+                    decodedToken.TryGetPayloadValue<JsonWebToken>(JwtRegisteredClaimNames.Actort, out JsonWebToken actor);
+                    Console.WriteLine($"Actor token level 1 subject: {actor.Subject}");
+                    actor.TryGetPayloadValue<JsonWebToken>(JwtRegisteredClaimNames.Actort, out JsonWebToken actor2);
+                    Console.WriteLine($"Actor token level 2 subject: {actor2.Subject}");
+                    actor2.TryGetPayloadValue<JsonWebToken>(JwtRegisteredClaimNames.Actort, out JsonWebToken actor3);
+                    Console.WriteLine($"Actor token level 3 subject: {actor3.Subject}");
+
+                    Assert.True(decodedToken.Payload.HasClaim("actort"), "JWT token should contain 'actort' claim");
+
+                    //Assert.Equal("level1-actor", actorJwt.Payload.GetValue<string>("sub"));
+                    //Assert.True(actorJwt.Payload.HasClaim("actort"), "Actor should have nested actor");
+                    //var nestedActorJwt = handler.ReadJsonWebToken(actorJwt.Actor);
+                    //Assert.Equal("level2-actor", nestedActorJwt.Payload.GetValue<string>("sub"));
+
+                    // Scenario 2: Create a token with 3 levels of actor tokens
+                    // Creating with MaxActorChainLength = 3 should work
+                    // But when we try to deserialize with MaxActorChainLength = 2, should throw
+                    var deepToken = handler.CreateToken(tokenDescriptor);
+
+                    // Now reduce MaxActorChainLength to 2 and try to deserialize
+                    JsonWebTokenConfiguration.MaxActorChainLength = 2;
+
+                    // Should throw exception
+                    Assert.Throws<System.Text.Json.JsonException>(() => handler.ReadJsonWebToken(deepToken));
+                }
+                finally
+                {
+                    // Restore original configuration
+                    JsonWebTokenConfiguration.MaxActorChainLength = originalMaxDepth;
+                }
+            }
+            catch (Exception ex)
+            {
+                context.Diffs.Add($"Unexpected exception: {ex}");
+            }
+
+            TestUtilities.AssertFailIfErrors(context);
+        }
+
 
     }
 }

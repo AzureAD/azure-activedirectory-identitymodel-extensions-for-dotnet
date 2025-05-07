@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
         }
 
-        private protected override void ReadPayloadValue(ref Utf8JsonReader reader, IDictionary<string, object> claims)
+        private protected override void ReadPayloadValue(ref Utf8JsonReader reader, IDictionary<string, object> claims, int actorChainDepth)
         {
             // Handle custom claims.
             if (reader.ValueTextEquals(CustomClaimName))
