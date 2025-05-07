@@ -120,7 +120,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                         LogHelper.FormatInvariant(
                         LogMessages.IDX14314,
                         LogHelper.MarkAsNonPII(JsonWebTokenConfiguration.MaxActorChainLength))));
-                claims[JwtRegisteredClaimNames.Actort] = new JsonWebToken(JsonSerializerPrimitives.ReadString(ref reader, JwtRegisteredClaimNames.Actort, ClassName, true));
+                claims[JwtRegisteredClaimNames.Actort] = new JsonWebToken(JsonSerializerPrimitives.ReadString(ref reader, JwtRegisteredClaimNames.Actort, ClassName, true), actorChainDepth + 1);
             }
             else
             {

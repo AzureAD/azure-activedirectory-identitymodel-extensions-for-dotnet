@@ -714,7 +714,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             try
             {
                 Base64UrlEncoder.Decode(strSpan.Slice(startIndex, length), output);
-                return createHeaderClaimSet ? CreateHeaderClaimSet(output) : CreatePayloadClaimSet(output);
+                return createHeaderClaimSet ? CreateHeaderClaimSet(output) : CreatePayloadClaimSet(output, actorChainDepth);
             }
             finally
             {
