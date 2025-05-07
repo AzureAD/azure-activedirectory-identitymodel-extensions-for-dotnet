@@ -409,11 +409,7 @@ namespace Microsoft.IdentityModel.Tests
             catch (SecurityTokenException ex)
             {
                 // Assert - Verify the exception message contains the expected content
-                if (ex.Message.Contains("IDX14313"))
-                {
-                    // Test passed - expected exception was thrown with the right message
-                }
-                else
+                if (!ex.Message.Contains("IDX14313"))
                 {
                     context.Diffs.Add($"Exception message does not contain expected content. Message: {ex.Message}");
                 }
@@ -477,11 +473,7 @@ namespace Microsoft.IdentityModel.Tests
             catch (SecurityTokenException ex)
             {
                 // Assert - Verify the exception message contains the expected content
-                if (ex.Message.Contains("IDX14313"))
-                {
-                    // Test passed - expected exception was thrown with the right message
-                }
-                else
+                if (!ex.Message.Contains("IDX14313"))
                 {
                     context.Diffs.Add($"Exception message does not contain expected content. Message: {ex.Message}");
                 }
@@ -604,11 +596,7 @@ namespace Microsoft.IdentityModel.Tests
             catch (SecurityTokenException ex)
             {
                 // Assert - Verify the exception message contains the expected content
-                if (ex.Message.Contains("IDX14313"))
-                {
-                    // Test passed - expected exception was thrown with the right message
-                }
-                else
+                if (!ex.Message.Contains("IDX14313"))
                 {
                     context.Diffs.Add($"Exception message does not contain expected content. Message: {ex.Message}");
                 }
