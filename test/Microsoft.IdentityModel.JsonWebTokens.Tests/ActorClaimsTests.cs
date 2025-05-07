@@ -13,7 +13,7 @@ namespace Microsoft.IdentityModel.Tests
 {
     public class ActorClaimsTests
     {
-        [Fact]  // This tests that the actor token is properly serialized when added to the claims dictionary without any nesting.
+        [Fact]
         public void ActorTokenInClaimsDictionaryShouldBeProperlySerialized()
         {
             var context = new CompareContext($"{this}.ActorTokenInClaimsDictionaryShouldBeProperlySerialized");
@@ -69,7 +69,7 @@ namespace Microsoft.IdentityModel.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Fact]// This tests that the actor token is properly serialized when added as Subject without any nesting.
+        [Fact]
         public void ActorTokenAsSubjectShouldBeProperlySerialized()
         {
             var context = new CompareContext($"{this}.ActorTokenAsSubjectShouldBeProperlySerialized");
@@ -122,7 +122,7 @@ namespace Microsoft.IdentityModel.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Fact]// This tests that the actor token from claims is preferred over that of subject when both are specified.
+        [Fact]
         public void ActorTokenInBothClaimsAndSubjectShouldPreferClaimsValue()
         {
             var context = new CompareContext($"{this}.ActorTokenInBothClaimsAndSubjectShouldPreferClaimsValue");
@@ -186,7 +186,7 @@ namespace Microsoft.IdentityModel.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Fact]// This tests that the actor token is properly serialized when added to the claims dictionary with nested actors.
+        [Fact]
         public void NestedActorTokenInClaimsDictionaryShouldBeProperlySerialized()
         {
             var context = new CompareContext($"{this}.NestedActorTokenInClaimsDictionaryShouldBeProperlySerialized");
@@ -259,7 +259,7 @@ namespace Microsoft.IdentityModel.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Fact]//This tests that the actor token is properly serialized when added as Subject with nested actors.
+        [Fact]
         public void NestedActorTokenAsSubjectShouldBeProperlySerialized()
         {
             var context = new CompareContext($"{this}.NestedActorTokenAsSubjectShouldBeProperlySerialized");
@@ -329,7 +329,7 @@ namespace Microsoft.IdentityModel.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Fact] // This tests that the MaxActorChainLength rejects negative values but accepts all the permissible values
+        [Fact]
         public void MaxActorChainLength_RejectsNegativeValues()
         {
             // Arrange
@@ -361,7 +361,7 @@ namespace Microsoft.IdentityModel.Tests
             }
         }
 
-        [Fact]// This tests that an exception is thrown when actor token at level 1 is provided as Subject and there are more nested actors than the MaxActorChainLength.
+        [Fact]
         public void NestedSubjectActorTokens_ExceedingMaxDepth_ThrowsException()
         {
             var context = new CompareContext($"{this}.NestedActorTokens_ExceedingMaxDepth_ThrowsException");
@@ -423,9 +423,7 @@ namespace Microsoft.IdentityModel.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-
-
-        [Fact]// This tests that an exception is thrown when MaxActorChainLength is set to 0 and actor specified as Subject.
+        [Fact]
         public void NestedClaimsDictionaryActorTokens_ExceedingMaxDepth_ThrowsException()
         {
             var context = new CompareContext($"{this}.NestedClaimsDictionaryActorTokens_ExceedingMaxDepth_ThrowsException");
@@ -487,7 +485,7 @@ namespace Microsoft.IdentityModel.Tests
             TestUtilities.AssertFailIfErrors(context);
         }
 
-        [Fact]// In this test, with 1 MaxActorChainLength, the subject actor has 2 levels of nesting while claims dictionary has 1 level. This verifies that the claim from claims dictionary is preferred and we dont get exception for the subject claim. 
+        [Fact]
         public void ActorTokens_MixedSourceRespectMaxActorChainLength()
         {
             // Arrange
@@ -546,7 +544,7 @@ namespace Microsoft.IdentityModel.Tests
             Assert.False(actorToken.Payload.HasClaim("actort"), "There should be no nested actor claim due to MaxActorChainLength");
         }
 
-        [Fact]// This tests that an exception is thrown when actor token at level 1 is provided in claims dictionary and there are more nested actors than the MaxActorChainLength.
+        [Fact]
         public void NestedClaimTokens_ExceedingMaxDepth_ThrowsException()
         {
             var context = new CompareContext($"{this}.NestedActorTokens_ExceedingMaxDepth_ThrowsException");
