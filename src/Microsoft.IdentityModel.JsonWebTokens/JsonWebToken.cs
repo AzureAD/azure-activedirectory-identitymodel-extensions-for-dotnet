@@ -98,7 +98,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// The contents of the returned <see cref="JsonWebToken"/> have not been validated, the JSON Web Token is simply decoded. Validation can be accomplished using the validation methods in <see cref="JsonWebTokenHandler"/>
         /// </para>
         /// </remarks>
-        public JsonWebToken(string jwtEncodedString, int actor)
+        public JsonWebToken(string jwtEncodedString, int actorChainDepth)
         {
             if (string.IsNullOrEmpty(jwtEncodedString))
                 throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(jwtEncodedString)));

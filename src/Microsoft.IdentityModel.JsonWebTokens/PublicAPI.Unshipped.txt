@@ -1,4 +1,4 @@
-Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.JsonWebToken(string jwtEncodedString, int actorChainDepth = 0) -> void
+Microsoft.IdentityModel.JsonWebTokens.JsonWebToken.JsonWebToken(string jwtEncodedString, int actorChainDepth) -> void
 Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenConfiguration
 static Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenConfiguration.MaxActorChainLength.get -> int
 static Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenConfiguration.MaxActorChainLength.set -> void
