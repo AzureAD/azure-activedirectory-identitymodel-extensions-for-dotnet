@@ -52,5 +52,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         internal const string IDX14311 = "IDX14311: Unable to decode the authentication tag as a Base64Url encoded string.";
         internal const string IDX14312 = "IDX14312: Unable to decode the cipher text as a Base64Url encoded string.";
         internal const string IDX14313 = "IDX14313: Unable to serialize actor token. Actor token chain exceeded maximum depth of {0}";
+        internal const string IDX14314 = "IDX14314: Unable to deserialize provided json web token. Actor token chain exceeded maximum depth of {0}";
     }
 }

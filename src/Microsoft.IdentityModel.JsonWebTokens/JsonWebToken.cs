@@ -63,6 +63,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Initializes a new instance of <see cref="JsonWebToken"/> from a string in JWS or JWE Compact serialized format.
         /// </summary>
         /// <param name="jwtEncodedString">A JSON Web Token that has been serialized in JWS or JWE Compact serialized format.</param>
+        /// <param name="actorChainDepth">this is used to control the deserialization depth of the actor token</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="jwtEncodedString"/> is null or empty.</exception>
         /// <exception cref="ArgumentException">Thrown if <paramref name="jwtEncodedString"/> is not in JWS or JWE Compact Serialization format.</exception>
         /// <remarks>
@@ -73,12 +74,12 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// The contents of the returned <see cref="JsonWebToken"/> have not been validated, the JSON Web Token is simply decoded. Validation can be accomplished using the validation methods in <see cref="JsonWebTokenHandler"/>
         /// </para>
         /// </remarks>
-        public JsonWebToken(string jwtEncodedString)
+        public JsonWebToken(string jwtEncodedString, int actorChainDepth = 0)
         {
             if (string.IsNullOrEmpty(jwtEncodedString))
                 throw LogHelper.LogExceptionMessage(new ArgumentNullException(nameof(jwtEncodedString)));
 
-            ReadToken(jwtEncodedString.AsMemory());
+            ReadToken(jwtEncodedString.AsMemory(), actorChainDepth);
 
             _encodedToken = jwtEncodedString;
         }
@@ -512,10 +513,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// Converts a span into an instance of <see cref="JsonWebToken"/>.
         /// </summary>
         /// <param name="encodedTokenMemory">A span representing a JSON Web Token (JWT) in JWS or JWE Compact Serialization format.</param>
+        /// <param name="actorChainDepth">this is used to control the deserialization depth of the actor token</param>
         /// <exception cref="SecurityTokenMalformedException">Thrown if <paramref name="encodedTokenMemory"/> is malformed, a valid JWT should have either 2 dots (JWS) or 4 dots (JWE).</exception>
         /// <exception cref="SecurityTokenMalformedException">Thrown if <paramref name="encodedTokenMemory"/> does not have a non-empty authentication tag after the 4th dot for a JWE.</exception>
         /// <exception cref="SecurityTokenMalformedException">Thrown if <paramref name="encodedTokenMemory"/> has more than 4 dots.</exception>
-        internal void ReadToken(ReadOnlyMemory<char> encodedTokenMemory)
+        internal void ReadToken(ReadOnlyMemory<char> encodedTokenMemory, int actorChainDepth = 0)
         {
             // JWT must have 2 dots for JWS or 4 dots for JWE (a.b.c.d.e)
             ReadOnlySpan<char> encodedTokenSpan = encodedTokenMemory.Span;
@@ -554,7 +556,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                 try
                 {
-                    Payload = CreateClaimSet(encodedTokenSpan, Dot1 + 1, Dot2 - Dot1 - 1, createHeaderClaimSet: false);
+                    Payload = CreateClaimSet(encodedTokenSpan, Dot1 + 1, Dot2 - Dot1 - 1, createHeaderClaimSet: false, actorChainDepth);
                 }
                 catch (Exception ex)
                 {
@@ -674,7 +676,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
 
-        internal JsonClaimSet CreateClaimSet(ReadOnlySpan<char> strSpan, int startIndex, int length, bool createHeaderClaimSet)
+        internal JsonClaimSet CreateClaimSet(ReadOnlySpan<char> strSpan, int startIndex, int length, bool createHeaderClaimSet, int actorChainDepth = 0)
         {
             int outputSize = Base64UrlEncoding.ValidateAndGetOutputSize(strSpan, startIndex, length);
 

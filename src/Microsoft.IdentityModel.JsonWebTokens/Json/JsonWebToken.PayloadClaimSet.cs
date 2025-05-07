@@ -17,7 +17,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             return CreatePayloadClaimSet(bytes.AsSpan(0, length));
         }
 
-        internal JsonClaimSet CreatePayloadClaimSet(ReadOnlySpan<byte> byteSpan)
+        internal JsonClaimSet CreatePayloadClaimSet(ReadOnlySpan<byte> byteSpan, int actorChainDepth = 0)
         {
             if (byteSpan.Length == 0)
                 return new JsonClaimSet([]);
@@ -40,7 +40,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 if (reader.TokenType == JsonTokenType.PropertyName)
                 {
-                    ReadPayloadValue(ref reader, claims);
+                    ReadPayloadValue(ref reader, claims, actorChainDepth);
                 }
                 // We read a JsonTokenType.StartObject above, exiting and positioning reader at next token.
                 else if (JsonSerializerPrimitives.IsReaderAtTokenType(ref reader, JsonTokenType.EndObject, false))
@@ -59,7 +59,8 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// </summary>
         /// <param name="reader">The Utf8JsonReader instance positioned at a claim name token used to read the JSON payload.</param>
         /// <param name="claims">Collection of claims that have been read from the reader.</param>
-        private protected virtual void ReadPayloadValue(ref Utf8JsonReader reader, IDictionary<string, object> claims)
+        /// <param name="actorChainDepth">this is used to control the deserialization depth of the actor token</param>
+        private protected virtual void ReadPayloadValue(ref Utf8JsonReader reader, IDictionary<string, object> claims, int actorChainDepth = 0)
         {
             if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Aud))
             {
@@ -110,6 +111,16 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Sub))
             {
                 claims[JwtRegisteredClaimNames.Sub] = JsonSerializerPrimitives.ReadStringOrNumberAsString(ref reader, JwtRegisteredClaimNames.Sub, ClassName, true);
+            }
+            else if (reader.ValueTextEquals(JwtPayloadUtf8Bytes.Actort))
+            {
+                if (actorChainDepth >= JsonWebTokenConfiguration.MaxActorChainLength)
+                    throw LogHelper.LogExceptionMessage(
+                    new JsonException(
+                        LogHelper.FormatInvariant(
+                        LogMessages.IDX14314,
+                        LogHelper.MarkAsNonPII(JsonWebTokenConfiguration.MaxActorChainLength))));
+                claims[JwtRegisteredClaimNames.Actort] = new JsonWebToken(JsonSerializerPrimitives.ReadString(ref reader, JwtRegisteredClaimNames.Actort, ClassName, true));
             }
             else
             {
