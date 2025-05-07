@@ -6,7 +6,16 @@ using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
-    internal class JsonWebTokenConfiguration
+    /// <summary>
+    /// Contains configuration settings for JSON Web Token processing.
+    /// This class provides centralized control over various aspects of JWT handling.
+    /// </summary>
+    /// <remarks>
+    /// The JsonWebTokenConfiguration class allows applications to customize token processing
+    /// behavior application-wide, including settings like actor token chain depth limitations.
+    /// This helps prevent security issues like excessive recursion and denial of service attacks.
+    /// </remarks>
+    public static class JsonWebTokenConfiguration
     {
         private static int s_maxActorChainLength = 5; // Default value
 
