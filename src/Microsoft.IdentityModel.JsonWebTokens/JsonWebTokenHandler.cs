@@ -118,6 +118,79 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
 
+#if NET8_0_OR_GREATER
+        /// <summary>
+        /// Determines if the span is a well formed JSON Web Token (JWT). See: <see href="https://datatracker.ietf.org/doc/html/rfc7519"/>.
+        /// </summary>
+        /// <param name="token">Span that should represent a valid JWT.</param>
+        /// <remarks>Uses <see cref="Regex.IsMatch(string, string)"/> matching:
+        /// <para>JWS: @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$"</para>
+        /// <para>JWE: (dir): @"^[A-Za-z0-9-_]+\.\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$"</para>
+        /// <para>JWE: (wrappedkey): @"^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]$"</para>
+        /// </remarks>
+        /// <returns>
+        /// <para><see langword="false"/> if the token is null or whitespace.</para>
+        /// <para><see langword="false"/> if token.Length is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</para>
+        /// <para><see langword="true"/> if the token is in JSON Compact Serialization format.</para>
+        /// </returns>
+        public virtual bool CanReadToken(in ReadOnlySpan<char> token)
+        {
+            if (token.IsEmpty || token.IsWhiteSpace())
+                return false;
+
+            if (token.Length > MaximumTokenSizeInBytes)
+            {
+                if (LogHelper.IsEnabled(EventLogLevel.Informational))
+                    LogHelper.LogInformation(TokenLogMessages.IDX10209, LogHelper.MarkAsNonPII(token.Length), LogHelper.MarkAsNonPII(MaximumTokenSizeInBytes));
+
+                return false;
+            }
+
+            // Count the number of segments, which is the number of periods + 1. We can stop when we've encountered
+            // more segments than the maximum we know how to handle.
+            int segmentCount = CountJwtTokenPart(token, JwtConstants.MaxJwtSegmentCount + 1);
+
+            switch (segmentCount)
+            {
+                case JwtConstants.JwsSegmentCount:
+                    return JwtTokenUtilities.RegexJws.IsMatch(token);
+
+                case JwtConstants.JweSegmentCount:
+                    return JwtTokenUtilities.RegexJwe.IsMatch(token);
+
+                default:
+                    LogHelper.LogInformation(LogMessages.IDX14107);
+                    return false;
+            }
+
+            static int CountJwtTokenPart(in ReadOnlySpan<char> token, int maxCount)
+            {
+                int count = 1;
+                int index = 0;
+                ReadOnlySpan<char> localToken = token;
+                while (index < localToken.Length)
+                {
+                    int dotIndex = localToken.IndexOf('.');
+                    if (dotIndex < 0)
+                    {
+                        break;
+                    }
+
+                    count++;
+                    index = dotIndex + 1;
+                    if (count == maxCount)
+                    {
+                        break;
+                    }
+
+                    localToken = localToken[index..];
+                }
+
+                return count;
+            }
+        }
+#endif
+
         /// <summary>
         /// Determines if the string is a well formed JSON Web Token (JWT). See: <see href="https://datatracker.ietf.org/doc/html/rfc7519"/>.
         /// </summary>
@@ -137,6 +210,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             if (string.IsNullOrWhiteSpace(token))
                 return false;
 
+#if NET8_0_OR_GREATER
+            return CanReadToken(token.AsSpan());
+#else
             if (token.Length > MaximumTokenSizeInBytes)
             {
                 if (LogHelper.IsEnabled(EventLogLevel.Informational))
@@ -167,6 +243,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                     LogHelper.LogInformation(LogMessages.IDX14107);
                     return false;
             }
+#endif
         }
 
         private static StringComparison GetStringComparisonRuleIf509(SecurityKey securityKey) =>

@@ -1,0 +1,1 @@
+virtual Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandler.CanReadToken(in System.ReadOnlySpan<char> token) -> bool
