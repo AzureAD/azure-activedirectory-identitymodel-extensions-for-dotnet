@@ -333,31 +333,31 @@ namespace Microsoft.IdentityModel.Tests
         public void MaxActorChainLength_RejectsNegativeValues()
         {
             // Arrange
-            int originalValue = JsonWebTokenHandler.MaxActorChainLength;
+            int originalValue = JsonWebTokenConfiguration.MaxActorChainLength;
 
             try
             {
                 // Act & Assert - Valid value 0 should not throw
-                JsonWebTokenHandler.MaxActorChainLength = 0;
-                Assert.Equal(0, JsonWebTokenHandler.MaxActorChainLength);
+                JsonWebTokenConfiguration.MaxActorChainLength = 0;
+                Assert.Equal(0, JsonWebTokenConfiguration.MaxActorChainLength);
 
                 // Act & Assert - Negative value
                 var ex = Assert.Throws<ArgumentOutOfRangeException>(() =>
-                    JsonWebTokenHandler.MaxActorChainLength = -5);
+                    JsonWebTokenConfiguration.MaxActorChainLength = -5);
                 Assert.Contains("MaxActorChainLength must be non negative", ex.Message);
 
                 // Act & Assert - Valid value 1 should not throw
-                JsonWebTokenHandler.MaxActorChainLength = 1;
-                Assert.Equal(1, JsonWebTokenHandler.MaxActorChainLength);
+                JsonWebTokenConfiguration.MaxActorChainLength = 1;
+                Assert.Equal(1, JsonWebTokenConfiguration.MaxActorChainLength);
 
                 // Act & Assert - Valid larger value
-                JsonWebTokenHandler.MaxActorChainLength = 10;
-                Assert.Equal(10, JsonWebTokenHandler.MaxActorChainLength);
+                JsonWebTokenConfiguration.MaxActorChainLength = 10;
+                Assert.Equal(10, JsonWebTokenConfiguration.MaxActorChainLength);
             }
             finally
             {
                 // Restore to original value
-                JsonWebTokenHandler.MaxActorChainLength = originalValue;
+                JsonWebTokenConfiguration.MaxActorChainLength = originalValue;
             }
         }
 
@@ -370,7 +370,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 // Arrange
                 var handler = new JsonWebTokenHandler();
-                JsonWebTokenHandler.MaxActorChainLength = 2; // Allow only 2 levels of nesting
+                JsonWebTokenConfiguration.MaxActorChainLength = 2; // Allow only 2 levels of nesting
 
                 // Create nested actor identities (3 levels, but we'll set MaxActorChainLength to 2)
                 var level3Actor = new CaseSensitiveClaimsIdentity("Level3Auth");
@@ -438,7 +438,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 // Arrange
                 var handler = new JsonWebTokenHandler();
-                JsonWebTokenHandler.MaxActorChainLength = 1; // Allow only 1 level of nesting
+                JsonWebTokenConfiguration.MaxActorChainLength = 1; // Allow only 1 level of nesting
 
                 // Create nested actor identities
                 var nestedActorIdentity = new CaseSensitiveClaimsIdentity("NestedActorAuth");
@@ -500,7 +500,7 @@ namespace Microsoft.IdentityModel.Tests
         {
             // Arrange
             var handler = new JsonWebTokenHandler();
-            JsonWebTokenHandler.MaxActorChainLength = 1; // Allow 1 levels of nesting
+            JsonWebTokenConfiguration.MaxActorChainLength = 1; // Allow 1 levels of nesting
 
             // Create level 2 actor (will be in claims dictionary)
             var level2Actor = new CaseSensitiveClaimsIdentity("Level2Auth");
@@ -563,7 +563,7 @@ namespace Microsoft.IdentityModel.Tests
             {
                 // Arrange
                 var handler = new JsonWebTokenHandler();
-                JsonWebTokenHandler.MaxActorChainLength = 2; // Allow only 2 levels of nesting
+                JsonWebTokenConfiguration.MaxActorChainLength = 2; // Allow only 2 levels of nesting
 
                 // Create nested actor identities (3 levels, but we'll set MaxActorChainLength to 2)
                 var level3Actor = new CaseSensitiveClaimsIdentity("Level3Auth");
