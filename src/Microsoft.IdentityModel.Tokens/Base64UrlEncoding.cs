@@ -3,7 +3,9 @@
 
 using System;
 using System.Buffers;
+#if NET9_0
 using System.Buffers.Text;
+#endif
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
