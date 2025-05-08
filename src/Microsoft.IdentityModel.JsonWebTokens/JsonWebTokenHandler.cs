@@ -118,7 +118,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             }
         }
 
-#if NET8_0_OR_GREATER
         /// <summary>
         /// Determines if the span is a well formed JSON Web Token (JWT). See: <see href="https://datatracker.ietf.org/doc/html/rfc7519"/>.
         /// </summary>
@@ -133,9 +132,9 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         /// <para><see langword="false"/> if token.Length is greater than <see cref="TokenHandler.MaximumTokenSizeInBytes"/>.</para>
         /// <para><see langword="true"/> if the token is in JSON Compact Serialization format.</para>
         /// </returns>
-        public virtual bool CanReadToken(in ReadOnlySpan<char> token)
+        public virtual bool CanReadToken(in ReadOnlyMemory<char> token)
         {
-            if (token.IsEmpty || token.IsWhiteSpace())
+            if (token.IsEmpty || token.Span.IsWhiteSpace())
                 return false;
 
             if (token.Length > MaximumTokenSizeInBytes)
@@ -148,15 +147,23 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
             // Count the number of segments, which is the number of periods + 1. We can stop when we've encountered
             // more segments than the maximum we know how to handle.
-            int segmentCount = CountJwtTokenPart(token, JwtConstants.MaxJwtSegmentCount + 1);
+            int segmentCount = CountJwtTokenPart(token.Span, JwtConstants.MaxJwtSegmentCount + 1);
 
             switch (segmentCount)
             {
                 case JwtConstants.JwsSegmentCount:
-                    return JwtTokenUtilities.RegexJws.IsMatch(token);
+#if NET8_0_OR_GREATER
+                    return JwtTokenUtilities.RegexJws.IsMatch(token.Span);
+#else
+                    return JwtTokenUtilities.RegexJws.IsMatch(token.ToString());
+#endif
 
                 case JwtConstants.JweSegmentCount:
-                    return JwtTokenUtilities.RegexJwe.IsMatch(token);
+#if NET8_0_OR_GREATER
+                    return JwtTokenUtilities.RegexJwe.IsMatch(token.Span);
+#else
+                    return JwtTokenUtilities.RegexJwe.IsMatch(token.ToString());
+#endif
 
                 default:
                     LogHelper.LogInformation(LogMessages.IDX14107);
@@ -189,7 +196,6 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return count;
             }
         }
-#endif
 
         /// <summary>
         /// Determines if the string is a well formed JSON Web Token (JWT). See: <see href="https://datatracker.ietf.org/doc/html/rfc7519"/>.
@@ -211,7 +217,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 return false;
 
 #if NET8_0_OR_GREATER
-            return CanReadToken(token.AsSpan());
+            return CanReadToken(token.AsMemory());
 #else
             if (token.Length > MaximumTokenSizeInBytes)
             {
