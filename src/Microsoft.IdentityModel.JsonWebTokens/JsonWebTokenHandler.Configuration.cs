@@ -7,8 +7,7 @@ using Microsoft.IdentityModel.Logging;
 namespace Microsoft.IdentityModel.JsonWebTokens
 {
     /// <summary>
-    /// Contains configuration settings for JSON Web Token processing.
-    /// This class provides centralized control over various aspects of JWT handling.
+    /// Contains configuration settings for JWT handler.
     /// </summary>
     /// <remarks>
     /// The JsonWebTokenHandlerConfiguration class allows applications to customize token processing
