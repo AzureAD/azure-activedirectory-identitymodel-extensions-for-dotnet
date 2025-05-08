@@ -4,12 +4,12 @@
 using System;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// Represents a validated token type, including the number of valid types present in the validation parameters.
     /// </summary>
-    internal readonly struct ValidatedTokenType : IEquatable<ValidatedTokenType>
+    public readonly struct ValidatedTokenType : IEquatable<ValidatedTokenType>
     {
         /// <summary>
         /// Initializes a new instance of <see cref="ValidatedTokenType"/>.

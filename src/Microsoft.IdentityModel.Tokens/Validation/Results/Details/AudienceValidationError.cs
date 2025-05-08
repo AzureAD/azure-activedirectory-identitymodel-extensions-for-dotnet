@@ -6,14 +6,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// Represents an error that occurs when the token's audience cannot be validated.
     /// If available, the invalid audiences from the token are stored in <see cref="TokenAudiences"/>
     /// and the allowed audiences are stored in <see cref="ValidAudiences"/>.
     /// </summary>
-    internal class AudienceValidationError : ValidationError
+    public class AudienceValidationError : ValidationError
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="IssuerSigningKeyValidationError"/> class.
@@ -55,8 +55,22 @@ namespace Microsoft.IdentityModel.Tokens
                 return exception;
             }
 
-            return base.CreateException(ExceptionType, null);
+            return CreateException(ExceptionType, null);
         }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="AudienceValidationError"/> representing a null parameter.
+        /// </summary>
+        /// <param name="parameterName">The name of the parameter.</param>
+        /// <param name="stackFrame">The stack frame where the error occurred.</param>
+        /// <returns>A new <see cref="AudienceValidationError"/>.</returns>
+        public static new AudienceValidationError NullParameter(string parameterName, StackFrame stackFrame) => new(
+            MessageDetail.NullParameter(parameterName),
+            ValidationFailureType.NullArgument,
+            typeof(SecurityTokenArgumentNullException),
+            stackFrame,
+            null, // TokenAudiences
+            null); // ValidAudiences
 
         /// <summary>
         /// The audiences that were in the token.

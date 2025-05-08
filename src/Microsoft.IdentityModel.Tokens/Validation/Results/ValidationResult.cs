@@ -5,35 +5,36 @@ using System;
 using Microsoft.IdentityModel.Logging;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// Represents a validation result that can be either valid or invalid.
     /// </summary>
     /// <typeparam name="TResult"></typeparam>
-    internal readonly struct ValidationResult<TResult> : IEquatable<ValidationResult<TResult>>
+    /// <typeparam name="TError"></typeparam>
+    public readonly struct ValidationResult<TResult, TError> : IEquatable<ValidationResult<TResult, TError>>
     {
         readonly TResult? _result;
-        readonly ValidationError? _error;
+        readonly TError? _error;
 
         /// <summary>
-        /// Creates a new instance of <see cref="ValidationResult{TResult}"/> indicating a successful operation
+        /// Creates a new instance of <see cref="ValidationResult{TResult, TError}"/> indicating a successful operation
         /// and containing an object of the associated type.
         /// </summary>
         /// <param name="result">The value associated with the success.</param>
         public ValidationResult(TResult result)
         {
             _result = result;
-            _error = null;
+            _error = default(TError);
             IsValid = true;
         }
 
         /// <summary>
-        /// Creates a new instance of <see cref="ValidationResult{TResult}"/> indicating a failed operation
-        /// and containing a <see cref="ValidationError"/> with the error information.
+        /// Creates a new instance of <see cref="ValidationResult{TResult, TError}"/>
+        /// indicating a failed operation and containing an error information.
         /// </summary>
         /// <param name="error">The error associated with the failure.</param>
-        public ValidationResult(ValidationError error)
+        public ValidationResult(TError error)
         {
             _result = default;
             _error = error;
@@ -52,13 +53,13 @@ namespace Microsoft.IdentityModel.Tokens
         /// Creates a successful, valid result implicitly from the value.
         /// </summary>
         /// <param name="result">The value to be stored in the result.</param>
-        public static implicit operator ValidationResult<TResult>(TResult result) => new(result);
+        public static implicit operator ValidationResult<TResult, TError>(TResult result) => new(result);
 
         /// <summary>
         /// Creates an error result implicitly from the error value.
         /// </summary>
         /// <param name="error">The error to be stored in the result.</param>
-        public static implicit operator ValidationResult<TResult>(ValidationError error) => new(error);
+        public static implicit operator ValidationResult<TResult, TError>(TError error) => new(error);
 
         /// <summary>
         /// Gets a value indicating whether the result is valid.
@@ -79,14 +80,14 @@ namespace Microsoft.IdentityModel.Tokens
         /// <returns>The wrapped error value.</returns>
         /// <remarks>This method is only valid if the result type is not valid.</remarks>
         /// <exception cref="InvalidOperationException">Thrown if attempted to unwrap an error from a valid result.</exception>
-        internal ValidationError UnwrapError() => IsValid ? throw new InvalidOperationException("Cannot unwrap success result") : _error!;
+        internal TError UnwrapError() => IsValid ? throw new InvalidOperationException("Cannot unwrap success result") : _error!;
 
         /// <summary>
         /// Gets the error associated with the validation result.
         /// </summary>
         /// <returns>The error associated with the validation result.</returns>
         /// <remarks>This property is only valid if the result type is not valid.</remarks>
-        public ValidationError? Error
+        public TError? Error
         {
             get
             {
@@ -117,13 +118,13 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Determines whether the specified object is equal to the current instance of <see cref="ValidationResult{TResult}"/>.
+        /// Determines whether the specified object is equal to the current instance of <see cref="ValidationResult{TResult, TError}"/>.
         /// </summary>
         /// <param name="obj">The object to compare with the current instance.</param>
         /// <returns><c>true</c> if the specified object is equal to the current instance; otherwise, <c>false</c>.</returns>
         public override bool Equals(object? obj)
         {
-            if (obj is ValidationResult<TResult> other)
+            if (obj is ValidationResult<TResult, TError> other)
             {
                 return Equals(other);
             }
@@ -132,7 +133,7 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Returns the hash code for this instance of <see cref="ValidationResult{TResult}"/>.
+        /// Returns the hash code for this instance of <see cref="ValidationResult{TResult, TError}"/>.
         /// </summary>
         /// <returns>The hash code for the current instance.</returns>
         public override int GetHashCode()
@@ -144,33 +145,33 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Equality comparison operator for <see cref="ValidationResult{TResult}"/>.
+        /// Equality comparison operator for <see cref="ValidationResult{TResult, TError}"/>.
         /// </summary>
         /// <param name="left">The left value to compare.</param>
         /// <param name="right">The right value to compare.</param>
         /// <returns>A boolean indicating whether the left value is equal to the right one.</returns>
-        public static bool operator ==(ValidationResult<TResult> left, ValidationResult<TResult> right)
+        public static bool operator ==(ValidationResult<TResult, TError> left, ValidationResult<TResult, TError> right)
         {
             return left.Equals(right);
         }
 
         /// <summary>
-        /// Inequality comparison operator for <see cref="ValidationResult{TResult}"/>.
+        /// Inequality comparison operator for <see cref="ValidationResult{TResult, TError}"/>.
         /// </summary>
         /// <param name="left">The left value to compare.</param>
         /// <param name="right">The right value to compare.</param>
         /// <returns>A boolean indicating whether the left value is not equal to the right one.</returns>
-        public static bool operator !=(ValidationResult<TResult> left, ValidationResult<TResult> right)
+        public static bool operator !=(ValidationResult<TResult, TError> left, ValidationResult<TResult, TError> right)
         {
             return !(left == right);
         }
 
         /// <summary>
-        /// Determines whether the specified <see cref="ValidationResult{TResult}"/> is equal to the current instance.
+        /// Determines whether the specified <see cref="ValidationResult{TResult, TError}"/> is equal to the current instance.
         /// </summary>
-        /// <param name="other">The <see cref="ValidationResult{TResult}"/> to compare with the current instance.</param>
-        /// <returns><c>true</c> if the specified <see cref="ValidationResult{TResult}"/> is equal to the current instance; otherwise, <c>false</c>.</returns>
-        public bool Equals(ValidationResult<TResult> other)
+        /// <param name="other">The <see cref="ValidationResult{TResult, TError}"/> to compare with the current instance.</param>
+        /// <returns><c>true</c> if the specified <see cref="ValidationResult{TResult, TError}"/> is equal to the current instance; otherwise, <c>false</c>.</returns>
+        public bool Equals(ValidationResult<TResult, TError> other)
         {
             if (other.IsValid != IsValid)
                 return false;
@@ -182,11 +183,11 @@ namespace Microsoft.IdentityModel.Tokens
         }
 
         /// <summary>
-        /// Casts the result to a <see cref="ValidationResult{TResult}"/>.
+        /// Casts the result to a <see cref="ValidationResult{TResult, TError}"/>.
         /// </summary>#
         /// <remarks>Required for compatibility, see CA2225 for more information</remarks>
         /// <returns>The existing instance.</returns>
-        public ValidationResult<TResult> ToValidationResult()
+        public ValidationResult<TResult, TError> ToValidationResult()
         {
             return this;
         }

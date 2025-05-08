@@ -10,6 +10,7 @@ using System.IdentityModel.Tokens.Jwt.Tests;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 using Xunit;
 using TokenLogMessages = Microsoft.IdentityModel.Tokens.LogMessages;
 using System.Threading.Tasks;
@@ -36,7 +37,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
 
             CompareContext context = TestUtilities.WriteHeader($"{this}.JsonWebTokenHandlerDecryptTokenTests", theoryData);
-            ValidationResult<string> result = await jsonWebTokenHandler.DecryptTokenWithConfigurationAsync(
+            ValidationResult<string, ValidationError> result = await jsonWebTokenHandler.DecryptTokenWithConfigurationAsync(
                 theoryData.Token,
                 theoryData.ValidationParameters,
                 new CallContext(),
@@ -83,7 +84,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
             }
 
             CompareContext context = TestUtilities.WriteHeader($"{this}.JsonWebTokenHandlerDecryptTokenTests", theoryData);
-            ValidationResult<string> result = jsonWebTokenHandler.DecryptToken(
+            ValidationResult<string, ValidationError> result = jsonWebTokenHandler.DecryptToken(
                 theoryData.Token,
                 theoryData.ValidationParameters,
                 theoryData.Configuration,
@@ -117,7 +118,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
         public void DecryptToken_ThrowsIfAccessingSecurityTokenOnFailedRead()
         {
             JsonWebTokenHandler jsonWebTokenHandler = new JsonWebTokenHandler();
-            ValidationResult<string> tokenDecryptionResult = jsonWebTokenHandler.DecryptToken(
+            ValidationResult<string, ValidationError> tokenDecryptionResult = jsonWebTokenHandler.DecryptToken(
                 null,
                 null,
                 null,
@@ -378,7 +379,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
     public class TokenDecryptingTheoryData : TheoryDataBase
     {
         public JsonWebToken Token { get; set; }
-        internal ValidationResult<string> Result { get; set; }
+        internal ValidationResult<string, ValidationError> Result { get; set; }
         public BaseConfiguration Configuration { get; internal set; }
         public SecurityTokenDescriptor SecurityTokenDescriptor { get; internal set; }
         public string TokenString { get; internal set; }

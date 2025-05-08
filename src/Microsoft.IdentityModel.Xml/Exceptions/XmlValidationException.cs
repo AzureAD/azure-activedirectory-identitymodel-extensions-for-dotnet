@@ -7,7 +7,7 @@ using System.Runtime.Serialization;
 #pragma warning disable IDE0005 // Using directive is unnecessary.
 using System.Text;
 #pragma warning restore IDE0005 // Using directive is unnecessary.
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 namespace Microsoft.IdentityModel.Xml
 {

@@ -1,12 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-namespace Microsoft.IdentityModel.Tokens
+#nullable enable
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// The type of the failure that occurred when validating a <see cref="SecurityToken"/>.
     /// </summary>
-    internal abstract class ValidationFailureType
+    public abstract class ValidationFailureType
     {
         /// <summary>
         /// Creates an instance of <see cref="TokenValidationResult"/>
@@ -19,7 +20,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// <summary>
         /// Gets the name of the <see cref="ValidationFailureType"/>.
         /// </summary>
-        public string Name { get; }
+        public string Name { get; internal set; }
 
         /// <summary>
         /// Defines a type that represents a required parameter was null.
@@ -171,3 +172,4 @@ namespace Microsoft.IdentityModel.Tokens
         public static readonly ValidationFailureType TokenTypeValidatorThrew = new TokenTypeValidationFailure("TokenTypeValidatorThrew");
     }
 }
+#nullable restore

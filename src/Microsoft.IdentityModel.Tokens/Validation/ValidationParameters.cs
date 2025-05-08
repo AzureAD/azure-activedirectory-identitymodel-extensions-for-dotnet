@@ -9,12 +9,12 @@ using System.Threading;
 using Microsoft.IdentityModel.Logging;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// Contains a set of parameters that are used by a <see cref="SecurityTokenHandler"/> when validating a <see cref="SecurityToken"/>.
     /// </summary>
-    internal class ValidationParameters
+    public class ValidationParameters
     {
         private string? _authenticationType;
         private TimeSpan _clockSkew = DefaultClockSkew;
@@ -332,7 +332,7 @@ namespace Microsoft.IdentityModel.Tokens
         /// Allows overriding the delegate that will be used to validate the issuer of the token.
         /// </summary>
         /// <exception cref="ArgumentNullException">Thrown when the value is set as null.</exception>
-        /// <returns>The <see cref="Tokens.IssuerValidationDelegateAsync"/> used to validate the issuer of a token</returns>
+        /// <returns>The <see cref="IssuerValidationDelegateAsync"/> used to validate the issuer of a token</returns>
         public IssuerValidationDelegateAsync IssuerValidatorAsync
         {
             get { return _issuerValidatorAsync; }
@@ -534,7 +534,7 @@ namespace Microsoft.IdentityModel.Tokens
 
         /// <summary>
         /// Allows overriding the delegate that will be used to validate the type of the token.
-        /// If the token type cannot be validated, a <see cref="ValidationResult{TResult}"/> MUST be returned by the delegate.
+        /// If the token type cannot be validated, a <see cref="ValidationResult{TResult, TError}"/> MUST be returned by the delegate.
         /// Note: the 'type' parameter may be null if it couldn't be extracted from its usual location.
         /// Implementations that need to resolve it from a different location can use the 'token' parameter.
         /// </summary>
