@@ -5,13 +5,13 @@ using System;
 using System.Diagnostics;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// Represents a validation error that occurs when a token's algorithm cannot be validated.
     /// If available, the invalid algorithm is stored in <see cref="InvalidAlgorithm"/>.
     /// </summary>
-    internal class AlgorithmValidationError : ValidationError
+    public class AlgorithmValidationError : ValidationError
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AlgorithmValidationError"/> class.
@@ -53,6 +53,19 @@ namespace Microsoft.IdentityModel.Tokens
 
             return base.CreateException();
         }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="AlgorithmValidationError"/> representing a null parameter.
+        /// </summary>
+        /// <param name="parameterName">The name of the parameter.</param>
+        /// <param name="stackFrame">The stack frame where the error occurred.</param>
+        /// <returns>A new <see cref="AlgorithmValidationError"/>.</returns>
+        public static new AlgorithmValidationError NullParameter(string parameterName, StackFrame stackFrame) => new(
+            MessageDetail.NullParameter(parameterName),
+            ValidationFailureType.NullArgument,
+            typeof(SecurityTokenArgumentNullException),
+            stackFrame,
+            null); // InvalidAlgorithm
 
         /// <summary>
         /// The algorithm that could not be validated.

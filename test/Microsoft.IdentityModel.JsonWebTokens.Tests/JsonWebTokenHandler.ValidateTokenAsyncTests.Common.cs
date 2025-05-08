@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using Microsoft.IdentityModel.TestUtils;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 namespace Microsoft.IdentityModel.JsonWebTokens.Tests
 {
@@ -23,7 +24,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens.Tests
                 await jsonWebTokenHandler.ValidateTokenAsync(jwtString, theoryData.TokenValidationParameters);
 
             // Validate the token using ValidationParameters
-            ValidationResult<ValidatedToken> validationParametersResult =
+            ValidationResult<ValidatedToken, ValidationError> validationParametersResult =
                 await jsonWebTokenHandler.ValidateTokenAsync(
                     jwtString, theoryData.ValidationParameters!, theoryData.CallContext, CancellationToken.None);
 

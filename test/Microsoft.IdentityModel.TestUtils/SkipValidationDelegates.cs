@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.IdentityModel.Tokens.Experimental;
 
 #nullable enable
 namespace Microsoft.IdentityModel.TestUtils
@@ -39,7 +40,7 @@ namespace Microsoft.IdentityModel.TestUtils
             CallContext callContext,
             CancellationToken cancellationToken)
         {
-            return Task.FromResult(new ValidationResult<ValidatedIssuer>(
+            return Task.FromResult(new ValidationResult<ValidatedIssuer, IssuerValidationError>(
                 new ValidatedIssuer(issuer, IssuerValidationSource.NotValidated)));
         };
 

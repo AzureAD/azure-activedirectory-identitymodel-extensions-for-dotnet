@@ -5,13 +5,13 @@ using System.Diagnostics;
 using System;
 
 #nullable enable
-namespace Microsoft.IdentityModel.Tokens
+namespace Microsoft.IdentityModel.Tokens.Experimental
 {
     /// <summary>
     /// Represents a validation error that occurs when the issuer signing key cannot be validated.
     /// If available, the invalid signing key is stored in <see cref="InvalidSigningKey"/>.
     /// </summary>
-    internal class IssuerSigningKeyValidationError : ValidationError
+    public class IssuerSigningKeyValidationError : ValidationError
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="IssuerSigningKeyValidationError"/> class.
