@@ -17,7 +17,6 @@ namespace Microsoft.IdentityModel.Tests
         public void ActorTokenInClaimsDictionaryShouldBeProperlySerialized()
         {
             var context = new CompareContext($"{this}.ActorTokenInClaimsDictionaryShouldBeProperlySerialized");
-            SecurityTokenDescriptor.ActorClaimTypeName = "actort";
 
             try
             {
@@ -43,7 +42,7 @@ namespace Microsoft.IdentityModel.Tests
                     SigningCredentials = Default.AsymmetricSigningCredentials,
                     Claims = new Dictionary<string, object>
                     {
-                        { JwtRegisteredClaimNames.Actort, actorIdentity }
+                        { SecurityTokenDescriptor.ActorClaimTypeName, actorIdentity }
                     }
                 };
 
@@ -51,7 +50,7 @@ namespace Microsoft.IdentityModel.Tests
                 JsonWebToken decodedToken = tokenHandler.ReadJsonWebToken(token);
 
                 // Verify actor claim exists in the token
-                Assert.True(decodedToken.Payload.HasClaim("actort"), "JWT token should contain 'actort' claim");
+                Assert.True(decodedToken.Payload.HasClaim(SecurityTokenDescriptor.ActorClaimTypeName), "JWT token should contain 'actort' claim");
                 // Get the actor token and verify it contains the expected claims
                 var actorTokenString = decodedToken.Actor;
                 Assert.NotNull(actorTokenString);
