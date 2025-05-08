@@ -17,10 +17,10 @@ namespace Microsoft.IdentityModel.Tests
         public void ActorTokenInClaimsDictionaryShouldBeProperlySerialized()
         {
             var context = new CompareContext($"{this}.ActorTokenInClaimsDictionaryShouldBeProperlySerialized");
+            SecurityTokenDescriptor.ActorClaimTypeName = "actort";
 
             try
             {
-                AppContext.SetSwitch(AppContextSwitches.UseClaimsIdentityTypeSwitch, true);
                 // Create a ClaimsIdentity for the actor
                 var actorIdentity = new CaseSensitiveClaimsIdentity("ActorAuth");
                 actorIdentity.AddClaim(new Claim("sub", "actor-subject-id"));
@@ -73,6 +73,7 @@ namespace Microsoft.IdentityModel.Tests
         public void ActorTokenAsSubjectShouldBeProperlySerialized()
         {
             var context = new CompareContext($"{this}.ActorTokenAsSubjectShouldBeProperlySerialized");
+            SecurityTokenDescriptor.ActorClaimTypeName = "actort";
 
             try
             {
@@ -126,6 +127,7 @@ namespace Microsoft.IdentityModel.Tests
         public void ActorTokenInBothClaimsAndSubjectShouldPreferClaimsValue()
         {
             var context = new CompareContext($"{this}.ActorTokenInBothClaimsAndSubjectShouldPreferClaimsValue");
+            SecurityTokenDescriptor.ActorClaimTypeName = "actort";
 
             try
             {
@@ -190,6 +192,7 @@ namespace Microsoft.IdentityModel.Tests
         public void NestedActorTokenInClaimsDictionaryShouldBeProperlySerialized()
         {
             var context = new CompareContext($"{this}.NestedActorTokenInClaimsDictionaryShouldBeProperlySerialized");
+            SecurityTokenDescriptor.ActorClaimTypeName = "actort";
 
             try
             {
@@ -263,6 +266,7 @@ namespace Microsoft.IdentityModel.Tests
         public void NestedActorTokenAsSubjectShouldBeProperlySerialized()
         {
             var context = new CompareContext($"{this}.NestedActorTokenAsSubjectShouldBeProperlySerialized");
+            SecurityTokenDescriptor.ActorClaimTypeName = "actort";
 
             try
             {
@@ -334,6 +338,7 @@ namespace Microsoft.IdentityModel.Tests
         {
             // Arrange
             int originalValue = SecurityTokenDescriptor.MaxActorChainLength;
+            SecurityTokenDescriptor.ActorClaimTypeName = "actort";
 
             try
             {
@@ -344,7 +349,7 @@ namespace Microsoft.IdentityModel.Tests
                 // Act & Assert - Negative value
                 var ex = Assert.Throws<ArgumentOutOfRangeException>(() =>
                     SecurityTokenDescriptor.MaxActorChainLength = -5);
-                Assert.Contains("MaxActorChainLength must be non negative", ex.Message);
+                Assert.Contains("IDX11027", ex.Message);
 
                 // Act & Assert - Valid value 1 should not throw
                 SecurityTokenDescriptor.MaxActorChainLength = 1;
@@ -365,6 +370,7 @@ namespace Microsoft.IdentityModel.Tests
         public void NestedSubjectActorTokens_ExceedingMaxDepth_ThrowsException()
         {
             var context = new CompareContext($"{this}.NestedActorTokens_ExceedingMaxDepth_ThrowsException");
+            SecurityTokenDescriptor.ActorClaimTypeName = "actort";
 
             try
             {
@@ -427,6 +433,7 @@ namespace Microsoft.IdentityModel.Tests
         public void NestedClaimsDictionaryActorTokens_ExceedingMaxDepth_ThrowsException()
         {
             var context = new CompareContext($"{this}.NestedClaimsDictionaryActorTokens_ExceedingMaxDepth_ThrowsException");
+            SecurityTokenDescriptor.ActorClaimTypeName = "actort";
 
             try
             {
@@ -488,6 +495,8 @@ namespace Microsoft.IdentityModel.Tests
         [Fact]
         public void ActorTokens_MixedSourceRespectMaxActorChainLength()
         {
+            SecurityTokenDescriptor.ActorClaimTypeName = "actort";
+
             // Arrange
             var handler = new JsonWebTokenHandler();
             SecurityTokenDescriptor.MaxActorChainLength = 1; // Allow 1 levels of nesting
@@ -548,6 +557,7 @@ namespace Microsoft.IdentityModel.Tests
         public void NestedClaimTokens_ExceedingMaxDepth_ThrowsException()
         {
             var context = new CompareContext($"{this}.NestedActorTokens_ExceedingMaxDepth_ThrowsException");
+            SecurityTokenDescriptor.ActorClaimTypeName = "actort";
 
             try
             {

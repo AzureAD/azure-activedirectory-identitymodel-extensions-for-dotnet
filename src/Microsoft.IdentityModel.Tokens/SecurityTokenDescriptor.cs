@@ -133,10 +133,41 @@ namespace Microsoft.IdentityModel.Tokens
             {
                 if (value < 0)
                     throw LogHelper.LogExceptionMessage(
-                        new ArgumentOutOfRangeException(nameof(value),
-                            LogHelper.FormatInvariant("MaxActorChainLength must be non negative and less than or equal to 5. Value provided: {0}", value)));
+                    new ArgumentOutOfRangeException(
+                    LogHelper.FormatInvariant(
+                    LogMessages.IDX11027,
+                    LogHelper.MarkAsNonPII("MaxActorChainLength"))
+                    + ". Permissible values are integers in range 0 to 5"));
 
                 s_maxActorChainLength = value;
+            }
+        }
+
+        private static string s_actoryClaimTypeName = "act";
+        /// <summary>
+        /// Gets or sets the claim type name for the actor claim.
+        /// Permissible values are 'act' or 'actort'.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown if the value is null.
+        /// </exception>
+        /// <exception cref="SecurityTokenException">
+        /// Thrown if the value is not 'act' or 'actort'.
+        /// </exception>
+        public static string ActorClaimTypeName
+        {
+            get => s_actoryClaimTypeName;
+            set
+            {
+                if (string.IsNullOrEmpty(value) || (!value.Equals("act") && !value.Equals("actort")))
+                    throw LogHelper.LogExceptionMessage(
+                    new ArgumentOutOfRangeException(
+                    LogHelper.FormatInvariant(
+                    LogMessages.IDX11027,
+                    LogHelper.MarkAsNonPII("ActorClaimTypeName"))
+                    + ". Permissible values are 'act' or 'actort'."));
+
+                s_actoryClaimTypeName = value;
             }
         }
     }
