@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Claims;
 using System.Threading;
+using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
@@ -116,5 +117,27 @@ namespace Microsoft.IdentityModel.Tokens
         /// </summary>
         [DefaultValue(true)]
         public bool IncludeKeyIdInHeader { get; set; } = true;
+
+        private static int s_maxActorChainLength = 5;
+        /// <summary>
+        /// Gets or sets the maximum depth allowed when processing nested actor tokens.
+        /// This prevents excessive recursion when handling deeply nested actor tokens.
+        /// The value must be at least 0. Value 0 would mean that the actor token is not allowed to be nested.
+        /// Default value is 5. Max value is also 5
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if the value is less than 0.</exception>
+        public static int MaxActorChainLength
+        {
+            get => s_maxActorChainLength;
+            set
+            {
+                if (value < 0)
+                    throw LogHelper.LogExceptionMessage(
+                        new ArgumentOutOfRangeException(nameof(value),
+                            LogHelper.FormatInvariant("MaxActorChainLength must be non negative and less than or equal to 5. Value provided: {0}", value)));
+
+                s_maxActorChainLength = value;
+            }
+        }
     }
 }

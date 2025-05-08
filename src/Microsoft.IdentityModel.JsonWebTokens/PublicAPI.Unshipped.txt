@@ -1,3 +1,0 @@
-Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandlerConfiguration
-static Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandlerConfiguration.MaxActorChainLength.get -> int
-static Microsoft.IdentityModel.JsonWebTokens.JsonWebTokenHandlerConfiguration.MaxActorChainLength.set -> void

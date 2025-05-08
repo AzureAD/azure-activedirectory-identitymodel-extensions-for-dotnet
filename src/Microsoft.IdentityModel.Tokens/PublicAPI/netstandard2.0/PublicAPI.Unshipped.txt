@@ -1,0 +1,2 @@
+static Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.MaxActorChainLength.get -> int
+static Microsoft.IdentityModel.Tokens.SecurityTokenDescriptor.MaxActorChainLength.set -> void
