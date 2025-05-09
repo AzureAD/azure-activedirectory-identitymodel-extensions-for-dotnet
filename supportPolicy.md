@@ -14,7 +14,7 @@ The following table lists IdentityModel versions currently supported and receivi
 ## Out of support versions
 The following table lists IdentityModel versions no longer supported and no longer receiving security fixes.
 
-| Major Version | Lastest patch version| Patch release date | End of support|
+| Major Version | Latest Patch Version| Patch Release Date | End of Support Date|
 | --------------|--------------|--------|--------|
 | 7.x           | <= 7.7.0      |  July 18, 2024      | July 18, 2024 |
 | 6.x           | <= 6.36.0       | July 18, 2024       | May 2024|

@@ -20,7 +20,7 @@ You can find the release notes for each version [here](https://github.com/AzureA
 
 See [Long Term Support policy](./supportPolicy.md) for details.
 
-| Major Version | Currently suported version | Status |
+| Major Version | Currently Supported Version | Status |
 | --------------|--------------|--------|
 | 8.x           | 8.0.1 <= [![Nuget](https://img.shields.io/nuget/v/Microsoft.IdentityModel.JsonWebTokens?label=Latest%20release)](https://www.nuget.org/packages/Microsoft.IdentityModel.JsonWebTokens/)        | Active (Current) - Tied to .NET 9 (STS) & 10 (LTS) ~ Nov, 2028|
 | 7.x           | 7.7.1        | Supported (LTS) through .NET 8 LTS lifetime Nov 10, 2026. ⚠️Versions `< 7.7.1` not supported.|
