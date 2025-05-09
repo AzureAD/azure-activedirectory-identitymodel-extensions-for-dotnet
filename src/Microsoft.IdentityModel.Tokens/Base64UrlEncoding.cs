@@ -3,13 +3,18 @@
 
 using System;
 using System.Buffers;
-#if NET9_0
+#if NET9_0_OR_GREATER
 using System.Buffers.Text;
 #endif
 using Microsoft.IdentityModel.Logging;
 
 namespace Microsoft.IdentityModel.Tokens
 {
+    /// <summary>
+    /// For Non-Net9.0 Targets: Base64 encode/decode implementation for as per https://tools.ietf.org/html/rfc4648#section-5.
+    /// For Net9.0 Targets: Uses System.Buffers.Text.Base64Url to perform the encoding/decoding.
+    /// Uses ArrayPool[T] to minimize memory usage.
+    /// </summary>
     internal static class Base64UrlEncoding
     {
         private const uint IntA = 'A';
@@ -94,11 +99,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             finally
             {
-#if NET9_0_OR_GREATER
                 ArrayPool<byte>.Shared.Return(output, true);
-#else
-                ArrayPool<byte>.Shared.Return(output);
-#endif
             }
         }
 
@@ -132,11 +133,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             finally
             {
-#if NET9_0_OR_GREATER
                 ArrayPool<byte>.Shared.Return(output, true);
-#else
-                ArrayPool<byte>.Shared.Return(output);
-#endif
             }
         }
 
@@ -182,11 +179,7 @@ namespace Microsoft.IdentityModel.Tokens
             }
             finally
             {
-#if NET9_0_OR_GREATER
                 ArrayPool<byte>.Shared.Return(output, true);
-#else
-                ArrayPool<byte>.Shared.Return(output);
-#endif
             }
         }
 
@@ -416,6 +409,7 @@ namespace Microsoft.IdentityModel.Tokens
             outputSize += (effectiveLength / 4) * 3;
             return outputSize;
         }
+
 #if !NET9_0_OR_GREATER
         private static void WriteEncodedOutput(byte[] inputBytes, int offset, int length, Span<char> output)
         {

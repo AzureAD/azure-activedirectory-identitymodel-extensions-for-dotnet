@@ -3,7 +3,7 @@
 
 using System;
 using System.Buffers;
-#if NET9_0
+#if NET9_0_OR_GREATER
 using System.Buffers.Text;
 #endif
 using System.Text;
