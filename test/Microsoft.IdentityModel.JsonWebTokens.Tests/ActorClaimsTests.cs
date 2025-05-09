@@ -40,9 +40,10 @@ namespace Microsoft.IdentityModel.Tests
                     Audience = "https://api.example.com",
                     Expires = DateTime.UtcNow.AddHours(1),
                     SigningCredentials = Default.AsymmetricSigningCredentials,
+                    ActorClaimName = "actort",
                     Claims = new Dictionary<string, object>
                     {
-                        { SecurityTokenDescriptor.ActorClaimTypeName, actorIdentity }
+                        { "actort", actorIdentity }
                     }
                 };
 
@@ -50,7 +51,7 @@ namespace Microsoft.IdentityModel.Tests
                 JsonWebToken decodedToken = tokenHandler.ReadJsonWebToken(token);
 
                 // Verify actor claim exists in the token
-                Assert.True(decodedToken.Payload.HasClaim(SecurityTokenDescriptor.ActorClaimTypeName), "JWT token should contain 'actort' claim");
+                Assert.True(decodedToken.Payload.HasClaim(tokenDescriptor.ActorClaimName), "JWT token should contain 'actort' claim");
                 // Get the actor token and verify it contains the expected claims
                 var actorTokenString = decodedToken.Actor;
                 Assert.NotNull(actorTokenString);
@@ -72,7 +73,6 @@ namespace Microsoft.IdentityModel.Tests
         public void ActorTokenAsSubjectShouldBeProperlySerialized()
         {
             var context = new CompareContext($"{this}.ActorTokenAsSubjectShouldBeProperlySerialized");
-            SecurityTokenDescriptor.ActorClaimTypeName = "actort";
 
             try
             {
@@ -96,7 +96,8 @@ namespace Microsoft.IdentityModel.Tests
                     Issuer = "https://example.com",
                     Audience = "https://api.example.com",
                     Expires = DateTime.UtcNow.AddHours(1),
-                    SigningCredentials = Default.AsymmetricSigningCredentials
+                    SigningCredentials = Default.AsymmetricSigningCredentials,
+                    ActorClaimName = "actort"
                 };
 
                 var token = tokenHandler.CreateToken(tokenDescriptor);
@@ -126,7 +127,6 @@ namespace Microsoft.IdentityModel.Tests
         public void ActorTokenInBothClaimsAndSubjectShouldPreferClaimsValue()
         {
             var context = new CompareContext($"{this}.ActorTokenInBothClaimsAndSubjectShouldPreferClaimsValue");
-            SecurityTokenDescriptor.ActorClaimTypeName = "actort";
 
             try
             {
@@ -155,6 +155,7 @@ namespace Microsoft.IdentityModel.Tests
                     Audience = "https://api.example.com",
                     Expires = DateTime.UtcNow.AddHours(1),
                     SigningCredentials = Default.AsymmetricSigningCredentials,
+                    ActorClaimName = "actort",
                     // Add Claims actor that should take precedence
                     Claims = new Dictionary<string, object>
                     {
@@ -191,7 +192,6 @@ namespace Microsoft.IdentityModel.Tests
         public void NestedActorTokenInClaimsDictionaryShouldBeProperlySerialized()
         {
             var context = new CompareContext($"{this}.NestedActorTokenInClaimsDictionaryShouldBeProperlySerialized");
-            SecurityTokenDescriptor.ActorClaimTypeName = "actort";
 
             try
             {
@@ -220,6 +220,7 @@ namespace Microsoft.IdentityModel.Tests
                     Audience = "https://api.example.com",
                     Expires = DateTime.UtcNow.AddHours(1),
                     SigningCredentials = Default.AsymmetricSigningCredentials,
+                    ActorClaimName = "actort",
                     Claims = new Dictionary<string, object>
                     {
                         { JwtRegisteredClaimNames.Actort, actorIdentity }
@@ -265,7 +266,6 @@ namespace Microsoft.IdentityModel.Tests
         public void NestedActorTokenAsSubjectShouldBeProperlySerialized()
         {
             var context = new CompareContext($"{this}.NestedActorTokenAsSubjectShouldBeProperlySerialized");
-            SecurityTokenDescriptor.ActorClaimTypeName = "actort";
 
             try
             {
@@ -294,7 +294,8 @@ namespace Microsoft.IdentityModel.Tests
                     Issuer = "https://example.com",
                     Audience = "https://api.example.com",
                     Expires = DateTime.UtcNow.AddHours(1),
-                    SigningCredentials = Default.AsymmetricSigningCredentials
+                    SigningCredentials = Default.AsymmetricSigningCredentials,
+                    ActorClaimName = "actort"
                 };
 
                 var token = tokenHandler.CreateToken(tokenDescriptor);
@@ -463,6 +464,7 @@ namespace Microsoft.IdentityModel.Tests
                     Issuer = "https://example.com",
                     Audience = "https://api.example.com",
                     SigningCredentials = Default.AsymmetricSigningCredentials,
+                    ActorClaimName = "actort",
                     Claims = new Dictionary<string, object>
                     {
                         { JwtRegisteredClaimNames.Actort, actorIdentity }
@@ -530,6 +532,7 @@ namespace Microsoft.IdentityModel.Tests
                 Audience = "https://api.example.com",
                 SigningCredentials = Default.AsymmetricSigningCredentials,
                 // Add level 2 actor in claims dictionary to replace level 1's actor
+                ActorClaimName = "actort",
                 Claims = new Dictionary<string, object>
                 {
                     { JwtRegisteredClaimNames.Actort, level2Actor }
@@ -590,6 +593,7 @@ namespace Microsoft.IdentityModel.Tests
                     Issuer = "https://example.com",
                     Audience = "https://api.example.com",
                     SigningCredentials = Default.AsymmetricSigningCredentials,
+                    ActorClaimName = "actort",
                     Claims = new Dictionary<string, object>
                     {
                         { JwtRegisteredClaimNames.Actort, level1Actor }

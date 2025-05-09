@@ -678,7 +678,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
             {
                 foreach (KeyValuePair<string, object> kvp in tokenDescriptor.Claims)
                 {
-                    if (kvp.Key.Equals(SecurityTokenDescriptor.ActorClaimTypeName, StringComparison.Ordinal))
+                    if (kvp.Key.Equals(tokenDescriptor.ActorClaimName, StringComparison.Ordinal))
                     {
                         continue;
                     }
@@ -762,7 +762,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
 
                     JsonPrimitives.WriteObject(ref writer, kvp.Key, kvp.Value);
                 }
-                if (tokenDescriptor.Claims.ContainsKey(SecurityTokenDescriptor.ActorClaimTypeName))
+                if (!AppContextSwitches.UseLegacyActorClaimBehavior && tokenDescriptor.Claims.ContainsKey(tokenDescriptor.ActorClaimName))
                 {
                     // Check for maximum actor chain depth
                     if (actorChainDepth >= SecurityTokenDescriptor.MaxActorChainLength)
@@ -779,14 +779,15 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                             LogHelper.LogInformation(LogHelper.FormatInvariant(LogMessages.IDX14113, LogHelper.MarkAsNonPII(nameof(tokenDescriptor.Expires))));
 
                     }
-                    ClaimsIdentity actor = tokenDescriptor.Claims[SecurityTokenDescriptor.ActorClaimTypeName] as ClaimsIdentity;
+                    ClaimsIdentity actor = tokenDescriptor.Claims[tokenDescriptor.ActorClaimName] as ClaimsIdentity;
                     var actorTokenDescriptor = new SecurityTokenDescriptor
                     {
-                        Subject = actor
+                        Subject = actor,
+                        ActorClaimName = tokenDescriptor.ActorClaimName,
                     };
                     actorChainDepth = actorChainDepth + 1;
                     string actorToken = CreateToken(actorTokenDescriptor, false, 0, actorChainDepth);
-                    JsonPrimitives.WriteObject(ref writer, SecurityTokenDescriptor.ActorClaimTypeName, actorToken);
+                    JsonPrimitives.WriteObject(ref writer, tokenDescriptor.ActorClaimName, actorToken);
                     isActorTokenSet = true;
                 }
             }
@@ -856,10 +857,11 @@ namespace Microsoft.IdentityModel.JsonWebTokens
                 var actorTokenDescriptor = new SecurityTokenDescriptor
                 {
                     Subject = tokenDescriptor.Subject.Actor,
+                    ActorClaimName = tokenDescriptor.ActorClaimName,
                 };
 
                 string actorToken = CreateToken(actorTokenDescriptor, false, 0, actorChainDepth + 1);
-                writer.WritePropertyName(SecurityTokenDescriptor.ActorClaimTypeName);
+                writer.WritePropertyName(tokenDescriptor.ActorClaimName);
                 writer.WriteStringValue(actorToken);
                 isActorTokenSet = true;
             }

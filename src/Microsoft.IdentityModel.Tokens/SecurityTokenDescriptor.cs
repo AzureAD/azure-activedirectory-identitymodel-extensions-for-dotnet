@@ -170,5 +170,13 @@ namespace Microsoft.IdentityModel.Tokens
                 s_actoryClaimTypeName = value;
             }
         }
+
+        /// <summary>
+        /// Gets or sets the claim name for the actor claim.
+        /// </summary>
+        /// <remarks>
+        /// The default value is "act".
+        /// </remarks>
+        public string ActorClaimName { get; set; } = "act";
     }
 }

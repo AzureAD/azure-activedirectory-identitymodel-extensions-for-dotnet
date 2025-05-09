@@ -1020,7 +1020,7 @@ namespace Microsoft.IdentityModel.JsonWebTokens
         {
             get
             {
-                _act ??= Payload.GetStringValue(SecurityTokenDescriptor.ActorClaimTypeName);
+                _act ??= Payload.GetStringValue(JwtRegisteredClaimNames.Actort);
                 return _act;
             }
         }
