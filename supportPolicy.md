@@ -1,6 +1,6 @@
 # Microsoft.IdentityModel Support Policy
 
-_Last updated April 8, 2025_
+_Last updated May 8, 2025_
 
 Every Microsoft product has a lifecycle. The lifecycle begins when a product is released and ends when it's no longer supported. Knowing key dates in this lifecycle helps you make informed decisions about when to upgrade or make other changes to your software. This product is governed by [Microsoft's Modern Lifecycle Policy](https://learn.microsoft.com/en-us/lifecycle/policies/modern).
 
@@ -10,7 +10,7 @@ The Microsoft suite of auth libraries provides comprehensive tools for identity 
 
 ## Support Policy Guiding Principles
 The support policy can be summarized by three key rules:
-1. **“Last Major Release” Support Window:** For each major version of the library (v5, v6, v7, v8, etc.), only the latest patch of that major is officially supported once a new major version is released. This last release of a major version (for example, 7.7.1 for the 7.x branch) will continue to be supported for a grace period of 180 days after the next major (v8.0) comes out or for the entire lifespan of the .NET LTS release that the library is associated with – whichever is longer. In other words, if a given major version of IdentityModel ships as part of a .NET LTS wave, it inherits that longer support timeline. For example, IdentityModel 7.x is shipped as part of ASP.NET Core in .NET 8 (an LTS release), then IdentityModel 7.x will be supported throughout the supported lifetime of .NET 8. If a major is not tied to an LTS .NET, the default support overlap is 180 days.
+1. **“Last Major Release” Support Window:** For each major version of the library (v5, v6, v7, v8, etc.), only the latest patch release of that major version is officially supported once a new major version is released. This last release of a major version (for example, 7.7.1 for the 7.x branch) will continue to be supported for a grace period of 180 days after the next major (v8.0) comes out or for the entire lifespan of the .NET LTS release that the library is associated with – whichever is longer. In other words, if a given major version of IdentityModel ships as part of a .NET LTS wave, it inherits that longer support timeline. For example, IdentityModel 7.x is shipped as part of ASP.NET Core in .NET 8 (an LTS release), then IdentityModel 7.x will be supported throughout the supported lifetime of .NET 8. If a major is not tied to an LTS .NET, the default support overlap is 180 days.
 2. **Deprecation of Older Versions on New Major Release:** When a new major version of the library is released (e.g., 8.0.0), all previous minor/patch versions of the previous major (e.g., 7.0.0 up to 7.7.0) are immediately considered deprecated, only the last patch release of the previous major (e.g., 7.7.1) remains supported during the 180-day overlap or LTS period as described above. Earlier patches in that branch will no longer receive updates. For example, once 8.0.0 is released, the entire 7.x series before 7.7.1 is deprecated. Developers should move to 7.7.1 (the final 7.x release) or upgrade to 8.x for continued support.
 3. **Security Fixes Only in Supported Versions:** Security fixes and critical bug fixes will be provided only for the supported versions – namely, the latest patch of the latest major, and in some cases the latest patch of the previous major during the overlap window. Older majors (and any old patch versions) will not receive security updates once they are out of support. This means if a vulnerability is discovered, the team will issue a fix in the current supported release (and possibly the last release of the previous major if still within 180-day/LTS overlap), but will not back-port fixes to earlier, deprecated patch versions. In practice, organizations must upgrade to the supported version to get the fix. (For example, a security advisory might instruct users to update to 7.7.1 or 8.x to resolve an issue, as older 7.x builds would not be patched.)
 
@@ -19,8 +19,8 @@ The following table lists IdentityModel versions currently supported and receivi
 
 | Major Version | Last Release | Patch release date| Support phase|End of support |
 | --------------|--------------|--------|--------|--------|
-| 9.x           |              |        |Not planned     | n/a|
-| 8.x           | 8.x latest   |monthly| Active | Tied to .NET 9 (STS) & 10 (LTS) ~ Nov, 2028|
+| 9.x           |   N/A           |    N/A    |Not planned     | N/A|
+| 8.x           | 8.x latest   |Monthly| Active | Tied to .NET 9 (STS) & 10 (LTS) ~ Nov, 2028|
 | 7.x           | 7.7.1        | July 19, 2024 |Active, security fixes only |Supported (LTS) through .NET 8 LTS lifetime Nov 10, 2026|
 | 5.x           | 5.7.0        |January 9, 2024| Active, security fixes only |Tied to Microsoft.Owin.Security.JWT 4.2.2 |
 

@@ -35,19 +35,19 @@ Version `8.x` introduces significant updates and improvements:
 
 >🧭LTS: Supported through .NET 9 LTS lifetime: May 12, 2026 + .NET 10 LTS (~3 years).
 
-## IdentityModel 7x
+## IdentityModel 7.x
 
-[IdentityModel 7x](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki/IdentityModel-7x) introduced several improvements related to serialization and consistency in the API, which will provide a better user experience for developers, as well as full AOT compatibility on .NET, and huge perf improvements compared to 6x.
+[IdentityModel 7x](https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet/wiki/IdentityModel-7x) introduced several improvements related to serialization and consistency in the API, which provide a better user experience for developers, as well as full AOT compatibility on .NET, and considerable performance improvements compared to IdentityModel 6x.
 
 >🧭LTS: Supported through .NET 8 LTS lifetime: Nov 10, 2026.
 >
->⚡Recommendation: Move to 8x.
+>⚡Recommendation: Move to 8.x.
 
 ## IdentityModel 6.x
 
 >🧭Deprecated: Support ended with .NET 7 LTS lifetime: May 2024.
 >
->⚡Action: Move to 8x.
+>⚡Action: Move to 8.x.
 
 ## IdentityModel 5.x
 
@@ -55,7 +55,7 @@ __Not a recommended version__
 
 >🧭LTS: Supported for Microsoft.Owin.Security.JWT
 >
->⚡Action: Move to 8x.
+>⚡Action: Move to 8.x.
 
 ## Samples and Documentation
 
