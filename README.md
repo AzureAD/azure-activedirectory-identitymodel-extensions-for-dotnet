@@ -25,7 +25,7 @@ See [Long Term Support policy](./supportPolicy.md) for details.
 | 8.x           | 8.9.0        | Active (Current) |
 | 7.x           | 7.7.1        | Supported (LTS) through .NET 8 LTS lifetime Nov 10, 2026|
 | 6.x           | 6.36.0       | Not supported since May 2024|
-| 5.x           | 5.7.0        | Supported Microsoft.Owin.Security.JWT 4.2.2 |
+| 5.x           | 5.7.0        | Supported (LTS), tied to the Microsoft.Owin.Security.JWT 4.2.2 lifetime |
 
 ## IdentityModel 8.x?
 
