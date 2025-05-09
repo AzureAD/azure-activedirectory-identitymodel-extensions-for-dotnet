@@ -27,7 +27,7 @@ See [Long Term Support policy](./supportPolicy.md) for details.
 | 6.x           | 6.36.0       | Not supported since May 2024|
 | 5.x           | 5.7.0        | Supported (LTS), tied to the Microsoft.Owin.Security.JWT 4.2.2 lifetime |
 
-## IdentityModel 8.x?
+## IdentityModel 8.x
 
 Version `8.x` introduces significant updates and improvements:
 - **Enhanced Performance:** Optimized token validation to handle high-throughput scenarios.
