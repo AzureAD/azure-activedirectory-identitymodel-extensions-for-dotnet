@@ -1,3 +1,5 @@
 const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCapitalizedXMLTypeAttrSwitch = "Switch.Microsoft.IdentityModel.UseCapitalizedXMLTypeAttr" -> string
+const Microsoft.IdentityModel.Tokens.AppContextSwitches.UseLegacyActorClaimBehaviorSwitch = "Switch.Microsoft.IdentityModel.UseLegacyActorClaimBehavior" -> string
 const Microsoft.IdentityModel.Tokens.LogMessages.IDX11027 = "IDX11027: Invalid JsonWebToken handler configuration parameter value provided for {0}" -> string
 static Microsoft.IdentityModel.Tokens.AppContextSwitches.UseCapitalizedXMLTypeAttr.get -> bool
+static Microsoft.IdentityModel.Tokens.AppContextSwitches.UseLegacyActorClaimBehavior.get -> bool

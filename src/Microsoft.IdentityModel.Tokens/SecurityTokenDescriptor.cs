@@ -159,13 +159,13 @@ namespace Microsoft.IdentityModel.Tokens
             get => s_actoryClaimTypeName;
             set
             {
-                if (string.IsNullOrEmpty(value) || (!value.Equals("act") && !value.Equals("actort")))
+                if (string.IsNullOrEmpty(value))
                     throw LogHelper.LogExceptionMessage(
                     new ArgumentOutOfRangeException(
                     LogHelper.FormatInvariant(
                     LogMessages.IDX11027,
                     LogHelper.MarkAsNonPII("ActorClaimTypeName"))
-                    + ". Permissible values are 'act' or 'actort'."));
+                    + ". ActorClaimTypeName cannot be empty."));
 
                 s_actoryClaimTypeName = value;
             }

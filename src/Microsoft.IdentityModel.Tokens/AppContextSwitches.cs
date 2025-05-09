@@ -99,6 +99,12 @@ namespace Microsoft.IdentityModel.Tokens
         internal static bool UseCapitalizedXMLTypeAttr => _useCapitalizedXMLTypeAttr ??= (AppContext.TryGetSwitch(UseCapitalizedXMLTypeAttrSwitch, out bool useCapitalizedXMLTypeAttr) && useCapitalizedXMLTypeAttr);
 
         /// <summary>
+        /// Enable the legacy behavior of actor claims. The legacy behavior is to use "actort" as claim name and also not serialize actor claim.
+        /// </summary>
+        internal const string UseLegacyActorClaimBehaviorSwitch = "Switch.Microsoft.IdentityModel.UseLegacyActorClaimBehavior";
+        private static bool? _useLegacyActorClaimBehavior;
+        internal static bool UseLegacyActorClaimBehavior => _useLegacyActorClaimBehavior ??= (AppContext.TryGetSwitch(UseLegacyActorClaimBehaviorSwitch, out bool UseLegacyActorClaimBehavior) && UseLegacyActorClaimBehavior);
+        /// <summary>
         /// Used for testing to reset all switches to its default value.
         /// </summary>
         internal static void ResetAllSwitches()
@@ -123,6 +129,9 @@ namespace Microsoft.IdentityModel.Tokens
 
             _useCapitalizedXMLTypeAttr = null;
             AppContext.SetSwitch(UseCapitalizedXMLTypeAttrSwitch, false);
+
+            _useLegacyActorClaimBehavior = null;
+            AppContext.SetSwitch(UseLegacyActorClaimBehaviorSwitch, false);
         }
     }
 }
